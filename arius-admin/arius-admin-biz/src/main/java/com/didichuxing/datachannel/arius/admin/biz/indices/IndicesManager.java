@@ -179,4 +179,13 @@ public interface IndicesManager {
      */
     Result<List<String>> getClusterLogicIndexName(String clusterLogicName, Integer appId);
 
+    /**
+     * 判断索引是否存在
+     *
+     * @param cluster   集群
+     * @param indexName 索引名称
+     * @param appId     应用程序id
+     * @return {@link Result}<{@link Boolean}>
+     */
+    Result<Boolean> isExists(String cluster, String indexName, Integer appId);
 }

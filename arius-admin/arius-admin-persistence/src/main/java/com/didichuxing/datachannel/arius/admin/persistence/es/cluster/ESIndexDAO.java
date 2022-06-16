@@ -358,6 +358,27 @@ public class ESIndexDAO extends BaseESDAO {
         }
     }
 
+    public Map<String, IndexNodes> getIndexStats(String cluster, String expression) {
+        try {
+            ESClient client = fetchESClientByCluster(cluster);
+            if (client == null) {
+                return Maps.newHashMap();
+            }
+            ESIndicesStatsResponse response;
+            if (StringUtils.isNotBlank(expression)) {
+                response = client.admin().indices().prepareStats(expression).setLevel(IndicesStatsLevel.INDICES)
+                    .execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+            } else {
+                response = client.admin().indices().prepareStats().setLevel(IndicesStatsLevel.INDICES).execute()
+                    .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+            }
+            return response.getIndicesMap();
+        } catch (Exception e) {
+            LOGGER.warn("class=ESIndexDAO||method=getIndexByExpression||errMsg={}||cluster={}||expression={}",
+                e.getMessage(), cluster, expression, e);
+            return Maps.newHashMap();
+        }
+    }
     /**
      * 获取指定集群,指定表达式的别名
      * @param cluster

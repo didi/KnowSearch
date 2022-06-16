@@ -259,6 +259,13 @@ public interface ESIndexService {
     List<CatIndexResult> syncCatIndex(String cluster, int tryTimes);
 
     /**
+     * 同步获取索引Segment数量
+     *
+     * @param clusterPhyName 物理集群
+     * @return {@link Map}<{@link String}, {@link Tuple}<{@link Long}, {@link Long}>>
+     */
+    Map<String, Tuple<Long, Long>> syncGetIndicesSegmentCount(String clusterPhyName);
+    /**
      * 获取索引主shard个数
      * @param cluster
      * @param indexName

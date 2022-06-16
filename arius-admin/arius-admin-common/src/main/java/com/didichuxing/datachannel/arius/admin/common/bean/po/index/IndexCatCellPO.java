@@ -18,7 +18,7 @@ public class IndexCatCellPO extends BaseESPO {
     private String  cluster;
     private String  clusterPhy;
     private String  clusterLogic;
-    private long    resourceId;
+    private Long    resourceId;
     private Integer appId;
     private String  health;
     private String  status;
@@ -33,6 +33,10 @@ public class IndexCatCellPO extends BaseESPO {
     private Boolean writeFlag;
     private boolean deleteFlag;
     private long    timestamp;
+
+    private Long    primariesSegmentCount;
+    private Long    totalSegmentCount;
+    private Integer    templateId;
 
     public boolean getDeleteFlag() {
         return deleteFlag;

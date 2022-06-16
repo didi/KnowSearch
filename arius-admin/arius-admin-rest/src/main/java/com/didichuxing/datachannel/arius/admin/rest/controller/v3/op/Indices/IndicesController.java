@@ -40,7 +40,8 @@ public class IndicesController {
     @PostMapping("/page")
     @ResponseBody
     @ApiOperation(value = "分页获取索引列表信息", notes = "携带可读可写标志位")
-    public PaginationResult<IndexCatCellVO> pageGetIndexCatInfoVO(HttpServletRequest request, @RequestBody IndexQueryDTO condition) {
+    public PaginationResult<IndexCatCellVO> pageGetIndexCatInfoVO(HttpServletRequest request,
+                                                                  @RequestBody IndexQueryDTO condition) {
         return indicesManager.pageGetIndex(condition, HttpRequestUtils.getAppId(request));
     }
 
@@ -54,15 +55,25 @@ public class IndicesController {
     @GetMapping("{cluster}/{indexName}")
     @ResponseBody
     @ApiOperation(value = "查询索引")
-    public Result<IndexCatCellVO> getIndex(HttpServletRequest request, @PathVariable String cluster, @PathVariable String indexName) {
+    public Result<IndexCatCellVO> getIndex(HttpServletRequest request, @PathVariable String cluster,
+                                           @PathVariable String indexName) {
         return indicesManager.getIndexCatInfo(cluster, indexName, HttpRequestUtils.getAppId(request));
+    }
+
+    @GetMapping("{cluster}/{indexName}/exists")
+    @ResponseBody
+    @ApiOperation(value = "查询索引")
+    public Result<Boolean> isExists(HttpServletRequest request, @PathVariable String cluster,
+                                    @PathVariable String indexName) {
+        return indicesManager.isExists(cluster, indexName, HttpRequestUtils.getAppId(request));
     }
 
     @DeleteMapping("")
     @ResponseBody
     @ApiOperation(value = "删除索引")
     public Result<Void> deleteIndex(HttpServletRequest request, @RequestBody List<IndexCatCellDTO> param) {
-        return indicesManager.deleteIndex(param, HttpRequestUtils.getAppId(request), HttpRequestUtils.getOperator(request));
+        return indicesManager.deleteIndex(param, HttpRequestUtils.getAppId(request),
+            HttpRequestUtils.getOperator(request));
     }
 
     @PutMapping("/mapping")
@@ -75,9 +86,9 @@ public class IndicesController {
     @GetMapping("{cluster}/{indexName}/mapping")
     @ResponseBody
     @ApiOperation(value = "查询mapping")
-    public Result<IndexMappingVO> getMapping(@PathVariable String cluster,
-                                             @PathVariable String indexName,HttpServletRequest request) {
-        return indicesManager.getMapping(cluster,indexName, HttpRequestUtils.getAppId(request));
+    public Result<IndexMappingVO> getMapping(@PathVariable String cluster, @PathVariable String indexName,
+                                             HttpServletRequest request) {
+        return indicesManager.getMapping(cluster, indexName, HttpRequestUtils.getAppId(request));
     }
 
     @PutMapping("/setting")
@@ -90,9 +101,9 @@ public class IndicesController {
     @GetMapping("{cluster}/{indexName}/setting")
     @ResponseBody
     @ApiOperation(value = "查询setting")
-    public Result<IndexSettingVO> getSetting(@PathVariable String cluster,
-                                             @PathVariable String indexName,HttpServletRequest request) {
-        return indicesManager.getSetting(cluster,indexName, HttpRequestUtils.getAppId(request));
+    public Result<IndexSettingVO> getSetting(@PathVariable String cluster, @PathVariable String indexName,
+                                             HttpServletRequest request) {
+        return indicesManager.getSetting(cluster, indexName, HttpRequestUtils.getAppId(request));
     }
 
     @PutMapping("/close")
@@ -100,7 +111,7 @@ public class IndicesController {
     @ApiOperation(value = "关闭索引")
     public Result<Boolean> close(HttpServletRequest request, @RequestBody List<IndexCatCellDTO> params) {
         return indicesManager.batchUpdateIndexStatus(params, false, HttpRequestUtils.getAppId(request),
-                HttpRequestUtils.getOperator(request));
+            HttpRequestUtils.getOperator(request));
     }
 
     @PutMapping("/open")
@@ -108,7 +119,7 @@ public class IndicesController {
     @ApiOperation(value = "关闭索引")
     public Result<Boolean> open(HttpServletRequest request, @RequestBody List<IndexCatCellDTO> params) {
         return indicesManager.batchUpdateIndexStatus(params, true, HttpRequestUtils.getAppId(request),
-                HttpRequestUtils.getOperator(request));
+            HttpRequestUtils.getOperator(request));
     }
 
     @PutMapping("/block")
@@ -137,24 +148,25 @@ public class IndicesController {
     @GetMapping("{cluster}/{indexName}/shard")
     @ResponseBody
     @ApiOperation(value = "获取索引shard分配详情")
-    public Result<List<IndexShardInfoVO>> getIndexShard(@PathVariable String cluster,
-                                                        @PathVariable String indexName, HttpServletRequest request) {
+    public Result<List<IndexShardInfoVO>> getIndexShard(@PathVariable String cluster, @PathVariable String indexName,
+                                                        HttpServletRequest request) {
         return indicesManager.getIndexShardsInfo(cluster, indexName, HttpRequestUtils.getAppId(request));
     }
 
     @GetMapping("/{clusterPhyName}/phy/indices")
     @ResponseBody
     @ApiModelProperty(value = "获取物理集群索引列表")
-    public Result<List<String>> getClusterPhyIndexName(@PathVariable String clusterPhyName, HttpServletRequest request) {
+    public Result<List<String>> getClusterPhyIndexName(@PathVariable String clusterPhyName,
+                                                       HttpServletRequest request) {
         return indicesManager.getClusterPhyIndexName(clusterPhyName, HttpRequestUtils.getAppId(request));
     }
 
     @GetMapping("/{clusterLogicName}/logic/indices")
     @ResponseBody
     @ApiModelProperty(value = "获取逻辑集群索引列表")
-    public Result<List<String>> getClusterLogicIndexName(@PathVariable String clusterLogicName, HttpServletRequest request) {
+    public Result<List<String>> getClusterLogicIndexName(@PathVariable String clusterLogicName,
+                                                         HttpServletRequest request) {
         return indicesManager.getClusterLogicIndexName(clusterLogicName, HttpRequestUtils.getAppId(request));
     }
-
 
 }

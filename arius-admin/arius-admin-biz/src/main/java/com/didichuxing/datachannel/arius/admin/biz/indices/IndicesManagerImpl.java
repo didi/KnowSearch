@@ -29,7 +29,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.manage.In
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.srv.IndexForceMergeDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.srv.IndexRolloverDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.IndexShardInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
@@ -125,9 +124,13 @@ public class IndicesManagerImpl implements IndicesManager {
 
     @Override
     public Result<Void> createIndex(IndexCatCellWithConfigDTO indexCreateDTO, Integer appId) {
-        String cluster = getClusterPhy(indexCreateDTO.getCluster(), appId);
+        Result<String> getClusterRet = getClusterPhyByClusterNameAndAppId(indexCreateDTO.getCluster(), appId);
+        if (getClusterRet.failed()) {
+            return Result.buildFrom(getClusterRet);
+        }
+        String phyCluster = getClusterRet.getData();
         try {
-            esIndexService.syncCreateIndex(cluster, indexCreateDTO.getIndex(), indexCreateDTO.getMapping(), indexCreateDTO.getSetting(), RETRY_COUNT);
+            esIndexService.syncCreateIndex(phyCluster, indexCreateDTO.getIndex(), indexCreateDTO.getMapping(), indexCreateDTO.getSetting(), RETRY_COUNT);
         } catch (Exception e) {
             LOGGER.error("class=IndicesManagerImpl||method=createIndex||msg=create index failed||index={}" + indexCreateDTO.getIndex(), e);
             return Result.buildFail();
@@ -138,7 +141,12 @@ public class IndicesManagerImpl implements IndicesManager {
     @Override
     public Result<Void> deleteIndex(List<IndexCatCellDTO> params, Integer appId, String operator) {
         for (IndexCatCellDTO param : params) {
-            param.setCluster(getClusterPhy(param.getCluster(), appId));
+            Result<String> getClusterRet = getClusterPhyByClusterNameAndAppId(param.getCluster(), appId);
+            if (getClusterRet.failed()) {
+                return Result.buildFrom(getClusterRet);
+            }
+            String phyCluster = getClusterRet.getData();
+            param.setCluster(phyCluster);
             Result<Void> ret = basicCheckParam(param.getCluster(), param.getIndex(), appId);
             if (ret.failed()) {
                 return Result.buildFrom(ret);
@@ -173,7 +181,12 @@ public class IndicesManagerImpl implements IndicesManager {
     @Override
     public Result<Boolean> batchUpdateIndexStatus(List<IndexCatCellDTO> params, boolean indexNewStatus, Integer appId, String operator) {
         for (IndexCatCellDTO param : params) {
-            param.setCluster(getClusterPhy(param.getCluster(), appId));
+            Result<String> getClusterRet = getClusterPhyByClusterNameAndAppId(param.getCluster(), appId);
+            if (getClusterRet.failed()) {
+                return Result.buildFrom(getClusterRet);
+            }
+            String phyCluster = getClusterRet.getData();
+            param.setCluster(phyCluster);
             Result<Void> ret = basicCheckParam(param.getCluster(), param.getIndex(), appId);
             if (ret.failed()) {
                 return Result.buildFrom(ret);
@@ -243,7 +256,12 @@ public class IndicesManagerImpl implements IndicesManager {
     public Result<Boolean> batchEditIndexBlockSetting(List<IndicesBlockSettingDTO> params, Integer appId,
                                                       String operator) {
         for (IndicesBlockSettingDTO param : params) {
-            param.setCluster(getClusterPhy(param.getCluster(), appId));
+            Result<String> getClusterRet = getClusterPhyByClusterNameAndAppId(param.getCluster(), appId);
+            if (getClusterRet.failed()) {
+                return Result.buildFrom(getClusterRet);
+            }
+            String phyCluster = getClusterRet.getData();
+            param.setCluster(phyCluster);
         }
         Result<Boolean> checkResult = checkEditIndexBlockSetting(params, appId);
         if (checkResult.failed()) {
@@ -304,19 +322,23 @@ public class IndicesManagerImpl implements IndicesManager {
 
     @Override
     public Result<Void> editMapping(IndexCatCellWithConfigDTO param, Integer appId) {
-        String cluster = getClusterPhy(param.getCluster(), appId);
+        Result<String> getClusterRet = getClusterPhyByClusterNameAndAppId(param.getCluster(), appId);
+        if (getClusterRet.failed()) {
+            return Result.buildFrom(getClusterRet);
+        }
+        String phyCluster = getClusterRet.getData();
         String indexName = param.getIndex();
         String mapping = param.getMapping();
-        Result<Void> ret = basicCheckParam(cluster, indexName, appId);
+        Result<Void> ret = basicCheckParam(phyCluster, indexName, appId);
         if (ret.failed()) {
             return Result.buildFrom(ret);
         }
 
         try {
             MappingConfig mappingConfig = new MappingConfig(JSON.parseObject(mapping));
-            return Result.build(esIndexService.syncUpdateIndexMapping(cluster, indexName, mappingConfig));
+            return Result.build(esIndexService.syncUpdateIndexMapping(phyCluster, indexName, mappingConfig));
         } catch (Exception e) {
-            LOGGER.error("class=IndicesManagerImpl||method=editMapping||cluster={}||index={}||errMsg={}", cluster, indexName, e.getMessage(), e);
+            LOGGER.error("class=IndicesManagerImpl||method=editMapping||cluster={}||index={}||errMsg={}", phyCluster, indexName, e.getMessage(), e);
             return Result.buildFail();
         }
     }
@@ -351,9 +373,13 @@ public class IndicesManagerImpl implements IndicesManager {
 
     @Override
     public Result<Void> editSetting(IndexCatCellWithConfigDTO param, Integer appId) {
-        String cluster = getClusterPhy(param.getCluster(), appId);
+        Result<String> getClusterRet = getClusterPhyByClusterNameAndAppId(param.getCluster(), appId);
+        if (getClusterRet.failed()) {
+            return Result.buildFrom(getClusterRet);
+        }
+        String phyCluster = getClusterRet.getData();
         String indexName = param.getIndex();
-        Result<Void> ret = basicCheckParam(cluster, indexName, appId);
+        Result<Void> ret = basicCheckParam(phyCluster, indexName, appId);
         if (ret.failed()) {
             return Result.buildFrom(ret);
         }
@@ -364,9 +390,9 @@ public class IndicesManagerImpl implements IndicesManager {
         }
         Map<String, String> settingMap = JsonUtils.flat(settingObj);
         try {
-            return Result.build(esIndexService.syncPutIndexSetting(cluster, Lists.newArrayList(indexName), settingMap, RETRY_COUNT));
+            return Result.build(esIndexService.syncPutIndexSetting(phyCluster, Lists.newArrayList(indexName), settingMap, RETRY_COUNT));
         } catch (Exception e) {
-            LOGGER.error("class=IndicesManagerImpl||method=editSetting||cluster={}||index={}||errMsg=update setting fail", cluster, indexName, e);
+            LOGGER.error("class=IndicesManagerImpl||method=editSetting||cluster={}||index={}||errMsg=update setting fail", phyCluster, indexName, e);
             return Result.buildFail("更新索引setting fail");
         }
 
@@ -374,13 +400,17 @@ public class IndicesManagerImpl implements IndicesManager {
 
     @Override
     public Result<List<IndexShardInfoVO>> getIndexShardsInfo(String cluster, String indexName, Integer appId) {
-        String clusterPhy = getClusterPhy(cluster, appId);
-        Result<Void> ret = basicCheckParam(clusterPhy, indexName, appId);
+        Result<String> getClusterRet = getClusterPhyByClusterNameAndAppId(cluster, appId);
+        if (getClusterRet.failed()) {
+            return Result.buildFrom(getClusterRet);
+        }
+        String phyCluster = getClusterRet.getData();
+        Result<Void> ret = basicCheckParam(phyCluster, indexName, appId);
         if (ret.failed()) {
             return Result.buildFrom(ret);
         }
 
-        List<IndexShardInfo> indexShardInfoList = esIndexCatService.syncGetIndexShardInfo(clusterPhy, indexName);
+        List<IndexShardInfo> indexShardInfoList = esIndexCatService.syncGetIndexShardInfo(phyCluster, indexName);
         List<IndexShardInfoVO> indexNodeShardVOList = indexShardInfoList.stream().filter(this::filterPrimaryShard)
             .map(this::coverUnit).collect(Collectors.toList());
         return Result.buildSucc(indexNodeShardVOList);
@@ -389,7 +419,17 @@ public class IndicesManagerImpl implements IndicesManager {
     @Override
     public Result<IndexCatCellVO> getIndexCatInfo(String cluster, String indexName, Integer appId) {
         //1.建立单个索引查询的查询条件信息
-        IndexQueryDTO indexQueryDTO = buildOneIndicesConditionDTO(cluster, indexName, appId);
+        Result<String> getClusterRet = getClusterPhyByClusterNameAndAppId(cluster, appId);
+        if (getClusterRet.failed()) {
+            return Result.buildFrom(getClusterRet);
+        }
+        String phyCluster = getClusterRet.getData();
+        IndexQueryDTO indexQueryDTO = new IndexQueryDTO();
+        indexQueryDTO.setIndex(indexName);
+        indexQueryDTO.setCluster(phyCluster);
+        indexQueryDTO.setSortTerm(DEFAULT_SORT_TERM);
+        indexQueryDTO.setPage(1L);
+        indexQueryDTO.setSize(1L);
         PaginationResult<IndexCatCellVO> indexCatCellVOPaginationResult = pageGetIndex(indexQueryDTO, appId);
         if (indexCatCellVOPaginationResult.failed()) {
             return Result.buildFail("获取单个索引详情信息失败");
@@ -405,7 +445,12 @@ public class IndicesManagerImpl implements IndicesManager {
     }
     @Override
     public Result<Void> editAlias(IndexCatCellWithConfigDTO param, Boolean editFlag, Integer appId) {
-        return esIndexService.editAlias(getClusterPhy(param.getCluster(), appId), param.getIndex(), param.getAlias(), editFlag);
+        Result<String> getClusterRet = getClusterPhyByClusterNameAndAppId(param.getCluster(), appId);
+        if (getClusterRet.failed()) {
+            return Result.buildFrom(getClusterRet);
+        }
+        String phyCluster = getClusterRet.getData();
+        return esIndexService.editAlias(phyCluster, param.getIndex(), param.getAlias(), editFlag);
     }
 
     @Override
@@ -487,6 +532,22 @@ public class IndicesManagerImpl implements IndicesManager {
         return Result.buildSucc(indexNames);
     }
 
+    @Override
+    public Result<Boolean> isExists(String cluster, String indexName, Integer appId) {
+        if (!appService.isAppExists(appId)) {
+            return Result.buildParamIllegal(String.format("当前登录项目Id[%s]不存在, 无权限操作", appId));
+        }
+        Result<String> getClusterRet = getClusterPhyByClusterNameAndAppId(cluster, appId);
+        if (getClusterRet.failed()) {
+            return Result.buildFrom(getClusterRet);
+        }
+        String phyClusterName = getClusterRet.getData();
+        if (!clusterPhyManager.isClusterExists(phyClusterName)) {
+            return Result.buildParamIllegal(String.format("物理集群[%s]不存在", phyClusterName));
+        }
+        return Result.buildSucc(esIndexService.syncIsIndexExist(phyClusterName, indexName));
+    }
+
     /***************************************************private**********************************************************/
     private Result<Void> basicCheckParam(String cluster, String index, Integer appId) {
         if (!appService.isAppExists(appId)) {
@@ -519,16 +580,6 @@ public class IndicesManagerImpl implements IndicesManager {
         return Result.buildSucc();
     }
 
-    private IndexQueryDTO buildOneIndicesConditionDTO(String cluster, String indexName, Integer appId) {
-        IndexQueryDTO indexQueryDTO = new IndexQueryDTO();
-        indexQueryDTO.setIndex(indexName);
-        indexQueryDTO.setCluster(getClusterPhy(cluster, appId));
-        indexQueryDTO.setSortTerm(DEFAULT_SORT_TERM);
-        indexQueryDTO.setPage(1L);
-        indexQueryDTO.setSize(1L);
-        return indexQueryDTO;
-    }
-
     private boolean filterPrimaryShard(IndexShardInfo indexShardInfo) {
         if (null == indexShardInfo) {
             return false;
@@ -556,16 +607,21 @@ public class IndicesManagerImpl implements IndicesManager {
         }
     }
 
-    private String getClusterPhy(String cluster, Integer appId) {
+    private Result<String> getClusterPhyByClusterNameAndAppId(String cluster, Integer appId) {
+        String phyClusterName;
         if (appService.isSuperApp(appId)) {
-            return cluster;
+            phyClusterName = cluster;
         } else {
-            List<ClusterPhy> clusterPhyList = clusterLogicManager.getLogicClusterAssignedPhysicalClusters(cluster);
-            if (AriusObjUtils.isEmptyList(clusterPhyList)) {
-                return null;
+            ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByName(cluster);
+            if (null == clusterLogic) {
+                return Result.buildParamIllegal(String.format("逻辑集群[%s]不存在", cluster));
             }
-
-            return clusterPhyList.get(0).getCluster();
+            ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(clusterLogic.getId());
+            if (null == clusterRegion) {
+                return Result.buildParamIllegal("逻辑集群未绑定Region");
+            }
+            phyClusterName = clusterRegion.getPhyClusterName();
         }
+        return Result.buildSucc(phyClusterName);
     }
 }

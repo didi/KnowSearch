@@ -10,7 +10,10 @@ import java.util.stream.Collectors;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.IndicesDistributionVO;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
+import com.didiglobal.logi.elasticsearch.client.response.model.indices.CommonStat;
+import com.didiglobal.logi.elasticsearch.client.response.model.indices.Segments;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.rest.RestStatus;
 import org.springframework.beans.BeanUtils;
@@ -435,6 +438,29 @@ public class ESIndexServiceImpl implements ESIndexService {
         return catIndexResultList.stream().filter(this::filterOriginalIndices).collect(Collectors.toList());
     }
 
+    /**
+     * 获取集群中索引segment数量
+     *
+     * @param clusterPhyName 物理集群名称
+     * @return {@link Map}<{@link String}, {@link Tuple}<{@link Long}, {@link Long}>>
+     */
+    public Map<String, Tuple<Long, Long>> syncGetIndicesSegmentCount(String clusterPhyName) {
+        Map<String, IndexNodes> indexNodesMap = esIndexDAO.getIndexStats(clusterPhyName, null);
+        Map<String, Tuple<Long, Long>> retMap = new HashMap<>();
+        if (MapUtils.isNotEmpty(indexNodesMap)) {
+            indexNodesMap.forEach((key, val) -> {
+                Tuple<Long, Long> tuple = new Tuple<>();
+                Optional.ofNullable(val).map(IndexNodes::getTotal).map(CommonStat::getSegments).map(Segments::getCount)
+                    .ifPresent(tuple::setV1);
+                Optional.ofNullable(val).map(IndexNodes::getPrimaries).map(CommonStat::getSegments)
+                    .map(Segments::getCount).ifPresent(tuple::setV2);
+                retMap.put(key, tuple);
+            });
+
+        }
+        return retMap;
+    }
+    
     /**
      * 过滤原始索引
      */
