@@ -456,6 +456,39 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     }
 
     @Override
+    public Result<List<String>> listClusterPhyNameByResourceType(Integer clusterResourceType, Integer appId) {
+        if (!appService.isAppExists(appId)) {
+            return Result.buildParamIllegal("项目不存在");
+        }
+        if (null != clusterResourceType && !ClusterResourceTypeEnum.isExist(clusterResourceType)) {
+            return Result.buildParamIllegal("集群资源类型非法");
+        }
+        List<String> clusters;
+        List<ClusterPhy> clusterPhyList;
+        if (null != clusterResourceType) {
+            ClusterPhyDTO clusterPhyDTO = new ClusterPhyDTO();
+            clusterPhyDTO.setResourceType(clusterResourceType);
+            clusterPhyList = clusterPhyService.listClustersByCondt(clusterPhyDTO);
+
+        } else {
+            clusterPhyList = clusterPhyService.listAllClusters();
+        }
+        Set<String> clusterNameSet = ConvertUtil.list2Set(clusterPhyList, ClusterPhy::getCluster);
+        if (appService.isSuperApp(appId)) {
+            clusters = clusterPhyList.stream().map(ClusterPhy::getCluster).distinct().sorted(Comparator.naturalOrder())
+                .collect(Collectors.toList());
+        } else {
+            List<ClusterLogic> clusterLogicList = clusterLogicService.getOwnedClusterLogicListByAppId(appId);
+            //项目下的有管理权限逻辑集群会关联多个物理集群
+            List<ClusterRegion> regions = clusterRegionService.getClusterRegionsByLogicIds(
+                clusterLogicList.stream().map(ClusterLogic::getId).collect(Collectors.toList()));
+            clusters = regions.stream().map(ClusterRegion::getPhyClusterName).distinct()
+                .filter(clusterNameSet::contains).sorted(Comparator.naturalOrder()).collect(Collectors.toList());
+        }
+        return Result.buildSucc(clusters);
+    }
+
+    @Override
     public Result<List<String>> getTemplateSameVersionClusterNamesByTemplateId(Integer appId, Integer templateId) {
         List<String> clusterPhyNameList = listClusterPhyNameByAppId(appId);
         // No permission, cut branches and return

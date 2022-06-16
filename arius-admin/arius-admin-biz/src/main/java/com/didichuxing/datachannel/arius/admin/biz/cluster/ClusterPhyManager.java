@@ -292,4 +292,6 @@ public interface ClusterPhyManager {
      * @return {@link List}<{@link ClusterRoleInfo}>
      */
     List<ClusterRoleInfo> listClusterRolesByClusterId(Integer clusterId);
+
+    Result<List<String>> listClusterPhyNameByResourceType(Integer clusterResourceType, Integer appId);
 }
