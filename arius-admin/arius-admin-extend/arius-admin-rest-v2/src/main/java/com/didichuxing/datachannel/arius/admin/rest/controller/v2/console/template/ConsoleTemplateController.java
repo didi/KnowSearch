@@ -240,7 +240,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
 
       
 
-        return indexTemplateService.getLogicTemplatesByProjectId(projectId);
+        return indexTemplateService.listLogicTemplatesByProjectId(projectId);
     }
 
     @GetMapping("/cyclicalRoll")

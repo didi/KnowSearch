@@ -178,7 +178,7 @@ public class TemplateLogicV3Controller {
     @GetMapping("{clusterLogicName}/logic/templates")
     @ResponseBody
     @ApiOperation(value = "根据逻辑集群名称获取对应全量逻辑模板列表", notes = "")
-    public Result<List<ConsoleTemplateVO>> getLogicTemplatesByLogicCluster(HttpServletRequest request,@PathVariable String clusterLogicName) {
-        return templateLogicManager.getTemplateVOByLogicCluster(clusterLogicName, HttpRequestUtil.getProjectId(request));
+    public Result<List<ConsoleTemplateVO>> listTemplateVOByLogicCluster(HttpServletRequest request,@PathVariable String clusterLogicName) {
+        return templateLogicManager.listTemplateVOByLogicCluster(clusterLogicName, HttpRequestUtil.getProjectId(request));
     }
 }

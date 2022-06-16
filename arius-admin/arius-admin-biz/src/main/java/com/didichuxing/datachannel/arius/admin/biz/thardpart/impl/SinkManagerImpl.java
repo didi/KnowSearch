@@ -158,7 +158,7 @@ public class SinkManagerImpl implements SinkManager {
      */
     private Result<IndexTemplateWithPhyTemplates> fetchIndexTemplateMetaByName(String templateName) {
         // 主键顺序存放
-        List<IndexTemplate> templateLogicList = indexTemplateService.getLogicTemplateByName(templateName);
+        List<IndexTemplate> templateLogicList = indexTemplateService.listLogicTemplateByName(templateName);
 
         if (CollectionUtils.isEmpty(templateLogicList)) {
             return Result.buildFrom(Result.buildNotExist("模板不存在"));
@@ -187,7 +187,7 @@ public class SinkManagerImpl implements SinkManager {
      */
     private Result<IndexTemplateWithPhyTemplates> getIndexTemplateMetaByName(String templateName) {
         // 主键顺序存放
-        List<IndexTemplate> templateLogicList = indexTemplateService.getLogicTemplateByName(templateName);
+        List<IndexTemplate> templateLogicList = indexTemplateService.listLogicTemplateByName(templateName);
 
         if (CollectionUtils.isEmpty(templateLogicList)) {
             return Result.buildNotExist("模板不存在");

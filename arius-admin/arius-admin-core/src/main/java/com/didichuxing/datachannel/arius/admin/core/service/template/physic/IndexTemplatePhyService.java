@@ -135,13 +135,6 @@ public interface IndexTemplatePhyService {
     List<IndexTemplatePhy> getNormalTemplateByCluster(String cluster);
 
     /**
-     * 根据物理模板状态和模糊匹配获取模板列表
-     * @param cluster 集群
-     * @return set
-     */
-    Set<String> getMatchNormalLogicIdByCluster(String cluster);
-
-    /**
      * 获取模板匹配的索引列表，按着时间排序
      * @param physicalId 物理模板id
      * @return list

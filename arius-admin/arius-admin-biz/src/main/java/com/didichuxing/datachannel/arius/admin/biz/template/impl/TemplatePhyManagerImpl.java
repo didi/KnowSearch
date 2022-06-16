@@ -146,7 +146,7 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
     public boolean checkMeta() {
         List<IndexTemplatePhy> templatePhysicals = indexTemplatePhyService.listTemplate();
 
-        List<IndexTemplate> templateLogics = indexTemplateService.getAllLogicTemplates();
+        List<IndexTemplate> templateLogics = indexTemplateService.listAllLogicTemplates();
         Map<Integer, IndexTemplate> logicId2IndexTemplateLogicMap = ConvertUtil.list2Map(templateLogics,
                 IndexTemplate::getId);
 

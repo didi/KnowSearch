@@ -23,7 +23,7 @@ public class ESClusterStaticsService {
     public List<Integer> getLogicClusterAccessInfo(Long logicClusterId, int days){
         List<Integer> projectIds = new ArrayList<>();
 
-        List<IndexTemplate> templateLogics = indexTemplateService.getLogicClusterTemplates(logicClusterId);
+        List<IndexTemplate> templateLogics = indexTemplateService.listLogicClusterTemplates(logicClusterId);
 
         for(IndexTemplate indexTemplate : templateLogics){
             List<ProjectTemplateAccessCountPO> accessCountPos = accessCountEsDao.getAccessProjectIdsInfoByTemplateId(indexTemplate.getId(), days);

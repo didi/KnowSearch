@@ -34,7 +34,7 @@ public class TemplateLogicOpController {
 
     public Result<List<OpLogicTemplateVO>> list(@RequestBody IndexTemplateDTO param) {
         return Result
-            .buildSucc(ConvertUtil.list2List(indexTemplateService.getLogicTemplates(param), OpLogicTemplateVO.class));
+            .buildSucc(ConvertUtil.list2List(indexTemplateService.listLogicTemplates(param), OpLogicTemplateVO.class));
     }
 
     @RequestMapping(path = "/blockRead", method = RequestMethod.PUT)

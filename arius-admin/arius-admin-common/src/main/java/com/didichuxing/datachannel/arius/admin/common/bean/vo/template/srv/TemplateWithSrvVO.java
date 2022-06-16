@@ -20,27 +20,27 @@ import java.util.List;
 public class TemplateWithSrvVO extends BaseVO {
 
     @ApiModelProperty("模板ID")
-    private Integer id;
+    private Integer                        id;
 
     @ApiModelProperty("模板名称")
-    private String name;
+    private String                         name;
 
     @ApiModelProperty("所属集群")
-    private List<String> cluster;
+    private List<String>                   cluster;
 
     @ApiModelProperty("开启的服务")
-    private List<TemplateSrvVO> openSrv;
+    private List<TemplateSrvVO>            openSrv;
 
     @ApiModelProperty("不可用的服务")
     private List<UnavailableTemplateSrvVO> unavailableSrv;
 
     @ApiModelProperty("DCDR主从位点差")
-    private Long checkPointDiff;
+    private Long                           checkPointDiff;
 
     @ApiModelProperty("数据保存时长 单位天")
-    private Integer expireTime;
+    private Integer                        expireTime;
 
     @ApiModelProperty("热数据保存时长 单位天")
-    private Integer hotTime;
+    private Integer                        hotTime;
 
 }

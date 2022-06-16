@@ -15,19 +15,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import java.util.List;
-import javax.servlet.http.HttpServletRequest;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
 
 /**
  * App逻辑集群权限接口
@@ -91,7 +78,7 @@ public class ProjectLogicClusterAuthV3Controller {
         }
 
         List<IndexTemplate> templatesInLogicCluster = indexTemplateService
-            .getHasAuthTemplatesInLogicCluster(projectClusterLogicAuth.getProjectId(), projectClusterLogicAuth.getLogicClusterId());
+            .listHasAuthTemplatesInLogicCluster(projectClusterLogicAuth.getProjectId(), projectClusterLogicAuth.getLogicClusterId());
         if (!templatesInLogicCluster.isEmpty()) {
             return Result.buildFail("应用在集群上存在有权限的索引模板，不能删除");
         }

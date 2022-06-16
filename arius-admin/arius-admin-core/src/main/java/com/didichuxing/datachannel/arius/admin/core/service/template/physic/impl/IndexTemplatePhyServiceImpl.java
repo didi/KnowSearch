@@ -382,13 +382,6 @@ public class IndexTemplatePhyServiceImpl implements IndexTemplatePhyService {
             IndexTemplatePhy.class);
     }
 
-    @Override
-    public Set<String> getMatchNormalLogicIdByCluster(String cluster) {
-        return ConvertUtil.list2Set(
-                indexTemplatePhyDAO.listByMatchClusterAndStatus(cluster, TemplatePhysicalStatusEnum.NORMAL.getCode()),
-                x -> x.getLogicId().toString());
-    }
-
     /**
      * 获取模板匹配的索引列表，按着时间排序
      * 注意：

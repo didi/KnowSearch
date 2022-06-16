@@ -109,7 +109,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 public class TemplateLogicManagerImpl implements TemplateLogicManager {
 
-    private static final ILog           LOGGER = LogFactory.getLog(TemplateLogicManager.class);
+    private static final ILog           LOGGER      = LogFactory.getLog(TemplateLogicManager.class);
 
     @Autowired
     private ProjectLogicTemplateAuthService projectLogicTemplateAuthService;
@@ -144,10 +144,10 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     private ESUserService  esUserService;
 
     @Autowired
-    private ESIndexService esIndexService;
+    private ESIndexService              esIndexService;
 
     @Autowired
-    private ESTemplateService esTemplateService;
+    private ESTemplateService           esTemplateService;
 
     
 
@@ -163,10 +163,10 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     private TemplateDCDRManager         templateDcdrManager;
 
     @Autowired
-    private PreCreateManager preCreateManager;
+    private PreCreateManager            preCreateManager;
 
     @Autowired
-    private ClusterLogicService clusterLogicService;
+    private ClusterLogicService         clusterLogicService;
 
     private final Integer RETRY_TIMES = 3;
 
@@ -179,7 +179,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     public boolean checkAllLogicTemplatesMeta() {
         List<Integer> projectIds = projectService.getProjectBriefList().stream().map(ProjectBriefVO::getId).collect(
                 Collectors.toList());
-        List<IndexTemplate> logicTemplates = indexTemplateService.getAllLogicTemplates();
+        List<IndexTemplate> logicTemplates = indexTemplateService.listAllLogicTemplates();
         for (IndexTemplate templateLogic : logicTemplates) {
             try {
                 Result<Void> result = checkLogicTemplateMeta(templateLogic, projectIds);
@@ -308,7 +308,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     public List<IndexTemplateLogicAggregate> getAllTemplatesAggregate(Integer projectId) {
         List<IndexTemplateLogicAggregate> indexTemplateLogicAggregates = new ArrayList<>();
         List<IndexTemplateWithCluster> logicTemplates = indexTemplateService
-                .getAllLogicTemplateWithClusters();
+                .listAllLogicTemplateWithClusters();
 
         if (CollectionUtils.isNotEmpty(logicTemplates)) {
             indexTemplateLogicAggregates = fetchLogicTemplatesAggregates(logicTemplates, projectId);
@@ -332,7 +332,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         }
 
         List<IndexTemplateWithCluster> logicTemplates = indexTemplateService
-                .getLogicTemplateWithClustersByClusterId(logicClusterId);
+                .listLogicTemplateWithClustersByClusterId(logicClusterId);
 
         if (CollectionUtils.isEmpty(logicTemplates)) {
             return new ArrayList<>();
@@ -457,9 +457,9 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         switch (ProjectTemplateAuthEnum.valueOf(authType)) {
             case OWN:
                 if (AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
-                    return indexTemplateService.getAllLogicTemplates();
+                    return indexTemplateService.listAllLogicTemplates();
                 }else {
-                    return indexTemplateService.getProjectLogicTemplatesByProjectId(projectId);
+                    return indexTemplateService.listAppLogicTemplatesByProjectId(projectId);
                 }
 
             case RW:
@@ -479,9 +479,9 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
                         .collect(Collectors.toList());
 
             case NO_PERMISSION:
-                List<IndexTemplate> allLogicTemplates = indexTemplateService.getAllLogicTemplates();
+                List<IndexTemplate> allLogicTemplates = indexTemplateService.listAllLogicTemplates();
                 List<Integer> projectRAndRwAuthTemplateIdList = projectLogicTemplateAuthService
-                        .getProjectTemplateRWAndRAuthsWithoutCodecResponsible(projectId)
+                        .getProjectTemplateRWAndRAuthsWithoutCodecResponsible(appId)
                         .stream()
                         .map(ProjectTemplateAuth::getTemplateId)
                         .collect(Collectors.toList());
@@ -500,7 +500,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
 
     @Override
     public List<String> getTemplateLogicNames(Integer projectId) {
-        List<IndexTemplate> templateLogics = indexTemplateService.getProjectLogicTemplatesByProjectId(projectId);
+        List<IndexTemplate> templateLogics = indexTemplateService.listAppLogicTemplatesByAppId(projectId);
 
         return templateLogics.stream().map(IndexTemplate::getName).collect(Collectors.toList());
     }
@@ -815,7 +815,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     }
 
     @Override
-    public Result<List<ConsoleTemplateVO>> getTemplateVOByLogicCluster(String clusterLogicName, Integer projectId) {
+    public Result<List<ConsoleTemplateVO>> listTemplateVOByLogicCluster(String clusterLogicName, Integer projectId) {
         ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByName(clusterLogicName);
         if (clusterLogic == null) {
             return Result.buildFail();
@@ -1045,7 +1045,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         }
 
         // 获取全部的正在使用的逻辑模板
-        List<IndexTemplate> allLogicTemplates = indexTemplateService.getAllLogicTemplates();
+        List<IndexTemplate> allLogicTemplates = indexTemplateService.listAllLogicTemplates();
 
         if (!CollectionUtils.isEmpty(allLogicTemplates)) {
             for (IndexTemplate indexTemplate : allLogicTemplates) {

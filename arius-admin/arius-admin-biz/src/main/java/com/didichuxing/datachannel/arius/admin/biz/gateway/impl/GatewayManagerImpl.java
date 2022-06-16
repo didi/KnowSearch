@@ -277,7 +277,7 @@ public class GatewayManagerImpl implements GatewayManager {
     @Override
     public Result<Map<String, GatewayTemplateDeployInfoVO>> listDeployInfo(String dataCenter) {
         List<IndexTemplateWithPhyTemplates> logicWithPhysicals = indexTemplateService
-                .getTemplateWithPhysicalByDataCenter(dataCenter);
+                .listTemplateWithPhysicalByDataCenter(dataCenter);
 
         List<IndexTemplateAlias> logicWithAliases = templateLogicAliasesManager.listAlias(logicWithPhysicals);
         Multimap<Integer, IndexTemplateAlias> logicId2IndexTemplateAliasMultiMap = ConvertUtil
