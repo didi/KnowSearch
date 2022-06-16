@@ -26,4 +26,13 @@ public class IndexCatCell {
     private String  priStoreSize;
     private Boolean readFlag;
     private Boolean writeFlag;
+
+    private String  cluster;
+    private Long    resourceId;
+    private Integer appId;
+    private boolean deleteFlag;
+    private long    timestamp;
+    private Long    primariesSegmentCount;
+    private Long    totalSegmentCount;
+    private Integer templateId;
 }
