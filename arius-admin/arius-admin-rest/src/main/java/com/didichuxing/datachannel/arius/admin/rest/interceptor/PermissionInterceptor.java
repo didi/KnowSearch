@@ -6,6 +6,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V2_THIRD_PART;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_NORMAL_USER;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_PROJECT;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_SECURITY;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_THIRD_PART;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_THIRD_PART_SSO;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_WHITE_PART;
@@ -121,7 +122,7 @@ public class PermissionInterceptor implements HandlerInterceptor {
             return Boolean.TRUE;
         }
         //排除admin中接口中含有/logi-security 或者/v3/project 之后，对于原本属于admin中的接口进行header设置，保证项目视角到存在header
-        if (!(request.getServletPath().startsWith(API_PREFIX) || request.getServletPath().startsWith(V3_PROJECT))) {
+        if (!(request.getServletPath().startsWith(API_PREFIX) || request.getServletPath().startsWith(V3_SECURITY))) {
             final Integer projectId = HttpRequestUtil.getProjectId(request);
             if (Objects.isNull(projectId)) {
                 throw new OperateForbiddenException(

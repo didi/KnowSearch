@@ -13,6 +13,7 @@ public class ApiVersion {
     public static final String V2                = "/v2";
 
     public static final String V3                = "/v3";
+    public static final String V3_SECURITY = "/v3/security";
 
     public static final String V2_OP             = "/v2/op";
 

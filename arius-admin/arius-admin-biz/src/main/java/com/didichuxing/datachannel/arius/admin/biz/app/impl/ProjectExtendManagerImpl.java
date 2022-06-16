@@ -32,6 +32,7 @@ import com.didiglobal.logi.security.common.PagingResult;
 import com.didiglobal.logi.security.common.dto.project.ProjectBriefQueryDTO;
 import com.didiglobal.logi.security.common.dto.project.ProjectQueryDTO;
 import com.didiglobal.logi.security.common.dto.project.ProjectSaveDTO;
+import com.didiglobal.logi.security.common.enums.project.ProjectUserCode;
 import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import com.didiglobal.logi.security.common.vo.project.ProjectDeleteCheckVO;
 import com.didiglobal.logi.security.common.vo.project.ProjectVO;
@@ -40,7 +41,9 @@ import com.didiglobal.logi.security.common.vo.user.UserVO;
 import com.didiglobal.logi.security.exception.LogiSecurityException;
 import com.didiglobal.logi.security.service.OplogService;
 import com.didiglobal.logi.security.service.ProjectService;
+import com.didiglobal.logi.security.service.UserProjectService;
 import com.didiglobal.logi.security.service.UserService;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -73,7 +76,9 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
     @Autowired
     private IndexTemplateService indexTemplateService;
     @Autowired
-    private UserService          userService;
+    private UserService        userService;
+    @Autowired
+    private UserProjectService userProjectService;
     
     @Override
     public Result<ProjectExtendVO> createProject(ProjectExtendSaveDTO saveDTO, String operator) {
@@ -82,8 +87,10 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
             ProjectSaveDTO project = saveDTO.getProject();
             // 2. 创建项目配置
             ProjectConfigDTO config = saveDTO.getConfig();
+         
             // 3. 创建项目
             ProjectVO projectVO = projectService.createProject(project, operator);
+          
             // 4. 转换
             ProjectExtendVO projectExtendVO = ConvertUtil.obj2Obj(project, ProjectExtendVO.class);
             //5. 设置项目id
@@ -102,7 +109,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
                         ConvertUtil.obj2Obj(resultProjectConfigPOTuple.getV2(), ProjectConfigVO.class));
                 
             }
-            
+       
             //创建es user
             createESUserDefault(projectVO, operator);
             return Result.<ProjectExtendVO>buildSucc(projectExtendVO);
@@ -124,7 +131,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
             ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectId);
             projectExtendVO.setConfig(ConvertUtil.obj2Obj(projectConfig, ProjectConfigVO.class));
             
-            return Result.<ProjectExtendVO>buildSucc(projectExtendVO);
+            return Result.buildSucc(projectExtendVO);
         } catch (LogiSecurityException e) {
             return Result.buildFail(e.getMessage());
         }
@@ -157,6 +164,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
         projectService.deleteProjectByProjectId(projectId, operator);
         //删除es user
         esUserService.deleteByESUsers(projectId);
+        //todo 操作记录
         return Result.buildSucc();
     }
     
@@ -225,7 +233,23 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
                 }
             }
             final ProjectSaveDTO project = saveDTO.getProject();
+            List<Integer> ownerIdList = project.getOwnerIdList();
+            List<Integer> userIdList = project.getUserIdList();
+            project.setOwnerIdList(Collections.emptyList());
+            project.setUserIdList(Collections.emptyList());
             projectService.updateProject(project, operator);
+            //更新项目与用户拥有者的关联关系
+            if (CollectionUtils.isNotEmpty(ownerIdList)) {
+                userProjectService.saveOwnerProject(project.getId(), ownerIdList);
+                //todo 操作记录
+            }
+            //更新项目与用户成员的关联关系
+            if (CollectionUtils.isNotEmpty(userIdList)) {
+                userProjectService.updateUserProject(project.getId(), userIdList);
+                //todo 操作记录
+        
+            }
+            
             return Result.buildSucc();
         } catch (LogiSecurityException e) {
             return Result.buildFail(e.getMessage());
@@ -242,6 +266,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
     public Result<Void> changeProjectStatus(Integer projectId, String operator) {
         try {
             projectService.changeProjectStatus(projectId, operator);
+            //todo 操作记录
         return Result.buildSucc();
         }catch (LogiSecurityException e) {
             return Result.buildFail(e.getMessage());
@@ -277,9 +302,8 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
             return Result.buildParamIllegal(String.format("以下用户已经是该项目的成员:%s", havaUseridListStr));
         }
         try {
-            for (Integer id : userIdList) {
-                projectService.addProjectUser(projectId, id, operator);
-            }
+              userProjectService.saveUserProject(projectId, userIdList);
+            //todo 操作记录
             return Result.buildSucc();
         } catch (LogiSecurityException e) {
             return Result.buildFail(e.getMessage());
@@ -298,6 +322,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
     public Result<Void> delProjectUser(Integer projectId, Integer userId, String operator) {
         try {
             projectService.delProjectUser(projectId, userId, operator);
+            //todo 操作记录
             return Result.buildSucc();
         } catch (LogiSecurityException e) {
             return Result.buildFail(e.getMessage());
@@ -330,10 +355,8 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
             return Result.buildParamIllegal(String.format("以下用户已经是该项目的拥有者:%s", havaUseridListStr));
         }
         try {
-            for (Integer ownerId : ownerIdList) {
-                projectService.addProjectOwner(projectId, ownerId, operator);
-        
-            }
+            userProjectService.saveOwnerProject(projectId,ownerIdList);
+            //todo 操作记录
             return Result.buildSucc();
         } catch (LogiSecurityException e) {
             return Result.buildFail(e.getMessage());
@@ -351,6 +374,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
     public Result<Void> delProjectOwner(Integer projectId, Integer ownerId, String operator) {
         try {
             projectService.delProjectOwner(projectId, ownerId, operator);
+            //todo 操作记录
             return Result.buildSucc();
         } catch (LogiSecurityException e) {
             return Result.buildFail(e.getMessage());

@@ -59,8 +59,6 @@ public class NormalOperateRecordController {
     @GetMapping("/trigger-way")
     @ResponseBody
     @ApiOperation(value = "获取触发方式")
-    @ApiImplicitParams({
-            @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "moduleCode", value = "模块code:为空则会返回全部", required = true) })
     public Result<List<String>> listTriggerWay() {
         return Result.buildSucc(TriggerWayEnum.getOperationList());
     }
