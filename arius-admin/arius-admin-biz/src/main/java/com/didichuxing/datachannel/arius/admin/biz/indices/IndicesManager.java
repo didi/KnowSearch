@@ -139,6 +139,16 @@ public interface IndicesManager {
     Result<Void> editAlias(IndexCatCellWithConfigDTO param, Boolean editFlag, Integer appId);
 
     /**
+     * 获取索引别名
+     *
+     * @param cluster   集群
+     * @param indexName 索引名称
+     * @param appId     项目
+     * @return {@link Result}<{@link String}>
+     */
+    Result<String> getAlias(String cluster, String indexName, Integer appId);
+
+    /**
      * rollover
      * @param param
      * @return

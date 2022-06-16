@@ -52,7 +52,7 @@ public class IndicesController {
         return indicesManager.createIndex(param, HttpRequestUtils.getAppId(request));
     }
 
-    @GetMapping("{cluster}/{indexName}")
+    @GetMapping("/{cluster}/{indexName}")
     @ResponseBody
     @ApiOperation(value = "查询索引")
     public Result<IndexCatCellVO> getIndex(HttpServletRequest request, @PathVariable String cluster,
@@ -60,7 +60,7 @@ public class IndicesController {
         return indicesManager.getIndexCatInfo(cluster, indexName, HttpRequestUtils.getAppId(request));
     }
 
-    @GetMapping("{cluster}/{indexName}/exists")
+    @GetMapping("/{cluster}/{indexName}/exists")
     @ResponseBody
     @ApiOperation(value = "查询索引")
     public Result<Boolean> isExists(HttpServletRequest request, @PathVariable String cluster,
@@ -83,7 +83,7 @@ public class IndicesController {
         return indicesManager.editMapping(param, HttpRequestUtils.getAppId(request));
     }
 
-    @GetMapping("{cluster}/{indexName}/mapping")
+    @GetMapping("/{cluster}/{indexName}/mapping")
     @ResponseBody
     @ApiOperation(value = "查询mapping")
     public Result<IndexMappingVO> getMapping(@PathVariable String cluster, @PathVariable String indexName,
@@ -98,7 +98,7 @@ public class IndicesController {
         return indicesManager.editSetting(param, HttpRequestUtils.getAppId(request));
     }
 
-    @GetMapping("{cluster}/{indexName}/setting")
+    @GetMapping("/{cluster}/{indexName}/setting")
     @ResponseBody
     @ApiOperation(value = "查询setting")
     public Result<IndexSettingVO> getSetting(@PathVariable String cluster, @PathVariable String indexName,
@@ -130,7 +130,14 @@ public class IndicesController {
         return indicesManager.batchEditIndexBlockSetting(params, HttpRequestUtils.getAppId(request),
             HttpRequestUtils.getOperator(request));
     }
-
+    
+    @GetMapping("/{cluster}/{indexName}/alias")
+    @ResponseBody
+    @ApiOperation(value = "获取索引别名")
+    public Result<String> getAlias(HttpServletRequest request, @PathVariable String cluster, @PathVariable String indexName) {
+        return indicesManager.getAlias(cluster, indexName, HttpRequestUtils.getAppId(request));
+    }
+    
     @PutMapping("/alias")
     @ResponseBody
     @ApiOperation(value = "编辑别名")
@@ -145,7 +152,7 @@ public class IndicesController {
         return indicesManager.editAlias(param, Boolean.FALSE, HttpRequestUtils.getAppId(request));
     }
 
-    @GetMapping("{cluster}/{indexName}/shard")
+    @GetMapping("/{cluster}/{indexName}/shard")
     @ResponseBody
     @ApiOperation(value = "获取索引shard分配详情")
     public Result<List<IndexShardInfoVO>> getIndexShard(@PathVariable String cluster, @PathVariable String indexName,

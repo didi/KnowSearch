@@ -82,9 +82,6 @@ public class IndicesManagerImpl implements IndicesManager {
     private ESIndexService        esIndexService;
 
     @Autowired
-    private ClusterLogicManager clusterLogicManager;
-
-    @Autowired
     private ClusterPhyManager     clusterPhyManager;
 
     @Autowired
@@ -451,6 +448,11 @@ public class IndicesManagerImpl implements IndicesManager {
         }
         String phyCluster = getClusterRet.getData();
         return esIndexService.editAlias(phyCluster, param.getIndex(), param.getAlias(), editFlag);
+    }
+
+    @Override
+    public Result<String> getAlias(String cluster, String indexName, Integer appId) {
+        return null;
     }
 
     @Override
