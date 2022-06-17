@@ -1,6 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.BaseVO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

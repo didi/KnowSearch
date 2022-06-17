@@ -96,7 +96,7 @@ public class AppLogicClusterAuthController {
         }
 
         if (appClusterLogicAuth.getLogicClusterId() != null) {
-            List<IndexTemplate> templatesInLogicCluster = indexTemplateService.getHasAuthTemplatesInLogicCluster(
+            List<IndexTemplate> templatesInLogicCluster = indexTemplateService.listHasAuthTemplatesInLogicCluster(
                     appClusterLogicAuth.getAppId(), appClusterLogicAuth.getLogicClusterId());
             if (!templatesInLogicCluster.isEmpty()) {
                 return Result.buildFail("应用在集群上存在有权限的索引模板，不能删除");

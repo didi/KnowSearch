@@ -8,6 +8,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.Template
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.BaseTemplateSrvOpenDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
+import com.didichuxing.datachannel.arius.admin.common.constant.ESClusterVersionEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.NewTemplateSrvEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
@@ -49,11 +50,6 @@ public class IndexPlanManagerImpl extends BaseTemplateSrvImpl implements IndexPl
     @Override
     public NewTemplateSrvEnum templateSrv() {
         return NewTemplateSrvEnum.INDEX_PLAN;
-    }
-
-    @Override
-    public Result<Void> isTemplateSrvAvailable(Integer logicTemplateId) {
-        return Result.buildSucc();
     }
 
     @Override

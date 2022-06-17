@@ -278,7 +278,7 @@ public class TemplateLabelService {
     public Map<Integer/*indexTemplateId*/, Collection<TemplateLabelPO>> listAllIndexTemplateLabelByLabelIds(String includeLabelIds, String excludeLabelIds) {
         Map<Integer/*indexTemplateId*/, Collection<TemplateLabelPO>> retMap = new ConcurrentHashMap<>();
 
-        List<IndexTemplate> templateLogics = indexTemplateService.getAllLogicTemplates();
+        List<IndexTemplate> templateLogics = indexTemplateService.listAllLogicTemplates();
 
         templateLogics.parallelStream().forEach(indexTemplate -> {
             Integer templateId = indexTemplate.getId();

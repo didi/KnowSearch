@@ -1,0 +1,14 @@
+{
+  "*":{
+    "createTime":"2022-04-11T06:21:04.000+0000",
+    "updateTime":"2022-04-15T19:00:12.000+0000",
+    "id":46799,
+    "name":"yyftest-mb-0411-01",
+    "dataCenter":"cn",
+    "expression":"yyftest-mb-0411-01*",
+    "version":1,
+    "aliases":[
+
+    ]
+  }
+}

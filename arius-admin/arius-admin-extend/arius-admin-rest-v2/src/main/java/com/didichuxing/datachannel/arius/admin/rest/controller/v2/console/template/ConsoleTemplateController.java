@@ -239,7 +239,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
             return Result.buildNotExist("应用不存在");
         }
 
-        return indexTemplateService.getLogicTemplatesByAppId(appId);
+        return indexTemplateService.listLogicTemplatesByAppId(appId);
     }
 
     @GetMapping("/cyclicalRoll")

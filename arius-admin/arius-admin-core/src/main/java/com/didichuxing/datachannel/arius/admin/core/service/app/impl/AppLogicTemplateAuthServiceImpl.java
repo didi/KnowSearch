@@ -73,7 +73,7 @@ public class AppLogicTemplateAuthServiceImpl implements AppLogicTemplateAuthServ
     @Override
     public boolean deleteRedundancyTemplateAuths(boolean shouldDeleteFlags) {
         Map<Integer, IndexTemplate> logicTemplateId2LogicTemplateMappings = ConvertUtil
-            .list2Map(indexTemplateService.getAllLogicTemplates(), IndexTemplate::getId);
+            .list2Map(indexTemplateService.listAllLogicTemplates(), IndexTemplate::getId);
 
         Multimap<Integer, AppTemplateAuthPO> appId2TemplateAuthsMappings = ConvertUtil
             .list2MulMap(templateAuthDAO.listWithRwAuths(), AppTemplateAuthPO::getAppId);
@@ -180,7 +180,7 @@ public class AppLogicTemplateAuthServiceImpl implements AppLogicTemplateAuthServ
 
         //超级项目拥有所有模板own权限
         if (appService.isSuperApp(appId)) {
-            List<IndexTemplate> allLogicTemplates = indexTemplateService.getAllLogicTemplates();
+            List<IndexTemplate> allLogicTemplates = indexTemplateService.listAllLogicTemplates();
             return allLogicTemplates.stream().map(r -> buildTemplateAuth(r, AppTemplateAuthEnum.OWN))
                 .collect(Collectors.toList());
         }
@@ -495,7 +495,7 @@ public class AppLogicTemplateAuthServiceImpl implements AppLogicTemplateAuthServ
      * @return
      */
     private List<AppTemplateAuth> getAllAppsActiveTemplateOwnerAuths() {
-        List<IndexTemplate> logicTemplates = indexTemplateService.getAllLogicTemplates();
+        List<IndexTemplate> logicTemplates = indexTemplateService.listAllLogicTemplates();
         Map<Integer, App> appsMap = appService.getAppsMap();
 
         return logicTemplates
@@ -514,14 +514,14 @@ public class AppLogicTemplateAuthServiceImpl implements AppLogicTemplateAuthServ
             AppTemplateAuth.class);
 
         // 过滤出active的逻辑模板的权限点
-        Set<Integer> logicTemplateIds = indexTemplateService.getAllLogicTemplates().stream().map(IndexTemplate::getId)
+        Set<Integer> logicTemplateIds = indexTemplateService.listAllLogicTemplates().stream().map(IndexTemplate::getId)
                 .collect(Collectors.toSet());
         return rwTemplateAuths.stream().filter(authTemplate -> logicTemplateIds.contains(authTemplate.getTemplateId()))
             .collect(Collectors.toList());
     }
 
     private List<AppTemplateAuth> getAppTemplateOwnerAuths(Integer appId) {
-        List<IndexTemplate> ownAuthTemplates = indexTemplateService.getAppLogicTemplatesByAppId(appId);
+        List<IndexTemplate> ownAuthTemplates = indexTemplateService.listAppLogicTemplatesByAppId(appId);
         return ownAuthTemplates.stream().map(r -> buildTemplateAuth(r, AppTemplateAuthEnum.OWN))
             .collect(Collectors.toList());
     }
