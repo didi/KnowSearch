@@ -67,7 +67,7 @@ public class NormalOperateRecordController {
     @ApiOperation(value = "查询操作日志列表", notes = "分页和条件查询")
     public PagingResult<OplogVO> page(@RequestBody OplogQueryDTO queryDTO) {
          
-        return operateRecordManager.getOplogPage(queryDTO);
+        return operateRecordManager.pageOplogPage(queryDTO);
     }
     
     @GetMapping("/{id}")

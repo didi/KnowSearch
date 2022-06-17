@@ -5,14 +5,20 @@ import com.didiglobal.logi.security.common.PagingResult;
 import com.didiglobal.logi.security.common.dto.oplog.OplogQueryDTO;
 import com.didiglobal.logi.security.common.vo.oplog.OplogVO;
 
-/**
- * 操作记录
- *
- * @author shizeying
- * @date 2022/06/16
- */
 public interface OperateRecordManager {
-    PagingResult<OplogVO> getOplogPage(OplogQueryDTO queryDTO);
+    /**
+     * oplogvo
+     *
+     * @param queryDTO 查询dto
+     * @return {@code PagingResult<OplogVO>}
+     */
+    PagingResult<OplogVO> pageOplogPage(OplogQueryDTO queryDTO);
     
+    /**
+     * 获取oplog
+     *
+     * @param id id
+     * @return {@code Result<OplogVO>}
+     */
     Result<OplogVO> getOplogDetailByOplogId(Integer id);
 }

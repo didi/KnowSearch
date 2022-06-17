@@ -7,26 +7,24 @@ import com.didiglobal.logi.security.common.dto.oplog.OplogQueryDTO;
 import com.didiglobal.logi.security.common.vo.oplog.OplogVO;
 import org.springframework.stereotype.Component;
 
-/**
- * 操作记录
- *
- * @author shizeying
- * @date 2022/06/16
- */
 @Component
 public class OperateRecordManagerImpl implements OperateRecordManager {
     /**
-     * @param queryDTO
-     * @return
+     * oplogvo
+     *
+     * @param queryDTO 查询dto
+     * @return {@code PagingResult<OplogVO>}
      */
     @Override
-    public PagingResult<OplogVO> getOplogPage(OplogQueryDTO queryDTO) {
+    public PagingResult<OplogVO> pageOplogPage(OplogQueryDTO queryDTO) {
         return null;
     }
     
     /**
-     * @param id
-     * @return
+     * 获取oplog
+     *
+     * @param id id
+     * @return {@code Result<OplogVO>}
      */
     @Override
     public Result<OplogVO> getOplogDetailByOplogId(Integer id) {
