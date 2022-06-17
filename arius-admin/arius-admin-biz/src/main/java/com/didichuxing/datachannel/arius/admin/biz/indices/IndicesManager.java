@@ -133,10 +133,10 @@ public interface IndicesManager {
     /**
      * 编辑别名
      * @param param
-     * @param editFlag True 新增别名， False 删除别名，若未指定别名，则默认删除所有别名
+     * @param flag True 新增别名， False 删除别名，若未指定别名，则默认删除所有别名
      * @return
      */
-    Result<Void> editAlias(IndexCatCellWithConfigDTO param, Boolean editFlag, Integer appId);
+    Result<Void> editAlias(IndexCatCellWithConfigDTO param, Boolean flag, Integer appId);
 
     /**
      * 获取索引别名
@@ -146,7 +146,7 @@ public interface IndicesManager {
      * @param appId     项目
      * @return {@link Result}<{@link String}>
      */
-    Result<String> getAlias(String cluster, String indexName, Integer appId);
+    Result<List<String>> getIndexAliases(String cluster, String indexName, Integer appId);
 
     /**
      * rollover

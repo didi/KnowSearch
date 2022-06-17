@@ -1,6 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.manage;
 
+import java.util.List;
+
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatCellDTO;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -23,12 +26,12 @@ public class IndexCatCellWithConfigDTO extends IndexCatCellDTO {
     @ApiModelProperty("setting")
     private String setting;
 
-    @ApiModelProperty("alias")
-    private String alias;
-
     @ApiModelProperty("target index")
     private String targetIndex;
 
     @ApiModelProperty("extra")
     private String extra;
+
+    @ApiModelProperty("别名")
+    private List<String> aliases;
 }

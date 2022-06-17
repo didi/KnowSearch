@@ -15,7 +15,6 @@ import org.springframework.stereotype.Component;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
-import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterLogicManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.page.IndexPageSearchHandle;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
@@ -440,19 +439,30 @@ public class IndicesManagerImpl implements IndicesManager {
 
         return Result.buildSucc(ConvertUtil.obj2Obj(indexCatCellVOs.getBizData().get(0), IndexCatCellVO.class));
     }
+
     @Override
-    public Result<Void> editAlias(IndexCatCellWithConfigDTO param, Boolean editFlag, Integer appId) {
+    public Result<Void> editAlias(IndexCatCellWithConfigDTO param, Boolean flag, Integer appId) {
         Result<String> getClusterRet = getClusterPhyByClusterNameAndAppId(param.getCluster(), appId);
         if (getClusterRet.failed()) {
             return Result.buildFrom(getClusterRet);
         }
         String phyCluster = getClusterRet.getData();
-        return esIndexService.editAlias(phyCluster, param.getIndex(), param.getAlias(), editFlag);
+        if (!flag) {
+            return esIndexService.deleteAliases(phyCluster, param.getIndex(), param.getAliases());
+        } else {
+            return esIndexService.addAliases(phyCluster, param.getIndex(), param.getAliases());
+        }
     }
 
     @Override
-    public Result<String> getAlias(String cluster, String indexName, Integer appId) {
-        return null;
+    public Result<List<String>> getIndexAliases(String cluster, String indexName, Integer appId) {
+        Result<String> getClusterRet = getClusterPhyByClusterNameAndAppId(cluster, appId);
+        if (getClusterRet.failed()) {
+            return Result.buildFrom(getClusterRet);
+        }
+        String phyCluster = getClusterRet.getData();
+        Map<String, List<String>> aliasMap = esIndexService.syncGetIndexAliasesByIndices(phyCluster, indexName);
+        return Result.buildSucc(aliasMap.getOrDefault(indexName,Lists.newArrayList()));
     }
 
     @Override

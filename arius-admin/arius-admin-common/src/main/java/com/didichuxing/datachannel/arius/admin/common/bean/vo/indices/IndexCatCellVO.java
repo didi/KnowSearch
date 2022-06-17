@@ -1,5 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.vo.indices;
 
+import java.util.List;
+
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.BaseVO;
 
 import io.swagger.annotations.ApiModel;
@@ -73,4 +75,7 @@ public class IndexCatCellVO extends BaseVO {
 
     @ApiModelProperty("appId")
     private Integer appId;
+
+    @ApiModelProperty("别名")
+    private List<String> aliases;
 }

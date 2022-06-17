@@ -139,6 +139,14 @@ public interface ESIndexService {
     List<Tuple<String, String>> syncGetIndexAliasesByExpression(String cluster, String expression);
 
     /**
+     * 查询集群中的别名
+     *
+     * @param cluster 集群
+     * @param indices 索引列表
+     * @return {@link Map}<{@link String}, {@link List}<{@link String}>>
+     */
+    Map<String,List<String>> syncGetIndexAliasesByIndices(String cluster, String... indices);
+    /**
      * 批量删除索引
      * @param cluster 集群
      * @param shouldDels 索引集合
@@ -304,15 +312,24 @@ public interface ESIndexService {
     AtomicLong syncGetTotalCheckpoint(String index, IndexNodes stat, AtomicBoolean checkpointEqualSeqNo);
 
     /**
-     * 编辑别名
+     * 新增别名
      *
-     * @param alias
-     * @param index
-     * @param cluster
-     * @param editFlag True 新增别名， False 删除别名，若未指定别名，则默认删除所有别名
-     * @return
+     * @param cluster       集群
+     * @param index         索引
+     * @param aliases    要添加别名
+     * @return {@link Result}<{@link Void}>
      */
-    Result<Void> editAlias(String cluster, String index, String alias, Boolean editFlag);
+    Result<Void> addAliases(String cluster, String index, List<String> aliases);
+
+    /**
+     * 删除别名
+     *
+     * @param cluster       集群
+     * @param index         索引
+     * @param aliases 要删除别名
+     * @return {@link Result}<{@link Void}>
+     */
+    Result<Void> deleteAliases(String cluster, String index, List<String> aliases);
 
     /**
      * rollover

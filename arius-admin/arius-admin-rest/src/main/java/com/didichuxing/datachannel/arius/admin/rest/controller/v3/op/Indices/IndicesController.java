@@ -134,8 +134,8 @@ public class IndicesController {
     @GetMapping("/{cluster}/{indexName}/alias")
     @ResponseBody
     @ApiOperation(value = "获取索引别名")
-    public Result<String> getAlias(HttpServletRequest request, @PathVariable String cluster, @PathVariable String indexName) {
-        return indicesManager.getAlias(cluster, indexName, HttpRequestUtils.getAppId(request));
+    public Result<List<String>> getIndexAliases(HttpServletRequest request, @PathVariable String cluster, @PathVariable String indexName) {
+        return indicesManager.getIndexAliases(cluster, indexName, HttpRequestUtils.getAppId(request));
     }
     
     @PutMapping("/alias")

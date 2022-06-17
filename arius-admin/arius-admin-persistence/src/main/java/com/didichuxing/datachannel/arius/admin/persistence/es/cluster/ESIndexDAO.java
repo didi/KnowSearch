@@ -1,5 +1,19 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.cluster;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.COMMA;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.*;
+
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+
+import javax.annotation.Nullable;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.rest.RestStatus;
+import org.springframework.stereotype.Repository;
+
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.setting.ESIndicesGetAllSettingRequest;
@@ -17,7 +31,6 @@ import com.didiglobal.logi.elasticsearch.client.model.type.ESVersion;
 import com.didiglobal.logi.elasticsearch.client.request.index.exists.ESIndicesExistsRequest;
 import com.didiglobal.logi.elasticsearch.client.request.index.getindex.ESIndicesGetIndexRequest;
 import com.didiglobal.logi.elasticsearch.client.request.index.putalias.PutAliasNode;
-import com.didiglobal.logi.elasticsearch.client.request.index.putalias.PutAliasType;
 import com.didiglobal.logi.elasticsearch.client.request.index.stats.ESIndicesStatsRequestBuilder;
 import com.didiglobal.logi.elasticsearch.client.request.index.stats.IndicesStatsLevel;
 import com.didiglobal.logi.elasticsearch.client.request.index.updatemapping.ESIndicesUpdateMappingRequestBuilder;
@@ -42,25 +55,8 @@ import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingC
 import com.didiglobal.logi.elasticsearch.client.response.setting.common.TypeConfig;
 import com.didiglobal.logi.elasticsearch.client.response.setting.index.IndexConfig;
 import com.didiglobal.logi.elasticsearch.client.response.setting.index.MultiIndexsConfig;
-import com.didiglobal.logi.elasticsearch.client.response.setting.template.TemplateConfig;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.rest.RestStatus;
-import org.springframework.stereotype.Repository;
-
-import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.COMMA;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.*;
 
 /**
  * @author d06679
@@ -92,7 +88,7 @@ public class ESIndexDAO extends BaseESDAO {
 
         ESClient client = fetchESClientByCluster(cluster);
         if (client != null) {
-            ESIndicesPutIndexResponse response = client.admin().indices().preparePutIndex(indexName).setIndexConfig(indexConfig).execute()
+            ESIndicesPutIndexResponse response = client.admin().indices().preparePutIndex(indexName).setIndexConfig(indexConfig).setIncludeTypeName(true).execute()
                     .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
             return response.getAcknowledged();
         } else {
@@ -394,6 +390,24 @@ public class ESIndexDAO extends BaseESDAO {
         } catch (Exception e) {
             LOGGER.warn("class=ESIndexDAO||method=getAliasesByExpression||errMsg={}||cluster={}||expression={}",
                 cluster, e.getMessage(), expression, e);
+            return null;
+        }
+    }
+    /**
+     * 获取指定集群,指定多个索引
+     * @param cluster
+     * @param indices
+     * @return
+     */
+    public Map<String/*index*/, AliasIndexNode> getAliasesByIndices(String cluster, String... indices) {
+        try {
+            ESClient client = esOpClient.getESClient(cluster);
+            ESIndicesGetAliasResponse response = client.admin().indices().prepareAlias(indices).execute()
+                    .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+            return response.getM();
+        } catch (Exception e) {
+            LOGGER.warn("class=ESIndexDAO||method=getAliasesByExpression||errMsg={}||cluster={}||indices={}",
+                    cluster, e.getMessage(), indices, e);
             return null;
         }
     }
@@ -726,26 +740,17 @@ public class ESIndexDAO extends BaseESDAO {
 
     /**
      * 编辑索引别名
-     * @param editFlag True 新增别名， False 删除别名，若未指定别名，则默认删除所有别名
+     * @param aliases
      * @return result
      */
-    public Result<Void> editAlias(String cluster, String index, String alias, Boolean editFlag) {
+    public Result<Void> editAlias(String cluster, List<PutAliasNode> aliases) {
         ESClient client = fetchESClientByCluster(cluster);
         if (client == null) {
             LOGGER.warn("class=ESIndexDAO||method=editAlias||errMsg=es client not found");
             return Result.buildFail();
         }
 
-        if (Boolean.TRUE.equals(editFlag) && null == alias) {
-            return Result.buildParamIllegal("新增别名为空");
-        }
-
-        PutAliasNode putAliasNode = new PutAliasNode();
-        putAliasNode.setIndex(index);
-        putAliasNode.setAlias(null == alias ? "*" : alias);
-        putAliasNode.setType(editFlag ? PutAliasType.ADD : PutAliasType.REMOVE);
-
-        ESIndicesPutAliasResponse response = client.admin().indices().preparePutAlias().addPutAliasNode(putAliasNode).execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+        ESIndicesPutAliasResponse response = client.admin().indices().preparePutAlias().addPutAliasNodes(aliases).execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
         return Result.build(response.getAcknowledged());
     }
 

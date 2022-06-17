@@ -7,11 +7,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.IndicesDistributionVO;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
-import com.didiglobal.logi.elasticsearch.client.response.model.indices.CommonStat;
-import com.didiglobal.logi.elasticsearch.client.response.model.indices.Segments;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -24,17 +19,24 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.IndexResponse;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.IndicesDistributionVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.BatchProcessor;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpTimeoutRetry;
 import com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESIndexDAO;
 import com.didiglobal.logi.elasticsearch.client.gateway.direct.DirectResponse;
+import com.didiglobal.logi.elasticsearch.client.request.index.putalias.PutAliasNode;
+import com.didiglobal.logi.elasticsearch.client.request.index.putalias.PutAliasType;
 import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
 import com.didiglobal.logi.elasticsearch.client.response.indices.getalias.AliasIndexNode;
 import com.didiglobal.logi.elasticsearch.client.response.indices.stats.IndexNodes;
+import com.didiglobal.logi.elasticsearch.client.response.model.indices.CommonStat;
+import com.didiglobal.logi.elasticsearch.client.response.model.indices.Segments;
 import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
 import com.didiglobal.logi.elasticsearch.client.response.setting.index.IndexConfig;
 import com.didiglobal.logi.elasticsearch.client.response.setting.index.MultiIndexsConfig;
@@ -229,6 +231,27 @@ public class ESIndexServiceImpl implements ESIndexService {
                 aliases.keySet().forEach(a -> ret.add(new Tuple<>(index, a)));
             }
         }
+
+        return ret;
+    }
+
+    public Map<String,List<String>> syncGetIndexAliasesByIndices(String cluster, String... indices) {
+        Map<String/*index*/, AliasIndexNode> aliasIndexNodeMap = esIndexDAO.getAliasesByIndices(cluster, indices);
+        if (aliasIndexNodeMap == null) {
+            LOGGER.warn(
+                    "class=ESIndexServiceImpl||method=syncGetIndexNameByExpression||msg=no alias||cluster={}||expression={}",
+                    cluster, indices);
+            return new HashMap<>();
+        }
+
+        Map<String, List<String>> ret = new HashMap<>();
+        aliasIndexNodeMap.forEach((index, aliasIndexNode) -> {
+            Optional.ofNullable(aliasIndexNode.getAliases()).map(Map::keySet).ifPresent(set -> {
+                List<String> aliases = ret.getOrDefault(index, Lists.newArrayList());
+                aliases.addAll(set);
+                ret.put(index, aliases);
+            });
+        });
 
         return ret;
     }
@@ -576,8 +599,108 @@ public class ESIndexServiceImpl implements ESIndexService {
     }
 
     @Override
-    public Result<Void> editAlias(String cluster, String index, String alias, Boolean editFlag) {
-        return esIndexDAO.editAlias(cluster, index, alias, editFlag);
+    public Result<Void> addAliases(String cluster, String index, List<String> aliases) {
+        if (!esIndexDAO.exist(cluster, index)) {
+            return Result.buildParamIllegal(String.format("索引【%s】不存在", index));
+        }
+        if (CollectionUtils.isEmpty(aliases)) {
+            return Result.buildParamIllegal("要操作的别名不存在");
+        }
+        List<PutAliasNode> putAliasNodeList = new ArrayList<>();
+        Map<String, List<String>> aliasIndexNodeMap = syncGetIndexAliasesByIndices(cluster, index);
+        Set<String> aliasSet = new HashSet<>();
+        Optional.ofNullable(aliasIndexNodeMap.get(index)).map(aliasSet::addAll);
+
+        aliases.stream().filter(StringUtils::isNotBlank).forEach(aliasName -> {
+            PutAliasNode putAliasNode = new PutAliasNode();
+            putAliasNode.setIndex(index);
+            putAliasNode.setAlias(aliasName);
+            putAliasNode.setType(PutAliasType.ADD);
+            if (!aliasSet.contains(aliasName)) {
+                putAliasNodeList.add(putAliasNode);
+            }
+        });
+
+        if (CollectionUtils.isNotEmpty(putAliasNodeList)) {
+            return esIndexDAO.editAlias(cluster, putAliasNodeList);
+        }
+        return Result.buildSucc();
+    }
+
+    @Override
+    public Result<Void> deleteAliases(String cluster, String index, List<String> aliases) {
+        if (!esIndexDAO.exist(cluster, index)) {
+            return Result.buildParamIllegal(String.format("索引【%s】不存在", index));
+        }
+        if (CollectionUtils.isEmpty(aliases)) {
+            return Result.buildParamIllegal("要操作的别名不存在");
+        }
+        List<PutAliasNode> putAliasNodeList = new ArrayList<>();
+        Map<String, List<String>> aliasIndexNodeMap = syncGetIndexAliasesByIndices(cluster, index);
+        Set<String> aliasSet = new HashSet<>();
+        Optional.ofNullable(aliasIndexNodeMap.get(index)).map(aliasSet::addAll);
+        Set<String> notExistsAlias = new HashSet<>();
+
+        aliases.stream().filter(StringUtils::isNotBlank).forEach(aliasName -> {
+            PutAliasNode putAliasNode = new PutAliasNode();
+            putAliasNode.setIndex(index);
+            putAliasNode.setAlias(aliasName);
+            putAliasNode.setType(PutAliasType.REMOVE);
+            if (!aliasSet.contains(aliasName)) {
+                notExistsAlias.add(aliasName);
+            }
+            putAliasNodeList.add(putAliasNode);
+        });
+        if (!notExistsAlias.isEmpty()) {
+            return Result.buildParamIllegal(String.format("要删除的别名【%s】不存在", StringUtils.join(notExistsAlias, ",")));
+        }
+        return esIndexDAO.editAlias(cluster, putAliasNodeList);
+    }
+
+    private Result<Void> checkAliases(String cluster, String index, List<String> addAliases, List<String> deleteAliases) {
+        if (!esIndexDAO.exist(cluster, index)) {
+            return Result.buildParamIllegal(String.format("索引【%s】不存在", index));
+        }
+        if (CollectionUtils.isEmpty(addAliases) && CollectionUtils.isEmpty(deleteAliases)) {
+            return Result.buildParamIllegal("要操作的别名不存在");
+        }
+        List<PutAliasNode> putAliasNodeList = new ArrayList<>();
+        Map<String, List<String>> aliasIndexNodeMap = syncGetIndexAliasesByIndices(cluster, index);
+        Set<String> aliasSet = new HashSet<>();
+        Optional.ofNullable(aliasIndexNodeMap.get(index)).map(aliasSet::addAll);
+        if (CollectionUtils.isNotEmpty(deleteAliases)) {
+            Set<String> notExistsAlias = new HashSet<>();
+
+            deleteAliases.stream().filter(StringUtils::isNotBlank).forEach(aliasName -> {
+                PutAliasNode putAliasNode = new PutAliasNode();
+                putAliasNode.setIndex(index);
+                putAliasNode.setAlias(aliasName);
+                putAliasNode.setType(PutAliasType.REMOVE);
+                if (aliasSet.contains(aliasName)) {
+                    notExistsAlias.add(aliasName);
+                }
+                putAliasNodeList.add(putAliasNode);
+            });
+            if (!notExistsAlias.isEmpty()) {
+                return Result.buildParamIllegal(String.format("要删除的别名【%s】不存在", StringUtils.join(notExistsAlias, ",")));
+            }
+        }
+        if (CollectionUtils.isNotEmpty(addAliases)) {
+            addAliases.stream().filter(StringUtils::isNotBlank).forEach(aliasName -> {
+                PutAliasNode putAliasNode = new PutAliasNode();
+                putAliasNode.setIndex(index);
+                putAliasNode.setAlias(aliasName);
+                putAliasNode.setType(PutAliasType.ADD);
+                if (!aliasSet.contains(aliasName)) {
+                    putAliasNodeList.add(putAliasNode);
+                }
+            });
+        }
+
+        if (CollectionUtils.isNotEmpty(putAliasNodeList)) {
+            return esIndexDAO.editAlias(cluster, putAliasNodeList);
+        }
+        return Result.buildSucc();
     }
 
     @Override

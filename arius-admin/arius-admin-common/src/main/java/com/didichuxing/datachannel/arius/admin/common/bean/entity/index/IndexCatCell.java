@@ -1,5 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.index;
 
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -35,4 +37,5 @@ public class IndexCatCell {
     private Long    primariesSegmentCount;
     private Long    totalSegmentCount;
     private Integer templateId;
+    private List<String> aliases;
 }
