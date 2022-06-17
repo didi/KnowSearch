@@ -43,7 +43,7 @@ public class NormalOperateRecordController {
     @GetMapping("/module")
     @ResponseBody
     @ApiOperation(value = "获取所有模块")
-    public Result<Map<Integer, String>> mapModules() {
+    public Result<Map<String, Integer>> mapModules() {
         return Result.buildSucc(NewModuleEnum.toMap());
     }
     
@@ -51,15 +51,16 @@ public class NormalOperateRecordController {
     @ResponseBody
     @ApiOperation(value = "获取操作类型")
     @ApiImplicitParams({
-            @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "moduleCode", value = "模块code:为空则会返回全部", required = true) })
-    public Result<List<String>> listOperationType(@PathVariable("moduleCode") Integer moduleCode) {
+            @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "moduleCode", value = "模块cod:为空则会返回全部",
+                    required = false) })
+    public Result<Map<String,Integer>> listOperationType(@PathVariable(value = "moduleCode",required = false) Integer moduleCode) {
         return Result.buildSucc(OperationTypeEnum.getOperationTypeByModule(moduleCode));
     }
     
     @GetMapping("/trigger-way")
     @ResponseBody
     @ApiOperation(value = "获取触发方式")
-    public Result<List<String>> listTriggerWay() {
+    public Result<Map<String,Integer>> listTriggerWay() {
         return Result.buildSucc(TriggerWayEnum.getOperationList());
     }
     

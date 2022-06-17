@@ -81,9 +81,9 @@ public enum NewModuleEnum {
         return code;
     }
     
-    public static Map<Integer, String> toMap() {
+    public static Map<String, Integer> toMap() {
         return Arrays.stream(NewModuleEnum.values())
-                .collect(Collectors.toMap(NewModuleEnum::getCode, NewModuleEnum::getModule));
+                .collect(Collectors.toMap( NewModuleEnum::getModule,NewModuleEnum::getCode));
     }
     
    
