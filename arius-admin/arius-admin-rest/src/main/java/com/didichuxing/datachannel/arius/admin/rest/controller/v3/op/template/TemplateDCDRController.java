@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.template;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
 import javax.servlet.http.HttpServletRequest;
@@ -13,12 +14,10 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateD
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 
 @RestController
-@RequestMapping(V3_OP + "/template/srv/dcdr")
+@RequestMapping({ V3_OP + "/template/dcdr", V3 + "/template/dcdr" })
 @Api(tags = "模板DCDR接口(REST)")
 public class TemplateDCDRController {
 
@@ -42,13 +41,11 @@ public class TemplateDCDRController {
         return templateDCDRManager.getTemplateDCDRInfoVO(templateId);
     }
 
-    @DeleteMapping("")
+    @DeleteMapping("/{templateId}")
     @ResponseBody
     @ApiOperation(value = "DCDR链路删除接口", notes = "")
-    @ApiImplicitParams({@ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "逻辑模板ID", required = true)})
-    public Result<Void> deleteDcdr(HttpServletRequest request,
-                                   @RequestParam(value = "logicId") Integer logicId) throws AdminOperateException {
-        return templateDCDRManager.deleteDCDR(logicId, HttpRequestUtil.getOperator(request));
+    public Result<Void> deleteDcdr(HttpServletRequest request, @PathVariable(value = "templateId") Integer templateId) throws AdminOperateException {
+        return templateDCDRManager.deleteDCDR(templateId, HttpRequestUtil.getOperator(request));
     }
 
 }
