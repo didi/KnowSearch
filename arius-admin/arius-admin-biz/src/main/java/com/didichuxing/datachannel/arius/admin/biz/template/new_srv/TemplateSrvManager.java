@@ -40,14 +40,6 @@ public interface TemplateSrvManager {
     List<UnavailableTemplateSrv> getUnavailableSrv(Integer logicTemplateId);
 
     /**
-     * 过滤可用「指定模板服务」的模板列表
-     * @param srvCode
-     * @param logicTemplateIdList 待验证是否可用的模板id列表
-     * @return
-     */
-    Result<List<TemplateWithSrvVO>> checkAvailable(Integer srvCode, List<Integer> logicTemplateIdList);
-
-    /**
      * 分页模糊查询模板服务
      * @param condition
      * @return
@@ -58,10 +50,9 @@ public interface TemplateSrvManager {
      * 开启模板服务
      * @param srvCode 服务代码
      * @param templateIdList 模板id列表
-     * @param openParam 开启参数
      * @return
      */
-    Result<Void> openSrv(Integer srvCode, List<Integer> templateIdList, BaseTemplateSrvOpenDTO openParam);
+    Result<Void> openSrv(Integer srvCode, List<Integer> templateIdList);
 
     /**
      * 关闭模板服务

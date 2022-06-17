@@ -425,7 +425,7 @@ public class MonitorJobHandler extends AbstractMetaDataJob {
     private Map<String/*templateName*/, AmsTemplatePhysicalConfVO> listTypeMappingIndex(String dataCenter) {
         Map<String/*templateName*/, AmsTemplatePhysicalConfVO> resultMap = Maps.newHashMap();
         List<IndexTemplateWithPhyTemplates> logicWithPhysicals = indexTemplateService
-                .getTemplateWithPhysicalByDataCenter(dataCenter);
+                .listTemplateWithPhysicalByDataCenter(dataCenter);
 
         String templateConfig = null;
         AmsTemplatePhysicalConfVO item = null;

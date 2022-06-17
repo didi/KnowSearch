@@ -34,27 +34,7 @@ public enum NewTemplateSrvEnum {
     /**
      * 冷热分离：提供SSD和HDD两种类型的磁盘来保存索引，从而降低成本.
      */
-    TEMPLATE_COLD(5, "冷热分离", ES_6_6_1_700),
-
-    /**
-     * 清理
-     */
-    TEMPLATE_CLEAR(6, "清理", ES_2_3_3_100),
-
-    /**
-     * 升级版本
-     */
-    TEMPLATE_UPGRADE(7, "升级版本", ES_2_3_3_100),
-
-    /**
-     * 扩缩容（调整shard）
-     */
-    TEMPLATE_ADJUST_SHARD(8, "扩缩容", ES_2_3_3_100),
-
-    /**
-     * 跨集群同步（DCDR）：跨集群数据复制功能，用于集群间的数据复制，类似ES官方的CCR能力.
-     */
-    TEMPLATE_DCDR(9, "跨集群同步(DCDR)", ES_6_6_1_902),;
+    TEMPLATE_COLD(5, "冷热分离", ES_6_6_1_700);
 
     private Integer code;
 
