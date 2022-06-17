@@ -41,12 +41,12 @@ public interface TemplateDCDRManager {
 
     /**
      * 删除DCDR
-     * @param logicId 模板ID
+     * @param templateId 模板ID
      * @param operator 操作人
      * @return result
      * @throws ESOperateException
      */
-    Result<Void> deleteDCDR(Integer logicId, String operator) throws ESOperateException;
+    Result<Void> deleteDCDR(Integer templateId, String operator) throws ESOperateException;
 
     /**
      * deletePhyDCDR
