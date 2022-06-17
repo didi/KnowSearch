@@ -1,33 +1,37 @@
 package com.didichuxing.datachannel.arius.admin.biz.metrics.impl;
 
-import java.util.List;
-
 import com.didichuxing.datachannel.arius.admin.biz.component.MetricsValueConvertUtils;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.dashboard.ClusterPhyHealthMetricsVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.VariousLineChartMetrics;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.list.MetricList;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.ClusterPhyHealthMetrics;
-import com.didichuxing.datachannel.arius.admin.common.constant.metrics.MetricsConstant;
-import com.didichuxing.datachannel.arius.admin.common.constant.metrics.OneLevelTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
-import com.google.common.collect.Lists;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.didichuxing.datachannel.arius.admin.biz.metrics.DashboardMetricsManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.BaseDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsDashboardListDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsDashboardTopNDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.config.AriusConfigInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.VariousLineChartMetrics;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.list.MetricList;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.ClusterPhyHealthMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.list.MetricListVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.dashboard.ClusterPhyHealthMetricsVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.top.VariousLineChartMetricsVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricListTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricTopTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.metrics.MetricsConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.metrics.OneLevelTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
+import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.DashBoardMetricsService;
+import com.google.common.collect.Lists;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Created by linyunan on 3/14/22
@@ -42,6 +46,9 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
 
     @Autowired
     private DashBoardMetricsService dashBoardMetricsService;
+
+    @Autowired
+    private AriusConfigInfoService ariusConfigInfoService;
 
     @Override
     public Result<List<VariousLineChartMetricsVO>> getTopClusterMetricsInfo(MetricsDashboardTopNDTO param, Integer appId) {
@@ -172,8 +179,29 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
             });
         }
         futureUtil.waitExecute();
-
+        filterBySystemConfiguration(listMetrics);
         return Result.buildSucc(ConvertUtil.list2List(listMetrics, MetricListVO.class));
+    }
+
+    /**
+     * 根据系统配置筛选
+     */
+    private void  filterBySystemConfiguration(List<MetricList> listMetrics){
+        //根据系统配置筛选
+        List<AriusConfigInfo> ariusConfigInfos =  ariusConfigInfoService.getConfigByGroup("dashboard.threshold");
+        Map<String,String> enableConfigs = new HashMap<>();
+        ariusConfigInfos.forEach(ariusConfigInfo -> {
+            if (1==ariusConfigInfo.getStatus()){
+                enableConfigs.put(ariusConfigInfo.getValueName(),ariusConfigInfo.getValue());
+            }
+        });
+        listMetrics.forEach(metric -> {
+            if(enableConfigs.get(metric.getType())!=null){
+               Double configValue = Double.valueOf( enableConfigs.get(metric.getType()));
+                metric.setMetricListContents(metric.getMetricListContents().stream()
+                        .filter(metricListContent -> metricListContent.getValue()>configValue).collect(Collectors.toList()));
+            }
+        });
     }
 
     /**

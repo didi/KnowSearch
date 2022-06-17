@@ -51,5 +51,11 @@ public interface DashboardMetricsManager {
 
     Result<List<MetricListVO>> getListTemplateMetricsInfo(MetricsDashboardListDTO param, Integer appId);
 
+    /**
+     * 获取dashboard大盘索引相关list列表指标信息
+     * @param param
+     * @param appId
+     * @return
+     */
     Result<List<MetricListVO>> getListIndexMetricsInfo(MetricsDashboardListDTO param, Integer appId);
 }

@@ -56,7 +56,7 @@ public class ClusterPhyMetricsController {
         return Result.buildSucc(clusterPhyMetricsManager.getMetricsCode2TypeMap(type));
     }
 
-    @PostMapping("/config-metrics")
+    @GetMapping("/config-metrics")
     @ResponseBody
     @ApiOperation(value = "获取账号下已配置指标类型")
     public Result<List<String>> getClusterPhyMetricsTypes(@RequestBody MetricsConfigInfoDTO param,
@@ -65,7 +65,7 @@ public class ClusterPhyMetricsController {
             clusterPhyMetricsManager.getDomainAccountConfigMetrics(param, HttpRequestUtils.getOperator(request)));
     }
 
-    @PostMapping("/updateConfigMetrics")
+    @PutMapping("/config-metrics")
     @ResponseBody
     @ApiOperation(value = "更新账号下已配置指标类型")
     public Result<Integer> updateClusterPhyMetricsTypes(@RequestBody MetricsConfigInfoDTO param, HttpServletRequest request) {
