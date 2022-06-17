@@ -1,12 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.vo.operaterecord;
 
-import java.util.Date;
-
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.BaseVO;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
-
 import io.swagger.annotations.ApiModelProperty;
+import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,40 +16,55 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class OperateRecordVO extends BaseVO {
 
+       /**
+     * 主键
+     */
     @ApiModelProperty("记录ID")
     private Integer id;
 
     /**
-     * @see ModuleEnum
+     * @see com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.NewModuleEnum
      */
-    @ApiModelProperty("模块ID")
-    private Integer moduleId;
-
     @ApiModelProperty("模块")
-    private String  module;
+    private String module;
 
     /**
-     * @see OperationEnum
+     * @see com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationTypeEnum
      */
     @ApiModelProperty("操作ID")
-    private Integer operateId;
+    private String operate;
 
-    @ApiModelProperty("操作")
-    private String  operate;
 
-    @ApiModelProperty("业务ID")
-    private String  bizId;
 
+    /**
+     * 操作描述
+     */
     @ApiModelProperty("操作内容")
     private String  content;
 
     /**
-     * 操作人  邮箱前缀
+     * 操作人
      */
     @ApiModelProperty("操作人")
-    private String  operator;
+    private String  userOperation;
 
+    /**
+     * 操作时间
+     */
     @ApiModelProperty("操作时间")
     private Date    operateTime;
+
+    
+    /**
+     * 触发方式
+     * @see com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum
+     */
+    @ApiModelProperty("操作方式")
+    private String triggerWay;
+    /**
+     * 应用id
+     */
+    @ApiModelProperty("项目")
+    private String projectName;
 
 }

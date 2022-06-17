@@ -210,10 +210,10 @@ public class DslStatisService {
 
     public OperateRecordDTO buildDslSettingOperatorRecord(String bizId, Integer operateId, String operator, String content) {
         OperateRecordDTO operateRecord = new OperateRecordDTO();
-        operateRecord.setBizId(bizId);
+        //operateRecord.setBizId(bizId);
         operateRecord.setModuleId( ModuleEnum.DSL_ANALYZER.getCode());
         operateRecord.setOperateId(operateId);
-        operateRecord.setOperator(operator);
+        //operateRecord.setOperator(operator);
         operateRecord.setContent(content);
 
         return operateRecord;

@@ -1,8 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.constant.operaterecord;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -224,7 +222,7 @@ public enum OperationTypeEnum {
     }
     
     public static Map<String, Integer> getOperationTypeByModule(Integer module) {
-        final NewModuleEnum moduleEnum = NewModuleEnum.getNewModuleEnum(module);
+        final NewModuleEnum moduleEnum = NewModuleEnum.getModuleEnum(module);
         if (Objects.isNull(moduleEnum)) {
             return Arrays.stream(OperationTypeEnum.values())
                     .collect(Collectors.toMap(OperationTypeEnum::getOperationType, OperationTypeEnum::getCode));
@@ -232,6 +230,10 @@ public enum OperationTypeEnum {
         return Arrays.stream(OperationTypeEnum.values())
                 .filter(operationTypeEnum -> operationTypeEnum.getModule().equals(moduleEnum))
                 .collect(Collectors.toMap(OperationTypeEnum::getOperationType, OperationTypeEnum::getCode));
+    }
+     public static OperationTypeEnum getOperationTypeEnum(Integer code) {
+        return Arrays.stream(OperationTypeEnum.values()).filter(operationTypeEnum -> operationTypeEnum.getCode().equals(code))
+                .findFirst().orElse(null);
     }
     
     

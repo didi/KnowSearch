@@ -1,7 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.constant.operaterecord;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -25,7 +24,7 @@ public enum TriggerWayEnum {
      * 触发方式
      */
     private final String triggerWay;
-    private final int code;
+    private final Integer code;
     
     TriggerWayEnum(String triggerWay, int code) {
         this.triggerWay = triggerWay;
@@ -36,7 +35,7 @@ public enum TriggerWayEnum {
         return triggerWay;
     }
     
-    public int getCode() {
+    public Integer getCode() {
         return code;
     }
     
@@ -44,5 +43,9 @@ public enum TriggerWayEnum {
         return Arrays.stream(TriggerWayEnum.values())
                 .collect(Collectors.toMap(TriggerWayEnum::getTriggerWay, TriggerWayEnum::getCode));
         
+    }
+      public static TriggerWayEnum getTriggerWayEnum(Integer code) {
+        return Arrays.stream(TriggerWayEnum.values()).filter(triggerWayEnum -> triggerWayEnum.getCode().equals(code))
+                .findFirst().orElse(null);
     }
 }

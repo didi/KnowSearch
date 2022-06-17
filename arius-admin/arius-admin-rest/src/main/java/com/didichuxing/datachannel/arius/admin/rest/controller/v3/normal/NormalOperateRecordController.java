@@ -3,19 +3,20 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v3.normal;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_NORMAL;
 
 import com.didichuxing.datachannel.arius.admin.biz.app.OperateRecordManager;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.oprecord.OperateRecordDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.operaterecord.OperateRecordVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.NewModuleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
-import com.didiglobal.logi.security.common.PagingResult;
-import com.didiglobal.logi.security.common.dto.oplog.OplogQueryDTO;
-import com.didiglobal.logi.security.common.vo.oplog.OplogVO;
+import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import java.util.List;
 import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -66,15 +67,15 @@ public class NormalOperateRecordController {
     
     @PostMapping("/page")
     @ApiOperation(value = "查询操作日志列表", notes = "分页和条件查询")
-    public PagingResult<OplogVO> page(@RequestBody OplogQueryDTO queryDTO) {
+    public PaginationResult<OperateRecordVO> page(HttpServletRequest request,@RequestBody OperateRecordDTO queryDTO) {
          
-        return operateRecordManager.pageOplogPage(queryDTO);
+        return operateRecordManager.pageOplogPage(queryDTO, HttpRequestUtil.getProjectId(request));
     }
     
     @GetMapping("/{id}")
     @ApiOperation(value = "获取操作日志详情", notes = "根据操作日志id获取操作日志详情")
     @ApiImplicitParam(name = "id", value = "操作日志id", dataType = "int", required = true)
-    public Result<OplogVO> get(@PathVariable Integer id) {
+    public Result<OperateRecordVO> get(@PathVariable Integer id) {
         return operateRecordManager.getOplogDetailByOplogId(id);
     }
     

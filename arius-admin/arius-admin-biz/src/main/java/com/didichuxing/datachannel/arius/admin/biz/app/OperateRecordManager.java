@@ -1,18 +1,19 @@
 package com.didichuxing.datachannel.arius.admin.biz.app;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didiglobal.logi.security.common.PagingResult;
-import com.didiglobal.logi.security.common.dto.oplog.OplogQueryDTO;
-import com.didiglobal.logi.security.common.vo.oplog.OplogVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.oprecord.OperateRecordDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.operaterecord.OperateRecordVO;
 
 public interface OperateRecordManager {
     /**
      * oplogvo
      *
-     * @param queryDTO 查询dto
+     * @param queryDTO  查询dto
+     * @param projectId
      * @return {@code PagingResult<OplogVO>}
      */
-    PagingResult<OplogVO> pageOplogPage(OplogQueryDTO queryDTO);
+    PaginationResult<OperateRecordVO> pageOplogPage(OperateRecordDTO queryDTO,Integer projectId);
     
     /**
      * 获取oplog
@@ -20,5 +21,5 @@ public interface OperateRecordManager {
      * @param id id
      * @return {@code Result<OplogVO>}
      */
-    Result<OplogVO> getOplogDetailByOplogId(Integer id);
+    Result<OperateRecordVO> getOplogDetailByOplogId(Integer id);
 }

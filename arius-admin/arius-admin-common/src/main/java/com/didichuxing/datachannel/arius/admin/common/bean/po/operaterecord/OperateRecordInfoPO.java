@@ -25,19 +25,15 @@ public class OperateRecordInfoPO extends BasePO {
     private Integer id;
 
     /**
-     * @see ModuleEnum
+     * @see com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.NewModuleEnum
      */
     private Integer moduleId;
 
     /**
-     * @see OperationEnum
+     * @see com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationTypeEnum
      */
     private Integer operateId;
 
-    /**
-     * 操作业务id String类型
-     */
-    private String  bizId;
 
     /**
      * 操作描述
@@ -45,23 +41,22 @@ public class OperateRecordInfoPO extends BasePO {
     private String  content;
 
     /**
-     * 操作人  邮箱前缀
+     * 操作人
      */
-    private String  operator;
+    private String userOperation;
 
     /**
      * 操作时间
      */
     private Date    operateTime;
-
     /**
-     * 开始时间
-     */
-    private Date    beginTime;
-
+    * 触发方式
+     * @see com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum
+    */
+    private Integer triggerWayId;
     /**
-     * 结束时间
-     */
-    private Date    endTime;
+    * 应用id
+    */
+    private String  projectName;
 
 }

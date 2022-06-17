@@ -88,7 +88,7 @@ public enum NewModuleEnum {
     
    
     
-    public static NewModuleEnum getNewModuleEnum(Integer code) {
+    public static NewModuleEnum getModuleEnum(Integer code) {
         return Arrays.stream(NewModuleEnum.values()).filter(moduleEnum -> moduleEnum.getCode().equals(code))
                 .findFirst().orElse(null);
     }

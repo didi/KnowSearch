@@ -1,30 +1,31 @@
 package com.didichuxing.datachannel.arius.admin.core.service.common.impl;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
-
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.operaterecord.OperateRecordVO;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
+import com.didichuxing.datachannel.arius.admin.common.Tuple;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.oprecord.OperateRecordDTO;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.operaterecord.OperateRecordInfoPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.operaterecord.OperateRecordVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusDateUtils;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.NewModuleEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.optrecord.OperateRecordDAO;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-import com.google.common.collect.Lists;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
 
 /**
  *
@@ -72,23 +73,7 @@ public class OperateRecordServiceImpl implements OperateRecordService {
         }
     }
 
-    /**
-     * 根据指定的查询条件查询
-     * @param condt 查询条件dto
-     * @return 操作记录列表
-     */
-    @Override
-    public Result<List<OperateRecordVO>> list(OperateRecordDTO condt) {
-        if (condt == null) {
-            return Result.buildSucc(Lists.newArrayList());
-        }
-        List<OperateRecordVO> records = ConvertUtil.list2List(operateRecordDAO.listByCondition(ConvertUtil.obj2Obj(condt, OperateRecordInfoPO.class)), OperateRecordVO.class);
-        if (records.size() > MAX_RECORD_COUNT) {
-            records = records.subList(0, MAX_RECORD_COUNT);
-        }
-        fillVOField(records);
-        return Result.buildSucc(records);
-    }
+
 
     /**
      * 插入一条操作记录
@@ -104,7 +89,18 @@ public class OperateRecordServiceImpl implements OperateRecordService {
                        String operator) {
         return save(moduleEnum.getCode(), operationEnum.getCode(), String.valueOf(bizId), content, operator);
     }
-
+    
+    /**
+     * @param operateRecord
+     * @return
+     */
+    @Override
+    public Result<Void> save(OperateRecord operateRecord) {
+        final OperateRecordInfoPO operateRecordInfoPO = ConvertUtil.obj2Obj(operateRecord, OperateRecordInfoPO.class);
+        return Result.build(operateRecordDAO.insert(operateRecordInfoPO) == 1);
+        
+    }
+    
     /**
      * 插入一条操作记录
      * @param moduleId  模块id  比如索引模板、应用管理、DSL审核
@@ -123,9 +119,9 @@ public class OperateRecordServiceImpl implements OperateRecordService {
         OperateRecordDTO param = new OperateRecordDTO();
         param.setModuleId(moduleId);
         param.setOperateId(operateId);
-        param.setBizId(bizId);
-        param.setContent(content);
-        param.setOperator(operator);
+        //param.setBizId(bizId);
+        //param.setContent(content);
+        //param.setOperator(operator);
 
         return save(param);
     }
@@ -145,58 +141,67 @@ public class OperateRecordServiceImpl implements OperateRecordService {
             return Result.buildSucc();
         }
 
-        return Result.build(operateRecordDAO.insert(ConvertUtil.obj2Obj(param, OperateRecordInfoPO.class)) == 1);
+        //return Result.build(operateRecordDAO.insert(ConvertUtil.obj2Obj(param, OperateRecordInfoPO.class)) == 1);
+        return Result.buildSucc();
     }
 
+
+    
     /**
-     * 查询某个最新的操作记录
-     * @param moduleId  模块id
-     * @param operateId 操作行为
-     * @param bizId     业务id
-     * @param beginDate 起始时间 时间范围是:[beginDate, beginDate + 24h]
-     * @return 如果没有一条 返回 null
-     */
-    @Override
-    public OperateRecord getLastRecord(int moduleId, int operateId, String bizId, Date beginDate) {
-        OperateRecordInfoPO condt = new OperateRecordInfoPO();
-        condt.setModuleId(moduleId);
-        condt.setOperateId(operateId);
-        condt.setBizId(bizId);
-        condt.setBeginTime(AriusDateUtils.getZeroDate(beginDate));
-        condt.setEndTime(AriusDateUtils.getAfterDays(condt.getBeginTime(), 1));
-
-        List<OperateRecordInfoPO> pos = operateRecordDAO.listByCondition(condt);
-
-        if (CollectionUtils.isEmpty(pos)) {
-            return null;
-        }
-
-        return ConvertUtil.obj2Obj(pos.get(0), OperateRecord.class);
-    }
-
-    /**
-     * 根据指定的查询条件批量查询
+     * 动态分页查询
      *
-     * @param bizId
-     * @param moduleIds
-     * @return 操作记录列表
+     * @param pageDTO 页面dto
+     * @return {@code Object}
      */
     @Override
-    public Result<List<OperateRecordVO>> multiList(String bizId, List<Integer> moduleIds) {
-        if (bizId == null) {
-            return Result.buildSucc(Lists.newArrayList());
+    public Tuple<Long, List<OperateRecordVO>> pagingGetOperateRecordByCondition(OperateRecordDTO pageDTO) {
+        final List<OperateRecordInfoPO> recordInfoPOList = operateRecordDAO.listByCondition(pageDTO);
+        
+        final Map</*id*/Integer, OperateRecordInfoPO> operateRecordInfoPOMap = ConvertUtil.list2Map(recordInfoPOList,
+                OperateRecordInfoPO::getId);
+        final List<OperateRecordVO> operateRecordVOList = ConvertUtil.list2List(recordInfoPOList, OperateRecordVO.class);
+        //对vo中的数据进行转换
+        for (OperateRecordVO operateRecordVO : operateRecordVOList) {
+            //设置操作的模块
+            Optional.ofNullable(operateRecordInfoPOMap.get(operateRecordVO.getId()))
+                    .map(OperateRecordInfoPO::getModuleId).map(NewModuleEnum::getModuleEnum)
+                    .map(NewModuleEnum::getModule).ifPresent(operateRecordVO::setModule);
+            //设置触发方式
+            Optional.ofNullable(operateRecordInfoPOMap.get(operateRecordVO.getId()))
+                    .map(OperateRecordInfoPO::getTriggerWayId).map(TriggerWayEnum::getTriggerWayEnum)
+                    .map(TriggerWayEnum::getTriggerWay).ifPresent(operateRecordVO::setTriggerWay);
+            //设置操作类型
+            Optional.ofNullable(operateRecordInfoPOMap.get(operateRecordVO.getId()))
+                    .map(OperateRecordInfoPO::getOperateId).map(OperationTypeEnum::getOperationTypeEnum)
+                    .map(OperationTypeEnum::getOperationType).ifPresent(operateRecordVO::setModule);
         }
-        List<OperateRecordVO> operateRecordVOS= new ArrayList<>();
-        for (Integer moduleId : moduleIds) {
-            OperateRecordDTO operateRecordDTO = new OperateRecordDTO();
-            operateRecordDTO.setBizId(bizId);
-            operateRecordDTO.setModuleId(moduleId);
-            Result<List<OperateRecordVO>> result = list(operateRecordDTO);
-            operateRecordVOS.addAll(result.getData());
-        }
-        operateRecordVOS.sort(Comparator.comparing(OperateRecordVO::getOperateTime).reversed());
-        return Result.buildSucc(operateRecordVOS);
+        final Long count = operateRecordDAO.countByCondition(pageDTO);
+        
+    
+        return new Tuple<>(count,operateRecordVOList);
     }
+    
+    /**
+     * @param id
+     * @return
+     */
+    @Override
+    public OperateRecordVO getById(Integer id) {
+        final OperateRecordInfoPO recordInfo = operateRecordDAO.getById(id);
+        final OperateRecordVO operateRecordVO = ConvertUtil.obj2Obj(recordInfo, OperateRecordVO.class);
+        //设置操作的模块
+        Optional.ofNullable(recordInfo).map(OperateRecordInfoPO::getModuleId).map(NewModuleEnum::getModuleEnum)
+                .map(NewModuleEnum::getModule).ifPresent(operateRecordVO::setModule);
+        //设置触发方式
+        Optional.ofNullable(recordInfo).map(OperateRecordInfoPO::getTriggerWayId).map(TriggerWayEnum::getTriggerWayEnum)
+                .map(TriggerWayEnum::getTriggerWay).ifPresent(operateRecordVO::setTriggerWay);
+        //设置操作类型
+        Optional.ofNullable(recordInfo).map(OperateRecordInfoPO::getOperateId)
+                .map(OperationTypeEnum::getOperationTypeEnum).map(OperationTypeEnum::getOperationType)
+                .ifPresent(operateRecordVO::setModule);
+        return operateRecordVO;
+    }
+    
 
     /******************************************* private method **************************************************/
     private Result<Void> checkParam(OperateRecordDTO param) {
@@ -209,15 +214,15 @@ public class OperateRecordServiceImpl implements OperateRecordService {
         if (AriusObjUtils.isNull(param.getOperateId())) {
             return Result.buildParamIllegal("操作为空");
         }
-        if (AriusObjUtils.isBlack(param.getBizId())) {
-            return Result.buildParamIllegal("业务id为空");
-        }
+        //if (AriusObjUtils.isBlack(param.getBizId())) {
+        //    return Result.buildParamIllegal("业务id为空");
+        //}
         if (AriusObjUtils.isNullStr(param.getContent())) {
             return Result.buildParamIllegal("操作内容为空");
         }
-        if (AriusObjUtils.isBlack(param.getOperator())) {
-            return Result.buildParamIllegal("操作人为空");
-        }
+        //if (AriusObjUtils.isBlack(param.getOperator())) {
+        //    return Result.buildParamIllegal("操作人为空");
+        //}
         if (!ModuleEnum.validate(param.getModuleId())) {
             return Result.buildParamIllegal("模块非法");
         }
@@ -231,8 +236,8 @@ public class OperateRecordServiceImpl implements OperateRecordService {
     private void fillVOField(List<OperateRecordVO> records) {
         if(CollectionUtils.isEmpty(records)){return;}
         for(OperateRecordVO vo : records){
-            vo.setModule(ModuleEnum.valueOf(vo.getModuleId()).getDesc());
-            vo.setOperate( OperationEnum.valueOf(vo.getOperateId()).getDesc());
+            //vo.setModule(ModuleEnum.valueOf(vo.getModuleId()).getDesc());
+            //vo.setOperate( OperationEnum.valueOf(vo.getOperateId()).getDesc());
         }
     }
 }
