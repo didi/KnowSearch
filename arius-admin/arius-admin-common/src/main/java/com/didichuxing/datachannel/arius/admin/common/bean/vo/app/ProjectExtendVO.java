@@ -21,6 +21,6 @@ public class ProjectExtendVO extends ProjectVO {
 	@ApiModelProperty(value = "项目配置", dataType = "ProjectSaveDTO", required = false)
 	private ProjectConfigVO config;
 	@ApiModelProperty(value = "是否为超级项目", dataType = "boolean", required = false)
-	private Boolean         isAdmin;
+	private Boolean         isAdmin=false;
 	
 }

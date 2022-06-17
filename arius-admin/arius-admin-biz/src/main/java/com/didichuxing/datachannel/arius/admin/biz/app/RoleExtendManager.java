@@ -1,6 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.app;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.RoleExtendVO;
 import com.didiglobal.logi.security.common.PagingResult;
 import com.didiglobal.logi.security.common.dto.role.RoleAssignDTO;
 import com.didiglobal.logi.security.common.dto.role.RoleQueryDTO;
@@ -8,7 +9,6 @@ import com.didiglobal.logi.security.common.dto.role.RoleSaveDTO;
 import com.didiglobal.logi.security.common.vo.role.AssignInfoVO;
 import com.didiglobal.logi.security.common.vo.role.RoleBriefVO;
 import com.didiglobal.logi.security.common.vo.role.RoleDeleteCheckVO;
-import com.didiglobal.logi.security.common.vo.role.RoleVO;
 import com.didiglobal.logi.security.exception.LogiSecurityException;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
@@ -33,7 +33,7 @@ public interface RoleExtendManager {
      * @param roleId 角色id
      * @return RoleVo 角色信息
      */
-    Result<RoleVO> getRoleDetailByRoleId(Integer roleId);
+    Result<RoleExtendVO> getRoleDetailByRoleId(Integer roleId);
 
     /**
      * 分页获取角色列表
@@ -41,7 +41,7 @@ public interface RoleExtendManager {
      * @param queryDTO 查询角色列表条件
      * @return 角色列表
      */
-    PagingResult<RoleVO> getRolePage(RoleQueryDTO queryDTO);
+    PagingResult<RoleExtendVO> getRolePage(RoleQueryDTO queryDTO);
 
     /**
      * 保存角色

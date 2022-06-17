@@ -1,6 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.app;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_SECURITY;
 
 import com.didichuxing.datachannel.arius.admin.biz.app.ProjectConfigManager;
@@ -14,12 +13,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ProjectExtendV
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
 import com.didiglobal.logi.security.common.PagingResult;
-import com.didiglobal.logi.security.common.constant.Constants;
-import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import com.didiglobal.logi.security.common.vo.project.ProjectDeleteCheckVO;
-import com.didiglobal.logi.security.common.vo.project.ProjectVO;
 import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
-import com.didiglobal.logi.security.exception.LogiSecurityException;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -140,7 +135,7 @@ public class ProjectV3Controller {
 	
 	@PostMapping("/page")
 	@ApiOperation(value = "分页查询项目列表", notes = "分页和条件查询")
-	public PagingResult<ProjectVO> page(@RequestBody ProjectQueryExtendDTO queryDTO) {
+	public PagingResult<ProjectExtendVO> page(@RequestBody ProjectQueryExtendDTO queryDTO) {
 		return projectExtendManager.getProjectPage(queryDTO);
 	}
 	

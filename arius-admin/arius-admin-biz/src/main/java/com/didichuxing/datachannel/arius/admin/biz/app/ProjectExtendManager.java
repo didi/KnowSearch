@@ -5,16 +5,16 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectExtend
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectQueryExtendDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ProjectBriefExtendVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ProjectExtendVO;
-;
 import com.didiglobal.logi.security.common.PagingData;
 import com.didiglobal.logi.security.common.PagingResult;
 import com.didiglobal.logi.security.common.dto.project.ProjectBriefQueryDTO;
 import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import com.didiglobal.logi.security.common.vo.project.ProjectDeleteCheckVO;
-import com.didiglobal.logi.security.common.vo.project.ProjectVO;
 import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
 import com.didiglobal.logi.security.exception.LogiSecurityException;
 import java.util.List;
+
+;
 
 /**
  * 基于logi的扩展能力
@@ -82,7 +82,7 @@ public interface ProjectExtendManager {
      * @param queryDTO 条件信息
      * @return 项目分页信息
      */
-    PagingResult<ProjectVO> getProjectPage(ProjectQueryExtendDTO queryDTO);
+    PagingResult<ProjectExtendVO> getProjectPage(ProjectQueryExtendDTO queryDTO);
 
   
 

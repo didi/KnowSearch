@@ -1,21 +1,19 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.app;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_SECURITY;
 
 import com.didichuxing.datachannel.arius.admin.biz.app.RoleExtendManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.RoleExtendVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
 import com.didiglobal.logi.security.common.PagingResult;
-import com.didiglobal.logi.security.common.constant.Constants;
 import com.didiglobal.logi.security.common.dto.role.RoleAssignDTO;
 import com.didiglobal.logi.security.common.dto.role.RoleQueryDTO;
 import com.didiglobal.logi.security.common.dto.role.RoleSaveDTO;
 import com.didiglobal.logi.security.common.vo.role.AssignInfoVO;
 import com.didiglobal.logi.security.common.vo.role.RoleBriefVO;
 import com.didiglobal.logi.security.common.vo.role.RoleDeleteCheckVO;
-import com.didiglobal.logi.security.common.vo.role.RoleVO;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
@@ -85,7 +83,7 @@ public class RoleV3Controller {
 	@GetMapping("/{id}")
 	@ApiOperation(value = "获取角色详情", notes = "根据角色id或角色code获取角色详情")
 	@ApiImplicitParam(name = "id", value = "角色id", dataType = "int", required = true)
-	public Result<RoleVO> detail(@PathVariable Integer id) {
+	public Result<RoleExtendVO> detail(@PathVariable Integer id) {
 		return roleExtendManager.getRoleDetailByRoleId(id);
 	}
 	
@@ -118,7 +116,7 @@ public class RoleV3Controller {
 	
 	@PostMapping("/page")
 	@ApiOperation(value = "分页查询角色列表", notes = "分页和条件查询")
-	public PagingResult<RoleVO> page(@RequestBody RoleQueryDTO queryDTO) {
+	public PagingResult<RoleExtendVO> page(@RequestBody RoleQueryDTO queryDTO) {
 		return roleExtendManager.getRolePage(queryDTO);
 	}
 	

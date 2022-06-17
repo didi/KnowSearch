@@ -10,7 +10,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectConfigDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectExtendSaveDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectQueryExtendDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUser;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
@@ -32,7 +31,6 @@ import com.didiglobal.logi.security.common.PagingResult;
 import com.didiglobal.logi.security.common.dto.project.ProjectBriefQueryDTO;
 import com.didiglobal.logi.security.common.dto.project.ProjectQueryDTO;
 import com.didiglobal.logi.security.common.dto.project.ProjectSaveDTO;
-import com.didiglobal.logi.security.common.enums.project.ProjectUserCode;
 import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import com.didiglobal.logi.security.common.vo.project.ProjectDeleteCheckVO;
 import com.didiglobal.logi.security.common.vo.project.ProjectVO;
@@ -43,7 +41,6 @@ import com.didiglobal.logi.security.service.OplogService;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.didiglobal.logi.security.service.UserProjectService;
 import com.didiglobal.logi.security.service.UserService;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -125,8 +122,6 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
             ProjectExtendVO projectExtendVO = ConvertUtil.obj2Obj(projectVO, ProjectExtendVO.class);
             if (AuthConstant.SUPER_PROJECT_ID.equals(projectExtendVO.getId())) {
                 projectExtendVO.setIsAdmin(true);
-            } else {
-                projectExtendVO.setIsAdmin(false);
             }
             ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectId);
             projectExtendVO.setConfig(ConvertUtil.obj2Obj(projectConfig, ProjectConfigVO.class));
@@ -196,16 +191,33 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
      * @return 项目分页信息
      */
     @Override
-    public PagingResult<ProjectVO> getProjectPage(ProjectQueryExtendDTO queryDTO) {
+    public PagingResult<ProjectExtendVO> getProjectPage(ProjectQueryExtendDTO queryDTO) {
         final ProjectQueryDTO projectQueryDTO = ConvertUtil.obj2Obj(queryDTO, ProjectQueryDTO.class);
     
         if (Objects.isNull(queryDTO.getSearchType())) {
             final PagingData<ProjectVO> projectPage = projectService.getProjectPage(projectQueryDTO);
-            return PagingResult.success(projectPage);
+            final List<ProjectVO> bizData = projectPage.getBizData();
+            final List<ProjectExtendVO> projectExtendVOList = ConvertUtil.list2List(bizData, ProjectExtendVO.class);
+            for (ProjectExtendVO projectExtendVO : projectExtendVOList) {
+                if (AuthConstant.SUPER_PROJECT_ID.equals(projectExtendVO.getId())) {
+                    projectExtendVO.setIsAdmin(true);
+                }
+            }
+    
+            return PagingResult.success(new PagingData<>(projectExtendVOList, projectPage.getPagination()));
         } else {
             final List<Integer> projectIds = esUserService.getProjectIdBySearchType(queryDTO.getSearchType());
             final PagingData<ProjectVO> projectPage = projectService.getProjectPage(projectQueryDTO, projectIds);
-            return PagingResult.success(projectPage);
+            final List<ProjectExtendVO> projectExtendVOList = ConvertUtil.list2List(projectPage.getBizData(),
+                    ProjectExtendVO.class);
+            for (ProjectExtendVO projectExtendVO : projectExtendVOList) {
+                if (AuthConstant.SUPER_PROJECT_ID.equals(projectExtendVO.getId())) {
+                    projectExtendVO.setIsAdmin(true);
+                }
+                final ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectExtendVO.getId());
+                projectExtendVO.setConfig(ConvertUtil.obj2Obj(projectConfig,ProjectConfigVO.class));
+            }
+            return PagingResult.success(new PagingData<>(projectExtendVOList, projectPage.getPagination()));
         
         }
     }

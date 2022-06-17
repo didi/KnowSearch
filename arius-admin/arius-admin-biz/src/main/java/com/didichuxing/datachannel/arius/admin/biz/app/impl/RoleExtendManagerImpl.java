@@ -2,7 +2,11 @@ package com.didichuxing.datachannel.arius.admin.biz.app.impl;
 
 import com.didichuxing.datachannel.arius.admin.biz.app.RoleExtendManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.RoleExtendVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
+import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didiglobal.logi.security.common.PagingData;
+import com.didiglobal.logi.security.common.PagingData.Pagination;
 import com.didiglobal.logi.security.common.PagingResult;
 import com.didiglobal.logi.security.common.dto.role.RoleAssignDTO;
 import com.didiglobal.logi.security.common.dto.role.RoleQueryDTO;
@@ -14,6 +18,7 @@ import com.didiglobal.logi.security.common.vo.role.RoleVO;
 import com.didiglobal.logi.security.exception.LogiSecurityException;
 import com.didiglobal.logi.security.service.RoleService;
 import java.util.List;
+import java.util.Objects;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -48,14 +53,29 @@ public class RoleExtendManagerImpl implements RoleExtendManager {
 	}
 	
 	@Override
-	public Result<RoleVO> getRoleDetailByRoleId(Integer roleId) {
-		
-		return Result.buildSucc(roleService.getRoleDetailByRoleId(roleId));
+	public Result<RoleExtendVO> getRoleDetailByRoleId(Integer roleId) {
+		final RoleVO roleVO = roleService.getRoleDetailByRoleId(roleId);
+		final RoleExtendVO roleExtendVO = ConvertUtil.obj2Obj(roleVO, RoleExtendVO.class);
+		if (Objects.equals(roleExtendVO.getId(), AuthConstant.RESOURCE_OWN_ROLE_ID) || Objects.equals(
+				roleExtendVO.getId(), AuthConstant.ADMIN_ROLE_ID)) {
+			roleExtendVO.setIsDefaultRole(true);
+		}
+		return Result.buildSucc(roleExtendVO);
 	}
 	
 	@Override
-	public PagingResult<RoleVO> getRolePage(RoleQueryDTO queryDTO) {
-		return PagingResult.success(roleService.getRolePage(queryDTO));
+	public PagingResult<RoleExtendVO> getRolePage(RoleQueryDTO queryDTO) {
+		final PagingData<RoleVO> rolePage = roleService.getRolePage(queryDTO);
+		final List<RoleVO> bizData = rolePage.getBizData();
+		final List<RoleExtendVO> roleExtendVOList = ConvertUtil.list2List(bizData, RoleExtendVO.class);
+		for (RoleExtendVO roleExtendVO : roleExtendVOList) {
+			if (Objects.equals(roleExtendVO.getId(), AuthConstant.RESOURCE_OWN_ROLE_ID) || Objects.equals(
+					roleExtendVO.getId(), AuthConstant.ADMIN_ROLE_ID)) {
+				roleExtendVO.setIsDefaultRole(true);
+			}
+		}
+		final Pagination pagination = rolePage.getPagination();
+		return PagingResult.success(new PagingData<>(roleExtendVOList, pagination));
 	}
 	
 	@Override
