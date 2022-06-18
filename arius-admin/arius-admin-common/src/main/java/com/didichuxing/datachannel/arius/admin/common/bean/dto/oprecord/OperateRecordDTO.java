@@ -1,6 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.dto.oprecord;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.PageDTO;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import java.util.Date;
 
 import io.swagger.annotations.ApiModel;
@@ -34,7 +35,7 @@ public class OperateRecordDTO extends PageDTO {
     private Integer moduleId;
 
     /**
-     * @see com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationTypeEnum
+     * @see OperateTypeEnum
      */
     @ApiModelProperty("操作ID")
     private Integer operateId;

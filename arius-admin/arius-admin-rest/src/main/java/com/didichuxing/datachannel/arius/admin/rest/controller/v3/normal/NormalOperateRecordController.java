@@ -8,7 +8,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.oprecord.OperateRecordDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.operaterecord.OperateRecordVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.NewModuleEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
@@ -55,7 +55,7 @@ public class NormalOperateRecordController {
             @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "moduleCode", value = "模块cod:为空则会返回全部",
                     required = false) })
     public Result<Map<String,Integer>> listOperationType(@PathVariable(value = "moduleCode",required = false) Integer moduleCode) {
-        return Result.buildSucc(OperationTypeEnum.getOperationTypeByModule(moduleCode));
+        return Result.buildSucc(OperateTypeEnum.getOperationTypeByModule(moduleCode));
     }
     
     @GetMapping("/trigger-way")

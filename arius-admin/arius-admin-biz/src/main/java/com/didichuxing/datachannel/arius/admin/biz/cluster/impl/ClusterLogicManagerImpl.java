@@ -5,12 +5,8 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.Cl
 import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum.RED;
 import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum.UNKNOWN;
 import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum.YELLOW;
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.RESOURCE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.TEMPLATE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.ADD;
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.DELETE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.DELETE_INDEX;
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.EDIT;
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.DATA_NODE;
 
 import com.alibaba.fastjson.JSON;
@@ -23,6 +19,7 @@ import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.TemplateSrvManager;
 import com.didichuxing.datachannel.arius.admin.common.Triple;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterLogicConditionDTO;
@@ -59,6 +56,8 @@ import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectClusterLogicAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.event.resource.ClusterLogicEvent;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
@@ -430,7 +429,16 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
 
         if (result.success()) {
 			SpringTool.publish(new ClusterLogicEvent(result.getData(), projectId));
-            operateRecordService.save(RESOURCE, ADD, result.getData(), "创建逻辑集群", operator);
+            //添加逻辑集群日志
+            operateRecordService.save(
+                    new OperateRecord.Builder()
+                            .project(projectService.getProjectBriefByProjectId(projectId))
+                            .operationTypeEnum(OperateTypeEnum.MY_CLUSTER_APPLY)
+                            .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                            .userOperation(operator)
+                            .content(param.getName())
+                            .bizId(result.getData().intValue())
+                            .build());
         }
         return result;
     }
@@ -438,6 +446,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     @Override
     public Result<Void> deleteLogicCluster(Long logicClusterId, String operator, Integer projectId)
             throws AdminOperateException {
+        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(logicClusterId);
         Result<Void> result = clusterLogicService.deleteClusterLogicById(logicClusterId, operator);
         ClusterLogicTemplateIndexDetailDTO templateIndexVO = getTemplateIndexVO(logicClusterId, projectId);
 
@@ -449,7 +458,16 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
 
         if (result.success()) {
 			SpringTool.publish(new ClusterLogicEvent(logicClusterId, projectId));
-            operateRecordService.save(RESOURCE, DELETE, logicClusterId, "", operator);
+            //操作记录 集群下线
+            operateRecordService.save(
+                    new OperateRecord.Builder()
+                            .project(projectService.getProjectBriefByProjectId(projectId))
+                            .operationTypeEnum(OperateTypeEnum.MY_CLUSTER_OFFLINE)
+                            .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                            .content(clusterLogic.getName())
+                            .bizId(logicClusterId.intValue())
+                            .userOperation(operator)
+                            .build());
         }
         return result;
     }
@@ -488,10 +506,21 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
 
     @Override
 	public Result<Void> editLogicCluster(ESLogicClusterDTO param, String operator, Integer projectId) {
+       
         Result<Void> result = clusterLogicService.editClusterLogic(param, operator);
         if (result.success()) {
             SpringTool.publish(new ClusterLogicEvent(param.getId(), projectId));
-            operateRecordService.save(RESOURCE, EDIT, param.getId(), String.valueOf(param.getId()), operator);
+            //操作记录 我的集群信息修改
+            operateRecordService.save(
+                    new OperateRecord.Builder()
+                            .project(projectService.getProjectBriefByProjectId(projectId))
+                            .operationTypeEnum(OperateTypeEnum.MY_CLUSTER_INFO_MODIFY)
+                            .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                            .userOperation(operator)
+                            .content(param.toString())
+                            .bizId(param.getId().intValue())
+                            .build()
+                    );
         }
 		return result;
 	}

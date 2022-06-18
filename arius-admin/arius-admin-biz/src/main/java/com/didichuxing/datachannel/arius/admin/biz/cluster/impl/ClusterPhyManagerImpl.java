@@ -18,6 +18,7 @@ import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping.TemplatePhyMappingManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.pipeline.TemplatePipelineManager;
 import com.didichuxing.datachannel.arius.admin.common.Triple;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterJoinDTO;
@@ -52,8 +53,8 @@ import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterDy
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterDynamicConfigsTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterCreateSourceEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterImportRuleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum;
@@ -617,7 +618,17 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
         if (result.success()) {
             SpringTool.publish(new ClusterPhyEvent(param.getCluster(), operator));
-            operateRecordService.save(ModuleEnum.CLUSTER, OperationEnum.ADD, param.getCluster(), null, operator);
+            operateRecordService.save(
+                    new OperateRecord.Builder()
+                            .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_NEW)
+                            .project(projectService.getProjectBriefByProjectId(projectId))
+                            .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                            .content(param.getCluster())
+                            .userOperation(operator)
+                            .build()
+                    
+                    
+                   );
         }
         return result;
     }
@@ -1243,9 +1254,14 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         }
 
         updateClusterHealth(param.getCluster(), AriusUser.SYSTEM.getDesc());
-
-        operateRecordService.save(ModuleEnum.ES_CLUSTER_JOIN, OperationEnum.ADD, param.getCluster(),
-            param.getPhyClusterDesc(), operator);
+        //集群接入
+        operateRecordService.save(
+                new OperateRecord.Builder()
+                        .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_JOIN)
+                        .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                        .userOperation(operator)
+                        .content( param.getCluster())
+                        .build());
     }
 
     private void refreshClusterDistInfo() {

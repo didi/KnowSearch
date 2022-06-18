@@ -1,11 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.biz.cluster.impl;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.CLUSTER_REGION;
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.ADD;
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.DATA_NODE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType.FAIL;
-import static java.util.stream.Collectors.toList;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -13,7 +13,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESClusterRoleHostPO;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.jetbrains.annotations.Nullable;
@@ -125,8 +124,14 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
                 param.setId(addRegionRet.getData());
                 Result<Boolean> booleanResult = editNode2Region(param);
                 if (booleanResult.success()) {
-                    // 2. 操作记录
-                    operateRecordService.save(CLUSTER_REGION, ADD, addRegionRet.getMessage(), "", operator);
+                    // 2. 操作记录 :Region变更
+                    operateRecordService.save(
+                            new OperateRecord.Builder()
+                                    .userOperation(operator)
+                                    .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_REGION_CHANGE)
+                                    .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                                    .content(String.format("新增region[%s]", param.getName()))
+                                    .build());
                     // 3. 发送消息
                     regionIdLis.add(addRegionRet.getData());
                 }else {

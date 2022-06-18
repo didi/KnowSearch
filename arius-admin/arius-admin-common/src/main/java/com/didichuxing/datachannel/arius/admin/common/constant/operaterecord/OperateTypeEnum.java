@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
  * @author shizeying
  * @date 2022/06/16
  */
-public enum OperationTypeEnum {
+public enum OperateTypeEnum {
         /**
      * 物理集群：集群接入
      */
@@ -207,7 +207,7 @@ public enum OperationTypeEnum {
     private final String operationType;
     private final Integer code;
     
-    OperationTypeEnum(NewModuleEnum module, String operationType, Integer code) {
+    OperateTypeEnum(NewModuleEnum module, String operationType, Integer code) {
         this.module = module;
         this.operationType = operationType;
         this.code = code;
@@ -228,15 +228,15 @@ public enum OperationTypeEnum {
     public static Map<String, Integer> getOperationTypeByModule(Integer module) {
         final NewModuleEnum moduleEnum = NewModuleEnum.getModuleEnum(module);
         if (Objects.isNull(moduleEnum)) {
-            return Arrays.stream(OperationTypeEnum.values())
-                    .collect(Collectors.toMap(OperationTypeEnum::getOperationType, OperationTypeEnum::getCode));
+            return Arrays.stream(OperateTypeEnum.values())
+                    .collect(Collectors.toMap(OperateTypeEnum::getOperationType, OperateTypeEnum::getCode));
         }
-        return Arrays.stream(OperationTypeEnum.values())
+        return Arrays.stream(OperateTypeEnum.values())
                 .filter(operationTypeEnum -> operationTypeEnum.getModule().equals(moduleEnum))
-                .collect(Collectors.toMap(OperationTypeEnum::getOperationType, OperationTypeEnum::getCode));
+                .collect(Collectors.toMap(OperateTypeEnum::getOperationType, OperateTypeEnum::getCode));
     }
-     public static OperationTypeEnum getOperationTypeEnum(Integer code) {
-        return Arrays.stream(OperationTypeEnum.values()).filter(operationTypeEnum -> operationTypeEnum.getCode().equals(code))
+     public static OperateTypeEnum getOperationTypeEnum(Integer code) {
+        return Arrays.stream(OperateTypeEnum.values()).filter(operationTypeEnum -> operationTypeEnum.getCode().equals(code))
                 .findFirst().orElse(null);
     }
     

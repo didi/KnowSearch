@@ -3,9 +3,8 @@ package com.didichuxing.datachannel.arius.admin.biz.app.impl;
 import com.didichuxing.datachannel.arius.admin.biz.app.UserExtendManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.oprecord.OperateRecordDTO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didiglobal.logi.security.common.PagingData;
@@ -232,14 +231,14 @@ public class UserExtendManagerImpl implements UserExtendManager {
 		}
 		if (StringUtils.isNotBlank(userDTO.getEmail())) {
 			operateRecordService.save(
-					new OperateRecord(OperationTypeEnum.TENANT_INFO_MODIFY, TriggerWayEnum.MANUAL_TRIGGER,
+					new OperateRecord(OperateTypeEnum.TENANT_INFO_MODIFY, TriggerWayEnum.MANUAL_TRIGGER,
 							String.format("修改email:%s-->%s", userBriefVO.getEmail(), userDTO.getEmail()), operator,
 							
 							userBriefVO.getId()));
 		}
 		if (StringUtils.isNotBlank(userDTO.getPhone())) {
 			operateRecordService.save(
-					new OperateRecord(OperationTypeEnum.TENANT_INFO_MODIFY, TriggerWayEnum.MANUAL_TRIGGER,
+					new OperateRecord(OperateTypeEnum.TENANT_INFO_MODIFY, TriggerWayEnum.MANUAL_TRIGGER,
 							String.format("修改手机号:%s-->%s", userBriefVO.getPhone(), userDTO.getPhone()), operator
 							
 							,
@@ -248,7 +247,7 @@ public class UserExtendManagerImpl implements UserExtendManager {
 		}
 		if (StringUtils.isNotBlank(userDTO.getRealName())) {
 			operateRecordService.save(
-					new OperateRecord(OperationTypeEnum.TENANT_INFO_MODIFY, TriggerWayEnum.MANUAL_TRIGGER,
+					new OperateRecord(OperateTypeEnum.TENANT_INFO_MODIFY, TriggerWayEnum.MANUAL_TRIGGER,
 							String.format("修改用户实名:%s-->%s", userBriefVO.getRealName(), userDTO.getRealName()), operator
 							
 							,
@@ -257,7 +256,7 @@ public class UserExtendManagerImpl implements UserExtendManager {
 		}
 		if (StringUtils.isNotBlank(userDTO.getPw())) {
 			operateRecordService.save(
-					new OperateRecord(OperationTypeEnum.TENANT_INFO_MODIFY, TriggerWayEnum.MANUAL_TRIGGER, "修改用户密码",
+					new OperateRecord(OperateTypeEnum.TENANT_INFO_MODIFY, TriggerWayEnum.MANUAL_TRIGGER, "修改用户密码",
 							operator
 							
 							,
@@ -291,7 +290,7 @@ public class UserExtendManagerImpl implements UserExtendManager {
 			return Result.buildFail(result.getMessage());
 		}
 		operateRecordService.save(
-				new OperateRecord(OperationTypeEnum.TENANT_ADD, TriggerWayEnum.MANUAL_TRIGGER, param.getUserName(),
+				new OperateRecord(OperateTypeEnum.TENANT_ADD, TriggerWayEnum.MANUAL_TRIGGER, param.getUserName(),
 						operator
 				
 				));

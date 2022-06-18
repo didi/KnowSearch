@@ -22,7 +22,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ProjectConfigV
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ProjectExtendVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.AppSearchTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.VerifyCodeFactory;
@@ -48,7 +48,6 @@ import com.didiglobal.logi.security.service.UserService;
 import com.google.common.collect.Lists;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -125,7 +124,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
                 
             }
             //7. 写入操作日志
-            operateRecordService.save(new OperateRecord(project.getProjectName(),OperationTypeEnum.APPLICATION_CREATE
+            operateRecordService.save(new OperateRecord(project.getProjectName(), OperateTypeEnum.APPLICATION_CREATE
                     , TriggerWayEnum.MANUAL_TRIGGER,project.getProjectName(),operator));
             //创建es user
             createESUserDefault(projectVO, operator);
@@ -184,13 +183,13 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
         esUserService.deleteByESUsers(projectId);
         for (ESUser esUser : esUsers) {
             operateRecordService.save(
-                    new OperateRecord(projectBriefVO.getProjectName(), OperationTypeEnum.APPLICATION_ACCESS_MODE,
+                    new OperateRecord(projectBriefVO.getProjectName(), OperateTypeEnum.APPLICATION_ACCESS_MODE,
                             TriggerWayEnum.MANUAL_TRIGGER,
                             String.format("删除访问模式:%s", AppSearchTypeEnum.valueOf(esUser.getSearchType()).getDesc()),
                             operator));
         }
         operateRecordService.save(
-                new OperateRecord(projectBriefVO.getProjectName(), OperationTypeEnum.APPLICATION_DELETE,
+                new OperateRecord(projectBriefVO.getProjectName(), OperateTypeEnum.APPLICATION_DELETE,
                         TriggerWayEnum.MANUAL_TRIGGER, projectBriefVO.getProjectName(), operator));
         return Result.buildSucc();
     }
@@ -295,7 +294,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
                 String newUser = newUserBriefList.stream().map(UserBriefVO::getUserName).distinct()
                         .collect(Collectors.joining(","));
                 operateRecordService.save(
-                        new OperateRecord(oldProject.getProjectName(), OperationTypeEnum.APPLICATION_OWNER_CHANGE,
+                        new OperateRecord(oldProject.getProjectName(), OperateTypeEnum.APPLICATION_OWNER_CHANGE,
                                 TriggerWayEnum.MANUAL_TRIGGER, oldUser + "-->" + newUser, operator));
             }
             //更新项目与用户成员的关联关系
@@ -316,7 +315,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
                 String newUser = newUserBriefList.stream().map(UserBriefVO::getUserName).distinct()
                         .collect(Collectors.joining(","));
                 operateRecordService.save(
-                        new OperateRecord(oldProject.getProjectName(), OperationTypeEnum.APPLICATION_USER_CHANGE,
+                        new OperateRecord(oldProject.getProjectName(), OperateTypeEnum.APPLICATION_USER_CHANGE,
                                 TriggerWayEnum.MANUAL_TRIGGER, oldUser + "-->" + newUser, operator));
         
             }
@@ -378,7 +377,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
                     .collect(Collectors.joining(","));
             String oldUser = oldUserBriefList.stream().map(UserBriefVO::getUserName).collect(Collectors.joining(","));
             operateRecordService.save(
-                    new OperateRecord(projectVO.getProjectName(), OperationTypeEnum.APPLICATION_OWNER_CHANGE,
+                    new OperateRecord(projectVO.getProjectName(), OperateTypeEnum.APPLICATION_OWNER_CHANGE,
                             TriggerWayEnum.MANUAL_TRIGGER, oldUser + "-->" + newUserName, operator));
             return Result.buildSucc();
         } catch (LogiSecurityException e) {
@@ -410,7 +409,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
             String oldUser = oldUserBriefList.stream().map(UserBriefVO::getUserName).collect(Collectors.joining(","));
             String newUser = newUserBriefList.stream().map(UserBriefVO::getUserName).collect(Collectors.joining(","));
             operateRecordService.save(
-                    new OperateRecord(oldProject.getProjectName(), OperationTypeEnum.APPLICATION_USER_CHANGE,
+                    new OperateRecord(oldProject.getProjectName(), OperateTypeEnum.APPLICATION_USER_CHANGE,
                             TriggerWayEnum.MANUAL_TRIGGER, oldUser + "-->" + newUser, operator));
             return Result.buildSucc();
         } catch (LogiSecurityException e) {
@@ -448,7 +447,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
             String oldUser = oldUserBriefList.stream().map(UserBriefVO::getUserName).collect(Collectors.joining(","));
            
             operateRecordService.save(
-                    new OperateRecord(oldProject.getProjectName(), OperationTypeEnum.APPLICATION_OWNER_CHANGE,
+                    new OperateRecord(oldProject.getProjectName(), OperateTypeEnum.APPLICATION_OWNER_CHANGE,
                             TriggerWayEnum.MANUAL_TRIGGER, oldUser + "-->" + newUserName, operator));
             return Result.buildSucc();
         } catch (LogiSecurityException e) {
@@ -476,7 +475,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
             String oldUser = oldUserBriefList.stream().map(UserBriefVO::getUserName).collect(Collectors.joining(","));
             String newUser = newUserBriefList.stream().map(UserBriefVO::getUserName).collect(Collectors.joining(","));
             operateRecordService.save(
-                    new OperateRecord(oldProject.getProjectName(), OperationTypeEnum.APPLICATION_OWNER_CHANGE,
+                    new OperateRecord(oldProject.getProjectName(), OperateTypeEnum.APPLICATION_OWNER_CHANGE,
                             TriggerWayEnum.MANUAL_TRIGGER, oldUser + "-->" + newUser, operator));
             return Result.buildSucc();
         } catch (LogiSecurityException e) {
@@ -586,7 +585,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
         final Tuple<Result, ESUserPO> result = esUserService.registerESUser(esUserDTO, operator);
         if (result.getV1().success()){
             operateRecordService.save(
-                    new OperateRecord(data.getProjectName(), OperationTypeEnum.APPLICATION_ACCESS_MODE,
+                    new OperateRecord(data.getProjectName(), OperateTypeEnum.APPLICATION_ACCESS_MODE,
                             TriggerWayEnum.MANUAL_TRIGGER,
                             String.format("新增访问模式:%s", AppSearchTypeEnum.TEMPLATE.getDesc()), operator,result.getV2()
                             .getId()));

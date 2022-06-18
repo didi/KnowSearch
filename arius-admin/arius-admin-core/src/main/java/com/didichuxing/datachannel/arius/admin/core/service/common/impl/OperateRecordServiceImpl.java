@@ -6,13 +6,11 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.oprecord.OperateRecordDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.operaterecord.OperateRecordInfoPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.operaterecord.OperateRecordVO;
-import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.NewModuleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.optrecord.OperateRecordDAO;
@@ -22,7 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -134,8 +131,8 @@ public class OperateRecordServiceImpl implements OperateRecordService {
                     .map(TriggerWayEnum::getTriggerWay).ifPresent(operateRecordVO::setTriggerWay);
             //设置操作类型
             Optional.ofNullable(operateRecordInfoPOMap.get(operateRecordVO.getId()))
-                    .map(OperateRecordInfoPO::getOperateId).map(OperationTypeEnum::getOperationTypeEnum)
-                    .map(OperationTypeEnum::getOperationType).ifPresent(operateRecordVO::setModule);
+                    .map(OperateRecordInfoPO::getOperateId).map(OperateTypeEnum::getOperationTypeEnum)
+                    .map(OperateTypeEnum::getOperationType).ifPresent(operateRecordVO::setModule);
         }
         final Long count = operateRecordDAO.countByCondition(pageDTO);
         
@@ -159,7 +156,7 @@ public class OperateRecordServiceImpl implements OperateRecordService {
                 .map(TriggerWayEnum::getTriggerWay).ifPresent(operateRecordVO::setTriggerWay);
         //设置操作类型
         Optional.ofNullable(recordInfo).map(OperateRecordInfoPO::getOperateId)
-                .map(OperationTypeEnum::getOperationTypeEnum).map(OperationTypeEnum::getOperationType)
+                .map(OperateTypeEnum::getOperationTypeEnum).map(OperateTypeEnum::getOperationType)
                 .ifPresent(operateRecordVO::setModule);
         return operateRecordVO;
     }

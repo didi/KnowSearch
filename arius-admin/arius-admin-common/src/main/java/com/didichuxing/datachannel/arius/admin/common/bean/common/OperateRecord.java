@@ -1,8 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.common;
 
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.NewModuleEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
+import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Optional;
@@ -24,7 +25,7 @@ public class OperateRecord {
 	private Integer moduleId;
 	
 	/**
-	 * @see OperationTypeEnum
+	 * @see OperateTypeEnum
 	 */
 	private Integer operateId;
 	
@@ -57,10 +58,10 @@ public class OperateRecord {
 	 */
 	private Integer bizId;
 	
-	public OperateRecord(String projectName, OperationTypeEnum operationTypeEnum, TriggerWayEnum triggerWayEnum,
+	public OperateRecord(String projectName, OperateTypeEnum operateTypeEnum, TriggerWayEnum triggerWayEnum,
 	                     String content, String userOperation, Integer bizId) {
-		this.moduleId = operationTypeEnum.getModule().getCode();
-		this.operateId = operationTypeEnum.getCode();
+		this.moduleId = operateTypeEnum.getModule().getCode();
+		this.operateId = operateTypeEnum.getCode();
 		this.content = content;
 		this.userOperation = userOperation;
 		this.operateTime = Calendar.getInstance().getTime();
@@ -69,10 +70,10 @@ public class OperateRecord {
 		this.bizId = bizId;
 	}
 	
-	public OperateRecord(String projectName, OperationTypeEnum operationTypeEnum, TriggerWayEnum triggerWayEnum,
+	public OperateRecord(String projectName, OperateTypeEnum operateTypeEnum, TriggerWayEnum triggerWayEnum,
 	                     String content, String userOperation) {
-		this.moduleId = operationTypeEnum.getModule().getCode();
-		this.operateId = operationTypeEnum.getCode();
+		this.moduleId = operateTypeEnum.getModule().getCode();
+		this.operateId = operateTypeEnum.getCode();
 		this.content = content;
 		this.userOperation = userOperation;
 		this.operateTime = Calendar.getInstance().getTime();
@@ -80,10 +81,10 @@ public class OperateRecord {
 		this.projectName = projectName;
 	}
 	
-	public OperateRecord(OperationTypeEnum operationTypeEnum, TriggerWayEnum triggerWayEnum, String content,
+	public OperateRecord(OperateTypeEnum operateTypeEnum, TriggerWayEnum triggerWayEnum, String content,
 	                     String userOperation, Integer bizId) {
-		this.moduleId = operationTypeEnum.getModule().getCode();
-		this.operateId = operationTypeEnum.getCode();
+		this.moduleId = operateTypeEnum.getModule().getCode();
+		this.operateId = operateTypeEnum.getCode();
 		this.content = content;
 		this.userOperation = userOperation;
 		this.operateTime = Calendar.getInstance().getTime();
@@ -91,27 +92,27 @@ public class OperateRecord {
 		this.bizId = bizId;
 	}
 	
-	public OperateRecord(OperationTypeEnum operationTypeEnum, TriggerWayEnum triggerWayEnum, String content,
+	public OperateRecord(OperateTypeEnum operateTypeEnum, TriggerWayEnum triggerWayEnum, String content,
 	                     String userOperation) {
-		this.moduleId = operationTypeEnum.getModule().getCode();
-		this.operateId = operationTypeEnum.getCode();
+		this.moduleId = operateTypeEnum.getModule().getCode();
+		this.operateId = operateTypeEnum.getCode();
 		this.content = content;
 		this.userOperation = userOperation;
 		this.operateTime = Calendar.getInstance().getTime();
 		this.triggerWayId = triggerWayEnum.getCode();
 	}
 	
-	public OperateRecord(OperationTypeEnum operationTypeEnum, String content, String userOperation) {
-		this.moduleId = operationTypeEnum.getModule().getCode();
-		this.operateId = operationTypeEnum.getCode();
+	public OperateRecord(OperateTypeEnum operateTypeEnum, String content, String userOperation) {
+		this.moduleId = operateTypeEnum.getModule().getCode();
+		this.operateId = operateTypeEnum.getCode();
 		this.content = content;
 		this.userOperation = userOperation;
 		this.operateTime = Calendar.getInstance().getTime();
 	}
 	
-	public OperateRecord(OperationTypeEnum operationTypeEnum, String content, String userOperation, Integer bizId) {
-		this.moduleId = operationTypeEnum.getModule().getCode();
-		this.operateId = operationTypeEnum.getCode();
+	public OperateRecord(OperateTypeEnum operateTypeEnum, String content, String userOperation, Integer bizId) {
+		this.moduleId = operateTypeEnum.getModule().getCode();
+		this.operateId = operateTypeEnum.getCode();
 		this.content = content;
 		this.userOperation = userOperation;
 		this.operateTime = Calendar.getInstance().getTime();
@@ -119,9 +120,9 @@ public class OperateRecord {
 	}
 	
 	private OperateRecord(Builder builder) {
-		Optional.ofNullable(builder.operationTypeEnum).map(OperationTypeEnum::getModule).map(NewModuleEnum::getCode)
+		Optional.ofNullable(builder.operateTypeEnum).map(OperateTypeEnum::getModule).map(NewModuleEnum::getCode)
 				.ifPresent(this::setModuleId);
-		Optional.ofNullable(builder.operationTypeEnum).map(OperationTypeEnum::getCode).ifPresent(this::setOperateId);
+		Optional.ofNullable(builder.operateTypeEnum).map(OperateTypeEnum::getCode).ifPresent(this::setOperateId);
 		setContent(builder.content);
 		setUserOperation(builder.userOperation);
 		setOperateTime(Calendar.getInstance().getTime());
@@ -131,16 +132,16 @@ public class OperateRecord {
 	}
 	
 	public static final class Builder {
-		private OperationTypeEnum operationTypeEnum;
-		private TriggerWayEnum    triggerWayEnum;
+		private OperateTypeEnum operateTypeEnum;
+		private TriggerWayEnum  triggerWayEnum;
 		private String            content;
 		private String            userOperation;
 		
 		private String  projectName;
 		private Integer bizId;
 		
-		public Builder operationTypeEnum(OperationTypeEnum operationType) {
-			this.operationTypeEnum = operationType;
+		public Builder operationTypeEnum(OperateTypeEnum operationType) {
+			this.operateTypeEnum = operationType;
 			return this;
 		}
 		
@@ -159,8 +160,9 @@ public class OperateRecord {
 			return this;
 		}
 		
-		public Builder projectName(String projectName) {
-			this.projectName = projectName;
+		public Builder project(ProjectBriefVO project) {
+			this.projectName = Optional.ofNullable(project)
+					.map(ProjectBriefVO::getProjectName).orElse(null);
 			return this;
 		}
 		

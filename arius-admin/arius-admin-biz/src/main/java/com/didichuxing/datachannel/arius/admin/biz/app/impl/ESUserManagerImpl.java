@@ -1,8 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.biz.app.impl;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.ES_USER;
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.ADD;
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.DELETE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.EDIT;
 import static com.didichuxing.datachannel.arius.admin.core.service.app.impl.ESUserServiceImpl.VERIFY_CODE_LENGTH;
 
@@ -17,17 +14,12 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleESUserV
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleESUserWithVerifyCodeVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ESUserVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.AppSearchTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
-import com.didichuxing.datachannel.arius.admin.common.event.app.ESUserAddEvent;
-import com.didichuxing.datachannel.arius.admin.common.event.app.ESUserDeleteEvent;
-import com.didichuxing.datachannel.arius.admin.common.event.app.ESUserEditEvent;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.VerifyCodeFactory;
 import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
-import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.app.ESUserService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didiglobal.logi.log.ILog;
@@ -39,7 +31,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -152,10 +143,10 @@ public class ESUserManagerImpl implements ESUserManager {
          if (resultESUserPOTuple.getV1().success()) {
             // 操作记录
              operateRecordService.save(
-                     new OperateRecord.Builder().projectName(
-                                     projectService.getProjectBriefByProjectId(projectId).getProjectName())
+                     new OperateRecord.Builder().project(
+                                     projectService.getProjectBriefByProjectId(projectId))
                              .content(String.format("新增访问模式:[%s]", AppSearchTypeEnum.valueOf(appDTO.getSearchType())))
-                             .operationTypeEnum(OperationTypeEnum.APPLICATION_ACCESS_MODE)
+                             .operationTypeEnum(OperateTypeEnum.APPLICATION_ACCESS_MODE)
                              .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).userOperation(operator).build());
            
         }
@@ -186,18 +177,18 @@ public class ESUserManagerImpl implements ESUserManager {
         final ESUser oldESUser = esUserService.getEsUserById(esUserDTO.getId());
         //校验当前esUserDTO中的projectId是否存在于esUser
         //更新之后的结果获取
-        final Tuple<Result<Void>/*更新的状态*/, ESUserPO/*更新之后的的ESUserPO*/> resultESUserPOTuple = esUserService.editUser(esUserDTO);
+        final Tuple<Result<Void>/*更新的状态*/, ESUserPO/*更新之后的的ESUserPO*/> resultESUserTuple = esUserService.editUser(esUserDTO);
     
-        if (resultESUserPOTuple.getV1().success()) {
+        if (resultESUserTuple.getV1().success()) {
             // 操作记录
-            operateRecordService.save(new OperateRecord.Builder().projectName(
-                            projectService.getProjectBriefByProjectId(oldESUser.getProjectId()).getProjectName()).content(
+            operateRecordService.save(new OperateRecord.Builder().project(
+                            projectService.getProjectBriefByProjectId(oldESUser.getProjectId())).content(
                             String.format("修改访问模式:%s-->%s", AppSearchTypeEnum.valueOf(oldESUser.getSearchType()),
                                     AppSearchTypeEnum.valueOf(esUserDTO.getSearchType())))
-                    .operationTypeEnum(OperationTypeEnum.APPLICATION_ACCESS_MODE)
+                    .operationTypeEnum(OperateTypeEnum.APPLICATION_ACCESS_MODE)
                     .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).userOperation(operator).build());
         }
-        return resultESUserPOTuple.getV1();
+        return resultESUserTuple.getV1();
     }
     
     /**
@@ -234,7 +225,7 @@ public class ESUserManagerImpl implements ESUserManager {
             // 操作记录
             operateRecordService.save(
                     new OperateRecord(projectService.getProjectBriefByProjectId(projectId).getProjectName(),
-                            OperationTypeEnum.APPLICATION_ACCESS_MODE, TriggerWayEnum.MANUAL_TRIGGER,
+                            OperateTypeEnum.APPLICATION_ACCESS_MODE, TriggerWayEnum.MANUAL_TRIGGER,
                             String.format("删除访问模式:%s",
                                     AppSearchTypeEnum.valueOf(resultESUserPOTuple.getV2().getSearchType())), operator
             
@@ -261,7 +252,7 @@ public class ESUserManagerImpl implements ESUserManager {
             // 操作记录
             operateRecordService.save(
                     new OperateRecord(projectService.getProjectBriefByProjectId(projectId).getProjectName(),
-                            OperationTypeEnum.APPLICATION_ACCESS_MODE, TriggerWayEnum.MANUAL_TRIGGER, "删除访问模式", operator
+                            OperateTypeEnum.APPLICATION_ACCESS_MODE, TriggerWayEnum.MANUAL_TRIGGER, "删除访问模式", operator
             
                     ));
         }
