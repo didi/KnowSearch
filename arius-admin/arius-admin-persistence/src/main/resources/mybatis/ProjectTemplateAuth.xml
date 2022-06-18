@@ -12,14 +12,14 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-       id, project_id, template, `type`, responsible_ids, create_time, update_time
+       id, project_id, template, `type`,  create_time, update_time
     </sql>
 
     <insert id="insert" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.app.ProjectTemplateAuthPO"
             useGeneratedKeys="true"
             keyColumn="id" keyProperty="id">
-        insert into project_template_info (project_id, template, `type`, responsible_ids)
-        values (#{projectId}, #{templateId}, #{type}, #{responsible})
+        insert into project_template_info (project_id, template, `type`)
+        values (#{projectId}, #{templateId}, #{type})
     </insert>
 
     <update id="update" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.app.ProjectTemplateAuthPO">
@@ -42,12 +42,7 @@
             <if test="projectId != null">and project_id = #{projectId}</if>
             <if test="templateId != null">and template = #{templateId}</if>
             <if test="type != null">and `type` = #{type}</if>
-            <if test="responsible != null">
-                and (responsible_ids = #{responsible}
-                or responsible_ids like concat(#{responsible},',%')
-                or responsible_ids like concat('%,', #{responsible})
-                or responsible_ids like concat('%,', #{responsible},',%'))
-            </if>
+            
         </trim>
         and status = 1
         order by id desc
