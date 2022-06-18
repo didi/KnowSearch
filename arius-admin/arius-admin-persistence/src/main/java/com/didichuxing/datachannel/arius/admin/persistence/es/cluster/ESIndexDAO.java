@@ -679,24 +679,23 @@ public class ESIndexDAO extends BaseESDAO {
 
         ESIndicesGetIndexResponse response = null;
         try {
-            for (int i = 0; i < tryTimes; i++) {
+            do {
                 response = esClient.admin().indices().getIndex(request).actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
-                if (null != response) {
-                    break;
-                }
-            }
+            } while (tryTimes-- > 0 && null == response);
         } catch (Exception e) {
-            LOGGER.warn("class=ESTemplateDAO||method=getIndexConfigs||get index fail||clusterName={}||indexName={}||msg={}",
-                    clusterName, e.getMessage(), e);
+            LOGGER.warn(
+                "class=ESTemplateDAO||method=getIndexConfigs||get index fail||clusterName={}||indexName={}||msg={}",
+                clusterName, e.getMessage(), e);
         }
 
         if (response == null) {
             return Maps.newHashMap();
         }
 
+        /* 这里toString()方法会抛json异常，应该是脏数据引起
         if (!EnvUtil.isOnline()) {
             LOGGER.warn("class=ESTemplateDAO||method=getIndexConfigs||response={}", JSON.toJSONString(response));
-        }
+        }*/
 
         return response.getIndexsMapping().getIndexConfigMap();
     }

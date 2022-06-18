@@ -108,8 +108,8 @@ public class IndexPageSearchHandle extends AbstractPageSearchHandle<IndexQueryDT
      * @return               List<IndexCatCell>
      */
     private List<IndexCatCell> batchFetchIndexRealTimeData(List<IndexCatCell> catCellList) {
-        List<IndexCatCell> finalIndexCatCellList = Lists.newCopyOnWriteArrayList();
-        Map<String, List<IndexCatCell>> cluster2IndexCatCellListMap = ConvertUtil.list2MapOfList(catCellList,
+        List<IndexCatCell> finalIndexCatCellList = Lists.newCopyOnWriteArrayList(catCellList);
+        Map<String, List<IndexCatCell>> cluster2IndexCatCellListMap = ConvertUtil.list2MapOfList(finalIndexCatCellList,
                 IndexCatCell::getClusterPhy, indexCatCell -> indexCatCell);
         if (MapUtils.isEmpty(cluster2IndexCatCellListMap)) {
             return finalIndexCatCellList;
@@ -117,7 +117,7 @@ public class IndexPageSearchHandle extends AbstractPageSearchHandle<IndexQueryDT
 
         cluster2IndexCatCellListMap.forEach((cluster, indexCatCellList) -> {
             INDEX_BUILD_FUTURE.runnableTask(() -> {
-                finalIndexCatCellList.addAll(esIndexService.buildIndexRealTimeData(cluster, indexCatCellList));
+                esIndexService.buildIndexRealTimeData(cluster, indexCatCellList);
             });
         });
         INDEX_BUILD_FUTURE.waitExecute();
