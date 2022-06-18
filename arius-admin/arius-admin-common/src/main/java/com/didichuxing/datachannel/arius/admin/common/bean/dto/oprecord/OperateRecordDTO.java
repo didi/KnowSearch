@@ -78,5 +78,7 @@ public class OperateRecordDTO extends PageDTO {
      */
     @ApiModelProperty("项目")
     private String  projectName;
+    @ApiModelProperty("bizId")
+    private Integer bizId;
 
 }

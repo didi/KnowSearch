@@ -36,7 +36,6 @@ import org.springframework.stereotype.Service;
 public class OperateRecordServiceImpl implements OperateRecordService {
 
     private static final ILog LOGGER = LogFactory.getLog(OperateRecordServiceImpl.class);
-    private static final int     MAX_RECORD_COUNT = 200;
 
     @Autowired
     private OperateRecordDAO operateRecordDAO;
@@ -67,9 +66,9 @@ public class OperateRecordServiceImpl implements OperateRecordService {
             }
             deleteList.add(operateRecordPO);
         }
-        for(OperateRecordInfoPO operateRecordPO : deleteList) {
+        for(OperateRecordInfoPO operateRecord : deleteList) {
             // 删除该类别中，比指定id小的数据
-            operateRecordDAO.deleteByModuleIdAndLessThanId(operateRecordPO.getModuleId(), operateRecordPO.getId());
+            operateRecordDAO.deleteByModuleIdAndLessThanId(operateRecord.getModuleId(), operateRecord.getId());
         }
     }
 
@@ -87,7 +86,7 @@ public class OperateRecordServiceImpl implements OperateRecordService {
     @Override
     public Result<Void> save(ModuleEnum moduleEnum, OperationEnum operationEnum, Object bizId, String content,
                        String operator) {
-        return save(moduleEnum.getCode(), operationEnum.getCode(), String.valueOf(bizId), content, operator);
+        return Result.buildSucc();
     }
     
     /**
@@ -101,47 +100,10 @@ public class OperateRecordServiceImpl implements OperateRecordService {
         
     }
     
-    /**
-     * 插入一条操作记录
-     * @param moduleId  模块id  比如索引模板、应用管理、DSL审核
-     * @param operateId 操作行为  OperationEnum
-     * @param bizId     业务id  例如索引模板id、应用id 或者工单id
-     * @param content   操作详情
-     * @param operator  操作人
-     * @return result
-     */
-    @Override
-    public Result<Void> save(int moduleId, int operateId, String bizId, String content, String operator) {
-        if (operator == null) {
-            operator = AriusUser.UNKNOWN.getDesc();
-        }
-
-        OperateRecordDTO param = new OperateRecordDTO();
-        param.setModuleId(moduleId);
-        param.setOperateId(operateId);
-        //param.setBizId(bizId);
-        //param.setContent(content);
-        //param.setOperator(operator);
-
-        return save(param);
-    }
 
     @Override
     public Result<Void> save(OperateRecordDTO param) {
-        Result<Void> checkResult = checkParam(param);
-
-        if (checkResult.failed()) {
-            LOGGER.warn("class=OperateRecordServiceImpl||method=save||msg={}||msg=check fail!",
-                checkResult.getMessage());
-            return checkResult;
-        }
-
-        if (OperationEnum.EDIT.getCode() == param.getOperateId()
-            && AriusObjUtils.isNull(param.getContent())) {
-            return Result.buildSucc();
-        }
-
-        //return Result.build(operateRecordDAO.insert(ConvertUtil.obj2Obj(param, OperateRecordInfoPO.class)) == 1);
+       
         return Result.buildSucc();
     }
 
@@ -203,41 +165,5 @@ public class OperateRecordServiceImpl implements OperateRecordService {
     }
     
 
-    /******************************************* private method **************************************************/
-    private Result<Void> checkParam(OperateRecordDTO param) {
-        if (AriusObjUtils.isNull(param)) {
-            return Result.buildParamIllegal("记录为空");
-        }
-        if (AriusObjUtils.isNull(param.getModuleId())) {
-            return Result.buildParamIllegal("模块为空");
-        }
-        if (AriusObjUtils.isNull(param.getOperateId())) {
-            return Result.buildParamIllegal("操作为空");
-        }
-        //if (AriusObjUtils.isBlack(param.getBizId())) {
-        //    return Result.buildParamIllegal("业务id为空");
-        //}
-        if (AriusObjUtils.isNullStr(param.getContent())) {
-            return Result.buildParamIllegal("操作内容为空");
-        }
-        //if (AriusObjUtils.isBlack(param.getOperator())) {
-        //    return Result.buildParamIllegal("操作人为空");
-        //}
-        if (!ModuleEnum.validate(param.getModuleId())) {
-            return Result.buildParamIllegal("模块非法");
-        }
-        if (!OperationEnum.validate(param.getOperateId())) {
-            return Result.buildParamIllegal("操作非法");
-        }
 
-        return Result.buildSucc();
-    }
-
-    private void fillVOField(List<OperateRecordVO> records) {
-        if(CollectionUtils.isEmpty(records)){return;}
-        for(OperateRecordVO vo : records){
-            //vo.setModule(ModuleEnum.valueOf(vo.getModuleId()).getDesc());
-            //vo.setOperate( OperationEnum.valueOf(vo.getOperateId()).getDesc());
-        }
-    }
 }

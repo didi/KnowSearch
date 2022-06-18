@@ -3,6 +3,9 @@ package com.didichuxing.datachannel.arius.admin.core.service.common.impl;
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.CONFIG;
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.*;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -82,9 +85,9 @@ public class AriusConfigInfoServiceImpl implements AriusConfigInfoService {
         AriusConfigInfoPO param = ConvertUtil.obj2Obj(configInfoDTO, AriusConfigInfoPO.class);
         boolean succ = (1 == configInfoDAO.insert(param));
         if (succ) {
-            operateRecordService.save(CONFIG, ADD, param.getId(),
-                String.format("新增平台配置, 配置组:%s, 配置名称%s", configInfoDTO.getValueGroup(), configInfoDTO.getValueName()),
-                operator);
+            operateRecordService.save(new OperateRecord(OperationTypeEnum.SETTING_ADD, TriggerWayEnum.MANUAL_TRIGGER,
+                    String.format("新增平台配置, 配置组:%s, 配置名称%s", configInfoDTO.getValueGroup(),
+                            configInfoDTO.getValueName()), operator,configInfoDTO.getId()));
         }
         return Result.build(succ,param.getId());
     }
@@ -105,9 +108,8 @@ public class AriusConfigInfoServiceImpl implements AriusConfigInfoService {
 
         boolean succ = (1 == configInfoDAO.updateByIdAndStatus(configId, AriusConfigStatusEnum.DELETED.getCode()));
         if (succ) {
-            operateRecordService.save(CONFIG, DELETE, configId,
-                String.format("删除平台配置, 配置组:%s, 配置名称%s", configInfoPO.getValueGroup(), configInfoPO.getValueName()),
-                operator);
+             operateRecordService.save(new OperateRecord(OperationTypeEnum.SETTING_DELETE, TriggerWayEnum.MANUAL_TRIGGER,
+                   String.format("删除平台配置, 配置组:%s, 配置名称%s", configInfoPO.getValueGroup(), configInfoPO.getValueName()), operator,configId));
         }
 
         return Result.build(succ);
@@ -134,10 +136,10 @@ public class AriusConfigInfoServiceImpl implements AriusConfigInfoService {
         boolean succ = (1 == configInfoDAO.update(ConvertUtil.obj2Obj(configInfoDTO, AriusConfigInfoPO.class)));
 
         if (succ) {
-            operateRecordService.save(CONFIG, EDIT, configInfoDTO.getId(),
-                    String.format("编辑平台配置，配置组：%s，配置名称%s，配置值：", configInfoPO.getValueGroup(), configInfoPO.getValueName())
-                            + AriusObjUtils.findChangedWithClear(configInfoPO, configInfoDTO),
-                    operator);
+            operateRecordService.save(new OperateRecord(OperationTypeEnum.SETTING_MODIFY, TriggerWayEnum.MANUAL_TRIGGER,
+                    String.format("编辑平台配置，配置组：%s，配置名称%s，配置值：", configInfoPO.getValueGroup(),
+                            configInfoPO.getValueName()), operator, configInfoPO.getId()));
+           
         }
 
         return Result.build(succ);
@@ -165,8 +167,10 @@ public class AriusConfigInfoServiceImpl implements AriusConfigInfoService {
 
         boolean succ = (1 == configInfoDAO.updateByIdAndStatus(configId, status));
         if (succ) {
-            operateRecordService.save(CONFIG, SWITCH, configId, String.format("平台配置%s, 配置组:%s, 配置名称%s",
-                statusEnum.getDesc(), configInfoPO.getValueGroup(), configInfoPO.getValueName()), operator);
+            operateRecordService.save(new OperateRecord(OperationTypeEnum.SETTING_MODIFY, TriggerWayEnum.MANUAL_TRIGGER,
+                    String.format("平台配置%s, 配置组:%s, 配置名称%s", statusEnum.getDesc(), configInfoPO.getValueGroup(),
+                            configInfoPO.getValueName()), operator, configInfoPO.getId()));
+        
         }
 
         return Result.build(succ);

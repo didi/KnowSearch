@@ -2,7 +2,7 @@
 	"http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.didichuxing.datachannel.arius.admin.persistence.mysql.optrecord.OperateRecordDAO">
 	<resultMap id="BaseResultMap"
-	           type="com.didichuxing.datachannel.arius.admin.common.bean.po.operaterecord.OperateRecordInfoPO">
+		type="com.didichuxing.datachannel.arius.admin.common.bean.po.operaterecord.OperateRecordInfoPO">
 		<!--@mbg.generated-->
 		<!--@Table operate_record-->
 		<id column="id" jdbcType="BIGINT" property="id"/>
@@ -11,6 +11,7 @@
 		<result column="operate_id" jdbcType="INTEGER" property="operateId"/>
 		<result column="trigger_way_id" jdbcType="INTEGER" property="triggerWayId"/>
 		<result column="user_operation" jdbcType="VARCHAR" property="userOperation"/>
+		<result column="biz_id" jdbcType="INTEGER" property="bizId"/>
 		<result column="operate_time" jdbcType="TIMESTAMP" property="operateTime"/>
 		<result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
 		<result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
@@ -18,26 +19,13 @@
 	
 	<sql id="Base_Column_List">
 		<!--@mbg.generated-->
-		<!--@Table operate_record-->
-		id,
-		project_name,
-		module_id,
-		operate_id,
-		trigger_way_id,
-		user_operation,
-		operate_time,
-		create_time,
-		update_time
+		<!--@Table operate_record-->		id, project_name, module_id, operate_id, trigger_way_id, user_operation, operate_time, create_time, update_time
 	</sql>
 	
 	<insert id="insert"
-	        parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.operaterecord.OperateRecordInfoPO"
-	        useGeneratedKeys="true" keyColumn="id" keyProperty="id">
-		<!--@mbg.generated-->
-		insert into operate_record (project_name, module_id, operate_id, trigger_way_id, user_operation,
-		                            operate_time, create_time, update_time, content)
-		values (#{projectName}, #{moduleId}, #{operateId}, #{triggerWayId}, #{userOperation},
-		        #{operateTime}, #{createTime}, #{updateTime}, #{content})
+		parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.operaterecord.OperateRecordInfoPO"
+		useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+		<!--@mbg.generated-->		insert into operate_record (project_name, module_id, operate_id, trigger_way_id, user_operation, operate_time, create_time, update_time, content, biz_id) values (#{projectName}, #{moduleId}, #{operateId}, #{triggerWayId}, #{userOperation}, #{operateTime}, #{createTime}, #{updateTime}, #{content},#{bizId})
 	</insert>
 	
 	<select id="listByCondition" resultMap="BaseResultMap">
@@ -51,6 +39,9 @@
 			<if test="param.moduleId != null">
 				and module_id = #{param.moduleId}
 			</if>
+			<if test="param.bizId != null">
+				and biz_id = #{bizId}
+			</if>
 			<if test="param.operateId != null">
 				and operate_id = #{param.operateId}
 			</if>
@@ -64,28 +55,21 @@
 				and operate_time &lt;= #{param.endTime}
 			</if>
 			<if test="param.projectName != null">
-				and project_name = #{param.projectName}
-					 OR project_name LIKE CONCAT(#{param.projectName}, '%')
-					 OR project_name LIKE CONCAT('%', #{param.projectName})
-					 OR project_name LIKE CONCAT('%', #{param.projectName}, '%')
+				and project_name = #{param.projectName} OR project_name LIKE CONCAT(#{param.projectName}, '%') OR project_name LIKE CONCAT('%', #{param.projectName}) OR project_name LIKE CONCAT('%', #{param.projectName}, '%')
 			</if>
 			<if test="param.userOperation != null">
 				and user_operation = #{param.userOperation}
 			</if>
 			<if test="param.content != null and param.content != ''">
-				and content = #{param.content}
-					 OR content LIKE CONCAT(#{param.content}, '%')
-					 OR content LIKE CONCAT('%', #{param.content})
-					 OR content LIKE CONCAT('%', #{param.content}, '%')
+				and content = #{param.content} OR content LIKE CONCAT(#{param.content}, '%') OR content LIKE CONCAT('%', #{param.content}) OR content LIKE CONCAT('%', #{param.content}, '%')
 			</if>
 		</trim>
-		order by id desc
-		limit #{param.from},#{param.size}
+			order by id DESC LIMIT #{param.from},#{param.size}
 	</select>
 	
 	
 	<select id="selectDescTopNByModuleId" resultMap="BaseResultMap"
-	        parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.operaterecord.OperateRecordInfoPO">
+		parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.operaterecord.OperateRecordInfoPO">
 		select id, module_id
 		from operate_record
 		where module_id = #{moduleId}
@@ -94,15 +78,17 @@
 	</select>
 	
 	<select id="countByCondition" resultType="java.lang.Long"
-	        parameterType="com.didichuxing.datachannel.arius.admin.common.bean.dto.oprecord.OperateRecordDTO">
-		select count(id)
-		from operate_record
+		parameterType="com.didichuxing.datachannel.arius.admin.common.bean.dto.oprecord.OperateRecordDTO">
+		select count(id) from operate_record
 		<trim prefix="where" prefixOverrides="and">
 			<if test="param.id != null">
 				and id = #{param.id}
 			</if>
 			<if test="param.moduleId != null">
 				and module_id = #{param.moduleId}
+			</if>
+			<if test="param.bizId != null">
+				and biz_id = #{bizId}
 			</if>
 			<if test="param.operateId != null">
 				and operate_id = #{param.operateId}
@@ -117,28 +103,21 @@
 				and operate_time &lt;= #{param.endTime}
 			</if>
 			<if test="param.projectName != null">
-				and project_name = #{param.projectName}
-					 OR project_name LIKE CONCAT(#{param.projectName}, '%')
-					 OR project_name LIKE CONCAT('%', #{param.projectName})
-					 OR project_name LIKE CONCAT('%', #{param.projectName}, '%')
+				and project_name = #{param.projectName} OR project_name LIKE CONCAT(#{param.projectName}, '%') OR project_name LIKE CONCAT('%', #{param.projectName}) OR project_name LIKE CONCAT('%', #{param.projectName}, '%')
 			</if>
 			<if test="param.userOperation != null">
 				and user_operation = #{param.userOperation}
 			</if>
 			<if test="param.content != null and param.content != ''">
-				and content = #{param.content}
-					 OR content LIKE CONCAT(#{param.content}, '%')
-					 OR content LIKE CONCAT('%', #{param.content})
-					 OR content LIKE CONCAT('%', #{param.content}, '%')
+				and content = #{param.content} OR content LIKE CONCAT(#{param.content}, '%') OR content LIKE CONCAT('%', #{param.content}) OR content LIKE CONCAT('%', #{param.content}, '%')
 			</if>
 		</trim>
 	</select>
 	<select id="getById"
-	        resultType="com.didichuxing.datachannel.arius.admin.common.bean.po.operaterecord.OperateRecordInfoPO">
+		resultType="com.didichuxing.datachannel.arius.admin.common.bean.po.operaterecord.OperateRecordInfoPO">
 		select
 		<include refid="Base_Column_List"/>
-		from operate_record
-		where id = #{id}
+		from operate_record where id = #{id}
 	</select>
 	
 	<update id="deleteByModuleIdAndLessThanId">

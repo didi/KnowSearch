@@ -8,6 +8,7 @@ import static com.didichuxing.datachannel.arius.admin.core.service.app.impl.ESUs
 
 import com.didichuxing.datachannel.arius.admin.biz.app.ESUserManager;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUser;
@@ -15,6 +16,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.po.app.ESUserPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleESUserVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleESUserWithVerifyCodeVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ESUserVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.app.AppSearchTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.event.app.ESUserAddEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.app.ESUserDeleteEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.app.ESUserEditEvent;
@@ -144,12 +148,16 @@ public class ESUserManagerImpl implements ESUserManager {
         }
     
         final Tuple</*创建的es user*/Result,/*创建的es user po*/ ESUserPO> resultESUserPOTuple = esUserService.registerESUser(appDTO, operator);
-    
+        
          if (resultESUserPOTuple.getV1().success()) {
             // 操作记录
-            operateRecordService.save(ES_USER, ADD, resultESUserPOTuple.getV2().getId(), "", operator);
-            SpringTool.publish(
-                    new ESUserAddEvent(this, ConvertUtil.obj2Obj(resultESUserPOTuple.getV2(), ESUser.class)));
+             operateRecordService.save(
+                     new OperateRecord(projectService.getProjectBriefByProjectId(projectId).getProjectName(),
+                             OperationTypeEnum.APPLICATION_ACCESS_MODE, TriggerWayEnum.MANUAL_TRIGGER,
+                             String.format("新增访问模式:[%s]", AppSearchTypeEnum.valueOf(appDTO.getSearchType())), operator
+            
+                     ));
+           
         }
 
         return resultESUserPOTuple.getV1();
@@ -181,11 +189,14 @@ public class ESUserManagerImpl implements ESUserManager {
         final Tuple<Result<Void>/*更新的状态*/, ESUserPO/*更新之后的的ESUserPO*/> resultESUserPOTuple = esUserService.editUser(esUserDTO);
     
         if (resultESUserPOTuple.getV1().success()) {
-            operateRecordService.save(ES_USER, EDIT, esUserDTO.getId(),
-                    AriusObjUtils.findChangedWithClear(oldESUser, resultESUserPOTuple.getV2()), operator);
-            SpringTool.publish(new ESUserEditEvent(this, ConvertUtil.obj2Obj(oldESUser, ESUser.class),
-                    ConvertUtil.obj2Obj(esUserService.getEsUserById(resultESUserPOTuple.getV2().getId()),
-                            ESUser.class)));
+            // 操作记录
+            operateRecordService.save(new OperateRecord(
+                    projectService.getProjectBriefByProjectId(oldESUser.getProjectId()).getProjectName(),
+                    OperationTypeEnum.APPLICATION_ACCESS_MODE, TriggerWayEnum.MANUAL_TRIGGER,
+                    String.format("修改访问模式:%s-->%s", AppSearchTypeEnum.valueOf(oldESUser.getSearchType()),
+                            AppSearchTypeEnum.valueOf(esUserDTO.getSearchType())), operator
+    
+            ));
         }
         return resultESUserPOTuple.getV1();
     }
@@ -221,9 +232,14 @@ public class ESUserManagerImpl implements ESUserManager {
         //进行es user的删除
         final Tuple<Result<Void>, ESUserPO> resultESUserPOTuple = esUserService.deleteESUserById(esUser);
         if (resultESUserPOTuple.getV1().success()){
-            operateRecordService.save(ES_USER, DELETE, projectId, String.format("删除项目[%s]下es user:[%s]", projectId,esUser),
-                    operator);
-            SpringTool.publish(new ESUserDeleteEvent(this, ConvertUtil.obj2Obj(resultESUserPOTuple.getV2(), ESUser.class)));
+            // 操作记录
+            operateRecordService.save(
+                    new OperateRecord(projectService.getProjectBriefByProjectId(projectId).getProjectName(),
+                            OperationTypeEnum.APPLICATION_ACCESS_MODE, TriggerWayEnum.MANUAL_TRIGGER,
+                            String.format("删除访问模式:%s",
+                                    AppSearchTypeEnum.valueOf(resultESUserPOTuple.getV2().getSearchType())), operator
+            
+                    ));
         }
         return resultESUserPOTuple.getV1();
     }
@@ -243,12 +259,12 @@ public class ESUserManagerImpl implements ESUserManager {
         
         final Tuple<Result<Void>, List<ESUserPO>> resultListTuple = esUserService.deleteByESUsers(projectId);
         if (resultListTuple.getV1().success()) {
-            operateRecordService.save(ES_USER, DELETE, projectId, String.format("删除项目[%s]下的所有es user", projectId),
-                    operator);
-            for (ESUserPO esUserPO : resultListTuple.getV2()) {
-                SpringTool.publish(new ESUserDeleteEvent(this, ConvertUtil.obj2Obj(esUserPO, ESUser.class)));
+            // 操作记录
+            operateRecordService.save(
+                    new OperateRecord(projectService.getProjectBriefByProjectId(projectId).getProjectName(),
+                            OperationTypeEnum.APPLICATION_ACCESS_MODE, TriggerWayEnum.MANUAL_TRIGGER, "删除访问模式", operator
             
-            }
+                    ));
         }
         return resultListTuple.getV1();
     }

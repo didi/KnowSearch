@@ -20,17 +20,6 @@ public interface OperateRecordService {
 
 
 
-    /**
-     * 插入一条操作记录
-     *
-     * @param moduleId  模块id  比如索引模板、应用管理、DSL审核
-     * @param operateId 操作行为  OperationEnum
-     * @param bizId     业务id  例如索引模板id、应用id 或者工单id
-     * @param content   操作详情
-     * @param operator  操作人
-     * @return 成功 true   失败 false
-     */
-    Result<Void> save(int moduleId, int operateId, String bizId, String content, String operator);
     Result<Void> save(OperateRecord operateRecord);
     /**
      * 插入一条操作记录

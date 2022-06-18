@@ -87,7 +87,7 @@ public enum OperationTypeEnum {
     /**
      * 应用：删除应用
      */
-    APPLICATION_DELETE_DELETE(NewModuleEnum.APPLICATION, "删除应用",18),
+    APPLICATION_DELETE(NewModuleEnum.APPLICATION, "删除应用",18),
     
     /**
      * 应用：访问模式
@@ -97,6 +97,10 @@ public enum OperationTypeEnum {
      * 应用：负责人变更
      */
     APPLICATION_OWNER_CHANGE(NewModuleEnum.APPLICATION, "负责人变更",20),
+    /**
+     * 应用程序：用户
+     */
+    APPLICATION_USER_CHANGE(NewModuleEnum.APPLICATION, "成员变更",45),
     /**
      * 租户：新增租户
      */
