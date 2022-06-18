@@ -152,11 +152,11 @@ public class ESUserManagerImpl implements ESUserManager {
          if (resultESUserPOTuple.getV1().success()) {
             // 操作记录
              operateRecordService.save(
-                     new OperateRecord(projectService.getProjectBriefByProjectId(projectId).getProjectName(),
-                             OperationTypeEnum.APPLICATION_ACCESS_MODE, TriggerWayEnum.MANUAL_TRIGGER,
-                             String.format("新增访问模式:[%s]", AppSearchTypeEnum.valueOf(appDTO.getSearchType())), operator
-            
-                     ));
+                     new OperateRecord.Builder().projectName(
+                                     projectService.getProjectBriefByProjectId(projectId).getProjectName())
+                             .content(String.format("新增访问模式:[%s]", AppSearchTypeEnum.valueOf(appDTO.getSearchType())))
+                             .operationTypeEnum(OperationTypeEnum.APPLICATION_ACCESS_MODE)
+                             .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).userOperation(operator).build());
            
         }
 
@@ -190,13 +190,12 @@ public class ESUserManagerImpl implements ESUserManager {
     
         if (resultESUserPOTuple.getV1().success()) {
             // 操作记录
-            operateRecordService.save(new OperateRecord(
-                    projectService.getProjectBriefByProjectId(oldESUser.getProjectId()).getProjectName(),
-                    OperationTypeEnum.APPLICATION_ACCESS_MODE, TriggerWayEnum.MANUAL_TRIGGER,
-                    String.format("修改访问模式:%s-->%s", AppSearchTypeEnum.valueOf(oldESUser.getSearchType()),
-                            AppSearchTypeEnum.valueOf(esUserDTO.getSearchType())), operator
-    
-            ));
+            operateRecordService.save(new OperateRecord.Builder().projectName(
+                            projectService.getProjectBriefByProjectId(oldESUser.getProjectId()).getProjectName()).content(
+                            String.format("修改访问模式:%s-->%s", AppSearchTypeEnum.valueOf(oldESUser.getSearchType()),
+                                    AppSearchTypeEnum.valueOf(esUserDTO.getSearchType())))
+                    .operationTypeEnum(OperationTypeEnum.APPLICATION_ACCESS_MODE)
+                    .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).userOperation(operator).build());
         }
         return resultESUserPOTuple.getV1();
     }

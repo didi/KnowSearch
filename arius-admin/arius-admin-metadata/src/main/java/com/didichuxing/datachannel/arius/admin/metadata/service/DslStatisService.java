@@ -61,6 +61,7 @@ public class DslStatisService {
                 OperateRecordDTO operateRecord = buildDslSettingOperatorRecord(
                         String.format("%d_%s", projectId, dslTemplatePo.getDslTemplateMd5()), OperationEnum.EDIT.getCode(), auditDsls.getUserName(),
                         String.format("checkMode->%s", dslTemplatePo.getCheckMode()));
+                
                 operateRecordService.save(operateRecord);
             }
         }
