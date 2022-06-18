@@ -1,28 +1,26 @@
 package com.didichuxing.datachannel.arius.admin.core.service.es;
 
+import java.util.List;
+
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.IndexCatCell;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.IndexShardInfo;
-
-import java.util.List;
 
 public interface ESIndexCatService {
 
     /**
      * 分页获取CatIndex信息
      * @param index        索引名称
-     * @param clusterLogic clusterLogic
-     * @param clusterPhy clusterPhy
+     * @param cluster cluster
      * @param health       索引健康状态
      * @param from         起始点
      * @param size         当前页数量
      * @param sortTerm     排序字段
      * @param orderByDesc  降序标识
      * @param appId        应用id
-     * @param resourceId   资源id
      * @return Tuple<Long, List<IndexCatCell>>   key1 -> 命中总数, key2 索引列表
      */
-    Tuple<Long, List<IndexCatCell>> syncGetCatIndexInfo(String clusterPhy, String index, String health, Integer appId, String clusterLogic,
+    Tuple<Long, List<IndexCatCell>> syncGetCatIndexInfo(String cluster, String index, String health, Integer appId,
                                                         Long from, Long size, String sortTerm, Boolean orderByDesc);
 
     /**
@@ -38,11 +36,11 @@ public interface ESIndexCatService {
      * 更新索引关闭标识
      * @param cluster           集群名称
      * @param indexNameList     索引名称
-     * @param indexNewStatus    true 开启索引标识，false 关闭索引标识
+     * @param status    "open" 开启索引标识，"close" 关闭索引标识
      * @param retryCount        重试次数
      * @return
      */
-    int syncUpdateCatIndexStatus(String cluster, List<String> indexNameList, boolean indexNewStatus, int retryCount);
+    int syncUpdateCatIndexStatus(String cluster, List<String> indexNameList, String status, int retryCount);
 
     /**
      * 获取索引shard(主)在节点中的分布详情

@@ -754,7 +754,7 @@ public class ESIndexDAO extends BaseESDAO {
         return Result.build(response.getAcknowledged());
     }
 
-    public Result<Void> rollover(String cluster, String alias) {
+    public Result<Void> rollover(String cluster, String alias, String conditions) {
         ESClient client = fetchESClientByCluster(cluster);
         if (client == null) {
             LOGGER.warn("class=ESIndexDAO||method=rollover||errMsg=es client not found");
@@ -763,11 +763,16 @@ public class ESIndexDAO extends BaseESDAO {
 
         try {
             DirectRequest directRequest = new DirectRequest("POST", alias + "/_rollover");
-            DirectResponse directResponse = client.direct(directRequest).actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
-            return Result.buildWithMsg(RestStatus.OK == directResponse.getRestStatus(), directResponse.getResponseContent());
+            if (StringUtils.isNotBlank(conditions)) {
+                directRequest.setPostContent(conditions);
+            }
+            DirectResponse directResponse = client.direct(directRequest).actionGet(ES_OPERATE_TIMEOUT,
+                TimeUnit.SECONDS);
+            return Result.buildWithMsg(RestStatus.OK == directResponse.getRestStatus(),
+                directResponse.getResponseContent());
         } catch (Exception e) {
             LOGGER.warn("class=ESIndexDAO||method=rollover||errMsg=index rollover fail");
-            return Result.buildFail();
+            return Result.buildFail("rollover 执行失败");
         }
     }
 
@@ -784,7 +789,7 @@ public class ESIndexDAO extends BaseESDAO {
                 params.put("max_num_segments", maxNumSegments.toString());
             }
 
-            if (null != onlyExpungeDeletes && Boolean.TRUE.equals(onlyExpungeDeletes)) {
+            if (Boolean.TRUE.equals(onlyExpungeDeletes)) {
                 params.put("only_expunge_deletes", "true");
             }
 
@@ -794,7 +799,7 @@ public class ESIndexDAO extends BaseESDAO {
             return Result.buildWithMsg(RestStatus.OK == directResponse.getRestStatus(), directResponse.getResponseContent());
         } catch (Exception e) {
             LOGGER.warn("class=ESIndexDAO||method=forceMerge||errMsg=index forceMerge fail");
-            return Result.buildFail();
+            return Result.buildFail("forcemerge 执行失败,请检查参数与索引配置");
         }
     }
 
@@ -812,7 +817,7 @@ public class ESIndexDAO extends BaseESDAO {
             return Result.buildWithMsg(RestStatus.OK == directResponse.getRestStatus(), directResponse.getResponseContent());
         } catch (Exception e) {
             LOGGER.warn("class=ESIndexDAO||method=shrink||errMsg=index shrink fail");
-            return Result.buildFail();
+            return Result.buildFail("shrink 执行失败,请检查参数与索引配置");
         }
     }
 
@@ -830,7 +835,7 @@ public class ESIndexDAO extends BaseESDAO {
             return Result.buildWithMsg(RestStatus.OK == directResponse.getRestStatus(), directResponse.getResponseContent());
         } catch (Exception e) {
             LOGGER.warn("class=ESIndexDAO||method=split||errMsg=index split fail");
-            return Result.buildFail();
+            return Result.buildFail("split 执行失败,请检查参数与索引配置");
         }
     }
 }

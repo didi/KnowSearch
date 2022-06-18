@@ -72,11 +72,11 @@ public class IndexCatESDAO extends BaseESDAO {
      * @param orderByDesc  是否降序
      * @return             Tuple<Long, List<IndexCatCellPO>> 命中数 具体数据
      */
-    public Tuple<Long, List<IndexCatCellPO>> getCatIndexInfo(String clusterPhy, String index, String health, Integer appId, String clusterLogic,
+    public Tuple<Long, List<IndexCatCellPO>> getCatIndexInfo(String cluster, String index, String health, Integer appId,
                                                              Long from,
                                                              Long size, String sortTerm, Boolean orderByDesc) {
         Tuple<Long, List<IndexCatCellPO>> totalHitAndIndexCatCellListTuple;
-        String queryTermDsl =  buildQueryTermDsl(clusterPhy, index, health, appId, clusterLogic);
+        String queryTermDsl =  buildQueryTermDsl(cluster, index, health, appId);
         String sortType     =  buildSortType(orderByDesc);
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_CAT_INDEX_INFO_BY_CONDITION,
             queryTermDsl, sortTerm, sortType, from, size);
@@ -112,14 +112,14 @@ public class IndexCatESDAO extends BaseESDAO {
      * 更新索引开启或关闭标识
      * @param cluster           索引所在集群
      * @param indexNameList     索引名称
-     * @param indexNewStatus    索引标识，true 开启，false 关闭
+     * @param status    索引标识，"open" 开启，"close" 关闭
      * @param retryCount        重试次数
      * @return
      */
-    public Boolean batchUpdateCatIndexStatus(String cluster, List<String> indexNameList, boolean indexNewStatus, int retryCount) {
+    public Boolean batchUpdateCatIndexStatus(String cluster, List<String> indexNameList, String status, int retryCount) {
         try {
             return ESOpTimeoutRetry.esRetryExecute("batchUpdateCatIndexStatus", retryCount,
-                    () -> updateCatIndexStatus(cluster, indexNameList, indexNewStatus));
+                    () -> updateCatIndexStatus(cluster, indexNameList, status));
         } catch (ESOperateException e) {
             LOGGER.warn("class=IndexCatESDAO||method=batchUpdateCatIndexStatus||errMsg={}", e.getMessage(), e);
         }
@@ -141,23 +141,26 @@ public class IndexCatESDAO extends BaseESDAO {
      * @param health
      * @return
      */
-    private String buildQueryTermDsl(String clusterPhy, String index, String health, Integer appId, String clusterLogic) {
-        return "[" + buildTermCell(clusterPhy, index, health, appId, clusterLogic) +"]";
+    private String buildQueryTermDsl(String cluster, String index, String health, Integer appId) {
+        return "[" + buildTermCell(cluster, index, health, appId) +"]";
     }
 
-    private String buildTermCell(String clusterPhy, String index, String health, Integer appId, String clusterLogic) {
+    private String buildTermCell(String cluster, String index, String health, Integer appId) {
         List<String> termCellList = Lists.newArrayList();
-        //get cluster dsl term
-        termCellList.add(DSLSearchUtils.getTermCellForExactSearch(clusterPhy, "clusterPhy"));
+        if (null == appId) {
+            //get cluster dsl term
+            termCellList.add(DSLSearchUtils.getTermCellForExactSearch(cluster, "clusterPhy"));
+        } else {
+            //get appId dsl term
+            termCellList.add(DSLSearchUtils.getTermCellForExactSearch(appId, "appId"));
+
+            //get resourceId dsl term
+            termCellList.add(DSLSearchUtils.getTermCellForExactSearch(cluster, "clusterLogic"));
+
+        }
 
         //get index dsl term
         termCellList.add(DSLSearchUtils.getTermCellForWildcardSearch(index, "index"));
-
-        //get appId dsl term
-        termCellList.add(DSLSearchUtils.getTermCellForExactSearch(appId, "appId"));
-
-        //get resourceId dsl term
-        termCellList.add(DSLSearchUtils.getTermCellForExactSearch(clusterLogic, "clusterLogic"));
 
         //get index status term
         if (IndexStatusEnum.isStatusExit(health)) {
@@ -166,7 +169,7 @@ public class IndexCatESDAO extends BaseESDAO {
 
         //get index deleteFlag term
         String deleteFlag = "false";
-        termCellList.add(DSLSearchUtils.getTermCellForExactSearch(deleteFlag,"deleteFlag"));
+        termCellList.add(DSLSearchUtils.getTermCellForExactSearch(deleteFlag, "deleteFlag"));
         return ListUtils.strList2String(termCellList);
     }
 
@@ -185,14 +188,14 @@ public class IndexCatESDAO extends BaseESDAO {
         return updateCatIndexInfo(indexCatCellPOSList);
     }
 
-    private boolean updateCatIndexStatus(String cluster, List<String> indexNameList, boolean indexNewStatus) {
+    private boolean updateCatIndexStatus(String cluster, List<String> indexNameList, String status) {
         List<IndexCatCellPO> indexCatCellPOSList = Lists.newArrayList();
         long currentTimeMillis = System.currentTimeMillis();
         for (String index : indexNameList) {
             IndexCatCellPO indexCatCellPO = new IndexCatCellPO();
             indexCatCellPO.setCluster(cluster);
             indexCatCellPO.setIndex(index);
-            indexCatCellPO.setStatus(indexNewStatus ? "open" : "close");
+            indexCatCellPO.setStatus(status);
             indexCatCellPO.setTimestamp(currentTimeMillis);
             indexCatCellPOSList.add(indexCatCellPO);
         }

@@ -1,6 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.indices;
 
 import java.util.List;
+import java.util.function.BiFunction;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -43,18 +44,38 @@ public interface IndicesManager {
      * @param operator   操作人
      * @return           Boolean
      */
-    Result<Void> deleteIndex(List<IndexCatCellDTO> params, Integer appId, String operator);
+    Result<Boolean> deleteIndex(List<IndexCatCellDTO> params, Integer appId, String operator);
+    
+    /**
+     * 批量更新索引状态
+     *
+     * @param params   索引信息
+     * @param appId    项目id
+     * @param function 操作函数
+     * @return {@link Result}<{@link Boolean}>
+     */
+    <T, U, R> Result<Boolean> batchOperateIndex(List<IndexCatCellDTO> params, Integer appId,
+                                                BiFunction<String, List<String>, Result<Void>> function);
+
+    /**
+     * 开启索引
+     *
+     * @param params   索引信息
+     * @param appId    项目id
+     * @param operator 操作人
+     * @return {@link Result}<{@link Boolean}>
+     */
+    Result<Boolean> openIndex(List<IndexCatCellDTO> params, Integer appId, String operator);
 
     /**
      * 关闭索引
-     * @param params         关闭索引信息
-     * @param indexNewStatus true 开启索引标识，false 关闭索引标识
-     * @param appId          项目
-     * @param operator       操作人
-     * @return               Boolean
+     *
+     * @param params   索引信息
+     * @param appId    项目id
+     * @param operator 操作人
+     * @return {@link Result}<{@link Boolean}>
      */
-    Result<Boolean> batchUpdateIndexStatus(List<IndexCatCellDTO> params, boolean indexNewStatus, Integer appId, String operator);
-
+    Result<Boolean> closeIndex(List<IndexCatCellDTO> params, Integer appId, String operator);
     /**
      * 配合删除真实集群索引使用
      *
@@ -65,7 +86,7 @@ public interface IndicesManager {
      * @param indexNameList    索引名称列表
      * @return
      */
-    Result<Boolean> batchSetIndexFlagInvalid(String cluster, List<String> indexNameList);
+    Result<Boolean> updateIndicesFlagInvalid(String cluster, List<String> indexNameList);
 
     /**
      * 编辑索引setting阻塞信息
@@ -74,7 +95,7 @@ public interface IndicesManager {
      * @param operator  操作人
      * @return          Boolean
      */
-    Result<Boolean> batchEditIndexBlockSetting(List<IndicesBlockSettingDTO> params, Integer appId, String operator);
+    Result<Boolean> editIndexBlockSetting(List<IndicesBlockSettingDTO> params, Integer appId, String operator);
 
     /**
      * 获取索引mapping

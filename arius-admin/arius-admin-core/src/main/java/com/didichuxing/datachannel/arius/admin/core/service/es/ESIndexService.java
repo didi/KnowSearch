@@ -9,6 +9,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.IndexCatCell;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.IndicesDistributionVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
@@ -333,11 +334,13 @@ public interface ESIndexService {
 
     /**
      * rollover
-     * @param cluster
-     * @param alias
-     * @return
+     *
+     * @param cluster    集群
+     * @param alias      别名
+     * @param conditions 条件
+     * @return {@link Result}<{@link Void}>
      */
-    Result<Void> rollover(String cluster, String alias);
+    Result<Void> rollover(String cluster, String alias, String conditions);
 
     /**
      * forceMerge
@@ -376,4 +379,10 @@ public interface ESIndexService {
      */
     List<IndicesDistributionVO> indicesDistribution(String cluster);
 
+    /**
+     * 构建索引实时数据(包含block和aliases)
+     * @param cluster          集群
+     * @param indexCatCellList 索引cat/index基本信息
+     */
+    List<IndexCatCell> buildIndexRealTimeData(String cluster, List<IndexCatCell> indexCatCellList);
 }

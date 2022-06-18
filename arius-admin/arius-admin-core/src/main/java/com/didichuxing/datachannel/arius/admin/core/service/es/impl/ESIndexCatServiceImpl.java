@@ -35,12 +35,12 @@ public class ESIndexCatServiceImpl implements ESIndexCatService {
     private IndexCatESDAO indexCatESDAO;
 
     @Override
-    public Tuple<Long, List<IndexCatCell>> syncGetCatIndexInfo(String clusterPhy, String index, String health, Integer appId, String clusterLogic,
+    public Tuple<Long, List<IndexCatCell>> syncGetCatIndexInfo(String cluster, String index, String health, Integer appId,
                                                                Long from, Long size, String sortTerm, Boolean orderByDesc) {
-        Tuple<Long, List<IndexCatCellPO>> hitTotal2catIndexInfoTuplePO = indexCatESDAO.getCatIndexInfo(clusterPhy, index,
-            health, appId, clusterLogic, from, size, sortTerm, orderByDesc);
+        Tuple<Long, List<IndexCatCellPO>> hitTotal2catIndexInfoTuplePO = indexCatESDAO.getCatIndexInfo(cluster, index,
+            health, appId, from, size, sortTerm, orderByDesc);
         if (null == hitTotal2catIndexInfoTuplePO) {
-            return null;
+           return null;
         }
 
         Tuple<Long, List<IndexCatCell>> hitTotal2catIndexInfoTuple = new Tuple<>();
@@ -71,7 +71,7 @@ public class ESIndexCatServiceImpl implements ESIndexCatService {
     }
 
     @Override
-    public int syncUpdateCatIndexStatus(String cluster, List<String> indexNameList, boolean indexNewStatus, int retryCount) {
+    public int syncUpdateCatIndexStatus(String cluster, List<String> indexNameList, String status, int retryCount) {
         if (CollectionUtils.isEmpty(indexNameList)) {
             return 0;
         }
@@ -79,7 +79,7 @@ public class ESIndexCatServiceImpl implements ESIndexCatService {
         BatchProcessor.BatchProcessResult<String, Boolean> result = new BatchProcessor<String, Boolean>()
                 .batchList(indexNameList)
                 .batchSize(10)
-                .processor(items -> indexCatESDAO.batchUpdateCatIndexStatus(cluster, items, indexNewStatus, retryCount))
+                .processor(items -> indexCatESDAO.batchUpdateCatIndexStatus(cluster, items, status, retryCount))
                 .succChecker(succ -> succ)
                 .process();
 

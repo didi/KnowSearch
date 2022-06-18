@@ -71,7 +71,7 @@ public class IndicesController {
     @DeleteMapping("")
     @ResponseBody
     @ApiOperation(value = "删除索引")
-    public Result<Void> deleteIndex(HttpServletRequest request, @RequestBody List<IndexCatCellDTO> param) {
+    public Result<Boolean> deleteIndex(HttpServletRequest request, @RequestBody List<IndexCatCellDTO> param) {
         return indicesManager.deleteIndex(param, HttpRequestUtils.getAppId(request),
             HttpRequestUtils.getOperator(request));
     }
@@ -110,7 +110,7 @@ public class IndicesController {
     @ResponseBody
     @ApiOperation(value = "关闭索引")
     public Result<Boolean> close(HttpServletRequest request, @RequestBody List<IndexCatCellDTO> params) {
-        return indicesManager.batchUpdateIndexStatus(params, false, HttpRequestUtils.getAppId(request),
+        return indicesManager.closeIndex(params, HttpRequestUtils.getAppId(request),
             HttpRequestUtils.getOperator(request));
     }
 
@@ -118,7 +118,7 @@ public class IndicesController {
     @ResponseBody
     @ApiOperation(value = "关闭索引")
     public Result<Boolean> open(HttpServletRequest request, @RequestBody List<IndexCatCellDTO> params) {
-        return indicesManager.batchUpdateIndexStatus(params, true, HttpRequestUtils.getAppId(request),
+        return indicesManager.openIndex(params, HttpRequestUtils.getAppId(request),
             HttpRequestUtils.getOperator(request));
     }
 
@@ -127,7 +127,7 @@ public class IndicesController {
     @ApiOperation(value = "批量编辑索引阻塞设置")
     public Result<Boolean> editIndexBlockSetting(@RequestBody List<IndicesBlockSettingDTO> params,
                                                  HttpServletRequest request) {
-        return indicesManager.batchEditIndexBlockSetting(params, HttpRequestUtils.getAppId(request),
+        return indicesManager.editIndexBlockSetting(params, HttpRequestUtils.getAppId(request),
             HttpRequestUtils.getOperator(request));
     }
     

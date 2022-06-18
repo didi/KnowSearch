@@ -1,6 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.core.service.es.impl;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.getBigIndicesRequestContent;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.*;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -20,8 +21,10 @@ import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.IndexCatCell;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.IndexResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.IndicesDistributionVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.index.IndexBlockEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.BatchProcessor;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
@@ -704,8 +707,8 @@ public class ESIndexServiceImpl implements ESIndexService {
     }
 
     @Override
-    public Result<Void> rollover(String cluster, String alias) {
-        return esIndexDAO.rollover(cluster, alias);
+    public Result<Void> rollover(String cluster, String alias, String conditions) {
+        return esIndexDAO.rollover(cluster, alias, conditions);
     }
 
     @Override
@@ -733,7 +736,82 @@ public class ESIndexServiceImpl implements ESIndexService {
             return vo;
         }).collect(Collectors.toList());
     }
+
+    @Override
+    public List<IndexCatCell> buildIndexRealTimeData(String cluster, List<IndexCatCell> indexCatCellList) {
+        if (CollectionUtils.isNotEmpty(indexCatCellList)) {
+            List<String> indexNameList = indexCatCellList.stream().map(IndexCatCell::getIndex)
+                .collect(Collectors.toList());
+            Map<String, IndexConfig> name2IndexConfigMap = this.syncGetIndexSetting(cluster, indexNameList, 3);
+
+            Map<String, List<String>> aliasMap = this.syncGetIndexAliasesByIndices(cluster,
+                indexNameList.toArray(new String[0]));
+            indexCatCellList.forEach(indexCatCell -> {
+                indexCatCell.setAliases(aliasMap.getOrDefault(indexCatCell.getIndex(), Lists.newArrayList()));
+
+                IndexConfig indexConfig = name2IndexConfigMap.get(indexCatCell.getIndex());
+                Tuple<Boolean, Boolean> writeAndReadBlockFromMerge = getWriteAndReadBlock(indexConfig);
+
+                indexCatCell
+                    .setReadFlag(writeAndReadBlockFromMerge.getV1() != null && writeAndReadBlockFromMerge.getV1());
+                indexCatCell
+                    .setWriteFlag(writeAndReadBlockFromMerge.getV2() != null && writeAndReadBlockFromMerge.getV2());
+            });
+        } else {
+            LOGGER.warn(
+                "class=IndicesPageSearchHandle||method=buildBlockInfo||cluster={}||index={}||errMsg=index is empty",
+                cluster);
+        }
+        return indexCatCellList;
+    }
+
     /***************************************** private method ****************************************************/
+
+
+    private Tuple<Boolean, Boolean> getWriteAndReadBlock(IndexConfig indexConfig) {
+        Tuple<Boolean, Boolean> writeAndReadBlockFromMerge = new Tuple<>();
+        //build from es setUp settings
+        Tuple<Boolean, Boolean> writeAndReadBlockFromSetUpSettingTuple = new Tuple<>();
+        writeAndReadBlockFromSetUpSettingTuple.setV1(null);
+        writeAndReadBlockFromSetUpSettingTuple.setV2( null);
+        Optional.ofNullable(indexConfig.getSettings()).filter(MapUtils::isNotEmpty).map(JSON::toJSONString).map(JSON::parseObject).ifPresent(settingsObj -> {
+            writeAndReadBlockFromSetUpSettingTuple.setV1(settingsObj.getBoolean(READ));
+            writeAndReadBlockFromSetUpSettingTuple.setV2(settingsObj.getBoolean(WRITE));
+        });
+
+        //build from es default settings
+        Tuple<Boolean, Boolean> writeAndReadBlockFromDefaultSettingTuple = new Tuple<>();
+        writeAndReadBlockFromDefaultSettingTuple.setV1(null);
+        writeAndReadBlockFromDefaultSettingTuple.setV2(null);
+        Optional.ofNullable(indexConfig.getOther(DEFAULTS)).map(Object::toString).map(JSON::parseObject).map(defaultObj -> defaultObj.getJSONObject(INDEX))
+                .map(indexSettings -> indexSettings.getJSONObject(BLOCKS)).ifPresent(blocksObj -> {
+                    if (null != blocksObj.get(IndexBlockEnum.READ.getType())) {
+                        writeAndReadBlockFromDefaultSettingTuple
+                                .setV1(blocksObj.getBoolean(IndexBlockEnum.READ.getType()));
+                    }
+                    if (null != blocksObj.get(IndexBlockEnum.WRITE.getType())) {
+                        writeAndReadBlockFromDefaultSettingTuple
+                                .setV2(blocksObj.getBoolean(IndexBlockEnum.WRITE.getType()));
+                    }
+                });
+
+        //set read block info
+        if (null != writeAndReadBlockFromSetUpSettingTuple.getV1()) {
+            writeAndReadBlockFromMerge.setV1(writeAndReadBlockFromSetUpSettingTuple.getV1());
+        } else if (null != writeAndReadBlockFromDefaultSettingTuple.getV1()) {
+            writeAndReadBlockFromMerge.setV1(writeAndReadBlockFromDefaultSettingTuple.getV1());
+        }
+
+        //set write block info
+        if (null != writeAndReadBlockFromSetUpSettingTuple.getV2()) {
+            writeAndReadBlockFromMerge.setV2(writeAndReadBlockFromSetUpSettingTuple.getV2());
+        } else if (null != writeAndReadBlockFromDefaultSettingTuple.getV2()) {
+            writeAndReadBlockFromMerge.setV2(writeAndReadBlockFromDefaultSettingTuple.getV2());
+        }
+
+        return writeAndReadBlockFromMerge;
+    }
+    
     private Result<Void> refreshIndex(String cluster, List<String> indexNames) {
         BatchProcessor.BatchProcessResult<String, Boolean> result = new BatchProcessor<String, Boolean>()
             .batchList(indexNames).batchSize(30).processor(items -> esIndexDAO.refreshIndex(cluster, items))
