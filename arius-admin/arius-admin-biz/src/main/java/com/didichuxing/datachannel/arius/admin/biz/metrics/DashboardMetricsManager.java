@@ -31,6 +31,12 @@ public interface DashboardMetricsManager {
      */
     Result<List<VariousLineChartMetricsVO>> getTopClusterMetricsInfo(MetricsDashboardTopNDTO param, Integer appId);
 
+    /**
+     * 获取dashboard大盘TopN节点相关指标信息
+     * @param param
+     * @param appId
+     * @return
+     */
     Result<List<VariousLineChartMetricsVO>> getTopNodeMetricsInfo(MetricsDashboardTopNDTO param, Integer appId);
 
     Result<List<VariousLineChartMetricsVO>> getTopTemplateMetricsInfo(MetricsDashboardTopNDTO param, Integer appId);

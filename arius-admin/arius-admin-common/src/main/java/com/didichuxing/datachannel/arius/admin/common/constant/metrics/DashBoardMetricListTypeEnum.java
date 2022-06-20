@@ -11,7 +11,7 @@ import com.google.common.collect.Lists;
  */
 public enum DashBoardMetricListTypeEnum {
     UNKNOWN(OneLevelTypeEnum.UNKNOWN,"", "未知"),
-
+    CLUSTER_ELAPSED_TIME_GTE_5MIN(OneLevelTypeEnum.CLUSTER,"elapsedTimeGte5Min", "采集超过5分钟"),
     NODE_DEAD(OneLevelTypeEnum.NODE,"dead", "节点是否死亡"),
     NODE_LARGE_DISK_USAGE(OneLevelTypeEnum.NODE,"largeDiskUsage", "磁盘利用率是否超红线"),
     NODE_LARGE_HEAD(OneLevelTypeEnum.NODE,"largeHead", "堆内存利用率是否超红线"),
@@ -95,6 +95,7 @@ public enum DashBoardMetricListTypeEnum {
                 INDEX_SINGLE_REP.getType(),
                 INDEX_BIG_SHARD.getType(),
                 INDEX_SMALL_SHARD.getType(),
+                CLUSTER_ELAPSED_TIME_GTE_5MIN.getType(),
                 INDEX_UNASSIGNED_SHARD.getType());
     }
 

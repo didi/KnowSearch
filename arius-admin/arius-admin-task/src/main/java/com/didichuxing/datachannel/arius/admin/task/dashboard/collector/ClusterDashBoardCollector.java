@@ -29,6 +29,7 @@ public class ClusterDashBoardCollector extends BaseDashboardCollector {
 
     private static final Map<String/*集群名称*/, ClusterMetrics /*上一次采集到的集群数据*/> cluster2LastTimeClusterMetricsMap = Maps.newConcurrentMap();
 
+    private static final long FIVE_MINUTE = 5*60*1000;
     @Override
     public void collectSingleCluster(String cluster, long startTime) {
         DashBoardStats dashBoardStats = buildInitDashBoardStats(startTime);
@@ -61,6 +62,7 @@ public class ClusterDashBoardCollector extends BaseDashboardCollector {
         long currentTime = CommonUtils.monitorTimestamp2min(currentTimeMillis);
         long elapsedTime = currentTime -startTime;
         clusterMetrics.setElapsedTime(elapsedTime);
+        clusterMetrics.setElapsedTimeGte5Min(elapsedTime>FIVE_MINUTE);
 
         dashBoardStats.setCluster(clusterMetrics);
         monitorMetricsSender.sendDashboardStats(Lists.newArrayList(dashBoardStats));
