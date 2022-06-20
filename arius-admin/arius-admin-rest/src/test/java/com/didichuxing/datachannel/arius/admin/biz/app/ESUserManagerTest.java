@@ -65,19 +65,7 @@ class ESUserManagerTest {
 	@InjectMocks
 	private ESUserManagerImpl    esUserManager;
 	
-	@Test
-	void testListESUsers() {
-		final ProjectBriefVO projectBriefVO = CustomDataSource.projectBriefVO();
-		final ESUserPO esUserPO = CustomDataSource.esUserPO();
-		final ESUser esUser = ConvertUtil.obj2Obj(esUserPO, ESUser.class);
-		when(projectService.getProjectBriefList()).thenReturn(Lists.newArrayList(projectBriefVO));
-		when(esUserService.listESUsers(Lists.newArrayList(projectBriefVO.getId()))).thenReturn(
-				Lists.newArrayList(esUser));
-		final Result<List<ESUser>> listResult = esUserManager.listESUsers();
-		Assertions.assertTrue(CollectionUtils.isNotEmpty(listResult.getData()));
-		
-	}
-	
+
 	@Test
 	void testListESUsersByProjectId() {
 		final ESUserPO esUserPO = CustomDataSource.esUserPO();
@@ -182,12 +170,7 @@ class ESUserManagerTest {
 		
 	}
 	
-	@Test
-	void testVerifyAppCode() {
-		when(esUserService.verifyAppCode(1, "aaa")).thenReturn(Result.buildSucc());
-		Assertions.assertTrue(esUserManager.verifyAppCode(1, "aaa").success());
-		
-	}
+
 	
 	@Test
 	void testGet() {

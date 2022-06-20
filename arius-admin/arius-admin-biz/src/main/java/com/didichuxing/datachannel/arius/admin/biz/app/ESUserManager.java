@@ -2,13 +2,11 @@ package com.didichuxing.datachannel.arius.admin.biz.app;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUser;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleESUserVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleESUserWithVerifyCodeVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ESUserVO;
 import com.didiglobal.logi.security.common.po.ProjectPO;
 import com.didiglobal.logi.security.common.vo.project.ProjectVO;
-import com.didiglobal.logi.security.service.ProjectService;
 import java.util.List;
 
 /**
@@ -19,13 +17,7 @@ import java.util.List;
  */
 public interface ESUserManager {
     
-    /**
-     * 获取所有项目下全部的es user
-     * {@link ProjectService#getProjectBriefList()} 获取全部项目
-     * {@link ProjectPO#getId()} 去获取全量的es user
-     * @return 返回es user 列表
-     */
-    Result<List<ESUser>> listESUsers();
+
     
     /**
      * 通过项目id获取es user 列表

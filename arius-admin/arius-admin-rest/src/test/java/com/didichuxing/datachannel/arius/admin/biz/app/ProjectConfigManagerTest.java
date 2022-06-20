@@ -69,37 +69,9 @@ class ProjectConfigManagerTest {
         assertThat(result).isEqualTo(expectedResult);
     }
     
-    @Test
-    void testUpdateProjectConfig() {
-        final ProjectConfigPO projectConfigPO = CustomDataSource.projectConfigPO();
-        final ProjectConfigDTO projectConfigDTO = ConvertUtil.obj2Obj(projectConfigPO, ProjectConfigDTO.class);
-        projectConfigDTO.setIsSourceSeparated(1);
-        
-        when( projectConfigService.updateOrInitProjectConfig(any(),
-				anyString())).thenReturn(new Tuple<>(Result.buildSucc(),projectConfigPO));
-        assertThat(projectConfigManager.updateProjectConfig(projectConfigDTO,"admin").success())
-                .isTrue();
-        
-        
-        
-    }
+   
     
     
-    @Test
-    void testInitProjectConfig() {
-      final ProjectConfigPO projectConfigPO = CustomDataSource.projectConfigPO();
-        final ProjectConfigDTO projectConfigDTO = ConvertUtil.obj2Obj(projectConfigPO, ProjectConfigDTO.class);
-        projectConfigDTO.setIsSourceSeparated(1);
-        
-        when( projectConfigService.updateOrInitProjectConfig(any(),
-				anyString())).thenReturn(new Tuple<>(Result.buildSucc(),projectConfigPO));
-        
-       
-        
-        // Run the test
-        final Result<Void> result = projectConfigManager.initProjectConfig(projectConfigDTO, "operator");
-        assertThat(result.success()).isTrue();
-        
-    }
+
     
 }

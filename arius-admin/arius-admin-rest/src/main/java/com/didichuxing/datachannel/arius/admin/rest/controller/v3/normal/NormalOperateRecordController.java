@@ -45,7 +45,7 @@ public class NormalOperateRecordController {
     @GetMapping("/module")
     @ResponseBody
     @ApiOperation(value = "获取所有模块")
-    public Result<Map<String, Integer>> mapModules() {
+    public Result<Map<String,Integer >> mapModules() {
         return Result.buildSucc(NewModuleEnum.toMap());
     }
     

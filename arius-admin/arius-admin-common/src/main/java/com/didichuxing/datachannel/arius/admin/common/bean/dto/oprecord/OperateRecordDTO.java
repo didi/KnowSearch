@@ -37,7 +37,7 @@ public class OperateRecordDTO extends PageDTO {
     /**
      * @see OperateTypeEnum
      */
-    @ApiModelProperty("操作ID")
+    @ApiModelProperty(value = "操作ID")
     private Integer operateId;
 
 
@@ -59,13 +59,13 @@ public class OperateRecordDTO extends PageDTO {
     /**
      * 操作起始时间 查询使用
      */
-    @ApiModelProperty("开始时间")
+    @ApiModelProperty(value = "开始时间",dataType ="Date" )
     private Date    beginTime;
 
     /**
      * 操作截止时间 查询使用
      */
-    @ApiModelProperty("结束时间")
+    @ApiModelProperty(value = "结束时间",dataType ="Date" )
     private Date    endTime;
     
     /**

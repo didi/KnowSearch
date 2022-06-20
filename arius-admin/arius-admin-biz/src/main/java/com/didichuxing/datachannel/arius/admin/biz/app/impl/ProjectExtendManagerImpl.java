@@ -89,6 +89,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
             ProjectSaveDTO project = saveDTO.getProject();
             // 2. 创建项目配置
             ProjectConfigDTO config = saveDTO.getConfig();
+            // 将项目中的所有者、用户提取出来后，使用biz层中的逻辑进行添加
             List<Integer> ownerIdList = project.getOwnerIdList();
             List<Integer> userIdList = project.getUserIdList();
             project.setOwnerIdList(Collections.emptyList());
@@ -98,27 +99,17 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
             ProjectVO projectVO = projectService.createProject(project, operator);
             // 4. 转换
             ProjectExtendVO projectExtendVO = ConvertUtil.obj2Obj(project, ProjectExtendVO.class);
-            if (CollectionUtils.isNotEmpty(ownerIdList)) {
-                addProjectOwner(projectVO.getId(), ownerIdList, operator);
-                Optional.ofNullable(userService.getUserBriefListByUserIdList(ownerIdList))
-                        .ifPresent(projectExtendVO::setOwnerList);
-            }
-            if (CollectionUtils.isNotEmpty(userIdList)) {
-                addProjectUser(projectVO.getId(), userIdList, operator);
-                Optional.ofNullable(userService.getUserBriefListByUserIdList(userIdList))
-                        .ifPresent(projectExtendVO::setUserList);
-            }
-           
+            // 5. 添加拥有者和成员
+            addOwnerAndUsers(operator, ownerIdList, userIdList, projectVO, projectExtendVO);
+    
             //5. 设置项目id
             config.setProjectId(projectVO.getId());
             // 6. 创建项目配置
             Tuple<Result<Void>, ProjectConfigPO> resultProjectConfigTuple = projectConfigService.updateOrInitProjectConfig(
                     config, operator);
-            
+             setAdminProjectExtendVO(projectExtendVO);
+            // 设置项目配置
             if (resultProjectConfigTuple.getV1().success()) {
-                if (AuthConstant.SUPER_PROJECT_ID.equals(projectExtendVO.getId())) {
-                    projectExtendVO.setIsAdmin(true);
-                }
                 projectExtendVO.setConfig(
                         ConvertUtil.obj2Obj(resultProjectConfigTuple.getV2(), ProjectConfigVO.class));
                 
@@ -134,20 +125,44 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
         }
     }
     
+    private void addOwnerAndUsers(String operator, List<Integer> ownerIdList, List<Integer> userIdList,
+                               ProjectVO projectVO,
+                           ProjectExtendVO projectExtendVO) {
+        if (CollectionUtils.isNotEmpty(ownerIdList)) {
+            addProjectOwner(projectVO.getId(), ownerIdList, operator);
+            Optional.ofNullable(userService.getUserBriefListByUserIdList(ownerIdList))
+                    .ifPresent(projectExtendVO::setOwnerList);
+        }
+        if (CollectionUtils.isNotEmpty(userIdList)) {
+            addProjectUser(projectVO.getId(), userIdList, operator);
+            Optional.ofNullable(userService.getUserBriefListByUserIdList(userIdList))
+                    .ifPresent(projectExtendVO::setUserList);
+        }
+    }
+    
     @Override
     public Result<ProjectExtendVO> getProjectDetailByProjectId(Integer projectId) {
         try {
             ProjectVO projectVO = projectService.getProjectDetailByProjectId(projectId);
             ProjectExtendVO projectExtendVO = ConvertUtil.obj2Obj(projectVO, ProjectExtendVO.class);
-            if (AuthConstant.SUPER_PROJECT_ID.equals(projectExtendVO.getId())) {
-                projectExtendVO.setIsAdmin(true);
-            }
+            setAdminProjectExtendVO(projectExtendVO);
             ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectId);
             projectExtendVO.setConfig(ConvertUtil.obj2Obj(projectConfig, ProjectConfigVO.class));
             
             return Result.buildSucc(projectExtendVO);
         } catch (LogiSecurityException e) {
             return Result.buildFail(e.getMessage());
+        }
+    }
+    
+    /**
+     * 设置超级项目
+     *
+     * @param projectExtendVO 项目延长签证官
+     */
+    private void setAdminProjectExtendVO(ProjectExtendVO projectExtendVO) {
+        if (AuthConstant.SUPER_PROJECT_ID.equals(projectExtendVO.getId())) {
+            projectExtendVO.setIsAdmin(true);
         }
     }
     
@@ -222,16 +237,13 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
     @Override
     public PagingResult<ProjectExtendVO> getProjectPage(ProjectQueryExtendDTO queryDTO) {
         final ProjectQueryDTO projectQueryDTO = ConvertUtil.obj2Obj(queryDTO, ProjectQueryDTO.class);
-    
+        
         if (Objects.isNull(queryDTO.getSearchType())) {
             final PagingData<ProjectVO> projectPage = projectService.getProjectPage(projectQueryDTO);
             final List<ProjectVO> bizData = projectPage.getBizData();
             final List<ProjectExtendVO> projectExtendVOList = ConvertUtil.list2List(bizData, ProjectExtendVO.class);
-            for (ProjectExtendVO projectExtendVO : projectExtendVOList) {
-                if (AuthConstant.SUPER_PROJECT_ID.equals(projectExtendVO.getId())) {
-                    projectExtendVO.setIsAdmin(true);
-                }
-            }
+            projectExtendVOList.forEach(this::setAdminProjectExtendVO);
+        
     
             return PagingResult.success(new PagingData<>(projectExtendVOList, projectPage.getPagination()));
         } else {
@@ -240,9 +252,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
             final List<ProjectExtendVO> projectExtendVOList = ConvertUtil.list2List(projectPage.getBizData(),
                     ProjectExtendVO.class);
             for (ProjectExtendVO projectExtendVO : projectExtendVOList) {
-                if (AuthConstant.SUPER_PROJECT_ID.equals(projectExtendVO.getId())) {
-                    projectExtendVO.setIsAdmin(true);
-                }
+                setAdminProjectExtendVO(projectExtendVO);
                 final ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectExtendVO.getId());
                 projectExtendVO.setConfig(ConvertUtil.obj2Obj(projectConfig,ProjectConfigVO.class));
             }
@@ -267,7 +277,6 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
                 config.setProjectId(id);
                 //只有success时候会存在tuple._2不为null
                 projectConfigService.updateOrInitProjectConfig(config, operator);
-                
             }
             final ProjectSaveDTO project = saveDTO.getProject();
             List<Integer> ownerIdList = project.getOwnerIdList();
@@ -278,52 +287,59 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
             projectService.updateProject(project, operator);
             //更新项目与用户拥有者的关联关系
             if (CollectionUtils.isNotEmpty(ownerIdList)) {
-                List<UserBriefVO> oldUserBriefList = Lists.newArrayList();
-                //操作前的
-                Optional.ofNullable(oldProject.getOwnerList()).ifPresent(oldUserBriefList::addAll);
-                //更新
-                userProjectService.updateOwnerProject(project.getId(), ownerIdList);
-                //操作后
-                List<UserBriefVO> newUserBriefList = Lists.newArrayList();
-                Optional.ofNullable(projectService.getProjectDetailByProjectId(project.getId()))
-                        .map(ProjectVO::getOwnerList).ifPresent(newUserBriefList::addAll);
-                //旧的用户列表
-                String oldUser = oldUserBriefList.stream().map(UserBriefVO::getUserName).distinct()
-                        .collect(Collectors.joining(","));
-                //新的用户列表
-                String newUser = newUserBriefList.stream().map(UserBriefVO::getUserName).distinct()
-                        .collect(Collectors.joining(","));
-                operateRecordService.save(
-                        new OperateRecord(oldProject.getProjectName(), OperateTypeEnum.APPLICATION_OWNER_CHANGE,
-                                TriggerWayEnum.MANUAL_TRIGGER, oldUser + "-->" + newUser, operator));
+                updateProjectByOwnerList(operator, project, ownerIdList, oldProject);
             }
             //更新项目与用户成员的关联关系
             if (CollectionUtils.isNotEmpty(userIdList)) {
-                List<UserBriefVO> oldUserBriefList = Lists.newArrayList();
-                //操作前的
-                Optional.ofNullable(oldProject.getUserList()).ifPresent(oldUserBriefList::addAll);
-                //更新
-                userProjectService.updateUserProject(project.getId(), userIdList);
-                //操作后
-                List<UserBriefVO> newUserBriefList = Lists.newArrayList();
-                Optional.ofNullable(projectService.getProjectDetailByProjectId(project.getId()))
-                        .map(ProjectVO::getUserList).ifPresent(newUserBriefList::addAll);
-                //旧的用户列表
-                String oldUser = oldUserBriefList.stream().map(UserBriefVO::getUserName).distinct()
-                        .collect(Collectors.joining(","));
-                //新的用户列表
-                String newUser = newUserBriefList.stream().map(UserBriefVO::getUserName).distinct()
-                        .collect(Collectors.joining(","));
-                operateRecordService.save(
-                        new OperateRecord(oldProject.getProjectName(), OperateTypeEnum.APPLICATION_USER_CHANGE,
-                                TriggerWayEnum.MANUAL_TRIGGER, oldUser + "-->" + newUser, operator));
-        
+                setProjectByUserList(operator, project, userIdList, oldProject);
             }
           
             return Result.buildSucc();
         } catch (LogiSecurityException e) {
             return Result.buildFail(e.getMessage());
         }
+    }
+    
+    private void setProjectByUserList(String operator, ProjectSaveDTO project, List<Integer> userIdList, ProjectVO oldProject) {
+        List<UserBriefVO> oldUserBriefList = Lists.newArrayList();
+        //操作前的
+        Optional.ofNullable(oldProject.getUserList()).ifPresent(oldUserBriefList::addAll);
+        //更新
+        userProjectService.updateUserProject(project.getId(), userIdList);
+        //操作后
+        List<UserBriefVO> newUserBriefList = Lists.newArrayList();
+        Optional.ofNullable(projectService.getProjectDetailByProjectId(project.getId()))
+                .map(ProjectVO::getUserList).ifPresent(newUserBriefList::addAll);
+        //旧的用户列表
+        String oldUser = oldUserBriefList.stream().map(UserBriefVO::getUserName).distinct()
+                .collect(Collectors.joining(","));
+        //新的用户列表
+        String newUser = newUserBriefList.stream().map(UserBriefVO::getUserName).distinct()
+                .collect(Collectors.joining(","));
+        operateRecordService.save(
+                new OperateRecord(oldProject.getProjectName(), OperateTypeEnum.APPLICATION_USER_CHANGE,
+                        TriggerWayEnum.MANUAL_TRIGGER, oldUser + "-->" + newUser, operator));
+    }
+    
+    private void updateProjectByOwnerList(String operator, ProjectSaveDTO project, List<Integer> ownerIdList, ProjectVO oldProject) {
+        List<UserBriefVO> oldOwnerBriefList = Lists.newArrayList();
+        //操作前的
+        Optional.ofNullable(oldProject.getOwnerList()).ifPresent(oldOwnerBriefList::addAll);
+        //更新
+        userProjectService.updateOwnerProject(project.getId(), ownerIdList);
+        //操作后
+        List<UserBriefVO> newUserBriefList = Lists.newArrayList();
+        Optional.ofNullable(projectService.getProjectDetailByProjectId(project.getId()))
+                .map(ProjectVO::getOwnerList).ifPresent(newUserBriefList::addAll);
+        //旧的用户列表
+        String oldUser = oldOwnerBriefList.stream().map(UserBriefVO::getUserName).distinct()
+                .collect(Collectors.joining(","));
+        //新的用户列表
+        String newUser = newUserBriefList.stream().map(UserBriefVO::getUserName).distinct()
+                .collect(Collectors.joining(","));
+        operateRecordService.save(
+                new OperateRecord(oldProject.getProjectName(), OperateTypeEnum.APPLICATION_OWNER_CHANGE,
+                        TriggerWayEnum.MANUAL_TRIGGER, oldUser + "-->" + newUser, operator));
     }
     
     /**
@@ -367,7 +383,6 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
             Optional.ofNullable(projectService.getProjectDetailByProjectId(projectId)).map(ProjectVO::getUserList)
                     .ifPresent(oldUserBriefList::addAll);
             userProjectService.saveUserProject(projectId, userIdList);
-
             //更新后
             List<UserBriefVO> newUserBriefList = Lists.newArrayList();
             ProjectVO projectVO = projectService.getProjectDetailByProjectId(projectId);

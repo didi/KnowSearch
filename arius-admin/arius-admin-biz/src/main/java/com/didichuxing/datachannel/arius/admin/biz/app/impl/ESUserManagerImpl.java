@@ -58,28 +58,7 @@ public class ESUserManagerImpl implements ESUserManager {
     @Autowired
     private RoleTool             roleTool;
     
-    /**
-     * 获取所有项目下全部的es user
-     *
-     * @return 返回app列表
-     */
-    @Override
-    public Result<List<ESUser>> listESUsers() {
-        //获取全部项目id
-        final List<ProjectBriefVO> briefVOList = projectService.getProjectBriefList();
-        final List<Integer> projectIds = briefVOList.stream().map(ProjectBriefVO::getId)
-                .distinct().collect(Collectors.toList());
-        //根据项目下所有的es user
-        List<ESUser> users = esUserService.listESUsers(projectIds);
-        for (ESUser user : users) {
-            final Integer projectId = user.getProjectId();
-           briefVOList.stream().filter(projectBriefVO -> projectBriefVO.getId().equals(projectId))
-                   .findFirst().map(ProjectBriefVO::getProjectName).ifPresent(user::setName);
-            
-        }
-        
-        return Result.buildSucc(users);
-    }
+
     
     /**
      * @param projectId
