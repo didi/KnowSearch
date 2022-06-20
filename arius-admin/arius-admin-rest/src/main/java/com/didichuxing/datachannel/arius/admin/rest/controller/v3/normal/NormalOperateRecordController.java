@@ -17,6 +17,7 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -52,10 +53,11 @@ public class NormalOperateRecordController {
     @ResponseBody
     @ApiOperation(value = "获取操作类型")
     @ApiImplicitParams({
-            @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "moduleCode", value = "模块cod:为空则会返回全部",
+            @ApiImplicitParam(paramType = "path", dataType = "String", name = "moduleCode", value = "模块code:为空则会返回全部",
                     required = false) })
-    public Result<Map<String,Integer>> listOperationType(@PathVariable(value = "moduleCode",required = false) Integer moduleCode) {
-        return Result.buildSucc(OperateTypeEnum.getOperationTypeByModule(moduleCode));
+    public Result<Map<Integer,String>> listOperationType(@PathVariable(value = "moduleCode",required = false) String moduleCode) {
+        return Result.buildSucc(OperateTypeEnum.getOperationTypeByModule(StringUtils.isNumeric(moduleCode)?
+                Integer.valueOf(moduleCode):null));
     }
     
     @GetMapping("/trigger-way")

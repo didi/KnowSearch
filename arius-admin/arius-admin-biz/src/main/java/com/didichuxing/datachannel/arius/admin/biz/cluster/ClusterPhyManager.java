@@ -122,10 +122,12 @@ public interface ClusterPhyManager {
 
     /**
      * 更新集群下的动态配置信息
-     * @param param 配置信息参数
+     *
+     * @param param    配置信息参数
+     * @param operator
      * @return result
      */
-    Result<Boolean> updatePhyClusterDynamicConfig(ClusterSettingDTO param);
+    Result<Boolean> updatePhyClusterDynamicConfig(ClusterSettingDTO param, String operator);
 
     /**
      * 获取集群下的属性配置

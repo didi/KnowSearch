@@ -19,6 +19,7 @@ import com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping.Template
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.pipeline.TemplatePipelineManager;
 import com.didichuxing.datachannel.arius.admin.common.Triple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord.Builder;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterJoinDTO;
@@ -386,6 +387,12 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
                 SpringTool.publish(new ClusterPhyEvent(param.getCluster(), operator));
                 postProcessingForClusterJoin(param, operator);
             }
+            operateRecordService.save(new OperateRecord.Builder().project(
+                            projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
+                    .bizId(saveClusterResult.getData().getId()).content(saveClusterResult.getData().getCluster())
+                    .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_JOIN)
+                    .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).userOperation(operator)
+                    .build());
 
             return saveClusterResult;
         } catch (Exception e) {
@@ -452,8 +459,23 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     }
 
     @Override
-    public Result<Boolean> updatePhyClusterDynamicConfig(ClusterSettingDTO param) {
-        return clusterPhyService.updatePhyClusterDynamicConfig(param);
+    public Result<Boolean> updatePhyClusterDynamicConfig(ClusterSettingDTO param, String operator) {
+        final Result<Map<ClusterDynamicConfigsTypeEnum, Map<String, Object>>> configs = getPhyClusterDynamicConfigs(
+                param.getClusterName());
+        final ClusterPhy clusterByName = clusterPhyService.getClusterByName(param.getClusterName());
+        final Result<Boolean> result = clusterPhyService.updatePhyClusterDynamicConfig(param);
+        if (result.success()){
+            
+            operateRecordService.save(new OperateRecord.Builder()
+                            .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
+                            .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                            .userOperation(operator)
+                            .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_DYNAMIC_CONF_CHANGE)
+                            //.content()
+                            .bizId(clusterByName.getId())
+                    .build());
+        }
+        return result;
     }
 
     @Override
@@ -608,7 +630,14 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         }
 
         SpringTool.publish(new ClusterPhyEvent(clusterPhy.getCluster(), operator));
-
+        operateRecordService.save(new OperateRecord.Builder()
+                        .content(clusterPhy.getCluster())
+                        .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
+                        .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_OFFLINE)
+                        .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                        .userOperation(operator)
+                        .bizId(clusterPhyId)
+                .build());
         return Result.buildSucc(true);
     }
 
@@ -635,8 +664,24 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
     @Override
     public Result<Boolean> editCluster(ClusterPhyDTO param, String operator) {
-        //todo 这里需要记录操作记录hsl
-        return clusterPhyService.editCluster(param, operator);
+        final ClusterPhy oldClusterPhy = clusterPhyService.getClusterById(param.getId());
+        final Result<Boolean> result = clusterPhyService.editCluster(param, operator);
+        if (result.success()){
+    
+            if (!StringUtils.equals(oldClusterPhy.getDesc(), param.getDesc())) {
+                operateRecordService.save(new Builder().userOperation(operator)
+                        .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_UPGRADE)
+                        .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                        .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
+                        .bizId(param.getId()).content(String.format("%s,修改集群描述:%s-->%s", oldClusterPhy.getCluster(),
+                                oldClusterPhy.getCluster(), param.getCluster()))
+                
+                        .build());
+            }
+           
+         
+        }
+        return result;
     }
 
     @Override
@@ -831,6 +876,14 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             return Result.buildFail("编辑gateway失败！");
         }
         ClusterPhy clusterPhy = clusterPhyService.getClusterById(param.getId());
+        operateRecordService.save(new OperateRecord.Builder()
+                        .bizId(param.getId())
+                        .userOperation(operator)
+                        .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
+                        .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                        .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_GATEWAY_CHANGE)
+                        .content(String.format("%s,绑定gateway集群gateway_cluster:%s",oldCluster.getCluster(),param.getGatewayUrl()))
+                .build());
         //todo 这里需要记录操作记录hsl
         return Result.buildSucc(ConvertUtil.obj2Obj(clusterPhy, ClusterPhyVO.class));
     }

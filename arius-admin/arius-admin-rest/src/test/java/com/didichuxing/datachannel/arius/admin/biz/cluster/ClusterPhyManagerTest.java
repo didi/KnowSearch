@@ -55,6 +55,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.template.logic.Index
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpClient;
 import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
+import com.didiglobal.logi.security.util.HttpRequestUtil;
 import com.google.common.collect.Lists;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
@@ -660,7 +661,8 @@ class ClusterPhyManagerTest {
         when(mockClusterPhyService.updatePhyClusterDynamicConfig(new ClusterSettingDTO("clusterName", "key", "value")))
             .thenReturn(Result.buildFail(false));
 
-        final Result<Boolean> result = clusterPhyManager.updatePhyClusterDynamicConfig(param);
+        final Result<Boolean> result = clusterPhyManager.updatePhyClusterDynamicConfig(param,
+                HttpRequestUtil.getOperator(request));
 
         assertEquals(expectedResult, result);
     }

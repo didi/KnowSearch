@@ -225,15 +225,15 @@ public enum OperateTypeEnum {
         return code;
     }
     
-    public static Map<String, Integer> getOperationTypeByModule(Integer module) {
+    public static Map<Integer, String> getOperationTypeByModule(Integer module) {
         final NewModuleEnum moduleEnum = NewModuleEnum.getModuleEnum(module);
         if (Objects.isNull(moduleEnum)) {
             return Arrays.stream(OperateTypeEnum.values())
-                    .collect(Collectors.toMap(OperateTypeEnum::getOperationType, OperateTypeEnum::getCode));
+                    .collect(Collectors.toMap(OperateTypeEnum::getCode, OperateTypeEnum::getOperationType));
         }
         return Arrays.stream(OperateTypeEnum.values())
                 .filter(operationTypeEnum -> operationTypeEnum.getModule().equals(moduleEnum))
-                .collect(Collectors.toMap(OperateTypeEnum::getOperationType, OperateTypeEnum::getCode));
+                .collect(Collectors.toMap(OperateTypeEnum::getCode, OperateTypeEnum::getOperationType));
     }
      public static OperateTypeEnum getOperationTypeEnum(Integer code) {
         return Arrays.stream(OperateTypeEnum.values()).filter(operationTypeEnum -> operationTypeEnum.getCode().equals(code))
