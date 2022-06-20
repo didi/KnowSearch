@@ -210,3 +210,21 @@ create table project_arius_config
 
 
 ) comment '项目配置' charset = utf8;
+
+
+-- auto-generated definition
+create table operate_record
+(
+    id             bigint unsigned auto_increment comment '主键 自增'
+        primary key,
+    project_name   varchar(255)                          null comment '应用',
+    module_id      int(10)     default -1                not null comment '模块id',
+    operate_id     int(10)     default -1                not null comment '操作id',
+    trigger_way_id int                                   null comment '触发方式',
+    user_operation varchar(50) default ''                not null comment '操作人',
+    content        text                                  null comment '操作内容',
+    operate_time   timestamp   default CURRENT_TIMESTAMP not null comment '操作时间',
+    create_time    timestamp   default CURRENT_TIMESTAMP not null comment '创建时间',
+    update_time    timestamp   default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '修改时间'
+)
+    comment '操作记录表' charset = utf8;
