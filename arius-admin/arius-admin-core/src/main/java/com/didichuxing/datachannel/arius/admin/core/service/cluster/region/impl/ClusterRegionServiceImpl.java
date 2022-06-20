@@ -138,6 +138,7 @@ public class ClusterRegionServiceImpl implements ClusterRegionService {
         ClusterRegionPO clusterRegionPO = new ClusterRegionPO();
         clusterRegionPO.setName(regionName);
         clusterRegionPO.setLogicClusterIds(AdminConstant.REGION_NOT_BOUND_LOGIC_CLUSTER_ID);
+        clusterRegionPO.setConfig("");
         clusterRegionPO.setPhyClusterName(clusterName);
         return Result.build(1 == clusterRegionDAO.insert(clusterRegionPO), clusterRegionPO.getId());
     }
