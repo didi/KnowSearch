@@ -3,6 +3,7 @@ package com.didichuxing.datachannel.arius.admin.task.dashboard.collector;
 import java.util.List;
 import java.util.Map;
 
+import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -29,13 +30,12 @@ public class ClusterDashBoardCollector extends BaseDashboardCollector {
     private static final Map<String/*集群名称*/, ClusterMetrics /*上一次采集到的集群数据*/> cluster2LastTimeClusterMetricsMap = Maps.newConcurrentMap();
 
     @Override
-    public void collectSingleCluster(String cluster, long currentTime) {
-        DashBoardStats dashBoardStats = buildInitDashBoardStats(currentTime);
+    public void collectSingleCluster(String cluster, long startTime) {
+        DashBoardStats dashBoardStats = buildInitDashBoardStats(startTime);
 
         ClusterMetrics clusterMetrics = cluster2LastTimeClusterMetricsMap.getOrDefault(cluster, new ClusterMetrics());
-        clusterMetrics.setTimestamp(currentTime);
+        clusterMetrics.setTimestamp(startTime);
         clusterMetrics.setCluster(cluster);
-        clusterMetrics.setTimestamp(currentTime);
         // 1. 写入耗时
         clusterMetrics.setIndexingLatency(esClusterPhyStaticsService.getClusterIndexingLatency(cluster));
         // 2. 查询耗时
@@ -56,6 +56,11 @@ public class ClusterDashBoardCollector extends BaseDashboardCollector {
         clusterMetrics.setReqUprushNum(getReqUprushNum(cluster));
         //10.写入文档数突增量（上个时间间隔的写文档数的两倍
         clusterMetrics.setDocUprushNum(getDocUprushNum(cluster));
+
+        long currentTimeMillis = System.currentTimeMillis();
+        long currentTime = CommonUtils.monitorTimestamp2min(currentTimeMillis);
+        long elapsedTime = currentTime -startTime;
+        clusterMetrics.setElapsedTime(elapsedTime);
 
         dashBoardStats.setCluster(clusterMetrics);
         monitorMetricsSender.sendDashboardStats(Lists.newArrayList(dashBoardStats));

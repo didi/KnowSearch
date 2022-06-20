@@ -339,8 +339,11 @@ public class AriusStatsDashBoardInfoESDAO extends BaseAriusStatsESDAO {
         List<String> noNegativeMetricTypeList = Lists.newArrayList();
         // 处理非负值的指标类型
         for (String metricsType : metricsTypes) {
-            if (listNoNegativeMetricTypes().contains(metricsType)) { noNegativeMetricTypeList.add(metricsType);}
-            else { commonMetricTypeList.add(metricsType);}
+            if (listNoNegativeMetricTypes().contains(metricsType)){
+                noNegativeMetricTypeList.add(metricsType);
+            }else {
+                commonMetricTypeList.add(metricsType);
+            }
         }
 
         noNegativeMetricsAndCommonMetricsTuple.setV1(commonMetricTypeList);

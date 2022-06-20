@@ -75,7 +75,7 @@ public class DashboardMetricsController {
         return dashboardMetricsManager.getTopIndexMetricsInfo(param, HttpRequestUtils.getAppId(request));
     }
 
-    @PostMapping("/top/clusterThreadPoolQueue")
+    @PostMapping("/top/cluster-thread-pool-queue")
     @ResponseBody
     @ApiOperation(value = "获取dashboard大盘TopNES线程池相关指标信息")
     public Result<List<VariousLineChartMetricsVO>> getTopClusterThreadPoolQueueMetricsInfo(@RequestBody MetricsDashboardTopNDTO param,
@@ -114,4 +114,7 @@ public class DashboardMetricsController {
                                                                  HttpServletRequest request) {
         return dashboardMetricsManager.getListIndexMetricsInfo(param, HttpRequestUtils.getAppId(request));
     }
+
+
+
 }
