@@ -93,7 +93,7 @@ public class TemplateExpireManagerImpl extends BaseTemplateSrv implements Templa
             shouldDels, retryCount);
 
         if (succ) {
-            indicesManager.updateIndicesFlagInvalid(templatePhysical.getCluster(), Lists.newArrayList(shouldDels));
+            indicesManager.updateIndexFlagInvalid(templatePhysical.getCluster(), Lists.newArrayList(shouldDels));
         }
 
         return succ;
@@ -163,7 +163,7 @@ public class TemplateExpireManagerImpl extends BaseTemplateSrv implements Templa
                 succ = esIndexService.syncDeleteIndexByExpression(physical.getCluster(), physical.getExpression(), retryCount);
                 if (succ) {
                     //批量设置存储索引cat/index信息的元数据索引中的文档标志位（deleteFlag）为true
-                    indicesManager.updateIndicesFlagInvalid(physical.getCluster(), Lists.newArrayList(shouldDelSet));
+                    indicesManager.updateIndexFlagInvalid(physical.getCluster(), Lists.newArrayList(shouldDelSet));
                 }
             }
         }
@@ -262,7 +262,7 @@ public class TemplateExpireManagerImpl extends BaseTemplateSrv implements Templa
         boolean succ = esIndexService.syncBatchDeleteIndices(cluster, shouldDels, retryCount) == shouldDels.size();
         if (succ) {
             List<String> shouldDelList = Lists.newArrayList(shouldDels);
-            Result<Boolean> batchSetIndexFlagInvalidResult = indicesManager.updateIndicesFlagInvalid(cluster, shouldDelList);
+            Result<Boolean> batchSetIndexFlagInvalidResult = indicesManager.updateIndexFlagInvalid(cluster, shouldDelList);
             if (batchSetIndexFlagInvalidResult.success()){
                 operateRecordService.save(SCHEDULE, OperationEnum.DELETE, null,
                         String.format("根据模板过期时间删除过期索引：集群%s;索引:%s", cluster, ListUtils.strList2String(shouldDelList)),

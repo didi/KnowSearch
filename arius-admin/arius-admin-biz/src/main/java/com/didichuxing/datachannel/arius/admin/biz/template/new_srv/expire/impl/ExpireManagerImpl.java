@@ -100,7 +100,7 @@ public class ExpireManagerImpl extends BaseTemplateSrvImpl implements ExpireMana
             }
 
             succ = succ && esIndexService.syncBatchDeleteIndices(cluster, shouldDeleteIndexList, retryCount) == shouldDeleteIndexList.size();
-            succ = succ && indicesManager.updateIndicesFlagInvalid(cluster, shouldDeleteIndexList).success();
+            succ = succ && indicesManager.updateIndexFlagInvalid(cluster, shouldDeleteIndexList).success();
         }
         return succ;
     }
@@ -183,7 +183,7 @@ public class ExpireManagerImpl extends BaseTemplateSrvImpl implements ExpireMana
 
         Boolean succ = expireIndex.size() == esIndexService.syncBatchDeleteIndices(templatePhy.getCluster(), expireIndex, RETRY_TIMES);
         if (succ) {
-            indicesManager.updateIndicesFlagInvalid(templatePhy.getCluster(), Lists.newArrayList(expireIndex));
+            indicesManager.updateIndexFlagInvalid(templatePhy.getCluster(), Lists.newArrayList(expireIndex));
         }
         return succ;
     }
@@ -250,7 +250,7 @@ public class ExpireManagerImpl extends BaseTemplateSrvImpl implements ExpireMana
                 }
                 if (succ) {
                     //批量设置存储索引cat/index信息的元数据索引中的文档标志位（deleteFlag）为true
-                    indicesManager.updateIndicesFlagInvalid(physical.getCluster(), Lists.newArrayList(shouldDelSet));
+                    indicesManager.updateIndexFlagInvalid(physical.getCluster(), Lists.newArrayList(shouldDelSet));
                 }
             }
         }

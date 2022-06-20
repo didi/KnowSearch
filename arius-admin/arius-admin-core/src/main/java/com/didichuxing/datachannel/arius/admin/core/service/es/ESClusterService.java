@@ -5,13 +5,12 @@ import java.util.Map;
 import java.util.Set;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ESClusterStateResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.setting.ESClusterGetSettingsAllResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStatsResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterTaskStatsResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterThreadStats;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.ClusterThreadPoolQueueMetrics;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.PendingTaskAnalysisVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.TaskMissionAnalysisVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterConnectionStatus;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
@@ -127,13 +126,6 @@ public interface ESClusterService {
     ESClusterStatsResponse syncGetClusterStats(String clusterName);
 
     /**
-     * 获取集群信息
-     * @param cluster
-     * @return
-     */
-    ESClusterStateResponse syncGetClusterState(String cluster);
-
-    /**
      * 获取集群配置
      * @param cluster 集群名称
      * @return response
@@ -209,6 +201,7 @@ public interface ESClusterService {
      */
     ESClusterThreadStats syncGetThreadStatsByCluster(String cluster);
 
+    @Deprecated
     ESClusterHealthResponse syncGetClusterHealthAtIndicesLevel(String phyClusterName);
 
 

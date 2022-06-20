@@ -86,7 +86,7 @@ public interface IndicesManager {
      * @param indexNameList    索引名称列表
      * @return
      */
-    Result<Boolean> updateIndicesFlagInvalid(String cluster, List<String> indexNameList);
+    Result<Boolean> updateIndexFlagInvalid(String cluster, List<String> indexNameList);
 
     /**
      * 编辑索引setting阻塞信息

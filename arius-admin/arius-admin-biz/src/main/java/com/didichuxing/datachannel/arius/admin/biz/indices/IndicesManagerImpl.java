@@ -141,7 +141,7 @@ public class IndicesManagerImpl implements IndicesManager {
     public Result<Boolean> deleteIndex(List<IndexCatCellDTO> params, Integer appId, String operator) {
         return batchOperateIndex(params, appId, (cluster, indexNameList) -> {
             if (indexNameList.size() == esIndexService.syncBatchDeleteIndices(cluster, indexNameList, RETRY_COUNT)) {
-                Result<Boolean> batchSetIndexFlagInvalidResult = updateIndicesFlagInvalid(cluster, indexNameList);
+                Result<Boolean> batchSetIndexFlagInvalidResult = updateIndexFlagInvalid(cluster, indexNameList);
                 if (batchSetIndexFlagInvalidResult.success()) {
                     operateRecordService.save(INDEX_OP, OperationEnum.DELETE, null,
                         String.format("批量删除%s集群中的索引：%s", cluster, ListUtils.strList2String(indexNameList)), operator);
@@ -239,7 +239,7 @@ public class IndicesManagerImpl implements IndicesManager {
     }
 
     @Override
-    public Result<Boolean> updateIndicesFlagInvalid(String cluster, List<String> indexNameList) {
+    public Result<Boolean> updateIndexFlagInvalid(String cluster, List<String> indexNameList) {
         //不采集已删除索引
         indexCatInfoCollector.updateNotCollectorIndexNames(cluster, indexNameList);
         //更新存储cat/index信息的元信息索引中对应文档删除标识位为true
