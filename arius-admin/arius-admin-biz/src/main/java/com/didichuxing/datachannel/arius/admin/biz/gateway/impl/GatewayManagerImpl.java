@@ -60,6 +60,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -198,13 +199,14 @@ public class GatewayManagerImpl implements GatewayManager {
         //转换
         for (Entry<Integer, List<Integer>> projectIdESUsersEntry : projectIdEsUsersMap.entrySet()) {
             final Integer projectId = projectIdESUsersEntry.getKey();
-            final Collection<ProjectTemplateAuth> projectTemplateAuths = projectId2ProjectTemplateAuthsMap.get(
-                    projectId);
-            projectIdESUsersEntry.getValue().forEach(esuser->esUser2ProjectTemplateAuthsMap.put(esuser,projectTemplateAuths));
-            final String projectName = projectId2ProjectNameMap.get(projectId);
-            projectIdESUsersEntry.getValue().forEach(esuser -> esUser2ProjectNameMap.put(esuser, projectName));
-            ProjectConfig projectConfig = projectId2ProjectConfigMap.get(projectId);
-            projectIdESUsersEntry.getValue().forEach(esuser -> esUser2ESUserConfigMap.put(esuser,projectConfig ));
+            for (Integer esuser : projectIdESUsersEntry.getValue()) {
+                Optional.ofNullable(projectId2ProjectTemplateAuthsMap.get(projectId)).ifPresent(
+                        projectTemplateAuths -> esUser2ProjectTemplateAuthsMap.put(esuser, projectTemplateAuths));
+                Optional.ofNullable(projectId2ProjectNameMap.get(projectId))
+                        .ifPresent(projectName -> esUser2ProjectNameMap.put(esuser, projectName));
+                Optional.ofNullable(projectId2ProjectConfigMap.get(projectId))
+                        .ifPresent(projectConfig -> esUser2ESUserConfigMap.put(esuser, projectConfig));
+            }
         }
         String defaultIndices = ariusConfigInfoService.stringSetting(ARIUS_COMMON_GROUP,
                 APP_DEFAULT_READ_AUTH_INDICES, "");
