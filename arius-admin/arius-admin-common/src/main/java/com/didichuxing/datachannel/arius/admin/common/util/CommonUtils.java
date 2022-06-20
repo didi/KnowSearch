@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.util;
 
+import com.alibaba.fastjson.JSONObject;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.common.vo.project.ProjectVO;
@@ -319,5 +320,18 @@ public class CommonUtils {
     public static boolean isUserNameBelongProjectResponsible(String userName,ProjectVO projectVO){
        return StringUtils.hasText(userName) && Optional.ofNullable(projectVO).map(ProjectVO::getOwnerList).orElse(Collections.emptyList()).stream()
                 .map(UserBriefVO::getUserName).anyMatch(username -> username.equals(userName));
+    }
+    
+    /**
+     * 获取变更之前和变更之后的json
+     *
+     * @param afterObj  obj后
+     * @param beforeObj obj之前
+     * @return {@code String}
+     */
+    public static String getChangeByAfterAndBeforeJson(Object afterObj,Object beforeObj){
+        return new  JSONObject().fluentPut("beforeChange",beforeObj)
+                .fluentPut("afterChange",afterObj)
+                .toJSONString();
     }
 }

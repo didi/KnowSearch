@@ -506,21 +506,24 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
 
     @Override
 	public Result<Void> editLogicCluster(ESLogicClusterDTO param, String operator, Integer projectId) {
-       
+        final ClusterLogic logic = clusterLogicService.getClusterLogicById(param.getId());
         Result<Void> result = clusterLogicService.editClusterLogic(param, operator);
         if (result.success()) {
             SpringTool.publish(new ClusterLogicEvent(param.getId(), projectId));
             //操作记录 我的集群信息修改
-            operateRecordService.save(
+            if (StringUtils.isNotBlank(param.getMemo())){
+                operateRecordService.save(
                     new OperateRecord.Builder()
                             .project(projectService.getProjectBriefByProjectId(projectId))
                             .operationTypeEnum(OperateTypeEnum.MY_CLUSTER_INFO_MODIFY)
                             .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
                             .userOperation(operator)
-                            .content(param.toString())
+                            .content(String.format("%s修改集群描述，%s-->%s",logic.getName(),logic.getMemo(),param.getMemo()))
                             .bizId(param.getId().intValue())
                             .build()
                     );
+            }
+            
         }
 		return result;
 	}

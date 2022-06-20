@@ -11,6 +11,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.resource.E
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.DATA_NODE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.MASTER_NODE;
 
+import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.page.ClusterPhyPageSearchHandle;
@@ -460,18 +461,24 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
     @Override
     public Result<Boolean> updatePhyClusterDynamicConfig(ClusterSettingDTO param, String operator) {
-        final Result<Map<ClusterDynamicConfigsTypeEnum, Map<String, Object>>> configs = getPhyClusterDynamicConfigs(
+        final Result<Map<ClusterDynamicConfigsTypeEnum, Map<String, Object>>> beforeChangeConfigs =
+                getPhyClusterDynamicConfigs(
                 param.getClusterName());
         final ClusterPhy clusterByName = clusterPhyService.getClusterByName(param.getClusterName());
         final Result<Boolean> result = clusterPhyService.updatePhyClusterDynamicConfig(param);
+        final Result<Map<ClusterDynamicConfigsTypeEnum, Map<String, Object>>> afterChangeConfigs =
+                getPhyClusterDynamicConfigs(
+                param.getClusterName());
         if (result.success()){
             
             operateRecordService.save(new OperateRecord.Builder()
                             .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
                             .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
                             .userOperation(operator)
-                            .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_DYNAMIC_CONF_CHANGE)
-                            //.content()
+                            .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_DYNAMIC_CONF_CHANGE).content(
+                            CommonUtils.getChangeByAfterAndBeforeJson(afterChangeConfigs,beforeChangeConfigs)
+        
+                    )
                             .bizId(clusterByName.getId())
                     .build());
         }
