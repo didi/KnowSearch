@@ -1,5 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.common.constant.operaterecord;
 
+import com.didichuxing.datachannel.arius.admin.common.tuple.Tuple;
+import com.didichuxing.datachannel.arius.admin.common.tuple.Tuple2;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
@@ -71,15 +73,15 @@ public enum OperateTypeEnum {
     /**
      * 我的集群：集群扩容
      */
-    MY_CLUSTER_CAPACITY(NewModuleEnum.MY_CLUSTER, "集群扩容",14),
+    MY_CLUSTER_CAPACITY(NewModuleEnum.MY_CLUSTER, "集群扩容",3),
     /**
      * 我的集群：集群缩容
      */
-    MY_CLUSTER_SHRINKAGE_CAPACITY(NewModuleEnum.MY_CLUSTER, "集群缩容", 15),
+    MY_CLUSTER_SHRINKAGE_CAPACITY(NewModuleEnum.MY_CLUSTER, "集群缩容", 4),
     /**
      * 我的集群：集群下线
      */
-    MY_CLUSTER_OFFLINE(NewModuleEnum.MY_CLUSTER, "集群下线",16),
+    MY_CLUSTER_OFFLINE(NewModuleEnum.MY_CLUSTER, "集群下线",2),
     /**
      * 应用：新建应用
      */
@@ -228,17 +230,22 @@ public enum OperateTypeEnum {
     public static Map<Integer, String> getOperationTypeByModule(Integer module) {
         final NewModuleEnum moduleEnum = NewModuleEnum.getModuleEnum(module);
         if (Objects.isNull(moduleEnum)) {
-            return Arrays.stream(OperateTypeEnum.values())
-                    .collect(Collectors.toMap(OperateTypeEnum::getCode, OperateTypeEnum::getOperationType));
+            return   Arrays.stream(OperateTypeEnum.values())
+                 .map(operateTypeEnum -> Tuple.of(operateTypeEnum.getOperationType(),operateTypeEnum.getCode()))
+                 .distinct()
+                .collect(Collectors.toMap(Tuple2::_2, Tuple2::_1));
         }
         return Arrays.stream(OperateTypeEnum.values())
                 .filter(operationTypeEnum -> operationTypeEnum.getModule().equals(moduleEnum))
-                .collect(Collectors.toMap(OperateTypeEnum::getCode, OperateTypeEnum::getOperationType));
+                 .map(operateTypeEnum -> Tuple.of(operateTypeEnum.getOperationType(),operateTypeEnum.getCode()))
+                 .distinct()
+                .collect(Collectors.toMap(Tuple2::_2, Tuple2::_1));
     }
      public static OperateTypeEnum getOperationTypeEnum(Integer code) {
         return Arrays.stream(OperateTypeEnum.values()).filter(operationTypeEnum -> operationTypeEnum.getCode().equals(code))
                 .findFirst().orElse(null);
     }
+    
     
     
 }
