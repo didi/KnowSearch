@@ -231,18 +231,18 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrv implements Template
     /**
      * 删除DCDR
      *
-     * @param logicId  模板ID
+     * @param templateId  模板ID
      * @param operator 操作人
      * @return result
      * @throws ESOperateException
      */
     @Override
-    public Result<Void> deleteDCDR(Integer logicId, String operator) throws ESOperateException {
-        Result<Void> checkResult = checkDCDRParam(logicId);
+    public Result<Void> deleteDCDR(Integer templateId, String operator) throws ESOperateException {
+        Result<Void> checkResult = checkDCDRParam(templateId);
 
         if (checkResult.failed()) { return checkResult;}
 
-        return deletePhyDCDR(createDCDRMeta(logicId), operator);
+        return deletePhyDCDR(createDCDRMeta(templateId), operator);
     }
 
     /**
@@ -834,17 +834,17 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrv implements Template
     /**
      * 根据逻辑索引ID创建物理模板DCDR
      *
-     * @param logicId
+     * @param templateId
      * @return {@link  TemplatePhysicalDCDRDTO}
      */
-    private TemplatePhysicalDCDRDTO createDCDRMeta(Integer logicId) {
+    private TemplatePhysicalDCDRDTO createDCDRMeta(Integer templateId) {
         TemplatePhysicalDCDRDTO dcdrMeta = new TemplatePhysicalDCDRDTO();
 
         dcdrMeta.setPhysicalIds(new ArrayList<>());
         dcdrMeta.setReplicaClusters(new ArrayList<>());
 
         IndexTemplateWithPhyTemplates templateLogicWithPhysical = indexTemplateService
-                .getLogicTemplateWithPhysicalsById(logicId);
+                .getLogicTemplateWithPhysicalsById(templateId);
 
         List<IndexTemplatePhy> masterPhysicals = templateLogicWithPhysical.fetchMasterPhysicalTemplates();
         for (IndexTemplatePhy indexTemplatePhysicalInfo : masterPhysicals) {

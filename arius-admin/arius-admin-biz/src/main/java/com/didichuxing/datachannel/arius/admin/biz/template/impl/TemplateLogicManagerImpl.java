@@ -8,6 +8,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.app.AppTem
 import static com.didichuxing.datachannel.arius.admin.common.constant.app.AppTemplateAuthEnum.isTemplateAuthExitByCode;
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.TEMPLATE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.ADD;
+import static com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType.FAIL;
 import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum.TEMPLATE_MAPPING;
 import static com.didichuxing.datachannel.arius.admin.core.service.template.physic.impl.IndexTemplatePhyServiceImpl.NOT_CHECK;
 
@@ -31,7 +32,6 @@ import com.didichuxing.datachannel.arius.admin.biz.template.srv.dcdr.TemplateDCD
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.*;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateClearDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppTemplateAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
@@ -707,71 +707,64 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     }
 
     @Override
-    public Result<Void> clearIndices(TemplateClearDTO clearDTO) {
-        if (CollectionUtils.isEmpty(clearDTO.getDelIndices())) {
-            return Result.buildParamIllegal("清理索引不能为空");
+    public Result<Void> clearIndices(Integer templateId, List<String> indices, Integer appId) {
+        // TODO: zeyin 添加project权限校验 , 操作记录
+        if (CollectionUtils.isEmpty(indices)) { return Result.buildParamIllegal("清理索引不能为空");}
+
+        IndexTemplateWithPhyTemplates templateLogicWithPhysical = indexTemplateService.getLogicTemplateWithPhysicalsById(templateId);
+        if (null != templateLogicWithPhysical && CollectionUtils.isEmpty(templateLogicWithPhysical.getPhysicals())) {
+            return Result.buildFail(String.format("模板[%d]不存在Arius平台", templateId));
         }
 
-        IndexTemplateWithPhyTemplates templateLogicWithPhysical = indexTemplateService.getLogicTemplateWithPhysicalsById(clearDTO.getTemplateId());
-        List<String> delIndices = clearDTO.getDelIndices();
+        boolean succ = false;
         for (IndexTemplatePhy templatePhysical : templateLogicWithPhysical.getPhysicals()) {
-            if (CollectionUtils.isNotEmpty(delIndices)) {
-                esIndexService.syncBatchDeleteIndices(templatePhysical.getCluster(), delIndices, RETRY_TIMES);
-            }
+             succ = indices.size() == esIndexService.syncBatchDeleteIndices(templatePhysical.getCluster(), indices, RETRY_TIMES);
+        }
+        return Result.build(succ);
+    }
 
-            if (delIndices.size() != esIndexService.syncBatchDeleteIndices(templatePhysical.getCluster(), delIndices, RETRY_TIMES)) {
-                return Result.buildFail("删除索引失败，请重试");
-            }
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Result<Void> adjustShard(Integer logicTemplateId,
+                                    Integer shardNum,
+                                    Integer appId) throws AdminOperateException {
+        // TODO: zeyin 添加project权限校验 , 操作记录
+        List<IndexTemplatePhy> templatePhyList = indexTemplatePhyService.getTemplateByLogicId(logicTemplateId);
+        IndexTemplatePhyDTO updateParam = new IndexTemplatePhyDTO();
+        for (IndexTemplatePhy templatePhy : templatePhyList) {
+            if (templatePhy.getShard().equals(shardNum)) { throw new AdminOperateException("该模板已经是" + shardNum + "分片", FAIL);}
+
+            updateParam.setId(templatePhy.getId());
+            updateParam.setShard(shardNum);
+            Result<Void> updateDBResult = indexTemplatePhyService.update(updateParam);
+            if (updateDBResult.failed()) { throw new AdminOperateException(updateDBResult.getMessage(), FAIL);}
+
+            boolean succ = esTemplateService.syncUpdateShardNum(templatePhy.getCluster(), templatePhy.getName(), shardNum, RETRY_TIMES);
+            if (!succ) { throw new AdminOperateException(String.format("同步修改es集群[%s]中模板[%]shard数[%d]失败, 请确认集群是否正常",
+                            templatePhy.getCluster(), templatePhy.getName(), shardNum), FAIL);}
         }
 
         return Result.buildSucc();
     }
 
     @Override
-    public Result<Void> adjustShard(Integer logicTemplateId, Integer shardNum) {
-        List<IndexTemplatePhy> templatePhyList = indexTemplatePhyService.getTemplateByLogicId(logicTemplateId);
-        try {
-            IndexTemplatePhyDTO updateParam = new IndexTemplatePhyDTO();
-            for (IndexTemplatePhy templatePhy : templatePhyList) {
-                if (templatePhy.getShard().equals(shardNum)) {
-                    return Result.buildParamIllegal("该模板已经是" + shardNum + "分片");
-                }
+    @Transactional(rollbackFor = Exception.class)
+    public Result<Void> upgrade(Integer templateId, String operator) throws AdminOperateException {
+        // TODO: zeyin 添加project权限校验 , 操作记录
+        List<IndexTemplatePhy> templatePhyList = indexTemplatePhyService.getTemplateByLogicId(templateId);
+        if (CollectionUtils.isEmpty(templatePhyList)) { return Result.buildFail("模板不存在");}
 
-                updateParam.setId(templatePhy.getId());
-                updateParam.setShard(shardNum);
-                Result<Void> updateDBResult = indexTemplatePhyService.update(updateParam);
-                if (updateDBResult.failed()) {
-                    return updateDBResult;
-                }
-                esTemplateService.syncUpdateShardNum(templatePhy.getCluster(), templatePhy.getName(), shardNum, RETRY_TIMES);
-            }
-        } catch (Exception e) {
-            LOGGER.error("class=TemplateLogicManagerImpl||method=adjustShard||errorMsg=failed to adjust shard", e);
-            return Result.buildFail("模板扩缩容失败");
-        }
-        return Result.buildSucc();
-    }
+        IndexTemplatePhyDTO updateParam = new IndexTemplatePhyDTO();
+        for (IndexTemplatePhy templatePhy : templatePhyList) {
+            updateParam.setId(templatePhy.getId());
+            updateParam.setShard(updateParam.getShard());
+            updateParam.setRack("");
+            updateParam.setVersion(templatePhy.getVersion() + 1);
 
-    @Override
-    public Result<Void> upgrade(Integer logicTemplateId, String operator) {
-        List<IndexTemplatePhy> templatePhyList = indexTemplatePhyService.getTemplateByLogicId(logicTemplateId);
-        try {
-            IndexTemplatePhyDTO updateParam = new IndexTemplatePhyDTO();
-            for (IndexTemplatePhy templatePhy : templatePhyList) {
-                updateParam.setId(templatePhy.getId());
-                updateParam.setRack(templatePhy.getRack());
-                updateParam.setShard(updateParam.getShard());
-                updateParam.setVersion(templatePhy.getVersion() + 1);
+            Result<Void> editResult = templatePhyManager.editTemplateWithoutCheck(updateParam, operator, RETRY_TIMES);
+            if (editResult.failed()) { throw new AdminOperateException(editResult.getMessage(), FAIL);}
 
-                Result<Void> editResult = templatePhyManager.editTemplateWithoutCheck(updateParam, operator, RETRY_TIMES);
-                if (editResult.failed()) {
-                    return editResult;
-                }
-
-                preCreateManager.asyncCreateTodayAndTomorrowIndexByPhysicalId(templatePhy.getId());
-            }
-        } catch (Exception e) {
-            LOGGER.error("upgrade template error", e);
+            preCreateManager.asyncCreateTodayAndTomorrowIndexByPhysicalId(templatePhy.getId());
         }
 
         return Result.buildSucc();

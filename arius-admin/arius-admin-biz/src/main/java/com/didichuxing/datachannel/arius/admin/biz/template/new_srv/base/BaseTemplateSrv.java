@@ -1,11 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.new_srv.base;
 
+import java.util.List;
+
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.BaseTemplateSrvOpenDTO;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.NewTemplateSrvEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
-
-import java.util.List;
 
 /**
  * @author chengxiang

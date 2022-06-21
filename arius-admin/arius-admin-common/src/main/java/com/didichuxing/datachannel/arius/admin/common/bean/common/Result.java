@@ -151,6 +151,18 @@ public class Result<T> extends BaseResult {
         return result;
     }
 
+    public static <T> Result<T> buildWithMsg(boolean succ, String msg) {
+        Result<T> result = new Result<>();
+        if (succ) {
+            result.setCode(ResultType.SUCCESS.getCode());
+            result.setMessage(msg);
+        } else {
+            result.setCode(ResultType.FAIL.getCode());
+            result.setMessage(msg);
+        }
+        return result;
+    }
+
     public static <T> Result<T> buildSucc(T data) {
         Result<T> result = new Result<>();
         result.setCode(ResultType.SUCCESS.getCode());

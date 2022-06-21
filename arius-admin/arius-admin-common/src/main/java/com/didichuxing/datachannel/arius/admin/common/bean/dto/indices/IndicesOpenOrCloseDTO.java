@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Deprecated
 @ApiModel(description = "索引开启或关闭实体")
 public class IndicesOpenOrCloseDTO extends BaseDTO {
     @ApiModelProperty("集群名称")

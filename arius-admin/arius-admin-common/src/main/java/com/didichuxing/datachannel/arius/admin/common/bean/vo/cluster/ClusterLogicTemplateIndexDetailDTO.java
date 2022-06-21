@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatCellDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndicesClearDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicAggregate;
 import io.swagger.annotations.ApiModelProperty;
@@ -23,5 +24,5 @@ public class ClusterLogicTemplateIndexDetailDTO {
     private List<IndexTemplateLogicAggregate> templateLogicAggregates;
 
     @ApiModelProperty("索引列表")
-    private List<IndicesClearDTO> catIndexResults;
+    private List<IndexCatCellDTO> catIndexResults;
 }

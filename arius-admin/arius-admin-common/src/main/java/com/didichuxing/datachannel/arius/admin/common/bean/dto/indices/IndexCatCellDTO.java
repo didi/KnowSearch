@@ -1,8 +1,4 @@
-package com.didichuxing.datachannel.arius.admin.common.bean.vo.indices;
-
-import java.util.List;
-
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.BaseVO;
+package com.didichuxing.datachannel.arius.admin.common.bean.dto.indices;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -11,14 +7,15 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * @author lyn
- * @date 2021/09/30
- **/
+ * @author chengxiang
+ * @date 2022/5/31
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ApiModel(value = "IndexCatCellVO", description = "索引详情")
-public class IndexCatCellVO extends BaseVO {
+@ApiModel(description = "索引详情")
+public class IndexCatCellDTO {
+
     @ApiModelProperty("主键")
     private String key;
 
@@ -31,7 +28,7 @@ public class IndexCatCellVO extends BaseVO {
     @ApiModelProperty("分区状态")
     private String  status;
 
-    @ApiModelProperty("索引名字")
+    @ApiModelProperty("分区名字")
     private String  index;
 
     @ApiModelProperty("分区shard个数")
@@ -57,25 +54,4 @@ public class IndexCatCellVO extends BaseVO {
 
     @ApiModelProperty("可写标志位")
     private Boolean writeFlag;
-
-    @ApiModelProperty("segment数")
-    private Long    totalSegmentCount;
-
-    @ApiModelProperty("模板ID")
-    private Integer templateId;
-
-    @ApiModelProperty("物理集群名称")
-    private String  clusterPhy;
-
-    @ApiModelProperty("逻辑集群名称")
-    private String  clusterLogic;
-
-    @ApiModelProperty("逻辑集群ID")
-    private Long    resourceId;
-
-    @ApiModelProperty("appId")
-    private Integer appId;
-
-    @ApiModelProperty("别名")
-    private List<String> aliases;
 }
