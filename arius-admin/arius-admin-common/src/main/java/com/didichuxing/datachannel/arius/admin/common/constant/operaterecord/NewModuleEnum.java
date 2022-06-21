@@ -49,16 +49,16 @@ public enum NewModuleEnum {
     /**
      * 索引服务:
      */
-    INDEX_SERVICE("索引服务",6),
+    INDEX_SERVICE("索引服务",7),
     /**
      * 查询模板
      */
-    QUERY_TEMPLATE("查询模板",7),
+    QUERY_TEMPLATE("查询模板",8),
     
     /**
      * 配置
      */
-    SETTING("配置",8);
+    SETTING("配置",9);
     /**
      * 模块
      */
