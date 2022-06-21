@@ -4,7 +4,6 @@ import static com.didichuxing.datachannel.arius.admin.core.service.app.impl.ESUs
 
 import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
 import com.didichuxing.datachannel.arius.admin.biz.app.ProjectExtendManager;
-import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserDTO;
@@ -24,6 +23,8 @@ import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.AppSearchTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
+import com.didichuxing.datachannel.arius.admin.common.tuple.Tuple;
+import com.didichuxing.datachannel.arius.admin.common.tuple.Tuple2;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.VerifyCodeFactory;
 import com.didichuxing.datachannel.arius.admin.core.service.app.ESUserService;
@@ -52,6 +53,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -105,13 +107,14 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
             //5. 设置项目id
             config.setProjectId(projectVO.getId());
             // 6. 创建项目配置
-            Tuple<Result<Void>, ProjectConfigPO> resultProjectConfigTuple = projectConfigService.updateOrInitProjectConfig(
+            Tuple2<Result<Void>, ProjectConfigPO> resultProjectConfigTuple =
+                    projectConfigService.updateOrInitProjectConfig(
                     config, operator);
              setAdminProjectExtendVO(projectExtendVO);
             // 设置项目配置
-            if (resultProjectConfigTuple.getV1().success()) {
+            if (resultProjectConfigTuple._1().success()) {
                 projectExtendVO.setConfig(
-                        ConvertUtil.obj2Obj(resultProjectConfigTuple.getV2(), ProjectConfigVO.class));
+                        ConvertUtil.obj2Obj(resultProjectConfigTuple._2(), ProjectConfigVO.class));
                 
             }
             //7. 写入操作日志
@@ -301,45 +304,34 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
     }
     
     private void setProjectByUserList(String operator, ProjectSaveDTO project, List<Integer> userIdList, ProjectVO oldProject) {
-        List<UserBriefVO> oldUserBriefList = Lists.newArrayList();
+        List<UserBriefVO> beforeProjectUserList = Lists.newArrayList();
         //操作前的
-        Optional.ofNullable(oldProject.getUserList()).ifPresent(oldUserBriefList::addAll);
+        Optional.ofNullable(oldProject.getUserList()).ifPresent(beforeProjectUserList::addAll);
         //更新
         userProjectService.updateUserProject(project.getId(), userIdList);
         //操作后
-        List<UserBriefVO> newUserBriefList = Lists.newArrayList();
+        List<UserBriefVO> afterProjectUserList = Lists.newArrayList();
         Optional.ofNullable(projectService.getProjectDetailByProjectId(project.getId()))
-                .map(ProjectVO::getUserList).ifPresent(newUserBriefList::addAll);
-        //旧的用户列表
-        String oldUser = oldUserBriefList.stream().map(UserBriefVO::getUserName).distinct()
-                .collect(Collectors.joining(","));
-        //新的用户列表
-        String newUser = newUserBriefList.stream().map(UserBriefVO::getUserName).distinct()
-                .collect(Collectors.joining(","));
-        operateRecordService.save(
-                new OperateRecord(oldProject.getProjectName(), OperateTypeEnum.APPLICATION_USER_CHANGE,
-                        TriggerWayEnum.MANUAL_TRIGGER, oldUser + "-->" + newUser, operator));
+                .map(ProjectVO::getUserList).ifPresent(afterProjectUserList::addAll);
+        Tuple2</*beforeUserStr*/String,/*afterUserStr*/String> tuple2 = projectOwnerOrMemberChangeStr(
+                beforeProjectUserList, afterProjectUserList);
+        recordProjectOwnerOrUserChange(tuple2, project.getProjectName(), operator);
     }
     
     private void updateProjectByOwnerList(String operator, ProjectSaveDTO project, List<Integer> ownerIdList, ProjectVO oldProject) {
-        List<UserBriefVO> oldOwnerBriefList = Lists.newArrayList();
+        List<UserBriefVO> beforeProjectOwnerList = Lists.newArrayList();
         //操作前的
-        Optional.ofNullable(oldProject.getOwnerList()).ifPresent(oldOwnerBriefList::addAll);
+        Optional.ofNullable(oldProject.getOwnerList()).ifPresent(beforeProjectOwnerList::addAll);
         //更新
         userProjectService.updateOwnerProject(project.getId(), ownerIdList);
         //操作后
-        List<UserBriefVO> newUserBriefList = Lists.newArrayList();
+        List<UserBriefVO> afterProjectOwnerList = Lists.newArrayList();
         Optional.ofNullable(projectService.getProjectDetailByProjectId(project.getId()))
-                .map(ProjectVO::getOwnerList).ifPresent(newUserBriefList::addAll);
-        //旧的用户列表
-        String oldUser = oldOwnerBriefList.stream().map(UserBriefVO::getUserName).distinct()
-                .collect(Collectors.joining(","));
-        //新的用户列表
-        String newUser = newUserBriefList.stream().map(UserBriefVO::getUserName).distinct()
-                .collect(Collectors.joining(","));
-        operateRecordService.save(
-                new OperateRecord(oldProject.getProjectName(), OperateTypeEnum.APPLICATION_OWNER_CHANGE,
-                        TriggerWayEnum.MANUAL_TRIGGER, oldUser + "-->" + newUser, operator));
+                .map(ProjectVO::getOwnerList).ifPresent(afterProjectOwnerList::addAll);
+        Tuple2</*beforeOwnerStr*/String,/*afterOwnerStr*/String> tuple2=
+                projectOwnerOrMemberChangeStr(beforeProjectOwnerList,
+                afterProjectOwnerList);
+        recordProjectOwnerOrUserChange(tuple2,project.getProjectName(),operator);
     }
     
     /**
@@ -379,27 +371,28 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
             //更新前
        
             //获取旧的项目的owner和user
-            List<UserBriefVO> oldUserBriefList = Lists.newArrayList();
+            List<UserBriefVO> beforeProjectUserList = Lists.newArrayList();
             Optional.ofNullable(projectService.getProjectDetailByProjectId(projectId)).map(ProjectVO::getUserList)
-                    .ifPresent(oldUserBriefList::addAll);
+                    .ifPresent(beforeProjectUserList::addAll);
             userProjectService.saveUserProject(projectId, userIdList);
             //更新后
-            List<UserBriefVO> newUserBriefList = Lists.newArrayList();
+            List<UserBriefVO> afterProjectUserList = Lists.newArrayList();
             ProjectVO projectVO = projectService.getProjectDetailByProjectId(projectId);
             Optional.ofNullable(projectVO).map(ProjectVO::getUserList)
-                    .ifPresent(newUserBriefList::addAll);
-            String newUserName = newUserBriefList.stream().map(UserBriefVO::getUserName)
-                    .collect(Collectors.joining(","));
-            String oldUser = oldUserBriefList.stream().map(UserBriefVO::getUserName).collect(Collectors.joining(","));
-            operateRecordService.save(
-                    new OperateRecord(projectVO.getProjectName(), OperateTypeEnum.APPLICATION_OWNER_CHANGE,
-                            TriggerWayEnum.MANUAL_TRIGGER, oldUser + "-->" + newUserName, operator));
+                    .ifPresent(afterProjectUserList::addAll);
+            final Tuple2</*beforeProjectUserStr*/String,/*afterProjectUserStr*/ String> tuple2 =
+                    projectOwnerOrMemberChangeStr(beforeProjectUserList,
+                    afterProjectUserList);
+            recordProjectOwnerOrUserChange(tuple2, projectVO.getProjectName(), operator);
+    
             return Result.buildSucc();
         } catch (LogiSecurityException e) {
             return Result.buildFail(e.getMessage());
         }
        
     }
+    
+    
     
     /**
      * 删除项目成员
@@ -413,19 +406,18 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
         try {
             //更新前
             ProjectVO oldProject = projectService.getProjectDetailByProjectId(projectId);
-            List<UserBriefVO> oldUserBriefList = Lists.newArrayList();
-            Optional.ofNullable(oldProject.getUserList()).ifPresent(oldUserBriefList::addAll);
+            List<UserBriefVO> beforeProjectUserList = Lists.newArrayList();
+            Optional.ofNullable(oldProject.getUserList()).ifPresent(beforeProjectUserList::addAll);
             //更新
             projectService.delProjectUser(projectId, userId, operator);
             //更新后
-            ProjectVO newProject = projectService.getProjectDetailByProjectId(projectId);
-            List<UserBriefVO> newUserBriefList = Lists.newArrayList();
-            Optional.ofNullable(newProject.getUserList()).ifPresent(newUserBriefList::addAll);
-            String oldUser = oldUserBriefList.stream().map(UserBriefVO::getUserName).collect(Collectors.joining(","));
-            String newUser = newUserBriefList.stream().map(UserBriefVO::getUserName).collect(Collectors.joining(","));
-            operateRecordService.save(
-                    new OperateRecord(oldProject.getProjectName(), OperateTypeEnum.APPLICATION_USER_CHANGE,
-                            TriggerWayEnum.MANUAL_TRIGGER, oldUser + "-->" + newUser, operator));
+            ProjectVO afterProject = projectService.getProjectDetailByProjectId(projectId);
+            List<UserBriefVO> afterProjectUserList = Lists.newArrayList();
+            Optional.ofNullable(afterProject.getUserList()).ifPresent(afterProjectUserList::addAll);
+            final Tuple2</*beforeChangeUser*/String,/*afterChangeUser*/ String> tuple2 =
+                    projectOwnerOrMemberChangeStr(beforeProjectUserList,
+                    afterProjectUserList);
+            recordProjectOwnerOrUserChange(tuple2,oldProject.getProjectName(),operator);
             return Result.buildSucc();
         } catch (LogiSecurityException e) {
             return Result.buildFail(e.getMessage());
@@ -447,23 +439,20 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
         }
         
         try {
-            ProjectVO oldProject = projectService.getProjectDetailByProjectId(projectId);
+            ProjectVO beforeProjectAddOwner = projectService.getProjectDetailByProjectId(projectId);
             //获取旧的项目的owner和user
-            List<UserBriefVO> oldUserBriefList = Lists.newArrayList();
-            Optional.ofNullable(oldProject.getOwnerList()).ifPresent(oldUserBriefList::addAll);
+            List<UserBriefVO> beforeProjectAddOwnerList = Lists.newArrayList();
+            Optional.ofNullable(beforeProjectAddOwner.getOwnerList()).ifPresent(beforeProjectAddOwnerList::addAll);
             // 更新
             userProjectService.saveOwnerProject(projectId, ownerIdList);
-            List<UserBriefVO> newUserBriefList = Lists.newArrayList();
+            List<UserBriefVO> afterProjectAddOwnerList = Lists.newArrayList();
             //更新后的列表
             Optional.ofNullable(projectService.getProjectDetailByProjectId(projectId)).map(ProjectVO::getOwnerList)
-                    .ifPresent(newUserBriefList::addAll);
-            String newUserName = newUserBriefList.stream().map(UserBriefVO::getUserName)
-                    .collect(Collectors.joining(","));
-            String oldUser = oldUserBriefList.stream().map(UserBriefVO::getUserName).collect(Collectors.joining(","));
+                    .ifPresent(afterProjectAddOwnerList::addAll);
+         
+            Tuple2</*beforeOwnerUserName*/String,/*afterOwnerUserName*/String> tuple2 = projectOwnerOrMemberChangeStr(beforeProjectAddOwnerList,afterProjectAddOwnerList);
+            recordProjectOwnerOrUserChange(tuple2,beforeProjectAddOwner.getProjectName(),operator);
            
-            operateRecordService.save(
-                    new OperateRecord(oldProject.getProjectName(), OperateTypeEnum.APPLICATION_OWNER_CHANGE,
-                            TriggerWayEnum.MANUAL_TRIGGER, oldUser + "-->" + newUserName, operator));
             return Result.buildSucc();
         } catch (LogiSecurityException e) {
             return Result.buildFail(e.getMessage());
@@ -480,18 +469,22 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
     @Override
     public Result<Void> delProjectOwner(Integer projectId, Integer ownerId, String operator) {
         try {
-            ProjectVO oldProject = projectService.getProjectDetailByProjectId(projectId);
-            List<UserBriefVO> oldUserBriefList = Lists.newArrayList();
-            Optional.ofNullable(oldProject.getUserList()).ifPresent(oldUserBriefList::addAll);
+            ProjectVO beforeDeleteProjectOwner = projectService.getProjectDetailByProjectId(projectId);
+            List<UserBriefVO> beforeProjectOwnerList = Lists.newArrayList();
+            Optional.ofNullable(beforeDeleteProjectOwner)
+                    
+                    .map(ProjectVO::getOwnerList)
+                    .ifPresent(beforeProjectOwnerList::addAll);
             projectService.delProjectOwner(projectId, ownerId, operator);
-            ProjectVO newProject = projectService.getProjectDetailByProjectId(projectId);
-            List<UserBriefVO> newUserBriefList = Lists.newArrayList();
-            Optional.ofNullable(newProject.getUserList()).ifPresent(newUserBriefList::addAll);
-            String oldUser = oldUserBriefList.stream().map(UserBriefVO::getUserName).collect(Collectors.joining(","));
-            String newUser = newUserBriefList.stream().map(UserBriefVO::getUserName).collect(Collectors.joining(","));
-            operateRecordService.save(
-                    new OperateRecord(oldProject.getProjectName(), OperateTypeEnum.APPLICATION_OWNER_CHANGE,
-                            TriggerWayEnum.MANUAL_TRIGGER, oldUser + "-->" + newUser, operator));
+            ProjectVO afterDeleteProjectOwner = projectService.getProjectDetailByProjectId(projectId);
+            List<UserBriefVO> afterProjectOwnerList = Lists.newArrayList();
+            Optional.ofNullable(afterDeleteProjectOwner)
+                    .map(ProjectVO::getOwnerList)
+                    .ifPresent(afterProjectOwnerList::addAll);
+             Tuple2</*beforeOwnerUserName*/String,/*afterOwnerUserName*/String> tuple2 = projectOwnerOrMemberChangeStr(
+                     beforeProjectOwnerList,afterProjectOwnerList);
+             recordProjectOwnerOrUserChange(tuple2,beforeDeleteProjectOwner.getProjectName(),operator);
+           
             return Result.buildSucc();
         } catch (LogiSecurityException e) {
             return Result.buildFail(e.getMessage());
@@ -597,12 +590,12 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
         esUserDTO.setMemo((data).getProjectName() + "项目默认的es user");
         esUserDTO.setProjectId((data).getId());
         esUserDTO.setMemo("创建项目es user");
-        final Tuple<Result, ESUserPO> result = esUserService.registerESUser(esUserDTO, operator);
-        if (result.getV1().success()){
+        final Tuple2<Result, ESUserPO> result = esUserService.registerESUser(esUserDTO, operator);
+        if (result._1().success()){
             operateRecordService.save(
                     new OperateRecord(data.getProjectName(), OperateTypeEnum.APPLICATION_ACCESS_MODE,
                             TriggerWayEnum.MANUAL_TRIGGER,
-                            String.format("新增访问模式:%s", AppSearchTypeEnum.TEMPLATE.getDesc()), operator,result.getV2()
+                            String.format("新增访问模式:%s", AppSearchTypeEnum.TEMPLATE.getDesc()), operator,result._2()
                             .getId()));
 
         }
@@ -633,4 +626,43 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
         
         return Result.buildSucc();
     }
+    
+    /**
+     * 项目所有者或成员改变str
+     *
+     * @param beforeProjectAddOwnerOrUserList 之前项目添加所有者列表
+     * @param afterProjectAddOwnerUserList    在项目添加所有者列表
+     * @return {@code Tuple2<String, String>}
+     */
+    private Tuple2</*beforeOwnerUserName*/String,/*afterOwnerUserName*/String> projectOwnerOrMemberChangeStr(
+            List<UserBriefVO> beforeProjectAddOwnerOrUserList, List<UserBriefVO> afterProjectAddOwnerUserList){
+           String beforeOwnerUserName = afterProjectAddOwnerUserList.stream().map(UserBriefVO::getUserName)
+                   .sorted()
+                    .collect(Collectors.joining(","));
+            String afterOwnerUserName = beforeProjectAddOwnerOrUserList.stream().map(UserBriefVO::getUserName)
+                    .sorted()
+                    .collect(Collectors.joining(","));
+            return Tuple.of(beforeOwnerUserName,afterOwnerUserName);
+        
+    }
+    
+    /**
+     * 记录项目的所有者或者成员的变更
+     *
+     * @param tuple2      tuple2
+     * @param projectName 项目名称
+     * @param operator    操作人或角色
+     */
+    private void recordProjectOwnerOrUserChange(Tuple2</*beforeOwnerOrUser*/String,/*afterOwnerOrUser*/String> tuple2,
+                                                String projectName, String operator) {
+        if (!StringUtils.equals(tuple2._1, tuple2._2)) {
+            operateRecordService.save(new OperateRecord.Builder()
+                    
+                    .projectName(projectName).operationTypeEnum(OperateTypeEnum.APPLICATION_OWNER_CHANGE)
+                    .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).content(tuple2._1 + "-->" + tuple2._2)
+                    .userOperation(operator).build());
+        }
+    }
+    
+   
 }

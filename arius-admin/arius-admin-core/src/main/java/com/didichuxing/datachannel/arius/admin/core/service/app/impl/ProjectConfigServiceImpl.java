@@ -3,18 +3,18 @@ package com.didichuxing.datachannel.arius.admin.core.service.app.impl;
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.yesOrNo;
 import static com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil.obj2Obj;
 
-import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectConfigDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.app.ProjectConfigPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
+import com.didichuxing.datachannel.arius.admin.common.tuple.Tuple;
+import com.didichuxing.datachannel.arius.admin.common.tuple.Tuple2;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectConfigService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.app.ProjectConfigDAO;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,18 +66,18 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
 	 */
 	@Override
 	@Transactional(rollbackFor = Exception.class)
-	public Tuple<Result<Void>, ProjectConfigPO> updateOrInitProjectConfig(ProjectConfigDTO configDTO, String operator) {
+	public Tuple2<Result<Void>, ProjectConfigPO> updateOrInitProjectConfig(ProjectConfigDTO configDTO, String operator) {
 		Result<Void> checkResult = checkConfigParam(configDTO);
 		if (checkResult.failed()) {
 			LOGGER.warn("class=ProjectConfigServiceImpl||method=updateProjectConfig||msg={}||msg=check fail!",
 					checkResult.getMessage());
-			return new Tuple<>(checkResult, null);
+			return Tuple.of(checkResult, null);
 		}
 		//当项目存在的时候
 		if (projectConfigDAO.checkProjectConfigByProjectId(configDTO.getProjectId())) {
 			ProjectConfigPO oldConfigPO = projectConfigDAO.getByProjectId(configDTO.getProjectId());
 			boolean succ = (1 == projectConfigDAO.update(obj2Obj(configDTO, ProjectConfigPO.class)));
-			return new Tuple<>(Result.build(succ), oldConfigPO);
+			return Tuple.of(Result.build(succ), oldConfigPO);
 			
 		}
 		//
@@ -102,7 +102,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
 			boolean succ = (1 == projectConfigDAO.insert(param));
 			final ProjectConfigPO newProjectConfigPO = projectConfigDAO.getByProjectId(configDTO.getProjectId());
 			
-			return new Tuple<>(Result.build(succ), newProjectConfigPO);
+			return Tuple.of(Result.build(succ), newProjectConfigPO);
 		}
 		
 	}

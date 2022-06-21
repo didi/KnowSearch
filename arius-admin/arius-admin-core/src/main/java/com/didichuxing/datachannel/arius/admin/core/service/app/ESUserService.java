@@ -6,6 +6,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUser;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.app.ESUserPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
+import com.didichuxing.datachannel.arius.admin.common.tuple.Tuple2;
 import java.util.List;
 
 /**
@@ -40,8 +41,8 @@ public interface ESUserService {
      * @param operator  操作人 邮箱前缀
      * @return 成功 true  失败 false
      */
-    Tuple</*创建的es user*/Result,/*创建的es user po*/ ESUserPO> registerESUser(ESUserDTO esUserDTO,
-                                                                                   String operator);
+    Tuple2</*创建的es user*/Result,/*创建的es user po*/ ESUserPO> registerESUser(ESUserDTO esUserDTO,
+                                                                           String operator);
     
     /**编辑用户
      * 编辑APP
@@ -49,7 +50,7 @@ public interface ESUserService {
      * @param esUserDTO dto
      * @return Tuple<Result < Void>, ESUserPO>
      */
-    Tuple<Result<Void>/*更新的状态*/, ESUserPO/*更新之后的的ESUserPO*/> editUser(ESUserDTO esUserDTO);
+    Tuple2<Result<Void>/*更新的状态*/, ESUserPO/*更新之后的的ESUserPO*/> editUser(ESUserDTO esUserDTO);
     
     /**
      * 删除APP
@@ -57,9 +58,9 @@ public interface ESUserService {
      * @param esUser esuser
      * @return 成功 true  失败 false
      */
-    Tuple<Result<Void>, ESUserPO> deleteESUserById(int esUser);
+    Tuple2<Result<Void>, ESUserPO> deleteESUserById(int esUser);
     
-    Tuple<Result<Void>, List<ESUserPO>> deleteByESUsers(int projectId);
+    Tuple2<Result<Void>, List<ESUserPO>> deleteByESUsers(int projectId);
     
     /**
      * 获取项目下es user 个数

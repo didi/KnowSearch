@@ -4,7 +4,6 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.operaterec
 import static com.didichuxing.datachannel.arius.admin.core.service.app.impl.ESUserServiceImpl.VERIFY_CODE_LENGTH;
 
 import com.didichuxing.datachannel.arius.admin.biz.app.ESUserManager;
-import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserDTO;
@@ -16,6 +15,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ESUserVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.AppSearchTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
+import com.didichuxing.datachannel.arius.admin.common.tuple.Tuple2;
 import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.VerifyCodeFactory;
@@ -24,7 +24,6 @@ import com.didichuxing.datachannel.arius.admin.core.service.app.ESUserService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import com.didiglobal.logi.security.common.vo.project.ProjectVO;
 import com.didiglobal.logi.security.service.ProjectService;
 import java.util.Collections;
@@ -117,9 +116,10 @@ public class ESUserManagerImpl implements ESUserManager {
             return Result.buildParamIllegal(String.format("当前操作[%s] 不能创建es user", appDTO.getResponsible()));
         }
     
-        final Tuple</*创建的es user*/Result,/*创建的es user po*/ ESUserPO> resultESUserPOTuple = esUserService.registerESUser(appDTO, operator);
+        final Tuple2</*创建的es user*/Result,/*创建的es user po*/ ESUserPO> resultESUserPOTuple =
+                esUserService.registerESUser(appDTO, operator);
         
-         if (resultESUserPOTuple.getV1().success()) {
+         if (resultESUserPOTuple._1().success()) {
             // 操作记录
              operateRecordService.save(
                      new OperateRecord.Builder().project(
@@ -130,7 +130,7 @@ public class ESUserManagerImpl implements ESUserManager {
            
         }
 
-        return resultESUserPOTuple.getV1();
+        return resultESUserPOTuple._1();
     }
  
     
@@ -156,9 +156,10 @@ public class ESUserManagerImpl implements ESUserManager {
         final ESUser oldESUser = esUserService.getEsUserById(esUserDTO.getId());
         //校验当前esUserDTO中的projectId是否存在于esUser
         //更新之后的结果获取
-        final Tuple<Result<Void>/*更新的状态*/, ESUserPO/*更新之后的的ESUserPO*/> resultESUserTuple = esUserService.editUser(esUserDTO);
+        final Tuple2<Result<Void>/*更新的状态*/, ESUserPO/*更新之后的的ESUserPO*/> resultESUserTuple =
+                esUserService.editUser(esUserDTO);
     
-        if (resultESUserTuple.getV1().success()) {
+        if (resultESUserTuple._1().success()) {
             // 操作记录
             operateRecordService.save(new OperateRecord.Builder().project(
                             projectService.getProjectBriefByProjectId(oldESUser.getProjectId())).content(
@@ -167,7 +168,7 @@ public class ESUserManagerImpl implements ESUserManager {
                     .operationTypeEnum(OperateTypeEnum.APPLICATION_ACCESS_MODE)
                     .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).userOperation(operator).build());
         }
-        return resultESUserTuple.getV1();
+        return resultESUserTuple._1();
     }
     
     /**
@@ -199,18 +200,18 @@ public class ESUserManagerImpl implements ESUserManager {
             return Result.buildFail(String.format("项目[%s]中es user:[%s],属于项目默认的es user,请先进行解绑", projectId, esUser));
         }
         //进行es user的删除
-        final Tuple<Result<Void>, ESUserPO> resultESUserPOTuple = esUserService.deleteESUserById(esUser);
-        if (resultESUserPOTuple.getV1().success()){
+        final Tuple2<Result<Void>, ESUserPO> resultESUserPOTuple = esUserService.deleteESUserById(esUser);
+        if (resultESUserPOTuple._1().success()){
             // 操作记录
             operateRecordService.save(
                     new OperateRecord(projectService.getProjectBriefByProjectId(projectId).getProjectName(),
                             OperateTypeEnum.APPLICATION_ACCESS_MODE, TriggerWayEnum.MANUAL_TRIGGER,
                             String.format("删除访问模式:%s",
-                                    AppSearchTypeEnum.valueOf(resultESUserPOTuple.getV2().getSearchType())), operator
+                                    AppSearchTypeEnum.valueOf(resultESUserPOTuple._2().getSearchType())), operator
             
                     ));
         }
-        return resultESUserPOTuple.getV1();
+        return resultESUserPOTuple._1();
     }
     
     /**
@@ -226,8 +227,8 @@ public class ESUserManagerImpl implements ESUserManager {
             return Result.buildFail("当前操作者权限不足,需要管理员权限");
         }
         
-        final Tuple<Result<Void>, List<ESUserPO>> resultListTuple = esUserService.deleteByESUsers(projectId);
-        if (resultListTuple.getV1().success()) {
+        final Tuple2<Result<Void>, List<ESUserPO>> resultListTuple = esUserService.deleteByESUsers(projectId);
+        if (resultListTuple._1().success()) {
             // 操作记录
             operateRecordService.save(
                     new OperateRecord(projectService.getProjectBriefByProjectId(projectId).getProjectName(),
@@ -235,7 +236,7 @@ public class ESUserManagerImpl implements ESUserManager {
             
                     ));
         }
-        return resultListTuple.getV1();
+        return resultListTuple._1();
     }
     
 

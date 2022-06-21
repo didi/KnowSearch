@@ -4,7 +4,6 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.operaterec
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.EDIT;
 import static com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil.obj2Obj;
 
-import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUser;
@@ -12,6 +11,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.po.app.ESUserPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.app.AppSearchTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
+import com.didichuxing.datachannel.arius.admin.common.tuple.Tuple;
+import com.didichuxing.datachannel.arius.admin.common.tuple.Tuple2;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
@@ -72,14 +73,14 @@ public class ESUserServiceImpl implements ESUserService {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Tuple<Result, ESUserPO> registerESUser(ESUserDTO esUserDTO,
-                                                  String operator) {
+    public Tuple2<Result, ESUserPO> registerESUser(ESUserDTO esUserDTO,
+                                                   String operator) {
        
         Result<Void> checkResult = validateESUser(esUserDTO, ADD);
         
         if (checkResult.failed()) {
             LOGGER.warn("class=ESUserManagerImpl||method=addApp||fail msg={}", checkResult.getMessage());
-            return new Tuple<>(checkResult,null);
+            return Tuple.of(checkResult,null);
         }
         initParam(esUserDTO);
         ESUserPO param = obj2Obj(esUserDTO, ESUserPO.class);
@@ -95,7 +96,7 @@ public class ESUserServiceImpl implements ESUserService {
         boolean succ = (esUserDAO.insert(param) == 1);
        
 
-        return new Tuple<>(Result.build(succ, param.getId()),param);
+        return Tuple.of(Result.build(succ, param.getId()),param);
     }
 
 
@@ -108,11 +109,11 @@ public class ESUserServiceImpl implements ESUserService {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Tuple<Result<Void>/*更新的状态*/, ESUserPO/*更新之后的的ESUserPO*/> editUser(ESUserDTO esUserDTO) {
+    public Tuple2<Result<Void>/*更新的状态*/, ESUserPO/*更新之后的的ESUserPO*/> editUser(ESUserDTO esUserDTO) {
         
         final ESUserPO param = obj2Obj(esUserDTO, ESUserPO.class);
       
-        return new Tuple<>(Result.build((esUserDAO.update(param) == 1)), param);
+        return Tuple.of(Result.build((esUserDAO.update(param) == 1)), param);
     
     }
 
@@ -124,13 +125,13 @@ public class ESUserServiceImpl implements ESUserService {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Tuple<Result<Void>, ESUserPO> deleteESUserById(int esUser) {
+    public Tuple2<Result<Void>, ESUserPO> deleteESUserById(int esUser) {
         
         ESUserPO oldPO = esUserDAO.getByESUser(esUser);
         boolean succ = esUserDAO.delete(esUser) == 1;
       
 
-        return new Tuple<>(Result.build(succ),oldPO);
+        return Tuple.of(Result.build(succ),oldPO);
     }
      /**
       * @param projectId
@@ -138,10 +139,10 @@ public class ESUserServiceImpl implements ESUserService {
       */
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public Tuple<Result<Void>, List<ESUserPO>> deleteByESUsers(int projectId) {
+    public Tuple2<Result<Void>, List<ESUserPO>> deleteByESUsers(int projectId) {
         final List<ESUserPO> esUserPOS = esUserDAO.listByProjectId(projectId);
         final int deleteByProjectId = esUserDAO.deleteByProjectId(projectId);
-        return new Tuple<>(Result.build(deleteByProjectId==esUserPOS.size()), esUserPOS);
+        return Tuple.of(Result.build(deleteByProjectId==esUserPOS.size()), esUserPOS);
     }
     
     /**

@@ -20,6 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -116,28 +118,39 @@ public class OperateRecordServiceImpl implements OperateRecordService {
     public Tuple<Long, List<OperateRecordVO>> pagingGetOperateRecordByCondition(OperateRecordDTO pageDTO) {
         final List<OperateRecordInfoPO> recordInfoPOList = operateRecordDAO.listByCondition(pageDTO);
         
-        final Map</*id*/Integer, OperateRecordInfoPO> operateRecordInfoPOMap = ConvertUtil.list2Map(recordInfoPOList,
+        final Map</*id*/Integer, OperateRecordInfoPO> operateRecordInfoMap = ConvertUtil.list2Map(recordInfoPOList,
                 OperateRecordInfoPO::getId);
         final List<OperateRecordVO> operateRecordVOList = ConvertUtil.list2List(recordInfoPOList, OperateRecordVO.class);
         //对vo中的数据进行转换
-        for (OperateRecordVO operateRecordVO : operateRecordVOList) {
-            //设置操作的模块
-            Optional.ofNullable(operateRecordInfoPOMap.get(operateRecordVO.getId()))
-                    .map(OperateRecordInfoPO::getModuleId).map(NewModuleEnum::getModuleEnum)
-                    .map(NewModuleEnum::getModule).ifPresent(operateRecordVO::setModule);
-            //设置触发方式
-            Optional.ofNullable(operateRecordInfoPOMap.get(operateRecordVO.getId()))
-                    .map(OperateRecordInfoPO::getTriggerWayId).map(TriggerWayEnum::getTriggerWayEnum)
-                    .map(TriggerWayEnum::getTriggerWay).ifPresent(operateRecordVO::setTriggerWay);
-            //设置操作类型
-            Optional.ofNullable(operateRecordInfoPOMap.get(operateRecordVO.getId()))
-                    .map(OperateRecordInfoPO::getOperateId).map(OperateTypeEnum::getOperationTypeEnum)
-                    .map(OperateTypeEnum::getOperationType).ifPresent(operateRecordVO::setModule);
-        }
+        Consumer<OperateRecordVO> poIncludeEnumIdConvertEnumStrFunc = operateRecordVO -> this.poIncludeEnumIdConvertEnumStr(
+                operateRecordInfoMap.get(operateRecordVO.getId()), operateRecordVO);
+        operateRecordVOList.forEach(poIncludeEnumIdConvertEnumStrFunc);
+       
         final Long count = operateRecordDAO.countByCondition(pageDTO);
         
     
         return new Tuple<>(count,operateRecordVOList);
+    }
+    
+    /**
+     * po包括枚举id转换枚举str
+     *
+     * @param recordInfo 操作记录信息pomap
+     * @param operateRecordVO        操作记录签证官
+     */
+    private void poIncludeEnumIdConvertEnumStr(OperateRecordInfoPO recordInfo, OperateRecordVO operateRecordVO) {
+        //设置操作的模块
+        Optional.ofNullable(recordInfo)
+                .map(OperateRecordInfoPO::getModuleId).map(NewModuleEnum::getModuleEnum)
+                .map(NewModuleEnum::getModule).ifPresent(operateRecordVO::setModule);
+        //设置触发方式
+        Optional.ofNullable(recordInfo)
+                .map(OperateRecordInfoPO::getTriggerWayId).map(TriggerWayEnum::getTriggerWayEnum)
+                .map(TriggerWayEnum::getTriggerWay).ifPresent(operateRecordVO::setTriggerWay);
+        //设置操作类型
+        Optional.ofNullable(recordInfo)
+                .map(OperateRecordInfoPO::getOperateId).map(OperateTypeEnum::getOperationTypeEnum)
+                .map(OperateTypeEnum::getOperationType).ifPresent(operateRecordVO::setModule);
     }
     
     /**
@@ -148,16 +161,7 @@ public class OperateRecordServiceImpl implements OperateRecordService {
     public OperateRecordVO getById(Integer id) {
         final OperateRecordInfoPO recordInfo = operateRecordDAO.getById(id);
         final OperateRecordVO operateRecordVO = ConvertUtil.obj2Obj(recordInfo, OperateRecordVO.class);
-        //设置操作的模块
-        Optional.ofNullable(recordInfo).map(OperateRecordInfoPO::getModuleId).map(NewModuleEnum::getModuleEnum)
-                .map(NewModuleEnum::getModule).ifPresent(operateRecordVO::setModule);
-        //设置触发方式
-        Optional.ofNullable(recordInfo).map(OperateRecordInfoPO::getTriggerWayId).map(TriggerWayEnum::getTriggerWayEnum)
-                .map(TriggerWayEnum::getTriggerWay).ifPresent(operateRecordVO::setTriggerWay);
-        //设置操作类型
-        Optional.ofNullable(recordInfo).map(OperateRecordInfoPO::getOperateId)
-                .map(OperateTypeEnum::getOperationTypeEnum).map(OperateTypeEnum::getOperationType)
-                .ifPresent(operateRecordVO::setModule);
+        poIncludeEnumIdConvertEnumStr(recordInfo,operateRecordVO);
         return operateRecordVO;
     }
     

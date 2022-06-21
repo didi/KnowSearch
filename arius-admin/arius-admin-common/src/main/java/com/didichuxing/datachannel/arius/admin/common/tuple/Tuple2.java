@@ -77,6 +77,17 @@ public class Tuple2<T1, T2> implements Tuple, Comparable<Tuple2<T1, T2>>, Serial
         return new AbstractMap.SimpleEntry<>(_1, _2);
     }
     
+    /**
+     * 传入bi func 转换为tuple
+     * <blockquote><pre>
+     *   final Tuple2<Integer, Integer> tuple2 = Tuple.of(1, 2);
+     *         BiFunction<Integer,Integer,Tuple2<Integer,Integer>> biFunction=(a,b)->Tuple.of(a+1,b+1 );
+     *         result : tuple_2=3
+     * </pre></blockquote>
+     *
+     * @param mapper 映射器
+     * @return {@code Tuple2<U1, U2>}
+     */
     public <U1, U2> Tuple2<U1, U2> map(BiFunction<? super T1, ? super T2, Tuple2<U1, U2>> mapper) {
         Objects.requireNonNull(mapper, "mapper is null");
         return mapper.apply(_1, _2);
@@ -111,11 +122,13 @@ public class Tuple2<T1, T2> implements Tuple, Comparable<Tuple2<T1, T2>>, Serial
     }
     
     /**
-     * @param o the object to be compared.
+     * @param that the object to be compared.
      * @return
      */
     @Override
-    public int compareTo(Tuple2<T1, T2> o) {
-        return 0;
+    public int compareTo(Tuple2<T1, T2> that) {
+        Objects.requireNonNull(that, "that is not  null");
+        return Tuple2.compareTo(this, that);
     }
+    
 }

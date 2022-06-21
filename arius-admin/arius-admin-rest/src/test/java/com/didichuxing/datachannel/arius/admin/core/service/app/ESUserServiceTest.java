@@ -13,6 +13,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUser;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.app.ESUserPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
+import com.didichuxing.datachannel.arius.admin.common.tuple.Tuple2;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.app.impl.ESUserServiceImpl;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
@@ -67,14 +68,14 @@ class ESUserServiceTest {
     @Test
     void testRegisterESUser() {
         Assertions.assertEquals(Result.buildParamIllegal("应用信息为空").getMessage(),
-                esUserService.registerESUser(null, "operator").getV1().getMessage());
+                esUserService.registerESUser(null, "operator")._1().getMessage());
         ESUserPO esUserPO = CustomDataSource.esUserPO();
         final ESUserDTO esUserDTO = ConvertUtil.obj2Obj(esUserPO, ESUserDTO.class);
     
         esUserDTO.setProjectId(null);
         esUserDTO.setId(1);
         Assertions.assertEquals(Result.buildParamIllegal("项目id为空").getMessage(),
-                esUserService.registerESUser(esUserDTO, "operator").getV1()
+                esUserService.registerESUser(esUserDTO, "operator")._1()
                         .getMessage());
        
         
@@ -82,7 +83,7 @@ class ESUserServiceTest {
         when(esUserDAO.insert(any())).thenReturn(1);
         esUserDTO.setProjectId(1);
         Assertions.assertTrue(
-                esUserService.registerESUser(esUserDTO, "operator").getV1()
+                esUserService.registerESUser(esUserDTO, "operator")._1()
                         .success());
         
     }
@@ -97,8 +98,8 @@ class ESUserServiceTest {
         esUserDTO.setId(1);
         when(esUserDAO.getByESUser(anyInt())).thenReturn(esUserPO);
         // Run the test
-        final Tuple<Result<Void>, ESUserPO> result = esUserService.editUser(esUserDTO);
-        Assertions.assertTrue(result.getV1().success());
+        final Tuple2<Result<Void>, ESUserPO> result = esUserService.editUser(esUserDTO);
+        Assertions.assertTrue(result._1().success());
         // Verify the results
     }
     
@@ -108,8 +109,8 @@ class ESUserServiceTest {
         when(esUserDAO.delete(anyInt())).thenReturn(1);
         
         // Run the test
-        final Tuple<Result<Void>, ESUserPO> result = esUserService.deleteESUserById(1);
-        Assertions.assertTrue(result.getV1().success());
+        final Tuple2<Result<Void>, ESUserPO> result = esUserService.deleteESUserById(1);
+        Assertions.assertTrue(result._1().success());
         // Verify the results
     }
     
@@ -125,7 +126,7 @@ class ESUserServiceTest {
         when(esUserDAO.deleteByProjectId(0)).thenReturn(0);
         
         // Run the test
-        final Tuple<Result<Void>, List<ESUserPO>> result = esUserService.deleteByESUsers(0);
+        esUserService.deleteByESUsers(0);
         
         // Verify the results
     }

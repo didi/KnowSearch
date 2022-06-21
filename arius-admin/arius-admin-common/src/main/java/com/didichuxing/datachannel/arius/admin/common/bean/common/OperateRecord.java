@@ -166,6 +166,11 @@ public class OperateRecord {
 			return this;
 		}
 		
+		public Builder projectName(String project) {
+			this.projectName = project;
+			return this;
+		}
+		
 		public Builder bizId(Integer bizId) {
 			this.bizId = bizId;
 			return this;
