@@ -5,21 +5,6 @@ import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOpe
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.VERSION_INNER_NUMBER;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.VERSION_NUMBER;
 
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.*;
-
-import java.net.InetAddress;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.compress.utils.Sets;
-import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.common.transport.InetSocketTransportAddress;
-import org.elasticsearch.common.transport.TransportAddress;
-import org.elasticsearch.rest.RestStatus;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.NodeAttrInfo;

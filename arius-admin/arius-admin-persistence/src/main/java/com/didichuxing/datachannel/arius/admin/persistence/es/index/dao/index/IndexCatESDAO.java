@@ -72,11 +72,11 @@ public class IndexCatESDAO extends BaseESDAO {
      * @param orderByDesc  是否降序
      * @return             Tuple<Long, List<IndexCatCellPO>> 命中数 具体数据
      */
-    public Tuple<Long, List<IndexCatCellPO>> getCatIndexInfo(String cluster, String index, String health, Integer appId,
+    public Tuple<Long, List<IndexCatCellPO>> getCatIndexInfo(String cluster, String index, String health, Integer projectId,
                                                              Long from,
                                                              Long size, String sortTerm, Boolean orderByDesc) {
         Tuple<Long, List<IndexCatCellPO>> totalHitAndIndexCatCellListTuple;
-        String queryTermDsl =  buildQueryTermDsl(cluster, index, health, appId);
+        String queryTermDsl =  buildQueryTermDsl(cluster, index, health, projectId);
         String sortType     =  buildSortType(orderByDesc);
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_CAT_INDEX_INFO_BY_CONDITION,
             queryTermDsl, sortTerm, sortType, from, size);
@@ -136,24 +136,24 @@ public class IndexCatESDAO extends BaseESDAO {
      * 			"value": "cn_arius.template.label"
      *                } 	}
      * }
-     * @param clusterPhy
+     * @param cluster
      * @param index
      * @param health
      * @return
      */
-    private String buildQueryTermDsl(String cluster, String index, String health, Integer appId) {
-        return "[" + buildTermCell(cluster, index, health, appId) +"]";
+    private String buildQueryTermDsl(String cluster, String index, String health, Integer projectId) {
+        return "[" + buildTermCell(cluster, index, health, projectId) +"]";
     }
 
-    private String buildTermCell(String cluster, String index, String health, Integer appId) {
+    private String buildTermCell(String cluster, String index, String health, Integer projectId) {
         List<String> termCellList = Lists.newArrayList();
-        //appId == null 时，属于超级项目访问；
-        if (null == appId) {
+        //projectId == null 时，属于超级项目访问；
+        if (null == projectId) {
             //get cluster dsl term
             termCellList.add(DSLSearchUtils.getTermCellForExactSearch(cluster, "clusterPhy"));
         } else {
-            //get appId dsl term
-            termCellList.add(DSLSearchUtils.getTermCellForExactSearch(appId, "appId"));
+            //get projectId dsl term
+            termCellList.add(DSLSearchUtils.getTermCellForExactSearch(projectId, "projectId"));
 
             //get resourceId dsl term
             termCellList.add(DSLSearchUtils.getTermCellForExactSearch(cluster, "clusterLogic"));
