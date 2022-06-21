@@ -27,8 +27,7 @@ import org.springframework.stereotype.Component;
  * @Version 1.0
  */
 @Component
-public class DslTemplatePageSearchHandle extends AbstractPageSearchHandle<PageDTO, DslTemplateVO> {
-    private static final ILog LOGGER = LogFactory.getLog(DslTemplatePageSearchHandle.class);
+public class DslTemplatePageSearchHandle extends AbstractPageSearchHandle<DslTemplateConditionDTO, DslTemplateVO> {
     @Autowired
     private ProjectService projectService;
 
@@ -36,33 +35,23 @@ public class DslTemplatePageSearchHandle extends AbstractPageSearchHandle<PageDT
     private DslTemplateService dslTemplateService;
 
     @Override
-    protected Result<Boolean> checkCondition(PageDTO condition, Integer projectId) {
-         if (!projectService.checkProjectExist(projectId)) {
-            return Result.buildParamIllegal("项目不存在");
-        }
-        if (condition instanceof DslTemplateConditionDTO) {
-            DslTemplateConditionDTO dslTemplateConditionDTO = (DslTemplateConditionDTO) condition;
-            String queryIndex = dslTemplateConditionDTO.getQueryIndex();
-            if (!AriusObjUtils.isBlack(queryIndex) && (queryIndex.startsWith("*") || queryIndex.startsWith("?"))) {
-                return Result.buildParamIllegal("查询索引名称不允许带类似*, ?等通配符");
-            }
+    protected Result<Boolean> checkCondition(DslTemplateConditionDTO condition, Integer projectId) {
 
-            return Result.buildSucc(true);
+        String queryIndex = condition.getQueryIndex();
+        if (!AriusObjUtils.isBlack(queryIndex) && (queryIndex.startsWith("*") || queryIndex.startsWith("?"))) {
+            return Result.buildParamIllegal("查询索引名称不允许带类似*, ?等通配符");
         }
 
-        LOGGER.error("class=DslTemplatePageSearchHandle||method=validCheckForCondition||errMsg=failed to convert PageDTO to DslTemplateConditionDTO");
-
-        return Result.buildFail();
+        return Result.buildSucc(true);
     }
 
     @Override
-    protected void initCondition(PageDTO condition, Integer projectId) {
+    protected void initCondition(DslTemplateConditionDTO condition, Integer projectId) {
         // Do nothing
     }
 
     @Override
-    protected PaginationResult<DslTemplateVO> buildPageData(PageDTO pageDTO, Integer projectId) {
-        DslTemplateConditionDTO condition = buildInitDslTemplateConditionDTO(pageDTO);
+    protected PaginationResult<DslTemplateVO> buildPageData(DslTemplateConditionDTO condition, Integer projectId) {
 
         Tuple<Long, List<DslTemplatePO>> tuple = dslTemplateService.getDslTemplatePage(projectId, condition);
         if (tuple == null) {
@@ -70,12 +59,5 @@ public class DslTemplatePageSearchHandle extends AbstractPageSearchHandle<PageDT
         }
         List<DslTemplateVO> dslTemplateVOList = ConvertUtil.list2List(tuple.v2(), DslTemplateVO.class);
         return PaginationResult.buildSucc(dslTemplateVOList, tuple.v1(), condition.getPage(), condition.getSize());
-    }
-
-    private DslTemplateConditionDTO buildInitDslTemplateConditionDTO(PageDTO pageDTO) {
-        if (pageDTO instanceof DslTemplateConditionDTO) {
-            return (DslTemplateConditionDTO) pageDTO;
-        }
-        return null;
     }
 }

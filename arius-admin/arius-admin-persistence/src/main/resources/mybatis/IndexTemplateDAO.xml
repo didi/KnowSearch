@@ -200,7 +200,16 @@
         <foreach collection="logicIds" item="id" open="(" separator="," close=")">#{id}</foreach>
     </select>
 
-   
+    <select id="listByResourceIds" parameterType="list" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from index_template_info
+        where is_active = 1 and
+        resource_id in
+        <foreach collection="resourceIds" item="resourceId" open="(" separator="," close=")">#{resourceId}</foreach>
+    </select>
+
+    
     <update id="updateBlockReadState">
         update index_template_info
         set block_read = #{blockRead}

@@ -17,13 +17,31 @@
             "enabled":true
         },
         "properties":{
-            "priStoreSize":{
-                "type":"long"
+            "cluster": {
+                "type": "keyword"
             },
-            "cluster":{
-                "type":"keyword"
+            "clusterPhy": {
+                "type": "keyword"
             },
-            "pri":{
+            "clusterLogic": {
+                "type": "keyword"
+            },
+            "resourceId": {
+                "type": "long"
+            },
+            "templateId": {
+                "type": "integer"
+            },
+            "totalSegmentCount": {
+                "type": "long"
+            },
+            "primariesSegmentCount": {
+                "type": "long"
+            },
+            "priStoreSize": {
+                "type": "long"
+            },
+            "pri": {
                 "type":"long"
             },
             "index":{

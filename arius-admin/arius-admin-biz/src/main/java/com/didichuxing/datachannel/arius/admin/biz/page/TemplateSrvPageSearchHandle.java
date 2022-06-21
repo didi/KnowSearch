@@ -17,34 +17,24 @@ import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
-import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  * @author chengxiang
  * @date 2022/5/18
  */
 @Component
-public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<PageDTO, TemplateWithSrvVO> {
-
-    private static final ILog LOGGER = LogFactory.getLog(TemplateSrvPageSearchHandle.class);
-    private static final FutureUtil<Void> TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_CLUSTER_FUTURE_UTIL
-            = FutureUtil.init("TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_CLUSTER_FUTURE_UTIL", 10, 10, 100);
-
-    private static final FutureUtil<Void> TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_UNAVAILABLE_SRV_FUTURE_UTIL
-            = FutureUtil.init("TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_UNAVAILABLE_SRV_FUTURE_UTIL", 10, 10, 100);
-
-    @Autowired
-    private ProjectService projectService;
+public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<TemplateQueryDTO, TemplateWithSrvVO> {
+    private static final FutureUtil<Void> TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_CLUSTER_FUTURE_UTIL = FutureUtil.init("TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_CLUSTER_FUTURE_UTIL", 10, 10, 100);
+    private static final FutureUtil<Void> TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_UNAVAILABLE_SRV_FUTURE_UTIL = FutureUtil.init("TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_UNAVAILABLE_SRV_FUTURE_UTIL", 10, 10, 100);
 
     @Autowired
     private IndexTemplateService          indexTemplateService;
@@ -55,20 +45,9 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<PageDT
     @Autowired
     private TemplateSrvManager            templateSrvManager;
 
-    @Autowired
-    private ClusterPhyService             clusterPhyService;
-
-
     @Override
-    protected Result<Boolean> checkCondition(PageDTO pageDTO, Integer projectId) {
-        if (!projectService.checkProjectExist(projectId)) {
-            return Result.buildParamIllegal("项目不存在");
-        }
-        if (!(pageDTO instanceof TemplateQueryDTO)) {
-            return Result.buildFail("参数错误");
-        }
+    protected Result<Boolean> checkCondition(TemplateQueryDTO condition, Integer projectId) {
 
-        TemplateQueryDTO condition = (TemplateQueryDTO) pageDTO;
         String templateName = condition.getName();
         if (!AriusObjUtils.isBlack(templateName) && (templateName.startsWith("*") || templateName.startsWith("?"))) {
             return Result.buildParamIllegal("模板名称不能以*或者?开头");
@@ -78,16 +57,15 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<PageDT
     }
 
     @Override
-    protected void initCondition(PageDTO condition, Integer projectId) {
+    protected void initCondition(TemplateQueryDTO condition, Integer projectId) {
         // nothing to do
     }
 
     @Override
-    protected PaginationResult<TemplateWithSrvVO> buildPageData(PageDTO pageDTO, Integer projectId) {
+    protected PaginationResult<TemplateWithSrvVO> buildPageData(TemplateQueryDTO condition, Integer projectId) {
+        // 注意这里的condition是物理集群
         Integer totalHit;
         List<IndexTemplate> matchIndexTemplateList;
-        TemplateQueryDTO condition = (TemplateQueryDTO) pageDTO;
-        // 注意这里的condition是物理集群
         if (AriusObjUtils.isBlank(condition.getCluster())) {
             matchIndexTemplateList = indexTemplateService.pagingGetTemplateSrvByCondition(condition);
             totalHit = indexTemplateService.fuzzyLogicTemplatesHitByCondition(condition).intValue();

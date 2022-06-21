@@ -50,6 +50,14 @@ public interface ESClusterRoleHostDAO {
     List<ESClusterRoleHostPO> listByRoleClusterIds(List<Long> roleClusterIds);
 
     /**
+     * 根据集群和nodeSet 信息查询符合条件的主机信息列表
+     * @param cluster
+     * @param nodeSets
+     * @return
+     */
+    List<ESClusterRoleHostPO> listByClusterAndNodeSets(@Param("cluster") String cluster, @Param("nodeSets") List<String> nodeSets);
+
+    /**
      * 根据条件查询符合条件的主机信息列表
      * @param param
      * @return

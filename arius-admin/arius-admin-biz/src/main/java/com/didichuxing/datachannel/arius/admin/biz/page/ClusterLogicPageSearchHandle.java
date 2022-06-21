@@ -1,5 +1,12 @@
 package com.didichuxing.datachannel.arius.admin.biz.page;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterLogicManager;
@@ -95,7 +102,8 @@ public class ClusterLogicPageSearchHandle extends AbstractPageSearchHandle<Clust
     }
 
     private void setProjectName(ClusterLogicVO clusterLogicVO) {
-        Optional.ofNullable(projectService.getProjectBriefByProjectId(clusterLogicVO.getProjectId()))
+        Optional.ofNullable(clusterLogicVO.getProjectId())
+                .map(projectService::getProjectBriefByProjectId)
                 .map(ProjectBriefVO::getProjectName).ifPresent(clusterLogicVO::setProjectName);
         
     }
