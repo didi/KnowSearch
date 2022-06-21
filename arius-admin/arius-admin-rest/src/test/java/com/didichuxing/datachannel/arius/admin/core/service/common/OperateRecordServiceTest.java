@@ -53,7 +53,6 @@ public class OperateRecordServiceTest extends AriusAdminApplicationTest {
         Assertions.assertTrue(operateRecordService.save(operateRecordDTO).failed());
         operateRecordDTO.setModuleId(null);
         Assertions.assertTrue(operateRecordService.save(operateRecordDTO).failed());
-        Assertions.assertTrue(operateRecordService.save(null).failed());
         operateRecordDTO = OperateRecordDTOFatory();
         Mockito.when(operateRecordDAO.insert(Mockito.any())).thenReturn(1);
         Assertions.assertTrue(operateRecordService.save(operateRecordDTO).success());

@@ -218,7 +218,7 @@ public class ProjectLogicTemplateAuthServiceTest extends AriusAdminApplicationTe
         //appMap.put(app.getId(),app);
 
         // 创建mock规则
-        Mockito.when(indexTemplateService.getAllLogicTemplates()).thenReturn(Collections.singletonList(indexTemplate));
+        Mockito.when(indexTemplateService.listAllLogicTemplates()).thenReturn(Collections.singletonList(indexTemplate));
         Mockito.when(indexTemplateService.getLogicTemplateById(Mockito.anyInt())).thenReturn(indexTemplate);
         Mockito.when(indexTemplateService.getLogicTemplateWithClusterAndMasterTemplate(Mockito.anyInt())).thenReturn(indexTemplateLogicWithClusterAndMasterTemplate);
         Mockito.when(logicClusterAuthService.getLogicClusterAuthEnum(Mockito.anyInt(), Mockito.anyLong())).thenReturn(
@@ -226,7 +226,7 @@ public class ProjectLogicTemplateAuthServiceTest extends AriusAdminApplicationTe
         Mockito.when(projectService.getProjectDetailByProjectId(Mockito.anyInt())).thenReturn(new ProjectVO());
         Mockito.when(roleTool.isAdmin(Mockito.anyString())).thenReturn(true);
         Mockito.when(projectService.checkProjectExist(Mockito.anyInt())).thenReturn(true);
-        Mockito.when(indexTemplateService.getAllLogicTemplates()).thenReturn(ConvertUtil.list2List(CustomDataSource.getTemplateLogicPOList(),IndexTemplate.class));
+        Mockito.when(indexTemplateService.listAllLogicTemplates()).thenReturn(ConvertUtil.list2List(CustomDataSource.getTemplateLogicPOList(),IndexTemplate.class));
         Mockito.when(templateAuthDAO.listWithRwAuths()).thenReturn(Lists.newArrayList(CustomDataSource.projectTemplateAuthPO()));
         Mockito.when(templateAuthDAO.insert(Mockito.any())).thenReturn(1);
         Mockito.when(templateAuthDAO.getByProjectIdAndTemplateId(
@@ -238,6 +238,6 @@ public class ProjectLogicTemplateAuthServiceTest extends AriusAdminApplicationTe
         Mockito.when( templateAuthDAO.update(Mockito.any())).thenReturn(1);
         Mockito.when(templateAuthDAO.delete(Mockito.anyLong())).thenReturn(1);
         Mockito.when(templateAuthDAO.listWithRwAuthsByProjectId(Mockito.anyInt())).thenReturn(Lists.newArrayList(CustomDataSource.projectTemplateAuthPO()));
-        Mockito.when(indexTemplateService.getProjectLogicTemplatesByProjectId(Mockito.anyInt())).thenReturn(Lists.newArrayList(ConvertUtil.obj2Obj(CustomDataSource.indexTemplateLogicDTOFactory(),IndexTemplate.class)));
+        Mockito.when(indexTemplateService.listProjectLogicTemplatesByProjectId(Mockito.anyInt())).thenReturn(Lists.newArrayList(ConvertUtil.obj2Obj(CustomDataSource.indexTemplateLogicDTOFactory(),IndexTemplate.class)));
     }
 }
