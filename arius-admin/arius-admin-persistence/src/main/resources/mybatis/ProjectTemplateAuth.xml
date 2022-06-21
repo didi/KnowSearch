@@ -6,7 +6,6 @@
         <result column="project_id" jdbcType="INTEGER" property="projectId"/>
         <result column="template" jdbcType="VARCHAR" property="templateId"/>
         <result column="type" jdbcType="INTEGER" property="type"/>
-        <result column="responsible_ids" jdbcType="VARCHAR" property="responsible"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
     </resultMap>
@@ -26,7 +25,6 @@
         update project_template_info
         <trim prefix="set" prefixOverrides=",">
             <if test="type != null">,`type` = #{type}</if>
-            <if test="responsible != null">,responsible_ids = #{responsible}</if>
         </trim>
         where id = #{id}
     </update>

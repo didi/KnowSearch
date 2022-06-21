@@ -88,7 +88,7 @@
 				and module_id = #{param.moduleId}
 			</if>
 			<if test="param.bizId != null">
-				and biz_id = #{param1.bizId}
+				and biz_id = #{param.bizId}
 			</if>
 			<if test="param.operateId != null">
 				and operate_id = #{param.operateId}
