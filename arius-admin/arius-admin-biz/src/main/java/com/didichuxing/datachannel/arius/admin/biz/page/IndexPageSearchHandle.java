@@ -73,6 +73,7 @@ public class IndexPageSearchHandle extends AbstractPageSearchHandle<IndexQueryDT
     protected PaginationResult<IndexCatCellVO> buildPageData(IndexQueryDTO condition, Integer appId) {
         try {
             String queryCluster = condition.getCluster();
+            // 使用超级项目访问时，queryAppId为null
             Integer queryAppId = null;
             if (!appService.isSuperApp(appId)) {
                 queryAppId = appId;
@@ -89,7 +90,7 @@ public class IndexPageSearchHandle extends AbstractPageSearchHandle<IndexQueryDT
             }
 
             //设置索引阻塞信息
-            List<IndexCatCell> finalIndexCatCellList = batchFetchIndexRealTimeData(totalHitAndIndexCatCellListTuple.getV2());
+            List<IndexCatCell> finalIndexCatCellList = batchFetchIndexAliasesAndBlockInfo(totalHitAndIndexCatCellListTuple.getV2());
             List<IndexCatCellVO> indexCatCellVOList = ConvertUtil.list2List(finalIndexCatCellList, IndexCatCellVO.class);
 
             return PaginationResult.buildSucc(indexCatCellVOList, totalHitAndIndexCatCellListTuple.getV1(),
@@ -107,7 +108,7 @@ public class IndexPageSearchHandle extends AbstractPageSearchHandle<IndexQueryDT
      * @param catCellList    索引cat/index基本信息
      * @return               List<IndexCatCell>
      */
-    private List<IndexCatCell> batchFetchIndexRealTimeData(List<IndexCatCell> catCellList) {
+    private List<IndexCatCell> batchFetchIndexAliasesAndBlockInfo(List<IndexCatCell> catCellList) {
         List<IndexCatCell> finalIndexCatCellList = Lists.newCopyOnWriteArrayList(catCellList);
         Map<String, List<IndexCatCell>> cluster2IndexCatCellListMap = ConvertUtil.list2MapOfList(finalIndexCatCellList,
                 IndexCatCell::getClusterPhy, indexCatCell -> indexCatCell);
@@ -117,7 +118,7 @@ public class IndexPageSearchHandle extends AbstractPageSearchHandle<IndexQueryDT
 
         cluster2IndexCatCellListMap.forEach((cluster, indexCatCellList) -> {
             INDEX_BUILD_FUTURE.runnableTask(() -> {
-                esIndexService.buildIndexRealTimeData(cluster, indexCatCellList);
+                esIndexService.buildIndexAliasesAndBlockInfo(cluster, indexCatCellList);
             });
         });
         INDEX_BUILD_FUTURE.waitExecute();

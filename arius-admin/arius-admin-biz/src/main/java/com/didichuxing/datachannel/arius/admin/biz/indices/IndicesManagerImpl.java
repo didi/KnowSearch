@@ -5,7 +5,6 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.operaterec
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.PRIMARY;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
@@ -17,7 +16,6 @@ import org.springframework.stereotype.Component;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
-import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.page.IndexPageSearchHandle;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
@@ -43,7 +41,6 @@ import com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleT
 import com.didichuxing.datachannel.arius.admin.common.constant.index.IndexBlockEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
-import com.didichuxing.datachannel.arius.admin.common.mapping.AriusTypeProperty;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
@@ -321,11 +318,8 @@ public class IndicesManagerImpl implements IndicesManager {
         }
 
         IndexMappingVO indexMappingVO = new IndexMappingVO();
-        AriusTypeProperty ariusTypeProperty = new AriusTypeProperty();
-        String indexMappingStr = esIndexService.syncGetIndexMapping(cluster, indexName);
-        JSONObject indexMappingJsonObj = JSON.parseObject(indexMappingStr);
-        ariusTypeProperty.setProperties(indexMappingJsonObj);
-        indexMappingVO.setTypeProperties(ariusTypeProperty);
+        String mappingConfig = esIndexService.syncGetIndexMapping(cluster, indexName);
+        indexMappingVO.setMappings(mappingConfig);
         indexMappingVO.setIndexName(indexName);
         return Result.buildSucc(indexMappingVO);
     }
@@ -439,7 +433,7 @@ public class IndicesManagerImpl implements IndicesManager {
             return Result.buildFail("获取单个索引详情信息失败");
         }
         //设置索引阻塞信息
-        List<IndexCatCell> finalIndexCatCellList = esIndexService.buildIndexRealTimeData(cluster,
+        List<IndexCatCell> finalIndexCatCellList = esIndexService.buildIndexAliasesAndBlockInfo(cluster,
             totalHitAndIndexCatCellListTuple.getV2());
         List<IndexCatCellVO> indexCatCellVOList = ConvertUtil.list2List(finalIndexCatCellList, IndexCatCellVO.class);
 
@@ -447,17 +441,25 @@ public class IndicesManagerImpl implements IndicesManager {
     }
 
     @Override
-    public Result<Void> editAlias(IndexCatCellWithConfigDTO param, Boolean flag, Integer appId) {
+    public Result<Void> addIndexAliases(IndexCatCellWithConfigDTO param, Integer appId) {
         Result<String> getClusterRet = getClusterPhyByClusterNameAndAppId(param.getCluster(), appId);
         if (getClusterRet.failed()) {
             return Result.buildFrom(getClusterRet);
         }
         String phyCluster = getClusterRet.getData();
-        if (!flag) {
-            return esIndexService.deleteAliases(phyCluster, param.getIndex(), param.getAliases());
-        } else {
-            return esIndexService.addAliases(phyCluster, param.getIndex(), param.getAliases());
+
+        return esIndexService.addAliases(phyCluster, param.getIndex(), param.getAliases());
+    }
+
+    @Override
+    public Result<Void> deleteIndexAliases(IndexCatCellWithConfigDTO param, Integer appId) {
+        Result<String> getClusterRet = getClusterPhyByClusterNameAndAppId(param.getCluster(), appId);
+        if (getClusterRet.failed()) {
+            return Result.buildFrom(getClusterRet);
         }
+        String phyCluster = getClusterRet.getData();
+
+        return esIndexService.deleteAliases(phyCluster, param.getIndex(), param.getAliases());
     }
 
     @Override
@@ -476,8 +478,6 @@ public class IndicesManagerImpl implements IndicesManager {
         if (null == param.getIndices()) {
             return Result.buildFail("索引为空");
         }
-       
-        String conditions = generateConditions(param);
         for (IndexCatCellDTO indexCatCellDTO : param.getIndices()) {
             String cluster = indexCatCellDTO.getCluster();
             List<Tuple<String, String>> aliasList = esIndexService.syncGetIndexAliasesByExpression(cluster, indexCatCellDTO.getIndex());
@@ -485,28 +485,13 @@ public class IndicesManagerImpl implements IndicesManager {
                 return Result.buildFail("alias 为空");
             }
 
-            Result<Void> rolloverResult = esIndexService.rollover(cluster, aliasList.get(0).getV2(),conditions);
+            Result<Void> rolloverResult = esIndexService.rollover(cluster, aliasList.get(0).getV2(),param.getContent());
             if (rolloverResult.failed()) {
                 return rolloverResult;
             }
         }
 
         return Result.buildSucc();
-    }
-
-    private String generateConditions(IndexRolloverDTO param) {
-        Map<String, Object> conditionsMap = new HashMap<>();
-        if (StringUtils.isNotBlank(param.getMaxAge())) {
-            conditionsMap.put("max_age", param.getMaxAge());
-        }
-        if (StringUtils.isNotBlank(param.getMaxSize())) {
-            conditionsMap.put("max_size", param.getMaxSize());
-        }
-        if (null != param.getMaxDocs()) {
-            conditionsMap.put("max_docs", param.getMaxDocs());
-        }
-
-        return String.format("{\"conditions\":%s}", JSON.toJSONString(conditionsMap));
     }
 
     @Override

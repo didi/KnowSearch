@@ -152,12 +152,20 @@ public interface IndicesManager {
     Result<IndexCatCellVO> getIndexCatInfo(String cluster, String indexName, Integer appId);
 
     /**
-     * 编辑别名
+     * 新增别名
      * @param param
-     * @param flag True 新增别名， False 删除别名，若未指定别名，则默认删除所有别名
+     * @param appId 项目
      * @return
      */
-    Result<Void> editAlias(IndexCatCellWithConfigDTO param, Boolean flag, Integer appId);
+    Result<Void> addIndexAliases(IndexCatCellWithConfigDTO param, Integer appId);
+
+    /**
+     * 删除别名
+     * @param param
+     * @param appId 项目
+     * @return
+     */
+    Result<Void> deleteIndexAliases(IndexCatCellWithConfigDTO param, Integer appId);
 
     /**
      * 获取索引别名

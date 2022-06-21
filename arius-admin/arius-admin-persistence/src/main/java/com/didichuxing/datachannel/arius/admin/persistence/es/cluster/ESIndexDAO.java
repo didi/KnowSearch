@@ -12,6 +12,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.rest.RestStatus;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Repository;
 
 import com.alibaba.fastjson.JSON;
@@ -65,6 +66,11 @@ import com.google.common.collect.Maps;
 @Repository
 public class ESIndexDAO extends BaseESDAO {
 
+    public static final String failedMsg            = "%s 执行失败,请检查参数与索引配置";
+    public static final String MAX_NUM_SEGMENTS     = "max_num_segments";
+    public static final String ONLY_EXPUNGE_DELETES = "only_expunge_deletes";
+    public static final String ROLLOVER_API = "/_rollover";
+
     /**
      * 创建索引
      * @param cluster 集群
@@ -88,8 +94,10 @@ public class ESIndexDAO extends BaseESDAO {
 
         ESClient client = fetchESClientByCluster(cluster);
         if (client != null) {
-            ESIndicesPutIndexResponse response = client.admin().indices().preparePutIndex(indexName).setIndexConfig(indexConfig).setIncludeTypeName(true).execute()
-                    .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+            indexConfig.setVersion(ESVersion.valueBy(client.getEsVersion()));
+            ESIndicesPutIndexResponse response = client.admin().indices().preparePutIndex(indexName)
+                .setIndexConfig(indexConfig).execute()
+                .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
             return response.getAcknowledged();
         } else {
             return false;
@@ -692,7 +700,7 @@ public class ESIndexDAO extends BaseESDAO {
             return Maps.newHashMap();
         }
 
-        /* 这里toString()方法会抛json异常，应该是脏数据引起
+        /* //这里toString()方法会抛json异常，应该是脏数据引起
         if (!EnvUtil.isOnline()) {
             LOGGER.warn("class=ESTemplateDAO||method=getIndexConfigs||response={}", JSON.toJSONString(response));
         }*/
@@ -761,7 +769,7 @@ public class ESIndexDAO extends BaseESDAO {
         }
 
         try {
-            DirectRequest directRequest = new DirectRequest("POST", alias + "/_rollover");
+            DirectRequest directRequest = new DirectRequest(HttpMethod.POST.name(), alias + ROLLOVER_API);
             if (StringUtils.isNotBlank(conditions)) {
                 directRequest.setPostContent(conditions);
             }
@@ -771,7 +779,7 @@ public class ESIndexDAO extends BaseESDAO {
                 directResponse.getResponseContent());
         } catch (Exception e) {
             LOGGER.warn("class=ESIndexDAO||method=rollover||errMsg=index rollover fail");
-            return Result.buildFail("rollover 执行失败");
+            return Result.buildFail(String.format(failedMsg, "rollover"));
         }
     }
 
@@ -784,21 +792,21 @@ public class ESIndexDAO extends BaseESDAO {
 
         try {
             Map<String, String> params = new HashMap<>();
-            if (null != maxNumSegments) {
-                params.put("max_num_segments", maxNumSegments.toString());
-            }
-
             if (Boolean.TRUE.equals(onlyExpungeDeletes)) {
-                params.put("only_expunge_deletes", "true");
+                params.put(ONLY_EXPUNGE_DELETES, Boolean.TRUE.toString());
+            } else if (null != maxNumSegments) {
+                params.put(MAX_NUM_SEGMENTS, maxNumSegments.toString());
             }
 
-            DirectRequest directRequest = new DirectRequest("POST", index + "/_forcemerge");
+            DirectRequest directRequest = new DirectRequest(HttpMethod.POST.name(), index + "/_forcemerge");
             directRequest.setParams(params);
-            DirectResponse directResponse = client.direct(directRequest).actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
-            return Result.buildWithMsg(RestStatus.OK == directResponse.getRestStatus(), directResponse.getResponseContent());
+            DirectResponse directResponse = client.direct(directRequest).actionGet(ES_OPERATE_TIMEOUT,
+                TimeUnit.SECONDS);
+            return Result.buildWithMsg(RestStatus.OK == directResponse.getRestStatus(),
+                directResponse.getResponseContent());
         } catch (Exception e) {
             LOGGER.warn("class=ESIndexDAO||method=forceMerge||errMsg=index forceMerge fail");
-            return Result.buildFail("forcemerge 执行失败,请检查参数与索引配置");
+            return Result.buildFail(String.format(failedMsg, "forceMerge"));
         }
     }
 
@@ -810,13 +818,15 @@ public class ESIndexDAO extends BaseESDAO {
         }
 
         try {
-            DirectRequest directRequest = new DirectRequest("POST", index + "/_shrink/" + targetIndex);
+            DirectRequest directRequest = new DirectRequest(HttpMethod.POST.name(), index + "/_shrink/" + targetIndex);
             directRequest.setPostContent(config);
-            DirectResponse directResponse = client.direct(directRequest).actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
-            return Result.buildWithMsg(RestStatus.OK == directResponse.getRestStatus(), directResponse.getResponseContent());
+            DirectResponse directResponse = client.direct(directRequest).actionGet(ES_OPERATE_TIMEOUT,
+                TimeUnit.SECONDS);
+            return Result.buildWithMsg(RestStatus.OK == directResponse.getRestStatus(),
+                directResponse.getResponseContent());
         } catch (Exception e) {
             LOGGER.warn("class=ESIndexDAO||method=shrink||errMsg=index shrink fail");
-            return Result.buildFail("shrink 执行失败,请检查参数与索引配置");
+            return Result.buildFail(String.format(failedMsg, "shrink"));
         }
     }
 
@@ -828,13 +838,15 @@ public class ESIndexDAO extends BaseESDAO {
         }
 
         try {
-            DirectRequest directRequest = new DirectRequest("POST", index + "/_split/" + targetIndex);
+            DirectRequest directRequest = new DirectRequest(HttpMethod.POST.name(), index + "/_split/" + targetIndex);
             directRequest.setPostContent(config);
-            DirectResponse directResponse = client.direct(directRequest).actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
-            return Result.buildWithMsg(RestStatus.OK == directResponse.getRestStatus(), directResponse.getResponseContent());
+            DirectResponse directResponse = client.direct(directRequest).actionGet(ES_OPERATE_TIMEOUT,
+                TimeUnit.SECONDS);
+            return Result.buildWithMsg(RestStatus.OK == directResponse.getRestStatus(),
+                directResponse.getResponseContent());
         } catch (Exception e) {
             LOGGER.warn("class=ESIndexDAO||method=split||errMsg=index split fail");
-            return Result.buildFail("split 执行失败,请检查参数与索引配置");
+            return Result.buildFail(String.format(failedMsg, "split"));
         }
     }
 }

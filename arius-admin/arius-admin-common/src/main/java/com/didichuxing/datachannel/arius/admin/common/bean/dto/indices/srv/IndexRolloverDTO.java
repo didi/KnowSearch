@@ -21,14 +21,8 @@ import lombok.NoArgsConstructor;
 @ApiModel(description = "索引rollover")
 public class IndexRolloverDTO extends BaseDTO {
 
-    @ApiModelProperty("max age")
-    private String                maxAge;
-
-    @ApiModelProperty("max docs")
-    private Long                  maxDocs;
-
-    @ApiModelProperty("max size")
-    private String                maxSize;
+    @ApiModelProperty("rollover的参数")
+    private String                content;
 
     @ApiModelProperty("index 列表")
     private List<IndexCatCellDTO> indices;

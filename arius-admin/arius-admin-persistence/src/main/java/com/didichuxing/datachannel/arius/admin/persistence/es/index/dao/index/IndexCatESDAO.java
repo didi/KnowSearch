@@ -147,6 +147,7 @@ public class IndexCatESDAO extends BaseESDAO {
 
     private String buildTermCell(String cluster, String index, String health, Integer appId) {
         List<String> termCellList = Lists.newArrayList();
+        //appId == null 时，属于超级项目访问；
         if (null == appId) {
             //get cluster dsl term
             termCellList.add(DSLSearchUtils.getTermCellForExactSearch(cluster, "clusterPhy"));

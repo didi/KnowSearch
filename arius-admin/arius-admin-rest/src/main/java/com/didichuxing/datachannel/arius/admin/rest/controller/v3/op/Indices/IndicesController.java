@@ -142,14 +142,14 @@ public class IndicesController {
     @ResponseBody
     @ApiOperation(value = "编辑别名")
     public Result<Void> alias(HttpServletRequest request, @RequestBody IndexCatCellWithConfigDTO param) {
-        return indicesManager.editAlias(param, Boolean.TRUE, HttpRequestUtils.getAppId(request));
+        return indicesManager.addIndexAliases(param, HttpRequestUtils.getAppId(request));
     }
 
     @DeleteMapping("/alias")
     @ResponseBody
     @ApiOperation(value = "删除别名")
     public Result<Void> deleteAlias(HttpServletRequest request, @RequestBody IndexCatCellWithConfigDTO param) {
-        return indicesManager.editAlias(param, Boolean.FALSE, HttpRequestUtils.getAppId(request));
+        return indicesManager.deleteIndexAliases(param, HttpRequestUtils.getAppId(request));
     }
 
     @GetMapping("/{cluster}/{indexName}/shard")

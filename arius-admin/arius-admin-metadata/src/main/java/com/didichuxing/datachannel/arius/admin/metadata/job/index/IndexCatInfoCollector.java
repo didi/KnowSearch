@@ -56,7 +56,7 @@ public class IndexCatInfoCollector extends AbstractMetaDataJob {
     //key: cluster@indexName  value: indexName
     private final Cache<String, Object> notCollectorIndexNameCache = CacheBuilder.newBuilder()
             .expireAfterWrite(60, TimeUnit.MINUTES).maximumSize(10000).build();
-    private final Map<Long, String>     logicClusterId2NameMap     = Maps.newConcurrentMap();
+    private Map<Long, String>     logicClusterId2NameMap     = Maps.newConcurrentMap();
     @Override
     public Object handleJobTask(String params) {
         List<IndexCatCellPO> indexCatInfoList     =   Lists.newArrayList();
@@ -68,10 +68,10 @@ public class IndexCatInfoCollector extends AbstractMetaDataJob {
         }
         List<ClusterLogic> logicClusterList = clusterLogicService.listAllClusterLogics();
         if (CollectionUtils.isNotEmpty(logicClusterList)) {
-            logicClusterId2NameMap
-                .putAll(ConvertUtil.list2Map(logicClusterList, ClusterLogic::getId, ClusterLogic::getName));
+            logicClusterId2NameMap = logicClusterList.stream()
+                .collect(Collectors.toConcurrentMap(ClusterLogic::getId, ClusterLogic::getName, (o1, o2) -> o1));
         }
-        
+
         long currentTimeMillis = System.currentTimeMillis();
         BatchProcessor.BatchProcessResult<String, List<IndexCatCellPO>> batchResult
                         = new BatchProcessor<String, List<IndexCatCellPO>>()

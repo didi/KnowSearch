@@ -738,7 +738,7 @@ public class ESIndexServiceImpl implements ESIndexService {
     }
 
     @Override
-    public List<IndexCatCell> buildIndexRealTimeData(String cluster, List<IndexCatCell> indexCatCellList) {
+    public List<IndexCatCell> buildIndexAliasesAndBlockInfo(String cluster, List<IndexCatCell> indexCatCellList) {
         if (CollectionUtils.isNotEmpty(indexCatCellList)) {
             List<String> indexNameList = indexCatCellList.stream().map(IndexCatCell::getIndex)
                 .collect(Collectors.toList());

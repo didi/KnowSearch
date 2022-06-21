@@ -3,7 +3,6 @@ package com.didichuxing.datachannel.arius.admin.common.bean.vo.indices;
 import java.util.List;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.BaseVO;
-import com.didichuxing.datachannel.arius.admin.common.mapping.AriusTypeProperty;
 import com.didichuxing.datachannel.arius.admin.common.mapping.Field;
 
 import io.swagger.annotations.ApiModel;
@@ -28,6 +27,6 @@ public class IndexMappingVO extends BaseVO {
     @ApiModelProperty("索引mapping列表信息")
     private List<Field>       fields;
 
-    @ApiModelProperty("索引mappingJson信息")
-    private AriusTypeProperty typeProperties;
+    @ApiModelProperty("索引mapping信息")
+    private String mappings;
 }

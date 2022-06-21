@@ -384,5 +384,5 @@ public interface ESIndexService {
      * @param cluster          集群
      * @param indexCatCellList 索引cat/index基本信息
      */
-    List<IndexCatCell> buildIndexRealTimeData(String cluster, List<IndexCatCell> indexCatCellList);
+    List<IndexCatCell> buildIndexAliasesAndBlockInfo(String cluster, List<IndexCatCell> indexCatCellList);
 }
