@@ -9,12 +9,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResu
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateWithCreateInfoDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateAdjustShardDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateClearDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateConditionDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateSettingDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateWithCreateInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateSettingDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
@@ -28,6 +22,7 @@ import io.swagger.annotations.ApiOperation;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -157,7 +152,7 @@ public class TemplateLogicV3Controller {
     public Result<Void> clearIndices(HttpServletRequest request,
                                      @PathVariable("templateId") Integer templateId,
                                      @PathVariable("indices")    List<String> indices) {
-        return templateLogicManager.clearIndices(templateId, indices, HttpRequestUtils.getAppId(request));
+        return templateLogicManager.clearIndices(templateId, indices, HttpRequestUtil.getProjectId(request));
     }
 
     @PutMapping("/{templateId}/{shardNum}/adjustShard")
@@ -166,14 +161,14 @@ public class TemplateLogicV3Controller {
     public Result<Void> adjustShard(HttpServletRequest request,
                                     @PathVariable("templateId") Integer templateId,
                                     @PathVariable("shardNum")   Integer shardNum) throws AdminOperateException {
-        return templateLogicManager.adjustShard(templateId, shardNum, HttpRequestUtils.getAppId(request));
+        return templateLogicManager.adjustShard(templateId, shardNum, HttpRequestUtil.getProjectId(request));
     }
 
     @PutMapping("/{templateId}/upgrade")
     @ResponseBody
     @ApiOperation(value = "升版本")
     public Result<Void> upgrade(HttpServletRequest request, @RequestBody Integer templateId) throws AdminOperateException {
-        return templateLogicManager.upgrade(templateId, HttpRequestUtils.getOperator(request));
+        return templateLogicManager.upgrade(templateId, HttpRequestUtil.getOperator(request));
     }
 
     @GetMapping("{clusterPhyName}/phy/templates")
