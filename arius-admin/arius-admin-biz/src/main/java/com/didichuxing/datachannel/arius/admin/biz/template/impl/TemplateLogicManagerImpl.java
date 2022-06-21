@@ -759,6 +759,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             for (IndexTemplatePhy templatePhy : templatePhyList) {
                 updateParam.setId(templatePhy.getId());
                 updateParam.setShard(updateParam.getShard());
+                updateParam.setRack("");
                 updateParam.setVersion(templatePhy.getVersion() + 1);
 
                 Result<Void> editResult = templatePhyManager.editTemplateWithoutCheck(updateParam, operator, RETRY_TIMES);
