@@ -40,7 +40,7 @@
 				and module_id = #{param.moduleId}
 			</if>
 			<if test="param.bizId != null">
-				and biz_id = #{bizId}
+				and biz_id = #{param.bizId}
 			</if>
 			<if test="param.operateId != null">
 				and operate_id = #{param.operateId}
@@ -49,9 +49,9 @@
 				and trigger_way_id = #{param.triggerWayId}
 			</if>
 			<if test="param.beginTime != null">
-				and operate_time >= #{param.beginTime}
+				and operate_time &gt;= #{param.beginTime}
 			</if>
-			<if test="param.content != null">
+			<if test="param.endTime != null">
 				and operate_time &lt;= #{param.endTime}
 			</if>
 			<if test="param.projectName != null">
@@ -88,7 +88,7 @@
 				and module_id = #{param.moduleId}
 			</if>
 			<if test="param.bizId != null">
-				and biz_id = #{bizId}
+				and biz_id = #{param1.bizId}
 			</if>
 			<if test="param.operateId != null">
 				and operate_id = #{param.operateId}
@@ -97,7 +97,7 @@
 				and trigger_way_id = #{param.triggerWayId}
 			</if>
 			<if test="param.beginTime != null">
-				and operate_time >= #{param.beginTime}
+				and operate_time &gt;= #{param.beginTime}
 			</if>
 			<if test="param.content != null">
 				and operate_time &lt;= #{param.endTime}
