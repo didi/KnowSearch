@@ -75,6 +75,8 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 
+import javax.annotation.PostConstruct;
+
 @Service
 public class IndexTemplateServiceImpl implements IndexTemplateService {
 
@@ -992,6 +994,16 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
         }
         return res;
     }
+
+    @Override
+    public List<IndexTemplate> listByResourceIds(List<Long> resourceIds) {
+        if (CollectionUtils.isEmpty(resourceIds)) {
+            return new ArrayList<>();
+        }
+
+        return ConvertUtil.list2List(indexTemplateDAO.listByResourceIds(resourceIds), IndexTemplate.class);
+    }
+
     /**************************************** private method ****************************************************/
     /**
      * 转换逻辑模板，获取并组合对应的物理模板信息

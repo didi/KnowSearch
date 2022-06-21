@@ -148,7 +148,7 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
      */
     @Override
     public List<ClusterLogic> listAllClusterLogics() {
-        return responsibleConvertTool.list2List(logicClusterDAO.listAll(), ClusterLogic.class);
+        return ConvertUtil.list2List(logicClusterDAO.listAll(), ClusterLogic.class);
     }
 
     /**

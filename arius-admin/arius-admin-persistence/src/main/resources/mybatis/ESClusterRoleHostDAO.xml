@@ -94,6 +94,13 @@
         </trim>
     </select>
 
+    <select id="listByClusterAndNodeSets" parameterType="map" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from es_cluster_role_host_info
+        where cluster = #{cluster} and node_set in <foreach collection="nodeSets" item="nodeSet" open="(" separator="," close=")">#{nodeSet}</foreach>
+    </select>
+
     <select id="listByCluster" parameterType="string" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>

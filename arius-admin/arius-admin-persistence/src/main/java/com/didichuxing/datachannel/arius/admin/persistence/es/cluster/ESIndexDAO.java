@@ -1,16 +1,37 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.cluster;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.COMMA;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.*;
+
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+
+import javax.annotation.Nullable;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.rest.RestStatus;
+import org.springframework.http.HttpMethod;
+import org.springframework.stereotype.Repository;
+
 import com.alibaba.fastjson.JSON;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.setting.ESIndicesGetAllSettingRequest;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import com.didichuxing.datachannel.arius.admin.common.mapping.AriusIndexTemplateSetting;
+import com.didichuxing.datachannel.arius.admin.common.util.AriusIndexMappingConfigUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
 import com.didiglobal.logi.elasticsearch.client.ESClient;
+import com.didiglobal.logi.elasticsearch.client.gateway.direct.DirectRequest;
+import com.didiglobal.logi.elasticsearch.client.gateway.direct.DirectResponse;
 import com.didiglobal.logi.elasticsearch.client.model.Client;
 import com.didiglobal.logi.elasticsearch.client.model.type.ESVersion;
 import com.didiglobal.logi.elasticsearch.client.request.index.exists.ESIndicesExistsRequest;
 import com.didiglobal.logi.elasticsearch.client.request.index.getindex.ESIndicesGetIndexRequest;
+import com.didiglobal.logi.elasticsearch.client.request.index.putalias.PutAliasNode;
 import com.didiglobal.logi.elasticsearch.client.request.index.stats.ESIndicesStatsRequestBuilder;
 import com.didiglobal.logi.elasticsearch.client.request.index.stats.IndicesStatsLevel;
 import com.didiglobal.logi.elasticsearch.client.request.index.updatemapping.ESIndicesUpdateMappingRequestBuilder;
@@ -24,6 +45,7 @@ import com.didiglobal.logi.elasticsearch.client.response.indices.getalias.AliasI
 import com.didiglobal.logi.elasticsearch.client.response.indices.getalias.ESIndicesGetAliasResponse;
 import com.didiglobal.logi.elasticsearch.client.response.indices.getindex.ESIndicesGetIndexResponse;
 import com.didiglobal.logi.elasticsearch.client.response.indices.openindex.ESIndicesOpenIndexResponse;
+import com.didiglobal.logi.elasticsearch.client.response.indices.putalias.ESIndicesPutAliasResponse;
 import com.didiglobal.logi.elasticsearch.client.response.indices.putindex.ESIndicesPutIndexResponse;
 import com.didiglobal.logi.elasticsearch.client.response.indices.refreshindex.ESIndicesRefreshIndexResponse;
 import com.didiglobal.logi.elasticsearch.client.response.indices.stats.ESIndicesStatsResponse;
@@ -36,20 +58,6 @@ import com.didiglobal.logi.elasticsearch.client.response.setting.index.IndexConf
 import com.didiglobal.logi.elasticsearch.client.response.setting.index.MultiIndexsConfig;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Repository;
-
-import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.COMMA;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.*;
 
 /**
  * @author d06679
@@ -58,22 +66,38 @@ import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOpe
 @Repository
 public class ESIndexDAO extends BaseESDAO {
 
+    public static final String failedMsg            = "%s 执行失败,请检查参数与索引配置";
+    public static final String MAX_NUM_SEGMENTS     = "max_num_segments";
+    public static final String ONLY_EXPUNGE_DELETES = "only_expunge_deletes";
+    public static final String ROLLOVER_API = "/_rollover";
+
     /**
      * 创建索引
      * @param cluster 集群
      * @param indexName 索引名字
      * @return result
      */
-    public boolean createIndex(String cluster, String indexName) {
+    public boolean createIndex(String cluster, String indexName, String mapping, String setting) {
         if (exist(cluster, indexName)) {
             LOGGER.warn("class=ESIndexDAO||method=createIndex||index already exist||cluster={}||indexName={}", cluster, indexName);
             return true;
         }
 
+        IndexConfig indexConfig = new IndexConfig();
+        if (null != mapping) {
+            indexConfig.setMappings(AriusIndexMappingConfigUtils.parseMappingConfig(mapping).getData());
+        }
+
+        if (null != setting) {
+            indexConfig.setSettings(AriusIndexTemplateSetting.flat(JSON.parseObject(setting)));
+        }
+
         ESClient client = fetchESClientByCluster(cluster);
         if (client != null) {
-            ESIndicesPutIndexResponse response = client.admin().indices().preparePutIndex(indexName).execute()
-                    .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+            indexConfig.setVersion(ESVersion.valueBy(client.getEsVersion()));
+            ESIndicesPutIndexResponse response = client.admin().indices().preparePutIndex(indexName)
+                .setIndexConfig(indexConfig).execute()
+                .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
             return response.getAcknowledged();
         } else {
             return false;
@@ -338,6 +362,27 @@ public class ESIndexDAO extends BaseESDAO {
         }
     }
 
+    public Map<String, IndexNodes> getIndexStats(String cluster, String expression) {
+        try {
+            ESClient client = fetchESClientByCluster(cluster);
+            if (client == null) {
+                return Maps.newHashMap();
+            }
+            ESIndicesStatsResponse response;
+            if (StringUtils.isNotBlank(expression)) {
+                response = client.admin().indices().prepareStats(expression).setLevel(IndicesStatsLevel.INDICES)
+                    .execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+            } else {
+                response = client.admin().indices().prepareStats().setLevel(IndicesStatsLevel.INDICES).execute()
+                    .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+            }
+            return response.getIndicesMap();
+        } catch (Exception e) {
+            LOGGER.warn("class=ESIndexDAO||method=getIndexByExpression||errMsg={}||cluster={}||expression={}",
+                e.getMessage(), cluster, expression, e);
+            return Maps.newHashMap();
+        }
+    }
     /**
      * 获取指定集群,指定表达式的别名
      * @param cluster
@@ -353,6 +398,24 @@ public class ESIndexDAO extends BaseESDAO {
         } catch (Exception e) {
             LOGGER.warn("class=ESIndexDAO||method=getAliasesByExpression||errMsg={}||cluster={}||expression={}",
                 cluster, e.getMessage(), expression, e);
+            return null;
+        }
+    }
+    /**
+     * 获取指定集群,指定多个索引
+     * @param cluster
+     * @param indices
+     * @return
+     */
+    public Map<String/*index*/, AliasIndexNode> getAliasesByIndices(String cluster, String... indices) {
+        try {
+            ESClient client = esOpClient.getESClient(cluster);
+            ESIndicesGetAliasResponse response = client.admin().indices().prepareAlias(indices).execute()
+                    .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+            return response.getM();
+        } catch (Exception e) {
+            LOGGER.warn("class=ESIndexDAO||method=getAliasesByExpression||errMsg={}||cluster={}||indices={}",
+                    cluster, e.getMessage(), indices, e);
             return null;
         }
     }
@@ -494,6 +557,48 @@ public class ESIndexDAO extends BaseESDAO {
         return updateSettingsResponse.getAcknowledged();
     }
 
+    public boolean putIndexSetting(String cluster, List<String> indices, Map<String, String> settingMap) {
+        ESClient client = fetchESClientByCluster(cluster);
+        if (null == client) {
+            return false;
+        }
+
+        MultiIndexsConfig multiIndexsConfig = batchGetIndexConfig(cluster, indices);
+        List<String> needOps = Lists.newArrayList();
+        for (Map.Entry<String, IndexConfig> indexConfigEntry : multiIndexsConfig.getIndexConfigMap().entrySet()) {
+            IndexConfig indexConfig = indexConfigEntry.getValue();
+
+            Map<String, String> config = indexConfig.getSettings();
+            Boolean modifyFlag = Boolean.FALSE;
+            for (Map.Entry<String, String> settingEntry : settingMap.entrySet()) {
+                String settingName = settingEntry.getKey();
+                String settingValue = settingEntry.getValue();
+                String src = config.get(INDEX_SETTING_PRE + settingName);
+                if (settingName.startsWith(INDEX_SETTING_PRE)) {
+                    src = config.get(settingName);
+                }
+
+                if (!settingValue.equals(src)) {
+                    modifyFlag = Boolean.TRUE;
+                }
+            }
+            if (modifyFlag) {
+                needOps.add(indexConfigEntry.getKey());
+            }
+        }
+
+        if (CollectionUtils.isEmpty(needOps)) {
+            return true;
+        }
+
+        ESIndicesUpdateSettingsRequestBuilder updateSettingsRequestBuilder = client.admin().indices()
+                .prepareUpdateSettings(String.join(",", needOps));
+        for (Map.Entry<String, String> settingEntry : settingMap.entrySet()) {
+            updateSettingsRequestBuilder.addSettings(settingEntry.getKey(), settingEntry.getValue());
+        }
+        return updateSettingsRequestBuilder.execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS).getAcknowledged();
+    }
+
     /**
      * 关闭索引
      * @param cluster 集群
@@ -582,24 +687,23 @@ public class ESIndexDAO extends BaseESDAO {
 
         ESIndicesGetIndexResponse response = null;
         try {
-            for (int i = 0; i < tryTimes; i++) {
+            do {
                 response = esClient.admin().indices().getIndex(request).actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
-                if (null != response) {
-                    break;
-                }
-            }
+            } while (tryTimes-- > 0 && null == response);
         } catch (Exception e) {
-            LOGGER.warn("class=ESTemplateDAO||method=getIndexConfigs||get index fail||clusterName={}||indexName={}||msg={}",
-                    clusterName, e.getMessage(), e);
+            LOGGER.warn(
+                "class=ESTemplateDAO||method=getIndexConfigs||get index fail||clusterName={}||indexName={}||msg={}",
+                clusterName, e.getMessage(), e);
         }
 
         if (response == null) {
             return Maps.newHashMap();
         }
 
+        /* //这里toString()方法会抛json异常，应该是脏数据引起
         if (!EnvUtil.isOnline()) {
             LOGGER.warn("class=ESTemplateDAO||method=getIndexConfigs||response={}", JSON.toJSONString(response));
-        }
+        }*/
 
         return response.getIndexsMapping().getIndexConfigMap();
     }
@@ -639,5 +743,110 @@ public class ESIndexDAO extends BaseESDAO {
         }
 
         return response.getIndicesMap();
+    }
+
+    /**
+     * 编辑索引别名
+     * @param aliases
+     * @return result
+     */
+    public Result<Void> editAlias(String cluster, List<PutAliasNode> aliases) {
+        ESClient client = fetchESClientByCluster(cluster);
+        if (client == null) {
+            LOGGER.warn("class=ESIndexDAO||method=editAlias||errMsg=es client not found");
+            return Result.buildFail();
+        }
+
+        ESIndicesPutAliasResponse response = client.admin().indices().preparePutAlias().addPutAliasNodes(aliases).execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+        return Result.build(response.getAcknowledged());
+    }
+
+    public Result<Void> rollover(String cluster, String alias, String conditions) {
+        ESClient client = fetchESClientByCluster(cluster);
+        if (client == null) {
+            LOGGER.warn("class=ESIndexDAO||method=rollover||errMsg=es client not found");
+            return Result.buildFail();
+        }
+
+        try {
+            DirectRequest directRequest = new DirectRequest(HttpMethod.POST.name(), alias + ROLLOVER_API);
+            if (StringUtils.isNotBlank(conditions)) {
+                directRequest.setPostContent(conditions);
+            }
+            DirectResponse directResponse = client.direct(directRequest).actionGet(ES_OPERATE_TIMEOUT,
+                TimeUnit.SECONDS);
+            return Result.buildWithMsg(RestStatus.OK == directResponse.getRestStatus(),
+                directResponse.getResponseContent());
+        } catch (Exception e) {
+            LOGGER.warn("class=ESIndexDAO||method=rollover||errMsg=index rollover fail");
+            return Result.buildFail(String.format(failedMsg, "rollover"));
+        }
+    }
+
+    public Result<Void> forceMerge(String cluster, String index, Integer maxNumSegments, Boolean onlyExpungeDeletes) {
+        ESClient client = fetchESClientByCluster(cluster);
+        if (client == null) {
+            LOGGER.warn("class=ESIndexDAO||method=forceMerge||errMsg=es client not found");
+            return Result.buildFail();
+        }
+
+        try {
+            Map<String, String> params = new HashMap<>();
+            if (Boolean.TRUE.equals(onlyExpungeDeletes)) {
+                params.put(ONLY_EXPUNGE_DELETES, Boolean.TRUE.toString());
+            } else if (null != maxNumSegments) {
+                params.put(MAX_NUM_SEGMENTS, maxNumSegments.toString());
+            }
+
+            DirectRequest directRequest = new DirectRequest(HttpMethod.POST.name(), index + "/_forcemerge");
+            directRequest.setParams(params);
+            DirectResponse directResponse = client.direct(directRequest).actionGet(ES_OPERATE_TIMEOUT,
+                TimeUnit.SECONDS);
+            return Result.buildWithMsg(RestStatus.OK == directResponse.getRestStatus(),
+                directResponse.getResponseContent());
+        } catch (Exception e) {
+            LOGGER.warn("class=ESIndexDAO||method=forceMerge||errMsg=index forceMerge fail");
+            return Result.buildFail(String.format(failedMsg, "forceMerge"));
+        }
+    }
+
+    public Result<Void> shrink(String cluster, String index, String targetIndex, String config) {
+        ESClient client = fetchESClientByCluster(cluster);
+        if (client == null) {
+            LOGGER.warn("class=ESIndexDAO||method=forceMerge||errMsg=es client not found");
+            return Result.buildFail();
+        }
+
+        try {
+            DirectRequest directRequest = new DirectRequest(HttpMethod.POST.name(), index + "/_shrink/" + targetIndex);
+            directRequest.setPostContent(config);
+            DirectResponse directResponse = client.direct(directRequest).actionGet(ES_OPERATE_TIMEOUT,
+                TimeUnit.SECONDS);
+            return Result.buildWithMsg(RestStatus.OK == directResponse.getRestStatus(),
+                directResponse.getResponseContent());
+        } catch (Exception e) {
+            LOGGER.warn("class=ESIndexDAO||method=shrink||errMsg=index shrink fail");
+            return Result.buildFail(String.format(failedMsg, "shrink"));
+        }
+    }
+
+    public Result<Void> split(String cluster, String index, String targetIndex, String config) {
+        ESClient client = fetchESClientByCluster(cluster);
+        if (client == null) {
+            LOGGER.warn("class=ESIndexDAO||method=forceMerge||errMsg=es client not found");
+            return Result.buildFail();
+        }
+
+        try {
+            DirectRequest directRequest = new DirectRequest(HttpMethod.POST.name(), index + "/_split/" + targetIndex);
+            directRequest.setPostContent(config);
+            DirectResponse directResponse = client.direct(directRequest).actionGet(ES_OPERATE_TIMEOUT,
+                TimeUnit.SECONDS);
+            return Result.buildWithMsg(RestStatus.OK == directResponse.getRestStatus(),
+                directResponse.getResponseContent());
+        } catch (Exception e) {
+            LOGGER.warn("class=ESIndexDAO||method=split||errMsg=index split fail");
+            return Result.buildFail(String.format(failedMsg, "split"));
+        }
     }
 }

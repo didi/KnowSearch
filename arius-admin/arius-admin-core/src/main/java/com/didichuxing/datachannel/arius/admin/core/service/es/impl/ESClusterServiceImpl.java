@@ -1,5 +1,20 @@
 package com.didichuxing.datachannel.arius.admin.core.service.es.impl;
 
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.*;
+
+import java.net.InetAddress;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.compress.utils.Sets;
+import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.elasticsearch.common.transport.TransportAddress;
+import org.elasticsearch.rest.RestStatus;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.NodeAttrInfo;
@@ -33,21 +48,6 @@ import com.didiglobal.logi.log.LogFactory;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.compress.utils.Sets;
-import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.common.transport.InetSocketTransportAddress;
-import org.elasticsearch.common.transport.TransportAddress;
-import org.elasticsearch.rest.RestStatus;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.net.InetAddress;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
-
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.*;
 
 /**
  * @author d06679
@@ -428,7 +428,7 @@ public class ESClusterServiceImpl implements ESClusterService {
     @Override
     public boolean abnormalShardAllocationRetry(String cluster) {
         String response = esClusterDAO.abnormalShardAllocationRetry(cluster);
-      boolean  acknowledged  = (boolean) JSONObject.parseObject(response).get("acknowledged");
+        boolean  acknowledged  = (boolean) JSONObject.parseObject(response).get("acknowledged");
         return acknowledged;
     }
 

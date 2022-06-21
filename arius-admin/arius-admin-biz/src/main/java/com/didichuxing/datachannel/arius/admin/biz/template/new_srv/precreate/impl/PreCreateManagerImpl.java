@@ -131,7 +131,7 @@ public class PreCreateManagerImpl extends BaseTemplateSrvImpl implements PreCrea
 
         String tomorrowIndexName = IndexNameFactory.get(physicalWithLogic.getExpression(),
                 physicalWithLogic.getLogicTemplate().getDateFormat(), 1, physicalWithLogic.getVersion());
-        return esIndexService.syncCreateIndex(physicalWithLogic.getCluster(), tomorrowIndexName, retryCount);
+        return esIndexService.syncCreateIndex(physicalWithLogic.getCluster(), tomorrowIndexName, null, null, retryCount);
     }
 
     /**
@@ -147,7 +147,7 @@ public class PreCreateManagerImpl extends BaseTemplateSrvImpl implements PreCrea
         }
         String todayIndexName = IndexNameFactory.get(physicalWithLogic.getExpression(),
                 physicalWithLogic.getLogicTemplate().getDateFormat(), 0, physicalWithLogic.getVersion());
-        return esIndexService.syncCreateIndex(physicalWithLogic.getCluster(), todayIndexName, retryCount);
+        return esIndexService.syncCreateIndex(physicalWithLogic.getCluster(), todayIndexName, null, null, retryCount);
     }
 
     /**

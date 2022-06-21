@@ -1,8 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.cluster;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.INDICES;
 import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterQuickCommandEnum.*;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.*;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.INDICES;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,12 +10,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.ShardDistributionVO;
-import com.didiglobal.logi.elasticsearch.client.request.cluster.nodestats.ESClusterNodesStatsRequest;
-import com.didiglobal.logi.elasticsearch.client.request.index.searchshards.ESIndicesSearchShardsRequest;
-import com.didiglobal.logi.elasticsearch.client.response.cluster.nodesstats.ESClusterNodesStatsResponse;
-import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.ESIndicesCatIndicesResponse;
-import com.didiglobal.logi.elasticsearch.client.response.indices.searchshards.ESIndicesSearchShardsResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.common.unit.ByteSizeValue;
 import org.elasticsearch.rest.RestStatus;

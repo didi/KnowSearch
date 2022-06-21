@@ -166,7 +166,7 @@ public class TemplatePreCreateManagerImpl extends BaseTemplateSrv implements Tem
         }
         String todayIndexName = IndexNameFactory.get(physicalWithLogic.getExpression(),
             physicalWithLogic.getLogicTemplate().getDateFormat(), 0, physicalWithLogic.getVersion());
-        return esIndexService.syncCreateIndex(physicalWithLogic.getCluster(), todayIndexName, retryCount);
+        return esIndexService.syncCreateIndex(physicalWithLogic.getCluster(), todayIndexName, null, null, retryCount);
     }
 
     private boolean syncCreateTomorrowIndexByPhysicalId(Long physicalId, int retryCount) throws ESOperateException {
@@ -184,6 +184,6 @@ public class TemplatePreCreateManagerImpl extends BaseTemplateSrv implements Tem
 
         String tomorrowIndexName = IndexNameFactory.getNoVersion(physicalWithLogic.getExpression(),
             physicalWithLogic.getLogicTemplate().getDateFormat(), 1);
-        return esIndexService.syncCreateIndex(physicalWithLogic.getCluster(), tomorrowIndexName, retryCount);
+        return esIndexService.syncCreateIndex(physicalWithLogic.getCluster(), tomorrowIndexName, null, null, retryCount);
     }
 }

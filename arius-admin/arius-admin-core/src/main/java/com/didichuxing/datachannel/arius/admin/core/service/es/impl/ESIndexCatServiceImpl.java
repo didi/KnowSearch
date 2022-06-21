@@ -1,5 +1,15 @@
 package com.didichuxing.datachannel.arius.admin.core.service.es.impl;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.getShards2NodeInfoRequestContent;
+
+import java.util.List;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.rest.RestStatus;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.IndexCatCell;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.IndexShardInfo;
@@ -13,15 +23,6 @@ import com.didiglobal.logi.elasticsearch.client.gateway.direct.DirectResponse;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.rest.RestStatus;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.getShards2NodeInfoRequestContent;
 
 /**
  * Created by linyunan on 2021-10-14
@@ -34,12 +35,12 @@ public class ESIndexCatServiceImpl implements ESIndexCatService {
     private IndexCatESDAO indexCatESDAO;
 
     @Override
-    public Tuple<Long, List<IndexCatCell>> syncGetCatIndexInfo(List<String> clusters, String index, String health,
+    public Tuple<Long, List<IndexCatCell>> syncGetCatIndexInfo(String cluster, String index, String health, Integer appId,
                                                                Long from, Long size, String sortTerm, Boolean orderByDesc) {
-        Tuple<Long, List<IndexCatCellPO>> hitTotal2catIndexInfoTuplePO = indexCatESDAO.getCatIndexInfo(clusters, index,
-            health, from, size, sortTerm, orderByDesc);
+        Tuple<Long, List<IndexCatCellPO>> hitTotal2catIndexInfoTuplePO = indexCatESDAO.getCatIndexInfo(cluster, index,
+            health, appId, from, size, sortTerm, orderByDesc);
         if (null == hitTotal2catIndexInfoTuplePO) {
-            return null;
+           return null;
         }
 
         Tuple<Long, List<IndexCatCell>> hitTotal2catIndexInfoTuple = new Tuple<>();
@@ -70,7 +71,7 @@ public class ESIndexCatServiceImpl implements ESIndexCatService {
     }
 
     @Override
-    public int syncUpdateCatIndexStatus(String cluster, List<String> indexNameList, boolean indexNewStatus, int retryCount) {
+    public int syncUpdateCatIndexStatus(String cluster, List<String> indexNameList, String status, int retryCount) {
         if (CollectionUtils.isEmpty(indexNameList)) {
             return 0;
         }
@@ -78,7 +79,7 @@ public class ESIndexCatServiceImpl implements ESIndexCatService {
         BatchProcessor.BatchProcessResult<String, Boolean> result = new BatchProcessor<String, Boolean>()
                 .batchList(indexNameList)
                 .batchSize(10)
-                .processor(items -> indexCatESDAO.batchUpdateCatIndexStatus(cluster, items, indexNewStatus, retryCount))
+                .processor(items -> indexCatESDAO.batchUpdateCatIndexStatus(cluster, items, status, retryCount))
                 .succChecker(succ -> succ)
                 .process();
 
@@ -107,9 +108,9 @@ public class ESIndexCatServiceImpl implements ESIndexCatService {
     private List<IndexCatCell> buildIndexCatCell(List<IndexCatCellPO> indexCatCellPOList) {
         List<IndexCatCell> indexCatCellList = Lists.newArrayList();
         for (IndexCatCellPO indexCatCellPO : indexCatCellPOList) {
-            IndexCatCell indexCatCell = new IndexCatCell();
+            IndexCatCell indexCatCell = ConvertUtil.obj2Obj(indexCatCellPO,IndexCatCell.class);
             indexCatCell.setKey(indexCatCellPO.getKey());
-            indexCatCell.setCluster(indexCatCellPO.getCluster());
+            indexCatCell.setClusterPhy(indexCatCellPO.getCluster());
             indexCatCell.setIndex(indexCatCellPO.getIndex());
             indexCatCell.setStoreSize(SizeUtil.getUnitSizeAndFormat(indexCatCellPO.getStoreSize() ,2));
             indexCatCell.setPriStoreSize(SizeUtil.getUnitSizeAndFormat(indexCatCellPO.getPriStoreSize(), 2));
