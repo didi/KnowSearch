@@ -179,6 +179,7 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
             });
         }
         futureUtil.waitExecute();
+        //todo
         filterBySystemConfiguration(listMetrics);
         return Result.buildSucc(ConvertUtil.list2List(listMetrics, MetricListVO.class));
     }

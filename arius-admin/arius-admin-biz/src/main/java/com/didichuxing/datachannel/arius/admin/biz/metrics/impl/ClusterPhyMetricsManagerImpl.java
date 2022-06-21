@@ -78,6 +78,7 @@ public class ClusterPhyMetricsManagerImpl implements ClusterPhyMetricsManager {
         }
     }
 
+    //todo：需要判断下 传入的是逻辑集群的时候，不应该是物理集群了，应该是对应的regin
     @Override
     @SuppressWarnings("unchecked")
     public <T> Result<T> getClusterMetricsByMetricsType(MetricsClusterPhyDTO param, Integer appId, String domainAccount, ClusterPhyTypeMetricsEnum metricsTypeEnum) {

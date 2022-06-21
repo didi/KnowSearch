@@ -383,7 +383,7 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
     /**
      *  获取最新时间分片中指标数值前TopN的节点名称
      *  如果延迟后的最新时间分片的指标值为null，最新时间迭代 - 1, 直到不为空, 迭代上限为3次。
-     *
+     * todo:这块在获取最大值和平均值的时候，放到es去做
      * @param clusterPhyName   集群名称
      * @param metricsTypes     指标类型
      * @param topNu            topN
@@ -398,15 +398,14 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
 
         int retryTime = 0;
         List<VariousLineChartMetrics> variousLineChartMetrics = new ArrayList<>();
-        do {
             // 获取有数据的第一个时间点
             Long timePoint = getHasDataTime(clusterPhyName, startTime, endTime, DslsConstant.GET_HAS_NODE_METRICS_DATA_TIME);
             //没有数据则提前终止
-            if (null == timePoint) { break;}
+            if (null == timePoint) { return new ArrayList<>();}
 
             long startTimeForOneInterval    = timePoint-topTimeStep*60*1000;
             long endTimeForOneInterval      = timePoint;
-
+            //提出來，專用top
             String interval = "1m";
 
             String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_AGG_CLUSTER_PHY_NODES_INFO, clusterPhyName,
@@ -417,7 +416,6 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
 
             variousLineChartMetrics = gatewayClient.performRequestWithRouting(metadataClusterName, null,
                     realIndexName, TYPE, dsl, s -> fetchMultipleAggMetricsWithStep(s, null, metricsTypes, topNu,topMethod), 3);
-        }while (retryTime++ > 3 && CollectionUtils.isEmpty(variousLineChartMetrics));
 
         return variousLineChartMetrics.stream().map(this::buildTopMetrics).collect(Collectors.toList());
     }

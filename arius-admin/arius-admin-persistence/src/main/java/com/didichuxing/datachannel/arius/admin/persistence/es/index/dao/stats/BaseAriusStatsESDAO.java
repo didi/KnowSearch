@@ -365,6 +365,8 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
 
     /**
      * 根据第一个时间点的值进行倒排，取topNu
+     * 优化
+     * todo: 通过es来做，先获取所有数据，去重，再排序
      */
     void mergeTopNuWithStep(VariousLineChartMetrics variousLineChartsMetrics, Integer topNu,String topMethod) {
         List<MetricsContent> sortedList = new ArrayList<>();
@@ -407,6 +409,7 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
 
     /**
      *  获取平均值
+     *  todo:修改
      * @param cells
      * @return
      */
