@@ -79,7 +79,7 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
     @Override
     public Result<List<OrderTypeVO>> getOrderTypes() {
         List<OrderTypeVO> orderTypeVOList = new ArrayList<>();
-        orderTypeVOList.add(new OrderTypeVO(WorkOrderTypeEnum.LOGIC_CLUSTER_CREATE.name(),
+        orderTypeVOList.add(new OrderTypeVO(WorkOrderTypeEnum.LOGIC_CLUSTER_CREATE.getName(),
                 WorkOrderTypeEnum.LOGIC_CLUSTER_CREATE.getMessage()));
         orderTypeVOList.add(new OrderTypeVO(WorkOrderTypeEnum.LOGIC_CLUSTER_INDECREASE.getName(),
                 WorkOrderTypeEnum.LOGIC_CLUSTER_INDECREASE.getMessage()));
