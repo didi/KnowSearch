@@ -15,6 +15,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Deprecated
 @ApiModel(description = "索引清理实体")
 public class IndicesClearDTO extends BaseDTO {
     @ApiModelProperty("集群名称")

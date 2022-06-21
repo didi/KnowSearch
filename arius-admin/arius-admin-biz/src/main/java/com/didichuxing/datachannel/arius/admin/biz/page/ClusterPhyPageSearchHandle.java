@@ -33,11 +33,6 @@ import com.didiglobal.logi.log.LogFactory;
  */
 @Component
 public class ClusterPhyPageSearchHandle extends AbstractPageSearchHandle<ClusterPhyConditionDTO,ClusterPhyVO> {
-
-    private static final ILog        LOGGER = LogFactory.getLog(ClusterPhyPageSearchHandle.class);
-
-    @Autowired
-    private AppService               appService;
     @Autowired
     private ClusterPhyService        clusterPhyService;
     @Autowired

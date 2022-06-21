@@ -124,13 +124,13 @@ public class CommonManagerImpl implements CommonManager {
     @Override
     public Result<List<ThirdpartTemplateLogicVO>> listLogicTemplate() {
         return Result
-                .buildSucc(ConvertUtil.list2List(indexTemplateService.getAllLogicTemplates(), ThirdpartTemplateLogicVO.class));
+                .buildSucc(ConvertUtil.list2List(indexTemplateService.listAllLogicTemplates(), ThirdpartTemplateLogicVO.class));
     }
 
     @Override
     public Result<List<ThirdPartTemplateLogicWithMasterTemplateResourceVO>> listLogicWithMasterTemplateAndResource() {
         List<IndexTemplateLogicWithClusterAndMasterTemplate> logicWithMasterTemplateAndResource = indexTemplateService
-                .getLogicTemplatesWithClusterAndMasterTemplate();
+                .listLogicTemplatesWithClusterAndMasterTemplate();
 
         List<ThirdPartTemplateLogicWithMasterTemplateResourceVO> vos = logicWithMasterTemplateAndResource.stream()
                 .map(entity -> {
@@ -211,7 +211,7 @@ public class CommonManagerImpl implements CommonManager {
 
         if (app.getIsRoot().equals( AdminConstant.YES)) {
             return Result
-                    .buildSucc(ConvertUtil.list2List(indexTemplateService.getAllLogicTemplates(), ThirdpartTemplateLogicVO.class));
+                    .buildSucc(ConvertUtil.list2List(indexTemplateService.listAllLogicTemplates(), ThirdpartTemplateLogicVO.class));
         }
 
         List<AppTemplateAuth> templateAuths = appLogicTemplateAuthService.getTemplateAuthsByAppId(appId);
@@ -236,10 +236,10 @@ public class CommonManagerImpl implements CommonManager {
         List<IndexTemplate> templateLogics = Lists.newArrayList();
         if (CollectionUtils.isNotEmpty(logicIds)) {
             if (logicIds.size() > MAX_LOGIC_ID_NUM) {
-                templateLogics = indexTemplateService.getAllLogicTemplates().stream()
+                templateLogics = indexTemplateService.listAllLogicTemplates().stream()
                         .filter(temp -> logicIds.contains(temp.getId())).collect(Collectors.toList());
             } else {
-                templateLogics = indexTemplateService.getLogicTemplatesByIds(Lists.newArrayList(logicIds));
+                templateLogics = indexTemplateService.listLogicTemplatesByIds(Lists.newArrayList(logicIds));
             }
         }
 

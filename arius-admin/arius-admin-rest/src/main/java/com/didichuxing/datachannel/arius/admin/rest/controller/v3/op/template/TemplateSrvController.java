@@ -1,19 +1,20 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.template;
 
-import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.TemplateSrvManager;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.BaseTemplateSrvOpenDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.TemplateQueryDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv.TemplateWithSrvVO;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
 import java.util.List;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.TemplateSrvManager;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.TemplateQueryDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv.TemplateWithSrvVO;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 /**
  * @author chengxiang
@@ -29,7 +30,7 @@ public class TemplateSrvController {
 
     @PostMapping("/page")
     @ResponseBody
-    @ApiOperation(value = "分页模糊查询模板服务")
+    @ApiOperation(value = "分页查询模板服务列表")
     public PaginationResult<TemplateWithSrvVO> pageGetTemplateWithSrv(@RequestBody TemplateQueryDTO condition) {
         return templateSrvManager.pageGetTemplateWithSrv(condition);
     }
@@ -38,9 +39,8 @@ public class TemplateSrvController {
     @ResponseBody
     @ApiOperation(value = "开启模板服务")
     public Result<Void> openTemplateSrv(@PathVariable("srvCode") Integer srvCode,
-                                        @PathVariable("templateIdList") List<Integer> templateIdList,
-                                        @RequestBody BaseTemplateSrvOpenDTO openParam) {
-        return templateSrvManager.openSrv(srvCode, templateIdList, openParam);
+                                        @PathVariable("templateIdList") List<Integer> templateIdList) {
+        return templateSrvManager.openSrv(srvCode, templateIdList);
     }
 
     @DeleteMapping("/{srvCode}/{templateIdList}")
@@ -50,13 +50,4 @@ public class TemplateSrvController {
                                          @PathVariable("templateIdList") List<Integer> templateIdList) {
         return templateSrvManager.closeSrv(srvCode, templateIdList);
     }
-
-    @PostMapping("/checkAvailable/{srvCode}/{templateIdList}")
-    @ResponseBody
-    @ApiOperation(value = "检查模板服务是否可用")
-    public Result<List<TemplateWithSrvVO>> checkAvailable(@PathVariable("srvCode") Integer srvCode,
-                                                          @PathVariable("templateIdList") List<Integer> templateIdList) {
-        return templateSrvManager.checkAvailable(srvCode, templateIdList);
-    }
-
 }

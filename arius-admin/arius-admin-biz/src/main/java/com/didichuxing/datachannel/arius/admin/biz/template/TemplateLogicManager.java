@@ -3,7 +3,6 @@ package com.didichuxing.datachannel.arius.admin.biz.template;
 import java.util.List;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateWithCreateInfoDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateClearDTO;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -207,28 +206,25 @@ public interface TemplateLogicManager {
 
     /**
      * 清除索引
-     * @param clearDTO
-     * @return
      */
-    Result<Void> clearIndices(TemplateClearDTO clearDTO);
+    Result<Void> clearIndices(Integer templateId, List<String> indices, Integer appId);
 
     /**
      * 执行调整shard 数量
      * @param logicTemplateId 模板id
      * @param shardNum 调整后的shard数量
+     * @param appId
      * @return 调整结果
      */
-    Result<Void> adjustShard(Integer logicTemplateId, Integer shardNum);
+    Result<Void> adjustShard(Integer logicTemplateId, Integer shardNum, Integer appId) throws AdminOperateException;
 
     /**
      * 模板升级
-     * @param logicTemplateId 模板id
+     * @param templateId 模板id
      * @param operator 操作者
      * @return
      */
-    Result<Void> upgrade(Integer logicTemplateId, String operator);
+    Result<Void> upgrade(Integer templateId, String operator) throws AdminOperateException;
 
-    Result<List<ConsoleTemplateVO>> getTemplateVOByLogicCluster(String clusterLogicName, Integer appId);
-
-
+    Result<List<ConsoleTemplateVO>> listTemplateVOByLogicCluster(String clusterLogicName, Integer appId);
 }

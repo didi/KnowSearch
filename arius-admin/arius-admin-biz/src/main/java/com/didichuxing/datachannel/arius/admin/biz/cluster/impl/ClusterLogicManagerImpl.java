@@ -1,5 +1,23 @@
 package com.didichuxing.datachannel.arius.admin.biz.cluster.impl;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum.CLUSTER_LOGIC;
+import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum.*;
+import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum.UNKNOWN;
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.RESOURCE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.TEMPLATE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.*;
+import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.DATA_NODE;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterLogicManager;
@@ -16,7 +34,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterLo
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterLogicNodeConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterWithRegionDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndicesClearDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatCellDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateClearDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppClusterLogicAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.*;
@@ -62,22 +80,6 @@ import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import javax.servlet.http.HttpServletRequest;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum.CLUSTER_LOGIC;
-import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum.UNKNOWN;
-import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum.*;
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.RESOURCE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.TEMPLATE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.*;
-import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.DATA_NODE;
 
 @Component
 public class ClusterLogicManagerImpl implements ClusterLogicManager {
@@ -417,7 +419,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
             templateLogicManager.delTemplate(agg.getIndexTemplateLogicWithCluster().getId(), operator);
         }
 
-        indicesManager.batchDeleteIndex(templateIndexVO.getCatIndexResults(),appId,operator);
+        indicesManager.deleteIndex(templateIndexVO.getCatIndexResults(),appId,operator);
 
         if (result.success()) {
             SpringTool.publish(new ClusterLogicEvent(logicClusterId, appId));
@@ -430,7 +432,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         List<IndexTemplateLogicAggregate> templateLogicAggregates =
                 templateLogicManager.getLogicClusterTemplatesAggregate(logicClusterId, appId);
 
-        List<IndicesClearDTO> catIndexResults = Lists.newArrayList();
+        List<IndexCatCellDTO> catIndexResults = Lists.newArrayList();
         templateLogicAggregates.forEach(tl -> {
 
             Integer templateLogic = tl.getIndexTemplateLogicWithCluster().getId();
@@ -443,8 +445,9 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
                     List<CatIndexResult> catIndexResultList = esIndexService.syncCatIndexByExpression(physicalMaster.getCluster(),
                             physicalMaster.getExpression());
                     catIndexResultList.forEach(catIndexResult -> {
-                        IndicesClearDTO indicesClearDTO = new IndicesClearDTO();
+                        IndexCatCellDTO indicesClearDTO = new IndexCatCellDTO();
                         indicesClearDTO.setIndex(catIndexResult.getIndex());
+                        indicesClearDTO.setCluster(physicalMaster.getCluster());
                         catIndexResults.add(indicesClearDTO);
                     });
                 }

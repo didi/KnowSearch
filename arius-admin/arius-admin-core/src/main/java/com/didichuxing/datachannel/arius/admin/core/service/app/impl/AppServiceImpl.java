@@ -642,7 +642,7 @@ public class AppServiceImpl implements AppService {
     }
 
     private boolean hasOwnTemplate(int appId) {
-        List<IndexTemplate> templateLogics = indexTemplateService.getAppLogicTemplatesByAppId(appId);
+        List<IndexTemplate> templateLogics = indexTemplateService.listAppLogicTemplatesByAppId(appId);
         return CollectionUtils.isNotEmpty(templateLogics);
     }
 

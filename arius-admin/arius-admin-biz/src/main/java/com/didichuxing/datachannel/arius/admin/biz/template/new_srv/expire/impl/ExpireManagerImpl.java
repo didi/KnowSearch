@@ -1,11 +1,21 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.new_srv.expire.impl;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.PLATFORM_DELETED_TEMPLATE_EXPIRED_TIME;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.PLATFORM_EXPIRE_TIME_MIN;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.didichuxing.datachannel.arius.admin.biz.indices.IndicesManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.base.impl.BaseTemplateSrvImpl;
 import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.expire.ExpireManager;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.BaseTemplateSrvOpenDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
@@ -17,16 +27,6 @@ import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexT
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.PLATFORM_DELETED_TEMPLATE_EXPIRED_TIME;
-import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.PLATFORM_EXPIRE_TIME_MIN;
 
 /**
  * @author chengxiang, zqr
@@ -49,11 +49,6 @@ public class ExpireManagerImpl extends BaseTemplateSrvImpl implements ExpireMana
     @Override
     public NewTemplateSrvEnum templateSrv() {
         return NewTemplateSrvEnum.TEMPLATE_DEL_EXPIRE;
-    }
-
-    @Override
-    public Result<Void> isTemplateSrvAvailable(Integer logicTemplateId) {
-        return Result.buildSucc();
     }
 
     @Override
@@ -105,7 +100,7 @@ public class ExpireManagerImpl extends BaseTemplateSrvImpl implements ExpireMana
             }
 
             succ = succ && esIndexService.syncBatchDeleteIndices(cluster, shouldDeleteIndexList, retryCount) == shouldDeleteIndexList.size();
-            succ = succ && indicesManager.batchSetIndexFlagInvalid(cluster, shouldDeleteIndexList).success();
+            succ = succ && indicesManager.updateIndexFlagInvalid(cluster, shouldDeleteIndexList).success();
         }
         return succ;
     }
@@ -188,7 +183,7 @@ public class ExpireManagerImpl extends BaseTemplateSrvImpl implements ExpireMana
 
         Boolean succ = expireIndex.size() == esIndexService.syncBatchDeleteIndices(templatePhy.getCluster(), expireIndex, RETRY_TIMES);
         if (succ) {
-            indicesManager.batchSetIndexFlagInvalid(templatePhy.getCluster(), Lists.newArrayList(expireIndex));
+            indicesManager.updateIndexFlagInvalid(templatePhy.getCluster(), Lists.newArrayList(expireIndex));
         }
         return succ;
     }
@@ -255,7 +250,7 @@ public class ExpireManagerImpl extends BaseTemplateSrvImpl implements ExpireMana
                 }
                 if (succ) {
                     //批量设置存储索引cat/index信息的元数据索引中的文档标志位（deleteFlag）为true
-                    indicesManager.batchSetIndexFlagInvalid(physical.getCluster(), Lists.newArrayList(shouldDelSet));
+                    indicesManager.updateIndexFlagInvalid(physical.getCluster(), Lists.newArrayList(shouldDelSet));
                 }
             }
         }

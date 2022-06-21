@@ -517,7 +517,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
     private List<AriusTypeProperty> genAriusTypePropertyList(IndexTemplate templateLogic,
                                                              Map<String, TypeConfig> typeConfigMap) {
 
-        List<IndexTemplateType> templateTypes = indexTemplateService.getLogicTemplateTypes(templateLogic.getId());
+        List<IndexTemplateType> templateTypes = indexTemplateService.listLogicTemplateTypes(templateLogic.getId());
         Map<String, IndexTemplateType> typeName2IndexTemplateTypeMap = ConvertUtil.list2Map(templateTypes,
                 IndexTemplateType::getName);
 
@@ -1090,7 +1090,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
 
     private Result<Void> handleUpdateType(ConsoleTemplateSchemaDTO schemaDTO, String operator, List<AriusTypeProperty> typeProperties) throws AdminOperateException {
         // 修改type表
-        List<IndexTemplateType> templateTypes = indexTemplateService.getLogicTemplateTypes(schemaDTO.getLogicId());
+        List<IndexTemplateType> templateTypes = indexTemplateService.listLogicTemplateTypes(schemaDTO.getLogicId());
         Map<String, IndexTemplateType> typeName2IndexTemplateTypeMap = ConvertUtil.list2Map(templateTypes,
                 IndexTemplateType::getName);
 

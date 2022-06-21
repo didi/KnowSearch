@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 @ApiModel(description = "索引阻塞实体")
 public class IndicesBlockSettingDTO {
     @ApiModelProperty("集群名称")
-    private String  clusterPhyName;
+    private String cluster;
 
     @ApiModelProperty("索引名称")
     private String  index;

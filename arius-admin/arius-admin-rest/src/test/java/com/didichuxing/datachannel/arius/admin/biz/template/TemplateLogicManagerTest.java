@@ -1,19 +1,18 @@
 package com.didichuxing.datachannel.arius.admin.biz.template;
 
-import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateWithCreateInfoDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateAdjustShardDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateClearDTO;
-import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
-import com.didichuxing.datachannel.arius.admin.util.RandomGenerator;
+import java.util.Arrays;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
+import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateWithCreateInfoDTO;
+import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
+import com.didichuxing.datachannel.arius.admin.util.RandomGenerator;
 
 @Transactional
 @Rollback
@@ -49,26 +48,30 @@ public class TemplateLogicManagerTest extends AriusAdminApplicationTest {
 
     @Test
     public void adjustShardTest() {
-        TemplateAdjustShardDTO templateAdjustShardDTO = new TemplateAdjustShardDTO();
-        templateAdjustShardDTO.setTemplateId(37519);
-        templateAdjustShardDTO.setShardNum(2);
-        Result<Void> result = templateLogicManager.adjustShard(templateAdjustShardDTO.getTemplateId(), templateAdjustShardDTO.getShardNum());
+        Result<Void> result = null;
+        try {
+            result = templateLogicManager.adjustShard(37519, 2, 1);
+        } catch (AdminOperateException e) {
+            e.printStackTrace();
+        }
         Assertions.assertTrue(result.success());
     }
 
     @Test
     public void clearIndicesTest() {
-        TemplateClearDTO clearDTO = new TemplateClearDTO();
-        clearDTO.setTemplateId(37519);
-        clearDTO.setDelIndices(Arrays.asList("lcx_template_0411_2022-05-25_v1"));
-        Result<Void> result = templateLogicManager.clearIndices(clearDTO);
+        Result<Void> result = templateLogicManager.clearIndices(37519, Arrays.asList("lcx_template_0411_2022-05-25_v1"), 1);
         Assertions.assertTrue(result.success());
     }
 
     @Test
     public void upgradeTemplateTest() {
         Integer templateId = 37519;
-        Result<Void> result = templateLogicManager.upgrade(templateId, "admin");
+        Result<Void> result = null;
+        try {
+            result = templateLogicManager.upgrade(templateId, "admin");
+        } catch (AdminOperateException e) {
+            e.printStackTrace();
+        }
         try {
             Thread.sleep(10000);
         } catch (Exception e) {

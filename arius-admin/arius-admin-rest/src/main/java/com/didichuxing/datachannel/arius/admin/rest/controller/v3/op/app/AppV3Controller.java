@@ -4,7 +4,9 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion
 
 import java.util.List;
 
+import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleAppVO;
+import com.google.common.collect.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,6 +36,27 @@ public class AppV3Controller {
     @ApiOperation(value = "获取APP列表接口")
     public Result<List<ConsoleAppVO>> listNames() {
         return appManager.list();
+    }
+
+    @GetMapping("/ids-names")
+    @ResponseBody
+    @ApiOperation(value = "获取APP主键和名称列表接口")
+    public Result<List<Tuple<Integer, String>>> listIdsAndNames() {
+        // TODO: app_id需要更换为project_id
+        Result<List<ConsoleAppVO>> ret = appManager.list();
+        List<Tuple<Integer, String>> res = Lists.newArrayList();
+        if (ret.success()) {
+            List<ConsoleAppVO> data = ret.getData();
+            for (ConsoleAppVO appVO : data) {
+                Tuple<Integer, String> ids2NamesTuple = new Tuple<>();
+                ids2NamesTuple.setV1(appVO.getId());
+                ids2NamesTuple.setV2(appVO.getName());
+                res.add(ids2NamesTuple);
+            }
+            return Result.buildSucc(res);
+        }
+
+        return Result.buildFail("操作失败, 请确认服务是否正常");
     }
 
 }

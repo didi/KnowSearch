@@ -6,7 +6,7 @@ public enum PageSearchHandleTypeEnum {
         CLUSTER_LOGIC("clusterLogicPageSearch"),
         DSL_TEMPLATE("dslTemplatePageSearch"),
         CLUSTER_PHY("clusterPhyPageSearch"),
-        INDICES("indicesPageSearch"),
+        INDEX("indexPageSearch"),
         TEMPLATE_SRV("templateSrvPageSearch");
 
        private String pageSearchType;

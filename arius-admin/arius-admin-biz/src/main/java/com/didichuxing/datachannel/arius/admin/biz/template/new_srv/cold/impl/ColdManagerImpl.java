@@ -4,13 +4,15 @@ import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.base.impl.Ba
 import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.cold.ColdManager;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegionFSInfo;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.*;
+import com.didichuxing.datachannel.arius.admin.common.constant.ESClusterVersionEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.NewTemplateSrvEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import com.didichuxing.datachannel.arius.admin.common.util.ESVersionUtil;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
@@ -33,7 +35,7 @@ import java.util.Set;
 public class ColdManagerImpl extends BaseTemplateSrvImpl implements ColdManager {
 
     @Autowired
-    private ESIndexService esIndexService;
+    private ESIndexService       esIndexService;
 
     @Autowired
     private ClusterRegionService clusterRegionService;
@@ -46,11 +48,6 @@ public class ColdManagerImpl extends BaseTemplateSrvImpl implements ColdManager 
     @Override
     public NewTemplateSrvEnum templateSrv() {
         return NewTemplateSrvEnum.TEMPLATE_COLD;
-    }
-
-    @Override
-    public Result<Void> isTemplateSrvAvailable(Integer logicTemplateId) {
-        return Result.buildSucc();
     }
 
     @Override

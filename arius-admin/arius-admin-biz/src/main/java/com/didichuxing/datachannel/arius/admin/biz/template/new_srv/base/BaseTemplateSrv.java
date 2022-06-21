@@ -1,10 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.new_srv.base;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.BaseTemplateSrvOpenDTO;
-import com.didichuxing.datachannel.arius.admin.common.constant.template.NewTemplateSrvEnum;
-
 import java.util.List;
+
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.NewTemplateSrvEnum;
+import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 
 /**
  * @author chengxiang
@@ -25,7 +25,6 @@ public interface BaseTemplateSrv {
      */
     NewTemplateSrvEnum templateSrv();
 
-
     /**
      * 获取当前模板服务的名称
      * @return
@@ -33,25 +32,17 @@ public interface BaseTemplateSrv {
     String templateSrvName();
 
     /**
-     * 判断指定逻辑模板是否可以开启当前模板服务
-     * @param logicTemplateId 逻辑模板id
-     * @return 校验结果
-     */
-    Result<Void> isTemplateSrvAvailable(Integer logicTemplateId);
-
-    /**
      * 开启指定逻辑模板的模板服务
      * @param templateIdList
-     * @param openParam 开启参数
      * @return
      */
-    Result<Void> openSrv(List<Integer> templateIdList, BaseTemplateSrvOpenDTO openParam);
+    Result<Void> openSrv(List<Integer> templateIdList) throws AdminOperateException;
 
     /**
      * 关闭指定逻辑模板的模板服务
      * @param templateIdList
      * @return
      */
-    Result<Void> closeSrv(List<Integer> templateIdList);
+    Result<Void> closeSrv(List<Integer> templateIdList) throws AdminOperateException ;
 
 }
