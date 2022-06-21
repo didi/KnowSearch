@@ -1,9 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.biz.cluster;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterJoinDTO;
@@ -16,6 +12,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhy
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PluginVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterDynamicConfigsTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  *
@@ -59,18 +58,18 @@ public interface ClusterPhyManager {
      * 构建客户端需要的数据
      *
      * @param clusterPhyList  集群列表源数据
-     * @param appId           当前项目
+     * @param projectId           当前项目
      * @return
      */
-    List<ClusterPhyVO> buildClusterInfo(List<ClusterPhy> clusterPhyList, Integer appId);
+    List<ClusterPhyVO> buildClusterInfo(List<ClusterPhy> clusterPhyList, Integer projectId);
 
     /**
      * 获取单个物理集群overView信息
      * @param clusterId 物理集群id
-     * @param currentAppId 当前登录项目
+     * @param currentProjectId 当前登录项目
      * @return 物理集群信息
      */
-    ClusterPhyVO getClusterPhyOverview(Integer clusterId, Integer currentAppId);
+    ClusterPhyVO getClusterPhyOverview(Integer clusterId, Integer currentProjectId);
 
     /**
      * 获取逻辑集群可关联region的物理集群名称列表
@@ -123,10 +122,12 @@ public interface ClusterPhyManager {
 
     /**
      * 更新集群下的动态配置信息
-     * @param param 配置信息参数
+     *
+     * @param param    配置信息参数
+     * @param operator
      * @return result
      */
-    Result<Boolean> updatePhyClusterDynamicConfig(ClusterSettingDTO param);
+    Result<Boolean> updatePhyClusterDynamicConfig(ClusterSettingDTO param, String operator);
 
     /**
      * 获取集群下的属性配置
@@ -138,18 +139,18 @@ public interface ClusterPhyManager {
     /**
      * 获取APP有管理、读写、读权限的物理集群名称列表
      *
-     * @param appId appId
+     * @param projectId projectId
      * @return {@link List}<{@link String}>
      */
-    List<String> listClusterPhyNameByAppId(Integer appId);
+    List<String> listClusterPhyNameByProjectId(Integer projectId);
 
     /**
      * 根据模板所在集群，获取与该集群相同版本号的集群名称列表
-     * @param appId      appId
+     * @param projectId      projectId
      * @param templateId 模板id
      * @return {@link Result}<{@link List}<{@link String}>>
      */
-    Result<List<String>> getTemplateSameVersionClusterNamesByTemplateId(Integer appId, Integer templateId);
+    Result<List<String>> getTemplateSameVersionClusterNamesByTemplateId(Integer projectId, Integer templateId);
 
     /**
      * 获取物理集群节点名称列表
@@ -166,15 +167,16 @@ public interface ClusterPhyManager {
 
     /**
      * 获取APP可查看的物理集群节点名称列表
-     * @param appId appId
+     * @param projectId projectId
      * @return {@link List}<{@link String}>
      */
-    List<String> listNodeNameByAppId(Integer appId);
+    List<String> listNodeNameByProjectId(Integer projectId);
 
     /**
      * 物理集群信息删除 (host信息、角色信息、集群信息、region信息)
      * @param clusterPhyId 物理集群ID
      * @param operator     操作人
+     * @param projectId        projectId
      * @return {@link Result}<{@link Boolean}>
      */
     Result<Boolean> deleteCluster(Integer clusterPhyId, String operator);
@@ -184,10 +186,10 @@ public interface ClusterPhyManager {
      *
      * @param param    参数
      * @param operator 操作人
-     * @param appId    appId
+     * @param projectId    projectId
      * @return {@link Result}<{@link Boolean}>
      */
-    Result<Boolean> addCluster(ClusterPhyDTO param, String operator, Integer appId);
+    Result<Boolean> addCluster(ClusterPhyDTO param, String operator, Integer projectId);
 
     /**
      * 编辑集群
@@ -201,10 +203,10 @@ public interface ClusterPhyManager {
     /**
      * 条件组合、分页查询
      * @param condition
-     * @param appId
+     * @param projectId
      * @return
      */
-    PaginationResult<ClusterPhyVO> pageGetClusterPhys(ClusterPhyConditionDTO condition, Integer appId);
+    PaginationResult<ClusterPhyVO> pageGetClusterPhys(ClusterPhyConditionDTO condition, Integer projectId);
 
     /**
      * 构建物理集群角色信息
@@ -255,11 +257,11 @@ public interface ClusterPhyManager {
     /**
      * 删除存在集群
      * @param clusterPhyName
-     * @param appId
+     * @param projectId
      * @param operator
      * @return
      */
-    Result<Boolean> deleteClusterExit(String clusterPhyName, Integer appId, String operator);
+    Result<Boolean> deleteClusterExit(String clusterPhyName, Integer projectId, String operator);
 
     /**
      *  根据逻辑集群类型和已选中的物理集群名称筛选出es版本一致的物理集群名称列表
@@ -293,5 +295,5 @@ public interface ClusterPhyManager {
      */
     List<ClusterRoleInfo> listClusterRolesByClusterId(Integer clusterId);
 
-    Result<List<String>> listClusterPhyNameByResourceType(Integer clusterResourceType, Integer appId);
+    Result<List<String>> listClusterPhyNameByResourceType(Integer clusterResourceType, Integer projectId);
 }

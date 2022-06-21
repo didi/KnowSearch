@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail;
 
-import com.didichuxing.datachannel.arius.admin.common.constant.app.AppTemplateAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectTemplateAuthEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -25,7 +25,7 @@ public class TemplateAuthOrderDetail extends AbstractOrderDetail {
 
     /**
      * 权限类型
-     * @see AppTemplateAuthEnum
+     * @see ProjectTemplateAuthEnum
      */
     private Integer authCode;
 

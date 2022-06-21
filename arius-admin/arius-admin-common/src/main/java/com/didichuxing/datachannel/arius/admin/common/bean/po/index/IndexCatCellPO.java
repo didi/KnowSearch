@@ -19,7 +19,7 @@ public class IndexCatCellPO extends BaseESPO {
     private String  clusterPhy;
     private String  clusterLogic;
     private Long    resourceId;
-    private Integer appId;
+    private Integer projectId;
     private String  health;
     private String  status;
     private String  index;

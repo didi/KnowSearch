@@ -1,23 +1,21 @@
 package com.didichuxing.datachannel.arius.admin.biz.template;
 
-import java.util.List;
-
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateWithCreateInfoDTO;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateWithCreateInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateConditionDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
-import com.didichuxing.datachannel.arius.admin.common.constant.app.AppTemplateAuthEnum;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicAggregate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithLabels;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectTemplateAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
+import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
+import java.util.List;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * 逻辑模板管理Biz类
@@ -49,12 +47,12 @@ public interface TemplateLogicManager {
     List<IndexTemplateWithLabels> getByLabelIds(String includeLabelIds, String excludeLabelIds);
 
     /**
-     * 获取最近访问该模板的APP
+     * 获取最近访问该模板的project
      *
      * @param logicId logicId
      * @return result
      */
-    List<App> getLogicTemplateAppAccess(Integer logicId);
+    List<ProjectBriefVO> getLogicTemplateProjectAccess(Integer logicId);
 
     /**
      * 获取模板的标签信息
@@ -67,28 +65,28 @@ public interface TemplateLogicManager {
      * 新建逻辑模板
      * @param param 模板信息
      * @param operator 操作人
-     * @param appId appId
+     * @param projectId projectId
      * @return result
      */
     @Transactional(rollbackFor = Exception.class)
-    Result<Void> create(IndexTemplateWithCreateInfoDTO param, String operator, Integer appId) throws AdminOperateException;
+    Result<Void> create(IndexTemplateWithCreateInfoDTO param, String operator, Integer projectId) throws AdminOperateException;
 
     /**
      * 获取所有逻辑模板聚合
      *
-     * @param appId 当前App Id
+     * @param projectId 当前projectId
      * @return
      */
-    List<IndexTemplateLogicAggregate> getAllTemplatesAggregate(Integer appId);
+    List<IndexTemplateLogicAggregate> getAllTemplatesAggregate(Integer projectId);
 
     /**
      * 获取逻辑集群所有逻辑模板聚合
      *
      * @param logicClusterId 逻辑集群ID
-     * @param appId 操作的App Id
+     * @param projectId 操作的project Id
      * @return
      */
-    List<IndexTemplateLogicAggregate> getLogicClusterTemplatesAggregate(Long logicClusterId, Integer appId);
+    List<IndexTemplateLogicAggregate> getLogicClusterTemplatesAggregate(Long logicClusterId, Integer projectId);
 
     /**
      * 拼接集群名称
@@ -114,21 +112,21 @@ public interface TemplateLogicManager {
     /**
      * 获取逻辑索引列表
      */
-    List<ConsoleTemplateVO> getConsoleTemplatesVOS(Integer appId);
+    List<ConsoleTemplateVO> getConsoleTemplatesVOS(Integer projectId);
 
     /**
      * 根据项目和权限类型获取模板信息
-     * @param appId                 项目Id
+     * @param projectId                 项目Id
      * @param authType              权限类型
-     * @see   AppTemplateAuthEnum
+     * @see   ProjectTemplateAuthEnum
      * @return
      */
-    List<IndexTemplate> getTemplatesByAppIdAndAuthType(Integer appId, Integer authType);
+    List<IndexTemplate> getTemplatesByProjectIdAndAuthType(Integer projectId, Integer authType);
 
     /**
      * 根据项目获取有管理\读写\读权限的逻辑模版
      */
-    List<String> getTemplateLogicNames(Integer appId);
+    List<String> getTemplateLogicNames(Integer projectId);
 
     @Deprecated
     //todo: 下线并重命名方法
@@ -141,10 +139,10 @@ public interface TemplateLogicManager {
     /**
      * 模糊（精确）/分页查询模板列表接口
      * @param condition  查询条件
-     * @param appId      项目
+     * @param projectId      项目
      * @return
      */
-    PaginationResult<ConsoleTemplateVO> pageGetConsoleTemplateVOS(TemplateConditionDTO condition, Integer appId);
+    PaginationResult<ConsoleTemplateVO> pageGetConsoleTemplateVOS(TemplateConditionDTO condition, Integer projectId);
 
     /**
      * 校验创建模板名称是否合法
@@ -183,12 +181,12 @@ public interface TemplateLogicManager {
     Result<Boolean> checkTemplateEditService(Integer templateId, Integer templateSrvId);
 
     /**
-     * 校验指定appId能否对指定的逻辑模板进行操作
+     * 校验指定projectId能否对指定的逻辑模板进行操作
      * @param logicId 逻辑模板id
-     * @param appId appId
+     * @param projectId projectId
      * @return result
      */
-    Result<Void> checkAppAuthOnLogicTemplate(Integer logicId, Integer appId);
+    Result<Void> checkProjectAuthOnLogicTemplate(Integer logicId, Integer projectId);
 
     /**
      * 同步dcdr相关信息
@@ -199,24 +197,25 @@ public interface TemplateLogicManager {
 
     /**
      * 全量获取指定物理集群所关联的逻辑模板信息列表
+     *
      * @param phyCluster 物理集群名称
      * @return 物理集群下的全量模板信息列表视图
      */
-    Result<List<ConsoleTemplateVO>> getTemplateVOByPhyCluster(String phyCluster, Integer appId);
+    Result<List<ConsoleTemplateVO>> getTemplateVOByPhyCluster(String phyCluster);
 
     /**
      * 清除索引
      */
-    Result<Void> clearIndices(Integer templateId, List<String> indices, Integer appId);
+    Result<Void> clearIndices(Integer templateId, List<String> indices, Integer projectId);
 
     /**
      * 执行调整shard 数量
      * @param logicTemplateId 模板id
      * @param shardNum 调整后的shard数量
-     * @param appId
+     * @param projectId
      * @return 调整结果
      */
-    Result<Void> adjustShard(Integer logicTemplateId, Integer shardNum, Integer appId) throws AdminOperateException;
+    Result<Void> adjustShard(Integer logicTemplateId, Integer shardNum, Integer projectId) throws AdminOperateException;
 
     /**
      * 模板升级
@@ -226,5 +225,5 @@ public interface TemplateLogicManager {
      */
     Result<Void> upgrade(Integer templateId, String operator) throws AdminOperateException;
 
-    Result<List<ConsoleTemplateVO>> listTemplateVOByLogicCluster(String clusterLogicName, Integer appId);
+    Result<List<ConsoleTemplateVO>> listTemplateVOByLogicCluster(String clusterLogicName, Integer projectId);
 }

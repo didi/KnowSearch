@@ -5,6 +5,7 @@ package com.didichuxing.datachannel.arius.admin.common.constant.cluster;
  * @author wangshu
  * @date 2020/09/14
  */
+@Deprecated
 public enum ClusterRegionStatusEnum {
     /**
      * Region未加入容量规划

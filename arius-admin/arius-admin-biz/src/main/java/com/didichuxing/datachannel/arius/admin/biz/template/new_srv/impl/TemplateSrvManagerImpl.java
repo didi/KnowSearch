@@ -138,7 +138,7 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
         BaseHandle baseHandle = handleFactory.getByHandlerNamePer(TEMPLATE_SRV.getPageSearchType());
         if (baseHandle instanceof TemplateSrvPageSearchHandle) {
             TemplateSrvPageSearchHandle handler = (TemplateSrvPageSearchHandle) baseHandle;
-            return handler.doPage(condition, SUPER_APP_ID);
+            return handler.doPage(condition,condition.getProjectId() );
         }
         return PaginationResult.buildFail("没有找到对应的处理器");
     }

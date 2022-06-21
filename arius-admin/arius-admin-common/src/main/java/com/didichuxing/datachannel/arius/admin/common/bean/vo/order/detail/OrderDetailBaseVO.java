@@ -1,13 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.vo.order.detail;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.BaseVO;
-import java.util.Date;
-import java.util.List;
-
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.user.AriusUserInfoVO;
-
+import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.Date;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -28,19 +26,19 @@ public class OrderDetailBaseVO extends BaseVO {
     private String                type;
 
     @ApiModelProperty(value = "申请人")
-    private AriusUserInfoVO applicant;
+    private UserBriefVO applicant;
 
     @ApiModelProperty(value = "申请人部门")
     private String                appDeptName;
 
-    @ApiModelProperty(value = "申请人使用的appid")
-    private Integer               applicantAppId;
+    @ApiModelProperty(value = "申请人使用的ProjectId")
+    private Integer applicantProjectId;
 
     @ApiModelProperty(value = "申请人使用的项目名称")
     private String                applicantAppName;
 
     @ApiModelProperty(value = "审批人列表, 状态为未处理时返回的是审批人, 状态为处理完成时返回的是审批的人")
-    private List<AriusUserInfoVO> approverList;
+    private List<UserBriefVO> approverList;
 
     @ApiModelProperty(value = "审批时间")
     private Date                  finishTime;

@@ -50,19 +50,19 @@ public class GatewayAppMetricsDAO extends BaseESDAO {
     }
 
     /**
-     * 获取某个字段分布.(searchCost，totalCost) by appId
+     * 获取某个字段分布.(searchCost，totalCost) by projectId
      */
-    public List<VariousLineChartMetrics> getAggFieldByRange(Long startTime, Long endTime, List<String> metricsTypes, String appId) {
+    public List<VariousLineChartMetrics> getAggFieldByRange(Long startTime, Long endTime, List<String> metricsTypes, String projectId) {
         String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTime, endTime);
         String interval = MetricsUtils.getInterval((endTime - startTime));
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_APP_FIELD_BY_APPID, appId, startTime, endTime, interval, startTime, endTime);
-        return gatewayClient.performRequest(realIndexName, TYPE, dsl, (ESQueryResponse response) -> fetchFieldByAppIdAggMetrics(response, metricsTypes, appId, interval), 3);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_APP_FIELD_BY_APPID, projectId, startTime, endTime, interval, startTime, endTime);
+        return gatewayClient.performRequest(realIndexName, TYPE, dsl, (ESQueryResponse response) -> fetchFieldByProjectIdAggMetrics(response, metricsTypes, projectId, interval), 3);
     }
 
     /**
      * 获取各App查询量 count  topN
      */
-    public VariousLineChartMetrics getAggAppCountByRange(Long startTime, Long endTime, Integer topNu) {
+    public VariousLineChartMetrics getProjectCountByRange(Long startTime, Long endTime, Integer topNu) {
         String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTime, endTime);
         String interval = MetricsUtils.getInterval((endTime - startTime));
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_APP_FIELD_COUNT, startTime, endTime, interval, startTime, endTime);
@@ -72,14 +72,14 @@ public class GatewayAppMetricsDAO extends BaseESDAO {
     }
 
     /**
-     * 获取各App查询量 count by appId
+     * 获取各project查询量 count by projectId
      */
-    public VariousLineChartMetrics getAggAppCountByRange(Long startTime, Long endTime, String appId) {
+    public VariousLineChartMetrics getProjectCountByRange(Long startTime, Long endTime, String projectId) {
         String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTime, endTime);
         String interval = MetricsUtils.getInterval((endTime - startTime));
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_APP_FIELD_COUNT_BY_APPID, appId, startTime, endTime, interval, startTime, endTime);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_APP_FIELD_COUNT_BY_APPID, projectId, startTime, endTime, interval, startTime, endTime);
         List<VariousLineChartMetrics> variousLineChartMetrics = gatewayClient.performRequest(realIndexName, TYPE, dsl, (ESQueryResponse response) ->
-                fetchFieldByAppIdAggMetrics(response, Lists.newArrayList(GatewayMetricsTypeEnum.QUERY_APP_COUNT.getType()), appId, interval), 3);
+                fetchFieldByProjectIdAggMetrics(response, Lists.newArrayList(GatewayMetricsTypeEnum.QUERY_APP_COUNT.getType()), projectId, interval), 3);
         return variousLineChartMetrics.get(0);
     }
     private List<VariousLineChartMetrics> fetchFieldAggMetrics(ESQueryResponse response, List<String> metricsTypes, Integer topNu, String interval) {
@@ -108,9 +108,9 @@ public class GatewayAppMetricsDAO extends BaseESDAO {
 
     private void handleBucketList(String interval, String metricsType, VariousLineChartMetrics variousLineChartMetrics, Map<String, ESAggr> esAggrMap) {
         for (ESBucket esBucket : esAggrMap.get(AGG_KEY_APP).getBucketList()) {
-            String appId = esBucket.getUnusedMap().get(KEY).toString();
+            String projectId = esBucket.getUnusedMap().get(KEY).toString();
             MetricsContent metricsContent = new MetricsContent();
-            metricsContent.setName(appId);
+            metricsContent.setName(projectId);
             metricsContent.setMetricsContentCells(Lists.newArrayList());
             variousLineChartMetrics.getMetricsContents().add(metricsContent);
             if (null != esBucket.getAggrMap() && null != esBucket.getAggrMap().get(AGG_KEY_TIMESTAMP)) {
@@ -129,14 +129,14 @@ public class GatewayAppMetricsDAO extends BaseESDAO {
         }
     }
 
-    private List<VariousLineChartMetrics> fetchFieldByAppIdAggMetrics(ESQueryResponse response, List<String> metricsTypes, String appId, String interval) {
+    private List<VariousLineChartMetrics> fetchFieldByProjectIdAggMetrics(ESQueryResponse response, List<String> metricsTypes, String projectId, String interval) {
         List<VariousLineChartMetrics> vos = Lists.newArrayList();
         for (String metricsType : metricsTypes) {
             VariousLineChartMetrics variousLineChartMetrics = new VariousLineChartMetrics();
             variousLineChartMetrics.setType(metricsType);
 
             MetricsContent metricsContent = new MetricsContent();
-            metricsContent.setName(appId);
+            metricsContent.setName(projectId);
             metricsContent.setMetricsContentCells(Lists.newArrayList());
 
             variousLineChartMetrics.setMetricsContents(Lists.newArrayList(metricsContent));

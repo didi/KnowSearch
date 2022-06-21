@@ -10,21 +10,30 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.SortConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.SortTermEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  *
@@ -33,6 +42,11 @@ import com.didiglobal.logi.log.LogFactory;
  */
 @Component
 public class ClusterPhyPageSearchHandle extends AbstractPageSearchHandle<ClusterPhyConditionDTO,ClusterPhyVO> {
+
+    private static final ILog        LOGGER = LogFactory.getLog(ClusterPhyPageSearchHandle.class);
+
+    
+
     @Autowired
     private ClusterPhyService        clusterPhyService;
     @Autowired
@@ -42,7 +56,7 @@ public class ClusterPhyPageSearchHandle extends AbstractPageSearchHandle<Cluster
     @Autowired
     private  ClusterRegionService clusterRegionService;
     @Override
-    protected Result<Boolean> checkCondition(ClusterPhyConditionDTO condition, Integer appId) {
+    protected Result<Boolean> checkCondition(ClusterPhyConditionDTO condition, Integer projectId) {
 
         Integer status = condition.getHealth();
         if (null != status && !ClusterHealthEnum.isExitByCode(status)) {
@@ -62,12 +76,11 @@ public class ClusterPhyPageSearchHandle extends AbstractPageSearchHandle<Cluster
     }
     
     @Override
-    protected void initCondition(ClusterPhyConditionDTO condition, Integer appId) {
-        boolean isSuperApp = appService.isSuperApp(appId);
+    protected void initCondition(ClusterPhyConditionDTO condition, Integer projectId) {
         List<String> clusterNames = new ArrayList<>();
-        if (!isSuperApp) {
+        if (!AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
             // 非超级管理员，获取拥有的逻辑集群对应的物理集群列表
-            List<ClusterLogic> clusterLogicList = clusterLogicService.getOwnedClusterLogicListByAppId(appId);
+            List<ClusterLogic> clusterLogicList = clusterLogicService.getOwnedClusterLogicListByProjectId(projectId);
             //项目下的有管理权限逻辑集群会关联多个物理集群
             List<ClusterRegion> regions = clusterRegionService.getClusterRegionsByLogicIds(
                 clusterLogicList.stream().map(ClusterLogic::getId).collect(Collectors.toList()));
@@ -83,11 +96,11 @@ public class ClusterPhyPageSearchHandle extends AbstractPageSearchHandle<Cluster
     }
 
     @Override
-    protected PaginationResult<ClusterPhyVO> buildPageData(ClusterPhyConditionDTO condition, Integer appId) {
+    protected PaginationResult<ClusterPhyVO> buildPageData(ClusterPhyConditionDTO condition, Integer projectId) {
 
         List<ClusterPhy> pagingGetClusterPhyList      =  clusterPhyService.pagingGetClusterPhyByCondition(condition);
 
-        List<ClusterPhyVO> clusterPhyVOList = clusterPhyManager.buildClusterInfo(pagingGetClusterPhyList, appId);
+        List<ClusterPhyVO> clusterPhyVOList = clusterPhyManager.buildClusterInfo(pagingGetClusterPhyList, projectId);
 
         long totalHit = clusterPhyService.fuzzyClusterPhyHitByCondition(condition);
         return PaginationResult.buildSucc(clusterPhyVOList, totalHit, condition.getPage(), condition.getSize());

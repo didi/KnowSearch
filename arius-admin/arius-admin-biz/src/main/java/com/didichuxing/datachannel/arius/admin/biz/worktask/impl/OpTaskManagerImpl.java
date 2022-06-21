@@ -1,12 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.biz.worktask.impl;
 
-import java.util.List;
-
 import com.didichuxing.datachannel.arius.admin.biz.worktask.OpTaskHandler;
-import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.didichuxing.datachannel.arius.admin.biz.worktask.OpTaskManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskDTO;
@@ -15,14 +9,18 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.task.OpTaskPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskHandleEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
-import com.didichuxing.datachannel.arius.admin.core.service.common.AriusUserInfoService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.task.OpTaskDAO;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.logi.security.service.UserService;
 import com.google.common.collect.Lists;
+import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * @author d06679
@@ -39,7 +37,7 @@ public class OpTaskManagerImpl implements OpTaskManager {
     private HandleFactory        handleFactory;
 
     @Autowired
-    private AriusUserInfoService ariusUserInfoService;
+    private UserService  userService;
 
     @Override
     public Result<OpTask> addTask(OpTaskDTO opTaskDTO) {
@@ -52,7 +50,7 @@ public class OpTaskManagerImpl implements OpTaskManager {
             return Result.buildNotExist("任务类型不存在");
         }
 
-        if (AriusObjUtils.isNull(ariusUserInfoService.getByDomainAccount(opTaskDTO.getCreator()))) {
+        if (AriusObjUtils.isNull(userService.getUserBriefByUserName(opTaskDTO.getCreator()))) {
             return Result.buildParamIllegal("提交人非法");
         }
         OpTaskHandleEnum taskHandleEnum = OpTaskHandleEnum.valueOfType(opTaskDTO.getTaskType());

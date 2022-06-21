@@ -34,9 +34,9 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.impl.han
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleService;
-import com.didichuxing.datachannel.arius.admin.core.service.common.AriusUserInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.remote.zeus.bean.constant.EcmActionEnum;
+import com.didiglobal.logi.security.service.UserService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import java.util.ArrayList;
@@ -86,7 +86,7 @@ public class EcmHandleServiceImpl implements EcmHandleService {
     private ESPackageService                    esPackageService;
 
     @Autowired
-    private AriusUserInfoService                ariusUserInfoService;
+    private UserService userService;
 
     private AriusTaskThreadPool                 ariusTaskThreadPool;
 
@@ -525,7 +525,7 @@ public class EcmHandleServiceImpl implements EcmHandleService {
     }
 
     private Result<Void> validityCheck(Integer clusterId, String operator) {
-        if (!ariusUserInfoService.isOPByDomainAccount(operator)) {
+        if (userService.getUserBriefByUserName(operator)==null) {
             return Result.buildFail("User has no permissions");
         }
 

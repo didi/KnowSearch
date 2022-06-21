@@ -12,7 +12,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsDa
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsDashboardTopNDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateConditionDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.user.AriusUserInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.workorder.WorkOrderDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.workorder.WorkOrderProcessDTO;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterImportRuleEnum;
@@ -34,8 +33,8 @@ public class CustomDataSource {
     public static String testAdminPort;
     public static String testPhyClusterIp;
     public static Integer testPhyClusterPort;
-    public static String operator;
-    public static Integer appid;
+    public static String  operator;
+    public static Integer projectId;
 
     private static String generateString(Random random, int length) {
         String sources = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
@@ -58,7 +57,7 @@ public class CustomDataSource {
         String clusterName = getRandomClusterName();
         ClusterJoinDTO param = new ClusterJoinDTO();
         param.setType(4);
-        param.setAppId(appid);
+        param.setProjectId(projectId);
         param.setCluster(clusterName);
         param.setEsVersion("7.6.2");
         param.setPhyClusterDesc("");
@@ -95,7 +94,7 @@ public class CustomDataSource {
         Map<String, Object> contentObj = new HashMap<>();
         workOrderDTO.setContentObj(contentObj);
         workOrderDTO.setSubmitor(operator);
-        workOrderDTO.setSubmitorAppid(appid);
+        workOrderDTO.setSubmitorProjectid(projectId);
         workOrderDTO.setDescription("testtest");
         workOrderDTO.setType(type);
         return workOrderDTO;
@@ -120,7 +119,7 @@ public class CustomDataSource {
     public static WorkOrderProcessDTO getWorkOrderProcessDTO(Long orderId) {
         WorkOrderProcessDTO workOrderProcessDTO = new WorkOrderProcessDTO();
         workOrderProcessDTO.setAssignee(operator);
-        workOrderProcessDTO.setAssigneeAppid(appid);
+        workOrderProcessDTO.setAssigneeProjectId(projectId);
         workOrderProcessDTO.setComment("testtest");
         workOrderProcessDTO.setOrderId(orderId);
         workOrderProcessDTO.setCheckAuthority(false);
@@ -154,17 +153,7 @@ public class CustomDataSource {
         return dto;
     }
 
-    public static AriusUserInfoDTO getariusUserInfoDTOFactory() {
-        AriusUserInfoDTO ariusUserInfoDTO = new AriusUserInfoDTO();
-        ariusUserInfoDTO.setEmail("");
-        ariusUserInfoDTO.setMobile("");
-        ariusUserInfoDTO.setStatus(1);
-        ariusUserInfoDTO.setDomainAccount("wpk");
-        ariusUserInfoDTO.setName("wpk");
-        ariusUserInfoDTO.setPassword("hTw1yTAuEifG/HN82zFkHzTK1N2rQ9WCw8QuRgfITAy9aNJ7IccoFQwM11sblbhPmkKHGV+rsbO+rzenRmjwiB7bmyu8kYgNWPZuI5wXYKFeeBPbXXd2NQDM01i9oUDU8KAiN60rY83XSiEm4X2iBVKOgYlq3SEchNkodfsBWts=");
-        ariusUserInfoDTO.setRole(2);
-        return ariusUserInfoDTO;
-    }
+   
 
     public static OpTaskDTO getworkTaskDTO(){
         OpTaskDTO opTaskDTO =new OpTaskDTO();

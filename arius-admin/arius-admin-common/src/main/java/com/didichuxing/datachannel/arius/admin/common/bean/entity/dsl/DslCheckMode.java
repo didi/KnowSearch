@@ -24,8 +24,8 @@ public class DslCheckMode extends DslBase {
      */
     private String checkMode;
 
-    public DslCheckMode(Integer appid, String dslTemplateMd5, String checkMode) {
-        super(appid, dslTemplateMd5);
+    public DslCheckMode(Integer projectId, String dslTemplateMd5, String checkMode) {
+        super(projectId, dslTemplateMd5);
         this.checkMode = checkMode;
     }
 

@@ -9,15 +9,14 @@ import com.didichuxing.datachannel.arius.admin.common.bean.po.dsl.DslTemplatePO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.DslTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.DslTemplateService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
+import com.didiglobal.logi.security.service.ProjectService;
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * 详细介绍类情况.
@@ -30,13 +29,13 @@ import java.util.List;
 @Component
 public class DslTemplatePageSearchHandle extends AbstractPageSearchHandle<DslTemplateConditionDTO, DslTemplateVO> {
     @Autowired
-    private AppService appService;
+    private ProjectService projectService;
 
     @Autowired
     private DslTemplateService dslTemplateService;
 
     @Override
-    protected Result<Boolean> checkCondition(DslTemplateConditionDTO condition, Integer appId) {
+    protected Result<Boolean> checkCondition(DslTemplateConditionDTO condition, Integer projectId) {
 
         String queryIndex = condition.getQueryIndex();
         if (!AriusObjUtils.isBlack(queryIndex) && (queryIndex.startsWith("*") || queryIndex.startsWith("?"))) {
@@ -47,14 +46,14 @@ public class DslTemplatePageSearchHandle extends AbstractPageSearchHandle<DslTem
     }
 
     @Override
-    protected void initCondition(DslTemplateConditionDTO condition, Integer appId) {
+    protected void initCondition(DslTemplateConditionDTO condition, Integer projectId) {
         // Do nothing
     }
 
     @Override
-    protected PaginationResult<DslTemplateVO> buildPageData(DslTemplateConditionDTO condition, Integer appId) {
+    protected PaginationResult<DslTemplateVO> buildPageData(DslTemplateConditionDTO condition, Integer projectId) {
 
-        Tuple<Long, List<DslTemplatePO>> tuple = dslTemplateService.getDslTemplatePage(appId, condition);
+        Tuple<Long, List<DslTemplatePO>> tuple = dslTemplateService.getDslTemplatePage(projectId, condition);
         if (tuple == null) {
             return PaginationResult.buildSucc( new ArrayList<>(), 0L, condition.getPage(), condition.getSize());
         }

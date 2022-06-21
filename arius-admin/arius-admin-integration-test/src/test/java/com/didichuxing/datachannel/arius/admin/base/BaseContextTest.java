@@ -53,7 +53,7 @@ public class BaseContextTest {
         CustomDataSource.testAdminPort = testAdminPort;
         CustomDataSource.testPhyClusterIp = testPhyClusterIp;
         CustomDataSource.testPhyClusterPort = Integer.valueOf(testPhyClusterPort);
-        CustomDataSource.appid = Integer.valueOf(appid);
+        CustomDataSource.projectId = Integer.valueOf(appid);
         CustomDataSource.operator = operator;
     }
 }

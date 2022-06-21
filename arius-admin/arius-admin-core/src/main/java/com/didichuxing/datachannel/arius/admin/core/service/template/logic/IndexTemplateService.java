@@ -170,11 +170,11 @@ public interface IndexTemplateService {
     Map<Integer, IndexTemplate> getLogicTemplatesMapByIds(List<Integer> logicTemplateIds);
 
     /**
-     * 根据appId查询模板
-     * @param appId appId
+     * 根据projectId查询模板
+     * @param projectId projectId
      * @return list
      */
-    List<IndexTemplate> listAppLogicTemplatesByAppId(Integer appId);
+    List<IndexTemplate> listProjectLogicTemplatesByProjectId(Integer projectId);
 
     /**
      * 获取所有逻辑集群对应逻辑模板
@@ -185,21 +185,21 @@ public interface IndexTemplateService {
 
     /**
      * 获取模板具体的物理索引
-     * @param appId appId
+     * @param projectId projectId
      * @return result
      */
-    Result<List<Tuple<String, String>>> listLogicTemplatesByAppId(Integer appId);
+    Result<List<Tuple<String, String>>> listLogicTemplatesByProjectId(Integer projectId);
 
     /**
      * 模板移交
      * @param logicId 模板id
-     * @param tgtAppId appid
+     * @param tgtProjectId projectId
      * @param tgtResponsible 责任人
      * @param operator 操作人
      * @return Result
      * @throws AdminOperateException
      */
-    Result<Void> turnOverLogicTemplate(Integer logicId, Integer tgtAppId, String tgtResponsible,
+    Result<Void> turnOverLogicTemplate(Integer logicId, Integer tgtProjectId, String tgtResponsible,
                                        String operator) throws AdminOperateException;
 
     /**
@@ -215,12 +215,7 @@ public interface IndexTemplateService {
      */
     List<IndexTemplateType> listLogicTemplateTypes(Integer logicId);
 
-    /**
-     * 根据责任人查询
-     * @param responsibleId 责任人id
-     * @return list
-     */
-    List<IndexTemplate> listTemplateByResponsibleId(Long responsibleId);
+
 
     /**
      * 修改模板名称
@@ -241,18 +236,18 @@ public interface IndexTemplateService {
 
     /**
      * 获取APP有权限的集群下的所有逻辑模板.
-     * @param appId APP的id
+     * @param projectId APP的id
      * @return list
      */
-    List<IndexTemplate> listTemplatesByHasAuthCluster(Integer appId);
+    List<IndexTemplate> listTemplatesByHasAuthCluster(Integer projectId);
 
     /**
      * 获取APP在指定逻辑集群下有权限的逻辑模板.
-     * @param appId APP的id
+     * @param projectId project的id
      * @param logicClusterId 逻辑集群ID
      * @return list
      */
-    List<IndexTemplate> listHasAuthTemplatesInLogicCluster(Integer appId, Long logicClusterId);
+    List<IndexTemplate> listHasAuthTemplatesInLogicCluster(Integer projectId, Long logicClusterId);
 
     /**
      * 获取所有的逻辑模板列表信息（带有逻辑集群和物理模板）

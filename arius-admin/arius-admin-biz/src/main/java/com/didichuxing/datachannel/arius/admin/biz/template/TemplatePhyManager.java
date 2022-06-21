@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.biz.template;
 
+import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhyDTO;
@@ -9,12 +10,11 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplatePhyVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.IndexTemplatePhysicalVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
-import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import java.util.List;
+import java.util.Set;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.*;
 
 public interface TemplatePhyManager {
 
@@ -154,14 +154,14 @@ public interface TemplatePhyManager {
 
     /**
      * 获取带有App权限信息的物理模板列表
-     * @param appId 当前登录appId
+     * @param projectId 当前登录projectId
      */
-    List<ConsoleTemplatePhyVO> getConsoleTemplatePhyVOS(IndexTemplatePhyDTO param, Integer appId);
+    List<ConsoleTemplatePhyVO> getConsoleTemplatePhyVOS(IndexTemplatePhyDTO param, Integer projectId);
 
     /**
      * 根据项目获取有管理权限的物理模板
      */
-    List<String> getTemplatePhyNames(Integer appId);
+    List<String> getTemplatePhyNames(Integer projectId);
 
     /**
      * 获取物理模板可复制的物理集群名称列表, 仅支持不同集群间模板复制

@@ -1,27 +1,26 @@
 package com.didichuxing.datachannel.arius.admin.biz.workorder.handler;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
-import java.util.List;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandler;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.ClusterLogicTransferContent;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
-import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.ClusterLogicTransferOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
+import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
+import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
-import com.didichuxing.datachannel.arius.admin.core.service.common.AriusUserInfoService;
+import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
+import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
+import com.didiglobal.logi.security.service.ProjectService;
+import java.util.List;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * Created by linyunan on 2021-06-17
@@ -30,10 +29,11 @@ import com.didichuxing.datachannel.arius.admin.core.service.common.AriusUserInfo
 public class LogicClusterTransferHandler extends BaseWorkOrderHandler {
 
     @Autowired
-    private AppService            appService;
-
+    private ProjectService projectService;
     @Autowired
-    private AriusUserInfoService  ariusUserInfoService;
+    private RoleTool roleTool;
+
+  
 
     @Autowired
     private ClusterLogicService clusterLogicService;
@@ -43,35 +43,25 @@ public class LogicClusterTransferHandler extends BaseWorkOrderHandler {
         ClusterLogicTransferContent clusterLogicTransferContent = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
             ClusterLogicTransferContent.class);
 
-        Integer sourceAppId = clusterLogicTransferContent.getSourceAppId();
-        Integer targetAppId = clusterLogicTransferContent.getTargetAppId();
-        if (AriusObjUtils.isNull(sourceAppId)) {
+        Integer sourceProjectId = clusterLogicTransferContent.getSourceProjectId();
+        Integer targetProjectId = clusterLogicTransferContent.getTargetProjectId();
+        if (AriusObjUtils.isNull(sourceProjectId)) {
             return Result.buildParamIllegal("原项目Id为空");
         }
-        if (AriusObjUtils.isNull(targetAppId)) {
+        if (AriusObjUtils.isNull(targetProjectId)) {
             return Result.buildParamIllegal("目标项目Id为空");
         }
 
-        App sourceApp = appService.getAppById(sourceAppId);
-        if (AriusObjUtils.isNull(sourceApp)) {
+       
+        if (!projectService.checkProjectExist(sourceProjectId)) {
             return Result.buildParamIllegal("原项目不存在");
         }
 
-        App targetApp = appService.getAppById(targetAppId);
-        if (AriusObjUtils.isNull(targetApp)) {
+       
+        if (!projectService.checkProjectExist(targetProjectId)) {
             return Result.buildParamIllegal("目标项目不存在");
         }
-
-        List<String> responsibles = ListUtils.string2StrList(clusterLogicTransferContent.getTargetResponsible());
-        if (CollectionUtils.isEmpty(responsibles)) {
-            return Result.buildParamIllegal("负责人为空");
-        }
-
-        for (String responsible : responsibles) {
-            if (!ariusUserInfoService.isExist(responsible)) {
-                return Result.buildParamIllegal("负责人非法");
-            }
-        }
+        
 
         Long clusterLogicId = clusterLogicTransferContent.getClusterLogicId();
         if (!clusterLogicService.isClusterLogicExists(clusterLogicId)) {
@@ -98,24 +88,24 @@ public class LogicClusterTransferHandler extends BaseWorkOrderHandler {
         ClusterLogicTransferContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
             ClusterLogicTransferContent.class);
 
-        if (AriusObjUtils.isNull(content.getSourceAppId())) {
-            return Result.buildParamIllegal("原appId为空");
+        if (AriusObjUtils.isNull(content.getSourceProjectId())) {
+            return Result.buildParamIllegal("原projectId为空");
         }
 
-        if (AriusObjUtils.isNull(content.getTargetAppId())) {
-            return Result.buildParamIllegal("目标appId为空");
+        if (AriusObjUtils.isNull(content.getTargetProjectId())) {
+            return Result.buildParamIllegal("目标projectId为空");
         }
 
-        if (content.getTargetAppId().equals(content.getSourceAppId())) {
+        if (content.getTargetProjectId().equals(content.getSourceProjectId())) {
             return Result.buildFail("无效转让, 原始项目Id和目标项目ID相同");
         }
 
-        if (appService.isSuperApp(workOrder.getSubmitorAppid())) {
+        if (projectService.checkProjectExist(workOrder.getSubmitorProjectId())) {
             return Result.buildSucc();
         }
 
         ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(content.getClusterLogicId());
-        if (!clusterLogic.getAppId().equals(workOrder.getSubmitorAppid())) {
+        if (!clusterLogic.getProjectId().equals(workOrder.getSubmitorProjectId())) {
             return Result.buildOpForBidden("您无权对该集群进行转让操作");
         }
 
@@ -133,7 +123,7 @@ public class LogicClusterTransferHandler extends BaseWorkOrderHandler {
                                               ClusterLogicTransferContent.class);
         
         Result<Void> result = clusterLogicService.transferClusterLogic(content.getClusterLogicId(),
-            content.getTargetAppId(), content.getTargetResponsible(), workOrder.getSubmitor());
+            content.getTargetProjectId(), content.getTargetResponsible(), workOrder.getSubmitor());
 
         return Result.buildFrom(result);
     }
@@ -149,7 +139,7 @@ public class LogicClusterTransferHandler extends BaseWorkOrderHandler {
     }
 
     @Override
-    public List<AriusUserInfo> getApproverList(AbstractOrderDetail detail) {
+    public List<UserBriefVO> getApproverList(AbstractOrderDetail detail) {
         return getOPList();
     }
 

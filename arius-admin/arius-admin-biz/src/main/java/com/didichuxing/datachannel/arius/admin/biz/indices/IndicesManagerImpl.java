@@ -2,16 +2,7 @@ package com.didichuxing.datachannel.arius.admin.biz.indices;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.INDEX_BLOCK_SETTING;
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.INDEX_OP;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.PRIMARY;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.function.BiFunction;
-import java.util.stream.Collectors;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.PRIMARY;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -37,6 +28,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexMappi
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexSettingVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexShardInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.index.IndexBlockEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
@@ -46,7 +38,6 @@ import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.SizeUtil;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
@@ -61,7 +52,15 @@ import com.didiglobal.logi.elasticsearch.client.response.setting.index.MultiInde
 import com.didiglobal.logi.elasticsearch.client.utils.JsonUtils;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.function.BiFunction;
+import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * @author lyn
@@ -70,9 +69,9 @@ import com.google.common.collect.Lists;
 @Component
 public class IndicesManagerImpl implements IndicesManager {
     private static final ILog     LOGGER = LogFactory.getLog(IndicesManagerImpl.class);
-    public static final int RETRY_COUNT = 3;
+    public static final int            RETRY_COUNT = 3;
     @Autowired
-    private AppService            appService;
+    private             ProjectService projectService;
 
     @Autowired
     private ESIndexCatService     esIndexCatService;
@@ -106,11 +105,11 @@ public class IndicesManagerImpl implements IndicesManager {
     private static final String DEFAULT_SORT_TERM = "timestamp";
 
     @Override
-    public PaginationResult<IndexCatCellVO> pageGetIndex(IndexQueryDTO condition, Integer appId) {
+    public PaginationResult<IndexCatCellVO> pageGetIndex(IndexQueryDTO condition, Integer projectId) {
         BaseHandle baseHandle     = handleFactory.getByHandlerNamePer(PageSearchHandleTypeEnum.INDEX.getPageSearchType());
         if (baseHandle instanceof IndexPageSearchHandle) {
             IndexPageSearchHandle handle = (IndexPageSearchHandle) baseHandle;
-            return handle.doPage(condition, appId);
+            return handle.doPage(condition, projectId);
         }
 
         LOGGER.warn("class=TemplateLogicManagerImpl||method=pageGetConsoleClusterVOS||msg=failed to get the TemplateLogicPageSearchHandle");
@@ -119,8 +118,8 @@ public class IndicesManagerImpl implements IndicesManager {
     }
 
     @Override
-    public Result<Void> createIndex(IndexCatCellWithConfigDTO indexCreateDTO, Integer appId) {
-        Result<String> getClusterRet = getClusterPhyByClusterNameAndAppId(indexCreateDTO.getCluster(), appId);
+    public Result<Void> createIndex(IndexCatCellWithConfigDTO indexCreateDTO, Integer projectId) {
+        Result<String> getClusterRet = getClusterPhyByClusterNameAndProjectId(indexCreateDTO.getCluster(), projectId);
         if (getClusterRet.failed()) {
             return Result.buildFrom(getClusterRet);
         }
@@ -135,8 +134,8 @@ public class IndicesManagerImpl implements IndicesManager {
     }
 
     @Override
-    public Result<Boolean> deleteIndex(List<IndexCatCellDTO> params, Integer appId, String operator) {
-        return batchOperateIndex(params, appId, (cluster, indexNameList) -> {
+    public Result<Boolean> deleteIndex(List<IndexCatCellDTO> params, Integer projectId, String operator) {
+        return batchOperateIndex(params, projectId, (cluster, indexNameList) -> {
             if (indexNameList.size() == esIndexService.syncBatchDeleteIndices(cluster, indexNameList, RETRY_COUNT)) {
                 Result<Boolean> batchSetIndexFlagInvalidResult = updateIndexFlagInvalid(cluster, indexNameList);
                 if (batchSetIndexFlagInvalidResult.success()) {
@@ -149,15 +148,15 @@ public class IndicesManagerImpl implements IndicesManager {
     }
 
     @Override
-    public  <T,U,R> Result<Boolean> batchOperateIndex(List<IndexCatCellDTO> params, Integer appId, BiFunction<String,List<String>, Result<Void>> function) {
+    public  <T,U,R> Result<Boolean> batchOperateIndex(List<IndexCatCellDTO> params, Integer projectId, BiFunction<String,List<String>, Result<Void>> function) {
         for (IndexCatCellDTO param : params) {
-            Result<String> getClusterRet = getClusterPhyByClusterNameAndAppId(param.getCluster(), appId);
+            Result<String> getClusterRet = getClusterPhyByClusterNameAndProjectId(param.getCluster(), projectId);
             if (getClusterRet.failed()) {
                 return Result.buildFrom(getClusterRet);
             }
             String phyCluster = getClusterRet.getData();
             param.setCluster(phyCluster);
-            Result<Void> ret = basicCheckParam(param.getCluster(), param.getIndex(), appId);
+            Result<Void> ret = basicCheckParam(param.getCluster(), param.getIndex(), projectId);
             if (ret.failed()) {
                 return Result.buildFrom(ret);
             }
@@ -178,8 +177,8 @@ public class IndicesManagerImpl implements IndicesManager {
         return Result.buildSucc(true);
     }
     @Override
-    public Result<Boolean> openIndex(List<IndexCatCellDTO> params, Integer appId, String operator) {
-        return this.batchOperateIndex(params, appId, (cluster, indexNameList) -> {
+    public Result<Boolean> openIndex(List<IndexCatCellDTO> params, Integer projectId, String operator) {
+        return this.batchOperateIndex(params, projectId, (cluster, indexNameList) -> {
             try {
 
                 boolean syncOpenOrCloseResult = esIndexService.syncBatchOpenIndices(cluster, indexNameList, 3);
@@ -207,8 +206,8 @@ public class IndicesManagerImpl implements IndicesManager {
     }
 
     @Override
-    public Result<Boolean> closeIndex(List<IndexCatCellDTO> params, Integer appId, String operator) {
-        return this.batchOperateIndex(params, appId, (cluster, indexNameList) -> {
+    public Result<Boolean> closeIndex(List<IndexCatCellDTO> params, Integer projectId, String operator) {
+        return this.batchOperateIndex(params, projectId, (cluster, indexNameList) -> {
             try {
 
                 boolean syncOpenOrCloseResult = esIndexService.syncBatchCloseIndices(cluster, indexNameList, 3);
@@ -260,17 +259,17 @@ public class IndicesManagerImpl implements IndicesManager {
     }
 
     @Override
-    public Result<Boolean> editIndexBlockSetting(List<IndicesBlockSettingDTO> params, Integer appId,
+    public Result<Boolean> editIndexBlockSetting(List<IndicesBlockSettingDTO> params, Integer projectId,
                                                  String operator) {
         for (IndicesBlockSettingDTO param : params) {
-            Result<String> getClusterRet = getClusterPhyByClusterNameAndAppId(param.getCluster(), appId);
+            Result<String> getClusterRet = getClusterPhyByClusterNameAndProjectId(param.getCluster(), projectId);
             if (getClusterRet.failed()) {
                 return Result.buildFrom(getClusterRet);
             }
             String phyCluster = getClusterRet.getData();
             param.setCluster(phyCluster);
         }
-        Result<Boolean> checkResult = checkEditIndexBlockSetting(params, appId);
+        Result<Boolean> checkResult = checkEditIndexBlockSetting(params, projectId);
         if (checkResult.failed()) {
             return checkResult;
         }
@@ -311,8 +310,8 @@ public class IndicesManagerImpl implements IndicesManager {
     }
 
     @Override
-    public Result<IndexMappingVO> getMapping(String cluster, String indexName, Integer appId) {
-        Result<Void> ret = basicCheckParam(cluster, indexName, appId);
+    public Result<IndexMappingVO> getMapping(String cluster, String indexName, Integer projectId) {
+        Result<Void> ret = basicCheckParam(cluster, indexName, projectId);
         if (ret.failed()) {
             return Result.buildFrom(ret);
         }
@@ -325,15 +324,15 @@ public class IndicesManagerImpl implements IndicesManager {
     }
 
     @Override
-    public Result<Void> editMapping(IndexCatCellWithConfigDTO param, Integer appId) {
-        Result<String> getClusterRet = getClusterPhyByClusterNameAndAppId(param.getCluster(), appId);
+    public Result<Void> editMapping(IndexCatCellWithConfigDTO param, Integer projectId) {
+        Result<String> getClusterRet = getClusterPhyByClusterNameAndProjectId(param.getCluster(), projectId);
         if (getClusterRet.failed()) {
             return Result.buildFrom(getClusterRet);
         }
         String phyCluster = getClusterRet.getData();
         String indexName = param.getIndex();
         String mapping = param.getMapping();
-        Result<Void> ret = basicCheckParam(phyCluster, indexName, appId);
+        Result<Void> ret = basicCheckParam(phyCluster, indexName, projectId);
         if (ret.failed()) {
             return Result.buildFrom(ret);
         }
@@ -348,8 +347,8 @@ public class IndicesManagerImpl implements IndicesManager {
     }
 
     @Override
-    public Result<IndexSettingVO> getSetting(String cluster, String indexName, Integer appId) {
-        Result<Void> ret = basicCheckParam(cluster, indexName, appId);
+    public Result<IndexSettingVO> getSetting(String cluster, String indexName, Integer projectId) {
+        Result<Void> ret = basicCheckParam(cluster, indexName, projectId);
         if (ret.failed()) {
             return Result.buildFrom(ret);
         }
@@ -376,14 +375,14 @@ public class IndicesManagerImpl implements IndicesManager {
     }
 
     @Override
-    public Result<Void> editSetting(IndexCatCellWithConfigDTO param, Integer appId) {
-        Result<String> getClusterRet = getClusterPhyByClusterNameAndAppId(param.getCluster(), appId);
+    public Result<Void> editSetting(IndexCatCellWithConfigDTO param, Integer projectId) {
+        Result<String> getClusterRet = getClusterPhyByClusterNameAndProjectId(param.getCluster(), projectId);
         if (getClusterRet.failed()) {
             return Result.buildFrom(getClusterRet);
         }
         String phyCluster = getClusterRet.getData();
         String indexName = param.getIndex();
-        Result<Void> ret = basicCheckParam(phyCluster, indexName, appId);
+        Result<Void> ret = basicCheckParam(phyCluster, indexName, projectId);
         if (ret.failed()) {
             return Result.buildFrom(ret);
         }
@@ -403,13 +402,13 @@ public class IndicesManagerImpl implements IndicesManager {
     }
 
     @Override
-    public Result<List<IndexShardInfoVO>> getIndexShardsInfo(String cluster, String indexName, Integer appId) {
-        Result<String> getClusterRet = getClusterPhyByClusterNameAndAppId(cluster, appId);
+    public Result<List<IndexShardInfoVO>> getIndexShardsInfo(String cluster, String indexName, Integer projectId) {
+        Result<String> getClusterRet = getClusterPhyByClusterNameAndProjectId(cluster, projectId);
         if (getClusterRet.failed()) {
             return Result.buildFrom(getClusterRet);
         }
         String phyCluster = getClusterRet.getData();
-        Result<Void> ret = basicCheckParam(phyCluster, indexName, appId);
+        Result<Void> ret = basicCheckParam(phyCluster, indexName, projectId);
         if (ret.failed()) {
             return Result.buildFrom(ret);
         }
@@ -421,13 +420,13 @@ public class IndicesManagerImpl implements IndicesManager {
     }
 
     @Override
-    public Result<IndexCatCellVO> getIndexCatInfo(String cluster, String indexName, Integer appId) {
-        Integer queryAppId = null;
-        if (!appService.isSuperApp(appId)) {
-            queryAppId = appId;
+    public Result<IndexCatCellVO> getIndexCatInfo(String cluster, String indexName, Integer projectId) {
+        Integer queryProjectId = null;
+        if (!AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
+            queryProjectId = projectId;
         }
         Tuple<Long, List<IndexCatCell>> totalHitAndIndexCatCellListTuple = esIndexCatService
-            .syncGetCatIndexInfo(cluster, indexName, null, queryAppId, 0L, 1L, DEFAULT_SORT_TERM, true);
+            .syncGetCatIndexInfo(cluster, indexName, null, queryProjectId, 0L, 1L, DEFAULT_SORT_TERM, true);
         if (null == totalHitAndIndexCatCellListTuple
             || CollectionUtils.isEmpty(totalHitAndIndexCatCellListTuple.getV2())) {
             return Result.buildFail("获取单个索引详情信息失败");
@@ -441,8 +440,8 @@ public class IndicesManagerImpl implements IndicesManager {
     }
 
     @Override
-    public Result<Void> addIndexAliases(IndexCatCellWithConfigDTO param, Integer appId) {
-        Result<String> getClusterRet = getClusterPhyByClusterNameAndAppId(param.getCluster(), appId);
+    public Result<Void> addIndexAliases(IndexCatCellWithConfigDTO param, Integer projectId) {
+        Result<String> getClusterRet = getClusterPhyByClusterNameAndProjectId(param.getCluster(), projectId);
         if (getClusterRet.failed()) {
             return Result.buildFrom(getClusterRet);
         }
@@ -452,8 +451,8 @@ public class IndicesManagerImpl implements IndicesManager {
     }
 
     @Override
-    public Result<Void> deleteIndexAliases(IndexCatCellWithConfigDTO param, Integer appId) {
-        Result<String> getClusterRet = getClusterPhyByClusterNameAndAppId(param.getCluster(), appId);
+    public Result<Void> deleteIndexAliases(IndexCatCellWithConfigDTO param, Integer projectId) {
+        Result<String> getClusterRet = getClusterPhyByClusterNameAndProjectId(param.getCluster(), projectId);
         if (getClusterRet.failed()) {
             return Result.buildFrom(getClusterRet);
         }
@@ -463,8 +462,8 @@ public class IndicesManagerImpl implements IndicesManager {
     }
 
     @Override
-    public Result<List<String>> getIndexAliases(String cluster, String indexName, Integer appId) {
-        Result<String> getClusterRet = getClusterPhyByClusterNameAndAppId(cluster, appId);
+    public Result<List<String>> getIndexAliases(String cluster, String indexName, Integer projectId) {
+        Result<String> getClusterRet = getClusterPhyByClusterNameAndProjectId(cluster, projectId);
         if (getClusterRet.failed()) {
             return Result.buildFrom(getClusterRet);
         }
@@ -522,15 +521,15 @@ public class IndicesManagerImpl implements IndicesManager {
 
 
     @Override
-    public Result<List<String>> getClusterPhyIndexName(String clusterPhyName, Integer appId) {
-        if (!appService.isAppExists(appId)) {
-            return Result.buildParamIllegal(String.format("There is no appId:%s", appId));
+    public Result<List<String>> getClusterPhyIndexName(String clusterPhyName, Integer projectId) {
+        if (!projectService.checkProjectExist(projectId)) {
+            return Result.buildParamIllegal(String.format("There is no projectId:%s", projectId));
         }
 
         return Result.buildSucc(esIndexService.syncGetIndexName(clusterPhyName));
     }
     @Override
-    public Result<List<String>> getClusterLogicIndexName(String clusterLogicName, Integer appId) {
+    public Result<List<String>> getClusterLogicIndexName(String clusterLogicName, Integer projectId) {
         ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByName(clusterLogicName);
         if (clusterLogic == null) {
             return Result.buildFail();
@@ -552,11 +551,11 @@ public class IndicesManagerImpl implements IndicesManager {
     }
 
     @Override
-    public Result<Boolean> isExists(String cluster, String indexName, Integer appId) {
-        if (!appService.isAppExists(appId)) {
-            return Result.buildParamIllegal(String.format("当前登录项目Id[%s]不存在, 无权限操作", appId));
+    public Result<Boolean> isExists(String cluster, String indexName, Integer projectId) {
+        if (!projectService.checkProjectExist(projectId)) {
+            return Result.buildParamIllegal(String.format("当前登录项目Id[%s]不存在, 无权限操作", projectId));
         }
-        Result<String> getClusterRet = getClusterPhyByClusterNameAndAppId(cluster, appId);
+        Result<String> getClusterRet = getClusterPhyByClusterNameAndProjectId(cluster, projectId);
         if (getClusterRet.failed()) {
             return Result.buildFrom(getClusterRet);
         }
@@ -568,9 +567,9 @@ public class IndicesManagerImpl implements IndicesManager {
     }
 
     /***************************************************private**********************************************************/
-    private Result<Void> basicCheckParam(String cluster, String index, Integer appId) {
-        if (!appService.isAppExists(appId)) {
-            return Result.buildParamIllegal(String.format("当前登录项目Id[%s]不存在, 无权限操作", appId));
+    private Result<Void> basicCheckParam(String cluster, String index, Integer projectId) {
+        if (!projectService.checkProjectExist(projectId)) {
+            return Result.buildParamIllegal(String.format("当前登录项目Id[%s]不存在, 无权限操作", projectId));
         }
 
         if (!clusterPhyManager.isClusterExists(cluster)) {
@@ -584,9 +583,9 @@ public class IndicesManagerImpl implements IndicesManager {
         return Result.buildSucc();
     }
 
-    private Result<Boolean> checkEditIndexBlockSetting(List<IndicesBlockSettingDTO> params, Integer appId) {
+    private Result<Boolean> checkEditIndexBlockSetting(List<IndicesBlockSettingDTO> params, Integer projectId) {
         for (IndicesBlockSettingDTO param : params) {
-            Result<Void> ret = basicCheckParam(param.getCluster(), param.getIndex(), appId);
+            Result<Void> ret = basicCheckParam(param.getCluster(), param.getIndex(), projectId);
             if (ret.failed()) {
                 return Result.buildFrom(ret);
             }
@@ -626,9 +625,9 @@ public class IndicesManagerImpl implements IndicesManager {
         }
     }
 
-    private Result<String> getClusterPhyByClusterNameAndAppId(String cluster, Integer appId) {
+    private Result<String> getClusterPhyByClusterNameAndProjectId(String cluster, Integer projectId) {
         String phyClusterName;
-        if (appService.isSuperApp(appId)) {
+        if (AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
             phyClusterName = cluster;
         } else {
             ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByName(cluster);

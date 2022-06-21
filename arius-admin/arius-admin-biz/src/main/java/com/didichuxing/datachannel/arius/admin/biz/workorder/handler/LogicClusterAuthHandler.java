@@ -6,21 +6,21 @@ import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandler;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.LogicClusterAuthContent;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.LogicClusterAuthOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
-import com.didichuxing.datachannel.arius.admin.common.constant.app.AppClusterLogicAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectClusterLogicAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppClusterLogicAuthService;
+import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectClusterLogicAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
+import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,7 +32,7 @@ public class LogicClusterAuthHandler extends BaseWorkOrderHandler {
     private ClusterLogicService clusterLogicService;
 
     @Autowired
-    private AppClusterLogicAuthService appClusterLogicAuthService;
+    private ProjectClusterLogicAuthService projectClusterLogicAuthService;
 
     @Override
     protected Result<Void> validateConsoleParam(WorkOrder workOrder) {
@@ -81,15 +81,15 @@ public class LogicClusterAuthHandler extends BaseWorkOrderHandler {
         LogicClusterAuthContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
             LogicClusterAuthContent.class);
 
-        Result<Void> result = appClusterLogicAuthService.ensureSetLogicClusterAuth(workOrder.getSubmitorAppid(),
-            content.getLogicClusterId(), AppClusterLogicAuthEnum.valueOf(content.getAuthCode()),
+        Result<Void> result = projectClusterLogicAuthService.ensureSetLogicClusterAuth(workOrder.getSubmitorProjectId(),
+            content.getLogicClusterId(), ProjectClusterLogicAuthEnum.valueOf(content.getAuthCode()),
             workOrder.getSubmitor(), workOrder.getSubmitor());
 
         if (null != result && result.success()) {
             operateRecordService
                 .save(CLUSTER, OperationEnum.ADD, content.getLogicClusterId(),
-                    workOrder.getSubmitor() + "申请" + content.getLogicClusterName() + "的"
-                                                                               + AppClusterLogicAuthEnum
+                        workOrder.getSubmitor() + "申请" + content.getLogicClusterName() + "的"
+                        + ProjectClusterLogicAuthEnum
                                                                                    .valueOf(content.getAuthCode()),
                     approver);
         }
@@ -110,7 +110,7 @@ public class LogicClusterAuthHandler extends BaseWorkOrderHandler {
     }
 
     @Override
-    public List<AriusUserInfo> getApproverList(AbstractOrderDetail detail) {
+    public List<UserBriefVO> getApproverList(AbstractOrderDetail detail) {
         return getOPList();
     }
 

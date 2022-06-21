@@ -17,13 +17,13 @@ import lombok.NoArgsConstructor;
 public class DslAnalyzeResultTypePO extends BaseESPO {
 
     /**
-     * appid
+     * projectId
      */
-    private Integer appid;
+    private Integer projectId;
     /**
      * 分析所在日期
      */
-    private String date;
+    private String  date;
     /**
      * 访问gateway信息
      */
@@ -57,7 +57,7 @@ public class DslAnalyzeResultTypePO extends BaseESPO {
     @JSONField(serialize = false)
     @Override
     public String getKey() {
-        return String.format("%d_%s", appid, date);
+        return String.format("%d_%s", projectId, date);
     }
 
     @Override

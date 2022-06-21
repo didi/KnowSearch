@@ -6,7 +6,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.BaseDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsDashboardListDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsDashboardTopNDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.config.AriusConfigInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.VariousLineChartMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.list.MetricList;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.ClusterPhyHealthMetrics;
@@ -20,18 +19,13 @@ import com.didichuxing.datachannel.arius.admin.common.constant.metrics.OneLevelT
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
-import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.DashBoardMetricsService;
+import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
+import java.util.List;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Created by linyunan on 3/14/22
@@ -42,7 +36,7 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
     private static final FutureUtil<Void> futureUtil = FutureUtil.init("DashboardMetricsManagerImpl",  10,10,500);
 
     @Autowired
-    private AppService              appService;
+    private ProjectService projectService;
 
     @Autowired
     private DashBoardMetricsService dashBoardMetricsService;
@@ -51,68 +45,68 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
     private AriusConfigInfoService ariusConfigInfoService;
 
     @Override
-    public Result<List<VariousLineChartMetricsVO>> getTopClusterMetricsInfo(MetricsDashboardTopNDTO param, Integer appId) {
+    public Result<List<VariousLineChartMetricsVO>> getTopClusterMetricsInfo(MetricsDashboardTopNDTO param, Integer projectId) {
         param.init();
         String oneLevelType = OneLevelTypeEnum.CLUSTER.getType();
-        return commonGetTopInfoByOneLevelType(param, appId, oneLevelType);
+        return commonGetTopInfoByOneLevelType(param, projectId, oneLevelType);
     }
 
     @Override
-    public Result<List<VariousLineChartMetricsVO>> getTopNodeMetricsInfo(MetricsDashboardTopNDTO param, Integer appId) {
+    public Result<List<VariousLineChartMetricsVO>> getTopNodeMetricsInfo(MetricsDashboardTopNDTO param, Integer projectId) {
         param.init();
         String oneLevelType = OneLevelTypeEnum.NODE.getType();
-        return commonGetTopInfoByOneLevelType(param, appId, oneLevelType);
+        return commonGetTopInfoByOneLevelType(param, projectId, oneLevelType);
     }
 
     @Override
-    public Result<List<VariousLineChartMetricsVO>> getTopTemplateMetricsInfo(MetricsDashboardTopNDTO param, Integer appId) {
+    public Result<List<VariousLineChartMetricsVO>> getTopTemplateMetricsInfo(MetricsDashboardTopNDTO param, Integer projectId) {
         param.init();
         String oneLevelType = OneLevelTypeEnum.TEMPLATE.getType();
-        return commonGetTopInfoByOneLevelType(param, appId, oneLevelType);
+        return commonGetTopInfoByOneLevelType(param, projectId, oneLevelType);
     }
 
     @Override
-    public Result<List<VariousLineChartMetricsVO>> getTopIndexMetricsInfo(MetricsDashboardTopNDTO param, Integer appId) {
+    public Result<List<VariousLineChartMetricsVO>> getTopIndexMetricsInfo(MetricsDashboardTopNDTO param, Integer projectId) {
         param.init();
         String oneLevelType = OneLevelTypeEnum.INDEX.getType();
-        return commonGetTopInfoByOneLevelType(param, appId, oneLevelType);
+        return commonGetTopInfoByOneLevelType(param, projectId, oneLevelType);
     }
 
     @Override
     public Result<List<VariousLineChartMetricsVO>> getTopClusterThreadPoolQueueMetricsInfo(MetricsDashboardTopNDTO param,
-                                                Integer appId) {
+                                                Integer projectId) {
         param.init();
         String oneLevelType = OneLevelTypeEnum.CLUSTER_THREAD_POOL_QUEUE.getType();
-        return commonGetTopInfoByOneLevelType(param, appId, oneLevelType);
+        return commonGetTopInfoByOneLevelType(param, projectId, oneLevelType);
     }
 
     @Override
-    public Result<List<MetricListVO>> getListClusterMetricsInfo(MetricsDashboardListDTO param, Integer appId) {
+    public Result<List<MetricListVO>> getListClusterMetricsInfo(MetricsDashboardListDTO param, Integer projectId) {
         String oneLevelType = OneLevelTypeEnum.CLUSTER.getType();
-        return commonGetListInfoByOneLevelType(param, appId, oneLevelType);
+        return commonGetListInfoByOneLevelType(param, projectId, oneLevelType);
     }
 
     @Override
-    public Result<List<MetricListVO>> getListNodeMetricsInfo(MetricsDashboardListDTO param, Integer appId) {
+    public Result<List<MetricListVO>> getListNodeMetricsInfo(MetricsDashboardListDTO param, Integer projectId) {
         String oneLevelType = OneLevelTypeEnum.NODE.getType();
-        return commonGetListInfoByOneLevelType(param, appId, oneLevelType);
+        return commonGetListInfoByOneLevelType(param, projectId, oneLevelType);
     }
 
     @Override
-    public Result<List<MetricListVO>> getListTemplateMetricsInfo(MetricsDashboardListDTO param, Integer appId) {
+    public Result<List<MetricListVO>> getListTemplateMetricsInfo(MetricsDashboardListDTO param, Integer projectId) {
         String oneLevelType = OneLevelTypeEnum.TEMPLATE.getType();
-        return commonGetListInfoByOneLevelType(param, appId, oneLevelType);
+        return commonGetListInfoByOneLevelType(param, projectId, oneLevelType);
     }
 
     @Override
-    public Result<List<MetricListVO>> getListIndexMetricsInfo(MetricsDashboardListDTO param, Integer appId) {
+    public Result<List<MetricListVO>> getListIndexMetricsInfo(MetricsDashboardListDTO param, Integer projectId) {
         String oneLevelType = OneLevelTypeEnum.INDEX.getType();
-        return commonGetListInfoByOneLevelType(param, appId, oneLevelType);
+        return commonGetListInfoByOneLevelType(param, projectId, oneLevelType);
     }
 
     @Override
-    public Result<ClusterPhyHealthMetricsVO> getClusterHealthInfo(Integer appId) {
-        Result<Void> checkCommonParamResult = checkCommonParam(MetricsConstant.CLUSTER, new BaseDTO(), appId);
+    public Result<ClusterPhyHealthMetricsVO> getClusterHealthInfo(Integer projectId) {
+        Result<Void> checkCommonParamResult = checkCommonParam(MetricsConstant.CLUSTER, new BaseDTO(), projectId);
         if (checkCommonParamResult.failed()) { return Result.buildFrom(checkCommonParamResult);}
 
         ClusterPhyHealthMetrics clusterHealthInfo = dashBoardMetricsService.getClusterHealthInfo();
@@ -135,12 +129,12 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
     /**
      * 
      * @param param  MetricsDashboardTopNDTO
-     * @param appId  项目
+     * @param projectId  项目
      * @param oneLevelType   OneLevelTypeEnum
      * @return
      */
-    private Result<List<VariousLineChartMetricsVO>> commonGetTopInfoByOneLevelType(MetricsDashboardTopNDTO param, Integer appId, String oneLevelType) {
-        Result<Void> checkCommonParamResult = checkCommonParam(oneLevelType, param, appId);
+    private Result<List<VariousLineChartMetricsVO>> commonGetTopInfoByOneLevelType(MetricsDashboardTopNDTO param, Integer projectId, String oneLevelType) {
+        Result<Void> checkCommonParamResult = checkCommonParam(oneLevelType, param, projectId);
         if (checkCommonParamResult.failed()) {
             return Result.buildFrom(checkCommonParamResult);
         }
@@ -155,12 +149,12 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
     /**
      *
      * @param param            MetricsDashboardListDTO
-     * @param appId            项目
+     * @param projectId            项目
      * @param oneLevelType     OneLevelTypeEnum
      * @return
      */
-    private Result<List<MetricListVO>> commonGetListInfoByOneLevelType(MetricsDashboardListDTO param, Integer appId, String oneLevelType) {
-        Result<Void> checkCommonParamResult = checkCommonParam(oneLevelType, param, appId);
+    private Result<List<MetricListVO>> commonGetListInfoByOneLevelType(MetricsDashboardListDTO param, Integer projectId, String oneLevelType) {
+        Result<Void> checkCommonParamResult = checkCommonParam(oneLevelType, param, projectId);
         if (checkCommonParamResult.failed()) {
             return Result.buildFrom(checkCommonParamResult);
         }
@@ -210,16 +204,16 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
      *
      * @param oneLevelType  OneLevelTypeEnum
      * @param param   instanceof MetricsDashboardTopNDTO or MetricsDashboardListDTO
-     * @param appId   项目
+     * @param projectId   项目
      * @return
      */
-    private Result<Void> checkCommonParam(String oneLevelType, BaseDTO param, Integer appId) {
+    private Result<Void> checkCommonParam(String oneLevelType, BaseDTO param, Integer projectId) {
         if (null == param) { return Result.buildParamIllegal("指标项为空");}
 
-        if (null == appId) { return Result.buildParamIllegal("appId is empty");}
+        if (null == projectId) { return Result.buildParamIllegal("projectId is empty");}
 
-        if (!appService.isAppExists(appId)) {
-            return Result.buildParamIllegal(String.format("There is no appId:%s", appId));
+        if (!projectService.checkProjectExist(projectId)) {
+            return Result.buildParamIllegal(String.format("There is no projectId:%s", projectId));
         }
         
         if (param instanceof MetricsDashboardTopNDTO) {

@@ -73,8 +73,8 @@ public class IndexCatCellVO extends BaseVO {
     @ApiModelProperty("逻辑集群ID")
     private Long    resourceId;
 
-    @ApiModelProperty("appId")
-    private Integer appId;
+    @ApiModelProperty("projectId")
+    private Integer projectId;
 
     @ApiModelProperty("别名")
     private List<String> aliases;

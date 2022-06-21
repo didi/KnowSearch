@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster;
 
-import com.didichuxing.datachannel.arius.admin.common.constant.app.AppClusterLogicAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectClusterLogicAuthEnum;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -18,6 +18,11 @@ import java.util.List;
 @AllArgsConstructor
 @ApiModel(description = "逻辑集群条件查询信息")
 public class ClusterLogicConditionDTO extends ESLogicClusterDTO {
+    /**
+     * @see ProjectClusterLogicAuthEnum
+     */
+    @ApiModelProperty("权限类型 1:配置管理, 2:访问, -1:无权限")
+    private Integer authType;
 
     @ApiModelProperty("暂无")
     private String  sortTerm;

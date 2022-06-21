@@ -1,6 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.workorder.handler;
 
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterLogicManager;
+import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -17,7 +18,6 @@ import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.Ope
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.LogicClusterCreateOrderDetail;
@@ -46,7 +46,7 @@ public class LogicClusterCreateHandler extends BaseWorkOrderHandler {
     }
 
     @Override
-    public List<AriusUserInfo> getApproverList(AbstractOrderDetail detail) {
+    public List<UserBriefVO> getApproverList(AbstractOrderDetail detail) {
         return getOPList();
     }
 
@@ -83,7 +83,7 @@ public class LogicClusterCreateHandler extends BaseWorkOrderHandler {
             LogicClusterCreateContent.class);
 
         ESLogicClusterDTO resourceLogicDTO = ConvertUtil.obj2Obj(content, ESLogicClusterDTO.class);
-        resourceLogicDTO.setAppId(workOrder.getSubmitorAppid());
+        resourceLogicDTO.setProjectId(workOrder.getSubmitorProjectId());
         resourceLogicDTO.setType(ClusterResourceTypeEnum.PRIVATE.getCode());
         return clusterLogicService.validateClusterLogicParams(resourceLogicDTO, OperationEnum.ADD);
     }
@@ -118,7 +118,7 @@ public class LogicClusterCreateHandler extends BaseWorkOrderHandler {
     protected Result<Void> doProcessAgree(WorkOrder workOrder, String approver) {
         ESLogicClusterWithRegionDTO esLogicClusterWithRegionDTO = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
             ESLogicClusterWithRegionDTO.class);
-        esLogicClusterWithRegionDTO.setAppId(workOrder.getSubmitorAppid());
+        esLogicClusterWithRegionDTO.setProjectId(workOrder.getSubmitorProjectId());
 
         // 创建逻辑集群并且批量绑定指定的region,默认是能成功
         Result<Void> result = Result.buildSucc();
@@ -127,7 +127,7 @@ public class LogicClusterCreateHandler extends BaseWorkOrderHandler {
         }
 
         if (result.success()) {
-            List<String> administrators = getOPList().stream().map(AriusUserInfo::getName).collect(Collectors.toList());
+            List<String> administrators = getOPList().stream().map(UserBriefVO::getUserName).collect(Collectors.toList());
             return Result.buildSuccWithMsg(
                 String.format("请联系管理员【%s】进行后续操作", administrators.get(new Random().nextInt(administrators.size()))));
         }

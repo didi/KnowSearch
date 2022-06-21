@@ -333,14 +333,14 @@ public class BaseHttpUtil {
         return response;
     }
 
-    public static Header buildHttpHeader(String appid, String passWord) {
+    public static Header buildHttpHeader(String esUser, String passWord) {
         // 构建认证信息的header
         Header header = null;
         try {
-            header = new BasicHeader("Authorization", "Basic " + Base64.getEncoder().encodeToString(String.format("%s:%s", appid, passWord).getBytes(UTF8)));
+            header = new BasicHeader("Authorization", "Basic " + Base64.getEncoder().encodeToString(String.format("%s:%s", esUser, passWord).getBytes(UTF8)));
         } catch (UnsupportedEncodingException e) {
-            LOGGER.error("class=BaseHttpUtil||method=buildHttpHeader||appid={}||passWord={}||errMsg=encoding error",
-                    appid, passWord, e);
+            LOGGER.error("class=BaseHttpUtil||method=buildHttpHeader||esUser={}||passWord={}||errMsg=encoding error",
+                    esUser, passWord, e);
         }
 
         return header;

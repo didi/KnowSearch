@@ -1,7 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.dto.workorder;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.BaseDTO;
-
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -29,8 +28,8 @@ public class WorkOrderDTO extends BaseDTO {
     @ApiModelProperty("提交人")
     private String  submitor;
 
-    @ApiModelProperty("提交APPID")
-    private Integer submitorAppid;
+    @ApiModelProperty("提交projectID")
+    private Integer submitorProjectid;
 
     @ApiModelProperty("数据中心")
     private String  dataCenter;

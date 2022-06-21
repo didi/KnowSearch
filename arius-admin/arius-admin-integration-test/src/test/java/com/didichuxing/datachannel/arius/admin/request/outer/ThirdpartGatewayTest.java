@@ -8,6 +8,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.ScrollDslTemplateRequest;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.ScrollDslTemplateResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.GatewayAppVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.GatewayESUserVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.GatewayTemplateDeployInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.GatewayTemplatePhysicalVO;
 import com.didichuxing.datachannel.arius.admin.util.CompareUtil;
@@ -53,10 +54,10 @@ public class ThirdpartGatewayTest extends BaseContextTest {
     @Test
     public void testListApp() throws IOException {
         //调用main中的request方法去访问接口
-        Result<List<GatewayAppVO>> result = ThirdpartGatewayControllerMethod.listApp();
+        Result<List<GatewayESUserVO>> result = ThirdpartGatewayControllerMethod.listApp();
         Assert.assertTrue(result.success());
         String templateJsonFile = "src/main/resources/template.thirdpart.gateway/gatewayappvo.json";
-        for (GatewayAppVO gatewayAppVO:result.getData()){
+        for (GatewayESUserVO gatewayAppVO:result.getData()){
             String responseJsonString = CompareUtil.serialize(gatewayAppVO);
             Assert.assertTrue(CompareUtil.compareJson(templateJsonFile,responseJsonString));
         }

@@ -1,11 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.vo.template;
 
-import java.util.List;
-
-import com.didichuxing.datachannel.arius.admin.common.constant.app.AppTemplateAuthEnum;
-
+import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectTemplateAuthEnum;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,7 +18,7 @@ import lombok.NoArgsConstructor;
 @ApiModel(description = "模板信息")
 public class ConsoleTemplateVO extends BaseTemplateVO implements Comparable<ConsoleTemplateVO> {
     /**
-     * @see AppTemplateAuthEnum
+     * @see ProjectTemplateAuthEnum
      */
     @ApiModelProperty("权限（1:管理；2:读写；3:读）")
     private Integer      authType;
@@ -38,7 +36,7 @@ public class ConsoleTemplateVO extends BaseTemplateVO implements Comparable<Cons
     private Long         checkPointDiff;
 
     @ApiModelProperty("项目名称")
-    private String       appName;
+    private String projectName;
 
     @ApiModelProperty("是否开启indexRollover能力")
     private Boolean      disableIndexRollover;

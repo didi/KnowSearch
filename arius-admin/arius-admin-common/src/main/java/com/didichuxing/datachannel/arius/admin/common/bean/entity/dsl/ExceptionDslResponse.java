@@ -15,7 +15,7 @@ public class ExceptionDslResponse {
     private static final String NEW_FORMAT_STR = "new dsl, time:%s, count:%d";
     private static final String GROW_FORMAT_STR = "grow dsl, before:%d, after:%d, time:%s";
 
-    private int appId;
+    private int projectId;
 
     private String templateMD5;
 

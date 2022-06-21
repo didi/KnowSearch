@@ -9,6 +9,7 @@ import java.util.List;
 /**
  * @author cjm
  */
+@Deprecated
 @Data
 public class SearchGatewayResponseVO {
 

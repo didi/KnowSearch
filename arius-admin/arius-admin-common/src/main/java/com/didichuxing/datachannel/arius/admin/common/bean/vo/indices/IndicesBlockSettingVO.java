@@ -16,6 +16,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel(description = "索引setting阻塞信息")
+@Deprecated
 public class IndicesBlockSettingVO extends BaseVO {
     @ApiModelProperty("集群名称")
     private String  clusterPhyName;

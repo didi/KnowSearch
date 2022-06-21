@@ -2,7 +2,7 @@ package com.didichuxing.datachannel.arius.admin.common.bean.dto.template;
 
 import java.util.List;
 
-import com.didichuxing.datachannel.arius.admin.common.constant.app.AppTemplateAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectTemplateAuthEnum;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -19,7 +19,7 @@ import lombok.NoArgsConstructor;
 @ApiModel(description = "条件查询索引模板信息")
 public class TemplateConditionDTO extends IndexTemplateDTO {
     /**
-     * @see AppTemplateAuthEnum
+     * @see ProjectTemplateAuthEnum
      */
     @ApiModelProperty("当前项目拥有的权限（1:管理；2:读写；3:读; -1无权限）")
     private Integer      authType;

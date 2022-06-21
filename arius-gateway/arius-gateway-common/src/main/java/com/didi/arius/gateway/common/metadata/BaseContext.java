@@ -163,11 +163,16 @@ public abstract class BaseContext implements Serializable {
      * 查询模式
      */
     private Integer searchType;
+    /**
+     * 项目id
+     */
+    private Integer projectId;
 
     public void setAppDetail(AppDetail appDetail) {
         this.appDetail = appDetail;
         this.searchType = appDetail.getSearchType().type;
         this.appid = appDetail.getId();
+        this.projectId=appDetail.getProjectId();
     }
 
 

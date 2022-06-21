@@ -1,18 +1,22 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.gateway;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
+
 import com.didichuxing.datachannel.arius.admin.biz.gateway.GatewayManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
+import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import javax.servlet.http.HttpServletRequest;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
-import javax.servlet.http.HttpServletRequest;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.DEFAULT_APP_ID;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 @NoArgsConstructor
 @RestController()
@@ -28,13 +32,13 @@ public class GatewaySqlController {
     public Result<String> directSqlSearch(@RequestBody String sql,
                                           @PathVariable(required = false) String phyClusterName,
                                           HttpServletRequest request) {
-        return gatewayManager.directSqlSearch(sql, phyClusterName, HttpRequestUtils.getAppId(request));
+        return gatewayManager.directSqlSearch(sql, phyClusterName, HttpRequestUtil.getProjectId(request));
     }
 
     @PostMapping("/explain")
     @ResponseBody
     @ApiOperation(value = "根据sql语句解释")
     public Result<String> sqlExplain(@RequestBody String sql) {
-        return gatewayManager.sqlExplain(sql, DEFAULT_APP_ID);
+        return gatewayManager.sqlExplain(sql, AuthConstant.SUPER_PROJECT_ID);
     }
 }
