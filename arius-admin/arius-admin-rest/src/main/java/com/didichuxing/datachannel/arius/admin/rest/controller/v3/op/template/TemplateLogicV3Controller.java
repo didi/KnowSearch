@@ -162,7 +162,7 @@ public class TemplateLogicV3Controller {
     @PutMapping("/{templateId}/upgrade")
     @ResponseBody
     @ApiOperation(value = "升版本")
-    public Result<Void> upgrade(HttpServletRequest request, @RequestBody Integer templateId) throws AdminOperateException {
+    public Result<Void> upgrade(HttpServletRequest request, @PathVariable Integer templateId) throws AdminOperateException {
         return templateLogicManager.upgrade(templateId, HttpRequestUtils.getOperator(request));
     }
 

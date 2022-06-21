@@ -54,12 +54,12 @@ public class ESPhyClusterRegionController {
     @Autowired
     private ClusterRegionManager    clusterRegionManager;
 
-    @GetMapping("")
+    @GetMapping("{cluster}/{clusterLogicType}")
     @ResponseBody
     @ApiOperation(value = "获取物理集群region列表接口", notes = "支持各种纬度检索集群Region信息")
     @Deprecated
-    public Result<List<ClusterRegionVO>> listPhyClusterRegions(@RequestParam("cluster") String cluster,
-                                                               @RequestParam("clusterLogicType") Integer clusterLogicType) {
+    public Result<List<ClusterRegionVO>> listPhyClusterRegions(@PathVariable("cluster") String cluster,
+                                                               @PathVariable("clusterLogicType") Integer clusterLogicType) {
         return listPhyClusterRegionsAfterFilter(cluster, clusterLogicType, null);
     }
 
