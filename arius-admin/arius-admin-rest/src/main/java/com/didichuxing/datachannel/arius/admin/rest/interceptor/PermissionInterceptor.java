@@ -2,13 +2,9 @@ package com.didichuxing.datachannel.arius.admin.rest.interceptor;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.HEALTH;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.SWAGGER;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.SWAGGER_UI;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V2_THIRD_PART;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_NORMAL_USER;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_PROJECT;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_SECURITY;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_THIRD_PART;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_THIRD_PART_SSO;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_WHITE_PART;
 import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_COMMON_GROUP;
 import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.REQUEST_INTERCEPTOR_SWITCH_OPEN;
@@ -31,7 +27,6 @@ import java.util.List;
 import java.util.Objects;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -74,8 +69,8 @@ public class PermissionInterceptor implements HandlerInterceptor {
                 "class=PermissionInterceptor||method=preHandle||uri={}||msg=parse class request-mapping failed",
                 request.getRequestURI(), e);
         }
-        List<String> whiteMappingValues = Lists.newArrayList(HEALTH, V3_THIRD_PART_SSO, V2_THIRD_PART, V3_THIRD_PART,
-                V3_NORMAL_USER, V3_WHITE_PART);
+        List<String> whiteMappingValues = Lists.newArrayList(HEALTH,  V2_THIRD_PART, V3_THIRD_PART,
+                 V3_WHITE_PART);
     
         return loginService.interceptorCheck(request, response, classRequestMappingValue,whiteMappingValues);
     }
@@ -121,8 +116,10 @@ public class PermissionInterceptor implements HandlerInterceptor {
         if (request.getServletPath().contains(SWAGGER)) {
             return Boolean.TRUE;
         }
+         List<String> whiteMappingValues = Lists.newArrayList(HEALTH,  V2_THIRD_PART, V3_THIRD_PART,
+                 V3_WHITE_PART,API_PREFIX,V3_SECURITY);
         //排除admin中接口中含有/logi-security 或者/v3/project 之后，对于原本属于admin中的接口进行header设置，保证项目视角到存在header
-        if (!(request.getServletPath().startsWith(API_PREFIX) || request.getServletPath().startsWith(V3_SECURITY))) {
+        if (whiteMappingValues.stream().noneMatch(whiteMappingValue -> request.getServletPath().startsWith(whiteMappingValue))) {
             final Integer projectId = HttpRequestUtil.getProjectId(request);
             if (Objects.isNull(projectId)) {
                 throw new OperateForbiddenException(

@@ -5,30 +5,25 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import com.didichuxing.datachannel.arius.admin.biz.app.impl.ESUserManagerImpl;
-import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUser;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.app.ESUserPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleESUserVO;
+import com.didichuxing.datachannel.arius.admin.common.tuple.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.app.ESUserService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
-import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import com.didiglobal.logi.security.common.vo.project.ProjectVO;
 import com.didiglobal.logi.security.service.ProjectService;
-import java.util.List;
 import java.util.stream.Collectors;
-import org.apache.commons.collections4.CollectionUtils;
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
@@ -106,10 +101,10 @@ class ESUserManagerTest {
 		when(roleTool.isAdmin(anyString())).thenReturn(true);
 		when(esUserService.validateESUser(any(), any())).thenReturn(Result.buildParamIllegal("应用信息为空"));
 		when(esUserService.registerESUser(null, null)).thenReturn(
-				new Tuple<>(Result.buildParamIllegal("应用信息为空"), esUserPO));
+				Tuple.of(Result.buildParamIllegal("应用信息为空"), esUserPO));
 		Assertions.assertEquals(Result.buildParamIllegal("应用信息为空").getMessage(),
 				esUserManager.registerESUser(null, null, null).getMessage());
-		when(esUserService.registerESUser(any(), anyString())).thenReturn(new Tuple<>(Result.buildSucc(1), esUserPO));
+		when(esUserService.registerESUser(any(), anyString())).thenReturn(Tuple.of(Result.buildSucc(1), esUserPO));
 		Assertions.assertTrue(esUserManager.registerESUser(esUserDTO, 1, "a").success());
 	}
 	
@@ -122,7 +117,7 @@ class ESUserManagerTest {
 		Assertions.assertEquals(Result.buildFail("应用不存在").getMessage(),
 				esUserManager.editESUser(esUserDTO, "admin").getMessage());
 		when(esUserService.validateESUser(any(), any())).thenReturn(Result.buildSucc());
-		when(esUserService.editUser(any())).thenReturn(new Tuple<>(Result.buildSucc(), esUserPO));
+		when(esUserService.editUser(any())).thenReturn(Tuple.of(Result.buildSucc(), esUserPO));
 		Assertions.assertTrue(
 				Assertions.assertDoesNotThrow(() -> esUserManager.editESUser(esUserDTO, "admin").success()));
 		
@@ -152,7 +147,7 @@ class ESUserManagerTest {
 				esUserManager.deleteESUserByProject(1, 1, "admin").getMessage());
 		esUser.setDefaultDisplay(false);
 		when(esUserService.listESUsers(anyList())).thenReturn(Lists.newArrayList(esUser, esUser));
-		when(esUserService.deleteESUserById(1)).thenReturn(new Tuple<>(Result.buildSucc(), esUserPO));
+		when(esUserService.deleteESUserById(1)).thenReturn(Tuple.of(Result.buildSucc(), esUserPO));
 		Assertions.assertTrue(esUserManager.deleteESUserByProject(1, 1, "admin").success());
 		
 	}
@@ -162,7 +157,7 @@ class ESUserManagerTest {
 		when(roleTool.isAdmin("admin")).thenReturn(true);
 		when(roleTool.isAdmin("")).thenReturn(false);
 		when(esUserService.deleteByESUsers(anyInt())).thenReturn(
-				new Tuple<>(Result.buildSucc(), Lists.newArrayList(CustomDataSource.esUserPO())));
+				Tuple.of(Result.buildSucc(), Lists.newArrayList(CustomDataSource.esUserPO())));
 		Assertions.assertEquals(Result.buildFail("当前操作者权限不足,需要管理员权限").getMessage(),
 				esUserManager.deleteAllESUserByProject(1, "").getMessage());
 		

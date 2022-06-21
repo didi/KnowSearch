@@ -94,11 +94,9 @@ public class CustomDataSource {
 
     public static OperateRecordDTO OperateRecordDTOFatory() {
         OperateRecordDTO operateRecordDTO = new OperateRecordDTO();
-        operateRecordDTO.setBizId("12");
         operateRecordDTO.setContent("");
         operateRecordDTO.setModuleId(2);
         operateRecordDTO.setOperateId(9);
-        operateRecordDTO.setOperator("wpk");
         return operateRecordDTO;
     }
 
