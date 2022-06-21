@@ -245,7 +245,7 @@ public class IndexTemplateServiceTest extends AriusAdminApplicationTest {
     @Test
     public void getAppLogicTemplatesByAppIdTest() {
         Mockito.when(indexTemplateDAO.listByProjectId(Mockito.any())).thenReturn(CustomDataSource.getTemplateLogicPOList());
-        List<IndexTemplate> ret = indexTemplateService.listAppLogicTemplatesByAppId(1);
+        List<IndexTemplate> ret = indexTemplateService.listProjectLogicTemplatesByProjectId(1);
         Assertions.assertFalse(ret.isEmpty());
     }
 
