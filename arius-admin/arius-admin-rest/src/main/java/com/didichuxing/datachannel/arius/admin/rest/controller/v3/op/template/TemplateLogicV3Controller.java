@@ -13,6 +13,10 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.Template
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateClearDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateSettingDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateWithCreateInfoDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateConditionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateSettingDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateSettingVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
@@ -147,25 +151,29 @@ public class TemplateLogicV3Controller {
         return templateLogicManager.newEditTemplate(param, HttpRequestUtil.getOperator(request));
     }
 
-    @PostMapping("/clearIndices")
+    @DeleteMapping("/{templateId}/{indices}/clear-indices")
     @ResponseBody
     @ApiOperation(value = "清理索引")
-    public Result<Void> clearIndices(HttpServletRequest request, @RequestBody TemplateClearDTO param) {
-        return templateLogicManager.clearIndices(param);
+    public Result<Void> clearIndices(HttpServletRequest request,
+                                     @PathVariable("templateId") Integer templateId,
+                                     @PathVariable("indices")    List<String> indices) {
+        return templateLogicManager.clearIndices(templateId, indices, HttpRequestUtils.getAppId(request));
     }
 
-    @PostMapping("/adjustShard")
+    @PutMapping("/{templateId}/{shardNum}/adjustShard")
     @ResponseBody
     @ApiOperation(value = "扩缩容")
-    public Result<Void> adjustShard(HttpServletRequest request, @RequestBody TemplateAdjustShardDTO param) {
-        return templateLogicManager.adjustShard(param.getTemplateId(), param.getShardNum());
+    public Result<Void> adjustShard(HttpServletRequest request,
+                                    @PathVariable("templateId") Integer templateId,
+                                    @PathVariable("shardNum")   Integer shardNum) throws AdminOperateException {
+        return templateLogicManager.adjustShard(templateId, shardNum, HttpRequestUtils.getAppId(request));
     }
 
-    @PostMapping("/upgrade")
+    @PutMapping("/{templateId}/upgrade")
     @ResponseBody
     @ApiOperation(value = "升版本")
-    public Result<Void> upgrade(HttpServletRequest request, @RequestBody Integer logicTemplateId) {
-        return templateLogicManager.upgrade(logicTemplateId, HttpRequestUtil.getOperator(request));
+    public Result<Void> upgrade(HttpServletRequest request, @RequestBody Integer templateId) throws AdminOperateException {
+        return templateLogicManager.upgrade(templateId, HttpRequestUtils.getOperator(request));
     }
 
     @GetMapping("{clusterPhyName}/phy/templates")
