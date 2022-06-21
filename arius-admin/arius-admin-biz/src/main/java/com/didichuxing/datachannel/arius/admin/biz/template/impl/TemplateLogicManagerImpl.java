@@ -767,9 +767,8 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
                 updateParam.setId(templatePhy.getId());
                 updateParam.setShard(shardNum);
                 Result<Void> updateDBResult = indexTemplatePhyService.update(updateParam);
-                if (updateDBResult.failed()) {
-                    return updateDBResult;
-                }
+                if (updateDBResult.failed()) { return updateDBResult;}
+
                 esTemplateService.syncUpdateShardNum(templatePhy.getCluster(), templatePhy.getName(), shardNum, RETRY_TIMES);
             }
         } catch (Exception e) {
@@ -786,8 +785,8 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             IndexTemplatePhyDTO updateParam = new IndexTemplatePhyDTO();
             for (IndexTemplatePhy templatePhy : templatePhyList) {
                 updateParam.setId(templatePhy.getId());
-                updateParam.setRack(templatePhy.getRack());
                 updateParam.setShard(updateParam.getShard());
+                updateParam.setRack("");
                 updateParam.setVersion(templatePhy.getVersion() + 1);
 
                 Result<Void> editResult = templatePhyManager.editTemplateWithoutCheck(updateParam, operator, RETRY_TIMES);
