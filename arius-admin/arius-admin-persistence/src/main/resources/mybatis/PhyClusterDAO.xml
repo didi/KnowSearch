@@ -131,7 +131,7 @@
         from es_cluster_phy_info
         where is_active = 1
         <if test="id != null">and id = #{id}</if>
-        <if test="desc != null">and desc LIKE CONCAT('%',#{desc},'%')</if>
+        <if test="desc != null">and `desc` LIKE CONCAT('%',#{desc},'%')</if>
         <if test="cluster != null">and cluster LIKE CONCAT('%',#{cluster},'%')</if>
         <if test="esVersion != null">and es_version = #{esVersion}</if>
         <if test="health != null">and health = #{health}</if>
@@ -157,7 +157,7 @@
         from es_cluster_phy_info
         where is_active = 1
         <if test="id != null">and id = #{id}</if>
-        <if test="desc != null">and desc LIKE CONCAT('%',#{desc},'%')</if>
+        <if test="desc != null">and `desc` LIKE CONCAT('%',#{desc},'%')</if>
         <if test="cluster != null">and cluster LIKE CONCAT('%',#{cluster},'%')</if>
         <if test="esVersion != null">and es_version = #{esVersion}</if>
         <if test="health != null">and health = #{health}</if>
