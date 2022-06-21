@@ -401,22 +401,14 @@ public class ESClusterServiceImpl implements ESClusterService {
     @Override
     public List<PendingTaskAnalysisVO> pendingTaskAnalysis(String cluster) {
         String response = esClusterDAO.pendingTask(cluster);
-        if (null!=response){
-            JSONArray tasks = JSONObject.parseObject(response).getJSONArray("tasks");
-            return JSONObject.parseArray(tasks.toJSONString(), PendingTaskAnalysisVO.class);
-        }else {
-            return null;
-        }
+        return  Optional.ofNullable(response).map(JSONObject::parseObject).map(jsonObject->jsonObject.getJSONArray("tasks"))
+                .map(tasks->JSONObject.parseArray(tasks.toJSONString(), PendingTaskAnalysisVO.class)).orElse(new ArrayList<>());
     }
 
     @Override
     public List<TaskMissionAnalysisVO> taskMissionAnalysis(String cluster) {
         String response = esClusterDAO.taskMission(cluster);
-        if (null!=response){
-            return buildTaskMission(JSONObject.parseObject(response));
-        }else {
-            return null;
-        }
+        return Optional.ofNullable(response).map(JSONObject::parseObject).map(jsonObject -> buildTaskMission(jsonObject)).orElse(new ArrayList<>());
     }
 
     @Override
@@ -428,15 +420,14 @@ public class ESClusterServiceImpl implements ESClusterService {
     @Override
     public boolean abnormalShardAllocationRetry(String cluster) {
         String response = esClusterDAO.abnormalShardAllocationRetry(cluster);
-      boolean  acknowledged  = (boolean) JSONObject.parseObject(response).get("acknowledged");
-        return acknowledged;
+        return  Optional.ofNullable(response).map(JSONObject::parseObject).map(jsonObject ->jsonObject.getBoolean("acknowledged")).orElse(false);
     }
 
     @Override
     public boolean clearFieldDataMemory(String cluster) {
         String response = esClusterDAO.clearFieldDataMemory(cluster);
-        JSONObject shards = JSONObject.parseObject(response).getJSONObject("_shards");
-        return 0 == shards.getInteger("failed");
+        return  Optional.ofNullable(response).map(JSONObject::parseObject).map(jsonObject -> jsonObject.getJSONObject("_shards"))
+                .map(shards->shards.getInteger("failed")).map(failed->failed.equals(0)).orElse(false);
     }
 
     private List<TaskMissionAnalysisVO> buildTaskMission(JSONObject responseJson) {

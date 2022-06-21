@@ -48,8 +48,6 @@ public class ClusterPhyMetricsManagerImpl implements ClusterPhyMetricsManager {
     @Autowired
     private MetricsConfigService         metricsConfigService;
 
-    @Autowired
-    private ESIndexService               esIndexService;
 
     @Autowired
     private NodeStatisService            nodeStatisService;
