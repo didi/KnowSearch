@@ -22,7 +22,7 @@ public class DslBaseDTO {
      * 应用id
      */
     @ApiModelProperty(value = "应用账号", example = "1")
-    private Integer appid;
+    private Integer projectId;
 
     /**
      * 查询模板的md5值
@@ -36,8 +36,8 @@ public class DslBaseDTO {
      * @return
      */
     @JSONField(serialize = false)
-    public String getAppidDslTemplateMd5() {
-        return String.format("%d_%s", this.appid, this.dslTemplateMd5);
+    public String getProjectIdDslTemplateMd5() {
+        return String.format("%d_%s", this.projectId, this.dslTemplateMd5);
     }
 
     @Override
@@ -46,4 +46,3 @@ public class DslBaseDTO {
     }
 
 }
-

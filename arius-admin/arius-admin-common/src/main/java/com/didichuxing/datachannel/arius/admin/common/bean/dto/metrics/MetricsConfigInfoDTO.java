@@ -14,8 +14,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class MetricsConfigInfoDTO extends BaseDTO {
 
-    @ApiModelProperty("账号信息")
-    private String       domainAccount;
+    @ApiModelProperty("用户名")
+    private String userName;
 
     @ApiModelProperty("一级目录下的指标配置类型,如集群看板，网关看板")
     private String       firstMetricsType;

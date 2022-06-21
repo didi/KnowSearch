@@ -1,15 +1,14 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.BaseVO;
-import com.didichuxing.datachannel.arius.admin.common.constant.app.AppClusterLogicAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectClusterLogicAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
 
 /**
  * 集群基本类
@@ -37,10 +36,10 @@ public class ClusterLogicVO extends BaseVO implements Comparable<ClusterLogicVO>
     private Integer                      type;
 
     @ApiModelProperty("所属应用ID")
-    private Integer                      appId;
+    private Integer projectId;
 
     @ApiModelProperty("所属应用名")
-    private String                       appName;
+    private String projectName;
 
     @ApiModelProperty("是否关联物理集群")
     private Boolean                      phyClusterAssociated;
@@ -75,7 +74,7 @@ public class ClusterLogicVO extends BaseVO implements Comparable<ClusterLogicVO>
     @ApiModelProperty("权限记录ID")
     private Long                         authId;
 
-    /** @see AppClusterLogicAuthEnum */
+    /** @see ProjectClusterLogicAuthEnum */
     @ApiModelProperty("权限,1:配置管理,2:访问,-1:无权限")
     private Integer                      authType;
 

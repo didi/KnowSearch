@@ -1,20 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.core.service.es.impl;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.getBigIndicesRequestContent;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.*;
-
-import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.rest.RestStatus;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.BLOCKS;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.DEFAULTS;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.INDEX;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.READ;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.WRITE;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -48,6 +39,24 @@ import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.rest.RestStatus;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * @author d06679
@@ -237,7 +246,7 @@ public class ESIndexServiceImpl implements ESIndexService {
 
         return ret;
     }
-
+    @Override
     public Map<String,List<String>> syncGetIndexAliasesByIndices(String cluster, String... indices) {
         Map<String/*index*/, AliasIndexNode> aliasIndexNodeMap = esIndexDAO.getAliasesByIndices(cluster, indices);
         if (aliasIndexNodeMap == null) {
@@ -470,6 +479,7 @@ public class ESIndexServiceImpl implements ESIndexService {
      * @param clusterPhyName 物理集群名称
      * @return {@link Map}<{@link String}, {@link Tuple}<{@link Long}, {@link Long}>>
      */
+    @Override
     public Map<String, Tuple<Long, Long>> syncGetIndicesSegmentCount(String clusterPhyName) {
         Map<String, IndexNodes> indexNodesMap = esIndexDAO.getIndexStats(clusterPhyName, null);
         Map<String, Tuple<Long, Long>> retMap = new HashMap<>();

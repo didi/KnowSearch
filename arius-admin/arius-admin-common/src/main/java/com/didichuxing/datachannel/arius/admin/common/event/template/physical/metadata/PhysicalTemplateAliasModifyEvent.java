@@ -12,9 +12,9 @@ import java.util.List;
 public class PhysicalTemplateAliasModifyEvent extends PhysicalMetaDataModifyEvent {
 
     /**
-     * APP ID
+     * project ID
      */
-    private final Integer appId;
+    private final Integer projectId;
 
     /**
      * 模板名称
@@ -43,14 +43,14 @@ public class PhysicalTemplateAliasModifyEvent extends PhysicalMetaDataModifyEven
 
     public PhysicalTemplateAliasModifyEvent(
             Object source,
-            Integer appId,
+            Integer projectId,
             String cluster,
             String templateName,
             List<String> receivers,
             IndexTemplatePhyAlias beforeUpdateAlias,
             IndexTemplatePhyAlias afterUpdateAlias) {
         super(source);
-        this.appId = appId;
+        this.projectId = projectId;
         this.templateName = templateName;
         this.cluster = cluster;
         this.receivers = receivers;
@@ -58,8 +58,8 @@ public class PhysicalTemplateAliasModifyEvent extends PhysicalMetaDataModifyEven
         this.afterUpdateAlias = afterUpdateAlias;
     }
 
-    public Integer getAppId() {
-        return appId;
+    public Integer getProjectId() {
+        return projectId;
     }
 
     public String getTemplateName() {

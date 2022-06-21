@@ -1,11 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.po.query;
 
 import com.google.common.collect.Maps;
+import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.Map;
 
 /**
  * @author: D10865
@@ -16,6 +15,7 @@ import java.util.Map;
  * 查询统计子任务结果
  *
  */
+@Deprecated
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -23,14 +23,14 @@ public class QueryStatisticsResult {
     /**
      *  索引模板维度访问次数
      */
-    private Map<String/*templateId*/, TemplateAccessCountPO> templateAccessCountMap = Maps.newLinkedHashMap();
+    private Map<String/*templateId*/, TemplateAccessCountPO>                  templateAccessCountMap          = Maps.newLinkedHashMap();
     /**
      * 索引维度访问次数
      */
-    private Map<String/*templateId_indexName*/, IndexNameAccessCountPO> indexNameAccessCountMap = Maps.newLinkedHashMap();
+    private Map<String/*templateId_indexName*/, IndexNameAccessCountPO>       indexNameAccessCountMap         = Maps.newLinkedHashMap();
     /**
-     * appid维度访问次数
+     * projectid维度访问次数
      */
-    private Map<String/*templateId_appId*/, AppIdTemplateAccessCountPO> appIdTemplateAccessCountMap = Maps.newLinkedHashMap();
+    private Map<String/*templateId_projectId*/, ProjectTemplateAccessCountPO> projectIdTemplateAccessCountMap = Maps.newLinkedHashMap();
 
 }

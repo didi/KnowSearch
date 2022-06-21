@@ -84,10 +84,7 @@ public class InterfaceConstant {
      */
     public static final String KAFKA_CONSUME_DETAILS = "/api/v1/third-part/{physicalClusterId}/consumers/{consumerGroup}/topics/{topicName}/consume-details";
 
-    /**
-     * 创建kafkaappid
-     */
-    public static final String KAFKA_CREATE_APPID           = "/api/v1/appIds/appId";
+    
 
     /**
      * 获取应用Topic信息
@@ -231,7 +228,7 @@ public class InterfaceConstant {
     public static final String URL_STATIS_REPORT_TEMPLATE_STATS       = "/template/statis/getTemplateStatsInfo.do";
 
     /**
-     *  获取appID查询信息(top10)
+     *  获取projectId查询信息(top10)
      */
     public static final String URL_REPORT_QUERY_TOP_TEM_INFO          = "/template/statis/getQueryTopNumInfo.do";
 
@@ -241,7 +238,7 @@ public class InterfaceConstant {
     public static final String URL_STATIS_TEMPLATE_INDEX_ACCESS_COUNT = "/template/access/indexName/queryRate.do";
 
     /**
-     * 根据逻辑模板id，查询最近days天之内的appid访问列表
+     * 根据逻辑模板id，查询最近days天之内的projectId访问列表
      */
     public static final String URL_STATIS_TEMPLATE_ACCESS_APPIDS      = "/template/access/appids.do";
 

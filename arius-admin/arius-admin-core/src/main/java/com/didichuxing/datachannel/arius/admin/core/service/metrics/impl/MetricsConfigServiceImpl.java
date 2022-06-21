@@ -1,61 +1,60 @@
 package com.didichuxing.datachannel.arius.admin.core.service.metrics.impl;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang3.BooleanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsConfigInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.config.MetricsConfigInfo;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.metrics.MetricsConfigPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.metrics.UserMetricsConfigPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.MetricsTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
-import com.didichuxing.datachannel.arius.admin.core.service.metrics.MetricsConfigService;
-import com.didichuxing.datachannel.arius.admin.persistence.mysql.metrics.MetricsConfigDAO;
+import com.didichuxing.datachannel.arius.admin.core.service.metrics.UserMetricsConfigService;
+import com.didichuxing.datachannel.arius.admin.persistence.mysql.metrics.UserMetricsConfigDAO;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+import org.apache.commons.lang3.BooleanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * @author wangpengkai
  * @date 2021/08/10
  */
 @Service
-public class MetricsConfigServiceImpl implements MetricsConfigService {
+public class MetricsConfigServiceImpl implements UserMetricsConfigService {
 
     private static final ILog LOGGER = LogFactory.getLog(MetricsConfigServiceImpl.class);
 
-    private static final String DOMAIN_ACCOUNT = "domain_account";
+    private static final String USER_NAME = "user_name";
 
     @Autowired
-    private MetricsConfigDAO metricsConfigDAO;
+    private UserMetricsConfigDAO userMetricsConfigDAO;
 
     @Override
-    public List<String> getMetricsByTypeAndDomainAccount(MetricsConfigInfoDTO param) {
+    public List<String> getMetricsByTypeAndUserName(MetricsConfigInfoDTO param) {
         MetricsTypeEnum metricsTypeEnum = metricsConfigDTO2Type(param);
 
-        Result<Void> result = paramCheck(param.getDomainAccount(), metricsTypeEnum);
+        Result<Void> result = paramCheck(param.getUserName(), metricsTypeEnum);
         if (result.failed()) {
             return new ArrayList<>();
         }
 
-        MetricsConfigPO metricsConfigPO = getMetricsInfoByDomainAccount(param.getDomainAccount());
-        if (null == metricsConfigPO || AriusObjUtils.isNull(metricsConfigPO.getMetricInfo())) {
+        UserMetricsConfigPO userMetricsConfigPO = getMetricsInfoByDomainAccount(param.getUserName());
+        if (null == userMetricsConfigPO || AriusObjUtils.isNull(userMetricsConfigPO.getMetricInfo())) {
             return new ArrayList<>();
         }
 
-        List<MetricsConfigInfo> metricsConfigInfos = JSON.parseArray(metricsConfigPO.getMetricInfo(), MetricsConfigInfo.class);
+        List<MetricsConfigInfo> metricsConfigInfos = JSON.parseArray(userMetricsConfigPO.getMetricInfo(),
+                MetricsConfigInfo.class);
 
         // 获取对应属性下的配置列表
         List<List<String>> metricsList = metricsConfigInfos
                 .stream()
-                .filter(metricsConfigInfo -> metricsTypeMatch(metricsConfigInfo, metricsTypeEnum))
+                .filter(metricsConfigInfoPO -> metricsTypeMatch(metricsConfigInfoPO, metricsTypeEnum))
                 .map(MetricsConfigInfo::getMetricsTypes)
                 .collect(Collectors.toList());
 
@@ -67,25 +66,26 @@ public class MetricsConfigServiceImpl implements MetricsConfigService {
     }
 
     @Override
-    public Result<Integer> updateByMetricsByTypeAndDomainAccount(MetricsConfigInfoDTO param) {
+    public Result<Integer> updateByMetricsByTypeAndUserName(MetricsConfigInfoDTO param) {
         MetricsTypeEnum metricsTypeEnum = metricsConfigDTO2Type(param);
 
-        Result<Void> result = paramCheck(param.getDomainAccount(), metricsTypeEnum);
+        Result<Void> result = paramCheck(param.getUserName(), metricsTypeEnum);
         if (result.failed()) {
             return Result.buildFrom(result);
         }
 
-        MetricsConfigPO metricsConfigPO = getMetricsInfoByDomainAccount(param.getDomainAccount());
-        if (null == metricsConfigPO) {
+        UserMetricsConfigPO userMetricsConfigPO = getMetricsInfoByDomainAccount(param.getUserName());
+        if (null == userMetricsConfigPO) {
             return insertMetricsConfigInfoWithoutCheck(param);
         }
 
-        List<MetricsConfigInfo> metricsConfigInfos = JSON.parseArray(metricsConfigPO.getMetricInfo(), MetricsConfigInfo.class);
+        List<MetricsConfigInfo> metricsConfigInfos = JSON.parseArray(userMetricsConfigPO.getMetricInfo(),
+                MetricsConfigInfo.class);
 
         boolean ifPresent = false;
-        for (MetricsConfigInfo metricsConfigInfo : metricsConfigInfos) {
-            if (metricsTypeMatch(metricsConfigInfo, metricsTypeEnum)) {
-                metricsConfigInfo.setMetricsTypes(param.getMetricsTypes());
+        for (MetricsConfigInfo metricsConfigInfoPO : metricsConfigInfos) {
+            if (metricsTypeMatch(metricsConfigInfoPO, metricsTypeEnum)) {
+                metricsConfigInfoPO.setMetricsTypes(param.getMetricsTypes());
                 ifPresent = true;
                 break;
             }
@@ -95,14 +95,15 @@ public class MetricsConfigServiceImpl implements MetricsConfigService {
             metricsConfigInfos.add(createMetricsConfigInfoWithoutCheck(param));
         }
 
-        metricsConfigPO.setMetricInfo(JSON.toJSONString(metricsConfigInfos));
-        boolean succ = (1 == metricsConfigDAO.update(metricsConfigPO, new QueryWrapper<MetricsConfigPO>().eq(DOMAIN_ACCOUNT, param.getDomainAccount())));
-        return Result.build(succ, metricsConfigPO.getId());
+        userMetricsConfigPO.setMetricInfo(JSON.toJSONString(metricsConfigInfos));
+        boolean succ = (1 == userMetricsConfigDAO.update(
+                userMetricsConfigPO, new QueryWrapper<UserMetricsConfigPO>().eq(USER_NAME, param.getUserName())));
+        return Result.build(succ, userMetricsConfigPO.getId());
     }
 
     @Override
-    public void deleteByDomainAccount(String domainAccount) {
-        metricsConfigDAO.delete(new QueryWrapper<MetricsConfigPO>().eq(DOMAIN_ACCOUNT, domainAccount));
+    public void deleteByUserName(String userName) {
+        userMetricsConfigDAO.delete(new QueryWrapper<UserMetricsConfigPO>().eq(USER_NAME, userName));
     }
 
     /**************************************************** private methods ****************************************************/
@@ -120,8 +121,8 @@ public class MetricsConfigServiceImpl implements MetricsConfigService {
         return MetricsTypeEnum.UNKNOWN;
     }
 
-    private Result<Void> paramCheck(String domainAccount, MetricsTypeEnum metricsTypeEnum) {
-        if (AriusObjUtils.isNull(domainAccount)) {
+    private Result<Void> paramCheck(String userName, MetricsTypeEnum metricsTypeEnum) {
+        if (AriusObjUtils.isNull(userName)) {
             return Result.buildFail("用户账号为空");
         }
 
@@ -132,21 +133,21 @@ public class MetricsConfigServiceImpl implements MetricsConfigService {
         return Result.buildSucc();
     }
 
-    private MetricsConfigPO getMetricsInfoByDomainAccount(String domainAccount) {
-        return metricsConfigDAO.selectOne(new QueryWrapper<MetricsConfigPO>().eq(DOMAIN_ACCOUNT, domainAccount));
+    private UserMetricsConfigPO getMetricsInfoByDomainAccount(String userName) {
+        return userMetricsConfigDAO.selectOne(new QueryWrapper<UserMetricsConfigPO>().eq(USER_NAME, userName));
     }
 
-    private boolean metricsTypeMatch(MetricsConfigInfo metricsConfigInfo, MetricsTypeEnum metricsTypeEnum) {
-        return metricsConfigInfo.getFirstMetricsType().equals(metricsTypeEnum.getFirstMetricsType())
-                && metricsConfigInfo.getSecondMetricsType().equals(metricsTypeEnum.getSecondMetricsType());
+    private boolean metricsTypeMatch(MetricsConfigInfo metricsConfigInfoPO, MetricsTypeEnum metricsTypeEnum) {
+        return metricsConfigInfoPO.getFirstMetricsType().equals(metricsTypeEnum.getFirstMetricsType())
+               && metricsConfigInfoPO.getSecondMetricsType().equals(metricsTypeEnum.getSecondMetricsType());
     }
 
     private Result<Integer> insertMetricsConfigInfoWithoutCheck(MetricsConfigInfoDTO param) {
-        MetricsConfigPO metricsConfigPO = new MetricsConfigPO();
-        metricsConfigPO.setDomainAccount(param.getDomainAccount());
-        metricsConfigPO.setMetricInfo(JSON.toJSONString(Arrays.asList(createMetricsConfigInfoWithoutCheck(param))));
-        boolean succ = (1 == metricsConfigDAO.insert(metricsConfigPO));
-        return Result.build(succ, metricsConfigPO.getId());
+        UserMetricsConfigPO userMetricsConfigPO = new UserMetricsConfigPO();
+        userMetricsConfigPO.setUserName(param.getUserName());
+        userMetricsConfigPO.setMetricInfo(JSON.toJSONString(Arrays.asList(createMetricsConfigInfoWithoutCheck(param))));
+        boolean succ = (1 == userMetricsConfigDAO.insert(userMetricsConfigPO));
+        return Result.build(succ, userMetricsConfigPO.getId());
     }
 
     private MetricsConfigInfo createMetricsConfigInfoWithoutCheck(MetricsConfigInfoDTO param) {
@@ -154,7 +155,7 @@ public class MetricsConfigServiceImpl implements MetricsConfigService {
         metricsConfigInfo.setMetricsTypes(param.getMetricsTypes());
         metricsConfigInfo.setFirstMetricsType(param.getFirstMetricsType());
         metricsConfigInfo.setSecondMetricsType(param.getSecondMetricsType());
-        metricsConfigInfo.setDomainAccount(param.getDomainAccount());
+        metricsConfigInfo.setUserName(param.getUserName());
         return metricsConfigInfo;
     }
 }

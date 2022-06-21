@@ -31,7 +31,7 @@ public class IndexCatCell {
 
     private String  cluster;
     private Long    resourceId;
-    private Integer appId;
+    private Integer projectId;
     private boolean deleteFlag;
     private long    timestamp;
     private Long    primariesSegmentCount;

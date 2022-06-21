@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel(description ="提取查询模板")
+@Deprecated
 public class ExtractDslContent {
 
     @ApiModelProperty(value = "查询语句")

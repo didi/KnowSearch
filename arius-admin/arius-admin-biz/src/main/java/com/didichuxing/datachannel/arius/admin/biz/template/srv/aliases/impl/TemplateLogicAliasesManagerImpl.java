@@ -12,7 +12,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.alias.ConsoleAliasDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.alias.ConsoleLogicTemplateAliasesDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.alias.ConsoleLogicTemplateDeleteAliasesDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppTemplateAuth;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectTemplateAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateAlias;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyAlias;
@@ -20,7 +20,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppLogicTemplateAuthService;
+import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectLogicTemplateAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -51,7 +51,7 @@ public class TemplateLogicAliasesManagerImpl extends BaseTemplateSrv implements 
     private ESIndexService              esIndexService;
 
     @Autowired
-    private AppLogicTemplateAuthService appLogicTemplateAuthService;
+    private ProjectLogicTemplateAuthService projectLogicTemplateAuthService;
 
     @Override
     public TemplateServiceEnum templateService() {
@@ -286,18 +286,19 @@ public class TemplateLogicAliasesManagerImpl extends BaseTemplateSrv implements 
     /**
      * 获取模板具体的别名
      *
-     * @param appId appId
+     * @param projectId projectId
      */
     @Override
-    public Result<List<Tuple<String/*index*/, String/*aliases*/>>> getAllTemplateAliasesByAppid(Integer appId) {
+    public Result<List<Tuple<String/*index*/, String/*aliases*/>>> getAllTemplateAliasesByProjectId(Integer projectId) {
         List<Tuple<String, String>> aliases = new ArrayList<>();
 
-        List<AppTemplateAuth> appTemplateAuths = appLogicTemplateAuthService.getTemplateAuthsByAppId(appId);
-        if (CollectionUtils.isEmpty(appTemplateAuths)) {
+        List<ProjectTemplateAuth> projectTemplateAuths = projectLogicTemplateAuthService.getTemplateAuthsByProjectId(
+                projectId);
+        if (CollectionUtils.isEmpty(projectTemplateAuths)) {
             return Result.build(true);
         }
 
-        appTemplateAuths.parallelStream().forEach(appTemplateAuth -> {
+        projectTemplateAuths.parallelStream().forEach(appTemplateAuth -> {
             IndexTemplateWithPhyTemplates logicWithPhysical = this.indexTemplateService
                 .getLogicTemplateWithPhysicalsById(appTemplateAuth.getTemplateId());
 

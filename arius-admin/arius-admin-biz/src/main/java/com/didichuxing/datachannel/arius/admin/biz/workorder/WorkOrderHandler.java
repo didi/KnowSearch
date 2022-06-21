@@ -2,12 +2,12 @@ package com.didichuxing.datachannel.arius.admin.biz.workorder;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.workorder.WorkOrderProcessDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
+import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
 import java.util.List;
 
 /**
@@ -66,7 +66,7 @@ public interface WorkOrderHandler extends BaseHandle {
      * @param detail 扩展信息
      * @return List<AriusUserInfo>
      */
-    List<AriusUserInfo> getApproverList(AbstractOrderDetail detail);
+    List<UserBriefVO> getApproverList(AbstractOrderDetail detail);
     
     /**检查机关
      * 是否审批人员

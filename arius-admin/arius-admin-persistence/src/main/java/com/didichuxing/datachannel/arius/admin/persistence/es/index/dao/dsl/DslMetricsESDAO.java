@@ -43,26 +43,26 @@ public class DslMetricsESDAO extends BaseESDAO {
     }
 
     /**
-     * 根据时间范围查询某个appid的记录数
+     * 根据时间范围查询某个projectId的记录数
      *
-     * @param appId
+     * @param projectId
      * @param startDate
      * @param endDate
      * @return
      */
-    public Long queryTotalHitsByAppIdDate(Integer appId, String startDate, String endDate) {
-        String dsl = dslLoaderUtil.getFormatDslByFileName( DslsConstant.GET_TOTAL_HITS_BY_APPID, appId, startDate, endDate);
+    public Long queryTotalHitsByProjectIdDate(Integer projectId, String startDate, String endDate) {
+        String dsl = dslLoaderUtil.getFormatDslByFileName( DslsConstant.GET_TOTAL_HITS_BY_APPID, projectId, startDate, endDate);
 
         return gatewayClient.performRequestAndGetTotalCount(indexName, typeName, dsl);
     }
 
     /**
-     * 查询某一天出现的appid和dslTemplateMd5
+     * 查询某一天出现的projectid和dslTemplateMd5
      *
      * @param date
      * @return
      */
-    public List<DslMetricsPO> getAppIdTemplateMd5InfoByDate(String date) {
+    public List<DslMetricsPO> getProjectIdTemplateMd5InfoByDate(String date) {
         List<DslMetricsPO> list = Lists.newLinkedList();
 
         String realIndexName = String.format("%s_%s", this.indexName.replace("*", ""), date);
@@ -95,7 +95,7 @@ public class DslMetricsESDAO extends BaseESDAO {
             index = key.indexOf("_");
             if (index > 0) {
                 dslMetricsPo = new DslMetricsPO();
-                dslMetricsPo.setAppid(Integer.valueOf(key.substring(0, index)));
+                dslMetricsPo.setProjectId(Integer.valueOf(key.substring(0, index)));
                 dslMetricsPo.setDslTemplateMd5(key.substring(index + 1));
 
                 list.add(dslMetricsPo);
@@ -109,18 +109,18 @@ public class DslMetricsESDAO extends BaseESDAO {
      * @param dslBase
      * @return
      */
-    public DslMetricsPO getMaxAppidTemplateQpsInfoByAppidTemplateMd5(DslBase dslBase) {
+    public DslMetricsPO getMaxProjectIdTemplateQpsInfoByProjectIdTemplateMd5(DslBase dslBase) {
         if(null == dslBase){return null;}
 
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_MAX_QPS_BY_KEY, dslBase.getAppid(), dslBase.getDslTemplateMd5());
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_MAX_QPS_BY_KEY, dslBase.getProjectId(), dslBase.getDslTemplateMd5());
         String realIndexName = IndexNameUtils.genCurrentDailyIndexName(indexName);
         return gatewayClient.performRequestAndTakeFirst(realIndexName, typeName, dsl, DslMetricsPO.class);
     }
 
-    public List<DslMetricsPO> getDslDetailMetricByAppidAndDslTemplateMd5(int appid, String dslTemplteMd5, long startDate, long endDate){
+    public List<DslMetricsPO> getDslDetailMetricByProjectIdAndDslTemplateMd5(int projectId, String dslTemplteMd5, long startDate, long endDate){
         String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startDate, endDate);
 
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_DSL_DETAIL_METRICS_BY_APPID_AND_MD5_AND_RANGE, appid, dslTemplteMd5, startDate, endDate, startDate, endDate);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_DSL_DETAIL_METRICS_BY_APPID_AND_MD5_AND_RANGE, projectId, dslTemplteMd5, startDate, endDate, startDate, endDate);
 
         return gatewayClient.performRequest(realIndexName, typeName, dsl, s -> {
             List<DslMetricsPO> dslMetricsPos = new ArrayList<>();
@@ -137,7 +137,7 @@ public class DslMetricsESDAO extends BaseESDAO {
                             DslMetricsPO dslMetricsPo = new DslMetricsPO();
 
                             dslMetricsPo.setDslTemplateMd5(dslTemplteMd5);
-                            dslMetricsPo.setAppid(appid);
+                            dslMetricsPo.setProjectId(projectId);
                             dslMetricsPo.setDslLenAvg(Double.valueOf(aggrMap.get("dslLenAvg").getUnusedMap().get(VALUE).toString()));
                             dslMetricsPo.setEsCostAvg(Double.valueOf(aggrMap.get("esCostAvg").getUnusedMap().get(VALUE).toString()));
                             dslMetricsPo.setFailedShardsAvg(Double.valueOf(aggrMap.get("failedShardsAvg").getUnusedMap().get(VALUE).toString()));
@@ -151,7 +151,7 @@ public class DslMetricsESDAO extends BaseESDAO {
                             dslMetricsPos.add(dslMetricsPo);
                         }
                     }catch (Exception e){
-                        LOGGER.error("class=AriusStatsInfoEsDao||method=getDslDetailMetricByAppidAndDslTemplateMd5||exceptionMsg:{}", e);
+                        LOGGER.error("class=AriusStatsInfoEsDao||method=getDslDetailMetricByProjectIdAndDslTemplateMd5||exceptionMsg:{}", e);
                     }
                 });
             }
@@ -161,16 +161,16 @@ public class DslMetricsESDAO extends BaseESDAO {
     }
 
     /**
-     * 查询某个appid一天查询次数
+     * 查询某个projectId一天查询次数
      *
-     * @param appid
+     * @param projectId
      * @param date
      * @return
      */
-    public Long getTotalSearchByAppidDate(Integer appid, String date) {
+    public Long getTotalSearchByProjectIdDate(Integer projectId, String date) {
         String index = String.format("%s_%s", indexName.replace("*", ""), date);
 
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_TOTAL_SEARCHCOUNT_BY_APPID, appid);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_TOTAL_SEARCHCOUNT_BY_APPID, projectId);
 
         ESAggrMap esAggrMap = gatewayClient.performAggRequest(index, typeName, dsl);
         if (esAggrMap == null) {
@@ -187,12 +187,12 @@ public class DslMetricsESDAO extends BaseESDAO {
      *
      * 获取一个查询模板的数据
      *
-     * @param appid
+     * @param projectId
      * @param dslTemplateMd5
      * @return
      */
-    public DslMetricsPO getNeariestDslMetricsByappidTemplateMd5(Integer appid, String dslTemplateMd5) {
-        String queryDsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_DSL_METRICS_BY_KEY, appid, dslTemplateMd5);
+    public DslMetricsPO getNeariestDslMetricsByProjectIdTemplateMd5(Integer projectId, String dslTemplateMd5) {
+        String queryDsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_DSL_METRICS_BY_KEY, projectId, dslTemplateMd5);
 
         return gatewayClient.performRequestAndTakeFirst(indexName, typeName, queryDsl,
                 DslMetricsPO.class);

@@ -10,9 +10,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ClusterLogicTransferContent extends BaseContent {
 
-    private Integer targetAppId;
+    private Integer targetProjectId;
 
-    private Integer sourceAppId;
+    private Integer sourceProjectId;
 
     private Long    clusterLogicId;
 

@@ -33,37 +33,37 @@ public class DslAnalyzeResultTypeESDAO extends BaseESDAO {
     }
 
     /**
-     * 批量写入appid维度分析查询结果到es
+     * 批量写入projectId维度分析查询结果到es
      *
-     * @param appidAnalyzeResultList
+     * @param projectIdAnalyzeResultList
      * @return
      */
-    public boolean batchInsert(List<DslAnalyzeResultTypePO> appidAnalyzeResultList) {
-        return updateClient.batchInsert(EnvUtil.getWriteIndexNameByEnv(this.indexName), typeName, appidAnalyzeResultList);
+    public boolean batchInsert(List<DslAnalyzeResultTypePO> projectIdAnalyzeResultList) {
+        return updateClient.batchInsert(EnvUtil.getWriteIndexNameByEnv(this.indexName), typeName, projectIdAnalyzeResultList);
     }
 
     /**
-     * 查询分析结果根据appid
+     * 查询分析结果根据projectId
      *
-     * @param appid
+     * @param projectId
      * @return
      */
     @Nullable
-    public List<DslAnalyzeResultTypePO> getDslAnalyzeResultByAppid(Integer from, Long appid) {
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_DSL_ANALYZE_RESULT_BY_APPID, from, appid);
+    public List<DslAnalyzeResultTypePO> getDslAnalyzeResultByProjectId(Integer from, Long projectId) {
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_DSL_ANALYZE_RESULT_BY_APPID, from, projectId);
 
         return gatewayClient.performRequest(indexName, typeName, dsl, DslAnalyzeResultTypePO.class);
     }
 
     /**
-     * 查询分析结果根据appid
+     * 查询分析结果根据projectId
      *
-     * @param appid
+     * @param projectId
      * @return
      */
     @Nullable
-    public List<DslAnalyzeResultTypePO> getDslAnalyzeResultByAppidAndRange(Long appid, Long startDate, Long endDate) {
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_DSL_ANALYZE_RESULT_BY_APPID_AND_RANGE, SCROLL_SIZE, startDate, endDate, appid);
+    public List<DslAnalyzeResultTypePO> getDslAnalyzeResultByProjectIdAndRange(Long projectId, Long startDate, Long endDate) {
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_DSL_ANALYZE_RESULT_BY_APPID_AND_RANGE, SCROLL_SIZE, startDate, endDate, projectId);
 
         List<DslAnalyzeResultTypePO> dslAnalyzeResultTypePos = Lists.newLinkedList();
         gatewayClient.queryWithScroll(indexName,

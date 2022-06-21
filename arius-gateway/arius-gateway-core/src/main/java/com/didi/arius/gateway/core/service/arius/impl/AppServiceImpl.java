@@ -155,6 +155,7 @@ public class AppServiceImpl implements AppService {
         Map<Integer, AppDetail> newAppDetails = new HashMap<>();
         for (AppDetailResponse appDetailResponse : appListResponse.getData()) {
             AppDetail appDetail = new AppDetail();
+            appDetail.setProjectId(appDetailResponse.getProjectId());
             appDetail.setId(appDetailResponse.getId());
             appDetail.setIndexExp(appDetailResponse.getIndexExp() == null ? new ArrayList<>() : appDetailResponse.getIndexExp());
             appDetail.setWindexExp(appDetailResponse.getWindexExp() == null ? new ArrayList<>() : appDetailResponse.getWindexExp());

@@ -11,9 +11,9 @@ import lombok.Data;
 @ApiModel(value = "索引别名切换")
 public class ConsoleTemplateAliasSwitchDTO {
     @ApiModelProperty("索引应用ID")
-    private Integer appId;
+    private Integer projectId;
     @ApiModelProperty("别名名称")
-    private String aliasName;
+    private String  aliasName;
     @ApiModelProperty("需要添加别名的索引")
     private List<String> addAliasIndices;
     @ApiModelProperty("需要删除别名的索引")

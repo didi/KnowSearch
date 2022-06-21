@@ -16,6 +16,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel(description = "模板配置信息")
+@Deprecated
 public class IndexTemplateConfigVO extends BaseVO {
 
     @ApiModelProperty("模板ID")

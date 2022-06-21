@@ -16,6 +16,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel(description = "模板标签信息")
+@Deprecated
 public class TemplateLabelDTO {
 
     @ApiModelProperty("模板ID")

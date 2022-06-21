@@ -1,9 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.template;
 
-import com.didichuxing.datachannel.arius.admin.common.constant.template.DataTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.BaseEntity;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.StringResponsible;
-
+import com.didichuxing.datachannel.arius.admin.common.constant.template.DataTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class IndexTemplate extends BaseEntity implements StringResponsible, Comparable<IndexTemplate> {
+public class IndexTemplate extends BaseEntity implements  Comparable<IndexTemplate> {
 
     private Integer id;
 
@@ -25,9 +23,9 @@ public class IndexTemplate extends BaseEntity implements StringResponsible, Comp
     private String  name;
 
     /**
-     * appid
+     * projectId
      */
-    private Integer appId;
+    private Integer projectId;
 
     /**
      * 用户数据类型

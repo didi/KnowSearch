@@ -2,6 +2,7 @@ package com.didichuxing.datachannel.arius.admin.metadata.service;
 
 import static com.didichuxing.datachannel.arius.admin.common.util.CommonUtils.formatDouble;
 
+import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.app.ProjectTemplateAccessESDAO;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,14 +19,14 @@ import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESIndexStats;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.AppIdTemplateAccessCount;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.ProjectTemplateAccessCount;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithStats;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.TemplateStatsInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.weekly.AppQuery;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.dsl.DslFieldUsePO;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.query.AppIdTemplateAccessCountPO;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.query.AppQueryPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.query.ProjectTemplateAccessCountPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.query.ProjectQueryPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.query.TemplateAccessCountPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.stats.TemplateTpsMetricPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateStatsInfoPO;
@@ -35,7 +36,6 @@ import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
-import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.app.AppIdTemplateAccessESDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.dsl.DslFieldUseESDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.gateway.GatewayJoinESDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats.AriusStatsIndexInfoESDAO;
@@ -71,7 +71,7 @@ public class TemplateSattisService {
     private TemplateAccessESDAO             templateAccessESDAO;
 
     @Autowired
-    private AppIdTemplateAccessESDAO        appIdTemplateAccessESDAO;
+    private ProjectTemplateAccessESDAO projectTemplateAccessESDAO;
 
     @Autowired
     private DslFieldUseESDAO                dslFieldUseESDAO;
@@ -111,24 +111,24 @@ public class TemplateSattisService {
      *
      * @param logicTemplateId 模板id
      * @param days 结束日期
-     * @return appid列表
+     * @return projectid列表
      */
     
-    public Result<Map<Integer, Long>> getTemplateAccessAppIds(Integer logicTemplateId, int days) {
-        List<AppIdTemplateAccessCountPO> accessCountPos = appIdTemplateAccessESDAO.getAccessAppidsInfoByTemplateId(logicTemplateId, days);
+    public Result<Map<Integer, Long>> getTemplateAccessProjectIds(Integer logicTemplateId, int days) {
+        List<ProjectTemplateAccessCountPO> accessCountPos = projectTemplateAccessESDAO.getAccessProjectIdsInfoByTemplateId(logicTemplateId, days);
         if(CollectionUtils.isEmpty(accessCountPos)){
             return Result.buildSucc();
         }
 
         Map<Integer, Long> ret = new HashMap<>();
-        for(AppIdTemplateAccessCountPO accessCountPo : accessCountPos){
-            Integer appid = accessCountPo.getAppId();
+        for(ProjectTemplateAccessCountPO accessCountPo : accessCountPos){
+            Integer projectId = accessCountPo.getProjectId();
             Long    count = accessCountPo.getCount();
 
-            if(null != ret.get(appid)){
-                count += ret.get(appid);
+            if(null != ret.get(projectId)){
+                count += ret.get(projectId);
             }
-            ret.put(appid, count);
+            ret.put(projectId, count);
         }
 
         return Result.buildSucc(ret);
@@ -409,19 +409,19 @@ public class TemplateSattisService {
     }
 
     /**
-     * 获取appID查询信息(top10)
+     * 获取projectId查询信息(top10)
      *
-     * @param appId
+     * @param projectId
      * @param startDate
      * @param endDate
      * @return
      */
     
-    public Result<List<AppQuery>> getQueryTopNumInfo(Integer appId, Long startDate, Long endDate) {
-        if (null == appId || null == startDate || null == endDate) {
+    public Result<List<AppQuery>> getQueryTopNumInfo(Integer projectId, Long startDate, Long endDate) {
+        if (null == projectId || null == startDate || null == endDate) {
             return Result.build(ResultType.ILLEGAL_PARAMS);
         }
-        List<AppQueryPO> queryInfoList = gatewayJoinESDAO.getQueryTopNumInfoByAppid(appId, startDate,
+        List<ProjectQueryPO> queryInfoList = gatewayJoinESDAO.getQueryTopNumInfoByProjectId(projectId, startDate,
                 endDate, 10);
         if (CollectionUtils.isEmpty(queryInfoList)) {
             return Result.build(ResultType.NOT_EXIST);
@@ -431,20 +431,20 @@ public class TemplateSattisService {
     }
 
     public Result<Map<Integer, Long>> getAccessStatsInfoByTemplateIdAndDays(int logicTemplateId, int days) {
-        List<AppIdTemplateAccessCountPO> accessCountPos = appIdTemplateAccessESDAO.getAccessAppidsInfoByTemplateId(logicTemplateId, days);
+        List<ProjectTemplateAccessCountPO> accessCountPos = projectTemplateAccessESDAO.getAccessProjectIdsInfoByTemplateId(logicTemplateId, days);
         if(CollectionUtils.isEmpty(accessCountPos)){
             Result.build(ResultType.SUCCESS);
         }
 
-        Map<Integer, Long> ret = new HashMap<>();
-        for(AppIdTemplateAccessCountPO accessCountPo : accessCountPos){
-            Integer appid = accessCountPo.getAppId();
+        Map<Integer, Long> ret = Maps.newHashMap();
+        for(ProjectTemplateAccessCountPO accessCountPo : accessCountPos){
+            Integer projectId = accessCountPo.getProjectId();
             Long    count = accessCountPo.getCount();
 
-            if(null != ret.get(appid)){
-                count += ret.get(appid);
+            if(null != ret.get(projectId)){
+                count += ret.get(projectId);
             }
-            ret.put(appid, count);
+            ret.put(projectId, count);
         }
 
         return Result.buildSucc(ret);
@@ -496,10 +496,10 @@ public class TemplateSattisService {
         return Result.buildSucc(ConvertUtil.obj2Obj(templateStatsInfoPO, TemplateStatsInfo.class));
     }
 
-    public Result<List<AppIdTemplateAccessCount>> getAccessAppInfos(int logicTemplateId, Long startDate, Long endDate) {
+    public Result<List<ProjectTemplateAccessCount>> getAccessAppInfos(int logicTemplateId, Long startDate, Long endDate) {
         return Result.buildSucc(ConvertUtil.list2List(
-                appIdTemplateAccessESDAO.getAccessAppidsInfoByTemplateId(logicTemplateId, startDate, endDate),
-                AppIdTemplateAccessCount.class));
+                projectTemplateAccessESDAO.getAccessProjectIdsInfoByTemplateId(logicTemplateId, startDate, endDate),
+                ProjectTemplateAccessCount.class));
     }
 
     public Result<List<ESIndexStats>> getIndexStatis(Long logicTemplateId, Long startDate, Long endDate) {

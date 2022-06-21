@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.didichuxing.datachannel.arius.admin.persistence.mysql.app.ProjectTemplateAuthDAO">
+    <resultMap id="BaseResultMap" type="com.didichuxing.datachannel.arius.admin.common.bean.po.app.ProjectTemplateAuthPO">
+        <result column="id" jdbcType="BIGINT" property="id"/>
+        <result column="project_id" jdbcType="INTEGER" property="projectId"/>
+        <result column="template" jdbcType="VARCHAR" property="templateId"/>
+        <result column="type" jdbcType="INTEGER" property="type"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+       id, project_id, template, `type`,  create_time, update_time
+    </sql>
+
+    <insert id="insert" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.app.ProjectTemplateAuthPO"
+            useGeneratedKeys="true"
+            keyColumn="id" keyProperty="id">
+        insert into project_template_info (project_id, template, `type`)
+        values (#{projectId}, #{templateId}, #{type})
+    </insert>
+
+    <update id="update" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.app.ProjectTemplateAuthPO">
+        update project_template_info
+        <trim prefix="set" prefixOverrides=",">
+            <if test="type != null">,`type` = #{type}</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <select id="listByCondition"
+            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.app.ProjectTemplateAuthPO"
+            resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from project_template_info
+        <trim prefix="where" prefixOverrides="and">
+            <if test="id != null">and id = #{id}</if>
+            <if test="projectId != null">and project_id = #{projectId}</if>
+            <if test="templateId != null">and template = #{templateId}</if>
+            <if test="type != null">and `type` = #{type}</if>
+            
+        </trim>
+        and status = 1
+        order by id desc
+    </select>
+
+    <delete id="delete" parameterType="long">
+        update project_template_info
+        set status = 0
+        where id = #{authId}
+    </delete>
+
+    <delete id="deleteByTemplate" parameterType="int">
+        update project_template_info
+        set status = 0
+        where template = #{templateId}
+    </delete>
+
+    <delete id="batchDeleteByTemplateIds" parameterType="java.util.List">
+        delete from project_template_info
+        where template in
+        <foreach item="item" collection="list" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+    <select id="listWithRwAuthsByProjectId" parameterType="int" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from project_template_info
+        where project_id = #{projectId} and (`type` = 2 or `type` = 3) and status = 1
+    </select>
+
+    <select id="getByProjectIdAndTemplateId" parameterType="map" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from project_template_info
+        where project_id = #{projectId} and template = #{templateId} and (`type` = 2 or `type` = 3) and status = 1
+    </select>
+
+    <select id="getByProjectIdAndTemplateIdAndType" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from project_template_info
+        where project_id = #{projectId} and template = #{templateId} and `type` = #{type} and status = 1
+    </select>
+
+    <select id="listByLogicTemplateId" parameterType="string" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from project_template_info
+        where template = #{templateId} and (`type` = 2 or `type` = 3) and status = 1
+    </select>
+
+    <select id="getByTemplateId" parameterType="int" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from project_template_info
+        where template = #{templateId} and status = 1
+    </select>
+
+    <select id="getById" parameterType="long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from project_template_info
+        where id = #{authId} and status = 1
+    </select>
+
+    <select id="listWithRwAuths" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from project_template_info
+        where (`type` = 2 or `type` = 3) and status = 1
+    </select>
+
+
+    <select id="listWithOwnerAuths" parameterType="long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from project_template_info
+        where `type` = 1 and status = 1
+    </select>
+</mapper>

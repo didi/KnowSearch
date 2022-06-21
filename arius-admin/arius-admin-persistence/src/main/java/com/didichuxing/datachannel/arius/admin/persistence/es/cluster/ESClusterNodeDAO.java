@@ -1,37 +1,18 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.cluster;
 
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.ES_OPERATE_TIMEOUT;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
-import com.didiglobal.logi.elasticsearch.client.request.cluster.nodestats.ESClusterNodesStatsRequest;
-import com.didiglobal.logi.elasticsearch.client.request.query.query.ESQueryAction;
-import com.didiglobal.logi.elasticsearch.client.request.query.query.ESQueryRequest;
-import com.didiglobal.logi.elasticsearch.client.response.query.query.ESQueryResponse;
-import org.springframework.stereotype.Repository;
-
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.ES_OPERATE_TIMEOUT;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
-import com.didiglobal.logi.elasticsearch.client.request.query.query.ESQueryAction;
-import com.didiglobal.logi.elasticsearch.client.request.query.query.ESQueryRequest;
-import com.didiglobal.logi.elasticsearch.client.response.query.query.ESQueryResponse;
-import org.springframework.stereotype.Repository;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_OPERATE_TIMEOUT;
 
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
 import com.didiglobal.logi.elasticsearch.client.ESClient;
+import com.didiglobal.logi.elasticsearch.client.request.cluster.nodestats.ESClusterNodesStatsRequest;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodesstats.ClusterNodeStats;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodesstats.ESClusterNodesStatsResponse;
 import com.google.common.collect.Lists;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import org.springframework.stereotype.Repository;
 
 /**
  * @author d06679

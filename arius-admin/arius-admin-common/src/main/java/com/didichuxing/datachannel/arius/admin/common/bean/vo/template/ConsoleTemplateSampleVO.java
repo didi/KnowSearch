@@ -14,6 +14,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel(description = "索引基本信息（包含配额利用信息）")
+@Deprecated
 public class ConsoleTemplateSampleVO extends ConsoleTemplateVO {
 
     @ApiModelProperty("所属应用名称")

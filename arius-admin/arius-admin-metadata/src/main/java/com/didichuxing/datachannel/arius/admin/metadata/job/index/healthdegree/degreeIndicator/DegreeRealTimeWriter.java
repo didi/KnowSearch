@@ -4,7 +4,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.IndicatorsType;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.BaseDegree;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.RealTimeWrite;
 import com.didichuxing.datachannel.arius.admin.metadata.job.index.healthdegree.AbstractDegreeIndicator;
-
+@Deprecated
 public class DegreeRealTimeWriter extends AbstractDegreeIndicator {
     @Override
     public IndicatorsType getType() {

@@ -1,22 +1,21 @@
 package com.didichuxing.datachannel.arius.admin.request.outer;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V2_THIRD_PART;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
-import com.didichuxing.datachannel.arius.admin.util.AriusClient;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.GatewayHeartbeat;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.ScrollDslTemplateRequest;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.ScrollDslTemplateResponse;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.GatewayAppVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.GatewayESUserVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.GatewayTemplateDeployInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.GatewayTemplatePhysicalVO;
-
+import com.didichuxing.datachannel.arius.admin.util.AriusClient;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V2_THIRD_PART;
 
 /**
  * @author wuxuan
@@ -45,9 +44,9 @@ public class ThirdpartGatewayControllerMethod {
         });
     }
 
-    public static Result<List<GatewayAppVO>> listApp() throws IOException {
+    public static Result<List<GatewayESUserVO>> listApp() throws IOException {
         String path = String.format("%s/listApp", THIRDPART_GATEWAY);
-        return JSON.parseObject(AriusClient.get(path), new TypeReference<Result<List<GatewayAppVO>>>() {
+        return JSON.parseObject(AriusClient.get(path), new TypeReference<Result<List<GatewayESUserVO>>>() {
         });
     }
 

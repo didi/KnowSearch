@@ -40,9 +40,9 @@ public class WorkOrder extends BaseEntity {
     private String  submitor;
 
     /**
-     * 提交人appid
+     * 提交人projectid
      */
-    private Integer submitorAppid;
+    private Integer submitorProjectId;
 
     /**
      * 数据中心

@@ -35,7 +35,7 @@ public class ESLogicClusterDTO extends PageDTO {
      * todo:等待泽颖修改
      */
     @ApiModelProperty("所属应用ID")
-    private Integer appId;
+    private Integer projectId;
 
     @ApiModelProperty("数据中心")
     private String  dataCenter;
@@ -46,11 +46,7 @@ public class ESLogicClusterDTO extends PageDTO {
     @ApiModelProperty("责任人")
     private String  responsible;
 
-    @ApiModelProperty("成本部门ID")
-    private String  libraDepartmentId;
 
-    @ApiModelProperty("成本部门名称")
-    private String  libraDepartment;
 
     @ApiModelProperty("备注")
     private String  memo;

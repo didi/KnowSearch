@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.biz.workorder.handler;
 
+import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -15,7 +16,6 @@ import com.didichuxing.datachannel.arius.admin.biz.worktask.ecm.EcmTaskManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.ecm.EcmTaskDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
@@ -23,7 +23,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.Work
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.LogicClusterPlugOperationOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
-import com.didichuxing.datachannel.arius.admin.common.constant.app.AppClusterLogicAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectClusterLogicAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.OperationTypeEnum;
@@ -32,7 +32,7 @@ import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateExce
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppClusterLogicAuthService;
+import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectClusterLogicAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.EcmHandleService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
@@ -45,7 +45,7 @@ import com.didiglobal.logi.log.LogFactory;
 public class LogicClusterPlugOperationHandler extends BaseWorkOrderHandler {
 
     @Autowired
-    private AppClusterLogicAuthService appClusterLogicAuthService;
+    private ProjectClusterLogicAuthService projectClusterLogicAuthService;
 
     @Autowired
     private ClusterRegionService       clusterRegionService;
@@ -102,18 +102,18 @@ public class LogicClusterPlugOperationHandler extends BaseWorkOrderHandler {
         LogicClusterPlugOperationContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
             LogicClusterPlugOperationContent.class);
 
-        AppClusterLogicAuthEnum logicClusterAuthEnum = appClusterLogicAuthService
-            .getLogicClusterAuthEnum(workOrder.getSubmitorAppid(), content.getLogicClusterId());
+        ProjectClusterLogicAuthEnum logicClusterAuthEnum = projectClusterLogicAuthService
+            .getLogicClusterAuthEnum(workOrder.getSubmitorProjectId(), content.getLogicClusterId());
 
         switch (logicClusterAuthEnum) {
             case OWN:
             case ALL:
                 return Result.buildSucc();
             case ACCESS:
-                return Result.buildParamIllegal("您的appid无该集群的管理权限进行插件安装");
+                return Result.buildParamIllegal("您的projectId无该集群的管理权限进行插件安装");
             case NO_PERMISSIONS:
             default:
-                return Result.buildParamIllegal("您的appid无该集群的相关权限");
+                return Result.buildParamIllegal("您的projectId无该集群的相关权限");
         }
     }
 
@@ -150,7 +150,7 @@ public class LogicClusterPlugOperationHandler extends BaseWorkOrderHandler {
     }
 
     @Override
-    public List<AriusUserInfo> getApproverList(AbstractOrderDetail detail) {
+    public List<UserBriefVO> getApproverList(AbstractOrderDetail detail) {
         return getOPList();
     }
 

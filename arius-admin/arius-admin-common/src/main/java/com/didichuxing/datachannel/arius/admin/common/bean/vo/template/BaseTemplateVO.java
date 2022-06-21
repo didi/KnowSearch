@@ -61,7 +61,7 @@ public class BaseTemplateVO extends BaseVO {
     private String libraDepartment;
 
     @ApiModelProperty("索引应用ID")
-    private Integer appId;
+    private Integer projectId;
 
     @ApiModelProperty("责任人")
     private String responsible;
