@@ -94,7 +94,7 @@ public class CustomDataSource {
         Map<String, Object> contentObj = new HashMap<>();
         workOrderDTO.setContentObj(contentObj);
         workOrderDTO.setSubmitor(operator);
-        workOrderDTO.setSubmitorProjectid(projectId);
+        workOrderDTO.setSubmitorProjectId(projectId);
         workOrderDTO.setDescription("testtest");
         workOrderDTO.setType(type);
         return workOrderDTO;
