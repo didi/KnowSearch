@@ -41,7 +41,6 @@ import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.Mod
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
@@ -55,7 +54,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.template.logic.Index
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpClient;
 import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
-import com.didiglobal.logi.security.util.HttpRequestUtil;
+import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
@@ -117,11 +116,11 @@ class ClusterPhyManagerTest {
     @Mock
     private ClusterRegionService          mockClusterRegionService;
     @Mock
-    private ClusterContextManager         mockClusterContextManager;
+    private ClusterContextManager mockClusterContextManager;
     @Mock
-    private AppService                    mockAppService;
+    private ProjectService        mockAppService;
     @Mock
-    private OperateRecordService          mockOperateRecordService;
+    private OperateRecordService  mockOperateRecordService;
     @Mock
     private ESClusterNodeService          mockEsClusterNodeService;
     @Mock
@@ -662,7 +661,7 @@ class ClusterPhyManagerTest {
             .thenReturn(Result.buildFail(false));
 
         final Result<Boolean> result = clusterPhyManager.updatePhyClusterDynamicConfig(param,
-                HttpRequestUtil.getOperator(request));
+                "operator");
 
         assertEquals(expectedResult, result);
     }
@@ -670,7 +669,6 @@ class ClusterPhyManagerTest {
 
     @Test
     void testGetAppClusterPhyNames() {
-        when(mockAppService.isSuperApp(0)).thenReturn(true);
         when(mockClusterPhyService.listAllClusters()).thenReturn(clusterPhyList);
         assertEquals(Collections.singletonList(CLUSTER), clusterPhyManager.listClusterPhyNameByProjectId(0));
     }
@@ -850,7 +848,6 @@ class ClusterPhyManagerTest {
         Result<List<String>> rest = clusterPhyManager.getTemplateSameVersionClusterNamesByTemplateId(1, 37529);
         Assertions.assertTrue(rest.success());
 
-        when(mockAppService.isSuperApp(1)).thenReturn(true);
         when(mockClusterPhyService.listAllClusters()).thenReturn(clusterPhyList);
         when(mockIndexTemplateService.getLogicTemplateWithPhysicalsById(Mockito.any())).thenReturn(new IndexTemplateWithPhyTemplates(null));
         Assertions.assertEquals(Result.buildFail(String.format("the physicals of templateId[%s] is empty", 37529)).getMessage(),clusterPhyManager.getTemplateSameVersionClusterNamesByTemplateId(1, 37529).getMessage());
@@ -864,9 +861,7 @@ class ClusterPhyManagerTest {
     @Test
     public void testDeleteClusterExit() {
 
-        when(mockAppService.isSuperApp(1)).thenReturn(false);
         Assertions.assertEquals(Result.buildFail("无权限删除集群").getMessage(),clusterPhyManager.deleteClusterExit(CLUSTER, 1,"operator").getMessage());
-        when(mockAppService.isSuperApp(1)).thenReturn(true);
         when(mockClusterPhyService.getClusterByName(CLUSTER)).thenReturn(clusterPhy);
         when(mockClusterPhyService.getClusterById(0)).thenReturn(clusterPhy);
         when(mockClusterRoleHostService.getNodesByCluster(CLUSTER)).thenReturn(Collections.emptyList());

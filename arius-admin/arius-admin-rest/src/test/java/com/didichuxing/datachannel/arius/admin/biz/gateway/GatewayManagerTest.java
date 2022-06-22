@@ -173,8 +173,7 @@ public class GatewayManagerTest {
         // Setup
         final HttpServletRequest request = mockHttpServletRequest;
         final Result<List<GatewayESUserVO>> expectedResult = Result.buildSucc(Arrays.asList(
-                new GatewayESUserVO(0, "name", "verifyCode", 0, "cluster", 0, Arrays.asList("value"),
-                        Arrays.asList("value"), Arrays.asList("value"), "dataCenter", 0, 0, 0, 0)));
+                new GatewayESUserVO()));
         
         // Configure ProjectService.getProjectBriefList(...).
         final ProjectBriefVO projectBriefVO = new ProjectBriefVO();
@@ -238,7 +237,7 @@ public class GatewayManagerTest {
                 new IndexTemplateWithPhyTemplates(Arrays.asList(
                         new IndexTemplatePhy(0L, 0, "name", "expression", "cluster", "rack", 0, 0, 0, 0, 0, "config",
                                 0))));
-        when(mockIndexTemplateService.getTemplateWithPhysicalByDataCenter("dataCenter")).thenReturn(
+        when(mockIndexTemplateService.listTemplateWithPhysicalByDataCenter("dataCenter")).thenReturn(
                 indexTemplateWithPhyTemplates);
         
         // Configure TemplateLogicAliasesManager.listAlias(...).
