@@ -179,4 +179,12 @@ public interface ProjectExtendManager {
      * @return {@code Result<List<ProjectBriefVO>>}
      */
     Result<List<ProjectBriefExtendVO>> getProjectBriefByUserId(Integer userId);
+    
+    /**
+     * 用户列表按项目id列表
+     *
+     * @param projectId 项目id
+     * @return {@code Result<List<UserBriefVO>>}
+     */
+    Result<List<UserBriefVO>> listUserListByProjectId(Integer projectId);
 }

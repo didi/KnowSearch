@@ -5,6 +5,7 @@ import java.util.List;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.BaseEntity;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 
@@ -178,7 +179,8 @@ public class ClusterPhy extends BaseEntity implements Comparable<ClusterPhy> {
     private String                platformType;
 
     /**
-     * 集群资源类型(-1 未知 1 共享 2 独立 3 独享
+     * 集群资源类型(-1 未知 1 共享 2 独立 3 独享)
+     * @see ClusterResourceTypeEnum
      */
     private Integer               resourceType;
 

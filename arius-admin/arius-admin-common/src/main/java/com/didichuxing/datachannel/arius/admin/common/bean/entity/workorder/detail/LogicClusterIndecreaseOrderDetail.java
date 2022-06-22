@@ -15,7 +15,7 @@ public class LogicClusterIndecreaseOrderDetail extends AbstractOrderDetail {
     /**
      * 集群名称
      */
-    private String  name;
+    private String  logicClusterName;
 
     /**
      * 逻辑集群的id
