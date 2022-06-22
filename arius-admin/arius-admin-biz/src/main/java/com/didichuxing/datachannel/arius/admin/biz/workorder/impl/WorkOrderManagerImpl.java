@@ -364,11 +364,11 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
             return Result.buildParamIllegal("提交人非法");
         }
     
-        if (AriusObjUtils.isNull(workOrderDTO.getSubmitorProjectid())) {
+        if (AriusObjUtils.isNull(workOrderDTO.getSubmitorProjectId())) {
             return Result.buildParamIllegal("提交projectID为空");
         }
-        if (PROJECT_ID_TO_CREATE != workOrderDTO.getSubmitorProjectid() && !projectService.checkProjectExist(
-                workOrderDTO.getSubmitorProjectid())) {
+        if (PROJECT_ID_TO_CREATE != workOrderDTO.getSubmitorProjectId() && !projectService.checkProjectExist(
+                workOrderDTO.getSubmitorProjectId())) {
             return Result.buildNotExist("提交projectId不存在");
         }
 
