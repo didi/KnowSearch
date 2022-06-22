@@ -82,12 +82,15 @@ public interface WorkOrderManager {
      */
     Result<Void> processOrder(WorkOrderPO orderDO);
     
-    /**获取订单应用列表
-     * 获取工单申请列表
-     @param applicant 申请人
-     @param status 状态
-      * @return {@link Result}<{@link List}<{@link WorkOrderVO}>>
+    /**
+     * 获取订单应用列表 获取工单申请列表
+     *
+     * @param applicant 申请人
+     * @param status    状态
+     * @param projectId
+     * @return {@link Result}<{@link List}<{@link WorkOrderVO}>>
      */
+    Result<List<WorkOrderVO>> getOrderApplyList(String applicant, Integer status,Integer projectId);
     Result<List<WorkOrderVO>> getOrderApplyList(String applicant, Integer status);
     
     /**获取批准列表
