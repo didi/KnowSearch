@@ -102,9 +102,9 @@ public class PermissionInterceptor implements HandlerInterceptor {
      */
     private boolean hasNoInterceptor(HttpServletRequest request) {
 
-        //if (EnvUtil.isDev()) {
-        //    return Boolean.TRUE;
-        //}
+        if (EnvUtil.isDev()) {
+            return Boolean.TRUE;
+        }
 
         if (request.getServletPath().contains(SWAGGER)) {
             return Boolean.TRUE;
