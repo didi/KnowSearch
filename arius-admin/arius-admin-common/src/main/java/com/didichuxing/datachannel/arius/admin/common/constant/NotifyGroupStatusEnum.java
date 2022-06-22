@@ -4,6 +4,7 @@ package com.didichuxing.datachannel.arius.admin.common.constant;
  * @author fitz
  * @date 2021/1/15 11:42 上午
  */
+@Deprecated
 public enum NotifyGroupStatusEnum {
     DELETE(-1,"删除"),
     DISABLE(0,"停用"),

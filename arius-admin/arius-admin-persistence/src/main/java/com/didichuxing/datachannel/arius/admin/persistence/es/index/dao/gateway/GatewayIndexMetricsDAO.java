@@ -42,40 +42,40 @@ public class GatewayIndexMetricsDAO extends BaseESDAO {
     /**
      * 获取各索引写入. topNu
      */
-    public List<VariousLineChartMetrics> getWriteIndex(List<String> metricsTypes, Long startTime, Long endTime, Integer appId, Integer topNu) {
+    public List<VariousLineChartMetrics> getWriteIndex(List<String> metricsTypes, Long startTime, Long endTime, Integer projectId, Integer topNu) {
         String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTime, endTime);
         String interval = MetricsUtils.getInterval((endTime - startTime));
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_INDEX_WRITE, appId, startTime, endTime,interval, startTime, endTime);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_INDEX_WRITE, projectId, startTime, endTime,interval, startTime, endTime);
         return gatewayClient.performRequest(realIndexName, TYPE, dsl, (ESQueryResponse response) -> fetchFieldAggMetrics(response, metricsTypes, topNu, interval), 3);
     }
 
     /**
      * 获取某个索引写入 by templateName
      */
-    public List<VariousLineChartMetrics> getWriteIndexByTemplateName(List<String> metricsTypes, Long startTime, Long endTime, Integer appId, String templateName) {
+    public List<VariousLineChartMetrics> getWriteIndexByTemplateName(List<String> metricsTypes, Long startTime, Long endTime, Integer projectId, String templateName) {
         String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTime, endTime);
         String interval = MetricsUtils.getInterval((endTime - startTime));
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_INDEX_WRITE_BY_TEMPLATE_NAME, appId, templateName, startTime, endTime, interval, startTime, endTime);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_INDEX_WRITE_BY_TEMPLATE_NAME, projectId, templateName, startTime, endTime, interval, startTime, endTime);
         return gatewayClient.performRequest(realIndexName, TYPE, dsl, (ESQueryResponse response) -> fetchFieldByTemplateAggMetrics(response, metricsTypes, templateName, interval), 3);
     }
 
     /**
      * 获取各索引查询. topNu
      */
-    public List<VariousLineChartMetrics> getSearchIndex(List<String> metricsTypes, Long startTime, Long endTime, Integer appId, Integer topNu) {
+    public List<VariousLineChartMetrics> getSearchIndex(List<String> metricsTypes, Long startTime, Long endTime, Integer projectId, Integer topNu) {
         String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTime, endTime);
         String interval = MetricsUtils.getInterval((endTime - startTime));
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_INDEX_SEARCH, appId, startTime, endTime,interval, startTime, endTime);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_INDEX_SEARCH, projectId, startTime, endTime,interval, startTime, endTime);
         return gatewayClient.performRequest(realIndexName, TYPE, dsl, (ESQueryResponse response) -> fetchFieldAggMetrics(response, metricsTypes, topNu, interval), 3);
     }
 
     /**
      * 获取某个索引查询 by templateName
      */
-    public List<VariousLineChartMetrics> getSearchIndexByTemplateName(List<String> metricsTypes, Long startTime, Long endTime, Integer appId, String templateName) {
+    public List<VariousLineChartMetrics> getSearchIndexByTemplateName(List<String> metricsTypes, Long startTime, Long endTime, Integer projectId, String templateName) {
         String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTime, endTime);
         String interval = MetricsUtils.getInterval((endTime - startTime));
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_INDEX_SEARCH_BY_TEMPLATE_NAME, appId, templateName, startTime, endTime, interval, startTime, endTime);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_INDEX_SEARCH_BY_TEMPLATE_NAME, projectId, templateName, startTime, endTime, interval, startTime, endTime);
         return gatewayClient.performRequest(realIndexName, TYPE, dsl, (ESQueryResponse response) -> fetchFieldByTemplateAggMetrics(response, metricsTypes, templateName, interval), 3);
     }
 

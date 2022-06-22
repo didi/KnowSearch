@@ -27,7 +27,7 @@ public class IndexTemplateDTO extends PageDTO {
     private String                    name;
 
     @ApiModelProperty("索引应用ID")
-    private Integer                   appId;
+    private Integer projectId;
 
     @ApiModelProperty("数据类型（0:系统 1:日志；2:上报；3:rds数据；4:离线导入数据")
     private Integer                   dataType;
@@ -44,11 +44,7 @@ public class IndexTemplateDTO extends PageDTO {
     @ApiModelProperty("热数据保存天数, 单位天")
     private Integer                   hotTime;
 
-    @ApiModelProperty("成本部门ID")
-    private String                    libraDepartmentId;
-
-    @ApiModelProperty("成本部门名称")
-    private String                    libraDepartment;
+  
 
     @ApiModelProperty("责任人")
     private String                    responsible;

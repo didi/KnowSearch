@@ -1,14 +1,13 @@
 package com.didichuxing.datachannel.arius.admin.core.service.common;
 
-import java.util.Date;
-import java.util.List;
-
+import com.didichuxing.datachannel.arius.admin.common.Tuple;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.oprecord.OperateRecordDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.operaterecord.OperateRecordVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord.OperateRecord;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import java.util.List;
 
 /**
  * 操作记录
@@ -19,26 +18,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
  */
 public interface OperateRecordService {
 
-    /**
-     * 根据指定的查询条件查询
-     *
-     * @param condt 查询条件dto
-     * @return 操作记录列表
-     */
-    Result<List<OperateRecordVO>> list(OperateRecordDTO condt);
 
-    /**
-     * 插入一条操作记录
-     *
-     * @param moduleId  模块id  比如索引模板、应用管理、DSL审核
-     * @param operateId 操作行为  OperationEnum
-     * @param bizId     业务id  例如索引模板id、应用id 或者工单id
-     * @param content   操作详情
-     * @param operator  操作人
-     * @return 成功 true   失败 false
-     */
-    Result<Void> save(int moduleId, int operateId, String bizId, String content, String operator);
 
+    Result<Void> save(OperateRecord operateRecord);
     /**
      * 插入一条操作记录
      *
@@ -59,24 +41,17 @@ public interface OperateRecordService {
      */
     Result<Void> save(OperateRecordDTO param);
 
-    /**
-     * 查询某个最新的操作记录
-     *
-     * @param moduleId  模块id
-     * @param operateId 操作行为
-     * @param bizId     业务id
-     * @param beginDate 起始时间 时间范围是:[beginDate, beginDate + 24h]
-     * @return 如果没有一条 返回 null
-     */
-    OperateRecord getLastRecord(int moduleId, int operateId, String bizId, Date beginDate);
 
-    /**
-     * 根据指定的查询条件批量查询
-     *
-     * @param bizId 业务ID
-     * @param moduleIds 模块ID集合
-     * @return 操作记录列表
-     */
-    Result<List<OperateRecordVO>> multiList(String bizId, List<Integer> moduleIds);
 
+
+    
+    /**
+     * 动态分页查询
+     *
+     * @param pageDTO 页面dto
+     * @return {@code Object}
+     */
+    Tuple<Long,List<OperateRecordVO>> pagingGetOperateRecordByCondition(OperateRecordDTO pageDTO);
+    
+    OperateRecordVO getById(Integer id);
 }

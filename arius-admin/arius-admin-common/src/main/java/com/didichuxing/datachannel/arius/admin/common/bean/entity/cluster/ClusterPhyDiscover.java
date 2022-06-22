@@ -15,6 +15,7 @@ import java.util.Date;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Deprecated
 public class ClusterPhyDiscover implements Serializable {
     /**
      * 物理集群名称

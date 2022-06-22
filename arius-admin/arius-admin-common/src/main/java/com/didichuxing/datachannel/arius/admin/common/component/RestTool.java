@@ -25,6 +25,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.AriusJSON;
  * @version $Id: RestHelper.java, v 0.1 2018年09月19日 17:31 jinbinbin Exp $
  */
 @Component
+@Deprecated
 public class RestTool {
 
     private static final ILog LOGGER  = LogFactory.getLog(RestTool.class);

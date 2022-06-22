@@ -47,107 +47,107 @@ public class GatewayMetricsService {
         return gatewayOverviewMetricsDAO.getAggWriteMetricsByRange(metricsTypes, startTime, endTime);
     }
 
-    public List<VariousLineChartMetrics> getGatewayIndexWriteMetrics(List<String> metricsTypes, Long startTime, Long endTime, Integer appId, Integer topNu) {
-        return gatewayIndexMetricsDAO.getWriteIndex(metricsTypes, startTime, endTime, appId, topNu);
+    public List<VariousLineChartMetrics> getGatewayIndexWriteMetrics(List<String> metricsTypes, Long startTime, Long endTime, Integer projectId, Integer topNu) {
+        return gatewayIndexMetricsDAO.getWriteIndex(metricsTypes, startTime, endTime, projectId, topNu);
     }
 
-    public List<VariousLineChartMetrics> getGatewayIndexSearchMetrics(List<String> metricsTypes, Long startTime, Long endTime, Integer appId, Integer topNu) {
-        return gatewayIndexMetricsDAO.getSearchIndex(metricsTypes, startTime, endTime, appId, topNu);
+    public List<VariousLineChartMetrics> getGatewayIndexSearchMetrics(List<String> metricsTypes, Long startTime, Long endTime, Integer projectId, Integer topNu) {
+        return gatewayIndexMetricsDAO.getSearchIndex(metricsTypes, startTime, endTime, projectId, topNu);
     }
 
-    public List<VariousLineChartMetrics> getGatewayIndexWriteMetrics(List<String> metricsTypes, Long startTime, Long endTime, Integer appId, String templateName) {
-        return gatewayIndexMetricsDAO.getWriteIndexByTemplateName(metricsTypes, startTime, endTime, appId, templateName);
+    public List<VariousLineChartMetrics> getGatewayIndexWriteMetrics(List<String> metricsTypes, Long startTime, Long endTime, Integer projectId, String templateName) {
+        return gatewayIndexMetricsDAO.getWriteIndexByTemplateName(metricsTypes, startTime, endTime, projectId, templateName);
     }
 
-    public List<VariousLineChartMetrics> getGatewayIndexSearchMetrics(List<String> metricsTypes, Long startTime, Long endTime, Integer appId, String templateName) {
-        return gatewayIndexMetricsDAO.getSearchIndexByTemplateName(metricsTypes, startTime, endTime, appId, templateName);
+    public List<VariousLineChartMetrics> getGatewayIndexSearchMetrics(List<String> metricsTypes, Long startTime, Long endTime, Integer projectId, String templateName) {
+        return gatewayIndexMetricsDAO.getSearchIndexByTemplateName(metricsTypes, startTime, endTime, projectId, templateName);
     }
 
-    public VariousLineChartMetrics getGatewayNodeWriteMetrics(Long startTime, Long endTime, Integer appId, Integer topNu) {
-        return gatewayNodeMetricsDAO.getWriteGatewayNode(startTime, endTime, appId, topNu);
+    public VariousLineChartMetrics getGatewayNodeWriteMetrics(Long startTime, Long endTime, Integer projectId, Integer topNu) {
+        return gatewayNodeMetricsDAO.getWriteGatewayNode(startTime, endTime, projectId, topNu);
     }
 
-    public VariousLineChartMetrics getGatewayNodeWriteMetrics(Long startTime, Long endTime, Integer appId, String nodeIp) {
-        return gatewayNodeMetricsDAO.getWriteGatewayNodeByIp(startTime, endTime, appId, nodeIp);
+    public VariousLineChartMetrics getGatewayNodeWriteMetrics(Long startTime, Long endTime, Integer projectId, String nodeIp) {
+        return gatewayNodeMetricsDAO.getWriteGatewayNodeByIp(startTime, endTime, projectId, nodeIp);
     }
 
-    public VariousLineChartMetrics getGatewayNodeDSLLenMetrics(Long startTime, Long endTime, Integer appId, String nodeIp) {
-        return gatewayNodeMetricsDAO.getWriteGatewayDSLLenByIp(startTime, endTime, appId, nodeIp);
+    public VariousLineChartMetrics getGatewayNodeDSLLenMetrics(Long startTime, Long endTime, Integer projectId, String nodeIp) {
+        return gatewayNodeMetricsDAO.getWriteGatewayDSLLenByIp(startTime, endTime, projectId, nodeIp);
     }
 
-    public VariousLineChartMetrics getGatewayNodeDSLLenMetrics(Long startTime, Long endTime, Integer appId, Integer topNu) {
-        return gatewayNodeMetricsDAO.getWriteGatewayDSLLen(startTime, endTime, appId, topNu);
+    public VariousLineChartMetrics getGatewayNodeDSLLenMetrics(Long startTime, Long endTime, Integer projectId, Integer topNu) {
+        return gatewayNodeMetricsDAO.getWriteGatewayDSLLen(startTime, endTime, projectId, topNu);
     }
 
-    public VariousLineChartMetrics getGatewayNodeMetrics(Long startTime, Long endTime, Integer appId, Integer topNu) {
-        return gatewayNodeMetricsDAO.getAggFieldByRange(GatewayMetricsTypeEnum.QUERY_GATEWAY_NODE,  startTime, endTime, appId, topNu);
+    public VariousLineChartMetrics getGatewayNodeMetrics(Long startTime, Long endTime, Integer projectId, Integer topNu) {
+        return gatewayNodeMetricsDAO.getAggFieldByRange(GatewayMetricsTypeEnum.QUERY_GATEWAY_NODE,  startTime, endTime, projectId, topNu);
     }
 
-    public VariousLineChartMetrics getGatewayNodeMetrics(Long startTime, Long endTime, Integer appId, String nodeIp) {
-        return gatewayNodeMetricsDAO.getAggFieldByRange(GatewayMetricsTypeEnum.QUERY_GATEWAY_NODE, startTime, endTime, appId, nodeIp);
+    public VariousLineChartMetrics getGatewayNodeMetrics(Long startTime, Long endTime, Integer projectId, String nodeIp) {
+        return gatewayNodeMetricsDAO.getAggFieldByRange(GatewayMetricsTypeEnum.QUERY_GATEWAY_NODE, startTime, endTime, projectId, nodeIp);
     }
 
-    public VariousLineChartMetrics getClientNodeWriteMetrics(Long startTime, Long endTime, Integer appId, String gatewayNodeIp, String clientNodeIp) {
-        return gatewayNodeMetricsDAO.getClientNodeWriteByIp(startTime, endTime, appId, gatewayNodeIp, clientNodeIp);
+    public VariousLineChartMetrics getClientNodeWriteMetrics(Long startTime, Long endTime, Integer projectId, String gatewayNodeIp, String clientNodeIp) {
+        return gatewayNodeMetricsDAO.getClientNodeWriteByIp(startTime, endTime, projectId, gatewayNodeIp, clientNodeIp);
     }
 
-    public VariousLineChartMetrics getClientNodeWriteMetrics(Long startTime, Long endTime, Integer appId, Integer topNu, String gatewayNodeIp) {
-        return gatewayNodeMetricsDAO.getClientNodeWrite(startTime, endTime, appId, topNu, gatewayNodeIp);
+    public VariousLineChartMetrics getClientNodeWriteMetrics(Long startTime, Long endTime, Integer projectId, Integer topNu, String gatewayNodeIp) {
+        return gatewayNodeMetricsDAO.getClientNodeWrite(startTime, endTime, projectId, topNu, gatewayNodeIp);
     }
 
-    public VariousLineChartMetrics getClientNodeDSLLENMetrics(Long startTime, Long endTime, Integer appId, Integer topNu, String gatewayNodeIp) {
-        return gatewayNodeMetricsDAO.getClientNodeDSLLENByIp(startTime, endTime, appId, topNu, gatewayNodeIp);
+    public VariousLineChartMetrics getClientNodeDSLLENMetrics(Long startTime, Long endTime, Integer projectId, Integer topNu, String gatewayNodeIp) {
+        return gatewayNodeMetricsDAO.getClientNodeDSLLENByIp(startTime, endTime, projectId, topNu, gatewayNodeIp);
     }
 
-    public VariousLineChartMetrics getClientNodeDSLLENMetrics(Long startTime, Long endTime, Integer appId, String gatewayNodeIp, String clientNodeIp) {
-        return gatewayNodeMetricsDAO.getClientNodeDSLLENByIp(startTime, endTime, appId, gatewayNodeIp, clientNodeIp);
+    public VariousLineChartMetrics getClientNodeDSLLENMetrics(Long startTime, Long endTime, Integer projectId, String gatewayNodeIp, String clientNodeIp) {
+        return gatewayNodeMetricsDAO.getClientNodeDSLLENByIp(startTime, endTime, projectId, gatewayNodeIp, clientNodeIp);
     }
 
-    public VariousLineChartMetrics getClientNodeMetrics(Long startTime, Long endTime, Integer appId, Integer topNu, String gatewayNodeIp) {
-        return gatewayNodeMetricsDAO.getClientNodeAggFieldByRange(GatewayMetricsTypeEnum.QUERY_CLIENT_NODE, startTime, endTime, appId, topNu, gatewayNodeIp);
+    public VariousLineChartMetrics getClientNodeMetrics(Long startTime, Long endTime, Integer projectId, Integer topNu, String gatewayNodeIp) {
+        return gatewayNodeMetricsDAO.getClientNodeAggFieldByRange(GatewayMetricsTypeEnum.QUERY_CLIENT_NODE, startTime, endTime, projectId, topNu, gatewayNodeIp);
     }
 
-    public VariousLineChartMetrics getClientNodeMetrics(Long startTime, Long endTime, Integer appId, String gatewayNodeIp, String clientNodeIp) {
-        return gatewayNodeMetricsDAO.getClientNodeAggFieldByRange(GatewayMetricsTypeEnum.QUERY_CLIENT_NODE, startTime, endTime, appId, gatewayNodeIp, clientNodeIp);
+    public VariousLineChartMetrics getClientNodeMetrics(Long startTime, Long endTime, Integer projectId, String gatewayNodeIp, String clientNodeIp) {
+        return gatewayNodeMetricsDAO.getClientNodeAggFieldByRange(GatewayMetricsTypeEnum.QUERY_CLIENT_NODE, startTime, endTime, projectId, gatewayNodeIp, clientNodeIp);
     }
 
     public List<VariousLineChartMetrics> getAppCommonMetrics(Long startTime, Long endTime, List<String> metricsTypes, Integer topNu) {
         return gatewayAppMetricsDAO.getAggFieldByRange(startTime, endTime, metricsTypes, topNu);
     }
 
-    public List<VariousLineChartMetrics> getAppCommonMetricsByAppId(Long startTime, Long endTime, List<String> metricsTypes, String appId) {
-        return gatewayAppMetricsDAO.getAggFieldByRange(startTime, endTime, metricsTypes, appId);
+    public List<VariousLineChartMetrics> getAppCommonMetricsByProjectId(Long startTime, Long endTime, List<String> metricsTypes, String projectId) {
+        return gatewayAppMetricsDAO.getAggFieldByRange(startTime, endTime, metricsTypes, projectId);
     }
 
     public VariousLineChartMetrics getAppCountMetrics(Long startTime, Long endTime, Integer topNu) {
-        return gatewayAppMetricsDAO.getAggAppCountByRange(startTime, endTime,  topNu);
+        return gatewayAppMetricsDAO.getProjectCountByRange(startTime, endTime,  topNu);
     }
 
-    public VariousLineChartMetrics getAppCountMetricsByAppId(Long startTime, Long endTime, String appId) {
-        return gatewayAppMetricsDAO.getAggAppCountByRange(startTime, endTime, appId);
+    public VariousLineChartMetrics getAppCountMetricsByProjectId(Long startTime, Long endTime, String projectId) {
+        return gatewayAppMetricsDAO.getProjectCountByRange(startTime, endTime, projectId);
     }
 
-    public VariousLineChartMetrics getDslCountMetrics(Long startTime, Long endTime, Integer topNu, Integer appId) {
-        return gatewayDslMetricsDAO.getDslCountByRange(startTime, endTime, topNu, appId);
+    public VariousLineChartMetrics getDslCountMetrics(Long startTime, Long endTime, Integer topNu, Integer projectId) {
+        return gatewayDslMetricsDAO.getDslCountByRange(startTime, endTime, topNu, projectId);
     }
 
-    public VariousLineChartMetrics getDslCountMetricsByMd5(Long startTime, Long endTime, String dslMd5, Integer appId) {
-        return gatewayDslMetricsDAO.getDslCountByRangeAndMd5(startTime, endTime, dslMd5, appId);
+    public VariousLineChartMetrics getDslCountMetricsByMd5(Long startTime, Long endTime, String dslMd5, Integer projectId) {
+        return gatewayDslMetricsDAO.getDslCountByRangeAndMd5(startTime, endTime, dslMd5, projectId);
     }
 
-    public VariousLineChartMetrics getDslTotalCostMetrics(Long startTime, Long endTime, Integer topNu, Integer appId) {
-        return gatewayDslMetricsDAO.getDslTotalCostByRange(startTime, endTime, topNu, appId);
+    public VariousLineChartMetrics getDslTotalCostMetrics(Long startTime, Long endTime, Integer topNu, Integer projectId) {
+        return gatewayDslMetricsDAO.getDslTotalCostByRange(startTime, endTime, topNu, projectId);
     }
 
-    public VariousLineChartMetrics getDslTotalCostMetricsByMd5(Long startTime, Long endTime, String dslMd5, Integer appId) {
-        return gatewayDslMetricsDAO.getDslTotalCostByRangeAndMd5(startTime, endTime, dslMd5, appId);
+    public VariousLineChartMetrics getDslTotalCostMetricsByMd5(Long startTime, Long endTime, String dslMd5, Integer projectId) {
+        return gatewayDslMetricsDAO.getDslTotalCostByRangeAndMd5(startTime, endTime, dslMd5, projectId);
     }
 
-    public List<String> getDslMd5List(Long startTime, Long endTime, Integer appId) {
-        return gatewayDslMetricsDAO.getDslMd5List(startTime, endTime, appId);
+    public List<String> getDslMd5List(Long startTime, Long endTime, Integer projectId) {
+        return gatewayDslMetricsDAO.getDslMd5List(startTime, endTime, projectId);
     }
 
-    public List<String> getEsClientNodeIpListByGatewayNode(String gatewayNode, Long startTime, Long endTime, Integer appId) {
-        return gatewayNodeMetricsDAO.getEsClientNodeIpListByGatewayNode(gatewayNode, startTime, endTime, appId);
+    public List<String> getEsClientNodeIpListByGatewayNode(String gatewayNode, Long startTime, Long endTime, Integer projectId) {
+        return gatewayNodeMetricsDAO.getEsClientNodeIpListByGatewayNode(gatewayNode, startTime, endTime, projectId);
     }
 }

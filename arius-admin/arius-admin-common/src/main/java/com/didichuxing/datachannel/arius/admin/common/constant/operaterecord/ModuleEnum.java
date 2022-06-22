@@ -19,6 +19,7 @@ public enum ModuleEnum {
                         TEMPLATE(1, "模板"),
 
                         APP(2, "应用"),
+                        ES_USER(27, "es user"),
 
                         WORK_ORDER(3, "工单"),
 

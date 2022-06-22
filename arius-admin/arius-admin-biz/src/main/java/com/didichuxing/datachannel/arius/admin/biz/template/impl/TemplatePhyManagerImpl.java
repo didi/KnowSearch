@@ -1,23 +1,18 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.impl;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.MILLIS_PER_DAY;
-import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.*;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_COMMON_GROUP;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.CLUSTERS_INDEX_EXPIRE_DELETE_AHEAD;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.INDEX_OPERATE_AHEAD_SECONDS;
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.TEMPLATE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.COPY;
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.EDIT;
 import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum.MASTER;
 import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum.SLAVE;
 import static com.didichuxing.datachannel.arius.admin.common.util.IndexNameFactory.genIndexNameClear;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.*;
-
-import java.util.*;
-import java.util.stream.Collectors;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.INDEX_SHARD_NUM;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.SINGLE_TYPE;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.TEMPLATE_INDEX_INCLUDE_NODE_NAME;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -39,7 +34,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplatePhyVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.IndexTemplatePhysicalVO;
-import com.didichuxing.datachannel.arius.admin.common.constant.app.AppTemplateAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectTemplateAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TemplateOperateRecordEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplatePhysicalStatusEnum;
@@ -48,10 +43,14 @@ import com.didichuxing.datachannel.arius.admin.common.event.template.PhysicalTem
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.mapping.AriusIndexTemplateSetting;
-import com.didichuxing.datachannel.arius.admin.common.util.*;
+import com.didichuxing.datachannel.arius.admin.common.util.AriusDateUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.AriusIndexMappingConfigUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.IndexNameFactory;
+import com.didichuxing.datachannel.arius.admin.common.util.TemplateUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppLogicTemplateAuthService;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
+import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectLogicTemplateAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
@@ -65,10 +64,27 @@ import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingC
 import com.didiglobal.logi.elasticsearch.client.response.setting.template.TemplateConfig;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
+import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
 
 @Component
 public class TemplatePhyManagerImpl implements TemplatePhyManager {
@@ -121,10 +137,10 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
     private AriusConfigInfoService      ariusConfigInfoService;
 
     @Autowired
-    private AppLogicTemplateAuthService appLogicTemplateAuthService;
+    private ProjectLogicTemplateAuthService projectLogicTemplateAuthService;
 
     @Autowired
-    private AppService                  appService;
+    private ProjectService projectService;
 
     @Override
     public boolean checkMeta() {
@@ -529,18 +545,18 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
     }
 
     @Override
-    public List<ConsoleTemplatePhyVO> getConsoleTemplatePhyVOS(IndexTemplatePhyDTO param, Integer appId) {
+    public List<ConsoleTemplatePhyVO> getConsoleTemplatePhyVOS(IndexTemplatePhyDTO param, Integer projectId) {
         List<ConsoleTemplatePhyVO> consoleTemplatePhyVOS = ConvertUtil.list2List(indexTemplatePhyService.getByCondt(param),
             ConsoleTemplatePhyVO.class);
 
-        buildConsoleTemplatePhyVO(consoleTemplatePhyVOS, appId);
+        buildConsoleTemplatePhyVO(consoleTemplatePhyVOS, projectId);
 
         return consoleTemplatePhyVOS;
     }
 
     @Override
-    public List<String> getTemplatePhyNames(Integer appId) {
-        return getConsoleTemplatePhyVOS(null, appId).parallelStream().map(ConsoleTemplatePhyVO::getName)
+    public List<String> getTemplatePhyNames(Integer projectId) {
+        return getConsoleTemplatePhyVOS(null, projectId).parallelStream().map(ConsoleTemplatePhyVO::getName)
             .collect(Collectors.toList());
     }
 
@@ -776,9 +792,9 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         return  (shardNum != null && shardNum > 0);
     }
 
-    private void buildConsoleTemplatePhyVO(List<ConsoleTemplatePhyVO> params, Integer currentAppId) {
+    private void buildConsoleTemplatePhyVO(List<ConsoleTemplatePhyVO> params, Integer currentProjectId) {
         
-        Map<Integer, String> appId2AppNameMap = Maps.newHashMap();
+        Map<Integer, String> projectId2ProjectNameMap = Maps.newHashMap();
 
         for (ConsoleTemplatePhyVO consoleTemplatePhyVO : params) {
 
@@ -790,24 +806,28 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
                 continue;
             }
 
-            handleIndexTemplateLogic(currentAppId, appId2AppNameMap, consoleTemplatePhyVO, logicTemplate);
+            handleIndexTemplateLogic(currentProjectId, projectId2ProjectNameMap, consoleTemplatePhyVO, logicTemplate);
 
         }
     }
 
-    private void handleIndexTemplateLogic(Integer currentAppId, Map<Integer, String> appId2AppNameMap, ConsoleTemplatePhyVO consoleTemplatePhyVO, IndexTemplate logicTemplate) {
+    private void handleIndexTemplateLogic(Integer currentProjectId, Map<Integer, String> projectId2ProjectNameMap, ConsoleTemplatePhyVO consoleTemplatePhyVO, IndexTemplate logicTemplate) {
         //设置归属项目信息
-        Integer appIdFromLogicTemplate = logicTemplate.getAppId();
-        if (!AriusObjUtils.isNull(appIdFromLogicTemplate)) {
-            consoleTemplatePhyVO.setAppId(appIdFromLogicTemplate);
+        Integer projectIdFromLogicTemplate = logicTemplate.getProjectId();
+        if (!AriusObjUtils.isNull(projectIdFromLogicTemplate)) {
+            consoleTemplatePhyVO.setProjectId(projectIdFromLogicTemplate);
 
-            if (appId2AppNameMap.containsKey(appIdFromLogicTemplate)) {
-                consoleTemplatePhyVO.setAppName(appId2AppNameMap.get(logicTemplate.getAppId()));
+            if (projectId2ProjectNameMap.containsKey(projectIdFromLogicTemplate)) {
+                consoleTemplatePhyVO.setProjectName(projectId2ProjectNameMap.get(logicTemplate.getProjectId()));
             } else {
-                String appName = appService.getAppName(logicTemplate.getAppId());
-                if (!AriusObjUtils.isNull(appName)) {
-                    consoleTemplatePhyVO.setAppName(appName);
-                    appId2AppNameMap.put(appIdFromLogicTemplate, appName);
+                String projectName =
+                        Optional.ofNullable(projectService.getProjectBriefByProjectId(logicTemplate.getProjectId()))
+                                .map(ProjectBriefVO::getProjectName)
+                                .orElse(null);
+        
+                if (!AriusObjUtils.isNull(projectName)) {
+                    consoleTemplatePhyVO.setProjectName(projectName);
+                    projectId2ProjectNameMap.put(projectIdFromLogicTemplate, projectName);
                 }
             }
         }
@@ -819,15 +839,15 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         consoleTemplatePhyVO.setMemo(logicTemplate.getDesc());
 
         //设置权限
-        if (AriusObjUtils.isNull(currentAppId)) {
-            consoleTemplatePhyVO.setAuthType(AppTemplateAuthEnum.NO_PERMISSION.getCode());
+        if (AriusObjUtils.isNull(currentProjectId)) {
+            consoleTemplatePhyVO.setAuthType(ProjectTemplateAuthEnum.NO_PERMISSION.getCode());
             return;
         }
-        if (currentAppId.equals(appIdFromLogicTemplate)) {
-            consoleTemplatePhyVO.setAuthType(AppTemplateAuthEnum.OWN.getCode());
+        if (currentProjectId.equals(projectIdFromLogicTemplate)) {
+            consoleTemplatePhyVO.setAuthType(ProjectTemplateAuthEnum.OWN.getCode());
         } else {
-            AppTemplateAuthEnum authEnum = appLogicTemplateAuthService.getAuthEnumByAppIdAndLogicId(currentAppId,
-                    appIdFromLogicTemplate);
+            ProjectTemplateAuthEnum authEnum = projectLogicTemplateAuthService.getAuthEnumByProjectIdAndLogicId(currentProjectId,
+                    projectIdFromLogicTemplate);
             consoleTemplatePhyVO.setAuthType(authEnum.getCode());
         }
     }

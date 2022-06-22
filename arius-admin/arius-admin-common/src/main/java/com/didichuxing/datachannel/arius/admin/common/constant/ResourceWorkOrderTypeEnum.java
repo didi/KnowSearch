@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.constant;
 
+@Deprecated
 public enum ResourceWorkOrderTypeEnum {
     CREATE(1,   "新建"),
     INCREASE(2, "扩缩容"),

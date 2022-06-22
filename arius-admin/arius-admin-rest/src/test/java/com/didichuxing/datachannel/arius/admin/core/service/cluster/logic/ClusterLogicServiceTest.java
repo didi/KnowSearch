@@ -1,20 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.core.service.cluster.logic;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.test.annotation.Rollback;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.LogicResourceConfig;
@@ -29,16 +14,29 @@ import com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESMachineNorms
 import com.didichuxing.datachannel.arius.admin.common.bean.po.esplugin.PluginPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
+import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESMachineNormsService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESPluginService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
-import com.didichuxing.datachannel.arius.admin.core.service.extend.employee.EmployeeService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.resource.LogicClusterDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.resource.PhyClusterDAO;
 import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
+import com.didiglobal.logi.security.service.ProjectService;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.test.annotation.Rollback;
+import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
 @Rollback
@@ -47,11 +45,14 @@ public class ClusterLogicServiceTest extends AriusAdminApplicationTest {
     @Autowired
     private LogicClusterDAO logicClusterDAO;
 
-    @MockBean
-    private AppService appService;
+    @SpyBean
+    private ClusterRegionService rackService;
 
     @MockBean
-    private EmployeeService employeeService;
+    private ProjectService projectService;
+
+    @MockBean
+    private RoleTool roleTool;
 
     @MockBean
     private IndexTemplatePhyService indexTemplatePhyService;
@@ -78,8 +79,8 @@ public class ClusterLogicServiceTest extends AriusAdminApplicationTest {
 
     @BeforeEach
     public void mockRules() {
-        Mockito.when(appService.isAppExists(Mockito.anyInt())).thenReturn(true);
-        Mockito.when(employeeService.checkUsers(Mockito.anyString())).thenReturn(Result.buildSucc());
+        Mockito.when(projectService.checkProjectExist(Mockito.anyInt())).thenReturn(true);
+        Mockito.when(roleTool.isAdmin(Mockito.anyString())).thenReturn(true);
     }
 
     @Test
@@ -106,20 +107,18 @@ public class ClusterLogicServiceTest extends AriusAdminApplicationTest {
     @Test
     public void createLogicClusterTest() {
         ESLogicClusterDTO esLogicClusterDTO = CustomDataSource.esLogicClusterDTOFactory();
-        Mockito.when(appService.isAppExists(Mockito.anyInt())).thenReturn(false);
+        Mockito.when(projectService.checkProjectExist(Mockito.anyInt())).thenReturn(false);
         Assertions.assertEquals(Result.buildParamIllegal("应用ID非法").getMessage(),
                 clusterLogicService.createClusterLogic(esLogicClusterDTO).getMessage());
-        Mockito.when(appService.isAppExists(Mockito.anyInt())).thenReturn(true);
-        Mockito.when(employeeService.checkUsers(Mockito.anyString())).thenReturn(Result.buildFail());
-        Assertions.assertEquals(Result.buildParamIllegal("责任人非法").getMessage(),
-                clusterLogicService.createClusterLogic(esLogicClusterDTO).getMessage());
-        Mockito.when(employeeService.checkUsers(Mockito.anyString())).thenReturn(Result.buildSucc());
+        Mockito.when(projectService.checkProjectExist(Mockito.anyInt())).thenReturn(true);
+    
         Assertions.assertEquals(Result.buildParamIllegal("逻辑集群信息为空").getMessage(),
                 clusterLogicService.createClusterLogic(null).getMessage());
         esLogicClusterDTO.setResponsible("");
-        Assertions.assertEquals(Result.buildParamIllegal("责任人为空").getMessage(),
+        Assertions.assertEquals(Result.buildParamIllegal("责任人非法").getMessage(),
                 clusterLogicService.createClusterLogic(esLogicClusterDTO).getMessage());
-        esLogicClusterDTO.setAppId(null);
+        esLogicClusterDTO.setProjectId(null);
+        esLogicClusterDTO.setResponsible("afdsa");
         Assertions.assertEquals(Result.buildParamIllegal("应用ID为空").getMessage(),
                 clusterLogicService.createClusterLogic(esLogicClusterDTO).getMessage());
         esLogicClusterDTO.setName("");
@@ -183,7 +182,7 @@ public class ClusterLogicServiceTest extends AriusAdminApplicationTest {
         ESLogicClusterDTO esLogicClusterDTO = CustomDataSource.esLogicClusterDTOFactory();
         Long id = clusterLogicService.createClusterLogic(esLogicClusterDTO).getData();
         Assertions.assertTrue(
-                clusterLogicService.getOwnedClusterLogicListByAppId(esLogicClusterDTO.getAppId()).stream().anyMatch(esClusterLogic -> esClusterLogic.getId().equals(id)));
+                clusterLogicService.getOwnedClusterLogicListByProjectId(esLogicClusterDTO.getProjectId()).stream().anyMatch(esClusterLogic -> esClusterLogic.getId().equals(id)));
     }
 
     @Test
@@ -267,10 +266,10 @@ public class ClusterLogicServiceTest extends AriusAdminApplicationTest {
         ESLogicClusterDTO esLogicClusterDTO = CustomDataSource.esLogicClusterDTOFactory();
         Long id = clusterLogicService.createClusterLogic(esLogicClusterDTO).getData();
         esLogicClusterDTO.setId(id);
-        Integer targetAppId = 1234;
+        Integer targetProjectId = 1234;
         String targetResponsible = "test";
         Assertions.assertTrue(clusterLogicService
-                .transferClusterLogic(id, targetAppId, targetResponsible, OPERATOR).success());
-        Assertions.assertEquals(targetAppId, logicClusterDAO.getById(id).getAppId());
+                .transferClusterLogic(id, targetProjectId, targetResponsible, OPERATOR).success());
+        Assertions.assertEquals(targetProjectId, logicClusterDAO.getById(id).getProjectId());
     }
 }

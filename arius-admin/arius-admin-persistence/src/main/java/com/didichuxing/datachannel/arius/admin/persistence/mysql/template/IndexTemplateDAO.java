@@ -24,7 +24,7 @@ public interface IndexTemplateDAO {
 
     IndexTemplatePO getById(Integer logicId);
 
-    List<IndexTemplatePO> listByAppId(Integer appId);
+    List<IndexTemplatePO> listByProjectId(Integer projectId);
 
     List<IndexTemplatePO> listAll();
 
@@ -44,7 +44,6 @@ public interface IndexTemplateDAO {
 
     long getTotalHitByCondition(IndexTemplatePO param);
 
-    List<IndexTemplatePO> likeByResponsible(String responsible);
 
     int batchChangeHotDay(Integer days);
 

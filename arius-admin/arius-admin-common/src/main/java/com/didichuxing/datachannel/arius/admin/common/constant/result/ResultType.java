@@ -25,7 +25,7 @@ public enum ResultType {
 
                         APP_VERIFY_SUCCESS(10006, "APP校验通过"),
 
-                        APP_VERIFY_FAIL_APP_NOT_EXIST(10007, "APP校验失败:APPID不存在"),
+                        APP_VERIFY_FAIL_APP_NOT_EXIST(10007, "APP校验失败:PROJECTID不存在"),
 
                         APP_VERIFY_FAIL_VERIFY_ERROR(10008, "APP校验失败:appsecret不正确"),
 

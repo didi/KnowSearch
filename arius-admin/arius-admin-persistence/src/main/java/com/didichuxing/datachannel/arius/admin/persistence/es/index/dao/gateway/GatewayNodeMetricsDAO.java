@@ -54,8 +54,8 @@ public class GatewayNodeMetricsDAO extends BaseESDAO {
     /**
      * 获取某 clientNode 读分布
      */
-    public VariousLineChartMetrics getClientNodeAggFieldByRange(GatewayMetricsTypeEnum gatewayMetricsTypeEnum, Long startTime, Long endTime, Integer appId, String gatewayNodeIp, String clientNodeIp) {
-        List<String> cellList = buildBaseTermCondition(gatewayNodeIp, startTime, endTime, appId);
+    public VariousLineChartMetrics getClientNodeAggFieldByRange(GatewayMetricsTypeEnum gatewayMetricsTypeEnum, Long startTime, Long endTime, Integer projectId, String gatewayNodeIp, String clientNodeIp) {
+        List<String> cellList = buildBaseTermCondition(gatewayNodeIp, startTime, endTime, projectId);
         cellList.add(DSLSearchUtils.getTermCellForExactSearch(clientNodeIp, "clientNode"));
         cellList.add(DSLSearchUtils.getTermCellForExactSearch(true, "queryRequest"));
         String condition = "[" + ListUtils.strList2String(cellList) +"]";
@@ -69,8 +69,8 @@ public class GatewayNodeMetricsDAO extends BaseESDAO {
     /**
      * 获取 topN clientNode 读分布
      */
-    public VariousLineChartMetrics getClientNodeAggFieldByRange(GatewayMetricsTypeEnum gatewayMetricsTypeEnum, Long startTime, Long endTime, Integer appId, Integer topNu, String gatewayNodeIp) {
-        List<String> cellList = buildBaseTermCondition(gatewayNodeIp, startTime, endTime, appId);
+    public VariousLineChartMetrics getClientNodeAggFieldByRange(GatewayMetricsTypeEnum gatewayMetricsTypeEnum, Long startTime, Long endTime, Integer projectId, Integer topNu, String gatewayNodeIp) {
+        List<String> cellList = buildBaseTermCondition(gatewayNodeIp, startTime, endTime, projectId);
         cellList.add(DSLSearchUtils.getTermCellForExactSearch(true, "queryRequest"));
         String condition = "[" + ListUtils.strList2String(cellList) +"]";
         String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTime, endTime);
@@ -89,8 +89,8 @@ public class GatewayNodeMetricsDAO extends BaseESDAO {
     /**
      * 获取 topN clientNode 分布
      */
-    public VariousLineChartMetrics getClientNodeTopN(Long startTime, Long endTime, Integer appId, Integer topNu, String gatewayNodeIp, GatewayMetricsTypeEnum gatewayMetricsTypeEnum) {
-        List<String> cellList = buildBaseTermCondition(gatewayNodeIp, startTime, endTime, appId);
+    public VariousLineChartMetrics getClientNodeTopN(Long startTime, Long endTime, Integer projectId, Integer topNu, String gatewayNodeIp, GatewayMetricsTypeEnum gatewayMetricsTypeEnum) {
+        List<String> cellList = buildBaseTermCondition(gatewayNodeIp, startTime, endTime, projectId);
         cellList.add(DSLSearchUtils.getTermCellForExactSearch(false, "queryRequest"));
         String condition = "[" + ListUtils.strList2String(cellList) +"]";
         String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTime, endTime);
@@ -106,19 +106,19 @@ public class GatewayNodeMetricsDAO extends BaseESDAO {
         return variousLineChartMetrics;
     }
 
-    public VariousLineChartMetrics getClientNodeWrite(Long startTime, Long endTime, Integer appId, Integer topNu, String gatewayNodeIp) {
-        return getClientNodeTopN(startTime, endTime, appId, topNu, gatewayNodeIp, GatewayMetricsTypeEnum.WRITE_CLIENT_NODE);
+    public VariousLineChartMetrics getClientNodeWrite(Long startTime, Long endTime, Integer projectId, Integer topNu, String gatewayNodeIp) {
+        return getClientNodeTopN(startTime, endTime, projectId, topNu, gatewayNodeIp, GatewayMetricsTypeEnum.WRITE_CLIENT_NODE);
     }
 
-    public VariousLineChartMetrics getClientNodeDSLLENByIp(Long startTime, Long endTime, Integer appId, Integer topNu, String gatewayNodeIp) {
-        return getClientNodeTopN(startTime, endTime, appId, topNu, gatewayNodeIp, GatewayMetricsTypeEnum.DSLLEN_CLIENT_NODE);
+    public VariousLineChartMetrics getClientNodeDSLLENByIp(Long startTime, Long endTime, Integer projectId, Integer topNu, String gatewayNodeIp) {
+        return getClientNodeTopN(startTime, endTime, projectId, topNu, gatewayNodeIp, GatewayMetricsTypeEnum.DSLLEN_CLIENT_NODE);
     }
 
     /**
      * 获取某 clientNode 分布
      */
-    public VariousLineChartMetrics getSingleClientNodeWriteByIp(Long startTime, Long endTime, Integer appId, String gatewayNodeIp, String clientNodeIp, GatewayMetricsTypeEnum gatewayMetricsTypeEnum) {
-        List<String> cellList = buildBaseTermCondition(gatewayNodeIp, startTime, endTime, appId);
+    public VariousLineChartMetrics getSingleClientNodeWriteByIp(Long startTime, Long endTime, Integer projectId, String gatewayNodeIp, String clientNodeIp, GatewayMetricsTypeEnum gatewayMetricsTypeEnum) {
+        List<String> cellList = buildBaseTermCondition(gatewayNodeIp, startTime, endTime, projectId);
         cellList.add(DSLSearchUtils.getTermCellForExactSearch(clientNodeIp, "clientNode"));
         cellList.add(DSLSearchUtils.getTermCellForExactSearch(false, "queryRequest"));
         String condition = "[" + ListUtils.strList2String(cellList) +"]";
@@ -128,21 +128,21 @@ public class GatewayNodeMetricsDAO extends BaseESDAO {
         return gatewayClient.performRequest(realIndexName, TYPE, dsl, (ESQueryResponse response) -> fetchFieldByIpAggMetrics(response, clientNodeIp, gatewayMetricsTypeEnum, interval), 3);
     }
 
-    public VariousLineChartMetrics getClientNodeWriteByIp(Long startTime, Long endTime, Integer appId, String gatewayNodeIp, String clientNodeIp) {
-        return getSingleClientNodeWriteByIp(startTime, endTime, appId, gatewayNodeIp, clientNodeIp, GatewayMetricsTypeEnum.WRITE_CLIENT_NODE);
+    public VariousLineChartMetrics getClientNodeWriteByIp(Long startTime, Long endTime, Integer projectId, String gatewayNodeIp, String clientNodeIp) {
+        return getSingleClientNodeWriteByIp(startTime, endTime, projectId, gatewayNodeIp, clientNodeIp, GatewayMetricsTypeEnum.WRITE_CLIENT_NODE);
     }
 
-    public VariousLineChartMetrics getClientNodeDSLLENByIp(Long startTime, Long endTime, Integer appId, String gatewayNodeIp, String clientNodeIp) {
-        return getSingleClientNodeWriteByIp(startTime, endTime, appId, gatewayNodeIp, clientNodeIp, GatewayMetricsTypeEnum.DSLLEN_CLIENT_NODE);
+    public VariousLineChartMetrics getClientNodeDSLLENByIp(Long startTime, Long endTime, Integer projectId, String gatewayNodeIp, String clientNodeIp) {
+        return getSingleClientNodeWriteByIp(startTime, endTime, projectId, gatewayNodeIp, clientNodeIp, GatewayMetricsTypeEnum.DSLLEN_CLIENT_NODE);
     }
 
     /**
      * 获取 topN gatewayNode 读分布
      */
-    public VariousLineChartMetrics getAggFieldByRange(GatewayMetricsTypeEnum gatewayMetricsTypeEnum, Long startTime, Long endTime, Integer appId, Integer topNu) {
+    public VariousLineChartMetrics getAggFieldByRange(GatewayMetricsTypeEnum gatewayMetricsTypeEnum, Long startTime, Long endTime, Integer projectId, Integer topNu) {
         String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTime, endTime);
         String interval = MetricsUtils.getInterval((endTime - startTime));
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_NODE_FIELD, startTime, endTime, appId, interval, startTime, endTime);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_NODE_FIELD, startTime, endTime, projectId, interval, startTime, endTime);
         VariousLineChartMetrics variousLineChartMetrics = gatewayClient.performRequest(realIndexName, TYPE, dsl, (ESQueryResponse response) -> fetchFieldAggMetrics(response, gatewayMetricsTypeEnum, interval), 3);
         //根据第一个时间点的值进行倒排，取topNu
         List<MetricsContent> sortedList = variousLineChartMetrics.getMetricsContents().stream()
@@ -156,20 +156,20 @@ public class GatewayNodeMetricsDAO extends BaseESDAO {
     /**
      * 获取某 gatewayNode 读分布
      */
-    public VariousLineChartMetrics getAggFieldByRange(GatewayMetricsTypeEnum gatewayMetricsTypeEnum, Long startTime, Long endTime, Integer appId, String nodeIp) {
+    public VariousLineChartMetrics getAggFieldByRange(GatewayMetricsTypeEnum gatewayMetricsTypeEnum, Long startTime, Long endTime, Integer projectId, String nodeIp) {
         String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTime, endTime);
         String interval = MetricsUtils.getInterval((endTime - startTime));
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_NODE_FIELD_BY_IP, nodeIp, startTime, endTime, appId, interval, startTime, endTime);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_NODE_FIELD_BY_IP, nodeIp, startTime, endTime, projectId, interval, startTime, endTime);
         return gatewayClient.performRequest(realIndexName, TYPE, dsl, (ESQueryResponse response) -> fetchFieldByIpAggMetrics(response, nodeIp, gatewayMetricsTypeEnum, interval), 3);
     }
 
     /**
      * 获取 topN gatewayNode 分布
      */
-    public VariousLineChartMetrics getWriteGatewayNodeTopN(Long startTime, Long endTime, Integer appId, Integer topNu, GatewayMetricsTypeEnum gatewayMetricsTypeEnum) {
+    public VariousLineChartMetrics getWriteGatewayNodeTopN(Long startTime, Long endTime, Integer projectId, Integer topNu, GatewayMetricsTypeEnum gatewayMetricsTypeEnum) {
         String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTime, endTime);
         String interval = MetricsUtils.getInterval((endTime - startTime));
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_NODE_WRITE, startTime, endTime, appId, interval, startTime, endTime);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_NODE_WRITE, startTime, endTime, projectId, interval, startTime, endTime);
         VariousLineChartMetrics variousLineChartMetrics = gatewayClient.performRequest(realIndexName, TYPE, dsl, (ESQueryResponse response) -> fetchFieldAggMetrics(response, gatewayMetricsTypeEnum, interval), 3);
         //根据第一个时间点的值进行倒排，取topNu
         List<MetricsContent> sortedList = variousLineChartMetrics.getMetricsContents().stream()
@@ -183,47 +183,47 @@ public class GatewayNodeMetricsDAO extends BaseESDAO {
     /**
      * 获取 topN gatewayNode 写分布
      */
-    public VariousLineChartMetrics getWriteGatewayNode(Long startTime, Long endTime,Integer appId, Integer topNu) {
-        return getWriteGatewayNodeTopN(startTime, endTime, appId, topNu, GatewayMetricsTypeEnum.WRITE_GATEWAY_NODE);
+    public VariousLineChartMetrics getWriteGatewayNode(Long startTime, Long endTime,Integer projectId, Integer topNu) {
+        return getWriteGatewayNodeTopN(startTime, endTime, projectId, topNu, GatewayMetricsTypeEnum.WRITE_GATEWAY_NODE);
     }
 
     /**
      * 获取某 gatewayNode 写入的数据量
      */
-    public VariousLineChartMetrics getSingleGatewayNodeWriteByIp(Long startTime, Long endTime, Integer appId, String nodeIp, GatewayMetricsTypeEnum gatewayMetricsTypeEnum) {
+    public VariousLineChartMetrics getSingleGatewayNodeWriteByIp(Long startTime, Long endTime, Integer projectId, String nodeIp, GatewayMetricsTypeEnum gatewayMetricsTypeEnum) {
         String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTime, endTime);
         String interval = MetricsUtils.getInterval((endTime - startTime));
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_NODE_WRITE_BY_IP, nodeIp, startTime, endTime, appId, interval, startTime, endTime);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_NODE_WRITE_BY_IP, nodeIp, startTime, endTime, projectId, interval, startTime, endTime);
         return gatewayClient.performRequest(realIndexName, TYPE, dsl, (ESQueryResponse response) -> fetchFieldByIpAggMetrics(response, nodeIp, gatewayMetricsTypeEnum, interval), 3);
     }
 
     /**
      * 获取某 gatewayNode 写分布
      */
-    public VariousLineChartMetrics getWriteGatewayNodeByIp(Long startTime, Long endTime, Integer appId, String nodeIp) {
-        return getSingleGatewayNodeWriteByIp(startTime, endTime, appId, nodeIp, GatewayMetricsTypeEnum.WRITE_GATEWAY_NODE);
+    public VariousLineChartMetrics getWriteGatewayNodeByIp(Long startTime, Long endTime, Integer projectId, String nodeIp) {
+        return getSingleGatewayNodeWriteByIp(startTime, endTime, projectId, nodeIp, GatewayMetricsTypeEnum.WRITE_GATEWAY_NODE);
     }
 
     /**
      * 获取 topN gatewayNode dsl 长度
      */
-    public VariousLineChartMetrics getWriteGatewayDSLLen(Long startTime, Long endTime,Integer appId, Integer topNu) {
-        return getWriteGatewayNodeTopN(startTime, endTime, appId, topNu, GatewayMetricsTypeEnum.DSLLEN_GATEWAY_NODE);
+    public VariousLineChartMetrics getWriteGatewayDSLLen(Long startTime, Long endTime,Integer projectId, Integer topNu) {
+        return getWriteGatewayNodeTopN(startTime, endTime, projectId, topNu, GatewayMetricsTypeEnum.DSLLEN_GATEWAY_NODE);
     }
 
     /**
      * 获取某 gatewayNode dsl 长度
      */
-    public VariousLineChartMetrics getWriteGatewayDSLLenByIp(Long startTime, Long endTime, Integer appId, String nodeIp) {
-        return getSingleGatewayNodeWriteByIp(startTime, endTime, appId, nodeIp, GatewayMetricsTypeEnum.DSLLEN_GATEWAY_NODE);
+    public VariousLineChartMetrics getWriteGatewayDSLLenByIp(Long startTime, Long endTime, Integer projectId, String nodeIp) {
+        return getSingleGatewayNodeWriteByIp(startTime, endTime, projectId, nodeIp, GatewayMetricsTypeEnum.DSLLEN_GATEWAY_NODE);
     }
 
     /**
      * 获取 gatewayNode 相关的 clientNode ip 信息
      */
-    public List<String> getEsClientNodeIpListByGatewayNode(String gatewayNode, Long startTime, Long endTime, Integer appId) {
+    public List<String> getEsClientNodeIpListByGatewayNode(String gatewayNode, Long startTime, Long endTime, Integer projectId) {
         String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTime, endTime);
-        List<String> cellList = buildBaseTermCondition(gatewayNode, startTime, endTime, appId);
+        List<String> cellList = buildBaseTermCondition(gatewayNode, startTime, endTime, projectId);
         String condition = "[" + ListUtils.strList2String(cellList) +"]";
 
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_CLIENT_NODE_BY_GATEWAY_NODE, condition);
@@ -292,10 +292,10 @@ public class GatewayNodeMetricsDAO extends BaseESDAO {
     
    
     /**************************************** private methods ****************************************/
-    private List<String> buildBaseTermCondition(String gatewayNode, Long startTime, Long endTime, Integer appId) {
+    private List<String> buildBaseTermCondition(String gatewayNode, Long startTime, Long endTime, Integer projectId) {
         List<String> cellList = Lists.newArrayList();
         cellList.add(DSLSearchUtils.getTermCellForRangeSearch(startTime, endTime, "timeStamp"));
-        cellList.add(DSLSearchUtils.getTermCellForExactSearch(appId, "appid"));
+        cellList.add(DSLSearchUtils.getTermCellForExactSearch(projectId, "appid"));
         cellList.add(DSLSearchUtils.getTermCellForExactSearch(gatewayNode, "gatewayNode"));
         return cellList;
     }

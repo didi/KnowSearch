@@ -47,7 +47,7 @@ public class DslMetricHelper {
         DslLogEntity dslLogEntity = JSON.parseObject(logString, DslLogEntity.class);
         if (!filter(dslLogEntity)) {
             es.submit(() -> {
-                String key = String.format("%d_%s", dslLogEntity.getAppid(), dslLogEntity.getDslTemplateMd5());
+                String key = String.format("%d_%s", dslLogEntity.getProjectId(), dslLogEntity.getDslTemplateMd5());
                 dslLogEntity.setAppidDslTemplateMd5(key);
 
                 //这里由于涉及到累加所以得加锁，但是全局加锁会导致性能低，所以这里采用对单个key加锁，不同key互不影响
@@ -113,7 +113,7 @@ public class DslMetricHelper {
         }
 
         if (!dslLogMap.containsKey(String.format("%d_%s",
-                dslLogEntity.getAppid(), dslLogEntity.getDslTemplateMd5())) &&
+                dslLogEntity.getProjectId(), dslLogEntity.getDslTemplateMd5())) &&
                 dslLogMap.size() >= dslMapSize) {
             return true;
         }

@@ -32,8 +32,8 @@ public class ClusterLogicChangeListener implements ApplicationListener<ClusterLo
             clusterLogicManager.updateClusterLogicHealth(event.getClusterLogicId());
         } catch (Exception e) {
             LOGGER.error(
-                "class=ClusterPhyChangeListener||method=onApplicationEvent||appId={}||clusterPhyName={}||ErrorMsg={}",
-                event.getAppId(), event.getClusterLogicId(), e.getMessage());
+                "class=ClusterPhyChangeListener||method=onApplicationEvent||projectId={}||clusterPhyName={}||ErrorMsg={}",
+                event.getProjectId(), event.getClusterLogicId(), e.getMessage());
         }
     }
 }

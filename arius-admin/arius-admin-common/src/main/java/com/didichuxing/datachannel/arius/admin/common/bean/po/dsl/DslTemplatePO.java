@@ -103,15 +103,15 @@ public class DslTemplatePO extends BaseESPO {
     /**
      * sink写入时间
      */
-    private Long sinkTime;
+    private Long    sinkTime;
     /**
-     * appid
+     * projectId
      */
-    private Integer appid;
+    private Integer projectId;
     /**
      * 查询语句
      */
-    private String dsl;
+    private String  dsl;
     /**
      * 平均gateway处理耗时
      */
@@ -162,7 +162,7 @@ public class DslTemplatePO extends BaseESPO {
     @JSONField(serialize = false)
     @Override
     public String getKey() {
-        return String.format("%d_%s", this.appid, this.dslTemplateMd5);
+        return String.format("%d_%s", this.projectId, this.dslTemplateMd5);
     }
 
     @Override

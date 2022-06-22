@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel(description = "工单任务详细")
+@Deprecated
 public class WorkOrderTaskDetailDTO extends BaseDTO {
 
     @ApiModelProperty("ID")

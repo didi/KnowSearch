@@ -24,58 +24,58 @@ public interface IndicesManager {
     /**
      * 条件获取索引列表信息 ,携带可读可写标志位
      * @param condition     查询条件
-     * @param appId         项目
+     * @param projectId         项目
      * @return              List<IndexCatInfoVO>
      */
-    PaginationResult<IndexCatCellVO> pageGetIndex(IndexQueryDTO condition, Integer appId);
+    PaginationResult<IndexCatCellVO> pageGetIndex(IndexQueryDTO condition, Integer projectId);
 
     /**
      * 创建索引
      * @param indexCreateDTO
-     * @param appId
+     * @param projectId
      * @return
      */
-    Result<Void> createIndex(IndexCatCellWithConfigDTO indexCreateDTO, Integer appId);
+    Result<Void> createIndex(IndexCatCellWithConfigDTO indexCreateDTO, Integer projectId);
 
     /**
      * 删除索引
      * @param params     删除索引信息
-     * @param appId      项目
+     * @param projectId      项目
      * @param operator   操作人
      * @return           Boolean
      */
-    Result<Boolean> deleteIndex(List<IndexCatCellDTO> params, Integer appId, String operator);
+    Result<Boolean> deleteIndex(List<IndexCatCellDTO> params, Integer projectId, String operator);
     
     /**
      * 批量更新索引状态
      *
      * @param params   索引信息
-     * @param appId    项目id
+     * @param projectId    项目id
      * @param function 操作函数
      * @return {@link Result}<{@link Boolean}>
      */
-    <T, U, R> Result<Boolean> batchOperateIndex(List<IndexCatCellDTO> params, Integer appId,
+    <T, U, R> Result<Boolean> batchOperateIndex(List<IndexCatCellDTO> params, Integer projectId,
                                                 BiFunction<String, List<String>, Result<Void>> function);
 
     /**
      * 开启索引
      *
      * @param params   索引信息
-     * @param appId    项目id
+     * @param projectId    项目id
      * @param operator 操作人
      * @return {@link Result}<{@link Boolean}>
      */
-    Result<Boolean> openIndex(List<IndexCatCellDTO> params, Integer appId, String operator);
+    Result<Boolean> openIndex(List<IndexCatCellDTO> params, Integer projectId, String operator);
 
     /**
      * 关闭索引
      *
      * @param params   索引信息
-     * @param appId    项目id
+     * @param projectId    项目id
      * @param operator 操作人
      * @return {@link Result}<{@link Boolean}>
      */
-    Result<Boolean> closeIndex(List<IndexCatCellDTO> params, Integer appId, String operator);
+    Result<Boolean> closeIndex(List<IndexCatCellDTO> params, Integer projectId, String operator);
     /**
      * 配合删除真实集群索引使用
      *
@@ -91,91 +91,91 @@ public interface IndicesManager {
     /**
      * 编辑索引setting阻塞信息
      * @param params    索引信息列表
-     * @param appId     项目
+     * @param projectId     项目
      * @param operator  操作人
      * @return          Boolean
      */
-    Result<Boolean> editIndexBlockSetting(List<IndicesBlockSettingDTO> params, Integer appId, String operator);
+    Result<Boolean> editIndexBlockSetting(List<IndicesBlockSettingDTO> params, Integer projectId, String operator);
 
     /**
      * 获取索引mapping
      *
      * @param cluster   集群
      * @param indexName 索引名称
-     * @param appId     项目
+     * @param projectId              项目
      * @return IndexMappingVO
      */
-    Result<IndexMappingVO> getMapping(String cluster, String indexName, Integer appId);
+    Result<IndexMappingVO> getMapping(String cluster, String indexName, Integer projectId);
 
     /**
      * 更新索引mapping
      * @param param
-     * @param appId
+     * @param projectId
      * @return
      */
-    Result<Void> editMapping(IndexCatCellWithConfigDTO param, Integer appId);
+    Result<Void> editMapping(IndexCatCellWithConfigDTO param, Integer projectId);
 
     /**
      * 获取索引setting信息
      *
-     * @param appId     项目
+     * @param projectId     项目
      * @param cluster   集群
      * @param indexName 索引名称
      * @return IndexSettingVO
      */
-    Result<IndexSettingVO> getSetting(String cluster, String indexName, Integer appId);
+    Result<IndexSettingVO> getSetting(String cluster, String indexName, Integer projectId);
 
     /**
      * 更新索引setting
      * @param param
-     * @param appId
+     * @param projectId
      * @return
      */
-    Result<Void> editSetting(IndexCatCellWithConfigDTO param, Integer appId);
+    Result<Void> editSetting(IndexCatCellWithConfigDTO param, Integer projectId);
 
     /**
      * 获取索引shard分配信息
      * @param cluster 集群
      * @param indexName         索引名称
-     * @param appId             项目
+     * @param projectId             项目
      * @return
      */
-    Result<List<IndexShardInfoVO>> getIndexShardsInfo(String cluster, String indexName, Integer appId);
+    Result<List<IndexShardInfoVO>> getIndexShardsInfo(String cluster, String indexName, Integer projectId);
 
     /**
      * 获取单个索引的详情信息
      * @param cluster 集群名称
      * @param indexName 索引名称
-     * @param appId 项目
+     * @param projectId 项目
      * @return
      */
-    Result<IndexCatCellVO> getIndexCatInfo(String cluster, String indexName, Integer appId);
+    Result<IndexCatCellVO> getIndexCatInfo(String cluster, String indexName, Integer projectId);
 
     /**
      * 新增别名
      * @param param
-     * @param appId 项目
+     * @param projectId 项目
      * @return
      */
-    Result<Void> addIndexAliases(IndexCatCellWithConfigDTO param, Integer appId);
+    Result<Void> addIndexAliases(IndexCatCellWithConfigDTO param, Integer projectId);
 
     /**
      * 删除别名
      * @param param
-     * @param appId 项目
+     * @param projectId 项目
      * @return
      */
-    Result<Void> deleteIndexAliases(IndexCatCellWithConfigDTO param, Integer appId);
+    Result<Void> deleteIndexAliases(IndexCatCellWithConfigDTO param, Integer projectId);
 
     /**
      * 获取索引别名
      *
      * @param cluster   集群
      * @param indexName 索引名称
-     * @param appId     项目
+     * @param projectId     项目
      * @return {@link Result}<{@link String}>
      */
-    Result<List<String>> getIndexAliases(String cluster, String indexName, Integer appId);
+    Result<List<String>> getIndexAliases(String cluster, String indexName, Integer projectId);
 
     /**
      * rollover
@@ -208,23 +208,23 @@ public interface IndicesManager {
     /**
      * 获取物理集群中的索引列表
      */
-    Result<List<String>> getClusterPhyIndexName(String clusterPhyName, Integer appId);
+    Result<List<String>> getClusterPhyIndexName(String clusterPhyName, Integer projectId);
 
     /**
      * 获取逻辑集群下的索引列表
      * @param clusterLogicName
-     * @param appId
+     * @param projectId
      * @return
      */
-    Result<List<String>> getClusterLogicIndexName(String clusterLogicName, Integer appId);
+    Result<List<String>> getClusterLogicIndexName(String clusterLogicName, Integer projectId);
 
     /**
      * 判断索引是否存在
      *
      * @param cluster   集群
      * @param indexName 索引名称
-     * @param appId     应用程序id
+     * @param projectId     应用程序id
      * @return {@link Result}<{@link Boolean}>
      */
-    Result<Boolean> isExists(String cluster, String indexName, Integer appId);
+    Result<Boolean> isExists(String cluster, String indexName, Integer projectId);
 }

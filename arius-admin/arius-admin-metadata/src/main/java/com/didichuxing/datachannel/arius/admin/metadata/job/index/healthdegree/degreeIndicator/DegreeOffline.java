@@ -7,7 +7,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.OffLine;
 import com.didichuxing.datachannel.arius.admin.metadata.job.index.healthdegree.AbstractDegreeIndicator;
 import com.didichuxing.datachannel.arius.admin.metadata.utils.ReadExprValueUtil;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithClusterAndMasterTemplate;
-
+@Deprecated
 public class DegreeOffline extends AbstractDegreeIndicator {
     private static final Long GB_IN_BYTE = 1024 * 1024 * 1024L;
 

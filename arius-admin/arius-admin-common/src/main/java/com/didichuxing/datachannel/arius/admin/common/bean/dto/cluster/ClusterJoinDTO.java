@@ -26,7 +26,7 @@ public class ClusterJoinDTO extends BaseDTO {
     private Integer                    type;
 
     @ApiModelProperty("所属项目id")
-    private Integer                    appId;
+    private Integer projectId;
 
     @ApiModelProperty("集群名字")
     private String                     cluster;

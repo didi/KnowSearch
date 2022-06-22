@@ -3,26 +3,30 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v2.op.config;
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.COMMA;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V2_OP;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-
-import com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.config.AriusConfigInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.config.AriusConfigInfoVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
-
+import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import java.util.ArrayList;
+import java.util.List;
+import javax.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * 
@@ -52,7 +56,7 @@ public class AriusConfigController {
     @ApiOperation(value = "使能配置接口" )
     public Result<Void> switchConfig(HttpServletRequest request, @RequestBody AriusConfigInfoDTO param) {
         return ariusConfigInfoService.switchConfig(param.getId(), param.getStatus(),
-            HttpRequestUtils.getOperator(request));
+            HttpRequestUtil.getOperator(request));
     }
 
     @DeleteMapping("/{id}")
@@ -60,21 +64,21 @@ public class AriusConfigController {
     @ApiOperation(value = "删除配置接口" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "id", value = "配置ID", required = true) })
     public Result<Void> delete(HttpServletRequest request, @PathVariable Integer id) {
-        return ariusConfigInfoService.delConfig(id, HttpRequestUtils.getOperator(request));
+        return ariusConfigInfoService.delConfig(id, HttpRequestUtil.getOperator(request));
     }
 
     @PutMapping("/add")
     @ResponseBody
     @ApiOperation(value = "新建配置接口" )
     public Result<Integer> add(HttpServletRequest request, @RequestBody AriusConfigInfoDTO param) {
-        return ariusConfigInfoService.addConfig(param, HttpRequestUtils.getOperator(request));
+        return ariusConfigInfoService.addConfig(param, HttpRequestUtil.getOperator(request));
     }
 
     @PostMapping("/edit")
     @ResponseBody
     @ApiOperation(value = "编辑配置接口【三方接口】",tags = "【三方接口】" )
     public Result<Void> edit(HttpServletRequest request, @RequestBody AriusConfigInfoDTO param) {
-        return ariusConfigInfoService.editConfig(param, HttpRequestUtils.getOperator(request));
+        return ariusConfigInfoService.editConfig(param, HttpRequestUtil.getOperator(request));
     }
 
     @GetMapping("/cluster-version")

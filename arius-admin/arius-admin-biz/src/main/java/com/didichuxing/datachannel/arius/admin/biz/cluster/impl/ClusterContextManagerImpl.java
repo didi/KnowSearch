@@ -3,6 +3,8 @@ package com.didichuxing.datachannel.arius.admin.biz.cluster.impl;
 import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum.*;
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.DATA_NODE;
 
+import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
+import com.didiglobal.logi.security.service.ProjectService;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -15,7 +17,6 @@ import org.springframework.stereotype.Component;
 
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicContext;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
@@ -28,7 +29,6 @@ import com.didichuxing.datachannel.arius.admin.common.threadpool.AriusScheduleTh
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
@@ -41,7 +41,7 @@ import com.google.common.collect.Sets;
 
 /**
  * 集群上下文类, 包含以下信息:
- * 1. 包括逻辑集群（共享、独享、独占）关联的物理集群信息（region、node、App消息等）
+ * 1. 包括逻辑集群（共享、独享、独占）关联的物理集群信息（region、node、project消息等）
  * 2. 物理集群信息关联逻辑集群（共享、独享、独占）信息
  * 3. 校验模型 ————> 获取逻辑集群可绑定的物理集群列表
  *
@@ -82,7 +82,7 @@ public class ClusterContextManagerImpl implements ClusterContextManager {
     private AriusScheduleThreadPool        ariusScheduleThreadPool;
 
     @Autowired
-    private AppService                     appService;
+    private ProjectService projectService;
 
     @PostConstruct
     private void init(){
@@ -229,7 +229,7 @@ public class ClusterContextManagerImpl implements ClusterContextManager {
                 .build();
 
         setClusterPhyNodeInfo(build);
-        setRegionAndClusterLogicInfoAndAppId(build);
+        setRegionAndClusterLogicInfoAndProjectId(build);
         return build;
     }
 
@@ -288,9 +288,10 @@ public class ClusterContextManagerImpl implements ClusterContextManager {
         Map<String, List<ClusterRoleHost>> cluster2RoleListMap = ConvertUtil.list2MapOfList(clusterRoleHosts,
                 ClusterRoleHost::getCluster, clusterRoleHost -> clusterRoleHost);
 
-        // app信息分组
-        List<App> apps = appService.listApps();
-        Map<Integer/*appId*/, String/*appName*/> appId2AppNameMap = ConvertUtil.list2Map(apps, App::getId, App::getName);
+        // project信息分组
+        final List<ProjectBriefVO> briefVOS = projectService.getProjectBriefList();
+        Map<Integer/*projectId*/, String/*projectName*/> projectId2ProjectNameMap = ConvertUtil.list2Map(briefVOS, ProjectBriefVO::getId,
+                ProjectBriefVO::getProjectName);
 
         for (ClusterPhy phy : clusterPhyList) {
             // 初始化
@@ -335,20 +336,20 @@ public class ClusterContextManagerImpl implements ClusterContextManager {
             clusterPhyContext.setAssociatedClusterLogicIds(Lists.newArrayList(associatedClusterLogicIds));
             clusterPhyContext.setAssociatedLogicNum(associatedClusterLogicIds.size());
 
-            // 设置app信息
-            Set<Integer> appIdSet  = Sets.newHashSet();
-            Set<String> appNameSet = Sets.newHashSet();
+            // 设置project信息
+            Set<Integer> projectIdSet  = Sets.newHashSet();
+            Set<String> projectNameSet = Sets.newHashSet();
             for (Long associatedClusterLogicId : associatedClusterLogicIds) {
                 ClusterLogic clusterLogic = id2ClusterLogicMap.get(associatedClusterLogicId);
                 if (null == clusterLogic) { continue;}
-                appIdSet.add(clusterLogic.getAppId());
+                projectIdSet.add(clusterLogic.getProjectId());
 
-                String appName = appId2AppNameMap.get(clusterLogic.getAppId());
-                if (AriusObjUtils.isBlack(appName)) { continue;}
-                appNameSet.add(appName);
+                String projectName = projectId2ProjectNameMap.get(clusterLogic.getProjectId());
+                if (AriusObjUtils.isBlack(projectName)) { continue;}
+                projectNameSet.add(projectName);
             }
-            clusterPhyContext.setAssociatedAppIds(Lists.newArrayList(appIdSet));
-            clusterPhyContext.setAssociatedAppNames(Lists.newArrayList(appNameSet));
+            clusterPhyContext.setAssociatedProjectIds(Lists.newArrayList(projectIdSet));
+            clusterPhyContext.setAssociatedProjectNames(Lists.newArrayList(projectNameSet));
 
             name2ClusterPhyContextMap.put(phy.getCluster(), clusterPhyContext);
         }
@@ -534,7 +535,7 @@ public class ClusterContextManagerImpl implements ClusterContextManager {
         build.setAssociatedDataNodeIps(associatedRackClusterHosts.stream().map(ClusterRoleHost::getIp).collect(Collectors.toList()));
     }
 
-    private void setRegionAndClusterLogicInfoAndAppId(ClusterPhyContext build) {
+    private void setRegionAndClusterLogicInfoAndProjectId(ClusterPhyContext build) {
         // 1. set region
         List<ClusterRegion> regions = clusterRegionService.listPhyClusterRegions(build.getClusterName());
         build.setAssociatedRegionIds(regions.stream().map(ClusterRegion::getId).collect(Collectors.toList()));
@@ -553,21 +554,21 @@ public class ClusterContextManagerImpl implements ClusterContextManager {
         build.setAssociatedClusterLogicIds(Lists.newArrayList(associatedClusterLogicIds));
         build.setAssociatedLogicNum(associatedClusterLogicIds.size());
 
-        // 3. set appId
-        Set<Integer> appIdSet   = new HashSet<>();
-        Set<String>  appNameSet = new HashSet<>();
+        // 3. set projectId
+        Set<Integer> projectIdSet   = new HashSet<>();
+        Set<String>  clusterLogicSet = new HashSet<>();
         if (!CollectionUtils.isEmpty(associatedClusterLogicIds)) {
             for (Long associatedClusterLogicId : associatedClusterLogicIds) {
                 ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(associatedClusterLogicId);
-                if (null != clusterLogic && null != clusterLogic.getAppId() && null != clusterLogic.getName()) {
-                    appIdSet.add(clusterLogic.getAppId());
-                    appNameSet.add(clusterLogic.getName());
+                if (null != clusterLogic && null != clusterLogic.getProjectId() && null != clusterLogic.getName()) {
+                    projectIdSet.add(clusterLogic.getProjectId());
+                    clusterLogicSet.add(clusterLogic.getName());
                 }
             }
         }
 
-        build.setAssociatedAppIds(Lists.newArrayList(appIdSet));
-        build.setAssociatedAppNames(Lists.newArrayList(appNameSet));
+        build.setAssociatedProjectIds(Lists.newArrayList(projectIdSet));
+        build.setAssociatedProjectNames(Lists.newArrayList(clusterLogicSet));
     }
 
     private void setClusterPhyNodeInfo(ClusterPhyContext build) {
