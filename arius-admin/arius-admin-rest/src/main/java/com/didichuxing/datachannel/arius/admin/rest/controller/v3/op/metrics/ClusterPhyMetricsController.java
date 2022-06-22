@@ -28,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -74,7 +75,7 @@ public class ClusterPhyMetricsController {
             clusterPhyMetricsManager.getUserNameConfigMetrics(param, HttpRequestUtil.getOperator(request)));
     }
 
-    @PostMapping("/update-config-metrics")
+    @PutMapping("/config-metrics")
     @ResponseBody
     @ApiOperation(value = "更新账号下已配置指标类型")
     public Result<Integer> updateClusterPhyMetricsTypes(@RequestBody MetricsConfigInfoDTO param, HttpServletRequest request) {
