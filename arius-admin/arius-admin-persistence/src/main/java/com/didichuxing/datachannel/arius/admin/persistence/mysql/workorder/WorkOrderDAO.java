@@ -52,9 +52,19 @@ public interface WorkOrderDAO {
      * @param status 状态
      * @return {@link List}<{@link WorkOrderPO}>
      */
+    List<WorkOrderPO> listByApplicantAndStatusAndProjectId(@Param("applicant")String applicant,
+                                                           @Param("status")Integer status,
+                                                           @Param("applicantProjectId")Integer applicantProjectId);
+        /**
+     * 由申请人和状态列表
+     *
+     * @param applicant 申请人
+     * @param status 状态
+     * @return {@link List}<{@link WorkOrderPO}>
+     */
     List<WorkOrderPO> listByApplicantAndStatus(@Param("applicant")String applicant,
-                                               @Param("status")Integer status);
-    
+                                                           @Param("status")Integer status
+                                                           );
     /**
      * 审批人列表
      *
