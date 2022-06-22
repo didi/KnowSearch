@@ -1,13 +1,17 @@
 package com.didi.arius.gateway.common.utils;
 
 
-import com.didi.arius.gateway.common.metadata.AuthRequest;
-import com.didi.arius.gateway.common.metadata.FieldInfo;
-import com.didi.arius.gateway.elasticsearch.client.gateway.search.ESSearchRequest;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Pattern;
+
+import javax.servlet.http.HttpServletRequest;
+
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.common.Base64;
@@ -16,16 +20,13 @@ import org.elasticsearch.search.fetch.source.FetchSourceContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.http.HttpServletRequest;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import com.didi.arius.gateway.common.metadata.AuthRequest;
+import com.didi.arius.gateway.common.metadata.FieldInfo;
+import com.didi.arius.gateway.elasticsearch.client.gateway.search.ESSearchRequest;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 
 /**
 * @author weizijun
@@ -264,7 +265,7 @@ public class Convert {
 
 		for (int i = 0; i < indices.length; ++i) {
 			String index = indices[i];
-			if (StringUtils.isNotBlank(index) && index.endsWith("*")) {
+            if (StringUtils.isNotBlank(index) && !index.endsWith("*")) {
 				String newIndex = index + "*";
 				newIndices[i] = newIndex;
 				changed = true;

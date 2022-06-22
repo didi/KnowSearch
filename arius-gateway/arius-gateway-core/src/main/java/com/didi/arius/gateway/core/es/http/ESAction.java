@@ -1,18 +1,21 @@
 package com.didi.arius.gateway.core.es.http;
 
-import com.didi.arius.gateway.common.metadata.IndexTemplate;
-import com.didi.arius.gateway.common.metadata.JoinLogContext;
-import com.didi.arius.gateway.common.metadata.QueryContext;
-import com.didi.arius.gateway.common.utils.CommonUtil;
-import com.didi.arius.gateway.elasticsearch.client.ESClient;
-import com.google.common.collect.Lists;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.common.Strings;
 import org.elasticsearch.rest.RestChannel;
 import org.elasticsearch.rest.RestRequest;
 
-import java.util.List;
+import com.didi.arius.gateway.common.metadata.IndexTemplate;
+import com.didi.arius.gateway.common.metadata.JoinLogContext;
+import com.didi.arius.gateway.common.metadata.QueryContext;
+import com.didi.arius.gateway.elasticsearch.client.ESClient;
+import com.didi.arius.gateway.elasticsearch.client.gateway.direct.DirectRequest;
+import com.google.common.collect.Lists;
 
 public abstract class ESAction extends HttpRestHandler {
 	@Override
@@ -51,28 +54,56 @@ public abstract class ESAction extends HttpRestHandler {
 
 	protected abstract void handleInterRequest(QueryContext queryContext, RestRequest request, RestChannel channel) throws Exception;
 
-	protected void indexAction(QueryContext queryContext, String index) {
-		preIndexAction(queryContext, index);
-		doIndexAction(queryContext, queryContext.getIndexTemplate());
-	}
+    protected void indexAction(QueryContext queryContext, String index) {
+        IndexTemplate indexTemplate = preIndexAction(queryContext, index);
+        ESClient client = esClusterService.getClient(queryContext, indexTemplate, actionName);
+        directRequest(client, queryContext);
+    }
 
-	protected void preIndexAction(QueryContext queryContext, String index) {
+    protected void indexAction(QueryContext queryContext, String index, String api) {
+        IndexTemplate indexTemplate = preIndexAction(queryContext, index);
+        List<String> indices = Lists.newArrayList();
+        if (CollectionUtils.isNotEmpty(queryContext.getIndices()) && null != indexTemplate
+            && indexTemplate.getExpression().endsWith("*")) {
+            indices = queryContext.getIndices().stream()
+                .map(str -> (StringUtils.isNotBlank(str) && !str.endsWith("*")) ? str + "*" : str)
+                .collect(Collectors.toList());
+            queryContext.setIndices(indices);
+        }
+        ESClient client = esClusterService.getClient(queryContext, indexTemplate, actionName);
+        String path = queryContext.getUri();
+        String type = queryContext.getTypeNames();
+        if (CollectionUtils.isNotEmpty(indices)) {
+            List<String> finalIndices = indices;
+            List<String> list = new ArrayList<String>(6) {
+                {
+                    add("/");
+                    add(StringUtils.join(finalIndices, ","));
+                }
+            };
+            if (StringUtils.isNotBlank(type)) {
+                list.add("/");
+                list.add(type);
+            }
+            list.add(api);
+            path = StringUtils.join(list, "");
+        }
+        DirectRequest directRequest = buildDirectRequest(queryContext, path);
+        directRequest(client, queryContext, directRequest);
+    }
+
+	protected IndexTemplate preIndexAction(QueryContext queryContext, String index) {
 		String[] indicesArr = Strings.splitStringByCommaToArray(index);
 		List<String> indices = Lists.newArrayList(indicesArr);
 		queryContext.setIndices(indices);
 		checkIndices(queryContext);
-
+		IndexTemplate indexTemplate = null;
 		if (!queryContext.isFromKibana()) {
 			// kibana的请求就不需要搜索模版了
-			IndexTemplate indexTemplate = getTemplateByIndexTire(indices, queryContext);
+			indexTemplate = getTemplateByIndexTire(indices, queryContext);
 			queryContext.setIndexTemplate(indexTemplate);
 		}
-	}
-
-	protected void doIndexAction(QueryContext queryContext, IndexTemplate indexTemplate) {
-		ESClient client = esClusterService.getClient(queryContext, indexTemplate, actionName);
-
-		directRequest(client, queryContext);
+		return indexTemplate;
 	}
 
 	protected boolean isAliasGet(IndexTemplate indexTemplate, List<String> indexs){
