@@ -13,10 +13,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboar
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.list.MetricListVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.dashboard.ClusterPhyHealthMetricsVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.top.VariousLineChartMetricsVO;
-import com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricListTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricTopTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.metrics.MetricsConstant;
-import com.didichuxing.datachannel.arius.admin.common.constant.metrics.OneLevelTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.config.AriusConfigStatusEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.metrics.*;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
@@ -188,12 +186,15 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
      * 根据系统配置筛选
      */
     private void  filterBySystemConfiguration(List<MetricList> listMetrics){
-        //根据系统配置筛选
-        List<AriusConfigInfo> ariusConfigInfos =  ariusConfigInfoService.getConfigByGroup("dashboard.threshold");
+        Map thresholdValues = DashBoardThresholdEnum.getDashBoardThresholdValue();
+
+        //根据系统配置筛选,如果库里有对应的指标，就使用配置的指标
+        List<AriusConfigInfo> ariusConfigInfos =  ariusConfigInfoService.getDashboardThreshold("dashboard.threshold");
         Map<String,String> enableConfigs = new HashMap<>();
         ariusConfigInfos.forEach(ariusConfigInfo -> {
-            if (1==ariusConfigInfo.getStatus()){
-                enableConfigs.put(ariusConfigInfo.getValueName(),ariusConfigInfo.getValue());
+            if (AriusConfigStatusEnum.NORMAL.getCode()==ariusConfigInfo.getStatus()&&
+                    thresholdValues.containsKey(ariusConfigInfo.getValueName())){
+                thresholdValues.put(ariusConfigInfo.getValueName(),ariusConfigInfo.getValue());
             }
         });
         listMetrics.forEach(metric -> {

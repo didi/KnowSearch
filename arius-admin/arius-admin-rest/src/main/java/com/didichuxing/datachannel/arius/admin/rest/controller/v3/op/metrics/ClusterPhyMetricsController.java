@@ -26,7 +26,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion
  * @date 2021-07-30
  */
 @RestController()
-@RequestMapping({ V3_OP + "/phy/cluster/metrics", V3 + "/metrics/cluster" })
+@RequestMapping({ V3 + "/metrics/cluster" })
 @Api(tags = "ES物理集群监控信息")
 public class ClusterPhyMetricsController {
     @Autowired

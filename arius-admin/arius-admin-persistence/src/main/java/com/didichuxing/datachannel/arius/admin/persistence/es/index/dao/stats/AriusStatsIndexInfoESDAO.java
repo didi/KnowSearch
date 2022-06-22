@@ -1103,30 +1103,25 @@ public class AriusStatsIndexInfoESDAO extends BaseAriusStatsESDAO {
 
     private List<TopMetrics> buildTopNIndexMetricsInfoWithStep(String clusterPhyName, List<String> metricsTypes, Integer topNu, String topMethod, Integer topTimeStep,
                                                                String aggType, int indicesBucketsMaxNum, Long startTime, Long endTime) {
-        int retryTime = 0;
         List<VariousLineChartMetrics> variousLineChartMetrics = new ArrayList<>();
-        do {
-            Long timePoint = getHasDataTime(clusterPhyName, startTime, endTime, DslsConstant.GET_HAS_INDEX_METRICS_DATA_TIME);
-            //没有数据则提前终止
-            if (null == timePoint) {
-                break;
-            }
+        Long timePoint = getHasDataTime(clusterPhyName, startTime, endTime, DslsConstant.GET_HAS_INDEX_METRICS_DATA_TIME);
+        //没有数据则提前终止
+        if (null == timePoint) {
+            return new ArrayList<>();
+        }
 
-            long startTimeForOneInterval    = timePoint-topTimeStep*60*1000;
-            long endTimeForOneInterval      = timePoint;
+        long startTimeForOneInterval = timePoint - topTimeStep * 60 * 1000;
+        long endTimeForOneInterval = timePoint;
 
-            String interval = "1m";
+        String dsl = dslLoaderUtil.getFormatDslByFileName(
+                DslsConstant.GET_MULTIPLE_INDEX_FIRST_INTERVAL_AGG_METRICS, clusterPhyName, startTimeForOneInterval,
+                endTimeForOneInterval, indicesBucketsMaxNum, STEP_INTERVAL, buildAggsDSL(metricsTypes, aggType));
 
-            String dsl = dslLoaderUtil.getFormatDslByFileName(
-                    DslsConstant.GET_MULTIPLE_INDEX_FIRST_INTERVAL_AGG_METRICS, clusterPhyName, startTimeForOneInterval,
-                    endTimeForOneInterval, indicesBucketsMaxNum, interval, buildAggsDSL(metricsTypes, aggType));
+        String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTimeForOneInterval,
+                endTimeForOneInterval);
 
-            String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTimeForOneInterval,
-                    endTimeForOneInterval);
-
-            variousLineChartMetrics = gatewayClient.performRequestWithRouting(metadataClusterName, null,
-                    realIndexName, TYPE, dsl, s -> fetchMultipleAggMetricsWithStep(s, null, metricsTypes, topNu,topMethod), 3);
-        } while (retryTime++ > 3 && CollectionUtils.isEmpty(variousLineChartMetrics));
+        variousLineChartMetrics = gatewayClient.performRequestWithRouting(metadataClusterName, null,
+                realIndexName, TYPE, dsl, s -> fetchMultipleAggMetricsWithStep(s, null, metricsTypes, topNu, topMethod), 3);
 
         return variousLineChartMetrics.stream().map(this::buildTopMetrics).collect(Collectors.toList());
     }

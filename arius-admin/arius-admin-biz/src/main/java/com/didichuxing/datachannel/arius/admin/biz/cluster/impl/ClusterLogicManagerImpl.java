@@ -1,21 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.biz.cluster.impl;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum.CLUSTER_LOGIC;
-import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum.*;
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.TEMPLATE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.DELETE_INDEX;
-import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.DATA_NODE;
-
-import java.util.*;
-import java.util.stream.Collectors;
-
-import javax.servlet.http.HttpServletRequest;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterLogicManager;
@@ -471,7 +455,6 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         return result;
     }
 
-    //todo:修改tl
     private ClusterLogicTemplateIndexDetailDTO getTemplateIndexVO(Long logicClusterId, Integer projectId) {
         List<IndexTemplateLogicAggregate> templateLogicAggregates =
                 templateLogicManager.getLogicClusterTemplatesAggregate(logicClusterId, projectId);
@@ -603,6 +586,8 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
 
     @Override
     public Result<String> estimatedDiskSize(Long clusterLogicId, Integer count) {
+        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(clusterLogicId);
+        String nodeSpec = clusterLogic.getDataNodeSpec();
         ClusterRegion clusterRegion =  clusterRegionService.getRegionByLogicClusterId(clusterLogicId);
         if (clusterRegion == null) {
             return Result.buildSucc(UNKNOWN_SIZE);
@@ -610,7 +595,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         //todo:使用申请集群的时候，选择的规格来计算
         Map<String, Triple<Long, Long, Double>> map = eSClusterNodeService.syncGetNodesDiskUsage(clusterRegion.getPhyClusterName());
         Triple<Long, Long, Double> diskInfo = getFirstOrNull(map);
-        return Result.buildSucc(diskInfo == null?UNKNOWN_SIZE:fileSizeStr(count * diskInfo.v1()));
+        return Result.buildSucc(nodeSpec);
     }
 
     @Override
@@ -622,32 +607,8 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
                 .stream().map(ClusterLogic::getName).collect(Collectors.toList()));
     }
 
-/**************************************************** private method ****************************************************/
-    //todo:放到工具類，使用原來的
-    public static final double KB = 1024.0;
 
-    public static String fileSizeStr(double fileLength) {
-        if (fileLength / KB >= 1 && fileLength / KB <= 1024) {
-            double len = fileLength / KB;
-            len = Math.round(len * 100.00) / 100.00;
-            return len + "KB";
-        } else if (fileLength / KB / KB >= 1 && fileLength / KB / KB <= 1024) {
-            double len = fileLength / KB / KB;
-            len = Math.round(len * 100.00) / 100.00;
-            return len + "M";
-        } else if (fileLength >= 0 && fileLength <= 1024) {
-            return fileLength + "b";
-        } else if (fileLength / KB / KB / KB >= 1 && fileLength / KB / KB / KB <= 1024) {
-            double len = fileLength / KB / KB / KB;
-            len = Math.round(len * 100.00) / 100.00;
-            return len + "G";
-        } else if (fileLength / KB / KB / KB / KB >= 1 && fileLength / KB / KB / KB / KB <= 1024) {
-            double len = fileLength / KB / KB / KB / KB;
-            len = Math.round(len * 100.00) / 100.00;
-            return len + "T";
-        }
-        return fileLength + "B";
-    }
+/**************************************************** private method ****************************************************/
     /**
      * 获取map中第⼀个数据值
      *

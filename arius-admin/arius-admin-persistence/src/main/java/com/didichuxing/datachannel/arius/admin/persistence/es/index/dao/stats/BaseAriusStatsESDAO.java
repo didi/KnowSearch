@@ -1,19 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.AVG;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.DOUBLE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.FIELD;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.HIST;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.INT;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.KEY;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.LONG;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.METRICS;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.PERCENTILES;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.STATIS;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.TIME_STAMP;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.VALUE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.VALUES;
-
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONPath;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.MetricsContent;
@@ -34,6 +20,11 @@ import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESAggr
 import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESBucket;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import lombok.NoArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
+
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
@@ -41,10 +32,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.Collectors;
-import lombok.NoArgsConstructor;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Value;
+
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.*;
+import static com.didichuxing.datachannel.arius.admin.common.util.MetricsUtils.getAvgValue;
+import static com.didichuxing.datachannel.arius.admin.common.util.MetricsUtils.getMaxValue;
 
 @NoArgsConstructor
 public class BaseAriusStatsESDAO extends BaseESDAO {
@@ -83,6 +74,12 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
     protected static final String                                         DEFAULT_AGG        = "avg";
     public static final String                                            INDEX_INDEX_TOTAL_DIFF = "indexing-index_total";
     public static final String                                            SEARCH_QUERY_TOTAL_DIFF = "search-query_total";
+
+    public static final String                                            STEP_INTERVAL = "1m";
+    public static final String                                            STEP_METHOD_AVG =  "avg";
+    public static final String                                            STEP_METHOD_MAX =  "max";
+
+
 
     /**
      * 不同维度es监控数据
@@ -371,14 +368,14 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
     void mergeTopNuWithStep(VariousLineChartMetrics variousLineChartsMetrics, Integer topNu,String topMethod) {
         List<MetricsContent> sortedList = new ArrayList<>();
         switch (topMethod){
-            case "avg":
+            case STEP_METHOD_AVG:
                 sortedList = variousLineChartsMetrics.getMetricsContents()
                         .stream()
                         .sorted(Comparator.comparing(x -> getAvgValue(x.getMetricsContentCells()), Comparator.reverseOrder()))
                         .limit(topNu != null ? topNu : 0)
                         .collect(Collectors.toList());
                 break;
-            case "max":
+            case STEP_METHOD_MAX:
                 sortedList = variousLineChartsMetrics.getMetricsContents()
                         .stream()
                         .sorted(Comparator.comparing(x -> getMaxValue(x.getMetricsContentCells()), Comparator.reverseOrder()))
@@ -392,34 +389,6 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
         variousLineChartsMetrics.setMetricsContents(sortedList);
     }
 
-    /**
-     *  获取最大值
-     * @param cells
-     * @return
-     */
-    private double getMaxValue(List<MetricsContentCell> cells){
-        double value = 0d;
-        for (int i = 0; i < cells.size(); i++) {
-            if (value<cells.get(i).getValue()){
-                value = cells.get(i).getValue();
-            }
-        }
-        return  value;
-    }
-
-    /**
-     *  获取平均值
-     *  todo:修改
-     * @param cells
-     * @return
-     */
-    private double getAvgValue(List<MetricsContentCell> cells){
-        double value = 0d;
-        for (int i = 0; i < cells.size(); i++) {
-            value += cells.get(i).getValue();
-        }
-        return  value/cells.size();
-    }
 
     /**
      * 根据第一个时间点的值进行倒排，取topNu
@@ -892,6 +861,7 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
         String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTime, endTime);
 
         return gatewayClient.performRequestWithRouting(metadataClusterName, null,
-                realIndexName, TYPE, dsl, s -> s.getHits().getHits().size() > 0 ? ((Map<String, Long>)s.getHits().getHits().get(0).getSource()).get("timestamp") : null, 3);
+                realIndexName, TYPE, dsl, s -> s.getHits().getHits().size() > 0 ? ((Map<String, Long>) s.getHits().getHits().get(0).getSource()).get("timestamp") : null,
+                3);
     }
 }

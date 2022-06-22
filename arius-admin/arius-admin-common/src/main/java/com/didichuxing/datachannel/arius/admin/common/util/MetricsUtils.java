@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.MetricsContentCell;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.top.MetricsContentVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.top.VariousLineChartMetricsVO;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
@@ -231,6 +232,35 @@ public class MetricsUtils {
         }
 
         return (currentTimeValue / lastTimeValue) >= UPRUSH_THRESHOLD ? currentTimeValue : 0d;
+    }
+
+    /**
+     *  获取最大值
+     * @param cells
+     * @return
+     */
+    public static double getMaxValue(List<MetricsContentCell> cells){
+        double value = 0d;
+        for (int i = 0; i < cells.size(); i++) {
+            if (value<cells.get(i).getValue()){
+                value = cells.get(i).getValue();
+            }
+        }
+        return  value;
+    }
+
+    /**
+     *  获取平均值
+     *  todo:修改
+     * @param cells
+     * @return
+     */
+    public static double getAvgValue(List<MetricsContentCell> cells){
+        double value = 0d;
+        for (int i = 0; i < cells.size(); i++) {
+            value += cells.get(i).getValue();
+        }
+        return  value/cells.size();
     }
 
 }

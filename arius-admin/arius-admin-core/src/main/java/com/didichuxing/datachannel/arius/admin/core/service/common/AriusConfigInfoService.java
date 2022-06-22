@@ -139,4 +139,5 @@ public interface AriusConfigInfoService {
      */
     <T> T objectSetting(String group, String name, T defaultValue, Class<T> clazz);
 
+    List<AriusConfigInfo> getDashboardThreshold(String s);
 }

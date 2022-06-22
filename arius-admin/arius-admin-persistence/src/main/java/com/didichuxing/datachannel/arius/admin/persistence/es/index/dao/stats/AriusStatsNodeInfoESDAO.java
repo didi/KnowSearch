@@ -393,18 +393,25 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
      * @param endTime          结束时间
      * @return
      */
-    private List<TopMetrics> getTopNNodeMetricsInfoWithStep(String clusterPhyName, List<String> metricsTypes, Integer topNu,String topMethod,Integer topTimeStep,
+    private List<TopMetrics> getTopNNodeMetricsInfoWithStep(String clusterPhyName, List<String> metricsTypes, Integer topNu, String topMethod, Integer topTimeStep,
                                                             String aggType, int esNodesMaxNum, Long startTime, Long endTime) {
 
         int retryTime = 0;
         List<VariousLineChartMetrics> variousLineChartMetrics = new ArrayList<>();
+        do {
             // 获取有数据的第一个时间点
             Long timePoint = getHasDataTime(clusterPhyName, startTime, endTime, DslsConstant.GET_HAS_NODE_METRICS_DATA_TIME);
             //没有数据则提前终止
-            if (null == timePoint) { return new ArrayList<>();}
+            if (null == timePoint) {
+                return new ArrayList<>();
+            }
 
-            long startTimeForOneInterval    = timePoint-topTimeStep*60*1000;
-            long endTimeForOneInterval      = timePoint;
+            long startTimeForOneInterval = timePoint - topTimeStep * 60 * 1000;
+            long endTimeForOneInterval = timePoint;
+
+//            long startTimeForOneInterval = 1655875858706L;
+//            long endTimeForOneInterval = 1655879458706L;
+
             //提出來，專用top
             String interval = "1m";
 
@@ -415,8 +422,8 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
                     endTimeForOneInterval);
 
             variousLineChartMetrics = gatewayClient.performRequestWithRouting(metadataClusterName, null,
-                    realIndexName, TYPE, dsl, s -> fetchMultipleAggMetricsWithStep(s, null, metricsTypes, topNu,topMethod), 3);
-
+                    realIndexName, TYPE, dsl, s -> fetchMultipleAggMetricsWithStep(s, null, metricsTypes, topNu, topMethod), 3);
+        } while (retryTime++ > 3 && CollectionUtils.isEmpty(variousLineChartMetrics));
         return variousLineChartMetrics.stream().map(this::buildTopMetrics).collect(Collectors.toList());
     }
 
