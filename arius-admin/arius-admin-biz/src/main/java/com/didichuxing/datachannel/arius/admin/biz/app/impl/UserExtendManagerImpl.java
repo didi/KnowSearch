@@ -114,7 +114,7 @@ public class UserExtendManagerImpl implements UserExtendManager {
 			userVO.setPermissionTreeVO(permissionService.buildPermissionTreeWithHas(hasPermissionIdList));
 		}
 		
-		return Result.buildSucc();
+		return Result.buildSucc(userVO);
 	}
 	
 	/**
