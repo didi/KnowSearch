@@ -1,10 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.common.event.metrics;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESDataTempBean;
-import org.springframework.context.ApplicationEvent;
-
-import java.util.List;
-
 public class MetricsMonitorCollectTimeEvent extends MetaDataMetricsEvent {
 
     private String cluster;

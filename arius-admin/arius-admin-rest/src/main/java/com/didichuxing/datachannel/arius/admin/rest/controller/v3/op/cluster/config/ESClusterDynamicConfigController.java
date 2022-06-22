@@ -2,9 +2,11 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.cluster.co
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
 
+import com.didiglobal.logi.security.util.HttpRequestUtil;
 import java.util.Map;
 import java.util.Set;
 
+import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,8 +38,8 @@ public class ESClusterDynamicConfigController {
     
     @PutMapping("")
     @ApiOperation(value = "更新集群配置项的信息")
-    public Result<Boolean> updateDynamicConfig(@RequestBody ClusterSettingDTO param) {
-        return clusterPhyManager.updatePhyClusterDynamicConfig(param);
+    public Result<Boolean> updateDynamicConfig(HttpServletRequest request,@RequestBody ClusterSettingDTO param) {
+        return clusterPhyManager.updatePhyClusterDynamicConfig(param, HttpRequestUtil.getOperator(request));
     }
 
     @GetMapping("/attributes/{cluster}")

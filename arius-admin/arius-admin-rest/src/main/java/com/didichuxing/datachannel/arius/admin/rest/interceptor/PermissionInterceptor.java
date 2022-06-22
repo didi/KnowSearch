@@ -1,25 +1,37 @@
 package com.didichuxing.datachannel.arius.admin.rest.interceptor;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.GlobalParams;
-import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
-import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
-import com.didichuxing.datachannel.arius.admin.core.service.extend.login.LoginService;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.HEALTH;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.SWAGGER;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V2_THIRD_PART;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_SECURITY;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_THIRD_PART;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_WHITE_PART;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_COMMON_GROUP;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.REQUEST_INTERCEPTOR_SWITCH_OPEN;
+import static com.didiglobal.logi.security.common.constant.Constants.API_PREFIX;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.GlobalParams;
+import com.didichuxing.datachannel.arius.admin.common.exception.OperateForbiddenException;
+import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
+import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.logi.security.common.enums.ResultCode;
+import com.didiglobal.logi.security.exception.LogiSecurityException;
+import com.didiglobal.logi.security.service.LoginService;
+import com.didiglobal.logi.security.service.ProjectService;
+import com.didiglobal.logi.security.util.HttpRequestUtil;
+import com.google.common.collect.Lists;
+import java.util.List;
+import java.util.Objects;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.SWAGGER;
-import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_COMMON_GROUP;
-import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.REQUEST_INTERCEPTOR_SWITCH_OPEN;
 
 /**
  * 登陆拦截 && 权限校验
@@ -29,7 +41,9 @@ public class PermissionInterceptor implements HandlerInterceptor {
     private static final ILog      LOGGER = LogFactory.getLog(PermissionInterceptor.class);
 
     @Autowired
-    private LoginService           loginService;
+    private LoginService loginService;
+    @Autowired
+    private ProjectService projectService;
 
     @Autowired
     private AriusConfigInfoService ariusConfigInfoService;
@@ -44,6 +58,7 @@ public class PermissionInterceptor implements HandlerInterceptor {
 
         if (hasNoInterceptor(request)) {
             return true;
+
         }
 
         String classRequestMappingValue = null;
@@ -54,14 +69,16 @@ public class PermissionInterceptor implements HandlerInterceptor {
                 "class=PermissionInterceptor||method=preHandle||uri={}||msg=parse class request-mapping failed",
                 request.getRequestURI(), e);
         }
-
-        return loginService.interceptorCheck(request, response, classRequestMappingValue);
+        List<String> whiteMappingValues = Lists.newArrayList(HEALTH,  V2_THIRD_PART, V3_THIRD_PART,
+                 V3_WHITE_PART);
+    
+        return loginService.interceptorCheck(request, response, classRequestMappingValue,whiteMappingValues);
     }
 
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
         GlobalParams.CURRENT_USER.remove();
-        GlobalParams.CURRENT_APPID.remove();
+        GlobalParams.CURRENT_PROJECT_ID.remove();
     }
 
     /**
@@ -98,6 +115,19 @@ public class PermissionInterceptor implements HandlerInterceptor {
 
         if (request.getServletPath().contains(SWAGGER)) {
             return Boolean.TRUE;
+        }
+         List<String> whiteMappingValues = Lists.newArrayList(HEALTH,  V2_THIRD_PART, V3_THIRD_PART,
+                 V3_WHITE_PART,API_PREFIX,V3_SECURITY);
+        //排除admin中接口中含有/logi-security 或者/v3/project 之后，对于原本属于admin中的接口进行header设置，保证项目视角到存在header
+        if (whiteMappingValues.stream().noneMatch(whiteMappingValue -> request.getServletPath().startsWith(whiteMappingValue))) {
+            final Integer projectId = HttpRequestUtil.getProjectId(request);
+            if (Objects.isNull(projectId)) {
+                throw new OperateForbiddenException(
+                        String.format("请携带项目信息,HTTP_HEADER_KEY:%s", HttpRequestUtil.PROJECT_ID));
+            }
+            if (!projectService.checkProjectExist(projectId)) {
+                throw new LogiSecurityException(ResultCode.PROJECT_NOT_EXISTS);
+            }
         }
 
         boolean interceptorSwitch = ariusConfigInfoService.booleanSetting(ARIUS_COMMON_GROUP,

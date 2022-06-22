@@ -17,6 +17,7 @@ public class JoinLogContext {
     private String exceptionName;
     private String stack;
     private int appid;
+    private int projectId;
     private String ariusType;
     private String traceid;
     private String requestId;

@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.QueryDslLimitEditOrderDetail;
@@ -15,6 +14,7 @@ import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandle
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.QueryDslLimitEditContent;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.DslQueryLimit;
 import com.didichuxing.datachannel.arius.admin.metadata.service.DslStatisService;
+import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -50,7 +50,7 @@ public class QueryDslLimitEditHandler extends BaseWorkOrderHandler {
     }
 
     @Override
-    public List<AriusUserInfo> getApproverList(AbstractOrderDetail detail) {
+    public List<UserBriefVO> getApproverList(AbstractOrderDetail detail) {
         return getRDOrOPList();
     }
 
@@ -132,7 +132,7 @@ public class QueryDslLimitEditHandler extends BaseWorkOrderHandler {
             QueryDslLimitEditContent.class);
 
         DslQueryLimit dslQueryLimit = new DslQueryLimit();
-        dslQueryLimit.setAppid(workOrder.getSubmitorAppid());
+        dslQueryLimit.setProjectId(workOrder.getSubmitorProjectId());
         dslQueryLimit.setQueryLimit(content.getQueryLimit());
         dslQueryLimit.setDslTemplateMd5(content.getDslTemplateMd5());
 

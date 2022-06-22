@@ -15,6 +15,7 @@ import java.util.List;
 public class AppDetailResponse {
 	private int id;
 	private String name;
+	private Integer projectId;
 	private List<String> indexExp;
 	private List<String> windexExp;
 	private String verifyCode;

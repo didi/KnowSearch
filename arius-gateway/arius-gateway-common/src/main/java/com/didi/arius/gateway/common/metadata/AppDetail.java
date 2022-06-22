@@ -13,6 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 public class AppDetail {
     private int id;
+    private Integer projectId;
 
     /**
      * appid授权的索引列表

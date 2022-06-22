@@ -14,6 +14,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv.Unava
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.google.common.collect.Lists;
@@ -45,7 +46,7 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<Templa
     private TemplateSrvManager            templateSrvManager;
 
     @Override
-    protected Result<Boolean> checkCondition(TemplateQueryDTO condition, Integer appId) {
+    protected Result<Boolean> checkCondition(TemplateQueryDTO condition, Integer projectId) {
 
         String templateName = condition.getName();
         if (!AriusObjUtils.isBlack(templateName) && (templateName.startsWith("*") || templateName.startsWith("?"))) {
@@ -56,12 +57,12 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<Templa
     }
 
     @Override
-    protected void initCondition(TemplateQueryDTO condition, Integer appId) {
+    protected void initCondition(TemplateQueryDTO condition, Integer projectId) {
         // nothing to do
     }
 
     @Override
-    protected PaginationResult<TemplateWithSrvVO> buildPageData(TemplateQueryDTO condition, Integer appId) {
+    protected PaginationResult<TemplateWithSrvVO> buildPageData(TemplateQueryDTO condition, Integer projectId) {
         // 注意这里的condition是物理集群
         Integer totalHit;
         List<IndexTemplate> matchIndexTemplateList;
@@ -79,7 +80,7 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<Templa
     }
     /******************************************private***********************************************/
     /**
-     * 根据模板Id、名称、归属AppId、归属物理集群等进行组合查询
+     * 根据模板Id、名称、归属projectId、归属物理集群等进行组合查询
      *
      * @param condition
      * @return
@@ -100,8 +101,8 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<Templa
             matchIndexTemplates = matchIndexTemplates.stream().filter(r -> r.getName().contains(condition.getName())).collect(Collectors.toList());
         }
 
-        if (null != condition.getAppId()) {
-            matchIndexTemplates = matchIndexTemplates.stream().filter(r -> r.getAppId().equals(condition.getAppId())).collect(Collectors.toList());
+        if (null != condition.getProjectId()) {
+            matchIndexTemplates = matchIndexTemplates.stream().filter(r -> r.getProjectId().equals(condition.getProjectId())).collect(Collectors.toList());
         }
         return matchIndexTemplates;
     }

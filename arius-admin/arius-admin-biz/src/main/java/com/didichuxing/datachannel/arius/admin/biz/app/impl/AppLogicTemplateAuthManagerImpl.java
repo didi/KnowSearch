@@ -1,5 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.app.impl;
 
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
+import com.didiglobal.logi.security.service.ProjectService;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -9,77 +11,78 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.didichuxing.datachannel.arius.admin.biz.app.AppLogicTemplateAuthManager;
+import com.didichuxing.datachannel.arius.admin.biz.app.ProjectLogicTemplateAuthManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.AppTemplateAuthDTO;
-import com.didichuxing.datachannel.arius.admin.common.constant.app.AppTemplateAuthEnum;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppTemplateAuth;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectTemplateAuthDTO;
+import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectTemplateAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectTemplateAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppLogicTemplateAuthService;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
+import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectLogicTemplateAuthService;
 
 /**
  * Created by linyunan on 2021-06-15
  */
 @Component
-public class AppLogicTemplateAuthManagerImpl implements AppLogicTemplateAuthManager {
+public class AppLogicTemplateAuthManagerImpl implements ProjectLogicTemplateAuthManager {
 
     @Autowired
-    private AppLogicTemplateAuthService appLogicTemplateAuthService;
-
+    private ProjectLogicTemplateAuthService projectLogicTemplateAuthService;
     @Autowired
-    private AppService                  appService;
+    private ProjectService                  projectService;
+
+  
 
     @Override
-    public List<AppTemplateAuth> getTemplateAuthListByTemplateListAndAppId(Integer appId,
-                                                                           List<IndexTemplate> indexTemplateList) {
-        List<AppTemplateAuth> appTemplateAuthList = Lists.newArrayList();
+    public List<ProjectTemplateAuth> getTemplateAuthListByTemplateListAndProjectId(Integer projectId,
+                                                                                   List<IndexTemplate> indexTemplateList) {
+        List<ProjectTemplateAuth> projectTemplateAuthList = Lists.newArrayList();
         if (CollectionUtils.isEmpty(indexTemplateList)) {
-            return appTemplateAuthList;
+            return projectTemplateAuthList;
         }
 
-        if (!appService.isAppExists(appId)) {
-            appTemplateAuthList = indexTemplateList.stream()
-                .map(r -> appLogicTemplateAuthService.buildTemplateAuth(r, AppTemplateAuthEnum.NO_PERMISSION))
+        if (!projectService.checkProjectExist(projectId)) {
+            projectTemplateAuthList = indexTemplateList.stream()
+                .map(r -> projectLogicTemplateAuthService.buildTemplateAuth(r, ProjectTemplateAuthEnum.NO_PERMISSION))
                 .collect(Collectors.toList());
-            return appTemplateAuthList;
+            return projectTemplateAuthList;
         }
-
-        if (appService.isSuperApp(appId)) {
-            appTemplateAuthList = indexTemplateList.stream()
-                .map(r -> appLogicTemplateAuthService.buildTemplateAuth(r, AppTemplateAuthEnum.OWN))
+        //判断是否为超级应用
+        if (AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
+            projectTemplateAuthList = indexTemplateList.stream()
+                .map(r -> projectLogicTemplateAuthService.buildTemplateAuth(r, ProjectTemplateAuthEnum.OWN))
                 .collect(Collectors.toList());
-            return appTemplateAuthList;
+            return projectTemplateAuthList;
         }
 
-        List<AppTemplateAuth> appActiveTemplateRWAuths = appLogicTemplateAuthService.getAppActiveTemplateRWAndRAuths(appId);
-        Map<Integer, AppTemplateAuth> templateId2AppTemplateAuthMap = ConvertUtil.list2Map(appActiveTemplateRWAuths,
-            AppTemplateAuth::getTemplateId);
+        List<ProjectTemplateAuth> appActiveTemplateRWAuths = projectLogicTemplateAuthService.getProjectActiveTemplateRWAndRAuths(
+                projectId);
+        Map<Integer, ProjectTemplateAuth> templateId2AppTemplateAuthMap = ConvertUtil.list2Map(appActiveTemplateRWAuths,
+            ProjectTemplateAuth::getTemplateId);
 
         for (IndexTemplate indexTemplate : indexTemplateList) {
             Integer templateLogicId = indexTemplate.getId();
-            if (null != appId && appId.equals(indexTemplate.getAppId())) {
-                appTemplateAuthList.add(
-                    appLogicTemplateAuthService.buildTemplateAuth(indexTemplate, AppTemplateAuthEnum.OWN));
+            if (null != projectId && projectId.equals(indexTemplate.getProjectId())) {
+                projectTemplateAuthList.add(
+                    projectLogicTemplateAuthService.buildTemplateAuth(indexTemplate, ProjectTemplateAuthEnum.OWN));
                 continue;
             }
 
             if (null != templateLogicId && templateId2AppTemplateAuthMap.containsKey(templateLogicId)) {
-                appTemplateAuthList.add(templateId2AppTemplateAuthMap.get(templateLogicId));
+                projectTemplateAuthList.add(templateId2AppTemplateAuthMap.get(templateLogicId));
                 continue;
             }
 
-            appTemplateAuthList.add(appLogicTemplateAuthService.buildTemplateAuth(indexTemplate,
-                AppTemplateAuthEnum.NO_PERMISSION));
+            projectTemplateAuthList.add(projectLogicTemplateAuthService.buildTemplateAuth(indexTemplate,
+                ProjectTemplateAuthEnum.NO_PERMISSION));
         }
 
-        return appTemplateAuthList;
+        return projectTemplateAuthList;
     }
 
     @Override
-    public Result<Void> updateTemplateAuth(AppTemplateAuthDTO authDTO, String operator) {
+    public Result<Void> updateTemplateAuth(ProjectTemplateAuthDTO authDTO, String operator) {
         if (AriusObjUtils.isNull(authDTO)) {
             return Result.buildFail("更新权限信息不存在");
         }
@@ -88,29 +91,29 @@ public class AppLogicTemplateAuthManagerImpl implements AppLogicTemplateAuthMana
             return Result.buildFail("更新权限类型不存在");
         }
 
-        List<Integer> appTemplateAuthCodes = AppTemplateAuthEnum.listAppTemplateAuthCodes();
+        List<Integer> appTemplateAuthCodes = ProjectTemplateAuthEnum.listAppTemplateAuthCodes();
         if (!appTemplateAuthCodes.contains(authDTO.getType())) {
             return Result.buildFail("更新权限类型不支持");
         }
 
-        AppTemplateAuth appTemplateAuth = appLogicTemplateAuthService
-            .getTemplateRWAuthByLogicTemplateIdAndAppId(authDTO.getTemplateId(), authDTO.getAppId());
+        ProjectTemplateAuth projectTemplateAuth = projectLogicTemplateAuthService
+            .getTemplateRWAuthByLogicTemplateIdAndProjectId(authDTO.getTemplateId(), authDTO.getProjectId());
 
-        if (AriusObjUtils.isNull(appTemplateAuth)) {
+        if (AriusObjUtils.isNull(projectTemplateAuth)) {
             return Result.buildFail("权限信息不存在");
         }
 
-        if (AriusObjUtils.isNull(appTemplateAuth.getType())) {
+        if (AriusObjUtils.isNull(projectTemplateAuth.getType())) {
             return Result.buildFail("权限信息不存在");
         }
 
-        if (authDTO.getType().equals(appTemplateAuth.getType())) {
+        if (authDTO.getType().equals(projectTemplateAuth.getType())) {
             return Result.buildSucc();
         }
 
-        appTemplateAuth.setType(authDTO.getType());
-        appTemplateAuth.setResponsible(authDTO.getResponsible());
-        return appLogicTemplateAuthService
-            .updateTemplateAuth(ConvertUtil.obj2Obj(appTemplateAuth, AppTemplateAuthDTO.class), operator);
+        projectTemplateAuth.setType(authDTO.getType());
+        projectTemplateAuth.setResponsible(authDTO.getResponsible());
+        return projectLogicTemplateAuthService
+            .updateTemplateAuth(ConvertUtil.obj2Obj(projectTemplateAuth, ProjectTemplateAuthDTO.class), operator);
     }
 }

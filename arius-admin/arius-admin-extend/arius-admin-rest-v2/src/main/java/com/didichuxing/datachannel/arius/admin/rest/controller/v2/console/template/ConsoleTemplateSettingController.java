@@ -13,12 +13,20 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateSettingDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhySettings;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
-import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
-
+import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import javax.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(V2_CONSOLE + "/template/setting")
@@ -35,12 +43,12 @@ public class ConsoleTemplateSettingController extends BaseConsoleTemplateControl
     @Deprecated
     public Result<Void> modifySetting(HttpServletRequest request,
                                 @RequestBody ConsoleTemplateSettingDTO settingDTO) throws AdminOperateException {
-        Result<Void> checkAuthResult = checkAppAuth(settingDTO.getLogicId(), HttpRequestUtils.getAppId(request));
+        Result<Void> checkAuthResult = checkAppAuth(settingDTO.getLogicId(), HttpRequestUtil.getProjectId(request));
         if (checkAuthResult.failed()) {
             return checkAuthResult;
         }
 
-        return templateLogicSettingsManager.modifySetting(settingDTO, HttpRequestUtils.getOperator(request));
+        return templateLogicSettingsManager.modifySetting(settingDTO, HttpRequestUtil.getOperator(request));
     }
 
     @GetMapping("")

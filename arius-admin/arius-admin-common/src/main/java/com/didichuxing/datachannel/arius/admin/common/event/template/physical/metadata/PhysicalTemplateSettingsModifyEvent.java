@@ -10,8 +10,8 @@ import java.util.List;
  * @date 2020/09/02
  */
 public class PhysicalTemplateSettingsModifyEvent extends PhysicalMetaDataModifyEvent {
-    private final Integer appId;
-    private final String cluster;
+    private final Integer projectId;
+    private final String  cluster;
     private final String templateName;
     private final List<String> receivers;
     private final IndexTemplatePhySettings beforeUpdateSettings;
@@ -20,14 +20,14 @@ public class PhysicalTemplateSettingsModifyEvent extends PhysicalMetaDataModifyE
 
     public PhysicalTemplateSettingsModifyEvent(
             Object source,
-            Integer appId,
+            Integer projectId,
             String cluster,
             String templateName,
             List<String> receivers,
             IndexTemplatePhySettings beforeUpdateSettings,
             IndexTemplatePhySettings afterUpdateSettings) {
         super(source);
-        this.appId = appId;
+        this.projectId = projectId;
         this.cluster = cluster;
         this.templateName = templateName;
         this.receivers = receivers;
@@ -35,8 +35,8 @@ public class PhysicalTemplateSettingsModifyEvent extends PhysicalMetaDataModifyE
         this.afterUpdateSettings = afterUpdateSettings;
     }
 
-    public Integer getAppId() {
-        return this.appId;
+    public Integer getProjectId() {
+        return this.projectId;
     }
 
     public String getCluster() {

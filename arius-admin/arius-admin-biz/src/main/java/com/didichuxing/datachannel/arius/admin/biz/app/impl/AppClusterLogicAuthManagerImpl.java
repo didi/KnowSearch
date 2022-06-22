@@ -1,66 +1,65 @@
 package com.didichuxing.datachannel.arius.admin.biz.app.impl;
 
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
+import com.didichuxing.datachannel.arius.admin.biz.app.ProjectClusterLogicAuthManager;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectClusterLogicAuth;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectClusterLogicAuthEnum;
+import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectClusterLogicAuthService;
+import com.didiglobal.logi.security.service.ProjectService;
+import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
-import com.didichuxing.datachannel.arius.admin.biz.app.AppClusterLogicAuthManager;
-import com.didichuxing.datachannel.arius.admin.common.constant.app.AppClusterLogicAuthEnum;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppClusterLogicAuth;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppClusterLogicAuthService;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
-import com.google.common.collect.Lists;
 
 /**
  * @author linyunan
  * @date 2021-04-28
  */
 @Component
-public class AppClusterLogicAuthManagerImpl implements AppClusterLogicAuthManager {
+public class AppClusterLogicAuthManagerImpl implements ProjectClusterLogicAuthManager {
     @Autowired
-    private AppService                 appService;
+    private ProjectService projectService;
 
     @Autowired
-    private AppClusterLogicAuthService appClusterLogicAuthService;
+    private ProjectClusterLogicAuthService projectClusterLogicAuthService;
 
     @Override
-    public List<AppClusterLogicAuth> getByClusterLogicListAndAppId(Integer appId, List<ClusterLogic> clusterLogicList) {
-        List<AppClusterLogicAuth> appClusterLogicAuthList = Lists.newArrayList();
+    public List<ProjectClusterLogicAuth> getByClusterLogicListAndProjectId(Integer projectId, List<ClusterLogic> clusterLogicList) {
+        List<ProjectClusterLogicAuth> projectClusterLogicAuthList = Lists.newArrayList();
         if (CollectionUtils.isEmpty(clusterLogicList)) {
-            return appClusterLogicAuthList;
+            return projectClusterLogicAuthList;
         }
 
-        if (!appService.isAppExists(appId)) {
-            appClusterLogicAuthList = clusterLogicList
+        if (!projectService.checkProjectExist(projectId)) {
+            projectClusterLogicAuthList = clusterLogicList
                     .stream()
-                    .map(r -> appClusterLogicAuthService.buildClusterLogicAuth(appId, r.getId(), AppClusterLogicAuthEnum.NO_PERMISSIONS))
+                    .map(r -> projectClusterLogicAuthService.buildClusterLogicAuth(projectId, r.getId(), ProjectClusterLogicAuthEnum.NO_PERMISSIONS))
                     .collect(Collectors.toList());
-            return appClusterLogicAuthList;
+            return projectClusterLogicAuthList;
         }
 
-        if (appService.isSuperApp(appId)) {
-            appClusterLogicAuthList = clusterLogicList
+        if (AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
+            projectClusterLogicAuthList = clusterLogicList
                     .stream()
-                    .map(r -> appClusterLogicAuthService.buildClusterLogicAuth(appId, r.getId(), AppClusterLogicAuthEnum.OWN))
+                    .map(r -> projectClusterLogicAuthService.buildClusterLogicAuth(projectId, r.getId(), ProjectClusterLogicAuthEnum.OWN))
                     .collect(Collectors.toList());
-            return appClusterLogicAuthList;
+            return projectClusterLogicAuthList;
         }
 
-        appClusterLogicAuthList = clusterLogicList
+        projectClusterLogicAuthList = clusterLogicList
                             .stream()
-                            .map(clusterLogic -> appClusterLogicAuthService.getLogicClusterAuth(appId, clusterLogic.getId()))
+                            .map(clusterLogic -> projectClusterLogicAuthService.getLogicClusterAuth(projectId, clusterLogic.getId()))
                             .collect(Collectors.toList());
 
         //处理无权限
-        for (AppClusterLogicAuth appClusterLogicAuth : appClusterLogicAuthList) {
-            if (null == appClusterLogicAuth.getType()) {
-                appClusterLogicAuth.setType(AppClusterLogicAuthEnum.NO_PERMISSIONS.getCode());
+        for (ProjectClusterLogicAuth projectClusterLogicAuth : projectClusterLogicAuthList) {
+            if (null == projectClusterLogicAuth.getType()) {
+                projectClusterLogicAuth.setType(ProjectClusterLogicAuthEnum.NO_PERMISSIONS.getCode());
             }
         }
-        return appClusterLogicAuthList;
+        return projectClusterLogicAuthList;
     }
 }

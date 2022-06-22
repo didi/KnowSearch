@@ -3,16 +3,6 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.task;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-
-import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.worktask.OpTaskManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -20,16 +10,30 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.TaskTypeVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.WorkTaskVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 
+import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import javax.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * @author fengqiongfeng
@@ -37,7 +41,7 @@ import io.swagger.annotations.ApiOperation;
  */
 @Api(tags = "任务相关接口(REST)")
 @RestController
-@RequestMapping({V3_OP + "/worktask",V3 + "/op-task"})
+@RequestMapping({ V3_OP + "/worktask", V3 + "/op-task"})
 public class OpTaskController {
     private static final ILog LOGGER = LogFactory.getLog(OpTaskController.class);
 
@@ -63,10 +67,10 @@ public class OpTaskController {
     @ApiOperation(value = "提交任务接口", notes = "")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "path", dataType = "String", name = "type", value = "任务类型", required = true) })
     public Result<WorkTaskVO> submit(HttpServletRequest request,
-                                               @PathVariable(value = "type") Integer type,
-                                               @RequestBody OpTaskDTO workTaskDTO) {
+                                     @PathVariable(value = "type") Integer type,
+                                     @RequestBody OpTaskDTO workTaskDTO) {
         String dataCenter = workTaskDTO.getDataCenter();
-        String user = HttpRequestUtils.getOperator(request);
+        String user = HttpRequestUtil.getOperator(request);
 
         workTaskDTO.setTaskType(type);
         workTaskDTO.setCreator(user);
@@ -110,7 +114,7 @@ public class OpTaskController {
     public Result<WorkTaskVO> addTask(HttpServletRequest request, @PathVariable(value = "type") String code,
                                      @RequestBody OpTaskDTO opTaskDTO) {
         String dataCenter = opTaskDTO.getDataCenter();
-        String user = HttpRequestUtils.getOperator(request);
+        String user = HttpRequestUtil.getOperator(request);
 
         opTaskDTO.setTaskType(OpTaskTypeEnum.valueOfPath(code).getType());
         opTaskDTO.setCreator(user);

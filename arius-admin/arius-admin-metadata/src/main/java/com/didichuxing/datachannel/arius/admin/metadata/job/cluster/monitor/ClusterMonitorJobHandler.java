@@ -4,7 +4,6 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConst
 import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.PHY_CLUSTER;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStats;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStatsCells;
@@ -22,7 +21,6 @@ import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpHostUtil;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.monitortask.AriusMetaJobClusterDistributeService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
@@ -34,6 +32,7 @@ import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats.Ar
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats.AriusStatsNodeInfoESDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.template.TemplateAccessESDAO;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.ESClusterHealthResponse;
+import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import java.util.HashMap;
@@ -47,7 +46,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,7 +68,7 @@ public class ClusterMonitorJobHandler extends AbstractMetaDataJob {
     private IndexTemplatePhyService indexTemplatePhyService;
 
     @Autowired
-    private AppService               appService;
+    private ProjectService projectService;
 
     @Autowired
     private ESClusterService         esClusterService;
@@ -139,7 +137,7 @@ public class ClusterMonitorJobHandler extends AbstractMetaDataJob {
 
         final Map<String, Integer> clusterPhyName2TemplateCountMap = indexTemplatePhyService.getClusterTemplateCountMap();
 
-        int appIdCount = calcAppNu();
+        int projectIdCount = calcAppNu();
 
         Map<ClusterPhy, ESClusterHealthResponse> clusterHealthResponseMap = Maps.newConcurrentMap();
         int clusterSize = monitorCluster.size();
@@ -152,7 +150,7 @@ public class ClusterMonitorJobHandler extends AbstractMetaDataJob {
                         if (EnvUtil.getDC().getCode().equals(dataSource.getDataCenter())) {
                             ESClusterHealthResponse clusterHealthResponse = esClusterService.syncGetClusterHealth(dataSource.getCluster());
                             List<ESClusterStats> esClusterStatusList = buildEsClusterStatusWithPercentiles(clusterSize, dataSource,
-                                    clusterPhyName2TemplateCountMap, appIdCount, clusterHealthResponse);
+                                    clusterPhyName2TemplateCountMap, projectIdCount, clusterHealthResponse);
 
                             monitorMetricsSender.sendClusterStats(esClusterStatusList);
                             buildAndSendTaskStats(timestamp, dataSource);
@@ -222,18 +220,18 @@ public class ClusterMonitorJobHandler extends AbstractMetaDataJob {
      * @param clusterNum 集群数量
      * @param dataSource 集群信息
      * @param clusterPhyName2TemplateCountMap  集群中的模板数量
-     * @param appIdCount  应用数量
+     * @param projectIdCount  应用数量
      * @return 集群状态
      */
     private List<ESClusterStats> buildEsClusterStatusWithPercentiles(Integer clusterNum, ClusterPhy dataSource,
                                                                      Map<String, Integer> clusterPhyName2TemplateCountMap,
-                                                                     Integer appIdCount, ESClusterHealthResponse healthResponse) {
+                                                                     Integer projectIdCount, ESClusterHealthResponse healthResponse) {
         
         List<ESClusterStats> esClusterStatsList = Lists.newArrayList();
 
         //获取不同分位值的指标
         Map<String, ESClusterStatsCells> percentilesType2ESClusterStatsCellsMap = getPhysicalClusterStatsPercentiles(
-            dataSource, healthResponse, clusterPhyName2TemplateCountMap, appIdCount, clusterNum);
+            dataSource, healthResponse, clusterPhyName2TemplateCountMap, projectIdCount, clusterNum);
 
         percentilesType2ESClusterStatsCellsMap.forEach((percentilesType, esClusterStatsCells) -> {
             ESClusterStats esClusterStats = new ESClusterStats();
@@ -255,13 +253,13 @@ public class ClusterMonitorJobHandler extends AbstractMetaDataJob {
      * @param dataSource 集群信息
      * @param healthResponse    健康信息
      * @param clusterPhyName2TemplateCountMap   集群中模板数量
-     * @param appIdCount    应用数量
+     * @param projectIdCount    应用数量
      * @param clusterNum    集群数量
      * @return  Map<String, ESClusterStatsCells>
      */
     private Map<String, ESClusterStatsCells> getPhysicalClusterStatsPercentiles(ClusterPhy dataSource, ESClusterHealthResponse healthResponse,
                                                                                 Map<String, Integer> clusterPhyName2TemplateCountMap,
-                                                                                Integer appIdCount, Integer clusterNum) {
+                                                                                Integer projectIdCount, Integer clusterNum) {
         Map<String, ESClusterStatsCells> percentilesType2ESClusterStatsCellsMap = Maps.newHashMap();
         String clusterName = dataSource.getCluster();
         if (AriusObjUtils.isNull(clusterName)) {
@@ -270,7 +268,7 @@ public class ClusterMonitorJobHandler extends AbstractMetaDataJob {
         }
 
         ESClusterStatsCells esClusterStatsCells = buildForBasicInfo(dataSource, healthResponse,
-                clusterPhyName2TemplateCountMap, appIdCount, clusterNum);
+                clusterPhyName2TemplateCountMap, projectIdCount, clusterNum);
 
         AtomicReference<Map<String, Double>> clusterCpuAvgAndPercentilesAtomic                  = new AtomicReference<>();
         AtomicReference<Map<String, Double>> clusterDiskFreeUsagePercentAvgAndPercentilesAtomic = new AtomicReference<>();
@@ -391,13 +389,13 @@ public class ClusterMonitorJobHandler extends AbstractMetaDataJob {
      * @param dataSource 集群信息
      * @param healthResponse    健康信息
      * @param clusterPhyName2TemplateCountMap   集群中模板数量
-     * @param appIdCount    应用数量
+     * @param projectId    应用数量
      * @param clusterNum    集群数量
      * @return  ESClusterStatsCells
     */
     private ESClusterStatsCells buildForBasicInfo(ClusterPhy dataSource, ESClusterHealthResponse healthResponse,
                                                   Map<String, Integer> clusterPhyName2TemplateCountMap,
-                                                  Integer appIdCount, Integer clusterNum) {
+                                                  Integer projectId, Integer clusterNum) {
         ESClusterStatsCells esClusterStatsBean = new ESClusterStatsCells();
         if (null != healthResponse) {
             esClusterStatsBean.setStatus(healthResponse.getStatus());
@@ -411,7 +409,7 @@ public class ClusterMonitorJobHandler extends AbstractMetaDataJob {
             esClusterStatsBean.setClusterName(dataSource.getCluster());
             esClusterStatsBean.setLevel(dataSource.getLevel());
             esClusterStatsBean.setClusterNu(clusterNum);
-            esClusterStatsBean.setAppNu(appIdCount);
+            esClusterStatsBean.setAppNu(projectId);
             esClusterStatsBean.setSla(SLA);
 
             int totalTemplateNu = clusterPhyName2TemplateCountMap.getOrDefault(dataSource.getCluster(), 0);
@@ -497,8 +495,7 @@ public class ClusterMonitorJobHandler extends AbstractMetaDataJob {
      * 获取应用数量
      */
     private int calcAppNu() {
-        List<App> queryApps = appService.listApps();
-        return CollectionUtils.isEmpty(queryApps) ? 0 : queryApps.size();
+        return projectService.getProjectBriefList().size();
     }
 
     private void handleSaveClusterHealthToDB(ClusterPhy clusterPhy, ESClusterHealthResponse esClusterHealthResponse) {

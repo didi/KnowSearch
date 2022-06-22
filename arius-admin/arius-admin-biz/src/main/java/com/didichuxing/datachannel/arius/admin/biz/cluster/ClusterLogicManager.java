@@ -12,15 +12,17 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterLo
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterWithRegionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateClearDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicTemplateIndexCountVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.ecm.ESClusterNodeSepcVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import java.util.List;
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * @description: 逻辑集群manager
@@ -46,41 +48,41 @@ public interface ClusterLogicManager {
 
     /**
      * 获取APP拥有的集群列表
-     * @param appId appId
+     * @param projectId
      * @return
      */
-    Result<List<ClusterLogicVO>> getAppLogicClusters(Integer appId);
+    Result<List<ClusterLogicVO>> getProjectLogicClusters(Integer projectId);
 
     /**
-     * 获取APP拥有的逻辑集群id和名称列表
-     * @param appId 应用id
+     * 获取project拥有的逻辑集群id和名称列表
+     * @param projectId 应用id
      * @return
      */
-    Result<List<Tuple<Long/*逻辑集群Id*/, String/*逻辑集群名称*/>>> listAppClusterLogicIdsAndNames(Integer appId);
+    Result<List<Tuple<Long/*逻辑集群Id*/, String/*逻辑集群名称*/>>> listProjectClusterLogicIdsAndNames(Integer projectId);
 
     /**
      * 获取项目下的逻辑集群信息
      *
-     * @param appId 项目id
+     * @param projectId 项目id
      * @return
      */
-    Result<List<ClusterLogicVO>> getLogicClustersByProjectId(Integer appId);
+    Result<List<ClusterLogicVO>> getLogicClustersByProjectId(Integer projectId);
 
     /**
      * 获取集群详情
      * @param clusterId
-     * @param appId
+     * @param projectId
      * @return
      */
-    Result<ClusterLogicVO> getAppLogicClusters(Long clusterId, Integer appId);
+    Result<ClusterLogicVO> getProjectLogicClusters(Long clusterId, Integer projectId);
 
     /**
      * 根据项目和集群类型获取逻辑集群(项目对其有管理权限)名称列表
-     * @param appId
+     * @param projectId
      * @param type
      * @return
      */
-    Result<List<ClusterLogicVO>> getAppLogicClusterInfoByType(Integer appId, Integer type);
+    Result<List<ClusterLogicVO>> getProjectLogicClusterInfoByType(Integer projectId, Integer type);
 
 
     /**
@@ -117,18 +119,17 @@ public interface ClusterLogicManager {
     /**
      * 获取所有逻辑集群列表接口
      * @param param
-     * @param appId
+     * @param projectId
      * @return
      */
-    List<ClusterLogicVO> getClusterLogics(ESLogicClusterDTO param, Integer appId);
+    List<ClusterLogicVO> getClusterLogics(ESLogicClusterDTO param, Integer projectId);
 
     /**
      *  获取单个逻辑集群overView信息
      * @param clusterLogicId 逻辑集群id
-     * @param currentAppId 当前登录项目
-     * @return
+     * @param currentProjectId 当前登录项目
      */
-    ClusterLogicVO getClusterLogic(Long clusterLogicId, Integer currentAppId);
+    ClusterLogicVO getClusterLogic(Long clusterLogicId, Integer currentProjectId);
 
     /**
      * 新建逻辑集群, 关联 logicCluster 关联 region
@@ -139,48 +140,48 @@ public interface ClusterLogicManager {
     Result<Void> addLogicClusterAndClusterRegions(ESLogicClusterWithRegionDTO param, String operator);
 
     /**
-     *  根据逻辑集群Id和appId创建逻辑集群信息
+     *  根据逻辑集群Id和projectId创建逻辑集群信息
      * @param clusterLogicId 集群id
-     * @param appId appId
+     * @param projectId projectId
      * @return 集群详情
      */
-    ClusterLogicVO getClusterLogicByIdAndAppId(Long clusterLogicId, Integer appId);
+    ClusterLogicVO getConsoleClusterVOByIdAndProjectId(Long clusterLogicId, Integer projectId);
 
     /**
      *  新建带有region信息的逻辑集群
      * @param param 逻辑集群信息
      * @param operator 操作人
-     * @param appId appId
+     * @param projectId projectId
      * @return id
      */
-    Result<Long> addLogicCluster(ESLogicClusterDTO param, String operator, Integer appId);
+    Result<Long> addLogicCluster(ESLogicClusterDTO param, String operator, Integer projectId);
 
     /**
      * 逻辑集群下线
      * @param logicClusterId 逻辑集群id
      * @param operator 操作人
-     * @param appId appId
+     * @param projectId projectId
      * @return 成功或者失败
      * @throws AdminOperateException
      */
-    Result<Void> deleteLogicCluster(Long logicClusterId, String operator, Integer appId) throws AdminOperateException;
+    Result<Void> deleteLogicCluster(Long logicClusterId, String operator, Integer projectId) throws AdminOperateException;
 
     /**
      *  修改逻辑集群信息
      * @param param 逻辑集群dto
      * @param operator 操作人
-     * @param appId appId
+     * @param projectId projectId
      * @return 成功或者失败
      */
-    Result<Void> editLogicCluster(ESLogicClusterDTO param, String operator, Integer appId);
+    Result<Void> editLogicCluster(ESLogicClusterDTO param, String operator, Integer projectId);
 
     /**
      * 组合查询带分页信息的逻辑集群列表
      * @param condition
-     * @param appId
+     * @param projectId
      * @return
      */
-    PaginationResult<ClusterLogicVO> pageGetClusterLogics(ClusterLogicConditionDTO condition, Integer appId);
+    PaginationResult<ClusterLogicVO> pageGetClusterLogics(ClusterLogicConditionDTO condition, Integer projectId);
 
     /**
      * 更新逻辑集群状态
@@ -193,10 +194,10 @@ public interface ClusterLogicManager {
      * 获取我的集群下索引和模板的数量
      * @param clusterId
      * @param operator
-     * @param appId
+     * @param projectId
      * @return
      */
-    Result<ClusterLogicTemplateIndexCountVO> indexTemplateCount(Long clusterId, String operator, Integer appId);
+    Result<ClusterLogicTemplateIndexCountVO> indexTemplateCount(Long clusterId, String operator, Integer projectId);
 
 
     /**
@@ -216,9 +217,9 @@ public interface ClusterLogicManager {
 
     /**
      * 根据项目和集群类型获取逻辑集群(项目对其有管理权限)名称列表
-     * @param appId
+     * @param projectId
      * @param type
      * @return
      */
-    Result<List<String>> getAppLogicClusterNameByType(Integer appId, Integer type);
+    Result<List<String>> getProjectLogicClusterNameByType(Integer projectId, Integer type);
 }

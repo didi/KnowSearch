@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.rest.swagger;
 
+import com.didiglobal.logi.security.util.HttpRequestUtil;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,12 +52,6 @@ public class SwaggerConfiguration {
 
         LOGGER.info("class=SwaggerConfiguration||method=createRestApi||swagger started||env={}", envStr);
 
-        ParameterBuilder ticketPar = new ParameterBuilder();
-        List<Parameter> pars = new ArrayList<>();
-        ticketPar.name("X-SSO-USER").description("操作人").modelRef(new ModelRef("string")).parameterType("header")
-            .required(true).defaultValue("").build();
-
-        pars.add(ticketPar.build());
 
         List<ResponseMessage> responseMessageList = new ArrayList<>();
         responseMessageList.add(new ResponseMessageBuilder().code(200).message("OK；服务正常返回或者异常都返回200，通过返回结构中的code来区分异常；code为0表示操作成功，其他为异常").build());
@@ -64,11 +59,24 @@ public class SwaggerConfiguration {
 
         return new Docket(DocumentationType.SWAGGER_2).apiInfo(apiInfo()).select()
             .apis(RequestHandlerSelectors.basePackage("com.didichuxing.datachannel.arius.admin"))
-            .paths(PathSelectors.any()).build().globalOperationParameters(pars)
+            .paths(PathSelectors.any()).build().globalOperationParameters(parameters())
             .globalResponseMessage(RequestMethod.GET, responseMessageList)
             .globalResponseMessage(RequestMethod.POST, responseMessageList)
             .globalResponseMessage(RequestMethod.PUT, responseMessageList)
             .globalResponseMessage(RequestMethod.DELETE, responseMessageList);
+    }
+    
+    private List<Parameter> parameters() {
+        
+        final Parameter user = new ParameterBuilder().name(HttpRequestUtil.USER).description("操作人")
+                .modelRef(new ModelRef("string")).parameterType("header").required(false).defaultValue("").build();
+        final Parameter userId = new ParameterBuilder().name(HttpRequestUtil.USER_ID).description("操作人id")
+                .modelRef(new ModelRef("integer")).parameterType("header").required(false).build();
+        final Parameter projectId = new ParameterBuilder().name(HttpRequestUtil.PROJECT_ID)
+                .description("项目id:在项目创建后，各个接口都需要带此header").modelRef(new ModelRef("integer")).parameterType("header")
+                .required(false).build();
+        
+        return Lists.newArrayList(user, userId, projectId);
     }
 
     /**

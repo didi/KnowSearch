@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.constant;
 
+@Deprecated
 public enum ClusterHealthStatus {
     GREEN((byte) 0),
     YELLOW((byte) 1),

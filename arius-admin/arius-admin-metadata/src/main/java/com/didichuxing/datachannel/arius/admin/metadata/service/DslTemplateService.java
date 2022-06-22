@@ -22,19 +22,19 @@ public class DslTemplateService {
     @Autowired
     private DslTemplateESDAO dslTemplateESDAO;
 
-    public Boolean updateDslTemplateQueryLimit(Integer appId, List<String> dslTemplateMd5List, Double queryLimit) {
+    public Boolean updateDslTemplateQueryLimit(Integer projectId, List<String> dslTemplateMd5List, Double queryLimit) {
         List<DslQueryLimit> dslQueryLimitList = new ArrayList<>();
         for(String dslTemplateMd5 : dslTemplateMd5List) {
             // 排除无效的 dslTemplateMd5
-            if(dslTemplateESDAO.getDslTemplateByKey(appId, dslTemplateMd5) != null) {
-                dslQueryLimitList.add(new DslQueryLimit(appId, dslTemplateMd5, queryLimit));
+            if(dslTemplateESDAO.getDslTemplateByKey(projectId, dslTemplateMd5) != null) {
+                dslQueryLimitList.add(new DslQueryLimit(projectId, dslTemplateMd5, queryLimit));
             }
         }
-        return dslTemplateESDAO.updateQueryLimitByAppidDslTemplate(dslQueryLimitList);
+        return dslTemplateESDAO.updateQueryLimitByProjectIdDslTemplate(dslQueryLimitList);
     }
 
-    public Boolean updateDslTemplateStatus(Integer appId, String dslTemplateMd5) {
-        DslTemplatePO dslTemplatePO = dslTemplateESDAO.getDslTemplateByKey(appId, dslTemplateMd5);
+    public Boolean updateDslTemplateStatus(Integer projectId, String dslTemplateMd5) {
+        DslTemplatePO dslTemplatePO = dslTemplateESDAO.getDslTemplateByKey(projectId, dslTemplateMd5);
         if(dslTemplatePO == null) {
             // 如果没有该 dslTemplateMd5
             return false;
@@ -52,11 +52,11 @@ public class DslTemplateService {
         return dslTemplateESDAO.updateTemplates(dslTemplatePOList);
     }
 
-    public DslTemplatePO getDslTemplateDetail(Integer appId, String dslTemplateMd5) {
-        return dslTemplateESDAO.getDslTemplateByKey(appId, dslTemplateMd5);
+    public DslTemplatePO getDslTemplateDetail(Integer projectId, String dslTemplateMd5) {
+        return dslTemplateESDAO.getDslTemplateByKey(projectId, dslTemplateMd5);
     }
 
-    public Tuple<Long, List<DslTemplatePO>> getDslTemplatePage(Integer appId, DslTemplateConditionDTO queryDTO) {
-        return dslTemplateESDAO.getDslTemplatePage(appId, queryDTO);
+    public Tuple<Long, List<DslTemplatePO>> getDslTemplatePage(Integer projectId, DslTemplateConditionDTO queryDTO) {
+        return dslTemplateESDAO.getDslTemplatePage(projectId, queryDTO);
     }
 }

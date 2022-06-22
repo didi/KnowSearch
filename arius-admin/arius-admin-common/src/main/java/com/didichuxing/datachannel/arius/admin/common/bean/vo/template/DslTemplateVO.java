@@ -83,8 +83,8 @@ public class DslTemplateVO {
     @ApiModelProperty("dsink写入时间")
     private Long sinkTime;
 
-    @ApiModelProperty("appid")
-    private Integer appid;
+    @ApiModelProperty("projectId")
+    private Integer projectId;
 
     @ApiModelProperty("查询语句")
     private String dsl;

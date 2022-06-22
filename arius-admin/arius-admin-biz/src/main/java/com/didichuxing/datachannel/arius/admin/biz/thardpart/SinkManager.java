@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.thardpart;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.SinkSdkAppVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.SinkSdkESUserVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.SinkSdkIDCTemplateDeployInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.SinkSdkTemplateDeployInfoVO;
 
@@ -12,10 +12,10 @@ public interface SinkManager {
     /**
      * 获取权限信息、验证码因袭，请求头中需要提供ticket
      * @param request
-     * @param appId
+     * @param projectId
      * @return
      */
-    Result<SinkSdkAppVO> listApp(HttpServletRequest request, Integer appId);
+    Result<SinkSdkESUserVO> listApp(HttpServletRequest request, Integer projectId);
 
     /**
      * 获取模板信息，带主从结构

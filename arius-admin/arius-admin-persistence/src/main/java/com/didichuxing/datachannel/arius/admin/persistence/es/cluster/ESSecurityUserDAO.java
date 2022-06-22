@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.ES_OPERATE_TIMEOUT;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_OPERATE_TIMEOUT;
 
 /**
  * @author didi

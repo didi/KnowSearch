@@ -6,7 +6,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.RealTime
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESIndexToNodeStats;
 import com.didichuxing.datachannel.arius.admin.metadata.job.index.healthdegree.AbstractDegreeIndicator;
 import org.apache.commons.lang3.StringUtils;
-
+@Deprecated
 public class DegreeRealTimeOldGC extends AbstractDegreeIndicator {
     @Override
     public <T extends BaseDegree> T execInner(DegreeParam degreeParam, T t) {

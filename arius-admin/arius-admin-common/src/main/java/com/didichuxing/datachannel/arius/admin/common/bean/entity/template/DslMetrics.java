@@ -99,15 +99,15 @@ public class DslMetrics {
     /**
      * 查询平均失败shard数
      */
-    private Double failedShardsAvg;
+    private Double  failedShardsAvg;
     /**
-     * appid
+     * projectId
      */
-    private Integer appid;
+    private Integer projectId;
     /**
      * 查询语句
      */
-    private String dsl;
+    private String  dsl;
     /**
      * gateway处理平均耗时
      */

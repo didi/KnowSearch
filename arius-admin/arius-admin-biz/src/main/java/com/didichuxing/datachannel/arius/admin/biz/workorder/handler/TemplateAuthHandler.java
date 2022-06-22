@@ -4,23 +4,23 @@ import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandler;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.TemplateAuthContent;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppTemplateAuth;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectTemplateAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.TemplateAuthOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
-import com.didichuxing.datachannel.arius.admin.common.constant.app.AppClusterLogicAuthEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.app.AppTemplateAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectClusterLogicAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectTemplateAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppClusterLogicAuthService;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppLogicTemplateAuthService;
+import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectClusterLogicAuthService;
+import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectLogicTemplateAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
+import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
 import java.util.List;
 import java.util.Map;
 import lombok.NoArgsConstructor;
@@ -41,15 +41,15 @@ public class TemplateAuthHandler extends BaseWorkOrderHandler {
     private IndexTemplateService indexTemplateService;
 
     @Autowired
-    private AppLogicTemplateAuthService                 appLogicTemplateAuthService;
+    private ProjectLogicTemplateAuthService projectLogicTemplateAuthService;
 
 
 
     @Autowired
-    private AppLogicTemplateAuthService                 logicTemplateAuthService;
+    private ProjectLogicTemplateAuthService logicTemplateAuthService;
 
     @Autowired
-    private AppClusterLogicAuthService                  logicClusterAuthService;
+    private ProjectClusterLogicAuthService logicClusterAuthService;
 
     /**
      * 工单是否自动审批
@@ -69,7 +69,7 @@ public class TemplateAuthHandler extends BaseWorkOrderHandler {
     }
 
     @Override
-    public List<AriusUserInfo> getApproverList(AbstractOrderDetail detail) {
+    public List<UserBriefVO> getApproverList(AbstractOrderDetail detail) {
         return getRDOrOPList();
     }
 
@@ -105,20 +105,20 @@ public class TemplateAuthHandler extends BaseWorkOrderHandler {
             return Result.buildParamIllegal("权限类型为空");
         }
 
-        AppTemplateAuthEnum authEnum = AppTemplateAuthEnum.valueOf(content.getAuthCode());
-        if (AppTemplateAuthEnum.NO_PERMISSION.equals(authEnum)) {
+        ProjectTemplateAuthEnum authEnum = ProjectTemplateAuthEnum.valueOf(content.getAuthCode());
+        if (ProjectTemplateAuthEnum.NO_PERMISSION.equals(authEnum)) {
             return Result.buildParamIllegal("权限类型非法");
         }
 
-        if (authEnum.equals(AppTemplateAuthEnum.OWN)
+        if (authEnum.equals(ProjectTemplateAuthEnum.OWN)
                 && AriusObjUtils.isNull(content.getResponsible())) {
             return Result.buildParamIllegal("管理责任人为空");
         }
 
-        List<AppTemplateAuth> auths = appLogicTemplateAuthService.getTemplateAuthsByAppId(workOrder.getSubmitorAppid());
-        Map<Integer, AppTemplateAuth> logicId2AppTemplateAuthMap = ConvertUtil.list2Map(auths,
-            AppTemplateAuth::getTemplateId);
-        AppTemplateAuth templateAuth = logicId2AppTemplateAuthMap.get(content.getId());
+        List<ProjectTemplateAuth> auths = projectLogicTemplateAuthService.getTemplateAuthsByProjectId(workOrder.getSubmitorProjectId());
+        Map<Integer, ProjectTemplateAuth> logicId2AppTemplateAuthMap = ConvertUtil.list2Map(auths,
+            ProjectTemplateAuth::getTemplateId);
+        ProjectTemplateAuth templateAuth = logicId2AppTemplateAuthMap.get(content.getId());
         if (templateAuth != null && templateAuth.getType() <= content.getAuthCode()) {
             return Result.buildParamIllegal("您已经拥有该权限");
         }

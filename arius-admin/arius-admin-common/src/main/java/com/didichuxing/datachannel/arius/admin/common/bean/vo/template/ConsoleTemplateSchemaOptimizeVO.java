@@ -19,6 +19,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel(description = "索引schema信息")
+@Deprecated
 public class ConsoleTemplateSchemaOptimizeVO extends BaseVO {
 
     @ApiModelProperty("索引ID")

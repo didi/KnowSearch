@@ -45,10 +45,10 @@ public class DslStatisService {
             return Result.build(ResultType.ILLEGAL_PARAMS);
         }
 
-        Integer appid = auditDsls.getAppid();
+        Integer projectId = auditDsls.getProjectId();
 
         List<DslTemplatePO> dslTemplatePOList = Lists.newArrayList();
-        boolean auditResult = auditDsl(appid, auditDsls.getDslInfos(), dslTemplatePOList);
+        boolean auditResult = auditDsl(projectId, auditDsls.getDslInfos(), dslTemplatePOList);
         if (!auditResult) {
             return Result.build(ResultType.FAIL);
         }
@@ -59,8 +59,9 @@ public class DslStatisService {
         if (operatorResult) {
             for (DslTemplatePO dslTemplatePo : dslTemplatePOList) {
                 OperateRecordDTO operateRecord = buildDslSettingOperatorRecord(
-                        String.format("%d_%s", appid, dslTemplatePo.getDslTemplateMd5()), OperationEnum.EDIT.getCode(), auditDsls.getUserName(),
+                        String.format("%d_%s", projectId, dslTemplatePo.getDslTemplateMd5()), OperationEnum.EDIT.getCode(), auditDsls.getUserName(),
                         String.format("checkMode->%s", dslTemplatePo.getCheckMode()));
+                
                 operateRecordService.save(operateRecord);
             }
         }
@@ -73,11 +74,11 @@ public class DslStatisService {
             return Result.build(ResultType.ILLEGAL_PARAMS);
         }
 
-        // 获取到原来的查询模板信息
-        Map<String, DslTemplatePO> orginalMap = dslTemplateEsDao.getDslTemplateByKeys(dslQueryLimitList);
+        // 获取到原来地查询模板信息
+        Map<String, DslTemplatePO> originalMap = dslTemplateEsDao.getDslTemplateByKeys(dslQueryLimitList);
 
         // 更新查询限流值
-        boolean operatorResult = dslTemplateEsDao.updateQueryLimitByAppidDslTemplate(dslQueryLimitList);
+        boolean operatorResult = dslTemplateEsDao.updateQueryLimitByProjectIdDslTemplate(dslQueryLimitList);
         if (!operatorResult) {
             return Result.build(ResultType.FAIL.getCode(), "document missing fail to update query limit");
         }
@@ -88,9 +89,9 @@ public class DslStatisService {
         // 添加操作记录
         for (DslQueryLimit dslQueryLimit : dslQueryLimitList) {
             OperateRecordDTO operateRecord = buildDslSettingOperatorRecord(
-                    dslQueryLimit.getAppidDslTemplateMd5(), OperationEnum.EDIT.getCode(), operator,
+                    dslQueryLimit.getProjectIdDslTemplateMd5(), OperationEnum.EDIT.getCode(), operator,
                     String.format("queryLimit %f->%f",
-                            orginalMap.getOrDefault(dslQueryLimit.getAppidDslTemplateMd5(), defaultDsl).getQueryLimit(),
+                            originalMap.getOrDefault(dslQueryLimit.getProjectIdDslTemplateMd5(), defaultDsl).getQueryLimit(),
                             dslQueryLimit.getQueryLimit())
             );
             operateRecordService.save(operateRecord);
@@ -128,12 +129,12 @@ public class DslStatisService {
     /**
      * DSL审核查询语句
      *
-     * @param appid
+     * @param projectId
      * @param dslInfos
      * @param dslTemplatePOList
      * @return
      */
-    private boolean auditDsl(Integer appid, List<DslInfo> dslInfos, List<DslTemplatePO> dslTemplatePOList) {
+    private boolean auditDsl(Integer projectId, List<DslInfo> dslInfos, List<DslTemplatePO> dslTemplatePOList) {
 
         String dsl ;
         ExtractResult extractResult;
@@ -158,11 +159,11 @@ public class DslStatisService {
             // 对新版本进行审核
             dslTemplateMd5 = extractResult.getDslTemplateMd5();
 
-            dslTemplatePO = dslTemplateEsDao.getDslTemplateByKey(appid, dslTemplateMd5);
+            dslTemplatePO = dslTemplateEsDao.getDslTemplateByKey(projectId, dslTemplateMd5);
 
             // 如果为空，则新建索引模板
             if (null == dslTemplatePO) {
-                dslTemplatePO = createDslTemplate(appid, dsl, extractResult, dslTemplateMd5, timeValue);
+                dslTemplatePO = createDslTemplate(projectId, dsl, extractResult, dslTemplateMd5, timeValue);
 
                 // 如果存在，就修改黑白名单和修改时间
             } else {
@@ -177,14 +178,14 @@ public class DslStatisService {
         return  dslInfos.size() == dslTemplatePOList.size();
     }
 
-    private DslTemplatePO createDslTemplate(Integer appid, String dsl, ExtractResult extractResult, String dslTemplateMd5, String timeValue) {
+    private DslTemplatePO createDslTemplate(Integer projectId, String dsl, ExtractResult extractResult, String dslTemplateMd5, String timeValue) {
         DslTemplatePO dslTemplatePO;
         dslTemplatePO = new DslTemplatePO();
         dslTemplatePO.setVersion("V2");
         dslTemplatePO.setAriusCreateTime(timeValue);
         dslTemplatePO.setAriusModifyTime(timeValue);
         dslTemplatePO.setFlinkTime(timeValue);
-        dslTemplatePO.setAppid(appid);
+        dslTemplatePO.setProjectId(projectId);
         dslTemplatePO.setDslTemplate(extractResult.getDslTemplate());
         dslTemplatePO.setDslTemplateMd5(dslTemplateMd5);
         dslTemplatePO.setDslType(extractResult.getDslType());
@@ -194,12 +195,12 @@ public class DslStatisService {
         // 如果查询语句中有聚合查询，或者没有过滤条件，则加入到黑名单
         if ("aggs".equals(extractResult.getDslType()) || StringUtils.isBlank(extractResult.getWhereFields())) {
             dslTemplatePO.setCheckMode("black");
-            LOGGER.error("class=DslAnalyzerController||method=auditDsl||errMsg={} {} has aggs or no where", appid, dsl);
+            LOGGER.error("class=DslAnalyzerController||method=auditDsl||errMsg={} {} has aggs or no where", projectId, dsl);
             // 通过sql查询语句中有订单号order_id 但没有routing值，则加入到黑名单
         } else if ("sql".equals(extractResult.getSearchType()) &&
                 extractResult.getWhereFields().contains("order_id") && !extractResult.getDslTemplate().contains("ROUTINGS")) {
             dslTemplatePO.setCheckMode("black");
-            LOGGER.error("class=DslAnalyzerController||method=auditDsl||errMsg={} {} search with order_id no routing", appid, dsl);
+            LOGGER.error("class=DslAnalyzerController||method=auditDsl||errMsg={} {} search with order_id no routing", projectId, dsl);
         } else {
             dslTemplatePO.setCheckMode("white");
         }
@@ -210,10 +211,10 @@ public class DslStatisService {
 
     public OperateRecordDTO buildDslSettingOperatorRecord(String bizId, Integer operateId, String operator, String content) {
         OperateRecordDTO operateRecord = new OperateRecordDTO();
-        operateRecord.setBizId(bizId);
+        //operateRecord.setBizId(bizId);
         operateRecord.setModuleId( ModuleEnum.DSL_ANALYZER.getCode());
         operateRecord.setOperateId(operateId);
-        operateRecord.setOperator(operator);
+        //operateRecord.setOperator(operator);
         operateRecord.setContent(content);
 
         return operateRecord;

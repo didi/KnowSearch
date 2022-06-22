@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.biz.page;
 
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import java.util.List;
 import java.util.Map;
 
@@ -35,7 +36,7 @@ public class IndexPageSearchHandle extends AbstractPageSearchHandle<IndexQueryDT
 
 
     @Override
-    protected Result<Boolean> checkCondition(IndexQueryDTO condition, Integer appId) {
+    protected Result<Boolean> checkCondition(IndexQueryDTO condition, Integer projectId) {
 
         if (StringUtils.isNotBlank(condition.getHealth()) && !IndexStatusEnum.isStatusExit(condition.getHealth())) {
             return Result.buildParamIllegal(String.format("健康状态%s非法", condition.getHealth()));
@@ -50,7 +51,7 @@ public class IndexPageSearchHandle extends AbstractPageSearchHandle<IndexQueryDT
     }
 
     @Override
-    protected void initCondition(IndexQueryDTO condition, Integer appId) {
+    protected void initCondition(IndexQueryDTO condition, Integer projectId) {
         if (null == condition.getPage()) {
             condition.setPage(1L);
         }
@@ -70,16 +71,16 @@ public class IndexPageSearchHandle extends AbstractPageSearchHandle<IndexQueryDT
      * 业务上限制ES深分页(不考虑10000条之后的数据), 由前端限制
      */
     @Override
-    protected PaginationResult<IndexCatCellVO> buildPageData(IndexQueryDTO condition, Integer appId) {
+    protected PaginationResult<IndexCatCellVO> buildPageData(IndexQueryDTO condition, Integer projectId) {
         try {
             String queryCluster = condition.getCluster();
-            // 使用超级项目访问时，queryAppId为null
-            Integer queryAppId = null;
-            if (!appService.isSuperApp(appId)) {
-                queryAppId = appId;
+            // 使用超级项目访问时，queryProjectId为null
+            Integer queryProjectId = null;
+            if (!AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
+                queryProjectId = projectId;
             }
             Tuple<Long, List<IndexCatCell>> totalHitAndIndexCatCellListTuple = esIndexCatService.syncGetCatIndexInfo(
-                queryCluster, condition.getIndex(), condition.getHealth(), queryAppId,
+                queryCluster, condition.getIndex(), condition.getHealth(), queryProjectId,
                 (condition.getPage() - 1) * condition.getSize(), condition.getSize(), condition.getSortTerm(),
                 condition.getOrderByDesc());
             if (null == totalHitAndIndexCatCellListTuple) {

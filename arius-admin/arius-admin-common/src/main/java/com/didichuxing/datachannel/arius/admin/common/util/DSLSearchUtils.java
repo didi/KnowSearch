@@ -88,7 +88,7 @@ public class DSLSearchUtils {
      *
      * {
      *   "term": {
-     *       "appId": {
+     *       "projectId": {
      *            "value": 123
      *           }
      *     }
@@ -114,7 +114,7 @@ public class DSLSearchUtils {
      * 返回样例：
      * {
      *   "term": {
-     *       "appId": {
+     *       "projectId": {
      *            "value": true
      *           }
      *     }

@@ -1,5 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.cluster.logic;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
+
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterLogicManager;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
@@ -11,19 +14,23 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLog
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
-import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
+import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
+import javax.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * @author guoyoupeng_v
@@ -39,16 +46,16 @@ public class ESLogicClusterOpV3Controller {
 
     @GetMapping("/ids-names")
     @ResponseBody
-    @ApiOperation(value = "获取APP拥有的逻辑集群id和名称列表")
+    @ApiOperation(value = "获取project拥有的逻辑集群id和名称列表")
     public Result<List<Tuple<Long/*逻辑集群Id*/, String/*逻辑集群名称*/>>> getAppClusterLogicIdsAndNames(HttpServletRequest request) {
-        return clusterLogicManager.listAppClusterLogicIdsAndNames(HttpRequestUtils.getAppId(request));
+        return clusterLogicManager.listProjectClusterLogicIdsAndNames(HttpRequestUtil.getProjectId(request));
     }
     
     @GetMapping()
     @ResponseBody
-    @ApiOperation(value = "根据AppId获取有权限的逻辑或物理集群信息")
+    @ApiOperation(value = "根据projectId获取有权限的逻辑或物理集群信息")
     public Result<List<ClusterLogicVO>> getAppLogicClusterInfo(HttpServletRequest request) {
-        return clusterLogicManager.getLogicClustersByProjectId(HttpRequestUtils.getAppId(request));
+        return clusterLogicManager.getLogicClustersByProjectId(HttpRequestUtil.getProjectId(request));
     }
 
     @GetMapping("/{type}")
@@ -56,7 +63,7 @@ public class ESLogicClusterOpV3Controller {
     @ApiOperation(value = "根据项目和集群类型获取逻辑集群(项目对其有管理权限)名称列表")
     public Result<List<ClusterLogicVO>> getAppLogicClusterInfoByType(HttpServletRequest request,
                                                                        @PathVariable Integer type) {
-        return clusterLogicManager.getAppLogicClusterInfoByType(HttpRequestUtils.getAppId(request), type);
+        return clusterLogicManager.getProjectLogicClusterInfoByType(HttpRequestUtil.getProjectId(request), type);
     }
 
     @PostMapping("/page")
@@ -64,7 +71,7 @@ public class ESLogicClusterOpV3Controller {
     @ApiOperation(value = "条件获取逻辑集群列表")
     public PaginationResult<ClusterLogicVO> pageGetClusterLogics(HttpServletRequest request,
                                                                      @RequestBody ClusterLogicConditionDTO condition) {
-        return clusterLogicManager.pageGetClusterLogics(condition, HttpRequestUtils.getAppId(request));
+        return clusterLogicManager.pageGetClusterLogics(condition, HttpRequestUtil.getProjectId(request));
     }
     
     @GetMapping("/detail/{clusterLogicId}")
@@ -73,7 +80,7 @@ public class ESLogicClusterOpV3Controller {
     @ApiImplicitParam(type = "Long", name = "clusterLogicId", value = "逻辑集群ID", required = true)
     public Result<ClusterLogicVO> detail(HttpServletRequest request, @PathVariable Long clusterLogicId) {
         return Result.buildSucc(
-                clusterLogicManager.getClusterLogic(clusterLogicId, HttpRequestUtils.getAppId(request)));
+                clusterLogicManager.getClusterLogic(clusterLogicId, HttpRequestUtil.getProjectId(request)));
     }
     
     @GetMapping("/{logicClusterId}/{templateSize}/sizeCheck")
@@ -88,8 +95,8 @@ public class ESLogicClusterOpV3Controller {
     @ResponseBody
     @ApiOperation(value = "编辑逻辑集群接口")
     public Result<Void> modifyLogicCluster(HttpServletRequest request, @RequestBody ESLogicClusterDTO param) {
-        return clusterLogicManager.editLogicCluster(param, HttpRequestUtils.getOperator(request),
-                HttpRequestUtils.getAppId(request));
+        return clusterLogicManager.editLogicCluster(param, HttpRequestUtil.getOperator(request),
+                HttpRequestUtil.getProjectId(request));
     }
     
     @DeleteMapping("{clusterId}")
@@ -97,16 +104,16 @@ public class ESLogicClusterOpV3Controller {
     @ApiOperation(value = "下线集群")
     
     public Result<Void> delete(HttpServletRequest request, @PathVariable Long clusterId) throws AdminOperateException {
-        return clusterLogicManager.deleteLogicCluster(clusterId, HttpRequestUtils.getOperator(request),
-                HttpRequestUtils.getAppId(request));
+        return clusterLogicManager.deleteLogicCluster(clusterId, HttpRequestUtil.getOperator(request),
+                HttpRequestUtil.getProjectId(request));
     }
     
     @GetMapping("/index-template-count/{clusterId}")
     @ResponseBody
     @ApiOperation(value = "提示用户索引和模板的数量")
     public Result<ClusterLogicTemplateIndexCountVO> indexTemplateCount(HttpServletRequest request, @PathVariable Long clusterId) {
-        return clusterLogicManager.indexTemplateCount(clusterId, HttpRequestUtils.getOperator(request),
-                HttpRequestUtils.getAppId(request));
+        return clusterLogicManager.indexTemplateCount(clusterId, HttpRequestUtil.getOperator(request),
+                HttpRequestUtil.getProjectId(request));
     }
     
     @GetMapping("/nodes/{clusterLogicId}")
