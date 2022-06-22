@@ -199,4 +199,12 @@ public class ProjectV3Controller {
 		}
 		return projectExtendManager.getProjectBriefByUserId(userId);
 	}
+	
+	@GetMapping("")
+	@ApiOperation(value = "获取项目绑定的用户列表", notes = "获取项目绑定的用户列表")
+	public Result<List<UserBriefVO>> getProjectBriefByUserId(HttpServletRequest request) {
+		
+		return projectExtendManager.listUserListByProjectId(HttpRequestUtil.getProjectId(request));
+	}
+	
 }

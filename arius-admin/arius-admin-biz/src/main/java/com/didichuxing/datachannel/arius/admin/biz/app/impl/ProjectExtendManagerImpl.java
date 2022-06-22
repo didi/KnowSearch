@@ -37,6 +37,7 @@ import com.didiglobal.logi.security.common.PagingResult;
 import com.didiglobal.logi.security.common.dto.project.ProjectBriefQueryDTO;
 import com.didiglobal.logi.security.common.dto.project.ProjectQueryDTO;
 import com.didiglobal.logi.security.common.dto.project.ProjectSaveDTO;
+import com.didiglobal.logi.security.common.enums.project.ProjectUserCode;
 import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import com.didiglobal.logi.security.common.vo.project.ProjectDeleteCheckVO;
 import com.didiglobal.logi.security.common.vo.project.ProjectVO;
@@ -544,6 +545,19 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
             return Result.buildFail(listResult.getMessage());
         }
     
+    }
+    
+    /**
+     * @param projectId 项目id
+     * @return
+     */
+    @Override
+    public Result<List<UserBriefVO>> listUserListByProjectId(Integer projectId) {
+        final List<Integer> userIdLists = userProjectService.getUserIdListByProjectId(projectId,
+                ProjectUserCode.NORMAL);
+        userIdLists.addAll( userProjectService.getUserIdListByProjectId(projectId,
+                ProjectUserCode.OWNER));
+        return Result.buildSucc(userService.getUserBriefListByUserIdList(userIdLists));
     }
     
     /**

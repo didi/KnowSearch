@@ -14,22 +14,34 @@ import com.didiglobal.logi.security.common.dto.user.UserDTO;
 import com.didiglobal.logi.security.common.dto.user.UserQueryDTO;
 import com.didiglobal.logi.security.common.entity.user.User;
 import com.didiglobal.logi.security.common.vo.role.AssignInfoVO;
+import com.didiglobal.logi.security.common.vo.role.RoleBriefVO;
 import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
 import com.didiglobal.logi.security.common.vo.user.UserVO;
 import com.didiglobal.logi.security.exception.LogiSecurityException;
+import com.didiglobal.logi.security.service.PermissionService;
+import com.didiglobal.logi.security.service.RolePermissionService;
 import com.didiglobal.logi.security.service.UserService;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.test.web.reactive.server.WebTestClient.ListBodySpec;
 
 @Component
 public class UserExtendManagerImpl implements UserExtendManager {
 	@Autowired
 	private UserService          userService;
 	@Autowired
-	private OperateRecordService operateRecordService;
+	private OperateRecordService  operateRecordService;
+	@Autowired
+	private RolePermissionService rolePermissionService;
+	@Autowired
+	private PermissionService     permissionService;
 	
 	/**
 	 * 用户注册信息校验
@@ -74,13 +86,35 @@ public class UserExtendManagerImpl implements UserExtendManager {
 	/**
 	 * 获取用户详情（主要是获取用户所拥有的权限信息）
 	 *
-	 * @param userId 用户id
+	 * @param userId    用户id
+	 * @param projectId
 	 * @return 用户详情
 	 * @throws LogiSecurityException 用户不存在
 	 */
 	@Override
-	public Result<UserVO> getUserDetailByUserId(Integer userId) {
-		return Result.buildSucc(userService.getUserDetailByUserId(userId));
+	public Result<UserVO> getUserDetailByUserId(Integer userId, Integer projectId) {
+		final UserVO userVO = userService.getUserDetailByUserId(userId);
+		final List<RoleBriefVO> roleList = Optional.ofNullable(userVO.getRoleList()).orElse(Lists.newArrayList());
+		final List<Integer> roleIds = roleList.stream().map(RoleBriefVO::getId).collect(Collectors.toList());
+		//传入项目id判断是否是超级项目,如果是则判断是否为管理员,然后返回权限点
+		if (Objects.nonNull(projectId)) {
+			if (AuthConstant.SUPER_PROJECT_ID.equals(projectId) && roleIds.stream()
+					.anyMatch(id -> Objects.equals(id, AuthConstant.ADMIN_ROLE_ID))) {
+				final List<Integer> hasPermissionIdList = rolePermissionService.getPermissionIdListByRoleIdList(
+						Collections.singletonList(AuthConstant.ADMIN_ROLE_ID));
+				// 构建权限树
+				userVO.setPermissionTreeVO(permissionService.buildPermissionTreeWithHas(hasPermissionIdList));
+			}
+			
+		} else {
+			//删除管理员id
+			roleIds.remove(AuthConstant.ADMIN_ROLE_ID);
+			final List<Integer> hasPermissionIdList = rolePermissionService.getPermissionIdListByRoleIdList(roleIds);
+			// 构建权限树
+			userVO.setPermissionTreeVO(permissionService.buildPermissionTreeWithHas(hasPermissionIdList));
+		}
+		
+		return Result.buildSucc();
 	}
 	
 	/**
