@@ -99,48 +99,47 @@ public class LoginManagerImpl implements LoginManager {
         Tuple3</*username*/String,/*userId*/Integer,/*projectId*/Integer> userNameAndUserIdAndProjectIdTuple3 = getRequestByHead(
                 request);
         //进行一致性校验
+    
         if (interceptorCheck) {
-            interceptorCheck = hasLoginValidExtend(userNameAndUserIdAndProjectIdTuple3._1, request);
-        }
         
-        if (interceptorCheck) {
-            
             //跳过检查项目id和用户的正确性和匹配度
             if (skipHeaderAuthValues.stream()
                     .noneMatch(whiteMappingValue -> request.getServletPath().startsWith(whiteMappingValue))) {
+                if (hasLoginValidExtend(userNameAndUserIdAndProjectIdTuple3._1, request)) {
                 
-                //项目id没有带
-                if (Objects.isNull(userNameAndUserIdAndProjectIdTuple3._3)) {
+                    //项目id没有带
+                    if (Objects.isNull(userNameAndUserIdAndProjectIdTuple3._3)) {
                     
-                    throw new OperateForbiddenException(
-                            String.format("请携带项目信息,HTTP_HEADER_KEY:%s", HttpRequestUtil.PROJECT_ID));
-                }
-                if (Objects.isNull(userNameAndUserIdAndProjectIdTuple3._2)) {
-                    throw new OperateForbiddenException(
-                            String.format("请携带操作者id,HTTP_HEADER_KEY:%s", HttpRequestUtil.USER_ID));
-                    
-                }
-                if (StringUtils.isBlank(userNameAndUserIdAndProjectIdTuple3._1)) {
-                    throw new OperateForbiddenException(
-                            String.format("请携带操作者,HTTP_HEADER_KEY:%s", HttpRequestUtil.USER));
-                    
-                }
-                
-                if (!projectService.checkProjectExist(userNameAndUserIdAndProjectIdTuple3._3)) {
-                    throw new LogiSecurityException(ResultCode.PROJECT_NOT_EXISTS);
-                }
-                //判断用户在非管理员角色下，操作用户是否是当前项目成员或者拥有者
-                if (!roleTool.isAdmin(userNameAndUserIdAndProjectIdTuple3._2)) {
-                    final ProjectVO projectVO = projectService.getProjectDetailByProjectId(
-                            userNameAndUserIdAndProjectIdTuple3._3);
-                    if (!(CommonUtils.isUserNameBelongProjectMember(userNameAndUserIdAndProjectIdTuple3._1, projectVO)
-                          || CommonUtils.isUserNameBelongProjectResponsible(userNameAndUserIdAndProjectIdTuple3._1,
-                            projectVO))) {
-                        throw new LogiSecurityException(ResultCode.NO_PERMISSION);
+                        throw new OperateForbiddenException(
+                                String.format("请携带项目信息,HTTP_HEADER_KEY:%s", HttpRequestUtil.PROJECT_ID));
                     }
+                    if (Objects.isNull(userNameAndUserIdAndProjectIdTuple3._2)) {
+                        throw new OperateForbiddenException(
+                                String.format("请携带操作者id,HTTP_HEADER_KEY:%s", HttpRequestUtil.USER_ID));
                     
-                }
+                    }
+                    if (StringUtils.isBlank(userNameAndUserIdAndProjectIdTuple3._1)) {
+                        throw new OperateForbiddenException(
+                                String.format("请携带操作者,HTTP_HEADER_KEY:%s", HttpRequestUtil.USER));
+                    
+                    }
                 
+                    if (!projectService.checkProjectExist(userNameAndUserIdAndProjectIdTuple3._3)) {
+                        throw new LogiSecurityException(ResultCode.PROJECT_NOT_EXISTS);
+                    }
+                    //判断用户在非管理员角色下，操作用户是否是当前项目成员或者拥有者
+                    if (!roleTool.isAdmin(userNameAndUserIdAndProjectIdTuple3._2)) {
+                        final ProjectVO projectVO = projectService.getProjectDetailByProjectId(
+                                userNameAndUserIdAndProjectIdTuple3._3);
+                        if (!(CommonUtils.isUserNameBelongProjectMember(userNameAndUserIdAndProjectIdTuple3._1,
+                                projectVO) || CommonUtils.isUserNameBelongProjectResponsible(
+                                userNameAndUserIdAndProjectIdTuple3._1, projectVO))) {
+                            throw new LogiSecurityException(ResultCode.NO_PERMISSION);
+                        }
+                    
+                    }
+                
+                }
             }
         }
         
