@@ -49,7 +49,7 @@ class ProjectConfigManagerTest {
     @BeforeEach
     void setUp() {
         initMocks(this);
-         when(operateRecordService.save(anyInt(), anyInt(), anyString(), anyString(), anyString())).thenReturn(
+         when(operateRecordService.save(any(), any(), anyString(), anyString(), anyString())).thenReturn(
                 Result.buildSucc());
     }
     
