@@ -3,13 +3,13 @@ package com.didichuxing.datachannel.arius.admin.common.bean.entity.template;
 import java.util.ArrayList;
 import java.util.List;
 
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @author d06679
@@ -94,13 +94,6 @@ public class IndexTemplateWithPhyTemplates extends IndexTemplate {
                     return physical;
                 }
             }
-        }
-        return null;
-    }
-
-    public IndexTemplatePhy getAnyOne() {
-        if (CollectionUtils.isNotEmpty(physicals)) {
-            return physicals.get(0);
         }
         return null;
     }
