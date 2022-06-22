@@ -185,7 +185,7 @@ create table arius_es_user
     is_active          tinyint(2)    default 1                 not null comment '1为可用，0不可用',
     query_threshold    int(10)       default 100               not null comment '限流值',
     cluster            varchar(100)  default ''                not null comment '查询集群',
-    responsible        varchar(500)  default ''                not null comment '责任人',
+    responsible        varchar(500)  default ''                comment '责任人',
     search_type        tinyint       default 0                 not null comment '0表示app的查询请求需要app里配置的集群(一般配置的都是trib集群) 1表示app的查询请求必须只能访问一个模板',
     create_time        timestamp     default CURRENT_TIMESTAMP not null comment '创建时间',
     update_time        timestamp     default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '修改时间',

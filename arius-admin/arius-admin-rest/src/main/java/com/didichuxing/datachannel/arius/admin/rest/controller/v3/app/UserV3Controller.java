@@ -17,6 +17,7 @@ import com.didiglobal.logi.security.util.HttpRequestUtil;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
@@ -84,9 +85,11 @@ public class UserV3Controller {
 	
 	@GetMapping("/{id}")
 	@ApiOperation(value = "获取用户详情", notes = "根据用户id获取用户详情")
-	@ApiImplicitParam(name = "id", value = "用户id", dataType = "int", required = true)
-	public Result<UserVO> detail(@PathVariable Integer id) {
-		return userManager.getUserDetailByUserId(id);
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "id", value = "用户id", dataType = "int",paramType = "query",required = true)
+	})
+	public Result<UserVO> detail(HttpServletRequest request,@PathVariable Integer id) {
+		return userManager.getUserDetailByUserId(id,HttpRequestUtil.getProjectId(request));
 	}
 	
 	@PostMapping("/page")

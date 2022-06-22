@@ -11,7 +11,6 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.resource.E
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.DATA_NODE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.MASTER_NODE;
 
-import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.page.ClusterPhyPageSearchHandle;
@@ -317,9 +316,8 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         }
         List<String> clusters = Lists.newArrayList();
         ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(clusterLogicId);
-        if (clusterLogic == null) {
-            return Result.buildFail("选定的逻辑集群不存在");
-        }
+        if (clusterLogic == null) { return Result.buildFail("选定的逻辑集群不存在");}
+
         ClusterRegion logicClusterRegions = clusterRegionService.getRegionByLogicClusterId(clusterLogic.getId());
         if (null != logicClusterRegions) {
             return Result.buildSucc(clusters);
@@ -329,9 +327,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
     @Override
     public Result<List<String>> listCanBeAssociatedClustersPhys(Integer clusterLogicType) {
-        if (!ClusterResourceTypeEnum.isExist(clusterLogicType)) {
-            return Result.buildParamIllegal("集群资源类型非法");
-        }
+        if (!ClusterResourceTypeEnum.isExist(clusterLogicType)) { return Result.buildParamIllegal("集群资源类型非法");}
 
         List<String> clusters = Lists.newArrayList();
         ClusterPhyDTO clusterPhyDTO = new ClusterPhyDTO();

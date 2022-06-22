@@ -3,6 +3,18 @@ package com.didichuxing.datachannel.arius.admin.rest.exception;
 import static com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType.ADMIN_OPERATE_ERROR;
 import static com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType.ES_OPERATE_ERROR;
 
+import com.didichuxing.datachannel.arius.admin.biz.app.LoginManager;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.ResultWorkOrder;
+import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
+import com.didichuxing.datachannel.arius.admin.common.exception.AriusRunTimeException;
+import com.didichuxing.datachannel.arius.admin.common.exception.BaseException;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import com.didichuxing.datachannel.arius.admin.common.exception.OperateForbiddenException;
+import com.didichuxing.datachannel.arius.admin.common.exception.WorkOrderOperateException;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.logi.security.exception.LogiSecurityException;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.aop.ThrowsAdvice;
 import org.springframework.http.HttpStatus;
@@ -10,22 +22,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.ResultWorkOrder;
-import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
-import com.didichuxing.datachannel.arius.admin.common.exception.BaseException;
-import com.didichuxing.datachannel.arius.admin.common.exception.AriusRunTimeException;
-import com.didichuxing.datachannel.arius.admin.common.exception.WorkOrderOperateException;
-import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
-
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
-
 /**
  *
  * Created by d06679 on 2019/3/13.
  */
-@RestControllerAdvice("com.didichuxing.datachannel.arius.admin.rest.controller")
+@RestControllerAdvice(basePackages = {"com.didichuxing.datachannel.arius.admin.rest.controller"},basePackageClasses =
+        { LoginManager.class })
 public class ExceptionHandleController implements ThrowsAdvice {
 
     private static final ILog LOGGER = LogFactory.getLog(ExceptionHandleController.class);
@@ -73,6 +75,36 @@ public class ExceptionHandleController implements ThrowsAdvice {
     public Result<Object> handleException(Exception e) {
         LOGGER.warn("class=ExceptionHandleController||method=handleException||arius admin process error||errMsg={}", e.getMessage(), e);
         LOGGER.warn("class=ExceptionHandleController||method=handleException||arius admin process error||errStack={}", e.getStackTrace());
+        Result<Object> result = Result.build(ResultType.FAIL);
+        if (StringUtils.isNotBlank(e.getMessage())) {
+            result.setMessage(e.getMessage());
+        }
+        return result;
+    }
+    
+    @ExceptionHandler(LogiSecurityException.class)
+    public Result<Object> handleLogiSecurityException(LogiSecurityException e) {
+        LOGGER.warn(
+                "class=ExceptionHandleController||method=handleLogiSecurityException||arius admin process error||errMsg={}",
+                e.getMessage(), e);
+        LOGGER.warn(
+                "class=ExceptionHandleController||method=handleLogiSecurityException||arius admin process error||errStack={}",
+                e.getStackTrace());
+        Result<Object> result = Result.build(ResultType.FAIL);
+        if (StringUtils.isNotBlank(e.getMessage())) {
+            result.setMessage(e.getMessage());
+        }
+        return result;
+    }
+    
+    @ExceptionHandler(OperateForbiddenException.class)
+    public Result<Object> handleOperateForbiddenException(OperateForbiddenException e) {
+        LOGGER.warn(
+                "class=ExceptionHandleController||method=handleOperateForbiddenException||arius admin process error||errMsg={}",
+                e.getMessage(), e);
+        LOGGER.warn(
+                "class=ExceptionHandleController||method=handleOperateForbiddenException||arius admin process error||errStack={}",
+                e.getStackTrace());
         Result<Object> result = Result.build(ResultType.FAIL);
         if (StringUtils.isNotBlank(e.getMessage())) {
             result.setMessage(e.getMessage());

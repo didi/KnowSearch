@@ -1,7 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.biz.app;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didiglobal.logi.security.common.PagingData;
 import com.didiglobal.logi.security.common.PagingResult;
 import com.didiglobal.logi.security.common.dto.user.UserBriefQueryDTO;
 import com.didiglobal.logi.security.common.dto.user.UserDTO;
@@ -54,11 +53,13 @@ public interface UserExtendManager {
 
     /**
      * 获取用户详情（主要是获取用户所拥有的权限信息）
-     * @param userId 用户id
+     *
+     * @param userId    用户id
+     * @param projectId
      * @return 用户详情
      * @throws LogiSecurityException 用户不存在
      */
-    Result<UserVO> getUserDetailByUserId(Integer userId);
+    Result<UserVO> getUserDetailByUserId(Integer userId, Integer projectId);
 
     /**
      * 根据用户id删除用户
