@@ -1,7 +1,12 @@
 package com.didichuxing.datachannel.arius.admin.biz.app.impl;
 
+import static com.didiglobal.logi.security.util.HttpRequestUtil.COOKIE_OR_SESSION_MAX_AGE_UNIT_SEC;
+
 import com.didichuxing.datachannel.arius.admin.biz.app.LoginManager;
 import com.didichuxing.datachannel.arius.admin.common.exception.OperateForbiddenException;
+import com.didichuxing.datachannel.arius.admin.common.tuple.Tuple;
+import com.didichuxing.datachannel.arius.admin.common.tuple.Tuple3;
+import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
 import com.didiglobal.logi.security.common.Result;
@@ -12,10 +17,13 @@ import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
 import com.didiglobal.logi.security.exception.LogiSecurityException;
 import com.didiglobal.logi.security.service.LoginService;
 import com.didiglobal.logi.security.service.ProjectService;
+import com.didiglobal.logi.security.util.AESUtils;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
@@ -31,11 +39,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class LoginManagerImpl implements LoginManager {
     @Autowired
-    private LoginService   loginService;
+    private              LoginService   loginService;
     @Autowired
-    private ProjectService projectService;
+    private              ProjectService projectService;
     @Autowired
-    private RoleTool       roleTool;
+    private              RoleTool       roleTool;
+    public static final  String         KNOW_SEARCH_TOKEN = "knowSearchToken";
+    private static final String         STRING_SPLIT      = "||";
     
     /**
      * 验证登录信息（验证前密码先用Base64解码再用RSA解密） 登录前会检查账户激活状态
@@ -52,6 +62,8 @@ public class LoginManagerImpl implements LoginManager {
         
         try {
             UserBriefVO userBriefVO = loginService.verifyLogin(loginDTO, request, response);
+            //response设置平台独有cookie
+            addCookieByKnowSearch(userBriefVO.getUserName(), response);
             return Result.success(userBriefVO);
         } catch (LogiSecurityException e) {
             return Result.fail(e);
@@ -81,48 +93,115 @@ public class LoginManagerImpl implements LoginManager {
     @Override
     public boolean interceptorCheck(HttpServletRequest request, HttpServletResponse response,
                                     String requestMappingValue, List<String> whiteMappingValues,
-                                    List<String> skipMappingValues) throws IOException {
-        final boolean interceptorCheck = loginService.interceptorCheck(request, response, requestMappingValue,
+                                    List<String> skipHeaderAuthValues) throws IOException {
+        boolean interceptorCheck = loginService.interceptorCheck(request, response, requestMappingValue,
                 whiteMappingValues);
+        Tuple3</*username*/String,/*userId*/Integer,/*projectId*/Integer> userNameAndUserIdAndProjectIdTuple3 = getRequestByHead(
+                request);
+        //进行一致性校验
+        if (interceptorCheck) {
+            interceptorCheck = hasLoginValidExtend(userNameAndUserIdAndProjectIdTuple3._1, request);
+        }
+        
         if (interceptorCheck) {
             
             //跳过检查项目id和用户的正确性和匹配度
-            if (skipMappingValues.stream()
+            if (skipHeaderAuthValues.stream()
                     .noneMatch(whiteMappingValue -> request.getServletPath().startsWith(whiteMappingValue))) {
-                final Integer projectId = HttpRequestUtil.getProjectId(request);
-                final String operator = HttpRequestUtil.getOperator(request);
-                final Integer operatorId = HttpRequestUtil.getOperatorId(request);
+                
                 //项目id没有带
-                if (Objects.isNull(projectId)) {
+                if (Objects.isNull(userNameAndUserIdAndProjectIdTuple3._3)) {
                     
                     throw new OperateForbiddenException(
                             String.format("请携带项目信息,HTTP_HEADER_KEY:%s", HttpRequestUtil.PROJECT_ID));
                 }
-                if (Objects.isNull(operatorId)) {
+                if (Objects.isNull(userNameAndUserIdAndProjectIdTuple3._2)) {
                     throw new OperateForbiddenException(
                             String.format("请携带操作者id,HTTP_HEADER_KEY:%s", HttpRequestUtil.USER_ID));
                     
                 }
-                if (StringUtils.isBlank(operator)) {
+                if (StringUtils.isBlank(userNameAndUserIdAndProjectIdTuple3._1)) {
                     throw new OperateForbiddenException(
                             String.format("请携带操作者,HTTP_HEADER_KEY:%s", HttpRequestUtil.USER));
                     
                 }
-                if (!projectService.checkProjectExist(projectId)) {
+                
+                if (!projectService.checkProjectExist(userNameAndUserIdAndProjectIdTuple3._3)) {
                     throw new LogiSecurityException(ResultCode.PROJECT_NOT_EXISTS);
                 }
                 //判断用户在非管理员角色下，操作用户是否是当前项目成员或者拥有者
-                if (!roleTool.isAdmin(operatorId)) {
-                    final ProjectVO projectVO = projectService.getProjectDetailByProjectId(projectId);
-                    if (!(CommonUtils.isUserNameBelongProjectMember(operator, projectVO)
-                          || CommonUtils.isUserNameBelongProjectResponsible(operator, projectVO))) {
+                if (!roleTool.isAdmin(userNameAndUserIdAndProjectIdTuple3._2)) {
+                    final ProjectVO projectVO = projectService.getProjectDetailByProjectId(
+                            userNameAndUserIdAndProjectIdTuple3._3);
+                    if (!(CommonUtils.isUserNameBelongProjectMember(userNameAndUserIdAndProjectIdTuple3._1, projectVO)
+                          || CommonUtils.isUserNameBelongProjectResponsible(userNameAndUserIdAndProjectIdTuple3._1,
+                            projectVO))) {
                         throw new LogiSecurityException(ResultCode.NO_PERMISSION);
                     }
                     
                 }
+                
             }
         }
         
         return interceptorCheck;
     }
+    
+    private void addCookieByKnowSearch(String userName, HttpServletResponse response) {
+        //这里对domainAccount 进行加密处理，避免用户通过自行修改domainAccount进行替换用户的场景
+        String plaintext = userName + STRING_SPLIT + System.currentTimeMillis();
+        String ciphertext = AESUtils.encrypt(plaintext);
+        Cookie cookieCiphertext = new Cookie(KNOW_SEARCH_TOKEN, ciphertext);
+        cookieCiphertext.setMaxAge(COOKIE_OR_SESSION_MAX_AGE_UNIT_SEC);
+        cookieCiphertext.setPath("/");
+        response.addCookie(cookieCiphertext);
+    }
+    
+    /**
+     * 扩展验证ks是否篡改登录信息
+     *
+     * @param userName 用户名
+     * @param request  请求
+     * @return boolean
+     */
+    private boolean hasLoginValidExtend(String userName, HttpServletRequest request) {
+        Cookie[] cookies = request.getCookies();
+        if (AriusObjUtils.isNull(cookies)) {
+            return false;
+        }
+        return Arrays.stream(cookies).filter(cookie -> KNOW_SEARCH_TOKEN.equals(cookie.getName()))
+                .map(cookie -> AESUtils.decrypt(cookie.getValue())).filter(Objects::nonNull)
+                .map(plaintext -> StringUtils.split(plaintext, STRING_SPLIT))
+                .filter(plaintexts -> plaintexts.length == 2).map(plaintexts -> plaintexts[0])
+                .anyMatch(domainAccountInner -> StringUtils.equals(domainAccountInner, userName));
+    }
+    
+    /**
+     * 通过请求头获取user name usernameId projectId
+     *
+     * @param request 请求
+     * @return {@code Tuple3<String, Integer, Integer>}
+     */
+    private Tuple3</*username*/String,/*userId*/Integer,/*projectId*/Integer> getRequestByHead(
+            HttpServletRequest request) {
+        Tuple3<String, Integer, Integer> tuple3 = Tuple.of(null, null, null);
+        try {
+            tuple3.update1(HttpRequestUtil.getOperator(request));
+        } catch (Exception ignore) {
+        
+        }
+        try {
+            tuple3.update2(HttpRequestUtil.getOperatorId(request));
+        } catch (Exception ignore) {
+        
+        }
+        try {
+            tuple3.update3(HttpRequestUtil.getProjectId(request));
+        } catch (Exception ignore) {
+        
+        }
+        return tuple3;
+        
+    }
+    
 }

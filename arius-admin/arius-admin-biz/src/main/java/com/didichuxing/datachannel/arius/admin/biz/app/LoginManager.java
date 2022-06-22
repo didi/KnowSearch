@@ -48,5 +48,5 @@ public interface LoginManager {
      * @throws IOException ioexception
      */
     boolean interceptorCheck(HttpServletRequest request, HttpServletResponse response, String requestMappingValue,
-                             List<String> whiteMappingValues,List<String> skipMappingValues) throws IOException;
+                             List<String> whiteMappingValues,List<String> skipHeaderAuthValues) throws IOException;
 }

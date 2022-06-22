@@ -10,9 +10,11 @@ import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType
 import com.didichuxing.datachannel.arius.admin.common.exception.AriusRunTimeException;
 import com.didichuxing.datachannel.arius.admin.common.exception.BaseException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import com.didichuxing.datachannel.arius.admin.common.exception.OperateForbiddenException;
 import com.didichuxing.datachannel.arius.admin.common.exception.WorkOrderOperateException;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.logi.security.exception.LogiSecurityException;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.aop.ThrowsAdvice;
 import org.springframework.http.HttpStatus;
@@ -73,6 +75,36 @@ public class ExceptionHandleController implements ThrowsAdvice {
     public Result<Object> handleException(Exception e) {
         LOGGER.warn("class=ExceptionHandleController||method=handleException||arius admin process error||errMsg={}", e.getMessage(), e);
         LOGGER.warn("class=ExceptionHandleController||method=handleException||arius admin process error||errStack={}", e.getStackTrace());
+        Result<Object> result = Result.build(ResultType.FAIL);
+        if (StringUtils.isNotBlank(e.getMessage())) {
+            result.setMessage(e.getMessage());
+        }
+        return result;
+    }
+    
+    @ExceptionHandler(LogiSecurityException.class)
+    public Result<Object> handleLogiSecurityException(LogiSecurityException e) {
+        LOGGER.warn(
+                "class=ExceptionHandleController||method=handleLogiSecurityException||arius admin process error||errMsg={}",
+                e.getMessage(), e);
+        LOGGER.warn(
+                "class=ExceptionHandleController||method=handleLogiSecurityException||arius admin process error||errStack={}",
+                e.getStackTrace());
+        Result<Object> result = Result.build(ResultType.FAIL);
+        if (StringUtils.isNotBlank(e.getMessage())) {
+            result.setMessage(e.getMessage());
+        }
+        return result;
+    }
+    
+    @ExceptionHandler(OperateForbiddenException.class)
+    public Result<Object> handleOperateForbiddenException(OperateForbiddenException e) {
+        LOGGER.warn(
+                "class=ExceptionHandleController||method=handleOperateForbiddenException||arius admin process error||errMsg={}",
+                e.getMessage(), e);
+        LOGGER.warn(
+                "class=ExceptionHandleController||method=handleOperateForbiddenException||arius admin process error||errStack={}",
+                e.getStackTrace());
         Result<Object> result = Result.build(ResultType.FAIL);
         if (StringUtils.isNotBlank(e.getMessage())) {
             result.setMessage(e.getMessage());
