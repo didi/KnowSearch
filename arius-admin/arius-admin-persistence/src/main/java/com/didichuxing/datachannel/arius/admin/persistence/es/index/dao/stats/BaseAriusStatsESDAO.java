@@ -32,6 +32,7 @@ import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
 import com.didiglobal.logi.elasticsearch.client.response.query.query.ESQueryResponse;
 import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESAggr;
 import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESBucket;
+import com.didiglobal.logi.elasticsearch.client.response.query.query.hits.ESHits;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import java.beans.IntrospectionException;
@@ -39,7 +40,12 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.NoArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
@@ -889,6 +895,9 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
         String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTime, endTime);
 
         return gatewayClient.performRequestWithRouting(metadataClusterName, null,
-                realIndexName, TYPE, dsl, s -> s.getHits().getHits().size() > 0 ? ((Map<String, Long>)s.getHits().getHits().get(0).getSource()).get("timestamp") : null, 3);
+                realIndexName, TYPE, dsl, response -> Optional.ofNullable(response).map(ESQueryResponse::getHits)
+                        .map(ESHits::getHits)
+                        .filter(CollectionUtils::isNotEmpty)
+                        .map(esHits ->((Map<String,Long>)esHits.get(0).getSource()).get("timestamp")).orElse(null), 3);
     }
 }
