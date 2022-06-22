@@ -24,12 +24,11 @@ public interface ClusterRegionManager {
 
     /**
      * 根据逻辑集群的类型筛选出可以绑定的region信息
-     * @param clusterLogicId 逻辑集群id
      * @param clusterLogicType 逻辑集群类型
      * @param phyCluster 物理集群名称
      * @return 筛选后的region列表
      */
-    List<ClusterRegion> filterClusterRegionByLogicClusterType(Long clusterLogicId, String phyCluster, Integer clusterLogicType);
+    Result<List<ClusterRegionVO>> listPhyClusterRegionsByLogicClusterTypeAndCluster(String phyCluster, Integer clusterLogicType);
 
     /**
      * 构建regionVO
