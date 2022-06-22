@@ -60,6 +60,8 @@ public class NormalOrderController {
     @ResponseBody
     @ApiOperation(value = "审核")
     public Result<Void> process(@PathVariable(value = "orderId") Long orderId, @RequestBody WorkOrderProcessDTO processDTO) {
+        //设置当前操作人
+        processDTO.setAssignee( SpringTool.getUserName() );
         return workOrderManager.process(processDTO);
     }
 
