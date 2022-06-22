@@ -79,7 +79,22 @@ public enum TemplateServiceEnum {
     /**
      * 安全管控:对于索引的安全服务进行权限控制.
      */
-    TEMPLATE_SECURITY(13, "安全管控", ES_7_6_0_1100, 0);
+    TEMPLATE_SECURITY(13, "安全管控", ES_7_6_0_1100, 0),
+
+    /**
+     * 清理
+     */
+    TEMPLATE_CLEAR(14, "清理", ES_2_3_3_100, 0),
+
+    /**
+     * 升级版本
+     */
+    TEMPLATE_UPGRADE(15, "升级版本", ES_2_3_3_100,  0),
+
+    /**
+     * 扩缩容（调整shard）
+     */
+    TEMPLATE_ADJUST_SHARD(16, "扩缩容", ES_2_3_3_100, 0);
 
     private Integer code;
 

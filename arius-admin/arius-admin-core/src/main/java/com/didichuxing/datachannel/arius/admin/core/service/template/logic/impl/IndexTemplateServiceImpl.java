@@ -1,21 +1,17 @@
 package com.didichuxing.datachannel.arius.admin.core.service.template.logic.impl;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.REGION_NOT_BOUND_LOGIC_CLUSTER_ID;
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.yesOrNo;
-import static com.didichuxing.datachannel.arius.admin.common.constant.TemplateConstant.*;
+import static com.didichuxing.datachannel.arius.admin.common.constant.TemplateConstant.TEMPLATE_NAME_CHAR_SET;
+import static com.didichuxing.datachannel.arius.admin.common.constant.TemplateConstant.TEMPLATE_NAME_SIZE_MAX;
+import static com.didichuxing.datachannel.arius.admin.common.constant.TemplateConstant.TEMPLATE_NAME_SIZE_MIN;
+import static com.didichuxing.datachannel.arius.admin.common.constant.TemplateConstant.TEMPLATE_NOT_EXIST;
+import static com.didichuxing.datachannel.arius.admin.common.constant.TemplateConstant.TEMPLATE_SAVE_BY_DAY_EXPIRE_MAX;
+import static com.didichuxing.datachannel.arius.admin.common.constant.TemplateConstant.TEMPLATE_SAVE_BY_MONTH_EXPIRE_MIN;
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.TEMPLATE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.*;
-
-import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DuplicateKeyException;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.ADD;
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.DELETE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.EDIT;
 
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
@@ -24,13 +20,20 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleT
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateConfigDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateConditionDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppClusterLogicAuth;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppTemplateAuth;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.TemplateQueryDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectClusterLogicAuth;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectTemplateAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicRackInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord.template.TemplateOperateRecord;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateConfig;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithClusterAndMasterTemplate;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateType;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithCluster;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateConfigPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
@@ -51,15 +54,12 @@ import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.TemplateUtils;
-import com.didichuxing.datachannel.arius.admin.core.component.ResponsibleConvertTool;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppClusterLogicAuthService;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppLogicTemplateAuthService;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
+import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectClusterLogicAuthService;
+import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectLogicTemplateAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
-import com.didichuxing.datachannel.arius.admin.core.service.common.AriusUserInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
@@ -69,12 +69,27 @@ import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexT
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateTypeDAO;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import javax.annotation.PostConstruct;
 
 @Service
 public class IndexTemplateServiceImpl implements IndexTemplateService {
@@ -95,24 +110,20 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
 
     @Autowired
     private IndexTemplatePhyService indexTemplatePhyService;
-
+    
     @Autowired
-    private AppService                  appService;
+    private ProjectService projectService;
 
-    @Autowired
-    private AriusUserInfoService        ariusUserInfoService;
-
-    @Autowired
-    private ResponsibleConvertTool      responsibleConvertTool;
+    
 
     @Autowired
     private ESIndexService              esIndexService;
 
     @Autowired
-    private AppLogicTemplateAuthService logicTemplateAuthService;
+    private ProjectLogicTemplateAuthService logicTemplateAuthService;
 
     @Autowired
-    private AppClusterLogicAuthService  logicClusterAuthService;
+    private ProjectClusterLogicAuthService logicClusterAuthService;
 
     @Autowired
     private ClusterLogicService         clusterLogicService;
@@ -132,9 +143,9 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
      * @return 逻辑模板列表
      */
     @Override
-    public List<IndexTemplate> getLogicTemplates(IndexTemplateDTO param) {
-        return responsibleConvertTool.list2List(
-            indexTemplateDAO.listByCondition(responsibleConvertTool.obj2Obj(param, IndexTemplatePO.class)),
+    public List<IndexTemplate> listLogicTemplates(IndexTemplateDTO param) {
+        return ConvertUtil.list2List(
+            indexTemplateDAO.listByCondition(ConvertUtil.obj2Obj(param, IndexTemplatePO.class)),
             IndexTemplate.class);
     }
 
@@ -146,8 +157,8 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
      */
     @Override
     public List<IndexTemplate> fuzzyLogicTemplatesByCondition(IndexTemplateDTO param) {
-        return responsibleConvertTool.list2List(
-            indexTemplateDAO.likeByCondition(responsibleConvertTool.obj2Obj(param, IndexTemplatePO.class)),
+        return ConvertUtil.list2List(
+            indexTemplateDAO.likeByCondition(ConvertUtil.obj2Obj(param, IndexTemplatePO.class)),
             IndexTemplate.class);
     }
 
@@ -155,22 +166,36 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
     public List<IndexTemplate> pagingGetLogicTemplatesByCondition(TemplateConditionDTO param) {
         String sortTerm = null == param.getSortTerm() ? SortConstant.ID : param.getSortTerm();
         String sortType = param.getOrderByDesc() ? SortConstant.DESC : SortConstant.ASC;
+
         List<IndexTemplatePO> indexTemplatePOS = Lists.newArrayList();
         try {
-            indexTemplatePOS = indexTemplateDAO.pagingByCondition(param.getName(),
-                    param.getDataType(), param.getHasDCDR(), (param.getPage() - 1) * param.getSize(), param.getSize(), sortTerm, sortType);
+            indexTemplatePOS = indexTemplateDAO.pagingByCondition(ConvertUtil.obj2Obj(param, IndexTemplatePO.class),
+                    (param.getPage() - 1) * param.getSize(), param.getSize(),
+                    sortTerm, sortType);
         } catch (Exception e) {
             LOGGER.error("class=TemplateLogicServiceImpl||method=pagingGetLogicTemplatesByCondition||err={}",
                 e.getMessage(), e);
         }
 
-        return responsibleConvertTool.list2List(indexTemplatePOS, IndexTemplate.class);
+        return ConvertUtil.list2List(indexTemplatePOS, IndexTemplate.class);
+    }
+
+    @Override
+    public List<IndexTemplate> pagingGetTemplateSrvByCondition(TemplateQueryDTO param) {
+        List<IndexTemplatePO> indexTemplatePOS = Lists.newArrayList();
+        try {
+            indexTemplatePOS = indexTemplateDAO.pagingByCondition(ConvertUtil.obj2Obj(param, IndexTemplatePO.class),
+                    (param.getPage() - 1) * param.getSize(), param.getSize(),
+                    SortConstant.ID, SortConstant.DESC);
+        } catch (Exception e) {
+            LOGGER.error("class=IndexTemplateServiceImpl||method=pagingGetTemplateSrvByCondition||err={}", e.getMessage(), e);
+        }
+        return ConvertUtil.list2List(indexTemplatePOS, IndexTemplate.class);
     }
 
     @Override
     public Long fuzzyLogicTemplatesHitByCondition(IndexTemplateDTO param) {
-        return indexTemplateDAO
-            .getTotalHitByCondition(responsibleConvertTool.obj2Obj(param, IndexTemplatePO.class));
+        return indexTemplateDAO.getTotalHitByCondition(ConvertUtil.obj2Obj(param, IndexTemplatePO.class));
     }
 
     /**
@@ -180,8 +205,8 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
      * @return list
      */
     @Override
-    public List<IndexTemplate> getLogicTemplateByName(String templateName) {
-        return responsibleConvertTool.list2List(indexTemplateDAO.listByName(templateName),
+    public List<IndexTemplate> listLogicTemplateByName(String templateName) {
+        return ConvertUtil.list2List(indexTemplateDAO.listByName(templateName),
             IndexTemplate.class);
     }
 
@@ -193,7 +218,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
      */
     @Override
     public IndexTemplate getLogicTemplateById(Integer logicTemplateId) {
-        return responsibleConvertTool.obj2Obj(indexTemplateDAO.getById(logicTemplateId), IndexTemplate.class);
+        return ConvertUtil.obj2Obj(indexTemplateDAO.getById(logicTemplateId), IndexTemplate.class);
     }
 
     /**
@@ -277,7 +302,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
         }
 
 
-        List<IndexTemplate> indexTemplateList = getLogicTemplateByName(param.getName());
+        List<IndexTemplate> indexTemplateList = listLogicTemplateByName(param.getName());
         Result<Void> result = validateIndexTemplateLogicStep1(param, indexTemplateList);
         if (result.failed()) {return result;}
 
@@ -308,13 +333,13 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
 
     @Override
     public Result<Void> addTemplateWithoutCheck(IndexTemplateDTO param) throws AdminOperateException {
-        IndexTemplatePO templatePO = responsibleConvertTool.obj2Obj(param, IndexTemplatePO.class);
+        IndexTemplatePO templatePO = ConvertUtil.obj2Obj(param, IndexTemplatePO.class);
         boolean succ;
         try {
             succ = (1 == indexTemplateDAO.insert(templatePO));
         } catch (DuplicateKeyException e) {
             LOGGER.warn("class=TemplateLogicServiceImpl||method=addTemplateWithoutCheck||errMsg={}", e.getMessage());
-            throw new AdminOperateException(String.format("保存逻辑模板【%s】失败：模板名称已存在！", templatePO.getName()));
+            throw new AdminOperateException(String.format("保存逻辑模板【%s】失败！", templatePO.getName()));
         }
 
         param.setId(templatePO.getId());
@@ -329,7 +354,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
      */
     @Override
     public IndexTemplateConfig getTemplateConfig(Integer logicTemplateId) {
-        return responsibleConvertTool.obj2Obj(indexTemplateConfigDAO.getByLogicId(logicTemplateId),
+        return ConvertUtil.obj2Obj(indexTemplateConfigDAO.getByLogicId(logicTemplateId),
             IndexTemplateConfig.class);
     }
 
@@ -355,7 +380,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
         }
 
         boolean succ = 1 == indexTemplateConfigDAO
-            .update(responsibleConvertTool.obj2Obj(configDTO, TemplateConfigPO.class));
+            .update(ConvertUtil.obj2Obj(configDTO, TemplateConfigPO.class));
 
         return Result.build(succ);
     }
@@ -377,12 +402,12 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
         IndexTemplateConfig templateConfig = getTemplateConfig(logicTemplateId);
         if (templateConfig == null) {
             TemplateConfigPO configPO = getDefaultTemplateConfig(logicTemplateId);
-            configPO.setAdjustRackShardFactor(factor);
+            configPO.setAdjustShardFactor(factor);
             Result.build(1 == indexTemplateConfigDAO.insert(configPO));
         } else {
             IndexTemplateConfigDTO param = new IndexTemplateConfigDTO();
             param.setLogicId(logicTemplateId);
-            param.setAdjustRackShardFactor(factor);
+            param.setAdjustShardFactor(factor);
             updateTemplateConfig(param, operator);
         }
     }
@@ -399,13 +424,13 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
         IndexTemplateConfig templateConfig = getTemplateConfig(logicTemplateId);
         if (templateConfig == null) {
             TemplateConfigPO configPO = getDefaultTemplateConfig(logicTemplateId);
-            configPO.setAdjustRackShardFactor(factor);
+            configPO.setAdjustShardFactor(factor);
             Result.build(1 == indexTemplateConfigDAO.insert(configPO));
             return;
-        } else if (templateConfig.getAdjustRackShardFactor() < factor) {
+        } else if (templateConfig.getAdjustShardFactor() < factor) {
             IndexTemplateConfigDTO param = new IndexTemplateConfigDTO();
             param.setLogicId(logicTemplateId);
-            param.setAdjustRackShardFactor(factor);
+            param.setAdjustShardFactor(factor);
             updateTemplateConfig(param, operator);
             return;
         }
@@ -430,35 +455,35 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
      */
     @Override
     public Map<Integer, IndexTemplate> getAllLogicTemplatesMap() {
-        return getAllLogicTemplates().stream()
+        return listAllLogicTemplates().stream()
             .collect(Collectors.toMap(IndexTemplate::getId, indexTemplateLogic -> indexTemplateLogic));
     }
 
     @Override
-    public List<IndexTemplate> getLogicTemplatesByIds(List<Integer> logicTemplateIds) {
+    public List<IndexTemplate> listLogicTemplatesByIds(List<Integer> logicTemplateIds) {
         if (CollectionUtils.isEmpty(logicTemplateIds)) {
             return new ArrayList<>();
         }
 
-        return responsibleConvertTool.list2List(indexTemplateDAO.listByIds(logicTemplateIds),
+        return ConvertUtil.list2List(indexTemplateDAO.listByIds(logicTemplateIds),
             IndexTemplate.class);
     }
 
     @Override
     public Map<Integer, IndexTemplate> getLogicTemplatesMapByIds(List<Integer> logicTemplateIds) {
-        return getLogicTemplatesByIds(logicTemplateIds).stream()
+        return listLogicTemplatesByIds(logicTemplateIds).stream()
             .collect(Collectors.toMap(IndexTemplate::getId, indexTemplateLogic -> indexTemplateLogic));
     }
 
     /**
      * 根据APP ID查询模板
      *
-     * @param appId APP ID
+     * @param projectId APP ID
      * @return list
      */
     @Override
-    public List<IndexTemplate> getAppLogicTemplatesByAppId(Integer appId) {
-        return responsibleConvertTool.list2List(indexTemplateDAO.listByAppId(appId), IndexTemplate.class);
+    public List<IndexTemplate> listProjectLogicTemplatesByProjectId(Integer projectId) {
+        return ConvertUtil.list2List(indexTemplateDAO.listByProjectId(projectId), IndexTemplate.class);
     }
 
     /**
@@ -467,11 +492,11 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
      * @return
      */
     @Override
-    public List<IndexTemplate> getLogicClusterTemplates(Long logicClusterId) {
+    public List<IndexTemplate> listLogicClusterTemplates(Long logicClusterId) {
         List<IndexTemplate> logicTemplates = Lists.newArrayList();
 
         if (logicClusterId != null) {
-            List<IndexTemplateWithCluster> indexTemplateLogicWithClusters = getLogicTemplateWithClustersByClusterId(
+            List<IndexTemplateWithCluster> indexTemplateLogicWithClusters = listLogicTemplateWithClustersByClusterId(
                 logicClusterId);
             logicTemplates = ConvertUtil.list2List(indexTemplateLogicWithClusters, IndexTemplate.class);
         }
@@ -482,18 +507,18 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
     /**
      * 获取模板具体的物理索引
      *
-     * @param appId appId
+     * @param projectId projectId
      */
     @Override
-    public Result<List<Tuple<String, String>>> getLogicTemplatesByAppId(Integer appId) {
-        List<AppTemplateAuth> appTemplateAuths = logicTemplateAuthService.getTemplateAuthsByAppId(appId);
-        if (CollectionUtils.isEmpty(appTemplateAuths)) {
+    public Result<List<Tuple<String, String>>> listLogicTemplatesByProjectId(Integer projectId) {
+        List<ProjectTemplateAuth> projectTemplateAuths = logicTemplateAuthService.getTemplateAuthsByProjectId(projectId);
+        if (CollectionUtils.isEmpty(projectTemplateAuths)) {
             return Result.buildSucc();
         }
 
         List<Tuple<String, String>> indicesClusterTupleList = new ArrayList<>();
 
-        appTemplateAuths.parallelStream().forEach(appTemplateAuth -> {
+        projectTemplateAuths.parallelStream().forEach(appTemplateAuth -> {
             IndexTemplateWithPhyTemplates logicWithPhysical = getLogicTemplateWithPhysicalsById(
                 appTemplateAuth.getTemplateId());
 
@@ -509,8 +534,8 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
             }
         });
 
-        LOGGER.info("class=TemplateLogicServiceImpl||method=getAllTemplateIndicesByAppid||appId={}||indicesList={}",
-            appId, JSON.toJSONString(indicesClusterTupleList));
+        LOGGER.info("class=TemplateLogicServiceImpl||method=getAllTemplateIndicesByProjectId||projectId={}||indicesList={}",
+                projectId, JSON.toJSONString(indicesClusterTupleList));
 
         return Result.buildSucc(indicesClusterTupleList);
     }
@@ -519,15 +544,15 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
      * 模板移交
      *
      * @param logicId        模板id
-     * @param tgtAppId       appid
+     * @param tgtProjectId       projectId
      * @param tgtResponsible 责任人
      * @param operator       操作人
      * @return Result
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result<Void> turnOverLogicTemplate(Integer logicId, Integer tgtAppId, String tgtResponsible,
-                                        String operator) throws AdminOperateException {
+    public Result<Void> turnOverLogicTemplate(Integer logicId, Integer tgtProjectId, String tgtResponsible,
+                                              String operator) throws AdminOperateException {
 
         IndexTemplate templateLogic = getLogicTemplateById(logicId);
         if (templateLogic == null) {
@@ -536,7 +561,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
 
         IndexTemplateDTO logicDTO = new IndexTemplateDTO();
         logicDTO.setId(logicId);
-        logicDTO.setAppId(tgtAppId);
+        logicDTO.setProjectId(tgtProjectId);
         logicDTO.setResponsible(tgtResponsible);
 
         return editTemplate(logicDTO, operator);
@@ -559,16 +584,16 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
      * @return
      */
     @Override
-    public List<IndexTemplate> getAllLogicTemplates() {
-        return responsibleConvertTool.list2List(indexTemplateDAO.listAll(), IndexTemplate.class);
+    public List<IndexTemplate> listAllLogicTemplates() {
+        return ConvertUtil.list2List(indexTemplateDAO.listAll(), IndexTemplate.class);
     }
 
     @Override
-    public List<IndexTemplate> getAllLogicTemplatesWithCache() {
+    public List<IndexTemplate> listAllLogicTemplatesWithCache() {
         try {
-            return templateListCache.get("getAllLogicTemplates", this::getAllLogicTemplates);
+            return templateListCache.get("listAllLogicTemplates", this::listAllLogicTemplates);
         } catch (Exception e) {
-            return getAllLogicTemplates();
+            return listAllLogicTemplates();
         }
     }
 
@@ -579,21 +604,11 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
      * @return list
      */
     @Override
-    public List<IndexTemplateType> getLogicTemplateTypes(Integer logicId) {
+    public List<IndexTemplateType> listLogicTemplateTypes(Integer logicId) {
         return ConvertUtil.list2List(indexTemplateTypeDAO.listByIndexTemplateId(logicId), IndexTemplateType.class);
     }
 
-    /**
-     * 根据责任人查询
-     *
-     * @param responsibleId 责任人id
-     * @return list
-     */
-    @Override
-    public List<IndexTemplate> getTemplateByResponsibleId(Long responsibleId) {
-        return responsibleConvertTool.list2List(indexTemplateDAO.likeByResponsible(String.valueOf(responsibleId)),
-            IndexTemplate.class);
-    }
+
 
     /**
      * 需要修改逻辑表和物理表的name
@@ -649,34 +664,34 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
     }
 
     @Override
-    public List<IndexTemplate> getTemplatesByHasAuthCluster(Integer appId) {
-        if (appId == null) {
+    public List<IndexTemplate> listTemplatesByHasAuthCluster(Integer projectId) {
+        if (projectId == null) {
             return new ArrayList<>();
         }
 
         // 获取有权限的集群id
-        Set<Long> hasAuthLogicClusterIds = logicClusterAuthService.getAllLogicClusterAuths(appId).stream()
-            .map(AppClusterLogicAuth::getLogicClusterId).collect(Collectors.toSet());
+        Set<Long> hasAuthLogicClusterIds = logicClusterAuthService.getAllLogicClusterAuths(projectId).stream()
+            .map(ProjectClusterLogicAuth::getLogicClusterId).collect(Collectors.toSet());
 
         // 获取集群下的模板
-        return getLogicTemplateWithClusterAndMasterTemplateByClusters(hasAuthLogicClusterIds).stream()
+        return listLogicTemplateWithClusterAndMasterTemplateByClusters(hasAuthLogicClusterIds).stream()
                 .map(IndexTemplate.class::cast)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public List<IndexTemplate> getHasAuthTemplatesInLogicCluster(Integer appId, Long logicClusterId) {
-        if (appId == null || logicClusterId == null) {
+    public List<IndexTemplate> listHasAuthTemplatesInLogicCluster(Integer projectId, Long logicClusterId) {
+        if (projectId == null || logicClusterId == null) {
             return new ArrayList<>();
         }
 
         // 获取逻辑集群下的逻辑模板列表
-        List<IndexTemplateLogicWithClusterAndMasterTemplate> templatesInLogicCluster = getLogicTemplateWithClusterAndMasterTemplateByCluster(
+        List<IndexTemplateLogicWithClusterAndMasterTemplate> templatesInLogicCluster = listLogicTemplateWithClusterAndMasterTemplateByCluster(
             logicClusterId);
 
         // 获取app的模板权限记录
-        List<AppTemplateAuth> appTemplateAuths = logicTemplateAuthService.getTemplateAuthsByAppId(appId);
-        Set<Integer> hasAuthTemplateIds = appTemplateAuths.stream().map(AppTemplateAuth::getTemplateId)
+        List<ProjectTemplateAuth> projectTemplateAuths = logicTemplateAuthService.getTemplateAuthsByProjectId(projectId);
+        Set<Integer> hasAuthTemplateIds = projectTemplateAuths.stream().map(ProjectTemplateAuth::getTemplateId)
             .collect(Collectors.toSet());
 
         // 筛选app有权限的逻辑模板
@@ -687,9 +702,9 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
     }
 
     @Override
-    public List<IndexTemplateLogicWithClusterAndMasterTemplate> getLogicTemplatesWithClusterAndMasterTemplate() {
+    public List<IndexTemplateLogicWithClusterAndMasterTemplate> listLogicTemplatesWithClusterAndMasterTemplate() {
 
-        List<IndexTemplateWithCluster> logicClusters = getAllLogicTemplateWithClusters();
+        List<IndexTemplateWithCluster> logicClusters = listAllLogicTemplateWithClusters();
         if (CollectionUtils.isEmpty(logicClusters)) {
             return new ArrayList<>();
         }
@@ -703,9 +718,9 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
     }
 
     @Override
-    public List<IndexTemplateLogicWithClusterAndMasterTemplate> getLogicTemplatesWithClusterAndMasterTemplate(Set<Integer> logicTemplateIds) {
+    public List<IndexTemplateLogicWithClusterAndMasterTemplate> listLogicTemplatesWithClusterAndMasterTemplate(Set<Integer> logicTemplateIds) {
 
-        List<IndexTemplateWithCluster> logicClusters = getLogicTemplateWithClusters(logicTemplateIds);
+        List<IndexTemplateWithCluster> logicClusters = listLogicTemplateWithClusters(logicTemplateIds);
         if (CollectionUtils.isEmpty(logicClusters)) {
             return new ArrayList<>();
         }
@@ -715,19 +730,19 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
 
     @Override
     public Map<Integer, IndexTemplateLogicWithClusterAndMasterTemplate> getLogicTemplatesWithClusterAndMasterTemplateMap(Set<Integer> logicTemplateIds) {
-        return getLogicTemplatesWithClusterAndMasterTemplate(logicTemplateIds).stream()
+        return listLogicTemplatesWithClusterAndMasterTemplate(logicTemplateIds).stream()
             .collect(Collectors.toMap(IndexTemplateLogicWithClusterAndMasterTemplate::getId, template -> template));
     }
 
     @Override
-    public List<IndexTemplateLogicWithClusterAndMasterTemplate> getLogicTemplateWithClusterAndMasterTemplateByClusters(Set<Long> logicClusterIds) {
+    public List<IndexTemplateLogicWithClusterAndMasterTemplate> listLogicTemplateWithClusterAndMasterTemplateByClusters(Set<Long> logicClusterIds) {
 
         if (CollectionUtils.isEmpty(logicClusterIds)) {
             return new ArrayList<>();
         }
 
         // 过滤出指定集群的数据
-        return getLogicTemplatesWithClusterAndMasterTemplate().parallelStream()
+        return listLogicTemplatesWithClusterAndMasterTemplate().parallelStream()
             .filter(logicTemplateWithLogicCluster -> logicTemplateWithLogicCluster != null
                                                      && logicTemplateWithLogicCluster.getLogicCluster() != null
                                                      && logicClusterIds.contains(
@@ -736,13 +751,13 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
     }
 
     @Override
-    public List<IndexTemplateLogicWithClusterAndMasterTemplate> getLogicTemplateWithClusterAndMasterTemplateByCluster(Long logicClusterId) {
+    public List<IndexTemplateLogicWithClusterAndMasterTemplate> listLogicTemplateWithClusterAndMasterTemplateByCluster(Long logicClusterId) {
         if (logicClusterId == null) {
             return new ArrayList<>();
         }
 
         // 过滤出指定集群的数据
-        return getLogicTemplatesWithClusterAndMasterTemplate().parallelStream()
+        return listLogicTemplatesWithClusterAndMasterTemplate().parallelStream()
             .filter(logicTemplateWithLogicCluster -> logicTemplateWithLogicCluster != null
                                                      && logicTemplateWithLogicCluster.getLogicCluster() != null
                                                      && logicClusterId.equals(
@@ -767,8 +782,8 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
     }
 
     @Override
-    public List<IndexTemplateWithCluster> getLogicTemplateWithClusters(Set<Integer> logicTemplateIds) {
-        List<IndexTemplateWithPhyTemplates> physicalTemplates = getLogicTemplateWithPhysicalsByIds(
+    public List<IndexTemplateWithCluster> listLogicTemplateWithClusters(Set<Integer> logicTemplateIds) {
+        List<IndexTemplateWithPhyTemplates> physicalTemplates = listLogicTemplateWithPhysicalsByIds(
             logicTemplateIds);
 
         return convert2WithCluster(physicalTemplates).stream().filter(Objects::nonNull).collect(Collectors.toList());
@@ -780,12 +795,11 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
      * @return 带有逻辑集群的所有逻辑模板列表
      */
     @Override
-    public List<IndexTemplateWithCluster> getAllLogicTemplateWithClusters() {
-        List<IndexTemplateWithPhyTemplates> logicTemplatesCombinePhysicals = getAllLogicTemplateWithPhysicals();
+    public List<IndexTemplateWithCluster> listAllLogicTemplateWithClusters() {
+        List<IndexTemplateWithPhyTemplates> logicTemplatesCombinePhysicals = listAllLogicTemplateWithPhysicals();
 
         return convert2WithCluster(logicTemplatesCombinePhysicals).stream().filter(Objects::nonNull)
             .collect(Collectors.toList());
-
     }
 
     /**
@@ -795,8 +809,8 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
      * @return List<IndexTemplateLogicClusterMeta> 逻辑模板列表
      */
     @Override
-    public List<IndexTemplateWithCluster> getLogicTemplateWithClustersByClusterId(Long logicClusterId) {
-        List<IndexTemplateWithCluster> allClusterMetas = getAllLogicTemplateWithClusters();
+    public List<IndexTemplateWithCluster> listLogicTemplateWithClustersByClusterId(Long logicClusterId) {
+        List<IndexTemplateWithCluster> allClusterMetas = listAllLogicTemplateWithClusters();
 
         List<IndexTemplateWithCluster> currentClusterMetas = new ArrayList<>();
         for (IndexTemplateWithCluster clusterMeta : allClusterMetas) {
@@ -813,12 +827,12 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
      * @return
      */
     @Override
-    public List<IndexTemplateWithPhyTemplates> getAllLogicTemplateWithPhysicals() {
+    public List<IndexTemplateWithPhyTemplates> listAllLogicTemplateWithPhysicals() {
         return batchConvertLogicTemplateCombinePhysical(indexTemplateDAO.listAll());
     }
 
     @Override
-    public List<IndexTemplateWithPhyTemplates> getLogicTemplateWithPhysicalsByIds(Set<Integer> logicTemplateIds) {
+    public List<IndexTemplateWithPhyTemplates> listLogicTemplateWithPhysicalsByIds(Set<Integer> logicTemplateIds) {
         if (CollectionUtils.isEmpty(logicTemplateIds)) {
             return new ArrayList<>();
         }
@@ -849,7 +863,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
      * @return list
      */
     @Override
-    public List<IndexTemplateWithPhyTemplates> getTemplateWithPhysicalByDataCenter(String dataCenter) {
+    public List<IndexTemplateWithPhyTemplates> listTemplateWithPhysicalByDataCenter(String dataCenter) {
         return batchConvertLogicTemplateCombinePhysical(indexTemplateDAO.listByDataCenter(dataCenter));
     }
 
@@ -908,12 +922,12 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
             }
         }
         IndexTemplatePO oldPO = indexTemplateDAO.getById(dto.getLogicId());
-        IndexTemplatePO editTemplate = responsibleConvertTool.obj2Obj(dto, IndexTemplatePO.class);
+        IndexTemplatePO editTemplate = ConvertUtil.obj2Obj(dto, IndexTemplatePO.class);
         editTemplate.setId(dto.getLogicId());
         editTemplate.setWriteRateLimit(dto.getAdjustRateLimit());
         int update = indexTemplateDAO.update(editTemplate);
         if (update > 0) {
-            IndexTemplateDTO param = responsibleConvertTool.obj2Obj(editTemplate, IndexTemplateDTO.class);
+            IndexTemplateDTO param = ConvertUtil.obj2Obj(editTemplate, IndexTemplateDTO.class);
             param.setId(dto.getLogicId());
             // 将修改同步到物理模板
             Result editPhyResult = indexTemplatePhyService.editTemplateFromLogic(param, AriusUser.SYSTEM.getDesc());
@@ -921,7 +935,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
                 return Result.buildFail("修改限流，修改物理模板失败");
             }
             operateRecordService.save(TEMPLATE, EDIT, dto.getLogicId(), String.format("数据库写入限流值修改%s->%s", dto.getCurRateLimit(), dto.getAdjustRateLimit()), dto.getSubmitor());
-            SpringTool.publish(new LogicTemplateModifyEvent(this, responsibleConvertTool.obj2Obj(oldPO, IndexTemplate.class), getLogicTemplateById(oldPO.getId())));
+            SpringTool.publish(new LogicTemplateModifyEvent(this, ConvertUtil.obj2Obj(oldPO, IndexTemplate.class), getLogicTemplateById(oldPO.getId())));
             return Result.buildSucc();
         }
         return Result.buildFail();
@@ -946,14 +960,48 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
 
     @Override
     public Result<List<IndexTemplate>> listByRegionId(Integer regionId) {
-        List<IndexTemplatePO> indexTemplatePOS;
-        try {
-            indexTemplatePOS = indexTemplateDAO.listByRegionId(regionId);
-        } catch (Exception e) {
-            LOGGER.error("class=IndexTemplateServiceImpl||method=listAllByRegionId||errMsg={}", e);
-            return Result.buildFail(String.format("根据regionId获取模板列表失败, msg:%s", e.getMessage()));
+        Result<List<IndexTemplatePhy>> phyListResult = indexTemplatePhyService.listByRegionId(regionId);
+        if (phyListResult.failed() && CollectionUtils.isEmpty(phyListResult.getData())) {
+            return Result.buildFail(phyListResult.getMessage());
         }
-        return Result.buildSucc(ConvertUtil.list2List(indexTemplatePOS, IndexTemplate.class));
+
+        List<Integer> logicTemplateIdList = phyListResult.getData().stream().map(IndexTemplatePhy::getLogicId).distinct().collect(Collectors.toList());
+        List<IndexTemplate> logicTemplateList = listLogicTemplatesByIds(logicTemplateIdList);
+        return Result.buildSucc(logicTemplateList);
+    }
+
+    @Override
+    public List<IndexTemplateWithCluster> convert2WithCluster(List<IndexTemplateWithPhyTemplates> indexTemplateWithPhyTemplates) {
+        if (CollectionUtils.isEmpty(indexTemplateWithPhyTemplates)) { return new ArrayList<>();}
+
+        List<IndexTemplateWithCluster> res = Lists.newArrayList();
+        for (IndexTemplateWithPhyTemplates indexTemplateWithPhyTemplate : indexTemplateWithPhyTemplates) {
+            IndexTemplateWithCluster indexTemplateWithCluster = ConvertUtil.obj2Obj(indexTemplateWithPhyTemplate, IndexTemplateWithCluster.class);
+            IndexTemplatePhy masterPhyTemplate = indexTemplateWithPhyTemplate.getMasterPhyTemplate();
+            res.add(indexTemplateWithCluster);
+
+            ClusterRegion region = clusterRegionService.getRegionById(masterPhyTemplate.getRegionId().longValue());
+            if (null == region) { continue;}
+
+            String logicClusterIds = region.getLogicClusterIds();
+            if (REGION_NOT_BOUND_LOGIC_CLUSTER_ID.equals(logicClusterIds)) { continue;}
+
+            List<String> logicClusterIdStrList = ListUtils.string2StrList(logicClusterIds);
+            List<Long>   logicClusterIdList    = logicClusterIdStrList.stream().map(Long::parseLong).distinct().collect(Collectors.toList());
+            List<ClusterLogic> clusterLogicList = clusterLogicService.getClusterLogicListByIds(logicClusterIdList);
+
+            indexTemplateWithCluster.setLogicClusters(clusterLogicList);
+        }
+        return res;
+    }
+
+    @Override
+    public List<IndexTemplate> listByResourceIds(List<Long> resourceIds) {
+        if (CollectionUtils.isEmpty(resourceIds)) {
+            return new ArrayList<>();
+        }
+
+        return ConvertUtil.list2List(indexTemplateDAO.listByResourceIds(resourceIds), IndexTemplate.class);
     }
 
     /**************************************** private method ****************************************************/
@@ -977,7 +1025,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
         List<IndexTemplateWithPhyTemplates> indexTemplateCombinePhysicalTemplates = Lists.newArrayListWithCapacity(logicTemplates.size());
 
         for (IndexTemplatePO logicTemplate : logicTemplates) {
-            IndexTemplateWithPhyTemplates logicWithPhysical = responsibleConvertTool.obj2Obj(logicTemplate,
+            IndexTemplateWithPhyTemplates logicWithPhysical = ConvertUtil.obj2Obj(logicTemplate,
                 IndexTemplateWithPhyTemplates.class);
             logicWithPhysical
                 .setPhysicals(Lists.newArrayList(logicId2PhysicalTemplatesMapping.get(logicTemplate.getId())));
@@ -988,7 +1036,6 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
         return indexTemplateCombinePhysicalTemplates;
     }
 
-    /**************************************** private method ****************************************************/
     /**
      *
      * @param esLogicClusters 逻辑集群列表
@@ -1005,146 +1052,6 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
         }
 
         return false;
-    }
-
-    /**
-     * 构建整合逻辑集群元数据信息的逻辑模板列表
-     *
-     * @param logicClusterId2ClusterMeta     逻辑集群ID与逻辑集群元数据映射
-     * @param clusterRackMeta2LogicClusterId 集群Rack元数据信息跟逻辑集群ID的映射
-     * @param templateLogicWithPhysical      带有物理模板的逻辑模板信息
-     * @return
-     */
-    private IndexTemplateWithCluster buildLogicTemplateWithLogicClusterMeta(Map<Long, ClusterLogic> logicClusterId2ClusterMeta,
-                                                                            Multimap<String, Long> clusterRackMeta2LogicClusterId,
-                                                                            IndexTemplateWithPhyTemplates templateLogicWithPhysical) {
-        List<IndexTemplatePhy> physicals = templateLogicWithPhysical.getPhysicals();
-
-        Map<Long, ClusterLogic> relatedLogicClusters = Maps.newHashMap();
-        if (CollectionUtils.isNotEmpty(physicals)) {
-            for (IndexTemplatePhy physical : physicals) {
-
-                List<ClusterLogic> logicClusters = getPhysicalTemplateLogicCluster(physical, clusterRackMeta2LogicClusterId,
-                        logicClusterId2ClusterMeta);
-
-                if (!CollectionUtils.isEmpty(logicClusters)) {
-                    logicClusters.forEach(logicCluster -> relatedLogicClusters.put(logicCluster.getId(), logicCluster));
-                }
-            }
-        }
-
-        IndexTemplateWithCluster templateLogicWithCluster = ConvertUtil.obj2Obj(templateLogicWithPhysical,
-            IndexTemplateWithCluster.class);
-
-        templateLogicWithCluster.setLogicClusters(Lists.newArrayList(relatedLogicClusters.values()));
-
-        return templateLogicWithCluster;
-    }
-
-    /**
-     * 获取物理模板对应的逻辑集群信息
-     *
-     * @param physicalTemplate                        物理模板
-     * @param clusterRack2LogicClusterId      集群Rack
-     * @param logicClusterId2LogicClusterMeta 逻辑集群ID与逻辑集群的映射关系
-     * @return
-     */
-    private List<ClusterLogic> getPhysicalTemplateLogicCluster(IndexTemplatePhy physicalTemplate,
-                                                               Multimap<String, Long> clusterRack2LogicClusterId,
-                                                               Map<Long, ClusterLogic> logicClusterId2LogicClusterMeta) {
-
-        if (physicalTemplate != null) {
-            Collection<Long> logicClusterIds = clusterRack2LogicClusterId
-                    .get(fetchRackKey(physicalTemplate.getCluster(), fetchFirstRack(physicalTemplate.getRack())));
-
-            if (CollectionUtils.isEmpty(logicClusterIds)) {
-                logicClusterIds = clusterRack2LogicClusterId
-                        .get(fetchRackKey(physicalTemplate.getCluster(), AdminConstant.RACK_COMMA));
-            }
-
-            List<ClusterLogic> clusterLogics = Lists.newArrayList();
-            logicClusterIds.forEach(logicClusterId -> clusterLogics.add(logicClusterId2LogicClusterMeta.get(logicClusterId)));
-
-            return clusterLogics;
-        }
-
-        return null;
-    }
-
-    /**
-     * 获取第一个Rack
-     * @param racks 格式化的Rack列表
-     * @return
-     */
-    private String fetchFirstRack(String racks) {
-        if (StringUtils.isNotBlank(racks)) {
-            return racks.split(",")[0];
-        }
-
-        return StringUtils.EMPTY;
-    }
-
-    /**
-     * 获取所有集群Rack与逻辑集群ID映射
-     *
-     * @return
-     */
-    private Multimap<String, Long> fetchClusterRacks2LogicClusterIdMappings() {
-        Multimap<String, Long> logicClusterIdMappings = ArrayListMultimap.create();
-        for (ClusterLogicRackInfo param : clusterRegionService.listAllLogicClusterRacks()) {
-            List<Long> logicClusterIds = ListUtils.string2LongList(param.getLogicClusterIds());
-            logicClusterIds.forEach(logicClusterId -> logicClusterIdMappings.put(fetchRackKey(param.getPhyClusterName(), param.getRack()), logicClusterId));
-        }
-        return logicClusterIdMappings;
-    }
-
-    /**
-     * 生成Map Key
-     *
-     * @param cluster 物理集群名称
-     * @param rack    Rack名称
-     * @return
-     */
-    private String fetchRackKey(String cluster, String rack) {
-        return cluster + "&" + rack;
-    }
-
-    /**
-     * 获取所有逻辑集群
-     *
-     * @return
-     */
-    private Map<Long, ClusterLogic> getLogicClusters() {
-        return ConvertUtil.list2Map(clusterLogicService.listAllClusterLogics(), ClusterLogic::getId);
-    }
-
-    /**
-     * 从LogicTemplateCombinePhysicalTemplates转换到LogicTemplateCombineLogicCluster
-     * @param logicTemplatesCombinePhysicals
-     * @return
-     */
-    private List<IndexTemplateWithCluster> convert2WithCluster(List<IndexTemplateWithPhyTemplates> logicTemplatesCombinePhysicals) {
-        if (CollectionUtils.isEmpty(logicTemplatesCombinePhysicals)) {
-            return new ArrayList<>();
-        }
-
-        List<IndexTemplateWithCluster> indexTemplateLogicWithClusters = new CopyOnWriteArrayList<>();
-        // 所有逻辑集群，key-逻辑集群id，value-逻辑集群
-        final Map<Long, ClusterLogic> logicClusterMap = getLogicClusters();
-        // 集群rack到逻辑集群id的映射
-        final Multimap<String, Long> clusterIdMappingsMap = fetchClusterRacks2LogicClusterIdMappings();
-
-        logicTemplatesCombinePhysicals.forEach(templateLogicWithPhysical -> {
-            try {
-                indexTemplateLogicWithClusters.add(buildLogicTemplateWithLogicClusterMeta(logicClusterMap,
-                    clusterIdMappingsMap, templateLogicWithPhysical));
-            } catch (Exception e) {
-                LOGGER.error("class=LogicTemplateCombineClusterServiceImpl||method=acquireLogicTemplateCombineClusters"
-                             + "||physical={}",
-                    templateLogicWithPhysical, e);
-            }
-        });
-        return indexTemplateLogicWithClusters;
     }
 
     private Result<Void> checkConfigParam(IndexTemplateConfigDTO configDTO) {
@@ -1170,8 +1077,8 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
     private TemplateConfigPO getDefaultTemplateConfig(Integer logicId) {
         TemplateConfigPO configPO = new TemplateConfigPO();
         configPO.setLogicId(logicId);
-        configPO.setAdjustRackTpsFactor(1.0);
-        configPO.setAdjustRackShardFactor(1.0);
+        configPO.setAdjustTpsFactor(1.0);
+        configPO.setAdjustShardFactor(1.0);
         configPO.setDynamicLimitEnable(AdminConstant.YES);
         configPO.setMappingImproveEnable(AdminConstant.NO);
         configPO.setIsSourceSeparated(AdminConstant.NO);
@@ -1195,7 +1102,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
         }
 
         IndexTemplatePO oldPO = indexTemplateDAO.getById(param.getId());
-        IndexTemplatePO editTemplate = responsibleConvertTool.obj2Obj(param, IndexTemplatePO.class);
+        IndexTemplatePO editTemplate = ConvertUtil.obj2Obj(param, IndexTemplatePO.class);
         if ("".equals(editTemplate.getResponsible())) {
             editTemplate.setResponsible(null);
         }
@@ -1214,7 +1121,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
             operateRecordService.save(ModuleEnum.TEMPLATE, OperationEnum.EDIT, param.getId(), JSON.toJSONString(
                     new TemplateOperateRecord(TemplateOperateRecordEnum.TRANSFER.getCode(), AriusObjUtils.findChangedWithClear(oldPO, editTemplate))), operator);
 
-            SpringTool.publish(new LogicTemplateModifyEvent(this, responsibleConvertTool.obj2Obj(oldPO, IndexTemplate.class)
+            SpringTool.publish(new LogicTemplateModifyEvent(this, ConvertUtil.obj2Obj(oldPO, IndexTemplate.class)
                     , getLogicTemplateById(oldPO.getId())));
         }
 
@@ -1276,11 +1183,13 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
 
     private Result<Void> validateIndexTemplateLogicStep2(IndexTemplateDTO param, String dateFormatFinal, String expressionFinal, String nameFinal, String dateFieldFinal) {
         List<String> responsibles = ListUtils.string2StrList(param.getResponsible());
+        //todo 后期变更
+        /**
         for (String responsible : responsibles) {
             if (AriusObjUtils.isNull(ariusUserInfoService.getByDomainAccount(responsible))) {
                 return Result.buildParamIllegal(String.format("责任人%s非法", responsible));
             }
-        }
+        }**/
         if (expressionFinal != null && expressionFinal.endsWith("*") && AriusObjUtils.isNull(dateFormatFinal)) {
             return Result.buildParamIllegal("表达式*结尾,后缀格式必填");
         }
@@ -1322,8 +1231,8 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
                 && !DataCenterEnum.validate(param.getDataCenter())) {
             return Result.buildParamIllegal("数据中心非法");
         }
-        if (param.getAppId() != null
-                && !appService.isAppExists(param.getAppId())) {
+        if (param.getProjectId() != null
+                && !projectService.checkProjectExist(param.getProjectId())) {
             return Result.buildParamIllegal("所属应用不存在");
         }
         if (param.getDataType() != null
@@ -1370,7 +1279,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
         if (AriusObjUtils.isNull(param.getName())) {
             return Result.buildParamIllegal("名字为空");
         }
-        if (AriusObjUtils.isNull(param.getAppId())) {
+        if (AriusObjUtils.isNull(param.getProjectId())) {
             return Result.buildParamIllegal("所属应用为空");
         }
         if (AriusObjUtils.isNull(param.getDataType())) {
@@ -1388,8 +1297,8 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
         if (AriusObjUtils.isNull(param.getDataCenter())) {
             return Result.buildParamIllegal("数据中心为空");
         }
-        if (AriusObjUtils.isNull(param.getQuota())) {
-            return Result.buildParamIllegal("Quota为空");
+        if (AriusObjUtils.isNull(param.getDiskSize())) {
+            return Result.buildParamIllegal("DiskSize为空");
         }
         if (AriusObjUtils.isNull(param.getWriteRateLimit())) {
             param.setWriteRateLimit(-1);
@@ -1399,6 +1308,9 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
         }
         if(levelOfTemplateLower(param)) {
             return Result.buildParamIllegal("模板设置的服务等级低于所属逻辑集群的服务等级");
+        }
+        if (AriusObjUtils.isNull(clusterLogicService.getClusterLogicById(param.getResourceId()))) {
+            return Result.buildNotExist("逻辑集群不存在");
         }
 
         return Result.buildSucc();

@@ -36,8 +36,6 @@ public class ESIndexServiceTest extends AriusAdminApplicationTest {
 
     @Test
     public void syncCreateIndexTest() throws ESOperateException {
-        Mockito.when(esIndexDAO.createIndex(CustomDataSource.PHY_CLUSTER_NAME, "test")).thenReturn(true);
-        Assertions.assertTrue(esIndexService.syncCreateIndex(CustomDataSource.PHY_CLUSTER_NAME, "test", 1));
     }
 
     @Test
@@ -139,15 +137,6 @@ public class ESIndexServiceTest extends AriusAdminApplicationTest {
         indices.add("test1");
         indices.add("test2");
         Assertions.assertTrue(esIndexService.syncDeleteByQuery(CustomDataSource.PHY_CLUSTER_NAME, indices, ""));
-    }
-
-    @Test
-    public void syncBatchUpdateRackTest() throws ESOperateException {
-        Mockito.when(esIndexDAO.batchUpdateIndexRack(Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(true);
-        List<String> indices = new ArrayList<>();
-        indices.add("test1");
-        indices.add("test2");
-        Assertions.assertTrue(esIndexService.syncBatchUpdateRack(CustomDataSource.PHY_CLUSTER_NAME, indices, "rack", 1));
     }
 
     @Test

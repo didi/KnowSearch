@@ -13,6 +13,7 @@ public enum WorkOrderTypeEnum {
     /**
      * 应用创建工单
      */
+    @Deprecated
     APP_CREATE("appCreate", "项目创建"),
 
     LOGIC_CLUSTER_CREATE("logicClusterCreate", "集群创建"),

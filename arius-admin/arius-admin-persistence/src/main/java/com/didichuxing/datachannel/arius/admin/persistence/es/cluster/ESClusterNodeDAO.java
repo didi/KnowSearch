@@ -1,15 +1,18 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.cluster;
 
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_OPERATE_TIMEOUT;
+
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
 import com.didiglobal.logi.elasticsearch.client.ESClient;
+import com.didiglobal.logi.elasticsearch.client.request.cluster.nodestats.ESClusterNodesStatsRequest;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodesstats.ClusterNodeStats;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodesstats.ESClusterNodesStatsResponse;
-import org.springframework.stereotype.Repository;
-
+import com.google.common.collect.Lists;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.ES_OPERATE_TIMEOUT;
+import org.springframework.stereotype.Repository;
 
 /**
  * @author d06679
@@ -35,6 +38,45 @@ public class ESClusterNodeDAO extends BaseESDAO {
         }
 
         return count;
+    }
+
+    public List<ClusterNodeStats> syncGetNodesStats(String clusterName) {
+        ESClient esClient = esOpClient.getESClient(clusterName);
+        if (esClient == null) {
+            LOGGER.error(
+                "class=ESClusterNodeServiceImpl||method=syncGetNodeFsStatsMap||clusterName={}||errMsg=esClient is null",
+                clusterName);
+            return Lists.newArrayList();
+        }
+        ESClusterNodesStatsResponse response = esClient.admin().cluster().prepareNodeStats().setFs(true).setOs(true)
+            .setJvm(true).setThreadPool(true).level("node").execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+        if (response.getNodes() != null) {
+            return new ArrayList<>(response.getNodes().values());
+
+        }
+        return Lists.newArrayList();
+    }
+
+    /**
+     * 获取nodes信息
+     * @param cluster
+     * @return
+     */
+    public List<ClusterNodeStats> getNodeState(String cluster) {
+        ESClient esClient = esOpClient.getESClient(cluster);
+        if (esClient == null) {
+            LOGGER.error(
+                    "class=ESClusterNodeServiceImpl||method=getNodeState||clusterName={}||errMsg=esClient is null",
+                    cluster);
+            return Lists.newArrayList();
+        }
+        ESClusterNodesStatsResponse response =  esClient.admin().cluster().nodeStats(new ESClusterNodesStatsRequest())
+                .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+        if (response.getNodes() != null) {
+            return new ArrayList<>(response.getNodes().values());
+
+        }
+        return Lists.newArrayList();
     }
 
 }

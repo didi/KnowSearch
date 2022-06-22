@@ -7,12 +7,12 @@ public class ClusterLogicEvent extends ClusterEvent {
 
     private Long    clusterLogicId;
 
-    private Integer appId;
+    private Integer projectId;
 
-    public ClusterLogicEvent(Long clusterLogicId, Integer appId) {
+    public ClusterLogicEvent(Long clusterLogicId, Integer projectId) {
         super(clusterLogicId);
         this.clusterLogicId = clusterLogicId;
-        this.appId = appId;
+        this.projectId = projectId;
     }
 
     public Long getClusterLogicId() {
@@ -23,12 +23,12 @@ public class ClusterLogicEvent extends ClusterEvent {
         this.clusterLogicId = clusterLogicId;
     }
 
-    public Integer getAppId() {
-        return appId;
+    public Integer getProjectId() {
+        return projectId;
     }
 
-    public void setAppId(Integer appId) {
-        this.appId = appId;
+    public void setProjectId(Integer projectId) {
+        this.projectId = projectId;
     }
 
     public ClusterLogicEvent(Object source) {

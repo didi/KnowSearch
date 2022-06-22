@@ -1,21 +1,19 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.template;
 
-import com.didichuxing.datachannel.arius.admin.common.constant.template.DataTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.BaseEntity;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.StringResponsible;
-
+import com.didichuxing.datachannel.arius.admin.common.constant.template.DataTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
  * @author chengxiang
- * @date 2022/5/9
+ * @date 2022/5/11
  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class IndexTemplate extends BaseEntity implements StringResponsible, Comparable<IndexTemplate> {
+public class IndexTemplate extends BaseEntity implements  Comparable<IndexTemplate> {
 
     private Integer id;
 
@@ -25,9 +23,9 @@ public class IndexTemplate extends BaseEntity implements StringResponsible, Comp
     private String  name;
 
     /**
-     * appid
+     * projectId
      */
-    private Integer appId;
+    private Integer projectId;
 
     /**
      * 用户数据类型
@@ -154,9 +152,18 @@ public class IndexTemplate extends BaseEntity implements StringResponsible, Comp
     private Long    checkPointDiff;
 
     /**
+     * 已开启的模板服务
+     */
+    private String  openSrv;
+    /**
      * regionId
      */
     private Integer regionId;
+
+    /**
+     * 可用磁盘容量
+     */
+    private Double diskSize;
 
     @Override
     public int compareTo(IndexTemplate o) {

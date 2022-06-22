@@ -6,13 +6,6 @@
     "settings":{
         "index":{
             "number_of_shards":"4",
-            "routing":{
-                "allocation":{
-                    "include":{
-                        "rack":""
-                    }
-                }
-            },
             "mapping":{
                 "single_type":"true"
             }

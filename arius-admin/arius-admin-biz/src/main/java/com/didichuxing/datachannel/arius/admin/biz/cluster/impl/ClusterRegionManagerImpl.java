@@ -3,20 +3,11 @@ package com.didichuxing.datachannel.arius.admin.biz.cluster.impl;
 import static com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType.FAIL;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionWithNodeInfoVO;
-import com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
-import com.google.common.collect.Sets;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -28,22 +19,26 @@ import com.didichuxing.datachannel.arius.admin.biz.template.srv.TemplateSrvManag
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRegionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterWithRegionDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.LogicClusterRackVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PhyClusterRackVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicContext;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicRackInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionWithNodeInfoVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AriusRunTimeException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
+import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 @Component
 public class ClusterRegionManagerImpl implements ClusterRegionManager {
@@ -67,6 +62,9 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
 
     @Autowired
     private ClusterRoleHostService clusterRoleHostService;
+    
+    @Autowired
+    private OperateRecordService operateRecordService;
 
     /**
      * 构建regionVO
@@ -85,27 +83,27 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
 
     /**
      * 逻辑集群绑定同一个物理集群的region的时候需要根据类型进行过滤
-     * @param clusterLogicId 逻辑集群id
      * @param phyCluster 物理集群名称
      * @param clusterLogicType 逻辑集群类型
      * @return
      */
     @Override
-    public List<ClusterRegion> filterClusterRegionByLogicClusterType(Long clusterLogicId, String phyCluster, Integer clusterLogicType) {
-        if (ResourceLogicTypeEnum.valueOf(clusterLogicType).equals(ResourceLogicTypeEnum.UNKNOWN)) {
-            return new ArrayList<>();
+    public Result<List<ClusterRegionVO>> listPhyClusterRegionsByLogicClusterTypeAndCluster(String phyCluster, Integer clusterLogicType) {
+        if (!ClusterResourceTypeEnum.isExist(clusterLogicType)) { return Result.buildFail("逻辑集群类型不存在");}
+
+        ClusterPhy clusterPhy = clusterPhyService.getClusterByName(phyCluster);
+        if (null == clusterPhy) { return Result.buildFail(String.format("物理集群[%s]不存在", phyCluster));}
+
+        int resourceType = clusterPhy.getResourceType();
+        if (clusterLogicType != resourceType) {
+            return Result.buildFail(String.format("物理集群[%s]类型为[%s], 不满足逻辑集群类型[%s], 请调整类型一致",phyCluster, resourceType, clusterLogicType));
         }
 
-        //根据物理集群获取全量的region数据
         List<ClusterRegion> clusterRegions = clusterRegionService.listPhyClusterRegions(phyCluster);
         if (CollectionUtils.isEmpty(clusterRegions)) {
-            return clusterRegions;
+            return Result.buildFail(String.format("物理集群[%s]无划分region, 请先进行region划分", phyCluster));
         }
-
-        //只有当物理集群上的region没有被绑定或者逻辑集群类型为public时region只被绑定到了共享类型的逻辑集群
-        return clusterRegions.stream()
-                .filter(clusterRegion -> canBindRegionToLogicCluster(clusterRegion, clusterLogicType, clusterLogicId))
-                .collect(Collectors.toList());
+        return Result.buildSucc(ConvertUtil.list2List(clusterRegions, ClusterRegionVO.class));
     }
 
     /**
@@ -123,54 +121,7 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
         logicClusterRegionVO.setId(region.getId());
         logicClusterRegionVO.setLogicClusterIds(region.getLogicClusterIds());
         logicClusterRegionVO.setClusterName(region.getPhyClusterName());
-        logicClusterRegionVO.setRacks(region.getRacks());
         return logicClusterRegionVO;
-    }
-
-    @Override
-    public List<PhyClusterRackVO> buildCanDividePhyClusterRackVOs(String cluster) {
-        // 所有的racks
-        Set<String> clusterRacks                 =   clusterPhyService.getClusterRacks(cluster);
-        List<PhyClusterRackVO> racks             =   Lists.newArrayList();
-        Set<String>            usedRacks         =   fetchDivideRacks(cluster, clusterRacks);
-        Set<String>            unusedRacks       =   fetchUnusedRacks(clusterRacks, usedRacks);
-
-        racks.addAll(batchBuildClusterRackVOs(cluster, usedRacks, 1));
-        racks.addAll(batchBuildClusterRackVOs(cluster, unusedRacks, 0));
-
-        LOGGER.info(
-            "class=ClusterRegionManagerImpl||method=buildCanDividePhyClusterRackVOs||clusterRacks={}||usedRacksInfo={}||racks={}",
-            clusterRacks, usedRacks, racks);
-        return racks;
-    }
-
-    /**
-     * 获取已经划分在region中的racks
-     * @param phyClusterName
-     * @param clusterRacks
-     * @return
-     */
-    private Set<String> fetchDivideRacks(String phyClusterName, Set<String> clusterRacks) {
-        List<ClusterRegion> regions = clusterRegionService.listRegionsByClusterName(phyClusterName);
-        List<String> regionRacks    = Lists.newArrayList();
-        regions.forEach(region-> regionRacks.addAll(ListUtils.string2StrList(region.getRacks())));
-
-        return clusterRacks.stream().filter(regionRacks::contains).collect(Collectors.toSet());
-    }
-
-    /**
-     * 构建逻辑集群物RackVO
-     * @param logicClusterRackInfos 逻辑集群rack信息
-     * @return
-     */
-    @Override
-    public List<LogicClusterRackVO> buildLogicClusterRackVOs(List<ClusterLogicRackInfo> logicClusterRackInfos) {
-        if (CollectionUtils.isEmpty(logicClusterRackInfos)) {
-            return new ArrayList<>();
-        }
-
-        return logicClusterRackInfos.stream().filter(Objects::nonNull).map(this::buildLogicClusterRackVO)
-            .collect(Collectors.toList());
     }
 
     @Override
@@ -223,7 +174,7 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
     }
 
     @Override
-    public Result<List<ClusterRegionWithNodeInfoVO>> getClusterRegionWithNodeInfoByClusterName(String clusterName) {
+    public Result<List<ClusterRegionWithNodeInfoVO>> listClusterRegionWithNodeInfoByClusterName(String clusterName) {
         List<ClusterRegion> clusterRegions = clusterRegionService.listRegionsByClusterName(clusterName);
         if (CollectionUtils.isEmpty(clusterRegions)) { return Result.buildSucc();}
 
@@ -242,38 +193,23 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
         return Result.buildSucc(clusterRegionWithNodeInfoVOS.stream().filter(r -> !AriusObjUtils.isBlank(r.getName())).distinct().collect(Collectors.toList()));
     }
 
+    @Override
+    public Result<List<ClusterRegionVO>> listNoEmptyClusterRegionByClusterName(String clusterName) {
+        Result<List<ClusterRegionWithNodeInfoVO>> ret = listClusterRegionWithNodeInfoByClusterName(clusterName);
+        if (ret.failed()) { return Result.buildFrom(ret);}
+
+        List<ClusterRegionWithNodeInfoVO> data = ret.getData();
+        if (CollectionUtils.isEmpty(data)) { return Result.buildSucc();}
+
+        // 过滤空region
+        List<ClusterRegionVO> validClusterRegionVOList = data.stream()
+                .filter(r -> Objects.nonNull(r) && !AriusObjUtils.isBlank(r.getNodeNames()))
+                .collect(Collectors.toList());
+
+        return Result.buildSucc(validClusterRegionVOList);
+    }
+
     /***************************************** private method ****************************************************/
-    /**
-     * 获取没有使用的Rack列表
-     * @param clusterRacks 物理集群Rack
-     * @param usedRacks    使用的Rack
-     * @return
-     */
-    private Set<String> fetchUnusedRacks(Set<String> clusterRacks, Set<String> usedRacks) {
-
-        Set<String> unusedRacks = new HashSet<>(clusterRacks);
-
-        for (String rack : clusterRacks) {
-            if (usedRacks.contains(rack)) {
-                unusedRacks.remove(rack);
-            }
-        }
-
-        return unusedRacks;
-    }
-
-    /**
-     * 批量构建物理集群RackVO
-     * @param cluster   物理集群
-     * @param racks     Rack列表
-     * @param usedFlags 使用标示
-     * @return
-     */
-    private List<PhyClusterRackVO> batchBuildClusterRackVOs(String cluster, Set<String> racks, Integer usedFlags) {
-
-        return racks.stream().map(rack -> buildClusterRackVO(cluster, rack, usedFlags)).collect(Collectors.toList());
-    }
-
     /**
      * 对于逻辑集群绑定的物理集群的版本进行一致性校验
      *
@@ -299,48 +235,6 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
         }
 
         return Result.buildSucc();
-    }
-
-    /**
-     * 构建物理集群RackVO
-     * @param cluster   物理集群
-     * @param rack      rack信息
-     * @param usedFlags 使用标示
-     * @return
-     */
-    private PhyClusterRackVO buildClusterRackVO(String cluster, String rack, Integer usedFlags) {
-        PhyClusterRackVO clusterRack = new PhyClusterRackVO();
-        clusterRack.setCluster(cluster);
-        clusterRack.setRack(rack);
-        clusterRack.setUsageFlags(usedFlags);
-        return clusterRack;
-    }
-
-    private LogicClusterRackVO buildLogicClusterRackVO(ClusterLogicRackInfo clusterLogicRackInfo) {
-        if (clusterLogicRackInfo == null) {
-            return null;
-        }
-
-        LogicClusterRackVO logicClusterRackVO = new LogicClusterRackVO();
-        logicClusterRackVO.setResourceIds(clusterLogicRackInfo.getLogicClusterIds());
-        logicClusterRackVO.setResourceId(genResourceIdFromLogicClusterIds(clusterLogicRackInfo.getLogicClusterIds()));
-        logicClusterRackVO.setCluster(clusterLogicRackInfo.getPhyClusterName());
-        logicClusterRackVO.setRack(clusterLogicRackInfo.getRack());
-        return logicClusterRackVO;
-    }
-
-    /**
-     * 为了兼容调用该视图的应用，所以这里resourceId字段取rack关联的逻辑集群id列表的首位
-     * @param logicClusters 逻辑集群id列表
-     * @return 关联的首位逻辑集群id
-     */
-    private Long genResourceIdFromLogicClusterIds(String logicClusters) {
-        List<Long> logicClusterIds = ListUtils.string2LongList(logicClusters);
-        if (!CollectionUtils.isEmpty(logicClusterIds)) {
-            return logicClusterIds.get(0);
-        }
-
-        return null;
     }
 
     /**
@@ -451,29 +345,5 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
                         clusterLogicId, e.getMessage());
             }
         }
-    }
-
-    /**
-     * 判断当前的region可否被指定类型的逻辑集群继续绑定
-     * @param clusterRegion 集群region
-     * @param clusterLogicType 逻辑集群类型
-     * @param clusterLogicId 逻辑集群id
-     * @return 校验结果
-     */
-    private boolean canBindRegionToLogicCluster(ClusterRegion clusterRegion, Integer clusterLogicType, Long clusterLogicId) {
-        List<Long> logicClusterIds = ListUtils.string2LongList(clusterRegion.getLogicClusterIds());
-        // 获取region绑定的逻辑集群类型
-        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(logicClusterIds.get(0));
-
-        // region没有被任何的逻辑集群绑定，则该region可以被绑定
-        if (AriusObjUtils.isNull(clusterLogic)) {
-            return true;
-        }
-
-        // 当region有被逻辑集群绑定时，如需被指定逻辑集群绑定需要满足：region已绑定的逻辑集群类型为共享且指定的逻辑集群类型为共享
-        // 当满足上述条件之后，分为两种情况讨论：新建共享逻辑集群可以绑定该region;已建立逻辑集群需要过滤掉本来已经绑定了的region模块
-        return ResourceLogicTypeEnum.valueOf(clusterLogicType).equals(ResourceLogicTypeEnum.PUBLIC)
-                && clusterLogic.getType().equals(ResourceLogicTypeEnum.PUBLIC.getCode())
-                && (AriusObjUtils.isNull(clusterLogicId) || !logicClusterIds.contains(clusterLogicId));
     }
 }

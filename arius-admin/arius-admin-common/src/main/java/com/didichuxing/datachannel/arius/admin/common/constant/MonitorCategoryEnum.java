@@ -9,6 +9,7 @@ import java.util.List;
  * @author fitz
  * @date 2021/1/15 11:42 上午
  */
+@Deprecated
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public enum MonitorCategoryEnum {
     PHY_CLUSTER("cluster","物理集群", Lists.newArrayList("es.cluster.cpu.usage", "es.cluster.disk.usage", "es.cluster.health.pendingTask")),

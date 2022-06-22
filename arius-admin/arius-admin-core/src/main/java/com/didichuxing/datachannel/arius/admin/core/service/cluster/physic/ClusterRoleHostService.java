@@ -90,14 +90,6 @@ public interface ClusterRoleHostService {
     boolean createClusterNodeSettings(List<ESClusterRoleHost> param, String phyClusterName) throws AdminTaskException;
 
     /**
-     * 获取指定rack的索引个数
-     * @param cluster 集群
-     * @param racks node
-     * @return 个数
-     */
-    int getIndicesCount(String cluster, String racks);
-
-    /**
      * 获取所有在线的节点
      * @return list
      */
@@ -123,6 +115,14 @@ public interface ClusterRoleHostService {
      * @return 节点对象
      */
     List<ClusterRoleHost> getByRoleClusterId(Long roleClusterId);
+
+    /**
+     * 根据集群和nodeSet 获取节点信息
+     * @param cluster
+     * @param nodeSets
+     * @return
+     */
+    List<ClusterRoleHost> getByClusterAndNodeSets(String cluster, List<String> nodeSets);
 
     /**
      * 获取节点信息
@@ -165,14 +165,6 @@ public interface ClusterRoleHostService {
      * @return            List<ClusterRoleHost>
      */
     List<ClusterRoleHost> listAllNodeByRole(Integer roleCode);
-
-    /**
-     * 获取指定集群指定racks包含的节点
-     * @param clusterName 物理集群名
-     * @param racks racks
-     * @return
-     */
-    List<ClusterRoleHost> listRacksNodes(String clusterName, String racks);
 
     /**
      * 删除

@@ -1,6 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.persistence.mysql.region;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterRegionPO;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -12,7 +13,7 @@ public interface ClusterRegionDAO {
 
     ClusterRegionPO getByName(String regionName);
 
-    List<ClusterRegionPO> listByLogicClusterId(Long logicClusterId);
+    ClusterRegionPO getByLogicClusterId(Long logicClusterId);
 
     List<ClusterRegionPO> getByPhyClusterName(String phyClusterName);
 

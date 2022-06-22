@@ -8,9 +8,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.IndexCatCell;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.IndicesDistributionVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
 import com.didiglobal.logi.elasticsearch.client.response.indices.stats.IndexNodes;
+import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
 import com.didiglobal.logi.elasticsearch.client.response.setting.index.IndexConfig;
 import com.didiglobal.logi.elasticsearch.client.response.setting.index.MultiIndexsConfig;
 
@@ -25,10 +29,12 @@ public interface ESIndexService {
      * @param cluster 集群名称
      * @param indexName 索引名称
      * @param retryCount 重试次数
+     * @param mapping mapping
+     * @param setting setting
      * @return
      * @throws ESOperateException
      */
-    boolean syncCreateIndex(String cluster, String indexName, int retryCount) throws ESOperateException;
+    boolean syncCreateIndex(String cluster, String indexName, String mapping, String setting, int retryCount) throws ESOperateException;
 
     /**
      * 同步删除索引
@@ -51,12 +57,21 @@ public interface ESIndexService {
     boolean syncDeleteIndexByExpression(String cluster, String expression, int retryCount) throws ESOperateException;
 
     /**
-     * 跟进索引名称获取索引的mapping
+     * 根据索引名称获取索引的mapping
      * @param cluster    集群
      * @param index      索引名称
      * @return result
      */
     String syncGetIndexMapping(String cluster, String index);
+
+    /**
+     * 更新索引mapping
+     * @param cluster
+     * @param index
+     * @param mappingConfig
+     * @return
+     */
+    boolean syncUpdateIndexMapping(String cluster, String index, MappingConfig mappingConfig);
 
     Map<String, IndexConfig> syncBatchGetIndexConfig(String cluster, List<String> indexList);
 
@@ -79,6 +94,16 @@ public interface ESIndexService {
      */
     boolean syncPutIndexSetting(String cluster, List<String> indices, String settingName, String settingValue,
                                 String defaultValue, int retryCount) throws ESOperateException;
+
+    /**
+     * 更新setting
+     * @param cluster
+     * @param indices
+     * @param settingMap
+     * @param retryCount
+     * @return
+     */
+    boolean syncPutIndexSetting(String cluster, List<String> indices, Map<String, String> settingMap, Integer retryCount) throws  ESOperateException;
 
     /**
      * 批量修改多个索引的相同的多个setting
@@ -114,6 +139,14 @@ public interface ESIndexService {
      */
     List<Tuple<String, String>> syncGetIndexAliasesByExpression(String cluster, String expression);
 
+    /**
+     * 查询集群中的别名
+     *
+     * @param cluster 集群
+     * @param indices 索引列表
+     * @return {@link Map}<{@link String}, {@link List}<{@link String}>>
+     */
+    Map<String,List<String>> syncGetIndexAliasesByIndices(String cluster, String... indices);
     /**
      * 批量删除索引
      * @param cluster 集群
@@ -151,15 +184,15 @@ public interface ESIndexService {
     boolean syncDeleteByQuery(String cluster, List<String> delIndices, String delQueryDsl) throws ESOperateException;
 
     /**
-     * 修改表达式对应索引的rack
-     * @param cluster cluster
-     * @param indices 表达式
-     * @param tgtRack tgtRack
-     * @param retryCount 重试次数
-     * @return true/false
+     * 修改索引的region
+     * @param cluster
+     * @param indices
+     * @param tgtRegionId
+     * @param retryCount
+     * @return
      * @throws ESOperateException
      */
-    boolean syncBatchUpdateRack(String cluster, List<String> indices, String tgtRack,
+    boolean syncBatchUpdateRegion(String cluster, List<String> indices, Integer tgtRegionId,
                                 int retryCount) throws ESOperateException;
 
     /**
@@ -235,6 +268,13 @@ public interface ESIndexService {
     List<CatIndexResult> syncCatIndex(String cluster, int tryTimes);
 
     /**
+     * 同步获取索引Segment数量
+     *
+     * @param clusterPhyName 物理集群
+     * @return {@link Map}<{@link String}, {@link Tuple}<{@link Long}, {@link Long}>>
+     */
+    Map<String, Tuple<Long, Long>> syncGetIndicesSegmentCount(String clusterPhyName);
+    /**
      * 获取索引主shard个数
      * @param cluster
      * @param indexName
@@ -271,4 +311,78 @@ public interface ESIndexService {
      * @return
      */
     AtomicLong syncGetTotalCheckpoint(String index, IndexNodes stat, AtomicBoolean checkpointEqualSeqNo);
+
+    /**
+     * 新增别名
+     *
+     * @param cluster       集群
+     * @param index         索引
+     * @param aliases    要添加别名
+     * @return {@link Result}<{@link Void}>
+     */
+    Result<Void> addAliases(String cluster, String index, List<String> aliases);
+
+    /**
+     * 删除别名
+     *
+     * @param cluster       集群
+     * @param index         索引
+     * @param aliases 要删除别名
+     * @return {@link Result}<{@link Void}>
+     */
+    Result<Void> deleteAliases(String cluster, String index, List<String> aliases);
+
+    /**
+     * rollover
+     *
+     * @param cluster    集群
+     * @param alias      别名
+     * @param conditions 条件
+     * @return {@link Result}<{@link Void}>
+     */
+    Result<Void> rollover(String cluster, String alias, String conditions);
+
+    /**
+     * forceMerge
+     * @param cluster
+     * @param index
+     * @param maxNumSegments
+     * @param onlyExpungeDeletes
+     * @return
+     */
+    Result<Void> forceMerge(String cluster, String index, Integer maxNumSegments, Boolean onlyExpungeDeletes);
+
+    /**
+     * shrink
+     * @param cluster
+     * @param index
+     * @param targetIndex
+     * @param config
+     * @return
+     */
+    Result<Void> shrink(String cluster, String index, String targetIndex, String config);
+
+    /**
+     * split
+     * @param cluster
+     * @param index
+     * @param targetIndex
+     * @param config
+     * @return
+     */
+    Result<Void> split(String cluster, String index, String targetIndex, String config);
+
+    /**
+     * indices分布
+     * @param cluster
+     * @return
+     */
+    List<IndicesDistributionVO> indicesDistribution(String cluster);
+
+    /**
+     * 构建索引实时数据(包含block和aliases)
+     * @param cluster          集群
+     * @param indexCatCellList 索引cat/index基本信息
+     */
+    List<IndexCatCell> buildIndexAliasesAndBlockInfo(String cluster, List<IndexCatCell> indexCatCellList);
 }

@@ -34,4 +34,15 @@ public interface TemplatePhySettingsManager {
      */
     boolean mergeTemplateSettings(Integer logicId, String cluster, String template, String operator,
                                   Map<String, String> settings) throws AdminOperateException;
+
+    /**
+     * 更新模板settings
+     * @param logicId
+     * @param cluster
+     * @param template
+     * @param settings
+     * @return
+     * @throws AdminOperateException
+     */
+    boolean mergeTemplateSettings(Integer logicId, String cluster, String template, IndexTemplatePhySettings settings) throws AdminOperateException;
 }

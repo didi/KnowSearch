@@ -20,7 +20,7 @@ import com.didiglobal.logi.elasticsearch.client.response.setting.template.Templa
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.*;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.*;
 
 /**
  * @author d06679
@@ -91,11 +91,10 @@ public class ESTemplateDAO extends BaseESDAO {
      * 修改模板rack和shard
      * @param cluster 集群
      * @param name 模板名字
-     * @param rack rack
      * @param shard shard
      * @return result
      */
-    public boolean updateRackAndShard(String cluster, String name, String rack, Integer shard, Integer shardRouting) {
+    public boolean updateShard(String cluster, String name, Integer shard, Integer shardRouting) {
         ESClient client = esOpClient.getESClient(cluster);
 
         // 获取es中原来index template的配置
@@ -103,18 +102,9 @@ public class ESTemplateDAO extends BaseESDAO {
             .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
         TemplateConfig templateConfig = getTemplateResponse.getMultiTemplatesConfig().getSingleConfig();
 
-        if (StringUtils.isNotBlank(rack) && !"*".equals(rack)) {
-            templateConfig.setSettings(TEMPLATE_INDEX_INCLUDE_RACK, rack);
-        }
-
         if (shard != null && shard > 0) {
             templateConfig.setSettings(INDEX_SHARD_NUM, String.valueOf(shard));
         }
-
-        //开源版本不支持这个参数先注释
-        /*if (shardRouting != null) {
-            templateConfig.setSettings(INDEX_SHARD_ROUTING_NUM, String.valueOf(shardRouting));
-        }*/
 
         // 设置ES版本
         templateConfig.setVersion(client.getEsVersion());
@@ -143,12 +133,11 @@ public class ESTemplateDAO extends BaseESDAO {
      * @param cluster 集群
      * @param name 名字
      * @param expression 表达式
-     * @param rack rack
      * @param shard shard
      * @param shardRouting shardRouting
      * @return result
      */
-    public boolean create(String cluster, String name, String expression, String rack, Integer shard,
+    public boolean create(String cluster, String name, String expression, Integer shard,
                           Integer shardRouting) {
         ESClient client = esOpClient.getESClient(cluster);
 
@@ -168,10 +157,6 @@ public class ESTemplateDAO extends BaseESDAO {
 
         if (StringUtils.isNotBlank(expression)) {
             templateConfig.setTemplate(expression);
-        }
-
-        if (StringUtils.isNotBlank(rack) && !"*".equals(rack)) {
-            templateConfig.setSettings(TEMPLATE_INDEX_INCLUDE_RACK, rack);
         }
 
         if (shard != null && shard > 0) {

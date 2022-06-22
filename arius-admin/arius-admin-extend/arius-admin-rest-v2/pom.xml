@@ -478,11 +478,6 @@
         </dependency>
 
         <dependency>
-            <groupId>com.didichuxing.datachannel</groupId>
-            <artifactId>capacity-plan</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-params</artifactId>
             <scope>test</scope>

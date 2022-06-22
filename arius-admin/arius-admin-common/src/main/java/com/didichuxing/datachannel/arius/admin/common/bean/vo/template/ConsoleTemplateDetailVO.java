@@ -3,7 +3,7 @@ package com.didichuxing.datachannel.arius.admin.common.bean.vo.template;
 import java.util.List;
 
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicLevelEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -27,7 +27,7 @@ public class ConsoleTemplateDetailVO extends BaseTemplateVO {
     private String       cluster;
 
     /**
-     * @see ResourceLogicTypeEnum
+     * @see ClusterResourceTypeEnum
      */
     @ApiModelProperty("集群类型")
     private Integer      clusterType;

@@ -32,7 +32,7 @@ public class TemplateSrvManagerTest extends AriusAdminApplicationTest {
         //有设置冷节点的集群
         clusterName = "cold_hot_test";
         Assertions.assertTrue(templateSrvManager.checkTemplateSrv(clusterName,
-                TemplateServiceEnum.TEMPLATE_COLD.getCode().toString(), "wpk").success());
+                TemplateServiceEnum.TEMPLATE_COLD.getCode().toString(), "wpk" ).success());
     }
 
     /**

@@ -20,8 +20,8 @@ public class DslQueryLimit extends DslBase {
     public DslQueryLimit() {
     }
 
-    public DslQueryLimit(Integer appid, String dslTemplateMd5, Double queryLimit) {
-        super(appid, dslTemplateMd5);
+    public DslQueryLimit(Integer projectId, String dslTemplateMd5, Double queryLimit) {
+        super(projectId, dslTemplateMd5);
         this.queryLimit = queryLimit;
     }
 

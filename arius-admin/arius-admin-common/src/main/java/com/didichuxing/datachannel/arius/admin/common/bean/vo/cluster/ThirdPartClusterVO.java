@@ -59,13 +59,6 @@ public class ThirdPartClusterVO extends BaseVO {
     @ApiModelProperty("机房")
     private String               idc;
 
-    /**
-     * @deprecated
-     */
-    @Deprecated
-    @ApiModelProperty("业务分组")
-    private Integer              bizGroup;
-
     @ApiModelProperty("服务等级")
     private Integer              level;
 
@@ -113,7 +106,7 @@ public class ThirdPartClusterVO extends BaseVO {
             return null;
         }
         String[] addressList = addresses.split(",");
-        Map<String, Integer> addressMap = new HashMap<>();
+        Map<String, Integer> addressMap = new HashMap<>(16);
         for (String address : addressList) {
             try {
                 String[] hostAndPort = address.trim().split(":");

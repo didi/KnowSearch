@@ -3,8 +3,6 @@ package com.didi.arius.gateway.elasticsearch.client.response.model.node;
 import com.alibaba.fastjson.annotation.JSONField;
 
 public class NodeAttributes {
-    @JSONField(name = "rack")
-    private String rack;
     @JSONField(name = "set")
     private String set;
     @JSONField(name = "max_local_storage_nodes")
@@ -14,14 +12,6 @@ public class NodeAttributes {
 
     public NodeAttributes() {
         // pass
-    }
-
-    public String getRack() {
-        return rack;
-    }
-
-    public void setRack(String rack) {
-        this.rack = rack;
     }
 
     public String getSet() {

@@ -16,6 +16,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel(description = "模板配置信息")
+@Deprecated
 public class IndexTemplateConfigVO extends BaseVO {
 
     @ApiModelProperty("模板ID")
@@ -28,10 +29,10 @@ public class IndexTemplateConfigVO extends BaseVO {
     private Integer isSourceSeparated;
 
     @ApiModelProperty("tps因子")
-    private Double  adjustRackTpsFactor;
+    private Double adjustTpsFactor;
 
     @ApiModelProperty("shard资源因子")
-    private Double  adjustRackShardFactor;
+    private Double adjustShardFactor;
 
     @ApiModelProperty("动态限流开关")
     private Integer dynamicLimitEnable;

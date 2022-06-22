@@ -152,12 +152,4 @@ public interface EcmTaskManager {
      * @return ecm任务工单的contentObj内容
      */
     Result<String> getEcmTaskOrderDetailInfo(String cluster);
-
-    /**
-     * 根据集群名称，ip和port获取对应的rack信息的设置
-     * @param clusterName 物理集群名称
-     * @param ip ip地址
-     * @return 判断指定data节点的rack类型，如果是冷节点则返回cold，否则返回*
-     */
-    String judgeColdRackFromEcmTaskOfClusterNewOrder(String clusterName, String ip);
 }

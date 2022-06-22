@@ -1,11 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.persistence.mysql.optrecord;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.oprecord.OperateRecordDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.operaterecord.OperateRecordInfoPO;
 import java.util.List;
-
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
-
-import com.didichuxing.datachannel.arius.admin.common.bean.po.operaterecord.OperateRecordInfoPO;
 
 /**
  * @author d06679
@@ -18,7 +17,15 @@ public interface OperateRecordDAO {
      * @param param OperateRecordInfoPO
      * @return List<OperateRecordPO>
      */
-    List<OperateRecordInfoPO> listByCondition(OperateRecordInfoPO param);
+    List<OperateRecordInfoPO> listByCondition(@Param("param") OperateRecordDTO param);
+    
+    /**
+     * 总数计算
+     *
+     * @param param 入参
+     * @return int
+     */
+    Long countByCondition(@Param("param") OperateRecordDTO param);
 
     /**
      * 插入一条数据
@@ -27,11 +34,7 @@ public interface OperateRecordDAO {
      */
     int insert(OperateRecordInfoPO po);
 
-    /**
-     * 当biz_id为空，将business_id设为默认值
-     * @return  int
-     */
-    int compatible();
+
 
     /**
      * 通过moduleId和topN获取数据
@@ -47,4 +50,12 @@ public interface OperateRecordDAO {
      * @param id        id
      */
     void deleteByModuleIdAndLessThanId(@Param("moduleId")int moduleId, @Param("id") int id);
+    
+    /**
+     * 获取通过id
+     *
+     * @param id id
+     * @return {@code OperateRecordInfoPO}
+     */
+    OperateRecordInfoPO getById(Integer id);
 }

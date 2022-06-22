@@ -1,7 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.core.component;
 
 import com.didichuxing.datachannel.arius.admin.common.exception.OperateForbiddenException;
-import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
+import com.didiglobal.logi.security.util.HttpRequestUtil;
+import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -14,9 +16,6 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-
-import javax.servlet.http.HttpServletRequest;
-import java.util.Map;
 
 /**
  * @author huangyiminghappy@163.com
@@ -81,12 +80,12 @@ public class SpringTool implements ApplicationContextAware, DisposableBean {
     public static String getUserName() {
         ServletRequestAttributes servletRequestAttributes = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes());
         if(null == servletRequestAttributes) {
-            throw new OperateForbiddenException("请携带操作人信息,HTTP_HEADER_KEY:X-SSO-USER");
+            throw new OperateForbiddenException(String.format("请携带操作人信息,HTTP_HEADER_KEY:%s",HttpRequestUtil.USER));
         }
         HttpServletRequest request = servletRequestAttributes.getRequest();
-        Object value = request.getHeader(HttpRequestUtils.USER);
+        Object value = request.getHeader(HttpRequestUtil.USER);
         if (value == null) {
-            throw new OperateForbiddenException("请携带操作人信息,HTTP_HEADER_KEY:X-SSO-USER");
+            throw new OperateForbiddenException(String.format("请携带操作人信息,HTTP_HEADER_KEY:%s",HttpRequestUtil.USER));
         }
         return String.valueOf(value);
     }

@@ -13,7 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AuditDsls {
-    private Integer appid;
+    private Integer projectId;
 
     private String userName;
 
@@ -26,7 +26,7 @@ public class AuditDsls {
      */
     @JSONField(serialize = false)
     public boolean isVaild() {
-        if (appid == null) {
+        if (projectId == null) {
             return false;
         }
 

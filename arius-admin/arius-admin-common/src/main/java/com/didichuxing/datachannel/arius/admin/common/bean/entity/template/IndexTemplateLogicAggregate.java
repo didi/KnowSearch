@@ -1,13 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.template;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.IndexTemplateValue;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppTemplateAuth;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.quota.ESTemplateQuotaUsage;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectTemplateAuth;
+import java.io.Serializable;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.io.Serializable;
 
 /**
  * 逻辑模板聚合类
@@ -27,12 +25,7 @@ public class IndexTemplateLogicAggregate implements Serializable {
     /**
      * APP对当前模板的权限
      */
-    private AppTemplateAuth               appTemplateAuth;
-
-    /**
-     * 模板Quota使用
-     */
-    private ESTemplateQuotaUsage          esTemplateQuotaUsage;
+    private ProjectTemplateAuth projectTemplateAuth;
 
     /**
      * 模板健康分

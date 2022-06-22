@@ -2,18 +2,30 @@ package com.didichuxing.datachannel.arius.admin.core.service.template.physic.imp
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.TEMPLATE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.DELETE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.EDIT;
+
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.IndexTemplatePhysicalConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhyDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePhyPO;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplatePhysicalStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.event.template.PhysicalTemplateDeleteEvent;
@@ -22,10 +34,9 @@ import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateExcepti
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.IndexNameFactory;
-import com.didichuxing.datachannel.arius.admin.common.util.RackUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.CacheSwitch;
-import com.didichuxing.datachannel.arius.admin.core.component.ResponsibleConvertTool;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
@@ -41,12 +52,14 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -56,6 +69,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.google.common.collect.Sets;
 
 /**
  * @author d06679
@@ -70,6 +84,11 @@ public class IndexTemplatePhyServiceImpl implements IndexTemplatePhyService {
     public static final Integer                            NOT_CHECK                      = -100;
 
     private static final String                            MSG                            = "editTemplateFromLogic fail||physicalId={}||expression={}";
+    private static final String TEMPLATE_PHYSICAL_ID_IS_NULL = "物理模板id为空";
+
+    private static final String TEMPLATE_PHYSICAL_NOT_EXISTS = "物理模板不存在";
+
+    private static final String CHECK_FAIL_MSG = "check fail||msg={}";
 
     @Autowired
     private IndexTemplatePhyDAO indexTemplatePhyDAO;
@@ -86,8 +105,10 @@ public class IndexTemplatePhyServiceImpl implements IndexTemplatePhyService {
     @Autowired
     private ESTemplateService                              esTemplateService;
 
+    
+
     @Autowired
-    private ResponsibleConvertTool                         responsibleConvertTool;
+    private ClusterPhyService clusterPhyService;
 
     @Autowired
     private IndexTemplateService indexTemplateService;
@@ -337,6 +358,18 @@ public class IndexTemplatePhyServiceImpl implements IndexTemplatePhyService {
     }
 
     /**
+     * 根据物理模板状态获取模板列表
+     * @param logicId 逻辑模板id
+     * @param status 状态 1 常规    -1 删除中     -2 已删除
+     * @return list
+     */
+    @Override
+    public List<IndexTemplatePhy> getTemplateByLogicIdAndStatus(Integer logicId, Integer status) {
+        return ConvertUtil.list2List(indexTemplatePhyDAO.getByLogicIdAndStatus(logicId, status),
+            IndexTemplatePhy.class);
+    }
+
+    /**
      * 获取状态正常的模板列表
      *
      * @param cluster 集群
@@ -347,34 +380,6 @@ public class IndexTemplatePhyServiceImpl implements IndexTemplatePhyService {
         return ConvertUtil.list2List(
             indexTemplatePhyDAO.listByClusterAndStatus(cluster, TemplatePhysicalStatusEnum.NORMAL.getCode()),
             IndexTemplatePhy.class);
-    }
-
-    @Override
-    public Set<String> getMatchNormalLogicIdByCluster(String cluster) {
-        return ConvertUtil.list2Set(
-                indexTemplatePhyDAO.listByMatchClusterAndStatus(cluster, TemplatePhysicalStatusEnum.NORMAL.getCode()),
-                x -> x.getLogicId().toString());
-    }
-
-    /**
-     * 根据集群和分区获取模板列表
-     *
-     * @param cluster 集群
-     * @param racks
-     * @return list
-     */
-    @Override
-    public List<IndexTemplatePhy> getNormalTemplateByClusterAndRack(String cluster, Collection<String> racks) {
-        if (CollectionUtils.isEmpty(racks)) {
-            return Lists.newArrayList();
-        }
-        List<IndexTemplatePhy> templatePhysicals = getNormalTemplateByCluster(cluster);
-        if (CollectionUtils.isEmpty(templatePhysicals)) {
-            return Lists.newArrayList();
-        }
-        return templatePhysicals.stream()
-            .filter(templatePhysical -> RackUtils.hasIntersect(templatePhysical.getRack(), racks))
-            .collect(Collectors.toList());
     }
 
     /**
@@ -647,16 +652,6 @@ public class IndexTemplatePhyServiceImpl implements IndexTemplatePhyService {
     }
 
     @Override
-    public List<IndexTemplatePhy> getTemplateByRegionId(Long regionId) {
-        ClusterRegion region = clusterRegionService.getRegionById(regionId);
-        if (AriusObjUtils.isNull(region)) {
-            return Lists.newArrayList();
-        }
-
-        return getNormalTemplateByClusterAndRack(region.getPhyClusterName(), RackUtils.racks2List(region.getRacks()));
-    }
-
-    @Override
     public Map<Integer, Integer> getAllLogicTemplatesPhysicalCount() {
         Map<Integer, Integer> map = new HashMap<>();
         List<IndexTemplatePhyPO> list = indexTemplatePhyDAO.countListByLogicId();
@@ -664,6 +659,64 @@ public class IndexTemplatePhyServiceImpl implements IndexTemplatePhyService {
             map = list.stream().collect(Collectors.toMap(IndexTemplatePhyPO::getLogicId, o -> 1, Integer::sum));
         }
         return map;
+    }
+
+    @Override
+    public Result<Void> validateTemplates(List<IndexTemplatePhyDTO> params, OperationEnum operation) {
+        if (AriusObjUtils.isNull(params)) {
+            return Result.buildParamIllegal("物理模板信息为空");
+        }
+
+        Set<String> deployClusterSet = Sets.newTreeSet();
+        for (IndexTemplatePhyDTO param : params) {
+            Result<Void> checkResult = validateTemplate(param, operation);
+            if (checkResult.failed()) {
+                LOGGER.warn("class=TemplatePhyManagerImpl||method=validateTemplates||msg={}", CHECK_FAIL_MSG + checkResult.getMessage());
+                checkResult
+                        .setMessage(checkResult.getMessage() + "; 集群:" + param.getCluster() + ",模板:" + param.getName());
+                return checkResult;
+            }
+
+            if (deployClusterSet.contains(param.getCluster())) {
+                return Result.buildParamIllegal("部署集群重复");
+            } else {
+                deployClusterSet.add(param.getCluster());
+            }
+
+        }
+
+        return Result.buildSucc();
+    }
+
+    @Override
+    public Result<Void> validateTemplate(IndexTemplatePhyDTO param, OperationEnum operation) {
+        if (AriusObjUtils.isNull(param)) {
+            return Result.buildParamIllegal("物理模板参数为空");
+        }
+        if (operation == OperationEnum.ADD) {
+            Result<Void> result = handleValidateTemplateAdd(param);
+            if (result.failed()) {return result;}
+        } else if (operation == EDIT) {
+            Result<Void> result = handleValidateTemplateEdit(param);
+            if (result.failed()) {return result;}
+        }
+
+        Result<Void> result = handleValidateTemplate(param);
+        if (result.failed()) {return result;}
+
+        return Result.buildSucc();
+    }
+
+    @Override
+    public Result<List<IndexTemplatePhy>> listByRegionId(Integer regionId) {
+        List<IndexTemplatePhyPO> indexTemplatePhyPOS;
+        try {
+            indexTemplatePhyPOS = indexTemplatePhyDAO.listByRegionId(regionId);
+        } catch (Exception e) {
+            LOGGER.error("class=IndexTemplatePhyServiceImpl||method=listAllByRegionId||errMsg={}", e);
+            return Result.buildFail(String.format("根据regionId获取模板列表失败, msg:%s", e.getMessage()));
+        }
+        return Result.buildSucc(ConvertUtil.list2List(indexTemplatePhyPOS, IndexTemplatePhy.class));
     }
 
 
@@ -741,8 +794,7 @@ public class IndexTemplatePhyServiceImpl implements IndexTemplatePhyService {
                 LOGGER.info("class=TemplatePhyServiceImpl||method=updateShardNumTemplatePhy||editTemplateFromLogic succeed||physicalId={}||preShardNum={}||currentShardNum={}",
                         physicalPO.getId(), physicalPO.getShard(), param.getShardNum());
 
-                esTemplateService.syncUpdateRackAndShard(physicalPO.getCluster(), physicalPO.getName(),
-                        physicalPO.getRack(), param.getShardNum(), physicalPO.getShardRouting(), 0);
+                esTemplateService.syncUpdateShard(physicalPO.getCluster(), physicalPO.getName(), param.getShardNum(), physicalPO.getShardRouting(), 0);
             } else {
                 LOGGER.warn("class=TemplatePhyServiceImpl||method=updateShardNumTemplatePhy||msg=", MSG, physicalPO.getId(),
                         param.getExpression());
@@ -765,6 +817,59 @@ public class IndexTemplatePhyServiceImpl implements IndexTemplatePhyService {
                         param.getExpression());
                 return Result.build(false);
             }
+        }
+        return Result.buildSucc();
+    }
+
+    private Result<Void> handleValidateTemplate(IndexTemplatePhyDTO param) {
+        if (param.getCluster() != null && !clusterPhyService.isClusterExists(param.getCluster())) {
+            return Result.buildParamIllegal("集群不存在");
+        }
+        if (param.getShard() != null && param.getShard() < 1) {
+            return Result.buildParamIllegal("shard个数非法");
+        }
+        if (param.getRole() != null
+                && TemplateDeployRoleEnum.UNKNOWN.equals(TemplateDeployRoleEnum.valueOf(param.getRole()))) {
+            return Result.buildParamIllegal("模板角色非法");
+        }
+        if (param.getLogicId() != null && !Objects.equals(param.getLogicId(), NOT_CHECK)) {
+            IndexTemplate logic = indexTemplateService.getLogicTemplateById(param.getLogicId());
+            if (logic == null) {
+                return Result.buildNotExist("逻辑模板不存在");
+            }
+        }
+        return Result.buildSucc();
+    }
+
+    private Result<Void> handleValidateTemplateEdit(IndexTemplatePhyDTO param) {
+        if (AriusObjUtils.isNull(param.getId())) {
+            return Result.buildParamIllegal(TEMPLATE_PHYSICAL_ID_IS_NULL);
+        }
+        IndexTemplatePhy indexTemplatePhy = getTemplateById(param.getId());
+        if (indexTemplatePhy == null) {
+            return Result.buildNotExist(TEMPLATE_PHYSICAL_NOT_EXISTS);
+        }
+        return Result.buildSucc();
+    }
+
+    private Result<Void> handleValidateTemplateAdd(IndexTemplatePhyDTO param) {
+        if (AriusObjUtils.isNull(param.getLogicId())) {
+            return Result.buildParamIllegal("逻辑模板id为空");
+        }
+        if (AriusObjUtils.isNull(param.getCluster())) {
+            return Result.buildParamIllegal("集群为空");
+        }
+
+        if (AriusObjUtils.isNull(param.getShard())) {
+            return Result.buildParamIllegal("shard为空");
+        }
+        if (AriusObjUtils.isNull(param.getRole())) {
+            return Result.buildParamIllegal("模板角色为空");
+        }
+
+        IndexTemplatePhy indexTemplatePhy = getTemplateByClusterAndName(param.getCluster(), param.getName());
+        if (indexTemplatePhy != null) {
+            return Result.buildDuplicate("物理模板已经存在");
         }
         return Result.buildSucc();
     }

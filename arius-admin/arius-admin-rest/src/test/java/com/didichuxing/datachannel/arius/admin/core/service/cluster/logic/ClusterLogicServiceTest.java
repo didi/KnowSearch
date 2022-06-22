@@ -6,29 +6,28 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.LogicResourceC
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.PluginDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
-import com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicRackInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPhyPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESMachineNormsPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.esplugin.PluginPO;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
+import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESMachineNormsService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESPluginService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
-import com.didichuxing.datachannel.arius.admin.core.service.extend.employee.EmployeeService;
-import com.didichuxing.datachannel.arius.admin.persistence.mysql.resource.PhyClusterDAO;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.resource.LogicClusterDAO;
+import com.didichuxing.datachannel.arius.admin.persistence.mysql.resource.PhyClusterDAO;
 import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
-import lombok.SneakyThrows;
+import com.didiglobal.logi.security.service.ProjectService;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,11 +37,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 @Transactional
 @Rollback
@@ -55,10 +49,10 @@ public class ClusterLogicServiceTest extends AriusAdminApplicationTest {
     private ClusterRegionService rackService;
 
     @MockBean
-    private AppService appService;
+    private ProjectService projectService;
 
     @MockBean
-    private EmployeeService employeeService;
+    private RoleTool roleTool;
 
     @MockBean
     private IndexTemplatePhyService indexTemplatePhyService;
@@ -85,8 +79,8 @@ public class ClusterLogicServiceTest extends AriusAdminApplicationTest {
 
     @BeforeEach
     public void mockRules() {
-        Mockito.when(appService.isAppExists(Mockito.anyInt())).thenReturn(true);
-        Mockito.when(employeeService.checkUsers(Mockito.anyString())).thenReturn(Result.buildSucc());
+        Mockito.when(projectService.checkProjectExist(Mockito.anyInt())).thenReturn(true);
+        Mockito.when(roleTool.isAdmin(Mockito.anyString())).thenReturn(true);
     }
 
     @Test
@@ -111,77 +105,26 @@ public class ClusterLogicServiceTest extends AriusAdminApplicationTest {
     }
 
     @Test
-    public void listAllLogicClustersWithRackInfoTest() {
-        ClusterLogicRackInfo clusterLogicRackInfo = new ClusterLogicRackInfo();
-        ESLogicClusterDTO esLogicClusterDTO = CustomDataSource.esLogicClusterDTOFactory();
-        Long id = clusterLogicService.createClusterLogic(esLogicClusterDTO).getData();
-        clusterLogicRackInfo.setLogicClusterIds(id.toString());
-        Mockito.when(clusterRegionService.listAllLogicClusterRacks()).thenReturn(Arrays.asList(
-				clusterLogicRackInfo));
-        Assertions.assertTrue(clusterLogicService
-                .listAllClusterLogicsWithRackInfo()
-                .stream()
-                .anyMatch(esClusterLogicWithRack -> esClusterLogicWithRack.getItems().stream().anyMatch(esClusterLogicRackInfo1 -> ListUtils.string2LongList(esClusterLogicRackInfo1.getLogicClusterIds()).contains(id))));
-    }
-
-    @Test
-    public void getLogicClusterWithRackInfoByIdTest() {
-        ClusterLogicRackInfo clusterLogicRackInfo = new ClusterLogicRackInfo();
-        ESLogicClusterDTO esLogicClusterDTO = CustomDataSource.esLogicClusterDTOFactory();
-        Long id = clusterLogicService.createClusterLogic(esLogicClusterDTO).getData();
-        clusterLogicRackInfo.setLogicClusterIds(id.toString());
-        Mockito.when(clusterRegionService.listAllLogicClusterRacks()).thenReturn(Collections.singletonList(
-                clusterLogicRackInfo));
-        Assertions.assertTrue(clusterLogicService.getClusterLogicWithRackInfoById(id).getItems().stream().anyMatch(esClusterLogicRackInfo1 -> ListUtils.string2LongList(esClusterLogicRackInfo1.getLogicClusterIds()).contains(id)));
-    }
-
-    @SneakyThrows
-    @Test
-    public void deleteLogicClusterByIdTest() {
-        ESLogicClusterDTO esLogicClusterDTO = CustomDataSource.esLogicClusterDTOFactory();
-        Long id = clusterLogicService.createClusterLogic(esLogicClusterDTO).getData();
-        Assertions.assertEquals(Result.buildNotExist("逻辑集群不存在").getMessage(),
-                clusterLogicService.deleteClusterLogicById(id + 1, OPERATOR).getMessage());
-        ClusterLogicRackInfo clusterLogicRackInfo = new ClusterLogicRackInfo();
-        String clusterName = "wpk";
-        String rack = "wpk";
-        clusterLogicRackInfo.setPhyClusterName(clusterName);
-        clusterLogicRackInfo.setRack(rack);
-        Mockito.when(clusterRegionService.listLogicClusterRacks(Mockito.anyLong())).thenReturn(Arrays.asList(
-				clusterLogicRackInfo));
-        IndexTemplatePhy indexTemplatePhy = new IndexTemplatePhy();
-        indexTemplatePhy.setRack(rack);
-        Mockito.when(indexTemplatePhyService.getNormalTemplateByCluster(Mockito.anyString())).thenReturn(Arrays.asList(indexTemplatePhy));
-        Assertions.assertEquals(Result.build(ResultType.IN_USE_ERROR.getCode(), "逻辑集群使用中").getMessage(),
-                clusterLogicService.deleteClusterLogicById(id, OPERATOR).getMessage());
-        Mockito.when(clusterRegionService.listLogicClusterRacks(Mockito.anyLong())).thenReturn(new ArrayList<>());
-        Mockito.when(rackService.listLogicClusterRacks(Mockito.anyLong())).thenReturn(new ArrayList<>());
-        Assertions.assertTrue(clusterLogicService.deleteClusterLogicById(id, OPERATOR).success());
-    }
-
-    @Test
     public void createLogicClusterTest() {
         ESLogicClusterDTO esLogicClusterDTO = CustomDataSource.esLogicClusterDTOFactory();
-        Mockito.when(appService.isAppExists(Mockito.anyInt())).thenReturn(false);
+        Mockito.when(projectService.checkProjectExist(Mockito.anyInt())).thenReturn(false);
         Assertions.assertEquals(Result.buildParamIllegal("应用ID非法").getMessage(),
                 clusterLogicService.createClusterLogic(esLogicClusterDTO).getMessage());
-        Mockito.when(appService.isAppExists(Mockito.anyInt())).thenReturn(true);
-        Mockito.when(employeeService.checkUsers(Mockito.anyString())).thenReturn(Result.buildFail());
-        Assertions.assertEquals(Result.buildParamIllegal("责任人非法").getMessage(),
-                clusterLogicService.createClusterLogic(esLogicClusterDTO).getMessage());
-        Mockito.when(employeeService.checkUsers(Mockito.anyString())).thenReturn(Result.buildSucc());
+        Mockito.when(projectService.checkProjectExist(Mockito.anyInt())).thenReturn(true);
+    
         Assertions.assertEquals(Result.buildParamIllegal("逻辑集群信息为空").getMessage(),
                 clusterLogicService.createClusterLogic(null).getMessage());
         esLogicClusterDTO.setResponsible("");
-        Assertions.assertEquals(Result.buildParamIllegal("责任人为空").getMessage(),
+        Assertions.assertEquals(Result.buildParamIllegal("责任人非法").getMessage(),
                 clusterLogicService.createClusterLogic(esLogicClusterDTO).getMessage());
-        esLogicClusterDTO.setAppId(null);
+        esLogicClusterDTO.setProjectId(null);
+        esLogicClusterDTO.setResponsible("afdsa");
         Assertions.assertEquals(Result.buildParamIllegal("应用ID为空").getMessage(),
                 clusterLogicService.createClusterLogic(esLogicClusterDTO).getMessage());
         esLogicClusterDTO.setName("");
         Assertions.assertEquals(Result.buildParamIllegal("集群名字为空").getMessage(),
                 clusterLogicService.createClusterLogic(esLogicClusterDTO).getMessage());
-        esLogicClusterDTO.setType(ResourceLogicTypeEnum.UNKNOWN.getCode());
+        esLogicClusterDTO.setType(ClusterResourceTypeEnum.UNKNOWN.getCode());
         Assertions.assertEquals(Result.buildParamIllegal("新建逻辑集群提交内容中集群类型非法").getMessage(),
                 clusterLogicService.createClusterLogic(esLogicClusterDTO).getMessage());
         esLogicClusterDTO = CustomDataSource.esLogicClusterDTOFactory();
@@ -239,7 +182,7 @@ public class ClusterLogicServiceTest extends AriusAdminApplicationTest {
         ESLogicClusterDTO esLogicClusterDTO = CustomDataSource.esLogicClusterDTOFactory();
         Long id = clusterLogicService.createClusterLogic(esLogicClusterDTO).getData();
         Assertions.assertTrue(
-                clusterLogicService.getOwnedClusterLogicListByAppId(esLogicClusterDTO.getAppId()).stream().anyMatch(esClusterLogic -> esClusterLogic.getId().equals(id)));
+                clusterLogicService.getOwnedClusterLogicListByProjectId(esLogicClusterDTO.getProjectId()).stream().anyMatch(esClusterLogic -> esClusterLogic.getId().equals(id)));
     }
 
     @Test
@@ -260,7 +203,7 @@ public class ClusterLogicServiceTest extends AriusAdminApplicationTest {
         Long id = clusterLogicService.createClusterLogic(esLogicClusterDTO).getData();
         Assertions.assertTrue(clusterLogicService.getClusterLogicRole(id).isEmpty());
         String clusterName = "wpk";
-        Mockito.when(rackService.listPhysicClusterNames(Mockito.anyLong())).thenReturn(Arrays.asList(clusterName));
+        Mockito.when(clusterRegionService.listPhysicClusterNames(Mockito.anyLong())).thenReturn(Arrays.asList(clusterName));
         Assertions.assertTrue(clusterLogicService.getClusterLogicRole(id).isEmpty());
         Mockito.when(esClusterPhyService.getClusterByName(Mockito.anyString())).thenReturn(null);
         Assertions.assertTrue(clusterLogicService.getClusterLogicRole(id).isEmpty());
@@ -288,7 +231,7 @@ public class ClusterLogicServiceTest extends AriusAdminApplicationTest {
         Long id = clusterLogicService.createClusterLogic(esLogicClusterDTO).getData();
         Assertions.assertTrue(clusterLogicService.getClusterLogicPlugins(id).isEmpty());
         String clusterPhy = "wpk";
-        Mockito.when(rackService.listPhysicClusterNames(Mockito.anyLong())).thenReturn(Collections.singletonList(clusterPhy));
+        Mockito.when(clusterRegionService.listPhysicClusterNames(Mockito.anyLong())).thenReturn(Collections.singletonList(clusterPhy));
         ClusterPhy esClusterPhy = new ClusterPhy();
         esClusterPhy.setId(123);
         Mockito.when(esClusterPhyService.getClusterByName(Mockito.anyString())).thenReturn(esClusterPhy);
@@ -310,10 +253,10 @@ public class ClusterLogicServiceTest extends AriusAdminApplicationTest {
     public void addPluginTest() {
         Integer clusterId = new Integer(5);
         List<Integer> clusterIdList = Arrays.asList(clusterId);
-        Mockito.when(rackService.listPhysicClusterId(Mockito.anyLong())).thenReturn(new ArrayList<>());
+        Mockito.when(clusterRegionService.listPhysicClusterId(Mockito.anyLong())).thenReturn(new ArrayList<>());
         Assertions.assertEquals(Result.buildFail("对应物理集群不存在").getMessage(),
                 clusterLogicService.addPlugin(5l, new PluginDTO(), OPERATOR).getMessage());
-        Mockito.when(rackService.listPhysicClusterId(Mockito.anyLong())).thenReturn(clusterIdList);
+        Mockito.when(clusterRegionService.listPhysicClusterId(Mockito.anyLong())).thenReturn(clusterIdList);
         Mockito.when(esPluginService.addESPlugin(Mockito.any())).thenReturn(Result.buildSucc());
         Assertions.assertTrue(clusterLogicService.addPlugin(5l, new PluginDTO(), OPERATOR).success());
     }
@@ -323,10 +266,10 @@ public class ClusterLogicServiceTest extends AriusAdminApplicationTest {
         ESLogicClusterDTO esLogicClusterDTO = CustomDataSource.esLogicClusterDTOFactory();
         Long id = clusterLogicService.createClusterLogic(esLogicClusterDTO).getData();
         esLogicClusterDTO.setId(id);
-        Integer targetAppId = 1234;
+        Integer targetProjectId = 1234;
         String targetResponsible = "test";
         Assertions.assertTrue(clusterLogicService
-                .transferClusterLogic(id, targetAppId, targetResponsible, OPERATOR).success());
-        Assertions.assertEquals(targetAppId, logicClusterDAO.getById(id).getAppId());
+                .transferClusterLogic(id, targetProjectId, targetResponsible, OPERATOR).success());
+        Assertions.assertEquals(targetProjectId, logicClusterDAO.getById(id).getProjectId());
     }
 }

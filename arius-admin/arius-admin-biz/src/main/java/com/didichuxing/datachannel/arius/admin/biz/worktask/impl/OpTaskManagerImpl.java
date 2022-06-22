@@ -1,22 +1,22 @@
 package com.didichuxing.datachannel.arius.admin.biz.worktask.impl;
 
+import com.didichuxing.datachannel.arius.admin.biz.worktask.OpTaskHandler;
 import com.didichuxing.datachannel.arius.admin.biz.worktask.OpTaskManager;
-import com.didichuxing.datachannel.arius.admin.biz.worktask.WorkTaskHandler;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskProcessDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.task.OpTaskPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
-import com.didichuxing.datachannel.arius.admin.common.constant.task.AriusOpTaskTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.task.WorkTaskHandleEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskHandleEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
-import com.didichuxing.datachannel.arius.admin.core.service.common.AriusUserInfoService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.task.OpTaskDAO;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.logi.security.service.UserService;
 import com.google.common.collect.Lists;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +37,7 @@ public class OpTaskManagerImpl implements OpTaskManager {
     private HandleFactory        handleFactory;
 
     @Autowired
-    private AriusUserInfoService ariusUserInfoService;
+    private UserService  userService;
 
     @Override
     public Result<OpTask> addTask(OpTaskDTO opTaskDTO) {
@@ -45,27 +45,26 @@ public class OpTaskManagerImpl implements OpTaskManager {
             return Result.buildParamIllegal("提交人为空");
         }
 
-        AriusOpTaskTypeEnum typeEnum = AriusOpTaskTypeEnum.valueOfType(opTaskDTO.getTaskType());
-        if (AriusOpTaskTypeEnum.UNKNOWN.equals(typeEnum)) {
+        OpTaskTypeEnum typeEnum = OpTaskTypeEnum.valueOfType(opTaskDTO.getTaskType());
+        if (OpTaskTypeEnum.UNKNOWN.equals(typeEnum)) {
             return Result.buildNotExist("任务类型不存在");
         }
 
-        if (AriusObjUtils.isNull(ariusUserInfoService.getByDomainAccount(opTaskDTO.getCreator()))) {
+        if (AriusObjUtils.isNull(userService.getUserBriefByUserName(opTaskDTO.getCreator()))) {
             return Result.buildParamIllegal("提交人非法");
         }
+        OpTaskHandleEnum taskHandleEnum = OpTaskHandleEnum.valueOfType(opTaskDTO.getTaskType());
 
-        WorkTaskHandleEnum taskHandleEnum = WorkTaskHandleEnum.valueOfType(opTaskDTO.getTaskType());
-
-        WorkTaskHandler handler = (WorkTaskHandler) handleFactory.getByHandlerNamePer(taskHandleEnum.getMessage());
+        OpTaskHandler handler = (OpTaskHandler) handleFactory.getByHandlerNamePer(taskHandleEnum.getMessage());
 
         return handler.addTask(ConvertUtil.obj2Obj(opTaskDTO, OpTask.class));
     }
 
     @Override
     public boolean existUnClosedTask(Integer key, Integer type) {
-        WorkTaskHandleEnum taskHandleEnum = WorkTaskHandleEnum.valueOfType(type);
+        OpTaskHandleEnum taskHandleEnum = OpTaskHandleEnum.valueOfType(type);
 
-        WorkTaskHandler handler = (WorkTaskHandler) handleFactory.getByHandlerNamePer(taskHandleEnum.getMessage());
+        OpTaskHandler handler = (OpTaskHandler) handleFactory.getByHandlerNamePer(taskHandleEnum.getMessage());
         return handler.existUnClosedTask(String.valueOf(key), type);
     }
 
@@ -99,11 +98,11 @@ public class OpTaskManagerImpl implements OpTaskManager {
 
     @Override
     public Result<List<OpTask>> list() {
-        List<OpTaskPO> opTaskPOS = opTaskDao.listAll();
-        if (opTaskPOS == null) {
+        List<OpTaskPO> opTasks = opTaskDao.listAll();
+        if (opTasks == null) {
             return Result.buildSucc(Lists.newArrayList());
         }
-        return Result.buildSucc(ConvertUtil.list2List(opTaskPOS, OpTask.class));
+        return Result.buildSucc(ConvertUtil.list2List(opTasks, OpTask.class));
     }
 
     @Override
@@ -113,14 +112,14 @@ public class OpTaskManagerImpl implements OpTaskManager {
         }
         OpTaskPO taskPO = opTaskDao.getById(processDTO.getTaskId());
 
-        AriusOpTaskTypeEnum typeEnum = AriusOpTaskTypeEnum.valueOfType(taskPO.getTaskType());
-        if (AriusOpTaskTypeEnum.UNKNOWN.equals(typeEnum)) {
+        OpTaskTypeEnum typeEnum = OpTaskTypeEnum.valueOfType(taskPO.getTaskType());
+        if (OpTaskTypeEnum.UNKNOWN.equals(typeEnum)) {
             return Result.buildNotExist("任务类型不存在");
         }
 
-        WorkTaskHandleEnum taskHandleEnum = WorkTaskHandleEnum.valueOfType(taskPO.getTaskType());
+        OpTaskHandleEnum taskHandleEnum = OpTaskHandleEnum.valueOfType(taskPO.getTaskType());
 
-        WorkTaskHandler handler = (WorkTaskHandler) handleFactory.getByHandlerNamePer(taskHandleEnum.getMessage());
+        OpTaskHandler handler = (OpTaskHandler) handleFactory.getByHandlerNamePer(taskHandleEnum.getMessage());
 
         return handler.process(ConvertUtil.obj2Obj(taskPO, OpTask.class), processDTO.getTaskProgress(),
             processDTO.getStatus(), processDTO.getExpandData());

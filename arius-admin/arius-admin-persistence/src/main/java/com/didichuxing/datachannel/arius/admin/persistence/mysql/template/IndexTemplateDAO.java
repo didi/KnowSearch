@@ -24,11 +24,13 @@ public interface IndexTemplateDAO {
 
     IndexTemplatePO getById(Integer logicId);
 
-    List<IndexTemplatePO> listByAppId(Integer appId);
+    List<IndexTemplatePO> listByProjectId(Integer projectId);
 
     List<IndexTemplatePO> listAll();
 
-    List<IndexTemplatePO> listByIds(List<Integer> logicIds);
+    List<IndexTemplatePO> listByIds(@Param("logicIds") List<Integer> logicIds);
+
+    List<IndexTemplatePO> listByResourceIds(@Param("resourceIds") List<Long> resourceIds);
 
     List<IndexTemplatePO> listByDataCenter(String dataCenter);
 
@@ -36,14 +38,12 @@ public interface IndexTemplateDAO {
 
     List<IndexTemplatePO> likeByCondition(IndexTemplatePO param);
 
-    List<IndexTemplatePO> pagingByCondition(@Param("name") String name, @Param("dataType") Integer dataType,
-                                            @Param("hasDCDR") Boolean hasDCDR,
+    List<IndexTemplatePO> pagingByCondition(@Param("param") IndexTemplatePO param,
                                             @Param("from") Long from, @Param("size") Long size,
                                             @Param("sortTerm") String sortTerm, @Param("sortType") String sortType);
 
     long getTotalHitByCondition(IndexTemplatePO param);
 
-    List<IndexTemplatePO> likeByResponsible(String responsible);
 
     int batchChangeHotDay(Integer days);
 
@@ -53,5 +53,4 @@ public interface IndexTemplateDAO {
 
     List<String> listAllNames();
 
-    List<IndexTemplatePO> listByRegionId(Integer regionId);
 }

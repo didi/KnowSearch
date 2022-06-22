@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.PageDTO;
-import com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -26,28 +26,27 @@ public class ESLogicClusterDTO extends PageDTO {
     private String  name;
 
     /**
-     * @see ResourceLogicTypeEnum
+     * @see ClusterResourceTypeEnum
      */
     @ApiModelProperty("类型(1:公共：2:独立, 3:独占)")
     private Integer type;
 
+    /**
+     * todo:等待泽颖修改
+     */
     @ApiModelProperty("所属应用ID")
-    private Integer appId;
+    private Integer projectId;
 
     @ApiModelProperty("数据中心")
     private String  dataCenter;
 
     @ApiModelProperty("数据节点个数")
-    private Integer  dataNodeNu;
+    private Integer  dataNodeNum;
 
     @ApiModelProperty("责任人")
     private String  responsible;
 
-    @ApiModelProperty("成本部门ID")
-    private String  libraDepartmentId;
 
-    @ApiModelProperty("成本部门名称")
-    private String  libraDepartment;
 
     @ApiModelProperty("备注")
     private String  memo;

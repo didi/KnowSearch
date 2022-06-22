@@ -4,12 +4,9 @@ import java.util.List;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterWithRegionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionWithNodeInfoVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.LogicClusterRackVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PhyClusterRackVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicRackInfo;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 
 /**
  * @Author: lanxinzheng
@@ -27,12 +24,11 @@ public interface ClusterRegionManager {
 
     /**
      * 根据逻辑集群的类型筛选出可以绑定的region信息
-     * @param clusterLogicId 逻辑集群id
      * @param clusterLogicType 逻辑集群类型
      * @param phyCluster 物理集群名称
      * @return 筛选后的region列表
      */
-    List<ClusterRegion> filterClusterRegionByLogicClusterType(Long clusterLogicId, String phyCluster, Integer clusterLogicType);
+    Result<List<ClusterRegionVO>> listPhyClusterRegionsByLogicClusterTypeAndCluster(String phyCluster, Integer clusterLogicType);
 
     /**
      * 构建regionVO
@@ -40,20 +36,6 @@ public interface ClusterRegionManager {
      * @return
      */
     ClusterRegionVO buildLogicClusterRegionVO(ClusterRegion region);
-
-    /**
-     * 获取物理集群可划分至region的Racks信息
-     * @param cluster       物理集群名
-     * @return
-     */
-    List<PhyClusterRackVO> buildCanDividePhyClusterRackVOs(String cluster);
-
-    /**
-     * 构建逻辑集群物RackVO
-     * @param logicClusterRackInfos 逻辑集群rack信息
-     * @return
-     */
-    List<LogicClusterRackVO> buildLogicClusterRackVOs(List<ClusterLogicRackInfo> logicClusterRackInfos);
 
     /**
      * 逻辑集群批量绑定region
@@ -82,9 +64,17 @@ public interface ClusterRegionManager {
     Result<Void> bindRegion(Long regionId, Long logicClusterId, Integer share, String operator);
 
     /**
-     * 根据物理集群名称获region信息，包含region中的数据节点信息
+     * 根据物理集群名称获region信息（包含空节点region），包含region中的数据节点信息
      * @param clusterName          物理集群名称
      * @return                     Result<List<ClusterRegionWithNodeInfoVO>>
      */
-    Result<List<ClusterRegionWithNodeInfoVO>> getClusterRegionWithNodeInfoByClusterName(String clusterName);
+    Result<List<ClusterRegionWithNodeInfoVO>> listClusterRegionWithNodeInfoByClusterName(String clusterName);
+
+    /**
+     * 获取可分配至dcdr的物理集群名称获region列表, 不包含空节点region
+     *
+     * @param clusterName         物理集群名称
+     * @return                    Result<List<ClusterRegionVO>>
+     */
+    Result<List<ClusterRegionVO>> listNoEmptyClusterRegionByClusterName(String clusterName);
 }

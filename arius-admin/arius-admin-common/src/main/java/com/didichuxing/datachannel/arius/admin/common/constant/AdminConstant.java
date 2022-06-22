@@ -41,11 +41,6 @@ public class AdminConstant {
 
     public static final Double       G_PER_SHARD                             = 50.0;
 
-    /**
-     * Rack相关常量
-     */
-    public static final String       RACK_COMMA                              = ",";
-
     public static final String       COMMA                                   = ",";
 
     /**
@@ -53,24 +48,7 @@ public class AdminConstant {
      */
     public static final String       DEFAULT_PLUGIN_VERSION                  = "0.0.0.1";
 
-    /**
-     * 集群和Rack分割符
-     */
-    public static final String       CLUSTER_RACK_COMMA                      = "@";
-
-    public static final String       DCDR_TASK_BIZ_COMMA                     = "@";
-
-    public static final String       INCLUDE_CLUSTER_ALL_RACK                = "all";
-
-    public static final String       COLD_RACK_PREFER                        = "c";
-
-    public static final String       DEFAULT_COLD_RACK                       = "cold";
-
-    public static final String       DEFAULT_HOT_RACK                        = "*";
-
     public static final Long         MILLIS_PER_DAY                          = 24 * 60 * 60 * 1000L;
-
-    public static final Long         SECONDS_PER_DAY                         = 24 * 60 * 60L;
 
     public static final String       MM_DD_DATE_FORMAT                       = "MMdd";
     public static final String       YY_MM_DD_DATE_FORMAT                    = "_yyyy-MM-dd";
@@ -78,16 +56,6 @@ public class AdminConstant {
 
     public static final Integer      PIPELINE_RATE_LIMIT_MAX_VALUE           = 1000000;
     public static final Integer      PIPELINE_RATE_LIMIT_MIN_VALUE           = 1000;
-
-    /**
-     * 容量规划空闲Rack针对新需求的比例
-     */
-    public static final Double       FREE_RACK_FOR_NEW_DEMAND_RATE           = 0.4;
-
-    /**
-     * 最小可申请资源Quota
-     */
-    public static final Double       MIN_QUOTA                               = 50.0 / (7 * 1024);
 
     /**
      * 默认写标识
@@ -122,10 +90,7 @@ public class AdminConstant {
 
     public static final Integer      DEFAULT_SHARD_NUM                       = 1;
 
-    /**
-     * 默认APP ID
-     */
-    public static final Integer      DEFAULT_APP_ID                          = 1;
+    
 
     /**
      * 数据最短保存时长
@@ -159,5 +124,6 @@ public class AdminConstant {
      */
     public static final Integer MAX_BIND_PORT_VALUE                          =   65535;
     public static final Integer MIN_BIND_PORT_VALUE                          =   1;
+
 
 }

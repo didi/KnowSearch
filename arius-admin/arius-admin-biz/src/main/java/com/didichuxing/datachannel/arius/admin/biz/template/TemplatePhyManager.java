@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.biz.template;
 
+import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhyDTO;
@@ -9,12 +10,11 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplatePhyVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.IndexTemplatePhysicalVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
-import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import java.util.List;
+import java.util.Set;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.*;
 
 public interface TemplatePhyManager {
 
@@ -94,24 +94,6 @@ public interface TemplatePhyManager {
                                          String operator) throws ESOperateException;
 
     /**
-     * 校验物理模板信息
-     *
-     * @param param     参数
-     * @param operation 操作
-     * @return result
-     */
-    Result<Void> validateTemplate(IndexTemplatePhyDTO param, OperationEnum operation);
-
-    /**
-     * 批量校验物理模板信息
-     *
-     * @param params    参数
-     * @param operation 操作
-     * @return result
-     */
-    Result<Void> validateTemplates(List<IndexTemplatePhyDTO> params, OperationEnum operation);
-
-    /**
      * 批量新增物理模板
      *
      * @param logicId       逻辑模板id
@@ -132,19 +114,6 @@ public interface TemplatePhyManager {
     Result<Long> addTemplateWithoutCheck(IndexTemplatePhyDTO param) throws AdminOperateException;
 
     /**
-     * 修改由于逻辑模板修改而物理模板需要同步修改的属性
-     * <p>
-     * 目前有:
-     * expression
-     *
-     * @param param    参数
-     * @param operator 操作人
-     * @return result
-     */
-    @Transactional(rollbackFor = Exception.class)
-    Result<Void> editTemplateFromLogic(IndexTemplateDTO param, String operator) throws ESOperateException;
-
-    /**
      * 主从切换
      *
      * @param logicId                逻辑模板id
@@ -154,26 +123,6 @@ public interface TemplatePhyManager {
      */
     @Transactional(rollbackFor = Exception.class)
     Result<Void> switchMasterSlave(Integer logicId, Long expectMasterPhysicalId, String operator);
-
-    /**
-     * 更新模板的rack和shard
-     *
-     * @param physicalId 物理模板的id
-     * @param tgtRack    rack
-     * @return result
-     * @throws ESOperateException
-     */
-    Result<Void> editTemplateRackWithoutCheck(Long physicalId, String tgtRack, String operator,
-                                              int retryCount) throws ESOperateException;
-
-    /**
-     * 升级模板
-     *
-     * @param physicalId physicalId
-     * @return reuslt
-     */
-
-    Result<Void> upgradeTemplateVersion(Long physicalId, String operator, int retryCount) throws ESOperateException;
 
     /**
      *
@@ -205,14 +154,14 @@ public interface TemplatePhyManager {
 
     /**
      * 获取带有App权限信息的物理模板列表
-     * @param appId 当前登录appId
+     * @param projectId 当前登录projectId
      */
-    List<ConsoleTemplatePhyVO> getConsoleTemplatePhyVOS(IndexTemplatePhyDTO param, Integer appId);
+    List<ConsoleTemplatePhyVO> getConsoleTemplatePhyVOS(IndexTemplatePhyDTO param, Integer projectId);
 
     /**
      * 根据项目获取有管理权限的物理模板
      */
-    List<String> getTemplatePhyNames(Integer appId);
+    List<String> getTemplatePhyNames(Integer projectId);
 
     /**
      * 获取物理模板可复制的物理集群名称列表, 仅支持不同集群间模板复制

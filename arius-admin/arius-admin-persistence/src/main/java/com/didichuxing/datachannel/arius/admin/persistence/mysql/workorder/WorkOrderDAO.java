@@ -56,7 +56,7 @@ public interface WorkOrderDAO {
                                                @Param("status")Integer status);
     
     /**
-     * 由审批人列表和地位
+     * 审批人列表
      *
      * @param approver 审批人
      * @param status 状态
@@ -68,7 +68,7 @@ public interface WorkOrderDAO {
     /**
      * 列表状态
      *
-     * @param status 状态
+     * @param status
      * @return {@link List}<{@link WorkOrderPO}>
      */
     List<WorkOrderPO> listByStatus(@Param("status")Integer status);

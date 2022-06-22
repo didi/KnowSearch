@@ -278,7 +278,7 @@ public class TemplateLabelService {
     public Map<Integer/*indexTemplateId*/, Collection<TemplateLabelPO>> listAllIndexTemplateLabelByLabelIds(String includeLabelIds, String excludeLabelIds) {
         Map<Integer/*indexTemplateId*/, Collection<TemplateLabelPO>> retMap = new ConcurrentHashMap<>();
 
-        List<IndexTemplate> templateLogics = indexTemplateService.getAllLogicTemplates();
+        List<IndexTemplate> templateLogics = indexTemplateService.listAllLogicTemplates();
 
         templateLogics.parallelStream().forEach(indexTemplate -> {
             Integer templateId = indexTemplate.getId();
@@ -451,10 +451,10 @@ public class TemplateLabelService {
      */
     private OperateRecordDTO buildLabelSettingOperatorRecord(String bizId, Integer operateId, String operator, String content) {
         OperateRecordDTO operateRecord = new OperateRecordDTO();
-        operateRecord.setBizId(bizId);
+        //operateRecord.setBizId(bizId);
         operateRecord.setModuleId(ModuleEnum.TEMPLATE.getCode());
         operateRecord.setOperateId(operateId);
-        operateRecord.setOperator(operator);
+        //operateRecord.setOperator(operator);
         operateRecord.setContent(content);
 
         return operateRecord;

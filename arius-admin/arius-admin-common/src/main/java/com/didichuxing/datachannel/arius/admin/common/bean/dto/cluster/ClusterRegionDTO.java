@@ -26,7 +26,6 @@ public class ClusterRegionDTO {
     @ApiModelProperty("物理集群名称")
     private String phyClusterName;
 
-    @ApiModelProperty("Rack列表")
-    @Deprecated
-    private String racks;
+    @ApiModelProperty("配置项")
+    private String config;
 }

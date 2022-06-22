@@ -83,8 +83,8 @@ public class DslMetricsVO {
     @ApiModelProperty("查询平均失败shard数")
     private Double  failedShardsAvg;
 
-    @ApiModelProperty("appid")
-    private Integer appid;
+    @ApiModelProperty("projectId")
+    private Integer projectId;
 
     @ApiModelProperty("查询语句")
     private String  dsl;

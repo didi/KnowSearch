@@ -64,11 +64,11 @@ public interface TemplateLogicAliasesManager {
     Result<Void> deleteTemplateAliases(ConsoleLogicTemplateDeleteAliasesDTO deleteAliasesDTO, String operator);
 
     /**
-     * getAllTemplateAliasesByAppid
-     * @param appId
+     * getAllTemplateAliasesByProjectId
+     * @param projectId
      * @return
      */
-    Result<List<Tuple<String/*index*/, String/*aliases*/>>> getAllTemplateAliasesByAppid(Integer appId);
+    Result<List<Tuple<String/*index*/, String/*aliases*/>>> getAllTemplateAliasesByProjectId(Integer projectId);
 
     /**
      * 根据逻辑模板ID获取对应别名详情列表

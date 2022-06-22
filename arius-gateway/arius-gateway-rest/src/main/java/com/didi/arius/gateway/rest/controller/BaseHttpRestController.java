@@ -170,8 +170,10 @@ public abstract class BaseHttpRestController implements IRestHandler {
             joinLogContext.setDslLen(queryContext.getPostBody().length());
             joinLogContext.setDsl(queryContext.getPostBody().replaceAll("\\n", " "));
             joinLogContext.setTimeStamp(System.currentTimeMillis());
-            traceLogger.info("_com_request_in||traceid={}||spanid={}||type=http||appid={}||requestId={}||uri={}||remoteAddr={}||requestLen={}||name={}",
-                    queryContext.getTraceid(), queryContext.getSpanid(), queryContext.getAppid(), queryContext.getRequestId(), queryContext.getUri(), queryContext.getRemoteAddr(), queryContext.getPostBody().length(), name());
+            joinLogContext.setProjectId(queryContext.getProjectId());
+            traceLogger.info("_com_request_in||traceid={}||spanid={}||type=http||appid={}||projectId={}||requestId={}||uri={}||remoteAddr={}||requestLen={}||name={}",
+                    queryContext.getTraceid(), queryContext.getSpanid(), queryContext.getAppid(), queryContext.getProjectId(),
+                    queryContext.getRequestId(), queryContext.getUri(), queryContext.getRemoteAddr(), queryContext.getPostBody().length(), name());
         } else {
             LogGather.recordInfoLog(QueryConsts.DLFLAG_PREFIX + "query_request_" + queryContext.getAppid() + "_" + name(), String.format("requestId=%s||method=%s||uri=%s||queryString=%s||remoteAddr=%s||postBodyLen=%d",
                     queryContext.getRequestId(), queryContext.getMethod(), queryContext.getUri(), queryContext.getQueryString(), queryContext.getRemoteAddr(), queryContext.getPostBody().length()));

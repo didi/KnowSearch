@@ -81,7 +81,7 @@ public class EcmHostHandler extends AbstractEcmBaseHandle {
             hostCreateActionParamList.add(hostCreateActionParam);
         }
 
-        //保存物理集群信息 es_data_source
+        //保存物理集群信息 es_cluster_phy_info
         Result<HostsCreateActionParam> hostCreateActionParamResult = persistClusterPOAndSupplyField(
             hostCreateActionParamList.get(0));
         if (hostCreateActionParamResult.failed()) {

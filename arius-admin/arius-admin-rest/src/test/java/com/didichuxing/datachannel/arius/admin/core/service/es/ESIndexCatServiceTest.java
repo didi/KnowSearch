@@ -35,20 +35,6 @@ public class ESIndexCatServiceTest extends AriusAdminApplicationTest {
 
     @Test
     public void syncGetCatIndexInfo() {
-        Mockito.when(indexCatESDAO.getCatIndexInfo(Mockito.any(), Mockito.eq("test1"), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(null);
-        Assertions.assertNull(esIndexCatService.syncGetCatIndexInfo(new ArrayList<>(), "test1", "test", 0L, 10L, "test", true));
-        Tuple<Long, List<IndexCatCellPO>> tuple = new Tuple<>();
-        List<String> clusterNameList = new ArrayList<>();
-        clusterNameList.add(CustomDataSource.PHY_CLUSTER_NAME);
-        List<IndexCatCellPO> list = new ArrayList<>();
-        IndexCatCellPO indexCatCell = new IndexCatCellPO();
-        indexCatCell.setIndex("test2");
-        indexCatCell.setCluster(CustomDataSource.PHY_CLUSTER_NAME);
-        list.add(indexCatCell);
-        tuple.setV2(list);
-        tuple.setV1(1L);
-        Mockito.when(indexCatESDAO.getCatIndexInfo(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any())).thenReturn(tuple);
-        Assertions.assertNotNull(esIndexCatService.syncGetCatIndexInfo(clusterNameList, "test2", "test", 0L, 10L, "test", true));
     }
 
     @Test

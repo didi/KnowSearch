@@ -3,17 +3,18 @@ package com.didichuxing.datachannel.arius.admin.core.service.cluster.logic;
 import java.util.List;
 import java.util.Set;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.common.Plugin;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.LogicResourceConfig;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Plugin;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterLogicConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.PluginDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterLogicDiskUsedInfoPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicWithRack;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterNodeSepc;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 
 /**
@@ -35,18 +36,6 @@ public interface ClusterLogicService {
      * @return 逻辑集群列表
      */
     List<ClusterLogic> listAllClusterLogics();
-
-    /**
-     * 获取所有逻辑集群，返回结果里包含逻辑集群拥有的rack信息
-     * @return
-     */
-    List<ClusterLogicWithRack> listAllClusterLogicsWithRackInfo();
-
-    /**
-     * 获取逻辑集群，返回结果里包含逻辑集群拥有的rack信息
-     * @return
-     */
-    ClusterLogicWithRack getClusterLogicWithRackInfoById(Long logicClusterId);
 
     /**
      * 删除逻辑集群
@@ -107,19 +96,19 @@ public interface ClusterLogicService {
 
     /**
      * 查询指定app所创建（作为owner）的逻辑集群
-     * @param appId APP ID
+     * @param projectId project ID
      * @return 逻辑集群列表
      */
-    List<ClusterLogic> getOwnedClusterLogicListByAppId(Integer appId);
+    List<ClusterLogic> getOwnedClusterLogicListByProjectId(Integer projectId);
 
     /**
      * 查询指定app有权限的逻辑集群（包括ALL、OWN、ACCESS）
-     * @param appId APP ID
+     * @param projectId project ID
      * @return 逻辑集群列表
      */
-    List<ClusterLogic> getHasAuthClusterLogicsByAppId(Integer appId);
+    List<ClusterLogic> getHasAuthClusterLogicsByProjectId(Integer projectId);
 
-    List<Long> getHasAuthClusterLogicIdsByAppId(Integer appId);
+    List<Long> getHasAuthClusterLogicIdsByProjectId(Integer projectId);
 
     /**
      * 判断逻辑集群是否存在
@@ -127,21 +116,6 @@ public interface ClusterLogicService {
      * @return result
      */
     Boolean isClusterLogicExists(Long resourceId);
-
-    /**
-     * 获取rack匹配到的逻辑集群
-     * @param cluster 集群
-     * @param racks racks
-     * @return count
-     */
-    ClusterLogic getClusterLogicByRack(String cluster, String racks);
-
-    /**
-     * 根据责任人查询
-     * @param responsibleId 责任人id
-     * @return list
-     */
-    List<ClusterLogic> getLogicClusterByOwnerId(Long responsibleId);
 
     /**
      * 根据配置字符创生成配置，填充默认值
@@ -183,12 +157,12 @@ public interface ClusterLogicService {
     /**
      * 转移逻辑集群
      * @param clusterLogicId       逻辑集群Id
-     * @param targetAppId          项目Id
+     * @param targetProjectId          项目Id
      * @param targetResponsible    目标负责人
      * @param submitor             提交人
      * @return
      */
-    Result<Void> transferClusterLogic(Long clusterLogicId, Integer targetAppId, String targetResponsible, String submitor);
+    Result<Void> transferClusterLogic(Long clusterLogicId, Integer targetProjectId, String targetResponsible, String submitor);
 
     /**
      * 模糊分页查询物理集群列表信息，仅获取部分属性
@@ -202,5 +176,17 @@ public interface ClusterLogicService {
      */
     Long fuzzyClusterLogicHitByCondition(ClusterLogicConditionDTO param);
 
+    /**
+     * 根据逻辑集群id列表获取逻辑集群列表信息
+     * @param clusterLogicIdList  逻辑集群id列表
+     * @return                    List<ClusterLogic>
+     */
     List<ClusterLogic> getClusterLogicListByIds(List<Long> clusterLogicIdList);
+
+    /**
+     * 获取磁盘信息
+     * @param id
+     * @return
+     */
+    ClusterLogicDiskUsedInfoPO getDiskInfo(Long id);
 }

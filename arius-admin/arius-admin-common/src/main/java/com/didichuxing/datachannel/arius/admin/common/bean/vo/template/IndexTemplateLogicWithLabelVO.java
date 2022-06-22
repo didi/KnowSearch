@@ -15,6 +15,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Deprecated
 public class IndexTemplateLogicWithLabelVO extends OpLogicTemplateVO {
 
     private List<Label> labels;

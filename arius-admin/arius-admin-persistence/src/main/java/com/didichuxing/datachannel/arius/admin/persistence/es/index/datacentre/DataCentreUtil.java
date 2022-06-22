@@ -43,12 +43,12 @@ public class DataCentreUtil {
     @Value("${es.template.hit.index.name:arius.template.hit}")
     private String ariusTemplateHit;
 
-    // appid维度访问次数索引
+    // projectId维度访问次数索引
     @Value("${es.appid.template.access.index.name:arius.appid.template.access}")
-    private String  ariusAppidTemplateAccess;
+    private String ariusProjectIdTemplateAccess;
     // 索引维度访问次数索引
     @Value("${es.indexname.access.index.name:arius.indexname.access}")
-    private String  ariusIndexNameAccess;
+    private String ariusIndexNameAccess;
     // 索引模板维度访问次数索引
     @Value("${es.template.access.index.name:arius.template.access}")
     private String  ariusTemplateAccess;
@@ -56,13 +56,6 @@ public class DataCentreUtil {
     // es 索引标签数据
     @Value("${es.template.label.index.name:v2.arius.template.label}")
     private String  ariusTemplateLabel;
-
-    // 健康分
-    @Value("${es.health.degress.index.name:index_health_degree}")
-    private String ariusIndexHealthDegress;
-    // 健康检查
-    @Value("${es.health.check.info.index.name:health_check_info}")
-    private String ariusHealthCheck;
 
     // 国内原始gateway日志索引
     @Value("${arius.gateway.original.log.index.name:foundation_fd.data-online.arius.gateway}")
@@ -124,12 +117,10 @@ public class DataCentreUtil {
         LOGGER.info("class=DataCentreUtil||method=init||ariusTemplateMapping={}",               getAriusTemplateMapping());
         LOGGER.info("class=DataCentreUtil||method=init||ariusIndexSize={}",                     getAriusIndexSize());
         LOGGER.info("class=DataCentreUtil||method=init||ariusTemplateHit={}",                   getAriusTemplateHit());
-        LOGGER.info("class=DataCentreUtil||method=init||ariusAppidTemplateAccess={}",           getAriusAppidTemplateAccess());
+        LOGGER.info("class=DataCentreUtil||method=init||ariusProjectIdTemplateAccess={}",           getAriusProjectIdTemplateAccess());
         LOGGER.info("class=DataCentreUtil||method=init||ariusIndexNameAccess={}",               getAriusIndexNameAccess());
         LOGGER.info("class=DataCentreUtil||method=init||ariusTemplateAccess={}",                getAriusTemplateAccess());
         LOGGER.info("class=DataCentreUtil||method=init||ariusTemplateLabel={}",                 getAriusTemplateLabel());
-        LOGGER.info("class=DataCentreUtil||method=init||ariusIndexHealthDegress={}",            getAriusIndexHealthDegress());
-        LOGGER.info("class=DataCentreUtil||method=init||ariusHealthCheck={}",                   getAriusHealthCheck());
         LOGGER.info("class=DataCentreUtil||method=init||ariusGatewayOriginalLog={}",            getAriusGatewayOriginalLog());
         LOGGER.info("class=DataCentreUtil||method=init||ariusStatsNodeIndexInfo={}",            getAriusStatsNodeIndexInfo());
         LOGGER.info("class=DataCentreUtil||method=init||ariusStatsNodeInfo={}",                 getAriusStatsNodeInfo());
@@ -215,21 +206,13 @@ public class DataCentreUtil {
         return getIndexName(ariusIndexNameAccess);
     }
 
-    public String getAriusAppidTemplateAccess(){
-        return getIndexName(ariusAppidTemplateAccess);
+    public String getAriusProjectIdTemplateAccess(){
+        return getIndexName(ariusProjectIdTemplateAccess);
     }
 
     public String getAriusGatewayJoin() { return getIndexName(ariusGatewayJoin); }
 
     public String getAriusGatewayOriginalLog(){ return getIndexName(ariusCNGatewayOriginalLog);}
-
-    public String getAriusHealthCheck(){
-        return getIndexName(ariusHealthCheck);
-    }
-
-    public String getAriusIndexHealthDegress(){
-        return getIndexName(ariusIndexHealthDegress);
-    }
 
     public String getAriusDslAnalyzeResult(){
         return getIndexName(ariusDslAnalyzeResult);

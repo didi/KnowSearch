@@ -2,8 +2,11 @@ package com.didichuxing.datachannel.arius.admin.biz.cluster;
 
 import java.util.List;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostWithRegionInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
+import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
 import com.google.common.collect.Lists;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -63,5 +66,33 @@ public class ClusterNodeManagerTest extends AriusAdminApplicationTest {
         Assertions.assertNotNull(ret);
         if (ret.success()) { Assertions.assertTrue(ret.getData());}
         if (ret.failed())  { Assertions.assertNotNull(ret.getMessage());}
+    }
+
+     @Test
+    public void getClusterPhyRegionInfosTest() {
+        String clusterName = "logi-elasticsearch-7.6.0";
+        ClusterPhy clusterphy = clusterPhyService.getClusterByName(clusterName);
+        Result<List<ESClusterRoleHostVO>> clusterPhyRegionInfos = clusterNodeManager.listClusterPhyNode(clusterphy.getId());
+        Assertions.assertTrue(clusterPhyRegionInfos.success());
+        List<ESClusterRoleHostVO> esClusterRoleHostVOS = clusterPhyRegionInfos.getData();
+        List<String> masterRegion = org.apache.commons.compress.utils.Lists.newArrayList();
+        List<String> clientRegion = org.apache.commons.compress.utils.Lists.newArrayList();
+        List<String> dataRegion = org.apache.commons.compress.utils.Lists.newArrayList();
+        esClusterRoleHostVOS.forEach(esClusterRoleHostVO -> {
+            if(esClusterRoleHostVO.getRole().equals(ESClusterNodeRoleEnum.DATA_NODE.getCode())) {
+                dataRegion.add(esClusterRoleHostVO.getCluster());
+            }
+            if(esClusterRoleHostVO.getRole().equals(ESClusterNodeRoleEnum.MASTER_NODE.getCode())) {
+                masterRegion.add(esClusterRoleHostVO.getCluster());
+            }
+            if(esClusterRoleHostVO.getRole().equals(ESClusterNodeRoleEnum.CLIENT_NODE.getCode())) {
+                clientRegion.add(esClusterRoleHostVO.getCluster());
+            }
+
+        });
+        Assertions.assertFalse(masterRegion.isEmpty());
+        Assertions.assertFalse(clientRegion.isEmpty());
+        Assertions.assertFalse(dataRegion.isEmpty());
+        Assertions.assertEquals(dataRegion.get(0), clusterName);
     }
 }

@@ -44,9 +44,9 @@ public class WorkOrderPO extends BasePO {
     private String            applicant;
 
     /**
-     * 申请人appid
+     * 申请人projectid
      */
-    private Integer           applicantAppId;
+    private Integer applicantProjectId;
 
     /**
      * 备注信息
@@ -74,7 +74,7 @@ public class WorkOrderPO extends BasePO {
     private Integer           status;
 
     /**
-     * 审批人appId
+     * 审批人projectId
      */
-    private Integer           approverAppId;
+    private Integer approverProjectId;
 }

@@ -1,40 +1,43 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.template;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.setting.TemplateLogicSettingsManager;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateSettingDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateSettingVO;
-import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.setting.TemplateLogicSettingsManager;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateWithCreateInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateConditionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateSettingDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
-import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateSettingVO;
+import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
+import com.didiglobal.logi.security.util.HttpRequestUtil;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 
 /**
  * Created by linyunan on 2021-07-30
  */
 @RestController
-@RequestMapping(V3_OP + "/template/logic")
+@RequestMapping({ V3_OP + "/template/logic", V3 + "/template/logic" })
 @Api(tags = "逻辑模板接口(REST)")
 public class TemplateLogicV3Controller {
 
     @Autowired
-    private TemplateLogicManager templateLogicManager;
+    private TemplateLogicManager         templateLogicManager;
 
     @Autowired
     private TemplateLogicSettingsManager templateLogicSettingsManager;
@@ -43,7 +46,7 @@ public class TemplateLogicV3Controller {
     @ResponseBody
     @ApiOperation(value = "获取逻辑模板名称列表接口")
     public Result<List<String>> listTemplateLogicNames(HttpServletRequest request) {
-        return Result.buildSucc(templateLogicManager.getTemplateLogicNames(HttpRequestUtils.getAppId(request)));
+        return Result.buildSucc(templateLogicManager.getTemplateLogicNames(HttpRequestUtil.getProjectId(request)));
     }
 
     @PostMapping("/page")
@@ -51,7 +54,7 @@ public class TemplateLogicV3Controller {
     @ApiOperation(value = "模糊查询模板列表")
     public PaginationResult<ConsoleTemplateVO> pageGetConsoleTemplateVOS(HttpServletRequest request,
                                                                          @RequestBody TemplateConditionDTO condition) {
-        return templateLogicManager.pageGetConsoleTemplateVOS(condition, HttpRequestUtils.getAppId(request));
+        return templateLogicManager.pageGetConsoleTemplateVOS(condition, HttpRequestUtil.getProjectId(request));
     }
 
     @GetMapping("/{templateName}/nameCheck")
@@ -89,7 +92,7 @@ public class TemplateLogicV3Controller {
     })
     public Result<Void> switchRolloverStatus(@PathVariable Integer templateLogicId, @PathVariable Integer status,
                                                HttpServletRequest request) {
-        String operator = HttpRequestUtils.getOperator(request);
+        String operator = HttpRequestUtil.getOperator(request);
         return templateLogicManager.switchRolloverStatus(templateLogicId, status, operator);
     }
 
@@ -99,27 +102,81 @@ public class TemplateLogicV3Controller {
     @ApiImplicitParams({@ApiImplicitParam(paramType = "header", dataType = "String", name = "X-ARIUS-APP-ID", value = "应用ID", required = true)})
     public Result<Void> customizeSetting(HttpServletRequest request,
                                       @RequestBody TemplateSettingDTO settingDTO) throws AdminOperateException {
-        Result<Void> checkAuthResult = templateLogicManager.checkAppAuthOnLogicTemplate(settingDTO.getLogicId(), HttpRequestUtils.getAppId(request));
+        Result<Void> checkAuthResult = templateLogicManager.checkProjectAuthOnLogicTemplate(settingDTO.getLogicId(), HttpRequestUtil.getProjectId(request));
         if (checkAuthResult.failed()) {
             return checkAuthResult;
         }
 
-        return templateLogicSettingsManager.customizeSetting(settingDTO, HttpRequestUtils.getOperator(request));
+        return templateLogicSettingsManager.customizeSetting(settingDTO, HttpRequestUtil.getOperator(request));
     }
 
     @GetMapping("/setting")
     @ResponseBody
     @ApiOperation(value = "获取索引Setting接口", notes = "")
     @ApiImplicitParams({@ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "索引ID", required = true)})
+    @Deprecated
     public Result<TemplateSettingVO> getTemplateSettings(@RequestParam("logicId") Integer logicId) throws AdminOperateException {
         return templateLogicSettingsManager.buildTemplateSettingVO(logicId);
     }
 
-    @GetMapping("/listTemplates")
+    @GetMapping("/templates")
     @ResponseBody
     @ApiOperation(value = "根据物理集群名称获取对应全量逻辑模板列表", notes = "")
     public Result<List<ConsoleTemplateVO>> getLogicTemplatesByCluster(HttpServletRequest request,
                                                                       @RequestParam("cluster") String cluster) {
-        return templateLogicManager.getTemplateVOByPhyCluster(cluster, HttpRequestUtils.getAppId(request));
+        return templateLogicManager.getTemplateVOByPhyCluster(cluster);
+    }
+
+    @PostMapping("/create")
+    @ResponseBody
+    @ApiOperation(value = "创建逻辑模板")
+    public Result<Void> createTemplate(HttpServletRequest request, @RequestBody IndexTemplateWithCreateInfoDTO param) throws AdminOperateException{
+        return templateLogicManager.create(param, HttpRequestUtil.getOperator(request), HttpRequestUtil.getProjectId(request));
+    }
+
+    @PutMapping("/edit")
+    @ResponseBody
+    @ApiOperation(value = "用户编辑模板")
+    public Result<Void> editTemplate(HttpServletRequest request, @RequestBody IndexTemplateDTO param) {
+        return templateLogicManager.newEditTemplate(param, HttpRequestUtil.getOperator(request));
+    }
+
+    @DeleteMapping("/{templateId}/{indices}/clear-indices")
+    @ResponseBody
+    @ApiOperation(value = "清理索引")
+    public Result<Void> clearIndices(HttpServletRequest request,
+                                     @PathVariable("templateId") Integer templateId,
+                                     @PathVariable("indices")    List<String> indices) {
+        return templateLogicManager.clearIndices(templateId, indices, HttpRequestUtil.getProjectId(request));
+    }
+
+    @PutMapping("/{templateId}/{shardNum}/adjustShard")
+    @ResponseBody
+    @ApiOperation(value = "扩缩容")
+    public Result<Void> adjustShard(HttpServletRequest request,
+                                    @PathVariable("templateId") Integer templateId,
+                                    @PathVariable("shardNum")   Integer shardNum) throws AdminOperateException {
+        return templateLogicManager.adjustShard(templateId, shardNum, HttpRequestUtil.getProjectId(request));
+    }
+
+    @PutMapping("/{templateId}/upgrade")
+    @ResponseBody
+    @ApiOperation(value = "升版本")
+    public Result<Void> upgrade(HttpServletRequest request, @RequestBody Integer templateId) throws AdminOperateException {
+        return templateLogicManager.upgrade(templateId, HttpRequestUtil.getOperator(request));
+    }
+
+    @GetMapping("{clusterPhyName}/phy/templates")
+    @ResponseBody
+    @ApiOperation(value = "根据物理集群名称获取对应全量逻辑模板列表", notes = "")
+    public Result<List<ConsoleTemplateVO>> getLogicTemplatesByPhyCluster(HttpServletRequest request,@PathVariable String clusterPhyName) {
+        return templateLogicManager.getTemplateVOByPhyCluster(clusterPhyName);
+    }
+
+    @GetMapping("{clusterLogicName}/logic/templates")
+    @ResponseBody
+    @ApiOperation(value = "根据逻辑集群名称获取对应全量逻辑模板列表", notes = "")
+    public Result<List<ConsoleTemplateVO>> listTemplateVOByLogicCluster(HttpServletRequest request,@PathVariable String clusterLogicName) {
+        return templateLogicManager.listTemplateVOByLogicCluster(clusterLogicName, HttpRequestUtil.getProjectId(request));
     }
 }

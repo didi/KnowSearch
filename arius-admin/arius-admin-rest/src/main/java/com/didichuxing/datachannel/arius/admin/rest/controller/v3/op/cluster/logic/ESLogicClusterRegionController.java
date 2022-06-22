@@ -2,10 +2,19 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.cluster.lo
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
+import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterRegionManager;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterWithRegionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionVO;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
+import com.didiglobal.logi.security.util.HttpRequestUtil;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,19 +24,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterRegionManager;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterWithRegionDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
-import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
-
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
 
 /**
  * @author wangshu
@@ -62,7 +58,7 @@ public class ESLogicClusterRegionController {
                                                         @RequestParam("regionId") Long regionId,
                                                         @RequestParam("logicClusterId")Long logicClusterId) {
 
-        return clusterRegionManager.unbindRegion(regionId, logicClusterId, HttpRequestUtils.getOperator(request));
+        return clusterRegionManager.unbindRegion(regionId, logicClusterId, HttpRequestUtil.getOperator(request));
     }
 
     @PostMapping("")
@@ -70,7 +66,7 @@ public class ESLogicClusterRegionController {
     @ApiOperation(value = "绑定逻辑集群region接口", notes = "")
     public Result<Void> bindingLogicClusterRegion(HttpServletRequest request,
                                                   @RequestBody ESLogicClusterWithRegionDTO param) {
-        return clusterRegionManager.batchBindRegionToClusterLogic(param, HttpRequestUtils.getOperator(request),
+        return clusterRegionManager.batchBindRegionToClusterLogic(param, HttpRequestUtil.getOperator(request),
             Boolean.FALSE);
     }
 }

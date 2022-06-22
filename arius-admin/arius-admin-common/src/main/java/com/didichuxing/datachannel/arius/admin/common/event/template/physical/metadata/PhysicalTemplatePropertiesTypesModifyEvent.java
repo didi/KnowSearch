@@ -10,9 +10,9 @@ import java.util.List;
 public class PhysicalTemplatePropertiesTypesModifyEvent extends PhysicalMetaDataModifyEvent {
 
     /**
-     * APP ID
+     * project ID
      */
-    private final Integer appId;
+    private final Integer projectId;
 
     /**
      * 集群
@@ -41,14 +41,14 @@ public class PhysicalTemplatePropertiesTypesModifyEvent extends PhysicalMetaData
 
     public PhysicalTemplatePropertiesTypesModifyEvent(
             Object source,
-            Integer appId,
+            Integer projectId,
             String cluster,
             String templateName,
             List<String> receivers,
             List<String> beforeUpdateTypes,
             List<String> afterUpdateTypes) {
         super(source);
-        this.appId = appId;
+        this.projectId = projectId;
         this.cluster = cluster;
         this.templateName = templateName;
         this.receivers = receivers;
@@ -56,8 +56,8 @@ public class PhysicalTemplatePropertiesTypesModifyEvent extends PhysicalMetaData
         this.afterUpdateTypes = afterUpdateTypes;
     }
 
-    public Integer getAppId() {
-        return this.appId;
+    public Integer getProjectId() {
+        return this.projectId;
     }
 
     public String getCluster() {

@@ -1,19 +1,17 @@
 package com.didichuxing.datachannel.arius.admin.core.service.template.physic;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
-import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePhyPO;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author d06679
@@ -121,25 +119,18 @@ public interface IndexTemplatePhyService {
 
     /**
      * 根据物理模板状态获取模板列表
-     * @param cluster 集群
+     * @param logicId 逻辑模板id
+     * @param status 状态 1 常规    -1 删除中     -2 已删除
      * @return list
      */
-    List<IndexTemplatePhy> getNormalTemplateByCluster(String cluster);
-
-    /**
-     * 根据物理模板状态和模糊匹配获取模板列表
-     * @param cluster 集群
-     * @return set
-     */
-    Set<String> getMatchNormalLogicIdByCluster(String cluster);
+    List<IndexTemplatePhy> getTemplateByLogicIdAndStatus(Integer logicId, Integer status);
 
     /**
      * 根据物理模板状态获取模板列表
      * @param cluster 集群
-     * @param racks racks
      * @return list
      */
-    List<IndexTemplatePhy> getNormalTemplateByClusterAndRack(String cluster, Collection<String> racks);
+    List<IndexTemplatePhy> getNormalTemplateByCluster(String cluster);
 
     /**
      * 获取模板匹配的索引列表，按着时间排序
@@ -255,11 +246,30 @@ public interface IndexTemplatePhyService {
      */
     IndexTemplatePhyWithLogic buildIndexTemplatePhysicalWithLogic(IndexTemplatePhyPO physicalPO);
 
-    /**
-     * 获取regionId下的物理模板
-     */
-    List<IndexTemplatePhy> getTemplateByRegionId(Long regionId);
-
-
     Map<Integer, Integer> getAllLogicTemplatesPhysicalCount();
+
+    /**
+     * 校验物理模板信息
+     *
+     * @param param     参数
+     * @param operation 操作
+     * @return result
+     */
+    Result<Void> validateTemplate(IndexTemplatePhyDTO param, OperationEnum operation);
+
+    /**
+     * 批量校验物理模板信息
+     *
+     * @param params    参数
+     * @param operation 操作
+     * @return result
+     */
+    Result<Void> validateTemplates(List<IndexTemplatePhyDTO> params, OperationEnum operation);
+
+    /**
+     * 获取指定regionId下的所有物理模板列表
+     * @param regionId  regionId
+     * @return    Result<List<IndexTemplatePhy>>
+     */
+    Result<List<IndexTemplatePhy>> listByRegionId(Integer regionId);
 }

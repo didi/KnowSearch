@@ -1,29 +1,19 @@
 package com.didichuxing.datachannel.arius.admin.biz.espackage;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant;
-import com.didichuxing.datachannel.arius.admin.common.constant.ESClusterVersionEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.espackage.AriusESPackageEnum;
-import com.didichuxing.datachannel.arius.admin.common.util.ESVersionUtil;
-import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
-import com.google.common.collect.Sets;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.compress.utils.Lists;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESPackageDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.espackage.ESPackageVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.espackage.ESPackage;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.espackage.ESPackageVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.espackage.AriusESPackageEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusOptional;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.ESVersionUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESPackageService;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.COMMA;
+import java.util.List;
+import java.util.stream.Collectors;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * @author linyunan

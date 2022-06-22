@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v2.console.template;
 
-import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyStatisManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyStaticsManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESIndexStats;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateStatsInfoVO;
@@ -23,7 +23,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion
 public class ConsoleTemplateStatisController extends BaseConsoleTemplateController {
 
     @Autowired
-    private TemplatePhyStatisManager templatePhyStatisManager;
+    private TemplatePhyStaticsManager templatePhyStaticsManager;
 
     /**
      * 根据逻辑模板id获取模板的monitor统计信息
@@ -34,14 +34,14 @@ public class ConsoleTemplateStatisController extends BaseConsoleTemplateControll
      * @return
      */
     @GetMapping(path = "/query.do")
-    @ApiOperation(value = "获取索引模板的统计信息" )
+    @ApiOperation(value = "获取索引模板的统计信息【三方接口】",tags = "【三方接口】" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Long", name = "logicTemplateId", value = "模板id", required = true),
             @ApiImplicitParam(paramType = "query", dataType = "Long", name = "startDate", value = "查询开始时间，毫秒时间戳", required = true),
             @ApiImplicitParam(paramType = "query", dataType = "Long", name = "endDate", value = "查询结束时间，毫秒时间戳", required = true) })
     public Result<List<ESIndexStats>> getIndexStatis(@RequestParam(value = "templateId") Long logicTemplateId,
                                                      @RequestParam(value = "startDate") Long startDate,
                                                      @RequestParam(value = "endDate") Long endDate) {
-        return templatePhyStatisManager.getIndexStatis(logicTemplateId, startDate, endDate);
+        return templatePhyStaticsManager.getIndexStatics(logicTemplateId, startDate, endDate);
     }
 
     /**
@@ -51,9 +51,9 @@ public class ConsoleTemplateStatisController extends BaseConsoleTemplateControll
      * @return
      */
     @GetMapping(path = "/statisInfo.do")
-    @ApiOperation(value = "根据模板id，查询模板的基本统计信息" )
+    @ApiOperation(value = "根据模板id，查询模板的基本统计信息【三方接口】",tags = "【三方接口】" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Long", name = "templateId", value = "模板id", required = true) })
     public Result<TemplateStatsInfoVO> getTemplateBaseStatisInfo(@RequestParam(value = "templateId") Long logicTemplateId) {
-        return templatePhyStatisManager.getTemplateBaseStatisticalInfoByLogicTemplateId(logicTemplateId);
+        return templatePhyStaticsManager.getTemplateBaseStatisticalInfoByLogicTemplateId(logicTemplateId);
     }
 }

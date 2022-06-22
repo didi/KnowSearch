@@ -6,22 +6,21 @@
         <result column="id" jdbcType="BIGINT" property="id"/>
         <result column="name" jdbcType="VARCHAR" property="name"/>
         <result column="type" jdbcType="TINYINT" property="type"/>
-        <result column="app_id" jdbcType="INTEGER" property="appId"/>
+        <result column="project_id" jdbcType="INTEGER" property="projectId"/>
         <result column="data_center" jdbcType="VARCHAR" property="dataCenter"/>
         <result column="responsible" jdbcType="VARCHAR" property="responsible"/>
-        <result column="department_id" jdbcType="VARCHAR" property="libraDepartmentId"/>
-        <result column="department" jdbcType="VARCHAR" property="libraDepartment"/>
         <result column="memo" jdbcType="VARCHAR" property="memo"/>
         <result column="quota" jdbcType="DECIMAL" property="quota"/>
         <result column="level" jdbcType="TINYINT" property="level"/>
         <result column="config_json" jdbcType="VARCHAR" property="configJson"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
-        <result column="health"                     jdbcType="TINYINT" property="health"/>
+        <result column="health" jdbcType="TINYINT" property="health"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-        id, `name`, `type`, app_id, data_center, responsible, department_id, department, memo, quota, `level`, config_json, create_time, update_time, health
+        id
+        , `name`, `type`, project_id, data_center, responsible, memo, quota, `level`, config_json, create_time, update_time, health
     </sql>
 
     <select id="listByCondition"
@@ -29,15 +28,15 @@
             resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from arius_resource_logic
+        from project_arius_resource_logic
         <trim prefix="where" prefixOverrides="and">
             <if test="id != null">and id = #{id}</if>
             <if test="name != null">and `name` = #{name}</if>
             <if test="type != null">and `type` = #{type}</if>
             <if test="level != null">and `level` = #{level}</if>
-            <if test="appId != null">and app_id = #{appId}</if>
+            <if test="projectId != null">and project_id = #{projectId}</if>
             <if test="dataCenter != null">and data_center = #{dataCenter}</if>
-            <if test="health != null">    and health = #{health}</if>
+            <if test="health != null">and health = #{health}</if>
         </trim>
         order by id desc
     </select>
@@ -45,21 +44,21 @@
     <insert id="insert" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterLogicPO"
             useGeneratedKeys="true"
             keyColumn="id" keyProperty="id">
-        insert into arius_resource_logic
-        (`name`, `type`, app_id, data_center, responsible, department_id, department, memo, quota, `level`, config_json,health)
-        values
-        (#{name}, #{type}, #{appId}, #{dataCenter}, #{responsible}, #{libraDepartmentId}, #{libraDepartment}, #{memo}, #{quota}, #{level}, #{configJson}, #{health})
+        insert into project_arius_resource_logic
+        (`name`, `type`, project_id, data_center, responsible,  memo, quota, `level`, config_json,
+         health)
+        values (#{name}, #{type}, #{projectId}, #{dataCenter}, #{responsible},
+                #{memo}, #{quota}, #{level}, #{configJson}, #{health})
     </insert>
 
     <update id="update" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterLogicPO">
-        update arius_resource_logic
+        update project_arius_resource_logic
         <trim prefix="set" prefixOverrides=",">
             <if test="name != null">,`name` = #{name}</if>
             <if test="type != null">,`type` = #{type}</if>
-            <if test="appId != null">,app_id = #{appId}</if>
+            <if test="projectId != null">,project_id = #{projectId}</if>
             <if test="responsible != null">,responsible = #{responsible}</if>
-            <if test="libraDepartmentId != null">,department_id = #{libraDepartmentId}</if>
-            <if test="libraDepartment != null">,department = #{libraDepartment}</if>
+           
             <if test="memo != null">,memo = #{memo}</if>
             <if test="quota != null">,quota = #{quota}</if>
             <if test="level != null">,`level` = #{level}</if>
@@ -70,32 +69,33 @@
     </update>
 
     <delete id="delete" parameterType="long">
-        delete from arius_resource_logic
+        delete from project_arius_resource_logic
         where id = #{resourceId}
     </delete>
 
     <select id="listAll" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from arius_resource_logic
+        from project_arius_resource_logic
         order by id desc
     </select>
 
     <select id="getById" parameterType="long" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from arius_resource_logic
+        from project_arius_resource_logic
         where id = #{resourceId}
     </select>
 
     <select id="listByIds" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from arius_resource_logic
+        from project_arius_resource_logic
         where
         <choose>
             <when test="ids != null and ids.size > 0">
-                id in <foreach collection="ids" item="id" open="(" separator="," close=")">#{id}</foreach>
+                id in
+                <foreach collection="ids" item="id" open="(" separator="," close=")">#{id}</foreach>
             </when>
             <otherwise>
                 1=0
@@ -106,21 +106,21 @@
     <select id="getByName" parameterType="string" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from arius_resource_logic
+        from project_arius_resource_logic
         where `name` = #{name}
     </select>
 
-    <select id="listByAppId" parameterType="int" resultMap="BaseResultMap">
+    <select id="listByProjectId" parameterType="int" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from arius_resource_logic
-        where app_id = #{appId}
+        from project_arius_resource_logic
+        where project_id = #{projectId}
     </select>
 
     <select id="getLastCommon" parameterType="string" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from arius_resource_logic
+        from project_arius_resource_logic
         where `type` = 1
         order by id desc
         limit 1
@@ -129,23 +129,28 @@
     <select id="listByResponsible" parameterType="string" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from arius_resource_logic
+        from project_arius_resource_logic
         where responsible = #{responsible}
         or responsible like concat(#{responsible},',%')
         or responsible like concat('%,', #{responsible})
         or responsible like concat('%,', #{responsible},',%')
     </select>
 
-    <select id="pagingByCondition" parameterType="map" resultMap="BaseResultMap">
+    <select id="pagingByCondition" resultMap="BaseResultMap"
+            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterLogicConditionDTO">
         select
         <include refid="Base_Column_List"/>
-        from arius_resource_logic
+        from project_arius_resource_logic
         where id > 0
-        <if test="name != null">  and  `name` LIKE CONCAT('%',#{name},'%')</if>
-        <if test="appId != null"> and  app_id = #{appId}</if>
-        <if test="health != null">and  health = #{health}</if>
-        <if test="type != null">  and  type = #{type}</if>
-        order by  ${sortTerm}  ${sortType}
+        <if test="id != null">and id = #{id}</if>
+        <if test="name != null">and `name` LIKE CONCAT('%',#{name},'%')</if>
+        <if test="projectId != null">and project_id = #{projectId}</if>
+        <if test="health != null">and health = #{health}</if>
+        <if test="type != null">and type = #{type}</if>
+        <if test="memo != null">and `memo` LIKE CONCAT('%',#{memo},'%')</if>
+        <if test="sortTerm != null">
+            order by ${sortTerm} ${sortType}
+        </if>
         limit #{from}, #{size}
     </select>
 
@@ -154,12 +159,12 @@
             resultType="long">
         select
         count(1)
-        from arius_resource_logic
+        from project_arius_resource_logic
         where id > 0
-        <if test="name != null">  and  `name` LIKE CONCAT('%',#{name},'%')</if>
-        <if test="appId != null"> and  app_id = #{appId}</if>
-        <if test="health != null">and  health = #{health}</if>
-        <if test="type != null">  and  type = #{type}</if>
+        <if test="name != null">and `name` LIKE CONCAT('%',#{name},'%')</if>
+        <if test="projectId != null">and project_id = #{projectId}</if>
+        <if test="health != null">and health = #{health}</if>
+        <if test="type != null">and type = #{type}</if>
     </select>
 
 </mapper>

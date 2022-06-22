@@ -1,18 +1,19 @@
 package com.didichuxing.datachannel.arius.admin.common.event.resource;
 
 /**
- * Created by linyunan on 2021-06-03
+ * @author linyunan
+ * @date 2021-06-03
  */
 public class ClusterPhyEvent extends ClusterEvent {
 
     private String  clusterPhyName;
 
-    private Integer appId;
+    private String operator;
 
-    public ClusterPhyEvent(String clusterPhyName, Integer appId) {
+    public ClusterPhyEvent(String clusterPhyName, String operator) {
         super(clusterPhyName);
         this.clusterPhyName = clusterPhyName;
-        this.appId = appId;
+        this.operator = operator;
     }
 
     public String getClusterPhyName() {
@@ -23,11 +24,11 @@ public class ClusterPhyEvent extends ClusterEvent {
         this.clusterPhyName = clusterPhyName;
     }
 
-    public Integer getAppId() {
-        return appId;
+    public String getOperator() {
+        return operator;
     }
 
-    public void setAppId(Integer appId) {
-        this.appId = appId;
+    public void setOperator(String operator) {
+        this.operator = operator;
     }
 }

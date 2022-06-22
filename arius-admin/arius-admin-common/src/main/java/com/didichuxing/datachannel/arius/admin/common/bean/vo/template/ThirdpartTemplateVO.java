@@ -1,12 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.vo.template;
 
-import java.util.Date;
-
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.BaseVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.DataTypeEnum;
-
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -56,7 +54,7 @@ public class ThirdpartTemplateVO extends BaseVO {
     /******************************* 逻辑信息 ********************************/
 
     @ApiModelProperty("所属应用ID")
-    private Integer appId;
+    private Integer projectId;
 
     /**
      * 用户数据类型
