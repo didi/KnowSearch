@@ -74,7 +74,7 @@ public class ClusterPhyMetricsController {
             clusterPhyMetricsManager.getUserNameConfigMetrics(param, HttpRequestUtil.getOperator(request)));
     }
 
-    @PostMapping("/updateConfigMetrics")
+    @PostMapping("/update-config-metrics")
     @ResponseBody
     @ApiOperation(value = "更新账号下已配置指标类型")
     public Result<Integer> updateClusterPhyMetricsTypes(@RequestBody MetricsConfigInfoDTO param, HttpServletRequest request) {
