@@ -1,5 +1,19 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.AVG;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.DOUBLE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.FIELD;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.HIST;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.INT;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.KEY;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.LONG;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.METRICS;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.PERCENTILES;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.STATIS;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.TIME_STAMP;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.VALUE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.VALUES;
+
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONPath;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.MetricsContent;
@@ -18,6 +32,7 @@ import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
 import com.didiglobal.logi.elasticsearch.client.response.query.query.ESQueryResponse;
 import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESAggr;
 import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESBucket;
+import com.didiglobal.logi.elasticsearch.client.response.query.query.hits.ESHits;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import lombok.NoArgsConstructor;
@@ -30,7 +45,12 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.*;
@@ -861,7 +881,9 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
         String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTime, endTime);
 
         return gatewayClient.performRequestWithRouting(metadataClusterName, null,
-                realIndexName, TYPE, dsl, s -> s.getHits().getHits().size() > 0 ? ((Map<String, Long>) s.getHits().getHits().get(0).getSource()).get("timestamp") : null,
-                3);
+                realIndexName, TYPE, dsl, response -> Optional.ofNullable(response).map(ESQueryResponse::getHits)
+                        .map(ESHits::getHits)
+                        .filter(CollectionUtils::isNotEmpty)
+                        .map(esHits ->((Map<String,Long>)esHits.get(0).getSource()).get("timestamp")).orElse(null), 3);
     }
 }

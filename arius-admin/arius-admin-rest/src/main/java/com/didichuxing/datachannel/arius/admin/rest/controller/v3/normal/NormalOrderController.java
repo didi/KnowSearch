@@ -12,11 +12,13 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.WorkOrderVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.detail.OrderDetailBaseVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
+import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import java.util.List;
+import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -60,6 +62,8 @@ public class NormalOrderController {
     @ResponseBody
     @ApiOperation(value = "审核")
     public Result<Void> process(@PathVariable(value = "orderId") Long orderId, @RequestBody WorkOrderProcessDTO processDTO) {
+        //设置当前操作人
+        processDTO.setAssignee( SpringTool.getUserName() );
         return workOrderManager.process(processDTO);
     }
 
@@ -80,8 +84,9 @@ public class NormalOrderController {
     @GetMapping("/orders")
     @ResponseBody
     @ApiOperation(value = "工单申请列表")
-    public Result<List<WorkOrderVO>> getOrderApplyList(@RequestParam(value = "status") Integer status) {
-        return workOrderManager.getOrderApplyList(SpringTool.getUserName(), status);
+    public Result<List<WorkOrderVO>> getOrderApplyList(HttpServletRequest httpServletRequest,
+                                                       @RequestParam(value = "status") Integer status) {
+        return workOrderManager.getOrderApplyList(SpringTool.getUserName(), status, HttpRequestUtil.getProjectId(httpServletRequest));
     }
 
     @GetMapping("/approvals")

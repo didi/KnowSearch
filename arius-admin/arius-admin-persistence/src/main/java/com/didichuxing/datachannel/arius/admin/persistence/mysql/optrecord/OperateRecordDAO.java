@@ -17,7 +17,7 @@ public interface OperateRecordDAO {
      * @param param OperateRecordInfoPO
      * @return List<OperateRecordPO>
      */
-    List<OperateRecordInfoPO> listByCondition(@Param("param") OperateRecordDTO param);
+    List<OperateRecordInfoPO> listByCondition( OperateRecordDTO param);
     
     /**
      * 总数计算
@@ -25,7 +25,7 @@ public interface OperateRecordDAO {
      * @param param 入参
      * @return int
      */
-    Long countByCondition(@Param("param") OperateRecordDTO param);
+    Long countByCondition(OperateRecordDTO param);
 
     /**
      * 插入一条数据

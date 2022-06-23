@@ -89,8 +89,6 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.PostConstruct;
-
 @Service
 public class IndexTemplateServiceImpl implements IndexTemplateService {
 
@@ -1018,8 +1016,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
 
         // 逻辑模板对应1到多个物理模板
         Multimap<Integer, IndexTemplatePhy> logicId2PhysicalTemplatesMapping = ConvertUtil.list2MulMap(
-            indexTemplatePhyService.getTemplateByLogicIds(
-                logicTemplates.stream().map(IndexTemplatePO::getId).collect(Collectors.toList())),
+            indexTemplatePhyService.listTemplateWithCache(),
             IndexTemplatePhy::getLogicId);
 
         List<IndexTemplateWithPhyTemplates> indexTemplateCombinePhysicalTemplates = Lists.newArrayListWithCapacity(logicTemplates.size());

@@ -28,43 +28,45 @@
 		<!--@mbg.generated-->		insert into operate_record (project_name, module_id, operate_id, trigger_way_id, user_operation, operate_time, create_time, update_time, content, biz_id) values (#{projectName}, #{moduleId}, #{operateId}, #{triggerWayId}, #{userOperation}, #{operateTime}, #{createTime}, #{updateTime}, #{content},#{bizId})
 	</insert>
 	
-	<select id="listByCondition" resultMap="BaseResultMap">
+	<select id="listByCondition" resultMap="BaseResultMap" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.dto.oprecord.OperateRecordDTO">
 		select
 		<include refid="Base_Column_List"/>
 		from operate_record
 		<trim prefix="where" prefixOverrides="and">
-			<if test="param.id != null">
-				and id = #{param.id}
+			<if test="id !=null">
+				and id = #{id}
 			</if>
-			<if test="param.moduleId != null">
-				and module_id = #{param.moduleId}
+			<if test="moduleId != null">
+				and module_id = #{moduleId}
 			</if>
-			<if test="param.bizId != null">
-				and biz_id = #{param.bizId}
+			<if test="bizId != null">
+				and biz_id = #{bizId}
 			</if>
-			<if test="param.operateId != null">
-				and operate_id = #{param.operateId}
+			<if test="operateId != null">
+				and operate_id = #{operateId}
 			</if>
-			<if test="param.triggerWayId != null">
-				and trigger_way_id = #{param.triggerWayId}
+			<if test="triggerWayId != null">
+				and trigger_way_id = #{triggerWayId}
 			</if>
-			<if test="param.beginTime != null">
-				and operate_time &gt;= #{param.beginTime}
+			<if test="beginTime != null">
+				and operate_time &gt;= #{beginTime}
 			</if>
-			<if test="param.endTime != null">
-				and operate_time &lt;= #{param.endTime}
+			<if test="endTime != null">
+				and operate_time &lt;= #{endTime}
 			</if>
-			<if test="param.projectName != null">
-				and project_name = #{param.projectName} OR project_name LIKE CONCAT(#{param.projectName}, '%') OR project_name LIKE CONCAT('%', #{param.projectName}) OR project_name LIKE CONCAT('%', #{param.projectName}, '%')
+			<if test="projectName != null">
+				and ( project_name = #{projectName} OR project_name LIKE CONCAT(#{projectName}, '%') OR project_name LIKE
+				CONCAT('%', #{projectName}) OR project_name LIKE CONCAT('%', #{projectName}, '%'))
 			</if>
-			<if test="param.userOperation != null">
-				and user_operation = #{param.userOperation}
+			<if test="userOperation != null">
+				and user_operation = #{userOperation}
 			</if>
-			<if test="param.content != null and param.content != ''">
-				and content = #{param.content} OR content LIKE CONCAT(#{param.content}, '%') OR content LIKE CONCAT('%', #{param.content}) OR content LIKE CONCAT('%', #{param.content}, '%')
+			<if test="content != null and content != ''">
+				and (content = #{content} OR content LIKE CONCAT(#{content}, '%') OR content LIKE CONCAT('%',
+				#{content}) OR content LIKE CONCAT('%', #{content}, '%'))
 			</if>
 		</trim>
-			order by id DESC LIMIT #{param.from},#{param.size}
+ 	ORDER BY id DESC	LIMIT #{from},#{size}
 	</select>
 	
 	
@@ -80,38 +82,41 @@
 	<select id="countByCondition" resultType="java.lang.Long"
 		parameterType="com.didichuxing.datachannel.arius.admin.common.bean.dto.oprecord.OperateRecordDTO">
 		select count(id) from operate_record
-		<trim prefix="where" prefixOverrides="and">
-			<if test="param.id != null">
-				and id = #{param.id}
+			<trim prefix="where" prefixOverrides="and">
+			<if test="id !=null">
+				and id = #{id}
 			</if>
-			<if test="param.moduleId != null">
-				and module_id = #{param.moduleId}
+			<if test="moduleId != null">
+				and module_id = #{moduleId}
 			</if>
-			<if test="param.bizId != null">
-				and biz_id = #{param.bizId}
+			<if test="bizId != null">
+				and biz_id = #{bizId}
 			</if>
-			<if test="param.operateId != null">
-				and operate_id = #{param.operateId}
+			<if test="operateId != null">
+				and operate_id = #{operateId}
 			</if>
-			<if test="param.triggerWayId != null">
-				and trigger_way_id = #{param.triggerWayId}
+			<if test="triggerWayId != null">
+				and trigger_way_id = #{triggerWayId}
 			</if>
-			<if test="param.beginTime != null">
-				and operate_time &gt;= #{param.beginTime}
+			<if test="beginTime != null">
+				and operate_time &gt;= #{beginTime}
 			</if>
-			<if test="param.content != null">
-				and operate_time &lt;= #{param.endTime}
+			<if test="endTime != null">
+				and operate_time &lt;= #{endTime}
 			</if>
-			<if test="param.projectName != null">
-				and project_name = #{param.projectName} OR project_name LIKE CONCAT(#{param.projectName}, '%') OR project_name LIKE CONCAT('%', #{param.projectName}) OR project_name LIKE CONCAT('%', #{param.projectName}, '%')
+			<if test="projectName != null">
+				and ( project_name = #{projectName} OR project_name LIKE CONCAT(#{projectName}, '%') OR project_name LIKE
+				CONCAT('%', #{projectName}) OR project_name LIKE CONCAT('%', #{projectName}, '%'))
 			</if>
-			<if test="param.userOperation != null">
-				and user_operation = #{param.userOperation}
+			<if test="userOperation != null">
+				and user_operation = #{userOperation}
 			</if>
-			<if test="param.content != null and param.content != ''">
-				and content = #{param.content} OR content LIKE CONCAT(#{param.content}, '%') OR content LIKE CONCAT('%', #{param.content}) OR content LIKE CONCAT('%', #{param.content}, '%')
+			<if test="content != null and content != ''">
+				and (content = #{content} OR content LIKE CONCAT(#{content}, '%') OR content LIKE CONCAT('%',
+				#{content}) OR content LIKE CONCAT('%', #{content}, '%'))
 			</if>
 		</trim>
+ 	ORDER BY id
 	</select>
 	<select id="getById"
 		resultType="com.didichuxing.datachannel.arius.admin.common.bean.po.operaterecord.OperateRecordInfoPO">

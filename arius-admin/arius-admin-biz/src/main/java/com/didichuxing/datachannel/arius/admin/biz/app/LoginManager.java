@@ -39,14 +39,14 @@ public interface LoginManager {
     /**
      * 拦截器检查 检查登陆
      *
+     * @param skipMappingValues   跳过登录检测列表
      * @param request             请求
      * @param response            响应
      * @param requestMappingValue 请求映射value
      * @param whiteMappingValues  白名单
-     * @param skipMappingValues   跳过登录检测列表
      * @return boolean
      * @throws IOException ioexception
      */
     boolean interceptorCheck(HttpServletRequest request, HttpServletResponse response, String requestMappingValue,
-                             List<String> whiteMappingValues,List<String> skipHeaderAuthValues) throws IOException;
+                             List<String> whiteMappingValues) throws IOException;
 }
