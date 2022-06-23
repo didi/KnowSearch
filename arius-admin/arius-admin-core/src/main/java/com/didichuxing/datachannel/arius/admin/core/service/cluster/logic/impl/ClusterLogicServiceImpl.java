@@ -649,6 +649,10 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
             param.setMemo("");
         }
 
+        if (AriusObjUtils.isNull(param.getQuota())) {
+            param.setQuota(0.00);
+        }
+
         if (null == param.getHealth()) {
             param.setHealth(DEFAULT_CLUSTER_HEALTH);
         }

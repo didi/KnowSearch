@@ -72,7 +72,7 @@
     </select>
 
 
-    <select id="getbyId" parameterType="integer" resultMap="BaseResultMap">
+    <select id="getById" parameterType="integer" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
         from arius_config_info
