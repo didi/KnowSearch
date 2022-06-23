@@ -13,6 +13,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.alias.Co
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.alias.ConsoleLogicTemplateAliasesDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.alias.ConsoleLogicTemplateDeleteAliasesDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectTemplateAuth;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateAlias;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyAlias;
@@ -22,10 +23,12 @@ import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateExcepti
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectLogicTemplateAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
+import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
@@ -92,7 +95,11 @@ public class TemplateLogicAliasesManagerImpl extends BaseTemplateSrv implements 
         try {
             Map<String, List<IndexTemplatePhyAlias>> map =  templatePhyAliasesManager.fetchAllTemplateAliases(new ArrayList<>(clusters));
             for (IndexTemplateWithPhyTemplates templateLogic : templateLogicList) {
-                for (IndexTemplatePhyAlias physicalAlias : map.get(templateLogic.getName())) {
+                final List<IndexTemplatePhyAlias> indexTemplatePhyAliases = Optional.ofNullable(templateLogic)
+                        .map(IndexTemplate::getName)
+                        .filter(map::containsKey)
+                        .map(map::get).orElse(Lists.newArrayList());
+                for (IndexTemplatePhyAlias physicalAlias :indexTemplatePhyAliases) {
                     aliases.add(fetchAlias(templateLogic.getId(), physicalAlias));
                 }
             }
