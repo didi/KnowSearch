@@ -505,9 +505,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
     @Override
     public Result<List<String>> listClusterPhyNameByResourceType(Integer clusterResourceType, Integer projectId) {
-        if (!projectService.checkProjectExist(projectId)) {
-            return Result.buildParamIllegal("项目不存在");
-        }
+        
         if (null != clusterResourceType && !ClusterResourceTypeEnum.isExist(clusterResourceType)) {
             return Result.buildParamIllegal("集群资源类型非法");
         }
