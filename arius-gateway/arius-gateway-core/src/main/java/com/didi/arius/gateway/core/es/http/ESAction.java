@@ -2,7 +2,6 @@ package com.didi.arius.gateway.core.es.http;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -13,6 +12,7 @@ import org.elasticsearch.rest.RestRequest;
 import com.didi.arius.gateway.common.metadata.IndexTemplate;
 import com.didi.arius.gateway.common.metadata.JoinLogContext;
 import com.didi.arius.gateway.common.metadata.QueryContext;
+import com.didi.arius.gateway.common.utils.Convert;
 import com.didi.arius.gateway.elasticsearch.client.ESClient;
 import com.didi.arius.gateway.elasticsearch.client.gateway.direct.DirectRequest;
 import com.google.common.collect.Lists;
@@ -63,11 +63,11 @@ public abstract class ESAction extends HttpRestHandler {
     protected void indexAction(QueryContext queryContext, String index, String api) {
         IndexTemplate indexTemplate = preIndexAction(queryContext, index);
         List<String> indices = Lists.newArrayList();
-        if (CollectionUtils.isNotEmpty(queryContext.getIndices()) && null != indexTemplate
-            && indexTemplate.getExpression().endsWith("*")) {
-            indices = queryContext.getIndices().stream()
-                .map(str -> (StringUtils.isNotBlank(str) && !str.endsWith("*")) ? str + "*" : str)
-                .collect(Collectors.toList());
+        //传入索引，且模版为分区模板或者不分区模板升了版本，则将传入索引加上'*'
+        if (StringUtils.isNotBlank(index) && null != indexTemplate
+            && (indexTemplate.getExpression().endsWith("*") || indexTemplate.getVersion() > 0)) {
+            String[] indicesArr = Strings.splitStringByCommaToArray(index);
+            indices = Lists.newArrayList(Convert.convertIndices(indicesArr));
             queryContext.setIndices(indices);
         }
         ESClient client = esClusterService.getClient(queryContext, indexTemplate, actionName);
