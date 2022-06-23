@@ -20,6 +20,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import java.util.List;
+import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -89,12 +90,9 @@ public class UserV3Controller {
 			@ApiImplicitParam(name = "id", value = "用户id", dataType = "int",paramType = "query",required = true)
 	})
 	public Result<UserVO> detail(HttpServletRequest request,@PathVariable Integer id) {
-		Integer projectId=null;
-		try {
-			projectId=HttpRequestUtil.getProjectId(request);
-		}catch (Exception ignore){
-		
-		}
+		Integer projectId= Optional.ofNullable(HttpRequestUtil.getProjectId(request))
+				.filter(i->i>0).orElse(null);
+	
 		return userManager.getUserDetailByUserId(id,projectId);
 	}
 	
