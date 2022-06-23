@@ -37,7 +37,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @date 2022/05/25
  */
 @RestController
-@RequestMapping({ V3_OP + "/logic/cluster", V3 + "/cluster/logic" })
+@RequestMapping({  V3 + "/cluster/logic" })
 @Api(tags = "ES我的集群接口(REST)")
 public class ESLogicClusterOpV3Controller {
     

@@ -14,17 +14,17 @@ import java.util.Map;
  * @version 1.0
  */
 public enum DashBoardThresholdEnum {
-    BIG_COPY_INDEX_CLUSTER_BLACKLIST(OneLevelTypeEnum.UNKNOWN,"bigCopyIndexClusterBlacklist", "大副本索引集群黑名单",0),
-    INDEX_TEMPLATE_SEGMENTS_MEMORY_SIZE(OneLevelTypeEnum.CLUSTER,"indexTemplateSegementsMemorySize", "索引模板Segements内存大小",1),
-    INDEX_TEMPLATE_SEGMENTS_NUM(OneLevelTypeEnum.INDEX,"indexTemplateSegmentsNum", "索引模板Segments个数",1000),
-    INDEX_MAPPING_NUM(OneLevelTypeEnum.INDEX,"indexMappingNum", "索引Mapping个数",100),
-    NODE_SHARD_NUM(OneLevelTypeEnum.NODE,"nodeShardnUM", "节点分片个数",500),
-    INDEX_SEGMENT_MEMORY_SIZE(OneLevelTypeEnum.NODE,"indexSegmentMemorySize", "索引Sements内存大小",1),
-    INDEX_SEGMENT_NUM(OneLevelTypeEnum.NODE,"indexSegmentNum", "索引Segements个数",1000),
-    INDEX_SMALL_SHARD_LIST(OneLevelTypeEnum.NODE,"indexSmallShardList", "小Shard索引列表(shard个数大于1)",1);
+    BIG_COPY_INDEX_CLUSTER_BLACKLIST(OneLevelTypeEnum.UNKNOWN,"bigCopyIndexClusterBlacklist", "大副本索引集群黑名单","[]"),
+    INDEX_TEMPLATE_SEGMENTS_MEMORY_SIZE(OneLevelTypeEnum.CLUSTER,"indexTemplateSegementsMemorySize", "索引模板Segements内存大小",""),
+    INDEX_TEMPLATE_SEGMENTS_NUM(OneLevelTypeEnum.INDEX,"indexTemplateSegmentsNum", "索引模板Segments个数","1000"),
+    INDEX_MAPPING_NUM(OneLevelTypeEnum.INDEX,"indexMappingNum", "索引Mapping个数","100"),
+    NODE_SHARD_NUM(OneLevelTypeEnum.NODE,"nodeShardnUM", "节点分片个数","500"),
+    INDEX_SEGMENT_MEMORY_SIZE(OneLevelTypeEnum.NODE,"indexSegmentMemorySize", "索引Sements内存大小","1"),
+    INDEX_SEGMENT_NUM(OneLevelTypeEnum.NODE,"indexSegmentNum", "索引Segements个数","1000"),
+    INDEX_SMALL_SHARD_LIST(OneLevelTypeEnum.NODE,"indexSmallShardList", "小Shard索引列表(shard个数大于1)","1");
 
 
-    DashBoardThresholdEnum(OneLevelTypeEnum oneLevelTypeEnum , String name, String desc,Integer value) {
+    DashBoardThresholdEnum(OneLevelTypeEnum oneLevelTypeEnum , String name, String desc,String value) {
         this.oneLevelTypeEnum = oneLevelTypeEnum;
         this.name = name;
         this.desc = desc;
@@ -35,12 +35,12 @@ public enum DashBoardThresholdEnum {
     private String name;
     private String desc;
 
-    private Integer value;
+    private String value;
 
     public String getName() {
         return name;
     }
-    public Integer getValue() { return value; }
+    public String getValue() { return value; }
 
 
     public static List<String> getDashBoardThresholdList() {
@@ -56,7 +56,7 @@ public enum DashBoardThresholdEnum {
     }
 
     public static Map getDashBoardThresholdValue() {
-        Map<String, Integer> map = new HashMap();
+        Map<String, String> map = new HashMap();
         map.put(BIG_COPY_INDEX_CLUSTER_BLACKLIST.getName(), BIG_COPY_INDEX_CLUSTER_BLACKLIST.getValue());
         map.put(INDEX_TEMPLATE_SEGMENTS_MEMORY_SIZE.getName(), INDEX_TEMPLATE_SEGMENTS_MEMORY_SIZE.getValue());
         map.put(INDEX_TEMPLATE_SEGMENTS_NUM.getName(), INDEX_TEMPLATE_SEGMENTS_NUM.getValue());

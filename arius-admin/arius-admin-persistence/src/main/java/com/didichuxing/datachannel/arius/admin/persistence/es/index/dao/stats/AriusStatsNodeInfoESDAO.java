@@ -412,11 +412,8 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
 //            long startTimeForOneInterval = 1655875858706L;
 //            long endTimeForOneInterval = 1655879458706L;
 
-            //提出來，專用top
-            String interval = "1m";
-
             String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_AGG_CLUSTER_PHY_NODES_INFO, clusterPhyName,
-                    startTimeForOneInterval, endTimeForOneInterval, esNodesMaxNum, interval, buildAggsDSL(metricsTypes, aggType));
+                    startTimeForOneInterval, endTimeForOneInterval, esNodesMaxNum, STEP_INTERVAL, buildAggsDSL(metricsTypes, aggType));
 
             String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTimeForOneInterval,
                     endTimeForOneInterval);

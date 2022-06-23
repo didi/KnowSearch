@@ -29,6 +29,7 @@ import org.springframework.stereotype.Component;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -186,11 +187,10 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
      * 根据系统配置筛选
      */
     private void  filterBySystemConfiguration(List<MetricList> listMetrics){
-        Map thresholdValues = DashBoardThresholdEnum.getDashBoardThresholdValue();
+        Map<String, String> thresholdValues = DashBoardThresholdEnum.getDashBoardThresholdValue();
 
         //根据系统配置筛选,如果库里有对应的指标，就使用配置的指标
         List<AriusConfigInfo> ariusConfigInfos =  ariusConfigInfoService.getDashboardThreshold("dashboard.threshold");
-        Map<String,String> enableConfigs = new HashMap<>();
         ariusConfigInfos.forEach(ariusConfigInfo -> {
             if (AriusConfigStatusEnum.NORMAL.getCode()==ariusConfigInfo.getStatus()&&
                     thresholdValues.containsKey(ariusConfigInfo.getValueName())){
@@ -198,8 +198,8 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
             }
         });
         listMetrics.forEach(metric -> {
-            if(enableConfigs.get(metric.getType())!=null){
-               Double configValue = Double.valueOf( enableConfigs.get(metric.getType()));
+            if(thresholdValues.get(metric.getType())!=null){
+               Double configValue = Double.valueOf( thresholdValues.get(metric.getType()));
                 metric.setMetricListContents(metric.getMetricListContents().stream()
                         .filter(metricListContent -> metricListContent.getValue()>configValue).collect(Collectors.toList()));
             }
