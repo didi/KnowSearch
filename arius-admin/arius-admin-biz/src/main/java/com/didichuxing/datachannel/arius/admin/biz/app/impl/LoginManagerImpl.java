@@ -97,8 +97,7 @@ public class LoginManagerImpl implements LoginManager {
                 whiteMappingValues);
         Tuple3</*username*/String,/*userId*/Integer,/*projectId*/Integer> userNameAndUserIdAndProjectIdTuple3 = getRequestByHead(
                 request);
-        //进行一致性校验
-    
+        //当用户登录成功/或者跳过白名单之后，就默认用户已经存在了header cookie等信息，此时需要确认项目和用户的一致性
         if (interceptorCheck) {
         
             //跳过检查项目id和用户的正确性和匹配度
@@ -183,20 +182,17 @@ public class LoginManagerImpl implements LoginManager {
     private Tuple3</*username*/String,/*userId*/Integer,/*projectId*/Integer> getRequestByHead(
             HttpServletRequest request) {
         Tuple3<String, Integer, Integer> tuple3 = Tuple.of(null, null, null);
-        try {
-            tuple3.update1(HttpRequestUtil.getOperator(request));
-        } catch (Exception ignore) {
-        
+        final String operator = HttpRequestUtil.getOperator(request);
+        final Integer operatorId = HttpRequestUtil.getOperatorId(request);
+        final Integer projectId = HttpRequestUtil.getProjectId(request);
+        if (StringUtils.isNotBlank(operator)){
+            tuple3.update1(operator);
         }
-        try {
-            tuple3.update2(HttpRequestUtil.getOperatorId(request));
-        } catch (Exception ignore) {
-        
+        if (Objects.nonNull(operatorId)&&operatorId>0){
+            tuple3.update2(operatorId);
         }
-        try {
-            tuple3.update3(HttpRequestUtil.getProjectId(request));
-        } catch (Exception ignore) {
-        
+         if (Objects.nonNull(projectId)&&projectId>0){
+            tuple3.update3(projectId);
         }
         return tuple3;
         
