@@ -270,6 +270,10 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
             List<String> clusterPhyNames = clusterRegionService.listPhysicClusterNames(clusterLogicVO.getId());
             clusterLogicVO.setPhyClusterAssociated(!AriusObjUtils.isEmptyList(clusterPhyNames));
             clusterLogicVO.setAssociatedPhyClusterName(clusterPhyNames);
+            Optional.ofNullable(clusterLogicVO.getProjectId())
+                    .map(projectService::getProjectBriefByProjectId)
+                    .map(ProjectBriefVO::getProjectName)
+                    .ifPresent(clusterLogicVO::setProjectName);
         }
         return Result.buildSucc(list);
     }
