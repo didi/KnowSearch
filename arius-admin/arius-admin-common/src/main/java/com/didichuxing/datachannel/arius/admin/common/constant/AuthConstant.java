@@ -24,11 +24,11 @@ public final class AuthConstant {
     /**
      * 管理角色id
      */
-    public static final Integer ADMIN_ROLE_ID                        = 1597;
+    public static final Integer ADMIN_ROLE_ID                        = 1;
     /**
      * 资源own role 角色id
      */
-    public static final Integer RESOURCE_OWN_ROLE_ID                 = 1603;
+    public static final Integer RESOURCE_OWN_ROLE_ID                 = 2;
     public static final String  GATEWAY_GET_PROJECT_TICKET           = "xTc59aY72";
     public static final String  GATEWAY_GET_PROJECT_TICKET_NAME      = "X-ARIUS-GATEWAY-TICKET";
     public static final String  GET_USER_PROJECT_ID_LIST_TICKET      = "xTc59aY72";

@@ -9,7 +9,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESPackageDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.espackage.ESPackage;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.espackage.ESPackagePO;
-import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.FileCompressionType;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum;
