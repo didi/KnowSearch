@@ -89,7 +89,13 @@ public class UserV3Controller {
 			@ApiImplicitParam(name = "id", value = "用户id", dataType = "int",paramType = "query",required = true)
 	})
 	public Result<UserVO> detail(HttpServletRequest request,@PathVariable Integer id) {
-		return userManager.getUserDetailByUserId(id,HttpRequestUtil.getProjectId(request));
+		Integer projectId=null;
+		try {
+			projectId=HttpRequestUtil.getProjectId(request);
+		}catch (Exception ignore){
+		
+		}
+		return userManager.getUserDetailByUserId(id,projectId);
 	}
 	
 	@PostMapping("/page")
