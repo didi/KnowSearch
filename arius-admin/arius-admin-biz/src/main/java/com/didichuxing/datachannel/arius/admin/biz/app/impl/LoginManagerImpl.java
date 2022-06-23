@@ -92,8 +92,7 @@ public class LoginManagerImpl implements LoginManager {
      */
     @Override
     public boolean interceptorCheck(HttpServletRequest request, HttpServletResponse response,
-                                    String requestMappingValue, List<String> whiteMappingValues,
-                                    List<String> skipHeaderAuthValues) throws IOException {
+                                    String requestMappingValue, List<String> whiteMappingValues) throws IOException {
         boolean interceptorCheck = loginService.interceptorCheck(request, response, requestMappingValue,
                 whiteMappingValues);
         Tuple3</*username*/String,/*userId*/Integer,/*projectId*/Integer> userNameAndUserIdAndProjectIdTuple3 = getRequestByHead(
@@ -103,7 +102,7 @@ public class LoginManagerImpl implements LoginManager {
         if (interceptorCheck) {
         
             //跳过检查项目id和用户的正确性和匹配度
-            if (skipHeaderAuthValues.stream()
+            if (whiteMappingValues.stream()
                     .noneMatch(whiteMappingValue -> request.getServletPath().startsWith(whiteMappingValue))) {
                 if (hasLoginValidExtend(userNameAndUserIdAndProjectIdTuple3._1, request)) {
                 
