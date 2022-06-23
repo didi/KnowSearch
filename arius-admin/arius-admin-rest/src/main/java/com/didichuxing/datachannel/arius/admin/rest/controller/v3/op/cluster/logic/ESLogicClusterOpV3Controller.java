@@ -39,6 +39,13 @@ public class ESLogicClusterOpV3Controller {
     public Result<List<Tuple<Long/*逻辑集群Id*/, String/*逻辑集群名称*/>>> getAppClusterLogicIdsAndNames(HttpServletRequest request) {
         return clusterLogicManager.listProjectClusterLogicIdsAndNames(HttpRequestUtil.getProjectId(request));
     }
+
+    @GetMapping("/names")
+    @ResponseBody
+    @ApiOperation(value = "根据项目获取逻辑集群下的物理集群名称")
+    public Result<List<String>> listClusterLogicNameByProjectId(HttpServletRequest request) {
+        return Result.buildSucc(clusterLogicManager.listClusterLogicNameByProjectId(HttpRequestUtil.getProjectId(request)));
+    }
     
     @GetMapping()
     @ResponseBody

@@ -222,4 +222,6 @@ public interface ClusterLogicManager {
      * @return
      */
     Result<List<String>> getProjectLogicClusterNameByType(Integer projectId, Integer type);
+
+    List<String> listClusterLogicNameByProjectId(Integer projectId);
 }

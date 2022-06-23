@@ -611,6 +611,17 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
                 .stream().map(ClusterLogic::getName).collect(Collectors.toList()));
     }
 
+    @Override
+    public List<String> listClusterLogicNameByProjectId(Integer projectId) {
+        List<ClusterLogic> tempAuthLogicClusters = Lists.newArrayList();
+        if (AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
+            tempAuthLogicClusters.addAll(clusterLogicService.listAllClusterLogics());
+        } else {
+            tempAuthLogicClusters.addAll(clusterLogicService.getHasAuthClusterLogicsByProjectId(projectId));
+        }
+        return tempAuthLogicClusters.stream().map(ClusterLogic::getName).collect(Collectors.toList());
+    }
+
 
 /**************************************************** private method ****************************************************/
     /**
