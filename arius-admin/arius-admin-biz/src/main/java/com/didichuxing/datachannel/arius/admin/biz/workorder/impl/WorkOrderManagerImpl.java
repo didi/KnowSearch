@@ -218,6 +218,25 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
     }
 
     @Override
+    public Result<List<WorkOrderVO>> getOrderApplyList(String applicant, Integer status, Integer projectId) {
+        List<WorkOrderVO> orderDOList = Lists.newArrayList();
+        try {
+            orderDOList = ConvertUtil.list2List(orderDao.listByApplicantAndStatusAndProjectId(applicant, status,projectId),
+                WorkOrderVO.class);
+        } catch (Exception e) {
+            LOGGER.error(
+                "class=WorkOrderManagerImpl||method=getOrderApplyList||applicant={}||status={}||msg=get apply order failed!",
+                applicant, status, e);
+        }
+        return Result.buildSucc(orderDOList);
+    }
+    
+    /**
+     * @param applicant
+     * @param status
+     * @return
+     */
+    @Override
     public Result<List<WorkOrderVO>> getOrderApplyList(String applicant, Integer status) {
         List<WorkOrderVO> orderDOList = Lists.newArrayList();
         try {
@@ -230,7 +249,7 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
         }
         return Result.buildSucc(orderDOList);
     }
-
+    
     @Override
     public List<WorkOrderPO> getApprovalList(String approver) {
         try {
@@ -364,11 +383,11 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
             return Result.buildParamIllegal("提交人非法");
         }
     
-        if (AriusObjUtils.isNull(workOrderDTO.getSubmitorProjectid())) {
+        if (AriusObjUtils.isNull(workOrderDTO.getSubmitorProjectId())) {
             return Result.buildParamIllegal("提交projectID为空");
         }
-        if (PROJECT_ID_TO_CREATE != workOrderDTO.getSubmitorProjectid() && !projectService.checkProjectExist(
-                workOrderDTO.getSubmitorProjectid())) {
+        if (PROJECT_ID_TO_CREATE != workOrderDTO.getSubmitorProjectId() && !projectService.checkProjectExist(
+                workOrderDTO.getSubmitorProjectId())) {
             return Result.buildNotExist("提交projectId不存在");
         }
 

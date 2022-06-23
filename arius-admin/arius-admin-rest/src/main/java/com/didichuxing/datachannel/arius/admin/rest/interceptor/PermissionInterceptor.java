@@ -63,9 +63,8 @@ public class PermissionInterceptor implements HandlerInterceptor {
         }
         List<String> whiteMappingValues = Lists.newArrayList(HEALTH,  V2_THIRD_PART, V3_THIRD_PART,
                  V3_WHITE_PART);
-        List<String> skipHeaderAuthValues = Lists.newArrayList(HEALTH, V2_THIRD_PART, V3_THIRD_PART, V3_WHITE_PART,
-                API_PREFIX, V3_SECURITY);
-        return loginManager.interceptorCheck(request, response, classRequestMappingValue,whiteMappingValues,skipHeaderAuthValues);
+    
+        return loginManager.interceptorCheck(request, response, classRequestMappingValue,whiteMappingValues);
     }
 
     @Override
