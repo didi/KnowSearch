@@ -60,6 +60,20 @@
     where id = #{id}
   </update>
 
+  <select id="listByApplicantAndStatusAndProjectId" parameterType="java.util.Map" resultMap="BaseResultMap">
+    select <include refid="Base_Column_List"/>
+    from arius_work_order_info
+    where applicant=#{applicant}
+    <trim>
+      <if test="status!=null">
+        and status=#{status}
+      </if>
+    <if test="applicantProjectId!=null">
+      and applicant_project_id=#{applicantProjectId}
+    </if>
+    </trim>
+    order by status,create_time desc
+  </select>
   <select id="listByApplicantAndStatus" parameterType="java.util.Map" resultMap="BaseResultMap">
     select <include refid="Base_Column_List"/>
     from arius_work_order_info
@@ -68,6 +82,7 @@
       <if test="status!=null">
         and status=#{status}
       </if>
+ 
     </trim>
     order by status,create_time desc
   </select>

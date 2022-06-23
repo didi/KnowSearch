@@ -1,10 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.persistence.mysql.region;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterRegionPO;
-import org.apache.ibatis.annotations.Param;
-import org.springframework.stereotype.Repository;
-
 import java.util.List;
+import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ClusterRegionDAO {
