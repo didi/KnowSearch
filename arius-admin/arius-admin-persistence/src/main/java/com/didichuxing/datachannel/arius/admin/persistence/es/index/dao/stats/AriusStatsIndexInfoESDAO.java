@@ -1121,7 +1121,7 @@ public class AriusStatsIndexInfoESDAO extends BaseAriusStatsESDAO {
                 endTimeForOneInterval);
 
         variousLineChartMetrics = gatewayClient.performRequestWithRouting(metadataClusterName, null,
-                realIndexName, TYPE, dsl, s -> fetchMultipleAggMetricsWithStep(s, null, metricsTypes, topNu, topMethod), 3);
+                realIndexName, TYPE, dsl, s -> fetchMultipleAggMetricsWithStep(s, null, metricsTypes, topNu, topMethod,null), 3);
 
         return variousLineChartMetrics.stream().map(this::buildTopMetrics).collect(Collectors.toList());
     }
@@ -1166,7 +1166,7 @@ public class AriusStatsIndexInfoESDAO extends BaseAriusStatsESDAO {
                     endTimeForOneInterval);
 
             variousLineChartMetrics = gatewayClient.performRequestWithRouting(metadataClusterName, null,
-                    realIndexName, TYPE, dsl, s -> fetchMultipleAggMetricsWithStep(s, null, metricsTypes, topNu,topMethod), 3);
+                    realIndexName, TYPE, dsl, s -> fetchMultipleAggMetricsWithStep(s, null, metricsTypes, topNu,topMethod,null), 3);
         } while (retryTime++ > 3 && CollectionUtils.isEmpty(variousLineChartMetrics));
 
         return variousLineChartMetrics.stream().map(this::buildTopMetrics).collect(Collectors.toList());

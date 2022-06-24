@@ -24,4 +24,9 @@ public class VariousLineChartMetrics implements Serializable {
      * 集群节点指标类型
      */
     private List<MetricsContent> metricsContents;
+
+    /**
+     * 时间段内的最大值或平均值
+     */
+    private Double valueInTimePeriod;
 }

@@ -5,29 +5,38 @@ import com.didichuxing.datachannel.arius.admin.biz.metrics.handle.BaseClusterMet
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.MetricsVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.ESClusterTaskDetailVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.top.VariousLineChartMetricsVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyTypeMetricsEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.MetricsUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
+import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.metrics.UserMetricsConfigService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.NodeStatisService;
+import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyClusterMetricsEnum.getClusterPhyMetricsType;
 import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyIndicesMetricsEnum.getClusterPhyIndicesMetricsType;
@@ -61,6 +70,17 @@ public class ClusterPhyMetricsManagerImpl implements ClusterPhyMetricsManager {
     @Autowired
     private ClusterRegionService         clusterRegionService;
 
+    @Autowired
+    private ClusterRoleHostService       clusterRoleHostService;
+
+    @Autowired
+    private IndexTemplateService indexTemplateService;
+
+    @Autowired
+    private ESIndexService esIndexService;
+
+
+
 
 
     @Override
@@ -83,12 +103,39 @@ public class ClusterPhyMetricsManagerImpl implements ClusterPhyMetricsManager {
     @SuppressWarnings("unchecked")
     public <T> Result<T> getClusterMetricsByMetricsType(MetricsClusterPhyDTO param, Integer projectId, String userName, ClusterPhyTypeMetricsEnum metricsTypeEnum) {
         try {
-            if (StringUtils.isNotBlank(param.getClusterLogicName())){
-                ClusterLogic clusterLogic =clusterLogicService.getClusterLogicByName(param.getClusterLogicName());
+            if (StringUtils.isNotBlank(param.getClusterLogicName())) {
+                ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByName(param.getClusterLogicName());
                 ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(clusterLogic.getId());
                 if (clusterRegion == null) {
                     return Result.buildFail();
                 }
+                List<String> nodeNamesUnderClusterLogic = new ArrayList<>();
+                //节点名称列表
+                switch (metricsTypeEnum){
+                    case NODE:
+                        Result<List<ClusterRoleHost>> result = clusterRoleHostService.listByRegionId(Math.toIntExact(clusterRegion.getId()));
+                        if (result.failed()||result.getData().size()==0) {
+                            return Result.buildFail(result.getMessage());
+                        }
+                         nodeNamesUnderClusterLogic = result.getData().stream().map(ClusterRoleHost::getNodeSet).collect(Collectors.toList());
+                        break;
+                    case INDICES:
+                        Result<List<IndexTemplate>> listResult = indexTemplateService.listByRegionId(Math.toIntExact(clusterRegion.getId()));
+                        List<IndexTemplate> indexTemplates = listResult.getData();
+                        List<CatIndexResult> catIndexResultList = new ArrayList<>();
+                        indexTemplates.forEach(indexTemplate -> {
+                            catIndexResultList.addAll(esIndexService.syncCatIndexByExpression(clusterRegion.getPhyClusterName(),
+                                    indexTemplate.getExpression()));
+                        });
+                        nodeNamesUnderClusterLogic =  catIndexResultList.stream().map(CatIndexResult::getIndex).collect(Collectors.toList());
+                        break;
+                    case TEMPLATES:
+//                        Result<List<IndexTemplate>>  listResult =indexTemplateService.listByRegionId(Math.toIntExact(clusterRegion.getId()));
+                        break;
+                }
+
+
+                param.setItemNamesUnderClusterLogic(nodeNamesUnderClusterLogic);
                 param.setClusterPhyName(clusterRegion.getPhyClusterName());
             }
             T result = null;

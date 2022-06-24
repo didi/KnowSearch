@@ -31,13 +31,13 @@ public class NodeStatisService {
         Long endTime              =   param.getEndTime();
         Long startTime            =   param.getStartTime();
         List<String> metricsTypes =   param.getMetricsTypes();
-
+        List<String> nodeNamesUnderClusterLogic = param.getItemNamesUnderClusterLogic();
         if (!AriusObjUtils.isBlack(param.getNodeName())) {
             return ariusStatsNodeInfoEsDao.getAggClusterPhySingleNodeMetrics(clusterPhyName, metricsTypes, nodeName,
                     aggType, startTime, endTime);
         }
 
-        return ariusStatsNodeInfoEsDao.getTopNNodeAggMetricsWithStep(clusterPhyName, metricsTypes, topNu,topMethod,topTimeStep,
+        return ariusStatsNodeInfoEsDao.getTopNNodeAggMetricsWithStep(clusterPhyName,nodeNamesUnderClusterLogic, metricsTypes, topNu,topMethod,topTimeStep,
             aggType, startTime, endTime);
     }
 
@@ -52,7 +52,8 @@ public class NodeStatisService {
         Long endTime              =   param.getEndTime();
         Long startTime            =   param.getStartTime();
         List<String> metricsTypes =   param.getMetricsTypes();
-        List<String> aggTypes = param.getAggTypes();
+        List<String> aggTypes     = param.getAggTypes();
+        List<String> nodeNamesUnderClusterLogic     = param.getItemNamesUnderClusterLogic();
 
 
         if (!AriusObjUtils.isBlack(param.getNodeName())) {

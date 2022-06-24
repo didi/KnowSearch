@@ -265,14 +265,13 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
         return totalPhySize[0];
     }
 
-    public List<VariousLineChartMetrics> getTopNNodeAggMetricsWithStep(String clusterPhyName, List<String> metricsTypes,
+    public List<VariousLineChartMetrics> getTopNNodeAggMetricsWithStep(String clusterPhyName, List<String> nodeNamesUnderClusterLogic,List<String> metricsTypes,
                                                                Integer topNu,String topMethod,Integer topTimeStep, String aggType,
                                                                Long startTime, Long endTime) {
         List<VariousLineChartMetrics> buildMetrics = Lists.newCopyOnWriteArrayList();
         //获取TopN指标节点名称信息
-        List<TopMetrics> topNIndexMetricsList = getTopNNodeMetricsInfoWithStep(clusterPhyName, metricsTypes, topNu,topMethod,topTimeStep, aggType,
+        List<TopMetrics> topNIndexMetricsList = getTopNNodeMetricsInfoWithStep(clusterPhyName,nodeNamesUnderClusterLogic, metricsTypes, topNu,topMethod,topTimeStep, aggType,
                 esNodesMaxNum, startTime, endTime);
-
         //构建多个指标TopN数据
         for (TopMetrics topMetrics : topNIndexMetricsList) {
             futureUtil.runnableTask(() -> buildTopNSingleMetricsForNode(buildMetrics, clusterPhyName, aggType,
@@ -393,7 +392,7 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
      * @param endTime          结束时间
      * @return
      */
-    private List<TopMetrics> getTopNNodeMetricsInfoWithStep(String clusterPhyName, List<String> metricsTypes, Integer topNu, String topMethod, Integer topTimeStep,
+    private List<TopMetrics> getTopNNodeMetricsInfoWithStep(String clusterPhyName,List<String> nodeNamesUnderClusterLogic, List<String> metricsTypes, Integer topNu, String topMethod, Integer topTimeStep,
                                                             String aggType, int esNodesMaxNum, Long startTime, Long endTime) {
 
         int retryTime = 0;
@@ -409,17 +408,15 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
             long startTimeForOneInterval = timePoint - topTimeStep * 60 * 1000;
             long endTimeForOneInterval = timePoint;
 
-//            long startTimeForOneInterval = 1655875858706L;
-//            long endTimeForOneInterval = 1655879458706L;
 
-            String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_AGG_CLUSTER_PHY_NODES_INFO, clusterPhyName,
-                    startTimeForOneInterval, endTimeForOneInterval, esNodesMaxNum, STEP_INTERVAL, buildAggsDSL(metricsTypes, aggType));
+            String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_AGG_CLUSTER_NODE_INFO_WITH_STEP, clusterPhyName,
+                    startTimeForOneInterval, endTimeForOneInterval, esNodesMaxNum, STEP_INTERVAL,buildAggsDSL(metricsTypes, aggType), buildAggsDSLWithStep(metricsTypes, aggType));
 
             String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTimeForOneInterval,
                     endTimeForOneInterval);
 
             variousLineChartMetrics = gatewayClient.performRequestWithRouting(metadataClusterName, null,
-                    realIndexName, TYPE, dsl, s -> fetchMultipleAggMetricsWithStep(s, null, metricsTypes, topNu, topMethod), 3);
+                    realIndexName, TYPE, dsl, s -> fetchMultipleAggMetricsWithStep(s, null, metricsTypes, topNu, topMethod,nodeNamesUnderClusterLogic), 3);
         } while (retryTime++ > 3 && CollectionUtils.isEmpty(variousLineChartMetrics));
         return variousLineChartMetrics.stream().map(this::buildTopMetrics).collect(Collectors.toList());
     }

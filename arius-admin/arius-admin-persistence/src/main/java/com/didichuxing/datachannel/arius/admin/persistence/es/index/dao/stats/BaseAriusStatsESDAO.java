@@ -45,12 +45,7 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.*;
@@ -367,6 +362,30 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
         return sb.toString();
     }
 
+    String buildAggsDSLWithStep(List<String> metrics, String aggType) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(",");
+        for (int i = 0; i < metrics.size(); i++) {
+            String metricName = metrics.get(i);
+            Map<String, Object> aggsSubSubCellMap = new HashMap();
+            Map bucket = new HashMap();
+
+            Map bucketsPath = new HashMap();
+            bucketsPath.put("buckets_path", "hist>" + metricName);
+            bucket.put(aggType + "_bucket", bucketsPath);
+
+            aggsSubSubCellMap.put(metricName + "_" + aggType + "_value", bucket);
+            JSONObject jsonObject = new JSONObject(aggsSubSubCellMap);
+            String str = jsonObject.toJSONString();
+            sb.append(str, 1, str.length() - 1);
+
+            if (i != metrics.size() - 1) {
+                sb.append(",").append("\n");
+            }
+        }
+        return sb.toString();
+    }
+
     protected void buildAggsDslMap(String aggType, StringBuilder sb, String metricName,
                                  Map<String, String> aggsSubSubCellMap) {
         Map<String, Object> aggsSubCellMap = Maps.newHashMap();
@@ -381,29 +400,17 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
     }
 
     /**
-     * 根据第一个时间点的值进行倒排，取topNu
-     * 优化
-     * todo: 通过es来做，先获取所有数据，去重，再排序
+     * 根据时间段内的值值进行倒排
      */
-    void mergeTopNuWithStep(VariousLineChartMetrics variousLineChartsMetrics, Integer topNu,String topMethod) {
-        List<MetricsContent> sortedList = new ArrayList<>();
-        switch (topMethod){
-            case STEP_METHOD_AVG:
-                sortedList = variousLineChartsMetrics.getMetricsContents()
-                        .stream()
-                        .sorted(Comparator.comparing(x -> getAvgValue(x.getMetricsContentCells()), Comparator.reverseOrder()))
-                        .limit(topNu != null ? topNu : 0)
-                        .collect(Collectors.toList());
-                break;
-            case STEP_METHOD_MAX:
-                sortedList = variousLineChartsMetrics.getMetricsContents()
-                        .stream()
-                        .sorted(Comparator.comparing(x -> getMaxValue(x.getMetricsContentCells()), Comparator.reverseOrder()))
-                        .limit(topNu != null ? topNu : 0)
-                        .collect(Collectors.toList());
-                break;
-
-        }
+    void mergeTopNuWithStep(VariousLineChartMetrics variousLineChartsMetrics, Integer topNu,List<String> nodeNamesUnderClusterLogic) {
+        List<MetricsContent> sortedList;
+            sortedList = variousLineChartsMetrics.getMetricsContents()
+                    .stream()
+                    .filter(metricsContent-> nodeNamesUnderClusterLogic==null||
+                            (nodeNamesUnderClusterLogic!=null&&nodeNamesUnderClusterLogic.contains(metricsContent.getName())))
+                    .sorted(Comparator.comparing(x -> x.getValueInTimePeriod(), Comparator.reverseOrder()))
+                    .limit(topNu != null ? topNu : 0)
+                    .collect(Collectors.toList());
 
         //根据第一个时间点的值进行倒排，取topNu
         variousLineChartsMetrics.setMetricsContents(sortedList);
@@ -531,7 +538,7 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
      * @return                 结果
      */
     List<VariousLineChartMetrics> fetchMultipleAggMetricsWithStep(ESQueryResponse response, String oneLevelType, List<String> metricsKeys,
-                                                          Integer topNu,String topMethod) {
+                                                          Integer topNu,String topMethod,List<String> nodeNamesUnderClusterLogic) {
         List<VariousLineChartMetrics> variousLineChartsMetrics = Lists.newArrayList();
 
         if (null == response || response.getAggs() == null) {
@@ -542,12 +549,12 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
 
         Map<String, ESAggr> esAggrMap = response.getAggs().getEsAggrMap();
         if (null != esAggrMap && null != esAggrMap.get(HIST)) {
-            metricsKeys.forEach(key -> variousLineChartsMetrics.add(buildVariousLineChartMetrics(oneLevelType ,key, esAggrMap)));
+            metricsKeys.forEach(key -> variousLineChartsMetrics.add(buildVariousLineChartMetricsWithStep(oneLevelType ,key, esAggrMap,topMethod)));
         }
 
         //get topNu
         if (topNu != null) {
-            variousLineChartsMetrics.forEach(metrics -> mergeTopNuWithStep(metrics, topNu,topMethod));
+            variousLineChartsMetrics.forEach(metrics -> mergeTopNuWithStep(metrics,topNu,nodeNamesUnderClusterLogic));
         }
 
         return variousLineChartsMetrics;
@@ -653,6 +660,13 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
         return metricsContentCell;
     }
 
+    private VariousLineChartMetrics buildVariousLineChartMetricsWithStep(String oneLevelType, String key, Map<String, ESAggr> esAggrMap,String topMethod) {
+        VariousLineChartMetrics variousLineChartMetrics = new VariousLineChartMetrics();
+        variousLineChartMetrics.setType(key);
+        variousLineChartMetrics.setMetricsContents(buildMetricsContentsWithStep(oneLevelType, key, esAggrMap,topMethod));
+        return variousLineChartMetrics;
+    }
+
     private VariousLineChartMetrics buildVariousLineChartMetrics(String oneLevelType, String key, Map<String, ESAggr> esAggrMap) {
         VariousLineChartMetrics variousLineChartMetrics = new VariousLineChartMetrics();
         variousLineChartMetrics.setType(key);
@@ -711,6 +725,22 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
         return metricsContents;
     }
 
+    private List<MetricsContent> buildMetricsContentsWithStep(String oneLevelType, String key, Map<String, ESAggr> esAggrMap, String topMethod) {
+        List<MetricsContent> metricsContents = Lists.newArrayList();
+        esAggrMap.get(HIST).getBucketList().forEach(esBucket -> {
+            //get nodeName
+            if (null != esBucket.getUnusedMap().get(KEY)) {
+                MetricsContent metricsContent = new MetricsContent();
+                String nodeName = (String) esBucket.getUnusedMap().get("key");
+                    metricsContent.setName(nodeName);
+                    ESAggr esAggr = esBucket.getAggrMap().get(key + "_" + topMethod + "_value");
+                    Double valueInTimePeriod = Double.valueOf(esAggr.getUnusedMap().get("value").toString());
+                    metricsContent.setValueInTimePeriod(valueInTimePeriod);
+                    metricsContents.add(metricsContent);
+            }
+        });
+        return metricsContents;
+    }
     private List<MetricsContent> buildMetricsContents(String oneLevelType, String key, Map<String, ESAggr> esAggrMap) {
         List<MetricsContent> metricsContents = Lists.newArrayList();
 
@@ -740,6 +770,29 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
         });
 
         return metricsContents;
+    }
+
+    private List<MetricsContentCell> buildMetricsContentCellsWithStep(String key, ESBucket esBucket) {
+        List<MetricsContentCell> metricsContentCells = Lists.newArrayList();
+
+        esBucket.getAggrMap().get(HIST).getBucketList().forEach(esSubBucket -> {
+            MetricsContentCell metricsContentCell = new MetricsContentCell();
+
+            // get timeStamp
+            if (null != esSubBucket.getUnusedMap().get(KEY)) {
+                metricsContentCell.setTimeStamp(Long.valueOf(esSubBucket.getUnusedMap().get(KEY).toString()));
+            }
+
+            //get value
+            ESAggr esAggr = esSubBucket.getAggrMap().get(key);
+            if (null != esAggr && null != esAggr.getUnusedMap().get(VALUE)) {
+                metricsContentCell.setValue(Double.valueOf(esAggr.getUnusedMap().get(VALUE).toString()));
+            }
+
+            metricsContentCells.add(metricsContentCell);
+        });
+
+        return metricsContentCells;
     }
 
     private List<MetricsContentCell> buildMetricsContentCells(String key, ESBucket esBucket) {
