@@ -4,6 +4,16 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.operaterec
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.INDEX_OP;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.PRIMARY;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.function.BiFunction;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
@@ -33,10 +43,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleT
 import com.didichuxing.datachannel.arius.admin.common.constant.index.IndexBlockEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.SizeUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.*;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
@@ -54,13 +61,7 @@ import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.function.BiFunction;
-import java.util.stream.Collectors;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import com.google.common.collect.Maps;
 
 /**
  * @author lyn
@@ -336,14 +337,23 @@ public class IndicesManagerImpl implements IndicesManager {
         if (ret.failed()) {
             return Result.buildFrom(ret);
         }
-
-        try {
-            MappingConfig mappingConfig = new MappingConfig(JSON.parseObject(mapping));
-            return Result.build(esIndexService.syncUpdateIndexMapping(phyCluster, indexName, mappingConfig));
-        } catch (Exception e) {
-            LOGGER.error("class=IndicesManagerImpl||method=editMapping||cluster={}||index={}||errMsg={}", phyCluster, indexName, e.getMessage(), e);
-            return Result.buildFail();
+        if (StringUtils.isBlank(mapping)) {
+            return Result.buildFail("请传入索引Mapping");
         }
+        Result<MappingConfig> mappingRet;
+        if (!StringUtils.contains(mapping, "\"properties\"")) {
+            //这里为了兼容多 type索引，前端进针对用户输入的内容做封装，所以后端解析封装
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("properties", mapping);
+            mappingRet = AriusIndexMappingConfigUtils.parseMappingConfig(jsonObject.toJSONString());
+        } else {
+            mappingRet = AriusIndexMappingConfigUtils.parseMappingConfig(mapping);
+        }
+        if (mappingRet.failed()) {
+            return Result.buildFail("mapping 转换异常");
+        }
+
+        return Result.build(esIndexService.syncUpdateIndexMapping(phyCluster, indexName, mappingRet.getData()));
     }
 
     @Override
@@ -375,7 +385,7 @@ public class IndicesManagerImpl implements IndicesManager {
     }
 
     @Override
-    public Result<Void> editSetting(IndexCatCellWithConfigDTO param, Integer projectId) {
+    public Result<Void> editSetting(IndexCatCellWithConfigDTO param, Integer projectId) throws ESOperateException {
         Result<String> getClusterRet = getClusterPhyByClusterNameAndProjectId(param.getCluster(), projectId);
         if (getClusterRet.failed()) {
             return Result.buildFrom(getClusterRet);
@@ -391,14 +401,14 @@ public class IndicesManagerImpl implements IndicesManager {
         if (null == settingObj) {
             return Result.buildFail("setting 配置非法");
         }
-        Map<String, String> settingMap = JsonUtils.flat(settingObj);
-        try {
-            return Result.build(esIndexService.syncPutIndexSetting(phyCluster, Lists.newArrayList(indexName), settingMap, RETRY_COUNT));
-        } catch (Exception e) {
-            LOGGER.error("class=IndicesManagerImpl||method=editSetting||cluster={}||index={}||errMsg=update setting fail", phyCluster, indexName, e);
-            return Result.buildFail("更新索引setting fail");
-        }
-
+        Map<String, IndexConfig> configMap = esIndexService.syncGetIndexSetting(param.getCluster(),
+            Lists.newArrayList(indexName), RETRY_COUNT);
+        Map<String, String> sourceSettings = AriusOptional.ofObjNullable(configMap.get(indexName))
+            .map(IndexConfig::getSettings).orElse(Maps.newHashMap());
+        final Map<String, String> finalSettingMap = IndexSettingsUtil.getChangedSettings(sourceSettings,
+            JsonUtils.flat(settingObj));
+        return Result.build(esIndexService.syncPutIndexSettings(phyCluster, Lists.newArrayList(indexName),
+            finalSettingMap, RETRY_COUNT));
     }
 
     @Override
