@@ -42,18 +42,9 @@ public class TemplateLabelService {
     private static final ILog LOGGER = LogFactory.getLog( TemplateLabelService.class);
 
     public static final String TEMPLATE_HAS_DELETED_DOC   = "21140";
-    public static final String TEMPLATE_DSL_REVIEW_LABEL  = "11101";
+ 
     public static final String TEMPLATE_IMPORTANT_LABEL   = "11102";
-    public static final String TEMPLATE_QUOTA_USAGE_LOW   = "32220";
-    public static final String TEMPLATE_QUOTA_USAGE_HIGH  = "32321";
-    public static final String TEMPLATE_FULL_LINK_SUPPORT = "12103";
-    public static final String TEMPLATE_EXPIRE_TIME_LONG  = "32222";
-    public static final String TEMPLATE_INVALID           = "22348";
-    public static final String TEMPLATE_SUSPEND_GOVERN    = "12104";
-    public static final String TEMPLATE_ERROR_QUERY       = "22243";
-    public static final String TEMPLATE_SLOW_QUERY        = "22244";
-    public static final String TEMPLATE_NO_DATA           = "22345";
-    public static final String TEMPLATE_NO_QUERY          = "22347";
+  
     public static final String TEMPLATE_HAVE_DCDR         = "12149";
 
 
@@ -141,23 +132,8 @@ public class TemplateLabelService {
         return Result.buildSucc(templateLabels);
     }
 
-    /**
-     * 根据表达式获取模板id
-     *
-     * @return list
-     */
-    public Result<List<TemplateLabel>> listDslReviewTemplates() {
-        return listByLabelId(TEMPLATE_DSL_REVIEW_LABEL);
-    }
 
-    /**
-     * 根据表达式获取模板id
-     *
-     * @return list
-     */
-    public Result<List<TemplateLabel>> listInvalidTemplates() {
-        return listByLabelId(TEMPLATE_INVALID);
-    }
+
 
     public Result<List<TemplateLabel>> listHaveDcdrTemplates() {
         return listByLabelId(TEMPLATE_HAVE_DCDR);
@@ -259,14 +235,6 @@ public class TemplateLabelService {
         return indexTemplateLabelDAO.getLabelByLabelId(labelId);
     }
 
-    /**
-     * 根据标签ID获取标签
-     *
-     * @return
-     */
-    public List<TemplateLabelPO> listAllPO() {
-        return indexTemplateLabelDAO.listAll();
-    }
 
     /**
      * 根据条件查询

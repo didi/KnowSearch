@@ -1,7 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.constant.metrics;
 
 import com.google.common.collect.Lists;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -50,9 +49,9 @@ public enum GatewayMetricsTypeEnum {
 	/**
 	 * 项目 metrics
 	 */
-	QUERY_APP_SEARCH_COST(MetricsConstant.APP, "queryAppSearchCost", "search_cost_avg", "appid查询时间分布"),
-	QUERY_APP_COUNT(MetricsConstant.APP, "queryAppCount", MetricsConstant.DOC_COUNT, "appid查询量"),
-	QUERY_APP_TOTAL_COST(MetricsConstant.APP, "queryAppTotalCost", MetricsConstant.TOTAL_COST_AVG, "appid查询平均响应时间"),
+	QUERY_APP_SEARCH_COST(MetricsConstant.APP, "queryAppSearchCost", "search_cost_avg", "projectId查询时间分布"),
+	QUERY_APP_COUNT(MetricsConstant.APP, "queryAppCount", MetricsConstant.DOC_COUNT, "projectId查询量"),
+	QUERY_APP_TOTAL_COST(MetricsConstant.APP, "queryAppTotalCost", MetricsConstant.TOTAL_COST_AVG, "projectId查询平均响应时间"),
 
 
 	/**

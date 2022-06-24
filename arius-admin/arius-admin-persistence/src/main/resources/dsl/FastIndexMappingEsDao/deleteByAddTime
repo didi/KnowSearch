@@ -1,9 +1,0 @@
-{
-  "query": {
-    "range": {
-      "addTime": {
-        "lte": %d
-      }
-    }
-  }
-}

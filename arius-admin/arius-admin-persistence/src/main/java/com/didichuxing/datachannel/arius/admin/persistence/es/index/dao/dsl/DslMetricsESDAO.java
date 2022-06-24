@@ -51,7 +51,7 @@ public class DslMetricsESDAO extends BaseESDAO {
      * @return
      */
     public Long queryTotalHitsByProjectIdDate(Integer projectId, String startDate, String endDate) {
-        String dsl = dslLoaderUtil.getFormatDslByFileName( DslsConstant.GET_TOTAL_HITS_BY_APPID, projectId, startDate, endDate);
+        String dsl = dslLoaderUtil.getFormatDslByFileName( DslsConstant.GET_TOTAL_HITS_BY_PROJECT_ID, projectId, startDate, endDate);
 
         return gatewayClient.performRequestAndGetTotalCount(indexName, typeName, dsl);
     }
@@ -66,7 +66,7 @@ public class DslMetricsESDAO extends BaseESDAO {
         List<DslMetricsPO> list = Lists.newLinkedList();
 
         String realIndexName = String.format("%s_%s", this.indexName.replace("*", ""), date);
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_APPID_TEMPLATE_MD5_INFO);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_PROJECT_ID_TEMPLATE_MD5_INFO);
 
         ESAggrMap esAggrMap = gatewayClient.performAggRequest(realIndexName, typeName, dsl);
         if (esAggrMap != null && esAggrMap.getEsAggrMap() != null) {
@@ -120,7 +120,7 @@ public class DslMetricsESDAO extends BaseESDAO {
     public List<DslMetricsPO> getDslDetailMetricByProjectIdAndDslTemplateMd5(int projectId, String dslTemplteMd5, long startDate, long endDate){
         String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startDate, endDate);
 
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_DSL_DETAIL_METRICS_BY_APPID_AND_MD5_AND_RANGE, projectId, dslTemplteMd5, startDate, endDate, startDate, endDate);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_DSL_DETAIL_METRICS_BY_PROJECT_ID_AND_MD5_AND_RANGE, projectId, dslTemplteMd5, startDate, endDate, startDate, endDate);
 
         return gatewayClient.performRequest(realIndexName, typeName, dsl, s -> {
             List<DslMetricsPO> dslMetricsPos = new ArrayList<>();
@@ -170,7 +170,7 @@ public class DslMetricsESDAO extends BaseESDAO {
     public Long getTotalSearchByProjectIdDate(Integer projectId, String date) {
         String index = String.format("%s_%s", indexName.replace("*", ""), date);
 
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_TOTAL_SEARCHCOUNT_BY_APPID, projectId);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_TOTAL_SEARCHCOUNT_BY_PROJECT_ID, projectId);
 
         ESAggrMap esAggrMap = gatewayClient.performAggRequest(index, typeName, dsl);
         if (esAggrMap == null) {

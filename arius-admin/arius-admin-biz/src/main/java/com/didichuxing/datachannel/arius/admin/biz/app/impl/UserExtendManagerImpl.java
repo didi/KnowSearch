@@ -104,14 +104,16 @@ public class UserExtendManagerImpl implements UserExtendManager {
 						Collections.singletonList(AuthConstant.ADMIN_ROLE_ID));
 				// 构建权限树
 				userVO.setPermissionTreeVO(permissionService.buildPermissionTreeWithHas(hasPermissionIdList));
+			} else {
+				//删除管理员id
+				List<Integer> notAdminIdLists = roleIds.stream().filter(id -> !AuthConstant.ADMIN_ROLE_ID.equals(id))
+						.collect(Collectors.toList());
+				final List<Integer> hasPermissionIdList = rolePermissionService.getPermissionIdListByRoleIdList(
+						notAdminIdLists);
+				// 构建权限树
+				userVO.setPermissionTreeVO(permissionService.buildPermissionTreeWithHas(hasPermissionIdList));
 			}
 			
-		} else {
-			//删除管理员id
-			roleIds.remove(AuthConstant.ADMIN_ROLE_ID);
-			final List<Integer> hasPermissionIdList = rolePermissionService.getPermissionIdListByRoleIdList(roleIds);
-			// 构建权限树
-			userVO.setPermissionTreeVO(permissionService.buildPermissionTreeWithHas(hasPermissionIdList));
 		}
 		
 		return Result.buildSucc(userVO);

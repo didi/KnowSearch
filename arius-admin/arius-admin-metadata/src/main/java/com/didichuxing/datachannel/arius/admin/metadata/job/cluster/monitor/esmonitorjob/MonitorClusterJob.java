@@ -508,7 +508,7 @@ public class MonitorClusterJob {
 
                     Map map = JSON.parseObject(JSON.toJSONString(indexStats.getPrimaries()), Map.class);
                     List<ESDataTempBean> esDataTempBeans = aggrAndComputeData(map, indexWorkOrders, base, metricsRegister);
-
+                    //todo indexStats.getTotal().getDocs().getCount() npe
                     esDataTempBeans.addAll(genIndexTotalCommonStatsMetric(indexStats.getTotal().getStore().getSizeInBytes(),
                         indexStats.getTotal().getDocs().getCount(), base));
 
