@@ -247,6 +247,6 @@
         select
         <include refid="Base_Column_List"/>
         from es_cluster_role_host_info
-        where cluster = #{cluster} and role = 1 delete_flag = '0'
+        where cluster = #{cluster} and role = 1 and delete_flag = '0'
     </select>
 </mapper>
