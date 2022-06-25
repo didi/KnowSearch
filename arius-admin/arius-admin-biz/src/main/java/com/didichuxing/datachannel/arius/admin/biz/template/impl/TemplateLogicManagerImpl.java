@@ -744,7 +744,9 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         }
 
         boolean succ = false;
-        for (IndexTemplatePhy templatePhysical : templateLogicWithPhysical.getPhysicals()) {
+        List<IndexTemplatePhy> indexTemplatePhyList = Optional.ofNullable(templateLogicWithPhysical.getPhysicals())
+                .orElse(Lists.newArrayList());
+        for (IndexTemplatePhy templatePhysical : indexTemplatePhyList) {
              succ = indices.size() == esIndexService.syncBatchDeleteIndices(templatePhysical.getCluster(), indices, RETRY_TIMES);
         }
         return Result.build(succ);

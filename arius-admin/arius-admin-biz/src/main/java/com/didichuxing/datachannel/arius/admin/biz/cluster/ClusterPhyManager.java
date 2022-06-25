@@ -176,7 +176,6 @@ public interface ClusterPhyManager {
      * 物理集群信息删除 (host信息、角色信息、集群信息、region信息)
      * @param clusterPhyId 物理集群ID
      * @param operator     操作人
-     * @param projectId        projectId
      * @return {@link Result}<{@link Boolean}>
      */
     Result<Boolean> deleteCluster(Integer clusterPhyId, String operator);
