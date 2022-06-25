@@ -11,7 +11,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.MetricsVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.ESClusterTaskDetailVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.top.VariousLineChartMetricsVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyTypeMetricsEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
@@ -30,7 +29,6 @@ import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -110,35 +108,13 @@ public class ClusterPhyMetricsManagerImpl implements ClusterPhyMetricsManager {
                     return Result.buildFail();
                 }
                 List<String> nodeNamesUnderClusterLogic = new ArrayList<>();
-                //节点名称列表
-                switch (metricsTypeEnum){
-                    case NODE:
-                        Result<List<ClusterRoleHost>> result = clusterRoleHostService.listByRegionId(Math.toIntExact(clusterRegion.getId()));
-                        if (result.failed()||result.getData().size()==0) {
-                            return Result.buildFail(result.getMessage());
-                        }
-                         nodeNamesUnderClusterLogic = result.getData().stream().map(ClusterRoleHost::getNodeSet).collect(Collectors.toList());
-                        break;
-                    case INDICES:
-                        Result<List<IndexTemplate>> listResult = indexTemplateService.listByRegionId(Math.toIntExact(clusterRegion.getId()));
-                        List<IndexTemplate> indexTemplates = listResult.getData();
-                        List<CatIndexResult> catIndexResultList = new ArrayList<>();
-                        indexTemplates.forEach(indexTemplate -> {
-                            catIndexResultList.addAll(esIndexService.syncCatIndexByExpression(clusterRegion.getPhyClusterName(),
-                                    indexTemplate.getExpression()));
-                        });
-                        nodeNamesUnderClusterLogic =  catIndexResultList.stream().map(CatIndexResult::getIndex).collect(Collectors.toList());
-                        break;
-                    case TEMPLATES:
-//                        Result<List<IndexTemplate>>  listResult =indexTemplateService.listByRegionId(Math.toIntExact(clusterRegion.getId()));
-                        break;
-                }
+                nodeNamesUnderClusterLogic = getItemsUnderClusterLogic(metricsTypeEnum, clusterRegion, nodeNamesUnderClusterLogic);
 
 
                 param.setItemNamesUnderClusterLogic(nodeNamesUnderClusterLogic);
                 param.setClusterPhyName(clusterRegion.getPhyClusterName());
             }
-            T result = null;
+            T result;
             BaseClusterMetricsHandle metricsHandle = (BaseClusterMetricsHandle) handleFactory.getByHandlerNamePer(metricsTypeEnum.getType());
             if (AriusObjUtils.isNull(metricsHandle)) {
                 LOGGER.warn("class=ClusterPhyMetricsManagerImpl||method=getClusterMetricsFromEs||errMsg=cannot get metricsHandle");
@@ -218,5 +194,37 @@ public class ClusterPhyMetricsManagerImpl implements ClusterPhyMetricsManager {
         }
         return Result.buildSucc(ConvertUtil.list2List(nodeStatisService.getClusterTaskDetail(clusterPhyName, node, Long.parseLong(startTime), Long.parseLong(endTime)),
                 ESClusterTaskDetailVO.class));
+    }
+
+
+    /**
+     * 获取逻辑集群下的节点，索引，模板信息
+     * @param metricsTypeEnum 类型
+     * @param clusterRegion 逻辑集群关联的region
+     * @param nodeNamesUnderClusterLogic  节点，索引，模板信息
+     * @return
+     */
+    private List<String> getItemsUnderClusterLogic(ClusterPhyTypeMetricsEnum metricsTypeEnum, ClusterRegion clusterRegion, List<String> nodeNamesUnderClusterLogic) {
+        //节点名称列表
+        switch (metricsTypeEnum){
+            case NODE:
+                Result<List<ClusterRoleHost>> result = clusterRoleHostService.listByRegionId(Math.toIntExact(clusterRegion.getId()));
+                nodeNamesUnderClusterLogic = result.getData().stream().map(ClusterRoleHost::getNodeSet).collect(Collectors.toList());
+                break;
+            case TEMPLATES:
+                Result<List<IndexTemplate>>  indexTemplates =indexTemplateService.listByRegionId(Math.toIntExact(clusterRegion.getId()));
+                nodeNamesUnderClusterLogic =  indexTemplates.getData().stream().map(IndexTemplate::getName).collect(Collectors.toList());
+                break;
+            case INDICES:
+                Result<List<IndexTemplate>> listResult = indexTemplateService.listByRegionId(Math.toIntExact(clusterRegion.getId()));
+                List<IndexTemplate> indexTemplatesList = listResult.getData();
+                List<CatIndexResult> catIndexResultList = new ArrayList<>();
+                indexTemplatesList.forEach(indexTemplate->catIndexResultList.addAll(esIndexService.syncCatIndexByExpression(clusterRegion.getPhyClusterName(),
+                        indexTemplate.getExpression())));
+                nodeNamesUnderClusterLogic =  catIndexResultList.stream().map(CatIndexResult::getIndex).collect(Collectors.toList());
+                break;
+
+        }
+        return nodeNamesUnderClusterLogic;
     }
 }
