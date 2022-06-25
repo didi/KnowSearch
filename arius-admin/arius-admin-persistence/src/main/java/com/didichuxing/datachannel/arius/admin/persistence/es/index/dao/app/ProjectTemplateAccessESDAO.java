@@ -55,7 +55,7 @@ public class ProjectTemplateAccessESDAO extends BaseESDAO {
     public List<Integer> getAccessProjectIdsByTemplateName(String templateName) {
         List<Integer> projectIds = Lists.newArrayList();
 
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_ACCESS_APPIDS_BY_TEMPLATE_NAME, templateName);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_ACCESS_PROJECT_ID_BY_TEMPLATE_NAME, templateName);
 
         ESAggrMap esAggrMap = gatewayClient.performAggRequest(this.indexName, typeName, dsl);
         if (esAggrMap == null) {
@@ -91,7 +91,7 @@ public class ProjectTemplateAccessESDAO extends BaseESDAO {
     public List<ProjectTemplateAccessCountPO> getAccessProjectIdsInfoByTemplateId(int logicTemplateId, int days){
         final int scrollSize = 5000;
 
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_ACCESS_APPIDS_INFO_BY_LOGIC_EMPLATE_ID, scrollSize, logicTemplateId, days);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_ACCESS_PROJECT_ID_INFO_BY_LOGIC_EMPLATE_ID, scrollSize, logicTemplateId, days);
 
         List<ProjectTemplateAccessCountPO> accessCountPos = Lists.newLinkedList();
         gatewayClient.queryWithScroll(indexName,
@@ -113,7 +113,7 @@ public class ProjectTemplateAccessESDAO extends BaseESDAO {
     public List<ProjectTemplateAccessCountPO> getAccessProjectIdsInfoByTemplateId(int logicTemplateId, Long startDate, Long endDate){
         final int scrollSize = 5000;
 
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_ACCESS_APPIDS_INFO_BY_LOGIC_TEMPLATE_ID_AND_DATE_RANGE, scrollSize, logicTemplateId,
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_ACCESS_PROJECT_ID_INFO_BY_LOGIC_TEMPLATE_ID_AND_DATE_RANGE, scrollSize, logicTemplateId,
                 getDateStr(startDate), getDateStr(endDate));
 
         List<ProjectTemplateAccessCountPO> accessCountPos = Lists.newLinkedList();

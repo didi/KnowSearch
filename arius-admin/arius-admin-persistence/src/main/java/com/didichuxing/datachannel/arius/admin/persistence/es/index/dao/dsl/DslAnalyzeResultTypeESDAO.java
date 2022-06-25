@@ -50,7 +50,7 @@ public class DslAnalyzeResultTypeESDAO extends BaseESDAO {
      */
     @Nullable
     public List<DslAnalyzeResultTypePO> getDslAnalyzeResultByProjectId(Integer from, Long projectId) {
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_DSL_ANALYZE_RESULT_BY_APPID, from, projectId);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_DSL_ANALYZE_RESULT_BY_PROJECT_ID, from, projectId);
 
         return gatewayClient.performRequest(indexName, typeName, dsl, DslAnalyzeResultTypePO.class);
     }
@@ -63,7 +63,7 @@ public class DslAnalyzeResultTypeESDAO extends BaseESDAO {
      */
     @Nullable
     public List<DslAnalyzeResultTypePO> getDslAnalyzeResultByProjectIdAndRange(Long projectId, Long startDate, Long endDate) {
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_DSL_ANALYZE_RESULT_BY_APPID_AND_RANGE, SCROLL_SIZE, startDate, endDate, projectId);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_DSL_ANALYZE_RESULT_BY_PROJECT_ID_AND_RANGE, SCROLL_SIZE, startDate, endDate, projectId);
 
         List<DslAnalyzeResultTypePO> dslAnalyzeResultTypePos = Lists.newLinkedList();
         gatewayClient.queryWithScroll(indexName,

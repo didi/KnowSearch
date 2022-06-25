@@ -14,7 +14,7 @@ import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
 import com.didiglobal.logi.security.exception.LogiSecurityException;
 import java.util.List;
 
-;
+
 
 /**
  * 基于logi的扩展能力
