@@ -403,7 +403,7 @@ public class GatewayManagerImpl implements GatewayManager {
                 Collection<ProjectTemplateAuth> templateAuthCollection =
                         esUser2ProjectTemplateAuthsMap.get(esUser.getId());
                 if (!templateAuthCollection.isEmpty()) {
-                    //todo 判断项目侧的索引权限
+                    
                     fetchPermissionIndexExpressions(esUser.getId(), templateAuthCollection,
                         templateId2IndexTemplateLogicMap,aliasMap, readPermissionIndexExpressions,writePermissionIndexExpressions);
                 } else {

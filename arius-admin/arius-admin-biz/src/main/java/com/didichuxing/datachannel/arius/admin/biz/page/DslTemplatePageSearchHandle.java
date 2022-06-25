@@ -3,16 +3,12 @@ package com.didichuxing.datachannel.arius.admin.biz.page;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.PageDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.dsl.template.DslTemplateConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.dsl.DslTemplatePO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.DslTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.metadata.service.DslTemplateService;
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
-import com.didiglobal.logi.security.service.ProjectService;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,8 +24,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class DslTemplatePageSearchHandle extends AbstractPageSearchHandle<DslTemplateConditionDTO, DslTemplateVO> {
-    @Autowired
-    private ProjectService projectService;
+  
 
     @Autowired
     private DslTemplateService dslTemplateService;

@@ -1,14 +1,15 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.new_srv.indexplan.impl;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.BYTE_TO_G;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.G_PER_SHARD;
+
 import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.base.impl.BaseTemplateSrvImpl;
 import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.indexplan.IndexPlanManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplatePhysicalUpgradeDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.BaseTemplateSrvOpenDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
-import com.didichuxing.datachannel.arius.admin.common.constant.ESClusterVersionEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.NewTemplateSrvEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
@@ -20,16 +21,17 @@ import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didiglobal.logi.elasticsearch.client.response.indices.stats.IndexNodes;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.BYTE_TO_G;
-import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.G_PER_SHARD;
 
 /**
  * @author chengxiang, jiamin
@@ -38,10 +40,12 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConst
 @Service("newIndexPlanManagerImpl")
 public class IndexPlanManagerImpl extends BaseTemplateSrvImpl implements IndexPlanManager {
 
-    private final Integer singleShardMaxSize = 50;
-    private final Integer singleShardRecommendSize = 30;
-
-    /*(key, value) = (模板id, 该模版对应索引近七天某一天占用磁盘容量最大值)*/
+    private final static Integer singleShardMaxSize = 50;
+    private final static Integer singleShardRecommendSize = 30;
+    
+    /**
+     * (key, value) = (模板id, 该模版对应索引近七天某一天占用磁盘容量最大值)
+     */
     private final Map<Long, Long> indexMaxStoreMap = Maps.newConcurrentMap();
 
     @Autowired

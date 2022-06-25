@@ -1,5 +1,17 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.new_srv.pipeline.impl;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.PIPELINE_RATE_LIMIT_MAX_VALUE;
+import static com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESPipelineDAO.DATE_FIELD;
+import static com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESPipelineDAO.DATE_FIELD_FORMAT;
+import static com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESPipelineDAO.EXPIRE_DAY;
+import static com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESPipelineDAO.INDEX_NAME_FORMAT;
+import static com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESPipelineDAO.INDEX_VERSION;
+import static com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESPipelineDAO.MS_TIME_FIELD_ES_FORMAT;
+import static com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESPipelineDAO.MS_TIME_FIELD_PLATFORM_FORMAT;
+import static com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESPipelineDAO.RATE_LIMIT;
+import static com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESPipelineDAO.SECOND_TIME_FIELD_ES_FORMAT;
+import static com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESPipelineDAO.SECOND_TIME_FIELD_PLATFORM_FORMAT;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.base.impl.BaseTemplateSrvImpl;
@@ -9,9 +21,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.IndexTemplateP
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePhyPO;
-import com.didichuxing.datachannel.arius.admin.common.constant.ESClusterVersionEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.NewTemplateSrvEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpTimeoutRetry;
@@ -19,17 +29,11 @@ import com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESPipeline
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplatePhyDAO;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import java.util.List;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-
-import java.util.List;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.PIPELINE_RATE_LIMIT_MAX_VALUE;
-import static com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESPipelineDAO.*;
-import static com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESPipelineDAO.INDEX_VERSION;
 
 /**
  * @author chengxiang, d06679

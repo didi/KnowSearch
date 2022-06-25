@@ -3,14 +3,6 @@ package com.didichuxing.datachannel.arius.admin.biz.template.new_srv.expire.impl
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.PLATFORM_DELETED_TEMPLATE_EXPIRED_TIME;
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.PLATFORM_EXPIRE_TIME_MIN;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.didichuxing.datachannel.arius.admin.biz.indices.IndicesManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.base.impl.BaseTemplateSrvImpl;
 import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.expire.ExpireManager;
@@ -27,6 +19,13 @@ import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexT
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * @author chengxiang, zqr
@@ -175,7 +174,7 @@ public class ExpireManagerImpl extends BaseTemplateSrvImpl implements ExpireMana
             return Boolean.TRUE;
         }
 
-        Set<String> expireIndex = getExpireIndex(physicalId).getV2();
+        Set<String> expireIndex = Optional.ofNullable(getExpireIndex(physicalId)).map(Tuple::getV2).orElse(null);
         if (CollectionUtils.isEmpty(expireIndex)) {
             finishDeleteIndex(physicalId);
             return Boolean.TRUE;

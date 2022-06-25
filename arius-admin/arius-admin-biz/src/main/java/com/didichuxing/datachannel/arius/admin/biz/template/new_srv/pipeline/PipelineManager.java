@@ -3,7 +3,6 @@ package com.didichuxing.datachannel.arius.admin.biz.template.new_srv.pipeline;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 
 /**
  * @author chengxiang, d06679

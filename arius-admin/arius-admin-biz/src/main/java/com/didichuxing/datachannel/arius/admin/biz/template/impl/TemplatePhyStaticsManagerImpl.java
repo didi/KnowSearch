@@ -4,15 +4,9 @@ import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyStaticsMa
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESIndexStats;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ProjectIdTemplateAccessCountVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateHealthDegreeRecordVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateStatsInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateValueRecordVO;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
-import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateHealthDegreeService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateSattisService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateValueService;
 import com.didiglobal.logi.log.ILog;
@@ -31,23 +25,11 @@ public class TemplatePhyStaticsManagerImpl implements TemplatePhyStaticsManager 
 
     private static final ILog         LOGGER = LogFactory.getLog( TemplatePhyStaticsManagerImpl.class);
 
-    @Autowired
-    private IndexTemplatePhyService indexTemplatePhyService;
-
-    @Autowired
-    private IndexTemplateService indexTemplateService;
+ 
 
     @Autowired
     private TemplateSattisService       templateSattisService;
 
-    @Autowired
-    private ClusterLogicService clusterLogicService;
-
-    @Autowired
-    private ClusterRegionService clusterRegionService;
-
-    @Autowired
-    private TemplateHealthDegreeService templateHealthDegreeService;
 
     @Autowired
     private TemplateValueService templateValueService;
@@ -76,17 +58,7 @@ public class TemplatePhyStaticsManagerImpl implements TemplatePhyStaticsManager 
         return templateSattisService.getIndexStatis(logicTemplateId, startDate, endDate);
     }
 
-    @Override
-    public Result<List<TemplateHealthDegreeRecordVO>> getHealthDegreeRecordByLogicTemplateId(Long logicTemplateId, Long startDate, Long endDate) {
-        return Result.buildSucc(ConvertUtil.list2List(
-                templateHealthDegreeService.getRecordByLogicTemplateId(logicTemplateId, startDate, endDate),
-                TemplateHealthDegreeRecordVO.class));
-    }
 
-    @Override
-    public Result<List<TemplateValueRecordVO>> getValueRecordByLogicTemplateId(Long logicTemplateId, Long startDate, Long endDate) {
-        return Result.buildSucc(ConvertUtil.list2List(
-                templateValueService.getRecordByLogicTemplateId(logicTemplateId, startDate, endDate),
-                TemplateValueRecordVO.class));
-    }
+
+  
 }
