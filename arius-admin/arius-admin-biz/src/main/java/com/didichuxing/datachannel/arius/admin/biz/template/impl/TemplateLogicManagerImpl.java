@@ -130,8 +130,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
 
     @Autowired
     private ProjectService projectService;
-    @Autowired
-    private ESUserService  esUserService;
+ 
 
     @Autowired
     private ESIndexService              esIndexService;
@@ -158,7 +157,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     @Autowired
     private ClusterLogicService         clusterLogicService;
 
-    private final Integer RETRY_TIMES = 3;
+    private final static Integer RETRY_TIMES = 3;
 
     /**
      * 校验所有逻辑模板元数据信息
@@ -1019,33 +1018,6 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         return indexTemplateService.insertTemplateConfig(defaultTemplateConfig);
     }
 
-    /**
-     * 校验模板名称是否是其他逻辑模板名称的前缀
-     * @param templateName 逻辑模板名称
-     * @return 校验的结果
-     */
-    private Result<Void> checkTemplateNamePrefix(String templateName) {
-        if (StringUtils.isEmpty(templateName)) {
-            return Result.buildFail("模板名称为空");
-        }
-
-        // 获取全部的正在使用的逻辑模板
-        List<IndexTemplate> allLogicTemplates = indexTemplateService.listAllLogicTemplates();
-
-        if (!CollectionUtils.isEmpty(allLogicTemplates)) {
-            for (IndexTemplate indexTemplate : allLogicTemplates) {
-                String logicTemplateName = indexTemplate.getName();
-
-                // 为了隔离索引创建匹配的模板，新建模板的名称和其他模板名称不能互相存在前缀匹配
-                if (logicTemplateName.startsWith(templateName)
-                        || templateName.startsWith(logicTemplateName)) {
-                    return Result.buildFail(String.format("目前和%s存在前缀匹配的情况", logicTemplateName));
-                }
-            }
-        }
-
-        return Result.buildSucc();
-    }
 
     private IndexTemplateDTO buildTemplateDTO(IndexTemplateWithCreateInfoDTO param, Integer projectId) {
         IndexTemplateDTO indexTemplateDTO = ConvertUtil.obj2Obj(param, IndexTemplateDTO.class);

@@ -3,12 +3,10 @@ package com.didichuxing.datachannel.arius.admin.rest.interceptor;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.HEALTH;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.SWAGGER;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V2_THIRD_PART;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_SECURITY;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_THIRD_PART;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_WHITE_PART;
 import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_COMMON_GROUP;
 import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.REQUEST_INTERCEPTOR_SWITCH_OPEN;
-import static com.didiglobal.logi.security.common.constant.Constants.API_PREFIX;
 
 import com.didichuxing.datachannel.arius.admin.biz.app.LoginManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.GlobalParams;

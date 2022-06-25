@@ -1,4 +1,4 @@
-package com.didichuxing.datachannel.arius.admin.metadata.job.index.healthdegree.degreeIndicator;
+package com.didichuxing.datachannel.arius.admin.metadata.job.index.healthdegree.degreeindicator;
 
 import com.didichuxing.datachannel.arius.admin.common.constant.IndicatorsType;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.BaseDegree;

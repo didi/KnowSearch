@@ -1,6 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.app;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_SECURITY;
 
 import com.didichuxing.datachannel.arius.admin.biz.app.PermissionExtendManager;

@@ -3,7 +3,7 @@ package com.didichuxing.datachannel.arius.admin.metadata.job.index.healthdegree;
 import com.didichuxing.datachannel.arius.admin.common.constant.IndicatorsType;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.BaseDegree;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.IndicatorChild;
-import com.didichuxing.datachannel.arius.admin.metadata.job.index.healthdegree.degreeIndicator.DegreeParam;
+import com.didichuxing.datachannel.arius.admin.metadata.job.index.healthdegree.degreeindicator.DegreeParam;
 import com.didichuxing.datachannel.arius.admin.metadata.utils.ReadExprValueUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didiglobal.logi.log.ILog;

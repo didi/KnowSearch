@@ -1,12 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.biz.page;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterLogicManager;
@@ -27,7 +20,6 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.Cluste
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
-import com.didiglobal.logi.security.service.ProjectService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -43,8 +35,7 @@ import org.springframework.stereotype.Component;
 public class ClusterLogicPageSearchHandle extends AbstractPageSearchHandle<ClusterLogicConditionDTO, ClusterLogicVO> {
     private static final ILog LOGGER = LogFactory.getLog(ClusterLogicPageSearchHandle.class);
 
-    @Autowired
-    private ProjectService projectService;
+  
 
     @Autowired
     private ClusterLogicService clusterLogicService;

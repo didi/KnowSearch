@@ -130,7 +130,6 @@ public class GatewayServiceImpl implements GatewayService {
 
 
         String url = GatewaySqlConstant.DEFAULT_HTTP_PRE_FIX + esGatewayClient.getSingleGatewayAddress() + postFix;
-//        String url = GatewaySqlConstant.DEFAULT_HTTP_PRE_FIX + esGatewayClient.getGatewayAddress() + postFix;
 
         try {
             // gateway的sql语句操作接口直接以字符串的形式返还结果

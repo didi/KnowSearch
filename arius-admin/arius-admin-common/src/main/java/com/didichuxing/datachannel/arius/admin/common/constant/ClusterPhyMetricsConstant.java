@@ -3,9 +3,9 @@ package com.didichuxing.datachannel.arius.admin.common.constant;
 /**
  * Created by linyunan on 2021-08-10
  */
-public class ClusterPhyMetricsContant {
+public class ClusterPhyMetricsConstant {
 
-    private ClusterPhyMetricsContant() {
+    private ClusterPhyMetricsConstant() {
     }
 
     /*****************************************构建dsl相关常量***************************************/
@@ -66,7 +66,7 @@ public class ClusterPhyMetricsContant {
 
     public static final String INSERT_PRDER      = "insert_order";
 
-    public static final long   ONE_BILLION       = 10 * 10000 * 10000;
+    public static final Long   ONE_BILLION       = 10 * 10000 * 10000L;
 
     public static final double   BIG_SHARD         = 50d;
 }

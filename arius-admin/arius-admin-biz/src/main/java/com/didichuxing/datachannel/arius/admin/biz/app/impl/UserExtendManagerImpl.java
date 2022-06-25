@@ -30,7 +30,6 @@ import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.test.web.reactive.server.WebTestClient.ListBodySpec;
 
 @Component
 public class UserExtendManagerImpl implements UserExtendManager {

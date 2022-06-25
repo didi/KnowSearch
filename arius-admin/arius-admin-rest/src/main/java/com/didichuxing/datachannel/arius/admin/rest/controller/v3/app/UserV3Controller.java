@@ -7,7 +7,6 @@ import com.didichuxing.datachannel.arius.admin.biz.app.UserExtendManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
 import com.didiglobal.logi.security.common.PagingResult;
-import com.didiglobal.logi.security.common.constant.Constants;
 import com.didiglobal.logi.security.common.dto.user.UserDTO;
 import com.didiglobal.logi.security.common.dto.user.UserQueryDTO;
 import com.didiglobal.logi.security.common.vo.role.AssignInfoVO;

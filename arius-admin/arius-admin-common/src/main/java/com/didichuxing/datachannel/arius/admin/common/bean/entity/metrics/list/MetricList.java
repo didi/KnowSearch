@@ -1,14 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.list;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.BaseEntity;
-
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
 
 /**
  * Created by linyunan on 2021-08-01

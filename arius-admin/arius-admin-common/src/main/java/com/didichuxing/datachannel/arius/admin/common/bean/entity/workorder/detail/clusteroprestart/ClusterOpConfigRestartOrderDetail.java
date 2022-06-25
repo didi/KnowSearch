@@ -1,4 +1,4 @@
-package com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.clusterOpRestart;
+package com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.clusteroprestart;
 
 import com.didichuxing.datachannel.arius.admin.common.constant.esconfig.EsConfigActionEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.esconfig.ESConfig;
