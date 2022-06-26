@@ -8,12 +8,16 @@ package com.didichuxing.datachannel.arius.admin.common.constant.app;
  * @date 2017/7/14
  */
 public enum AppSearchTypeEnum {
-                               /**集群模式*/
-                               CLUSTER(0, "集群模式"),
-
-                               TEMPLATE(1, "索引模式"),
-
-                               PRIMITIVE(2, "原生模式"),
+    
+    /**
+     * 索引模式
+     */
+    TEMPLATE(1, "索引模式"),
+    
+    /**
+     * 原生模式
+     */
+    PRIMITIVE(2, "原生模式"),
 
                                UNKNOWN(-1, "未知");
 
