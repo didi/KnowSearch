@@ -10,14 +10,15 @@ import org.apache.commons.lang3.StringUtils;
  * @date 2018/9/18
  */
 public enum WorkOrderTypeEnum {
+    
     /**
-     * 应用创建工单
+     * 逻辑集群创建
      */
-    @Deprecated
-    APP_CREATE("appCreate", "项目创建"),
-
     LOGIC_CLUSTER_CREATE("logicClusterCreate", "集群创建"),
-
+    
+    /**
+     * 逻辑集群indecrease
+     */
     LOGIC_CLUSTER_INDECREASE("logicClusterIndecrease", "集群扩(缩)容"),
 
     LOGIC_CLUSTER_OP_DELETE("logicClusterDelete","逻辑集群删除"),

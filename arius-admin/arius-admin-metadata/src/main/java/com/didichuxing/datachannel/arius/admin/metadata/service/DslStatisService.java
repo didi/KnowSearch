@@ -1,24 +1,15 @@
 package com.didichuxing.datachannel.arius.admin.metadata.service;
 
-import java.util.List;
-import java.util.Map;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
+import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.oprecord.OperateRecordDTO;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.AuditDsls;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.DslInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.DslQueryLimit;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.ScrollDslTemplateRequest;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.ScrollDslTemplateResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.dsl.DslTemplatePO;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.util.DateTimeUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.dsl.DslTemplateESDAO;
@@ -26,7 +17,16 @@ import com.didiglobal.logi.elasticsearch.client.parser.DslExtractionUtilV2;
 import com.didiglobal.logi.elasticsearch.client.parser.bean.ExtractResult;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
+import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 @Service
 public class DslStatisService {
@@ -38,6 +38,8 @@ public class DslStatisService {
 
     @Autowired
     private OperateRecordService operateRecordService;
+    @Autowired
+    private ProjectService projectService;
 
     public Result<String> auditDsl(AuditDsls auditDsls){
         // 入参判断
@@ -57,10 +59,14 @@ public class DslStatisService {
 
         // 添加操作记录
         if (operatorResult) {
+            ProjectBriefVO projectBriefVO = Optional.ofNullable(auditDsls.getProjectId())
+                    .map(projectService::getProjectBriefByProjectId)
+                    .orElse(null);
             for (DslTemplatePO dslTemplatePo : dslTemplatePOList) {
-                OperateRecordDTO operateRecord = buildDslSettingOperatorRecord(
-                        String.format("%d_%s", projectId, dslTemplatePo.getDslTemplateMd5()), OperationEnum.EDIT.getCode(), auditDsls.getUserName(),
-                        String.format("checkMode->%s", dslTemplatePo.getCheckMode()));
+                OperateRecord operateRecord = buildDslSettingOperatorRecord(
+                        String.format("%d_%s", projectId, dslTemplatePo.getDslTemplateMd5()),
+                        OperateTypeEnum.QUERY_TEMPLATE_DSL_CURRENT_LIMIT_ADJUSTMENT, auditDsls.getUserName(),
+                        String.format("checkMode->%s", dslTemplatePo.getCheckMode()),projectBriefVO);
                 
                 operateRecordService.save(operateRecord);
             }
@@ -85,15 +91,15 @@ public class DslStatisService {
 
         DslTemplatePO defaultDsl = new DslTemplatePO();
         defaultDsl.setQueryLimit(0D);
-
+       
         // 添加操作记录
         for (DslQueryLimit dslQueryLimit : dslQueryLimitList) {
-            OperateRecordDTO operateRecord = buildDslSettingOperatorRecord(
-                    dslQueryLimit.getProjectIdDslTemplateMd5(), OperationEnum.EDIT.getCode(), operator,
+            OperateRecord operateRecord = buildDslSettingOperatorRecord(dslQueryLimit.getProjectIdDslTemplateMd5(),
+                    OperateTypeEnum.QUERY_TEMPLATE_DSL_CURRENT_LIMIT_ADJUSTMENT, operator,
                     String.format("queryLimit %f->%f",
-                            originalMap.getOrDefault(dslQueryLimit.getProjectIdDslTemplateMd5(), defaultDsl).getQueryLimit(),
-                            dslQueryLimit.getQueryLimit())
-            );
+                            originalMap.getOrDefault(dslQueryLimit.getProjectIdDslTemplateMd5(), defaultDsl)
+                                    .getQueryLimit(), dslQueryLimit.getQueryLimit()), null);
+         
             operateRecordService.save(operateRecord);
         }
 
@@ -209,14 +215,16 @@ public class DslStatisService {
         return dslTemplatePO;
     }
 
-    public OperateRecordDTO buildDslSettingOperatorRecord(String bizId, Integer operateId, String operator, String content) {
-        OperateRecordDTO operateRecord = new OperateRecordDTO();
-        //operateRecord.setBizId(bizId);
-        operateRecord.setModuleId( ModuleEnum.DSL_ANALYZER.getCode());
-        operateRecord.setOperateId(operateId);
-        //operateRecord.setOperator(operator);
-        operateRecord.setContent(content);
+    public OperateRecord buildDslSettingOperatorRecord(String bizId, OperateTypeEnum operateType, String operator,
+                                                          String content, ProjectBriefVO projectBriefVO) {
+     
 
-        return operateRecord;
+        return new OperateRecord.Builder()
+                .content(content)
+                .operationTypeEnum(operateType)
+                .project(projectBriefVO)
+                .userOperation(operator)
+                .bizId(bizId)
+                .build();
     }
 }

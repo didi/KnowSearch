@@ -42,7 +42,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithCluster;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithLabels;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
@@ -62,7 +61,6 @@ import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.TemplateUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
-import com.didichuxing.datachannel.arius.admin.core.service.app.ESUserService;
 import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectLogicTemplateAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
@@ -159,63 +157,9 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
 
     private final static Integer RETRY_TIMES = 3;
 
-    /**
-     * 校验所有逻辑模板元数据信息
-     *
-     * @return
-     */
-    @Override
-    public boolean checkAllLogicTemplatesMeta() {
-        List<Integer> projectIds = projectService.getProjectBriefList().stream().map(ProjectBriefVO::getId).collect(
-                Collectors.toList());
-        List<IndexTemplate> logicTemplates = indexTemplateService.listAllLogicTemplates();
-        for (IndexTemplate templateLogic : logicTemplates) {
-            try {
-                Result<Void> result = checkLogicTemplateMeta(templateLogic, projectIds);
-                if (result.success()) {
-                    LOGGER.info("class=TemplateLogicManagerImpl||method=metaCheck||msg=succeed||logicId={}", templateLogic.getId());
-                } else {
-                    LOGGER.warn("class=TemplateLogicManagerImpl||method=metaCheck||msg=fail||logicId={}||failMsg={}", templateLogic.getId(),
-                            result.getMessage());
-                }
-            } catch (Exception e) {
-                LOGGER.error("class=TemplateLogicServiceImpl||method=metaCheck||errMsg={}||logicId={}||",
-                        e.getMessage(), templateLogic.getId(), e);
-            }
-        }
 
-        return true;
-    }
 
-    /**
-     * 获取模板信息
-     * @param excludeLabelIds 排除的Label ID列表
-     * @param includeLabelIds 包含的Label ID列表
-     * @return list
-     */
-    @Override
-    public List<IndexTemplateWithLabels> getByLabelIds(String includeLabelIds, String excludeLabelIds) {
 
-        List<IndexTemplateWithLabels> indexTemplateLogicWithLabels = Lists.newArrayList();
-
-        Map<Integer, IndexTemplate> logicTemplatesMappings = indexTemplateService.getAllLogicTemplatesMap();
-
-        List<TemplateLabel> templateLabels = fetchLabels(includeLabelIds, excludeLabelIds);
-        templateLabels.stream().forEach(templateLabel -> {
-            Integer templateId = templateLabel.getIndexTemplateId();
-
-            IndexTemplate indexTemplate = logicTemplatesMappings.get(templateId);
-            IndexTemplateWithLabels logicWithLabel = ConvertUtil.obj2Obj(indexTemplate,
-                    IndexTemplateWithLabels.class);
-            if (logicWithLabel != null) {
-                logicWithLabel.setLabels(templateLabel.getLabels());
-                indexTemplateLogicWithLabels.add(logicWithLabel);
-            }
-
-        });
-
-        return indexTemplateLogicWithLabels;
-    }
 
     /**
      * 获取最近访问该模板的project
@@ -239,22 +183,6 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
                 .filter(Objects::nonNull).collect( Collectors.toList());
     }
 
-    /**
-     * 获取模板的标签信息
-     * @param logicId 模板id
-     * @return label
-     */
-    @Override
-    public IndexTemplateWithLabels getLabelByLogicId(Integer logicId) {
-        IndexTemplateWithLabels indexTemplateLogicWithLabels = ConvertUtil
-                .obj2Obj(indexTemplateService.getLogicTemplateById(logicId), IndexTemplateWithLabels.class);
-
-        if (indexTemplateLogicWithLabels != null) {
-            indexTemplateLogicWithLabels.setLabels(templateLabelService.listTemplateLabel(logicId));
-        }
-
-        return indexTemplateLogicWithLabels;
-    }
 
     @Override
     @Transactional(rollbackFor = Exception.class)

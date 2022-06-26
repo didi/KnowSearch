@@ -1,18 +1,32 @@
 package com.didichuxing.datachannel.arius.admin.common.util;
 
+import static java.util.regex.Pattern.compile;
+
+import com.didichuxing.datachannel.arius.admin.common.tuple.Tuple;
+import com.didichuxing.datachannel.arius.admin.common.tuple.Tuple3;
+import com.google.common.collect.Lists;
+import io.swagger.annotations.ApiModelProperty;
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
+import java.util.StringJoiner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.ObjectUtils;
 
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Maps;
+import org.springframework.util.PatternMatchUtils;
 
 /**
  * Bean操作工具
@@ -118,6 +132,47 @@ public class AriusObjUtils {
 
         return content.toString();
     }
+    
+    public static String findChangedWithClearByBeanVo(Object srcVo, Object destVo) {
+        if (srcVo == null || destVo == null) {
+            return  null;
+        }
+        List<Tuple3<String,String,String>> changeTuple3= Lists.newArrayList();
+        StringJoiner content = new StringJoiner("");
+        try {
+            Map<String, String> destMethodMap = Maps.newHashMap();
+            for (Field destField : destVo.getClass().getDeclaredFields()) {
+                if (destField.isAnnotationPresent(ApiModelProperty.class)) {
+                    String apiModelPropertyValue = destField.getAnnotation(ApiModelProperty.class).value();
+                    String getValue = getInvokeValue(destField.getName(), destVo);
+                    if (StringUtils.isNotBlank(getValue)) {
+                        destMethodMap.put(apiModelPropertyValue, getValue);
+                    }
+                }
+            }
+    
+            for (Field srcField : srcVo.getClass().getDeclaredFields()) {
+                if (srcField.isAnnotationPresent(ApiModelProperty.class)) {
+                    String apiModelPropertyValue = srcField.getAnnotation(ApiModelProperty.class).value();
+                    String destValue = destMethodMap.get(apiModelPropertyValue);
+                    if (destValue != null) {
+                        String srcGetValue = getInvokeValue(srcField.getName(), srcVo);
+                        if (isChanged(destValue, srcGetValue)) {
+                            content.add("字段").add("【").add(apiModelPropertyValue).add("】")
+                                    .add("的原值").add("【").add(srcGetValue).add("】").add("修改为")
+                                    .add("【").add(destValue).add("】").add("\r\n");
+                        }
+                    }
+                    
+                }
+
+            }
+        } catch (Exception e) {
+            LOGGER.error("class=AriusObjUtils||method=findChangedWithClearByBeanVo||errMsg={}", e.getMessage(), e);
+        }
+        
+        return content.toString();
+    }
 
     /**
      * 是否是空
@@ -148,6 +203,17 @@ public class AriusObjUtils {
      */
     public static boolean isBlack(String str) {
         return StringUtils.isBlank(str);
+    }
+    
+    private static String getInvokeValue(String propertyName, Object bean) {
+        try {
+            PropertyDescriptor pd = new PropertyDescriptor(propertyName, bean.getClass());
+            Object invoke = pd.getReadMethod().invoke(bean);
+            return String.valueOf(invoke);
+        } catch (Exception e) {
+            return null;
+        }
+        
     }
 
     private static boolean isGetter(Method method) {

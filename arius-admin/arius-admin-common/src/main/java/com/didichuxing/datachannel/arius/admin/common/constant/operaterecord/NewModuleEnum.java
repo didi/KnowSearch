@@ -58,7 +58,10 @@ public enum NewModuleEnum {
     /**
      * 配置
      */
-    SETTING("配置",9);
+    SETTING("配置",9),
+    SENSE_OP("sense操作", 10),
+    SCHEDULE("定时任务", 11),
+     ES_CLUSTER_PLUGINS( "ES集群插件",12);
     /**
      * 模块
      */

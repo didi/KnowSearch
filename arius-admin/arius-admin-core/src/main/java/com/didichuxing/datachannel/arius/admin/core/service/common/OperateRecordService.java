@@ -33,13 +33,7 @@ public interface OperateRecordService {
      */
     Result<Void> save(ModuleEnum moduleEnum, OperationEnum operationEnum, Object bizId, String content, String operator);
 
-    /**
-     * 插入一条操作记录
-     *
-     * @param param OperateRecordDTO
-     * @return 成功 true   失败 false
-     */
-    Result<Void> save(OperateRecordDTO param);
+
 
 
 

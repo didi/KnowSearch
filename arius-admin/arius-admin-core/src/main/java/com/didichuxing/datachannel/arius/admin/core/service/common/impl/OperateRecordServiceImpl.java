@@ -97,14 +97,6 @@ public class OperateRecordServiceImpl implements OperateRecordService {
         return Result.build(operateRecordDAO.insert(operateRecordInfoPO) == 1);
         
     }
-    
-
-    @Override
-    public Result<Void> save(OperateRecordDTO param) {
-       
-        return Result.buildSucc();
-    }
-
 
     
     /**

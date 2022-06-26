@@ -30,7 +30,7 @@ public class ProjectLogicClusterAuthVO extends BaseDTO {
     /**
      * @see ProjectClusterLogicAuthEnum
      */
-    @ApiModelProperty("权限类型，0：超管权限，1：配置管理权限，2：访问权限")
+    @ApiModelProperty("权限类型:0：超管权限，1：配置管理权限，2：访问权限")
     private Integer type;
 
     @ApiModelProperty("责任人")

@@ -167,6 +167,7 @@ public enum OperateTypeEnum {
      * 索引管理:别名调整
      */
     INDEX_MANAGEMENT_ALIAS_MODIFY(NewModuleEnum.INDEX_MANAGEMENT, "别名调整", 36),
+    INDEX_MANAGEMENT_LABEL_MODIFY(NewModuleEnum.INDEX_MANAGEMENT, "标签调整", 36),
     /**
      * 索引管理:索引读写变更
      */
@@ -198,7 +199,23 @@ public enum OperateTypeEnum {
     /**
      * 配置删除
      */
-    SETTING_DELETE(NewModuleEnum.SETTING, "删除配置",44);
+    SETTING_DELETE(NewModuleEnum.SETTING, "删除配置",44),
+    
+    /**
+     * sense操作添加
+     */
+    SENSE_OP_ADD(NewModuleEnum.SENSE_OP, "新增配置",45),
+    SENSE_OP_EDIT(NewModuleEnum.SENSE_OP, "修改配置",45),
+    /**
+     * sense操作删除
+     */
+    SENSE_OP_DELETE(NewModuleEnum.SENSE_OP, "删除配置",46),
+    /**
+     * sense操作编辑
+     */
+    ES_CLUSTER_PLUGINS_ADD(NewModuleEnum.ES_CLUSTER_PLUGINS, "新增插件", 47),
+    ES_CLUSTER_PLUGINS_EDIT(NewModuleEnum.ES_CLUSTER_PLUGINS, "编辑插件", 48),
+    ES_CLUSTER_PLUGINS_DELETE(NewModuleEnum.ES_CLUSTER_PLUGINS, "删除配置", 97);
     /**
      * 模块
      */

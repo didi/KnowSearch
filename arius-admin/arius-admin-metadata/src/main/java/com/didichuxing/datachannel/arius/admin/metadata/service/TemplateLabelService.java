@@ -1,35 +1,41 @@
 package com.didichuxing.datachannel.arius.admin.metadata.service;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum.INDEX_MANAGEMENT_LABEL_MODIFY;
 
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Label;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.TemplateLabel;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateLabelPO;
+import com.didichuxing.datachannel.arius.admin.common.constant.UpdateIndexTemplateLabelParam;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateLabelEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AmsRemoteException;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateLabelEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.UpdateIndexTemplateLabelParam;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateLabelPO;
-import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.template.TemplateLabelESDAO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.oprecord.OperateRecordDTO;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
+import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.template.TemplateLabelESDAO;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 /**
  * 索引模板标签服务
@@ -338,9 +344,9 @@ public class TemplateLabelService {
 
         //记录操作记录
         if (change) {
-            OperateRecordDTO operateRecord = buildLabelSettingOperatorRecord(
-                    String.valueOf(indexTemplateId), OperationEnum.EDIT_LABELS.getCode(), operator,
-                    getEditContent(deleteMap.values(), news)
+            OperateRecord operateRecord = buildLabelSettingOperatorRecord(
+                    indexTemplateId, INDEX_MANAGEMENT_LABEL_MODIFY, operator,
+                    getEditContent(deleteMap.values(), news),null
             );
             operateRecordService.save(operateRecord);
         }
@@ -412,19 +418,15 @@ public class TemplateLabelService {
      * 构建索引标签配置操作记录
      *
      * @param bizId
-     * @param operateId
+     * @param operateType
      * @param operator
      * @param content
      * @return
      */
-    private OperateRecordDTO buildLabelSettingOperatorRecord(String bizId, Integer operateId, String operator, String content) {
-        OperateRecordDTO operateRecord = new OperateRecordDTO();
-        //operateRecord.setBizId(bizId);
-        operateRecord.setModuleId(ModuleEnum.TEMPLATE.getCode());
-        operateRecord.setOperateId(operateId);
-        //operateRecord.setOperator(operator);
-        operateRecord.setContent(content);
-
-        return operateRecord;
+    private OperateRecord buildLabelSettingOperatorRecord(Object bizId, OperateTypeEnum operateType, String operator,
+                                                          String content, ProjectBriefVO projectBriefVO) {
+    
+        return new OperateRecord.Builder().content(content).operationTypeEnum(operateType).project(projectBriefVO)
+                .userOperation(operator).bizId(bizId).build();
     }
 }
