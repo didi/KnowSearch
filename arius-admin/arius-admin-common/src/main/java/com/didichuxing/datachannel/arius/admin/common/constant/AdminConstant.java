@@ -78,17 +78,6 @@ public class AdminConstant {
     public static final List<String> LOW_VERSION_ES_CLUSTER                  = Arrays.asList("bigdata-arius-olap",
         "bigdata-arius-arcs", "mtn-to-es", "kefu-es", "DSearch_cluster_py");
 
-    /**
-     * 默认创建隔日索引标识
-     */
-    public static final Boolean      DEFAULT_PRE_CREATE_FLAGS                = true;
-
-    /**
-     * 是否禁用索引资源标识
-     */
-    public static final Boolean      DISABLE_SOURCE_FLAGS                    = false;
-
-    public static final Integer      DEFAULT_SHARD_NUM                       = 1;
 
     
 

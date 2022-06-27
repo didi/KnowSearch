@@ -58,6 +58,6 @@ public class OperateRecordInfoPO extends BasePO {
     /**
      * 业务id
      */
-    private Integer bizId;
+    private String bizId;
 
 }

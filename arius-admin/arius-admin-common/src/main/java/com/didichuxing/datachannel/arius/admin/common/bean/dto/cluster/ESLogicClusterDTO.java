@@ -31,6 +31,7 @@ public class ESLogicClusterDTO extends PageDTO {
     @ApiModelProperty("类型(1:公共：2:独立, 3:独占)")
     private Integer type;
 
+
     @ApiModelProperty("所属应用ID")
     private Integer projectId;
 

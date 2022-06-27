@@ -82,9 +82,15 @@ public class AriusConfigInfoServiceImpl implements AriusConfigInfoService {
         AriusConfigInfoPO param = ConvertUtil.obj2Obj(configInfoDTO, AriusConfigInfoPO.class);
         boolean succ = (1 == configInfoDAO.insert(param));
         if (succ) {
-            operateRecordService.save(new OperateRecord(OperateTypeEnum.SETTING_ADD, TriggerWayEnum.MANUAL_TRIGGER,
-                    String.format("新增平台配置, 配置组:%s, 配置名称%s", configInfoDTO.getValueGroup(),
-                            configInfoDTO.getValueName()), operator,configInfoDTO.getId()));
+            operateRecordService.save(new OperateRecord
+                            .Builder()
+                            .operationTypeEnum(OperateTypeEnum.SETTING_ADD)
+                            .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                            .content(String.format("新增平台配置, 配置组:%s, 配置名称%s", configInfoDTO.getValueGroup(),
+                            configInfoDTO.getValueName()))
+                            .userOperation(operator)
+                            .bizId(configInfoDTO.getId())
+                    .build());
         }
         return Result.build(succ,param.getId());
     }

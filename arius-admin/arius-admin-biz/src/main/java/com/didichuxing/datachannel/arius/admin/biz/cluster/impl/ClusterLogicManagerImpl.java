@@ -42,6 +42,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.Tri
 import com.didichuxing.datachannel.arius.admin.common.event.resource.ClusterLogicEvent;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import com.didichuxing.datachannel.arius.admin.common.tuple.Tuple2;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ClusterUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
@@ -212,8 +213,9 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         if (CollectionUtils.isEmpty(clearDTO.getDelIndices())) {
             return Result.buildParamIllegal("删除索引为空");
         }
-
-        Result<Void> checkResult = checkIndices(clearDTO.getDelIndices(), clearDTO.getLogicId());
+        final Tuple2<Result<Void>, Integer> resultIntegerTuple2 = checkIndices(clearDTO.getDelIndices(),
+                clearDTO.getLogicId());
+        Result<Void> checkResult = resultIntegerTuple2._1;
         if (checkResult.failed()) {
             return checkResult;
         }
@@ -238,8 +240,17 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
                 return deleteIndicesResult;
             }
         }
+        operateRecordService.save(
+                new OperateRecord.Builder()
+                        .bizId(clearDTO.getLogicId())
+                        .userOperation(operator)
+                        .project(projectService.getProjectBriefByProjectId(resultIntegerTuple2._2))
+                        .content(JSON.toJSONString(clearDTO))
+                        .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                        .operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE_CLEAN)
+                        .build()
 
-        operateRecordService.save(TEMPLATE, DELETE_INDEX, clearDTO.getLogicId(), JSON.toJSONString(clearDTO), operator);
+        );
         if (StringUtils.isNotBlank(clearDTO.getDelQueryDsl())) {
             return Result.buildSucWithTips("删除任务下发成功，请到sense中执行查询语句，确认删除进度");
         } else {
@@ -512,7 +523,6 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
                             .build()
                     );
             }
-
         }
 		return result;
 	}
@@ -867,10 +877,11 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         clusterLogicVO.setGatewayAddress(esGatewayClient.getGatewayAddress());
     }
 
-    private Result<Void> checkIndices(List<String> delIndices, Integer logicId) {
+    private Tuple2<Result<Void>,/*projectId*/Integer> checkIndices(List<String> delIndices, Integer logicId) {
         for (String index : delIndices) {
             if (index.endsWith("*")) {
-                return Result.buildParamIllegal("索引名字不能以*结尾");
+                return com.didichuxing.datachannel.arius.admin.common.tuple.Tuple.of(Result.buildParamIllegal(
+                        "索引名字不能以*结尾"),null);
             }
         }
 
@@ -881,10 +892,11 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         List<String> matchIndices = indexTemplatePhyService.getMatchNoVersionIndexNames(templatePhysical.getId());
         for (String index : delIndices) {
             if (!matchIndices.contains(index)) {
-                return Result.buildParamIllegal(index + "不属于该索引模板");
+                return com.didichuxing.datachannel.arius.admin.common.tuple.Tuple.of(Result.buildParamIllegal(index + "不属于该索引模板"),null);
             }
         }
-        return Result.buildSucc();
+        return com.didichuxing.datachannel.arius.admin.common.tuple.Tuple.of(Result.buildSucc(),
+                templateLogicWithPhysical.getProjectId());
     }
 
     /**

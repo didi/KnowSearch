@@ -1,9 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.persistence.mysql.template;
 
-import java.util.List;
-
-import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePhyPO;
+import java.util.List;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 

@@ -3,7 +3,7 @@ package com.didichuxing.datachannel.arius.admin.rest.exception;
 import static com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType.ADMIN_OPERATE_ERROR;
 import static com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType.ES_OPERATE_ERROR;
 
-import com.didichuxing.datachannel.arius.admin.biz.app.LoginManager;
+import com.didichuxing.datachannel.arius.admin.biz.project.LoginManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ResultWorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;

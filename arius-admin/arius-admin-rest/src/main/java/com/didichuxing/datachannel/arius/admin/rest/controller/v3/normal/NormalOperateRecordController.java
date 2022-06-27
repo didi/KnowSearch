@@ -2,7 +2,7 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v3.normal;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_NORMAL;
 
-import com.didichuxing.datachannel.arius.admin.biz.app.OperateRecordManager;
+import com.didichuxing.datachannel.arius.admin.biz.project.OperateRecordManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.oprecord.OperateRecordDTO;

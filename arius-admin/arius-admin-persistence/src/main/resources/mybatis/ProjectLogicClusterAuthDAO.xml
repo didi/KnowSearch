@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.didichuxing.datachannel.arius.admin.persistence.mysql.app.ProjectLogicClusterAuthDAO">
-    <resultMap id="BaseResultMap" type="com.didichuxing.datachannel.arius.admin.common.bean.po.app.ProjectClusterLogicAuthPO">
+<mapper namespace="com.didichuxing.datachannel.arius.admin.persistence.mysql.project.ProjectLogicClusterAuthDAO">
+    <resultMap id="BaseResultMap" type="com.didichuxing.datachannel.arius.admin.common.bean.po.project.ProjectClusterLogicAuthPO">
         <result column="id" jdbcType="BIGINT" property="id"/>
         <result column="project_id" jdbcType="INTEGER" property="projectId"/>
         <result column="logic_cluster_id" jdbcType="BIGINT" property="logicClusterId"/>
@@ -15,14 +15,14 @@
         id, project_id, logic_cluster_id, `type`, responsible, create_time, update_time
     </sql>
 
-    <insert id="insert" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.app.ProjectClusterLogicAuthPO"
+    <insert id="insert" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.project.ProjectClusterLogicAuthPO"
             useGeneratedKeys="true"
             keyColumn="id" keyProperty="id">
         insert into project_logi_cluster_auth (project_id, logic_cluster_id, `type`, responsible)
         values (#{projectId}, #{logicClusterId}, #{type}, #{responsible})
     </insert>
 
-    <update id="update" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.app.ProjectClusterLogicAuthPO">
+    <update id="update" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.project.ProjectClusterLogicAuthPO">
         update project_logi_cluster_auth
         <trim prefix="set" prefixOverrides=",">
             <if test="type != null">,`type` = #{type}</if>
@@ -32,7 +32,7 @@
     </update>
 
     <select id="listByCondition"
-            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.app.ProjectClusterLogicAuthPO"
+            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.project.ProjectClusterLogicAuthPO"
             resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>

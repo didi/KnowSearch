@@ -8,9 +8,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.Template
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicAggregate;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithLabels;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
-import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectTemplateAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectTemplateAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import java.util.List;
@@ -31,20 +30,8 @@ public interface TemplateLogicManager {
      */
     int DEFAULT_TEMPLATE_VALUE = 61;
 
-    /**
-     * 校验所有逻辑模板元数据信息
-     *
-     * @return
-     */
-    boolean checkAllLogicTemplatesMeta();
 
-    /**
-     * 获取模板信息
-     * @param excludeLabelIds 排除的Label ID列表
-     * @param includeLabelIds 包含的Label ID列表
-     * @return list
-     */
-    List<IndexTemplateWithLabels> getByLabelIds(String includeLabelIds, String excludeLabelIds);
+
 
     /**
      * 获取最近访问该模板的project
@@ -54,12 +41,7 @@ public interface TemplateLogicManager {
      */
     List<ProjectBriefVO> getLogicTemplateProjectAccess(Integer logicId);
 
-    /**
-     * 获取模板的标签信息
-     * @param logicId 模板id
-     * @return label
-     */
-    IndexTemplateWithLabels getLabelByLogicId(Integer logicId);
+
 
     /**
      * 新建逻辑模板
@@ -210,12 +192,14 @@ public interface TemplateLogicManager {
 
     /**
      * 执行调整shard 数量
+     *
      * @param logicTemplateId 模板id
-     * @param shardNum 调整后的shard数量
+     * @param shardNum        调整后的shard数量
      * @param projectId
+     * @param operator
      * @return 调整结果
      */
-    Result<Void> adjustShard(Integer logicTemplateId, Integer shardNum, Integer projectId) throws AdminOperateException;
+    Result<Void> adjustShard(Integer logicTemplateId, Integer shardNum, Integer projectId, String operator) throws AdminOperateException;
 
     /**
      * 模板升级

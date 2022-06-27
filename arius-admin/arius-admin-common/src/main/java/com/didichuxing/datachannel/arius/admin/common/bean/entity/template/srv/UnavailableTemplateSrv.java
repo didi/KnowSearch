@@ -1,8 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.template.srv;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 /**
  * @author chengxiang

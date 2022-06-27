@@ -6,10 +6,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.oprecord.OperateRecordDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.operaterecord.OperateRecordInfoPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.operaterecord.OperateRecordVO;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.NewModuleEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
@@ -21,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -73,21 +71,7 @@ public class OperateRecordServiceImpl implements OperateRecordService {
 
 
 
-    /**
-     * 插入一条操作记录
-     * @param moduleEnum    模块id  比如索引模板、应用管理、DSL审核
-     * @param operationEnum 操作行为  OperationEnum
-     * @param bizId     业务id  例如索引模板id、应用id 或者工单id
-     * @param content   操作详情
-     * @param operator  操作人
-     * @return result
-     */
-    @Override
-    public Result<Void> save(ModuleEnum moduleEnum, OperationEnum operationEnum, Object bizId, String content,
-                       String operator) {
-        return Result.buildSucc();
-    }
-    
+
     /**
      * @param operateRecord
      * @return
@@ -98,14 +82,6 @@ public class OperateRecordServiceImpl implements OperateRecordService {
         return Result.build(operateRecordDAO.insert(operateRecordInfoPO) == 1);
         
     }
-    
-
-    @Override
-    public Result<Void> save(OperateRecordDTO param) {
-       
-        return Result.buildSucc();
-    }
-
 
     
     /**

@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.common.ecm;
 
-import com.alibaba.fastjson.annotation.JSONField;
+import java.io.Serializable;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ESClusterRoleHost {
+public class ESClusterRoleHost implements Serializable {
 
     /**
      * ip:port 主機名:port = hostname:port

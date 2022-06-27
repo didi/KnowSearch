@@ -1,18 +1,18 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.AVG;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.DOUBLE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.FIELD;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.HIST;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.INT;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.KEY;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.LONG;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.METRICS;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.PERCENTILES;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.STATIS;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.TIME_STAMP;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.VALUE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.VALUES;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.AVG;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.DOUBLE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.FIELD;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.HIST;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.INT;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.KEY;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.LONG;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.METRICS;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.PERCENTILES;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.STATIS;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.TIME_STAMP;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.VALUE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.VALUES;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONPath;

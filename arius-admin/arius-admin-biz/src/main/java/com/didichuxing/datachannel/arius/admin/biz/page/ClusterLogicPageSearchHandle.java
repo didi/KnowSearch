@@ -38,8 +38,7 @@ import java.util.stream.Collectors;
 public class ClusterLogicPageSearchHandle extends AbstractPageSearchHandle<ClusterLogicConditionDTO, ClusterLogicVO> {
     private static final ILog LOGGER = LogFactory.getLog(ClusterLogicPageSearchHandle.class);
 
-    @Autowired
-    private ProjectService projectService;
+
 
     @Autowired
     private ClusterLogicService clusterLogicService;
@@ -117,7 +116,6 @@ public class ClusterLogicPageSearchHandle extends AbstractPageSearchHandle<Clust
         Optional.ofNullable(clusterLogicVO.getProjectId())
                 .map(projectService::getProjectBriefByProjectId)
                 .map(ProjectBriefVO::getProjectName).ifPresent(clusterLogicVO::setProjectName);
-
     }
     @Override
     protected Result<Boolean> checkCondition(ClusterLogicConditionDTO clusterLogicConditionDTO, Integer projectId) {

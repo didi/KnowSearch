@@ -91,7 +91,7 @@ public class ClusterMonitorJobHandler extends AbstractMetaDataJob {
     @Autowired
     private TemplateAccessESDAO templateAccessESDAO;
 
-    private final String  hostName     = HttpHostUtil.HOST_NAME;
+    private final static String  hostName     = HttpHostUtil.HOST_NAME;
 
     @Value("${monitorJob.threadPool.initsize:20}")
     private int  poolSize;
