@@ -142,7 +142,7 @@ public class LogicClusterTransferHandler extends BaseWorkOrderHandler {
 
     @Override
     public Result<Void> checkAuthority(WorkOrderPO orderPO, String userName) {
-        if (isRDOrOP(userName)) {
+        if (isOP(userName)) {
             return Result.buildSucc();
         }
         return Result.buildFail(ResultType.OPERATE_FORBIDDEN_ERROR.getMessage());

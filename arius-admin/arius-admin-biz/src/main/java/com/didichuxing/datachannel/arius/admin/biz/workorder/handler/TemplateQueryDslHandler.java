@@ -59,12 +59,12 @@ public class TemplateQueryDslHandler extends BaseWorkOrderHandler {
 
     @Override
     public List<UserBriefVO> getApproverList(AbstractOrderDetail detail) {
-        return getRDOrOPList();
+        return getOPList();
     }
 
     @Override
     public Result<Void> checkAuthority(WorkOrderPO orderPO, String userName) {
-        if (isRDOrOP(userName)) {
+        if (isOP(userName)) {
             return Result.buildSucc();
         }
         return Result.buildFail(ResultType.OPERATE_FORBIDDEN_ERROR.getMessage());
