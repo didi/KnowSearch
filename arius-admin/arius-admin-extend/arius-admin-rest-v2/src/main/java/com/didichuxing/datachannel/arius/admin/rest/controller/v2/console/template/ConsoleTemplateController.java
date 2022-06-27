@@ -40,6 +40,7 @@ import io.swagger.annotations.ApiOperation;
 import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -104,7 +105,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
         IndexTemplateWithCluster indexTemplateLogicWithCluster = indexTemplateService
             .getLogicTemplateWithCluster(logicId);
 
-        if (null == indexTemplateLogicWithCluster) {
+        if (null == indexTemplateLogicWithCluster || CollectionUtils.isEmpty(indexTemplateLogicWithCluster.getLogicClusters())) {
             return Result.buildFail("模板对应资源不存在!");
         }
 
