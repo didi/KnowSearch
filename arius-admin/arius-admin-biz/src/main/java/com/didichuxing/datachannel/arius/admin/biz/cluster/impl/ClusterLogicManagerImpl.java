@@ -85,6 +85,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.Cl
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.TEMPLATE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.DELETE_INDEX;
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.DATA_NODE;
+import static com.didichuxing.datachannel.arius.admin.common.util.SizeUtil.getUnitSize;
 
 @Component
 public class ClusterLogicManagerImpl implements ClusterLogicManager {
@@ -159,7 +160,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
 
     private static final FutureUtil<Void> futureUtil = FutureUtil.init("ClusterLogicManager", 10, 10, 100);
 
-    private final String UNKNOWN_SIZE = "未知大小";
+    private final Long UNKNOWN_SIZE = -1L;
     /**
      * 构建运维页面的逻辑集群VO
      * @param logicClusters     逻辑集群列表
@@ -589,17 +590,13 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     }
 
     @Override
-    public Result<String> estimatedDiskSize(Long clusterLogicId, Integer count) {
+    public Result<Long> estimatedDiskSize(Long clusterLogicId, Integer count) {
         ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(clusterLogicId);
         String nodeSpec = clusterLogic.getDataNodeSpec();
-        ClusterRegion clusterRegion =  clusterRegionService.getRegionByLogicClusterId(clusterLogicId);
-        if (clusterRegion == null) {
-            return Result.buildSucc(UNKNOWN_SIZE);
+        if (StringUtils.isNotBlank(nodeSpec)) {
+            return Result.buildSucc(getUnitSize( nodeSpec.split("-")[2])*count);
         }
-        //todo:使用申请集群的时候，选择的规格来计算
-        Map<String, Triple<Long, Long, Double>> map = eSClusterNodeService.syncGetNodesDiskUsage(clusterRegion.getPhyClusterName());
-        Triple<Long, Long, Double> diskInfo = getFirstOrNull(map);
-        return Result.buildSucc(nodeSpec);
+        return Result.buildSucc(UNKNOWN_SIZE);
     }
 
     @Override
