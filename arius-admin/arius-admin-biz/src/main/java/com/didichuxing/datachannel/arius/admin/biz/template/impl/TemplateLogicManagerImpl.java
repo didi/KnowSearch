@@ -1000,9 +1000,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         indexTemplateDTO.setIngestPipeline(indexTemplateDTO.getName());
         indexTemplateDTO.setDiskSize(indexTemplateDTO.getDiskSize());
         indexTemplateDTO.setQuota(indexTemplateDTO.getDiskSize());
-        //todo: 0.3干掉
-        indexTemplateDTO.setIdField("");
-        indexTemplateDTO.setRoutingField("");
+       
 
         if (null == indexTemplateDTO.getDesc()) { indexTemplateDTO.setDesc("");}
     }
