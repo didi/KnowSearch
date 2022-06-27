@@ -2,7 +2,7 @@ package com.didichuxing.datachannel.arius.admin.biz.project.impl;
 
 import com.didichuxing.datachannel.arius.admin.biz.project.ProjectConfigManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ProjectConfigVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.ProjectConfigVO;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectConfigService;
 import org.springframework.beans.factory.annotation.Autowired;

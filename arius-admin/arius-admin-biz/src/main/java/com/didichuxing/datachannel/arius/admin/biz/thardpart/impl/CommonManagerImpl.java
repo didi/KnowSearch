@@ -3,10 +3,13 @@ package com.didichuxing.datachannel.arius.admin.biz.thardpart.impl;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.TemplateSrvManager;
 import com.didichuxing.datachannel.arius.admin.biz.thardpart.CommonManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.config.AriusConfigInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ThirdPartClusterVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.config.ThirdpartConfigVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
+import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Sets;
@@ -27,7 +30,9 @@ public class CommonManagerImpl implements CommonManager {
   
 
     @Autowired
-    private TemplateSrvManager templateSrvManager;
+    private TemplateSrvManager     templateSrvManager;
+    @Autowired
+    private AriusConfigInfoService ariusConfigInfoService;
 
 
     @Override
@@ -51,7 +56,13 @@ public class CommonManagerImpl implements CommonManager {
                 .buildSucc(ConvertUtil.obj2Obj(esClusterPhyService.getClusterByName(cluster), ThirdPartClusterVO.class));
     }
 
-   
+    @Override
+    public Result<List<ThirdpartConfigVO>> queryConfig(AriusConfigInfoDTO param) {
+        return Result
+                .buildSucc(ConvertUtil.list2List(ariusConfigInfoService.queryByCondition(param), ThirdpartConfigVO.class));
+    }
+
+  
 
 
   

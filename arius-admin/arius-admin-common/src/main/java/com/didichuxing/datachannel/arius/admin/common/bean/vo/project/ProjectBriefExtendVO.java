@@ -1,6 +1,6 @@
-package com.didichuxing.datachannel.arius.admin.common.bean.vo.app;
+package com.didichuxing.datachannel.arius.admin.common.bean.vo.project;
 
-import com.didiglobal.logi.security.common.vo.project.ProjectVO;
+import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -8,7 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * projectvo 的扩展类：扩展logi侧projectvo
+ * 项目简要扩展签证官:加入项目配置相关信息
  *
  * @author shizeying
  * @date 2022/06/10
@@ -16,11 +16,10 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ApiModel(description = "项目信息（包含项目配置）和是否为超级项目")
-public class ProjectExtendVO extends ProjectVO {
+@ApiModel(description = "项目简要信息（包含项目配置）")
+public class ProjectBriefExtendVO extends ProjectBriefVO {
 	@ApiModelProperty(value = "项目配置", dataType = "ProjectSaveDTO", required = false)
 	private ProjectConfigVO config;
 	@ApiModelProperty(value = "是否为超级项目", dataType = "boolean", required = false)
-	private Boolean         isAdmin=false;
-	
+	private Boolean         isAdmin;
 }
