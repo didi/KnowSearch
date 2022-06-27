@@ -10,7 +10,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectConfigDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectConfig;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ProjectConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.project.ProjectConfigPO;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.project.impl.ProjectConfigServiceImpl;

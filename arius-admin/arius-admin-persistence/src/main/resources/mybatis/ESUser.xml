@@ -40,7 +40,7 @@
 		responsible,
 		is_default_display
 	</sql>
-	<select id="getDefaultESUserByProject" resultType="com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUser">
+	<select id="getDefaultESUserByProject" resultType="com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ESUser">
 		select
 		<include refid="Base_Column_List"/>
 		from arius_es_user

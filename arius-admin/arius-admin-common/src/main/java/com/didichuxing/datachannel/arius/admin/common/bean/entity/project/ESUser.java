@@ -1,4 +1,4 @@
-package com.didichuxing.datachannel.arius.admin.common.bean.entity.app;
+package com.didichuxing.datachannel.arius.admin.common.bean.entity.project;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.BaseEntity;
 import lombok.AllArgsConstructor;

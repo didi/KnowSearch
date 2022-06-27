@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.persistence.mysql.project;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUser;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ESUser;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.project.ESUserPO;
 import java.util.List;
 import org.apache.ibatis.annotations.Param;

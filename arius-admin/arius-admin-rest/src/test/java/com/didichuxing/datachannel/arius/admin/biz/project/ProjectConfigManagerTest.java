@@ -6,7 +6,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
 
 import com.didichuxing.datachannel.arius.admin.biz.project.impl.ProjectConfigManagerImpl;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectConfig;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ProjectConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ProjectConfigVO;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectConfigService;
