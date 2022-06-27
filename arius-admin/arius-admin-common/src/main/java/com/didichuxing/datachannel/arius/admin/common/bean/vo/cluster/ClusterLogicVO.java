@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.BaseVO;
-import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectClusterLogicAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectClusterLogicAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;

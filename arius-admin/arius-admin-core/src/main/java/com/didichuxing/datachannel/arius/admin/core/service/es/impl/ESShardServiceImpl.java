@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.core.service.es.impl;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.BIG_SHARD;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.BIG_SHARD;
 import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.*;
 
 import java.util.ArrayList;

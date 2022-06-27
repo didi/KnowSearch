@@ -2,14 +2,12 @@ package com.didichuxing.datachannel.arius.admin.biz.template;
 
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplatePhysicalCopyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplatePhysicalUpgradeDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplatePhyVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.IndexTemplatePhysicalVO;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import java.util.List;
@@ -56,18 +54,17 @@ public interface TemplatePhyManager {
     /**
      * 升版本
      * <p>
-     * 1、修改数据库中的版本号
-     * 2、删除原版本明天的索引,如果指定了rack就按着rack创建,否则在源rack上创建
-     * 3、创建新版本明天的索引,按着模板rack创建
+     * 1、修改数据库中的版本号 2、删除原版本明天的索引,如果指定了rack就按着rack创建,否则在源rack上创建 3、创建新版本明天的索引,按着模板rack创建
      *
-     * @param param    参数
-     * @param operator 操作人
+     * @param param     参数
+     * @param operator  操作人
+     * @param projectId
      * @return result
      */
     @Transactional(rollbackFor = Exception.class)
-    Result<Void> upgradeTemplate(TemplatePhysicalUpgradeDTO param, String operator) throws ESOperateException;
+    Result<Void> upgradeTemplate(TemplatePhysicalUpgradeDTO param, String operator, Integer projectId) throws ESOperateException;
 
-    Result<Boolean> upgradeMultipleTemplate(List<TemplatePhysicalUpgradeDTO> params, String operator) throws ESOperateException;
+    Result<Boolean> upgradeMultipleTemplate(List<TemplatePhysicalUpgradeDTO> params, String operator, Integer projectId) throws ESOperateException;
 
     Result<Void> rolloverUpgradeTemplate(TemplatePhysicalUpgradeDTO param, String operator) throws ESOperateException;
 

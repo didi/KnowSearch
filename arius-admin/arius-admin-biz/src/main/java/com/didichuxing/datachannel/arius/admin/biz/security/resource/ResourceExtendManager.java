@@ -4,6 +4,7 @@ import com.didiglobal.logi.security.common.PagingData;
 import com.didiglobal.logi.security.common.dto.resource.ResourceDTO;
 import com.didiglobal.logi.security.extend.ResourceExtend;
 import com.didiglobal.logi.security.properties.LogiSecurityProper;
+import java.util.Collections;
 import java.util.List;
 import org.springframework.stereotype.Component;
 
@@ -46,7 +47,7 @@ public class ResourceExtendManager implements ResourceExtend {
 	@Override
 	public List<ResourceDTO> getResourceList(Integer projectId, Integer resourceTypeId) {
 	
-		return null;
+		return Collections.emptyList();
 	}
 	
 	/**

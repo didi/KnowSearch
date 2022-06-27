@@ -177,7 +177,7 @@ public class EcmTaskDetailManagerImpl implements EcmTaskDetailManager {
         try {
             ecmTaskDetailDAO.deleteEcmTaskDetailsByTaskOrder(workOrderTaskId);
         } catch (Exception e) {
-            LOGGER.error("class=EcmTaskDetailManagerImpl||method=deleteEcmTaskDetailsByTaskOrder||errMsg={}",e);
+            LOGGER.error("class=EcmTaskDetailManagerImpl||method=deleteEcmTaskDetailsByTaskOrder",e);
             return Result.buildFail("根据工单任务id删除对应任务详情信息失败");
         }
         return Result.buildSucc();

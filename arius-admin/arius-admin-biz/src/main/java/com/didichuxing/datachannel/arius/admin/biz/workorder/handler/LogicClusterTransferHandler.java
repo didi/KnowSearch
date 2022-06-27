@@ -13,12 +13,10 @@ import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
 import com.didiglobal.logi.security.service.ProjectService;
 import java.util.List;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -30,8 +28,7 @@ public class LogicClusterTransferHandler extends BaseWorkOrderHandler {
 
     @Autowired
     private ProjectService projectService;
-    @Autowired
-    private RoleTool roleTool;
+  
 
   
 
@@ -64,7 +61,7 @@ public class LogicClusterTransferHandler extends BaseWorkOrderHandler {
         
 
         Long clusterLogicId = clusterLogicTransferContent.getClusterLogicId();
-        if (!clusterLogicService.isClusterLogicExists(clusterLogicId)) {
+        if (Boolean.FALSE.equals(clusterLogicService.isClusterLogicExists(clusterLogicId))) {
             return Result.buildParamIllegal("逻辑集群不存在");
         }
 
@@ -145,7 +142,7 @@ public class LogicClusterTransferHandler extends BaseWorkOrderHandler {
 
     @Override
     public Result<Void> checkAuthority(WorkOrderPO orderPO, String userName) {
-        if (isRDOrOP(userName)) {
+        if (isOP(userName)) {
             return Result.buildSucc();
         }
         return Result.buildFail(ResultType.OPERATE_FORBIDDEN_ERROR.getMessage());

@@ -55,7 +55,7 @@ public class GatewayAppMetricsDAO extends BaseESDAO {
     public List<VariousLineChartMetrics> getAggFieldByRange(Long startTime, Long endTime, List<String> metricsTypes, String projectId) {
         String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTime, endTime);
         String interval = MetricsUtils.getInterval((endTime - startTime));
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_APP_FIELD_BY_APPID, projectId, startTime, endTime, interval, startTime, endTime);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_APP_FIELD_BY_PROJECT_ID, projectId, startTime, endTime, interval, startTime, endTime);
         return gatewayClient.performRequest(realIndexName, TYPE, dsl, (ESQueryResponse response) -> fetchFieldByProjectIdAggMetrics(response, metricsTypes, projectId, interval), 3);
     }
 
@@ -77,7 +77,7 @@ public class GatewayAppMetricsDAO extends BaseESDAO {
     public VariousLineChartMetrics getProjectCountByRange(Long startTime, Long endTime, String projectId) {
         String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTime, endTime);
         String interval = MetricsUtils.getInterval((endTime - startTime));
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_APP_FIELD_COUNT_BY_APPID, projectId, startTime, endTime, interval, startTime, endTime);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_APP_FIELD_COUNT_BY_PROJECT_ID, projectId, startTime, endTime, interval, startTime, endTime);
         List<VariousLineChartMetrics> variousLineChartMetrics = gatewayClient.performRequest(realIndexName, TYPE, dsl, (ESQueryResponse response) ->
                 fetchFieldByProjectIdAggMetrics(response, Lists.newArrayList(GatewayMetricsTypeEnum.QUERY_APP_COUNT.getType()), projectId, interval), 3);
         return variousLineChartMetrics.get(0);

@@ -1,8 +1,0 @@
-{
-  "size":%d,
-  "query": {
-    "terms": {
-      "name": [%s]
-    }
-  }
-}

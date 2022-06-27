@@ -1,14 +1,14 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.setting.impl;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.TEMPLATE_CONFIG;
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.EDIT;
-
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.setting.TemplatePhySettingsManager;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord.template.TemplateSettingOperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhySettings;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminESOpRetryConstants;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
@@ -92,8 +92,14 @@ public class TemplatePhySettingsManagerImpl implements TemplatePhySettingsManage
             AdminESOpRetryConstants.DEFAULT_RETRY_COUNT);
         if(result) {
             // 记录setting 更新记录
-            operateRecordService.save(TEMPLATE_CONFIG, EDIT, logicId,
-                    JSON.toJSONString(new TemplateSettingOperateRecord(oldTemplateSettings, newTemplateSettings)), operator);
+             operateRecordService.save(new OperateRecord.Builder()
+                             .bizId(logicId)
+                             .operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_EDIT_SETTING)
+                             .content(JSON.toJSONString(new TemplateSettingOperateRecord(oldTemplateSettings, newTemplateSettings)))
+                             .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                     .build());
+            //operateRecordService.save(TEMPLATE_CONFIG, EDIT, logicId,
+            //        JSON.toJSONString(new TemplateSettingOperateRecord(oldTemplateSettings, newTemplateSettings)), operator);
         }
         return result;
     }

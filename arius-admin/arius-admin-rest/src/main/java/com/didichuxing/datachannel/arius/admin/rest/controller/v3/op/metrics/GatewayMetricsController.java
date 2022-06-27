@@ -3,25 +3,16 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.metrics;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
-import javax.servlet.http.HttpServletRequest;
-
 import com.didichuxing.datachannel.arius.admin.biz.gateway.GatewayManager;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
 import com.didichuxing.datachannel.arius.admin.biz.metrics.GatewayMetricsManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.ClientNodeDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayProjectDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayDslDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayIndexDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayMetricsDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayNodeDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayOverviewDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayProjectDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MultiGatewayNodesDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.gateway.GatewayOverviewMetricsVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.top.VariousLineChartMetricsVO;
@@ -40,6 +31,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController

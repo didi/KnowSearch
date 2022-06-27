@@ -1,11 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.new_srv.expire;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
-import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
-import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
-
-import java.util.Set;
 
 /**
  * @author chengxiang

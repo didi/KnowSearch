@@ -31,9 +31,7 @@ public class ESLogicClusterDTO extends PageDTO {
     @ApiModelProperty("类型(1:公共：2:独立, 3:独占)")
     private Integer type;
 
-    /**
-     * todo:等待泽颖修改
-     */
+   
     @ApiModelProperty("所属应用ID")
     private Integer projectId;
 
@@ -62,4 +60,8 @@ public class ESLogicClusterDTO extends PageDTO {
 
     @ApiModelProperty("健康状态 0 green 1 yellow 2 red -1 未知")
     private Integer health;
+
+    @ApiModelProperty("规格")
+    private String  dataNodeSpec;
+
 }

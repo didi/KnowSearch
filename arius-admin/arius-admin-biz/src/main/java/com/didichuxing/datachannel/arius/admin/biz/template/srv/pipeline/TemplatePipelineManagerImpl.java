@@ -2,28 +2,32 @@ package com.didichuxing.datachannel.arius.admin.biz.template.srv.pipeline;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.PIPELINE_RATE_LIMIT_MAX_VALUE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser.SYSTEM;
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.TEMPLATE_CONFIG;
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.EDIT;
 import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum.TEMPLATE_PIPELINE;
-import static com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESPipelineDAO.*;
-
-import java.util.List;
-
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import static com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESPipelineDAO.DATE_FIELD;
+import static com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESPipelineDAO.DATE_FIELD_FORMAT;
+import static com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESPipelineDAO.EXPIRE_DAY;
+import static com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESPipelineDAO.INDEX_NAME_FORMAT;
+import static com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESPipelineDAO.INDEX_VERSION;
+import static com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESPipelineDAO.MS_TIME_FIELD_ES_FORMAT;
+import static com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESPipelineDAO.MS_TIME_FIELD_PLATFORM_FORMAT;
+import static com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESPipelineDAO.RATE_LIMIT;
+import static com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESPipelineDAO.SECOND_TIME_FIELD_ES_FORMAT;
+import static com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESPipelineDAO.SECOND_TIME_FIELD_PLATFORM_FORMAT;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.BaseTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ESPipelineProcessor;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.IndexTemplatePhysicalConfig;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePhyPO;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
@@ -33,6 +37,10 @@ import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexT
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplatePhyDAO;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import java.util.List;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * @author d06679
@@ -294,9 +302,13 @@ public class TemplatePipelineManagerImpl extends BaseTemplateSrv implements Temp
                         : templateLogicWithPhysical.getExpireTime(),
                     finalRateLimitNew, templatePhysical.getVersion(), templateLogicWithPhysical.getIdField(),
                     templateLogicWithPhysical.getRoutingField()));
-
-            operateRecordService.save(TEMPLATE_CONFIG, EDIT, templatePhysical.getId(),
-                    "rateLimitOld:" + rateLimitOld + ",rateLimitNew:" + rateLimitNew, SYSTEM.getDesc());
+            operateRecordService.save(new OperateRecord.Builder().operationTypeEnum(
+                            OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_EDIT_SETTING).userOperation(SYSTEM.getDesc())
+                    .triggerWayEnum(TriggerWayEnum.TIMING_TASK)
+                    .content("rateLimitOld:" + rateLimitOld + ",rateLimitNew:" + rateLimitNew)
+                    .bizId(templatePhysical.getId()).build());
+            //operateRecordService.save(TEMPLATE_CONFIG, EDIT, templatePhysical.getId(),
+            //        "rateLimitOld:" + rateLimitOld + ",rateLimitNew:" + rateLimitNew, SYSTEM.getDesc());
 
             return esSuccess;
         }

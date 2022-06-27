@@ -39,7 +39,7 @@
 			<if test="moduleId != null">
 				and module_id = #{moduleId}
 			</if>
-			<if test="bizId != null">
+			<if test="bizId != null  and bizId != ''">
 				and biz_id = #{bizId}
 			</if>
 			<if test="operateId != null">
@@ -54,11 +54,11 @@
 			<if test="endTime != null">
 				and operate_time &lt;= #{endTime}
 			</if>
-			<if test="projectName != null">
+			<if test="projectName != null  and projectName != ''">
 				and ( project_name = #{projectName} OR project_name LIKE CONCAT(#{projectName}, '%') OR project_name LIKE
 				CONCAT('%', #{projectName}) OR project_name LIKE CONCAT('%', #{projectName}, '%'))
 			</if>
-			<if test="userOperation != null">
+			<if test="userOperation != null  and userOperation != ''">
 				and user_operation = #{userOperation}
 			</if>
 			<if test="content != null and content != ''">

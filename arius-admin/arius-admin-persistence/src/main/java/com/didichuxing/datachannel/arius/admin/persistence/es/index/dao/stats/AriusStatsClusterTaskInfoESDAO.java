@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.*;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.*;
 
 /**
  * @author didi
@@ -57,7 +57,7 @@ public class AriusStatsClusterTaskInfoESDAO extends BaseAriusStatsESDAO {
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.AGG_CLUSTER_TASK_COUNT, cluster,
                 NOW_2M, NOW_1M);
         String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
-
+        //todo response npe
         return gatewayClient.performRequestWithRouting(metadataClusterName, cluster, realIndex, TYPE, dsl,
                 response -> Long.parseLong(response.getHits().getUnusedMap().getOrDefault(ESConstant.HITS_TOTAL, "0").toString()), 3);
     }

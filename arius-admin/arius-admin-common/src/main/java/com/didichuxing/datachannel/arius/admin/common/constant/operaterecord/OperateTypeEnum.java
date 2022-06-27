@@ -29,19 +29,18 @@ public enum OperateTypeEnum {
     /**
      * 物理集群:扩容
      */
-    PHYSICAL_CLUSTER_CAPACITY(NewModuleEnum.PHYSICAL_CLUSTER, "集群扩容",3),
-    /**
-     * 物理集群：缩容
-     */
-    PHYSICAL_CLUSTER_SHRINKAGE_CAPACITY(NewModuleEnum.PHYSICAL_CLUSTER, "集群缩容",4),
+    PHYSICAL_CLUSTER_CAPACITY(NewModuleEnum.PHYSICAL_CLUSTER, "集群扩缩容",3),
+ 
     /**
      * 物理集群：重启
      */
     PHYSICAL_CLUSTER_RESTART(NewModuleEnum.PHYSICAL_CLUSTER, "重启",5),
+   
     /**
      * 物理集群： 信息修改
      */
     PHYSICAL_CLUSTER_INFO_MODIFY(NewModuleEnum.PHYSICAL_CLUSTER, "物理集群信息修改",6),
+     PHYSICAL_CLUSTER_START(NewModuleEnum.PHYSICAL_CLUSTER, "启动",53),
     /**
      * 物理集群:升级
      */
@@ -55,7 +54,7 @@ public enum OperateTypeEnum {
      */
     PHYSICAL_CLUSTER_GATEWAY_CHANGE(NewModuleEnum.PHYSICAL_CLUSTER, "GATEWAY变更",9),
     /**
-     * 物理集群：配置文件变更
+     * 物理集群：配置文件变更 todo
      */
     PHYSICAL_CLUSTER_CONF_FILE_CHANGE(NewModuleEnum.PHYSICAL_CLUSTER, "配置文件变更", 10),
     /**
@@ -73,11 +72,8 @@ public enum OperateTypeEnum {
     /**
      * 我的集群：集群扩容
      */
-    MY_CLUSTER_CAPACITY(NewModuleEnum.MY_CLUSTER, "集群扩容",3),
-    /**
-     * 我的集群：集群缩容
-     */
-    MY_CLUSTER_SHRINKAGE_CAPACITY(NewModuleEnum.MY_CLUSTER, "集群缩容", 4),
+    MY_CLUSTER_CAPACITY(NewModuleEnum.MY_CLUSTER, "集群扩缩容",3),
+
     /**
      * 我的集群：集群下线
      */
@@ -112,7 +108,7 @@ public enum OperateTypeEnum {
      */
     TENANT_INFO_MODIFY(NewModuleEnum.TENANT, "租户信息修改",22),
     /**
-     * 索引模板管理：模板创建
+     * 索引模板管理：模板创建 todo
      */
     INDEX_TEMPLATE_MANAGEMENT_CREATE(NewModuleEnum.INDEX_MANAGEMENT, "模板创建",23),
     /**
@@ -144,19 +140,16 @@ public enum OperateTypeEnum {
      */
     TEMPLATE_SERVICE_CLEAN(NewModuleEnum.TEMPLATE_SERVICE, "索引清理",30),
     /**
-     * 模板服务:模板扩容
+     * 模板服务:模板扩缩容
      */
-    TEMPLATE_SERVICE_CAPACITY(NewModuleEnum.TEMPLATE_SERVICE, "模板扩容",31),
-    /**
-     * 模板服务:模板缩容
-     */
-    TEMPLATE_SERVICE_SHRINKAGE_CAPACITY(NewModuleEnum.TEMPLATE_SERVICE, "模板缩容",32),
+    TEMPLATE_SERVICE_CAPACITY(NewModuleEnum.TEMPLATE_SERVICE, "模板扩缩容",31),
+   
     /**
      * 模板服务
      */
     TEMPLATE_SERVICE(NewModuleEnum.TEMPLATE_SERVICE, "模板服务",33),
     /**
-     * 索引管理:创建
+     * 索引管理:创建 todo
      */
     INDEX_MANAGEMENT_CREATE(NewModuleEnum.INDEX_MANAGEMENT, "索引创建",34),
     /**
@@ -167,6 +160,7 @@ public enum OperateTypeEnum {
      * 索引管理:别名调整
      */
     INDEX_MANAGEMENT_ALIAS_MODIFY(NewModuleEnum.INDEX_MANAGEMENT, "别名调整", 36),
+    INDEX_MANAGEMENT_LABEL_MODIFY(NewModuleEnum.INDEX_MANAGEMENT, "标签调整", 36),
     /**
      * 索引管理:索引读写变更
      */
@@ -184,7 +178,7 @@ public enum OperateTypeEnum {
      */
     QUERY_TEMPLATE_DSL_CURRENT_LIMIT_ADJUSTMENT(NewModuleEnum.QUERY_TEMPLATE, "DSL限流调整",40),
     /**
-     * 查询模板:DSL查询模板禁用
+     * 查询模板:DSL查询模板禁用 todo
      */
     QUERY_TEMPLATE_DISABLE(NewModuleEnum.QUERY_TEMPLATE, "DSL查询模板禁用",41),
     /**
@@ -198,7 +192,31 @@ public enum OperateTypeEnum {
     /**
      * 配置删除
      */
-    SETTING_DELETE(NewModuleEnum.SETTING, "删除配置",44);
+    SETTING_DELETE(NewModuleEnum.SETTING, "删除配置",44),
+    
+    /**
+     * sense操作添加 todo
+     */
+    SENSE_OP_ADD(NewModuleEnum.SENSE_OP, "新增配置",45),
+    SENSE_OP_EDIT(NewModuleEnum.SENSE_OP, "修改配置",45),
+    /**
+     * sense操作删除 todo
+     */
+    SENSE_OP_DELETE(NewModuleEnum.SENSE_OP, "删除配置",46),
+    /**
+     * sense操作编辑 todo
+     */
+    ES_CLUSTER_PLUGINS_ADD(NewModuleEnum.ES_CLUSTER_PLUGINS, "新增插件", 47),
+    ES_CLUSTER_PLUGINS_EDIT(NewModuleEnum.ES_CLUSTER_PLUGINS, "编辑插件", 48),
+    ES_CLUSTER_PLUGINS_DELETE(NewModuleEnum.ES_CLUSTER_PLUGINS, "删除配置", 49),
+    ES_CLUSTER_CONFIG_DELETE(NewModuleEnum.ES_CLUSTER_CONFIG, "删除集群配置", 50),
+    
+    ES_CLUSTER_CONFIG_ADD(NewModuleEnum.ES_CLUSTER_CONFIG, "新增集群配置", 51),
+    ES_CLUSTER_CONFIG_EDIT(NewModuleEnum.ES_CLUSTER_CONFIG, "编辑集群配置", 52),
+    ROLE_MANAGER_DELETE(NewModuleEnum.ROLE_MANAGER, "删除角色", 53),
+    ROLE_MANAGER_CREATE(NewModuleEnum.ROLE_MANAGER, "创建角色", 53),
+    ROLE_MANAGER_UNBIND_USER(NewModuleEnum.ROLE_MANAGER, "角色解绑用户", 54),
+    ROLE_MANAGER_BIND_USER(NewModuleEnum.ROLE_MANAGER, "角色绑定用户", 55);
     /**
      * 模块
      */

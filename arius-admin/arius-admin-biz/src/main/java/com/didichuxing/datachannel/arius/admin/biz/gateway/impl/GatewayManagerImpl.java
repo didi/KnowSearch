@@ -12,9 +12,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.GatewayHeartbe
 import com.didichuxing.datachannel.arius.admin.common.bean.common.IndexTemplatePhysicalConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.alias.IndexTemplateAliasDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUser;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectConfig;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectTemplateAuth;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ESUser;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ProjectConfig;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ProjectTemplateAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.ScrollDslTemplateRequest;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.ScrollDslTemplateResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.gateway.GatewayClusterNode;
@@ -30,14 +30,14 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.GatewayTe
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.GatewayTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.GatewaySqlConstant;
-import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectTemplateAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectTemplateAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.TemplateUtils;
-import com.didichuxing.datachannel.arius.admin.core.service.app.ESUserService;
-import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectConfigService;
-import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectLogicTemplateAuthService;
+import com.didichuxing.datachannel.arius.admin.core.service.project.ESUserService;
+import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectConfigService;
+import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectLogicTemplateAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.gateway.GatewayService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
@@ -403,7 +403,7 @@ public class GatewayManagerImpl implements GatewayManager {
                 Collection<ProjectTemplateAuth> templateAuthCollection =
                         esUser2ProjectTemplateAuthsMap.get(esUser.getId());
                 if (!templateAuthCollection.isEmpty()) {
-                    //todo 判断项目侧的索引权限
+                    
                     fetchPermissionIndexExpressions(esUser.getId(), templateAuthCollection,
                         templateId2IndexTemplateLogicMap,aliasMap, readPermissionIndexExpressions,writePermissionIndexExpressions);
                 } else {

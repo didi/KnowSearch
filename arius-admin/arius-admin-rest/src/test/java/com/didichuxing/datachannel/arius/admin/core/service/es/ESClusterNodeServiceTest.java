@@ -2,9 +2,7 @@ package com.didichuxing.datachannel.arius.admin.core.service.es;
 
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.ShardMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.IndexResponse;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.MovingShardMetrics;
 import com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESClusterNodeDAO;
 import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
 import com.didiglobal.logi.elasticsearch.client.gateway.direct.DirectResponse;
@@ -20,8 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.BIG_SHARD;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.ONE_BILLION;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.ONE_BILLION;
 
 /**
  * @author cjm

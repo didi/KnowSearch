@@ -1,13 +1,12 @@
 package com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.impl;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.CLUSTER;
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.EXE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.MASTER_NODE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum.ES_DOCKER;
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum.ES_HOST;
 import static java.util.Objects.nonNull;
 
 import com.alibaba.fastjson.JSON;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.EcmParamBase;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.EsConfigAction;
@@ -22,6 +21,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.Cl
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.espackage.ESPackage;
 import com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.ESClusterMethodNameEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.threadpool.AriusTaskThreadPool;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
@@ -486,8 +487,15 @@ public class EcmHandleServiceImpl implements EcmHandleService {
 
         // 操作记录
         if (recordOperate) {
-            operateRecordService.save(CLUSTER, EXE, String.valueOf(clusterId),
-                String.format("物理集群 %s 开始进行 %s 操作", clusterId, methodName), operator);
+            ESClusterMethodNameEnum.getOperateTypeEnum(methodName).ifPresent(
+                    operateTypeEnum -> operateRecordService.save(
+                            new OperateRecord.Builder().operationTypeEnum(operateTypeEnum)
+                                    .content(String.format("物理集群 %s 开始进行 %s 操作", clusterId, methodName))
+                                    .triggerWayEnum(TriggerWayEnum.TIMING_TASK).bizId(clusterId).userOperation(operator)
+                                    .build()));
+             
+            //operateRecordService.save(CLUSTER, EXE, String.valueOf(clusterId),
+            //    String.format("物理集群 %s 开始进行 %s 操作", clusterId, methodName), operator);
         }
 
         return result;

@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.vo.app;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.BaseDTO;
-import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectClusterLogicAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectClusterLogicAuthEnum;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -30,7 +30,7 @@ public class ProjectLogicClusterAuthVO extends BaseDTO {
     /**
      * @see ProjectClusterLogicAuthEnum
      */
-    @ApiModelProperty("权限类型，0：超管权限，1：配置管理权限，2：访问权限")
+    @ApiModelProperty("权限类型:0：超管权限，1：配置管理权限，2：访问权限")
     private Integer type;
 
     @ApiModelProperty("责任人")

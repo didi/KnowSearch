@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.event.app;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUser;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ESUser;
 
 public class ESUserDeleteEvent extends AppEvent {
 

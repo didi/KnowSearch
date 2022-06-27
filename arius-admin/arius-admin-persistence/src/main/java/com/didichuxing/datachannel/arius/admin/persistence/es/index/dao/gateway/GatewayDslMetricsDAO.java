@@ -13,26 +13,14 @@ import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESAggr
 import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESAggrMap;
 import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESBucket;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Queue;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 
@@ -82,7 +70,7 @@ public class GatewayDslMetricsDAO extends BaseESDAO {
     }
 
     /**
-     * 获取某个查询模版访问耗时  by dslTemplateMd5 GET_GATEWAY_DSLMD5_BY_APPID
+     * 获取某个查询模版访问耗时  by dslTemplateMd5 GET_GATEWAY_DSLMD5_BY_PROJECT_ID
      */
     public VariousLineChartMetrics getDslTotalCostByRangeAndMd5(Long startTime, Long endTime, String dslMd5, Integer projectId) {
         String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTime, endTime);
@@ -96,7 +84,7 @@ public class GatewayDslMetricsDAO extends BaseESDAO {
      */
     public List<String> getDslMd5List(Long startTime, Long endTime, Integer projectId) {
         String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTime, endTime);
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_DSLMD5_BY_APPID, projectId, startTime, endTime);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_DSL_MD5_BY_PROJECT_ID, projectId, startTime, endTime);
         return gatewayClient.performRequest(realIndexName, TYPE, dsl, (ESQueryResponse response) -> {
             List<String> list = Lists.newArrayList();
             Map<String, ESAggr> esAggrMap = Optional.ofNullable(response.getAggs()).map(ESAggrMap::getEsAggrMap).orElse(null);

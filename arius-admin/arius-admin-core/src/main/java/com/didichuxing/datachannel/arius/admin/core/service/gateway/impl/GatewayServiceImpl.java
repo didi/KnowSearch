@@ -2,7 +2,7 @@ package com.didichuxing.datachannel.arius.admin.core.service.gateway.impl;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.GatewayHeartbeat;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUser;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ESUser;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.gateway.GatewayClusterNode;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.gateway.GatewayClusterNodePO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.gateway.GatewayClusterPO;
@@ -130,7 +130,6 @@ public class GatewayServiceImpl implements GatewayService {
 
 
         String url = GatewaySqlConstant.DEFAULT_HTTP_PRE_FIX + esGatewayClient.getSingleGatewayAddress() + postFix;
-//        String url = GatewaySqlConstant.DEFAULT_HTTP_PRE_FIX + esGatewayClient.getGatewayAddress() + postFix;
 
         try {
             // gateway的sql语句操作接口直接以字符串的形式返还结果

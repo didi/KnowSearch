@@ -1,12 +1,12 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.HIST;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.INDICES;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.KEY;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.SHARDS;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.TASKS;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.TOTAL;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.VALUE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.HIST;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.INDICES;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.KEY;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.SHARDS;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.TASKS;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.TOTAL;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.VALUE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.GET_CLUSTER_STATS;
 import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.GET_PENDING_TASKS;
 
