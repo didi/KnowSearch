@@ -209,7 +209,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
                 .runnableTask(() -> buildLogicRole(clusterLogicVO, clusterLogic))
                 .runnableTask(() -> buildConsoleClusterVersions(clusterLogicVO));
 
-        //依赖获取集群状态, 不能使用FutureUtil, 否则抛NPE
+        
         buildClusterNodeInfo(clusterLogicVO);
         Optional.ofNullable(projectService.getProjectBriefByProjectId(clusterLogic.getProjectId()))
                 .map(ProjectBriefVO::getProjectName)
