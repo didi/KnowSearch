@@ -1,19 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.AVG;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.DOUBLE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.FIELD;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.HIST;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.INT;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.KEY;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.LONG;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.METRICS;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.PERCENTILES;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.STATIS;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.TIME_STAMP;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.VALUE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.VALUES;
-
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONPath;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.MetricsContent;
@@ -47,6 +33,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.*;
 
 @NoArgsConstructor
 public class BaseAriusStatsESDAO extends BaseESDAO {

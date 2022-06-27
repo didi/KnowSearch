@@ -17,8 +17,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.ecm.ESClusterNodeS
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
-import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * @description: 逻辑集群manager
@@ -219,5 +220,10 @@ public interface ClusterLogicManager {
      */
     Result<List<String>> getProjectLogicClusterNameByType(Integer projectId, Integer type);
 
+    /**
+     * 根据projectId获取项目下的逻辑集群
+     * @param projectId
+     * @return
+     */
     List<String> listClusterLogicNameByProjectId(Integer projectId);
 }
