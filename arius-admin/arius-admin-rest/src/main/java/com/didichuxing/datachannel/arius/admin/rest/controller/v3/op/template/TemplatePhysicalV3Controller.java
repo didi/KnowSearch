@@ -68,6 +68,7 @@ public class TemplatePhysicalV3Controller {
     @ApiOperation(value = "升级多个物理模板接口", notes = "")
     public Result<Boolean> multipleUpgrade(HttpServletRequest request,
                                            @RequestBody List<TemplatePhysicalUpgradeDTO> params) throws ESOperateException {
-        return templatePhyManager.upgradeMultipleTemplate(params, HttpRequestUtil.getOperator(request));
+        return templatePhyManager.upgradeMultipleTemplate(params, HttpRequestUtil.getOperator(request),
+                HttpRequestUtil.getProjectId(request));
     }
 }

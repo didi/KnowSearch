@@ -1,6 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.ESClusterRoleHost;
+import java.io.Serializable;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,7 +15,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ClusterOpIndecreaseHostOrderDetail extends BaseClusterHostOrderDetail {
+public class ClusterOpIndecreaseHostOrderDetail extends BaseClusterHostOrderDetail implements Serializable {
 
     /**
      * 物理集群id

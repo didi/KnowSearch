@@ -615,8 +615,7 @@ class ClusterPhyManagerTest {
         param.setImportRule(1);
         when(mockClusterPhyService.getClusterByName(CLUSTER)).thenReturn(clusterPhy);
         when(mockEsClusterService.syncGetClusterHealthEnum(CLUSTER)).thenReturn(ClusterHealthEnum.GREEN);
-        when(mockOperateRecordService.save(ModuleEnum.ES_CLUSTER_JOIN, OperationEnum.ADD, "clusterPhyName", "desc", "operator"))
-                .thenReturn(Result.buildFail(null));
+  
         when(mockClusterPhyService.editCluster(Mockito.any(),Mockito.anyString()))
                 .thenReturn(Result.buildFail(null));
         assertTrue(clusterPhyManager.joinCluster(param, "admin").success());

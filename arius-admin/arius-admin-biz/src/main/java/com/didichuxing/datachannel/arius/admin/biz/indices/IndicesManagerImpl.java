@@ -1,18 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.biz.indices;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.INDEX_BLOCK_SETTING;
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.INDEX_OP;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.PRIMARY;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.function.BiFunction;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -20,6 +8,8 @@ import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.page.IndexPageSearchHandle;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord.Builder;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatCellDTO;
@@ -41,9 +31,16 @@ import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.index.IndexBlockEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
-import com.didichuxing.datachannel.arius.admin.common.util.*;
+import com.didichuxing.datachannel.arius.admin.common.util.AriusIndexMappingConfigUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.AriusOptional;
+import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.IndexSettingsUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.SizeUtil;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
@@ -62,6 +59,14 @@ import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.function.BiFunction;
+import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * @author lyn
@@ -140,8 +145,14 @@ public class IndicesManagerImpl implements IndicesManager {
             if (indexNameList.size() == esIndexService.syncBatchDeleteIndices(cluster, indexNameList, RETRY_COUNT)) {
                 Result<Boolean> batchSetIndexFlagInvalidResult = updateIndexFlagInvalid(cluster, indexNameList);
                 if (batchSetIndexFlagInvalidResult.success()) {
-                    operateRecordService.save(INDEX_OP, OperationEnum.DELETE, null,
-                        String.format("批量删除%s集群中的索引：%s", cluster, ListUtils.strList2String(indexNameList)), operator);
+                    operateRecordService.save(new OperateRecord.Builder()
+                                    .operationTypeEnum(OperateTypeEnum.INDEX_MANAGEMENT_DELETE)
+                                    .userOperation(operator)
+                                    .content(String.format("批量删除%s集群中的索引：%s", cluster, ListUtils.strList2String(indexNameList)))
+                                    .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                                    .project(projectService.getProjectBriefByProjectId(projectId))
+                            
+                            .build());
                 }
             }
             return Result.buildSucc();
@@ -191,9 +202,13 @@ public class IndicesManagerImpl implements IndicesManager {
                 if (!setCatIndexResult.success()) {
                     return Result.buildFail("批量更新索引状态失败");
                 }
-
-                operateRecordService.save(INDEX_OP, OperationEnum.OPEN_INDEX, null,
-                        String.format("批量开启%s集群中的索引：%s", cluster, ListUtils.strList2String(indexNameList)), operator);
+                operateRecordService.save(
+                        new OperateRecord.Builder().project(projectService.getProjectBriefByProjectId(projectId))
+                                .content(String.format("批量开启%s集群中的索引：%s", cluster,
+                                        ListUtils.strList2String(indexNameList))).userOperation(operator)
+                                .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                                .operationTypeEnum(OperateTypeEnum.INDEX_MANAGEMENT_OP_INDEX).build());
+              
 
             } catch (ESOperateException e) {
                 LOGGER.error(
@@ -220,9 +235,18 @@ public class IndicesManagerImpl implements IndicesManager {
                 if (!setCatIndexResult.success()) {
                     return Result.buildFail("批量更新索引状态失败");
                 }
-
-                operateRecordService.save(INDEX_OP, OperationEnum.CLOSE_INDEX, null,
-                    String.format("批量关闭%s集群中的索引：%s", cluster, ListUtils.strList2String(indexNameList)), operator);
+                 operateRecordService.save(
+                         new OperateRecord.Builder()
+                                 .content(String.format("批量关闭%s集群中的索引：%s", cluster, ListUtils.strList2String(indexNameList)))
+                                 .project(projectService.getProjectBriefByProjectId(projectId))
+                                 .operationTypeEnum(OperateTypeEnum.INDEX_MANAGEMENT_OP_INDEX)
+                                 .userOperation(operator)
+                                 .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                                 .build()
+                         
+                         
+                 );
+                
 
             } catch (ESOperateException e) {
                 LOGGER.error(
@@ -296,8 +320,15 @@ public class IndicesManagerImpl implements IndicesManager {
                         String operateContent = String.format("设置【%s】集群中的索引【%s】的block信息中的【%s】配置值为：%s", cluster,
                             indicesBlockSetting.getIndex(), indicesBlockSetting.getType(),
                             indicesBlockSetting.getValue());
-                        operateRecordService.save(INDEX_BLOCK_SETTING, OperationEnum.EDIT, null, operateContent,
-                            operator);
+                        
+                        operateRecordService.save(new Builder()
+                                
+                                .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                                .content(operateContent)
+                                .userOperation(operator)
+                                .project(projectService.getProjectBriefByProjectId(projectId))
+                                .operationTypeEnum(OperateTypeEnum.INDEX_MANAGEMENT_OP_INDEX)
+                                .build());
                     }
                 } catch (ESOperateException e) {
                     LOGGER.error(

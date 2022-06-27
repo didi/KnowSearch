@@ -16,7 +16,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.esconfig.ESCon
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.clusterOpRestart.ClusterOpConfigRestartOrderDetail;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.clusteroprestart.ClusterOpConfigRestartOrderDetail;
 
 import com.didichuxing.datachannel.arius.admin.common.constant.esconfig.EsConfigActionEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;

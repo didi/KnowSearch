@@ -1,11 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.persistence.mysql.template;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePO;
 import java.util.List;
-
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
-
-import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePO;
 
 /**
  * @author chengxiang
@@ -52,5 +50,6 @@ public interface IndexTemplateDAO {
     int updateBlockWriteState(@Param("logicId") Integer logicId, @Param("blockWrite") Boolean blockWrite);
 
     List<String> listAllNames();
-
+    
+    Integer getProjectIdByTemplateLogicId(@Param("logicId")Integer templateLogicId);
 }

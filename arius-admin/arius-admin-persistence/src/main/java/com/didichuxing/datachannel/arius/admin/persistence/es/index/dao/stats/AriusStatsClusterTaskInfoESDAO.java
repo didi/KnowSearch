@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.*;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.*;
 
 /**
  * @author didi

@@ -1,17 +1,24 @@
 package com.didichuxing.datachannel.arius.admin.core.service.template.logic;
 
+import com.didichuxing.datachannel.arius.admin.common.Tuple;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateRateLimitDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateConfigDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateConditionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.TemplateQueryDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateConfig;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithClusterAndMasterTemplate;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateType;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithCluster;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
+import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.*;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.TemplateQueryDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.*;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
-import com.didichuxing.datachannel.arius.admin.common.Tuple;
-import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
-import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 
 /**
  * @author d06679
@@ -359,7 +366,7 @@ public interface IndexTemplateService {
      */
     Result updateBlockWriteState(Integer logicId, Boolean blockWrite, String operator);
 
-    Result updateTemplateWriteRateLimit(ConsoleTemplateRateLimitDTO consoleTemplateRateLimitDTO) throws ESOperateException;
+    Result updateTemplateWriteRateLimit(ConsoleTemplateRateLimitDTO consoleTemplateRateLimitDTO, String operator) throws ESOperateException;
 
     Result<Void> preCheckTemplateName(String templateName);
 
@@ -378,4 +385,12 @@ public interface IndexTemplateService {
      * @return
      */
      List<IndexTemplate> listByResourceIds(List<Long> resourceIds);
+    
+    /**
+     * 获取项目id通过模板逻辑id
+     *
+     * @param templateLogicId 模板逻辑id
+     * @return {@code Integer}
+     */
+    Integer getProjectIdByTemplateLogicId(Integer templateLogicId);
 }

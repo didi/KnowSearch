@@ -1,18 +1,21 @@
 package com.didichuxing.datachannel.arius.admin.common.util;
 
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
+import com.google.common.collect.Maps;
+import io.swagger.annotations.ApiModelProperty;
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
-
+import java.util.StringJoiner;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.ObjectUtils;
-
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
-import com.google.common.collect.Maps;
 
 /**
  * Bean操作工具
@@ -118,6 +121,61 @@ public class AriusObjUtils {
 
         return content.toString();
     }
+    
+    /**
+     * 找出两个vo中不同的值
+     *
+     * @param srcVo                       srcVo
+     * @param destVo                      destVo
+     * @param apiModelPropertyValueModify apiModelPropertyValueModify
+     * @return {@code String}
+     */
+    public static String findChangedWithClearByBeanVo(Object srcVo, Object destVo,
+                                                      Map</*apiModelPropertyValue*/String,/*修改后的apiModelPropertyValue*/String> apiModelPropertyValueModify) {
+        if (srcVo == null || destVo == null) {
+            return  null;
+        }
+        StringJoiner content = new StringJoiner("");
+        try {
+            Map<String, String> destMethodMap = Maps.newHashMap();
+            for (Field destField : destVo.getClass().getDeclaredFields()) {
+                if (destField.isAnnotationPresent(ApiModelProperty.class)) {
+                    String apiModelPropertyValue = destField.getAnnotation(ApiModelProperty.class).value();
+                    String getValue = getInvokeValue(destField.getName(), destVo);
+                    if (StringUtils.isNotBlank(getValue)) {
+                        destMethodMap.put(apiModelPropertyValue, getValue);
+                    }
+                }
+            }
+    
+            for (Field srcField : srcVo.getClass().getDeclaredFields()) {
+                if (srcField.isAnnotationPresent(ApiModelProperty.class)) {
+                    String apiModelPropertyValue = srcField.getAnnotation(ApiModelProperty.class).value();
+                    String destValue = destMethodMap.get(apiModelPropertyValue);
+                    if (destValue != null) {
+                        String srcGetValue = getInvokeValue(srcField.getName(), srcVo);
+                        String finalApiModelPropertyValue = apiModelPropertyValue;
+                        final Optional<String> apiModelPropertyValueModifyOptional = Optional.ofNullable(
+                                apiModelPropertyValueModify).map(m -> m.get(finalApiModelPropertyValue));
+                        if (apiModelPropertyValueModifyOptional.isPresent()) {
+                            apiModelPropertyValue = apiModelPropertyValueModifyOptional.get();
+                        }
+                        if (isChanged(destValue, srcGetValue)) {
+                            content.add("字段").add("【").add(apiModelPropertyValue).add("】")
+                                    .add("的原值").add("【").add(srcGetValue).add("】").add("修改为")
+                                    .add("【").add(destValue).add("】").add("\r\n");
+                        }
+                    }
+                    
+                }
+
+            }
+        } catch (Exception e) {
+            LOGGER.error("class=AriusObjUtils||method=findChangedWithClearByBeanVo||errMsg={}", e.getMessage(), e);
+        }
+        
+        return content.toString();
+    }
 
     /**
      * 是否是空
@@ -148,6 +206,17 @@ public class AriusObjUtils {
      */
     public static boolean isBlack(String str) {
         return StringUtils.isBlank(str);
+    }
+    
+    private static String getInvokeValue(String propertyName, Object bean) {
+        try {
+            PropertyDescriptor pd = new PropertyDescriptor(propertyName, bean.getClass());
+            Object invoke = pd.getReadMethod().invoke(bean);
+            return String.valueOf(invoke);
+        } catch (Exception e) {
+            return null;
+        }
+        
     }
 
     private static boolean isGetter(Method method) {

@@ -1,40 +1,37 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.cold;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.MILLIS_PER_DAY;
-import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.*;
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.BATCH_CHANGE_TEMPLATE_HOT_DAYS;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_COMMON_GROUP;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_TEMPLATE_COLD;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.INDEX_TEMPLATE_COLD_DAY_DEFAULT;
 import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum.TEMPLATE_COLD;
 import static com.didichuxing.datachannel.arius.admin.common.util.IndexNameFactory.genIndexNameClear;
-
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.BaseTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.IndexNameFactory;
 import com.didichuxing.datachannel.arius.admin.common.util.TemplateUtils;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
-import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
-import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateDAO;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * 索引冷存服务
@@ -49,17 +46,11 @@ public class TemplateColdManagerImpl extends BaseTemplateSrv implements Template
     @Autowired
     private AriusConfigInfoService ariusConfigInfoService;
 
-    @Autowired
-    private ESClusterService       esClusterService;
-
-    @Autowired
-    private ESIndexService         esIndexService;
-
+  
     @Autowired
     private IndexTemplateDAO indexTemplateDAO;
 
-    @Autowired
-    private ClusterPhyService      clusterPhyService;
+
 
     @Override
     public TemplateServiceEnum templateService() {
@@ -221,9 +212,12 @@ public class TemplateColdManagerImpl extends BaseTemplateSrv implements Template
         int count = indexTemplateDAO.batchChangeHotDay(days);
 
         LOGGER.info("class=TemplateColdManagerImpl||method=batchChangeHotDay||days={}||count={}||operator={}", days, count, operator);
-
-        operateRecordService.save(ModuleEnum.PLATFORM_OP, BATCH_CHANGE_TEMPLATE_HOT_DAYS, -1,
-            "deltaHotDays:" + days + ";editCount:" + count, operator);
+        operateRecordService.save(
+                new OperateRecord.Builder().userOperation(operator).operationTypeEnum(OperateTypeEnum.SETTING_MODIFY)
+                        .bizId(-1)
+                    
+                        .content("deltaHotDays:" + days + ";editCount:" + count).build());
+      
 
         return Result.buildSucc(count);
     }

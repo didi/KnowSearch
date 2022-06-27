@@ -1,15 +1,12 @@
 package com.didichuxing.datachannel.arius.admin.task.resource;
 
 import com.didichuxing.datachannel.arius.admin.task.BaseConcurrentClusterLogicTask;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import com.didichuxing.datachannel.arius.admin.task.metadata.IndicesCatInfoCollectorRandomTask;
 import com.didiglobal.logi.job.annotation.Task;
 import com.didiglobal.logi.job.common.TaskResult;
 import com.didiglobal.logi.job.core.job.Job;
 import com.didiglobal.logi.job.core.job.JobContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by linyunan on 2021-10-15

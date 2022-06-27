@@ -15,11 +15,7 @@ public final class AuthConstant {
      * 超级项目
      */
     public static final Integer SUPER_PROJECT_ID = 1;
-    /**
-     * 超级用户
-     */
-    public static final Integer SUPER_USER_ID    = 1;
-    public static final String  SUPER_USER_NAME  = "admin";
+
     
     /**
      * 管理角色id

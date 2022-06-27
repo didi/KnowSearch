@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?><!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	"http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.didichuxing.datachannel.arius.admin.persistence.mysql.app.ESUserDAO">
-	<resultMap id="BaseResultMap" type="com.didichuxing.datachannel.arius.admin.common.bean.po.app.ESUserPO">
+<mapper namespace="com.didichuxing.datachannel.arius.admin.persistence.mysql.project.ESUserDAO">
+	<resultMap id="BaseResultMap" type="com.didichuxing.datachannel.arius.admin.common.bean.po.project.ESUserPO">
 		<!--@mbg.generated-->
 		<!--@Table arius_es_user-->
 		<id column="id" jdbcType="BIGINT" property="id"/>
@@ -40,7 +40,7 @@
 		responsible,
 		is_default_display
 	</sql>
-	<select id="getDefaultESUserByProject" resultType="com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUser">
+	<select id="getDefaultESUserByProject" resultType="com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ESUser">
 		select
 		<include refid="Base_Column_List"/>
 		from arius_es_user
@@ -56,7 +56,7 @@
 	</select>
 
 	
-	<select id="listByCondition" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.app.ESUserPO"
+	<select id="listByCondition" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.project.ESUserPO"
 	        resultMap="BaseResultMap">
 		select
 		<include refid="Base_Column_List"/>
@@ -85,7 +85,7 @@
 		</if>
 		order by id desc
 	</select>
-	<insert id="insert" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.app.ESUserPO"
+	<insert id="insert" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.project.ESUserPO"
 	        useGeneratedKeys="true" keyColumn="id" keyProperty="id">
 		<!--@mbg.generated-->
 		insert into arius_es_user
@@ -123,7 +123,7 @@
 		</foreach>
 	</select>
 	
-	<update id="update" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.app.ESUserPO">
+	<update id="update" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.project.ESUserPO">
 		update arius_es_user
 		<trim prefix="set" prefixOverrides=",">
 			<if test="projectId != null">

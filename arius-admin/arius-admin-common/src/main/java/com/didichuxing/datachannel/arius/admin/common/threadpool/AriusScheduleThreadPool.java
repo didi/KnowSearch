@@ -50,6 +50,6 @@ public class AriusScheduleThreadPool {
                 t.setPriority( Thread.NORM_PRIORITY );
             }
             return t;
-        };
+        }
     }
 }

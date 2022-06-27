@@ -1,20 +1,21 @@
 package com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.impl;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.ES_CLUSTER_PLUGINS;
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.ADD;
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.DELETE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.EDIT;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Plugin;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.PluginDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.esplugin.PluginPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PluginVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
-import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.FileCompressionType;
 import com.didichuxing.datachannel.arius.admin.common.constant.PluginTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
@@ -30,6 +31,7 @@ import com.didichuxing.datachannel.arius.admin.persistence.mysql.ecm.ESPluginDAO
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.service.UserService;
+import com.google.common.collect.Maps;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -186,11 +188,22 @@ public class ESPluginServiceImpl implements ESPluginService {
         boolean succ = (1 == esPluginDAO.updateDesc(oldPlugin.getId(), pluginDTO.getDesc()));
 
         if (succ) {
-            operateRecordService.save(ES_CLUSTER_PLUGINS, EDIT, pluginDTO.getId(), "", operator);
+            PluginPO newPluginPo = esPluginDAO.getById(oldPlugin.getId());
+            PluginVO oldPluginVO = ConvertUtil.obj2Obj(oldPlugin, PluginVO.class);
+            PluginVO newPluginVO = ConvertUtil.obj2Obj(newPluginPo, PluginVO.class);
+            Map</*apiModelPropertyValue*/String,/*修改后的apiModelPropertyValue*/String> apiModelPropertyValueModify=
+                    Maps.newHashMap();
+            apiModelPropertyValueModify.put("上传插件类型: 0 系统默认插件, 1 ES能力插件, 2 平台能力插件","上传插件类型");
+            operateRecordService.save(new OperateRecord.Builder().bizId(pluginDTO.getId()).userOperation(operator)
+                    .operationTypeEnum(OperateTypeEnum.ES_CLUSTER_PLUGINS_EDIT)
+                    .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                    .content(AriusObjUtils.findChangedWithClearByBeanVo(oldPluginVO, newPluginVO,apiModelPropertyValueModify)).build()
+                    
+                    
+            );
         }
         return Result.build(succ);
     }
-
     @Override
     public PluginPO getESPluginById(Long id) {
         return esPluginDAO.getById(id);
@@ -217,7 +230,13 @@ public class ESPluginServiceImpl implements ESPluginService {
         // 删除DB插件信息
         boolean succ = (1 == esPluginDAO.delete(id));
         if (succ) {
-            operateRecordService.save(ES_CLUSTER_PLUGINS, DELETE, id, "", operator);
+            operateRecordService.save(new OperateRecord.Builder()
+                            .bizId(pluginDTO.getId())
+                            .userOperation(operator)
+                            .operationTypeEnum(OperateTypeEnum.ES_CLUSTER_PLUGINS_DELETE)
+                            .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                            .build()
+                    );
         }
 
         return Result.build(succ, id);

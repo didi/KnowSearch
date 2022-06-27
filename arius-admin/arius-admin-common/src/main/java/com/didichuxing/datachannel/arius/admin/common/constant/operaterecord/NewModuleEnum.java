@@ -54,11 +54,17 @@ public enum NewModuleEnum {
      * 查询模板
      */
     QUERY_TEMPLATE("查询模板",8),
+   
     
     /**
      * 配置
      */
-    SETTING("配置",9);
+    SETTING("配置",9),
+    SENSE_OP("sense操作", 10),
+    SCHEDULE("定时任务", 11),
+     ES_CLUSTER_PLUGINS( "ES集群插件",12),
+    ES_CLUSTER_CONFIG( "ES集群配置",13),
+    ROLE_MANAGER("角色管理", 14);
     /**
      * 模块
      */

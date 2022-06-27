@@ -1,24 +1,24 @@
 package com.didichuxing.datachannel.arius.admin.task;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser.SYSTEM;
+
+import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.threadpool.AriusTaskThreadPool;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import javax.annotation.PostConstruct;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.SCHEDULE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.EDIT;
-import static com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser.SYSTEM;
+import javax.annotation.PostConstruct;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * base任务 模板并发处理
@@ -103,7 +103,14 @@ public abstract class BaseConcurrentTask<T> {
         try {
             //记录任务的完成任务时间
             long cost = System.currentTimeMillis() - start;
-            operateRecordService.save(SCHEDULE, EDIT, getTaskName(), getTaskName() + "完成，耗时：" + cost, SYSTEM.getDesc());
+            operateRecordService.save(new OperateRecord.Builder()
+                            .bizId(getTaskName())
+                            .content(getTaskName() + "完成，耗时：" + cost)
+                            .operationTypeEnum(OperateTypeEnum.SENSE_OP_EDIT)
+                            .triggerWayEnum(TriggerWayEnum.TIMING_TASK)
+                            .userOperation(SYSTEM.getDesc())
+                    .build());
+        
         } catch (Exception e) {
             LOGGER.error("class=BaseConcurrentTask||method=execute||errMsg={}",
                     e.getMessage(), e);

@@ -192,17 +192,13 @@ public abstract class BaseWorkOrderHandler implements WorkOrderHandler {
      */
     protected abstract Result<Void> doProcessAgree(WorkOrder workOrder, String approver) throws AdminOperateException;
     
-    protected List<UserBriefVO> getRDOrOPList() {
-        return  roleTool.getAdminList();
-    }
+   
 
     protected List<UserBriefVO> getOPList() {
         return  roleTool.getAdminList();
     }
     
-    protected boolean isRDOrOP(String userName) {
-        return roleTool.isAdmin(userName);
-    }
+  
     
     protected boolean isOP(String userName) {
         return roleTool.isAdmin(userName);

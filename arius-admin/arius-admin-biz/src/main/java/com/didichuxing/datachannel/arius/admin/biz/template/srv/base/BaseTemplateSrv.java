@@ -1,7 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.base;
 
-import java.util.List;
-
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.TemplateSrvManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;

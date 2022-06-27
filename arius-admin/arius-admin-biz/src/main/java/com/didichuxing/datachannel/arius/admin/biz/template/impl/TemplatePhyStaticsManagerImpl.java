@@ -5,7 +5,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESIndexStats;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ProjectIdTemplateAccessCountVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateStatsInfoVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateValueRecordVO;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateSattisService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateValueService;
