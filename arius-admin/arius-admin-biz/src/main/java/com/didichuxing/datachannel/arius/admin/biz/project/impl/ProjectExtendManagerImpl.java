@@ -181,7 +181,9 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
     @Override
     public Result<Void> deleteProjectByProjectId(Integer projectId, String operator) {
         //项目删除前的检查
-       
+        if (AuthConstant.SUPER_PROJECT_ID.equals(projectId)){
+             return Result.buildFail("系统内置项目，不能删除");
+        }
         //校验项目绑定逻辑集群
         List<ClusterLogic> clusterLogics = clusterLogicService.getOwnedClusterLogicListByProjectId(projectId);
         if (CollectionUtils.isNotEmpty(clusterLogics)) {

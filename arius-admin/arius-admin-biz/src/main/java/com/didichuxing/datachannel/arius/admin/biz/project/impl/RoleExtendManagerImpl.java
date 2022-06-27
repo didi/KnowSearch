@@ -1,10 +1,14 @@
 package com.didichuxing.datachannel.arius.admin.biz.project.impl;
 
 import com.didichuxing.datachannel.arius.admin.biz.project.RoleExtendManager;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.RoleExtendVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didiglobal.logi.security.common.PagingData;
 import com.didiglobal.logi.security.common.PagingData.Pagination;
 import com.didiglobal.logi.security.common.PagingResult;
@@ -17,8 +21,11 @@ import com.didiglobal.logi.security.common.vo.role.RoleDeleteCheckVO;
 import com.didiglobal.logi.security.common.vo.role.RoleVO;
 import com.didiglobal.logi.security.exception.LogiSecurityException;
 import com.didiglobal.logi.security.service.RoleService;
+import com.didiglobal.logi.security.util.HttpRequestUtil;
+import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -33,6 +40,8 @@ import org.springframework.stereotype.Component;
 public class RoleExtendManagerImpl implements RoleExtendManager {
 	@Autowired
 	private RoleService roleService;
+	@Autowired
+	private OperateRecordService operateRecordService;
 	
 	/**
 	 * @param id
@@ -46,6 +55,14 @@ public class RoleExtendManagerImpl implements RoleExtendManager {
 		}
 		try {
 			roleService.deleteRoleByRoleId(id, request);
+			operateRecordService.save(new OperateRecord.Builder()
+							.userOperation(HttpRequestUtil.getOperator(request))
+							.operationTypeEnum(OperateTypeEnum.ROLE_MANAGER_DELETE)
+							.content(String.format("删除角色:[%d]",id))
+							.triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+					.build()
+			
+			);
 			return Result.buildSucc();
 		} catch (LogiSecurityException e) {
 			return Result.buildFail(e.getMessage());
@@ -82,6 +99,12 @@ public class RoleExtendManagerImpl implements RoleExtendManager {
 	public Result<Void> createRole(RoleSaveDTO saveDTO, HttpServletRequest request) {
 		try {
 			roleService.createRole(saveDTO, request);
+			operateRecordService.save(new OperateRecord.Builder().userOperation(HttpRequestUtil.getOperator(request))
+					.operationTypeEnum(OperateTypeEnum.ROLE_MANAGER_CREATE).content(String.format("新增角色:[%s]",
+							saveDTO.getRoleName()))
+					.triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).build()
+			
+			);
 			return Result.buildSucc();
 		} catch (LogiSecurityException e) {
 			return Result.buildFail(e.getMessage());
@@ -92,6 +115,12 @@ public class RoleExtendManagerImpl implements RoleExtendManager {
 	public Result<Void> deleteUserFromRole(Integer roleId, Integer userId, HttpServletRequest request) {
 		try {
 			roleService.deleteUserFromRole(roleId, userId, request);
+			operateRecordService.save(new OperateRecord.Builder().userOperation(HttpRequestUtil.getOperator(request))
+					.operationTypeEnum(OperateTypeEnum.ROLE_MANAGER_UNBIND_USER)
+					.content(String.format("角色:[%d]解绑的用户:[%d]", roleId, userId))
+					.triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).build()
+			
+			);
 			return Result.buildSucc();
 		} catch (LogiSecurityException e) {
 			return Result.buildFail(e.getMessage());
@@ -112,6 +141,16 @@ public class RoleExtendManagerImpl implements RoleExtendManager {
 	public Result<Void> assignRoles(RoleAssignDTO assignDTO, HttpServletRequest request) {
 		try {
 			roleService.assignRoles(assignDTO, request);
+			final List<Integer> userIds = Optional.ofNullable(assignDTO.getIdList()).orElse(Lists.newArrayList());
+			for (Integer userId : userIds) {
+				operateRecordService.save(
+						new OperateRecord.Builder().userOperation(HttpRequestUtil.getOperator(request))
+								.operationTypeEnum(OperateTypeEnum.ROLE_MANAGER_BIND_USER)
+								.content(String.format("角色:[%d]解绑的用户:[%d]", assignDTO.getId(), userId))
+								.triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).build());
+			}
+			
+		
 			return Result.buildSucc();
 			
 		} catch (LogiSecurityException e) {
