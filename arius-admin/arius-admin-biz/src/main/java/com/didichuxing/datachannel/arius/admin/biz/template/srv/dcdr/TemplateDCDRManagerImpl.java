@@ -1,9 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.dcdr;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.TEMPLATE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.CREATE_DCDR;
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.DELETE_DCDR;
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.SWITCH_MASTER_SLAVE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum.MASTER;
 import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum.SLAVE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum.TEMPLATE_DCDR;
@@ -12,6 +8,7 @@ import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.BaseTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.biz.worktask.OpTaskManager;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskProcessDTO;
@@ -30,9 +27,12 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.WorkTaskVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.DCDRSingleTemplateMasterSlaveSwitchDetailVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.DCDRTasksDetailVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateDCDRInfoVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
 import com.didichuxing.datachannel.arius.admin.common.constant.dcdr.DCDRStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.dcdr.DCDRSwithTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDCDRStepEnum;
@@ -54,6 +54,7 @@ import com.didiglobal.logi.elasticsearch.client.request.dcdr.DCDRTemplate;
 import com.didiglobal.logi.elasticsearch.client.response.indices.stats.IndexNodes;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
@@ -154,6 +155,8 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrv implements Template
   
     @Autowired
     private OperateRecordService  operateRecordService;
+    @Autowired
+    private ProjectService projectService;
     private static final  int TRY_LOCK_TIMEOUT=5;
     private static final  int ONE_STEP=1;
     private static final int TRY_TIMES_THREE=3;
@@ -225,8 +228,14 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrv implements Template
 
         //4. 记录操作
         if (result.success()) {
-            operateRecordService.save(TEMPLATE, CREATE_DCDR, templateId, "创建DCDR链路，主集群：" +
-                    templateLogicWithPhysical.getMasterPhyTemplate().getCluster() + "；从集群：" + targetCluster, operator);
+            operateRecordService.save(new OperateRecord.Builder().project(
+                            projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID)).content(
+                            "创建DCDR链路，主集群：" + templateLogicWithPhysical.getMasterPhyTemplate().getCluster() + "；从集群："
+                            + targetCluster).userOperation(operator).bizId(templateId)
+                    .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                    .operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE_DCDR_SETTING)
+            
+                    .build());
         }
         return result;
     }
@@ -311,9 +320,12 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrv implements Template
                                 param.getPhysicalIds());
                     }
                 }
-
-                operateRecordService.save(TEMPLATE, DELETE_DCDR, templatePhysicalPO.getLogicId(),
-                        "replicaCluster:" + param.getReplicaClusters(), operator);
+                operateRecordService.save(
+                        new OperateRecord.Builder().operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE_DCDR_SETTING)
+                                .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).bizId(templatePhysicalPO.getLogicId())
+                                .userOperation(operator).content("replicaCluster:" + param.getReplicaClusters())
+                    
+                                .build());
                 return Result.buildSucc();
             }
         }
@@ -358,8 +370,13 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrv implements Template
 
             //2.5 记录操作
             for (DCDRSingleTemplateMasterSlaveSwitchDetail dcdrTask: dcdrTasksDetail.getDcdrSingleTemplateMasterSlaveSwitchDetailList()) {
-                operateRecordService.save(TEMPLATE, SWITCH_MASTER_SLAVE, dcdrTask.getTemplateId(), "主从切换，主集群：" + dcdrTask.getMasterCluster() +
-                        "切换至从集群：" + dcdrTask.getSlaveCluster(), operator);
+                operateRecordService.save(
+                        new OperateRecord.Builder().operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE_DCDR_SETTING)
+                                .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).bizId(dcdrTask.getTemplateId())
+                                .userOperation(operator).content(
+                                        "主从切换，主集群：" + dcdrTask.getMasterCluster() + "切换至从集群：" + dcdrTask.getSlaveCluster())
+                    
+                                .build());
             }
 
         } catch (Exception e) {

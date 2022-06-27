@@ -1,11 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.core.service.template.physic.impl;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.TEMPLATE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.DELETE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.EDIT;
 
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.IndexTemplatePhysicalConfig;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhyDTO;
@@ -14,7 +13,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePhyPO;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplatePhysicalStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.event.template.PhysicalTemplateDeleteEvent;
@@ -37,6 +38,7 @@ import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexT
 import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
@@ -105,6 +107,8 @@ public class IndexTemplatePhyServiceImpl implements IndexTemplatePhyService {
 
     @Autowired
     private CacheSwitch                                    cacheSwitch;
+    @Autowired
+    private ProjectService projectService;
     private Cache<String, List<?>> templatePhyListCache = CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES).maximumSize(10).build();
 
     /**
@@ -217,9 +221,15 @@ public class IndexTemplatePhyServiceImpl implements IndexTemplatePhyService {
                     throw new ESOperateException(String.format("删除集群【%s】中物理模板【%s】失败！", oldPO.getCluster(), oldPO.getName()));
                 }
             }
-
-            operateRecordService.save(TEMPLATE, DELETE, oldPO.getLogicId(),
-                String.format("下线物理集群[%s]中模板[%s]", oldPO.getCluster(), oldPO.getName()), operator);
+            operateRecordService.save(
+                    new OperateRecord.Builder().bizId(oldPO.getLogicId()).triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                            .operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_OFFLINE)
+                            .content(String.format("下线物理集群[%s]中模板[%s]", oldPO.getCluster(), oldPO.getName()))
+                            .userOperation(operator)
+                    
+                            .build());
+            //operateRecordService.save(TEMPLATE, DELETE, oldPO.getLogicId(),
+            //    String.format("下线物理集群[%s]中模板[%s]", oldPO.getCluster(), oldPO.getName()), operator);
 
             SpringTool.publish(new PhysicalTemplateDeleteEvent(this, ConvertUtil.obj2Obj(oldPO, IndexTemplatePhy.class),
                 indexTemplateService.getLogicTemplateWithPhysicalsById(oldPO.getLogicId())));

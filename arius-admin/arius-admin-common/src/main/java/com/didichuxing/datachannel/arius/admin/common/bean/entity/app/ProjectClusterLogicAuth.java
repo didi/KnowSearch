@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.app;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.BaseEntity;
-import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectClusterLogicAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectClusterLogicAuthEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

@@ -4,8 +4,6 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConst
 import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_COMMON_GROUP;
 import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.CLUSTERS_INDEX_EXPIRE_DELETE_AHEAD;
 import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.INDEX_OPERATE_AHEAD_SECONDS;
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.TEMPLATE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.COPY;
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.EDIT;
 import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum.MASTER;
 import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum.SLAVE;
@@ -21,6 +19,7 @@ import com.didichuxing.datachannel.arius.admin.biz.template.srv.capacityplan.Ind
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.precreate.TemplatePreCreateManager;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.IndexTemplatePhysicalConfig;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplatePhysicalCopyDTO;
@@ -34,8 +33,11 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplatePhyVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.IndexTemplatePhysicalVO;
-import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectTemplateAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectTemplateAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TemplateOperateRecordEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplatePhysicalStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.event.template.PhysicalTemplateAddEvent;
@@ -50,7 +52,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.IndexNameFactory;
 import com.didichuxing.datachannel.arius.admin.common.util.TemplateUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
-import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectLogicTemplateAuthService;
+import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectLogicTemplateAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
@@ -267,14 +269,23 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result<Void> upgradeTemplate(TemplatePhysicalUpgradeDTO param, String operator) throws ESOperateException {
+    public Result<Void> upgradeTemplate(TemplatePhysicalUpgradeDTO param, String operator, Integer projectId) throws ESOperateException {
         Result<Void> checkResult = checkUpgradeParam(param);
         if (checkResult.failed()) {
             LOGGER.warn("class=TemplatePhyManagerImpl||method=upgradeTemplate||msg={}", CHECK_FAIL_MSG + checkResult.getMessage());
             return checkResult;
         } else {
-            operateRecordService.save(TEMPLATE, EDIT, param.getLogicId(), JSON.toJSONString(new TemplateOperateRecord(TemplateOperateRecordEnum.UPGRADE.getCode(),
-                    "模板版本升级为：" + param.getVersion())), operator);
+              operateRecordService.save(new OperateRecord.Builder()
+                              .bizId(param.getLogicId())
+                              .content(JSON.toJSONString(new TemplateOperateRecord(TemplateOperateRecordEnum.UPGRADE.getCode(),
+                    "模板版本升级为：" + param.getVersion())))
+                              .userOperation(operator)
+                              .operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE)
+                              .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                              .project(projectService.getProjectBriefByProjectId(projectId))
+              
+                      .build());
+        
         }
 
         return upgradeTemplateWithCheck(param, operator, 0);
@@ -291,13 +302,13 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Result<Boolean> upgradeMultipleTemplate(List<TemplatePhysicalUpgradeDTO> params,
-                                                   String operator) throws ESOperateException {
+                                                   String operator, Integer projectId) throws ESOperateException {
         if (CollectionUtils.isEmpty(params)) {
             Result.buildFail("参数为空");
         }
 
         for (TemplatePhysicalUpgradeDTO param : params) {
-            Result<Void> ret = upgradeTemplate(param, operator);
+            Result<Void> ret = upgradeTemplate(param, operator,projectId);
             if (ret.failed()) {
                 throw new ESOperateException(ret.getMessage());
             }
@@ -326,8 +337,14 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         if (addResult.failed()) { return Result.buildFrom(addResult);}
 
         // 记录操作记录
-        operateRecordService.save(TEMPLATE, COPY, indexTemplatePhy.getLogicId(),
-                String.format("复制【%s】物理模板至【%s】", indexTemplatePhy.getCluster(), param.getCluster()), operator);
+        operateRecordService.save(new OperateRecord.Builder()
+                        .operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE)
+                        .content(String.format("复制【%s】物理模板至【%s】", indexTemplatePhy.getCluster(), param.getCluster()))
+                        .triggerWayEnum(TriggerWayEnum.SYSTEM_TRIGGER)
+                        .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
+                        .userOperation(operator)
+                .build());
+       
 
         if (esTemplateService.syncCopyMappingAndAlias(indexTemplatePhy.getCluster(), indexTemplatePhy.getName(),
                 tgtTemplateParam.getCluster(), tgtTemplateParam.getName(), 0)) {
@@ -353,8 +370,14 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         if (result.success()) {
             String editContent = AriusObjUtils.findChangedWithClear(oldIndexTemplatePhy, param);
             if (StringUtils.isNotBlank(editContent)) {
-                operateRecordService.save(TEMPLATE, EDIT, param.getLogicId(),
-                        JSON.toJSONString(new TemplateOperateRecord(TemplateOperateRecordEnum.CONFIG.getCode(), editContent)), operator);
+                 operateRecordService.save(new OperateRecord.Builder()
+                        .operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE)
+                        .content(JSON.toJSONString(new TemplateOperateRecord(TemplateOperateRecordEnum.CONFIG.getCode(), editContent)))
+                        .triggerWayEnum(TriggerWayEnum.SYSTEM_TRIGGER)
+                        .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
+                        .userOperation(operator)
+                .build());
+                
             }
         }
         return result;

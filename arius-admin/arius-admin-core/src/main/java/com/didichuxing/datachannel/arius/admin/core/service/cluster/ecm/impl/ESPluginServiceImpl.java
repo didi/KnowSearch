@@ -31,6 +31,7 @@ import com.didichuxing.datachannel.arius.admin.persistence.mysql.ecm.ESPluginDAO
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.service.UserService;
+import com.google.common.collect.Maps;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -190,11 +191,13 @@ public class ESPluginServiceImpl implements ESPluginService {
             PluginPO newPluginPo = esPluginDAO.getById(oldPlugin.getId());
             PluginVO oldPluginVO = ConvertUtil.obj2Obj(oldPlugin, PluginVO.class);
             PluginVO newPluginVO = ConvertUtil.obj2Obj(newPluginPo, PluginVO.class);
-    
+            Map</*apiModelPropertyValue*/String,/*修改后的apiModelPropertyValue*/String> apiModelPropertyValueModify=
+                    Maps.newHashMap();
+            apiModelPropertyValueModify.put("上传插件类型: 0 系统默认插件, 1 ES能力插件, 2 平台能力插件","上传插件类型");
             operateRecordService.save(new OperateRecord.Builder().bizId(pluginDTO.getId()).userOperation(operator)
                     .operationTypeEnum(OperateTypeEnum.ES_CLUSTER_PLUGINS_EDIT)
                     .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                    .content(AriusObjUtils.findChangedWithClearByBeanVo(oldPluginVO, newPluginVO)).build()
+                    .content(AriusObjUtils.findChangedWithClearByBeanVo(oldPluginVO, newPluginVO,apiModelPropertyValueModify)).build()
                     
                     
             );

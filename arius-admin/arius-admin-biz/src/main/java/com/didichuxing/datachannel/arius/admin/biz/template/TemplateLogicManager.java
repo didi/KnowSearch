@@ -9,7 +9,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.Cluste
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicAggregate;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
-import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectTemplateAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectTemplateAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import java.util.List;
@@ -192,12 +192,14 @@ public interface TemplateLogicManager {
 
     /**
      * 执行调整shard 数量
+     *
      * @param logicTemplateId 模板id
-     * @param shardNum 调整后的shard数量
+     * @param shardNum        调整后的shard数量
      * @param projectId
+     * @param operator
      * @return 调整结果
      */
-    Result<Void> adjustShard(Integer logicTemplateId, Integer shardNum, Integer projectId) throws AdminOperateException;
+    Result<Void> adjustShard(Integer logicTemplateId, Integer shardNum, Integer projectId, String operator) throws AdminOperateException;
 
     /**
      * 模板升级

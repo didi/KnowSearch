@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?><!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	"http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.didichuxing.datachannel.arius.admin.persistence.mysql.app.ProjectConfigDAO">
-	<resultMap id="BaseResultMap" type="com.didichuxing.datachannel.arius.admin.common.bean.po.app.ProjectConfigPO">
+<mapper namespace="com.didichuxing.datachannel.arius.admin.persistence.mysql.project.ProjectConfigDAO">
+	<resultMap id="BaseResultMap" type="com.didichuxing.datachannel.arius.admin.common.bean.po.project.ProjectConfigPO">
 		<result column="project_id" jdbcType="INTEGER" property="projectId"/>
 		<result column="dsl_analyze_enable" jdbcType="INTEGER" property="dslAnalyzeEnable"/>
 		<result column="aggr_analyze_enable" jdbcType="INTEGER" property="aggrAnalyzeEnable"/>
@@ -46,7 +46,7 @@
 	</select>
 	
 	
-	<insert id="insert" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.app.ProjectConfigPO" >
+	<insert id="insert" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.project.ProjectConfigPO" >
 		insert into project_arius_config
 		(project_id, dsl_analyze_enable, aggr_analyze_enable, is_source_separated, analyze_response_enable,
 		 slow_query_times, memo)
@@ -54,7 +54,7 @@
 		        #{slowQueryTimes}, #{memo})
 	</insert>
 	
-	<update id="update" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.app.ProjectConfigPO">
+	<update id="update" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.project.ProjectConfigPO">
 		update project_arius_config
 		<trim prefix="set" prefixOverrides=",">
 			<if test="dslAnalyzeEnable != null">

@@ -22,9 +22,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.GatewayESUserV
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.gateway.GatewayClusterNodeVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.GatewayTemplateDeployInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.GatewayTemplatePhysicalVO;
-import com.didichuxing.datachannel.arius.admin.core.service.app.ESUserService;
-import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectConfigService;
-import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectLogicTemplateAuthService;
+import com.didichuxing.datachannel.arius.admin.core.service.project.ESUserService;
+import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectConfigService;
+import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectLogicTemplateAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.gateway.GatewayService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;

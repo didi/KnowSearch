@@ -8,7 +8,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion
 import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_COMMON_GROUP;
 import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.REQUEST_INTERCEPTOR_SWITCH_OPEN;
 
-import com.didichuxing.datachannel.arius.admin.biz.app.LoginManager;
+import com.didichuxing.datachannel.arius.admin.biz.project.LoginManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.GlobalParams;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;

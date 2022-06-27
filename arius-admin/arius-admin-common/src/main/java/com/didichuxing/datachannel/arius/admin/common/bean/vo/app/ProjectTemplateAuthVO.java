@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.vo.app;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.BaseVO;
-import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectTemplateAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectTemplateAuthEnum;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;

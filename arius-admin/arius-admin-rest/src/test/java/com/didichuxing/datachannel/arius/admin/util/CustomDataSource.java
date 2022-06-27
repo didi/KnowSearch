@@ -28,10 +28,10 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.Cl
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.app.ESUserPO;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.app.ProjectClusterLogicAuthPO;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.app.ProjectConfigPO;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.app.ProjectTemplateAuthPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.project.ESUserPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.project.ProjectClusterLogicAuthPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.project.ProjectConfigPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.project.ProjectTemplateAuthPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.config.AriusConfigInfoPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESMachineNormsPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.esplugin.PluginPO;
@@ -47,8 +47,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterR
 import com.didichuxing.datachannel.arius.admin.common.constant.DataCenterEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.PluginTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.RunModeEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectClusterLogicAuthEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectTemplateAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectClusterLogicAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectTemplateAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterDynamicConfigsEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;

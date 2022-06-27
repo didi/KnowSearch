@@ -1,13 +1,12 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.aliases.impl;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.TEMPLATE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.EDIT_TEMPLATE_ALIASES;
 import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum.TEMPLATE_ALIASES;
 
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.aliases.TemplateLogicAliasesManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.aliases.TemplatePhyAliasesManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.BaseTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.alias.ConsoleAliasDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.alias.ConsoleLogicTemplateAliasesDTO;
@@ -18,10 +17,12 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyAlias;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
-import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectLogicTemplateAuthService;
+import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectLogicTemplateAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
@@ -140,7 +141,15 @@ public class TemplateLogicAliasesManagerImpl extends BaseTemplateSrv implements 
 
         Result<Void> operationResult = createTemplateAliases(aliases.getLogicId(), aliases.getAliases());
         if (operationResult.success()) {
-            operateRecordService.save(TEMPLATE, EDIT_TEMPLATE_ALIASES, aliases.getLogicId(), "-", operator);
+            operateRecordService.save(new OperateRecord.Builder()
+                    
+                            .operationTypeEnum(OperateTypeEnum.INDEX_MANAGEMENT_ALIAS_MODIFY)
+                            .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                            .bizId(aliases.getLogicId())
+                            .content("别名创建")
+                            .userOperation(operator)
+                    
+                    .build());
         }
 
         return operationResult;
@@ -164,7 +173,13 @@ public class TemplateLogicAliasesManagerImpl extends BaseTemplateSrv implements 
 
         Result<Void> operationResult = modifyTemplateAliases(aliases.getLogicId(), aliases.getAliases());
         if (operationResult.success()) {
-            operateRecordService.save(TEMPLATE, EDIT_TEMPLATE_ALIASES, aliases.getLogicId(), "-", operator);
+             operateRecordService.save(new OperateRecord.Builder()
+                            .operationTypeEnum(OperateTypeEnum.INDEX_MANAGEMENT_ALIAS_MODIFY)
+                            .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                            .bizId(aliases.getLogicId())
+                             .content("别名修改")
+                            .userOperation(operator)
+                    .build());
         }
 
         return operationResult;
@@ -183,7 +198,13 @@ public class TemplateLogicAliasesManagerImpl extends BaseTemplateSrv implements 
         Result<Void> operationResult = deleteTemplateAliases(deleteAliasesDTO.getLogicId(), deleteAliasesDTO.getAliases());
 
         if (operationResult.success()) {
-            operateRecordService.save(TEMPLATE, EDIT_TEMPLATE_ALIASES, deleteAliasesDTO.getLogicId(), "-", operator);
+                  operateRecordService.save(new OperateRecord.Builder()
+                    
+                            .operationTypeEnum(OperateTypeEnum.INDEX_MANAGEMENT_ALIAS_MODIFY)
+                          .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).bizId(deleteAliasesDTO.getLogicId())
+                          .content("删除索引别名").userOperation(operator)
+                    
+                    .build());
         }
 
         return operationResult;
