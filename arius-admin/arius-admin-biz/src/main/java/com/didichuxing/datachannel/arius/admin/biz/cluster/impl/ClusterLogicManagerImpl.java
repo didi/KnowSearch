@@ -627,8 +627,32 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         return tempAuthLogicClusters.stream().map(ClusterLogic::getName).collect(Collectors.toList());
     }
 
+    @Override
+    public Result<List<Tuple<String, String>>> getClusterRelationByProjectId(Integer projectId) {
+
+        List<Tuple<String, String>> collect = Lists.newArrayList();
+        List<ClusterLogic> tempAuthLogicClusters = Lists.newArrayList();
+        if (AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
+            List<ClusterPhy> phyList = clusterPhyService.listAllClusters();
+             collect = phyList.stream().map(clusterPhy -> new Tuple<String, String>(clusterPhy.getCluster(), clusterPhy.getCluster())).collect(Collectors.toList());
+        } else {
+            List<ClusterLogic> logicList = clusterLogicService.getOwnedClusterLogicListByProjectId(projectId);
+            collect = logicList.stream().map(clusterLogic -> new Tuple<String, String>(clusterLogic.getName(),getPhyNameByLogic(clusterLogic.getId()))).collect(Collectors.toList());
+            tempAuthLogicClusters.addAll(clusterLogicService.getHasAuthClusterLogicsByProjectId(projectId));
+        }
+        return Result.buildSucc(collect);
+    }
+
+
+
 
 /**************************************************** private method ****************************************************/
+
+    private String getPhyNameByLogic(Long clusterLogicId) {
+        ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(clusterLogicId);
+        return clusterRegion == null ? "" : clusterRegion.getPhyClusterName();
+    }
+
     /**
      * 获取map中第⼀个数据值
      *
@@ -643,7 +667,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
                 break;
             }
         }
-        return  obj;
+        return obj;
     }
     /**
      * 构建OP逻辑集群权限

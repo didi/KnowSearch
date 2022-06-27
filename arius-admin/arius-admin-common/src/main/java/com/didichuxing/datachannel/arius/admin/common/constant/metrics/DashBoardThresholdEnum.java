@@ -14,6 +14,7 @@ import java.util.Map;
  * @version 1.0
  */
 public enum DashBoardThresholdEnum {
+
     BIG_COPY_INDEX_CLUSTER_BLACKLIST(OneLevelTypeEnum.UNKNOWN,"bigCopyIndexClusterBlacklist", "大副本索引集群黑名单","[]"),
     INDEX_TEMPLATE_SEGMENTS_MEMORY_SIZE(OneLevelTypeEnum.CLUSTER,"indexTemplateSegementsMemorySize", "索引模板Segements内存大小",""),
     INDEX_TEMPLATE_SEGMENTS_NUM(OneLevelTypeEnum.INDEX,"indexTemplateSegmentsNum", "索引模板Segments个数","1000"),

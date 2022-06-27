@@ -379,12 +379,6 @@ public class AriusConfigInfoServiceImpl implements AriusConfigInfoService {
         return defaultValue;
     }
 
-    @Override
-    public List<AriusConfigInfo> getDashboardThreshold(String s) {
-
-        return null;
-    }
-
     /******************************************* private method **************************************************/
     private Result<Void> checkParam(AriusConfigInfoDTO configInfoDTO) {
         if (AriusObjUtils.isNull(configInfoDTO)) {

@@ -138,6 +138,4 @@ public interface AriusConfigInfoService {
      * @return 如果查到转换后返回,转换报错或者没有查到则返回默认值
      */
     <T> T objectSetting(String group, String name, T defaultValue, Class<T> clazz);
-
-    List<AriusConfigInfo> getDashboardThreshold(String s);
 }

@@ -13,6 +13,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboar
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.list.MetricListVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.dashboard.ClusterPhyHealthMetricsVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.top.VariousLineChartMetricsVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.config.AriusConfigItemEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.config.AriusConfigStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.*;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
@@ -176,7 +177,6 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
             });
         }
         futureUtil.waitExecute();
-        //todo
         filterBySystemConfiguration(listMetrics);
         return Result.buildSucc(ConvertUtil.list2List(listMetrics, MetricListVO.class));
     }
@@ -188,7 +188,7 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
         Map<String, String> thresholdValues = DashBoardThresholdEnum.getDashBoardThresholdValue();
 
         //根据系统配置筛选,如果库里有对应的指标，就使用配置的指标
-        List<AriusConfigInfo> ariusConfigInfos =  ariusConfigInfoService.getDashboardThreshold("dashboard.threshold");
+        List<AriusConfigInfo> ariusConfigInfos =  ariusConfigInfoService.getConfigByGroup(AriusConfigItemEnum.DASHBOARD_THRESHOLD.getName());
         ariusConfigInfos.forEach(ariusConfigInfo -> {
             if (AriusConfigStatusEnum.NORMAL.getCode()==ariusConfigInfo.getStatus()&&
                     thresholdValues.containsKey(ariusConfigInfo.getValueName())){

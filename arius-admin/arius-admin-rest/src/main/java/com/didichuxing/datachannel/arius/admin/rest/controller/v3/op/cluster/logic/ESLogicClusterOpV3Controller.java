@@ -118,4 +118,13 @@ public class ESLogicClusterOpV3Controller {
     public Result<Long>  estimatedDiskSize(@PathVariable Long clusterLogicId,@PathVariable Integer count) {
         return clusterLogicManager.estimatedDiskSize(clusterLogicId,count);
     }
+
+    //超级应展示全部物理集群、普通应用展示普通应用有权限的逻辑集群
+    @GetMapping("/cluster-phy-relation")
+    @ResponseBody
+    @ApiOperation(value = "根据项目id获取不同权限的集群映射")
+    public Result<List<Tuple<String, String>>>  getClusterRelationByProjectId(HttpServletRequest request) {
+        return clusterLogicManager.getClusterRelationByProjectId(HttpRequestUtil.getProjectId(request));
+    }
+
 }

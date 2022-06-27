@@ -226,4 +226,11 @@ public interface ClusterLogicManager {
      * @return
      */
     List<String> listClusterLogicNameByProjectId(Integer projectId);
+
+    /**
+     * 根据项目id获取集群的映射关系
+     * @param projectId
+     * @return
+     */
+    Result<List<Tuple<String, String>>> getClusterRelationByProjectId(Integer projectId);
 }
