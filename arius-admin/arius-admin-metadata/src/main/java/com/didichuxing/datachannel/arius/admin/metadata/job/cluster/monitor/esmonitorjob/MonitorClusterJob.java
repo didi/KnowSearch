@@ -49,6 +49,7 @@ import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatI
 import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.ESIndicesCatIndicesResponse;
 import com.didiglobal.logi.elasticsearch.client.response.indices.stats.IndexNodes;
 import com.didiglobal.logi.elasticsearch.client.response.model.indices.CommonStat;
+import com.didiglobal.logi.elasticsearch.client.response.model.indices.Docs;
 import com.didiglobal.logi.elasticsearch.client.response.model.node.NodeAttributes;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
@@ -65,6 +66,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -508,9 +510,10 @@ public class MonitorClusterJob {
 
                     Map map = JSON.parseObject(JSON.toJSONString(indexStats.getPrimaries()), Map.class);
                     List<ESDataTempBean> esDataTempBeans = aggrAndComputeData(map, indexWorkOrders, base, metricsRegister);
-                    //todo indexStats.getTotal().getDocs().getCount() npe
+                    
                     esDataTempBeans.addAll(genIndexTotalCommonStatsMetric(indexStats.getTotal().getStore().getSizeInBytes(),
-                        indexStats.getTotal().getDocs().getCount(), base));
+                            Optional.ofNullable(indexStats).map(IndexNodes::getTotal).map(CommonStat::getDocs)
+                                    .map(Docs::getCount).orElse(0L), base));
 
                     ESIndexStats esIndexStats = buildESIndexStats(base, esDataTempBeans);
 
