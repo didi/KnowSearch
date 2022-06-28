@@ -20,6 +20,12 @@ public class AriusConfigConstant {
 
     public static final String ARIUS_TEMPLATE_COLD                             = "arius.template.cold";
 
+    /**
+     * dashboard限制阈值
+     */
+    public static final String DASHBOARD_THRESHOLD                             = "dashboard.threshold";
+
+
     public static final String ARIUS_QUOTA_CONFIG_GROUP                        = "arius.quota.config.group";
 
     public static final String ARIUS_QUOTA_CONFIG_TPS_PER_CPU_WITH_REPLICA     = "arius.quota.config.tps.per.cpu.with.replica";

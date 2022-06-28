@@ -44,18 +44,6 @@ public enum DashBoardThresholdEnum {
     public String getValue() { return value; }
 
 
-    public static List<String> getDashBoardThresholdList() {
-        return Lists.newArrayList(
-                BIG_COPY_INDEX_CLUSTER_BLACKLIST.getName(),
-                INDEX_TEMPLATE_SEGMENTS_MEMORY_SIZE.getName(),
-                INDEX_TEMPLATE_SEGMENTS_NUM.getName(),
-                INDEX_MAPPING_NUM.getName(),
-                NODE_SHARD_NUM.getName(),
-                INDEX_SEGMENT_MEMORY_SIZE.getName(),
-                INDEX_SMALL_SHARD_LIST.getName(),
-                INDEX_SEGMENT_NUM.getName());
-    }
-
     public static Map getDashBoardThresholdValue() {
         Map<String, String> map = new HashMap();
         map.put(BIG_COPY_INDEX_CLUSTER_BLACKLIST.getName(), BIG_COPY_INDEX_CLUSTER_BLACKLIST.getValue());

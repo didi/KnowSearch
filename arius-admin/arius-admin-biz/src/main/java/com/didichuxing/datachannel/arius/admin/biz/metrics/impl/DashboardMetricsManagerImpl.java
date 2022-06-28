@@ -6,15 +6,12 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.BaseDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsDashboardListDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsDashboardTopNDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.config.AriusConfigInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.VariousLineChartMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.list.MetricList;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.ClusterPhyHealthMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.list.MetricListVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.dashboard.ClusterPhyHealthMetricsVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.top.VariousLineChartMetricsVO;
-import com.didichuxing.datachannel.arius.admin.common.constant.config.AriusConfigItemEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.config.AriusConfigStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.*;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
@@ -30,6 +27,8 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.DASHBOARD_THRESHOLD;
 
 /**
  * Created by linyunan on 3/14/22
@@ -181,6 +180,42 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
         return Result.buildSucc(ConvertUtil.list2List(listMetrics, MetricListVO.class));
     }
 
+//    private void  filterBySystemConfiguration(List<MetricList> listMetrics,String oneLevelType){
+//        Map<String, String> thresholdValues = DashBoardThresholdEnum.getDashBoardThresholdValue();
+//        //根据系统配置筛选,如果库里有对应的指标，就使用配置的指标
+//        thresholdValues.keySet().forEach(key -> {
+//            double value = ariusConfigInfoService.doubleSetting(DASHBOARD_THRESHOLD,
+//                    key, Double.valueOf(thresholdValues.get(key)));
+//            thresholdValues.put(key, String.valueOf(value));
+//        });
+//        listMetrics.forEach(metric -> {
+//            if(OneLevelTypeEnum.NODE.getType().equals(oneLevelType)){
+//                switch (metric.getType()){
+//                    case "shardNum":
+//                        break;
+//                }
+//            }
+//            if(OneLevelTypeEnum.INDEX.getType().equals(oneLevelType)){
+//                switch (metric.getType()){
+//                    case "mappingNum":
+//                        break;
+//                    case "smallShard":
+//                        break;
+//                    case "segmentNum":
+//                        break;
+//                    case "segmentMemSize":
+//                        break;
+//                }
+//            }
+//            if(OneLevelTypeEnum.TEMPLATE.getType().equals(oneLevelType)){
+//                switch (metric.getType()){
+//                    case "segmentMemSize":
+//                        break;
+//                }
+//            }
+//        });
+//
+//    }
     /**
      * 根据系统配置筛选
      */
@@ -188,12 +223,16 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
         Map<String, String> thresholdValues = DashBoardThresholdEnum.getDashBoardThresholdValue();
         //根据系统配置筛选,如果库里有对应的指标，就使用配置的指标
         thresholdValues.keySet().forEach(key -> {
-            double value = ariusConfigInfoService.doubleSetting(AriusConfigItemEnum.DASHBOARD_THRESHOLD.getName(),
+            double value = ariusConfigInfoService.doubleSetting(DASHBOARD_THRESHOLD,
                     key, Double.valueOf(thresholdValues.get(key)));
             thresholdValues.put(key, String.valueOf(value));
         });
+
         listMetrics.forEach(metric -> {
             if(thresholdValues.get(metric.getType())!=null){
+                if ("mappingNum".equals(metric.getType())){
+
+                }
                Double configValue = Double.valueOf( thresholdValues.get(metric.getType()));
                 metric.setMetricListContents(metric.getMetricListContents().stream()
                         .filter(metricListContent -> metricListContent.getValue()>configValue).collect(Collectors.toList()));
