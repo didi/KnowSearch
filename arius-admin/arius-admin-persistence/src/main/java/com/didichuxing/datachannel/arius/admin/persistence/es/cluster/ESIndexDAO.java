@@ -19,8 +19,6 @@ import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.setting.ESIndicesGetAllSettingRequest;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
-import com.didichuxing.datachannel.arius.admin.common.mapping.AriusIndexTemplateSetting;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusIndexMappingConfigUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
@@ -77,26 +75,15 @@ public class ESIndexDAO extends BaseESDAO {
      * @param indexName 索引名字
      * @return result
      */
-    public boolean createIndex(String cluster, String indexName, String mapping, String setting) {
+    public boolean createIndex(String cluster, String indexName) {
         if (exist(cluster, indexName)) {
             LOGGER.warn("class=ESIndexDAO||method=createIndex||index already exist||cluster={}||indexName={}", cluster, indexName);
             return true;
         }
 
-        IndexConfig indexConfig = new IndexConfig();
-        if (null != mapping) {
-            indexConfig.setMappings(AriusIndexMappingConfigUtils.parseMappingConfig(mapping).getData());
-        }
-
-        if (null != setting) {
-            indexConfig.setSettings(AriusIndexTemplateSetting.flat(JSON.parseObject(setting)));
-        }
-
         ESClient client = fetchESClientByCluster(cluster);
         if (client != null) {
-            indexConfig.setVersion(ESVersion.valueBy(client.getEsVersion()));
-            ESIndicesPutIndexResponse response = client.admin().indices().preparePutIndex(indexName)
-                .setIndexConfig(indexConfig).execute()
+            ESIndicesPutIndexResponse response = client.admin().indices().preparePutIndex(indexName).execute()
                 .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
             return response.getAcknowledged();
         } else {
