@@ -1,6 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.common.util;
 
 import com.alibaba.fastjson.JSONObject;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.common.vo.project.ProjectVO;
@@ -15,8 +17,10 @@ import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
@@ -333,5 +337,24 @@ public class CommonUtils {
         return new  JSONObject().fluentPut("beforeChange",beforeObj)
                 .fluentPut("afterChange",afterObj)
                 .toJSONString();
+    }
+    
+    /**
+     * 检查项目是否匹配当前业务的操作
+     *
+     * @param func                     函数
+     * @param r                         操作点业务标识 各个业务的点
+     * @param projectId                项目id 接口传入的项目id
+     * @return {@code Boolean}
+     */
+    public static <R> Result<Void> checkProjectCorrectly(Function<R,Integer> func, R r, Integer projectId) {
+        final int currentProjectId = func.apply(r);
+        if (AuthConstant.SUPER_PROJECT_ID.equals(currentProjectId)) {
+            return Result.buildSucc();
+        }
+        if (Objects.equals(currentProjectId, projectId)) {
+            return Result.buildSucc();
+        }
+        return Result.buildFail("当前项目不属于超级项目或者持有该操作的项目");
     }
 }

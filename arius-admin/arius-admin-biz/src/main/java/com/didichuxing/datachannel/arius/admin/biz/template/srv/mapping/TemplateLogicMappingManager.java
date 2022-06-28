@@ -1,17 +1,16 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping;
 
-import java.util.List;
-import java.util.Set;
-
 import com.didichuxing.datachannel.arius.admin.common.bean.common.MappingOptimize;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateSchemaDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateSchemaOptimizeDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithMapping;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateSchemaVO;
+import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.mapping.AriusTypeProperty;
 import com.didichuxing.datachannel.arius.admin.common.mapping.Field;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithMapping;
-import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
+import java.util.List;
+import java.util.Set;
 
 /**
  * 逻辑模板的mapping服务；对我暴露的是field对象，并屏蔽底层的mapping信息、部署信息
@@ -85,11 +84,13 @@ public interface TemplateLogicMappingManager {
 
     /**
      * 修改模板schema
-     * @param schemaDTO schema
-     * @param operator 操作人
+     *
+     * @param schemaDTO       schema
+     * @param operator        操作人
+     * @param projectId
      * @return result
      */
-    Result<Void> modifySchema(ConsoleTemplateSchemaDTO schemaDTO, String operator) throws AdminOperateException;
+    Result<Void> modifySchema(ConsoleTemplateSchemaDTO schemaDTO, String operator, Integer projectId) throws AdminOperateException;
 
     /**
      * 获取模板schema
