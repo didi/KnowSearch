@@ -5,6 +5,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.template.T
 import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +20,9 @@ import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateExcepti
 import com.didichuxing.datachannel.arius.admin.common.threadpool.AriusOpThreadPool;
 import com.didichuxing.datachannel.arius.admin.common.util.IndexNameFactory;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
+import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
+import com.didiglobal.logi.elasticsearch.client.response.setting.index.IndexConfig;
+import com.didiglobal.logi.elasticsearch.client.response.setting.template.TemplateConfig;
 
 /**
  * 索引预创建服务实现
@@ -35,7 +39,12 @@ public class TemplatePreCreateManagerImpl extends BaseTemplateSrv implements Tem
     private ESIndexService           esIndexService;
 
     @Autowired
+    private ESTemplateService esTemplateService;
+
+    @Autowired
     private AriusOpThreadPool        ariusOpThreadPool;
+
+    public static final String START = "*";
 
     @Override
     public TemplateServiceEnum templateService() {
@@ -166,7 +175,7 @@ public class TemplatePreCreateManagerImpl extends BaseTemplateSrv implements Tem
         }
         String todayIndexName = IndexNameFactory.get(physicalWithLogic.getExpression(),
             physicalWithLogic.getLogicTemplate().getDateFormat(), 0, physicalWithLogic.getVersion());
-        return esIndexService.syncCreateIndex(physicalWithLogic.getCluster(), todayIndexName, null, null, retryCount);
+        return createIndex(todayIndexName, physicalWithLogic, retryCount);
     }
 
     private boolean syncCreateTomorrowIndexByPhysicalId(Long physicalId, int retryCount) throws ESOperateException {
@@ -184,6 +193,32 @@ public class TemplatePreCreateManagerImpl extends BaseTemplateSrv implements Tem
 
         String tomorrowIndexName = IndexNameFactory.getNoVersion(physicalWithLogic.getExpression(),
             physicalWithLogic.getLogicTemplate().getDateFormat(), 1);
-        return esIndexService.syncCreateIndex(physicalWithLogic.getCluster(), tomorrowIndexName, null, null, retryCount);
+        return createIndex(tomorrowIndexName, physicalWithLogic, retryCount);
+    }
+
+    private boolean createIndex(String indexName, IndexTemplatePhyWithLogic physicalWithLogic,
+                                int retryCount) throws ESOperateException {
+        IndexConfig indexConfig = null;
+        if (!StringUtils.endsWith(physicalWithLogic.getExpression(), START) && physicalWithLogic.getVersion() > 0) {
+            indexConfig = generateIndexConfig(physicalWithLogic);
+        }
+        if (null != indexConfig) {
+            return esIndexService.syncCreateIndex(physicalWithLogic.getCluster(), indexName, indexConfig, retryCount);
+        }
+        return esIndexService.syncCreateIndex(physicalWithLogic.getCluster(), indexName, retryCount);
+    }
+
+    private IndexConfig generateIndexConfig(IndexTemplatePhyWithLogic physicalWithLogic) {
+        TemplateConfig templateConfig = esTemplateService.syncGetTemplateConfig(physicalWithLogic.getCluster(),
+                physicalWithLogic.getName());
+        if (null == templateConfig) {
+            return null;
+        }
+        IndexConfig indexConfig = new IndexConfig();
+        indexConfig.setMappings(templateConfig.getMappings());
+        indexConfig.setSettings(templateConfig.getSetttings());
+        indexConfig.setAliases(templateConfig.getAliases());
+        indexConfig.setVersion(templateConfig.getVersion());
+        return indexConfig;
     }
 }

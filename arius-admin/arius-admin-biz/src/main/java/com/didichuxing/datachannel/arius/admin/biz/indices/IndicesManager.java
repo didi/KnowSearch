@@ -1,5 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.biz.indices;
 
+import java.util.List;
+import java.util.function.BiFunction;
+
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatCellDTO;
@@ -13,8 +16,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexMappi
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexSettingVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexShardInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
-import java.util.List;
-import java.util.function.BiFunction;
+import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
 
 /**
  * @author lyn
@@ -229,4 +231,20 @@ public interface IndicesManager {
      * @return {@link Result}<{@link Boolean}>
      */
     Result<Boolean> isExists(String cluster, String indexName, Integer projectId);
+
+    /**
+     * 查询物理模版所有匹配的索引，包含升版本与脏索引
+     *
+     * @param physicalId 物理模板id
+     * @return {@link List}<{@link String}>
+     */
+    List<String> listIndexNameByTemplatePhyId(Long physicalId);
+
+    /**
+     * 获取物理模版所有匹配的索引catinfo
+     *
+     * @param physicalId 物理模版id
+     * @return {@link List}<{@link CatIndexResult}>
+     */
+    List<CatIndexResult> listIndexCatInfoByTemplatePhyId(Long physicalId);
 }
