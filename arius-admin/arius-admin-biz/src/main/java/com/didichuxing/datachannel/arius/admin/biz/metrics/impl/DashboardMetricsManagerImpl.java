@@ -192,6 +192,7 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
         ariusConfigInfos.forEach(ariusConfigInfo -> {
             if (AriusConfigStatusEnum.NORMAL.getCode()==ariusConfigInfo.getStatus()&&
                     thresholdValues.containsKey(ariusConfigInfo.getValueName())){
+                if (DashBoardThresholdEnum.BIG_COPY_INDEX_CLUSTER_BLACKLIST.getName().equals(ariusConfigInfo.getValueName())){}
                 thresholdValues.put(ariusConfigInfo.getValueName(),ariusConfigInfo.getValue());
             }
         });

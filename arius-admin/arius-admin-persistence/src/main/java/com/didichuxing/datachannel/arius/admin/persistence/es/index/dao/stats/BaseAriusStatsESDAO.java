@@ -77,6 +77,10 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
     public static final String                                            STEP_INTERVAL = "1m";
     public static final String                                            STEP_METHOD_AVG =  "avg";
     public static final String                                            STEP_METHOD_MAX =  "max";
+    public static final String                                            BUCKETS_PATH =  "buckets_path";
+    public static final String                                            HISTS_GT =  "hist>";
+    public static final String                                            BUCKET =  "_bucket";
+    public static final String                                            VALUE =  "_value";
 
 
 
@@ -345,6 +349,16 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
         return sb.toString();
     }
 
+    /**
+     * 根据topMethod构造获取最大值/平均值dsl
+     * @param metrics
+     * @param topMethod
+     * @return
+     *
+     * ,"shardNu_avg_value":{"avg_bucket":{"buckets_path":"hist>shardNu"}},
+     * "docs-count_avg_value":{"avg_bucket":{"buckets_path":"hist>docs-count"}},
+     * "store-size_in_bytes_avg_value":{"avg_bucket":{"buckets_path":"hist>store-size_in_bytes"}}
+     */
     String buildAggsDSLWithStep(List<String> metrics, String topMethod) {
         StringBuilder sb = new StringBuilder();
         sb.append(",");
@@ -354,10 +368,10 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
             Map bucket = new HashMap();
 
             Map bucketsPath = new HashMap();
-            bucketsPath.put("buckets_path", "hist>" + metricName);
-            bucket.put(topMethod + "_bucket", bucketsPath);
+            bucketsPath.put(BUCKETS_PATH, HISTS_GT + metricName);
+            bucket.put(topMethod + BUCKET, bucketsPath);
 
-            aggsSubSubCellMap.put(metricName + "_" + topMethod + "_value", bucket);
+            aggsSubSubCellMap.put(metricName + "_" + topMethod + VALUE, bucket);
             JSONObject jsonObject = new JSONObject(aggsSubSubCellMap);
             String str = jsonObject.toJSONString();
             sb.append(str, 1, str.length() - 1);

@@ -68,6 +68,17 @@ public class ESClusterServiceImpl implements ESClusterService {
     @Autowired
     private ESClusterDAO      esClusterDAO;
 
+    private final String ACKNOWLEDGED = "acknowledged";
+    private final String SHARDS       = "_shards";
+    private final String FAILED = "failed";
+    private final String DESCRIPTION = "description";
+    private final String START_TIME_IN_MILLIS = "start_time_in_millis";
+    private final String RUNNING_TIME_IN_NANOS = "running_time_in_nanos";
+    private final String ACTION = "action";
+    private final String NODE = "node";
+    private final String NODES = "nodes";
+    private final String TASKS = "tasks";
+
     /**
      * 关闭集群re balance
      * @param cluster    集群
@@ -408,7 +419,7 @@ public class ESClusterServiceImpl implements ESClusterService {
     @Override
     public List<PendingTaskAnalysisVO> pendingTaskAnalysis(String cluster) {
         String response = esClusterDAO.pendingTask(cluster);
-        return  Optional.ofNullable(response).map(JSONObject::parseObject).map(jsonObject->jsonObject.getJSONArray("tasks"))
+        return  Optional.ofNullable(response).map(JSONObject::parseObject).map(jsonObject->jsonObject.getJSONArray(TASKS))
                 .map(tasks->JSONObject.parseArray(tasks.toJSONString(), PendingTaskAnalysisVO.class)).orElse(new ArrayList<>());
     }
 
@@ -427,32 +438,32 @@ public class ESClusterServiceImpl implements ESClusterService {
     @Override
     public boolean abnormalShardAllocationRetry(String cluster) {
         String response = esClusterDAO.abnormalShardAllocationRetry(cluster);
-        return  Optional.ofNullable(response).map(JSONObject::parseObject).map(jsonObject ->jsonObject.getBoolean("acknowledged")).orElse(false);
+        return  Optional.ofNullable(response).map(JSONObject::parseObject).map(jsonObject ->jsonObject.getBoolean(ACKNOWLEDGED)).orElse(false);
     }
 
     @Override
     public boolean clearFieldDataMemory(String cluster) {
         String response = esClusterDAO.clearFieldDataMemory(cluster);
-        return  Optional.ofNullable(response).map(JSONObject::parseObject).map(jsonObject -> jsonObject.getJSONObject("_shards"))
-                .map(shards->shards.getInteger("failed")).map(failed->failed.equals(0)).orElse(false);
+        return  Optional.ofNullable(response).map(JSONObject::parseObject).map(jsonObject -> jsonObject.getJSONObject(SHARDS))
+                .map(shards->shards.getInteger(FAILED)).map(failed->failed.equals(0)).orElse(false);
     }
 
     private List<TaskMissionAnalysisVO> buildTaskMission(JSONObject responseJson) {
         List<TaskMissionAnalysisVO> vos = new ArrayList<>();
 
-        JSONObject nodes = responseJson.getJSONObject("nodes");
+        JSONObject nodes = responseJson.getJSONObject(NODES);
         nodes.keySet().forEach(key -> {
-            Optional.ofNullable((JSONObject) nodes.get(key)).map(o -> o.getJSONObject("tasks")).ifPresent(nodeTasks -> {
+            Optional.ofNullable((JSONObject) nodes.get(key)).map(o -> o.getJSONObject(TASKS)).ifPresent(nodeTasks -> {
                 nodeTasks.forEach((key1, val) -> {
                     JSONObject nodeInfo = (JSONObject) val;
                     TaskMissionAnalysisVO taskMissionAnalysisVO = new TaskMissionAnalysisVO();
                     Optional.ofNullable(nodeInfo)
                             .ifPresent(o -> {
-                                taskMissionAnalysisVO.setAction(o.getString("action"));
-                                taskMissionAnalysisVO.setNode(o.getString("node"));
-                                taskMissionAnalysisVO.setDescription(o.getString("description"));
-                                taskMissionAnalysisVO.setStartTimeInMillis(o.getLong("start_time_in_millis"));
-                                taskMissionAnalysisVO.setRunningTimeInNanos(o.getInteger("running_time_in_nanos"));
+                                taskMissionAnalysisVO.setAction(o.getString(ACTION));
+                                taskMissionAnalysisVO.setNode(o.getString(NODE));
+                                taskMissionAnalysisVO.setDescription(o.getString(DESCRIPTION));
+                                taskMissionAnalysisVO.setStartTimeInMillis(o.getLong(START_TIME_IN_MILLIS));
+                                taskMissionAnalysisVO.setRunningTimeInNanos(o.getInteger(RUNNING_TIME_IN_NANOS));
                                 vos.add(taskMissionAnalysisVO);
                             });
                 });

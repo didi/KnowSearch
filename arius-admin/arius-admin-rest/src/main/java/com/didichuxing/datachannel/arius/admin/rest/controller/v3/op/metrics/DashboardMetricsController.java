@@ -16,13 +16,13 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
 
 /**
  * Created by linyunan on 3/14/22
  */
 @RestController()
-@RequestMapping(V3_OP + "/dashboard/metrics")
+@RequestMapping(V3 + "/dashboard/metrics")
 @Api(tags = "dashboard监控信息")
 public class DashboardMetricsController {
     @Autowired

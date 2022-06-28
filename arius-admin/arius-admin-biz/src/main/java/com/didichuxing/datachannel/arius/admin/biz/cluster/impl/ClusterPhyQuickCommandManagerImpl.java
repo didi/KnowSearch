@@ -10,10 +10,13 @@ import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterNodeServ
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESShardService;
+import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 快捷指令实现.
@@ -55,7 +58,13 @@ public class ClusterPhyQuickCommandManagerImpl implements ClusterPhyQuickCommand
         if (checkResult.failed()) {
             return Result.buildFail(checkResult.getMessage());
         }
-        return Result.buildSucc(esIndexService.indicesDistribution(cluster));
+        // 把 List<CatIndexResult> 转为 List<IndicesDistributionVO>
+        List<CatIndexResult> catIndexResultList = esIndexService.indicesDistribution(cluster);
+        return Result.buildSucc( catIndexResultList.stream().map(catIndexResult -> {
+            IndicesDistributionVO vo = new IndicesDistributionVO();
+            BeanUtils.copyProperties(catIndexResult, vo);
+            return vo;
+        }).collect(Collectors.toList()));
     }
 
     @Override
