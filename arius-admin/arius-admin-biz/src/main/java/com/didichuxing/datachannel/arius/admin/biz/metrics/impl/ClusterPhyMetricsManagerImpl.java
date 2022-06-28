@@ -96,7 +96,6 @@ public class ClusterPhyMetricsManagerImpl implements ClusterPhyMetricsManager {
         }
     }
 
-    //todo：需要判断下 传入的是逻辑集群的时候，不应该是物理集群了，应该是对应的regin
     @Override
     @SuppressWarnings("unchecked")
     public <T> Result<T> getClusterMetricsByMetricsType(MetricsClusterPhyDTO param, Integer projectId, String userName, ClusterPhyTypeMetricsEnum metricsTypeEnum) {
@@ -107,11 +106,10 @@ public class ClusterPhyMetricsManagerImpl implements ClusterPhyMetricsManager {
                 if (clusterRegion == null) {
                     return Result.buildFail();
                 }
-                List<String> nodeNamesUnderClusterLogic = new ArrayList<>();
-                nodeNamesUnderClusterLogic = getItemsUnderClusterLogic(metricsTypeEnum, clusterRegion, nodeNamesUnderClusterLogic);
-
-
-                param.setItemNamesUnderClusterLogic(nodeNamesUnderClusterLogic);
+                List<String> itemNamesUnderClusterLogic = new ArrayList<>();
+                //获取逻辑集群下面的节点，索引，模板的名称列表
+                buildItemsUnderClusterLogic(metricsTypeEnum, clusterRegion, itemNamesUnderClusterLogic);
+                param.setItemNamesUnderClusterLogic(itemNamesUnderClusterLogic);
                 param.setClusterPhyName(clusterRegion.getPhyClusterName());
             }
             T result;
@@ -204,7 +202,7 @@ public class ClusterPhyMetricsManagerImpl implements ClusterPhyMetricsManager {
      * @param nodeNamesUnderClusterLogic  节点，索引，模板信息
      * @return
      */
-    private List<String> getItemsUnderClusterLogic(ClusterPhyTypeMetricsEnum metricsTypeEnum, ClusterRegion clusterRegion, List<String> nodeNamesUnderClusterLogic) {
+    private List<String> buildItemsUnderClusterLogic(ClusterPhyTypeMetricsEnum metricsTypeEnum, ClusterRegion clusterRegion, List<String> nodeNamesUnderClusterLogic) {
         //节点名称列表
         switch (metricsTypeEnum){
             case NODE:

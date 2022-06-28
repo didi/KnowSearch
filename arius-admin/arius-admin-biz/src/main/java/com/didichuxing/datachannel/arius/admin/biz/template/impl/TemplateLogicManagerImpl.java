@@ -675,6 +675,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         // 转化为视图列表展示
         List<ConsoleTemplateVO> consoleTemplateVOLists = new ArrayList<>();
         templateByPhyCluster.stream()
+                //todo：Object.isnull
                 .filter(indexTemplatePhyWithLogic->indexTemplatePhyWithLogic.getLogicTemplate()!=null)
                 .forEach(indexTemplatePhyWithLogic -> consoleTemplateVOLists.add(buildTemplateVO(indexTemplatePhyWithLogic)));
         return Result.buildSucc(consoleTemplateVOLists);

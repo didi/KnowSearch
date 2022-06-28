@@ -104,7 +104,6 @@ public class GatewayMetricsController {
         return gatewayMetricsManager.getGatewayAppMetrics(dto);
     }
 
-
     @PostMapping("/dsl")
     @ApiModelProperty(value = "获取gateway查询模版指标信息")
     public Result<List<VariousLineChartMetricsVO>> getGatewayDslMetrics(@RequestBody GatewayDslDTO dto,

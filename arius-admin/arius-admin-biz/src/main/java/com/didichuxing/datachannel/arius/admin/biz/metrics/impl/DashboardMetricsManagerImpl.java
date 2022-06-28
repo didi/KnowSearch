@@ -186,15 +186,11 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
      */
     private void  filterBySystemConfiguration(List<MetricList> listMetrics){
         Map<String, String> thresholdValues = DashBoardThresholdEnum.getDashBoardThresholdValue();
-
         //根据系统配置筛选,如果库里有对应的指标，就使用配置的指标
-        List<AriusConfigInfo> ariusConfigInfos =  ariusConfigInfoService.getConfigByGroup(AriusConfigItemEnum.DASHBOARD_THRESHOLD.getName());
-        ariusConfigInfos.forEach(ariusConfigInfo -> {
-            if (AriusConfigStatusEnum.NORMAL.getCode()==ariusConfigInfo.getStatus()&&
-                    thresholdValues.containsKey(ariusConfigInfo.getValueName())){
-                if (DashBoardThresholdEnum.BIG_COPY_INDEX_CLUSTER_BLACKLIST.getName().equals(ariusConfigInfo.getValueName())){}
-                thresholdValues.put(ariusConfigInfo.getValueName(),ariusConfigInfo.getValue());
-            }
+        thresholdValues.keySet().forEach(key -> {
+            double value = ariusConfigInfoService.doubleSetting(AriusConfigItemEnum.DASHBOARD_THRESHOLD.getName(),
+                    key, Double.valueOf(thresholdValues.get(key)));
+            thresholdValues.put(key, String.valueOf(value));
         });
         listMetrics.forEach(metric -> {
             if(thresholdValues.get(metric.getType())!=null){

@@ -47,7 +47,7 @@ public class TemplateLogicV3Controller {
     @Autowired
     private TemplateLogicSettingsManager templateLogicSettingsManager;
 
-    @GetMapping("/listNames")
+    @GetMapping("/names")
     @ResponseBody
     @ApiOperation(value = "获取逻辑模板名称列表接口")
     public Result<List<String>> listTemplateLogicNames(HttpServletRequest request) {

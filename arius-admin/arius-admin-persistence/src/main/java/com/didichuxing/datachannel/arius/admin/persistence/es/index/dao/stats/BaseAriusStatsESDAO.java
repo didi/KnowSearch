@@ -723,11 +723,11 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
     private List<MetricsContent> buildMetricsContentsWithStep(String oneLevelType, String key, Map<String, ESAggr> esAggrMap, String topMethod) {
         List<MetricsContent> metricsContents = Lists.newArrayList();
         esAggrMap.get(HIST).getBucketList().forEach(esBucket -> {
-            //get nodeName
             if (null != esBucket.getUnusedMap().get(KEY)) {
                 MetricsContent metricsContent = new MetricsContent();
-                String nodeName = (String) esBucket.getUnusedMap().get("key");
-                    metricsContent.setName(nodeName);
+                String itemName = esBucket.getUnusedMap().get(KEY).toString();
+                    metricsContent.setName(itemName);
+                    //例如：http-current_open_max_value
                     ESAggr esAggr = esBucket.getAggrMap().get(key + "_" + topMethod + "_value");
                     Double valueInTimePeriod = Double.valueOf(esAggr.getUnusedMap().get("value").toString());
                     metricsContent.setValueInTimePeriod(valueInTimePeriod);
@@ -766,30 +766,6 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
 
         return metricsContents;
     }
-
-    private List<MetricsContentCell> buildMetricsContentCellsWithStep(String key, ESBucket esBucket) {
-        List<MetricsContentCell> metricsContentCells = Lists.newArrayList();
-
-        esBucket.getAggrMap().get(HIST).getBucketList().forEach(esSubBucket -> {
-            MetricsContentCell metricsContentCell = new MetricsContentCell();
-
-            // get timeStamp
-            if (null != esSubBucket.getUnusedMap().get(KEY)) {
-                metricsContentCell.setTimeStamp(Long.parseLong(esSubBucket.getUnusedMap().get(KEY).toString()));
-            }
-
-            //get value
-            ESAggr esAggr = esSubBucket.getAggrMap().get(key);
-            if (null != esAggr && null != esAggr.getUnusedMap().get(VALUE)) {
-                metricsContentCell.setValue(Double.parseDouble(esAggr.getUnusedMap().get(VALUE).toString()));
-            }
-
-            metricsContentCells.add(metricsContentCell);
-        });
-
-        return metricsContentCells;
-    }
-
     private List<MetricsContentCell> buildMetricsContentCells(String key, ESBucket esBucket) {
         List<MetricsContentCell> metricsContentCells = Lists.newArrayList();
 

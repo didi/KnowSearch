@@ -5,6 +5,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.*;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterNodeService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
@@ -60,11 +61,7 @@ public class ClusterPhyQuickCommandManagerImpl implements ClusterPhyQuickCommand
         }
         // 把 List<CatIndexResult> 转为 List<IndicesDistributionVO>
         List<CatIndexResult> catIndexResultList = esIndexService.indicesDistribution(cluster);
-        return Result.buildSucc( catIndexResultList.stream().map(catIndexResult -> {
-            IndicesDistributionVO vo = new IndicesDistributionVO();
-            BeanUtils.copyProperties(catIndexResult, vo);
-            return vo;
-        }).collect(Collectors.toList()));
+        return Result.buildSucc( ConvertUtil.list2List(catIndexResultList,IndicesDistributionVO.class));
     }
 
     @Override
