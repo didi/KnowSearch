@@ -1,10 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.common.util;
 
-import com.alibaba.fastjson.JSONObject;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-import com.didiglobal.logi.security.common.vo.project.ProjectVO;
-import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -13,9 +10,7 @@ import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -297,41 +292,7 @@ public class CommonUtils {
         return sb.toString();
     }
     
-    /**
-     * 用户名是属于项目成员
-     * @see ProjectVO#getUserList()
-     * @param userName 用户名
-     * @param projectVO
-     * @return boolean
-     */
-    public static boolean isUserNameBelongProjectMember(String userName, ProjectVO projectVO) {
-        return StringUtils.hasText(userName) && Optional.ofNullable(projectVO)
-                .map(ProjectVO::getUserList).orElse(Collections.emptyList()).stream().map(UserBriefVO::getUserName)
-                .anyMatch(username -> username.equals(userName));
-    }
+
     
-    /**
-     * 判断用户名属于项目拥有者
-     * @see  ProjectVO#getOwnerList()
-     * @param userName 用户名
-     * @param projectVO
-     * @return boolean
-     */
-    public static boolean isUserNameBelongProjectResponsible(String userName,ProjectVO projectVO){
-       return StringUtils.hasText(userName) && Optional.ofNullable(projectVO).map(ProjectVO::getOwnerList).orElse(Collections.emptyList()).stream()
-                .map(UserBriefVO::getUserName).anyMatch(username -> username.equals(userName));
-    }
-    
-    /**
-     * 获取变更之前和变更之后的json
-     *
-     * @param afterObj  obj后
-     * @param beforeObj obj之前
-     * @return {@code String}
-     */
-    public static String getChangeByAfterAndBeforeJson(Object afterObj,Object beforeObj){
-        return new  JSONObject().fluentPut("beforeChange",beforeObj)
-                .fluentPut("afterChange",afterObj)
-                .toJSONString();
-    }
+
 }

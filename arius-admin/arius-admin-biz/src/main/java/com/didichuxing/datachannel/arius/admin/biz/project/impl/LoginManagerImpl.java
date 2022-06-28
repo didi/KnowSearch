@@ -7,7 +7,7 @@ import com.didichuxing.datachannel.arius.admin.common.exception.OperateForbidden
 import com.didichuxing.datachannel.arius.admin.common.tuple.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.tuple.Tuple3;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
 import com.didiglobal.logi.security.common.Result;
 import com.didiglobal.logi.security.common.dto.account.AccountLoginDTO;
@@ -129,8 +129,8 @@ public class LoginManagerImpl implements LoginManager {
                     if (!roleTool.isAdmin(userNameAndUserIdAndProjectIdTuple3._2)) {
                         final ProjectVO projectVO = projectService.getProjectDetailByProjectId(
                                 userNameAndUserIdAndProjectIdTuple3._3);
-                        if (!(CommonUtils.isUserNameBelongProjectMember(userNameAndUserIdAndProjectIdTuple3._1,
-                                projectVO) || CommonUtils.isUserNameBelongProjectResponsible(
+                        if (!(ProjectUtils.isUserNameBelongProjectMember(userNameAndUserIdAndProjectIdTuple3._1,
+                                projectVO) || ProjectUtils.isUserNameBelongProjectResponsible(
                                 userNameAndUserIdAndProjectIdTuple3._1, projectVO))) {
                             throw new LogiSecurityException(ResultCode.NO_PERMISSION);
                         }

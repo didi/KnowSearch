@@ -179,7 +179,8 @@ public class TemplateTransferHandler extends BaseWorkOrderHandler {
         TemplateTransferContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
             TemplateTransferContent.class);
 
-        Result<Void> result = indexTemplateService.turnOverLogicTemplate(content.getId(), content.getTgtProjectId(),
+        Result<Void> result = indexTemplateService.turnOverLogicTemplate(content.getId(),
+                content.getSourceProjectId(),content.getTgtProjectId(),
             content.getTgtResponsible(), workOrder.getSubmitor());
 
         if (result.success()) {

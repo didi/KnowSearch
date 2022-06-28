@@ -79,23 +79,24 @@ public class ESPackageServiceTest extends AriusAdminApplicationTest {
     @Test
     public void updateESPackageTest() {
         ESPackageDTO esPackageDTO = CustomDataSource.esPackageDTOFactory();
+        Integer projectId=1;
         //Mockito.when(ariusUserInfoService.isOPByDomainAccount(CustomDataSource.OPERATOR)).thenReturn(true);
         Long id = esPackageService.addESPackage(esPackageDTO, CustomDataSource.OPERATOR).getData();
         esPackageDTO.setId(id);
         Assertions.assertEquals(id,
-                esPackageService.updateESPackage(esPackageDTO, CustomDataSource.OPERATOR).getData().getId());
+                esPackageService.updateESPackage(esPackageDTO, CustomDataSource.OPERATOR, projectId).getData().getId());
         esPackageDTO.setId(id + 1);
         Assertions.assertEquals(Result.buildParamIllegal("版本号重复").getMessage(),
-                esPackageService.updateESPackage(esPackageDTO, CustomDataSource.OPERATOR).getMessage());
+                esPackageService.updateESPackage(esPackageDTO, CustomDataSource.OPERATOR, projectId).getMessage());
         esPackageDTO.setManifest(ESClusterTypeEnum.ES_HOST.getCode());
         Mockito.when(fileStorageService.upload(Mockito.anyString(),
                 Mockito.anyString(), Mockito.any())).thenReturn(Result.buildSucc());
         esPackageDTO.setId(id);
         Assertions.assertEquals(ResultType.SUCCESS.getCode(),
-                esPackageService.updateESPackage(esPackageDTO, CustomDataSource.OPERATOR).getCode().intValue());
+                esPackageService.updateESPackage(esPackageDTO, CustomDataSource.OPERATOR, projectId).getCode().intValue());
         esPackageDTO.setEsVersion("1.w");
         Assertions.assertEquals(Result.buildParamIllegal("版本号格式不正确, 必须是'1.1.1.1000'类似的格式").getMessage(),
-                esPackageService.updateESPackage(esPackageDTO, CustomDataSource.OPERATOR).getMessage());
+                esPackageService.updateESPackage(esPackageDTO, CustomDataSource.OPERATOR, projectId).getMessage());
     }
 
     @Test

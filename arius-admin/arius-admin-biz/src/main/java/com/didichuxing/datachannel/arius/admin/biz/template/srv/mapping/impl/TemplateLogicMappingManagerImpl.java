@@ -451,13 +451,14 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
     /**
      * 修改模板schema
      *
-     * @param schemaDTO schema
-     * @param operator  操作人
+     * @param schemaDTO       schema
+     * @param operator        操作人
+     * @param projectId
      * @return result
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result<Void> modifySchema(ConsoleTemplateSchemaDTO schemaDTO, String operator) throws AdminOperateException {
+    public Result<Void> modifySchema(ConsoleTemplateSchemaDTO schemaDTO, String operator, Integer projectId) throws AdminOperateException {
         if (AriusObjUtils.isNull(operator)) {
             return Result.buildParamIllegal("操作人为空");
         }
@@ -475,7 +476,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
             return Result.buildParamIllegal("该功能只支持高版本(6.5.1以上)es， 请使用JSON格式");
         }
 
-        Result<Void> saveSpecialFieldResult = saveSpecialField(schemaDTO, operator);
+        Result<Void> saveSpecialFieldResult = saveSpecialField(schemaDTO, operator,projectId);
         if (saveSpecialFieldResult.failed()) {
             return saveSpecialFieldResult;
         }
@@ -497,8 +498,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
         Result<Void> result = updateFields(schemaDTO.getLogicId(), schemaDTO.getFields(), schemaDTO.getRemoveFieldNames());
         if (result.success()) {
             // 记录操作记录
-            final Integer projectId = indexTemplateService.getProjectIdByTemplateLogicId(
-                    schemaDTO.getLogicId());
+            
             operateRecordService.save(new OperateRecord.Builder().project(
                             Optional.ofNullable(projectId).map(projectService::getProjectBriefByProjectId).orElse(null))
                     .userOperation(operator).operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_EDIT_MAPPING)
@@ -1074,17 +1074,17 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
         return typeProperties;
     }
 
-    private Result<Void> saveSpecialField(ConsoleTemplateSchemaDTO schemaDTO, String operator) throws AdminOperateException {
+    private Result<Void> saveSpecialField(ConsoleTemplateSchemaDTO schemaDTO, String operator, Integer projectId) throws AdminOperateException {
         if (CollectionUtils.isNotEmpty(schemaDTO.getFields())) {
-            return saveSpecialFieldByField(schemaDTO, operator);
+            return saveSpecialFieldByField(schemaDTO, operator,projectId);
         } else {
-            return saveSpecialFieldByJSON(schemaDTO, operator);
+            return saveSpecialFieldByJSON(schemaDTO, operator,projectId);
         }
 
     }
 
     private Result<Void> saveSpecialFieldByJSON(ConsoleTemplateSchemaDTO schemaDTO,
-                                                String operator) throws AdminOperateException {
+                                                String operator, Integer projectId) throws AdminOperateException {
         List<AriusTypeProperty> typeProperties = schemaDTO.getTypeProperties();
         if (typeProperties.size() == 1 && (StringUtils.isBlank(typeProperties.get(0).getTypeName())
                 || typeProperties.get(0).getTypeName().equals(DEFAULT_INDEX_MAPPING_TYPE))) {
@@ -1095,19 +1095,20 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
             templateLogicDTO.setRoutingField(typeProperties.get(0).getRoutingField());
             templateLogicDTO.setDateField(typeProperties.get(0).getDateField());
             templateLogicDTO.setDateFieldFormat(typeProperties.get(0).getDateFieldFormat());
-            Result<Void>  editDateFieldResult = indexTemplateService.editTemplate(templateLogicDTO, operator);
+            Result<Void>  editDateFieldResult = indexTemplateService.editTemplate(templateLogicDTO, operator,projectId);
             if (editDateFieldResult.failed()) {
                 return editDateFieldResult;
             }
         } else {
-            Result<Void> result = handleUpdateType(schemaDTO, operator, typeProperties);
+            Result<Void> result = handleUpdateType(schemaDTO, operator, typeProperties,projectId);
             if (result.failed()) {return result;}
         }
 
         return Result.buildSucc();
     }
 
-    private Result<Void> handleUpdateType(ConsoleTemplateSchemaDTO schemaDTO, String operator, List<AriusTypeProperty> typeProperties) throws AdminOperateException {
+    private Result<Void> handleUpdateType(ConsoleTemplateSchemaDTO schemaDTO, String operator, List<AriusTypeProperty> typeProperties,
+                                          Integer projectId) throws AdminOperateException {
         // 修改type表
         List<IndexTemplateType> templateTypes = indexTemplateService.listLogicTemplateTypes(schemaDTO.getLogicId());
         Map<String, IndexTemplateType> typeName2IndexTemplateTypeMap = ConvertUtil.list2Map(templateTypes,
@@ -1125,7 +1126,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
             templateLogicDTO.setId(schemaDTO.getLogicId());
             templateLogicDTO.setDateField(dateField);
             templateLogicDTO.setDateFieldFormat(dateFieldFormat);
-            Result<Void>  editDateFieldResult = indexTemplateService.editTemplate(templateLogicDTO, operator);
+            Result<Void>  editDateFieldResult = indexTemplateService.editTemplate(templateLogicDTO, operator,projectId);
             if (editDateFieldResult.failed()) {
                 return editDateFieldResult;
             }
@@ -1166,7 +1167,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
     }
 
     private Result<Void> saveSpecialFieldByField(ConsoleTemplateSchemaDTO schemaDTO,
-                                                 String operator) throws AdminOperateException {
+                                                 String operator, Integer projectId) throws AdminOperateException {
         SpecialField specialField = SpecialField.analyzeFromFields(schemaDTO.getFields(),
                 schemaDTO.getRemoveFieldNames());
         IndexTemplateDTO templateLogicDTO = new IndexTemplateDTO();
@@ -1175,7 +1176,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
         templateLogicDTO.setDateFieldFormat(specialField.getDateFieldFormat());
         templateLogicDTO.setIdField(specialField.getIdField());
         templateLogicDTO.setRoutingField(specialField.getRoutingField());
-        return indexTemplateService.editTemplate(templateLogicDTO, operator);
+        return indexTemplateService.editTemplate(templateLogicDTO, operator,projectId);
     }
 
     private boolean clusterIsHighVersion(Integer logicId) {

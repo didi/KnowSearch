@@ -3,7 +3,7 @@ package com.didichuxing.datachannel.arius.admin.biz.project.impl;
 import com.didichuxing.datachannel.arius.admin.biz.project.RoleExtendManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.RoleExtendVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.RoleExtendVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;

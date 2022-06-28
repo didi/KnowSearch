@@ -126,7 +126,7 @@ public class OperateRecordServiceImpl implements OperateRecordService {
         //设置操作类型
         Optional.ofNullable(recordInfo)
                 .map(OperateRecordInfoPO::getOperateId).map(OperateTypeEnum::getOperationTypeEnum)
-                .map(OperateTypeEnum::getOperationType).ifPresent(operateRecordVO::setModule);
+                .map(OperateTypeEnum::getOperationType).ifPresent(operateRecordVO::setOperate);
     }
     
     /**

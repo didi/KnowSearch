@@ -75,7 +75,8 @@ public class ConsoleTemplateSchemaController extends BaseConsoleTemplateControll
             return checkAuthResult;
         }
 
-        return templateLogicMappingManager.modifySchema(schemaDTO, HttpRequestUtil.getOperator(request));
+        return templateLogicMappingManager.modifySchema(schemaDTO, HttpRequestUtil.getOperator(request),
+                HttpRequestUtil.getProjectId(request));
     }
 
 }
