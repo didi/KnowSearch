@@ -11,6 +11,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.Work
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.ClusterDeleteOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
@@ -102,7 +103,8 @@ public class ClusterDeleteHandler extends BaseWorkOrderHandler {
             return Result.buildFail(String.format("物理集群[%s]不存在", content.getPhyClusterName()));
         }
 
-        Result<Boolean> deleteClusterResult = clusterPhyManager.deleteCluster(clusterPhy.getId(), workOrder.getSubmitor());
+        Result<Boolean> deleteClusterResult = clusterPhyManager.deleteCluster(clusterPhy.getId(), workOrder.getSubmitor(),
+                AuthConstant.SUPER_PROJECT_ID);
         if (deleteClusterResult.failed()) {
             return Result.buildFail(deleteClusterResult.getMessage());
         }

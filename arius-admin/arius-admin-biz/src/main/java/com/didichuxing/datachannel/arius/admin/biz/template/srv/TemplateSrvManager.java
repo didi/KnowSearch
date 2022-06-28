@@ -1,11 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv;
 
-import java.util.List;
-
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterTemplateSrvVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterTemplateSrv;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterTemplateSrvVO;
+import java.util.List;
 
 public interface TemplateSrvManager {
 
@@ -105,12 +104,15 @@ public interface TemplateSrvManager {
 
     /**
      * 为逻辑集群增加一个索引服务
-     * @param clusterLogicId  逻辑集群Id
-     * @param templateSrvId   索引服务Id
-     * @param operator        操作者
+     *
+     * @param clusterLogicId 逻辑集群Id
+     * @param templateSrvId  索引服务Id
+     * @param operator       操作者
+     * @param projectId
      * @return
      */
-    Result<Boolean> addTemplateSrvForClusterLogic(Long clusterLogicId, String templateSrvId, String operator);
+    Result<Boolean> addTemplateSrvForClusterLogic(Long clusterLogicId, String templateSrvId, String operator,
+                                                  Integer projectId);
 
     /**
      * 为一个物理集群增加多个索引服务
@@ -132,12 +134,15 @@ public interface TemplateSrvManager {
 
     /**
      * 逻辑集群删除一个索引服务
+     *
      * @param clusterLogicId
      * @param templateSrvId
      * @param operator
+     * @param projectId
      * @return
      */
-    Result<Boolean> delTemplateSrvForClusterLogic(Long clusterLogicId, String templateSrvId, String operator);
+    Result<Boolean> delTemplateSrvForClusterLogic(Long clusterLogicId, String templateSrvId, String operator,
+                                                  Integer projectId);
 
     /**
      * 清理所有索引服务

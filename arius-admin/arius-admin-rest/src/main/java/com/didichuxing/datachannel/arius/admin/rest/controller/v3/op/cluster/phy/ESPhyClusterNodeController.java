@@ -8,6 +8,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRegionWithNodeInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostWithRegionInfoVO;
+import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -56,6 +57,11 @@ public class ESPhyClusterNodeController {
     @ResponseBody
     @ApiOperation(value = "节点划分且创建region")
     public Result<List<Long>> createMultiNode2Region(HttpServletRequest request, @RequestBody List<ClusterRegionWithNodeInfoDTO> params) {
+        final Result<Void> result = ProjectUtils.checkProjectCorrectly(i -> i, HttpRequestUtil.getProjectId(request),
+                HttpRequestUtil.getProjectId(request));
+        if (result.failed()){
+            return Result.buildFail(result.getMessage());
+        }
         return clusterNodeManager.createMultiNode2Region(params, HttpRequestUtil.getOperator(request));
     }
 
@@ -63,6 +69,11 @@ public class ESPhyClusterNodeController {
     @ResponseBody
     @ApiOperation(value = "编辑多个region中的节点信息（扩缩容）")
     public Result<Boolean> editMultiNode2Region(HttpServletRequest request, @RequestBody List<ClusterRegionWithNodeInfoDTO> params) {
+        final Result<Void> result = ProjectUtils.checkProjectCorrectly(i -> i, HttpRequestUtil.getProjectId(request),
+                HttpRequestUtil.getProjectId(request));
+        if (result.failed()){
+            return Result.buildFail(result.getMessage());
+        }
         return clusterNodeManager.editMultiNode2Region(params, HttpRequestUtil.getOperator(request));
     }
 

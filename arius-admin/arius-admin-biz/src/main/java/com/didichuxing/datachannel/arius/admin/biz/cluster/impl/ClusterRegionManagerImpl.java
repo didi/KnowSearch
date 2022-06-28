@@ -2,17 +2,6 @@ package com.didichuxing.datachannel.arius.admin.biz.cluster.impl;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType.FAIL;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterRegionManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.TemplateSrvManager;
@@ -31,6 +20,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
@@ -39,6 +29,15 @@ import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecord
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Sets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class ClusterRegionManagerImpl implements ClusterRegionManager {
@@ -135,6 +134,7 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
         if (CollectionUtils.isEmpty(param.getClusterRegionDTOS())) {
             return Result.buildParamIllegal("逻辑集群关联region信息为空");
         }
+      
 
         //2. 集群合法关联性校验
         param.getClusterRegionDTOS().stream().distinct()
@@ -155,7 +155,13 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
             }
             param.setId(createLogicClusterResult.getData());
         }
-
+        //校验项目的合法性
+        final Result<Void> result = ProjectUtils.checkProjectCorrectly(ESLogicClusterWithRegionDTO::getProjectId, param,
+                param.getProjectId());
+        if (result.failed()){
+            return result;
+        }
+    
         //5. 初始化物理集群索引服务
         initTemplateSrvOfClusterPhy(param, operator);
 
@@ -164,14 +170,11 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
     }
 
     @Override
-    public Result<Void> unbindRegion(Long regionId, Long logicClusterId, String operator) {
-        return clusterRegionService.unbindRegion(regionId, logicClusterId, operator);
+    public Result<Void> unbindRegion(Long regionId, Long logicClusterId, String operator, Integer projectId) {
+        return clusterRegionService.unbindRegion(regionId, logicClusterId, operator,projectId);
     }
 
-    @Override
-    public Result<Void> bindRegion(Long regionId, Long logicClusterId, Integer share, String operator) {
-        return clusterRegionService.bindRegion(regionId, logicClusterId, share, operator);
-    }
+   
 
     @Override
     public Result<List<ClusterRegionWithNodeInfoVO>> listClusterRegionWithNodeInfoByClusterName(String clusterName) {
@@ -213,7 +216,8 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
     /**
      * 对于逻辑集群绑定的物理集群的版本进行一致性校验
      *
-     * @param param 逻辑集群Region
+     * @param param     逻辑集群Region
+     * @param projectId
      * @return
      */
     private Result<Void> boundPhyClusterVersionsCheck(ESLogicClusterWithRegionDTO param) {

@@ -59,6 +59,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
@@ -141,18 +142,24 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
      *
      * @param logicClusterId 资源id
      * @param operator       操作人
+     * @param projectId
      * @return result
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result<Void> deleteClusterLogicById(Long logicClusterId, String operator) throws AdminOperateException {
+    public Result<Void> deleteClusterLogicById(Long logicClusterId, String operator, Integer projectId) throws AdminOperateException {
         ClusterLogicPO logicCluster = logicClusterDAO.getById(logicClusterId);
         if (logicCluster == null) {
             return Result.buildNotExist("逻辑集群不存在");
         }
-
+        
         if (hasLogicClusterWithTemplates(logicClusterId)) {
             return Result.build(ResultType.IN_USE_ERROR.getCode(), "逻辑集群使用中");
+        }
+        final Result<Void> result = ProjectUtils.checkProjectCorrectly(ClusterLogicPO::getProjectId, logicCluster,
+                projectId);
+        if (result.failed()){
+            return result;
         }
 
         boolean succeed = (logicClusterDAO.delete(logicClusterId) > 0);
@@ -180,7 +187,7 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
      */
     @Override
     public Result<Long> createClusterLogic(ESLogicClusterDTO param) {
-        Result<Void> checkResult = validateClusterLogicParams(param, ADD);
+        Result<Void> checkResult = validateClusterLogicParams(param, ADD, param.getProjectId());
         if (checkResult.failed()) {
             LOGGER.warn("class=ClusterLogicServiceImpl||method=createClusterLogic||msg={}", checkResult.getMessage());
             return Result.buildFrom(checkResult);
@@ -198,16 +205,17 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
      *
      * @param param     参数
      * @param operation 操作
+     * @param projectId
      * @return result
      */
     @Override
-    public Result<Void> validateClusterLogicParams(ESLogicClusterDTO param, OperationEnum operation) {
-        return checkLogicClusterParams(param, operation);
+    public Result<Void> validateClusterLogicParams(ESLogicClusterDTO param, OperationEnum operation, Integer projectId) {
+        return checkLogicClusterParams(param, operation,projectId);
     }
 
     @Override
-    public Result<Void> editClusterLogic(ESLogicClusterDTO param, String operator) {
-        Result<Void> checkResult = validateClusterLogicParams(param, EDIT);
+    public Result<Void> editClusterLogic(ESLogicClusterDTO param, String operator, Integer projectId) {
+        Result<Void> checkResult = validateClusterLogicParams(param, EDIT,projectId);
         if (checkResult.failed()) {
             LOGGER.warn("class=ClusterLogicServiceImpl||method=editResource||msg={}", checkResult.getMessage());
             return checkResult;
@@ -451,7 +459,16 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
 
         return new ArrayList<>(pluginMap.values());
     }
-
+    
+    /**
+     * @param clusterLogicId 集群逻辑id
+     * @return
+     */
+    @Override
+    public Integer getProjectIdById(Long clusterLogicId) {
+        return logicClusterDAO.getProjectIdById(clusterLogicId);
+    }
+    
     @Override
     public Result<Long> addPlugin(Long logicClusterId, PluginDTO pluginDTO, String operator) {
 
@@ -521,9 +538,10 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
      *
      * @param param     逻辑集群
      * @param operation 操作类型
+     * @param projectId
      * @return
      */
-    private Result<Void> checkLogicClusterParams(ESLogicClusterDTO param, OperationEnum operation) {
+    private Result<Void> checkLogicClusterParams(ESLogicClusterDTO param, OperationEnum operation, Integer projectId) {
         if (AriusObjUtils.isNull(param)) {
             return Result.buildParamIllegal("逻辑集群信息为空");
         }
@@ -551,6 +569,22 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
             ClusterLogicPO oldPO = logicClusterDAO.getById(param.getId());
             if (oldPO == null) {
                 return Result.buildNotExist("逻辑集群不存在");
+            }
+            //当param中projectid存在
+            if (Objects.nonNull(param.getProjectId())) {
+                final Result<Void> result = ProjectUtils.checkProjectCorrectly(ClusterLogicPO::getProjectId, oldPO,
+                        param.getProjectId());
+                if (result.failed()) {
+                    return result;
+                }
+        
+            } else {
+                //校验路径
+                final Result<Void> result = ProjectUtils.checkProjectCorrectly(ClusterLogicPO::getProjectId, oldPO,
+                       projectId);
+                if (result.failed()) {
+                    return result;
+                }
             }
         }
 

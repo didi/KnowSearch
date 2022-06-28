@@ -47,7 +47,7 @@ public class ClusterLogicTemplateSrvController {
     public Result<Boolean> addTemplateSrvId(HttpServletRequest request, @PathVariable Long clusterLogicId,
                                             @PathVariable String templateSrvId) {
         return templateSrvManager.addTemplateSrvForClusterLogic(clusterLogicId, templateSrvId,
-            HttpRequestUtil.getOperator(request));
+            HttpRequestUtil.getOperator(request),HttpRequestUtil.getProjectId(request));
     }
 
     @DeleteMapping("/{clusterLogicId}/{templateSrvId}")
@@ -56,6 +56,6 @@ public class ClusterLogicTemplateSrvController {
     public Result<Boolean> delTemplateSrvId(HttpServletRequest request, @PathVariable Long clusterLogicId,
                                             @PathVariable String templateSrvId) {
         return templateSrvManager.delTemplateSrvForClusterLogic(clusterLogicId, templateSrvId,
-            HttpRequestUtil.getOperator(request) );
+            HttpRequestUtil.getOperator(request) ,HttpRequestUtil.getProjectId(request));
     }
 }

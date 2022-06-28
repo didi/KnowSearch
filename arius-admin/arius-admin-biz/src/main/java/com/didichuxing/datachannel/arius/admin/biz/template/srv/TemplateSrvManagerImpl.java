@@ -17,6 +17,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ESVersionUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
@@ -354,7 +355,8 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result<Boolean> addTemplateSrvForClusterLogic(Long clusterLogicId, String templateSrvId, String operator) {
+    public Result<Boolean> addTemplateSrvForClusterLogic(Long clusterLogicId, String templateSrvId, String operator,
+                                                         Integer projectId) {
         if (!isRDOrOP(operator)) {
             return Result.buildNotExist(NO_PERMISSION_CONTENT);
         }
@@ -375,6 +377,14 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
         if (CollectionUtils.isEmpty(associatedClusterPhyNames)) {
             return Result.buildSucc();
         }
+        //校验项目操作的正确性
+        final Integer clusterLogicBelongsToProjectId = clusterLogicService.getProjectIdById(clusterLogicId);
+        final Result<Void> result = ProjectUtils.checkProjectCorrectly(i -> i, clusterLogicBelongsToProjectId,
+                projectId);
+        if (result.failed()) {
+            return Result.buildFail(result.getMessage());
+        }
+    
 
         for (String associatedClusterPhyName : associatedClusterPhyNames) {
             try {
@@ -443,7 +453,8 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result<Boolean> delTemplateSrvForClusterLogic(Long clusterLogicId, String templateSrvId, String operator) {
+    public Result<Boolean> delTemplateSrvForClusterLogic(Long clusterLogicId, String templateSrvId, String operator,
+                                                         Integer projectId) {
         if (!isRDOrOP(operator)) {
             return Result.buildNotExist(NO_PERMISSION_CONTENT);
         }
@@ -464,6 +475,14 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
         if (CollectionUtils.isEmpty(associatedClusterPhyNames)) {
             return Result.buildSucc();
         }
+        //校验项目操作的正确性
+        final Integer clusterLogicBelongsToProjectId = clusterLogicService.getProjectIdById(clusterLogicId);
+        final Result<Void> result = ProjectUtils.checkProjectCorrectly(i -> i, clusterLogicBelongsToProjectId,
+                projectId);
+        if (result.failed()) {
+            return Result.buildFail(result.getMessage());
+        }
+    
 
         for (String associatedClusterPhyName : associatedClusterPhyNames) {
             try {

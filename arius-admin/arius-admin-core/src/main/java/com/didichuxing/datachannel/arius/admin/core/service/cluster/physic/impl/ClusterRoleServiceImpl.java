@@ -7,17 +7,17 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.Cl
 import com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESClusterRolePO;
 import com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.ecm.ESClusterRoleDAO;
-import org.apache.commons.collections.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.commons.collections.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * ES集群对应角色集群 服务实现类
@@ -127,7 +127,12 @@ public class ClusterRoleServiceImpl implements ClusterRoleService {
     }
 
     @Override
-    public Result<Void> deleteRoleClusterByClusterId(Integer clusterId) {
+    public Result<Void> deleteRoleClusterByClusterId(Integer clusterId, Integer projectId) {
+        //校验操作项目的合法性
+        final Result<Void> result = ProjectUtils.checkProjectCorrectly(i -> i, projectId, projectId);
+        if (result.failed()){
+         return result;
+        }
         boolean success = (roleClusterDAO.delete(clusterId) > 0);
         if (!success) {
             return Result.buildFail();
