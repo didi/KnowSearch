@@ -6,6 +6,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResu
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterLogicConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicPhyRelationVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicTemplateIndexCountVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
@@ -123,7 +124,7 @@ public class ESLogicClusterOpV3Controller {
     @GetMapping("/cluster-phy-relation")
     @ResponseBody
     @ApiOperation(value = "根据项目id获取不同权限的集群映射")
-    public Result<List<Tuple<String, String>>>  getClusterRelationByProjectId(HttpServletRequest request) {
+    public Result<List<Tuple<String, ClusterLogicPhyRelationVO>>>  getClusterRelationByProjectId(HttpServletRequest request) {
         return clusterLogicManager.getClusterRelationByProjectId(HttpRequestUtil.getProjectId(request));
     }
 

@@ -628,16 +628,19 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     }
 
     @Override
-    public Result<List<Tuple<String, String>>> getClusterRelationByProjectId(Integer projectId) {
+    public Result<List<Tuple<String, ClusterLogicPhyRelationVO>>> getClusterRelationByProjectId(Integer projectId) {
 
-        List<Tuple<String, String>> collect = Lists.newArrayList();
+        List<Tuple<String, ClusterLogicPhyRelationVO>> collect = Lists.newArrayList();
         List<ClusterLogic> tempAuthLogicClusters = Lists.newArrayList();
         if (AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
             List<ClusterPhy> phyList = clusterPhyService.listAllClusters();
-             collect = phyList.stream().map(clusterPhy -> new Tuple<String, String>(clusterPhy.getCluster(), clusterPhy.getCluster())).collect(Collectors.toList());
+             collect = phyList.stream().map(clusterPhy
+                     -> new Tuple<String, ClusterLogicPhyRelationVO>(clusterPhy.getCluster(),
+                     new ClusterLogicPhyRelationVO(clusterPhy.getId(),clusterPhy.getType(),clusterPhy.getCluster())))
+                     .collect(Collectors.toList());
         } else {
             List<ClusterLogic> logicList = clusterLogicService.getOwnedClusterLogicListByProjectId(projectId);
-            collect = logicList.stream().map(clusterLogic -> new Tuple<String, String>(clusterLogic.getName(),getPhyNameByLogic(clusterLogic.getId()))).collect(Collectors.toList());
+            collect = logicList.stream().map(clusterLogic -> new Tuple<String, ClusterLogicPhyRelationVO>(clusterLogic.getName(),getPhyNameByLogic(clusterLogic.getId()))).collect(Collectors.toList());
             tempAuthLogicClusters.addAll(clusterLogicService.getHasAuthClusterLogicsByProjectId(projectId));
         }
         return Result.buildSucc(collect);
@@ -648,9 +651,14 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
 
 /**************************************************** private method ****************************************************/
 
-    private String getPhyNameByLogic(Long clusterLogicId) {
+    private ClusterLogicPhyRelationVO getPhyNameByLogic(Long clusterLogicId) {
         ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(clusterLogicId);
-        return clusterRegion == null ? "" : clusterRegion.getPhyClusterName();
+        ClusterPhy clusterPhy =  clusterPhyService.getClusterByName(clusterRegion.getPhyClusterName());
+        ClusterLogicPhyRelationVO clusterLogicPhyRelationVO = new ClusterLogicPhyRelationVO();
+        clusterLogicPhyRelationVO.setId(clusterPhy.getId());
+        clusterLogicPhyRelationVO.setType(clusterPhy.getType());
+        clusterLogicPhyRelationVO.setName(clusterPhy.getCluster());
+        return clusterLogicPhyRelationVO;
     }
 
     /**

@@ -54,8 +54,7 @@ public class ClusterPhyMetricsController {
     @ApiOperation(value = "获取账号下已配置指标类型")
     public Result<List<String>> getClusterPhyMetricsTypes(@RequestBody MetricsConfigInfoDTO param,
                                                           HttpServletRequest request) {
-        return Result.buildSucc(
-            clusterPhyMetricsManager.getUserNameConfigMetrics(param, HttpRequestUtil.getOperator(request)));
+        return Result.buildSucc(clusterPhyMetricsManager.getUserNameConfigMetrics(param, HttpRequestUtil.getOperator(request)));
     }
 
     @PutMapping("/config-metrics")
