@@ -51,9 +51,9 @@ import com.didichuxing.datachannel.arius.admin.common.event.template.LogicTempla
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.TemplateUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
@@ -300,7 +300,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
             }
 
             IndexTemplatePO oldPO = indexTemplateDAO.getById(param.getId());
-            final Result<Void> checkProjectCorrectly = CommonUtils.checkProjectCorrectly(IndexTemplatePO::getProjectId, oldPO,
+            final Result<Void> checkProjectCorrectly = ProjectUtils.checkProjectCorrectly(IndexTemplatePO::getProjectId, oldPO,
                     projectId);
             if (checkProjectCorrectly.failed()) {
                 return checkProjectCorrectly;

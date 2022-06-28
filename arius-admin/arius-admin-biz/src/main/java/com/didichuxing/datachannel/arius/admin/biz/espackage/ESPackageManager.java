@@ -8,6 +8,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.espackage.AriusES
 import com.didichuxing.datachannel.arius.admin.common.util.AriusOptional;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ESVersionUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESPackageService;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -51,23 +52,31 @@ public class ESPackageManager {
 
     /**
      * 创建一个Package
+     *
      * @param esPackageDTO dto
-     * @param operator 操作者
+     * @param operator     操作者
+     * @param projectId
      * @return 创建数量
      */
-    public Result<Long> addESPackage(ESPackageDTO esPackageDTO, String operator) {
+    public Result<Long> addESPackage(ESPackageDTO esPackageDTO, String operator, Integer projectId) {
+        final Result<Void> result = ProjectUtils.checkProjectCorrectly(id -> id, projectId, projectId);
+        if (result.failed()){
+            return Result.buildFail(result.getMessage());
+        }
         return packageService.addESPackage(esPackageDTO, operator);
     }
 
     /**
      * 修改ES package
+     *
      * @param esPackageDTO dto
-     * @param operator 操作者
+     * @param operator     操作者
+     * @param projectId
      * @return 更新的es package
      */
-    public Result<ESPackageVO> updateESPackage(ESPackageDTO esPackageDTO, String operator) {
+    public Result<ESPackageVO> updateESPackage(ESPackageDTO esPackageDTO, String operator, Integer projectId) {
 
-        Result<ESPackage> esPackageResult = packageService.updateESPackage(esPackageDTO, operator);
+        Result<ESPackage> esPackageResult = packageService.updateESPackage(esPackageDTO, operator,projectId);
         if (esPackageResult.failed()) {
             return Result.buildFail(esPackageResult.getMessage());
         }
@@ -91,11 +100,17 @@ public class ESPackageManager {
 
     /**
      * 删除es对应的package
-     * @param id 插件包
-     * @param operator 操作人
+     *
+     * @param id        插件包
+     * @param operator  操作人
+     * @param projectId
      * @return
      */
-    public Result<Long> deleteESPackage(Long id, String operator) {
+    public Result<Long> deleteESPackage(Long id, String operator, Integer projectId) {
+        final Result<Void> result = ProjectUtils.checkProjectCorrectly(i -> i, projectId, projectId);
+        if (result.failed()){
+            return Result.buildFail(result.getMessage());
+        }
         return packageService.deleteESPackage(id, operator);
     }
 }

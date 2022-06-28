@@ -48,20 +48,21 @@ public class NormalPackageController {
     @ResponseBody
     @ApiOperation(value = "新增程序包接口", notes = "")
     public Result<Long> savePackage(HttpServletRequest request, ESPackageDTO esPackageDTO) {
-        return packageManager.addESPackage(esPackageDTO, HttpRequestUtil.getOperator(request));
+        return packageManager.addESPackage(esPackageDTO, HttpRequestUtil.getOperator(request),
+                HttpRequestUtil.getProjectId(request));
     }
 
     @PutMapping("/update")
     @ResponseBody
     @ApiOperation(value = "修改程序包接口", notes = "")
     public Result<ESPackageVO> updatePackage(HttpServletRequest request, @RequestBody ESPackageDTO esPackageDTO) {
-        return packageManager.updateESPackage(esPackageDTO, HttpRequestUtil.getOperator(request));
+        return packageManager.updateESPackage(esPackageDTO, HttpRequestUtil.getOperator(request),HttpRequestUtil.getProjectId(request));
     }
 
     @DeleteMapping("/{id}")
     @ResponseBody
     @ApiOperation(value = "删除程序包接口", notes = "")
     public Result<Long> deletePackage(HttpServletRequest request, @PathVariable Long id) {
-        return packageManager.deleteESPackage(id, HttpRequestUtil.getOperator(request));
+        return packageManager.deleteESPackage(id, HttpRequestUtil.getOperator(request),HttpRequestUtil.getProjectId(request));
     }
 }

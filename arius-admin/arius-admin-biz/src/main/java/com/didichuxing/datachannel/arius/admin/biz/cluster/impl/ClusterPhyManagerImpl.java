@@ -69,6 +69,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.ClusterUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
@@ -472,7 +473,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
                             .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
                             .userOperation(operator)
                             .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_DYNAMIC_CONF_CHANGE).content(
-                            CommonUtils.getChangeByAfterAndBeforeJson(afterChangeConfigs,beforeChangeConfigs)
+                            ProjectUtils.getChangeByAfterAndBeforeJson(afterChangeConfigs,beforeChangeConfigs)
         
                     )
                             .bizId(clusterByName.getId())
