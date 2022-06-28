@@ -8,12 +8,12 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.dsl.template.DslTemplateConditionDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.DslQueryLimit;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.dsl.DslTemplatePO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.DslTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.tuple.Tuple3;
+import com.didichuxing.datachannel.arius.admin.common.tuple.TupleThree;
+import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
@@ -21,9 +21,9 @@ import com.didichuxing.datachannel.arius.admin.metadata.service.DslTemplateServi
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.service.ProjectService;
-import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -52,20 +52,18 @@ public class DslTemplateManagerImpl implements DslTemplateManager {
         if(CollectionUtils.isEmpty(dslTemplateMd5List)) {
             return Result.build(true);
         }
-        final Tuple3</*变更后的结果*/Boolean,/*排除无效的dslTemplateMd5*/List<DslQueryLimit>,/*变更前的dsl*/Map<String, DslTemplatePO>> updateDslTemplateQueryLimit = dslTemplateService.updateDslTemplateQueryLimit(
+        final TupleTwo</*变更后的结果*/Boolean,/*变更前的dsl*/Map</*dslTemplateMd5*/String,/*变更前的queryLimit*/ Double>> updateDslTemplateQueryLimit = dslTemplateService.updateDslTemplateQueryLimit(
                 projectId, dslTemplateMd5List, queryLimit);
-        if (Boolean.TRUE.equals(updateDslTemplateQueryLimit._1)) {
-            final List<DslTemplatePO> dslTemplateList = Lists.newArrayList(updateDslTemplateQueryLimit._3.values());
-            final Map<String, DslTemplatePO> templateMap = ConvertUtil.list2Map(dslTemplateList,
-                    DslTemplatePO::getDslTemplateMd5);
-            for (DslQueryLimit dslQueryLimit : updateDslTemplateQueryLimit._2) {
-                OperateRecord operateRecord = new OperateRecord.Builder().content(String.format("queryLimit %f->%f",
-                                templateMap.get(dslQueryLimit.getDslTemplateMd5()).getQueryLimit(), queryLimit))
+        if (Boolean.TRUE.equals(updateDslTemplateQueryLimit.v1)) {
+            for (Entry<String, Double> entry : updateDslTemplateQueryLimit.v2.entrySet()) {
+                OperateRecord operateRecord = new OperateRecord.Builder().content(
+                                String.format("queryLimit %f->%f", entry.getValue(), queryLimit))
                         .operationTypeEnum(OperateTypeEnum.QUERY_TEMPLATE_DSL_CURRENT_LIMIT_ADJUSTMENT)
                         .project(projectService.getProjectBriefByProjectId(projectId)).userOperation(operator)
-                        .bizId(dslQueryLimit.getProjectIdDslTemplateMd5()).build();
+                        .bizId(entry.getKey()).build();
                 operateRecordService.save(operateRecord);
             }
+            
         }
         return Result.buildSucc();
     }
@@ -75,17 +73,17 @@ public class DslTemplateManagerImpl implements DslTemplateManager {
         if(StringUtils.isEmpty(dslTemplateMd5)) {
             return Result.build(true);
         }
-        final Tuple3</*变更前*/Boolean,/*变更后*/ Boolean,/*变更状态*/Boolean> templateStatus = dslTemplateService.updateDslTemplateStatus(
+        final TupleThree</*变更前*/Boolean,/*变更后*/ Boolean,/*变更状态*/Boolean> templateStatus = dslTemplateService.updateDslTemplateStatus(
                 projectId, dslTemplateMd5);
-        if (Boolean.TRUE.equals(templateStatus._3)) {
+        if (Boolean.TRUE.equals(templateStatus.v3)) {
             OperateRecord operateRecord = new OperateRecord.Builder().content(
-                            "变更前:" + templateStatus._1 + ";变更后:" + templateStatus._2)
+                            "变更前:" + templateStatus.v1 + ";变更后:" + templateStatus.v2)
                     .operationTypeEnum(OperateTypeEnum.QUERY_TEMPLATE_DSL_CURRENT_LIMIT_ADJUSTMENT)
                     .project(projectService.getProjectBriefByProjectId(projectId)).userOperation(operator)
                     .bizId(dslTemplateMd5).build();
             operateRecordService.save(operateRecord);
         }
-        return Result.build(templateStatus._3);
+        return Result.build(templateStatus.v3);
     }
 
     @Override

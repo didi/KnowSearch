@@ -12,7 +12,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ESUser;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.project.ESUserPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.ConsoleESUserVO;
-import com.didichuxing.datachannel.arius.admin.common.tuple.TupleInterface;
+import com.didichuxing.datachannel.arius.admin.common.tuple.Tuples;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
@@ -101,11 +101,11 @@ class ESUserManagerTest {
 		when(roleTool.isAdmin(anyString())).thenReturn(true);
 		when(esUserService.validateESUser(any(), any())).thenReturn(Result.buildParamIllegal("应用信息为空"));
 		when(esUserService.registerESUser(null, null)).thenReturn(
-				TupleInterface.of(Result.buildParamIllegal("应用信息为空"), esUserPO));
+				Tuples.of(Result.buildParamIllegal("应用信息为空"), esUserPO));
 		Assertions.assertEquals(Result.buildParamIllegal("应用信息为空").getMessage(),
 				esUserManager.registerESUser(null, null, null).getMessage());
 		when(esUserService.registerESUser(any(), anyString())).thenReturn(
-                TupleInterface.of(Result.buildSucc(1), esUserPO));
+                Tuples.of(Result.buildSucc(1), esUserPO));
 		Assertions.assertTrue(esUserManager.registerESUser(esUserDTO, 1, "a").success());
 	}
 	
@@ -118,7 +118,7 @@ class ESUserManagerTest {
 		Assertions.assertEquals(Result.buildFail("应用不存在").getMessage(),
 				esUserManager.editESUser(esUserDTO, "admin").getMessage());
 		when(esUserService.validateESUser(any(), any())).thenReturn(Result.buildSucc());
-		when(esUserService.editUser(any())).thenReturn(TupleInterface.of(Result.buildSucc(), esUserPO));
+		when(esUserService.editUser(any())).thenReturn(Tuples.of(Result.buildSucc(), esUserPO));
 		Assertions.assertTrue(
 				Assertions.assertDoesNotThrow(() -> esUserManager.editESUser(esUserDTO, "admin").success()));
 		
@@ -148,7 +148,7 @@ class ESUserManagerTest {
 				esUserManager.deleteESUserByProject(1, 1, "admin").getMessage());
 		esUser.setDefaultDisplay(false);
 		when(esUserService.listESUsers(anyList())).thenReturn(Lists.newArrayList(esUser, esUser));
-		when(esUserService.deleteESUserById(1)).thenReturn(TupleInterface.of(Result.buildSucc(), esUserPO));
+		when(esUserService.deleteESUserById(1)).thenReturn(Tuples.of(Result.buildSucc(), esUserPO));
 		Assertions.assertTrue(esUserManager.deleteESUserByProject(1, 1, "admin").success());
 		
 	}
@@ -158,7 +158,7 @@ class ESUserManagerTest {
 		when(roleTool.isAdmin("admin")).thenReturn(true);
 		when(roleTool.isAdmin("")).thenReturn(false);
 		when(esUserService.deleteByESUsers(anyInt())).thenReturn(
-				TupleInterface.of(Result.buildSucc(), Lists.newArrayList(CustomDataSource.esUserPO())));
+				Tuples.of(Result.buildSucc(), Lists.newArrayList(CustomDataSource.esUserPO())));
 		Assertions.assertEquals(Result.buildFail("当前操作者权限不足,需要管理员权限").getMessage(),
 				esUserManager.deleteAllESUserByProject(1, "").getMessage());
 		

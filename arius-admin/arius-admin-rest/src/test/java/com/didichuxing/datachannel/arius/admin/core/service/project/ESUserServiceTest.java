@@ -12,7 +12,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ESUser;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.project.ESUserPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
-import com.didichuxing.datachannel.arius.admin.common.tuple.Tuple2;
+import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.project.impl.ESUserServiceImpl;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.project.ESUserDAO;
@@ -96,7 +96,7 @@ class ESUserServiceTest {
         esUserDTO.setId(1);
         when(esUserDAO.getByESUser(anyInt())).thenReturn(esUserPO);
         // Run the test
-        final Tuple2<Result<Void>, ESUserPO> result = esUserService.editUser(esUserDTO);
+        final TupleTwo<Result<Void>, ESUserPO> result = esUserService.editUser(esUserDTO);
         Assertions.assertTrue(result._1().success());
         // Verify the results
     }
@@ -107,7 +107,7 @@ class ESUserServiceTest {
         when(esUserDAO.delete(anyInt())).thenReturn(1);
         
         // Run the test
-        final Tuple2<Result<Void>, ESUserPO> result = esUserService.deleteESUserById(1);
+        final TupleTwo<Result<Void>, ESUserPO> result = esUserService.deleteESUserById(1);
         Assertions.assertTrue(result._1().success());
         // Verify the results
     }

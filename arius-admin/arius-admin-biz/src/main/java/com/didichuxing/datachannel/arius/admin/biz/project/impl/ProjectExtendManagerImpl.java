@@ -23,8 +23,8 @@ import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectSearchTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.tuple.Tuple2;
-import com.didichuxing.datachannel.arius.admin.common.tuple.TupleInterface;
+import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
+import com.didichuxing.datachannel.arius.admin.common.tuple.Tuples;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.VerifyCodeFactory;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
@@ -108,7 +108,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
             //5. 设置项目id
             config.setProjectId(projectVO.getId());
             // 6. 创建项目配置
-            Tuple2<Result<Void>, ProjectConfigPO> resultProjectConfigTuple =
+            TupleTwo<Result<Void>, ProjectConfigPO> resultProjectConfigTuple =
                     projectConfigService.updateOrInitProjectConfig(
                     config, operator);
              setAdminProjectExtendVO(projectExtendVO);
@@ -316,7 +316,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
         List<UserBriefVO> afterProjectUserList = Lists.newArrayList();
         Optional.ofNullable(projectService.getProjectDetailByProjectId(project.getId()))
                 .map(ProjectVO::getUserList).ifPresent(afterProjectUserList::addAll);
-        Tuple2</*beforeUserStr*/String,/*afterUserStr*/String> tuple2 = projectOwnerOrMemberChangeStr(
+        TupleTwo</*beforeUserStr*/String,/*afterUserStr*/String> tuple2 = projectOwnerOrMemberChangeStr(
                 beforeProjectUserList, afterProjectUserList);
         recordProjectOwnerOrUserChange(tuple2, project.getProjectName(), operator);
     }
@@ -331,7 +331,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
         List<UserBriefVO> afterProjectOwnerList = Lists.newArrayList();
         Optional.ofNullable(projectService.getProjectDetailByProjectId(project.getId()))
                 .map(ProjectVO::getOwnerList).ifPresent(afterProjectOwnerList::addAll);
-        Tuple2</*beforeOwnerStr*/String,/*afterOwnerStr*/String> tuple2=
+        TupleTwo</*beforeOwnerStr*/String,/*afterOwnerStr*/String> tuple2=
                 projectOwnerOrMemberChangeStr(beforeProjectOwnerList,
                 afterProjectOwnerList);
         recordProjectOwnerOrUserChange(tuple2,project.getProjectName(),operator);
@@ -383,7 +383,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
             ProjectVO projectVO = projectService.getProjectDetailByProjectId(projectId);
             Optional.ofNullable(projectVO).map(ProjectVO::getUserList)
                     .ifPresent(afterProjectUserList::addAll);
-            final Tuple2</*beforeProjectUserStr*/String,/*afterProjectUserStr*/ String> tuple2 =
+            final TupleTwo</*beforeProjectUserStr*/String,/*afterProjectUserStr*/ String> tuple2 =
                     projectOwnerOrMemberChangeStr(beforeProjectUserList,
                     afterProjectUserList);
             recordProjectOwnerOrUserChange(tuple2, projectVO.getProjectName(), operator);
@@ -417,7 +417,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
             ProjectVO afterProject = projectService.getProjectDetailByProjectId(projectId);
             List<UserBriefVO> afterProjectUserList = Lists.newArrayList();
             Optional.ofNullable(afterProject.getUserList()).ifPresent(afterProjectUserList::addAll);
-            final Tuple2</*beforeChangeUser*/String,/*afterChangeUser*/ String> tuple2 =
+            final TupleTwo</*beforeChangeUser*/String,/*afterChangeUser*/ String> tuple2 =
                     projectOwnerOrMemberChangeStr(beforeProjectUserList,
                     afterProjectUserList);
             recordProjectOwnerOrUserChange(tuple2,oldProject.getProjectName(),operator);
@@ -453,7 +453,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
             Optional.ofNullable(projectService.getProjectDetailByProjectId(projectId)).map(ProjectVO::getOwnerList)
                     .ifPresent(afterProjectAddOwnerList::addAll);
          
-            Tuple2</*beforeOwnerUserName*/String,/*afterOwnerUserName*/String> tuple2 = projectOwnerOrMemberChangeStr(beforeProjectAddOwnerList,afterProjectAddOwnerList);
+            TupleTwo</*beforeOwnerUserName*/String,/*afterOwnerUserName*/String> tuple2 = projectOwnerOrMemberChangeStr(beforeProjectAddOwnerList,afterProjectAddOwnerList);
             recordProjectOwnerOrUserChange(tuple2,beforeProjectAddOwner.getProjectName(),operator);
            
             return Result.buildSucc();
@@ -484,7 +484,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
             Optional.ofNullable(afterDeleteProjectOwner)
                     .map(ProjectVO::getOwnerList)
                     .ifPresent(afterProjectOwnerList::addAll);
-             Tuple2</*beforeOwnerUserName*/String,/*afterOwnerUserName*/String> tuple2 = projectOwnerOrMemberChangeStr(
+             TupleTwo</*beforeOwnerUserName*/String,/*afterOwnerUserName*/String> tuple2 = projectOwnerOrMemberChangeStr(
                      beforeProjectOwnerList,afterProjectOwnerList);
              recordProjectOwnerOrUserChange(tuple2,beforeDeleteProjectOwner.getProjectName(),operator);
            
@@ -606,7 +606,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
         esUserDTO.setMemo((data).getProjectName() + "项目默认的es user");
         esUserDTO.setProjectId((data).getId());
         esUserDTO.setMemo("创建项目es user");
-        final Tuple2<Result, ESUserPO> result = esUserService.registerESUser(esUserDTO, operator);
+        final TupleTwo<Result, ESUserPO> result = esUserService.registerESUser(esUserDTO, operator);
         if (result._1().success()){
             operateRecordService.save(
                     new OperateRecord(data.getProjectName(), OperateTypeEnum.APPLICATION_ACCESS_MODE,
@@ -650,7 +650,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
      * @param afterProjectAddOwnerUserList    在项目添加所有者列表
      * @return {@code Tuple2<String, String>}
      */
-    private Tuple2</*beforeOwnerUserName*/String,/*afterOwnerUserName*/String> projectOwnerOrMemberChangeStr(
+    private TupleTwo</*beforeOwnerUserName*/String,/*afterOwnerUserName*/String> projectOwnerOrMemberChangeStr(
             List<UserBriefVO> beforeProjectAddOwnerOrUserList, List<UserBriefVO> afterProjectAddOwnerUserList){
            String beforeOwnerUserName = afterProjectAddOwnerUserList.stream().map(UserBriefVO::getUserName)
                    .sorted()
@@ -658,7 +658,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
             String afterOwnerUserName = beforeProjectAddOwnerOrUserList.stream().map(UserBriefVO::getUserName)
                     .sorted()
                     .collect(Collectors.joining(","));
-            return TupleInterface.of(beforeOwnerUserName,afterOwnerUserName);
+            return Tuples.of(beforeOwnerUserName,afterOwnerUserName);
         
     }
     
@@ -669,13 +669,13 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
      * @param projectName 项目名称
      * @param operator    操作人或角色
      */
-    private void recordProjectOwnerOrUserChange(Tuple2</*beforeOwnerOrUser*/String,/*afterOwnerOrUser*/String> tuple2,
+    private void recordProjectOwnerOrUserChange(TupleTwo</*beforeOwnerOrUser*/String,/*afterOwnerOrUser*/String> tuple2,
                                                 String projectName, String operator) {
-        if (!StringUtils.equals(tuple2._1, tuple2._2)) {
+        if (!StringUtils.equals(tuple2.v1, tuple2.v2)) {
             operateRecordService.save(new OperateRecord.Builder()
                     
                     .projectName(projectName).operationTypeEnum(OperateTypeEnum.APPLICATION_OWNER_CHANGE)
-                    .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).content(tuple2._1 + "-->" + tuple2._2)
+                    .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).content(tuple2.v1 + "-->" + tuple2.v2)
                     .userOperation(operator).build());
         }
     }

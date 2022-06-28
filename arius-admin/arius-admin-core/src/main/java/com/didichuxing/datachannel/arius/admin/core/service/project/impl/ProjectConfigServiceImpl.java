@@ -8,8 +8,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectConfig
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ProjectConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.project.ProjectConfigPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
-import com.didichuxing.datachannel.arius.admin.common.tuple.Tuple2;
-import com.didichuxing.datachannel.arius.admin.common.tuple.TupleInterface;
+import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
+import com.didichuxing.datachannel.arius.admin.common.tuple.Tuples;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectConfigService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.project.ProjectConfigDAO;
@@ -66,18 +66,18 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
 	 */
 	@Override
 	@Transactional(rollbackFor = Exception.class)
-	public Tuple2<Result<Void>, ProjectConfigPO> updateOrInitProjectConfig(ProjectConfigDTO configDTO, String operator) {
+	public TupleTwo<Result<Void>, ProjectConfigPO> updateOrInitProjectConfig(ProjectConfigDTO configDTO, String operator) {
 		Result<Void> checkResult = checkConfigParam(configDTO);
 		if (checkResult.failed()) {
 			LOGGER.warn("class=ProjectConfigServiceImpl||method=updateProjectConfig||msg={}||msg=check fail!",
 					checkResult.getMessage());
-			return TupleInterface.of(checkResult, null);
+			return Tuples.of(checkResult, null);
 		}
 		//当项目存在的时候
 		if (projectConfigDAO.checkProjectConfigByProjectId(configDTO.getProjectId())) {
 			ProjectConfigPO oldConfigPO = projectConfigDAO.getByProjectId(configDTO.getProjectId());
 			boolean succ = (1 == projectConfigDAO.update(obj2Obj(configDTO, ProjectConfigPO.class)));
-			return TupleInterface.of(Result.build(succ), oldConfigPO);
+			return Tuples.of(Result.build(succ), oldConfigPO);
 			
 		}
 		//
@@ -102,7 +102,7 @@ public class ProjectConfigServiceImpl implements ProjectConfigService {
 			boolean succ = (1 == projectConfigDAO.insert(param));
 			final ProjectConfigPO newProjectConfigPO = projectConfigDAO.getByProjectId(configDTO.getProjectId());
 			
-			return TupleInterface.of(Result.build(succ), newProjectConfigPO);
+			return Tuples.of(Result.build(succ), newProjectConfigPO);
 		}
 		
 	}

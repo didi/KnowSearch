@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.common.constant.operaterecord;
 
-import com.didichuxing.datachannel.arius.admin.common.tuple.Tuple2;
-import com.didichuxing.datachannel.arius.admin.common.tuple.TupleInterface;
+import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
+import com.didichuxing.datachannel.arius.admin.common.tuple.Tuples;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
@@ -239,15 +239,15 @@ public enum OperateTypeEnum {
         final NewModuleEnum moduleEnum = NewModuleEnum.getModuleEnum(module);
         if (Objects.isNull(moduleEnum)) {
             return   Arrays.stream(OperateTypeEnum.values())
-                 .map(operateTypeEnum -> TupleInterface.of(operateTypeEnum.getOperationType(),operateTypeEnum.getCode()))
+                 .map(operateTypeEnum -> Tuples.of(operateTypeEnum.getOperationType(),operateTypeEnum.getCode()))
                  .distinct()
-                .collect(Collectors.toMap(Tuple2::_2, Tuple2::_1));
+                .collect(Collectors.toMap(TupleTwo::_2, TupleTwo::_1));
         }
         return Arrays.stream(OperateTypeEnum.values())
                 .filter(operationTypeEnum -> operationTypeEnum.getModule().equals(moduleEnum))
-                 .map(operateTypeEnum -> TupleInterface.of(operateTypeEnum.getOperationType(),operateTypeEnum.getCode()))
+                 .map(operateTypeEnum -> Tuples.of(operateTypeEnum.getOperationType(),operateTypeEnum.getCode()))
                  .distinct()
-                .collect(Collectors.toMap(Tuple2::_2, Tuple2::_1));
+                .collect(Collectors.toMap(TupleTwo::_2, TupleTwo::_1));
     }
      public static OperateTypeEnum getOperationTypeEnum(Integer code) {
         return Arrays.stream(OperateTypeEnum.values()).filter(operationTypeEnum -> operationTypeEnum.getCode().equals(code))

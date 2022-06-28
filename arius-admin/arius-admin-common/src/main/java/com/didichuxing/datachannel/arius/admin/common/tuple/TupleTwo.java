@@ -17,20 +17,20 @@ import lombok.ToString;
  */
 @AllArgsConstructor
 @ToString
-public class Tuple2<T1, T2> implements TupleInterface, Comparable<Tuple2<T1, T2>>, Serializable {
+public class TupleTwo<T1, T2> implements Tuples, Comparable<TupleTwo<T1, T2>>, Serializable {
     private static final long serialVersionUID = 1L;
-    public final         T1   _1;
-    public final         T2   _2;
+    public final         T1 v1;
+    public final         T2 v2;
     
-    public static <T1, T2> Comparator<Tuple2<T1, T2>> comparator(Comparator<? super T1> t1Comp,
-                                                                 Comparator<? super T2> t2Comp) {
-        return (Comparator<Tuple2<T1, T2>> & Serializable) (t1, t2) -> {
-            final int check1 = t1Comp.compare(t1._1, t2._1);
+    public static <T1, T2> Comparator<TupleTwo<T1, T2>> comparator(Comparator<? super T1> t1Comp,
+                                                                   Comparator<? super T2> t2Comp) {
+        return (Comparator<TupleTwo<T1, T2>> & Serializable) (t1, t2) -> {
+            final int check1 = t1Comp.compare(t1.v1, t2.v1);
             if (check1 != 0) {
                 return check1;
             }
             
-            final int check2 = t2Comp.compare(t1._2, t2._2);
+            final int check2 = t2Comp.compare(t1.v2, t2.v2);
             if (check2 != 0) {
                 return check2;
             }
@@ -39,17 +39,18 @@ public class Tuple2<T1, T2> implements TupleInterface, Comparable<Tuple2<T1, T2>
         };
     }
     
-    private static <U1 extends Comparable<? super U1>, U2 extends Comparable<? super U2>> int compareTo(Tuple2<?, ?> o1,
-                                                                                                        Tuple2<?, ?> o2) {
-        final Tuple2<U1, U2> t1 = (Tuple2<U1, U2>) o1;
-        final Tuple2<U1, U2> t2 = (Tuple2<U1, U2>) o2;
+    private static <U1 extends Comparable<? super U1>, U2 extends Comparable<? super U2>> int compareTo(
+            TupleTwo<?, ?> o1,
+            TupleTwo<?, ?> o2) {
+        final TupleTwo<U1, U2> t1 = (TupleTwo<U1, U2>) o1;
+        final TupleTwo<U1, U2> t2 = (TupleTwo<U1, U2>) o2;
         
-        final int check1 = t1._1.compareTo(t2._1);
+        final int check1 = t1.v1.compareTo(t2.v1);
         if (check1 != 0) {
             return check1;
         }
         
-        final int check2 = t1._2.compareTo(t2._2);
+        final int check2 = t1.v2.compareTo(t2.v2);
         if (check2 != 0) {
             return check2;
         }
@@ -58,23 +59,23 @@ public class Tuple2<T1, T2> implements TupleInterface, Comparable<Tuple2<T1, T2>
     }
     
     public T1 _1() {
-        return _1;
+        return v1;
     }
     
     public T2 _2() {
-        return _2;
+        return v2;
     }
     
-    public Tuple2<T1, T2> update2(T2 value) {
-        return new Tuple2<>(_1, value);
+    public TupleTwo<T1, T2> update2(T2 value) {
+        return new TupleTwo<>(v1, value);
     }
     
-    public Tuple2<T2, T1> swap() {
-        return TupleInterface.of(_2, _1);
+    public TupleTwo<T2, T1> swap() {
+        return Tuples.of(v2, v1);
     }
     
     public Map.Entry<T1, T2> toEntry() {
-        return new AbstractMap.SimpleEntry<>(_1, _2);
+        return new AbstractMap.SimpleEntry<>(v1, v2);
     }
     
     /**
@@ -88,9 +89,9 @@ public class Tuple2<T1, T2> implements TupleInterface, Comparable<Tuple2<T1, T2>
      * @param mapper 映射器
      * @return {@code Tuple2<U1, U2>}
      */
-    public <U1, U2> Tuple2<U1, U2> map(BiFunction<? super T1, ? super T2, Tuple2<U1, U2>> mapper) {
+    public <U1, U2> TupleTwo<U1, U2> map(BiFunction<? super T1, ? super T2, TupleTwo<U1, U2>> mapper) {
         Objects.requireNonNull(mapper, "mapper is null");
-        return mapper.apply(_1, _2);
+        return mapper.apply(v1, v2);
     }
     
     /**
@@ -101,16 +102,16 @@ public class Tuple2<T1, T2> implements TupleInterface, Comparable<Tuple2<T1, T2>
     public boolean equals(Object obj) {
         if (obj == this) {
             return true;
-        } else if (obj instanceof Tuple2) {
-            final Tuple2<?, ?> that = (Tuple2<?, ?>) obj;
-            return Objects.equals(this._1, that._1) && Objects.equals(this._2, that._2);
+        } else if (obj instanceof TupleTwo) {
+            final TupleTwo<?, ?> that = (TupleTwo<?, ?>) obj;
+            return Objects.equals(this.v1, that.v1) && Objects.equals(this.v2, that.v2);
         }
         return false;
     }
     
     @Override
     public int hashCode() {
-        return TupleInterface.hash(_1, _2);
+        return Tuples.hash(v1, v2);
     }
     
     /**
@@ -126,9 +127,9 @@ public class Tuple2<T1, T2> implements TupleInterface, Comparable<Tuple2<T1, T2>
      * @return
      */
     @Override
-    public int compareTo(Tuple2<T1, T2> that) {
+    public int compareTo(TupleTwo<T1, T2> that) {
         Objects.requireNonNull(that, "that is not  null");
-        return Tuple2.compareTo(this, that);
+        return TupleTwo.compareTo(this, that);
     }
     
 }
