@@ -17,7 +17,7 @@ import lombok.ToString;
  */
 @AllArgsConstructor
 @ToString
-public class Tuple2<T1, T2> implements Tuple, Comparable<Tuple2<T1, T2>>, Serializable {
+public class Tuple2<T1, T2> implements TupleInterface, Comparable<Tuple2<T1, T2>>, Serializable {
     private static final long serialVersionUID = 1L;
     public final         T1   _1;
     public final         T2   _2;
@@ -70,7 +70,7 @@ public class Tuple2<T1, T2> implements Tuple, Comparable<Tuple2<T1, T2>>, Serial
     }
     
     public Tuple2<T2, T1> swap() {
-        return Tuple.of(_2, _1);
+        return TupleInterface.of(_2, _1);
     }
     
     public Map.Entry<T1, T2> toEntry() {
@@ -110,7 +110,7 @@ public class Tuple2<T1, T2> implements Tuple, Comparable<Tuple2<T1, T2>>, Serial
     
     @Override
     public int hashCode() {
-        return Tuple.hash(_1, _2);
+        return TupleInterface.hash(_1, _2);
     }
     
     /**

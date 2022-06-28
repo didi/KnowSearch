@@ -4,8 +4,8 @@ import static com.didiglobal.logi.security.util.HttpRequestUtil.COOKIE_OR_SESSIO
 
 import com.didichuxing.datachannel.arius.admin.biz.project.LoginManager;
 import com.didichuxing.datachannel.arius.admin.common.exception.OperateForbiddenException;
-import com.didichuxing.datachannel.arius.admin.common.tuple.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.tuple.Tuple3;
+import com.didichuxing.datachannel.arius.admin.common.tuple.TupleInterface;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
@@ -181,7 +181,7 @@ public class LoginManagerImpl implements LoginManager {
      */
     private Tuple3</*username*/String,/*userId*/Integer,/*projectId*/Integer> getRequestByHead(
             HttpServletRequest request) {
-        Tuple3<String, Integer, Integer> tuple3 = Tuple.of(null, null, null);
+        Tuple3<String, Integer, Integer> tuple3 = TupleInterface.of(null, null, null);
         final String operator = HttpRequestUtil.getOperator(request);
         final Integer operatorId = HttpRequestUtil.getOperatorId(request);
         final Integer projectId = HttpRequestUtil.getProjectId(request);

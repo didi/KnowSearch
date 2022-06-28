@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.common.constant.operaterecord;
 
-import com.didichuxing.datachannel.arius.admin.common.tuple.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.tuple.Tuple2;
+import com.didichuxing.datachannel.arius.admin.common.tuple.TupleInterface;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
@@ -54,7 +54,7 @@ public enum OperateTypeEnum {
      */
     PHYSICAL_CLUSTER_GATEWAY_CHANGE(NewModuleEnum.PHYSICAL_CLUSTER, "GATEWAY变更",9),
     /**
-     * 物理集群：配置文件变更 todo
+     * 物理集群：配置文件变更 todo op-task/cluster-config-add
      */
     PHYSICAL_CLUSTER_CONF_FILE_CHANGE(NewModuleEnum.PHYSICAL_CLUSTER, "配置文件变更", 10),
     /**
@@ -108,7 +108,7 @@ public enum OperateTypeEnum {
      */
     TENANT_INFO_MODIFY(NewModuleEnum.TENANT, "租户信息修改",22),
     /**
-     * 索引模板管理：模板创建 todo
+     * 索引模板管理：模板创建 todo 新建模版
      */
     INDEX_TEMPLATE_MANAGEMENT_CREATE(NewModuleEnum.INDEX_MANAGEMENT, "模板创建",23),
     /**
@@ -149,7 +149,7 @@ public enum OperateTypeEnum {
      */
     TEMPLATE_SERVICE(NewModuleEnum.TEMPLATE_SERVICE, "模板服务",33),
     /**
-     * 索引管理:创建 todo
+     * 索引管理:创建
      */
     INDEX_MANAGEMENT_CREATE(NewModuleEnum.INDEX_MANAGEMENT, "索引创建",34),
     /**
@@ -178,7 +178,7 @@ public enum OperateTypeEnum {
      */
     QUERY_TEMPLATE_DSL_CURRENT_LIMIT_ADJUSTMENT(NewModuleEnum.QUERY_TEMPLATE, "DSL限流调整",40),
     /**
-     * 查询模板:DSL查询模板禁用 todo
+     * 查询模板:DSL查询模板禁用
      */
     QUERY_TEMPLATE_DISABLE(NewModuleEnum.QUERY_TEMPLATE, "DSL查询模板禁用",41),
     /**
@@ -194,18 +194,8 @@ public enum OperateTypeEnum {
      */
     SETTING_DELETE(NewModuleEnum.SETTING, "删除配置",44),
     
-    /**
-     * sense操作添加 todo
-     */
-    SENSE_OP_ADD(NewModuleEnum.SENSE_OP, "新增配置",45),
-    SENSE_OP_EDIT(NewModuleEnum.SENSE_OP, "修改配置",45),
-    /**
-     * sense操作删除 todo
-     */
-    SENSE_OP_DELETE(NewModuleEnum.SENSE_OP, "删除配置",46),
-    /**
-     * sense操作编辑 todo
-     */
+ 
+    
     ES_CLUSTER_PLUGINS_ADD(NewModuleEnum.ES_CLUSTER_PLUGINS, "新增插件", 47),
     ES_CLUSTER_PLUGINS_EDIT(NewModuleEnum.ES_CLUSTER_PLUGINS, "编辑插件", 48),
     ES_CLUSTER_PLUGINS_DELETE(NewModuleEnum.ES_CLUSTER_PLUGINS, "删除配置", 49),
@@ -249,13 +239,13 @@ public enum OperateTypeEnum {
         final NewModuleEnum moduleEnum = NewModuleEnum.getModuleEnum(module);
         if (Objects.isNull(moduleEnum)) {
             return   Arrays.stream(OperateTypeEnum.values())
-                 .map(operateTypeEnum -> Tuple.of(operateTypeEnum.getOperationType(),operateTypeEnum.getCode()))
+                 .map(operateTypeEnum -> TupleInterface.of(operateTypeEnum.getOperationType(),operateTypeEnum.getCode()))
                  .distinct()
                 .collect(Collectors.toMap(Tuple2::_2, Tuple2::_1));
         }
         return Arrays.stream(OperateTypeEnum.values())
                 .filter(operationTypeEnum -> operationTypeEnum.getModule().equals(moduleEnum))
-                 .map(operateTypeEnum -> Tuple.of(operateTypeEnum.getOperationType(),operateTypeEnum.getCode()))
+                 .map(operateTypeEnum -> TupleInterface.of(operateTypeEnum.getOperationType(),operateTypeEnum.getCode()))
                  .distinct()
                 .collect(Collectors.toMap(Tuple2::_2, Tuple2::_1));
     }

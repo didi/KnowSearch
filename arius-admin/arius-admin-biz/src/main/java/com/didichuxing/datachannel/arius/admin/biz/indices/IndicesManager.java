@@ -1,8 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.biz.indices;
 
-import java.util.List;
-import java.util.function.BiFunction;
-
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatCellDTO;
@@ -16,6 +13,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexMappi
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexSettingVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexShardInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import java.util.List;
+import java.util.function.BiFunction;
 
 /**
  * @author lyn
@@ -32,11 +31,13 @@ public interface IndicesManager {
 
     /**
      * 创建索引
+     *
      * @param indexCreateDTO
      * @param projectId
+     * @param operator
      * @return
      */
-    Result<Void> createIndex(IndexCatCellWithConfigDTO indexCreateDTO, Integer projectId);
+    Result<Void> createIndex(IndexCatCellWithConfigDTO indexCreateDTO, Integer projectId, String operator);
 
     /**
      * 删除索引

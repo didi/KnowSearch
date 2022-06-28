@@ -215,7 +215,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
                         .content(JSON.toJSONString(new TemplateOperateRecord(TemplateOperateRecordEnum.NEW.getCode(), "新增模板")))
                         .project(projectService.getProjectBriefByProjectId(projectId))
                         .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                        .operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE)
+                        .operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_CREATE)
                 .build());
       
 

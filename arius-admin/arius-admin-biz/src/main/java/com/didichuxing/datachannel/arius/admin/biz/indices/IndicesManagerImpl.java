@@ -124,7 +124,7 @@ public class IndicesManagerImpl implements IndicesManager {
     }
 
     @Override
-    public Result<Void> createIndex(IndexCatCellWithConfigDTO indexCreateDTO, Integer projectId) {
+    public Result<Void> createIndex(IndexCatCellWithConfigDTO indexCreateDTO, Integer projectId, String operator) {
         Result<String> getClusterRet = getClusterPhyByClusterNameAndProjectId(indexCreateDTO.getCluster(), projectId);
         if (getClusterRet.failed()) {
             return Result.buildFrom(getClusterRet);
@@ -136,6 +136,11 @@ public class IndicesManagerImpl implements IndicesManager {
             LOGGER.error("class=IndicesManagerImpl||method=createIndex||msg=create index failed||index={}" + indexCreateDTO.getIndex(), e);
             return Result.buildFail();
         }
+        operateRecordService.save(new OperateRecord.Builder().content(
+                        String.format("物理集群:[%s],创建索引：[%s]", indexCreateDTO.getCluster(), indexCreateDTO.getIndex()))
+                .operationTypeEnum(OperateTypeEnum.INDEX_MANAGEMENT_CREATE).userOperation(operator)
+                .project(projectService.getProjectBriefByProjectId(projectId)).bizId(indexCreateDTO.getIndex())
+                .build());
         return Result.buildSucc();
     }
 

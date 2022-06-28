@@ -15,7 +15,7 @@ import lombok.ToString;
  */
 @ToString
 @AllArgsConstructor
-public class Tuple1<T1> implements Tuple, Comparable<Tuple1<T1>>, Serializable {
+public class Tuple1<T1> implements TupleInterface, Comparable<Tuple1<T1>>, Serializable {
     public final T1 _1;
     
     /**
@@ -66,7 +66,7 @@ public class Tuple1<T1> implements Tuple, Comparable<Tuple1<T1>>, Serializable {
     
     public <U1> Tuple1<U1> map(Function<? super T1, ? extends U1> mapper) {
         Objects.requireNonNull(mapper, "mapper is null");
-        return Tuple.of(mapper.apply(_1));
+        return TupleInterface.of(mapper.apply(_1));
     }
     
     public <U> U apply(Function<? super T1, ? extends U> f) {
@@ -75,17 +75,17 @@ public class Tuple1<T1> implements Tuple, Comparable<Tuple1<T1>>, Serializable {
     }
     
     public <T2> Tuple2<T1, T2> append(T2 t2) {
-        return Tuple.of(_1, t2);
+        return TupleInterface.of(_1, t2);
     }
     
     public <T2> Tuple2<T1, T2> concat(Tuple1<T2> tuple) {
         Objects.requireNonNull(tuple, "tuple1 is null");
-        return Tuple.of(_1, tuple._1);
+        return TupleInterface.of(_1, tuple._1);
     }
     
     public <T2, T3> Tuple3<T1, T2, T3> concat(Tuple2<T2, T3> tuple) {
         Objects.requireNonNull(tuple, "tuple2 is null");
-        return Tuple.of(_1, tuple._1, tuple._2);
+        return TupleInterface.of(_1, tuple._1, tuple._2);
     }
     
     @Override
@@ -104,7 +104,7 @@ public class Tuple1<T1> implements Tuple, Comparable<Tuple1<T1>>, Serializable {
      */
     @Override
     public int hashCode() {
-        return Tuple.hash(_1);
+        return TupleInterface.hash(_1);
     }
     
     

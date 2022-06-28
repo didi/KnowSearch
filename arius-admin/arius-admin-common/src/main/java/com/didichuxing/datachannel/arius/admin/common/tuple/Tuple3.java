@@ -9,7 +9,7 @@ import lombok.ToString;
 
 @AllArgsConstructor
 @ToString
-public class Tuple3<T1, T2, T3> implements Tuple, Comparable<Tuple3<T1, T2, T3>>, Serializable {
+public class Tuple3<T1, T2, T3> implements TupleInterface, Comparable<Tuple3<T1, T2, T3>>, Serializable {
     private static final long serialVersionUID = 1L;
     
     /**
@@ -143,25 +143,25 @@ public class Tuple3<T1, T2, T3> implements Tuple, Comparable<Tuple3<T1, T2, T3>>
         Objects.requireNonNull(f1, "f1 is null");
         Objects.requireNonNull(f2, "f2 is null");
         Objects.requireNonNull(f3, "f3 is null");
-        return Tuple.of(f1.apply(_1), f2.apply(_2), f3.apply(_3));
+        return TupleInterface.of(f1.apply(_1), f2.apply(_2), f3.apply(_3));
     }
     
     public <U> Tuple3<U, T2, T3> map1(Function<? super T1, ? extends U> mapper) {
         Objects.requireNonNull(mapper, "mapper is null");
         final U u = mapper.apply(_1);
-        return Tuple.of(u, _2, _3);
+        return TupleInterface.of(u, _2, _3);
     }
     
     public <U> Tuple3<T1, U, T3> map2(Function<? super T2, ? extends U> mapper) {
         Objects.requireNonNull(mapper, "mapper is null");
         final U u = mapper.apply(_2);
-        return Tuple.of(_1, u, _3);
+        return TupleInterface.of(_1, u, _3);
     }
     
     public <U> Tuple3<T1, T2, U> map3(Function<? super T3, ? extends U> mapper) {
         Objects.requireNonNull(mapper, "mapper is null");
         final U u = mapper.apply(_3);
-        return Tuple.of(_1, _2, u);
+        return TupleInterface.of(_1, _2, u);
     }
     
     @Override
@@ -186,7 +186,7 @@ public class Tuple3<T1, T2, T3> implements Tuple, Comparable<Tuple3<T1, T2, T3>>
     
     @Override
     public int hashCode() {
-        return Tuple.hash(_1, _2, _3);
+        return TupleInterface.hash(_1, _2, _3);
     }
     
     

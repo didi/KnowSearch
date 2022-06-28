@@ -23,8 +23,8 @@ import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectSearchTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.tuple.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.tuple.Tuple2;
+import com.didichuxing.datachannel.arius.admin.common.tuple.TupleInterface;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.VerifyCodeFactory;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
@@ -658,7 +658,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
             String afterOwnerUserName = beforeProjectAddOwnerOrUserList.stream().map(UserBriefVO::getUserName)
                     .sorted()
                     .collect(Collectors.joining(","));
-            return Tuple.of(beforeOwnerUserName,afterOwnerUserName);
+            return TupleInterface.of(beforeOwnerUserName,afterOwnerUserName);
         
     }
     

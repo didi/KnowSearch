@@ -15,7 +15,7 @@ import lombok.ToString;
  */
 @ToString
 @AllArgsConstructor
-public final class Tuple0 implements Tuple, Comparable<Tuple0>, Serializable {
+public final class Tuple0 implements TupleInterface, Comparable<Tuple0>, Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -48,25 +48,25 @@ public final class Tuple0 implements Tuple, Comparable<Tuple0>, Serializable {
     }
 
     public <T1> Tuple1<T1> append(T1 t1) {
-        return Tuple.of(t1);
+        return TupleInterface.of(t1);
     }
 
    
     public <T1> Tuple1<T1> concat(Tuple1<T1> tuple) {
         Objects.requireNonNull(tuple, "tuple1 is null");
-        return Tuple.of(tuple._1);
+        return TupleInterface.of(tuple._1);
     }
 
     
     public <T1, T2> Tuple2<T1, T2> concat(Tuple2<T1, T2> tuple) {
         Objects.requireNonNull(tuple, "tuple2 is null");
-        return Tuple.of(tuple._1, tuple._2);
+        return TupleInterface.of(tuple._1, tuple._2);
     }
 
     
     public <T1, T2, T3> Tuple3<T1, T2, T3> concat(Tuple3<T1, T2, T3> tuple) {
         Objects.requireNonNull(tuple, "tuple3 is null");
-        return Tuple.of(tuple._1, tuple._2, tuple._3);
+        return TupleInterface.of(tuple._1, tuple._2, tuple._3);
     }
 
   

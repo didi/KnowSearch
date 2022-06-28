@@ -9,10 +9,10 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ESUser;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.project.ESUserPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
-import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectSearchTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
-import com.didichuxing.datachannel.arius.admin.common.tuple.Tuple;
+import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectSearchTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.tuple.Tuple2;
+import com.didichuxing.datachannel.arius.admin.common.tuple.TupleInterface;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
@@ -80,7 +80,7 @@ public class ESUserServiceImpl implements ESUserService {
         
         if (checkResult.failed()) {
             LOGGER.warn("class=ESUserManagerImpl||method=addApp||fail msg={}", checkResult.getMessage());
-            return Tuple.of(checkResult,null);
+            return TupleInterface.of(checkResult,null);
         }
         initParam(esUserDTO);
         ESUserPO param = obj2Obj(esUserDTO, ESUserPO.class);
@@ -96,7 +96,7 @@ public class ESUserServiceImpl implements ESUserService {
         boolean succ = (esUserDAO.insert(param) == 1);
        
 
-        return Tuple.of(Result.build(succ, param.getId()),param);
+        return TupleInterface.of(Result.build(succ, param.getId()),param);
     }
 
 
@@ -113,7 +113,7 @@ public class ESUserServiceImpl implements ESUserService {
         
         final ESUserPO param = obj2Obj(esUserDTO, ESUserPO.class);
       
-        return Tuple.of(Result.build((esUserDAO.update(param) == 1)), param);
+        return TupleInterface.of(Result.build((esUserDAO.update(param) == 1)), param);
     
     }
 
@@ -131,7 +131,7 @@ public class ESUserServiceImpl implements ESUserService {
         boolean succ = esUserDAO.delete(esUser) == 1;
       
 
-        return Tuple.of(Result.build(succ),oldPO);
+        return TupleInterface.of(Result.build(succ),oldPO);
     }
      /**
       * @param projectId
@@ -142,7 +142,7 @@ public class ESUserServiceImpl implements ESUserService {
     public Tuple2<Result<Void>, List<ESUserPO>> deleteByESUsers(int projectId) {
         final List<ESUserPO> esUserPOS = esUserDAO.listByProjectId(projectId);
         final int deleteByProjectId = esUserDAO.deleteByProjectId(projectId);
-        return Tuple.of(Result.build(deleteByProjectId==esUserPOS.size()), esUserPOS);
+        return TupleInterface.of(Result.build(deleteByProjectId == esUserPOS.size()), esUserPOS);
     }
     
     /**

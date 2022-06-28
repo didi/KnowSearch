@@ -9,7 +9,7 @@ import java.util.Objects;
  * @author shizeying
  * @date 2022/06/20
  */
-public interface Tuple {
+public interface TupleInterface {
     /**
      * max 最大设置
      */

@@ -60,6 +60,7 @@ import com.didichuxing.datachannel.arius.admin.common.event.resource.ClusterLogi
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.tuple.Tuple2;
+import com.didichuxing.datachannel.arius.admin.common.tuple.TupleInterface;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ClusterUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
@@ -891,7 +892,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     private Tuple2<Result<Void>,/*projectId*/Integer> checkIndices(List<String> delIndices, Integer logicId) {
         for (String index : delIndices) {
             if (index.endsWith("*")) {
-                return com.didichuxing.datachannel.arius.admin.common.tuple.Tuple.of(Result.buildParamIllegal(
+                return TupleInterface.of(Result.buildParamIllegal(
                         "索引名字不能以*结尾"),null);
             }
         }
@@ -903,10 +904,10 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         List<String> matchIndices = indexTemplatePhyService.getMatchNoVersionIndexNames(templatePhysical.getId());
         for (String index : delIndices) {
             if (!matchIndices.contains(index)) {
-                return com.didichuxing.datachannel.arius.admin.common.tuple.Tuple.of(Result.buildParamIllegal(index + "不属于该索引模板"),null);
+                return TupleInterface.of(Result.buildParamIllegal(index + "不属于该索引模板"),null);
             }
         }
-        return com.didichuxing.datachannel.arius.admin.common.tuple.Tuple.of(Result.buildSucc(),
+        return TupleInterface.of(Result.buildSucc(),
                 templateLogicWithPhysical.getProjectId());
     }
 
