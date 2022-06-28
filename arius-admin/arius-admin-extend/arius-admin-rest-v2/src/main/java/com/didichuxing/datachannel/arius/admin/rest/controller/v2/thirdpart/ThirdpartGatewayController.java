@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -67,7 +68,7 @@ public class ThirdpartGatewayController {
         return gatewayManager.getGatewayAliveNodeNames("Normal");
     }
 
-    @GetMapping("/list-app")
+    @GetMapping("/project")
     @ResponseBody
     @ApiOperation(value = "获取APP列表接口", notes = "获取es user列表,包含es user全部元信息")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "header", dataType = "String", name = "X-ARIUS-GATEWAY-TICKET", value = "接口ticket", required = true) })
@@ -79,7 +80,7 @@ public class ThirdpartGatewayController {
         return gatewayManager.listESUserByProject();
     }
 
-    @GetMapping("/template-map")
+    @GetMapping("/template")
     @ResponseBody
     @ApiOperation(value = "获取模板信息", notes = "以map结构组织,key是表达式")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "String", name = "cluster", value = "集群名称", required = true) })
@@ -87,7 +88,7 @@ public class ThirdpartGatewayController {
         return gatewayManager.getTemplateMap(cluster);
     }
 
-    @GetMapping("/list-deploy-info")
+    @GetMapping("/deploy-info")
     @ResponseBody
     @ApiOperation(value = "获取模板信息", notes = "主主从结构组织")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "String", name = "dataCenter", value = "数据中心", required = true) })
@@ -95,21 +96,21 @@ public class ThirdpartGatewayController {
         return gatewayManager.listDeployInfo(dataCenter);
     }
 
-    @PostMapping(path = "dsl/scroll-dsl-templates")
+    @PostMapping(path = "dsl/scroll-dsl-template")
     @ApiOperation(value = "滚动获取查询模板数据", notes = "滚动获取查询模板数据", httpMethod = "POST")
     public Result<ScrollDslTemplateResponse> scrollSearchDslTemplate(@ApiParam(name="request", value="滚动查询参数", required = true)
                                                                      @RequestBody ScrollDslTemplateRequest request) {
         return gatewayManager.scrollSearchDslTemplate(request);
     }
 
-    @PostMapping(path = "/add-alias")
+    @PostMapping(path = "/alias")
     @ResponseBody
     @ApiOperation(value = "设置一个模板的别名", notes = "设置一个模板的别名")
     public Result<Boolean> addAlias(@RequestBody IndexTemplateAliasDTO indexTemplateAliasDTO){
         return gatewayManager.addAlias(indexTemplateAliasDTO);
     }
 
-    @PostMapping(path = "/del-alias")
+    @DeleteMapping(path = "/alias")
     @ResponseBody
     @ApiOperation(value = "删除一个模板的别名", notes = "删除一个模板的别名")
     public Result<Boolean> delAlias(@RequestBody IndexTemplateAliasDTO indexTemplateAliasDTO){

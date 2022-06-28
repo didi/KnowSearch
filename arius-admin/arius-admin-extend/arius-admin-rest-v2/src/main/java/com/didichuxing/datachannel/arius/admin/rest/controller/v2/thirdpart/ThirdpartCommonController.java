@@ -29,7 +29,7 @@ public class ThirdpartCommonController {
     @Autowired
     private CommonManager commonManager;
 
-    @GetMapping("/cluster/list")
+    @GetMapping("/cluster")
     @ResponseBody
     @ApiOperation(value = "获取物理集群列表接口【三方接口】",tags = "【三方接口】" )
     public Result<List<ThirdPartClusterVO>> listDataCluster() {
