@@ -15,7 +15,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.Ro
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ProjectClusterLogicAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterLogicDiskUsedInfoPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterLogicPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESClusterRoleHostPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESMachineNormsPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.esplugin.PluginPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
@@ -56,13 +58,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
-import java.util.stream.Collectors;
-
 import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.DEFAULT_CLUSTER_HEALTH;
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.ADD;
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.EDIT;
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.DATA_NODE;
+import static java.util.stream.Collectors.toList;
 
 /**
  * @author d06679
@@ -516,16 +516,6 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
     @Override
     public List<ClusterLogic> getClusterLogicListByIds(List<Long> clusterLogicIdList) {
         return ConvertUtil.list2List(logicClusterDAO.listByIds(new HashSet<>(clusterLogicIdList)), ClusterLogic.class);
-    }
-
-    @Override
-    public ClusterLogicDiskUsedInfoPO getDiskInfo(Long id) {
-        ClusterRegion clusterRegion =clusterRegionService.getRegionByLogicClusterId(id);
-        List<ESClusterRoleHostPO> esClusterRoleHostPOS = clusterRoleHostDAO.listByRegionId(Math.toIntExact(clusterRegion.getId()));
-        //节点名称列表
-        List<String> nodeList = esClusterRoleHostPOS.stream().map(ESClusterRoleHostPO::getNodeSet).collect(toList());
-        String clusterName =clusterRegion.getPhyClusterName();
-        return ariusStatsNodeInfoESDAO.getClusterLogicDiskUsedInfo(clusterName, nodeList);
     }
 
     /***************************************** private method ****************************************************/
