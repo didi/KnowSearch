@@ -7,7 +7,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.GatewayHeartbe
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.ScrollDslTemplateRequest;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.ScrollDslTemplateResponse;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.GatewayESUserVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.GatewayESUserVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.GatewayTemplateDeployInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.GatewayTemplatePhysicalVO;
 import com.didichuxing.datachannel.arius.admin.util.CompareUtil;

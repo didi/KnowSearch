@@ -3,14 +3,14 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v2.op.app;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V2_OP;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
-import com.didichuxing.datachannel.arius.admin.biz.app.ProjectLogicTemplateAuthManager;
+import com.didichuxing.datachannel.arius.admin.biz.project.ProjectLogicTemplateAuthManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectTemplateAuthDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithClusterAndMasterTemplate;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ProjectTemplateAuthVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.ProjectTemplateAuthVO;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectLogicTemplateAuthService;
+import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectLogicTemplateAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;

@@ -182,7 +182,7 @@ public class DslTemplateESDAO extends BaseESDAO {
      */
     public List<DslTemplatePO> getAllDslTemplateByProjectId(Integer projectId) {
 
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_DSL_TEMPLATE_BY_APPID, SCROLL_SIZE, projectId);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_DSL_TEMPLATE_BY_PROJECT_ID, SCROLL_SIZE, projectId);
 
         return getTemplatesByDsl(dsl);
     }
@@ -224,7 +224,7 @@ public class DslTemplateESDAO extends BaseESDAO {
     }
 
     public List<DslTemplatePO> getDslMetricsByProjectId(Integer projectId, Long startDate, Long endDate) {
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_DSL_TEMPLATE_BY_APPID_AND_RANGE, 10000, startDate, endDate, projectId);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_DSL_TEMPLATE_BY_PROJECT_ID_AND_RANGE, 10000, startDate, endDate, projectId);
 
         return gatewayClient.performRequest(indexName, typeName, dsl, DslTemplatePO.class);
     }
@@ -373,7 +373,7 @@ public class DslTemplateESDAO extends BaseESDAO {
      * @return
      */
     public Long getTemplateCountByProjectId(Integer projectId) {
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_DSL_TEMPLATE_COUNT_BY_APPID, projectId);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_DSL_TEMPLATE_COUNT_BY_PROJECT_ID, projectId);
 
         return gatewayClient.performRequestAndGetTotalCount(indexName, typeName, dsl);
     }
@@ -387,7 +387,7 @@ public class DslTemplateESDAO extends BaseESDAO {
      * @return
      */
     public Long getIncreaseTemplateCountByProjectId(Integer projectId, String date, String today) {
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_INCREASE_DSL_TEMPLATE_BY_APPID, projectId, date, today);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_INCREASE_DSL_TEMPLATE_BY_PROJECT_ID, projectId, date, today);
 
         return gatewayClient.performRequestAndGetTotalCount(indexName, typeName, dsl);
     }
@@ -431,9 +431,9 @@ public class DslTemplateESDAO extends BaseESDAO {
 
         String dsl = null;
         if (dayOffset == -1) {
-            dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_DSL_TEMPLATES_BY_INDEXNAME_APPID, SCROLL_SIZE, indexName, projectId);
+            dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_DSL_TEMPLATES_BY_INDEXNAME_PROJECT_ID, SCROLL_SIZE, indexName, projectId);
         } else {
-            dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_DSL_TEMPLATES_BY_INDEXNAME_APPID_WITH_DAY_RANGE, SCROLL_SIZE, indexName, projectId, dayOffset);
+            dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_DSL_TEMPLATES_BY_INDEXNAME_PROJECT_ID_WITH_DAY_RANGE, SCROLL_SIZE, indexName, projectId, dayOffset);
         }
 
         gatewayClient.queryWithScroll(this.indexName, typeName, dsl, SCROLL_SIZE, null, DslTemplatePO.class, resultList -> {

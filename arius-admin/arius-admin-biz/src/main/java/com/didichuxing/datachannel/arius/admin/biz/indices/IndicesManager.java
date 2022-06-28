@@ -15,6 +15,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexCatCe
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexMappingVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexSettingVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexShardInfoVO;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 
 /**
  * @author lyn
@@ -131,7 +132,7 @@ public interface IndicesManager {
      * @param projectId
      * @return
      */
-    Result<Void> editSetting(IndexCatCellWithConfigDTO param, Integer projectId);
+    Result<Void> editSetting(IndexCatCellWithConfigDTO param, Integer projectId) throws ESOperateException;
 
     /**
      * 获取索引shard分配信息

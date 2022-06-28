@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.didichuxing.datachannel.arius.admin.persistence.mysql.app.ProjectTemplateAuthDAO">
-    <resultMap id="BaseResultMap" type="com.didichuxing.datachannel.arius.admin.common.bean.po.app.ProjectTemplateAuthPO">
+<mapper namespace="com.didichuxing.datachannel.arius.admin.persistence.mysql.project.ProjectTemplateAuthDAO">
+    <resultMap id="BaseResultMap" type="com.didichuxing.datachannel.arius.admin.common.bean.po.project.ProjectTemplateAuthPO">
         <result column="id" jdbcType="BIGINT" property="id"/>
         <result column="project_id" jdbcType="INTEGER" property="projectId"/>
         <result column="template" jdbcType="VARCHAR" property="templateId"/>
@@ -14,14 +14,14 @@
        id, project_id, template, `type`,  create_time, update_time
     </sql>
 
-    <insert id="insert" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.app.ProjectTemplateAuthPO"
+    <insert id="insert" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.project.ProjectTemplateAuthPO"
             useGeneratedKeys="true"
             keyColumn="id" keyProperty="id">
         insert into project_template_info (project_id, template, `type`)
         values (#{projectId}, #{templateId}, #{type})
     </insert>
 
-    <update id="update" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.app.ProjectTemplateAuthPO">
+    <update id="update" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.project.ProjectTemplateAuthPO">
         update project_template_info
         <trim prefix="set" prefixOverrides=",">
             <if test="type != null">,`type` = #{type}</if>
@@ -30,7 +30,7 @@
     </update>
 
     <select id="listByCondition"
-            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.app.ProjectTemplateAuthPO"
+            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.project.ProjectTemplateAuthPO"
             resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>

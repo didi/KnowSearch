@@ -4,29 +4,30 @@ import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterNodeManager;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandler;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.LogicClusterIndecreaseContent;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRegionWithNodeInfoDTO;
-import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectClusterLogicAuthEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
-import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.LogicClusterIndecreaseOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectClusterLogicAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
+import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.core.service.app.ProjectClusterLogicAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
+import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectClusterLogicAuthService;
 import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
+import com.didiglobal.logi.security.service.ProjectService;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.CLUSTER;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * @author d06679
@@ -43,6 +44,8 @@ public class LogicClusterIndecreaseHandler extends BaseWorkOrderHandler {
 
     @Autowired
     private ClusterNodeManager clusterNodeManager;
+    @Autowired
+    private ProjectService projectService;
 
     /**
      * 工单是否自动审批
@@ -163,13 +166,23 @@ public class LogicClusterIndecreaseHandler extends BaseWorkOrderHandler {
 
         List<ClusterRegionWithNodeInfoDTO> clusterRegionWithNodeInfoDTOList = content.getRegionWithNodeInfo();
 
-        Result<Boolean> regionEditResult = clusterNodeManager.editMultiNode2Region(clusterRegionWithNodeInfoDTOList, approver);
+        Result<Boolean> regionEditResult = clusterNodeManager.editMultiNode2Region(clusterRegionWithNodeInfoDTOList, approver,
+                workOrder.getSubmitorProjectId());
         if (regionEditResult.failed()) { return Result.buildFrom(regionEditResult);}
-
-        operateRecordService.save(CLUSTER, OperationEnum.ADD, content.getLogicClusterId(),
-            workOrder.getSubmitor() + "申请" + content.getLogicClusterName() + "的扩缩容操作，具体参数："
-                                                                                           + JSON.toJSONString(content),
-            approver);
+         operateRecordService.save(new OperateRecord.Builder()
+                 
+                         .bizId(content.getLogicClusterId())
+                         .operationTypeEnum(OperateTypeEnum.MY_CLUSTER_CAPACITY)
+                         .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                         .content(workOrder.getSubmitor() + "申请" + content.getLogicClusterName() + "的扩缩容操作，具体参数："
+                                                                                           + JSON.toJSONString(content))
+                         .userOperation(approver)
+                         .project(projectService.getProjectBriefByProjectId(workOrder.getSubmitorProjectId()))
+                 .build());
+        //operateRecordService.save(CLUSTER, OperationEnum.ADD, content.getLogicClusterId(),
+        //    workOrder.getSubmitor() + "申请" + content.getLogicClusterName() + "的扩缩容操作，具体参数："
+        //                                                                                   + JSON.toJSONString(content),
+        //    approver);
 
         List<String> administrators = getOPList().stream().map(UserBriefVO::getUserName).collect(
                 Collectors.toList());

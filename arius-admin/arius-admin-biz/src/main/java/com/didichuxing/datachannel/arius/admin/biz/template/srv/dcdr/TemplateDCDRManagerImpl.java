@@ -1,32 +1,14 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.dcdr;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.TEMPLATE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.*;
 import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum.MASTER;
 import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum.SLAVE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum.TEMPLATE_DCDR;
-
-import java.util.*;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.locks.ReentrantLock;
-import java.util.stream.Collectors;
-
-import javax.annotation.PostConstruct;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.BaseTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.biz.worktask.OpTaskManager;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskProcessDTO;
@@ -45,9 +27,12 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.WorkTaskVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.DCDRSingleTemplateMasterSlaveSwitchDetailVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.DCDRTasksDetailVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateDCDRInfoVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
 import com.didichuxing.datachannel.arius.admin.common.constant.dcdr.DCDRStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.dcdr.DCDRSwithTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDCDRStepEnum;
@@ -55,22 +40,45 @@ import com.didichuxing.datachannel.arius.admin.common.constant.template.Template
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.threadpool.AriusTaskThreadPool;
-import com.didichuxing.datachannel.arius.admin.common.util.*;
+import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.BatchProcessor;
+import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
-import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateLabelService;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpTimeoutRetry;
 import com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESDCDRDAO;
 import com.didiglobal.logi.elasticsearch.client.request.dcdr.DCDRTemplate;
 import com.didiglobal.logi.elasticsearch.client.response.indices.stats.IndexNodes;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
+import javax.annotation.PostConstruct;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * 索引DCDR服务实现
@@ -140,17 +148,16 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrv implements Template
     @Autowired
     private ESTemplateService     esTemplateService;
 
-    @Autowired
-    private TemplateLabelService  templateLabelService;
+
 
     @Autowired
     private OpTaskManager         opTaskManager;
 
-    @Autowired
-    private IndexTemplateService  indexTemplateService;
-
+  
     @Autowired
     private OperateRecordService  operateRecordService;
+    @Autowired
+    private ProjectService projectService;
     private static final  int TRY_LOCK_TIMEOUT=5;
     private static final  int ONE_STEP=1;
     private static final int TRY_TIMES_THREE=3;
@@ -174,7 +181,8 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrv implements Template
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result<Void> copyAndCreateDCDR(Integer templateId, String targetCluster, Integer regionId, String operator) throws AdminOperateException {
+    public Result<Void> copyAndCreateDCDR(Integer templateId, String targetCluster, Integer regionId, String operator,
+                                          Integer projectId) throws AdminOperateException {
         //1. 判断目标集群是否存在模板, 存在则需要删除, 避免copy失败，确保copy流程的执行来保证主从模板setting mapping等信息的一致性。
         IndexTemplateWithPhyTemplates templateLogicWithPhysical = indexTemplateService.getLogicTemplateWithPhysicalsById(templateId);
         if (null == templateLogicWithPhysical) {return Result.buildParamIllegal(TEMPLATE_NO_EXIST);}
@@ -182,7 +190,7 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrv implements Template
         IndexTemplatePhy slavePhyTemplate = templateLogicWithPhysical.getSlavePhyTemplate();
         if (null != slavePhyTemplate) {
             //1.1删除DCDR链路
-            Result<Void> deleteDCDRResult = deleteDCDR(templateId, operator);
+            Result<Void> deleteDCDRResult = deleteDCDR(templateId, operator, projectId);
             if (deleteDCDRResult.failed()) {return deleteDCDRResult;}
 
             //1.2清理slave模板
@@ -222,8 +230,14 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrv implements Template
 
         //4. 记录操作
         if (result.success()) {
-            operateRecordService.save(TEMPLATE, CREATE_DCDR, templateId, "创建DCDR链路，主集群：" +
-                    templateLogicWithPhysical.getMasterPhyTemplate().getCluster() + "；从集群：" + targetCluster, operator);
+            operateRecordService.save(new OperateRecord.Builder().project(
+                            projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID)).content(
+                            "创建DCDR链路，主集群：" + templateLogicWithPhysical.getMasterPhyTemplate().getCluster() + "；从集群："
+                            + targetCluster).userOperation(operator).bizId(templateId)
+                    .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                    .operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE_DCDR_SETTING)
+            
+                    .build());
         }
         return result;
     }
@@ -231,13 +245,19 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrv implements Template
     /**
      * 删除DCDR
      *
-     * @param templateId  模板ID
-     * @param operator 操作人
+     * @param templateId 模板ID
+     * @param operator   操作人
+     * @param projectId
      * @return result
      * @throws ESOperateException
      */
     @Override
-    public Result<Void> deleteDCDR(Integer templateId, String operator) throws ESOperateException {
+    public Result<Void> deleteDCDR(Integer templateId, String operator, Integer projectId) throws ESOperateException {
+        final Result<Void> result = ProjectUtils.checkProjectCorrectly(i -> i, projectId,
+                projectId);
+        if (result.failed()) {
+            return Result.buildFail(result.getMessage());
+        }
         Result<Void> checkResult = checkDCDRParam(templateId);
 
         if (checkResult.failed()) { return checkResult;}
@@ -308,9 +328,12 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrv implements Template
                                 param.getPhysicalIds());
                     }
                 }
-
-                operateRecordService.save(TEMPLATE, DELETE_DCDR, templatePhysicalPO.getLogicId(),
-                        "replicaCluster:" + param.getReplicaClusters(), operator);
+                operateRecordService.save(
+                        new OperateRecord.Builder().operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE_DCDR_SETTING)
+                                .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).bizId(templatePhysicalPO.getLogicId())
+                                .userOperation(operator).content("replicaCluster:" + param.getReplicaClusters())
+                    
+                                .build());
                 return Result.buildSucc();
             }
         }
@@ -355,8 +378,13 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrv implements Template
 
             //2.5 记录操作
             for (DCDRSingleTemplateMasterSlaveSwitchDetail dcdrTask: dcdrTasksDetail.getDcdrSingleTemplateMasterSlaveSwitchDetailList()) {
-                operateRecordService.save(TEMPLATE, SWITCH_MASTER_SLAVE, dcdrTask.getTemplateId(), "主从切换，主集群：" + dcdrTask.getMasterCluster() +
-                        "切换至从集群：" + dcdrTask.getSlaveCluster(), operator);
+                operateRecordService.save(
+                        new OperateRecord.Builder().operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE_DCDR_SETTING)
+                                .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).bizId(dcdrTask.getTemplateId())
+                                .userOperation(operator).content(
+                                        "主从切换，主集群：" + dcdrTask.getMasterCluster() + "切换至从集群：" + dcdrTask.getSlaveCluster())
+                    
+                                .build());
             }
 
         } catch (Exception e) {
@@ -367,14 +395,14 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrv implements Template
     }
 
     @Override
-    public Result<Void> cancelDCDRSwitchMasterSlaveByTaskId(Integer taskId, String operator) throws ESOperateException{
-        return cancelDCDRSwitchMasterSlaveByTaskIdAndTemplateIds(taskId, null, true, operator);
+    public Result<Void> cancelDCDRSwitchMasterSlaveByTaskId(Integer taskId, String operator, Integer projectId) throws ESOperateException{
+        return cancelDCDRSwitchMasterSlaveByTaskIdAndTemplateIds(taskId, null, true, operator,projectId);
     }
 
     @Override
     public Result<Void> cancelDCDRSwitchMasterSlaveByTaskIdAndTemplateIds(Integer taskId, List<Long> templateIds,
                                                                           boolean fullDeleteFlag,
-                                                                          String operator) throws ESOperateException {
+                                                                          String operator, Integer projectId) throws ESOperateException {
         try {
             Result<OpTask> taskForDcdrSwitchResult = opTaskManager.getById(taskId);
             if (taskForDcdrSwitchResult.failed()) {
@@ -404,7 +432,7 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrv implements Template
                 }
             }
 
-            saveNewestWorkTaskStatusToDB(taskForDCDRSwitch, dcdrTasksDetail);
+            saveNewestWorkTaskStatusToDB(taskForDCDRSwitch, dcdrTasksDetail,projectId);
         } catch (Exception e) {
             LOGGER.error("method=cancelDCDRSwitchMasterSlaveByTaskIdAndTemplateIds||taskId={}||templateIds={}||"
                          + "msg={}", taskId, templateIds, e.getMessage(), e);
@@ -415,7 +443,7 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrv implements Template
     }
 
     @Override
-    public Result<Void> refreshDCDRChannelState(Integer taskId, Integer templateId, String operator) {
+    public Result<Void> refreshDCDRChannelState(Integer taskId, Integer templateId, String operator, Integer projectId) {
         Result<OpTask> taskForDCDRSwitchResult = opTaskManager.getById(taskId);
         if (taskForDCDRSwitchResult.failed()) {
             return Result.buildFrom(taskForDCDRSwitchResult);
@@ -433,7 +461,7 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrv implements Template
         initSwitchTaskInfo(templateId, dcdrTasksDetail);
 
         // 2. 保存初始化状态
-        saveNewestWorkTaskStatusToDB(taskForDCDRSwitch, dcdrTasksDetail);
+        saveNewestWorkTaskStatusToDB(taskForDCDRSwitch, dcdrTasksDetail, projectId);
 
         return Result.buildSucc();
     }
@@ -471,7 +499,7 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrv implements Template
     }
 
     @Override
-    public Result<Void> forceSwitchMasterSlave(Integer taskId, Integer templateId, String operator) {
+    public Result<Void> forceSwitchMasterSlave(Integer taskId, Integer templateId, String operator, Integer projectId) {
         if (null == templateId) {
             return Result.buildFail("模板Id不存在");
         }
@@ -506,7 +534,7 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrv implements Template
             initSwitchTaskInfo(templateId, dcdrTasksDetail);
             
             //2. 更新任务状态
-            saveNewestWorkTaskStatusToDB(data, dcdrTasksDetail);
+            saveNewestWorkTaskStatusToDB(data, dcdrTasksDetail, projectId);
         } catch (Exception e) {
             LOGGER.error("method=forceSwitchMasterSlave||taskId={}||templateId={}||msg="
                          + "failed to save newest workTask to db",
@@ -1538,7 +1566,7 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrv implements Template
         BATCH_DCDR_FUTURE_UTIL.waitExecute();
 
         try {
-            saveNewestWorkTaskStatusToDB(taskForDCDRSwitch, dcdrTasksDetail);
+            saveNewestWorkTaskStatusToDB(taskForDCDRSwitch, dcdrTasksDetail, AuthConstant.SUPER_PROJECT_ID);
         } catch (Exception e) {
             LOGGER.error("method=doRefreshDCDRChannelsState||taskId={}||msg=failed to save newest workTask to db",
                 taskForDCDRSwitch.getId(), e);
@@ -1585,10 +1613,13 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrv implements Template
 
     /**
      * 更新db中 DCDR任务状态
-     * @param taskForDCDRSwitch      原任务状态信息
-     * @param dcdrTasksDetail        新具体状态信息
+     *
+     * @param taskForDCDRSwitch 原任务状态信息
+     * @param dcdrTasksDetail   新具体状态信息
+     * @param projectId
      */
-    private void saveNewestWorkTaskStatusToDB(OpTask taskForDCDRSwitch, DCDRTasksDetail dcdrTasksDetail) {
+    private void saveNewestWorkTaskStatusToDB(OpTask taskForDCDRSwitch, DCDRTasksDetail dcdrTasksDetail,
+                                              Integer projectId) {
         //根据多个detail task 来计算状态
         dcdrTasksDetail.calculateProcess();
 
@@ -1600,7 +1631,7 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrv implements Template
         if (DCDRStatusEnum.SUCCESS.getCode().equals(dcdrTasksDetail.getState())) {
             taskForDCDRSwitch.setStatus(OpTaskStatusEnum.SUCCESS.getStatus());
             //成功删除DCDR链路
-            deleteDCDRChannelForSuccForceSwitch(taskForDCDRSwitch, dcdrTasksDetail);
+            deleteDCDRChannelForSuccForceSwitch(taskForDCDRSwitch, dcdrTasksDetail,projectId);
         }
 
         if (DCDRStatusEnum.FAILED.getCode().equals(dcdrTasksDetail.getState())) {
@@ -1631,16 +1662,19 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrv implements Template
     }
 
     /**
-     *  强切成功删除DCDR链路
+     * 强切成功删除DCDR链路
      *
-     * @param taskForDCDRSwitch   任务信息
-     * @param dcdrTasksDetail     DCDR任务信息
+     * @param taskForDCDRSwitch 任务信息
+     * @param dcdrTasksDetail   DCDR任务信息
+     * @param projectId
      */
-    private void deleteDCDRChannelForSuccForceSwitch(OpTask taskForDCDRSwitch, DCDRTasksDetail dcdrTasksDetail) {
+    private void deleteDCDRChannelForSuccForceSwitch(OpTask taskForDCDRSwitch, DCDRTasksDetail dcdrTasksDetail,
+                                                     Integer projectId) {
         for (DCDRSingleTemplateMasterSlaveSwitchDetail switchDetail : dcdrTasksDetail.getDcdrSingleTemplateMasterSlaveSwitchDetailList()) {
             if (DCDRSwithTypeEnum.FORCE.getCode().equals(switchDetail.getSwitchType())) {
                 try {
-                    Result<Void> deleteDCDRResult = deleteDCDR(switchDetail.getTemplateId().intValue(), AriusUser.SYSTEM.getDesc());
+                    Result<Void> deleteDCDRResult = deleteDCDR(switchDetail.getTemplateId().intValue(), AriusUser.SYSTEM.getDesc(),
+                            projectId);
                     if (deleteDCDRResult.failed()) {
                         LOGGER.error("method=deleteDCDRChannelForSuccForceSwitch||taskId={}||msg=failed to deleteDCDR for force switch",
                                 taskForDCDRSwitch.getId());

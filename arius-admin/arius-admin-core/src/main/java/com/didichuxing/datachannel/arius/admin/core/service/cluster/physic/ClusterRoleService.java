@@ -1,11 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.core.service.cluster.physic;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterRoleDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
 import java.util.List;
 import java.util.Map;
-
-import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterRoleDTO;
 
 /**
  * ES集群角色 服务类
@@ -84,10 +83,12 @@ public interface ClusterRoleService {
 
     /**
      * 删除集群角色
+     *
      * @param clusterId
+     * @param projectId
      * @return
      */
-    Result<Void> deleteRoleClusterByClusterId(Integer clusterId);
+    Result<Void> deleteRoleClusterByClusterId(Integer clusterId, Integer projectId);
 
     /**
      * 根据集群的id和集群的角色删除对应的角色

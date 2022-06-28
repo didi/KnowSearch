@@ -1,19 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping.impl;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.DEFAULT_INDEX_MAPPING_TYPE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.TEMPLATE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.EDIT;
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.EDIT_TEMPLATE_MAPPING;
 import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum.TEMPLATE_MAPPING;
-
-import java.util.*;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -24,21 +12,38 @@ import com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping.Template
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.precreate.TemplatePreCreateManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.MappingOptimize;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.MappingOptimizeItem;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateSchemaDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateSchemaOptimizeDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord.template.TemplateSchemaOperateRecord;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateType;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithMapping;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateConfigPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateTypePO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateSchemaVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
-import com.didichuxing.datachannel.arius.admin.common.mapping.*;
-import com.didichuxing.datachannel.arius.admin.common.util.*;
+import com.didichuxing.datachannel.arius.admin.common.mapping.AnalyzerEnum;
+import com.didichuxing.datachannel.arius.admin.common.mapping.AriusTypeProperty;
+import com.didichuxing.datachannel.arius.admin.common.mapping.Field;
+import com.didichuxing.datachannel.arius.admin.common.mapping.IndexEnum;
+import com.didichuxing.datachannel.arius.admin.common.mapping.SortEnum;
+import com.didichuxing.datachannel.arius.admin.common.mapping.SpecialField;
+import com.didichuxing.datachannel.arius.admin.common.mapping.TypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.util.AriusIndexMappingConfigUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.ESVersionUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.impl.IndexTemplateServiceImpl;
 import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateSattisService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateConfigDAO;
@@ -49,9 +54,27 @@ import com.didiglobal.logi.elasticsearch.client.response.setting.common.TypeDefi
 import com.didiglobal.logi.elasticsearch.client.response.setting.common.TypeProperties;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author zhonghua
@@ -77,6 +100,8 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
 
     @Autowired
     private IndexTemplateTypeDAO           indexTemplateTypeDAO;
+    @Autowired
+    private ProjectService projectService;
 
     private static final String TEXT_STR       = "text";
     private static final String TYPE_STR       = "type";
@@ -411,7 +436,14 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
 
         // 记录操作
         Result<ConsoleTemplateSchemaVO> newSchemaVO = getSchema(logicId);
-        operateRecordService.save(TEMPLATE, EDIT, logicId, JSON.toJSONString(new TemplateSchemaOperateRecord(oldSchemaVO.getData(), newSchemaVO.getData())), operator);
+        operateRecordService.save(new OperateRecord.Builder()
+                        .operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_EDIT_MAPPING)
+                        .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                        .userOperation(operator)
+                        .project(projectService.getProjectBriefByProjectId(templateLogicWithPhysical.getProjectId()))
+                        .content(JSON.toJSONString(new TemplateSchemaOperateRecord(oldSchemaVO.getData(), newSchemaVO.getData())))
+                        .bizId(logicId)
+                .build());
 
         return Result.buildSucc();
     }
@@ -419,13 +451,14 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
     /**
      * 修改模板schema
      *
-     * @param schemaDTO schema
-     * @param operator  操作人
+     * @param schemaDTO       schema
+     * @param operator        操作人
+     * @param projectId
      * @return result
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result<Void> modifySchema(ConsoleTemplateSchemaDTO schemaDTO, String operator) throws AdminOperateException {
+    public Result<Void> modifySchema(ConsoleTemplateSchemaDTO schemaDTO, String operator, Integer projectId) throws AdminOperateException {
         if (AriusObjUtils.isNull(operator)) {
             return Result.buildParamIllegal("操作人为空");
         }
@@ -443,7 +476,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
             return Result.buildParamIllegal("该功能只支持高版本(6.5.1以上)es， 请使用JSON格式");
         }
 
-        Result<Void> saveSpecialFieldResult = saveSpecialField(schemaDTO, operator);
+        Result<Void> saveSpecialFieldResult = saveSpecialField(schemaDTO, operator,projectId);
         if (saveSpecialFieldResult.failed()) {
             return saveSpecialFieldResult;
         }
@@ -461,11 +494,18 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
             }
             return result;
         }
-
+        
         Result<Void> result = updateFields(schemaDTO.getLogicId(), schemaDTO.getFields(), schemaDTO.getRemoveFieldNames());
         if (result.success()) {
             // 记录操作记录
-            operateRecordService.save(TEMPLATE, EDIT_TEMPLATE_MAPPING, schemaDTO.getLogicId(), "-", operator);
+            
+            operateRecordService.save(new OperateRecord.Builder().project(
+                            Optional.ofNullable(projectId).map(projectService::getProjectBriefByProjectId).orElse(null))
+                    .userOperation(operator).operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_EDIT_MAPPING)
+                    .content("-").triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+            
+                    .build());
+            //operateRecordService.save(TEMPLATE, EDIT_TEMPLATE_MAPPING, schemaDTO.getLogicId(), "-", operator);
 
             // 重建明天索引
             templatePreCreateManager.reBuildTomorrowIndex(schemaDTO.getLogicId(), 3);
@@ -1034,17 +1074,17 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
         return typeProperties;
     }
 
-    private Result<Void> saveSpecialField(ConsoleTemplateSchemaDTO schemaDTO, String operator) throws AdminOperateException {
+    private Result<Void> saveSpecialField(ConsoleTemplateSchemaDTO schemaDTO, String operator, Integer projectId) throws AdminOperateException {
         if (CollectionUtils.isNotEmpty(schemaDTO.getFields())) {
-            return saveSpecialFieldByField(schemaDTO, operator);
+            return saveSpecialFieldByField(schemaDTO, operator,projectId);
         } else {
-            return saveSpecialFieldByJSON(schemaDTO, operator);
+            return saveSpecialFieldByJSON(schemaDTO, operator,projectId);
         }
 
     }
 
     private Result<Void> saveSpecialFieldByJSON(ConsoleTemplateSchemaDTO schemaDTO,
-                                                String operator) throws AdminOperateException {
+                                                String operator, Integer projectId) throws AdminOperateException {
         List<AriusTypeProperty> typeProperties = schemaDTO.getTypeProperties();
         if (typeProperties.size() == 1 && (StringUtils.isBlank(typeProperties.get(0).getTypeName())
                 || typeProperties.get(0).getTypeName().equals(DEFAULT_INDEX_MAPPING_TYPE))) {
@@ -1055,19 +1095,20 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
             templateLogicDTO.setRoutingField(typeProperties.get(0).getRoutingField());
             templateLogicDTO.setDateField(typeProperties.get(0).getDateField());
             templateLogicDTO.setDateFieldFormat(typeProperties.get(0).getDateFieldFormat());
-            Result<Void>  editDateFieldResult = indexTemplateService.editTemplate(templateLogicDTO, operator);
+            Result<Void>  editDateFieldResult = indexTemplateService.editTemplate(templateLogicDTO, operator,projectId);
             if (editDateFieldResult.failed()) {
                 return editDateFieldResult;
             }
         } else {
-            Result<Void> result = handleUpdateType(schemaDTO, operator, typeProperties);
+            Result<Void> result = handleUpdateType(schemaDTO, operator, typeProperties,projectId);
             if (result.failed()) {return result;}
         }
 
         return Result.buildSucc();
     }
 
-    private Result<Void> handleUpdateType(ConsoleTemplateSchemaDTO schemaDTO, String operator, List<AriusTypeProperty> typeProperties) throws AdminOperateException {
+    private Result<Void> handleUpdateType(ConsoleTemplateSchemaDTO schemaDTO, String operator, List<AriusTypeProperty> typeProperties,
+                                          Integer projectId) throws AdminOperateException {
         // 修改type表
         List<IndexTemplateType> templateTypes = indexTemplateService.listLogicTemplateTypes(schemaDTO.getLogicId());
         Map<String, IndexTemplateType> typeName2IndexTemplateTypeMap = ConvertUtil.list2Map(templateTypes,
@@ -1085,7 +1126,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
             templateLogicDTO.setId(schemaDTO.getLogicId());
             templateLogicDTO.setDateField(dateField);
             templateLogicDTO.setDateFieldFormat(dateFieldFormat);
-            Result<Void>  editDateFieldResult = indexTemplateService.editTemplate(templateLogicDTO, operator);
+            Result<Void>  editDateFieldResult = indexTemplateService.editTemplate(templateLogicDTO, operator,projectId);
             if (editDateFieldResult.failed()) {
                 return editDateFieldResult;
             }
@@ -1126,7 +1167,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
     }
 
     private Result<Void> saveSpecialFieldByField(ConsoleTemplateSchemaDTO schemaDTO,
-                                                 String operator) throws AdminOperateException {
+                                                 String operator, Integer projectId) throws AdminOperateException {
         SpecialField specialField = SpecialField.analyzeFromFields(schemaDTO.getFields(),
                 schemaDTO.getRemoveFieldNames());
         IndexTemplateDTO templateLogicDTO = new IndexTemplateDTO();
@@ -1135,7 +1176,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
         templateLogicDTO.setDateFieldFormat(specialField.getDateFieldFormat());
         templateLogicDTO.setIdField(specialField.getIdField());
         templateLogicDTO.setRoutingField(specialField.getRoutingField());
-        return indexTemplateService.editTemplate(templateLogicDTO, operator);
+        return indexTemplateService.editTemplate(templateLogicDTO, operator,projectId);
     }
 
     private boolean clusterIsHighVersion(Integer logicId) {

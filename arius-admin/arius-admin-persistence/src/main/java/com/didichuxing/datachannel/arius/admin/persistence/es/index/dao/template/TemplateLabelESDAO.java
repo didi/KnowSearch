@@ -85,18 +85,7 @@ public class TemplateLabelESDAO extends BaseESDAO {
         return getLabelByDsl(dsl, scrollSize);
     }
 
-    /**
-     * 根据标签ID获取标签
-     *
-     * @return
-     */
-    public List<TemplateLabelPO> listAll() {
-        int scrollSize = 500;
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.V2_SCROLL_LABEL_LIST_ALL,
-                scrollSize);
 
-        return getLabelByDsl(dsl, scrollSize);
-    }
 
     /**************************************** private methods ****************************************/
     /**

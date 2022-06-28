@@ -2,10 +2,9 @@ package com.didichuxing.datachannel.arius.admin.common.bean.dto.oprecord;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.PageDTO;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
-import java.util.Date;
-
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -80,6 +79,6 @@ public class OperateRecordDTO extends PageDTO {
     @ApiModelProperty("项目")
     private String  projectName;
     @ApiModelProperty("bizId")
-    private Integer bizId;
+    private String bizId;
 
 }

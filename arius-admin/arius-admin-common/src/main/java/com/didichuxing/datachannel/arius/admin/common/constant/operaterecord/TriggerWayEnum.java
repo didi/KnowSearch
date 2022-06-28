@@ -18,7 +18,11 @@ public enum TriggerWayEnum {
     /**
      * 系统触发
      */
-    SYSTEM_TRIGGER("系统触发",1);
+    SYSTEM_TRIGGER("系统触发",1),
+    /**
+     * 定时任务
+     */
+    TIMING_TASK("定时任务",2);
     
     /**
      * 触发方式

@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.biz.workorder.content;
 
-import com.didichuxing.datachannel.arius.admin.common.constant.app.ProjectClusterLogicAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectClusterLogicAuthEnum;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

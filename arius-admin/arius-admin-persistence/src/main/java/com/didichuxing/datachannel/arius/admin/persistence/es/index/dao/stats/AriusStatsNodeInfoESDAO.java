@@ -1,18 +1,16 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.*;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyNodeMetricsEnum.*;
-
-import java.util.*;
-import java.util.stream.Collectors;
-
-import javax.annotation.PostConstruct;
-
-import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
-import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESBucket;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Component;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.METRICS;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.SUM;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.TIMESTAMP;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyNodeMetricsEnum.CPU_LOAD_AVERAGE_15M;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyNodeMetricsEnum.CPU_LOAD_AVERAGE_1M;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyNodeMetricsEnum.CPU_LOAD_AVERAGE_5M;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyNodeMetricsEnum.CPU_USAGE_PERCENT;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyNodeMetricsEnum.INDICES_INDEXING_LATENCY;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyNodeMetricsEnum.INDICES_QUERY_LATENCY;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyNodeMetricsEnum.TRANS_RX_SIZE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyNodeMetricsEnum.TRANS_TX_SIZE;
 
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.TopMetrics;
@@ -20,6 +18,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linech
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESNodeStats;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterLogicDiskUsedInfoPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AriusStatsEnum;
+import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.IndexNameUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.MetricsUtils;
@@ -27,10 +26,8 @@ import com.didichuxing.datachannel.arius.admin.persistence.es.index.dsls.DslsCon
 import com.didiglobal.logi.elasticsearch.client.response.query.query.ESQueryResponse;
 import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESAggr;
 import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESAggrMap;
+import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESBucket;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -39,7 +36,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
-
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
@@ -551,7 +547,7 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
                     Double percent = used/total;
                     clusterLogicDiskUsedInfoPO.setDiskTotal(total.longValue());
                     clusterLogicDiskUsedInfoPO.setDiskUsage(used.longValue());
-                    clusterLogicDiskUsedInfoPO.setDiskUsagePercent(percent.doubleValue());
+                    clusterLogicDiskUsedInfoPO.setDiskUsagePercent(percent);
                 }
             }
         }

@@ -9,7 +9,6 @@ import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecord
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
-import com.didiglobal.logi.security.service.ProjectService;
 import java.util.Collections;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
@@ -27,8 +26,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class OperateRecordPageSearchHandle extends AbstractPageSearchHandle<OperateRecordDTO, OperateRecordVO> {
     private static final ILog LOGGER = LogFactory.getLog(OperateRecordPageSearchHandle.class);
-    @Autowired
-    private ProjectService       projectService;
+   
     @Autowired
     private OperateRecordService operateRecordService;
 

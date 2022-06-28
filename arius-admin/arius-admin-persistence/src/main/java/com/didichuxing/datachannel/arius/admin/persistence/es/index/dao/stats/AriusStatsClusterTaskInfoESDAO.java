@@ -11,10 +11,13 @@ import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.IndexNameUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.MetricsUtils;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dsls.DslsConstant;
+import com.didiglobal.logi.elasticsearch.client.response.query.query.ESQueryResponse;
 import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESAggr;
 import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESBucket;
+import com.didiglobal.logi.elasticsearch.client.response.query.query.hits.ESHits;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import java.util.Optional;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -26,7 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.*;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.*;
 
 /**
  * @author didi
@@ -57,9 +60,16 @@ public class AriusStatsClusterTaskInfoESDAO extends BaseAriusStatsESDAO {
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.AGG_CLUSTER_TASK_COUNT, cluster,
                 NOW_2M, NOW_1M);
         String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
-
+       
         return gatewayClient.performRequestWithRouting(metadataClusterName, cluster, realIndex, TYPE, dsl,
-                response -> Long.parseLong(response.getHits().getUnusedMap().getOrDefault(ESConstant.HITS_TOTAL, "0").toString()), 3);
+                response -> Optional.ofNullable(response)
+                        .map(ESQueryResponse::getHits)
+                        
+                        .map(ESHits::getUnusedMap)
+                        .map( map->map.getOrDefault(ESConstant.HITS_TOTAL, "0").toString())
+                        .map(Long::parseLong)
+                        .orElse(0L)
+                       , 3);
     }
 
     /**

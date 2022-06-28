@@ -97,13 +97,14 @@ public interface ClusterPhyManager {
 	Result<ClusterPhyVO> joinCluster(ClusterJoinDTO param, String operator);
 
     /**
-     * 删除接入集群
-     * 删除顺序: region ——> clusterLogic ——> clusterHost ——> clusterRole  ——> cluster
+     * 删除接入集群 删除顺序: region ——> clusterLogic ——> clusterHost ——> clusterRole  ——> cluster
+     *
      * @param clusterId 集群id
      * @param operator  操作人
+     * @param projectId
      * @return {@link Result}<{@link Void}>
      */
-    Result<Void> deleteClusterJoin(Integer clusterId, String operator);
+    Result<Void> deleteClusterJoin(Integer clusterId, String operator, Integer projectId);
 
     /**
      * 插件列表
@@ -123,11 +124,12 @@ public interface ClusterPhyManager {
     /**
      * 更新集群下的动态配置信息
      *
-     * @param param    配置信息参数
+     * @param param     配置信息参数
      * @param operator
+     * @param projectId
      * @return result
      */
-    Result<Boolean> updatePhyClusterDynamicConfig(ClusterSettingDTO param, String operator);
+    Result<Boolean> updatePhyClusterDynamicConfig(ClusterSettingDTO param, String operator, Integer projectId);
 
     /**
      * 获取集群下的属性配置
@@ -174,12 +176,13 @@ public interface ClusterPhyManager {
 
     /**
      * 物理集群信息删除 (host信息、角色信息、集群信息、region信息)
+     *
      * @param clusterPhyId 物理集群ID
      * @param operator     操作人
-     * @param projectId        projectId
+     * @param projectId
      * @return {@link Result}<{@link Boolean}>
      */
-    Result<Boolean> deleteCluster(Integer clusterPhyId, String operator);
+    Result<Boolean> deleteCluster(Integer clusterPhyId, String operator, Integer projectId);
 
     /**
      * 添加集群

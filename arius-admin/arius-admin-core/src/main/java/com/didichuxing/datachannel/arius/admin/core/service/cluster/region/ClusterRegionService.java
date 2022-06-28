@@ -1,13 +1,12 @@
 package com.didichuxing.datachannel.arius.admin.core.service.cluster.region;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegionConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegionFSInfo;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author ohushenglin_v
@@ -83,11 +82,13 @@ public interface ClusterRegionService {
 
     /**
      * 删除物理集群region
-     * @param regionId regionId
-     * @param operator 操作人
+     *
+     * @param regionId  regionId
+     * @param operator  操作人
+     * @param projectId
      * @return
      */
-    Result<Void> deletePhyClusterRegion(Long regionId, String operator);
+    Result<Void> deletePhyClusterRegion(Long regionId, String operator, Integer projectId);
 
     /**
      * 批量删除物理集群中region
@@ -99,12 +100,14 @@ public interface ClusterRegionService {
 
     /**
      * 解绑region
-     * @param regionId regionId
-     * @param operator operator
+     *
+     * @param regionId       regionId
      * @param logicClusterId 逻辑集群id
+     * @param operator       operator
+     * @param projectId
      * @return
      */
-    Result<Void> unbindRegion(Long regionId, Long logicClusterId, String operator);
+    Result<Void> unbindRegion(Long regionId, Long logicClusterId, String operator, Integer projectId);
 
     /**
      * 绑定region到逻辑集群

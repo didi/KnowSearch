@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.event.auth;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ProjectClusterLogicAuth;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ProjectClusterLogicAuth;
 
 /**
  * App逻辑集群权限增加事件

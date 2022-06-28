@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.core.service.gateway;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.ESUser;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ESUser;
 import java.util.List;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.GatewayHeartbeat;

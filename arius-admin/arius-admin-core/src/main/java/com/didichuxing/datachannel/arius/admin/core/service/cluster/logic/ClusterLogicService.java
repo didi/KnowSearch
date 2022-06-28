@@ -1,21 +1,19 @@
 package com.didichuxing.datachannel.arius.admin.core.service.cluster.logic;
 
-import java.util.List;
-import java.util.Set;
-
 import com.didichuxing.datachannel.arius.admin.common.bean.common.LogicResourceConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Plugin;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterLogicConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.PluginDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterLogicDiskUsedInfoPO;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterNodeSepc;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterLogicDiskUsedInfoPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
+import java.util.List;
+import java.util.Set;
 
 /**
  * 逻辑集群service
@@ -39,12 +37,14 @@ public interface ClusterLogicService {
 
     /**
      * 删除逻辑集群
+     *
      * @param logicClusterId 逻辑集群ID
-     * @param operator 操作人
+     * @param operator       操作人
+     * @param projectId
      * @return result
      * @throws AdminOperateException
      */
-    Result<Void> deleteClusterLogicById(Long logicClusterId, String operator) throws AdminOperateException;
+    Result<Void> deleteClusterLogicById(Long logicClusterId, String operator, Integer projectId) throws AdminOperateException;
 
     /**
      * 判断逻辑集群是否有模板
@@ -62,19 +62,23 @@ public interface ClusterLogicService {
 
     /**
      * 验证逻辑集群创建、更新参数是否合法
-     * @param param 参数
+     *
+     * @param param     参数
      * @param operation 操作
+     * @param projectId
      * @return result
      */
-    Result<Void> validateClusterLogicParams(ESLogicClusterDTO param, OperationEnum operation);
+    Result<Void> validateClusterLogicParams(ESLogicClusterDTO param, OperationEnum operation, Integer projectId);
 
     /**
      * 编辑逻辑集群信息
-     * @param param 参数
-     * @param operator 操作人
+     *
+     * @param param     参数
+     * @param operator  操作人
+     * @param projectId
      * @return result
      */
-    Result<Void> editClusterLogic(ESLogicClusterDTO param, String operator);
+    Result<Void> editClusterLogic(ESLogicClusterDTO param, String operator, Integer projectId);
 
     Result<Void> editClusterLogicNotCheck(ESLogicClusterDTO param, String operator);
 
@@ -189,4 +193,12 @@ public interface ClusterLogicService {
      * @return
      */
     ClusterLogicDiskUsedInfoPO getDiskInfo(Long id);
+    
+    /**
+     * 获取项目id通过clusterLogicId
+     *
+     * @param clusterLogicId 集群逻辑id
+     * @return {@code Integer}
+     */
+    Integer getProjectIdById(Long clusterLogicId);
 }

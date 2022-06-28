@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.FIELD;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.FIELD;
 import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricTopTypeEnum.listNoNegativeMetricTypes;
 import static com.didichuxing.datachannel.arius.admin.common.constant.routing.ESRoutingConstant.CLUSTER_PHY_HEALTH_ROUTING;
 

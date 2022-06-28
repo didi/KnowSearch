@@ -1,23 +1,21 @@
 package com.didichuxing.datachannel.arius.admin.biz.cluster;
 
-import java.util.List;
-
+import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRegionWithNodeInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostWithRegionInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
+import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
 import com.google.common.collect.Lists;
+import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRegionWithNodeInfoDTO;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
-import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
 
 public class ClusterNodeManagerTest extends AriusAdminApplicationTest {
     @Autowired
@@ -37,6 +35,7 @@ public class ClusterNodeManagerTest extends AriusAdminApplicationTest {
 
     @Test
     public void createNode2RegionTest(){
+        final Integer projectId = 1;
         ClusterPhyDTO esClusterDTO = CustomDataSource.esClusterDTOFactory();
         ClusterRegionWithNodeInfoDTO param = new ClusterRegionWithNodeInfoDTO();
         List<Integer> dataNodeList = Lists.newArrayList(1185, 1191, 1197);
@@ -44,7 +43,8 @@ public class ClusterNodeManagerTest extends AriusAdminApplicationTest {
         param.setPhyClusterName("logi-elasticsearch-7.6.0");
         param.setName("region-lyn");
 
-        Result<List<Long>> ret = clusterNodeManager.createMultiNode2Region(Lists.newArrayList(param), AriusUser.SYSTEM.getDesc());
+        Result<List<Long>> ret = clusterNodeManager.createMultiNode2Region(Lists.newArrayList(param), AriusUser.SYSTEM.getDesc(),
+                projectId);
         Assertions.assertNotNull(ret);
         if (ret.success()) { Assertions.assertNotNull(ret.getData());}
         if (ret.failed())  { Assertions.assertNotNull(ret.getMessage());}
@@ -52,6 +52,7 @@ public class ClusterNodeManagerTest extends AriusAdminApplicationTest {
 
     @Test
     public void editNode2RegionTest(){
+        final Integer projectId =1;
         ClusterPhyDTO esClusterDTO = CustomDataSource.esClusterDTOFactory();
         ClusterRegionWithNodeInfoDTO param  = new ClusterRegionWithNodeInfoDTO();
         List<Integer> bindingDataNodeList   = Lists.newArrayList(1185, 1191);
@@ -62,7 +63,8 @@ public class ClusterNodeManagerTest extends AriusAdminApplicationTest {
         param.setPhyClusterName("logi-elasticsearch-7.6.0");
         param.setName("region-lyn");
 
-        Result<Boolean> ret = clusterNodeManager.editMultiNode2Region(Lists.newArrayList(param), AriusUser.SYSTEM.getDesc());
+        Result<Boolean> ret = clusterNodeManager.editMultiNode2Region(Lists.newArrayList(param), AriusUser.SYSTEM.getDesc(),
+                projectId);
         Assertions.assertNotNull(ret);
         if (ret.success()) { Assertions.assertTrue(ret.getData());}
         if (ret.failed())  { Assertions.assertNotNull(ret.getMessage());}

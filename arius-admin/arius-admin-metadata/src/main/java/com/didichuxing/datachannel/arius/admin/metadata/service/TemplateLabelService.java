@@ -1,35 +1,41 @@
 package com.didichuxing.datachannel.arius.admin.metadata.service;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum.INDEX_MANAGEMENT_LABEL_MODIFY;
 
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Label;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.TemplateLabel;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateLabelPO;
+import com.didichuxing.datachannel.arius.admin.common.constant.UpdateIndexTemplateLabelParam;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateLabelEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AmsRemoteException;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateLabelEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.UpdateIndexTemplateLabelParam;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateLabelPO;
-import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.template.TemplateLabelESDAO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.oprecord.OperateRecordDTO;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
+import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.template.TemplateLabelESDAO;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 /**
  * 索引模板标签服务
@@ -42,18 +48,9 @@ public class TemplateLabelService {
     private static final ILog LOGGER = LogFactory.getLog( TemplateLabelService.class);
 
     public static final String TEMPLATE_HAS_DELETED_DOC   = "21140";
-    public static final String TEMPLATE_DSL_REVIEW_LABEL  = "11101";
+ 
     public static final String TEMPLATE_IMPORTANT_LABEL   = "11102";
-    public static final String TEMPLATE_QUOTA_USAGE_LOW   = "32220";
-    public static final String TEMPLATE_QUOTA_USAGE_HIGH  = "32321";
-    public static final String TEMPLATE_FULL_LINK_SUPPORT = "12103";
-    public static final String TEMPLATE_EXPIRE_TIME_LONG  = "32222";
-    public static final String TEMPLATE_INVALID           = "22348";
-    public static final String TEMPLATE_SUSPEND_GOVERN    = "12104";
-    public static final String TEMPLATE_ERROR_QUERY       = "22243";
-    public static final String TEMPLATE_SLOW_QUERY        = "22244";
-    public static final String TEMPLATE_NO_DATA           = "22345";
-    public static final String TEMPLATE_NO_QUERY          = "22347";
+  
     public static final String TEMPLATE_HAVE_DCDR         = "12149";
 
 
@@ -141,23 +138,8 @@ public class TemplateLabelService {
         return Result.buildSucc(templateLabels);
     }
 
-    /**
-     * 根据表达式获取模板id
-     *
-     * @return list
-     */
-    public Result<List<TemplateLabel>> listDslReviewTemplates() {
-        return listByLabelId(TEMPLATE_DSL_REVIEW_LABEL);
-    }
 
-    /**
-     * 根据表达式获取模板id
-     *
-     * @return list
-     */
-    public Result<List<TemplateLabel>> listInvalidTemplates() {
-        return listByLabelId(TEMPLATE_INVALID);
-    }
+
 
     public Result<List<TemplateLabel>> listHaveDcdrTemplates() {
         return listByLabelId(TEMPLATE_HAVE_DCDR);
@@ -259,14 +241,6 @@ public class TemplateLabelService {
         return indexTemplateLabelDAO.getLabelByLabelId(labelId);
     }
 
-    /**
-     * 根据标签ID获取标签
-     *
-     * @return
-     */
-    public List<TemplateLabelPO> listAllPO() {
-        return indexTemplateLabelDAO.listAll();
-    }
 
     /**
      * 根据条件查询
@@ -370,9 +344,9 @@ public class TemplateLabelService {
 
         //记录操作记录
         if (change) {
-            OperateRecordDTO operateRecord = buildLabelSettingOperatorRecord(
-                    String.valueOf(indexTemplateId), OperationEnum.EDIT_LABELS.getCode(), operator,
-                    getEditContent(deleteMap.values(), news)
+            OperateRecord operateRecord = buildLabelSettingOperatorRecord(
+                    indexTemplateId, INDEX_MANAGEMENT_LABEL_MODIFY, operator,
+                    getEditContent(deleteMap.values(), news),null
             );
             operateRecordService.save(operateRecord);
         }
@@ -444,19 +418,15 @@ public class TemplateLabelService {
      * 构建索引标签配置操作记录
      *
      * @param bizId
-     * @param operateId
+     * @param operateType
      * @param operator
      * @param content
      * @return
      */
-    private OperateRecordDTO buildLabelSettingOperatorRecord(String bizId, Integer operateId, String operator, String content) {
-        OperateRecordDTO operateRecord = new OperateRecordDTO();
-        //operateRecord.setBizId(bizId);
-        operateRecord.setModuleId(ModuleEnum.TEMPLATE.getCode());
-        operateRecord.setOperateId(operateId);
-        //operateRecord.setOperator(operator);
-        operateRecord.setContent(content);
-
-        return operateRecord;
+    private OperateRecord buildLabelSettingOperatorRecord(Object bizId, OperateTypeEnum operateType, String operator,
+                                                          String content, ProjectBriefVO projectBriefVO) {
+    
+        return new OperateRecord.Builder().content(content).operationTypeEnum(operateType).project(projectBriefVO)
+                .userOperation(operator).bizId(bizId).build();
     }
 }

@@ -1,23 +1,23 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.CLUSTER;
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.DELETE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.EDIT;
-
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.BaseTemplateSrvInterface;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicContext;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterTemplateSrvVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ESVersionUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
@@ -341,15 +341,22 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
         Result<Boolean> result = clusterPhyService.editCluster(ConvertUtil.obj2Obj(clusterPhy, ClusterPhyDTO.class),
             operator);
         if (result.success()) {
-            operateRecordService.save(CLUSTER, EDIT, phyCluster,
-                phyCluster + "集群，增加一个索引服务：" + clusterTemplateSrv.getServiceName(), operator);
+              operateRecordService.save(new OperateRecord.Builder()
+                              .content(phyCluster + "集群，增加一个索引服务：" + clusterTemplateSrv.getServiceName())
+                              .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                              .bizId(phyCluster)
+                              .operationTypeEnum(OperateTypeEnum.INDEXING_SERVICE_RUN)
+                              .userOperation(operator)
+                      .build());
+            
         }
         return result;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result<Boolean> addTemplateSrvForClusterLogic(Long clusterLogicId, String templateSrvId, String operator) {
+    public Result<Boolean> addTemplateSrvForClusterLogic(Long clusterLogicId, String templateSrvId, String operator,
+                                                         Integer projectId) {
         if (!isRDOrOP(operator)) {
             return Result.buildNotExist(NO_PERMISSION_CONTENT);
         }
@@ -370,6 +377,14 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
         if (CollectionUtils.isEmpty(associatedClusterPhyNames)) {
             return Result.buildSucc();
         }
+        //校验项目操作的正确性
+        final Integer clusterLogicBelongsToProjectId = clusterLogicService.getProjectIdById(clusterLogicId);
+        final Result<Void> result = ProjectUtils.checkProjectCorrectly(i -> i, clusterLogicBelongsToProjectId,
+                projectId);
+        if (result.failed()) {
+            return Result.buildFail(result.getMessage());
+        }
+    
 
         for (String associatedClusterPhyName : associatedClusterPhyNames) {
             try {
@@ -425,14 +440,21 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
         Result<Boolean> result = clusterPhyService.editCluster(ConvertUtil.obj2Obj(clusterPhy, ClusterPhyDTO.class),
             operator);
         if (null != result && result.success()) {
-            operateRecordService.save(CLUSTER, EDIT, phyCluster, phyCluster + "集群，删除一个索引服务：" + templateSrvId, operator);
+            operateRecordService.save(new OperateRecord.Builder()
+                            .content(phyCluster + "集群，删除一个索引服务：" + templateSrvId)
+                            .userOperation(operator)
+                            .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                            .operationTypeEnum(OperateTypeEnum.INDEX_MANAGEMENT_DELETE)
+                            .bizId(phyCluster)
+                    .build());
         }
         return result;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result<Boolean> delTemplateSrvForClusterLogic(Long clusterLogicId, String templateSrvId, String operator) {
+    public Result<Boolean> delTemplateSrvForClusterLogic(Long clusterLogicId, String templateSrvId, String operator,
+                                                         Integer projectId) {
         if (!isRDOrOP(operator)) {
             return Result.buildNotExist(NO_PERMISSION_CONTENT);
         }
@@ -453,6 +475,14 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
         if (CollectionUtils.isEmpty(associatedClusterPhyNames)) {
             return Result.buildSucc();
         }
+        //校验项目操作的正确性
+        final Integer clusterLogicBelongsToProjectId = clusterLogicService.getProjectIdById(clusterLogicId);
+        final Result<Void> result = ProjectUtils.checkProjectCorrectly(i -> i, clusterLogicBelongsToProjectId,
+                projectId);
+        if (result.failed()) {
+            return Result.buildFail(result.getMessage());
+        }
+    
 
         for (String associatedClusterPhyName : associatedClusterPhyNames) {
             try {
@@ -485,7 +515,13 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
         Result<Boolean> result = clusterPhyService.editCluster(ConvertUtil.obj2Obj(cluster, ClusterPhyDTO.class),
                 operator);
         if (result.success()) {
-            operateRecordService.save(CLUSTER, DELETE, clusterPhy, clusterPhy + "物理集群绑定逻辑集群，删除索引服务：", operator);
+            operateRecordService.save(new OperateRecord.Builder()
+                            .bizId(clusterPhy)
+                            .userOperation(operator)
+                            .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                            .operationTypeEnum(OperateTypeEnum.INDEX_MANAGEMENT_DELETE)
+                            .content(clusterPhy + "物理集群绑定逻辑集群，删除索引服务：")
+                    .build());
         }
 
         return result;

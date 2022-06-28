@@ -37,8 +37,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhy
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterConnectionStatus;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
@@ -615,8 +613,7 @@ class ClusterPhyManagerTest {
         param.setImportRule(1);
         when(mockClusterPhyService.getClusterByName(CLUSTER)).thenReturn(clusterPhy);
         when(mockEsClusterService.syncGetClusterHealthEnum(CLUSTER)).thenReturn(ClusterHealthEnum.GREEN);
-        when(mockOperateRecordService.save(ModuleEnum.ES_CLUSTER_JOIN, OperationEnum.ADD, "clusterPhyName", "desc", "operator"))
-                .thenReturn(Result.buildFail(null));
+  
         when(mockClusterPhyService.editCluster(Mockito.any(),Mockito.anyString()))
                 .thenReturn(Result.buildFail(null));
         assertTrue(clusterPhyManager.joinCluster(param, "admin").success());
@@ -627,12 +624,14 @@ class ClusterPhyManagerTest {
 
     @Test
     void testDeleteClusterJoin()  {
-         when(mockClusterPhyService.getClusterById(0)).thenReturn(null);
-        assertEquals( Result.buildParamIllegal("物理集群不存在").getMessage(),clusterPhyManager.deleteClusterJoin(0, "operator").getMessage());
+        final Integer projectId =1;
+        when(mockClusterPhyService.getClusterById(0)).thenReturn(null);
+        assertEquals( Result.buildParamIllegal("物理集群不存在").getMessage(),clusterPhyManager.deleteClusterJoin(0, "operator",
+                projectId).getMessage());
 
         when(mockClusterPhyService.getClusterById(0)).thenReturn(clusterPhy);
         when(mockClusterContextManager.getClusterPhyContext("clusterPhyName")).thenReturn(null);
-        assertEquals( Result.buildSucc(),clusterPhyManager.deleteClusterJoin(0, "operator"));
+        assertEquals( Result.buildSucc(),clusterPhyManager.deleteClusterJoin(0, "operator", projectId));
     }
     
     @Test
@@ -659,9 +658,9 @@ class ClusterPhyManagerTest {
         final Result<Boolean> expectedResult = Result.buildFail(false);
         when(mockClusterPhyService.updatePhyClusterDynamicConfig(new ClusterSettingDTO("clusterName", "key", "value")))
             .thenReturn(Result.buildFail(false));
-
+        Integer projectId=1;
         final Result<Boolean> result = clusterPhyManager.updatePhyClusterDynamicConfig(param,
-                "operator");
+                "operator", projectId);
 
         assertEquals(expectedResult, result);
     }
@@ -689,26 +688,26 @@ class ClusterPhyManagerTest {
 
     @Test
     void testDeleteCluster() {
-
+        final Integer projectId = 1;
         when(mockClusterPhyService.getClusterById(0)).thenReturn(null);
         assertEquals(Result.buildFail(String.format("物理集群Id[%s]不存在", 0)),
-            clusterPhyManager.deleteCluster(0, "operator"));
+            clusterPhyManager.deleteCluster(0, "operator", projectId));
 
         when(mockClusterPhyService.getClusterById(0)).thenReturn(clusterPhy);
         when(mockClusterRoleHostService.getNodesByCluster(CLUSTER)).thenReturn(Collections.emptyList());
-        when(mockClusterRoleService.deleteRoleClusterByClusterId(0)).thenReturn(Result.buildSucc());
+        when(mockClusterRoleService.deleteRoleClusterByClusterId(0, projectId)).thenReturn(Result.buildSucc());
         when(mockClusterRegionService.listPhyClusterRegions(CLUSTER)).thenReturn(Collections.emptyList());
-        when(mockClusterPhyService.deleteClusterById(0, "operator")).thenReturn(Result.buildSucc(true));
-        assertEquals(Result.buildSucc(true), clusterPhyManager.deleteCluster(0, "operator"));
+        when(mockClusterPhyService.deleteClusterById(0, "operator", projectId)).thenReturn(Result.buildSucc(true));
+        assertEquals(Result.buildSucc(true), clusterPhyManager.deleteCluster(0, "operator", projectId));
 
         when(mockClusterRoleHostService.getNodesByCluster(CLUSTER)).thenReturn(roleHostList);
-        when(mockClusterRoleHostService.deleteByCluster(CLUSTER)).thenReturn(Result.buildSucc());
-        when(mockClusterRoleService.deleteRoleClusterByClusterId(0)).thenReturn(Result.buildSucc());
+        when(mockClusterRoleHostService.deleteByCluster(CLUSTER, projectId)).thenReturn(Result.buildSucc());
+        when(mockClusterRoleService.deleteRoleClusterByClusterId(0, projectId)).thenReturn(Result.buildSucc());
 
         when(mockClusterRegionService.listPhyClusterRegions(CLUSTER)).thenReturn(regions);
         when(mockClusterRegionService.deleteByClusterPhy(CLUSTER, "operator")).thenReturn(Result.buildSucc());
-        when(mockClusterPhyService.deleteClusterById(0, "operator")).thenReturn(Result.buildSucc(true));
-        assertEquals(Result.buildSucc(true), clusterPhyManager.deleteCluster(0, "operator"));
+        when(mockClusterPhyService.deleteClusterById(0, "operator", projectId)).thenReturn(Result.buildSucc(true));
+        assertEquals(Result.buildSucc(true), clusterPhyManager.deleteCluster(0, "operator", projectId));
     }
 
     @Test
@@ -860,14 +859,14 @@ class ClusterPhyManagerTest {
     }
     @Test
     public void testDeleteClusterExit() {
-
+        int projectId=1;
         Assertions.assertEquals(Result.buildFail("无权限删除集群").getMessage(),clusterPhyManager.deleteClusterExit(CLUSTER, 1,"operator").getMessage());
         when(mockClusterPhyService.getClusterByName(CLUSTER)).thenReturn(clusterPhy);
         when(mockClusterPhyService.getClusterById(0)).thenReturn(clusterPhy);
         when(mockClusterRoleHostService.getNodesByCluster(CLUSTER)).thenReturn(Collections.emptyList());
-        when(mockClusterRoleService.deleteRoleClusterByClusterId(0)).thenReturn(Result.buildSucc());
+        when(mockClusterRoleService.deleteRoleClusterByClusterId(0, projectId)).thenReturn(Result.buildSucc());
         when(mockClusterRegionService.listPhyClusterRegions(CLUSTER)).thenReturn(Collections.emptyList());
-        when(mockClusterPhyService.deleteClusterById(0, "operator")).thenReturn(Result.buildSucc(true));
+        when(mockClusterPhyService.deleteClusterById(0, "operator", projectId)).thenReturn(Result.buildSucc(true));
         Assertions.assertTrue(clusterPhyManager.deleteClusterExit(CLUSTER, 1,"operator").success());
     }
 

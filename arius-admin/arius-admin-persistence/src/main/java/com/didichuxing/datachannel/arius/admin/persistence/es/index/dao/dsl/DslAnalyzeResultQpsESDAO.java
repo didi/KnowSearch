@@ -52,7 +52,7 @@ public class DslAnalyzeResultQpsESDAO extends BaseESDAO {
             return null;
         }
 
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_MAX_QPS_BY_APPID_DSLTEMPLATE, dslBase.getProjectId(), dslBase.getDslTemplateMd5());
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_MAX_QPS_BY_PROJECT_ID_DSLTEMPLATE, dslBase.getProjectId(), dslBase.getDslTemplateMd5());
 
         return gatewayClient.performRequestAndTakeFirst(indexName, typeName, dsl, DslAnalyzeResultQpsPO.class);
     }

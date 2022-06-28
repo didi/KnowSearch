@@ -1,18 +1,16 @@
 package com.didichuxing.datachannel.arius.admin.biz.template;
 
-import java.util.Arrays;
-
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.annotation.Rollback;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateWithCreateInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.util.RandomGenerator;
+import java.util.Arrays;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.Rollback;
+import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
 @Rollback
@@ -48,9 +46,10 @@ public class TemplateLogicManagerTest extends AriusAdminApplicationTest {
 
     @Test
     public void adjustShardTest() {
+         Integer projectId=1;
         Result<Void> result = null;
         try {
-            result = templateLogicManager.adjustShard(37519, 2, 1);
+            result = templateLogicManager.adjustShard(37519, 2, 1, "admin");
         } catch (AdminOperateException e) {
             e.printStackTrace();
         }
