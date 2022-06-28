@@ -58,7 +58,8 @@ public class ESLogicClusterRegionController {
                                                         @RequestParam("regionId") Long regionId,
                                                         @RequestParam("logicClusterId")Long logicClusterId) {
 
-        return clusterRegionManager.unbindRegion(regionId, logicClusterId, HttpRequestUtil.getOperator(request));
+        return clusterRegionManager.unbindRegion(regionId, logicClusterId, HttpRequestUtil.getOperator(request),
+                HttpRequestUtil.getProjectId(request));
     }
 
     @PostMapping("")
@@ -66,6 +67,7 @@ public class ESLogicClusterRegionController {
     @ApiOperation(value = "绑定逻辑集群region接口", notes = "")
     public Result<Void> bindingLogicClusterRegion(HttpServletRequest request,
                                                   @RequestBody ESLogicClusterWithRegionDTO param) {
+        param.setProjectId(HttpRequestUtil.getProjectId(request));
         return clusterRegionManager.batchBindRegionToClusterLogic(param, HttpRequestUtil.getOperator(request),
             Boolean.FALSE);
     }

@@ -32,6 +32,9 @@ public final class ProjectUtils {
         if (Objects.equals(currentProjectId, projectId)) {
             return Result.buildSucc();
         }
+        if (AuthConstant.SUPER_PROJECT_ID.equals(projectId)){
+            return Result.buildSucc();
+        }
         return Result.buildFail("当前项目不属于超级项目或者持有该操作的项目");
     }
         /**

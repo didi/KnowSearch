@@ -1,11 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.biz.cluster;
 
-import java.util.List;
-
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRegionWithNodeInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostWithRegionInfoVO;
+import java.util.List;
 
 /**
  * @author ohushenglin_v
@@ -21,19 +20,24 @@ public interface ClusterNodeManager {
 
     /**
      * 划分指定节点至region
-     * @param operator          操作者
-     * @param params             集群带节点信息的Region实体
-     * @return                  Result<Long>
+     *
+     * @param params    集群带节点信息的Region实体
+     * @param operator  操作者
+     * @param projectId
+     * @return Result<Long>
      */
-    Result<List<Long>> createMultiNode2Region(List<ClusterRegionWithNodeInfoDTO> params, String operator);
+    Result<List<Long>> createMultiNode2Region(List<ClusterRegionWithNodeInfoDTO> params, String operator,
+                                              Integer projectId);
 
     /**
      * 编辑节点的region属性
-     * @param operator          操作者
-     * @param params             集群带节点信息的Region实体
-     * @return                  Result<Boolean>
+     *
+     * @param params    集群带节点信息的Region实体
+     * @param operator  操作者
+     * @param projectId
+     * @return Result<Boolean>
      */
-    Result<Boolean> editMultiNode2Region(List<ClusterRegionWithNodeInfoDTO> params, String operator);
+    Result<Boolean> editMultiNode2Region(List<ClusterRegionWithNodeInfoDTO> params, String operator, Integer projectId);
 
     /**
      * 获取物理集群节点列表

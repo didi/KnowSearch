@@ -404,14 +404,15 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result<Void> deleteClusterJoin(Integer clusterId, String operator) {
+    public Result<Void> deleteClusterJoin(Integer clusterId, String operator, Integer projectId) {
         ClusterPhy clusterPhy = clusterPhyService.getClusterById(clusterId);
         if (AriusObjUtils.isNull(clusterPhy)) {
             return Result.buildParamIllegal("物理集群不存在");
         }
-
+       
+    
         try {
-            doDeleteClusterJoin(clusterPhy, operator);
+            doDeleteClusterJoin(clusterPhy, operator,projectId);
         } catch (AdminOperateException e) {
             LOGGER.error("class=ClusterPhyManagerImpl||method=deleteClusterJoin||errMsg={}||e={}||clusterId={}",
                 e.getMessage(), e, clusterId);
@@ -419,7 +420,15 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return Result.buildFail(e.getMessage());
         }
-
+        operateRecordService.save(new OperateRecord.Builder()
+                        .content(String.format("删除接入集群：%d",clusterId))
+                        .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_JOIN)
+                        .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                        .project(projectService.getProjectBriefByProjectId(projectId))
+                        .userOperation(operator)
+                        .bizId(clusterId)
+                .build());
+        
         return Result.buildSucc();
     }
 
@@ -457,7 +466,11 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     }
 
     @Override
-    public Result<Boolean> updatePhyClusterDynamicConfig(ClusterSettingDTO param, String operator) {
+    public Result<Boolean> updatePhyClusterDynamicConfig(ClusterSettingDTO param, String operator, Integer projectId) {
+        final Result<Void> resultCheck = ProjectUtils.checkProjectCorrectly(i -> i, projectId, projectId);
+        if (resultCheck.failed()){
+            return Result.buildFail(resultCheck.getMessage());
+        }
         final Result<Map<ClusterDynamicConfigsTypeEnum, Map<String, Object>>> beforeChangeConfigs =
                 getPhyClusterDynamicConfigs(
                 param.getClusterName());
@@ -589,7 +602,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result<Boolean> deleteCluster(Integer clusterPhyId, String operator) {
+    public Result<Boolean> deleteCluster(Integer clusterPhyId, String operator, Integer projectId) {
         ClusterPhy clusterPhy  = clusterPhyService.getClusterById(clusterPhyId);
         if (null == clusterPhy) {
             return Result.buildFail(String.format("物理集群Id[%s]不存在", clusterPhyId));
@@ -599,13 +612,15 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             List<ClusterRoleHost> clusterRoleHosts = clusterRoleHostService.getNodesByCluster(clusterPhy.getCluster());
             // 该物理集群有采集到host数据才执行删除操作
             if (!CollectionUtils.isEmpty(clusterRoleHosts)) {
-                Result<Void> deleteHostResult = clusterRoleHostService.deleteByCluster(clusterPhy.getCluster());
+                Result<Void> deleteHostResult = clusterRoleHostService.deleteByCluster(clusterPhy.getCluster(),
+                        projectId);
                 if (deleteHostResult.failed()) {
                     throw new AdminOperateException(String.format("删除集群[%s]节点信息失败", clusterPhy.getCluster()));
                 }
             }
 
-            Result<Void> deleteRoleResult = clusterRoleService.deleteRoleClusterByClusterId(clusterPhy.getId());
+            Result<Void> deleteRoleResult = clusterRoleService.deleteRoleClusterByClusterId(clusterPhy.getId(),
+                    projectId);
             if (deleteRoleResult.failed()) {
                 throw new AdminOperateException(String.format("删除集群[%s]角色信息失败", clusterPhy.getCluster()));
             }
@@ -619,7 +634,8 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
                 }
             }
 
-            Result<Boolean> deleteClusterResult  = clusterPhyService.deleteClusterById(clusterPhyId, operator);
+            Result<Boolean> deleteClusterResult  = clusterPhyService.deleteClusterById(clusterPhyId, operator,
+                    projectId);
             if (deleteClusterResult.failed()) {
                 throw new AdminOperateException(String.format("删除集群[%s]信息失败", clusterPhy.getCluster()));
             }
@@ -831,7 +847,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             return Result.buildSucc(true);
         }
 
-        return deleteCluster(clusterPhy.getId(), operator);
+        return deleteCluster(clusterPhy.getId(), operator, projectId);
     }
 
     @Override
@@ -1207,7 +1223,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         return Result.buildSucc();
     }
 
-    private void doDeleteClusterJoin(ClusterPhy clusterPhy, String operator) throws AdminOperateException {
+    private void doDeleteClusterJoin(ClusterPhy clusterPhy, String operator, Integer projectId) throws AdminOperateException {
         ClusterPhyContext clusterPhyContext = clusterContextManager.getClusterPhyContext(clusterPhy.getCluster());
         if (null == clusterPhyContext) {
             return;
@@ -1215,40 +1231,93 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
         List<Long> associatedRegionIds = clusterPhyContext.getAssociatedRegionIds();
         for (Long associatedRegionId : associatedRegionIds) {
-            Result<Void> unbindRegionResult = clusterRegionService.unbindRegion(associatedRegionId, null, operator);
+            Result<Void> unbindRegionResult = clusterRegionService.unbindRegion(associatedRegionId, null, operator,
+                    projectId);
             if (unbindRegionResult.failed()) {
                 throw new AdminOperateException(String.format("解绑region(%s)失败", associatedRegionId));
+            } else {
+                //解绑region
+                operateRecordService.save(new OperateRecord.Builder().content(
+                                String.format("cluster:[%s]解绑region：%d", clusterPhy.getCluster(), associatedRegionId))
+                        .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_REGION_CHANGE)
+                        .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                        .project(projectService.getProjectBriefByProjectId(projectId)).userOperation(operator)
+                        .bizId(clusterPhy.getCluster()).build());
             }
 
             Result<Void> deletePhyClusterRegionResult = clusterRegionService.deletePhyClusterRegion(associatedRegionId,
-                operator);
+                operator, projectId);
             if (deletePhyClusterRegionResult.failed()) {
                 throw new AdminOperateException(String.format("删除region(%s)失败", associatedRegionId));
+            } else {
+    
+                //删除region
+                operateRecordService.save(new OperateRecord.Builder().content(
+                                String.format("cluster:[%s]删除region：%d", clusterPhy.getCluster(), associatedRegionId))
+                        .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_REGION_CHANGE)
+                        .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                        .project(projectService.getProjectBriefByProjectId(projectId)).userOperation(operator)
+                        .bizId(clusterPhy.getCluster()).build());
             }
         }
+       
+        
 
         List<Long> clusterLogicIds = clusterPhyContext.getAssociatedClusterLogicIds();
         for (Long clusterLogicId : clusterLogicIds) {
             Result<Void> deleteLogicClusterResult = clusterLogicService.deleteClusterLogicById(clusterLogicId,
-                operator);
+                operator,projectId);
             if (deleteLogicClusterResult.failed()) {
                 throw new AdminOperateException(String.format("删除逻辑集群(%s)失败", clusterLogicId));
+            }else {
+               //删除逻辑集群
+                operateRecordService.save(new OperateRecord.Builder().content(
+                                String.format("cluster:[%s]删除逻辑集群：%d", clusterPhy.getCluster(), clusterLogicId))
+                        .operationTypeEnum(OperateTypeEnum.MY_CLUSTER_OFFLINE)
+                        .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                        .project(projectService.getProjectBriefByProjectId(projectId)).userOperation(operator)
+                        .bizId(clusterPhy.getCluster()).build());
             }
         }
 
-        Result<Boolean> deleteClusterResult = clusterPhyService.deleteClusterById(clusterPhy.getId(), operator);
+        Result<Boolean> deleteClusterResult = clusterPhyService.deleteClusterById(clusterPhy.getId(), operator,projectId);
         if (deleteClusterResult.failed()) {
             throw new AdminOperateException(String.format("删除物理集群(%s)失败", clusterPhy.getCluster()));
+        }else {
+            //删除物理集群
+            operateRecordService.save(
+                    new OperateRecord.Builder().content(String.format("cluster:[%s]删除", clusterPhy.getCluster()))
+                            .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_OFFLINE)
+                            .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                            .project(projectService.getProjectBriefByProjectId(projectId)).userOperation(operator)
+                            .bizId(clusterPhy.getCluster()).build());
         }
 
-        Result<Void> deleteRoleClusterResult = clusterRoleService.deleteRoleClusterByClusterId(clusterPhy.getId());
+        Result<Void> deleteRoleClusterResult = clusterRoleService.deleteRoleClusterByClusterId(clusterPhy.getId(),projectId);
         if (deleteRoleClusterResult.failed()) {
             throw new AdminOperateException(String.format("删除物理集群角色(%s)失败", clusterPhy.getCluster()));
+        }else {
+            //删除物理集群角色
+            operateRecordService.save(
+                    new OperateRecord.Builder().content(String.format("cluster:[%s]删除物理集群角色;[%d]",
+                                    clusterPhy.getCluster(),clusterPhy.getId()))
+                            .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_OFFLINE)
+                            .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                            .project(projectService.getProjectBriefByProjectId(projectId)).userOperation(operator)
+                            .bizId(clusterPhy.getCluster()).build());
         }
 
-        Result<Void> deleteRoleClusterHostResult = clusterRoleHostService.deleteByCluster(clusterPhy.getCluster());
+        Result<Void> deleteRoleClusterHostResult = clusterRoleHostService.deleteByCluster(clusterPhy.getCluster(),projectId);
         if (deleteRoleClusterHostResult.failed()) {
             throw new AdminOperateException(String.format("删除物理集群节点(%s)失败", clusterPhy.getCluster()));
+        }else {
+            //删除物理集群角色
+            operateRecordService.save(
+                    new OperateRecord.Builder().content(String.format("cluster:[%s]删除物理集群节点", clusterPhy.getCluster()))
+                            .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_OFFLINE)
+                            .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                            .project(projectService.getProjectBriefByProjectId(projectId)).userOperation(operator)
+                            .bizId(clusterPhy.getCluster()).build());
         }
     }
 

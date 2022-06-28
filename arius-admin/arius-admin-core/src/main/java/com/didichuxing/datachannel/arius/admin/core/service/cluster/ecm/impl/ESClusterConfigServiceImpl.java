@@ -211,8 +211,8 @@ public class ESClusterConfigServiceImpl implements ESClusterConfigService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result<Void> editConfigDesc(ESConfigDTO param, String operator) {
-        Result<Void> result = checkEditConfigValid(param);
+    public Result<Void> editConfigDesc(ESConfigDTO param, String operator, Integer projectId) {
+        Result<Void> result = checkEditConfigValid(param,projectId);
         if (result.failed()) {
             return result;
         }
@@ -341,7 +341,7 @@ public class ESClusterConfigServiceImpl implements ESClusterConfigService {
         return Result.buildSucc();
     }
 
-    private Result<Void> checkEditConfigValid(ESConfigDTO param) {
+    private Result<Void> checkEditConfigValid(ESConfigDTO param, Integer projectId) {
         if (AriusObjUtils.isNull(param.getId())) {
             return Result.buildParamIllegal("集群配置Id为空");
         }
@@ -358,7 +358,11 @@ public class ESClusterConfigServiceImpl implements ESClusterConfigService {
         if (esConfig.getConfigData().equals(param.getConfigData())) {
             return Result.buildParamIllegal("不允许修改集群配置数据信息");
         }
-
+        final Result<Void> result = ProjectUtils.checkProjectCorrectly(i -> i, projectId, projectId);
+        if (result.failed()){
+            return result;
+        }
+    
         return Result.buildSucc();
     }
 }

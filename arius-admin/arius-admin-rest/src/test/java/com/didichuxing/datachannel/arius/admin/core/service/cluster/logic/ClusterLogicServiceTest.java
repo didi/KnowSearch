@@ -136,16 +136,17 @@ public class ClusterLogicServiceTest extends AriusAdminApplicationTest {
     @Test
     public void editLogicClusterTest() {
         ESLogicClusterDTO esLogicClusterDTO = CustomDataSource.esLogicClusterDTOFactory();
+        Integer projectId=1;
         Assertions.assertEquals(Result.buildParamIllegal("逻辑集群ID为空").getMessage(),
-                clusterLogicService.editClusterLogic(esLogicClusterDTO, OPERATOR).getMessage());
+                clusterLogicService.editClusterLogic(esLogicClusterDTO, OPERATOR, projectId).getMessage());
         Long id = clusterLogicService.createClusterLogic(esLogicClusterDTO).getData();
         esLogicClusterDTO.setId(id + 1);
         Assertions.assertEquals(Result.buildNotExist("逻辑集群不存在").getMessage(),
-                clusterLogicService.editClusterLogic(esLogicClusterDTO, OPERATOR).getMessage());
+                clusterLogicService.editClusterLogic(esLogicClusterDTO, OPERATOR, projectId).getMessage());
         esLogicClusterDTO.setId(id);
         String name = "test";
         esLogicClusterDTO.setName(name);
-        Assertions.assertTrue(clusterLogicService.editClusterLogic(esLogicClusterDTO, OPERATOR).success());
+        Assertions.assertTrue(clusterLogicService.editClusterLogic(esLogicClusterDTO, OPERATOR, projectId).success());
         Assertions.assertEquals(name, logicClusterDAO.getById(id).getName());
     }
 
