@@ -83,8 +83,10 @@
 				                                                                                         #{content}) OR
 				     content LIKE CONCAT('%', #{content}, '%'))
 			</if>
+			 <if test="sortTerm != null">
+            order by ${sortTerm} ${sortType}
+        </if>
 		</trim>
-		ORDER BY id DESC
 		LIMIT #{from},#{size}
 	</select>
 	

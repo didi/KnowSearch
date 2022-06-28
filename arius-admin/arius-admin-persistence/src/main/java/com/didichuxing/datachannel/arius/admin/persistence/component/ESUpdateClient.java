@@ -1,11 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.persistence.component;
 
-import java.net.InetSocketAddress;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
-
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.BaseESPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPhyPO;
@@ -24,6 +18,12 @@ import com.didiglobal.logi.elasticsearch.client.response.indices.deletebyquery.E
 import com.didiglobal.logi.elasticsearch.client.response.indices.refreshindex.ESIndicesRefreshIndexResponse;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import java.net.InetSocketAddress;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
+import javax.annotation.PostConstruct;
 import lombok.NoArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -33,8 +33,6 @@ import org.elasticsearch.common.transport.TransportAddress;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
-import javax.annotation.PostConstruct;
 
 /**
  * @Author: D10865
@@ -305,7 +303,7 @@ public class ESUpdateClient {
                 if (response == null) {
                     continue;
                 }
-
+                //todo 存在失败的情况需要解析 缺陷
                 return response.getRestStatus().getStatus() == HttpStatus.SC_OK && !response.getErrors();
             }
         } catch (Exception e) {
