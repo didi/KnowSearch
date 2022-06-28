@@ -49,7 +49,7 @@ public class ClusterPhyMetricsController {
         return Result.buildSucc(clusterPhyMetricsManager.getMetricsCode2TypeMap(type));
     }
 
-    @GetMapping("/config-metrics")
+    @PostMapping("/config-metrics")
     @ResponseBody
     @ApiOperation(value = "获取账号下已配置指标类型")
     public Result<List<String>> getClusterPhyMetricsTypes(@RequestBody MetricsConfigInfoDTO param,
