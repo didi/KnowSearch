@@ -1,4 +1,4 @@
-package com.didichuxing.datachannel.arius.admin.common.bean.vo.app;
+package com.didichuxing.datachannel.arius.admin.common.bean.vo.project;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.BaseVO;
 import io.swagger.annotations.ApiModel;
