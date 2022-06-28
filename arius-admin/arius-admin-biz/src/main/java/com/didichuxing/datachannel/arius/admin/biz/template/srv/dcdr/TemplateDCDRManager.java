@@ -19,16 +19,17 @@ import java.util.List;
 public interface TemplateDCDRManager {
     /**
      * 复制并且创建DCDR链路
-     * @param templateId           模板ID
-     * @param targetCluster       物理集群名称
-     * @param regionId            regionId信息
-     * @param operator            操作人
-     * @return Result
      *
-     @throws AdminOperateException 管理操作Exception
+     * @param templateId    模板ID
+     * @param targetCluster 物理集群名称
+     * @param regionId      regionId信息
+     * @param operator      操作人
+     * @param projectId
+     * @return Result
+     * @throws AdminOperateException 管理操作Exception
      */
     Result<Void> copyAndCreateDCDR(Integer templateId, String targetCluster, Integer regionId,
-                                   String operator) throws AdminOperateException;
+                                   String operator, Integer projectId) throws AdminOperateException;
 
     /**
      * createPhyDCDR
@@ -41,12 +42,14 @@ public interface TemplateDCDRManager {
 
     /**
      * 删除DCDR
+     *
      * @param templateId 模板ID
-     * @param operator 操作人
+     * @param operator   操作人
+     * @param projectId
      * @return result
      * @throws ESOperateException
      */
-    Result<Void> deleteDCDR(Integer templateId, String operator) throws ESOperateException;
+    Result<Void> deleteDCDR(Integer templateId, String operator, Integer projectId) throws ESOperateException;
 
     /**
      * deletePhyDCDR
@@ -67,36 +70,40 @@ public interface TemplateDCDRManager {
 
     /**
      * 根据任务id和模板id取消DCDR主从切换
+     *
      * @param taskId
-     * @param templateId
+     * @param templateIds
      * @param fullDeleteFlag
      * @param operator
+     * @param projectId
      * @return
      * @throws ESOperateException
      */
-    Result<Void> cancelDCDRSwitchMasterSlaveByTaskIdAndTemplateIds(Integer taskId, List<Long> templateId,
+    Result<Void> cancelDCDRSwitchMasterSlaveByTaskIdAndTemplateIds(Integer taskId, List<Long> templateIds,
                                                                    boolean fullDeleteFlag,
-                                                                   String operator) throws ESOperateException;
+                                                                   String operator, Integer projectId) throws ESOperateException;
     
-    /**取消dcdr主从切换任务id
-     * 根据任务id取消DCDR主从切换
+    /**
+     * 取消dcdr主从切换任务id 根据任务id取消DCDR主从切换
      *
-     @param taskId 任务id
-     @param operator 操作人或角色
-      * @return {@link Result}<{@link Void}>
-     @throws ESOperateException esoperateException
+     * @param taskId    任务id
+     * @param operator  操作人或角色
+     * @param projectId
+     * @return {@link Result}<{@link Void}>
+     * @throws ESOperateException esoperateException
      */
-    Result<Void> cancelDCDRSwitchMasterSlaveByTaskId(Integer taskId, String operator) throws ESOperateException;
+    Result<Void> cancelDCDRSwitchMasterSlaveByTaskId(Integer taskId, String operator, Integer projectId) throws ESOperateException;
 
   /**
-     * 刷新dcdrChannel状态
-     *
-     * @param taskId 任务id
-     * @param templateId 模板id
-     * @param operator 操作人或角色
-     * @return {@link Result}<{@link Void}>
-     */
-    Result<Void> refreshDCDRChannelState(Integer taskId, Integer templateId, String operator);
+   * 刷新dcdrChannel状态
+   *
+   * @param taskId     任务id
+   * @param templateId 模板id
+   * @param operator   操作人或角色
+   * @param projectId
+   * @return {@link Result}<{@link Void}>
+   */
+    Result<Void> refreshDCDRChannelState(Integer taskId, Integer templateId, String operator, Integer projectId);
 
     /**
      * 异步刷新DCDR任务状态
@@ -111,12 +118,14 @@ public interface TemplateDCDRManager {
 
     /**
      * 主从强制切换接口
+     *
      * @param taskId
      * @param templateId
      * @param operator
+     * @param projectId
      * @return
      */
-    Result<Void> forceSwitchMasterSlave(Integer taskId, Integer templateId, String operator);
+    Result<Void> forceSwitchMasterSlave(Integer taskId, Integer templateId, String operator, Integer projectId);
 
     /**
      * 获取DCDR主从切换任务详情

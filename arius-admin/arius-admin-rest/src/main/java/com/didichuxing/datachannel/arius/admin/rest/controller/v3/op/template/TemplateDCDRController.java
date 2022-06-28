@@ -7,7 +7,6 @@ import com.didichuxing.datachannel.arius.admin.biz.template.srv.dcdr.TemplateDCD
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateDCDRInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
-import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -36,7 +35,8 @@ public class TemplateDCDRController {
                                    @PathVariable("templateId") Integer templateId,
                                    @PathVariable("targetCluster") String targetCluster,
                                    @PathVariable("regionId") Integer regionId) throws AdminOperateException {
-        return templateDCDRManager.copyAndCreateDCDR(templateId, targetCluster, regionId, HttpRequestUtil.getOperator(request));
+        return templateDCDRManager.copyAndCreateDCDR(templateId, targetCluster, regionId,
+                HttpRequestUtil.getOperator(request),HttpRequestUtil.getProjectId(request));
     }
 
     @GetMapping("/{templateId}/dcdrInfo")
@@ -50,12 +50,8 @@ public class TemplateDCDRController {
     @ResponseBody
     @ApiOperation(value = "DCDR链路删除接口", notes = "")
     public Result<Void> deleteDcdr(HttpServletRequest request, @PathVariable(value = "templateId") Integer templateId) throws AdminOperateException {
-        final Result<Void> result = ProjectUtils.checkProjectCorrectly(i -> i, HttpRequestUtil.getProjectId(request),
-                HttpRequestUtil.getProjectId(request));
-        if (result.failed()) {
-            return Result.buildFail(result.getMessage());
-        }
-        return templateDCDRManager.deleteDCDR(templateId, HttpRequestUtil.getOperator(request));
+        
+        return templateDCDRManager.deleteDCDR(templateId, HttpRequestUtil.getOperator(request),HttpRequestUtil.getProjectId(request));
     }
 
 }
