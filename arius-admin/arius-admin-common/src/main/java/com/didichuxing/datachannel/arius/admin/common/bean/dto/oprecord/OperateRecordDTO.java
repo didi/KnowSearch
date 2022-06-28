@@ -80,5 +80,12 @@ public class OperateRecordDTO extends PageDTO {
     private String  projectName;
     @ApiModelProperty("bizId")
     private String bizId;
-
+    @ApiModelProperty(value = "排序字段",example = "id或者operate_time")
+    private String sortTerm;
+    
+    
+    @ApiModelProperty(value = "是否降序排序（默认降序）", dataType = "Boolean", required = false)
+    private Boolean orderByDesc = true;
+    @ApiModelProperty(hidden = true)
+    private String sortType;
 }
