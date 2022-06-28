@@ -4,8 +4,8 @@ import static com.didiglobal.logi.security.util.HttpRequestUtil.COOKIE_OR_SESSIO
 
 import com.didichuxing.datachannel.arius.admin.biz.project.LoginManager;
 import com.didichuxing.datachannel.arius.admin.common.exception.OperateForbiddenException;
-import com.didichuxing.datachannel.arius.admin.common.tuple.Tuple;
-import com.didichuxing.datachannel.arius.admin.common.tuple.Tuple3;
+import com.didichuxing.datachannel.arius.admin.common.tuple.TupleThree;
+import com.didichuxing.datachannel.arius.admin.common.tuple.Tuples;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
@@ -95,7 +95,7 @@ public class LoginManagerImpl implements LoginManager {
                                     String requestMappingValue, List<String> whiteMappingValues) throws IOException {
         boolean interceptorCheck = loginService.interceptorCheck(request, response, requestMappingValue,
                 whiteMappingValues);
-        Tuple3</*username*/String,/*userId*/Integer,/*projectId*/Integer> userNameAndUserIdAndProjectIdTuple3 = getRequestByHead(
+        TupleThree</*username*/String,/*userId*/Integer,/*projectId*/Integer> userNameAndUserIdAndProjectIdTuple3 = getRequestByHead(
                 request);
         //当用户登录成功/或者跳过白名单之后，就默认用户已经存在了header cookie等信息，此时需要确认项目和用户的一致性
         if (interceptorCheck) {
@@ -103,35 +103,35 @@ public class LoginManagerImpl implements LoginManager {
             //跳过检查项目id和用户的正确性和匹配度
             if (whiteMappingValues.stream()
                     .noneMatch(whiteMappingValue -> request.getServletPath().startsWith(whiteMappingValue))) {
-                if (hasLoginValidExtend(userNameAndUserIdAndProjectIdTuple3._1, request)) {
+                if (hasLoginValidExtend(userNameAndUserIdAndProjectIdTuple3.v1, request)) {
                 
                     //项目id没有带
-                    if (Objects.isNull(userNameAndUserIdAndProjectIdTuple3._3)) {
+                    if (Objects.isNull(userNameAndUserIdAndProjectIdTuple3.v3)) {
                     
                         throw new OperateForbiddenException(
                                 String.format("请携带项目信息,HTTP_HEADER_KEY:%s", HttpRequestUtil.PROJECT_ID));
                     }
-                    if (Objects.isNull(userNameAndUserIdAndProjectIdTuple3._2)) {
+                    if (Objects.isNull(userNameAndUserIdAndProjectIdTuple3.v2)) {
                         throw new OperateForbiddenException(
                                 String.format("请携带操作者id,HTTP_HEADER_KEY:%s", HttpRequestUtil.USER_ID));
                     
                     }
-                    if (StringUtils.isBlank(userNameAndUserIdAndProjectIdTuple3._1)) {
+                    if (StringUtils.isBlank(userNameAndUserIdAndProjectIdTuple3.v1)) {
                         throw new OperateForbiddenException(
                                 String.format("请携带操作者,HTTP_HEADER_KEY:%s", HttpRequestUtil.USER));
                     
                     }
                 
-                    if (!projectService.checkProjectExist(userNameAndUserIdAndProjectIdTuple3._3)) {
+                    if (!projectService.checkProjectExist(userNameAndUserIdAndProjectIdTuple3.v3)) {
                         throw new LogiSecurityException(ResultCode.PROJECT_NOT_EXISTS);
                     }
                     //判断用户在非管理员角色下，操作用户是否是当前项目成员或者拥有者
-                    if (!roleTool.isAdmin(userNameAndUserIdAndProjectIdTuple3._2)) {
+                    if (!roleTool.isAdmin(userNameAndUserIdAndProjectIdTuple3.v2)) {
                         final ProjectVO projectVO = projectService.getProjectDetailByProjectId(
-                                userNameAndUserIdAndProjectIdTuple3._3);
-                        if (!(ProjectUtils.isUserNameBelongProjectMember(userNameAndUserIdAndProjectIdTuple3._1,
+                                userNameAndUserIdAndProjectIdTuple3.v3);
+                        if (!(ProjectUtils.isUserNameBelongProjectMember(userNameAndUserIdAndProjectIdTuple3.v1,
                                 projectVO) || ProjectUtils.isUserNameBelongProjectResponsible(
-                                userNameAndUserIdAndProjectIdTuple3._1, projectVO))) {
+                                userNameAndUserIdAndProjectIdTuple3.v1, projectVO))) {
                             throw new LogiSecurityException(ResultCode.NO_PERMISSION);
                         }
                     
@@ -179,9 +179,9 @@ public class LoginManagerImpl implements LoginManager {
      * @param request 请求
      * @return {@code Tuple3<String, Integer, Integer>}
      */
-    private Tuple3</*username*/String,/*userId*/Integer,/*projectId*/Integer> getRequestByHead(
+    private TupleThree</*username*/String,/*userId*/Integer,/*projectId*/Integer> getRequestByHead(
             HttpServletRequest request) {
-        Tuple3<String, Integer, Integer> tuple3 = Tuple.of(null, null, null);
+        TupleThree<String, Integer, Integer> tuple3 = Tuples.of(null, null, null);
         final String operator = HttpRequestUtil.getOperator(request);
         final Integer operatorId = HttpRequestUtil.getOperatorId(request);
         final Integer projectId = HttpRequestUtil.getProjectId(request);

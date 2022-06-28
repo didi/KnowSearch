@@ -42,7 +42,8 @@ import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectCl
 import com.didichuxing.datachannel.arius.admin.common.event.resource.ClusterLogicEvent;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
-import com.didichuxing.datachannel.arius.admin.common.tuple.Tuple2;
+import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
+import com.didichuxing.datachannel.arius.admin.common.tuple.Tuples;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ClusterUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
@@ -212,9 +213,9 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         if (CollectionUtils.isEmpty(clearDTO.getDelIndices())) {
             return Result.buildParamIllegal("删除索引为空");
         }
-        final Tuple2<Result<Void>, Integer> resultIntegerTuple2 = checkIndices(clearDTO.getDelIndices(),
+        final TupleTwo<Result<Void>, Integer> resultIntegerTuple2 = checkIndices(clearDTO.getDelIndices(),
                 clearDTO.getLogicId());
-        Result<Void> checkResult = resultIntegerTuple2._1;
+        Result<Void> checkResult = resultIntegerTuple2.v1;
         if (checkResult.failed()) {
             return checkResult;
         }
@@ -243,7 +244,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
                 new OperateRecord.Builder()
                         .bizId(clearDTO.getLogicId())
                         .userOperation(operator)
-                        .project(projectService.getProjectBriefByProjectId(resultIntegerTuple2._2))
+                        .project(projectService.getProjectBriefByProjectId(resultIntegerTuple2.v2))
                         .content(JSON.toJSONString(clearDTO))
                         .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
                         .operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE_CLEAN)
@@ -913,10 +914,10 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         clusterLogicVO.setGatewayAddress(esGatewayClient.getGatewayAddress());
     }
 
-    private Tuple2<Result<Void>,/*projectId*/Integer> checkIndices(List<String> delIndices, Integer logicId) {
+    private TupleTwo<Result<Void>,/*projectId*/Integer> checkIndices(List<String> delIndices, Integer logicId) {
         for (String index : delIndices) {
             if (index.endsWith("*")) {
-                return com.didichuxing.datachannel.arius.admin.common.tuple.Tuple.of(Result.buildParamIllegal(
+                return Tuples.of(Result.buildParamIllegal(
                         "索引名字不能以*结尾"),null);
             }
         }
@@ -928,10 +929,10 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         List<String> matchIndices = indexTemplatePhyService.getMatchNoVersionIndexNames(templatePhysical.getId());
         for (String index : delIndices) {
             if (!matchIndices.contains(index)) {
-                return com.didichuxing.datachannel.arius.admin.common.tuple.Tuple.of(Result.buildParamIllegal(index + "不属于该索引模板"),null);
+                return Tuples.of(Result.buildParamIllegal(index + "不属于该索引模板"),null);
             }
         }
-        return com.didichuxing.datachannel.arius.admin.common.tuple.Tuple.of(Result.buildSucc(),
+        return Tuples.of(Result.buildSucc(),
                 templateLogicWithPhysical.getProjectId());
     }
 

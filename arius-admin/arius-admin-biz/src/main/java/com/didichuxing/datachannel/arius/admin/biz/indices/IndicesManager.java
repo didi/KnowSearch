@@ -33,11 +33,13 @@ public interface IndicesManager {
 
     /**
      * 创建索引
+     *
      * @param indexCreateDTO
      * @param projectId
+     * @param operator
      * @return
      */
-    Result<Void> createIndex(IndexCatCellWithConfigDTO indexCreateDTO, Integer projectId);
+    Result<Void> createIndex(IndexCatCellWithConfigDTO indexCreateDTO, Integer projectId, String operator);
 
     /**
      * 删除索引

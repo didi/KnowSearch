@@ -4,7 +4,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectConfigDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ProjectConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.project.ProjectConfigPO;
-import com.didichuxing.datachannel.arius.admin.common.tuple.Tuple2;
+import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
 import java.util.Map;
 
 /**
@@ -41,7 +41,7 @@ public interface ProjectConfigService {
      * @param operator  操作人
      * @return {@code Tuple<Result<Void>, ProjectConfigPO>}
      */
-    Tuple2<Result<Void>, ProjectConfigPO> updateOrInitProjectConfig(ProjectConfigDTO configDTO, String operator);
+    TupleTwo<Result<Void>, ProjectConfigPO> updateOrInitProjectConfig(ProjectConfigDTO configDTO, String operator);
     
     /**
      * 按项目id删除 通过项目id逻辑删除项目配置

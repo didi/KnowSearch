@@ -1,10 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.task;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser.SYSTEM;
-
-import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.threadpool.AriusTaskThreadPool;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
@@ -103,13 +98,13 @@ public abstract class BaseConcurrentTask<T> {
         try {
             //记录任务的完成任务时间
             long cost = System.currentTimeMillis() - start;
-            operateRecordService.save(new OperateRecord.Builder()
-                            .bizId(getTaskName())
-                            .content(getTaskName() + "完成，耗时：" + cost)
-                            .operationTypeEnum(OperateTypeEnum.SENSE_OP_EDIT)
-                            .triggerWayEnum(TriggerWayEnum.TIMING_TASK)
-                            .userOperation(SYSTEM.getDesc())
-                    .build());
+            //operateRecordService.save(new OperateRecord.Builder()
+            //                .bizId(getTaskName())
+            //                .content(getTaskName() + "完成，耗时：" + cost)
+            //                .operationTypeEnum(OperateTypeEnum.SENSE_OP_EDIT)
+            //                .triggerWayEnum(TriggerWayEnum.TIMING_TASK)
+            //                .userOperation(SYSTEM.getDesc())
+            //        .build());
         
         } catch (Exception e) {
             LOGGER.error("class=BaseConcurrentTask||method=execute||errMsg={}",
