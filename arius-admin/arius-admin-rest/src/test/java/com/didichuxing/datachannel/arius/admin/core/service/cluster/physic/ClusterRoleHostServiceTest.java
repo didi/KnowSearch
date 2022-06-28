@@ -6,24 +6,22 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPh
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterRoleDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterRoleHostDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESClusterRolePO;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeStatusEnum;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESClusterRolePO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminTaskException;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESClusterNodeDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.ecm.ESClusterRoleDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.ecm.ESClusterRoleHostDAO;
 import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
+import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Transactional
 @Rollback
@@ -181,13 +179,14 @@ public class ClusterRoleHostServiceTest extends AriusAdminApplicationTest {
 
     @Test
     public void deleteByClusterTest() {
+         Integer projectId=1;
         ESClusterRoleHostDTO esClusterRoleHostDTO = CustomDataSource.esRoleClusterHostDTOFactory();
         Assertions.assertEquals(Result.buildFail("failed to delete the clusterHost").getMessage(),
-                clusterRoleHostService.deleteByCluster(esClusterRoleHostDTO.getCluster()).getMessage());
+                clusterRoleHostService.deleteByCluster(esClusterRoleHostDTO.getCluster(), projectId).getMessage());
         ClusterRoleHost clusterRoleHost = ConvertUtil.obj2Obj(esClusterRoleHostDTO, ClusterRoleHost.class);
         clusterRoleHostService.save(clusterRoleHost);
         Assertions.assertEquals(Result.buildSuccWithMsg("success to delete the clusterHost").getMessage(),
-                clusterRoleHostService.deleteByCluster(clusterRoleHost.getCluster()).getMessage());
+                clusterRoleHostService.deleteByCluster(clusterRoleHost.getCluster(), projectId).getMessage());
     }
 
     @Test

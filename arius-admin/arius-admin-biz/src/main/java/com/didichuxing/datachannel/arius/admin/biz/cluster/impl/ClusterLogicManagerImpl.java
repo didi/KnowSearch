@@ -47,6 +47,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ClusterUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESMachineNormsService;
@@ -247,7 +248,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
                         .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
                         .operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE_CLEAN)
                         .build()
-
+                
         );
         if (StringUtils.isNotBlank(clearDTO.getDelQueryDsl())) {
             return Result.buildSucWithTips("删除任务下发成功，请到sense中执行查询语句，确认删除进度");
@@ -444,7 +445,12 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     public Result<Void> deleteLogicCluster(Long logicClusterId, String operator, Integer projectId)
             throws AdminOperateException {
         ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(logicClusterId);
-        Result<Void> result = clusterLogicService.deleteClusterLogicById(logicClusterId, operator);
+        final Result<Void> checkProjectCorrectly = ProjectUtils.checkProjectCorrectly(ClusterLogic::getProjectId,
+                clusterLogic, projectId);
+        if (checkProjectCorrectly.failed()) {
+            return checkProjectCorrectly;
+        }
+        Result<Void> result = clusterLogicService.deleteClusterLogicById(logicClusterId, operator, projectId);
         ClusterLogicTemplateIndexDetailDTO templateIndexVO = getTemplateIndexVO(logicClusterId, projectId);
 
         for (IndexTemplateLogicAggregate agg : templateIndexVO.getTemplateLogicAggregates()) {
@@ -505,7 +511,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     @Override
 	public Result<Void> editLogicCluster(ESLogicClusterDTO param, String operator, Integer projectId) {
         final ClusterLogic logic = clusterLogicService.getClusterLogicById(param.getId());
-        Result<Void> result = clusterLogicService.editClusterLogic(param, operator);
+        Result<Void> result = clusterLogicService.editClusterLogic(param, operator,projectId);
         if (result.success()) {
             SpringTool.publish(new ClusterLogicEvent(param.getId(), projectId));
             //操作记录 我的集群信息修改

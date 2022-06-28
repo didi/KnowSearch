@@ -3,11 +3,6 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.template;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
-import javax.servlet.http.HttpServletRequest;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.dcdr.TemplateDCDRManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateDCDRInfoVO;
@@ -15,6 +10,15 @@ import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateExce
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import javax.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping({ V3_OP + "/template/dcdr", V3 + "/template/dcdr" })
@@ -31,7 +35,8 @@ public class TemplateDCDRController {
                                    @PathVariable("templateId") Integer templateId,
                                    @PathVariable("targetCluster") String targetCluster,
                                    @PathVariable("regionId") Integer regionId) throws AdminOperateException {
-        return templateDCDRManager.copyAndCreateDCDR(templateId, targetCluster, regionId, HttpRequestUtil.getOperator(request));
+        return templateDCDRManager.copyAndCreateDCDR(templateId, targetCluster, regionId,
+                HttpRequestUtil.getOperator(request),HttpRequestUtil.getProjectId(request));
     }
 
     @GetMapping("/{templateId}/dcdrInfo")
@@ -45,7 +50,8 @@ public class TemplateDCDRController {
     @ResponseBody
     @ApiOperation(value = "DCDR链路删除接口", notes = "")
     public Result<Void> deleteDcdr(HttpServletRequest request, @PathVariable(value = "templateId") Integer templateId) throws AdminOperateException {
-        return templateDCDRManager.deleteDCDR(templateId, HttpRequestUtil.getOperator(request));
+        
+        return templateDCDRManager.deleteDCDR(templateId, HttpRequestUtil.getOperator(request),HttpRequestUtil.getProjectId(request));
     }
 
 }

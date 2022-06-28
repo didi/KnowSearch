@@ -42,4 +42,5 @@ public interface LogicClusterDAO {
     List<ClusterLogicPO> pagingByCondition(ClusterLogicConditionDTO param);
 
     Long getTotalHitByCondition(ClusterLogicPO param);
+    Integer getProjectIdById(@Param("resourceId") Long id);
 }

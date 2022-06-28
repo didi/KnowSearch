@@ -166,5 +166,10 @@
         <if test="health != null">and health = #{health}</if>
         <if test="type != null">and type = #{type}</if>
     </select>
-
+	
+	<select id="getProjectIdById" resultType="java.lang.Integer">
+		select project_id
+		from project_arius_resource_logic
+		where id = #{resourceId}
+	</select>
 </mapper>
