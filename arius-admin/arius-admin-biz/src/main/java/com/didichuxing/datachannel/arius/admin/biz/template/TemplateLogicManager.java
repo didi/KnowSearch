@@ -112,7 +112,7 @@ public interface TemplateLogicManager {
 
     @Deprecated
     //todo: 下线并重命名方法
-    Result<Void> editTemplate(IndexTemplateDTO param, String operator) throws AdminOperateException;
+    Result<Void> editTemplate(IndexTemplateDTO param, String operator, Integer projectId) throws AdminOperateException;
 
     Result<Void> newEditTemplate(IndexTemplateDTO param, String operator);
 

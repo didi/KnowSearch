@@ -1,4 +1,4 @@
-package com.didichuxing.datachannel.arius.admin.common.bean.vo.app;
+package com.didichuxing.datachannel.arius.admin.common.bean.vo.project;
 
 import com.didiglobal.logi.security.common.vo.role.RoleVO;
 import io.swagger.annotations.ApiModelProperty;

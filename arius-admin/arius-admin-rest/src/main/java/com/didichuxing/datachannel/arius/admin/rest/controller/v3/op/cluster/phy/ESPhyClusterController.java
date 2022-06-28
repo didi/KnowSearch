@@ -166,7 +166,8 @@ public class ESPhyClusterController {
     @ResponseBody
     @ApiOperation(value = "删除物理集群" )
     public Result<Boolean> delete(HttpServletRequest request, @PathVariable("clusterPhyId") Integer clusterId) {
-        return clusterPhyManager.deleteCluster(clusterId, HttpRequestUtil.getOperator(request));
+        return clusterPhyManager.deleteCluster(clusterId, HttpRequestUtil.getOperator(request),
+                HttpRequestUtil.getProjectId(request));
     }
 
 }

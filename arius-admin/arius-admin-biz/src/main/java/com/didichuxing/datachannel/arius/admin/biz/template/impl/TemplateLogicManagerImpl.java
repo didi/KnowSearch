@@ -169,7 +169,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     @Transactional(rollbackFor = Exception.class)
     public Result<Void> create(IndexTemplateWithCreateInfoDTO param, String operator, Integer projectId) throws AdminOperateException {
         IndexTemplateDTO indexTemplateDTO = buildTemplateDTO(param, projectId);
-        Result<Void> validLogicTemplateResult = indexTemplateService.validateTemplate(indexTemplateDTO, ADD);
+        Result<Void> validLogicTemplateResult = indexTemplateService.validateTemplate(indexTemplateDTO, ADD,projectId);
         if (validLogicTemplateResult.failed()) { return validLogicTemplateResult;}
 
         Result<Void> validPhyTemplateResult = indexTemplatePhyService.validateTemplates(indexTemplateDTO.getPhysicalInfos(), ADD);
@@ -410,9 +410,9 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     }
 
     @Override
-    public Result<Void> editTemplate(IndexTemplateDTO param, String operator)
+    public Result<Void> editTemplate(IndexTemplateDTO param, String operator, Integer projectId)
             throws AdminOperateException {
-        return indexTemplateService.editTemplate(param, operator);
+        return indexTemplateService.editTemplate(param, operator,projectId);
     }
 
     @Override
@@ -980,9 +980,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         indexTemplateDTO.setIngestPipeline(indexTemplateDTO.getName());
         indexTemplateDTO.setDiskSize(indexTemplateDTO.getDiskSize());
         indexTemplateDTO.setQuota(indexTemplateDTO.getDiskSize());
-        //todo: 0.3干掉
-        indexTemplateDTO.setIdField("");
-        indexTemplateDTO.setRoutingField("");
+
 
         if (null == indexTemplateDTO.getDesc()) { indexTemplateDTO.setDesc("");}
     }

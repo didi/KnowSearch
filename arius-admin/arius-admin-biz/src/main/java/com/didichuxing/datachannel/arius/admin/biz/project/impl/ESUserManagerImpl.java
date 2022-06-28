@@ -9,19 +9,19 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ESUser;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.project.ESUserPO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleESUserVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleESUserWithVerifyCodeVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ESUserVO;
-import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectSearchTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.ConsoleESUserVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.ConsoleESUserWithVerifyCodeVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.ESUserVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectSearchTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.tuple.Tuple2;
-import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.VerifyCodeFactory;
 import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
-import com.didichuxing.datachannel.arius.admin.core.service.project.ESUserService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
+import com.didichuxing.datachannel.arius.admin.core.service.project.ESUserService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.common.vo.project.ProjectVO;
@@ -72,10 +72,10 @@ public class ESUserManagerImpl implements ESUserManager {
        
         
         //确定当前操作者属于该项目成员或者是管理员
-        if (!(CommonUtils.isUserNameBelongProjectMember(operator,
-                projectVO)||
-            CommonUtils.isUserNameBelongProjectResponsible(operator, projectVO)||
-            roleTool.isAdmin(operator))
+        if (!(ProjectUtils.isUserNameBelongProjectMember(operator,
+                projectVO) ||
+              ProjectUtils.isUserNameBelongProjectResponsible(operator, projectVO) ||
+              roleTool.isAdmin(operator))
         ) {
             return Result.buildParamIllegal(String.format("项目:[%s]不存在成员:[%s]", projectId, operator));
         }
@@ -271,8 +271,8 @@ public class ESUserManagerImpl implements ESUserManager {
     public Result<List<ConsoleESUserWithVerifyCodeVO>> getNoCodeESUser(Integer projectId, String operator) {
        
         final ProjectVO projectVO = projectService.getProjectDetailByProjectId(projectId);
-        if (!(CommonUtils.isUserNameBelongProjectMember(operator, projectVO)
-            || CommonUtils.isUserNameBelongProjectResponsible(operator, projectVO) || roleTool.isAdmin(operator))) {
+        if (!(ProjectUtils.isUserNameBelongProjectMember(operator, projectVO)
+            || ProjectUtils.isUserNameBelongProjectResponsible(operator, projectVO) || roleTool.isAdmin(operator))) {
             return Result.buildFail("权限不足");
         }
         List<ESUser> users = esUserService.listESUsers(Collections.singletonList(projectId));

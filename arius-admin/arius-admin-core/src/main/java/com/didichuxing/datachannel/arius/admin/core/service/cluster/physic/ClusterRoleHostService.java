@@ -1,8 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.core.service.cluster.physic;
 
-import java.util.List;
-import java.util.Map;
-
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.ESClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterJoinDTO;
@@ -11,6 +8,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.Cl
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminTaskException;
 import com.didichuxing.datachannel.arius.admin.common.exception.AriusRunTimeException;
+import java.util.List;
+import java.util.Map;
 
 /**
  * ES集群节点 服务类
@@ -148,10 +147,12 @@ public interface ClusterRoleHostService {
 
     /**
      * 逻辑删除节点
-     * @param cluster  集群名称
+     *
+     * @param cluster   集群名称
+     * @param projectId
      * @return
      */
-    Result<Void> deleteByCluster(String cluster);
+    Result<Void> deleteByCluster(String cluster, Integer projectId);
 
     /**
      * 获取所有节点(包括不在线)

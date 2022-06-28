@@ -4,7 +4,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion
 
 import com.didichuxing.datachannel.arius.admin.biz.project.RoleExtendManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.RoleExtendVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.RoleExtendVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
 import com.didiglobal.logi.security.common.PagingResult;

@@ -38,7 +38,8 @@ public class ESPhyClusterWhiteController {
     @ResponseBody
     @ApiOperation(value = "删除接入集群")
     public Result<Void> deleteClusterJoin(HttpServletRequest request, @PathVariable Integer clusterId) {
-        return clusterPhyManager.deleteClusterJoin(clusterId, HttpRequestUtil.getOperator(request));
+        return clusterPhyManager.deleteClusterJoin(clusterId, HttpRequestUtil.getOperator(request),
+                HttpRequestUtil.getProjectId(request));
     }
 
     @PostMapping("/updateHttpAddress")

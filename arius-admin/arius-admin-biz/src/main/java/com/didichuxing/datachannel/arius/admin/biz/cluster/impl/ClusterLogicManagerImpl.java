@@ -26,7 +26,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicCl
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterWithRegionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatCellDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateClearDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ProjectClusterLogicAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicContext;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicStatis;
@@ -34,6 +33,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.Cluste
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ProjectClusterLogicAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStatsResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicAggregate;
@@ -51,11 +51,11 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.ecm.ESClusterNodeS
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
-import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectClusterLogicAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectClusterLogicAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.event.resource.ClusterLogicEvent;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
@@ -64,9 +64,9 @@ import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ClusterUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
-import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectClusterLogicAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESMachineNormsService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
@@ -76,6 +76,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecord
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterNodeService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
+import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectClusterLogicAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.ESClusterStaticsService;
@@ -209,7 +210,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
                 .runnableTask(() -> buildLogicRole(clusterLogicVO, clusterLogic))
                 .runnableTask(() -> buildConsoleClusterVersions(clusterLogicVO));
 
-        //依赖获取集群状态, 不能使用FutureUtil, 否则抛NPE
+        
         buildClusterNodeInfo(clusterLogicVO);
         Optional.ofNullable(projectService.getProjectBriefByProjectId(clusterLogic.getProjectId()))
                 .map(ProjectBriefVO::getProjectName)
@@ -460,7 +461,12 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     public Result<Void> deleteLogicCluster(Long logicClusterId, String operator, Integer projectId)
             throws AdminOperateException {
         ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(logicClusterId);
-        Result<Void> result = clusterLogicService.deleteClusterLogicById(logicClusterId, operator);
+        final Result<Void> checkProjectCorrectly = ProjectUtils.checkProjectCorrectly(ClusterLogic::getProjectId,
+                clusterLogic, projectId);
+        if (checkProjectCorrectly.failed()) {
+            return checkProjectCorrectly;
+        }
+        Result<Void> result = clusterLogicService.deleteClusterLogicById(logicClusterId, operator, projectId);
         ClusterLogicTemplateIndexDetailDTO templateIndexVO = getTemplateIndexVO(logicClusterId, projectId);
 
         for (IndexTemplateLogicAggregate agg : templateIndexVO.getTemplateLogicAggregates()) {
@@ -521,7 +527,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     @Override
 	public Result<Void> editLogicCluster(ESLogicClusterDTO param, String operator, Integer projectId) {
         final ClusterLogic logic = clusterLogicService.getClusterLogicById(param.getId());
-        Result<Void> result = clusterLogicService.editClusterLogic(param, operator);
+        Result<Void> result = clusterLogicService.editClusterLogic(param, operator,projectId);
         if (result.success()) {
             SpringTool.publish(new ClusterLogicEvent(param.getId(), projectId));
             //操作记录 我的集群信息修改

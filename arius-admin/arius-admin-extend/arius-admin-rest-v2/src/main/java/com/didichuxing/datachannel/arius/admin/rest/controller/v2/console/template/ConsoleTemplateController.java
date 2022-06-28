@@ -4,9 +4,11 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +23,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleT
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateRateLimitDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateUpdateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithCluster;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
@@ -95,7 +98,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
         IndexTemplateWithCluster indexTemplateLogicWithCluster = indexTemplateService
             .getLogicTemplateWithCluster(logicId);
 
-        if (null == indexTemplateLogicWithCluster) {
+        if (null == indexTemplateLogicWithCluster || CollectionUtils.isEmpty(indexTemplateLogicWithCluster.getLogicClusters())) {
             return Result.buildFail("模板对应资源不存在!");
         }
 
@@ -117,7 +120,11 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
         Result<Void> checkAuthResult = checkAppAuth(logicId, HttpRequestUtil.getProjectId(request));
         consoleTemplateDetail.setEditable(checkAuthResult.success());
         // 获取indexRollover功能开启状态
-        consoleTemplateDetail.setDisableIndexRollover(indexTemplateService.getTemplateConfig(logicId).getDisableIndexRollover());
+        consoleTemplateDetail.setDisableIndexRollover(Optional.ofNullable(indexTemplateService.getTemplateConfig(logicId))
+                .map(IndexTemplateConfig::getDisableIndexRollover)
+                .orElse(null)
+
+        );
 
         return Result.buildSucc(consoleTemplateDetail);
     }
@@ -128,7 +135,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
     public Result<Void> modifyConsoleTemplate(HttpServletRequest request,
                                         @RequestBody ConsoleTemplateUpdateDTO templateLogicDTO) throws AdminOperateException {
         return templateLogicManager.editTemplate(ConvertUtil.obj2Obj(templateLogicDTO, IndexTemplateDTO.class),
-            HttpRequestUtil.getOperator(request));
+            HttpRequestUtil.getOperator(request),HttpRequestUtil.getProjectId(request));
     }
 
     @GetMapping("/capacity")

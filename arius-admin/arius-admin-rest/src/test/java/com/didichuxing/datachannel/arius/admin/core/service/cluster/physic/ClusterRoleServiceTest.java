@@ -1,13 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.core.service.cluster.physic;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.annotation.Rollback;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
@@ -20,6 +12,13 @@ import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.ecm.ESClusterRoleDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.resource.PhyClusterDAO;
 import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.annotation.Rollback;
+import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
 @Rollback
@@ -143,12 +142,13 @@ public class ClusterRoleServiceTest extends AriusAdminApplicationTest {
 
     @Test
     public void deleteRoleClusterByClusterIdTest() {
+        Integer projectId=1;
         ESClusterRoleDTO esClusterRoleDTO = CustomDataSource.esRoleClusterDTOFactory();
         Long elasticClusterId = esClusterRoleDTO.getElasticClusterId();
         Assertions.assertTrue(
-                clusterRoleService.deleteRoleClusterByClusterId(elasticClusterId.intValue()).failed());
+                clusterRoleService.deleteRoleClusterByClusterId(elasticClusterId.intValue(), projectId).failed());
         clusterRoleService.save(esClusterRoleDTO);
         Assertions.assertTrue(
-                clusterRoleService.deleteRoleClusterByClusterId(elasticClusterId.intValue()).success());
+                clusterRoleService.deleteRoleClusterByClusterId(elasticClusterId.intValue(), projectId).success());
     }
 }

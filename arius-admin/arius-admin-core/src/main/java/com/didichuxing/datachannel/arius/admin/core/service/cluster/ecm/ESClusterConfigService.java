@@ -3,9 +3,8 @@ package com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESConfigDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESZeusConfigDTO;
-import com.didichuxing.datachannel.arius.admin.common.constant.esconfig.EsConfigActionEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.esconfig.ESConfig;
-
+import com.didichuxing.datachannel.arius.admin.common.constant.esconfig.EsConfigActionEnum;
 import java.util.List;
 
 /**
@@ -99,11 +98,13 @@ public interface ESClusterConfigService {
 
     /**
      * 修改配置详情
+     *
      * @param param
      * @param operator
+     * @param projectId
      * @return
      */
-    Result<Void> editConfigDesc(ESConfigDTO param, String operator);
+    Result<Void> editConfigDesc(ESConfigDTO param, String operator, Integer projectId);
 
     /**
      * 删除固定集群角色配置类型下的配置信息
