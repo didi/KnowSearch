@@ -6,6 +6,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.oprecord.OperateRecordDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.operaterecord.OperateRecordInfoPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.operaterecord.OperateRecordVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.OperateRecordSortEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.SortConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.NewModuleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
@@ -93,7 +94,7 @@ public class OperateRecordServiceImpl implements OperateRecordService {
      */
     @Override
     public Tuple<Long, List<OperateRecordVO>> pagingGetOperateRecordByCondition(OperateRecordDTO pageDTO) {
-        String sortTerm = null == pageDTO.getSortTerm() ? SortConstant.ID : pageDTO.getSortTerm();
+        String sortTerm = OperateRecordSortEnum.getSortField( pageDTO.getSortTerm());
         String sortType = pageDTO.getOrderByDesc() ? SortConstant.DESC : SortConstant.ASC;
         pageDTO.setSortTerm(sortTerm);
         pageDTO.setSortType(sortType);
