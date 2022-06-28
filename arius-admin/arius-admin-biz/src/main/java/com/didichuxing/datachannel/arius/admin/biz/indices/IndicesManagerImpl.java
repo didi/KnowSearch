@@ -2,10 +2,19 @@ package com.didichuxing.datachannel.arius.admin.biz.indices;
 
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.PRIMARY;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.function.BiFunction;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
-import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.page.IndexPageSearchHandle;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
@@ -23,6 +32,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.IndexCat
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.IndexShardInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexCatCellVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexMappingVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexSettingVO;
@@ -34,20 +44,17 @@ import com.didichuxing.datachannel.arius.admin.common.constant.index.IndexBlockE
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusIndexMappingConfigUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusOptional;
-import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.IndexSettingsUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.SizeUtil;
+import com.didichuxing.datachannel.arius.admin.common.mapping.AriusIndexTemplateSetting;
+import com.didichuxing.datachannel.arius.admin.common.util.*;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexCatService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.metadata.job.index.IndexCatInfoCollector;
 import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
 import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
@@ -59,14 +66,6 @@ import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.function.BiFunction;
-import java.util.stream.Collectors;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  * @author lyn
@@ -74,6 +73,7 @@ import org.springframework.stereotype.Component;
  **/
 @Component
 public class IndicesManagerImpl implements IndicesManager {
+    public static final String START = "*";
     private static final ILog     LOGGER = LogFactory.getLog(IndicesManagerImpl.class);
     public static final int            RETRY_COUNT = 3;
     @Autowired
@@ -86,7 +86,10 @@ public class IndicesManagerImpl implements IndicesManager {
     private ESIndexService        esIndexService;
 
     @Autowired
-    private ClusterPhyManager     clusterPhyManager;
+    private ClusterPhyService clusterPhyService;
+
+    @Autowired
+    private IndexTemplatePhyService indexTemplatePhyService;
 
     @Autowired
     private OperateRecordService operateRecordService;
@@ -130,8 +133,21 @@ public class IndicesManagerImpl implements IndicesManager {
             return Result.buildFrom(getClusterRet);
         }
         String phyCluster = getClusterRet.getData();
+        IndexConfig indexConfig = new IndexConfig();
+        if (StringUtils.isNotBlank(indexCreateDTO.getMapping())) {
+            Result<MappingConfig> mappingResult = AriusIndexMappingConfigUtils
+                .parseMappingConfig(indexCreateDTO.getMapping());
+            if (mappingResult.failed()) {
+                return Result.buildFrom(mappingResult);
+            }
+            indexConfig.setMappings(mappingResult.getData());
+        }
+
+        if (StringUtils.isNotBlank(indexCreateDTO.getSetting())) {
+            indexConfig.setSettings(AriusIndexTemplateSetting.flat(JSON.parseObject(indexCreateDTO.getSetting())));
+        }
         try {
-            esIndexService.syncCreateIndex(phyCluster, indexCreateDTO.getIndex(), indexCreateDTO.getMapping(), indexCreateDTO.getSetting(), RETRY_COUNT);
+            esIndexService.syncCreateIndex(phyCluster, indexCreateDTO.getIndex(), indexConfig, RETRY_COUNT);
         } catch (Exception e) {
             LOGGER.error("class=IndicesManagerImpl||method=createIndex||msg=create index failed||index={}" + indexCreateDTO.getIndex(), e);
             return Result.buildFail();
@@ -601,10 +617,33 @@ public class IndicesManagerImpl implements IndicesManager {
             return Result.buildFrom(getClusterRet);
         }
         String phyClusterName = getClusterRet.getData();
-        if (!clusterPhyManager.isClusterExists(phyClusterName)) {
+        if (!clusterPhyService.isClusterExists(phyClusterName)) {
             return Result.buildParamIllegal(String.format("物理集群[%s]不存在", phyClusterName));
         }
         return Result.buildSucc(esIndexService.syncIsIndexExist(phyClusterName, indexName));
+    }
+
+    @Override
+    public List<String> listIndexNameByTemplatePhyId(Long physicalId) {
+        List<CatIndexResult> indices = listIndexCatInfoByTemplatePhyId(physicalId);
+        if (CollectionUtils.isEmpty(indices)) {
+            return Lists.newArrayList();
+        }
+        return indices.stream().map(CatIndexResult::getIndex).sorted().collect(Collectors.toList());
+    }
+    @Override
+    public List<CatIndexResult> listIndexCatInfoByTemplatePhyId(Long physicalId) {
+        IndexTemplatePhyWithLogic templatePhysicalWithLogic = indexTemplatePhyService.getTemplateWithLogicById(physicalId);
+        if (templatePhysicalWithLogic == null) {
+            return Lists.newArrayList();
+        }
+        String expression = templatePhysicalWithLogic.getExpression();
+        if (templatePhysicalWithLogic.getVersion() != null && templatePhysicalWithLogic.getVersion() > 0
+                && !expression.endsWith(START)) {
+            expression = expression + START;
+        }
+        return esIndexService.syncCatIndexByExpression(templatePhysicalWithLogic.getCluster(),
+                expression);
     }
 
     /***************************************************private**********************************************************/
@@ -613,7 +652,7 @@ public class IndicesManagerImpl implements IndicesManager {
             return Result.buildParamIllegal(String.format("当前登录项目Id[%s]不存在, 无权限操作", projectId));
         }
 
-        if (!clusterPhyManager.isClusterExists(cluster)) {
+        if (!clusterPhyService.isClusterExists(cluster)) {
             return Result.buildParamIllegal(String.format("物理集群[%s]不存在", cluster));
         }
 

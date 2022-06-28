@@ -1,5 +1,12 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.new_srv.precreate.impl;
 
+import java.util.List;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.base.impl.BaseTemplateSrvImpl;
 import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.precreate.PreCreateManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.dcdr.TemplateDCDRManager;
@@ -12,10 +19,9 @@ import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateExcepti
 import com.didichuxing.datachannel.arius.admin.common.threadpool.AriusOpThreadPool;
 import com.didichuxing.datachannel.arius.admin.common.util.IndexNameFactory;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
-import java.util.List;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
+import com.didiglobal.logi.elasticsearch.client.response.setting.index.IndexConfig;
+import com.didiglobal.logi.elasticsearch.client.response.setting.template.TemplateConfig;
 
 /**
  * @author chengxiang, zqr
@@ -26,12 +32,15 @@ public class PreCreateManagerImpl extends BaseTemplateSrvImpl implements PreCrea
 
     private final static Integer RETRY_TIMES = 3;
     private final static Double SUCCESS_RATE = 0.7;
+    public static final String START = "*";
 
     @Autowired
     private TemplateDCDRManager templateDcdrManager;
 
     @Autowired
-    private ESIndexService esIndexService;
+    private ESIndexService       esIndexService;
+    @Autowired
+    private ESTemplateService    esTemplateService;
 
     @Autowired
     private AriusOpThreadPool ariusOpThreadPool;
@@ -94,8 +103,8 @@ public class PreCreateManagerImpl extends BaseTemplateSrvImpl implements PreCrea
     public void asyncCreateTodayAndTomorrowIndexByPhysicalId(Long physicalId) {
         ariusOpThreadPool.execute(() -> {
             try {
-                syncCreateTomorrowIndexByPhysicalId(physicalId, RETRY_TIMES);
                 syncCreateTodayIndexByPhysicalId(physicalId, RETRY_TIMES);
+                syncCreateTomorrowIndexByPhysicalId(physicalId, RETRY_TIMES);
             } catch (ESOperateException e) {
                 LOGGER.error("class=PreCreateManagerImpl||method=asyncCreateTodayIndexAsyncByPhysicalId||errMsg={}||physicalId={}", e.getMessage(), physicalId, e);
             }
@@ -128,7 +137,7 @@ public class PreCreateManagerImpl extends BaseTemplateSrvImpl implements PreCrea
 
         String tomorrowIndexName = IndexNameFactory.get(physicalWithLogic.getExpression(),
                 physicalWithLogic.getLogicTemplate().getDateFormat(), 1, physicalWithLogic.getVersion());
-        return esIndexService.syncCreateIndex(physicalWithLogic.getCluster(), tomorrowIndexName, null, null, retryCount);
+        return createIndex(tomorrowIndexName,physicalWithLogic,retryCount);
     }
 
     /**
@@ -143,8 +152,34 @@ public class PreCreateManagerImpl extends BaseTemplateSrvImpl implements PreCrea
             return false;
         }
         String todayIndexName = IndexNameFactory.get(physicalWithLogic.getExpression(),
-                physicalWithLogic.getLogicTemplate().getDateFormat(), 0, physicalWithLogic.getVersion());
-        return esIndexService.syncCreateIndex(physicalWithLogic.getCluster(), todayIndexName, null, null, retryCount);
+            physicalWithLogic.getLogicTemplate().getDateFormat(), 0, physicalWithLogic.getVersion());
+        return createIndex(todayIndexName, physicalWithLogic, retryCount);
+    }
+
+    private boolean createIndex(String indexName, IndexTemplatePhyWithLogic physicalWithLogic,
+                                int retryCount) throws ESOperateException {
+        IndexConfig indexConfig = null;
+        if (!StringUtils.endsWith(physicalWithLogic.getExpression(), START) && physicalWithLogic.getVersion() > 0) {
+            indexConfig = generateIndexConfig(physicalWithLogic);
+        }
+        if (null != indexConfig) {
+            return esIndexService.syncCreateIndex(physicalWithLogic.getCluster(), indexName, indexConfig, retryCount);
+        }
+        return esIndexService.syncCreateIndex(physicalWithLogic.getCluster(), indexName, retryCount);
+    }
+
+    private IndexConfig generateIndexConfig(IndexTemplatePhyWithLogic physicalWithLogic) {
+        TemplateConfig templateConfig = esTemplateService.syncGetTemplateConfig(physicalWithLogic.getCluster(),
+            physicalWithLogic.getName());
+        if (null == templateConfig) {
+            return null;
+        }
+        IndexConfig indexConfig = new IndexConfig();
+        indexConfig.setMappings(templateConfig.getMappings());
+        indexConfig.setSettings(templateConfig.getSetttings());
+        indexConfig.setAliases(templateConfig.getAliases());
+        indexConfig.setVersion(templateConfig.getVersion());
+        return indexConfig;
     }
 
     /**
