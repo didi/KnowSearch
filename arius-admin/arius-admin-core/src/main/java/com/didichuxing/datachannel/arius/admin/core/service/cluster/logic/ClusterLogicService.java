@@ -1,5 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.core.service.cluster.logic;
 
+import java.util.List;
+import java.util.Set;
+
 import com.didichuxing.datachannel.arius.admin.common.bean.common.LogicResourceConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Plugin;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -12,8 +15,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.Ro
 import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterLogicDiskUsedInfoPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
-import java.util.List;
-import java.util.Set;
 
 /**
  * 逻辑集群service
@@ -111,6 +112,16 @@ public interface ClusterLogicService {
      * @return 逻辑集群列表
      */
     List<ClusterLogic> getHasAuthClusterLogicsByProjectId(Integer projectId);
+
+    /**
+     * 根据项目和集群名称获取逻辑集群
+     *
+     * @param projectId   项目id
+     * @param clusterName 集群名称
+     * @return {@link List}<{@link ClusterLogic}>
+     */
+    List<ClusterLogic> listClusterLogicByProjectIdAndName(Integer projectId, String clusterName);
+    
 
     List<Long> getHasAuthClusterLogicIdsByProjectId(Integer projectId);
 

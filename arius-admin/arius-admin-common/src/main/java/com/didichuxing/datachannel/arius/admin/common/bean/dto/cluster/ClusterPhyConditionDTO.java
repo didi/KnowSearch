@@ -1,12 +1,12 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster;
 
+import java.util.List;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
 
 /**
  * @author linyunan
@@ -25,6 +25,9 @@ public class ClusterPhyConditionDTO extends ClusterPhyDTO {
 
     @ApiModelProperty(value = "是否降序排序（默认降序）", dataType = "Boolean", required = false)
     private Boolean orderByDesc = true;
+
+    @ApiModelProperty("逻辑集群")
+    private String       logicClusterName;
 
     @ApiModelProperty("集群名称，用于后端根据项目筛选")
     private List<String> clusterNames;
