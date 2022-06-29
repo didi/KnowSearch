@@ -10,14 +10,6 @@ package com.didichuxing.datachannel.arius.admin.common.constant.cluster;
  */
 public enum ClusterQuickCommandMethodsEnum {
     /**
-     * node_state分析
-     */
-    SHARDS("_shards", "_nodes/stats"),
-    /**
-     * indices分布
-     */
-    INDICES("GET", "_cat/indices"),
-    /**
      * shard分布
      */
     SHARD("GET", "_cat/shards"),
