@@ -1,5 +1,16 @@
 package com.didichuxing.datachannel.arius.admin.biz.metrics.impl;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import com.didichuxing.datachannel.arius.admin.biz.component.MetricsValueConvertUtils;
 import com.didichuxing.datachannel.arius.admin.biz.metrics.DashboardMetricsManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -27,6 +38,9 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import com.didichuxing.datachannel.arius.admin.metadata.service.DashBoardMetricsService;
+import com.didiglobal.logi.security.service.ProjectService;
+import com.google.common.collect.Lists;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.DASHBOARD_THRESHOLD;
 
@@ -77,7 +91,7 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
 
     @Override
     public Result<List<VariousLineChartMetricsVO>> getTopClusterThreadPoolQueueMetricsInfo(MetricsDashboardTopNDTO param,
-                                                Integer projectId) {
+                                                                                           Integer projectId) {
         param.init();
         String oneLevelType = OneLevelTypeEnum.CLUSTER_THREAD_POOL_QUEUE.getType();
         return commonGetTopInfoByOneLevelType(param, projectId, oneLevelType);
@@ -130,7 +144,7 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
 
     /***************************************************private**********************************************/
     /**
-     * 
+     *
      * @param param  MetricsDashboardTopNDTO
      * @param projectId  项目
      * @param oneLevelType   OneLevelTypeEnum
@@ -171,73 +185,37 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
                             param.getOrderByDesc()));
                 } else if (valueTypeList.contains(metricsType)) {
                     listMetrics.add(dashBoardMetricsService.getListValueMetrics(oneLevelType, metricsType,
-                        param.getAggType(), param.getOrderByDesc()));
+                            param.getAggType(), param.getOrderByDesc()));
                 }
             });
         }
         futureUtil.waitExecute();
-        filterBySystemConfiguration(listMetrics);
+        try {
+            filterBySystemConfiguration(listMetrics,oneLevelType);
+        } catch (AdminOperateException e) {
+            return  Result.buildFail(e.getMessage());
+        }
         return Result.buildSucc(ConvertUtil.list2List(listMetrics, MetricListVO.class));
     }
 
-//    private void  filterBySystemConfiguration(List<MetricList> listMetrics,String oneLevelType){
-//        Map<String, String> thresholdValues = DashBoardThresholdEnum.getDashBoardThresholdValue();
-//        //根据系统配置筛选,如果库里有对应的指标，就使用配置的指标
-//        thresholdValues.keySet().forEach(key -> {
-//            double value = ariusConfigInfoService.doubleSetting(DASHBOARD_THRESHOLD,
-//                    key, Double.valueOf(thresholdValues.get(key)));
-//            thresholdValues.put(key, String.valueOf(value));
-//        });
-//        listMetrics.forEach(metric -> {
-//            if(OneLevelTypeEnum.NODE.getType().equals(oneLevelType)){
-//                switch (metric.getType()){
-//                    case "shardNum":
-//                        break;
-//                }
-//            }
-//            if(OneLevelTypeEnum.INDEX.getType().equals(oneLevelType)){
-//                switch (metric.getType()){
-//                    case "mappingNum":
-//                        break;
-//                    case "smallShard":
-//                        break;
-//                    case "segmentNum":
-//                        break;
-//                    case "segmentMemSize":
-//                        break;
-//                }
-//            }
-//            if(OneLevelTypeEnum.TEMPLATE.getType().equals(oneLevelType)){
-//                switch (metric.getType()){
-//                    case "segmentMemSize":
-//                        break;
-//                }
-//            }
-//        });
-//
-//    }
+
     /**
      * 根据系统配置筛选
      */
-    private void  filterBySystemConfiguration(List<MetricList> listMetrics){
+    private void  filterBySystemConfiguration(List<MetricList> listMetrics, String oneLevelType) throws AdminOperateException{
         Map<String, String> thresholdValues = DashBoardThresholdEnum.getDashBoardThresholdValue();
         //根据系统配置筛选,如果库里有对应的指标，就使用配置的指标
-        thresholdValues.keySet().forEach(key -> {
-            double value = ariusConfigInfoService.doubleSetting(DASHBOARD_THRESHOLD,
-                    key, Double.valueOf(thresholdValues.get(key)));
-            thresholdValues.put(key, String.valueOf(value));
-        });
 
-        listMetrics.forEach(metric -> {
-            if(thresholdValues.get(metric.getType())!=null){
-                if ("mappingNum".equals(metric.getType())){
-
-                }
-               Double configValue = Double.valueOf( thresholdValues.get(metric.getType()));
+        for (MetricList metric : listMetrics) {
+            //配置的指标项：oneLevelType +"_"+ metric.getType() eg:index_segmentMemSize
+            String key = oneLevelType + "_" + metric.getType();
+            if (thresholdValues.get(metric.getType()) != null&&thresholdValues.containsKey(key)) {
+                String valueStr = ariusConfigInfoService.stringSetting(DASHBOARD_THRESHOLD, metric.getType(), thresholdValues.get(key));
+                Double configValue =  getValueTry(valueStr,v->Double.valueOf(v),String.format("平台配置:[%S]错误,需要类型:%S",key,Double.class.getSimpleName()));
                 metric.setMetricListContents(metric.getMetricListContents().stream()
-                        .filter(metricListContent -> metricListContent.getValue()>configValue).collect(Collectors.toList()));
+                        .filter(metricListContent -> metricListContent.getValue() > configValue).collect(Collectors.toList()));
             }
-        });
+        }
     }
 
     /**
@@ -256,7 +234,7 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
         if (!projectService.checkProjectExist(projectId)) {
             return Result.buildParamIllegal(String.format("There is no projectId:%s", projectId));
         }
-        
+
         if (param instanceof MetricsDashboardTopNDTO) {
             MetricsDashboardTopNDTO metricsDashboardTopNDTO =  (MetricsDashboardTopNDTO) param;
 
@@ -269,7 +247,7 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
                 }
             }
         }
-        
+
         if (param instanceof MetricsDashboardListDTO) {
             MetricsDashboardListDTO metricsDashboardListDTO = (MetricsDashboardListDTO) param;
 
@@ -284,5 +262,13 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
         }
 
         return Result.buildSucc();
+    }
+
+    private <R> R getValueTry(String value, Function<String, R> convertFunc, String errMsg) throws AdminOperateException {
+        try {
+            return convertFunc.apply(value);
+        } catch (Exception e) {
+            throw new AdminOperateException(errMsg);
+        }
     }
 }
