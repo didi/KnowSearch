@@ -58,11 +58,11 @@ public class TupleTwo<T1, T2> implements Tuples, Comparable<TupleTwo<T1, T2>>, S
         return 0;
     }
     
-    public T1 _1() {
+    public T1 v1() {
         return v1;
     }
     
-    public T2 _2() {
+    public T2 v2() {
         return v2;
     }
     

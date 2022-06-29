@@ -1,6 +1,5 @@
-package com.didichuxing.datachannel.arius.admin.rest.controller.v2.console.template;
+package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.template;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V2_CONSOLE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyStaticsManager;
@@ -18,10 +17,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping(V2_CONSOLE + "/template/access")
-@Api(tags = "Console-用户侧索引模板访问统计信息接口(REST)：见："+V3_OP)
-@Deprecated
-public class ConsoleTemplateAccessController extends BaseConsoleTemplateController {
+@RequestMapping(V3_OP + "/template/access")
+@Api(tags = "Console-用户侧索引模板访问统计信息接口(REST)")
+public class TemplateAccessController extends BaseTemplateController {
 
     @Autowired
     private TemplatePhyStaticsManager templatePhyStaticsManager;
@@ -34,7 +32,7 @@ public class ConsoleTemplateAccessController extends BaseConsoleTemplateControll
      * @param endDate 结束时刻
      * @return
      */
-    @GetMapping(path = "/appInfosByDateRange.do")
+    @GetMapping(path = "/project-info-date-range.do")
     @ApiOperation(value = "根据模板Id获取[startDate, endDate(毫秒)]的projectId访问统计信息【三方接口】",tags = "【三方接口】" )
     public Result<List<ProjectIdTemplateAccessCountVO>> getAccessAppInfos(
             @ApiParam(name="templateId", value="逻辑索引模板ID", required = true)

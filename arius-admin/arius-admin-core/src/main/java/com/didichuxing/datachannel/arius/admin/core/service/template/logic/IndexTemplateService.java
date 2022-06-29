@@ -74,12 +74,14 @@ public interface IndexTemplateService {
 
     /**
      * 删除逻辑模板
+     *
      * @param logicTemplateId 模板id
-     * @param operator 操作人
+     * @param operator        操作人
+     * @param projectId
      * @return result
      * @throws AdminOperateException
      */
-    Result<Void> delTemplate(Integer logicTemplateId, String operator) throws AdminOperateException;
+    Result<Void> delTemplate(Integer logicTemplateId, String operator, Integer projectId) throws AdminOperateException;
 
     /**
      * 校验模板参数是否合法
@@ -368,7 +370,7 @@ public interface IndexTemplateService {
      */
     Result updateBlockWriteState(Integer logicId, Boolean blockWrite, String operator);
 
-    Result updateTemplateWriteRateLimit(ConsoleTemplateRateLimitDTO consoleTemplateRateLimitDTO, String operator) throws ESOperateException;
+    Result updateTemplateWriteRateLimit(ConsoleTemplateRateLimitDTO consoleTemplateRateLimitDTO, String operator, Integer projectId) throws ESOperateException;
 
     Result<Void> preCheckTemplateName(String templateName);
 

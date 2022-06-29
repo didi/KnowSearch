@@ -1,6 +1,5 @@
-package com.didichuxing.datachannel.arius.admin.rest.controller.v2.console.template;
+package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.template;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V2_CONSOLE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping.TemplateLogicMappingManager;
@@ -29,10 +28,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping(V2_CONSOLE + "/template")
-@Api(tags = "Console-用户侧索引模板mapping接口(REST)：见："+V3_OP)
-@Deprecated
-public class ConsoleTemplateSchemaController extends BaseConsoleTemplateController {
+@RequestMapping(V3_OP + "/template")
+@Api(tags = "Console-用户侧索引模板mapping接口(REST)")
+public class TemplateSchemaController extends BaseTemplateController {
 
     @Autowired
     private TemplateLogicMappingManager templateLogicMappingManager;
@@ -72,7 +70,7 @@ public class ConsoleTemplateSchemaController extends BaseConsoleTemplateControll
     public Result<Void> modifySchema(HttpServletRequest request,
                                @RequestBody ConsoleTemplateSchemaDTO schemaDTO) throws AdminOperateException {
 
-        Result<Void> checkAuthResult = checkAppAuth(schemaDTO.getLogicId(), HttpRequestUtil.getProjectId(request));
+        Result<Void> checkAuthResult = checkProjectAuth(schemaDTO.getLogicId());
         if (checkAuthResult.failed()) {
             return checkAuthResult;
         }

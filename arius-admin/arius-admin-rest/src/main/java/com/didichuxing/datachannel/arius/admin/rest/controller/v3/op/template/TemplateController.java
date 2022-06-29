@@ -1,6 +1,5 @@
-package com.didichuxing.datachannel.arius.admin.rest.controller.v2.console.template;
+package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.template;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V2_CONSOLE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterLogicManager;
@@ -48,6 +47,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -60,12 +60,11 @@ import org.springframework.web.bind.annotation.RestController;
  * @date 2019/5/15
  */
 @RestController
-@RequestMapping(V2_CONSOLE + "/template")
-@Api(tags = "Console-用户侧索引模板接口(REST)：见："+V3_OP)
-@Deprecated
-public class ConsoleTemplateController extends BaseConsoleTemplateController {
+@RequestMapping(V3_OP + "/template")
+@Api(tags = "Console-用户侧索引模板接口(REST)")
+public class TemplateController extends BaseTemplateController {
 
-    private static final ILog        LOGGER = LogFactory.getLog(ConsoleTemplateController.class);
+    private static final ILog        LOGGER = LogFactory.getLog(TemplateController.class);
 
     private static final String INDEX_NOT_EXISTS_TIPS = "索引不存在";
  
@@ -89,23 +88,22 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
     @Autowired
     private TemplatePipelineManager templatePipelineManager;
 
-    @GetMapping("/list")
+    @GetMapping("/{projectId}")
     @ResponseBody
     @ApiOperation(value = "获取索引列表【三方接口】",tags = "【三方接口】", notes = "包含权限、集群信息、权限信息；")
-    @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "projectId", value = "应用ID，不会过滤索引，会影响权限信息", required = true) })
-    public Result<List<ConsoleTemplateVO>> getConsoleTemplates(@RequestParam(value = "projectId", required = false) Integer projectId,
-                                                               @RequestParam(value = "dataCenter", required = false, defaultValue = "") String dataCenter) {
+    @ApiImplicitParams({ @ApiImplicitParam(paramType = "path", dataType = "Integer", name = "projectId", value = "应用ID，不会过滤索引，会影响权限信息", required = true) })
+    public Result<List<ConsoleTemplateVO>> getConsoleTemplates(@PathVariable(value = "projectId", required = true) Integer projectId) {
        
         return Result.buildSucc(templateLogicManager.getConsoleTemplatesVOS(projectId));
     }
 
-    @GetMapping("/get")
+    @GetMapping("/{logicId}")
     @ResponseBody
     @ApiOperation(value = "获取索引详细信息接口【三方接口】",tags = "【三方接口】" )
-    @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "索引ID", required = true) })
+    @ApiImplicitParams({ @ApiImplicitParam(paramType = "path", dataType = "Integer", name = "logicId", value = "索引ID", required = true) })
     @Deprecated
     public Result<ConsoleTemplateDetailVO> getConsoleTemplateDetail(HttpServletRequest request,
-                                                                    @RequestParam("logicId") Integer logicId) {
+                                                                    @PathVariable("logicId") Integer logicId) {
         IndexTemplateWithCluster indexTemplateLogicWithCluster = indexTemplateService
             .getLogicTemplateWithCluster(logicId);
 
@@ -128,7 +126,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
         consoleTemplateDetail.setAppName(getAppName(indexTemplateLogicWithCluster.getProjectId()));
         consoleTemplateDetail.setIndices(getLogicTemplateIndices(logicId));
 
-        Result<Void> checkAuthResult = checkAppAuth(logicId, HttpRequestUtil.getProjectId(request));
+        Result<Void> checkAuthResult = checkProjectAuth(logicId);
         consoleTemplateDetail.setEditable(checkAuthResult.success());
         // 获取indexRollover功能开启状态
         consoleTemplateDetail.setDisableIndexRollover(Optional.ofNullable(indexTemplateService.getTemplateConfig(logicId))
@@ -140,7 +138,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
         return Result.buildSucc(consoleTemplateDetail);
     }
 
-    @PutMapping("/update")
+    @PutMapping("")
     @ResponseBody
     @ApiOperation(value = "用户编辑模板接口【三方接口】",tags = "【三方接口】", notes = "支持修改数据类型、责任人、备注")
     public Result<Void> modifyConsoleTemplate(HttpServletRequest request,
@@ -158,7 +156,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
         return Result.buildSucc();
     }
 
-    @GetMapping("/clearInfo")
+    @GetMapping("/clear-info")
     @ResponseBody
     @ApiOperation(value = "获取索引清理信息接口【三方接口】",tags = "【三方接口】" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "索引ID", required = true) })
@@ -184,13 +182,13 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
         return Result.buildSucc(consoleTemplateClearVO);
     }
 
-    @PutMapping("/clearInfo")
+    @PutMapping("/clear-info")
     @ResponseBody
     @ApiOperation(value = "清理索引信息接口【三方接口】",tags = "【三方接口】" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "header", dataType = "String", name = HttpRequestUtil.PROJECT_ID, value = "应用ID", required = true) })
     public Result<Void> clearLogicTemplateIndices(HttpServletRequest request,
                                             @RequestBody ConsoleTemplateClearDTO clearDTO) throws ESOperateException {
-        Result<Void> checkAuthResult = checkAppAuth(clearDTO.getLogicId(), HttpRequestUtil.getProjectId(request));
+        Result<Void> checkAuthResult = checkProjectAuth(clearDTO.getLogicId());
         if (checkAuthResult.failed()) {
             return checkAuthResult;
         }
@@ -198,11 +196,12 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
         return clusterLogicManager.clearIndices(clearDTO, HttpRequestUtil.getOperator(request));
     }
 
-    @GetMapping("/deleteInfo")
+    @GetMapping("/delete-info/{logicId}")
     @ResponseBody
     @ApiOperation(value = "获取将要索引下线信息接口【三方接口】",tags = "【三方接口】" )
-    @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "索引ID", required = true) })
-    public Result<ConsoleTemplateDeleteVO> getLogicTemplateDeleteInfo(@RequestParam("logicId") Integer logicId) {
+    @ApiImplicitParams({ @ApiImplicitParam(paramType = "path", dataType = "Integer", name = "logicId", value = "索引ID",
+            required = true) })
+    public Result<ConsoleTemplateDeleteVO> getLogicTemplateDeleteInfo(@PathVariable("logicId") Integer logicId) {
         //与上清理索引信息接口实现合并
         IndexTemplateWithPhyTemplates templateLogicWithPhysical = indexTemplateService
             .getLogicTemplateWithPhysicalsById(logicId);
@@ -224,36 +223,34 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
         return Result.buildSucc(consoleTemplateDeleteVO);
     }
 
-    @DeleteMapping("/deleteInfo")
+    @DeleteMapping("/delete-info/{logicId}")
     @ResponseBody
     @ApiOperation(value = "下线索引信息接口【三方接口】",tags = "【三方接口】" )
-    @ApiImplicitParams({ @ApiImplicitParam(paramType = "header", dataType = "String", name = HttpRequestUtil.PROJECT_ID, value
-            = "应用ID",
-            required = true),
-                         @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "索引ID", required = true) })
+    @ApiImplicitParams({ @ApiImplicitParam(paramType = "path", dataType = "Integer", name = "logicId", value = "索引ID",
+            required = true) })
     public Result<Void> deleteTemplate(HttpServletRequest request,
-                                 @RequestParam("logicId") Integer logicId) throws AdminOperateException {
-        Result<Void> checkAuthResult = checkAppAuth(logicId, HttpRequestUtil.getProjectId(request));
+                                 @PathVariable("logicId") Integer logicId) throws AdminOperateException {
+        Result<Void> checkAuthResult = checkProjectAuth(logicId);
         if (checkAuthResult.failed()) {
             return checkAuthResult;
         }
-        return templateLogicManager.delTemplate(logicId, HttpRequestUtil.getOperator(request),
-                HttpRequestUtil.getProjectId(request));
+        return templateLogicManager.delTemplate(logicId, HttpRequestUtil.getOperator(request),  HttpRequestUtil.getProjectId(request));
     }
 
-    @GetMapping("/indices/list")
+    @GetMapping("/indices/{projectId}")
     @ResponseBody
-    @ApiOperation(value = "获取App Id所有模板的索引【三方接口】",tags = "【三方接口】" )
-    @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "projectId", value = "应用ID", required = true) })
+    @ApiOperation(value = "获取project Id所有模板的索引【三方接口】",tags = "【三方接口】" )
+    @ApiImplicitParams({ @ApiImplicitParam(paramType = "path", dataType = "Integer", name = "projectId", value = "应用ID",
+            required = true) })
     public Result<List<Tuple<String, String>>> getLogicTemplatesByProjectId(HttpServletRequest request,
-                                                                            @RequestParam("projectId") Integer projectId) {
+                                                                            @PathVariable("projectId") Integer projectId) {
 
       
 
         return indexTemplateService.listLogicTemplatesByProjectId(projectId);
     }
 
-    @GetMapping("/cyclicalRoll")
+    @GetMapping("/cyclical-roll")
     @ResponseBody
     @ApiOperation(value = "获取索引分区信息" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "索引ID", required = true) })
@@ -282,7 +279,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
     /**
      * 获取模板当前限流值
      */
-    @GetMapping(path = "/rateLimit")
+    @GetMapping(path = "/rate-limit")
     @ResponseBody
     @ApiOperation(value = "获取模板当前限流值接口【三方接口】",tags = "【三方接口】" )
     @ApiImplicitParams({@ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "索引ID", required = true)})
@@ -305,7 +302,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
      *  @return
      *  @throws AdminOperateException
      */
-    @PutMapping(path = "/rateLimit")
+    @PutMapping(path = "/rate-limit")
     @ResponseBody
     @ApiOperation(value = "更新模板当前限流值接口【三方接口】",tags = "【三方接口】" )
     public Result updateTemplateRateLimit(HttpServletRequest request,@RequestBody ConsoleTemplateRateLimitDTO consoleTemplateRateLimitDTO) {

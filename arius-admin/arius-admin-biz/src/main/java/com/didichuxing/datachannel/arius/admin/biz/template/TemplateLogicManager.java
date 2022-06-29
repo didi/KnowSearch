@@ -114,9 +114,9 @@ public interface TemplateLogicManager {
     //todo: 下线并重命名方法
     Result<Void> editTemplate(IndexTemplateDTO param, String operator, Integer projectId) throws AdminOperateException;
 
-    Result<Void> newEditTemplate(IndexTemplateDTO param, String operator);
+    Result<Void> newEditTemplate(IndexTemplateDTO param, String operator, Integer projectId);
 
-    Result<Void> delTemplate(Integer logicTemplateId, String operator) throws AdminOperateException;
+    Result<Void> delTemplate(Integer logicTemplateId, String operator, Integer projectId) throws AdminOperateException;
 
     /**
      * 模糊（精确）/分页查询模板列表接口
@@ -142,12 +142,14 @@ public interface TemplateLogicManager {
 
     /**
      * 更改逻辑模版的rollover能力
+     *
      * @param templateLogicId 逻辑模版id
-     * @param status 1 启用，0 禁用
-     * @param operator 操作者
+     * @param status          1 启用，0 禁用
+     * @param operator        操作者
+     * @param projectId
      * @return
      */
-    Result<Void> switchRolloverStatus(Integer templateLogicId, Integer status, String operator);
+    Result<Void> switchRolloverStatus(Integer templateLogicId, Integer status, String operator, Integer projectId);
     /**
      * 获取创建dcdr链路模板
      * @return
@@ -203,11 +205,13 @@ public interface TemplateLogicManager {
 
     /**
      * 模板升级
+     *
      * @param templateId 模板id
-     * @param operator 操作者
+     * @param operator   操作者
+     * @param projectId
      * @return
      */
-    Result<Void> upgrade(Integer templateId, String operator) throws AdminOperateException;
+    Result<Void> upgrade(Integer templateId, String operator, Integer projectId) throws AdminOperateException;
 
     Result<List<ConsoleTemplateVO>> listTemplateVOByLogicCluster(String clusterLogicName, Integer projectId);
 }

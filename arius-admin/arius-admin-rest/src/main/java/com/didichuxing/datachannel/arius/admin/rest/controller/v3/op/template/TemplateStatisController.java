@@ -1,6 +1,5 @@
-package com.didichuxing.datachannel.arius.admin.rest.controller.v2.console.template;
+package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.template;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V2_CONSOLE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyStaticsManager;
@@ -21,10 +20,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 @NoArgsConstructor
 @RestController()
-@RequestMapping(V2_CONSOLE + "/template/statis")
-@Api(tags = "Console-用户侧索引模板统计信息接口(REST)：见："+V3_OP)
-@Deprecated
-public class ConsoleTemplateStatisController extends BaseConsoleTemplateController {
+@RequestMapping(V3_OP + "/template/statis")
+@Api(tags = "Console-用户侧索引模板统计信息接口(REST)")
+public class TemplateStatisController extends BaseTemplateController {
 
     @Autowired
     private TemplatePhyStaticsManager templatePhyStaticsManager;

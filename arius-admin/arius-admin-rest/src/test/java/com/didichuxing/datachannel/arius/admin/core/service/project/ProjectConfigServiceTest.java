@@ -1,6 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.core.service.project;
 
-import static com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil.obj2Obj;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -93,39 +92,39 @@ class ProjectConfigServiceTest {
         final ProjectConfigPO projectConfigPO = CustomDataSource.projectConfigPO();
         final ProjectConfigDTO projectConfigDTO = ConvertUtil.obj2Obj(projectConfigPO, ProjectConfigDTO.class);
         
-        assertThat(projectConfigService.updateOrInitProjectConfig(null, null)._1().getMessage()).isEqualTo(
+        assertThat(projectConfigService.updateOrInitProjectConfig(null, null).v1().getMessage()).isEqualTo(
                 Result.buildParamIllegal("配置信息为空").getMessage());
         projectConfigDTO.setProjectId(null);
         assertThat(
-                projectConfigService.updateOrInitProjectConfig(projectConfigDTO, null)._1().getMessage()).isEqualTo(
+                projectConfigService.updateOrInitProjectConfig(projectConfigDTO, null).v1().getMessage()).isEqualTo(
                 Result.buildParamIllegal("应用ID为空").getMessage());
         projectConfigDTO.setProjectId(1);
         projectConfigDTO.setAnalyzeResponseEnable(23);
         assertThat(
-                projectConfigService.updateOrInitProjectConfig(projectConfigDTO, null)._1().getMessage()).isEqualTo(
+                projectConfigService.updateOrInitProjectConfig(projectConfigDTO, null).v1().getMessage()).isEqualTo(
                 Result.buildParamIllegal("解析响应结果开关非法").getMessage());
         projectConfigDTO.setAnalyzeResponseEnable(1);
         projectConfigDTO.setDslAnalyzeEnable(23);
         assertThat(
-                projectConfigService.updateOrInitProjectConfig(projectConfigDTO, null)._1().getMessage()).isEqualTo(
+                projectConfigService.updateOrInitProjectConfig(projectConfigDTO, null).v1().getMessage()).isEqualTo(
                 Result.buildParamIllegal("DSL分析开关非法").getMessage());
         projectConfigDTO.setDslAnalyzeEnable(1);
         projectConfigDTO.setAggrAnalyzeEnable(23);
         assertThat(
-                projectConfigService.updateOrInitProjectConfig(projectConfigDTO, null)._1().getMessage()).isEqualTo(
+                projectConfigService.updateOrInitProjectConfig(projectConfigDTO, null).v1().getMessage()).isEqualTo(
                 Result.buildParamIllegal("聚合分析开关非法").getMessage());
         projectConfigDTO.setAggrAnalyzeEnable(1);
         projectConfigDTO.setIsSourceSeparated(23);
         assertThat(
-                projectConfigService.updateOrInitProjectConfig(projectConfigDTO, null)._1().getMessage()).isEqualTo(
+                projectConfigService.updateOrInitProjectConfig(projectConfigDTO, null).v1().getMessage()).isEqualTo(
                 Result.buildParamIllegal("索引存储分离开关非法").getMessage());
         projectConfigDTO.setIsSourceSeparated(1);
         when(projectConfigDAO.checkProjectConfigByProjectId(1)).thenReturn(true);
         when(projectConfigDAO.update(any())).thenReturn(1);
-        assertThat(projectConfigService.updateOrInitProjectConfig(projectConfigDTO, null)._1().success()).isTrue();
+        assertThat(projectConfigService.updateOrInitProjectConfig(projectConfigDTO, null).v1().success()).isTrue();
         when(projectConfigDAO.checkProjectConfigByProjectId(1)).thenReturn(false);
         when(projectConfigDAO.insert(any())).thenReturn(1);
-        assertThat(projectConfigService.updateOrInitProjectConfig(projectConfigDTO, null)._1().success()).isTrue();
+        assertThat(projectConfigService.updateOrInitProjectConfig(projectConfigDTO, null).v1().success()).isTrue();
         // Verify the results
     }
     
