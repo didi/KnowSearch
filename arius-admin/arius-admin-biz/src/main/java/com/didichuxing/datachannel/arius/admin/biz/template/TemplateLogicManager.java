@@ -116,7 +116,7 @@ public interface TemplateLogicManager {
 
     Result<Void> newEditTemplate(IndexTemplateDTO param, String operator, Integer projectId);
 
-    Result<Void> delTemplate(Integer logicTemplateId, String operator) throws AdminOperateException;
+    Result<Void> delTemplate(Integer logicTemplateId, String operator, Integer projectId) throws AdminOperateException;
 
     /**
      * 模糊（精确）/分页查询模板列表接口

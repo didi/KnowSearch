@@ -224,18 +224,23 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
     /**
      * 删除逻辑模板
      *
-     * @param logicTemplateId  模板id
-     * @param operator 操作人
+     * @param logicTemplateId 模板id
+     * @param operator        操作人
+     * @param projectId
      * @return result
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result<Void> delTemplate(Integer logicTemplateId, String operator) throws AdminOperateException {
+    public Result<Void> delTemplate(Integer logicTemplateId, String operator, Integer projectId) throws AdminOperateException {
         IndexTemplatePO oldPO = indexTemplateDAO.getById(logicTemplateId);
         if (oldPO == null) {
             return Result.buildNotExist(TEMPLATE_NOT_EXIST);
         }
-
+        final Result<Void> checkProjectCorrectly = ProjectUtils.checkProjectCorrectly(IndexTemplatePO::getProjectId, oldPO,
+                projectId);
+        if (checkProjectCorrectly.failed()){
+            return checkProjectCorrectly;
+        }
         boolean succeed = (1 == indexTemplateDAO.delete(logicTemplateId));
         if (succeed) {
             Result<Void> deleteTemplateAuthResult = logicTemplateAuthService.deleteTemplateAuthByTemplateId(oldPO.getId(), AriusUser.SYSTEM.getDesc());
@@ -947,7 +952,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
     }
 
     @Override
-    public Result updateTemplateWriteRateLimit(ConsoleTemplateRateLimitDTO dto, String operator) throws ESOperateException {
+    public Result updateTemplateWriteRateLimit(ConsoleTemplateRateLimitDTO dto, String operator,Integer projectId) throws ESOperateException {
         List<IndexTemplatePhy> phyList = indexTemplatePhyService.getTemplateByLogicId(dto.getLogicId());
         for (IndexTemplatePhy indexTemplatePhy : phyList) {
             ClusterPhy clusterPhy = clusterPhyService.getClusterByName(indexTemplatePhy.getCluster());
@@ -956,6 +961,12 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
                 return Result.buildFail("指定物理集群没有开启写入限流服务");
             }
         }
+        final Integer projectIdByTemplateLogicId = indexTemplateDAO.getProjectIdByTemplateLogicId(dto.getLogicId());
+        final Result<Void> result = ProjectUtils.checkProjectCorrectly(i -> i, projectIdByTemplateLogicId, projectId);
+        if (result.failed()) {
+            return result;
+        }
+    
         IndexTemplatePO oldPO = indexTemplateDAO.getById(dto.getLogicId());
         IndexTemplatePO editTemplate = ConvertUtil.obj2Obj(dto, IndexTemplatePO.class);
         editTemplate.setId(dto.getLogicId());
@@ -969,7 +980,6 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
             if (editPhyResult.failed()) {
                 return Result.buildFail("修改限流，修改物理模板失败");
             }
-            final Integer projectId = indexTemplateDAO.getProjectIdByTemplateLogicId(dto.getLogicId());
     
             operateRecordService.save(new OperateRecord.Builder().operationTypeEnum(
                             OperateTypeEnum.QUERY_TEMPLATE_DSL_CURRENT_LIMIT_ADJUSTMENT).project(

@@ -11,7 +11,6 @@ import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.service.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
 
-@Deprecated
 public class BaseConsoleTemplateController {
 
     protected static final ILog    LOGGER = LogFactory.getLog(ConsoleTemplateController.class);

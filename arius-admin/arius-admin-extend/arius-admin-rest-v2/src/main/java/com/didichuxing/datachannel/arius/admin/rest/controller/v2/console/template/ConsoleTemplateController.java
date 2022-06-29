@@ -237,7 +237,8 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
         if (checkAuthResult.failed()) {
             return checkAuthResult;
         }
-        return templateLogicManager.delTemplate(logicId, HttpRequestUtil.getOperator(request));
+        return templateLogicManager.delTemplate(logicId, HttpRequestUtil.getOperator(request),
+                HttpRequestUtil.getProjectId(request));
     }
 
     @GetMapping("/indices/list")
@@ -315,7 +316,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
         }
         try {
             return indexTemplateService.updateTemplateWriteRateLimit(consoleTemplateRateLimitDTO,
-                    HttpRequestUtil.getOperator(request));
+                    HttpRequestUtil.getOperator(request),HttpRequestUtil.getProjectId(request));
         } catch (ESOperateException e) {
             LOGGER.info("限流调整失败", e);
             return Result.buildFail("限流调整失败！");

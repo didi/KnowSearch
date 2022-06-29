@@ -5,7 +5,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateWithCreateInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.util.RandomGenerator;
-import com.didiglobal.logi.security.util.HttpRequestUtil;
 import java.util.Arrays;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -68,7 +67,7 @@ public class TemplateLogicManagerTest extends AriusAdminApplicationTest {
         Integer templateId = 37519;
         Result<Void> result = null;
         try {
-            result = templateLogicManager.upgrade(templateId, "admin", HttpRequestUtil.getProjectId(request));
+            result = templateLogicManager.upgrade(templateId, "admin", 1);
         } catch (AdminOperateException e) {
             e.printStackTrace();
         }

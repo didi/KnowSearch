@@ -70,7 +70,7 @@ public class TemplateSchemaController extends BaseTemplateController {
     public Result<Void> modifySchema(HttpServletRequest request,
                                @RequestBody ConsoleTemplateSchemaDTO schemaDTO) throws AdminOperateException {
 
-        Result<Void> checkAuthResult = checkProjectAuth(schemaDTO.getLogicId(), HttpRequestUtil.getProjectId(request));
+        Result<Void> checkAuthResult = checkProjectAuth(schemaDTO.getLogicId());
         if (checkAuthResult.failed()) {
             return checkAuthResult;
         }

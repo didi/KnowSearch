@@ -468,9 +468,9 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     }
 
     @Override
-    public Result<Void> delTemplate(Integer logicTemplateId, String operator)
+    public Result<Void> delTemplate(Integer logicTemplateId, String operator, Integer projectId)
             throws AdminOperateException {
-        return indexTemplateService.delTemplate(logicTemplateId, operator);
+        return indexTemplateService.delTemplate(logicTemplateId, operator,projectId);
     }
 
     @Override
