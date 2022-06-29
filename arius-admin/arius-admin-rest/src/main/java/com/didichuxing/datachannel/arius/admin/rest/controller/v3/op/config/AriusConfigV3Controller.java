@@ -73,7 +73,7 @@ public class AriusConfigV3Controller {
         return ariusConfigInfoService.addConfig(param, HttpRequestUtil.getOperator(request));
     }
 
-    @PutMapping("/edit")
+    @PutMapping()
     @ResponseBody
     @ApiOperation(value = "编辑配置接口" )
     public Result<Void> editConfig(HttpServletRequest request, @RequestBody AriusConfigInfoDTO param) {
