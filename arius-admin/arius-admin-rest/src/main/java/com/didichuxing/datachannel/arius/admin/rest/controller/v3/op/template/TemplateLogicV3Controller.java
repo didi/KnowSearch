@@ -47,7 +47,7 @@ public class TemplateLogicV3Controller {
     @Autowired
     private TemplateLogicSettingsManager templateLogicSettingsManager;
 
-    @GetMapping("/listNames")
+    @GetMapping("/name")
     @ResponseBody
     @ApiOperation(value = "获取逻辑模板名称列表接口")
     public Result<List<String>> listTemplateLogicNames(HttpServletRequest request) {
@@ -62,21 +62,21 @@ public class TemplateLogicV3Controller {
         return templateLogicManager.pageGetConsoleTemplateVOS(condition, HttpRequestUtil.getProjectId(request));
     }
 
-    @GetMapping("/{templateName}/nameCheck")
+    @GetMapping("/{templateName}/name-check")
     @ResponseBody
     @ApiOperation(value = "校验模板名称是否合法")
     public Result<Void> checkTemplateValidForCreate(@PathVariable("templateName") String templateName) {
         return templateLogicManager.checkTemplateValidForCreate(templateName);
     }
 
-    @GetMapping("/{templateId}/checkEditMapping/")
+    @GetMapping("/{templateId}/check-edit-mapping/")
     @ResponseBody
     @ApiOperation(value = "校验可否编辑模板mapping")
     public Result<Boolean> checkTemplateEditMapping(@PathVariable Integer templateId) {
         return templateLogicManager.checkTemplateEditMapping(templateId);
     }
 
-    @GetMapping("/{templateId}/{templateSrvId}/checkEditTemplateSrv/")
+    @GetMapping("/{templateId}/{templateSrvId}/check-edit-template-srv/")
     @ResponseBody
     @ApiOperation(value = "校验模板是否可以使用指定的索引模板服务，例如是否可以编辑mapping,setting等")
     @ApiImplicitParams({
@@ -140,7 +140,7 @@ public class TemplateLogicV3Controller {
         return templateLogicManager.create(param, HttpRequestUtil.getOperator(request), HttpRequestUtil.getProjectId(request));
     }
 
-    @PutMapping("/edit")
+    @PutMapping()
     @ResponseBody
     @ApiOperation(value = "用户编辑模板")
     public Result<Void> editTemplate(HttpServletRequest request, @RequestBody IndexTemplateDTO param) {
@@ -157,7 +157,7 @@ public class TemplateLogicV3Controller {
         return templateLogicManager.clearIndices(templateId, indices, HttpRequestUtil.getProjectId(request));
     }
 
-    @PutMapping("/{templateId}/{shardNum}/adjustShard")
+    @PutMapping("/{templateId}/{shardNum}/adjust-shard")
     @ResponseBody
     @ApiOperation(value = "扩缩容")
     public Result<Void> adjustShard(HttpServletRequest request,
