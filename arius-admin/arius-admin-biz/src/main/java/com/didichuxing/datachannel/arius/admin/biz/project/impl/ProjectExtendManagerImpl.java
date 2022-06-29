@@ -113,9 +113,9 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
                     config, operator);
              setAdminProjectExtendVO(projectExtendVO);
             // 设置项目配置
-            if (resultProjectConfigTuple._1().success()) {
+            if (resultProjectConfigTuple.v1().success()) {
                 projectExtendVO.setConfig(
-                        ConvertUtil.obj2Obj(resultProjectConfigTuple._2(), ProjectConfigVO.class));
+                        ConvertUtil.obj2Obj(resultProjectConfigTuple.v2(), ProjectConfigVO.class));
                 
             }
             //7. 写入操作日志
@@ -607,11 +607,11 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
         esUserDTO.setProjectId((data).getId());
         esUserDTO.setMemo("创建项目es user");
         final TupleTwo<Result, ESUserPO> result = esUserService.registerESUser(esUserDTO, operator);
-        if (result._1().success()){
+        if (result.v1().success()){
             operateRecordService.save(
                     new OperateRecord(data.getProjectName(), OperateTypeEnum.APPLICATION_ACCESS_MODE,
                             TriggerWayEnum.MANUAL_TRIGGER,
-                            String.format("新增访问模式:%s", ProjectSearchTypeEnum.TEMPLATE.getDesc()), operator,result._2()
+                            String.format("新增访问模式:%s", ProjectSearchTypeEnum.TEMPLATE.getDesc()), operator,result.v2()
                             .getId()));
 
         }

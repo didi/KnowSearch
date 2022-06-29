@@ -241,13 +241,13 @@ public enum OperateTypeEnum {
             return   Arrays.stream(OperateTypeEnum.values())
                  .map(operateTypeEnum -> Tuples.of(operateTypeEnum.getOperationType(),operateTypeEnum.getCode()))
                  .distinct()
-                .collect(Collectors.toMap(TupleTwo::_2, TupleTwo::_1));
+                .collect(Collectors.toMap(TupleTwo::v2, TupleTwo::v1));
         }
         return Arrays.stream(OperateTypeEnum.values())
                 .filter(operationTypeEnum -> operationTypeEnum.getModule().equals(moduleEnum))
                  .map(operateTypeEnum -> Tuples.of(operateTypeEnum.getOperationType(),operateTypeEnum.getCode()))
                  .distinct()
-                .collect(Collectors.toMap(TupleTwo::_2, TupleTwo::_1));
+                .collect(Collectors.toMap(TupleTwo::v2, TupleTwo::v1));
     }
      public static OperateTypeEnum getOperationTypeEnum(Integer code) {
         return Arrays.stream(OperateTypeEnum.values()).filter(operationTypeEnum -> operationTypeEnum.getCode().equals(code))

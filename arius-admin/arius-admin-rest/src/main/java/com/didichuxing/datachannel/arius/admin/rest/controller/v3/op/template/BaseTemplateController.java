@@ -1,9 +1,8 @@
-package com.didichuxing.datachannel.arius.admin.rest.controller.v2.console.template;
+package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.template;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
-import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateLabelService;
 import com.didiglobal.logi.log.ILog;
@@ -11,10 +10,9 @@ import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.service.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
 
-@Deprecated
-public class BaseConsoleTemplateController {
+public class BaseTemplateController {
 
-    protected static final ILog    LOGGER = LogFactory.getLog(ConsoleTemplateController.class);
+    protected static final ILog    LOGGER = LogFactory.getLog(TemplateController.class);
 
     @Autowired
     protected IndexTemplateService indexTemplateService;
@@ -31,7 +29,7 @@ public class BaseConsoleTemplateController {
      * @param projectId App Id
      * @return
      */
-    protected Result<Void> checkAppAuth(Integer logicId, Integer projectId) {
+    protected Result<Void> checkProjectAuth(Integer logicId, Integer projectId) {
 
         if (AriusObjUtils.isNull(logicId)) {
             return Result.buildParamIllegal("索引id为空");
@@ -41,22 +39,20 @@ public class BaseConsoleTemplateController {
             return Result.buildParamIllegal("应用Id为空");
         }
 
-        IndexTemplate templateLogic = indexTemplateService.getLogicTemplateById(logicId);
-        if (templateLogic == null) {
+        Integer projectIdByTemplateLogicId = indexTemplateService.getProjectIdByTemplateLogicId(logicId);
+        if (projectIdByTemplateLogicId == null) {
             return Result.buildNotExist("索引不存在");
         }
 
         if (templateLabelService.isImportantIndex(logicId)) {
             return Result.buildOpForBidden("禁止操作重要索引，请联系Arius服务号处理");
         }
-
-        if (AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
-            return Result.buildSucc();
+        final Result<Void> result = ProjectUtils.checkProjectCorrectly(i -> i, projectIdByTemplateLogicId, projectId);
+        if (result.failed()) {
+            return result;
         }
-
-        if (!templateLogic.getProjectId().equals(projectId)) {
-            return Result.buildOpForBidden("您无权对该索引进行操作");
-        }
+    
+        
 
         return Result.buildSucc();
     }

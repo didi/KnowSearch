@@ -237,7 +237,6 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
         }
 
         boolean succeed = (1 == indexTemplateDAO.delete(logicTemplateId));
-
         if (succeed) {
             Result<Void> deleteTemplateAuthResult = logicTemplateAuthService.deleteTemplateAuthByTemplateId(oldPO.getId(), AriusUser.SYSTEM.getDesc());
             if (deleteTemplateAuthResult.failed()) {
@@ -245,6 +244,8 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
             } else {
                 LOGGER.info("class=TemplateLogicServiceImpl||method=delTemplate||logicId={}||msg=deleteTemplateAuthByTemplateId succ", logicTemplateId);
             }
+            //一并下线索引模版配置
+            indexTemplateConfigDAO.deleteByLogicId(logicTemplateId);
 
             Result<Void> result = indexTemplatePhyService.delTemplateByLogicId(logicTemplateId, operator);
             if (result.failed()) {

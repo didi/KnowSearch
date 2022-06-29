@@ -1,6 +1,5 @@
-package com.didichuxing.datachannel.arius.admin.rest.controller.v2.console.template;
+package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.template;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V2_CONSOLE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterLogicManager;
@@ -60,12 +59,11 @@ import org.springframework.web.bind.annotation.RestController;
  * @date 2019/5/15
  */
 @RestController
-@RequestMapping(V2_CONSOLE + "/template")
-@Api(tags = "Console-用户侧索引模板接口(REST)：见："+V3_OP)
-@Deprecated
-public class ConsoleTemplateController extends BaseConsoleTemplateController {
+@RequestMapping(V3_OP + "/template")
+@Api(tags = "Console-用户侧索引模板接口(REST)")
+public class TemplateController extends BaseTemplateController {
 
-    private static final ILog        LOGGER = LogFactory.getLog(ConsoleTemplateController.class);
+    private static final ILog        LOGGER = LogFactory.getLog(TemplateController.class);
 
     private static final String INDEX_NOT_EXISTS_TIPS = "索引不存在";
  
@@ -128,7 +126,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
         consoleTemplateDetail.setAppName(getAppName(indexTemplateLogicWithCluster.getProjectId()));
         consoleTemplateDetail.setIndices(getLogicTemplateIndices(logicId));
 
-        Result<Void> checkAuthResult = checkAppAuth(logicId, HttpRequestUtil.getProjectId(request));
+        Result<Void> checkAuthResult = checkProjectAuth(logicId, HttpRequestUtil.getProjectId(request));
         consoleTemplateDetail.setEditable(checkAuthResult.success());
         // 获取indexRollover功能开启状态
         consoleTemplateDetail.setDisableIndexRollover(Optional.ofNullable(indexTemplateService.getTemplateConfig(logicId))
@@ -190,7 +188,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "header", dataType = "String", name = HttpRequestUtil.PROJECT_ID, value = "应用ID", required = true) })
     public Result<Void> clearLogicTemplateIndices(HttpServletRequest request,
                                             @RequestBody ConsoleTemplateClearDTO clearDTO) throws ESOperateException {
-        Result<Void> checkAuthResult = checkAppAuth(clearDTO.getLogicId(), HttpRequestUtil.getProjectId(request));
+        Result<Void> checkAuthResult = checkProjectAuth(clearDTO.getLogicId(), HttpRequestUtil.getProjectId(request));
         if (checkAuthResult.failed()) {
             return checkAuthResult;
         }
@@ -233,7 +231,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
                          @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "索引ID", required = true) })
     public Result<Void> deleteTemplate(HttpServletRequest request,
                                  @RequestParam("logicId") Integer logicId) throws AdminOperateException {
-        Result<Void> checkAuthResult = checkAppAuth(logicId, HttpRequestUtil.getProjectId(request));
+        Result<Void> checkAuthResult = checkProjectAuth(logicId, HttpRequestUtil.getProjectId(request));
         if (checkAuthResult.failed()) {
             return checkAuthResult;
         }
