@@ -7,11 +7,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterReg
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionWithNodeInfoVO;
 import java.util.List;
 
-/**
- * @Author: lanxinzheng
- * @Date: 2021/1/7
- * @Comment:
- */
 public interface ClusterRegionManager {
 
     /**
@@ -69,5 +64,5 @@ public interface ClusterRegionManager {
      * @param clusterName         物理集群名称
      * @return                    Result<List<ClusterRegionVO>>
      */
-    Result<List<ClusterRegionVO>> listNoEmptyClusterRegionByClusterName(String clusterName);
+    Result<List<ClusterRegionVO>> listNotEmptyClusterRegionByClusterName(String clusterName);
 }

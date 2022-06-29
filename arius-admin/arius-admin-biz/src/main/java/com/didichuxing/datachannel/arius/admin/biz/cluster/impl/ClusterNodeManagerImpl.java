@@ -109,23 +109,27 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
     @Transactional(rollbackFor = Exception.class)
     public Result<List<Long>> createMultiNode2Region(List<ClusterRegionWithNodeInfoDTO> params, String operator,
                                                      Integer projectId) {
-         final Result<Void> result = ProjectUtils.checkProjectCorrectly(i -> i, projectId,projectId);
+        final Result<Void> result = ProjectUtils.checkProjectCorrectly(i -> i, projectId,projectId);
         if (result.failed()){
             return Result.buildFail(result.getMessage());
         }
+
         List<Long> regionIdLis = Lists.newArrayList();
         for (ClusterRegionWithNodeInfoDTO param : params) {
             Result<Boolean> checkRet = baseCheckParamValid(param);
             if (checkRet.failed()) { return Result.buildFrom(checkRet);}
+
             if (clusterRegionService.isExistByRegionName(param.getName())) {
                 return Result.buildFail(String.format("region名称[%s]已经存在", param.getName()));
             }
+
             if (CollectionUtils.isEmpty(param.getBindingNodeIds())) { return Result.buildFail("region节点集合为空");}
 
             Result<Long> addRegionRet = clusterRegionService.createPhyClusterRegion(param.getPhyClusterName(), param.getBindingNodeIds(),
                     param.getName(), operator);
             if (addRegionRet.success()) {
                 param.setId(addRegionRet.getData());
+                // 调用扩缩容region接口来添加region
                 Result<Boolean> booleanResult = editNode2Region(param);
                 if (booleanResult.success()) {
                     // 2. 操作记录 :Region变更
@@ -136,7 +140,6 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
                                     .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
                                     .content(String.format("新增region[%s]", param.getName()))
                                     .build());
-                    // 3. 发送消息
                     regionIdLis.add(addRegionRet.getData());
                 }else {
                     throw new AriusRunTimeException(addRegionRet.getMessage(), FAIL);
