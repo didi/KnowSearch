@@ -211,7 +211,7 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
             String key = oneLevelType + "_" + metric.getType();
             if (thresholdValues.get(metric.getType()) != null&&thresholdValues.containsKey(key)) {
                 String valueStr = ariusConfigInfoService.stringSetting(DASHBOARD_THRESHOLD, metric.getType(), thresholdValues.get(key));
-                Double configValue =  getValueTry(valueStr,v->Double.valueOf(v),String.format("平台配置:[%S]错误,需要类型:%S",key,Double.class.getSimpleName()));
+                Double configValue =  conversionType(valueStr,v->Double.valueOf(v),String.format("平台配置:[%S]错误,需要类型:%S",key,Double.class.getSimpleName()));
                 metric.setMetricListContents(metric.getMetricListContents().stream()
                         .filter(metricListContent -> metricListContent.getValue() > configValue).collect(Collectors.toList()));
             }
@@ -264,7 +264,7 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
         return Result.buildSucc();
     }
 
-    private <R> R getValueTry(String value, Function<String, R> convertFunc, String errMsg) throws AdminOperateException {
+    private <R> R conversionType(String value, Function<String, R> convertFunc, String errMsg) throws AdminOperateException {
         try {
             return convertFunc.apply(value);
         } catch (Exception e) {
