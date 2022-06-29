@@ -197,7 +197,7 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
     }
 
     @Override
-    public Result<List<ClusterRegionVO>> listNoEmptyClusterRegionByClusterName(String clusterName) {
+    public Result<List<ClusterRegionVO>> listNotEmptyClusterRegionByClusterName(String clusterName) {
         Result<List<ClusterRegionWithNodeInfoVO>> ret = listClusterRegionWithNodeInfoByClusterName(clusterName);
         if (ret.failed()) { return Result.buildFrom(ret);}
 
@@ -217,7 +217,6 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
      * 对于逻辑集群绑定的物理集群的版本进行一致性校验
      *
      * @param param     逻辑集群Region
-     * @param projectId
      * @return
      */
     private Result<Void> boundPhyClusterVersionsCheck(ESLogicClusterWithRegionDTO param) {
