@@ -6,9 +6,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResu
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterLogicConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicPhyRelationVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicTemplateIndexCountVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
@@ -123,9 +123,8 @@ public class ESLogicClusterOpV3Controller {
     //超级应展示全部物理集群、普通应用展示普通应用有权限的逻辑集群
     @GetMapping("/cluster-phy-relation")
     @ResponseBody
-    @ApiOperation(value = "根据项目id获取不同权限的集群映射")
-    public Result<List<Tuple<String, ClusterLogicPhyRelationVO>>>  getClusterRelationByProjectId(HttpServletRequest request) {
+    @ApiOperation(value = "根据项目id获取逻辑集群与物理集群映射")
+    public Result<List<Tuple<String, ClusterPhyVO>>>  getClusterRelationByProjectId(HttpServletRequest request) {
         return clusterLogicManager.getClusterRelationByProjectId(HttpRequestUtil.getProjectId(request));
     }
-
 }
