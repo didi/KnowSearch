@@ -297,7 +297,9 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
                 ids.addAll(list);
                 phyCluster2logicClusterIds.put(region.getPhyClusterName(), ids);
                 list.forEach(id -> {
-                    logicClusterId2Region.put(id, ConvertUtil.obj2Obj(region, ClusterRegionVO.class));
+                    logicClusterId2Region.put(id, ConvertUtil.obj2Obj(region, ClusterRegionVO.class, regionVO -> {
+                        regionVO.setClusterName(region.getPhyClusterName());
+                    }));
                 });
                 logicIds.addAll(list);
             });
