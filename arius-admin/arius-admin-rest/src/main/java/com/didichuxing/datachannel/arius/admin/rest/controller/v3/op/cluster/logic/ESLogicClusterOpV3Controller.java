@@ -50,7 +50,7 @@ public class ESLogicClusterOpV3Controller {
     
     @GetMapping()
     @ResponseBody
-    @ApiOperation(value = "根据projectId获取有权限的逻辑或物理集群信息")
+    @ApiOperation(value = "根据projectId获取有权限的逻辑集群信息")
     public Result<List<ClusterLogicVO>> getAppLogicClusterInfo(HttpServletRequest request) {
         return clusterLogicManager.getLogicClustersByProjectId(HttpRequestUtil.getProjectId(request));
     }
