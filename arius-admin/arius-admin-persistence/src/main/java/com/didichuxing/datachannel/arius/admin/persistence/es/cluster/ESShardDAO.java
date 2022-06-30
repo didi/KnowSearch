@@ -15,8 +15,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterQuickCommandEnum.SHARD;
-import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterQuickCommandEnum.SHARD_ASSIGNMENT;
+import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterQuickCommandMethodsEnum.SHARD;
+import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterQuickCommandMethodsEnum.SHARD_ASSIGNMENT;
 
 /**
  * Created by linyunan on 3/22/22

@@ -16,11 +16,11 @@
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
         <result column="health" jdbcType="TINYINT" property="health"/>
+        <result column="data_node_spec" jdbcType="VARCHAR" property="dataNodeSpec"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-        id
-        , `name`, `type`, project_id, data_center, responsible, memo, quota, `level`, config_json, create_time, update_time, health
+        id , `name`, `type`, project_id, data_center, responsible, memo, quota, `level`, config_json, create_time, update_time, health,data_node_spec
     </sql>
 
     <select id="listByCondition"

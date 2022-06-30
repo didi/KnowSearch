@@ -60,6 +60,12 @@ import com.didiglobal.logi.security.common.vo.project.ProjectVO;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.DEFAULT_CLUSTER_HEALTH;
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.ADD;
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.EDIT;
+import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.DATA_NODE;
+import static java.util.stream.Collectors.toList;
+
 /**
  * @author d06679
  * @date 2019/3/25
@@ -144,7 +150,7 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
         if (logicCluster == null) {
             return Result.buildNotExist("逻辑集群不存在");
         }
-        
+
         if (hasLogicClusterWithTemplates(logicClusterId)) {
             return Result.build(ResultType.IN_USE_ERROR.getCode(), "逻辑集群使用中");
         }
@@ -315,7 +321,6 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
 
         return ConvertUtil.list2List(hasAuthLogicClusters, ClusterLogic.class);
     }
-
     @Override
     public Boolean isClusterLogicExists(Long resourceId) {
         return null != logicClusterDAO.getById(resourceId);
@@ -451,7 +456,7 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
 
         return new ArrayList<>(pluginMap.values());
     }
-    
+
     /**
      * @param clusterLogicId 集群逻辑id
      * @return
@@ -460,7 +465,7 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
     public Integer getProjectIdById(Long clusterLogicId) {
         return logicClusterDAO.getProjectIdById(clusterLogicId);
     }
-    
+
     @Override
     public Result<Long> addPlugin(Long logicClusterId, PluginDTO pluginDTO, String operator) {
 
@@ -515,16 +520,6 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
     }
 
     @Override
-    public ClusterLogicDiskUsedInfoPO getDiskInfo(Long id) {
-        ClusterRegion clusterRegion =clusterRegionService.getRegionByLogicClusterId(id);
-        List<ESClusterRoleHostPO> esClusterRoleHostPOS = clusterRoleHostDAO.listByRegionId(Math.toIntExact(clusterRegion.getId()));
-        //节点名称列表
-        List<String> nodeList = esClusterRoleHostPOS.stream().map(ESClusterRoleHostPO::getNodeSet).collect(toList());
-        String clusterName =clusterRegion.getPhyClusterName();
-        return ariusStatsNodeInfoESDAO.getClusterLogicDiskUsedInfo(clusterName, nodeList);
-    }
-
-    @Override
     public List<ClusterLogic> listClusterLogicByProjectIdAndName(Integer projectId, String clusterName) {
         return ConvertUtil.list2List(logicClusterDAO.listByNameAndProjectId(clusterName, projectId),
                 ClusterLogic.class);
@@ -575,7 +570,7 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
                 if (result.failed()) {
                     return result;
                 }
-        
+
             } else {
                 //校验路径
                 final Result<Void> result = ProjectUtils.checkProjectCorrectly(ClusterLogicPO::getProjectId, oldPO,

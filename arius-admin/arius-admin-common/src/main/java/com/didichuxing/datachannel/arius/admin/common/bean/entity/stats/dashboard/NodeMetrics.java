@@ -65,4 +65,9 @@ public class NodeMetrics {
      * 节点任务耗时(单位 ms)
      */
     private Long    taskConsuming;
+
+    /**
+     * 消耗时间 （开始采集到结束采集的时间）
+     */
+    private Long   elapsedTime;
 }

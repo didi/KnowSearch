@@ -199,13 +199,6 @@ public interface ClusterLogicService {
     List<ClusterLogic> getClusterLogicListByIds(List<Long> clusterLogicIdList);
 
     /**
-     * 获取磁盘信息
-     * @param id
-     * @return
-     */
-    ClusterLogicDiskUsedInfoPO getDiskInfo(Long id);
-    
-    /**
      * 获取项目id通过clusterLogicId
      *
      * @param clusterLogicId 集群逻辑id

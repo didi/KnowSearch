@@ -700,8 +700,10 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
 
         // 转化为视图列表展示
         List<ConsoleTemplateVO> consoleTemplateVOLists = new ArrayList<>();
-        templateByPhyCluster.forEach(indexTemplatePhyWithLogic -> consoleTemplateVOLists.add(buildTemplateVO(indexTemplatePhyWithLogic)));
-
+        templateByPhyCluster.stream()
+                //todo：Object.isnull
+                .filter(indexTemplatePhyWithLogic->indexTemplatePhyWithLogic.getLogicTemplate()!=null)
+                .forEach(indexTemplatePhyWithLogic -> consoleTemplateVOLists.add(buildTemplateVO(indexTemplatePhyWithLogic)));
         return Result.buildSucc(consoleTemplateVOLists);
     }
 
@@ -858,12 +860,11 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
      * 构建逻辑模板视图
      */
     private ConsoleTemplateVO buildTemplateVO(IndexTemplatePhyWithLogic param) {
-        if (param == null) {
-            return null;
+        ConsoleTemplateVO consoleTemplateVO = new ConsoleTemplateVO();
+        if (param != null) {
+            consoleTemplateVO = ConvertUtil.obj2Obj(param.getLogicTemplate(), ConsoleTemplateVO.class);
+            consoleTemplateVO.setClusterPhies(Collections.singletonList(param.getCluster()));
         }
-
-        ConsoleTemplateVO consoleTemplateVO = ConvertUtil.obj2Obj(param.getLogicTemplate(), ConsoleTemplateVO.class);
-        consoleTemplateVO.setClusterPhies(Collections.singletonList(param.getCluster()));
         return consoleTemplateVO;
     }
 
