@@ -3,6 +3,7 @@ package com.didichuxing.datachannel.arius.admin.rest.interceptor;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.HEALTH;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.SWAGGER;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V2_THIRD_PART;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_SECURITY;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_THIRD_PART;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_WHITE_PART;
 import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_COMMON_GROUP;
@@ -60,7 +61,7 @@ public class PermissionInterceptor implements HandlerInterceptor {
                 request.getRequestURI(), e);
         }
         List<String> whiteMappingValues = Lists.newArrayList(HEALTH,  V2_THIRD_PART, V3_THIRD_PART,
-                 V3_WHITE_PART);
+                 V3_WHITE_PART,V3_SECURITY);
     
         return loginManager.interceptorCheck(request, response, classRequestMappingValue,whiteMappingValues);
     }
