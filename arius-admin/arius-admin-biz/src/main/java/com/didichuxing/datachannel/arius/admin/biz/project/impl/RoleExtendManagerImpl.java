@@ -55,9 +55,12 @@ public class RoleExtendManagerImpl implements RoleExtendManager {
 			return Result.buildFail(String.format("属于内置角色:[%s]，不可以被删除", id));
 		}
 		try {
+			
 			final RoleDeleteCheckVO roleDeleteCheckVO = roleService.checkBeforeDelete(id);
 			if (CollectionUtils.isEmpty(roleDeleteCheckVO.getUserNameList())){
-				return Result.buildFail(roleDeleteCheckVO);
+				final RoleVO roleVO = roleService.getRoleDetailByRoleId(id);
+				return Result.buildFailWithMsg(roleDeleteCheckVO,String.format("角色:[%s]已经分配给用了,不允许删除,请先解除分配的用户再试！",
+						roleVO.getRoleName()));
 			}
 			roleService.deleteRoleByRoleId(id, request);
 			operateRecordService.save(new OperateRecord.Builder()
@@ -173,10 +176,7 @@ public class RoleExtendManagerImpl implements RoleExtendManager {
 		return Result.buildSucc(roleService.getRoleBriefListByRoleName(roleName));
 	}
 	
-	@Override
-	public Result<RoleDeleteCheckVO> checkBeforeDelete(Integer roleId) {
-		return Result.buildSucc(roleService.checkBeforeDelete(roleId));
-	}
+
 	
 
 }
