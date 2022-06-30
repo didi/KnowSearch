@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -49,11 +50,15 @@ public class RoleExtendManagerImpl implements RoleExtendManager {
 	 * @return
 	 */
 	@Override
-	public Result<Void> deleteRoleByRoleId(Integer id, HttpServletRequest request) {
+	public Result deleteRoleByRoleId(Integer id, HttpServletRequest request) {
 		if (AuthConstant.RESOURCE_OWN_ROLE_ID.equals(id) || AuthConstant.ADMIN_ROLE_ID.equals(id)) {
 			return Result.buildFail(String.format("属于内置角色:[%s]，不可以被删除", id));
 		}
 		try {
+			final RoleDeleteCheckVO roleDeleteCheckVO = roleService.checkBeforeDelete(id);
+			if (CollectionUtils.isEmpty(roleDeleteCheckVO.getUserNameList())){
+				return Result.buildFail(roleDeleteCheckVO);
+			}
 			roleService.deleteRoleByRoleId(id, request);
 			operateRecordService.save(new OperateRecord.Builder()
 							.userOperation(HttpRequestUtil.getOperator(request))

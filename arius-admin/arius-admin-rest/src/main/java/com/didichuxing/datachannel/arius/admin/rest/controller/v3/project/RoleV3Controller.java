@@ -61,7 +61,7 @@ public class RoleV3Controller {
 	@DeleteMapping("/{id}")
 	@ApiOperation(value = "删除角色", notes = "根据角色id删除角色")
 	@ApiImplicitParam(name = "id", value = "角色id", dataType = "int", required = true)
-	public Result<Void> delete(@PathVariable Integer id, HttpServletRequest request) {
+	public Result delete(@PathVariable Integer id, HttpServletRequest request) {
 		
 		return roleExtendManager.deleteRoleByRoleId(id, request);
 	}
