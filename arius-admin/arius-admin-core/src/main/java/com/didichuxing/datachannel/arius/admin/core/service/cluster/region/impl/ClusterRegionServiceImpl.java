@@ -438,8 +438,9 @@ public class ClusterRegionServiceImpl implements ClusterRegionService {
 
         // 获取物理集群对应的逻辑集群，进行去重的操作
         Set<Long> logicClusterIds = Sets.newHashSet();
-        clusterRegions.forEach(clusterRegion -> logicClusterIds.addAll(new HashSet<>(ListUtils.string2LongList(clusterRegion.getLogicClusterIds()))));
-        return logicClusterIds;
+        clusterRegions.forEach(clusterRegion -> logicClusterIds
+            .addAll(new HashSet<>(ListUtils.string2LongList(clusterRegion.getLogicClusterIds()))));
+        return logicClusterIds.stream().filter(logicClusterId -> logicClusterId > 0).collect(Collectors.toSet());
     }
 
     @Override

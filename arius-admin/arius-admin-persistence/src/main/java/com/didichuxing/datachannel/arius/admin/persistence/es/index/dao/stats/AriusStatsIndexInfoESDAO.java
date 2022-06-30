@@ -1103,7 +1103,7 @@ public class AriusStatsIndexInfoESDAO extends BaseAriusStatsESDAO {
             return new ArrayList<>();
         }
 
-        long startTimeForOneInterval = timePoint - topTimeStep * ONE_MIN;
+        long startTimeForOneInterval = timePoint - topTimeStep;
         long endTimeForOneInterval = timePoint;
 
         String dsl = dslLoaderUtil.getFormatDslByFileName(

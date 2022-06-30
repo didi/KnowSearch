@@ -494,11 +494,6 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
 
     @Override
     public List<ClusterLogic> pagingGetClusterLogicByCondition(ClusterLogicConditionDTO param) {
-        String sortTerm = null == param.getSortTerm() ? SortConstant.ID : param.getSortTerm();
-        String sortType = param.getOrderByDesc() ? SortConstant.DESC : SortConstant.ASC;
-        param.setSortTerm(sortTerm);
-        param.setSortType(sortType);
-        param.setFrom((param.getPage() - 1) * param.getSize());
         List<ClusterLogicPO> clusters = Lists.newArrayList();
         try {
             clusters = logicClusterDAO.pagingByCondition(param);
