@@ -24,6 +24,8 @@ import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import com.didiglobal.logi.security.service.ProjectService;
+import com.google.common.collect.Lists;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -145,7 +147,10 @@ public class ClusterLogicPageSearchHandle extends AbstractPageSearchHandle<Clust
 
     @Override
     protected void initCondition(ClusterLogicConditionDTO condition, Integer projectId) {
-        condition.setProjectId(projectId);
+        if (!AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
+            // 非超级管理员，获取拥有的逻辑集群对应的物理集群列表
+            condition.setProjectId(projectId);
+        }
         String sortTerm = null == condition.getSortTerm() ? SortConstant.ID : condition.getSortTerm();
         String sortType = condition.getOrderByDesc() ? SortConstant.DESC : SortConstant.ASC;
         condition.setSortTerm(sortTerm);

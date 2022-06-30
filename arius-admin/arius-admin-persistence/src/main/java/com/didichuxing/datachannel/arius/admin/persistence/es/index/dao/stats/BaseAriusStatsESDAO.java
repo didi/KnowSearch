@@ -80,7 +80,7 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
     public static final String                                            BUCKETS_PATH =  "buckets_path";
     public static final String                                            HISTS_GT =  "hist>";
     public static final String                                            BUCKET =  "_bucket";
-    public static final String                                            VALUE =  "_value";
+    public static final String                                            VALUE =  "value";
 
 
 
@@ -371,7 +371,7 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
             bucketsPath.put(BUCKETS_PATH, HISTS_GT + metricName);
             bucket.put(topMethod + BUCKET, bucketsPath);
 
-            aggsSubSubCellMap.put(metricName + "_" + topMethod + VALUE, bucket);
+            aggsSubSubCellMap.put(metricName + "_" + topMethod + "_"+VALUE, bucket);
             JSONObject jsonObject = new JSONObject(aggsSubSubCellMap);
             String str = jsonObject.toJSONString();
             sb.append(str, 1, str.length() - 1);
@@ -726,12 +726,12 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
             if (null != esBucket.getUnusedMap().get(KEY)) {
                 MetricsContent metricsContent = new MetricsContent();
                 String itemName = esBucket.getUnusedMap().get(KEY).toString();
-                    metricsContent.setName(itemName);
-                    //例如：http-current_open_max_value
-                    ESAggr esAggr = esBucket.getAggrMap().get(key + "_" + topMethod + "_value");
-                    Double valueInTimePeriod = Double.valueOf(esAggr.getUnusedMap().get("value").toString());
-                    metricsContent.setValueInTimePeriod(valueInTimePeriod);
-                    metricsContents.add(metricsContent);
+                metricsContent.setName(itemName);
+                //例如：http-current_open_max_value
+                ESAggr esAggr = esBucket.getAggrMap().get(key + "_" + topMethod + "_value");
+                Double valueInTimePeriod = Optional.ofNullable(esAggr.getUnusedMap().get("value")).map(val -> Double.valueOf(val.toString())).orElse(0D);
+                metricsContent.setValueInTimePeriod(valueInTimePeriod);
+                metricsContents.add(metricsContent);
             }
         });
         return metricsContents;
