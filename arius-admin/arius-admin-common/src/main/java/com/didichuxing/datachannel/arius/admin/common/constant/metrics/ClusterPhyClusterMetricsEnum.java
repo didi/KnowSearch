@@ -15,6 +15,8 @@ public enum ClusterPhyClusterMetricsEnum {
 
     BASIC("basic", "基本指标"),
 
+    ELAPSEDTIME("elapsedTime", "采集用时"),
+
 /*************************************1.CPU**************************************/
     /**
      * 单位：%

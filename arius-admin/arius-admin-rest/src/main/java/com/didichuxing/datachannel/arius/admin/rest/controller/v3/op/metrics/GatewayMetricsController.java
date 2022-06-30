@@ -1,19 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.metrics;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
-
 import com.didichuxing.datachannel.arius.admin.biz.gateway.GatewayManager;
 import com.didichuxing.datachannel.arius.admin.biz.metrics.GatewayMetricsManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.ClientNodeDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayDslDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayIndexDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayMetricsDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayNodeDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayOverviewDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayProjectDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MultiGatewayNodesDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.gateway.GatewayOverviewMetricsVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.top.VariousLineChartMetricsVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.GatewayMetricsTypeEnum;
@@ -21,18 +11,16 @@ import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiModelProperty;
 import io.swagger.annotations.ApiOperation;
-import java.util.List;
-import java.util.stream.Collectors;
-import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
 @RestController
 @RequestMapping({V3_OP + "/gateway/metrics", V3 + "/metrics/gateway" })
@@ -52,19 +40,19 @@ public class GatewayMetricsController {
     }
 
     @GetMapping("/config/{group}")
-    @ApiOperation(value = "获取不同组的指标", notes = "")
+    @ApiOperation(value = "获取不同组的指标")
     public Result<List<String>> getGatewayMetrics(@PathVariable String group) {
         return gatewayMetricsManager.getGatewayMetricsEnums(group);
     }
 
     @GetMapping("/dsl-md5")
-    @ApiOperation(value = "获取当前项目下的dslMd5列表", notes = "")
+    @ApiOperation(value = "获取当前项目下的dslMd5列表")
     public Result<List<String>> getDslMd5List(Long startTime, Long endTime, HttpServletRequest request) {
         return gatewayMetricsManager.getDslMd5List(HttpRequestUtil.getProjectId(request), startTime, endTime);
     }
 
     @PostMapping("/overview")
-    @ApiOperation(value = "获取gateway概览", notes = "")
+    @ApiOperation(value = "获取gateway概览")
     public Result<List<GatewayOverviewMetricsVO>> getGatewayOverviewMetrics(@RequestBody GatewayOverviewDTO dto) {
         validateParam(dto);
         return gatewayMetricsManager.getGatewayOverviewMetrics(dto);
@@ -115,7 +103,6 @@ public class GatewayMetricsController {
         validateParam(dto);
         return gatewayMetricsManager.getGatewayAppMetrics(dto);
     }
-
 
     @PostMapping("/dsl")
     @ApiModelProperty(value = "获取gateway查询模版指标信息")

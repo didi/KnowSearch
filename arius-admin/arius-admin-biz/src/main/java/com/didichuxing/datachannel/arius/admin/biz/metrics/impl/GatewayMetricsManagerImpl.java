@@ -4,13 +4,7 @@ import com.didichuxing.datachannel.arius.admin.biz.gateway.GatewayManager;
 import com.didichuxing.datachannel.arius.admin.biz.metrics.GatewayMetricsManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.ClientNodeDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayDslDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayIndexDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayNodeDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayOverviewDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayProjectDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MultiGatewayNodesDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.GlobalParams;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.GatewayOverviewMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.MetricsContent;
@@ -28,15 +22,12 @@ import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class GatewayMetricsManagerImpl implements GatewayMetricsManager {
@@ -85,7 +76,7 @@ public class GatewayMetricsManagerImpl implements GatewayMetricsManager {
     @Override
     public Result<List<GatewayOverviewMetricsVO>> getGatewayOverviewMetrics(GatewayOverviewDTO dto) {
         List<GatewayOverviewMetrics> result = Lists.newCopyOnWriteArrayList();
-        List<String> rawMetricsTypes = dto.getMetricsTypes().stream().collect(Collectors.toList());
+        List<String> rawMetricsTypes = new ArrayList<>(dto.getMetricsTypes());
         Long startTime = dto.getStartTime();
         Long endTime = dto.getEndTime();
         //commonMetrics 只需要查一次， 就可以查出来若干个指标， 一个DSL搞定。
@@ -147,7 +138,7 @@ public class GatewayMetricsManagerImpl implements GatewayMetricsManager {
     @Override
     public Result<List<VariousLineChartMetricsVO>> getGatewayNodeMetrics(GatewayNodeDTO dto, Integer projectId) {
         List<VariousLineChartMetrics> result = Lists.newCopyOnWriteArrayList();
-        List<String> rawMetricsTypes = dto.getMetricsTypes().stream().collect(Collectors.toList());
+        List<String> rawMetricsTypes = new ArrayList<>(dto.getMetricsTypes());
         Long startTime = dto.getStartTime();
         Long endTime = dto.getEndTime();
         // 补齐数据用的
@@ -211,7 +202,7 @@ public class GatewayMetricsManagerImpl implements GatewayMetricsManager {
     @Override
     public Result<List<VariousLineChartMetricsVO>> getClientNodeMetrics(ClientNodeDTO dto, Integer projectId) {
         List<VariousLineChartMetrics> result = Lists.newCopyOnWriteArrayList();
-        List<String> rawMetricsTypes = dto.getMetricsTypes().stream().collect(Collectors.toList());
+        List<String> rawMetricsTypes = new ArrayList<>(dto.getMetricsTypes());
         Long startTime = dto.getStartTime();
         Long endTime = dto.getEndTime();
         // 补齐数据用的
@@ -252,7 +243,7 @@ public class GatewayMetricsManagerImpl implements GatewayMetricsManager {
     @Override
     public Result<List<VariousLineChartMetricsVO>> getGatewayIndexMetrics(GatewayIndexDTO dto, Integer projectId) {
         List<VariousLineChartMetrics> result = Lists.newCopyOnWriteArrayList();
-        List<String> rawMetricsTypes = dto.getMetricsTypes().stream().collect(Collectors.toList());
+        List<String> rawMetricsTypes = new ArrayList<>(dto.getMetricsTypes());
         Long startTime = dto.getStartTime();
         Long endTime = dto.getEndTime();
         // 补齐数据用的
@@ -306,7 +297,7 @@ public class GatewayMetricsManagerImpl implements GatewayMetricsManager {
     @Override
     public Result<List<VariousLineChartMetricsVO>> getGatewayAppMetrics(GatewayProjectDTO dto) {
         List<VariousLineChartMetrics> result = Lists.newCopyOnWriteArrayList();
-        List<String> rawMetricsTypes = dto.getMetricsTypes().stream().collect(Collectors.toList());
+        List<String> rawMetricsTypes = new ArrayList<>(dto.getMetricsTypes());
         Long startTime = dto.getStartTime();
         Long endTime = dto.getEndTime();
         // 补齐数据用的
@@ -355,7 +346,7 @@ public class GatewayMetricsManagerImpl implements GatewayMetricsManager {
     @Override
     public Result<List<VariousLineChartMetricsVO>> getGatewayDslMetrics(GatewayDslDTO dto, Integer projectId) {
         List<VariousLineChartMetrics> result = Lists.newCopyOnWriteArrayList();
-        List<String> rawMetricsTypes = dto.getMetricsTypes().stream().collect(Collectors.toList());
+        List<String> rawMetricsTypes = new ArrayList<>(dto.getMetricsTypes());
         Long startTime = dto.getStartTime();
         Long endTime = dto.getEndTime();
         // 补齐数据用的
@@ -471,7 +462,7 @@ public class GatewayMetricsManagerImpl implements GatewayMetricsManager {
 
     private List<Long> getTimeRange(Long startTime, Long endTime) {
         String interval = MetricsUtils.getInterval(endTime - startTime);
-        List<Long> timeRange = null;
+        List<Long> timeRange;
         if (MetricsUtils.Interval.ONE_MIN.getStr().equals(interval)) {
             timeRange = MetricsUtils.timeRange(startTime, endTime, 1L, Calendar.MINUTE);
         } else if (MetricsUtils.Interval.TWENTY_MIN.getStr().equals(interval)) {

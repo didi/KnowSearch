@@ -135,6 +135,9 @@ public class ClusterOverviewMetricsHandle {
                 case BASIC:
                     getBasicMetrics(metrics);
                     return;
+                case ELAPSEDTIME:
+                    getElapsedTimeMetrics(metrics);
+                    return;
 
                 /****************************业务指标(列表类型)*****************************/
                 case PENDING_TASKS:
@@ -252,6 +255,17 @@ public class ClusterOverviewMetricsHandle {
     private void getPendingTasksMetrics(ESClusterOverviewMetricsVO metrics) {
         List<PendingTask> pendingTaskFromES = esClusterNodeService.syncGetPendingTask(metrics.getClusterName());
         metrics.setPendingTasks(ConvertUtil.list2List(pendingTaskFromES, PendingTaskVO.class));
+    }
+
+
+    private void getElapsedTimeMetrics(ESClusterOverviewMetricsVO metrics) {
+        ESClusterPhyBasicMetricsVO   basic   =   metrics.getBasic();
+        getClusterBasicInfoFutureUtil
+                .runnableTask(()-> buildBasicMetricsFromClusterStats(basic, metrics.getClusterName()))
+                .runnableTask(()-> buildBasicMetricsFromEsClusterTemplate(basic, metrics.getClusterName()))
+                .runnableTask(()-> buildBasicMetricsFromEsClusterNodeInfo(basic, metrics.getClusterName()))
+                .runnableTask(()-> buildBasicMetricsFromEsClusterMemInfo(basic,metrics.getClusterName()))
+                .waitExecute();
     }
 
     private void getBasicMetrics(ESClusterOverviewMetricsVO metrics) {

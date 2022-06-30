@@ -187,6 +187,9 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
             return Result.buildFail(String.format("集群[%s]不存在", clusterId));
         }
         ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(clusterLogic.getId());
+        if (clusterRegion==null){
+            return Result.buildFail(String.format("集群[%s]未绑定region", clusterId));
+        }
         Result<List<ClusterRoleHost>> result = clusterRoleHostService.listByRegionId(Math.toIntExact(clusterRegion.getId()));
         if (result.failed()) {
             return Result.buildFail(result.getMessage());

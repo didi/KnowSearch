@@ -737,14 +737,9 @@ public class ESIndexServiceImpl implements ESIndexService {
     }
 
     @Override
-    public List<IndicesDistributionVO> indicesDistribution(String cluster) {
+    public List<CatIndexResult> indicesDistribution(String cluster) {
         List<CatIndexResult> catIndexResultList = esIndexDAO.catIndices(cluster);
-        // 把 List<CatIndexResult> 转为 List<IndicesDistributionVO>
-        return catIndexResultList.stream().map(catIndexResult -> {
-            IndicesDistributionVO vo = new IndicesDistributionVO();
-            BeanUtils.copyProperties(catIndexResult, vo);
-            return vo;
-        }).collect(Collectors.toList());
+        return catIndexResultList;
     }
 
     @Override

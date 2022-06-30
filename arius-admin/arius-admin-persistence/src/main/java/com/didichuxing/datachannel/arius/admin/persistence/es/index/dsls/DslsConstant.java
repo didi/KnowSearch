@@ -155,10 +155,11 @@ public class DslsConstant {
      */
     public static final String GET_MULTIPLE_INDEX_FIRST_INTERVAL_AGG_METRICS                 = "AriusStatsIndexInfoEsDao/getAggMultipleIndicesMetrics";
 
+
     /**
      * 查询第一个时间分片中指标数值的逻辑模板指标信息
      */
-    public static final String GET_MULTIPLE_TEMPLATE_FIRST_INTERVAL_AGG_METRICS              = "AriusStatsIndexInfoEsDao/getAggMultipleTemplateMetrics";
+    public static final String GET_MULTIPLE_TEMPLATE_FIRST_INTERVAL_AGG_METRICS_WITH_STEP    = "AriusStatsIndexInfoEsDao/getAggMultipleIndicesMetricsWithStep";
 
     /**
      * 查询topN索引聚合信息
@@ -247,13 +248,14 @@ public class DslsConstant {
     /**
      * 获取某个区间范围内的某个sum聚合值
      */
-    public static final String GET_FIELD_SUM_AND_RANGE_FIELD_TOTAL                           = "AriusStatsNodeInfoEsDao"
-                                                                                               + "/getFieldSumAndRangeFieldTotal";
-
+    public static final String GET_FIELD_SUM_AND_RANGE_FIELD_TOTAL                           = "AriusStatsNodeInfoEsDao/getFieldSumAndRangeFieldTotal";
     /**
-     * 获取指定集群节点的磁盘数据情况
+     * 获取时间段内指标的最大值或平均值
      */
-    public static final String GET_CLUSTER_LOGIC_DISK_INFO                                = "AriusStatsNodeInfoEsDao/getClusterLogicDiskInfo";
+    public static final String GET_AGG_CLUSTER_NODE_INFO_WITH_STEP                           = "AriusStatsNodeInfoEsDao/getAggClusterNodeInfoWithStep";
+
+
+
 
     /************************************************************** TemplateAccessCountEsDao **************************************************************/
     /**

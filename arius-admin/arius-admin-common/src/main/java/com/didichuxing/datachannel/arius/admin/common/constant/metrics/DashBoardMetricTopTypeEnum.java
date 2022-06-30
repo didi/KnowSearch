@@ -11,6 +11,8 @@ import com.google.common.collect.Lists;
  */
 public enum DashBoardMetricTopTypeEnum {
     UNKNOWN(OneLevelTypeEnum.UNKNOWN,"", "未知"),
+    CLUSTER_ELAPSED_TIME(OneLevelTypeEnum.CLUSTER,"clusterElapsedTime", "采集耗时"),
+    CLUSTER_ELAPSED_TIME_GTE_5MIN(OneLevelTypeEnum.CLUSTER,"elapsedTimeGte5Min", "采集耗时大于5分钟"),
     CLUSTER_INDEXING_LATENCY(OneLevelTypeEnum.CLUSTER,"indexingLatency", "写入耗时"),
     CLUSTER_SEARCH_LATENCY(OneLevelTypeEnum.CLUSTER,"searchLatency", "查询耗时"),
     CLUSTER_INDEX_REQ_NUM(OneLevelTypeEnum.CLUSTER,"indexReqNum", "写入文档数"),
@@ -22,6 +24,7 @@ public enum DashBoardMetricTopTypeEnum {
     CLUSTER_REQ_UPRUSH_NUM(OneLevelTypeEnum.CLUSTER,"reqUprushNum", "写入文档数突增集群"),
     CLUSTER_SHARD_NUM(OneLevelTypeEnum.CLUSTER,"shardNum", "集群shard个数"),
 
+    NODE_ELAPSED_TIME(OneLevelTypeEnum.NODE,"nodeElapsedTime", "采集耗时"),
     NODE_TASK_CONSUMING(OneLevelTypeEnum.NODE,"taskConsuming", "节点分片耗时"),
 
     INDEX_REQ_UPRUSH_NUM(OneLevelTypeEnum.INDEX,"reqUprushNum", "查询请求数突增索引"),

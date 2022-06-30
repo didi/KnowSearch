@@ -26,7 +26,7 @@ public enum ClusterHealthEnum {
     /**
      * 未知
      */
-    UNKNOWN(-1,"unknown");
+    UNKNOWN(-1, "unknown");
 
     ClusterHealthEnum(Integer code, String desc) {
         this.code = code;
@@ -38,13 +38,13 @@ public enum ClusterHealthEnum {
             return YELLOW;
         } else if (RED.getCode().equals(code)) {
             return RED;
-        } else if(GREEN.getCode().equals(code)) {
+        } else if (GREEN.getCode().equals(code)) {
             return GREEN;
         }
         return UNKNOWN;
     }
 
-    public static ClusterHealthEnum valuesOf(String desc){
+    public static ClusterHealthEnum valuesOf(String desc) {
         if (AriusObjUtils.isBlack(desc) || UNKNOWN.getDesc().equals(desc)) {
             return UNKNOWN;
         }
@@ -53,7 +53,7 @@ public enum ClusterHealthEnum {
             return YELLOW;
         } else if (RED.getDesc().equals(desc)) {
             return RED;
-        } else if(GREEN.getDesc().equals(desc)) {
+        } else if (GREEN.getDesc().equals(desc)) {
             return GREEN;
         }
         return UNKNOWN;
@@ -69,7 +69,7 @@ public enum ClusterHealthEnum {
 
     private Integer code;
     private String desc;
-    
+
     public static boolean isExitByCode(Integer code) {
         if (null == code) {
             return false;
