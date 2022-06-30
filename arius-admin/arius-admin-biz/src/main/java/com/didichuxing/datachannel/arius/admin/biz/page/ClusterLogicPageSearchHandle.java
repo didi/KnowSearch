@@ -70,7 +70,7 @@ public class ClusterLogicPageSearchHandle extends AbstractPageSearchHandle<Clust
         if (null == clusterLogicVO) {
             return;
         }
-        setResponsible(clusterLogicVO);
+//        setResponsible(clusterLogicVO);
         setProjectName(clusterLogicVO);
         setClusterPhyFlagAndDataNodeNum(clusterLogicVO);
         setDiskUsedInfo(clusterLogicVO);
@@ -147,15 +147,16 @@ public class ClusterLogicPageSearchHandle extends AbstractPageSearchHandle<Clust
     protected void initCondition(ClusterLogicConditionDTO condition, Integer projectId) {
 
         // 1. 获取登录用户，当前项目下的我的集群列表
-        List<String> clusterNames = new ArrayList<>();
-        if (!Objects.equals(projectId, AuthConstant.SUPER_PROJECT_ID)) {
-            List<ClusterLogic> clusterLogicList = clusterLogicService.getOwnedClusterLogicListByProjectId(projectId);
-            //项目下的有管理权限逻辑集群会关联多个物理集群
-            clusterLogicList.stream().map(ClusterLogic::getId).map(clusterContextManager::getClusterLogicContextCache)
-                    .map(ClusterLogicContext::getAssociatedClusterPhyNames).forEach(clusterNames::addAll);
-            clusterNames = clusterNames.stream().distinct().collect(Collectors.toList());
-        }
-        condition.setClusterNames(clusterNames);
+//        List<String> clusterNames = new ArrayList<>();
+//        if (!Objects.equals(projectId, AuthConstant.SUPER_PROJECT_ID)) {
+//            List<ClusterLogic> clusterLogicList = clusterLogicService.getOwnedClusterLogicListByProjectId(projectId);
+//            //项目下的有管理权限逻辑集群会关联多个物理集群
+//            clusterLogicList.stream().map(ClusterLogic::getId).map(clusterContextManager::getClusterLogicContextCache)
+//                    .map(ClusterLogicContext::getAssociatedClusterPhyNames).forEach(clusterNames::addAll);
+//            clusterNames = clusterNames.stream().distinct().collect(Collectors.toList());
+//        }
+        condition.setProjectId(projectId);
+//        condition.setClusterNames(clusterNames);
         String sortTerm = null == condition.getSortTerm() ? SortConstant.ID : condition.getSortTerm();
         String sortType = condition.getOrderByDesc() ? SortConstant.DESC : SortConstant.ASC;
         condition.setSortTerm(sortTerm);
