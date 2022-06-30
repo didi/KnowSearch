@@ -57,7 +57,7 @@ public class RoleExtendManagerImpl implements RoleExtendManager {
 		try {
 			
 			final RoleDeleteCheckVO roleDeleteCheckVO = roleService.checkBeforeDelete(id);
-			if (CollectionUtils.isEmpty(roleDeleteCheckVO.getUserNameList())){
+			if (CollectionUtils.isNotEmpty(roleDeleteCheckVO.getUserNameList())){
 				final RoleVO roleVO = roleService.getRoleDetailByRoleId(id);
 				return Result.buildFailWithMsg(roleDeleteCheckVO,String.format("角色:[%s]已经分配给用了,不允许删除,请先解除分配的用户再试！",
 						roleVO.getRoleName()));
