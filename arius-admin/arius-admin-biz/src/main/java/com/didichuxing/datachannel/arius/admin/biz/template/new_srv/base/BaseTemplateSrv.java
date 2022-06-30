@@ -1,10 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.new_srv.base;
 
-import java.util.List;
-
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.NewTemplateSrvEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
+import java.util.List;
 
 /**
  * @author chengxiang
@@ -33,16 +32,22 @@ public interface BaseTemplateSrv {
 
     /**
      * 开启指定逻辑模板的模板服务
+     *
      * @param templateIdList
+     * @param operator
+     * @param projectId
      * @return
      */
-    Result<Void> openSrv(List<Integer> templateIdList) throws AdminOperateException;
+    Result<Void> openSrv(List<Integer> templateIdList, String operator, Integer projectId) throws AdminOperateException;
 
     /**
      * 关闭指定逻辑模板的模板服务
+     *
      * @param templateIdList
+     * @param operator
+     * @param projectId
      * @return
      */
-    Result<Void> closeSrv(List<Integer> templateIdList) throws AdminOperateException ;
+    Result<Void> closeSrv(List<Integer> templateIdList, String operator, Integer projectId) throws AdminOperateException ;
 
 }

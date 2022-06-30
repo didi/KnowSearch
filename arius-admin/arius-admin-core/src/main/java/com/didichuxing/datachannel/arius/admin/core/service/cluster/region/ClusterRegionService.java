@@ -1,12 +1,13 @@
 package com.didichuxing.datachannel.arius.admin.core.service.cluster.region;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegionConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegionFSInfo;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * @author ohushenglin_v
@@ -174,4 +175,12 @@ public interface ClusterRegionService {
      * @return
      */
     List<ClusterRegion> getClusterRegionsByLogicIds(List<Long> clusterLogicIdList);
+
+    /**
+     * 根据物理集群名称批量查询region
+     *
+     * @param phyClusterNames 物理集群名称
+     * @return {@link List}<{@link ClusterRegion}>
+     */
+    List<ClusterRegion> listRegionByPhyClusterNames(List<String> phyClusterNames);
 }

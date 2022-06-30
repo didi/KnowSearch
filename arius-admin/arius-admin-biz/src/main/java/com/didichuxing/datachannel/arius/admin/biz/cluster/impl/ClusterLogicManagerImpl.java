@@ -455,7 +455,11 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         ClusterLogicTemplateIndexDetailDTO templateIndexVO = getTemplateIndexVO(logicClusterId, projectId);
 
         for (IndexTemplateLogicAggregate agg : templateIndexVO.getTemplateLogicAggregates()) {
-            templateLogicManager.delTemplate(agg.getIndexTemplateLogicWithCluster().getId(), operator);
+            final Result<Void> delTemplateResult = templateLogicManager.delTemplate(
+                    agg.getIndexTemplateLogicWithCluster().getId(), operator, projectId);
+            if (delTemplateResult.failed()){
+                return delTemplateResult;
+            }
         }
 
         indicesManager.deleteIndex(templateIndexVO.getCatIndexResults(),projectId,operator);

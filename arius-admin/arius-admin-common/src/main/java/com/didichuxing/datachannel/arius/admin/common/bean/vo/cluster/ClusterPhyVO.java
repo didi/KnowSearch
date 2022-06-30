@@ -2,9 +2,11 @@ package com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster;
 
 import java.util.List;
 
+import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.BaseVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum;
+import com.google.common.collect.Lists;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -112,6 +114,25 @@ public class ClusterPhyVO extends BaseVO implements Comparable<ClusterPhyVO> {
 
     @ApiModelProperty("gateway地址")
     private String                    gatewayUrl;
+
+    @ApiModelProperty("逻辑集群与对应region的列表")
+    private List<Tuple<ClusterLogicVO, ClusterRegionVO>>    logicClusterAndRegionList;
+
+    /**
+     * 添加逻辑集群
+     *
+     * @param clusterLogicVO 逻辑集群
+     * @param regionVO    region
+     */
+    public void addLogicCluster(ClusterLogicVO clusterLogicVO, ClusterRegionVO regionVO) {
+        if (null == logicClusterAndRegionList) {
+            logicClusterAndRegionList = Lists.newArrayList();
+        }
+        if (clusterLogicVO != null || regionVO != null) {
+            Tuple<ClusterLogicVO, ClusterRegionVO> tuple = new Tuple<>(clusterLogicVO, regionVO);
+            logicClusterAndRegionList.add(tuple);
+        }
+    }
     @Override
     public int compareTo(ClusterPhyVO o) {
         if (null == o) {

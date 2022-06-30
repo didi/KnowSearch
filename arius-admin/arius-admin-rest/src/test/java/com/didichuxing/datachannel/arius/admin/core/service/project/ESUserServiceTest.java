@@ -66,14 +66,14 @@ class ESUserServiceTest {
     @Test
     void testRegisterESUser() {
         Assertions.assertEquals(Result.buildParamIllegal("应用信息为空").getMessage(),
-                esUserService.registerESUser(null, "operator")._1().getMessage());
+                esUserService.registerESUser(null, "operator").v1().getMessage());
         ESUserPO esUserPO = CustomDataSource.esUserPO();
         final ESUserDTO esUserDTO = ConvertUtil.obj2Obj(esUserPO, ESUserDTO.class);
     
         esUserDTO.setProjectId(null);
         esUserDTO.setId(1);
         Assertions.assertEquals(Result.buildParamIllegal("项目id为空").getMessage(),
-                esUserService.registerESUser(esUserDTO, "operator")._1()
+                esUserService.registerESUser(esUserDTO, "operator").v1()
                         .getMessage());
        
         
@@ -81,7 +81,7 @@ class ESUserServiceTest {
         when(esUserDAO.insert(any())).thenReturn(1);
         esUserDTO.setProjectId(1);
         Assertions.assertTrue(
-                esUserService.registerESUser(esUserDTO, "operator")._1()
+                esUserService.registerESUser(esUserDTO, "operator").v1()
                         .success());
         
     }
@@ -97,7 +97,7 @@ class ESUserServiceTest {
         when(esUserDAO.getByESUser(anyInt())).thenReturn(esUserPO);
         // Run the test
         final TupleTwo<Result<Void>, ESUserPO> result = esUserService.editUser(esUserDTO);
-        Assertions.assertTrue(result._1().success());
+        Assertions.assertTrue(result.v1().success());
         // Verify the results
     }
     
@@ -108,7 +108,7 @@ class ESUserServiceTest {
         
         // Run the test
         final TupleTwo<Result<Void>, ESUserPO> result = esUserService.deleteESUserById(1);
-        Assertions.assertTrue(result._1().success());
+        Assertions.assertTrue(result.v1().success());
         // Verify the results
     }
     

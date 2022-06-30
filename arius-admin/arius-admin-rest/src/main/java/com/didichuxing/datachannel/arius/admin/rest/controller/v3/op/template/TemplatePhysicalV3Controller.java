@@ -41,14 +41,14 @@ public class TemplatePhysicalV3Controller {
         return templatePhyManager.getTemplatePhies(logicId);
     }
 
-    @GetMapping("/listNames")
+    @GetMapping("/names")
     @ResponseBody
     @ApiOperation(value = "获取物理模板名称列表接口")
     public Result<List<String>> listTemplatePhyNames(HttpServletRequest request) {
         return Result.buildSucc(templatePhyManager.getTemplatePhyNames(HttpRequestUtil.getProjectId(request)));
     }
 
-    @GetMapping("/{templatePhyId}/copyClusterPhyNames")
+    @GetMapping("/{templatePhyId}/copy-cluster-phy-names")
     @ResponseBody
     @ApiOperation(value = "获取物理模板可复制的物理集群名称")
     public Result<List<String>> getAppNodeNames(@PathVariable Long templatePhyId) {
@@ -63,7 +63,7 @@ public class TemplatePhysicalV3Controller {
         return templatePhyManager.editMultipleTemplate(params, HttpRequestUtil.getOperator(request));
     }
 
-    @PostMapping("/multipleUpgrade")
+    @PostMapping("/multiple-upgrade")
     @ResponseBody
     @ApiOperation(value = "升级多个物理模板接口", notes = "")
     public Result<Boolean> multipleUpgrade(HttpServletRequest request,

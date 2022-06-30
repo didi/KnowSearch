@@ -119,7 +119,7 @@ public class ESUserManagerImpl implements ESUserManager {
         final TupleTwo</*创建的es user*/Result,/*创建的es user po*/ ESUserPO> resultESUserPOTuple =
                 esUserService.registerESUser(appDTO, operator);
         
-         if (resultESUserPOTuple._1().success()) {
+         if (resultESUserPOTuple.v1().success()) {
             // 操作记录
              operateRecordService.save(
                      new OperateRecord.Builder().project(
@@ -130,7 +130,7 @@ public class ESUserManagerImpl implements ESUserManager {
            
         }
 
-        return resultESUserPOTuple._1();
+        return resultESUserPOTuple.v1();
     }
  
     
@@ -159,7 +159,7 @@ public class ESUserManagerImpl implements ESUserManager {
         final TupleTwo<Result<Void>/*更新的状态*/, ESUserPO/*更新之后的的ESUserPO*/> resultESUserTuple =
                 esUserService.editUser(esUserDTO);
     
-        if (resultESUserTuple._1().success()) {
+        if (resultESUserTuple.v1().success()) {
             // 操作记录
             operateRecordService.save(new OperateRecord.Builder().project(
                             projectService.getProjectBriefByProjectId(oldESUser.getProjectId())).content(
@@ -168,7 +168,7 @@ public class ESUserManagerImpl implements ESUserManager {
                     .operationTypeEnum(OperateTypeEnum.APPLICATION_ACCESS_MODE)
                     .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).userOperation(operator).build());
         }
-        return resultESUserTuple._1();
+        return resultESUserTuple.v1();
     }
     
     /**
@@ -201,17 +201,17 @@ public class ESUserManagerImpl implements ESUserManager {
         }
         //进行es user的删除
         final TupleTwo<Result<Void>, ESUserPO> resultESUserPOTuple = esUserService.deleteESUserById(esUser);
-        if (resultESUserPOTuple._1().success()){
+        if (resultESUserPOTuple.v1().success()){
             // 操作记录
             operateRecordService.save(
                     new OperateRecord(projectService.getProjectBriefByProjectId(projectId).getProjectName(),
                             OperateTypeEnum.APPLICATION_ACCESS_MODE, TriggerWayEnum.MANUAL_TRIGGER,
                             String.format("删除访问模式:%s",
-                                    ProjectSearchTypeEnum.valueOf(resultESUserPOTuple._2().getSearchType())), operator
+                                    ProjectSearchTypeEnum.valueOf(resultESUserPOTuple.v2().getSearchType())), operator
             
                     ));
         }
-        return resultESUserPOTuple._1();
+        return resultESUserPOTuple.v1();
     }
     
     /**
@@ -228,7 +228,7 @@ public class ESUserManagerImpl implements ESUserManager {
         }
         
         final TupleTwo<Result<Void>, List<ESUserPO>> resultListTuple = esUserService.deleteByESUsers(projectId);
-        if (resultListTuple._1().success()) {
+        if (resultListTuple.v1().success()) {
             // 操作记录
             operateRecordService.save(
                     new OperateRecord(projectService.getProjectBriefByProjectId(projectId).getProjectName(),
@@ -236,7 +236,7 @@ public class ESUserManagerImpl implements ESUserManager {
             
                     ));
         }
-        return resultListTuple._1();
+        return resultListTuple.v1();
     }
     
 
