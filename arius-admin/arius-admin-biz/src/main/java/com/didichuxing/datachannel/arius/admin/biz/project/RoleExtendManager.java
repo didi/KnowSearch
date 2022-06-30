@@ -8,7 +8,6 @@ import com.didiglobal.logi.security.common.dto.role.RoleQueryDTO;
 import com.didiglobal.logi.security.common.dto.role.RoleSaveDTO;
 import com.didiglobal.logi.security.common.vo.role.AssignInfoVO;
 import com.didiglobal.logi.security.common.vo.role.RoleBriefVO;
-import com.didiglobal.logi.security.common.vo.role.RoleDeleteCheckVO;
 import com.didiglobal.logi.security.exception.LogiSecurityException;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
@@ -92,10 +91,5 @@ public interface RoleExtendManager {
      */
     Result<List<RoleBriefVO>> getRoleBriefListByRoleName(String roleName);
 
-    /**
-     * 判断该角色是否已经分配给用户，如有分配给用户，则返回用户名list
-     * @param roleId 角色id
-     * @return 检查结果
-     */
-    Result<RoleDeleteCheckVO> checkBeforeDelete(Integer roleId);
+
 }

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.MetricsContentCell;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.top.MetricsContentVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.top.VariousLineChartMetricsVO;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
@@ -232,5 +233,4 @@ public class MetricsUtils {
 
         return (currentTimeValue / lastTimeValue) >= UPRUSH_THRESHOLD ? currentTimeValue : 0d;
     }
-
 }

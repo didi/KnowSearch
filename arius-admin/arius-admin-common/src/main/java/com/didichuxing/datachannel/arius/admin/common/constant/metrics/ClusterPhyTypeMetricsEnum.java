@@ -8,7 +8,7 @@ public enum ClusterPhyTypeMetricsEnum {
                                        UNKNOWN(-1, "未知", false),
 									   CLUSTER(1, "clusterPhyOverviewMetrics", false),
 	                                   NODE(2, "clusterPhyNodeMetrics", true),
-	                                   INDICES(3, "clusterPhyIdicesMetrics", true),
+	                                   INDICES(3, "clusterPhyIndicesMetrics", true),
                                        TEMPLATES(4, "clusterPhyTemplateMetrics", true),
                                        NODE_TASKS(5,"clusterPhyNodesTaskMetricsHandler", true);
 

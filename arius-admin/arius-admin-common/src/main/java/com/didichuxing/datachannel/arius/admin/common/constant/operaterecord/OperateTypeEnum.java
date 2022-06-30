@@ -40,7 +40,7 @@ public enum OperateTypeEnum {
      * 物理集群： 信息修改
      */
     PHYSICAL_CLUSTER_INFO_MODIFY(NewModuleEnum.PHYSICAL_CLUSTER, "物理集群信息修改",6),
-     PHYSICAL_CLUSTER_START(NewModuleEnum.PHYSICAL_CLUSTER, "启动",53),
+     PHYSICAL_CLUSTER_START(NewModuleEnum.PHYSICAL_CLUSTER, "启动",57),
     /**
      * 物理集群:升级
      */
@@ -160,7 +160,7 @@ public enum OperateTypeEnum {
      * 索引管理:别名调整
      */
     INDEX_MANAGEMENT_ALIAS_MODIFY(NewModuleEnum.INDEX_MANAGEMENT, "别名调整", 36),
-    INDEX_MANAGEMENT_LABEL_MODIFY(NewModuleEnum.INDEX_MANAGEMENT, "标签调整", 36),
+    INDEX_MANAGEMENT_LABEL_MODIFY(NewModuleEnum.INDEX_MANAGEMENT, "标签调整", 56),
     /**
      * 索引管理:索引读写变更
      */
@@ -203,7 +203,7 @@ public enum OperateTypeEnum {
     
     ES_CLUSTER_CONFIG_ADD(NewModuleEnum.ES_CLUSTER_CONFIG, "新增集群配置", 51),
     ES_CLUSTER_CONFIG_EDIT(NewModuleEnum.ES_CLUSTER_CONFIG, "编辑集群配置", 52),
-    ROLE_MANAGER_DELETE(NewModuleEnum.ROLE_MANAGER, "删除角色", 53),
+    ROLE_MANAGER_DELETE(NewModuleEnum.ROLE_MANAGER, "删除角色", 58),
     ROLE_MANAGER_CREATE(NewModuleEnum.ROLE_MANAGER, "创建角色", 53),
     ROLE_MANAGER_UNBIND_USER(NewModuleEnum.ROLE_MANAGER, "角色解绑用户", 54),
     ROLE_MANAGER_BIND_USER(NewModuleEnum.ROLE_MANAGER, "角色绑定用户", 55);
@@ -253,7 +253,5 @@ public enum OperateTypeEnum {
         return Arrays.stream(OperateTypeEnum.values()).filter(operationTypeEnum -> operationTypeEnum.getCode().equals(code))
                 .findFirst().orElse(null);
     }
-    
-    
     
 }

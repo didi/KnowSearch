@@ -3,12 +3,13 @@ package com.didichuxing.datachannel.arius.admin.biz.page;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterLogicManager;
+import com.didichuxing.datachannel.arius.admin.common.Triple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterLogicConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicContext;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterLogicDiskUsedInfoPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.SortConstant;
@@ -17,16 +18,18 @@ import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterRe
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
+import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterNodeService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import com.didiglobal.logi.security.service.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.math.BigDecimal;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by linyunan on 2021-10-14
@@ -35,7 +38,7 @@ import org.springframework.stereotype.Component;
 public class ClusterLogicPageSearchHandle extends AbstractPageSearchHandle<ClusterLogicConditionDTO, ClusterLogicVO> {
     private static final ILog LOGGER = LogFactory.getLog(ClusterLogicPageSearchHandle.class);
 
-  
+
 
     @Autowired
     private ClusterLogicService clusterLogicService;
@@ -45,6 +48,14 @@ public class ClusterLogicPageSearchHandle extends AbstractPageSearchHandle<Clust
 
     @Autowired
     private ClusterContextManager clusterContextManager;
+
+    @Autowired
+    private ClusterRegionService clusterRegionService;
+
+    @Autowired
+    private ESClusterNodeService eSClusterNodeService;
+
+
 
     private static final FutureUtil<Void> futureUtilForClusterNum = FutureUtil.init("futureUtilForClusterNum", 10, 10, 100);
 
@@ -59,18 +70,27 @@ public class ClusterLogicPageSearchHandle extends AbstractPageSearchHandle<Clust
         if (null == clusterLogicVO) {
             return;
         }
-        setResponsible(clusterLogicVO);
+//        setResponsible(clusterLogicVO);
         setProjectName(clusterLogicVO);
         setClusterPhyFlagAndDataNodeNum(clusterLogicVO);
         setDiskUsedInfo(clusterLogicVO);
     }
 
     private void setDiskUsedInfo(ClusterLogicVO clusterLogicVO) {
-        ClusterLogicDiskUsedInfoPO clusterLogicDiskUsedInfoPO =
-                clusterLogicService.getDiskInfo(clusterLogicVO.getId());
-        clusterLogicVO.setDiskTotal(clusterLogicDiskUsedInfoPO.getDiskTotal());
-        clusterLogicVO.setDiskUsage(clusterLogicDiskUsedInfoPO.getDiskUsage());
-        clusterLogicVO.setDiskUsagePercent(clusterLogicDiskUsedInfoPO.getDiskUsagePercent());
+        ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(clusterLogicVO.getId());
+        long diskTotal = 0L;
+        long diskUsage = 0L;
+        if (clusterRegion != null) {
+            Map<String, Triple<Long, Long, Double>> map = eSClusterNodeService.syncGetNodesDiskUsage(clusterRegion.getPhyClusterName());
+            Set<Map.Entry<String, Triple<Long, Long, Double>>> entries = map.entrySet();
+            for (Map.Entry<String, Triple<Long, Long, Double>> entry : entries) {
+                diskTotal += entry.getValue().v1();
+                diskUsage += entry.getValue().v2();
+            }
+        }
+        clusterLogicVO.setDiskTotal(diskTotal);
+        clusterLogicVO.setDiskUsage(diskUsage);
+        clusterLogicVO.setDiskUsagePercent(new BigDecimal((double)diskUsage/diskTotal).setScale(4, BigDecimal.ROUND_HALF_UP).doubleValue());
     }
 
     private void setResponsible(ClusterLogicVO clusterLogicVO) {
@@ -96,7 +116,6 @@ public class ClusterLogicPageSearchHandle extends AbstractPageSearchHandle<Clust
         Optional.ofNullable(clusterLogicVO.getProjectId())
                 .map(projectService::getProjectBriefByProjectId)
                 .map(ProjectBriefVO::getProjectName).ifPresent(clusterLogicVO::setProjectName);
-        
     }
     @Override
     protected Result<Boolean> checkCondition(ClusterLogicConditionDTO clusterLogicConditionDTO, Integer projectId) {
@@ -126,17 +145,7 @@ public class ClusterLogicPageSearchHandle extends AbstractPageSearchHandle<Clust
 
     @Override
     protected void initCondition(ClusterLogicConditionDTO condition, Integer projectId) {
-        
-        // 1. 获取登录用户，当前项目下的我的集群列表
-        List<String> clusterNames = new ArrayList<>();
-        if (!Objects.equals(projectId, AuthConstant.SUPER_PROJECT_ID)) {
-            List<ClusterLogic> clusterLogicList = clusterLogicService.getOwnedClusterLogicListByProjectId(projectId);
-            //项目下的有管理权限逻辑集群会关联多个物理集群
-            clusterLogicList.stream().map(ClusterLogic::getId).map(clusterContextManager::getClusterLogicContextCache)
-                    .map(ClusterLogicContext::getAssociatedClusterPhyNames).forEach(clusterNames::addAll);
-            clusterNames = clusterNames.stream().distinct().collect(Collectors.toList());
-        }
-        condition.setClusterNames(clusterNames);
+        condition.setProjectId(projectId);
         String sortTerm = null == condition.getSortTerm() ? SortConstant.ID : condition.getSortTerm();
         String sortType = condition.getOrderByDesc() ? SortConstant.DESC : SortConstant.ASC;
         condition.setSortTerm(sortTerm);

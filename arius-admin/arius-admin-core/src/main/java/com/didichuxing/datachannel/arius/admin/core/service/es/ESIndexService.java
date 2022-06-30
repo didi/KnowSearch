@@ -385,7 +385,7 @@ public interface ESIndexService {
      * @param cluster
      * @return
      */
-    List<IndicesDistributionVO> indicesDistribution(String cluster);
+    List<CatIndexResult> indicesDistribution(String cluster);
 
     /**
      * 构建索引实时数据(包含block和aliases)
