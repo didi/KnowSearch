@@ -41,10 +41,12 @@ import com.didiglobal.logi.security.common.enums.project.ProjectUserCode;
 import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import com.didiglobal.logi.security.common.vo.project.ProjectDeleteCheckVO;
 import com.didiglobal.logi.security.common.vo.project.ProjectVO;
+import com.didiglobal.logi.security.common.vo.role.RoleBriefVO;
 import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
 import com.didiglobal.logi.security.common.vo.user.UserVO;
 import com.didiglobal.logi.security.exception.LogiSecurityException;
 import com.didiglobal.logi.security.service.ProjectService;
+import com.didiglobal.logi.security.service.RoleService;
 import com.didiglobal.logi.security.service.UserProjectService;
 import com.didiglobal.logi.security.service.UserService;
 import com.google.common.collect.Lists;
@@ -52,6 +54,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -84,6 +87,8 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
     private UserService        userService;
     @Autowired
     private UserProjectService userProjectService;
+    @Autowired
+    private RoleService roleService;
     
     @Override
     public Result<ProjectExtendVO> createProject(ProjectExtendSaveDTO saveDTO, String operator) {
@@ -293,10 +298,18 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
             projectService.updateProject(project, operator);
             //更新项目与用户拥有者的关联关系
             if (CollectionUtils.isNotEmpty(ownerIdList)) {
+                //超级项目侧校验添加的用户收否存在管理员角色
+                if (!checkAddProjectUserOrOwnerIsAdminRole(project.getId(), ownerIdList)) {
+                    return Result.buildFail("超级项目只被允许添加管理员");
+                }
                 updateProjectByOwnerList(operator, project, ownerIdList, oldProject);
             }
             //更新项目与用户成员的关联关系
             if (CollectionUtils.isNotEmpty(userIdList)) {
+                //超级项目侧校验添加的用户收否存在管理员角色
+                if (!checkAddProjectUserOrOwnerIsAdminRole(project.getId(), ownerIdList)) {
+                    return Result.buildFail("超级项目只被允许添加管理员");
+                }
                 setProjectByUserList(operator, project, userIdList, oldProject);
             }
           
@@ -318,10 +331,11 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
                 .map(ProjectVO::getUserList).ifPresent(afterProjectUserList::addAll);
         TupleTwo</*beforeUserStr*/String,/*afterUserStr*/String> tuple2 = projectOwnerOrMemberChangeStr(
                 beforeProjectUserList, afterProjectUserList);
-        recordProjectOwnerOrUserChange(tuple2, project.getProjectName(), operator);
+        recordProjectOwnerOrUserChange(tuple2, project.getProjectName(), operator,OperateTypeEnum.APPLICATION_USER_CHANGE);
     }
     
     private void updateProjectByOwnerList(String operator, ProjectSaveDTO project, List<Integer> ownerIdList, ProjectVO oldProject) {
+        
         List<UserBriefVO> beforeProjectOwnerList = Lists.newArrayList();
         //操作前的
         Optional.ofNullable(oldProject.getOwnerList()).ifPresent(beforeProjectOwnerList::addAll);
@@ -334,7 +348,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
         TupleTwo</*beforeOwnerStr*/String,/*afterOwnerStr*/String> tuple2=
                 projectOwnerOrMemberChangeStr(beforeProjectOwnerList,
                 afterProjectOwnerList);
-        recordProjectOwnerOrUserChange(tuple2,project.getProjectName(),operator);
+        recordProjectOwnerOrUserChange(tuple2,project.getProjectName(),operator,OperateTypeEnum.APPLICATION_OWNER_CHANGE);
     }
     
     /**
@@ -362,13 +376,12 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
      */
     @Override
     public Result<Void> addProjectUser(Integer projectId, List<Integer> userIdList, String operator) {
-       
-       
-       
-       final Result<Void> result = checkProject(projectId, userIdList);
+    
+        final Result<Void> result = checkProject(projectId, userIdList);
         if (result.failed()) {
             return result;
         }
+       
     
         try {
             //更新前
@@ -386,7 +399,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
             final TupleTwo</*beforeProjectUserStr*/String,/*afterProjectUserStr*/ String> tuple2 =
                     projectOwnerOrMemberChangeStr(beforeProjectUserList,
                     afterProjectUserList);
-            recordProjectOwnerOrUserChange(tuple2, projectVO.getProjectName(), operator);
+            recordProjectOwnerOrUserChange(tuple2, projectVO.getProjectName(), operator,OperateTypeEnum.APPLICATION_USER_CHANGE);
     
             return Result.buildSucc();
         } catch (LogiSecurityException e) {
@@ -420,7 +433,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
             final TupleTwo</*beforeChangeUser*/String,/*afterChangeUser*/ String> tuple2 =
                     projectOwnerOrMemberChangeStr(beforeProjectUserList,
                     afterProjectUserList);
-            recordProjectOwnerOrUserChange(tuple2,oldProject.getProjectName(),operator);
+            recordProjectOwnerOrUserChange(tuple2,oldProject.getProjectName(),operator,OperateTypeEnum.APPLICATION_USER_CHANGE);
             return Result.buildSucc();
         } catch (LogiSecurityException e) {
             return Result.buildFail(e.getMessage());
@@ -454,7 +467,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
                     .ifPresent(afterProjectAddOwnerList::addAll);
          
             TupleTwo</*beforeOwnerUserName*/String,/*afterOwnerUserName*/String> tuple2 = projectOwnerOrMemberChangeStr(beforeProjectAddOwnerList,afterProjectAddOwnerList);
-            recordProjectOwnerOrUserChange(tuple2,beforeProjectAddOwner.getProjectName(),operator);
+            recordProjectOwnerOrUserChange(tuple2,beforeProjectAddOwner.getProjectName(),operator,OperateTypeEnum.APPLICATION_OWNER_CHANGE);
            
             return Result.buildSucc();
         } catch (LogiSecurityException e) {
@@ -486,7 +499,8 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
                     .ifPresent(afterProjectOwnerList::addAll);
              TupleTwo</*beforeOwnerUserName*/String,/*afterOwnerUserName*/String> tuple2 = projectOwnerOrMemberChangeStr(
                      beforeProjectOwnerList,afterProjectOwnerList);
-             recordProjectOwnerOrUserChange(tuple2,beforeDeleteProjectOwner.getProjectName(),operator);
+             recordProjectOwnerOrUserChange(tuple2,beforeDeleteProjectOwner.getProjectName(),operator,
+                     OperateTypeEnum.APPLICATION_OWNER_CHANGE);
            
             return Result.buildSucc();
         } catch (LogiSecurityException e) {
@@ -638,6 +652,10 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
                     .collect(Collectors.joining("，"));
             return Result.buildParamIllegal(String.format("传入用户:%s不存在", notExitsIds));
         }
+         //超级项目侧校验添加的用户收否存在管理员角色
+        if (!checkAddProjectUserOrOwnerIsAdminRole(projectId, userIdList)) {
+            return Result.buildFail("超级项目只被允许添加拥有管理员角色的用户");
+        }
         
         
         return Result.buildSucc();
@@ -670,15 +688,28 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
      * @param operator    操作人或角色
      */
     private void recordProjectOwnerOrUserChange(TupleTwo</*beforeOwnerOrUser*/String,/*afterOwnerOrUser*/String> tuple2,
-                                                String projectName, String operator) {
+                                                String projectName, String operator,OperateTypeEnum operateTypeEnum) {
         if (!StringUtils.equals(tuple2.v1, tuple2.v2)) {
             operateRecordService.save(new OperateRecord.Builder()
                     
-                    .projectName(projectName).operationTypeEnum(OperateTypeEnum.APPLICATION_OWNER_CHANGE)
+                    .projectName(projectName).operationTypeEnum(operateTypeEnum)
                     .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).content(tuple2.v1 + "-->" + tuple2.v2)
                     .userOperation(operator).build());
         }
     }
     
+    /**
+     * 检查添加超级项目用户的合法性
+     *
+     * @param projectId  项目id
+     * @param userIdList 用户id列表
+     * @return boolean true:包含管理员角色可以添加
+     */
+    private boolean checkAddProjectUserOrOwnerIsAdminRole(Integer projectId, List<Integer> userIdList) {
+        Predicate<List<RoleBriefVO>> checkContainsAdminRoleFunc = roleBriefList -> roleBriefList.stream()
+                .anyMatch(roleBriefVO -> AuthConstant.ADMIN_ROLE_ID.equals(roleBriefVO.getId()));
+        return AuthConstant.SUPER_PROJECT_ID.equals(projectId)&&userIdList.stream().map(roleService::getRoleBriefListByUserId).allMatch(checkContainsAdminRoleFunc);
+        
+    }
    
 }

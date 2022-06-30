@@ -134,7 +134,7 @@ spring:
     log-exipre: 3 # 日志保存天数，以天为单位
     app_name: arius_test03
     claim-strategy: com.didiglobal.logi.job.core.consensual.RandomConsensual
-    enable: false
+
   logi-security:
     app-name: know_search
     driver-class-name: ${spring.datasource.druid.driver-class-name}
