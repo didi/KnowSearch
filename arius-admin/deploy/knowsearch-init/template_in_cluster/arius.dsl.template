@@ -175,7 +175,7 @@
                 "type":"long"
             },
              "projectId":{
-                "type":"keyword"
+                "type":"long"
             },
             "queryLimit":{
                 "copy_to":[

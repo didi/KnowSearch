@@ -112,7 +112,7 @@
                 "type":"long"
             },
             "projectId":{
-                "type":"keyword"
+                "type":"long"
             },
             "dsl":{
                 "ignore_above":1024,

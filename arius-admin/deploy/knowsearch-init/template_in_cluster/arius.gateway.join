@@ -597,7 +597,7 @@
                 "type":"keyword"
             },
             "projectId":{
-                "type":"keyword"
+                "type":"long"
             },
             "cost":{
                 "type":"long"
