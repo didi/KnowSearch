@@ -321,7 +321,6 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
 
         return ConvertUtil.list2List(hasAuthLogicClusters, ClusterLogic.class);
     }
-
     @Override
     public Boolean isClusterLogicExists(Long resourceId) {
         return null != logicClusterDAO.getById(resourceId);
@@ -518,6 +517,12 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
     @Override
     public List<ClusterLogic> getClusterLogicListByIds(List<Long> clusterLogicIdList) {
         return ConvertUtil.list2List(logicClusterDAO.listByIds(new HashSet<>(clusterLogicIdList)), ClusterLogic.class);
+    }
+
+    @Override
+    public List<ClusterLogic> listClusterLogicByProjectIdAndName(Integer projectId, String clusterName) {
+        return ConvertUtil.list2List(logicClusterDAO.listByNameAndProjectId(clusterName, projectId),
+                ClusterLogic.class);
     }
 
     /***************************************** private method ****************************************************/
