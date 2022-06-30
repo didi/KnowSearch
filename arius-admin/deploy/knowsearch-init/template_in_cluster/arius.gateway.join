@@ -596,6 +596,9 @@
             "types":{
                 "type":"keyword"
             },
+            "projectId":{
+                "type":"long"
+            },
             "cost":{
                 "type":"long"
             },
@@ -715,10 +718,6 @@
             },
             "queryRequest":{
                 "type":"boolean"
-            },
-            "Long] ":{
-                "ignore_above":512,
-                "type":"keyword"
             }
         }
     },
