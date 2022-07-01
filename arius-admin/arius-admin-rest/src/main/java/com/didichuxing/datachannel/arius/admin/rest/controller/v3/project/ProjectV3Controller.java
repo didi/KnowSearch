@@ -97,7 +97,7 @@ public class ProjectV3Controller {
 		return projectExtendManager.deleteProjectByProjectId(id, HttpRequestUtil.getOperator(request));
 	}
 	
-	@GetMapping("/list")
+	@GetMapping("")
 	@ResponseBody
 	@ApiOperation(value = "获取所有项目简要信息", notes = "获取全部项目简要信息（只返回id、项目名）")
 	public Result<List<ProjectBriefExtendVO>> list(HttpServletRequest request) {
@@ -200,7 +200,7 @@ public class ProjectV3Controller {
 		return projectExtendManager.getProjectBriefByUserId(userId);
 	}
 	
-	@GetMapping("")
+	@GetMapping("/bind-user")
 	@ApiOperation(value = "获取项目绑定的用户列表", notes = "获取项目绑定的用户列表")
 	public Result<List<UserBriefVO>> getProjectBriefByUserId(HttpServletRequest request) {
 		
