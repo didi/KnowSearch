@@ -198,7 +198,7 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
             return Result.buildFail(result.getMessage());
         }
         //节点名称列表
-        return Result.buildSucc(ConvertUtil.list2List(result.getData(), ESClusterRoleHostVO.class));
+        return Result.buildSucc(buildClusterRoleHostStats(clusterRegion.getPhyClusterName(),result.getData()));
     }
 
     @Override
