@@ -143,7 +143,7 @@ public class ESLogicClusterOpV3Controller {
         return clusterLogicManager.getClusterLogicTemplates(request, clusterId);
     }
 
-    @GetMapping("/list/machine-spec")
+    @GetMapping("/machine-specs")
     @ResponseBody
     @ApiOperation(value = "获取当前集群支持的套餐列表【三方接口】",tags = "【三方接口】" )
     public Result<List<ESClusterNodeSepcVO>> listMachineSpec() {
