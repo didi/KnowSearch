@@ -351,16 +351,17 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
             final ProjectVO beforeProjectVo = projectService.getProjectDetailByProjectId(projectId);
             final String projectName = beforeProjectVo.getProjectName();
             List<UserBriefVO> beforeProjectUserList = Lists.newArrayList();
-           //操作前的
-           Optional.ofNullable(beforeProjectVo).map( operationFuncMapper).ifPresent(beforeProjectUserList::addAll);
-           //更新/add
-           operationConsumerFunc.accept(projectId,userOrOwnerList);
-           //操作后
-           List<UserBriefVO> afterProjectUserList = Lists.newArrayList();
-           Optional.ofNullable(projectService.getProjectDetailByProjectId(projectId)).map( operationFuncMapper).ifPresent(afterProjectUserList::addAll);
-           TupleTwo</*beforeUserStr*/String,/*afterUserStr*/String> tuple2 = projectOwnerOrMemberChangeStr(
-                   beforeProjectUserList, afterProjectUserList);
-           recordProjectOwnerOrUserChange(tuple2, projectName, operator, operateTypeEnum);
+            //操作前的
+            Optional.ofNullable(beforeProjectVo).map(operationFuncMapper).ifPresent(beforeProjectUserList::addAll);
+            //更新/add
+            operationConsumerFunc.accept(projectId, userOrOwnerList);
+            //操作后
+            List<UserBriefVO> afterProjectUserList = Lists.newArrayList();
+            Optional.ofNullable(projectService.getProjectDetailByProjectId(projectId)).map(operationFuncMapper)
+                    .ifPresent(afterProjectUserList::addAll);
+            TupleTwo</*beforeUserStr*/String,/*afterUserStr*/String> tuple2 = projectOwnerOrMemberChangeStr(
+                    beforeProjectUserList, afterProjectUserList);
+            recordProjectOwnerOrUserChange(tuple2, projectName, operator, operateTypeEnum);
        }
         return Result.buildSucc();
     }
@@ -422,7 +423,6 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
     public Result<Void> delProjectUser(Integer projectId, Integer userId, String operator) {
         try {
             //操作前
-            ProjectVO oldProject = projectService.getProjectDetailByProjectId(projectId);
             Consumer<TupleTwo</*projectId*/Integer,/*userId*/Integer>> delProjectUserConsumer = tupleTwo -> projectService.delProjectUser(
                     tupleTwo.v1, tupleTwo.v2, operator);
             final Result<Void> operationProjectOwnerResult = operationProjectMemberOrOwner(operator, projectId,
@@ -451,7 +451,6 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
     @Override
     public Result<Void> addProjectOwner(Integer projectId, List<Integer> ownerIdList, String operator) {
         try {
-            ProjectVO beforeProjectAddOwner = projectService.getProjectDetailByProjectId(projectId);
             final Result<Void> operationProjectOwnerResult = operationProjectMemberOrOwner(operator,
                     projectId, ownerIdList,
                     (id, ownerList) -> userProjectService.saveOwnerProject(id, ownerList), ProjectVO::getOwnerList,
@@ -479,7 +478,6 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
     public Result<Void> delProjectOwner(Integer projectId, Integer ownerId, String operator) {
         try {
             //操作前
-            ProjectVO oldProject = projectService.getProjectDetailByProjectId(projectId);
             Consumer<TupleTwo</*projectId*/Integer,/*ownerId*/Integer>> delProjectUserConsumer = tupleTwo -> projectService.delProjectOwner(
                     tupleTwo.v1, tupleTwo.v2, operator);
             final Result<Void> operationProjectOwnerResult = operationProjectMemberOrOwner(operator, projectId,
