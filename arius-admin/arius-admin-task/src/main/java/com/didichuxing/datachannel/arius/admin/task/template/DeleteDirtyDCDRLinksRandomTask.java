@@ -1,28 +1,27 @@
 package com.didichuxing.datachannel.arius.admin.task.template;
 
 import com.alibaba.fastjson.JSON;
-import com.didichuxing.datachannel.arius.admin.biz.worktask.OpTaskManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.dcdr.TemplateDCDRManager;
+import com.didichuxing.datachannel.arius.admin.biz.worktask.OpTaskManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
-import com.didichuxing.datachannel.arius.admin.common.constant.dcdr.DCDRSwithTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.detail.DCDRSingleTemplateMasterSlaveSwitchDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.detail.DCDRTasksDetail;
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
+import com.didichuxing.datachannel.arius.admin.common.constant.dcdr.DCDRSwithTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import org.apache.commons.collections4.CollectionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-
 import com.didiglobal.logi.job.annotation.Task;
 import com.didiglobal.logi.job.common.TaskResult;
 import com.didiglobal.logi.job.core.job.Job;
 import com.didiglobal.logi.job.core.job.JobContext;
-
 import java.util.List;
+import org.apache.commons.collections4.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * 删除脏dcdrlinks随机任务
@@ -64,7 +63,7 @@ public class DeleteDirtyDCDRLinksRandomTask implements Job {
                         && !switchDetail.getDeleteDcdrChannelFlag()) {
                     try {
                         Result<Void> deleteDcdrResult = templateDcdrManager.deleteDCDR(
-                                switchDetail.getTemplateId().intValue(), AriusUser.SYSTEM.getDesc());
+                                switchDetail.getTemplateId().intValue(), AriusUser.SYSTEM.getDesc(), AuthConstant.SUPER_PROJECT_ID);
 
                         if (deleteDcdrResult.failed()) {
                             LOGGER.error("class=DeleteDirtyDCDRLinksRandomTask||templateId={}||method=execute||msg={}",

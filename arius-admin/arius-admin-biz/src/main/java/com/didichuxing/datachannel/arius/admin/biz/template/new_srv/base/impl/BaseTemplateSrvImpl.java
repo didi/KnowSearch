@@ -3,21 +3,31 @@ package com.didichuxing.datachannel.arius.admin.biz.template.new_srv.base.impl;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.TemplateSrvManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.base.BaseTemplateSrv;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.BaseResult;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithClusterAndMasterTemplate;
 import com.didichuxing.datachannel.arius.admin.common.constant.ESClusterVersionEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
+import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
+import com.didichuxing.datachannel.arius.admin.common.tuple.Tuples;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ESVersionUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
+import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.logi.security.service.ProjectService;
+import com.google.common.collect.Lists;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,6 +53,10 @@ public abstract class BaseTemplateSrvImpl implements BaseTemplateSrv {
 
     @Autowired
     private ClusterPhyService         clusterPhyService;
+    @Autowired
+    protected OperateRecordService operateRecordService;
+    @Autowired
+    protected ProjectService       projectService;
     @Override
     public boolean isTemplateSrvOpen(Integer templateId) {
         return templateSrvManager.isTemplateSrvOpen(templateId, templateSrv().getCode());
@@ -55,7 +69,7 @@ public abstract class BaseTemplateSrvImpl implements BaseTemplateSrv {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result<Void> openSrv(List<Integer> templateIdList) throws AdminOperateException {
+    public Result<Void> openSrv(List<Integer> templateIdList, String operator, Integer projectId) throws AdminOperateException {
         // 0.校验服务是否可以开启
         for (Integer templateId : templateIdList) {
             Result<Void> checkAvailableResult = checkSrvIsValid(templateId);
@@ -63,7 +77,7 @@ public abstract class BaseTemplateSrvImpl implements BaseTemplateSrv {
         }
 
         // 1.更新DB服务开启状态
-        Result<Void> updateResult = updateSrvStatus(templateIdList, Boolean.TRUE);
+        Result<Void> updateResult = updateSrvStatus(templateIdList, Boolean.TRUE,operator,projectId);
         if (updateResult.failed()) { return updateResult;}
 
         return Result.buildSucc();
@@ -71,9 +85,9 @@ public abstract class BaseTemplateSrvImpl implements BaseTemplateSrv {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result<Void> closeSrv(List<Integer> templateIdList) throws AdminOperateException {
+    public Result<Void> closeSrv(List<Integer> templateIdList, String operator, Integer projectId) throws AdminOperateException {
         // 0.更新DB服务关闭状态
-        Result<Void> updateResult = updateSrvStatus(templateIdList, Boolean.FALSE);
+        Result<Void> updateResult = updateSrvStatus(templateIdList, Boolean.FALSE, operator, projectId);
         if (updateResult.failed()) { return updateResult;}
 
         return Result.buildSucc();
@@ -109,21 +123,44 @@ public abstract class BaseTemplateSrvImpl implements BaseTemplateSrv {
     /******************************************private************************************************/
     /**
      * 更新DB服务状态
+     *
+     * @param status,        true:开启, false:关闭
      * @param templateIdList
-     * @param status, true:开启, false:关闭
+     * @param operator
+     * @param projectId
      * @return
      */
-    private Result<Void> updateSrvStatus(List<Integer> templateIdList, Boolean status) throws AdminOperateException {
+    private Result<Void> updateSrvStatus(List<Integer> templateIdList, Boolean status, String operator,
+                                         Integer projectId) throws AdminOperateException {
         String srvCode = templateSrv().getCode().toString();
+        List<TupleTwo</*old*/IndexTemplate,/*change*/IndexTemplate>> tupleTwos= Lists.newArrayList();
         for (Integer templateId : templateIdList) {
             IndexTemplate indexTemplate = indexTemplateService.getLogicTemplateById(templateId);
-            if (null == indexTemplate) { continue;}
+            
 
+            if (null == indexTemplate) { continue;}
+            TupleTwo</*old*/IndexTemplate,/*change*/IndexTemplate> tupleTwo = Tuples.of(indexTemplate,null);
             if (status) { addSrvCode(indexTemplate, srvCode);}
             else { removeSrvCode(indexTemplate, srvCode);}
 
-            indexTemplateService.editTemplateInfoTODB(ConvertUtil.obj2Obj(indexTemplate, IndexTemplateDTO.class));
+            tupleTwo.update2(indexTemplate);
+            tupleTwos.add(tupleTwo);
         }
+        //确认操作项目的合法性
+        if (tupleTwos.stream().map(TupleTwo::v1)
+                .map(oldIndexTemplate -> ProjectUtils.checkProjectCorrectly(IndexTemplate::getProjectId,
+                        oldIndexTemplate, projectId)).anyMatch(BaseResult::failed)) {
+            return Result.buildFail("当前项目不属于超级项目或者持有该操作的项目");
+        }
+        for (TupleTwo<IndexTemplate, IndexTemplate> tupleTwo : tupleTwos) {
+            indexTemplateService.editTemplateInfoTODB(ConvertUtil.obj2Obj(tupleTwo.v2, IndexTemplateDTO.class));
+            operateRecordService.save(new OperateRecord.Builder().operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE)
+                    .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).bizId(tupleTwo.v2.getId())
+                    .project(projectService.getProjectBriefByProjectId(projectId))
+                    .content(Boolean.TRUE.equals(status) ? "开启模板服务" : "关闭模板服务").userOperation(operator).build());
+        }
+        
+        
         return Result.buildSucc();
     }
 

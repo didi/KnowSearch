@@ -3,7 +3,7 @@ package com.didichuxing.datachannel.arius.admin.biz.project.impl;
 import com.didichuxing.datachannel.arius.admin.biz.project.RoleExtendManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.RoleExtendVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.RoleExtendVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -49,11 +50,18 @@ public class RoleExtendManagerImpl implements RoleExtendManager {
 	 * @return
 	 */
 	@Override
-	public Result<Void> deleteRoleByRoleId(Integer id, HttpServletRequest request) {
+	public Result deleteRoleByRoleId(Integer id, HttpServletRequest request) {
 		if (AuthConstant.RESOURCE_OWN_ROLE_ID.equals(id) || AuthConstant.ADMIN_ROLE_ID.equals(id)) {
 			return Result.buildFail(String.format("属于内置角色:[%s]，不可以被删除", id));
 		}
 		try {
+			
+			final RoleDeleteCheckVO roleDeleteCheckVO = roleService.checkBeforeDelete(id);
+			if (CollectionUtils.isNotEmpty(roleDeleteCheckVO.getUserNameList())){
+				final RoleVO roleVO = roleService.getRoleDetailByRoleId(id);
+				return Result.buildFailWithMsg(roleDeleteCheckVO,String.format("角色:[%s]已经分配给用了,不允许删除,请先解除分配的用户再试！",
+						roleVO.getRoleName()));
+			}
 			roleService.deleteRoleByRoleId(id, request);
 			operateRecordService.save(new OperateRecord.Builder()
 							.userOperation(HttpRequestUtil.getOperator(request))
@@ -168,10 +176,7 @@ public class RoleExtendManagerImpl implements RoleExtendManager {
 		return Result.buildSucc(roleService.getRoleBriefListByRoleName(roleName));
 	}
 	
-	@Override
-	public Result<RoleDeleteCheckVO> checkBeforeDelete(Integer roleId) {
-		return Result.buildSucc(roleService.checkBeforeDelete(roleId));
-	}
+
 	
 
 }

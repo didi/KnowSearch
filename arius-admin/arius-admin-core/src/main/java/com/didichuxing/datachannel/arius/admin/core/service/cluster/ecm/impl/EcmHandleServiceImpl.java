@@ -505,8 +505,9 @@ public class EcmHandleServiceImpl implements EcmHandleService {
         return ecmBaseHandleMap.get(clusterType);
     }
 
-    private void deleteLocalClusterInfo(ClusterPhy clusterPhy, String operator) {
-        Result<Boolean> deleteClusterResult = esClusterPhyService.deleteClusterById(clusterPhy.getId(), operator);
+    private void deleteLocalClusterInfo(ClusterPhy clusterPhy, String operator,Integer projectId) {
+        Result<Boolean> deleteClusterResult = esClusterPhyService.deleteClusterById(clusterPhy.getId(), operator,
+                projectId);
         if (deleteClusterResult.failed()) {
             LOGGER
                 .error("class=ElasticClusterServiceImpl||method=deleteLocalClusterInfo||clusterId={}||clusterName={}||"
@@ -515,7 +516,8 @@ public class EcmHandleServiceImpl implements EcmHandleService {
         }
 
         //逻辑删除
-        Result<Void> deleteRoleClusterResult = clusterRoleService.deleteRoleClusterByClusterId(clusterPhy.getId());
+        Result<Void> deleteRoleClusterResult = clusterRoleService.deleteRoleClusterByClusterId(clusterPhy.getId(),
+                projectId);
         if (deleteRoleClusterResult.failed()) {
             LOGGER.error("class=ElasticClusterServiceImpl||method=deleteLocalClusterInfo||clusterName={}||"
                          + "msg=failed to delete local db role cluster info",
@@ -523,7 +525,8 @@ public class EcmHandleServiceImpl implements EcmHandleService {
         }
 
         //逻辑删除
-        Result<Void> deleteRoleClusterHostResult = clusterRoleHostService.deleteByCluster(clusterPhy.getCluster());
+        Result<Void> deleteRoleClusterHostResult = clusterRoleHostService.deleteByCluster(clusterPhy.getCluster(),
+                projectId);
         if (deleteRoleClusterHostResult.failed()) {
             LOGGER.error(
                 "class=ElasticClusterServiceImpl||method=deleteLocalClusterInfo||roleClusterName=={}||roleClusterName={}||"

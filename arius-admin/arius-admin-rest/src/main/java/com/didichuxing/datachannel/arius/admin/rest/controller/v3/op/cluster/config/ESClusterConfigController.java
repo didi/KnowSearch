@@ -80,6 +80,7 @@ public class ESClusterConfigController {
     @ResponseBody
     @ApiOperation(value = "更新ES集群配置描述")
     public Result<Void> editEsClusterConfigDesc(HttpServletRequest request, @RequestBody ESConfigDTO param) {
-        return esClusterConfigService.editConfigDesc(param, HttpRequestUtil.getOperator(request));
+        return esClusterConfigService.editConfigDesc(param, HttpRequestUtil.getOperator(request),
+                HttpRequestUtil.getProjectId(request));
     }
 }

@@ -1,10 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.cluster;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterQuickCommandEnum.ABNORMAL_SHARD_RETRY;
-import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterQuickCommandEnum.CLEAR_FIELDDATA_MEMORY;
-import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterQuickCommandEnum.HOT_THREAD;
-import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterQuickCommandEnum.PENDING_TASK;
-import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterQuickCommandEnum.TASK_MISSION_ANALYSIS;
+import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterQuickCommandMethodsEnum.ABNORMAL_SHARD_RETRY;
+import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterQuickCommandMethodsEnum.CLEAR_FIELDDATA_MEMORY;
+import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterQuickCommandMethodsEnum.HOT_THREAD;
+import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterQuickCommandMethodsEnum.PENDING_TASK;
+import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterQuickCommandMethodsEnum.TASK_MISSION_ANALYSIS;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ACTION;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.COUNT;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.DESCRIPTION;

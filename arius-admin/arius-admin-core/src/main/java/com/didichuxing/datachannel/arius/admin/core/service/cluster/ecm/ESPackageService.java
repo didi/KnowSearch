@@ -1,10 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm;
 
-import java.util.List;
-
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESPackageDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.espackage.ESPackage;
+import java.util.List;
 
 /**
  * 程序包版本管理 服务类
@@ -28,11 +27,13 @@ public interface ESPackageService {
 
     /**
      * 修改ES package
+     *
      * @param esPackageDTO dto
-     * @param operator 操作者
+     * @param operator     操作者
+     * @param projectId
      * @return 更新的es package
      */
-    Result<ESPackage> updateESPackage(ESPackageDTO esPackageDTO, String operator);
+    Result<ESPackage> updateESPackage(ESPackageDTO esPackageDTO, String operator, Integer projectId);
 
     /**
      * 根据id获取es package

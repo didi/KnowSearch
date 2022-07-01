@@ -12,18 +12,18 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.GatewayHeartbe
 import com.didichuxing.datachannel.arius.admin.common.bean.common.IndexTemplatePhysicalConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.alias.IndexTemplateAliasDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ESUser;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ProjectConfig;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ProjectTemplateAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.ScrollDslTemplateRequest;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.ScrollDslTemplateResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.gateway.GatewayClusterNode;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ESUser;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ProjectConfig;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ProjectTemplateAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateAlias;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.GatewayESUserVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.gateway.GatewayClusterNodeVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.GatewayESUserVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.GatewayTemplateDeployInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.GatewayTemplatePhysicalDeployVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.GatewayTemplatePhysicalVO;
@@ -35,11 +35,11 @@ import com.didichuxing.datachannel.arius.admin.common.constant.template.Template
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.TemplateUtils;
+import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
+import com.didichuxing.datachannel.arius.admin.core.service.gateway.GatewayService;
 import com.didichuxing.datachannel.arius.admin.core.service.project.ESUserService;
 import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectConfigService;
 import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectLogicTemplateAuthService;
-import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
-import com.didichuxing.datachannel.arius.admin.core.service.gateway.GatewayService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicAliasService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
@@ -324,7 +324,7 @@ public class GatewayManagerImpl implements GatewayManager {
 
     @Override
     public Result<String> sqlExplain(String sql, Integer projectId) {
-        if (projectId == null ||esUserService.checkDefaultESUserByProject(projectId)) {
+        if (projectId == null ||!esUserService.checkDefaultESUserByProject(projectId)) {
             return Result.buildParamIllegal("对应的projectId字段非法");
         }
         final ESUser esUser = esUserService.getDefaultESUserByProject(projectId);
@@ -334,7 +334,7 @@ public class GatewayManagerImpl implements GatewayManager {
 
     @Override
     public Result<String> directSqlSearch(String sql, String phyClusterName, Integer projectId) {
-        if (projectId == null ||esUserService.checkDefaultESUserByProject(projectId)) {
+        if (projectId == null ||!esUserService.checkDefaultESUserByProject(projectId)) {
             return Result.buildParamIllegal("对应的projectId字段非法");
         }
          final ESUser esUser = esUserService.getDefaultESUserByProject(projectId);

@@ -1,8 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v2.console.template;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V2_CONSOLE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterLogicManager;
+import com.didichuxing.datachannel.arius.admin.biz.indices.IndicesManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.pipeline.TemplatePipelineManager;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
@@ -11,6 +13,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleT
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateRateLimitDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateUpdateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithCluster;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
@@ -25,7 +28,6 @@ import com.didichuxing.datachannel.arius.admin.common.constant.template.Template
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
 import com.didiglobal.logi.log.ILog;
@@ -39,7 +41,9 @@ import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -57,7 +61,8 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping(V2_CONSOLE + "/template")
-@Api(tags = "Console-用户侧索引模板接口(REST)")
+@Api(tags = "Console-用户侧索引模板接口(REST)：见："+V3_OP)
+@Deprecated
 public class ConsoleTemplateController extends BaseConsoleTemplateController {
 
     private static final ILog        LOGGER = LogFactory.getLog(ConsoleTemplateController.class);
@@ -73,7 +78,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
     private IndexTemplatePhyService indexTemplatePhyService;
 
     @Autowired
-    private ESIndexService           esIndexService;
+    private IndicesManager          indicesManager;
 
     @Autowired
     private TemplateLogicManager     templateLogicManager;
@@ -104,7 +109,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
         IndexTemplateWithCluster indexTemplateLogicWithCluster = indexTemplateService
             .getLogicTemplateWithCluster(logicId);
 
-        if (null == indexTemplateLogicWithCluster) {
+        if (null == indexTemplateLogicWithCluster || CollectionUtils.isEmpty(indexTemplateLogicWithCluster.getLogicClusters())) {
             return Result.buildFail("模板对应资源不存在!");
         }
 
@@ -126,7 +131,11 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
         Result<Void> checkAuthResult = checkAppAuth(logicId, HttpRequestUtil.getProjectId(request));
         consoleTemplateDetail.setEditable(checkAuthResult.success());
         // 获取indexRollover功能开启状态
-        consoleTemplateDetail.setDisableIndexRollover(indexTemplateService.getTemplateConfig(logicId).getDisableIndexRollover());
+        consoleTemplateDetail.setDisableIndexRollover(Optional.ofNullable(indexTemplateService.getTemplateConfig(logicId))
+                .map(IndexTemplateConfig::getDisableIndexRollover)
+                .orElse(null)
+
+        );
 
         return Result.buildSucc(consoleTemplateDetail);
     }
@@ -137,7 +146,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
     public Result<Void> modifyConsoleTemplate(HttpServletRequest request,
                                         @RequestBody ConsoleTemplateUpdateDTO templateLogicDTO) throws AdminOperateException {
         return templateLogicManager.editTemplate(ConvertUtil.obj2Obj(templateLogicDTO, IndexTemplateDTO.class),
-            HttpRequestUtil.getOperator(request));
+            HttpRequestUtil.getOperator(request),HttpRequestUtil.getProjectId(request));
     }
 
     @GetMapping("/capacity")
@@ -169,7 +178,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
         consoleTemplateClearVO.setLogicId(templateLogicWithPhysical.getId());
         consoleTemplateClearVO.setName(templateLogicWithPhysical.getName());
         consoleTemplateClearVO
-            .setIndices(indexTemplatePhyService.getMatchNoVersionIndexNames(templateLogicWithPhysical.getMasterPhyTemplate().getId()));
+            .setIndices(indicesManager.listIndexNameByTemplatePhyId(templateLogicWithPhysical.getMasterPhyTemplate().getId()));
         consoleTemplateClearVO.setAccessApps(templateLogicManager.getLogicTemplateProjectAccess(logicId));
 
         return Result.buildSucc(consoleTemplateClearVO);
@@ -228,7 +237,8 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
         if (checkAuthResult.failed()) {
             return checkAuthResult;
         }
-        return templateLogicManager.delTemplate(logicId, HttpRequestUtil.getOperator(request));
+        return templateLogicManager.delTemplate(logicId, HttpRequestUtil.getOperator(request),
+                HttpRequestUtil.getProjectId(request));
     }
 
     @GetMapping("/indices/list")
@@ -260,8 +270,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
         List<IndexTemplatePhy> physicalMasters = templateLogicWithPhysical.fetchMasterPhysicalTemplates();
         for (IndexTemplatePhy physicalMaster : physicalMasters) {
             try {
-                catIndexResults.addAll(esIndexService.syncCatIndexByExpression(physicalMaster.getCluster(),
-                    physicalMaster.getExpression()));
+                catIndexResults.addAll(indicesManager.listIndexCatInfoByTemplatePhyId(physicalMaster.getId()));
             } catch (Exception e) {
                 LOGGER.warn("class=ConsoleTemplateController||method=TemplateCyclicalRollInfoVO||logicId={}||errMsg={}", logicId, e.getMessage(), e);
             }
@@ -307,7 +316,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
         }
         try {
             return indexTemplateService.updateTemplateWriteRateLimit(consoleTemplateRateLimitDTO,
-                    HttpRequestUtil.getOperator(request));
+                    HttpRequestUtil.getOperator(request),HttpRequestUtil.getProjectId(request));
         } catch (ESOperateException e) {
             LOGGER.info("限流调整失败", e);
             return Result.buildFail("限流调整失败！");

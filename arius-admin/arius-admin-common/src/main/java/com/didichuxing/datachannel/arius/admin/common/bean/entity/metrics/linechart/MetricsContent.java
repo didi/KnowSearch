@@ -28,4 +28,10 @@ public class MetricsContent implements Serializable {
      * 多个时间片指标数据
      */
     private List<MetricsContentCell> metricsContentCells;
+
+    /**
+     * 时间段内的最大值或平均值
+     */
+    private Double valueInTimePeriod;
+
 }

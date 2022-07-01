@@ -64,7 +64,7 @@ public class OpTaskDCDRController {
                                                                           @PathVariable("taskId") Integer taskId,
                                                                           @PathVariable("templateIds") List<Long> templateIds) throws ESOperateException {
         return templateDCDRManager.cancelDCDRSwitchMasterSlaveByTaskIdAndTemplateIds(taskId, templateIds, false,
-            HttpRequestUtil.getOperator(request));
+            HttpRequestUtil.getOperator(request), HttpRequestUtil.getProjectId(request));
     }
 
     @DeleteMapping("/{taskId}/cancel")
@@ -72,15 +72,17 @@ public class OpTaskDCDRController {
     @ApiOperation(value = "根据任务id取消全量DCDR主从切换任务")
     public Result<Void> cancelDcdrSwitchMasterSlaveByTaskId(HttpServletRequest request,
                                                             @PathVariable("taskId") Integer taskId) throws ESOperateException {
-        return templateDCDRManager.cancelDCDRSwitchMasterSlaveByTaskId(taskId, HttpRequestUtil.getOperator(request));
+        return templateDCDRManager.cancelDCDRSwitchMasterSlaveByTaskId(taskId, HttpRequestUtil.getOperator(request),
+                HttpRequestUtil.getProjectId(request));
     }
 
     @PostMapping("/{taskId}/{templateId}/refresh")
     @ResponseBody
     @ApiOperation(value = "刷新dcdr链路任务")
-    public Result<Void> refreshDcdrChannelState(@PathVariable("taskId") Integer taskId,
+    public Result<Void> refreshDcdrChannelState(HttpServletRequest request,@PathVariable("taskId") Integer taskId,
                                                 @PathVariable("templateId") Integer templateId) {
-        return templateDCDRManager.refreshDCDRChannelState(taskId, templateId, null);
+        return templateDCDRManager.refreshDCDRChannelState(taskId, templateId, HttpRequestUtil.getOperator(request),
+                HttpRequestUtil.getProjectId(request));
     }
 
     @PutMapping("/{taskId}/{templateId}/forceSwitch")
@@ -89,6 +91,7 @@ public class OpTaskDCDRController {
     public Result<Void> forceSwitchMasterSlave(HttpServletRequest request,
                                                @PathVariable("taskId") Integer taskId,
                                                @PathVariable ("templateId") Integer templateId) {
-        return templateDCDRManager.forceSwitchMasterSlave(taskId, templateId, HttpRequestUtil.getOperator(request));
+        return templateDCDRManager.forceSwitchMasterSlave(taskId, templateId, HttpRequestUtil.getOperator(request),
+                HttpRequestUtil.getProjectId(request));
     }
 }

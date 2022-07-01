@@ -1,11 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.dto.oprecord;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.PageDTO;
+import com.didichuxing.datachannel.arius.admin.common.constant.OperateRecordSortEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
-import java.util.Date;
-
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -80,6 +80,16 @@ public class OperateRecordDTO extends PageDTO {
     @ApiModelProperty("项目")
     private String  projectName;
     @ApiModelProperty("bizId")
-    private Integer bizId;
-
+    private String bizId;
+    /**
+     * @see OperateRecordSortEnum
+     */
+    @ApiModelProperty(value = "排序字段",example = "id或者operateTime")
+    private String sortTerm;
+    
+    
+    @ApiModelProperty(value = "是否降序排序（默认降序）", dataType = "Boolean", required = false)
+    private Boolean orderByDesc = true;
+    @ApiModelProperty(hidden = true)
+    private String sortType;
 }

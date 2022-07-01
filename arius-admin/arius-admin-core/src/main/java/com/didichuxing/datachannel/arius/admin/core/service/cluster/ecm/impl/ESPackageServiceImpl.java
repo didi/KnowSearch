@@ -15,6 +15,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESCluste
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ESVersionUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESPackageService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
@@ -74,7 +75,7 @@ public class ESPackageServiceImpl implements ESPackageService {
     }
 
     @Override
-    public Result<ESPackage> updateESPackage(ESPackageDTO esPackageDTO, String operator) {
+    public Result<ESPackage> updateESPackage(ESPackageDTO esPackageDTO, String operator, Integer projectId) {
         Result<Void> checkResult = checkValid(esPackageDTO, operator, EDIT);
         if (checkResult.failed()) {
             return Result.buildFrom(checkResult);
@@ -85,6 +86,10 @@ public class ESPackageServiceImpl implements ESPackageService {
             if (uploadResult.failed()) {
                 return Result.buildFrom(uploadResult);
             }
+        }
+        final Result<Void> result = ProjectUtils.checkProjectCorrectly(id -> id, projectId, projectId);
+        if (result.failed()){
+            return Result.buildFail(result.getMessage());
         }
 
         return updatePackageToDB(esPackageDTO);

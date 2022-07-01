@@ -97,5 +97,9 @@
         delete from index_template_config
         where id = #{configId}
     </delete>
-
+    
+    <delete id="deleteByLogicId">
+        delete from index_template_config
+        where logic_id = #{logicId}
+    </delete>
 </mapper>

@@ -4,24 +4,24 @@ import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectLogicClusterAuthDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ProjectClusterLogicAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ProjectClusterLogicAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.project.ProjectClusterLogicAuthPO;
-import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectClusterLogicAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectClusterLogicAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.event.auth.ProjectLogicClusterAuthAddEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.auth.ProjectLogicClusterAuthDeleteEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.auth.ProjectLogicClusterAuthEditEvent;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
-import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectClusterLogicAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
+import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectClusterLogicAuthService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.project.ProjectLogicClusterAuthDAO;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
@@ -496,17 +496,6 @@ public class ProjectClusterLogicAuthServiceImpl implements ProjectClusterLogicAu
         // 不能添加管理权限
         if (ProjectClusterLogicAuthEnum.ALL == authEnum) {
             return Result.buildParamIllegal("不支持添加超管权限");
-        }
-    
-        final Integer projectId = authDTO.getProjectId();
-        final ProjectVO projectVO = Optional.ofNullable(projectId)
-                .filter(projectService::checkProjectExist)
-                .map(projectService::getProjectDetailByProjectId)
-                .orElse(new ProjectVO());
-        // 校验责任人是否合法
-        if (!(roleTool.isAdmin(authDTO.getResponsible()) || CommonUtils.isUserNameBelongProjectMember(authDTO.getResponsible(),
-                projectVO)||CommonUtils.isUserNameBelongProjectResponsible(authDTO.getResponsible(),projectVO))) {
-            return Result.buildParamIllegal("责任人非法");
         }
         return Result.buildSucc();
     }

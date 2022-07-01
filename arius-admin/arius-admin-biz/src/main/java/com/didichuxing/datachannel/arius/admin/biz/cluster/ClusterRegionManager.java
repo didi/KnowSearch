@@ -1,18 +1,12 @@
 package com.didichuxing.datachannel.arius.admin.biz.cluster;
 
-import java.util.List;
-
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterWithRegionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionWithNodeInfoVO;
+import java.util.List;
 
-/**
- * @Author: lanxinzheng
- * @Date: 2021/1/7
- * @Comment:
- */
 public interface ClusterRegionManager {
 
     /**
@@ -39,6 +33,7 @@ public interface ClusterRegionManager {
 
     /**
      * 逻辑集群批量绑定region
+     *
      * @param isAddClusterLogicFlag 是否要添加逻辑集群
      */
     Result<Void> batchBindRegionToClusterLogic(ESLogicClusterWithRegionDTO param, String operator,
@@ -46,22 +41,15 @@ public interface ClusterRegionManager {
 
     /**
      * 解绑逻辑集群已经绑定的region
-     * @param regionId regionId
-     * @param operator operator
-     * @param logicClusterId 逻辑集群id
-     * @return
-     */
-    Result<Void> unbindRegion(Long regionId, Long logicClusterId, String operator);
-
-    /**
-     * 绑定region到逻辑集群
+     *
      * @param regionId       regionId
-     * @param logicClusterId 逻辑集群ID
-     * @param share          share
-     * @param operator       操作人
+     * @param logicClusterId 逻辑集群id
+     * @param operator       operator
+     * @param projectId
      * @return
      */
-    Result<Void> bindRegion(Long regionId, Long logicClusterId, Integer share, String operator);
+    Result<Void> unbindRegion(Long regionId, Long logicClusterId, String operator, Integer projectId);
+
 
     /**
      * 根据物理集群名称获region信息（包含空节点region），包含region中的数据节点信息
@@ -76,5 +64,5 @@ public interface ClusterRegionManager {
      * @param clusterName         物理集群名称
      * @return                    Result<List<ClusterRegionVO>>
      */
-    Result<List<ClusterRegionVO>> listNoEmptyClusterRegionByClusterName(String clusterName);
+    Result<List<ClusterRegionVO>> listNotEmptyClusterRegionByClusterName(String clusterName);
 }

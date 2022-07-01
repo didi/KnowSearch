@@ -50,21 +50,25 @@ public class PhyClusterPluginsController {
     @PostMapping("")
     @ResponseBody
     @ApiOperation(value = "上传插件")
-    public Result<Long> add(PluginDTO param) {
-        return clusterPluginsManager.addPlugins(param);
+    public Result<Long> add(HttpServletRequest request,PluginDTO param) {
+       
+        return clusterPluginsManager.addPlugins(param,HttpRequestUtil.getProjectId(request));
     }
 
     @DeleteMapping("/{pluginId}")
     @ResponseBody
     @ApiOperation(value = "删除ES本地插件信息")
     public Result<Long> deleteEsClusterConfig(HttpServletRequest request, @PathVariable(value = "pluginId") Long pluginId) {
-        return clusterPluginsManager.deletePluginById(pluginId, HttpRequestUtil.getOperator(request));
+        
+        return clusterPluginsManager.deletePluginById(pluginId, HttpRequestUtil.getOperator(request),
+                HttpRequestUtil.getProjectId(request));
     }
 
     @PutMapping("")
     @ResponseBody
     @ApiOperation(value = "编辑本地插件描述")
     public Result<Void> edit(HttpServletRequest request, @RequestBody PluginDTO pluginDTO) {
-        return clusterPluginsManager.editPluginDesc(pluginDTO, HttpRequestUtil.getOperator(request));
+        
+        return clusterPluginsManager.editPluginDesc(pluginDTO, HttpRequestUtil.getOperator(request),HttpRequestUtil.getProjectId(request));
     }
 }

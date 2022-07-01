@@ -27,10 +27,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterReg
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionWithNodeInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AriusRunTimeException;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.*;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
@@ -103,7 +100,7 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
         if (CollectionUtils.isEmpty(clusterRegions)) {
             return Result.buildFail(String.format("物理集群[%s]无划分region, 请先进行region划分", phyCluster));
         }
-        return Result.buildSucc(ConvertUtil.list2List(clusterRegions, ClusterRegionVO.class));
+        return Result.buildSucc(ConvertUtil.list2List(clusterRegions, ClusterRegionVO.class,regionVO -> regionVO.setClusterName(phyCluster)));
     }
 
     /**
@@ -117,7 +114,9 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
             return null;
         }
 
-        ClusterRegionVO logicClusterRegionVO = new ClusterRegionVO();
+        ClusterRegionVO logicClusterRegionVO = ConvertUtil.obj2Obj(region, ClusterRegionVO.class, regionVO -> {
+            regionVO.setClusterName(region.getPhyClusterName());
+        });
         logicClusterRegionVO.setId(region.getId());
         logicClusterRegionVO.setLogicClusterIds(region.getLogicClusterIds());
         logicClusterRegionVO.setClusterName(region.getPhyClusterName());
@@ -135,6 +134,7 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
         if (CollectionUtils.isEmpty(param.getClusterRegionDTOS())) {
             return Result.buildParamIllegal("逻辑集群关联region信息为空");
         }
+      
 
         //2. 集群合法关联性校验
         param.getClusterRegionDTOS().stream().distinct()
@@ -155,7 +155,13 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
             }
             param.setId(createLogicClusterResult.getData());
         }
-
+        //校验项目的合法性
+        final Result<Void> result = ProjectUtils.checkProjectCorrectly(ESLogicClusterWithRegionDTO::getProjectId, param,
+                param.getProjectId());
+        if (result.failed()){
+            return result;
+        }
+    
         //5. 初始化物理集群索引服务
         initTemplateSrvOfClusterPhy(param, operator);
 
@@ -164,14 +170,11 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
     }
 
     @Override
-    public Result<Void> unbindRegion(Long regionId, Long logicClusterId, String operator) {
-        return clusterRegionService.unbindRegion(regionId, logicClusterId, operator);
+    public Result<Void> unbindRegion(Long regionId, Long logicClusterId, String operator, Integer projectId) {
+        return clusterRegionService.unbindRegion(regionId, logicClusterId, operator,projectId);
     }
 
-    @Override
-    public Result<Void> bindRegion(Long regionId, Long logicClusterId, Integer share, String operator) {
-        return clusterRegionService.bindRegion(regionId, logicClusterId, share, operator);
-    }
+   
 
     @Override
     public Result<List<ClusterRegionWithNodeInfoVO>> listClusterRegionWithNodeInfoByClusterName(String clusterName) {
@@ -179,7 +182,7 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
         if (CollectionUtils.isEmpty(clusterRegions)) { return Result.buildSucc();}
 
         // 构建region中的节点信息
-        List<ClusterRegionWithNodeInfoVO> clusterRegionWithNodeInfoVOS = ConvertUtil.list2List(clusterRegions, ClusterRegionWithNodeInfoVO.class);
+        List<ClusterRegionWithNodeInfoVO> clusterRegionWithNodeInfoVOS = ConvertUtil.list2List(clusterRegions, ClusterRegionWithNodeInfoVO.class,region->region.setClusterName(clusterName));
         for (ClusterRegionWithNodeInfoVO clusterRegionWithNodeInfoVO : clusterRegionWithNodeInfoVOS) {
             Result<List<ClusterRoleHost>> ret = clusterRoleHostService.listByRegionId(clusterRegionWithNodeInfoVO.getId().intValue());
             if (ret.success() && CollectionUtils.isNotEmpty(ret.getData())) {
@@ -194,7 +197,7 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
     }
 
     @Override
-    public Result<List<ClusterRegionVO>> listNoEmptyClusterRegionByClusterName(String clusterName) {
+    public Result<List<ClusterRegionVO>> listNotEmptyClusterRegionByClusterName(String clusterName) {
         Result<List<ClusterRegionWithNodeInfoVO>> ret = listClusterRegionWithNodeInfoByClusterName(clusterName);
         if (ret.failed()) { return Result.buildFrom(ret);}
 
@@ -213,7 +216,7 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
     /**
      * 对于逻辑集群绑定的物理集群的版本进行一致性校验
      *
-     * @param param 逻辑集群Region
+     * @param param     逻辑集群Region
      * @return
      */
     private Result<Void> boundPhyClusterVersionsCheck(ESLogicClusterWithRegionDTO param) {

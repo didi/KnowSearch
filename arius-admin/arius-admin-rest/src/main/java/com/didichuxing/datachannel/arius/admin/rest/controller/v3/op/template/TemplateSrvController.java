@@ -48,16 +48,18 @@ public class TemplateSrvController {
     @PutMapping("/{srvCode}/{templateIdList}")
     @ResponseBody
     @ApiOperation(value = "开启模板服务")
-    public Result<Void> openTemplateSrv(@PathVariable("srvCode") Integer srvCode,
+    public Result<Void> openTemplateSrv(HttpServletRequest request,@PathVariable("srvCode") Integer srvCode,
                                         @PathVariable("templateIdList") List<Integer> templateIdList) {
-        return templateSrvManager.openSrv(srvCode, templateIdList);
+        return templateSrvManager.openSrv(srvCode, templateIdList,HttpRequestUtil.getOperator(request),
+                HttpRequestUtil.getProjectId(request));
     }
 
     @DeleteMapping("/{srvCode}/{templateIdList}")
     @ResponseBody
     @ApiOperation(value = "关闭模板服务")
-    public Result<Void> closeTemplateSrv(@PathVariable("srvCode") Integer srvCode,
+    public Result<Void> closeTemplateSrv(HttpServletRequest request,@PathVariable("srvCode") Integer srvCode,
                                          @PathVariable("templateIdList") List<Integer> templateIdList) {
-        return templateSrvManager.closeSrv(srvCode, templateIdList);
+        return templateSrvManager.closeSrv(srvCode, templateIdList,HttpRequestUtil.getOperator(request),
+                HttpRequestUtil.getProjectId(request));
     }
 }

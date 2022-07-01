@@ -62,7 +62,8 @@ public class DslTemplateController {
     @ApiImplicitParam(name = "dslTemplateMd5", value = "查询模板MD5List", required = true)
     public Result<Boolean> changeStatus(@PathVariable(value = "dslTemplateMd5") String dslTemplateMd5,
                                         HttpServletRequest request) {
-        return dslTemplateManager.changeDslTemplateStatus(HttpRequestUtil.getProjectId(request), dslTemplateMd5);
+        return dslTemplateManager.changeDslTemplateStatus(HttpRequestUtil.getProjectId(request),
+                HttpRequestUtil.getOperator(request), dslTemplateMd5);
     }
 
     @PutMapping(path = "/update/queryLimit")
@@ -74,7 +75,9 @@ public class DslTemplateController {
     public Result<Boolean> updateQueryLimit(@RequestParam(value = "dslTemplateMd5List") List<String> dslTemplateMd5List,
                                        @RequestParam(value = "queryLimit") Double queryLimit,
                                        HttpServletRequest request) {
-        return dslTemplateManager.updateDslTemplateQueryLimit(HttpRequestUtil.getProjectId(request), dslTemplateMd5List, queryLimit);
+        return dslTemplateManager.updateDslTemplateQueryLimit(HttpRequestUtil.getProjectId(request),
+                HttpRequestUtil.getOperator(request),
+                dslTemplateMd5List, queryLimit);
     }
 
     @PostMapping(path = "/slow/list")

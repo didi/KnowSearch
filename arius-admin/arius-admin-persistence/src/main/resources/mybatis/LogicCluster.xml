@@ -16,11 +16,11 @@
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
         <result column="health" jdbcType="TINYINT" property="health"/>
+        <result column="data_node_spec" jdbcType="VARCHAR" property="dataNodeSpec"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-        id
-        , `name`, `type`, project_id, data_center, responsible, memo, quota, `level`, config_json, create_time, update_time, health
+        id , `name`, `type`, project_id, data_center, responsible, memo, quota, `level`, config_json, create_time, update_time, health,data_node_spec
     </sql>
 
     <select id="listByCondition"
@@ -37,6 +37,17 @@
             <if test="projectId != null">and project_id = #{projectId}</if>
             <if test="dataCenter != null">and data_center = #{dataCenter}</if>
             <if test="health != null">and health = #{health}</if>
+        </trim>
+        order by id desc
+    </select>
+
+    <select id="listByNameAndProjectId" parameterType="String" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from project_arius_resource_logic
+        <trim prefix="where" prefixOverrides="and">
+            <if test="name != null and name != ''">and `name` LIKE CONCAT('%',#{name},'%')</if>
+            <if test="projectId != null">and project_id = #{projectId}</if>
         </trim>
         order by id desc
     </select>
@@ -166,5 +177,10 @@
         <if test="health != null">and health = #{health}</if>
         <if test="type != null">and type = #{type}</if>
     </select>
-
+	
+	<select id="getProjectIdById" resultType="java.lang.Integer">
+		select project_id
+		from project_arius_resource_logic
+		where id = #{resourceId}
+	</select>
 </mapper>

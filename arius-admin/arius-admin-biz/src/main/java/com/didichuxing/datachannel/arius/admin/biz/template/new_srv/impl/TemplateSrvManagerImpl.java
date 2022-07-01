@@ -2,17 +2,6 @@ package com.didichuxing.datachannel.arius.admin.biz.template.new_srv.impl;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum.TEMPLATE_SRV;
 
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-
-import javax.annotation.PostConstruct;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.DependsOn;
-import org.springframework.stereotype.Service;
-
 import com.didichuxing.datachannel.arius.admin.biz.page.TemplateSrvPageSearchHandle;
 import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.TemplateSrvManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.base.BaseTemplateSrv;
@@ -40,6 +29,14 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import javax.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.DependsOn;
+import org.springframework.stereotype.Service;
 
 /**
  * @author chengxiang
@@ -144,12 +141,12 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
     }
 
     @Override
-    public Result<Void> openSrv(Integer srvCode, List<Integer> templateIdList) {
+    public Result<Void> openSrv(Integer srvCode, List<Integer> templateIdList, String operator, Integer projectId) {
         BaseTemplateSrv srvHandle = BASE_TEMPLATE_SRV_MAP.get(srvCode);
         if (null == srvHandle) { return Result.buildParamIllegal("未找到对应的服务");}
 
         try {
-            return srvHandle.openSrv(templateIdList);
+            return srvHandle.openSrv(templateIdList,operator,projectId);
         } catch (AdminOperateException e) {
             LOGGER.error("class=TemplateSrvManagerImpl||method=openSrv||templateIdList={}||srvCode={}" +
                     "||errMsg=failed to open template srv", ListUtils.intList2String(templateIdList), srvCode);
@@ -158,12 +155,12 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
     }
 
     @Override
-    public Result<Void> closeSrv(Integer srvCode, List<Integer> templateIdList) {
+    public Result<Void> closeSrv(Integer srvCode, List<Integer> templateIdList, String operator, Integer projectId) {
         BaseTemplateSrv srvHandle = BASE_TEMPLATE_SRV_MAP.get(srvCode);
         if (null == srvHandle) { return Result.buildParamIllegal("未找到对应服务");}
 
         try {
-            return srvHandle.closeSrv(templateIdList);
+            return srvHandle.closeSrv(templateIdList,operator,projectId);
         } catch (AdminOperateException e) {
             LOGGER.error("class=TemplateSrvManagerImpl||method=closeSrv||templateIdList={}||srvCode={}" +
                     "||errMsg=failed to open template srv", ListUtils.intList2String(templateIdList), srvCode);

@@ -74,12 +74,14 @@ public interface IndexTemplateService {
 
     /**
      * 删除逻辑模板
+     *
      * @param logicTemplateId 模板id
-     * @param operator 操作人
+     * @param operator        操作人
+     * @param projectId
      * @return result
      * @throws AdminOperateException
      */
-    Result<Void> delTemplate(Integer logicTemplateId, String operator) throws AdminOperateException;
+    Result<Void> delTemplate(Integer logicTemplateId, String operator, Integer projectId) throws AdminOperateException;
 
     /**
      * 校验模板参数是否合法
@@ -87,7 +89,7 @@ public interface IndexTemplateService {
      * @param operation 操作
      * @return result
      */
-    Result<Void> validateTemplate(IndexTemplateDTO param, OperationEnum operation);
+    Result<Void> validateTemplate(IndexTemplateDTO param, OperationEnum operation,Integer projectId);
 
     /**
      * 编辑逻辑模板
@@ -96,7 +98,7 @@ public interface IndexTemplateService {
      * @return result
      * @throws AdminOperateException 操作es失败
      */
-    Result<Void> editTemplate(IndexTemplateDTO param, String operator) throws AdminOperateException;
+    Result<Void> editTemplate(IndexTemplateDTO param, String operator,Integer projectId) throws AdminOperateException;
 
     /**
      * 添加逻辑模板而不需要参数校验
@@ -199,14 +201,16 @@ public interface IndexTemplateService {
 
     /**
      * 模板移交
-     * @param logicId 模板id
-     * @param tgtProjectId projectId
-     * @param tgtResponsible 责任人
-     * @param operator 操作人
+     *
+     * @param logicId         模板id
+     * @param sourceProjectId 原项目
+     * @param tgtProjectId    projectId
+     * @param tgtResponsible  责任人
+     * @param operator        操作人
      * @return Result
      * @throws AdminOperateException
      */
-    Result<Void> turnOverLogicTemplate(Integer logicId, Integer tgtProjectId, String tgtResponsible,
+    Result<Void> turnOverLogicTemplate(Integer logicId, Integer sourceProjectId,Integer tgtProjectId, String tgtResponsible,
                                        String operator) throws AdminOperateException;
 
     /**
@@ -366,7 +370,7 @@ public interface IndexTemplateService {
      */
     Result updateBlockWriteState(Integer logicId, Boolean blockWrite, String operator);
 
-    Result updateTemplateWriteRateLimit(ConsoleTemplateRateLimitDTO consoleTemplateRateLimitDTO, String operator) throws ESOperateException;
+    Result updateTemplateWriteRateLimit(ConsoleTemplateRateLimitDTO consoleTemplateRateLimitDTO, String operator, Integer projectId) throws ESOperateException;
 
     Result<Void> preCheckTemplateName(String templateName);
 
@@ -393,4 +397,6 @@ public interface IndexTemplateService {
      * @return {@code Integer}
      */
     Integer getProjectIdByTemplateLogicId(Integer templateLogicId);
+    
+    
 }

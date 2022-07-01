@@ -22,6 +22,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.template.Template
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESPluginService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
@@ -97,17 +98,23 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
      *
      * @param clusterId 集群id
      * @param operator  操作人
+     * @param projectId
      * @return 成功 true 失败 false
      * <p>
      * 集群不存在
      */
     @Override
-    public Result<Boolean> deleteClusterById(Integer clusterId, String operator) {
+    public Result<Boolean> deleteClusterById(Integer clusterId, String operator, Integer projectId) {
         ClusterPhyPO clusterPO = clusterDAO.getById(clusterId);
         if (clusterPO == null) {
             return Result.buildNotExist(CLUSTER_NOT_EXIST);
         }
-        
+        //校验操作项目的合法性
+        final Result<Void> result = ProjectUtils.checkProjectCorrectly(i -> i, projectId, projectId);
+        if (result.failed()){
+          return   Result.buildFail(result.getMessage());
+        }
+    
         return Result.buildBoolen(clusterDAO.delete(clusterId) == 1);
     }
 

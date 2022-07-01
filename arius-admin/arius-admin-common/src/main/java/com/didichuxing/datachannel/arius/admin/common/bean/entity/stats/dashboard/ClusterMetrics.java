@@ -69,4 +69,14 @@ public class ClusterMetrics {
      * 查询请求数突增量 （上个时间间隔请求数的两倍）
      */
     private Long   reqUprushNum;
+
+    /**
+     * 消耗时间 （开始采集到结束采集的时间）
+     */
+    private Long   elapsedTime;
+
+    /**
+     * 消耗时间是否大于5分钟（开始采集到结束采集的时间）
+     */
+    private Boolean  elapsedTimeGte5Min;
 }

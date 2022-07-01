@@ -46,18 +46,24 @@ public interface TemplateSrvManager {
 
     /**
      * 开启模板服务
-     * @param srvCode 服务代码
+     *
+     * @param srvCode        服务代码
      * @param templateIdList 模板id列表
+     * @param operator
+     * @param projectId
      * @return
      */
-    Result<Void> openSrv(Integer srvCode, List<Integer> templateIdList);
+    Result<Void> openSrv(Integer srvCode, List<Integer> templateIdList, String operator, Integer projectId);
 
     /**
      * 关闭模板服务
-     * @param srvCode 服务代码
+     *
+     * @param srvCode        服务代码
      * @param templateIdList 模板id列表
+     * @param operator
+     * @param projectId
      * @return
      */
-    Result<Void> closeSrv(Integer srvCode, List<Integer> templateIdList);
+    Result<Void> closeSrv(Integer srvCode, List<Integer> templateIdList, String operator, Integer projectId);
 
 }

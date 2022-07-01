@@ -4,7 +4,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion
 
 import com.didichuxing.datachannel.arius.admin.biz.project.RoleExtendManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.RoleExtendVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.RoleExtendVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
 import com.didiglobal.logi.security.common.PagingResult;
@@ -13,7 +13,6 @@ import com.didiglobal.logi.security.common.dto.role.RoleQueryDTO;
 import com.didiglobal.logi.security.common.dto.role.RoleSaveDTO;
 import com.didiglobal.logi.security.common.vo.role.AssignInfoVO;
 import com.didiglobal.logi.security.common.vo.role.RoleBriefVO;
-import com.didiglobal.logi.security.common.vo.role.RoleDeleteCheckVO;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
@@ -59,9 +58,9 @@ public class RoleV3Controller {
 	}
 	
 	@DeleteMapping("/{id}")
-	@ApiOperation(value = "删除角色", notes = "根据角色id删除角色")
+	@ApiOperation(value = "删除角色", notes = "如果该角色是否已经分配给用户，如有分配给用户，则返回用户的信息list；否则直接删除")
 	@ApiImplicitParam(name = "id", value = "角色id", dataType = "int", required = true)
-	public Result<Void> delete(@PathVariable Integer id, HttpServletRequest request) {
+	public Result delete(@PathVariable Integer id, HttpServletRequest request) {
 		
 		return roleExtendManager.deleteRoleByRoleId(id, request);
 	}
@@ -99,12 +98,7 @@ public class RoleV3Controller {
 		return roleExtendManager.createRole(saveDTO, request);
 	}
 	
-	@DeleteMapping("/delete/check/{id}")
-	@ApiOperation(value = "删除角色前的检查", notes = "判断该角色是否已经分配给用户，如有分配给用户，则返回用户的信息list")
-	@ApiImplicitParam(name = "id", value = "角色id", dataType = "int", required = true)
-	public Result<RoleDeleteCheckVO> check(@PathVariable Integer id) {
-		return roleExtendManager.checkBeforeDelete(id);
-	}
+
 	
 	@DeleteMapping("/{id}/user/{userId}")
 	@ApiOperation(value = "从角色中删除该角色下的用户", notes = "从角色中删除该角色下的用户")
@@ -128,7 +122,7 @@ public class RoleV3Controller {
 		
 	}
 	
-	@GetMapping(value = "/assign/list/{roleId}")
+	@GetMapping(value = "/assign/{roleId}")
 	@ApiOperation(value = "角色管理/分配用户/列表", notes = "查询所有用户列表，并根据角色id，标记哪些用户拥有该角色")
 	@ApiImplicitParam(name = "roleId", value = "角色id", dataType = "int", required = true)
 	public Result<List<AssignInfoVO>> assignList(@PathVariable Integer roleId) {
@@ -136,7 +130,7 @@ public class RoleV3Controller {
 		
 	}
 	
-	@GetMapping(value = { "/list/{roleName}", "/list" })
+	@GetMapping(value = { "/{roleName}"  })
 	@ApiOperation(value = "根据角色名模糊查询", notes = "用户管理/列表查询条件/分配角色框，这里会用到此接口")
 	@ApiImplicitParam(name = "roleName", value = "角色名（为null，查询全部）", dataType = "String")
 	public Result<List<RoleBriefVO>> list(@PathVariable(required = false) String roleName) {

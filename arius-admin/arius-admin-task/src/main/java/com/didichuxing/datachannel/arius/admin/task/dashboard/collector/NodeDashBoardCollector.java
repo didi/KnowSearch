@@ -62,7 +62,7 @@ public class NodeDashBoardCollector extends BaseDashboardCollector {
     private static final FutureUtil futureUtil                              = FutureUtil.init("NodeDashBoardCollector",10,10,100);
 
     @Override
-    public void collectSingleCluster(String cluster, long currentTime) {
+    public void collectSingleCluster(String cluster, long startTime) {
         List<ClusterRoleHost> clusterRoleHostList = clusterRoleHostService.getNodesByCluster(cluster);
         if (CollectionUtils.isEmpty(clusterRoleHostList)) { return;}
 
@@ -94,12 +94,12 @@ public class NodeDashBoardCollector extends BaseDashboardCollector {
 
         List<DashBoardStats> dashBoardStatsList = Lists.newArrayList();
         for (ClusterRoleHost clusterRoleHost : clusterRoleHostList) {
-            DashBoardStats dashBoardStats = buildInitDashBoardStats(currentTime);
+            DashBoardStats dashBoardStats = buildInitDashBoardStats(startTime);
             String nodeName = clusterRoleHost.getNodeSet();
 
             String uniqueNodeKey    = CommonUtils.getUniqueKey(cluster, nodeName);
             NodeMetrics nodeMetrics = nodeName2NodeMetricsMap.getOrDefault(uniqueNodeKey, new NodeMetrics());
-            nodeMetrics.setTimestamp(currentTime);
+            nodeMetrics.setTimestamp(startTime);
             nodeMetrics.setCluster(cluster);
             nodeMetrics.setNode(nodeName);
 
@@ -120,6 +120,11 @@ public class NodeDashBoardCollector extends BaseDashboardCollector {
             buildSearchRejectedNum(nodeMetrics, clusterNodeStats, uniqueNodeKey);
             //8. 节点执行任务耗时
             nodeMetrics.setTaskConsuming(clusterNodesTaskTotalCostAtomic.get().getOrDefault(nodeName, 0d).longValue());
+
+            long currentTimeMillis = System.currentTimeMillis();
+            long currentTime = CommonUtils.monitorTimestamp2min(currentTimeMillis);
+            long elapsedTime = currentTime -startTime;
+            nodeMetrics.setElapsedTime(elapsedTime);
 
             // 设置dashboard中节点维度指标数据
             dashBoardStats.setNode(nodeMetrics);
