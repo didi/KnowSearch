@@ -16,7 +16,6 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import java.util.List;
-import java.util.Objects;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,8 +75,9 @@ public class ESUserV3Controller {
     @ResponseBody
     @ApiOperation(value = "获取项目下的es user")
     	@ApiImplicitParam(name = "projectId", value = "项目id", dataType = "int", required = true)
-    public Result<List<ESUserVO>> listESUserByProjectId(HttpServletRequest request,@PathVariable("projectId") Integer projectId) {
-        Integer id= Objects.isNull(projectId)?HttpRequestUtil.getProjectId(request):projectId;
+    public Result<List<ESUserVO>> listESUserByProjectId(HttpServletRequest request,
+                                                        @PathVariable("projectId") String projectId) {
+        Integer id= StringUtils.isNumeric(projectId)?HttpRequestUtil.getProjectId(request): Integer.parseInt(projectId);
         return esUserManager.listESUsersByProjectId(id,
                 HttpRequestUtil.getOperator(request));
     }
