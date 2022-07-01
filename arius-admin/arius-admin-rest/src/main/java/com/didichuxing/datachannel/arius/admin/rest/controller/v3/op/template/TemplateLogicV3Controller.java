@@ -69,7 +69,7 @@ public class TemplateLogicV3Controller {
         return templateLogicManager.checkTemplateValidForCreate(templateName);
     }
 
-    @GetMapping("/{templateId}/check-edit-mapping/")
+    @GetMapping("/{templateId}/check-edit-mapping")
     @ResponseBody
     @ApiOperation(value = "校验可否编辑模板mapping")
     public Result<Boolean> checkTemplateEditMapping(@PathVariable Integer templateId) {

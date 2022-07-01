@@ -57,7 +57,7 @@ public class ESLogicClusterOpV3Controller {
 
     @GetMapping("/{type}")
     @ResponseBody
-    @ApiOperation(value = "根据项目和集群类型获取逻辑集群(项目对其有管理权限)名称列表")
+    @ApiOperation(value = "根据项目和集群类型获取逻辑集群(项目对其有管理权限)列表")
     public Result<List<ClusterLogicVO>> getAppLogicClusterInfoByType(HttpServletRequest request,
                                                                        @PathVariable Integer type) {
         return clusterLogicManager.getProjectLogicClusterInfoByType(HttpRequestUtil.getProjectId(request), type);
@@ -85,6 +85,7 @@ public class ESLogicClusterOpV3Controller {
     @ApiOperation(value = "校验模板大小资源是否充足,主要是为了避免用户反复的进行模板创建操作，对于申请的权限做一定的限制")
     public Result<Void> checkTemplateValidForCreate(@PathVariable("logicClusterId") Long logicClusterId,
                                                     @PathVariable("templateSize") String templateSize) {
+
         return Result.buildSucc();
     }
     
