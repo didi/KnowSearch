@@ -108,12 +108,6 @@ public class UserV3Controller {
 		return userManager.getAssignDataByUserId(userId);
 	}
 	
-	@GetMapping(value = { "/{name}" })
-	@ApiOperation(value = "根据账户名或用户实名查询", notes = "获取用户简要信息list，会分别以账户名和实名去模糊查询，返回两者的并集")
-	@ApiImplicitParam(name = "name", value = "账户名或用户实名（为null，则获取全部用户）", dataType = "String")
-	public Result<List<UserBriefVO>> listByName(@PathVariable(required = false) String name) {
-		return userManager.getUserBriefListByUsernameOrRealName(name);
-	}
 	
 	@PutMapping("")
 	@ResponseBody
