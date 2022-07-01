@@ -1,5 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.core.service.cluster.physic;
 
+import java.util.List;
+import java.util.Set;
+
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Plugin;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyConditionDTO;
@@ -7,8 +10,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPh
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterSettingDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
-import java.util.List;
-import java.util.Set;
 
 /**
  * @author ohushenglin_v
@@ -28,11 +29,10 @@ public interface ClusterPhyService {
      * 删除物理集群
      *
      * @param clusterId 集群id
-     * @param operator  操作人
      * @param projectId
      * @return 成功 true 失败 false
      */
-    Result<Boolean> deleteClusterById(Integer clusterId, String operator, Integer projectId);
+    Result<Boolean> deleteClusterById(Integer clusterId, Integer projectId);
 
     /**
      * 新建物理集群

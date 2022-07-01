@@ -15,12 +15,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
-import com.google.common.collect.Sets;
+import com.google.common.collect.*;
 
 public class ConvertUtil {
 
@@ -52,6 +47,18 @@ public class ConvertUtil {
         StringBuilder sb = new StringBuilder();
         for (Object item : list) {
             sb.append(item).append(separator);
+        }
+        return sb.deleteCharAt(sb.length() - 1).toString();
+    }
+
+    public static <K, V> String list2String(List<V> list, String separator, Function<? super V, ? extends K> mapper) {
+        if (list == null || list.isEmpty()) {
+            return "";
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for (V item : list) {
+            sb.append(mapper.apply(item)).append(separator);
         }
         return sb.deleteCharAt(sb.length() - 1).toString();
     }
