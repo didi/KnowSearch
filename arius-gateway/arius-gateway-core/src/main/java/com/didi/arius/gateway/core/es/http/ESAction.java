@@ -1,7 +1,7 @@
 package com.didi.arius.gateway.core.es.http;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -18,6 +18,9 @@ import com.didi.arius.gateway.elasticsearch.client.gateway.direct.DirectRequest;
 import com.google.common.collect.Lists;
 
 public abstract class ESAction extends HttpRestHandler {
+
+	private static final String PATH_DELIMITER = "/";
+
 	@Override
 	public void handleRequest(QueryContext queryContext) throws Exception {
 		RestRequest request = queryContext.getRequest();
@@ -74,19 +77,16 @@ public abstract class ESAction extends HttpRestHandler {
         String path = queryContext.getUri();
         String type = queryContext.getTypeNames();
         if (CollectionUtils.isNotEmpty(indices)) {
-            List<String> finalIndices = indices;
-            List<String> list = new ArrayList<String>(6) {
-                {
-                    add("/");
-                    add(StringUtils.join(finalIndices, ","));
-                }
-            };
+            StringBuilder pathBuilder = new StringBuilder();
+            pathBuilder.append(PATH_DELIMITER).append(indices.stream().distinct().collect(Collectors.joining(",")));
             if (StringUtils.isNotBlank(type)) {
-                list.add("/");
-                list.add(type);
+                pathBuilder.append(PATH_DELIMITER).append(type);
             }
-            list.add(api);
-            path = StringUtils.join(list, "");
+            if (null != api && api.trim().length() > 0 && !api.startsWith(PATH_DELIMITER)) {
+                pathBuilder.append(PATH_DELIMITER);
+            }
+            pathBuilder.append(api);
+            path = pathBuilder.toString();
         }
         DirectRequest directRequest = buildDirectRequest(queryContext, path);
         directRequest(client, queryContext, directRequest);
