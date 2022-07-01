@@ -26,12 +26,13 @@ public interface ProjectExtendManager {
 	    /**
          * 创建项目
          *
-         * @param saveDTO  项目信息
-         * @param operator 请求信息
+         * @param saveDTO    项目信息
+         * @param operator   请求信息
+         * @param operatorId
          * @return 项目信息
          * @throws LogiSecurityException 项目相关的错误信息
          */
-    Result<ProjectExtendVO> createProject(ProjectExtendSaveDTO saveDTO, String operator);
+    Result<ProjectExtendVO> createProject(ProjectExtendSaveDTO saveDTO, String operator, Integer operatorId);
 
     /**
      * 获取项目详情，通过项目id

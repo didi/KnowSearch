@@ -85,7 +85,9 @@ public class ProjectV3Controller {
 	@ResponseBody
 	@ApiOperation(value = "创建项目", notes = "创建项目")
 	public Result<ProjectExtendVO> create(@RequestBody ProjectExtendSaveDTO saveDTO, HttpServletRequest request) {
-		return projectExtendManager.createProject(saveDTO, HttpRequestUtil.getOperator(request));
+		
+		return projectExtendManager.createProject(saveDTO, HttpRequestUtil.getOperator(request),
+				HttpRequestUtil.getOperatorId(request));
 	}
 	
 	@DeleteMapping("/{id}")

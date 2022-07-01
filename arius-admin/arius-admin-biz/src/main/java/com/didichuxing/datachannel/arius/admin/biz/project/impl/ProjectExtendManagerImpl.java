@@ -21,6 +21,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.ProjectCon
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.ProjectExtendVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectSearchTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
@@ -94,17 +95,29 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
     private RoleService          roleService;
     
     @Override
-    public Result<ProjectExtendVO> createProject(ProjectExtendSaveDTO saveDTO, String operator) {
+    public Result<ProjectExtendVO> createProject(ProjectExtendSaveDTO saveDTO, String operator, Integer operatorId) {
         try {
             // 1. 创建项目
             ProjectSaveDTO project = saveDTO.getProject();
             // 2. 创建项目配置
             ProjectConfigDTO config = saveDTO.getConfig();
             // 将项目中的所有者、用户提取出来后，使用biz层中的逻辑进行添加
-            List<Integer> ownerIdList = project.getOwnerIdList();
-            List<Integer> userIdList = project.getUserIdList();
+            List<Integer> ownerIdList = Optional.ofNullable(project.getOwnerIdList()).orElse(Lists.newArrayList());
+            List<Integer> userIdList = Optional.ofNullable(project.getUserIdList()).orElse(Lists.newArrayList());
             project.setOwnerIdList(Collections.emptyList());
             project.setUserIdList(Collections.emptyList());
+            //当所有者没有传入进来的时候
+            if (CollectionUtils.isEmpty(ownerIdList)) {
+                if (operatorId.equals(-1)) {
+                    return Result.buildFail("当前操作人id为空");
+                }
+                ownerIdList.add(operatorId);
+        
+            }
+            //谁创建、谁包含
+            if (!ownerIdList.contains(operatorId)){
+                 ownerIdList.add(operatorId);
+            }
             
             // 3. 创建项目
             ProjectVO projectVO = projectService.createProject(project, operator);
@@ -303,7 +316,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
                     ownerIdList,
                     (projectId, userList) -> userProjectService.updateOwnerProject(projectId, userList),
                     ProjectVO::getOwnerList, OperateTypeEnum.APPLICATION_OWNER_CHANGE,
-                    Boolean.FALSE
+                    OperationEnum.EDIT
     
             );
             if (operationProjectOwnerResult.failed()){
@@ -313,7 +326,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
             final Result<Void> operationProjectUserResult = operationProjectMemberOrOwner(operator,
                     saveDTO.getProject().getId(),
                     userIdList, (projectId, userList) -> userProjectService.updateUserProject(projectId, userList),
-                    ProjectVO::getUserList, OperateTypeEnum.APPLICATION_USER_CHANGE, Boolean.FALSE
+                    ProjectVO::getUserList, OperateTypeEnum.APPLICATION_USER_CHANGE, OperationEnum.EDIT
     
             );
             if (operationProjectUserResult.failed()) {
@@ -334,22 +347,20 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
      * @param operationConsumerFunc    更新/添加操作
      * @param  operationFuncMapper      函数映射器 需要获取的mapper userList/ownerList
      * @param operateTypeEnum 操作类型枚举
-     * @param isDeleteOp       是否是删除操作
+     * @param operation       是否是删除操作
      * @return {@code Result<Void>}
      */
     private Result<Void> operationProjectMemberOrOwner(String operator, Integer projectId,
                                                        List<Integer> userOrOwnerList,
                                                        BiConsumer<Integer, List<Integer>> operationConsumerFunc,
                                                        Function<ProjectVO, List<UserBriefVO>>  operationFuncMapper,
-                                                       OperateTypeEnum operateTypeEnum, Boolean isDeleteOp ) {
+                                                       OperateTypeEnum operateTypeEnum, OperationEnum operation ) {
         if (CollectionUtils.isNotEmpty(userOrOwnerList)) {
-            if (Boolean.FALSE.equals(isDeleteOp)) {
-                //超级项目侧校验添加的用户收否存在管理员角色
-                final Result<Void> result = checkProject(projectId, userOrOwnerList);
+           //超级项目侧校验添加的用户收否存在管理员角色
+                final Result<Void> result = checkProject(projectId, userOrOwnerList,operation);
                 if (result.failed()) {
                     return result;
                 }
-            }
             //操作前的项目信息
             final ProjectVO beforeProjectVo = projectService.getProjectDetailByProjectId(projectId);
             final String projectName = beforeProjectVo.getProjectName();
@@ -398,7 +409,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
             final Result<Void> operationProjectUserResult = operationProjectMemberOrOwner(operator,
                     projectId, userIdList,
                     (id, userList) -> userProjectService.saveUserProject(id, userList), ProjectVO::getUserList,
-                    OperateTypeEnum.APPLICATION_USER_CHANGE,Boolean.FALSE
+                    OperateTypeEnum.APPLICATION_USER_CHANGE,OperationEnum.ADD
             );
             if (operationProjectUserResult.failed()){
                 return operationProjectUserResult;
@@ -432,7 +443,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
                     Collections.singletonList(userId),
                     (id, userList) -> userList.stream().map(user -> Tuples.of(id, user))
                             .forEach(delProjectUserConsumer),
-                    ProjectVO::getOwnerList, OperateTypeEnum.APPLICATION_USER_CHANGE, Boolean.TRUE
+                    ProjectVO::getOwnerList, OperateTypeEnum.APPLICATION_USER_CHANGE, OperationEnum.DELETE
     
             );
             if (operationProjectOwnerResult.failed()) {
@@ -457,7 +468,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
             final Result<Void> operationProjectOwnerResult = operationProjectMemberOrOwner(operator,
                     projectId, ownerIdList,
                     (id, ownerList) -> userProjectService.saveOwnerProject(id, ownerList), ProjectVO::getOwnerList,
-                    OperateTypeEnum.APPLICATION_OWNER_CHANGE,Boolean.FALSE
+                    OperateTypeEnum.APPLICATION_OWNER_CHANGE,OperationEnum.ADD
     
             );
             if (operationProjectOwnerResult.failed()) {
@@ -487,7 +498,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
                     Collections.singletonList(ownerId),
                     (id, userList) -> userList.stream().map(user -> Tuples.of(id, user))
                             .forEach(delProjectUserConsumer), ProjectVO::getOwnerList,
-                    OperateTypeEnum.APPLICATION_USER_CHANGE, Boolean.TRUE
+                    OperateTypeEnum.APPLICATION_USER_CHANGE, OperationEnum.DELETE
     
             );
             if (operationProjectOwnerResult.failed()) {
@@ -620,7 +631,10 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
         }
     }
     
-    private Result<Void> checkProject(Integer projectId, List<Integer> userIdList) {
+    private Result<Void> checkProject(Integer projectId, List<Integer> userIdList, OperationEnum operation) {
+        if (operation.equals(OperationEnum.DELETE)){
+            return Result.buildSucc();
+        }
         if (CollectionUtils.isEmpty(userIdList)) {
             return Result.buildParamIllegal("用户id不存在");
         }
@@ -641,7 +655,8 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
             return Result.buildParamIllegal(String.format("传入用户:%s不存在", notExitsIds));
         }
         //超级项目侧校验添加的用户收否存在管理员角色
-        if (!checkAddProjectUserOrOwnerIsAdminRole(projectId, userIdList)) {
+        if (operation.equals(OperationEnum.EDIT)&&Boolean.FALSE.equals(checkAddProjectUserOrOwnerIsAdminRole(projectId,
+                userIdList))) {
             return Result.buildFail("超级项目只被允许添加拥有管理员角色的用户");
         }
         
@@ -695,7 +710,13 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
     private boolean checkAddProjectUserOrOwnerIsAdminRole(Integer projectId, List<Integer> userIdList) {
         Predicate<List<RoleBriefVO>> checkContainsAdminRoleFunc = roleBriefList -> roleBriefList.stream()
                 .anyMatch(roleBriefVO -> AuthConstant.ADMIN_ROLE_ID.equals(roleBriefVO.getId()));
-        return AuthConstant.SUPER_PROJECT_ID.equals(projectId) && userIdList.stream()
+        return
+                /**
+                 属于超级项目
+                 */
+                AuthConstant.SUPER_PROJECT_ID.equals(projectId) &&
+                /*当前用户列表中存在管理员*/
+                userIdList.stream()
                 .map(roleService::getRoleBriefListByUserId).allMatch(checkContainsAdminRoleFunc);
         
     }
