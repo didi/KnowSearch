@@ -655,9 +655,18 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
             return Result.buildParamIllegal(String.format("传入用户:%s不存在", notExitsIds));
         }
         //超级项目侧校验添加的用户收否存在管理员角色
-        if (operation.equals(OperationEnum.EDIT)&&Boolean.FALSE.equals(checkAddProjectUserOrOwnerIsAdminRole(projectId,
-                userIdList))) {
-            return Result.buildFail("超级项目只被允许添加拥有管理员角色的用户");
+        if (operation.equals(OperationEnum.EDIT)) {
+            if (AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
+                Predicate<List<RoleBriefVO>> checkContainsAdminRoleFunc = roleBriefList -> roleBriefList.stream()
+                        .anyMatch(roleBriefVO -> AuthConstant.ADMIN_ROLE_ID.equals(roleBriefVO.getId()));
+                /*当前用户列表中存在管理员*/
+                if (userIdList.stream().map(roleService::getRoleBriefListByUserId)
+                        .allMatch(checkContainsAdminRoleFunc)) {
+                    return Result.buildFail("超级项目只被允许添加拥有管理员角色的用户");
+        
+                }
+            }
+        
         }
         
         return Result.buildSucc();
@@ -700,25 +709,6 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
         }
     }
     
-    /**
-     * 检查添加超级项目用户的合法性
-     *
-     * @param projectId  项目id
-     * @param userIdList 用户id列表
-     * @return boolean true:包含管理员角色可以添加
-     */
-    private boolean checkAddProjectUserOrOwnerIsAdminRole(Integer projectId, List<Integer> userIdList) {
-        Predicate<List<RoleBriefVO>> checkContainsAdminRoleFunc = roleBriefList -> roleBriefList.stream()
-                .anyMatch(roleBriefVO -> AuthConstant.ADMIN_ROLE_ID.equals(roleBriefVO.getId()));
-        return
-                /**
-                 属于超级项目
-                 */
-                AuthConstant.SUPER_PROJECT_ID.equals(projectId) &&
-                /*当前用户列表中存在管理员*/
-                userIdList.stream()
-                .map(roleService::getRoleBriefListByUserId).allMatch(checkContainsAdminRoleFunc);
-        
-    }
+
    
 }
