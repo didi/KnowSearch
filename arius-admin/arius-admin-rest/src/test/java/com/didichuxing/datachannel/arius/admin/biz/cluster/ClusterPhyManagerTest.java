@@ -1,14 +1,29 @@
 
 package com.didichuxing.datachannel.arius.admin.biz.cluster;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.openMocks;
+
+import java.lang.reflect.InvocationTargetException;
+import java.util.*;
+
+import org.apache.commons.beanutils.BeanUtils;
+import org.elasticsearch.common.unit.ByteSizeUnit;
+import org.elasticsearch.common.unit.ByteSizeValue;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.impl.ClusterPhyManagerImpl;
@@ -16,13 +31,7 @@ import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping.TemplatePhyMappingManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.pipeline.TemplatePipelineManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterJoinDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterSettingDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterRoleDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterRoleHostDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESConfigDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.PluginDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
@@ -54,28 +63,6 @@ import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpClient;
 import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
-import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import org.apache.commons.beanutils.BeanUtils;
-import org.elasticsearch.common.unit.ByteSizeUnit;
-import org.elasticsearch.common.unit.ByteSizeValue;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.context.junit4.SpringRunner;
 
 @ActiveProfiles("test")
 @ExtendWith({SpringExtension.class})
@@ -181,7 +168,7 @@ class ClusterPhyManagerTest {
             "httpWriteAddress", 0, "tags", "dataCenter", 0, "machineSpec", 0, "esVersion", "imageName", null,
             Collections.singletonList(
                 new ESClusterRoleVO(0L, 0L, "roleClusterName", "role", 0, 0, "machineSpec", Lists.newArrayList())),
-            0.0, 0L, 0L, "password", "idc", 0, "writeAction", 0, 0L, "platformType", 0, "gatewayUrl");
+            0.0, 0L, 0L, "password", "idc", 0, "writeAction", 0, 0L, "platformType", 0, "gatewayUrl",null);
 
         clusterRoleHost = new ClusterRoleHost(0L, 0L, "hostname", "ip", CLUSTER, "port", 0, 0, "rack", "nodeSet",
             "machineSpec", 0, "attributes");
@@ -212,7 +199,7 @@ class ClusterPhyManagerTest {
         clusterPhyVOWithNotRole = new ClusterPhyVO(0, CLUSTER, "desc", "readAddress", "writeAddress", "httpAddress",
             "httpWriteAddress", 0, "tags", "dataCenter", 0, "machineSpec", 0, "esVersion", "imageName", null,
             Lists.newArrayList(), 0.0, 0L, 0L, "password", "idc", 0, "writeAction", 0, 0L, "platformType", 1,
-            "gatewayUrl");
+            "gatewayUrl",null);
 
         clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0, "responsible",
             "libraDepartmentId", "libraDepartment", "memo", 0.0, 0, "configJson", 0);
@@ -363,12 +350,12 @@ class ClusterPhyManagerTest {
 
     @Test
     void testBuildClusterInfo() {
-        assertEquals(Collections.emptyList(), clusterPhyManager.buildClusterInfo(Collections.emptyList(), 0));
+        assertEquals(Collections.emptyList(), clusterPhyManager.buildClusterInfo(Collections.emptyList()));
 
         when(mockClusterRoleService.getAllRoleClusterByClusterIds(Collections.singletonList(0)))
             .thenReturn(new HashMap<>());
         when(mockClusterRoleHostService.getByRoleClusterIds(Collections.singletonList(0L))).thenReturn(new HashMap<>());
-        assertEquals(Collections.singletonList(clusterPhyVOWithNotRole), clusterPhyManager.buildClusterInfo(clusterPhyList, 0));
+        assertEquals(Collections.singletonList(clusterPhyVOWithNotRole), clusterPhyManager.buildClusterInfo(clusterPhyList));
     }
 
     @Test
@@ -693,11 +680,13 @@ class ClusterPhyManagerTest {
         assertEquals(Result.buildFail(String.format("物理集群Id[%s]不存在", 0)),
             clusterPhyManager.deleteCluster(0, "operator", projectId));
 
+        when(mockClusterRegionService.getLogicClusterIdByPhyClusterId(0)).thenReturn(Collections.emptySet());
+        when(mockIndexTemplatePhyService.getNormalTemplateByCluster(CLUSTER)).thenReturn(Collections.emptyList());
         when(mockClusterPhyService.getClusterById(0)).thenReturn(clusterPhy);
         when(mockClusterRoleHostService.getNodesByCluster(CLUSTER)).thenReturn(Collections.emptyList());
         when(mockClusterRoleService.deleteRoleClusterByClusterId(0, projectId)).thenReturn(Result.buildSucc());
         when(mockClusterRegionService.listPhyClusterRegions(CLUSTER)).thenReturn(Collections.emptyList());
-        when(mockClusterPhyService.deleteClusterById(0, "operator", projectId)).thenReturn(Result.buildSucc(true));
+        when(mockClusterPhyService.deleteClusterById(0, projectId)).thenReturn(Result.buildSucc(true));
         assertEquals(Result.buildSucc(true), clusterPhyManager.deleteCluster(0, "operator", projectId));
 
         when(mockClusterRoleHostService.getNodesByCluster(CLUSTER)).thenReturn(roleHostList);
@@ -705,8 +694,8 @@ class ClusterPhyManagerTest {
         when(mockClusterRoleService.deleteRoleClusterByClusterId(0, projectId)).thenReturn(Result.buildSucc());
 
         when(mockClusterRegionService.listPhyClusterRegions(CLUSTER)).thenReturn(regions);
-        when(mockClusterRegionService.deleteByClusterPhy(CLUSTER, "operator")).thenReturn(Result.buildSucc());
-        when(mockClusterPhyService.deleteClusterById(0, "operator", projectId)).thenReturn(Result.buildSucc(true));
+        when(mockClusterRegionService.deleteByClusterPhy(CLUSTER)).thenReturn(Result.buildSucc());
+        when(mockClusterPhyService.deleteClusterById(0, projectId)).thenReturn(Result.buildSucc(true));
         assertEquals(Result.buildSucc(true), clusterPhyManager.deleteCluster(0, "operator", projectId));
     }
 
@@ -866,7 +855,7 @@ class ClusterPhyManagerTest {
         when(mockClusterRoleHostService.getNodesByCluster(CLUSTER)).thenReturn(Collections.emptyList());
         when(mockClusterRoleService.deleteRoleClusterByClusterId(0, projectId)).thenReturn(Result.buildSucc());
         when(mockClusterRegionService.listPhyClusterRegions(CLUSTER)).thenReturn(Collections.emptyList());
-        when(mockClusterPhyService.deleteClusterById(0, "operator", projectId)).thenReturn(Result.buildSucc(true));
+        when(mockClusterPhyService.deleteClusterById(0, projectId)).thenReturn(Result.buildSucc(true));
         Assertions.assertTrue(clusterPhyManager.deleteClusterExit(CLUSTER, 1,"operator").success());
     }
 

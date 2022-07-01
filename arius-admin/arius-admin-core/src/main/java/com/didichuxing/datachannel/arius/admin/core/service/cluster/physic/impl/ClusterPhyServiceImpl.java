@@ -2,6 +2,15 @@ package com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.impl
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.DEFAULT_CLUSTER_HEALTH;
 
+import java.util.*;
+import java.util.stream.Collectors;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Plugin;
@@ -36,18 +45,8 @@ import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
+
 import lombok.NoArgsConstructor;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author didi
@@ -97,14 +96,13 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
      * 删除集群
      *
      * @param clusterId 集群id
-     * @param operator  操作人
      * @param projectId
      * @return 成功 true 失败 false
      * <p>
      * 集群不存在
      */
     @Override
-    public Result<Boolean> deleteClusterById(Integer clusterId, String operator, Integer projectId) {
+    public Result<Boolean> deleteClusterById(Integer clusterId, Integer projectId) {
         ClusterPhyPO clusterPO = clusterDAO.getById(clusterId);
         if (clusterPO == null) {
             return Result.buildNotExist(CLUSTER_NOT_EXIST);

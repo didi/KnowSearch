@@ -200,7 +200,7 @@ public class ClusterRegionServiceImpl implements ClusterRegionService {
     }
 
     @Override
-    public Result<Void> deleteByClusterPhy(String clusterPhyName, String operator) {
+    public Result<Void> deleteByClusterPhy(String clusterPhyName) {
         return Result.build(0 < clusterRegionDAO.deleteByClusterPhyName(clusterPhyName));
     }
 

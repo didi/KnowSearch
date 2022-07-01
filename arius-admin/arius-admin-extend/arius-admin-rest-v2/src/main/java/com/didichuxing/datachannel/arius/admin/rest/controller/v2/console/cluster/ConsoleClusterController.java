@@ -2,6 +2,13 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v2.console.clust
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V2_CONSOLE;
 
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterLogicManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicVO;
@@ -10,18 +17,11 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.ecm.ESClusterNodeS
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import java.util.List;
-import javax.servlet.http.HttpServletRequest;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(V2_CONSOLE + "/cluster")
@@ -38,6 +38,7 @@ public class ConsoleClusterController {
     @ResponseBody
     @ApiOperation(value = "获取APP拥有的集群列表【三方接口】",tags = "【三方接口】" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "projectId", value = "应用ID", required = true) })
+    @Deprecated
     public Result<List<ClusterLogicVO>> getAppLogicClusters(@RequestParam("projectId") Integer projectId) {
         return clusterLogicManager.getProjectLogicClusters(projectId);
     }
@@ -45,6 +46,7 @@ public class ConsoleClusterController {
     @GetMapping("/listAll")
     @ResponseBody
     @ApiOperation(value = "获取平台所有的集群列表【三方接口】",tags = "【三方接口】" )
+    @Deprecated
     public Result<List<ClusterLogicVO>> getDataCenterLogicClusters(@RequestParam(value = "projectId",required = false) Integer projectId) {
         return clusterLogicManager.getLogicClustersByProjectId(projectId);
     }
@@ -55,6 +57,7 @@ public class ConsoleClusterController {
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Long", name = "clusterId", value = "集群ID", required = true),
                          @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "projectId", value =
                                  "PROJECT ID", required = true) })
+    @Deprecated
     public Result<ClusterLogicVO> getAppLogicClusters(@RequestParam("clusterId") Long clusterId,
                                                         @RequestParam("projectId") Integer projectId) {
         return clusterLogicManager.getProjectLogicClusters(clusterId, projectId);

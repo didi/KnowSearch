@@ -2,6 +2,16 @@ package com.didichuxing.datachannel.arius.admin.core.service.cluster.physic;
 
 import static org.mockito.MockitoAnnotations.initMocks;
 
+import java.util.*;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Plugin;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyConditionDTO;
@@ -20,18 +30,6 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.impl.
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.resource.PhyClusterDAO;
 import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import org.apache.commons.collections4.CollectionUtils;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
 
 /**
  * @author wpk
@@ -100,10 +98,10 @@ public class ClusterPhyServiceTest {
 
     @Test
     public void deleteClusterByIdTest() {
-         Integer projectId=1;
+        Integer projectId = 1;
         Assertions.assertEquals(Result.buildNotExist("集群不存在").getMessage(),
-                ClusterPhyService.deleteClusterById(id + 1, CustomDataSource.OPERATOR, projectId).getMessage());
-        Assertions.assertTrue(ClusterPhyService.deleteClusterById(id, CustomDataSource.OPERATOR, projectId).success());
+            ClusterPhyService.deleteClusterById(id + 1, projectId).getMessage());
+        Assertions.assertTrue(ClusterPhyService.deleteClusterById(id, projectId).success());
     }
 
     @Test

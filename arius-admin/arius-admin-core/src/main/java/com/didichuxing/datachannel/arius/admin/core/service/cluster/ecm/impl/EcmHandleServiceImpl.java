@@ -5,6 +5,20 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.resource.E
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum.ES_HOST;
 import static java.util.Objects.nonNull;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.BiFunction;
+
+import javax.annotation.PostConstruct;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -40,18 +54,8 @@ import com.didichuxing.datachannel.arius.admin.remote.zeus.bean.constant.EcmActi
 import com.didiglobal.logi.security.service.UserService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.function.BiFunction;
-import javax.annotation.PostConstruct;
+
 import lombok.NoArgsConstructor;
-import org.apache.commons.collections4.CollectionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 /**
  * ES集群表 服务实现类
@@ -506,8 +510,7 @@ public class EcmHandleServiceImpl implements EcmHandleService {
     }
 
     private void deleteLocalClusterInfo(ClusterPhy clusterPhy, String operator,Integer projectId) {
-        Result<Boolean> deleteClusterResult = esClusterPhyService.deleteClusterById(clusterPhy.getId(), operator,
-                projectId);
+        Result<Boolean> deleteClusterResult = esClusterPhyService.deleteClusterById(clusterPhy.getId(), projectId);
         if (deleteClusterResult.failed()) {
             LOGGER
                 .error("class=ElasticClusterServiceImpl||method=deleteLocalClusterInfo||clusterId={}||clusterName={}||"
