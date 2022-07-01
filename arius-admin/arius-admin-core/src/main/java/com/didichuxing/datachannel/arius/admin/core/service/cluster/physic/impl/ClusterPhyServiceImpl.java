@@ -22,7 +22,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.Cluste
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPhyPO;
-import com.didichuxing.datachannel.arius.admin.common.constant.DataCenterEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.SortConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterDynamicConfigsEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
@@ -458,9 +457,6 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
     }
 
     private Result<Boolean> isIllegal(ClusterPhyDTO param) {
-        if (param.getDataCenter() != null && !DataCenterEnum.validate(param.getDataCenter())) {
-            return Result.buildParamIllegal("数据中心非法");
-        }
 
         if (param.getEsVersion() != null && ESVersion.valueBy(param.getEsVersion()) == null) {
             return Result.buildParamIllegal("es版本号非法");
