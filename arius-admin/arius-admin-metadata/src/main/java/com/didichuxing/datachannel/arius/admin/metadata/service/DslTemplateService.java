@@ -51,7 +51,7 @@ public class DslTemplateService {
             return Tuples.of(false,null,null);
         }
         //设置变更前的enable
-        final TupleThree<Boolean, Boolean, Boolean> statusTuple3 = Tuples.of(dslTemplatePO.getEnable(), null, null);
+         TupleThree<Boolean, Boolean, Boolean> statusTuple3 = Tuples.of(dslTemplatePO.getEnable(), null, null);
         // getEnable() 如果为 null，表示当前是启用状态，反转模版启用状态
         if(dslTemplatePO.getEnable() == null) {
             dslTemplatePO.setEnable(false);
@@ -59,7 +59,7 @@ public class DslTemplateService {
         } else {
             dslTemplatePO.setEnable(!dslTemplatePO.getEnable());
         }
-        statusTuple3.update2(dslTemplatePO.getEnable());
+        statusTuple3=statusTuple3.update2(dslTemplatePO.getEnable());
         String ariusModifyTime = DateTimeUtil.getCurrentFormatDateTime();
         dslTemplatePO.setAriusModifyTime(ariusModifyTime);
         List<DslTemplatePO> dslTemplatePOList = new ArrayList<>();

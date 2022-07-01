@@ -109,7 +109,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
             // 3. 创建项目
             ProjectVO projectVO = projectService.createProject(project, operator);
             // 4. 转换
-            ProjectExtendVO projectExtendVO = ConvertUtil.obj2Obj(project, ProjectExtendVO.class);
+            ProjectExtendVO projectExtendVO = ConvertUtil.obj2Obj(projectVO, ProjectExtendVO.class);
             // 5. 添加拥有者和成员
             addOwnerAndUsers(operator, ownerIdList, userIdList, projectVO, projectExtendVO);
             
@@ -129,6 +129,9 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
                     TriggerWayEnum.MANUAL_TRIGGER, project.getProjectName(), operator));
             //创建es user
             createESUserDefault(projectVO, operator);
+            if (Objects.isNull(project.getId())){
+                projectExtendVO.setId(projectExtendVO.getConfig().getProjectId());
+            }
             return Result.<ProjectExtendVO>buildSucc(projectExtendVO);
         } catch (LogiSecurityException e) {
             return Result.buildFail(e.getMessage());

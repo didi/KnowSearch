@@ -140,24 +140,31 @@ public abstract class BaseTemplateSrvImpl implements BaseTemplateSrv {
 
             if (null == indexTemplate) { continue;}
             TupleTwo</*old*/IndexTemplate,/*change*/IndexTemplate> tupleTwo = Tuples.of(indexTemplate,null);
-            if (status) { addSrvCode(indexTemplate, srvCode);}
+            if (status) {
+                addSrvCode(indexTemplate, srvCode);
+            }
             else { removeSrvCode(indexTemplate, srvCode);}
-
-            tupleTwo.update2(indexTemplate);
+    
+            tupleTwo= tupleTwo.update2(indexTemplate);
             tupleTwos.add(tupleTwo);
         }
         //确认操作项目的合法性
         if (tupleTwos.stream().map(TupleTwo::v1)
                 .map(oldIndexTemplate -> ProjectUtils.checkProjectCorrectly(IndexTemplate::getProjectId,
-                        oldIndexTemplate, projectId)).anyMatch(BaseResult::failed)) {
+                        oldIndexTemplate, projectId)).allMatch(BaseResult::failed)) {
             return Result.buildFail("当前项目不属于超级项目或者持有该操作的项目");
         }
         for (TupleTwo<IndexTemplate, IndexTemplate> tupleTwo : tupleTwos) {
-            indexTemplateService.editTemplateInfoTODB(ConvertUtil.obj2Obj(tupleTwo.v2, IndexTemplateDTO.class));
-            operateRecordService.save(new OperateRecord.Builder().operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE)
-                    .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).bizId(tupleTwo.v2.getId())
-                    .project(projectService.getProjectBriefByProjectId(projectId))
-                    .content(Boolean.TRUE.equals(status) ? "开启模板服务" : "关闭模板服务").userOperation(operator).build());
+            final Result<Void> result = indexTemplateService.editTemplateInfoTODB(
+                    ConvertUtil.obj2Obj(tupleTwo.v2, IndexTemplateDTO.class));
+            if (result.success()) {
+                operateRecordService.save(
+                        new OperateRecord.Builder().operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE)
+                                .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).bizId(tupleTwo.v2.getId())
+                                .project(projectService.getProjectBriefByProjectId(projectId))
+                                .content(Boolean.TRUE.equals(status) ? "开启模板服务" : "关闭模板服务").userOperation(operator)
+                                .build());
+            }
         }
         
         
