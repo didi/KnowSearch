@@ -61,6 +61,7 @@ import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateExcepti
 import com.didichuxing.datachannel.arius.admin.common.threadpool.AriusScheduleThreadPool;
 import com.didichuxing.datachannel.arius.admin.common.util.*;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
+import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
@@ -160,6 +161,9 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     @Autowired
     private ESOpClient                                       esOpClient;
 
+    @Autowired
+    private RoleTool roleTool;
+
     @PostConstruct
     private void init(){
         ariusScheduleThreadPool.submitScheduleAtFixedDelayTask(this::refreshClusterDistInfo,60,180);
@@ -243,12 +247,12 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     @Override
     public List<ClusterPhyVO> listClusterPhys(ClusterPhyDTO param) {
         List<ClusterPhy> phyClusters = clusterPhyService.listClustersByCondt(param);
-        return buildPhyClusters(ConvertUtil.list2List(phyClusters, ClusterPhyVO.class));
+        return buildClusterInfo(phyClusters);
     }
 
 
     @Override
-    public List<ClusterPhyVO> buildClusterInfo(List<ClusterPhy> clusterPhyList, Integer projectId) {
+    public List<ClusterPhyVO> buildClusterInfo(List<ClusterPhy> clusterPhyList) {
         if (CollectionUtils.isEmpty(clusterPhyList)) {
             return Lists.newArrayList();
         }
@@ -629,48 +633,33 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Result<Boolean> deleteCluster(Integer clusterPhyId, String operator, Integer projectId) {
+        if (!roleTool.isAdmin(operator)||!AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
+            return Result.buildFail("当前登录人或项目没有权限进行该操作！");
+        }
+
         ClusterPhy clusterPhy  = clusterPhyService.getClusterById(clusterPhyId);
         if (null == clusterPhy) {
             return Result.buildFail(String.format("物理集群Id[%s]不存在", clusterPhyId));
         }
 
-        try {
-            List<ClusterRoleHost> clusterRoleHosts = clusterRoleHostService.getNodesByCluster(clusterPhy.getCluster());
-            // 该物理集群有采集到host数据才执行删除操作
-            if (!CollectionUtils.isEmpty(clusterRoleHosts)) {
-                Result<Void> deleteHostResult = clusterRoleHostService.deleteByCluster(clusterPhy.getCluster(),
-                        projectId);
-                if (deleteHostResult.failed()) {
-                    throw new AdminOperateException(String.format("删除集群[%s]节点信息失败", clusterPhy.getCluster()));
-                }
-            }
+        Set<Long> clusterLogicIdList = clusterRegionService.getLogicClusterIdByPhyClusterId(clusterPhyId);
+        if (CollectionUtils.isNotEmpty(clusterLogicIdList)) {
+            List<ClusterLogic> clusterLogicList = clusterLogicService
+                .getClusterLogicListByIds(Lists.newArrayList(clusterLogicIdList));
+            return Result.buildFail(String.format("物理集群[%s]和逻辑集群[%s]关联", clusterPhy.getCluster(),
+                ConvertUtil.list2String(Lists.newArrayList(clusterLogicList), ",", ClusterLogic::getName)));
+        }
 
-            Result<Void> deleteRoleResult = clusterRoleService.deleteRoleClusterByClusterId(clusterPhy.getId(),
-                    projectId);
-            if (deleteRoleResult.failed()) {
-                throw new AdminOperateException(String.format("删除集群[%s]角色信息失败", clusterPhy.getCluster()));
-            }
+        List<String> templatePhyNameList = indexTemplatePhyService.getNormalTemplateByCluster(clusterPhy.getCluster())
+                .stream().map(IndexTemplatePhy::getName).collect(Collectors.toList());
+        if (CollectionUtils.isNotEmpty(templatePhyNameList)) {
+            return Result.buildFail(String.format("物理集群[%s]中已经存在模板[%s]", clusterPhy.getCluster(),
+                    ListUtils.strList2String(templatePhyNameList)));
+        }
 
-            List<ClusterRegion> clusterRegionList = clusterRegionService.listPhyClusterRegions(clusterPhy.getCluster());
-            if(!AriusObjUtils.isEmptyList(clusterRegionList)) {
-                // 该物理集群有Region才删除
-                Result<Void> deletePhyClusterRegionResult = clusterRegionService.deleteByClusterPhy(clusterPhy.getCluster(), operator);
-                if (deletePhyClusterRegionResult.failed()) {
-                    throw new AdminOperateException(String.format("删除集群[%s]Region新失败", clusterPhy.getCluster()));
-                }
-            }
-
-            Result<Boolean> deleteClusterResult  = clusterPhyService.deleteClusterById(clusterPhyId, operator,
-                    projectId);
-            if (deleteClusterResult.failed()) {
-                throw new AdminOperateException(String.format("删除集群[%s]信息失败", clusterPhy.getCluster()));
-            }
-        } catch (AdminOperateException e) {
-            LOGGER.error("class=ClusterPhyManagerImpl||method=deleteClusterInfo||clusterName={}||errMsg={}||e={}",
-                clusterPhy.getCluster(), e.getMessage(), e);
-            // 这里显示回滚处理特殊异常场景
-            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-            return Result.buildFail("删除物理集群失败");
+        Result<Boolean> deleteClusterResult = deleteClusterInner(clusterPhyId, projectId);
+        if (deleteClusterResult.failed()) {
+            return Result.buildFrom(deleteClusterResult);
         }
 
         SpringTool.publish(new ClusterPhyEvent(clusterPhy.getCluster(), operator));
@@ -873,7 +862,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             return Result.buildSucc(true);
         }
 
-        return deleteCluster(clusterPhy.getId(), operator, projectId);
+        return deleteClusterInner(clusterPhy.getId(), projectId);
     }
 
     @Override
@@ -937,6 +926,53 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     }
 
     /**************************************** private method ***************************************************/
+    
+    private Result<Boolean> deleteClusterInner(Integer clusterPhyId, Integer projectId) {
+        ClusterPhy clusterPhy = clusterPhyService.getClusterById(clusterPhyId);
+        if (null == clusterPhy) {
+            return Result.buildFail(String.format("物理集群Id[%s]不存在", clusterPhyId));
+        }
+        try {
+            List<ClusterRoleHost> clusterRoleHosts = clusterRoleHostService.getNodesByCluster(clusterPhy.getCluster());
+            // 该物理集群有采集到host数据才执行删除操作
+            if (!CollectionUtils.isEmpty(clusterRoleHosts)) {
+                Result<Void> deleteHostResult = clusterRoleHostService.deleteByCluster(clusterPhy.getCluster(),
+                    projectId);
+                if (deleteHostResult.failed()) {
+                    throw new AdminOperateException(String.format("删除集群[%s]节点信息失败", clusterPhy.getCluster()));
+                }
+            }
+
+            Result<Void> deleteRoleResult = clusterRoleService.deleteRoleClusterByClusterId(clusterPhy.getId(),
+                projectId);
+            if (deleteRoleResult.failed()) {
+                throw new AdminOperateException(String.format("删除集群[%s]角色信息失败", clusterPhy.getCluster()));
+            }
+
+            List<ClusterRegion> clusterRegionList = clusterRegionService.listPhyClusterRegions(clusterPhy.getCluster());
+            if (!AriusObjUtils.isEmptyList(clusterRegionList)) {
+                // 该物理集群有Region才删除
+                Result<Void> deletePhyClusterRegionResult = clusterRegionService
+                    .deleteByClusterPhy(clusterPhy.getCluster());
+                if (deletePhyClusterRegionResult.failed()) {
+                    throw new AdminOperateException(String.format("删除集群[%s]Region新失败", clusterPhy.getCluster()));
+                }
+            }
+
+            Result<Boolean> deleteClusterResult = clusterPhyService.deleteClusterById(clusterPhyId, projectId);
+            if (deleteClusterResult.failed()) {
+                throw new AdminOperateException(String.format("删除集群[%s]信息失败", clusterPhy.getCluster()));
+            }
+        } catch (AdminOperateException e) {
+            LOGGER.error("class=ClusterPhyManagerImpl||method=deleteClusterInfo||clusterName={}||errMsg={}||e={}",
+                clusterPhy.getCluster(), e.getMessage(), e);
+            // 这里显示回滚处理特殊异常场景
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return Result.buildFail("删除物理集群失败");
+        }
+        return Result.buildSucc(true);
+    }
+
     /**
      * 更新物理模板setting single_type为true
      * @param cluster  集群
@@ -1307,7 +1343,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             }
         }
 
-        Result<Boolean> deleteClusterResult = clusterPhyService.deleteClusterById(clusterPhy.getId(), operator,projectId);
+        Result<Boolean> deleteClusterResult = clusterPhyService.deleteClusterById(clusterPhy.getId(), projectId);
         if (deleteClusterResult.failed()) {
             throw new AdminOperateException(String.format("删除物理集群(%s)失败", clusterPhy.getCluster()));
         }else {

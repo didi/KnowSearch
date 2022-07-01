@@ -94,10 +94,9 @@ public interface ClusterRegionService {
     /**
      * 批量删除物理集群中region
      * @param clusterPhyName 物理集群名称
-     * @param operator   操作人
      * @return
      */
-    Result<Void> deleteByClusterPhy(String clusterPhyName, String operator);
+    Result<Void> deleteByClusterPhy(String clusterPhyName);
 
     /**
      * 解绑region
