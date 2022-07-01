@@ -74,7 +74,7 @@ public class ESUserV3Controller {
     @GetMapping("/project/{projectId}")
     @ResponseBody
     @ApiOperation(value = "获取项目下的es user")
-    	@ApiImplicitParam(name = "projectId", value = "项目id", dataType = "int", required = true)
+    	@ApiImplicitParam(name = "projectId", value = "项目id", dataType = "String", required = true)
     public Result<List<ESUserVO>> listESUserByProjectId(HttpServletRequest request,
                                                         @PathVariable("projectId") String projectId) {
     

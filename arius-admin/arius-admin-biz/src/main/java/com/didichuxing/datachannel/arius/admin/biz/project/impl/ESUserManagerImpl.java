@@ -70,10 +70,17 @@ public class ESUserManagerImpl implements ESUserManager {
     @Override
     public Result<List<ESUserVO>> listESUsersByProjectId(String projectIdStr, HttpServletRequest request) {
     
-        Integer projectId = StringUtils.isNumeric(projectIdStr)
-                ? HttpRequestUtil.getProjectId(request)
-                : Integer.parseInt(projectIdStr);
+        Integer projectId = null;
+        if (StringUtils.isNumeric(projectIdStr)) {
+            projectId = Integer.parseInt(projectIdStr);
+        } else {
+            projectId = HttpRequestUtil.getProjectId(request);
+        }
+        
         final String operator = HttpRequestUtil.getOperator(request);
+        if (Objects.isNull(projectId)){
+            return Result.buildNotExist("未匹配到项目下的es user");
+        }
         ProjectVO projectVO = projectService.getProjectDetailByProjectId(projectId);
        
         

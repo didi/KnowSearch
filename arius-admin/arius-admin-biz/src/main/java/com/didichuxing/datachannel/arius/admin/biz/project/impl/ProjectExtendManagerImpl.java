@@ -661,7 +661,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
                         .anyMatch(roleBriefVO -> AuthConstant.ADMIN_ROLE_ID.equals(roleBriefVO.getId()));
                 /*当前用户列表中存在管理员*/
                 if (userIdList.stream().map(roleService::getRoleBriefListByUserId)
-                        .allMatch(checkContainsAdminRoleFunc)) {
+                        .noneMatch(checkContainsAdminRoleFunc)) {
                     return Result.buildFail("超级项目只被允许添加拥有管理员角色的用户");
         
                 }
