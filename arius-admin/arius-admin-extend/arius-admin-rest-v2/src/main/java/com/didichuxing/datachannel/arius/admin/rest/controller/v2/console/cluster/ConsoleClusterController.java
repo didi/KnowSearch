@@ -76,6 +76,7 @@ public class ConsoleClusterController {
     @GetMapping("machinespec/list")
     @ResponseBody
     @ApiOperation(value = "获取当前集群支持的套餐列表【三方接口】",tags = "【三方接口】" )
+    @Deprecated
     public Result<List<ESClusterNodeSepcVO>> listMachineSpec() {
         return clusterLogicManager.listMachineSpec();
     }

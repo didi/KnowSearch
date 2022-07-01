@@ -9,10 +9,15 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicCl
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicTemplateIndexCountVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PluginVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.ecm.ESClusterNodeSepcVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
+import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -126,5 +131,29 @@ public class ESLogicClusterOpV3Controller {
     @ApiOperation(value = "根据项目id获取逻辑集群与物理集群映射")
     public Result<List<Tuple<String, ClusterPhyVO>>>  getClusterRelationByProjectId(HttpServletRequest request) {
         return clusterLogicManager.getClusterRelationByProjectId(HttpRequestUtil.getProjectId(request));
+    }
+
+    @GetMapping("/logic-templates")
+    @ResponseBody
+    @ApiOperation(value = "获取逻辑集群所有逻辑模板列表" )
+    @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Long", name = "clusterId", value = "逻辑集群ID", required = true)
+    })
+    public Result<List<ConsoleTemplateVO>> getClusterLogicTemplates(HttpServletRequest request,
+                                                                    @RequestParam(value = "clusterId") Long clusterId) {
+        return clusterLogicManager.getClusterLogicTemplates(request, clusterId);
+    }
+
+    @GetMapping("/list/machine-spec")
+    @ResponseBody
+    @ApiOperation(value = "获取当前集群支持的套餐列表【三方接口】",tags = "【三方接口】" )
+    public Result<List<ESClusterNodeSepcVO>> listMachineSpec() {
+        return clusterLogicManager.listMachineSpec();
+    }
+
+    @GetMapping("/plugins")
+    @ResponseBody
+    @ApiOperation(value = "获取逻辑集群插件列表(用户侧获取)" )
+    public Result<List<PluginVO>> pluginList(Long clusterId) {
+        return clusterLogicManager.getClusterLogicPlugins(clusterId);
     }
 }

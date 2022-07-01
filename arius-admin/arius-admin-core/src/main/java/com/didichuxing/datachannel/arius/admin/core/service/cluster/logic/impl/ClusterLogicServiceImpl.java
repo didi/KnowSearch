@@ -589,10 +589,6 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
         if (AriusObjUtils.isNull(param.getProjectId())) {
             return Result.buildParamIllegal("应用ID为空");
         }
-
-        if (AriusObjUtils.isNull(param.getResponsible())) {
-            return Result.buildParamIllegal("责任人为空");
-        }
         return Result.buildSucc();
     }
 
