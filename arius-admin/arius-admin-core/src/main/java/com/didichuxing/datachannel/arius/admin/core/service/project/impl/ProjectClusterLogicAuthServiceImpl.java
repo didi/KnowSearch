@@ -497,17 +497,6 @@ public class ProjectClusterLogicAuthServiceImpl implements ProjectClusterLogicAu
         if (ProjectClusterLogicAuthEnum.ALL == authEnum) {
             return Result.buildParamIllegal("不支持添加超管权限");
         }
-    
-        final Integer projectId = authDTO.getProjectId();
-        final ProjectVO projectVO = Optional.ofNullable(projectId)
-                .filter(projectService::checkProjectExist)
-                .map(projectService::getProjectDetailByProjectId)
-                .orElse(new ProjectVO());
-        // 校验责任人是否合法
-        if (!(roleTool.isAdmin(authDTO.getResponsible()) || ProjectUtils.isUserNameBelongProjectMember(authDTO.getResponsible(),
-                projectVO) || ProjectUtils.isUserNameBelongProjectResponsible(authDTO.getResponsible(),projectVO))) {
-            return Result.buildParamIllegal("责任人非法");
-        }
         return Result.buildSucc();
     }
 

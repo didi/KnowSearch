@@ -1,16 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.biz.metrics.impl;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
-import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.didichuxing.datachannel.arius.admin.biz.component.MetricsValueConvertUtils;
 import com.didichuxing.datachannel.arius.admin.biz.metrics.DashboardMetricsManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -24,6 +13,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.list.Metri
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.dashboard.ClusterPhyHealthMetricsVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.top.VariousLineChartMetricsVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.*;
+import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
@@ -37,10 +27,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
-import com.didichuxing.datachannel.arius.admin.metadata.service.DashBoardMetricsService;
-import com.didiglobal.logi.security.service.ProjectService;
-import com.google.common.collect.Lists;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.DASHBOARD_THRESHOLD;
 
