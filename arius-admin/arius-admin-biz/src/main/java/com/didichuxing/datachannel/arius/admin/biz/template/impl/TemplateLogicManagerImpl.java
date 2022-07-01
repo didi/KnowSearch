@@ -758,7 +758,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
                             .bizId(logicTemplateId)
                             .operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE_CAPACITY)
                             .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                            .content(String.format("同步修改es集群[%s]中模板[%]shard数[%d]",
+                            .content(String.format("同步修改es集群[%s]中模板[%s]shard数[%d]",
                             templatePhy.getCluster(), templatePhy.getName(),shardNum))
                             .userOperation(operator)
                     .build()
