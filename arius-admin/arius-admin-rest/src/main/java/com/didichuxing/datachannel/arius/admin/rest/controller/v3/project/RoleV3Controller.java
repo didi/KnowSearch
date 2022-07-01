@@ -122,7 +122,7 @@ public class RoleV3Controller {
 		
 	}
 	
-	@GetMapping(value = "/assign/list/{roleId}")
+	@GetMapping(value = "/assign/{roleId}")
 	@ApiOperation(value = "角色管理/分配用户/列表", notes = "查询所有用户列表，并根据角色id，标记哪些用户拥有该角色")
 	@ApiImplicitParam(name = "roleId", value = "角色id", dataType = "int", required = true)
 	public Result<List<AssignInfoVO>> assignList(@PathVariable Integer roleId) {
@@ -130,7 +130,7 @@ public class RoleV3Controller {
 		
 	}
 	
-	@GetMapping(value = { "/list/{roleName}", "/list" })
+	@GetMapping(value = { "/{roleName}"  })
 	@ApiOperation(value = "根据角色名模糊查询", notes = "用户管理/列表查询条件/分配角色框，这里会用到此接口")
 	@ApiImplicitParam(name = "roleName", value = "角色名（为null，查询全部）", dataType = "String")
 	public Result<List<RoleBriefVO>> list(@PathVariable(required = false) String roleName) {
