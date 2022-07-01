@@ -137,8 +137,8 @@ public class ProjectV3Controller {
 	
 	@PostMapping("/page")
 	@ApiOperation(value = "分页查询项目列表", notes = "分页和条件查询")
-	public PagingResult<ProjectExtendVO> page(@RequestBody ProjectQueryExtendDTO queryDTO) {
-		return projectExtendManager.getProjectPage(queryDTO);
+	public PagingResult<ProjectExtendVO> page(@RequestBody ProjectQueryExtendDTO queryDTO,HttpServletRequest request) {
+		return projectExtendManager.getProjectPage(queryDTO,request);
 	}
 	
 	@PutMapping("/{id}/owner")

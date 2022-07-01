@@ -13,8 +13,7 @@ import com.didiglobal.logi.security.common.vo.project.ProjectDeleteCheckVO;
 import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
 import com.didiglobal.logi.security.exception.LogiSecurityException;
 import java.util.List;
-
-
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * 基于logi的扩展能力
@@ -81,9 +80,10 @@ public interface ProjectExtendManager {
      * 条件分页查询项目信息
      *
      * @param queryDTO 条件信息
+     * @param request
      * @return 项目分页信息
      */
-    PagingResult<ProjectExtendVO> getProjectPage(ProjectQueryExtendDTO queryDTO);
+    PagingResult<ProjectExtendVO> getProjectPage(ProjectQueryExtendDTO queryDTO, HttpServletRequest request);
 
   
 

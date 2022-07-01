@@ -28,6 +28,7 @@ import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
 import com.didichuxing.datachannel.arius.admin.common.tuple.Tuples;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.VerifyCodeFactory;
+import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.project.ESUserService;
@@ -50,6 +51,7 @@ import com.didiglobal.logi.security.service.ProjectService;
 import com.didiglobal.logi.security.service.RoleService;
 import com.didiglobal.logi.security.service.UserProjectService;
 import com.didiglobal.logi.security.service.UserService;
+import com.didiglobal.logi.security.util.HttpRequestUtil;
 import com.google.common.collect.Lists;
 import java.util.Collections;
 import java.util.List;
@@ -60,6 +62,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -93,6 +96,8 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
     private UserProjectService   userProjectService;
     @Autowired
     private RoleService          roleService;
+    @Autowired
+    private RoleTool roleTool;
     
     @Override
     public Result<ProjectExtendVO> createProject(ProjectExtendSaveDTO saveDTO, String operator, Integer operatorId) {
@@ -259,12 +264,17 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
      * 条件分页查询项目信息
      *
      * @param queryDTO 条件信息
+     * @param request
      * @return 项目分页信息
      */
     @Override
-    public PagingResult<ProjectExtendVO> getProjectPage(ProjectQueryExtendDTO queryDTO) {
+    public PagingResult<ProjectExtendVO> getProjectPage(ProjectQueryExtendDTO queryDTO, HttpServletRequest request) {
+        //如果当前操作人不是管理员的角色，则只应该获取属于自己的项目，不能获取全部的项目
+        String operator = HttpRequestUtil.getOperator(request);
+        if (StringUtils.isNotBlank(operator) && !roleTool.isAdmin(operator)) {
+            queryDTO.setChargeUsername(operator);
+        }
         final ProjectQueryDTO projectQueryDTO = ConvertUtil.obj2Obj(queryDTO, ProjectQueryDTO.class);
-        
         if (Objects.isNull(queryDTO.getSearchType())) {
             final PagingData<ProjectVO> projectPage = projectService.getProjectPage(projectQueryDTO);
             final List<ProjectVO> bizData = projectPage.getBizData();
