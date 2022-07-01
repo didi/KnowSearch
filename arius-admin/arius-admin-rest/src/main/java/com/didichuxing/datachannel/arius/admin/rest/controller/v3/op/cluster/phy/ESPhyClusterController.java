@@ -2,6 +2,14 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.cluster.ph
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
 
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.bind.annotation.*;
+
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -15,22 +23,10 @@ import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
-import java.util.List;
-import javax.servlet.http.HttpServletRequest;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
 
 /**
  * 物理集群接口
@@ -170,4 +166,17 @@ public class ESPhyClusterController {
                 HttpRequestUtil.getProjectId(request));
     }
 
+    @PostMapping("/condition-list")
+    @ResponseBody
+    @ApiOperation(value = "获取集群列表接口【三方接口】",tags = "【三方接口】")
+    public Result<List<ClusterPhyVO>> list(@RequestBody ClusterPhyDTO param, HttpServletRequest request) {
+        return Result.buildSucc(clusterPhyManager.listClusterPhys(param));
+    }
+
+    @PostMapping("")
+    @ResponseBody
+    @ApiOperation(value = "新建集群接口【三方接口】",tags = "【三方接口】" )
+    public Result<Boolean> add(HttpServletRequest request, @RequestBody ClusterPhyDTO param) {
+        return clusterPhyManager.addCluster(param, HttpRequestUtil.getOperator(request), HttpRequestUtil.getProjectId(request));
+    }
 }

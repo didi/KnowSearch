@@ -104,9 +104,9 @@ public class ClusterPhyPageSearchHandle extends AbstractPageSearchHandle<Cluster
     @Override
     protected PaginationResult<ClusterPhyVO> buildPageData(ClusterPhyConditionDTO condition, Integer projectId) {
 
-        List<ClusterPhy> pagingGetClusterPhyList      =  clusterPhyService.pagingGetClusterPhyByCondition(condition);
+        List<ClusterPhy> pagingGetClusterPhyList = clusterPhyService.pagingGetClusterPhyByCondition(condition);
 
-        List<ClusterPhyVO> clusterPhyVOList = clusterPhyManager.buildClusterInfo(pagingGetClusterPhyList, projectId);
+        List<ClusterPhyVO> clusterPhyVOList = clusterPhyManager.buildClusterInfo(pagingGetClusterPhyList);
 
         long totalHit = clusterPhyService.fuzzyClusterPhyHitByCondition(condition);
         return PaginationResult.buildSucc(clusterPhyVOList, totalHit, condition.getPage(), condition.getSize());
