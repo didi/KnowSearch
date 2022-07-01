@@ -186,13 +186,13 @@ public class LoginManagerImpl implements LoginManager {
         final Integer operatorId = HttpRequestUtil.getOperatorId(request);
         final Integer projectId = HttpRequestUtil.getProjectId(request);
         if (StringUtils.isNotBlank(operator)){
-            tuple3.update1(operator);
+            tuple3=tuple3.update1(operator);
         }
         if (Objects.nonNull(operatorId)&&operatorId>0){
-            tuple3.update2(operatorId);
+            tuple3=tuple3.update2(operatorId);
         }
          if (Objects.nonNull(projectId)&&projectId>0){
-            tuple3.update3(projectId);
+            tuple3=tuple3.update3(projectId);
         }
         return tuple3;
         

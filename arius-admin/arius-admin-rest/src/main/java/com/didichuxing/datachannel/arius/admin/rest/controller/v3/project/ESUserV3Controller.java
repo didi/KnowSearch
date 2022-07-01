@@ -77,9 +77,8 @@ public class ESUserV3Controller {
     	@ApiImplicitParam(name = "projectId", value = "项目id", dataType = "int", required = true)
     public Result<List<ESUserVO>> listESUserByProjectId(HttpServletRequest request,
                                                         @PathVariable("projectId") String projectId) {
-        Integer id= StringUtils.isNumeric(projectId)?HttpRequestUtil.getProjectId(request): Integer.parseInt(projectId);
-        return esUserManager.listESUsersByProjectId(id,
-                HttpRequestUtil.getOperator(request));
+    
+        return esUserManager.listESUsersByProjectId(projectId, request);
     }
     
     @DeleteMapping("/{projectId}/{esUser}")

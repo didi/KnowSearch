@@ -8,6 +8,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.ESUserVO;
 import com.didiglobal.logi.security.common.po.ProjectPO;
 import com.didiglobal.logi.security.common.vo.project.ProjectVO;
 import java.util.List;
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * es user 操作
@@ -22,11 +23,11 @@ public interface ESUserManager {
     /**
      * 通过项目id获取es user 列表
      *
-     * @param projectId {@link ProjectPO#getId()}
-     * @param operator  操作者属于{@link ProjectVO#getUserList()}
+     * @param projectIdStr {@link ProjectPO#getId()}
+     * @param request   操作者属于{@link ProjectVO#getUserList()}
      * @return {@code List<ESUser>}
      */
-    Result<List<ESUserVO>> listESUsersByProjectId(Integer projectId, String operator);
+    Result<List<ESUserVO>> listESUsersByProjectId(String projectIdStr, HttpServletRequest request);
     
 
     

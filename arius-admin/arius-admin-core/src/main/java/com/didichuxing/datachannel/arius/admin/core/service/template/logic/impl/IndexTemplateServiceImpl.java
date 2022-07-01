@@ -681,7 +681,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
         } catch (Exception e) {
             LOGGER.error("class=TemplateLogicServiceImpl||method=editTemplateInfoTODB||||msg={}", e.getMessage(), e);
         }
-        return succ ? Result.buildSucc() : Result.buildFail();
+        return   Result.build(succ);
     }
 
     @Override
