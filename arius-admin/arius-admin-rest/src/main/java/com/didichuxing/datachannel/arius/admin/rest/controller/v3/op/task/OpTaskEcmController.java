@@ -13,6 +13,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.ecm.EcmTaskBasicVO
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.ecm.EcmTaskDetailVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.ecm.EcmTaskVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
+import com.didichuxing.datachannel.arius.admin.common.exception.AdminTaskException;
+import com.didichuxing.datachannel.arius.admin.common.exception.EcmRemoteException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.remote.zeus.bean.constant.EcmActionEnum;
@@ -51,35 +53,35 @@ public class OpTaskEcmController {
     @PostMapping(path = "{taskId}/create")
     @ResponseBody
     @ApiOperation(value = "启动集群任务", notes = "")
-    public Result<EcmOperateAppBase> savaAndActionEcmTask(HttpServletRequest request, @PathVariable Long taskId) {
+    public Result<EcmOperateAppBase> savaAndActionEcmTask(HttpServletRequest request, @PathVariable Long taskId) throws EcmRemoteException {
         return ecmTaskManager.savaAndActionEcmTask(taskId, HttpRequestUtil.getOperator(request));
     }
 
     @PostMapping(path = "{taskId}/continue")
     @ResponseBody
     @ApiOperation(value = "继续集群任务", notes = "")
-    public Result<EcmOperateAppBase> continueWorkOrderTask(HttpServletRequest request, @PathVariable Long taskId) {
+    public Result<EcmOperateAppBase> continueWorkOrderTask(HttpServletRequest request, @PathVariable Long taskId) throws EcmRemoteException {
         return ecmTaskManager.actionClusterEcmTask(taskId, EcmActionEnum.START, null, HttpRequestUtil.getOperator(request));
     }
 
     @PostMapping(path = "{taskId}/scale")
     @ResponseBody
     @ApiOperation(value = "扩缩容集群任务", notes = "")
-    public Result<EcmOperateAppBase> scaleWorkOrderTask(HttpServletRequest request, @PathVariable Long taskId) {
+    public Result<EcmOperateAppBase> scaleWorkOrderTask(HttpServletRequest request, @PathVariable Long taskId) throws EcmRemoteException {
         return ecmTaskManager.actionClusterEcmTask(taskId, HttpRequestUtil.getOperator(request));
     }
 
     @PostMapping(path = "{taskId}/upgrade")
     @ResponseBody
     @ApiOperation(value = "升级集群任务", notes = "")
-    public Result<EcmOperateAppBase> upgradeWorkOrderTask(HttpServletRequest request, @PathVariable Long taskId) {
+    public Result<EcmOperateAppBase> upgradeWorkOrderTask(HttpServletRequest request, @PathVariable Long taskId) throws EcmRemoteException {
         return ecmTaskManager.actionClusterEcmTask(taskId, HttpRequestUtil.getOperator(request));
     }
 
     @PostMapping(path = "{taskId}/restart")
     @ResponseBody
     @ApiOperation(value = "重启集群任务", notes = "")
-    public Result<EcmOperateAppBase>restartWorkOrderTask(HttpServletRequest request, @PathVariable Long taskId) {
+    public Result<EcmOperateAppBase>restartWorkOrderTask(HttpServletRequest request, @PathVariable Long taskId) throws EcmRemoteException {
         return ecmTaskManager.actionClusterEcmTask(taskId, HttpRequestUtil.getOperator(request));
     }
 
@@ -150,7 +152,7 @@ public class OpTaskEcmController {
     @GetMapping(path = "{taskId}/task-details")
     @ResponseBody
     @ApiOperation(value = "任务详细信息", notes = "")
-    public Result<EcmTaskDetailVO> clusterTaskDetails(@PathVariable Long taskId) {
+    public Result<EcmTaskDetailVO> clusterTaskDetails(@PathVariable Long taskId) throws AdminTaskException {
         return Result.buildSucc(ConvertUtil.obj2Obj( ecmTaskDetailManager.getEcmTaskDetailInfo(taskId).getData()
                 , EcmTaskDetailVO.class));
     }

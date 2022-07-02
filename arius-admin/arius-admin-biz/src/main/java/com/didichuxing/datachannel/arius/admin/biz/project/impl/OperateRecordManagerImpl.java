@@ -9,6 +9,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.oprecord.OperateR
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.operaterecord.OperateRecordVO;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 import com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didiglobal.logi.log.ILog;
@@ -37,7 +38,7 @@ public class OperateRecordManagerImpl implements OperateRecordManager {
      * @return {@code PagingResult<OplogVO>}
      */
     @Override
-    public PaginationResult<OperateRecordVO> pageOplogPage(OperateRecordDTO queryDTO, Integer projectId) {
+    public PaginationResult<OperateRecordVO> pageOplogPage(OperateRecordDTO queryDTO, Integer projectId) throws NotFindSubclassException {
         final BaseHandle baseHandle = handleFactory.getByHandlerNamePer(
                 PageSearchHandleTypeEnum.OPERATE_RECORD.getPageSearchType());
          if (baseHandle instanceof OperateRecordPageSearchHandle) {

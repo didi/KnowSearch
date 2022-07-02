@@ -5,6 +5,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESPackageDTO;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.core.service.extend.storage.FileStorageService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.ecm.ESPackageDAO;
 import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
@@ -50,7 +51,7 @@ public class ESPackageServiceTest extends AriusAdminApplicationTest {
      * 涉及多个私有的校验方法，直接在这里进行分支的覆盖,后续不再额外覆盖分支
      */
     @Test
-    public void addESPackageTest() {
+    public void addESPackageTest() throws NotFindSubclassException {
         Assertions.assertEquals(Result.buildParamIllegal("安装包为空").getMessage(),
                 esPackageService.addESPackage(null, CustomDataSource.OPERATOR).getMessage());
         ESPackageDTO esPackageDTO = CustomDataSource.esPackageDTOFactory();
@@ -77,7 +78,7 @@ public class ESPackageServiceTest extends AriusAdminApplicationTest {
     }
 
     @Test
-    public void updateESPackageTest() {
+    public void updateESPackageTest() throws NotFindSubclassException {
         ESPackageDTO esPackageDTO = CustomDataSource.esPackageDTOFactory();
         Integer projectId=1;
         //Mockito.when(ariusUserInfoService.isOPByDomainAccount(CustomDataSource.OPERATOR)).thenReturn(true);
@@ -110,7 +111,7 @@ public class ESPackageServiceTest extends AriusAdminApplicationTest {
     }
 
     @Test
-    public void deleteESPackageTest() {
+    public void deleteESPackageTest() throws NotFindSubclassException {
         ESPackageDTO esPackageDTO = CustomDataSource.esPackageDTOFactory();
         Long id = 1234L;
         Assertions.assertEquals(Result.buildFail("非运维人员不能更新ES安装包!").getMessage(),

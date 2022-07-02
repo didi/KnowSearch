@@ -32,7 +32,7 @@ public class ExtendServiceFactory {
     @Value("${extend.service}")
     private String              extendService;
 
-    public <T> Result<T> getExtend(Class<T> tClass) {
+    public <T> Result<T> getExtend(Class<T> tClass) throws ExtendServiceNotSupportException {
         Map<String, T> beans = SpringTool.getBeansOfType(tClass);
 
         if (beans.isEmpty()) {
@@ -52,7 +52,7 @@ public class ExtendServiceFactory {
         return Result.buildNotExist("扩展服务不存在");
     }
 
-    public <T> T getDefault(Class<T> tClass) {
+    public <T> T getDefault(Class<T> tClass) throws ExtendServiceNotSupportException {
         Map<String, T> beans = SpringTool.getBeansOfType(tClass);
 
         if (beans.isEmpty()) {
@@ -72,7 +72,7 @@ public class ExtendServiceFactory {
         return first;
     }
 
-    public <T> List<T> getAll(Class<T> tClass) {
+    public <T> List<T> getAll(Class<T> tClass) throws ExtendServiceNotSupportException {
         Map<String, T> beans = SpringTool.getBeansOfType(tClass);
 
         if (beans.isEmpty()) {

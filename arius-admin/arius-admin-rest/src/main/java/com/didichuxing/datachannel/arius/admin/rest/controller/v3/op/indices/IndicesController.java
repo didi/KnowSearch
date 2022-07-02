@@ -14,6 +14,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexMappi
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexSettingVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexShardInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiModelProperty;
@@ -46,7 +47,7 @@ public class IndicesController {
     @ResponseBody
     @ApiOperation(value = "分页获取索引列表信息", notes = "携带可读可写标志位")
     public PaginationResult<IndexCatCellVO> pageGetIndexCatInfoVO(HttpServletRequest request,
-                                                                  @RequestBody IndexQueryDTO condition) {
+                                                                  @RequestBody IndexQueryDTO condition) throws NotFindSubclassException {
         return indicesManager.pageGetIndex(condition, HttpRequestUtil.getProjectId(request));
     }
 

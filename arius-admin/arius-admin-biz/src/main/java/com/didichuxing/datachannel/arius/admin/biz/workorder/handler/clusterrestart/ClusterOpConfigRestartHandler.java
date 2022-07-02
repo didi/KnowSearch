@@ -22,6 +22,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.esconfig.EsConfig
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESClusterConfigService;
@@ -47,7 +48,7 @@ public class ClusterOpConfigRestartHandler extends BaseClusterOpRestartHandler {
     private ESClusterConfigService esClusterConfigService;
 
     @Override
-    protected Result<Void> validateConsoleParam(WorkOrder workOrder) {
+    protected Result<Void> validateConsoleParam(WorkOrder workOrder) throws NotFindSubclassException {
         ClusterConfigRestartContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
             ClusterConfigRestartContent.class);
 

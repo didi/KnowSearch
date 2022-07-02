@@ -2,6 +2,7 @@ package com.didichuxing.datachannel.arius.admin.biz.cluster;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.PluginDTO;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 
 public interface ClusterPluginsManager {
 
@@ -12,7 +13,7 @@ public interface ClusterPluginsManager {
 	 * @param projectId
 	 * @return result
 	 */
-	Result<Long> addPlugins(PluginDTO plugin, Integer projectId);
+	Result<Long> addPlugins(PluginDTO plugin, Integer projectId) throws NotFindSubclassException;
 
 	/**
 	 * 删除指定的插件
@@ -22,7 +23,7 @@ public interface ClusterPluginsManager {
 	 * @param projectId
 	 * @return result
 	 */
-	Result<Long> deletePluginById(Long id, String operator, Integer projectId);
+	Result<Long> deletePluginById(Long id, String operator, Integer projectId) throws NotFindSubclassException;
 
 	/**
      * 编辑插件的描述信息

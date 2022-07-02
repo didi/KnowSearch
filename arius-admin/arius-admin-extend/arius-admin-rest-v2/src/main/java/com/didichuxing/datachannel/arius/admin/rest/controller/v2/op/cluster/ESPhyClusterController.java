@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.didichuxing.datachannel.arius.admin.common.exception.AdminTaskException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -84,7 +85,7 @@ public class ESPhyClusterController {
     @ApiOperation(value = "采集集群节点配置信息接口【三方接口】",tags = "【三方接口】" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "String", name = "cluster", value = "集群名称", required = true) })
     @Deprecated
-    public Result<Void> collectClusterNodeSettings(@RequestParam(value = "cluster") String cluster) {
+    public Result<Void> collectClusterNodeSettings(@RequestParam(value = "cluster") String cluster) throws AdminTaskException {
         return Result.build(clusterRoleHostService.collectClusterNodeSettings(cluster));
     }
 

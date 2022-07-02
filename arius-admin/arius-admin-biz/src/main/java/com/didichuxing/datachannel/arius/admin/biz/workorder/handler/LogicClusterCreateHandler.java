@@ -15,6 +15,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterRe
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
@@ -115,7 +116,7 @@ public class LogicClusterCreateHandler extends BaseWorkOrderHandler {
      * 处理工单 这里分为两种，一种是分配逻辑集群，一种是申请逻辑集群，其中申请逻辑集群不会绑定region，会联系同学在运维侧进行操作
      */
     @Override
-    protected Result<Void> doProcessAgree(WorkOrder workOrder, String approver) {
+    protected Result<Void> doProcessAgree(WorkOrder workOrder, String approver) throws AdminOperateException {
         ESLogicClusterWithRegionDTO esLogicClusterWithRegionDTO = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
             ESLogicClusterWithRegionDTO.class);
         esLogicClusterWithRegionDTO.setProjectId(workOrder.getSubmitorProjectId());

@@ -92,7 +92,7 @@ public class LoginManagerImpl implements LoginManager {
      */
     @Override
     public boolean interceptorCheck(HttpServletRequest request, HttpServletResponse response,
-                                    String requestMappingValue, List<String> whiteMappingValues) throws IOException {
+                                    String requestMappingValue, List<String> whiteMappingValues) throws IOException, OperateForbiddenException {
         boolean interceptorCheck = loginService.interceptorCheck(request, response, requestMappingValue,
                 whiteMappingValues);
         TupleThree</*username*/String,/*userId*/Integer,/*projectId*/Integer> userNameAndUserIdAndProjectIdTuple3 = getRequestByHead(

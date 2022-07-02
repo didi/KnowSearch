@@ -1,6 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.worktask.handler.cluster;
 
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import org.springframework.stereotype.Service;
 
 import com.didichuxing.datachannel.arius.admin.biz.worktask.content.ClusterOfflineContent;
@@ -19,7 +20,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 @Service("clusterOfflineTaskHandler")
 public class ClusterOfflineTaskHandler extends AbstractClusterTaskHandler {
     @Override
-    Result<Void> validateHostParam(String param) {
+    Result<Void> validateHostParam(String param) throws NotFindSubclassException {
         ClusterOfflineContent content = ConvertUtil.obj2ObjByJSON(param, ClusterOfflineContent.class);
 
         if (AriusObjUtils.isNull(content.getPhyClusterId())) {

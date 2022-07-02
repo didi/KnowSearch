@@ -11,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+import lombok.SneakyThrows;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpRequest;
@@ -67,6 +68,7 @@ public class RestTemplateConfig {
 
     private class LogHttpRequestInterceptor implements ClientHttpRequestInterceptor {
 
+        @SneakyThrows
         @Override
         public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution) {
             ClientHttpResponse response = null;
@@ -104,7 +106,7 @@ public class RestTemplateConfig {
         }
 
         private void traceResponse(HttpRequest request, ClientHttpResponse response, IOException exception,
-                                   String subFlag, long nanoTime) throws IOException {
+                                   String subFlag, long nanoTime) throws IOException, ThirdPartRemoteException {
             String url = simpleUrl(request);
             StringBuilder inputStringBuilder = new StringBuilder();
             if (response == null) {

@@ -9,6 +9,7 @@ import static java.util.stream.Collectors.toList;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -467,7 +468,7 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
     }
 
     @Override
-    public Result<Long> addPlugin(Long logicClusterId, PluginDTO pluginDTO, String operator) {
+    public Result<Long> addPlugin(Long logicClusterId, PluginDTO pluginDTO, String operator) throws NotFindSubclassException {
 
         if (null != logicClusterId) {
             List<Integer> clusterIdList = clusterRegionService.listPhysicClusterId(logicClusterId);

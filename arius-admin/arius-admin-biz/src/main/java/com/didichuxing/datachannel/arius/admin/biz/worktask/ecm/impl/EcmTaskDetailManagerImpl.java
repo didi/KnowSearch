@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import com.didichuxing.datachannel.arius.admin.common.exception.AdminTaskException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -93,7 +94,7 @@ public class EcmTaskDetailManagerImpl implements EcmTaskDetailManager {
     }
 
     @Override
-    public Result<EcmTaskDetailProgress> getEcmTaskDetailInfo(Long workOrderTaskId) {
+    public Result<EcmTaskDetailProgress> getEcmTaskDetailInfo(Long workOrderTaskId) throws AdminTaskException {
         EcmTask ecmTask = ecmTaskManager.getEcmTask(workOrderTaskId);
         if (AriusObjUtils.isNull(ecmTask)) {
             return Result.buildFail("the ecm task is empty");

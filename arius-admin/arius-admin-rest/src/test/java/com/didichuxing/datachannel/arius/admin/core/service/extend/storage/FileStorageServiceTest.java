@@ -2,6 +2,7 @@ package com.didichuxing.datachannel.arius.admin.core.service.extend.storage;
 
 import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.remote.storage.s3.S3FileStorageHandle;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -29,13 +30,13 @@ public class FileStorageServiceTest extends AriusAdminApplicationTest {
     private S3FileStorageHandle s3FileStorageHandle;
 
     @Test
-    void getDownloadBaseUrl() {
+    void getDownloadBaseUrl() throws NotFindSubclassException {
         Mockito.when(s3FileStorageHandle.getDownloadBaseUrl()).thenReturn("");
         Assertions.assertTrue(fileStorageService.getDownloadBaseUrl().success());
     }
 
     @Test
-    void upLoadTest() throws IOException {
+    void upLoadTest() throws IOException, NotFindSubclassException {
         Mockito.when(s3FileStorageHandle.upload(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
                 .thenReturn(Result.buildSucc());
         MockMultipartFile mockMultipartFile = new MockMultipartFile("test", new byte[10]);
@@ -43,14 +44,14 @@ public class FileStorageServiceTest extends AriusAdminApplicationTest {
     }
 
     @Test
-    void downLoadTest() {
+    void downLoadTest() throws NotFindSubclassException {
         Mockito.when(s3FileStorageHandle.download(Mockito.anyString())).thenReturn(Result.buildSucc());
         Result<MultipartFile> download = fileStorageService.download("test");
         Assertions.assertTrue(download.success());
     }
 
     @Test
-    void removeTest(){
+    void removeTest() throws NotFindSubclassException {
         Mockito.when(s3FileStorageHandle.remove(Mockito.anyString())).thenReturn(Result.buildSucc());
         Assertions.assertTrue(fileStorageService.remove(Mockito.anyString()).success());
     }

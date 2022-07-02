@@ -12,6 +12,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.detail.Order
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.OrderInfoDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
+import com.didichuxing.datachannel.arius.admin.common.exception.OperateForbiddenException;
 
 /**
  * @author d06679
@@ -38,7 +40,7 @@ public interface WorkOrderManager {
      @param workOrderProcessDTO 工作订单流程dto
       * @return {@link Result}<{@link Void}>
      */
-    Result<Void> process(WorkOrderProcessDTO workOrderProcessDTO);
+    Result<Void> process(WorkOrderProcessDTO workOrderProcessDTO) throws NotFindSubclassException;
     
     /**新增
      * 插入一条工单
@@ -119,12 +121,12 @@ public interface WorkOrderManager {
      @param orderPO 订单订单
       * @return {@link OrderInfoDetail}
      */
-    OrderInfoDetail getBaseDetail(WorkOrderPO orderPO);
+    OrderInfoDetail getBaseDetail(WorkOrderPO orderPO) throws NotFindSubclassException;
     
     /**获取订单批准列表通过状态
      * 根据状态获取工单列表
      @param status 状态
       * @return {@link Result}<{@link List}<{@link WorkOrderVO}>>
      */
-    Result<List<WorkOrderVO>> getOrderApprovalListByStatus(Integer status);
+    Result<List<WorkOrderVO>> getOrderApprovalListByStatus(Integer status) throws OperateForbiddenException;
 }

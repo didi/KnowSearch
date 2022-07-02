@@ -5,7 +5,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
-import com.didichuxing.datachannel.arius.admin.common.exception.AriusRunTimeException;
+import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +31,7 @@ public class CompareUtil {
      * @param ignoreFields
      * @return
      */
-    public static boolean objectEquals(Object src, Object dst, String... ignoreFields) {
+    public static boolean objectEquals(Object src, Object dst, String... ignoreFields) throws AdminOperateException {
         if (src == null) {
             LOGGER.warn("class=CompareUtils||method=objectEquals||msg=src and dst is null");
             return dst == null;
@@ -78,7 +78,7 @@ public class CompareUtil {
                 }
             } catch (IllegalAccessException e) {
                 LOGGER.error("", e);
-                throw new AriusRunTimeException("", ResultType.FAIL);
+                throw new AdminOperateException("", ResultType.FAIL);
             }
         }
         return true;
@@ -103,7 +103,7 @@ public class CompareUtil {
      * @param ignoreFields
      * @return
      */
-    public static boolean listEqualsIgnoreOrder(List<?> src, List<?> dst, String... ignoreFields) {
+    public static boolean listEqualsIgnoreOrder(List<?> src, List<?> dst, String... ignoreFields) throws AdminOperateException {
         if (src == null) {
             LOGGER.warn("class=CompareUtils||method=listEqualsIgnoreOrder||msg=src and dst is null");
             return dst == null;

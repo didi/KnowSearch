@@ -12,6 +12,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.po.dsl.DslTemplatePO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.DslTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.tuple.TupleThree;
 import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
@@ -96,7 +97,7 @@ public class DslTemplateManagerImpl implements DslTemplateManager {
     }
 
     @Override
-    public PaginationResult<DslTemplateVO> getDslTemplatePage(Integer projectId, DslTemplateConditionDTO queryDTO) {
+    public PaginationResult<DslTemplateVO> getDslTemplatePage(Integer projectId, DslTemplateConditionDTO queryDTO) throws NotFindSubclassException {
         BaseHandle baseHandle     = handleFactory.getByHandlerNamePer(DSL_TEMPLATE.getPageSearchType());
         if (baseHandle instanceof DslTemplatePageSearchHandle) {
             DslTemplatePageSearchHandle handle = (DslTemplatePageSearchHandle) baseHandle;

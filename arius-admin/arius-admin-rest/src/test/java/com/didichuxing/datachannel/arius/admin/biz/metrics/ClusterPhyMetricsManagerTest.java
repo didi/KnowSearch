@@ -15,6 +15,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.top.Metric
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.top.MetricsContentVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.top.VariousLineChartMetricsVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyTypeMetricsEnum;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
@@ -85,7 +86,7 @@ class ClusterPhyMetricsManagerTest {
     }
 
     @Test
-    void getClusterMetricsByMetricsTypeTest() {
+    void getClusterMetricsByMetricsTypeTest() throws NotFindSubclassException {
         // Setup
         final MetricsClusterPhyDTO param = new MetricsClusterPhyDTO("clusterPhyName", "clusterLogicName", 0L, 0L,
                 "aggType", Arrays.asList("value"), 0, 0, "topMethod", Arrays.asList("value"));
@@ -159,7 +160,7 @@ class ClusterPhyMetricsManagerTest {
     }
 
     @Test
-    void getClusterMetricsByMetricsTypeClusterRoleHostServiceReturnsNoItemTest() {
+    void getClusterMetricsByMetricsTypeClusterRoleHostServiceReturnsNoItemTest() throws NotFindSubclassException {
         // Setup
         final MetricsClusterPhyDTO param = new MetricsClusterPhyDTO("clusterPhyName", "clusterLogicName", 0L, 0L,
                 "aggType", Arrays.asList("value"), 0, 0, "topMethod", Arrays.asList("value"));
@@ -209,7 +210,7 @@ class ClusterPhyMetricsManagerTest {
     }
 
     @Test
-    void getClusterMetricsByMetricsTypeClusterRoleHostServiceReturnsNoItemsTest() {
+    void getClusterMetricsByMetricsTypeClusterRoleHostServiceReturnsNoItemsTest() throws NotFindSubclassException {
         // Setup
         final MetricsClusterPhyDTO param = new MetricsClusterPhyDTO("clusterPhyName", "clusterLogicName", 0L, 0L,
                 "aggType", Arrays.asList("value"), 0, 0, "topMethod", Arrays.asList("value"));
@@ -261,7 +262,7 @@ class ClusterPhyMetricsManagerTest {
     }
 
     @Test
-    void getClusterMetricsByMetricsTypeClusterRoleHostServiceReturnsFailureTest() {
+    void getClusterMetricsByMetricsTypeClusterRoleHostServiceReturnsFailureTest() throws NotFindSubclassException {
         // Setup
         final MetricsClusterPhyDTO param = new MetricsClusterPhyDTO("clusterPhyName", "clusterLogicName", 0L, 0L,
                 "aggType", Arrays.asList("value"), 0, 0, "topMethod", Arrays.asList("value"));
@@ -313,7 +314,7 @@ class ClusterPhyMetricsManagerTest {
     }
 
     @Test
-    void getClusterMetricsByMetricsTypeIndexTemplateServiceReturnsNoItemTest() {
+    void getClusterMetricsByMetricsTypeIndexTemplateServiceReturnsNoItemTest() throws NotFindSubclassException {
         // Setup
         final MetricsClusterPhyDTO param = new MetricsClusterPhyDTO("clusterPhyName", "clusterLogicName", 0L, 0L,
                 "aggType", Arrays.asList("value"), 0, 0, "topMethod", Arrays.asList("value"));
@@ -360,7 +361,7 @@ class ClusterPhyMetricsManagerTest {
     }
 
     @Test
-    void getClusterMetricsByMetricsTypeIndexTemplateServiceReturnsNoItemsTest() {
+    void getClusterMetricsByMetricsTypeIndexTemplateServiceReturnsNoItemsTest() throws NotFindSubclassException {
         // Setup
         final MetricsClusterPhyDTO param = new MetricsClusterPhyDTO("clusterPhyName", "clusterLogicName", 0L, 0L,
                 "aggType", Arrays.asList("value"), 0, 0, "topMethod", Arrays.asList("value"));
@@ -409,7 +410,7 @@ class ClusterPhyMetricsManagerTest {
     }
 
     @Test
-    void getClusterMetricsByMetricsTypeIndexTemplateServiceReturnsFailureTest() {
+    void getClusterMetricsByMetricsTypeIndexTemplateServiceReturnsFailureTest() throws NotFindSubclassException {
         // Setup
         final MetricsClusterPhyDTO param = new MetricsClusterPhyDTO("clusterPhyName", "clusterLogicName", 0L, 0L,
                 "aggType", Arrays.asList("value"), 0, 0, "topMethod", Arrays.asList("value"));
@@ -458,7 +459,7 @@ class ClusterPhyMetricsManagerTest {
     }
 
     @Test
-    void getClusterMetricsByMetricsTypeESIndexServiceReturnsNoItemsTest() {
+    void getClusterMetricsByMetricsTypeESIndexServiceReturnsNoItemsTest() throws NotFindSubclassException {
         // Setup
         final MetricsClusterPhyDTO param = new MetricsClusterPhyDTO("clusterPhyName", "clusterLogicName", 0L, 0L,
                 "aggType", Arrays.asList("value"), 0, 0, "topMethod", Arrays.asList("value"));
@@ -500,7 +501,7 @@ class ClusterPhyMetricsManagerTest {
     }
 
     @Test
-    void getMultiClusterMetricsTest() {
+    void getMultiClusterMetricsTest() throws NotFindSubclassException {
         // Setup
         final MultiMetricsClusterPhyNodeDTO param = new MultiMetricsClusterPhyNodeDTO(Arrays.asList("value"));
         final Result<List<VariousLineChartMetricsVO>> expectedResult = Result.buildFail(
@@ -582,7 +583,7 @@ class ClusterPhyMetricsManagerTest {
     }
 
     @Test
-    void getMultiClusterMetricsClusterRoleHostServiceReturnsNoItemTest() {
+    void getMultiClusterMetricsClusterRoleHostServiceReturnsNoItemTest() throws NotFindSubclassException {
         // Setup
         final MultiMetricsClusterPhyNodeDTO param = new MultiMetricsClusterPhyNodeDTO(Arrays.asList("value"));
         final Result<List<VariousLineChartMetricsVO>> expectedResult = Result.buildFail(
@@ -636,7 +637,7 @@ class ClusterPhyMetricsManagerTest {
     }
 
     @Test
-    void getMultiClusterMetricsClusterRoleHostServiceReturnsNoItemsTest() {
+    void getMultiClusterMetricsClusterRoleHostServiceReturnsNoItemsTest() throws NotFindSubclassException {
         // Setup
         final MultiMetricsClusterPhyNodeDTO param = new MultiMetricsClusterPhyNodeDTO(Arrays.asList("value"));
         final Result<List<VariousLineChartMetricsVO>> expectedResult = Result.buildFail(
@@ -692,7 +693,7 @@ class ClusterPhyMetricsManagerTest {
     }
 
     @Test
-    void getMultiClusterMetricsClusterRoleHostServiceReturnsFailureTest() {
+    void getMultiClusterMetricsClusterRoleHostServiceReturnsFailureTest() throws NotFindSubclassException {
         // Setup
         final MultiMetricsClusterPhyNodeDTO param = new MultiMetricsClusterPhyNodeDTO(Arrays.asList("value"));
         final Result<List<VariousLineChartMetricsVO>> expectedResult = Result.buildFail(
@@ -748,7 +749,7 @@ class ClusterPhyMetricsManagerTest {
     }
 
     @Test
-    void getMultiClusterMetricsIndexTemplateServiceReturnsNoItemTest() {
+    void getMultiClusterMetricsIndexTemplateServiceReturnsNoItemTest() throws NotFindSubclassException {
         // Setup
         final MultiMetricsClusterPhyNodeDTO param = new MultiMetricsClusterPhyNodeDTO(Arrays.asList("value"));
         final Result<List<VariousLineChartMetricsVO>> expectedResult = Result.buildFail(
@@ -799,7 +800,7 @@ class ClusterPhyMetricsManagerTest {
     }
 
     @Test
-    void getMultiClusterMetricsIndexTemplateServiceReturnsNoItemsTest() {
+    void getMultiClusterMetricsIndexTemplateServiceReturnsNoItemsTest() throws NotFindSubclassException {
         // Setup
         final MultiMetricsClusterPhyNodeDTO param = new MultiMetricsClusterPhyNodeDTO(Arrays.asList("value"));
         final Result<List<VariousLineChartMetricsVO>> expectedResult = Result.buildFail(
@@ -852,7 +853,7 @@ class ClusterPhyMetricsManagerTest {
     }
 
     @Test
-    void getMultiClusterMetricsIndexTemplateServiceReturnsFailureTest() {
+    void getMultiClusterMetricsIndexTemplateServiceReturnsFailureTest() throws NotFindSubclassException {
         // Setup
         final MultiMetricsClusterPhyNodeDTO param = new MultiMetricsClusterPhyNodeDTO(Arrays.asList("value"));
         final Result<List<VariousLineChartMetricsVO>> expectedResult = Result.buildFail(
@@ -905,7 +906,7 @@ class ClusterPhyMetricsManagerTest {
     }
 
     @Test
-    void getMultiClusterMetricsESIndexServiceReturnsNoItemsTest() {
+    void getMultiClusterMetricsESIndexServiceReturnsNoItemsTest() throws NotFindSubclassException {
         // Setup
         final MultiMetricsClusterPhyNodeDTO param = new MultiMetricsClusterPhyNodeDTO(Arrays.asList("value"));
         final Result<List<VariousLineChartMetricsVO>> expectedResult = Result.buildFail(

@@ -12,6 +12,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.po.espackage.ESPackag
 import com.didichuxing.datachannel.arius.admin.common.constant.FileCompressionType;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ESVersionUtil;
@@ -101,7 +102,7 @@ public class ESPackageServiceImpl implements ESPackageService {
     }
 
     @Override
-    public Result<Long> deleteESPackage(Long id, String operator) {
+    public Result<Long> deleteESPackage(Long id, String operator) throws NotFindSubclassException {
         // 集群版本删除操作时进行的参数校验
         ESPackageDTO esPackageDTO = new ESPackageDTO();
         esPackageDTO.setId(id);
