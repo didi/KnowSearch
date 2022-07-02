@@ -211,7 +211,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             throw new AdminOperateException(String.format("创建模板失败:%s", saveTemplateConfigResult.getMessage()));
         }
         operateRecordService.save(new OperateRecord.Builder()
-                        .bizId(param.getId())
+                        .bizId(indexTemplateDTO.getId())
                         .userOperation(operator)
                         .content(JSON.toJSONString(new TemplateOperateRecord(TemplateOperateRecordEnum.NEW.getCode(), "新增模板")))
                         .project(projectService.getProjectBriefByProjectId(projectId))
