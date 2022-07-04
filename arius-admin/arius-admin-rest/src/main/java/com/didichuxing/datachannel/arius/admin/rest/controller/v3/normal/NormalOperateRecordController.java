@@ -10,6 +10,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.operaterecord.Oper
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.NewModuleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -69,7 +70,7 @@ public class NormalOperateRecordController {
     
     @PostMapping("/page")
     @ApiOperation(value = "查询操作日志列表", notes = "分页和条件查询")
-    public PaginationResult<OperateRecordVO> page(HttpServletRequest request,@RequestBody OperateRecordDTO queryDTO) {
+    public PaginationResult<OperateRecordVO> page(HttpServletRequest request,@RequestBody OperateRecordDTO queryDTO) throws NotFindSubclassException {
          
         return operateRecordManager.pageOplogPage(queryDTO, HttpRequestUtil.getProjectId(request));
     }

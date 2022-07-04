@@ -9,6 +9,7 @@ import java.util.Objects;
 
 import com.didichuxing.datachannel.arius.admin.biz.worktask.content.ClusterBaseContent;
 import com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -38,7 +39,7 @@ import com.google.common.collect.Multimap;
 public class ClusterConfigRestartTaskHandler extends AbstractClusterTaskHandler {
 
     @Override
-    Result<Void> validateHostParam(String param) {
+    Result<Void> validateHostParam(String param) throws NotFindSubclassException {
         ClusterConfigRestartContent content = ConvertUtil.str2ObjByJson(param, ClusterConfigRestartContent.class);
 
         if (AriusObjUtils.isNull(content.getPhyClusterId())) {

@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.core.service.extend.storage.impl;
 
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -41,7 +42,7 @@ public class FileStorageServiceImpl implements FileStorageService {
     }
 
     @Override
-    public Result<String> upload(String fileName, String fileMd5, MultipartFile uploadFile) {
+    public Result<String> upload(String fileName, String fileMd5, MultipartFile uploadFile) throws NotFindSubclassException {
         Result<FileStorageHandle> result = getFileStorageHandleByType(fileStorageType);
         if (result.failed()) {
             LOGGER.info("class=FileStorageServiceImpl||method=upload||fileStorageType={}", fileStorageType);
@@ -51,7 +52,7 @@ public class FileStorageServiceImpl implements FileStorageService {
     }
 
     @Override
-    public Result<Void> remove(String fileName) {
+    public Result<Void> remove(String fileName) throws NotFindSubclassException {
         Result<FileStorageHandle> result = getFileStorageHandleByType(fileStorageType);
         if (result.failed()) {
             LOGGER.info("class=FileStorageServiceImpl||method=remove||fileStorageType={}", fileStorageType);
@@ -61,7 +62,7 @@ public class FileStorageServiceImpl implements FileStorageService {
     }
 
     @Override
-    public Result<MultipartFile> download(String fileName) {
+    public Result<MultipartFile> download(String fileName) throws NotFindSubclassException {
         Result<FileStorageHandle> result = getFileStorageHandleByType(fileStorageType);
         if (result.failed()) {
             LOGGER.info("class=FileStorageServiceImpl||method=download||fileStorageType={}", fileStorageType);
@@ -71,7 +72,7 @@ public class FileStorageServiceImpl implements FileStorageService {
     }
 
     @Override
-    public Result<String> getDownloadBaseUrl() {
+    public Result<String> getDownloadBaseUrl() throws NotFindSubclassException {
         Result<FileStorageHandle> result = getFileStorageHandleByType(fileStorageType);
         if (result.failed()) {
             LOGGER.info("class=FileStorageServiceImpl||method=getDownloadBaseUrl||fileStorageType={}", fileStorageType);
@@ -82,7 +83,7 @@ public class FileStorageServiceImpl implements FileStorageService {
 
     /*****************************************private*************************************************************/
 
-    private Result<FileStorageHandle> getFileStorageHandleByType(String fileStorageType) {
+    private Result<FileStorageHandle> getFileStorageHandleByType(String fileStorageType) throws NotFindSubclassException {
         if (FileStorageTypeEnum.valueOfType(fileStorageType).getCode() == -1) {
             return Result.buildFail(String.format("获取 %s 类型出错", fileStorageType));
         }

@@ -8,6 +8,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -26,7 +27,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.Cluster
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionWithNodeInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.exception.AriusRunTimeException;
 import com.didichuxing.datachannel.arius.admin.common.util.*;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
@@ -126,7 +126,7 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Result<Void> batchBindRegionToClusterLogic(ESLogicClusterWithRegionDTO param, String operator,
-                                                      boolean isAddClusterLogicFlag) {
+                                                      boolean isAddClusterLogicFlag) throws AdminOperateException {
         //1. 前置校验
         if (AriusObjUtils.isNull(param)) {
             return Result.buildParamIllegal("参数为空");
@@ -138,7 +138,13 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
 
         //2. 集群合法关联性校验
         param.getClusterRegionDTOS().stream().distinct()
-            .forEach(clusterRegionDTO -> checkCanBeBound(param.getId(), clusterRegionDTO, param.getType()));
+            .forEach(clusterRegionDTO -> {
+                try {
+                    checkCanBeBound(param.getId(), clusterRegionDTO, param.getType());
+                } catch (AdminOperateException e) {
+                    e.printStackTrace();
+                }
+            });
 
         //3. 逻辑集群绑定的物理集群版本一致性校验
         Result<Void> phyClusterVersionsResult = boundPhyClusterVersionsCheck(param);
@@ -246,15 +252,15 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
      * @param clusterRegionDTO       region信息
      * @param clusterLogicType       逻辑集群类型
      */
-    private void checkCanBeBound(Long clusterLogicId, ClusterRegionDTO clusterRegionDTO, Integer clusterLogicType) {
+    private void checkCanBeBound(Long clusterLogicId, ClusterRegionDTO clusterRegionDTO, Integer clusterLogicType) throws AdminOperateException {
         Result<Boolean> validResult = clusterContextManager.canClusterLogicAssociatedPhyCluster(clusterLogicId,
             clusterRegionDTO.getPhyClusterName(), clusterRegionDTO.getId(), clusterLogicType);
         if (validResult.failed()) {
-            throw new AriusRunTimeException(validResult.getMessage(), FAIL);
+            throw new AdminOperateException(validResult.getMessage(), FAIL);
         }
     }
 
-    private Result<Void> doBindRegionToClusterLogic(ESLogicClusterWithRegionDTO param, String operator) {
+    private Result<Void> doBindRegionToClusterLogic(ESLogicClusterWithRegionDTO param, String operator) throws AdminOperateException {
         List<ClusterRegionDTO> clusterRegionDTOS = param.getClusterRegionDTOS();
         if (CollectionUtils.isEmpty(clusterRegionDTOS)) {
             return Result.buildParamIllegal("region相关参数非法");
@@ -264,7 +270,7 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
             Result<Void> bindRegionResult = clusterRegionService.bindRegion(clusterRegionDTO.getId(), param.getId(), null,
                     operator);
             if (bindRegionResult.failed()) {
-                throw new AriusRunTimeException(bindRegionResult.getMessage(), FAIL);
+                throw new AdminOperateException(bindRegionResult.getMessage(), FAIL);
             }
         }
 

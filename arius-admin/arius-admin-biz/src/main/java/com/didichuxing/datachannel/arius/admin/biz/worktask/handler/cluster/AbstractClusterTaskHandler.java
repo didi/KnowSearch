@@ -4,6 +4,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.resource.E
 
 import java.util.Optional;
 
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.alibaba.fastjson.JSON;
@@ -43,7 +44,7 @@ public abstract class AbstractClusterTaskHandler extends AbstractOpTaskHandler {
      * @return {@link Result}<{@link OpTask}>
      */
     @Override
-    public Result<OpTask> addTask(OpTask opTask) {
+    public Result<OpTask> addTask(OpTask opTask) throws NotFindSubclassException {
         Result<Void> initResult = initParam(opTask);
         if (initResult.failed()) {
             return Result.buildFail(initResult.getMessage());
@@ -95,7 +96,7 @@ public abstract class AbstractClusterTaskHandler extends AbstractOpTaskHandler {
      * @param param 参数
      * @return {@link Result}<{@link Void}>
      */
-    Result<Void> validateParam(String param) {
+    Result<Void> validateParam(String param) throws NotFindSubclassException {
         ESClusterTypeEnum type = Optional.ofNullable(param).map(JSON::parseObject)
             .map(jsonObject -> jsonObject.getInteger("type")).map(ESClusterTypeEnum::valueOf).orElse(UNKNOWN);
 
@@ -161,7 +162,7 @@ public abstract class AbstractClusterTaskHandler extends AbstractOpTaskHandler {
      * @param param 参数
      * @return {@link Result}<{@link Void}>
      */
-    abstract Result<Void> validateHostParam(String param);
+    abstract Result<Void> validateHostParam(String param) throws NotFindSubclassException;
 
     /**
      * 构建ESHost的ecm任务信息

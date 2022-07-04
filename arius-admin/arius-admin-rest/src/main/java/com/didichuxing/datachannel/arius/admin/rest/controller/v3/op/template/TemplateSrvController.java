@@ -7,6 +7,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResu
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.TemplateQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv.TemplateWithSrvVO;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -38,7 +39,7 @@ public class TemplateSrvController {
     @ResponseBody
     @ApiOperation(value = "分页查询模板服务列表")
     public PaginationResult<TemplateWithSrvVO> pageGetTemplateWithSrv(HttpServletRequest request,
-                                                                      @RequestBody TemplateQueryDTO condition) {
+                                                                      @RequestBody TemplateQueryDTO condition) throws NotFindSubclassException {
         if (condition.getProjectId()==null) {
             condition.setProjectId(HttpRequestUtil.getProjectId(request));
         }

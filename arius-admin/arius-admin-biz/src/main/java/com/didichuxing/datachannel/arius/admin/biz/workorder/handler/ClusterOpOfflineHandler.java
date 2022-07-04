@@ -17,6 +17,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
@@ -84,7 +85,7 @@ public class ClusterOpOfflineHandler extends BaseWorkOrderHandler {
      * @return result
      */
     @Override
-    protected Result<Void> validateConsoleParam(WorkOrder workOrder) {
+    protected Result<Void> validateConsoleParam(WorkOrder workOrder) throws NotFindSubclassException {
         ClusterOfflineContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
             ClusterOfflineContent.class);
 

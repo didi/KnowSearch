@@ -7,7 +7,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESCluster
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminTaskException;
-import com.didichuxing.datachannel.arius.admin.common.exception.AriusRunTimeException;
+import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
+
 import java.util.List;
 import java.util.Map;
 
@@ -61,7 +62,7 @@ public interface ClusterRoleHostService {
      * @param regionId regionId
      * @return      false or true
      */
-    boolean editNodeRegionId(List<Integer> nodeIds, Integer regionId) throws AriusRunTimeException;
+    boolean editNodeRegionId(List<Integer> nodeIds, Integer regionId) throws AdminOperateException;
 
     /**
      * 采集集群节点配置信息到MySQL, 包括节点状态

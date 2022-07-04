@@ -15,6 +15,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.ecm.ESClusterNodeS
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -132,7 +133,7 @@ public interface ClusterLogicManager {
      * @param operator 操作人
      * @return 成功或失败
      */
-    Result<Void> addLogicClusterAndClusterRegions(ESLogicClusterWithRegionDTO param, String operator);
+    Result<Void> addLogicClusterAndClusterRegions(ESLogicClusterWithRegionDTO param, String operator) throws AdminOperateException;
 
     /**
      *  根据逻辑集群Id和projectId创建逻辑集群信息
@@ -176,7 +177,7 @@ public interface ClusterLogicManager {
      * @param projectId
      * @return
      */
-    PaginationResult<ClusterLogicVO> pageGetClusterLogics(ClusterLogicConditionDTO condition, Integer projectId);
+    PaginationResult<ClusterLogicVO> pageGetClusterLogics(ClusterLogicConditionDTO condition, Integer projectId) throws NotFindSubclassException;
 
     /**
      * 更新逻辑集群状态

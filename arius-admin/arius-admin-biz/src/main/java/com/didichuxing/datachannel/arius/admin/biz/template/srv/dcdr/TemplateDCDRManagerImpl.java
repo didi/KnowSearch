@@ -39,6 +39,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.template.Template
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.threadpool.AriusTaskThreadPool;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.BatchProcessor;
@@ -1342,7 +1343,7 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrv implements Template
             SEPARATOR + DCDR_SWITCH_DONE + SEPARATOR + SUCCESS_INFO));
     }
 
-    private Result<Void> processDcdrTask(Integer logicId, Result<Void> dcdrResult, int step) {
+    private Result<Void> processDcdrTask(Integer logicId, Result<Void> dcdrResult, int step) throws NotFindSubclassException {
         Result<OpTask> result = opTaskManager.getLatestTask(String.valueOf(logicId), OpTaskTypeEnum.TEMPLATE_DCDR.getType());
         if (result.failed()) {
             return Result.buildFrom(result);

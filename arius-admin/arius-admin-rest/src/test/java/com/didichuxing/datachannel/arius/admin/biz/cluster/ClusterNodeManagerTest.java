@@ -9,6 +9,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterR
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostWithRegionInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
+import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
 import com.google.common.collect.Lists;
@@ -34,7 +35,7 @@ public class ClusterNodeManagerTest extends AriusAdminApplicationTest {
     }
 
     @Test
-    public void createNode2RegionTest(){
+    public void createNode2RegionTest() throws AdminOperateException {
         final Integer projectId = 1;
         ClusterPhyDTO esClusterDTO = CustomDataSource.esClusterDTOFactory();
         ClusterRegionWithNodeInfoDTO param = new ClusterRegionWithNodeInfoDTO();
@@ -51,7 +52,7 @@ public class ClusterNodeManagerTest extends AriusAdminApplicationTest {
     }
 
     @Test
-    public void editNode2RegionTest(){
+    public void editNode2RegionTest() throws AdminOperateException {
         final Integer projectId =1;
         ClusterPhyDTO esClusterDTO = CustomDataSource.esClusterDTOFactory();
         ClusterRegionWithNodeInfoDTO param  = new ClusterRegionWithNodeInfoDTO();

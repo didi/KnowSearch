@@ -3,6 +3,7 @@ package com.didichuxing.datachannel.arius.admin.biz.cluster.impl;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPluginsManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.PluginDTO;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESPluginService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +15,7 @@ public class ClusterPluginsManagerImpl implements ClusterPluginsManager {
     private ESPluginService       esPluginService;
 
 	@Override
-	public Result<Long> addPlugins(PluginDTO plugin, Integer projectId) {
+	public Result<Long> addPlugins(PluginDTO plugin, Integer projectId) throws NotFindSubclassException {
 		final Result<Void> result = ProjectUtils.checkProjectCorrectly(i -> i, projectId,projectId);
         if (result.failed()){
             return Result.buildFail(result.getMessage());
@@ -23,7 +24,7 @@ public class ClusterPluginsManagerImpl implements ClusterPluginsManager {
 	}
 
 	@Override
-	public Result<Long> deletePluginById(Long id, String operator, Integer projectId) {
+	public Result<Long> deletePluginById(Long id, String operator, Integer projectId) throws NotFindSubclassException {
 		final Result<Void> result = ProjectUtils.checkProjectCorrectly(i -> i, projectId,projectId);
         if (result.failed()){
             return Result.buildFail(result.getMessage());
