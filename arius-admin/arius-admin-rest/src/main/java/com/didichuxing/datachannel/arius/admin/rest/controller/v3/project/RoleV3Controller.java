@@ -12,7 +12,6 @@ import com.didiglobal.logi.security.common.dto.role.RoleAssignDTO;
 import com.didiglobal.logi.security.common.dto.role.RoleQueryDTO;
 import com.didiglobal.logi.security.common.dto.role.RoleSaveDTO;
 import com.didiglobal.logi.security.common.vo.role.AssignInfoVO;
-import com.didiglobal.logi.security.common.vo.role.RoleBriefVO;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import com.google.common.collect.Lists;
 import io.swagger.annotations.Api;
@@ -130,11 +129,6 @@ public class RoleV3Controller {
 		
 	}
 	
-	@GetMapping(value = { "/{roleName}"  })
-	@ApiOperation(value = "根据角色名模糊查询", notes = "用户管理/列表查询条件/分配角色框，这里会用到此接口")
-	@ApiImplicitParam(name = "roleName", value = "角色名（为null，查询全部）", dataType = "String")
-	public Result<List<RoleBriefVO>> list(@PathVariable(required = false) String roleName) {
-		return roleExtendManager.getRoleBriefListByRoleName(roleName);
-	}
+	
 	
 }

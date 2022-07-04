@@ -231,4 +231,6 @@ public interface ClusterLogicManager {
      * @return
      */
     Result<List<Tuple<String, ClusterPhyVO>>> getClusterRelationByProjectId(Integer projectId);
+
+    Result<List<PluginVO>> getClusterLogicPlugins(Long clusterId);
 }

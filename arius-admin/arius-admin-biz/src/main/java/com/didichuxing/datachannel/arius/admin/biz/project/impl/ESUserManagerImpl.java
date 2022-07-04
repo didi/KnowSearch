@@ -26,10 +26,13 @@ import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.common.vo.project.ProjectVO;
 import com.didiglobal.logi.security.service.ProjectService;
+import com.didiglobal.logi.security.util.HttpRequestUtil;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import javax.servlet.http.HttpServletRequest;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -60,14 +63,24 @@ public class ESUserManagerImpl implements ESUserManager {
 
     
     /**
-     * @param projectId
-     * @param operator
+     * @param projectIdStr
+     * @param request
      * @return
      */
     @Override
-    public Result<List<ESUserVO>> listESUsersByProjectId(Integer projectId, String operator) {
-       
+    public Result<List<ESUserVO>> listESUsersByProjectId(String projectIdStr, HttpServletRequest request) {
     
+        Integer projectId = null;
+        if (StringUtils.isNumeric(projectIdStr)) {
+            projectId = Integer.parseInt(projectIdStr);
+        } else {
+            projectId = HttpRequestUtil.getProjectId(request);
+        }
+        
+        final String operator = HttpRequestUtil.getOperator(request);
+        if (Objects.isNull(projectId)){
+            return Result.buildNotExist("未匹配到项目下的es user");
+        }
         ProjectVO projectVO = projectService.getProjectDetailByProjectId(projectId);
        
         
@@ -77,7 +90,7 @@ public class ESUserManagerImpl implements ESUserManager {
               ProjectUtils.isUserNameBelongProjectResponsible(operator, projectVO) ||
               roleTool.isAdmin(operator))
         ) {
-            return Result.buildParamIllegal(String.format("项目:[%s]不存在成员:[%s]", projectId, operator));
+            return Result.buildParamIllegal(String.format("项目:[%s]不存在成员:[%s]", projectIdStr, request));
         }
         final List<ESUser> users = esUserService.listESUsers(Collections.singletonList(projectId));
         for (ESUser user : users) {

@@ -1,6 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.biz.metrics;
 
-import com.didichuxing.datachannel.arius.admin.biz.app.AppManager;
 import com.didichuxing.datachannel.arius.admin.biz.gateway.GatewayManager;
 import com.didichuxing.datachannel.arius.admin.biz.metrics.impl.GatewayMetricsManagerImpl;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager;
@@ -16,6 +15,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.top.Metric
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.top.VariousLineChartMetricsVO;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.metadata.service.GatewayMetricsService;
+import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
+import com.didiglobal.logi.security.service.ProjectService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
@@ -51,7 +52,7 @@ class GatewayMetricsManagerTest {
     @Mock
     private GatewayManager gatewayManager;
     @Mock
-    private AppManager appManager;
+    private ProjectService projectService;
     @Mock
     private TemplateLogicManager templateLogicManager;
 
@@ -217,34 +218,34 @@ class GatewayMetricsManagerTest {
                         new MetricsContentVO("cluster", "name", Arrays.asList(new MetricsContentCellVO(0.0, 0L)))))));
 
         // Configure GatewayMetricsService.getGatewayNodeWriteMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getGatewayNodeWriteMetrics(0L, 0L, 0, "nodeIp")).thenReturn(variousLineChartMetrics);
 
         // Configure GatewayMetricsService.getGatewayNodeMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics1 = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics1 = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getGatewayNodeMetrics(0L, 0L, 0, "nodeIp")).thenReturn(variousLineChartMetrics1);
 
         // Configure GatewayMetricsService.getGatewayNodeDSLLenMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics2 = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics2 = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getGatewayNodeDSLLenMetrics(0L, 0L, 0, "nodeIp"))
                 .thenReturn(variousLineChartMetrics2);
 
         // Configure GatewayMetricsService.getGatewayNodeWriteMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics3 = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics3 = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getGatewayNodeWriteMetrics(0L, 0L, 0, 0)).thenReturn(variousLineChartMetrics3);
 
         // Configure GatewayMetricsService.getGatewayNodeMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics4 = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics4 = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getGatewayNodeMetrics(0L, 0L, 0, 0)).thenReturn(variousLineChartMetrics4);
 
         // Configure GatewayMetricsService.getGatewayNodeDSLLenMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics5 = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics5 = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getGatewayNodeDSLLenMetrics(0L, 0L, 0, 0)).thenReturn(variousLineChartMetrics5);
 
         when(gatewayManager.getGatewayAliveNodeNames("Normal")).thenReturn(Result.buildFail(
@@ -266,34 +267,34 @@ class GatewayMetricsManagerTest {
                         new MetricsContentVO("cluster", "name", Arrays.asList(new MetricsContentCellVO(0.0, 0L)))))));
 
         // Configure GatewayMetricsService.getGatewayNodeWriteMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getGatewayNodeWriteMetrics(0L, 0L, 0, "nodeIp")).thenReturn(variousLineChartMetrics);
 
         // Configure GatewayMetricsService.getGatewayNodeMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics1 = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics1 = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getGatewayNodeMetrics(0L, 0L, 0, "nodeIp")).thenReturn(variousLineChartMetrics1);
 
         // Configure GatewayMetricsService.getGatewayNodeDSLLenMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics2 = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics2 = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getGatewayNodeDSLLenMetrics(0L, 0L, 0, "nodeIp"))
                 .thenReturn(variousLineChartMetrics2);
 
         // Configure GatewayMetricsService.getGatewayNodeWriteMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics3 = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics3 = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getGatewayNodeWriteMetrics(0L, 0L, 0, 0)).thenReturn(variousLineChartMetrics3);
 
         // Configure GatewayMetricsService.getGatewayNodeMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics4 = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics4 = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getGatewayNodeMetrics(0L, 0L, 0, 0)).thenReturn(variousLineChartMetrics4);
 
         // Configure GatewayMetricsService.getGatewayNodeDSLLenMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics5 = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics5 = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getGatewayNodeDSLLenMetrics(0L, 0L, 0, 0)).thenReturn(variousLineChartMetrics5);
 
         when(gatewayManager.getGatewayAliveNodeNames("Normal")).thenReturn(Result.buildSucc());
@@ -311,34 +312,34 @@ class GatewayMetricsManagerTest {
         final GatewayNodeDTO dto = new GatewayNodeDTO("nodeIp", 0);
 
         // Configure GatewayMetricsService.getGatewayNodeWriteMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getGatewayNodeWriteMetrics(0L, 0L, 0, "nodeIp")).thenReturn(variousLineChartMetrics);
 
         // Configure GatewayMetricsService.getGatewayNodeMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics1 = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics1 = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getGatewayNodeMetrics(0L, 0L, 0, "nodeIp")).thenReturn(variousLineChartMetrics1);
 
         // Configure GatewayMetricsService.getGatewayNodeDSLLenMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics2 = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics2 = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getGatewayNodeDSLLenMetrics(0L, 0L, 0, "nodeIp"))
                 .thenReturn(variousLineChartMetrics2);
 
         // Configure GatewayMetricsService.getGatewayNodeWriteMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics3 = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics3 = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getGatewayNodeWriteMetrics(0L, 0L, 0, 0)).thenReturn(variousLineChartMetrics3);
 
         // Configure GatewayMetricsService.getGatewayNodeMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics4 = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics4 = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getGatewayNodeMetrics(0L, 0L, 0, 0)).thenReturn(variousLineChartMetrics4);
 
         // Configure GatewayMetricsService.getGatewayNodeDSLLenMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics5 = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics5 = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getGatewayNodeDSLLenMetrics(0L, 0L, 0, 0)).thenReturn(variousLineChartMetrics5);
 
         when(gatewayManager.getGatewayAliveNodeNames("Normal")).thenReturn(Result.buildFail(Collections.emptyList()));
@@ -359,34 +360,34 @@ class GatewayMetricsManagerTest {
                         new MetricsContentVO("cluster", "name", Arrays.asList(new MetricsContentCellVO(0.0, 0L)))))));
 
         // Configure GatewayMetricsService.getGatewayNodeWriteMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getGatewayNodeWriteMetrics(0L, 0L, 0, "nodeIp")).thenReturn(variousLineChartMetrics);
 
         // Configure GatewayMetricsService.getGatewayNodeMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics1 = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics1 = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getGatewayNodeMetrics(0L, 0L, 0, "nodeIp")).thenReturn(variousLineChartMetrics1);
 
         // Configure GatewayMetricsService.getGatewayNodeDSLLenMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics2 = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics2 = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getGatewayNodeDSLLenMetrics(0L, 0L, 0, "nodeIp"))
                 .thenReturn(variousLineChartMetrics2);
 
         // Configure GatewayMetricsService.getGatewayNodeWriteMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics3 = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics3 = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getGatewayNodeWriteMetrics(0L, 0L, 0, 0)).thenReturn(variousLineChartMetrics3);
 
         // Configure GatewayMetricsService.getGatewayNodeMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics4 = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics4 = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getGatewayNodeMetrics(0L, 0L, 0, 0)).thenReturn(variousLineChartMetrics4);
 
         // Configure GatewayMetricsService.getGatewayNodeDSLLenMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics5 = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics5 = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getGatewayNodeDSLLenMetrics(0L, 0L, 0, 0)).thenReturn(variousLineChartMetrics5);
 
         when(gatewayManager.getGatewayAliveNodeNames("Normal")).thenReturn(Result.buildFail());
@@ -407,34 +408,34 @@ class GatewayMetricsManagerTest {
                         new MetricsContentVO("cluster", "name", Arrays.asList(new MetricsContentCellVO(0.0, 0L)))))));
 
         // Configure GatewayMetricsService.getGatewayNodeWriteMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getGatewayNodeWriteMetrics(0L, 0L, 0, "nodeIp")).thenReturn(variousLineChartMetrics);
 
         // Configure GatewayMetricsService.getGatewayNodeMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics1 = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics1 = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getGatewayNodeMetrics(0L, 0L, 0, "nodeIp")).thenReturn(variousLineChartMetrics1);
 
         // Configure GatewayMetricsService.getGatewayNodeDSLLenMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics2 = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics2 = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getGatewayNodeDSLLenMetrics(0L, 0L, 0, "nodeIp"))
                 .thenReturn(variousLineChartMetrics2);
 
         // Configure GatewayMetricsService.getGatewayNodeWriteMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics3 = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics3 = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getGatewayNodeWriteMetrics(0L, 0L, 0, 0)).thenReturn(variousLineChartMetrics3);
 
         // Configure GatewayMetricsService.getGatewayNodeMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics4 = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics4 = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getGatewayNodeMetrics(0L, 0L, 0, 0)).thenReturn(variousLineChartMetrics4);
 
         // Configure GatewayMetricsService.getGatewayNodeDSLLenMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics5 = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics5 = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getGatewayNodeDSLLenMetrics(0L, 0L, 0, 0)).thenReturn(variousLineChartMetrics5);
 
         when(gatewayManager.getGatewayAliveNodeNames("Normal")).thenReturn(Result.buildFail(
@@ -457,34 +458,34 @@ class GatewayMetricsManagerTest {
                         new MetricsContentVO("cluster", "name", Arrays.asList(new MetricsContentCellVO(0.0, 0L)))))));
 
         // Configure GatewayMetricsService.getGatewayNodeWriteMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getGatewayNodeWriteMetrics(0L, 0L, 0, "nodeIp")).thenReturn(variousLineChartMetrics);
 
         // Configure GatewayMetricsService.getGatewayNodeMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics1 = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics1 = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getGatewayNodeMetrics(0L, 0L, 0, "nodeIp")).thenReturn(variousLineChartMetrics1);
 
         // Configure GatewayMetricsService.getGatewayNodeDSLLenMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics2 = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics2 = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getGatewayNodeDSLLenMetrics(0L, 0L, 0, "nodeIp"))
                 .thenReturn(variousLineChartMetrics2);
 
         // Configure GatewayMetricsService.getGatewayNodeWriteMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics3 = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics3 = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getGatewayNodeWriteMetrics(0L, 0L, 0, 0)).thenReturn(variousLineChartMetrics3);
 
         // Configure GatewayMetricsService.getGatewayNodeMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics4 = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics4 = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getGatewayNodeMetrics(0L, 0L, 0, 0)).thenReturn(variousLineChartMetrics4);
 
         // Configure GatewayMetricsService.getGatewayNodeDSLLenMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics5 = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics5 = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getGatewayNodeDSLLenMetrics(0L, 0L, 0, 0)).thenReturn(variousLineChartMetrics5);
 
         when(gatewayManager.getGatewayAliveNodeNames("Normal")).thenReturn(Result.buildSucc());
@@ -503,34 +504,34 @@ class GatewayMetricsManagerTest {
         final MultiGatewayNodesDTO dto = new MultiGatewayNodesDTO(Arrays.asList("value"), 0);
 
         // Configure GatewayMetricsService.getGatewayNodeWriteMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getGatewayNodeWriteMetrics(0L, 0L, 0, "nodeIp")).thenReturn(variousLineChartMetrics);
 
         // Configure GatewayMetricsService.getGatewayNodeMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics1 = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics1 = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getGatewayNodeMetrics(0L, 0L, 0, "nodeIp")).thenReturn(variousLineChartMetrics1);
 
         // Configure GatewayMetricsService.getGatewayNodeDSLLenMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics2 = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics2 = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getGatewayNodeDSLLenMetrics(0L, 0L, 0, "nodeIp"))
                 .thenReturn(variousLineChartMetrics2);
 
         // Configure GatewayMetricsService.getGatewayNodeWriteMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics3 = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics3 = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getGatewayNodeWriteMetrics(0L, 0L, 0, 0)).thenReturn(variousLineChartMetrics3);
 
         // Configure GatewayMetricsService.getGatewayNodeMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics4 = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics4 = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getGatewayNodeMetrics(0L, 0L, 0, 0)).thenReturn(variousLineChartMetrics4);
 
         // Configure GatewayMetricsService.getGatewayNodeDSLLenMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics5 = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics5 = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getGatewayNodeDSLLenMetrics(0L, 0L, 0, 0)).thenReturn(variousLineChartMetrics5);
 
         when(gatewayManager.getGatewayAliveNodeNames("Normal")).thenReturn(Result.buildFail(Collections.emptyList()));
@@ -552,34 +553,34 @@ class GatewayMetricsManagerTest {
                         new MetricsContentVO("cluster", "name", Arrays.asList(new MetricsContentCellVO(0.0, 0L)))))));
 
         // Configure GatewayMetricsService.getGatewayNodeWriteMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getGatewayNodeWriteMetrics(0L, 0L, 0, "nodeIp")).thenReturn(variousLineChartMetrics);
 
         // Configure GatewayMetricsService.getGatewayNodeMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics1 = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics1 = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getGatewayNodeMetrics(0L, 0L, 0, "nodeIp")).thenReturn(variousLineChartMetrics1);
 
         // Configure GatewayMetricsService.getGatewayNodeDSLLenMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics2 = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics2 = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getGatewayNodeDSLLenMetrics(0L, 0L, 0, "nodeIp"))
                 .thenReturn(variousLineChartMetrics2);
 
         // Configure GatewayMetricsService.getGatewayNodeWriteMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics3 = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics3 = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getGatewayNodeWriteMetrics(0L, 0L, 0, 0)).thenReturn(variousLineChartMetrics3);
 
         // Configure GatewayMetricsService.getGatewayNodeMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics4 = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics4 = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getGatewayNodeMetrics(0L, 0L, 0, 0)).thenReturn(variousLineChartMetrics4);
 
         // Configure GatewayMetricsService.getGatewayNodeDSLLenMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics5 = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics5 = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getGatewayNodeDSLLenMetrics(0L, 0L, 0, 0)).thenReturn(variousLineChartMetrics5);
 
         when(gatewayManager.getGatewayAliveNodeNames("Normal")).thenReturn(Result.buildFail());
@@ -601,37 +602,37 @@ class GatewayMetricsManagerTest {
                         new MetricsContentVO("cluster", "name", Arrays.asList(new MetricsContentCellVO(0.0, 0L)))))));
 
         // Configure GatewayMetricsService.getClientNodeWriteMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getClientNodeWriteMetrics(0L, 0L, 0, "nodeIp", "clientNodeIp"))
                 .thenReturn(variousLineChartMetrics);
 
         // Configure GatewayMetricsService.getClientNodeMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics1 = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics1 = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getClientNodeMetrics(0L, 0L, 0, "nodeIp", "clientNodeIp"))
                 .thenReturn(variousLineChartMetrics1);
 
         // Configure GatewayMetricsService.getClientNodeDSLLENMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics2 = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics2 = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getClientNodeDSLLENMetrics(0L, 0L, 0, "nodeIp", "clientNodeIp"))
                 .thenReturn(variousLineChartMetrics2);
 
         // Configure GatewayMetricsService.getClientNodeWriteMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics3 = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics3 = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getClientNodeWriteMetrics(0L, 0L, 0, 0, "nodeIp"))
                 .thenReturn(variousLineChartMetrics3);
 
         // Configure GatewayMetricsService.getClientNodeMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics4 = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics4 = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getClientNodeMetrics(0L, 0L, 0, 0, "nodeIp")).thenReturn(variousLineChartMetrics4);
 
         // Configure GatewayMetricsService.getClientNodeDSLLENMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics5 = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics5 = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getClientNodeDSLLENMetrics(0L, 0L, 0, 0, "nodeIp"))
                 .thenReturn(variousLineChartMetrics5);
 
@@ -651,37 +652,37 @@ class GatewayMetricsManagerTest {
         final ClientNodeDTO dto = new ClientNodeDTO("clientNodeIp");
 
         // Configure GatewayMetricsService.getClientNodeWriteMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getClientNodeWriteMetrics(0L, 0L, 0, "nodeIp", "clientNodeIp"))
                 .thenReturn(variousLineChartMetrics);
 
         // Configure GatewayMetricsService.getClientNodeMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics1 = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics1 = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getClientNodeMetrics(0L, 0L, 0, "nodeIp", "clientNodeIp"))
                 .thenReturn(variousLineChartMetrics1);
 
         // Configure GatewayMetricsService.getClientNodeDSLLENMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics2 = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics2 = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getClientNodeDSLLENMetrics(0L, 0L, 0, "nodeIp", "clientNodeIp"))
                 .thenReturn(variousLineChartMetrics2);
 
         // Configure GatewayMetricsService.getClientNodeWriteMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics3 = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics3 = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getClientNodeWriteMetrics(0L, 0L, 0, 0, "nodeIp"))
                 .thenReturn(variousLineChartMetrics3);
 
         // Configure GatewayMetricsService.getClientNodeMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics4 = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics4 = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getClientNodeMetrics(0L, 0L, 0, 0, "nodeIp")).thenReturn(variousLineChartMetrics4);
 
         // Configure GatewayMetricsService.getClientNodeDSLLENMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics5 = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics5 = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getClientNodeDSLLENMetrics(0L, 0L, 0, 0, "nodeIp"))
                 .thenReturn(variousLineChartMetrics5);
 
@@ -705,25 +706,29 @@ class GatewayMetricsManagerTest {
 
         // Configure GatewayMetricsService.getGatewayIndexWriteMetrics(...).
         final List<VariousLineChartMetrics> variousLineChartMetrics = Arrays.asList(new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L))))));
+                Arrays.asList(
+                        new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0))));
         when(gatewayMetricsService.getGatewayIndexWriteMetrics(Arrays.asList("value"), 0L, 0L, 0,
                 "indexName")).thenReturn(variousLineChartMetrics);
 
         // Configure GatewayMetricsService.getGatewayIndexSearchMetrics(...).
         final List<VariousLineChartMetrics> variousLineChartMetrics1 = Arrays.asList(new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L))))));
+                Arrays.asList(
+                        new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0))));
         when(gatewayMetricsService.getGatewayIndexSearchMetrics(Arrays.asList("value"), 0L, 0L, 0,
                 "indexName")).thenReturn(variousLineChartMetrics1);
 
         // Configure GatewayMetricsService.getGatewayIndexWriteMetrics(...).
         final List<VariousLineChartMetrics> variousLineChartMetrics2 = Arrays.asList(new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L))))));
+                Arrays.asList(
+                        new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0))));
         when(gatewayMetricsService.getGatewayIndexWriteMetrics(Arrays.asList("value"), 0L, 0L, 0, 0))
                 .thenReturn(variousLineChartMetrics2);
 
         // Configure GatewayMetricsService.getGatewayIndexSearchMetrics(...).
         final List<VariousLineChartMetrics> variousLineChartMetrics3 = Arrays.asList(new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L))))));
+                Arrays.asList(
+                        new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0))));
         when(gatewayMetricsService.getGatewayIndexSearchMetrics(Arrays.asList("value"), 0L, 0L, 0, 0))
                 .thenReturn(variousLineChartMetrics3);
 
@@ -737,43 +742,6 @@ class GatewayMetricsManagerTest {
     }
 
 
-    @Test
-    void getGatewayIndexMetricsGatewayMetricsServiceGetGatewayIndexSearchMetricsReturnsNoItemsTest() {
-        // Setup
-        final GatewayIndexDTO dto = new GatewayIndexDTO("indexName", 0);
-        final Result<List<VariousLineChartMetricsVO>> expectedResult = Result.buildFail(
-                Arrays.asList(new VariousLineChartMetricsVO("type", Arrays.asList(
-                        new MetricsContentVO("cluster", "name", Arrays.asList(new MetricsContentCellVO(0.0, 0L)))))));
-
-        // Configure GatewayMetricsService.getGatewayIndexWriteMetrics(...).
-        final List<VariousLineChartMetrics> variousLineChartMetrics = Arrays.asList(new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L))))));
-        when(gatewayMetricsService.getGatewayIndexWriteMetrics(Arrays.asList("value"), 0L, 0L, 0,
-                "indexName")).thenReturn(variousLineChartMetrics);
-
-        when(gatewayMetricsService.getGatewayIndexSearchMetrics(Arrays.asList("value"), 0L, 0L, 0,
-                "indexName")).thenReturn(Collections.emptyList());
-
-        // Configure GatewayMetricsService.getGatewayIndexWriteMetrics(...).
-        final List<VariousLineChartMetrics> variousLineChartMetrics1 = Arrays.asList(new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L))))));
-        when(gatewayMetricsService.getGatewayIndexWriteMetrics(Arrays.asList("value"), 0L, 0L, 0, 0))
-                .thenReturn(variousLineChartMetrics1);
-
-        // Configure GatewayMetricsService.getGatewayIndexSearchMetrics(...).
-        final List<VariousLineChartMetrics> variousLineChartMetrics2 = Arrays.asList(new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L))))));
-        when(gatewayMetricsService.getGatewayIndexSearchMetrics(Arrays.asList("value"), 0L, 0L, 0, 0))
-                .thenReturn(variousLineChartMetrics2);
-
-        when(templateLogicManager.getTemplateLogicNames(0)).thenReturn(Arrays.asList("value"));
-
-        // Run the test
-        final Result<List<VariousLineChartMetricsVO>> result = gatewayMetricsManager.getGatewayIndexMetrics(dto, 0);
-
-        // Verify the results
-        assertThat(result).isEqualTo(expectedResult);
-    }
 
     @Test
     void getGatewayIndexMetricsGatewayMetricsServiceGetGatewayIndexWriteMetricsReturnsNoItemsTest() {
@@ -785,13 +753,15 @@ class GatewayMetricsManagerTest {
 
         // Configure GatewayMetricsService.getGatewayIndexWriteMetrics(...).
         final List<VariousLineChartMetrics> variousLineChartMetrics = Arrays.asList(new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L))))));
+                Arrays.asList(
+                        new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0))));
         when(gatewayMetricsService.getGatewayIndexWriteMetrics(Arrays.asList("value"), 0L, 0L, 0,
                 "indexName")).thenReturn(variousLineChartMetrics);
 
         // Configure GatewayMetricsService.getGatewayIndexSearchMetrics(...).
         final List<VariousLineChartMetrics> variousLineChartMetrics1 = Arrays.asList(new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L))))));
+                Arrays.asList(
+                        new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0))));
         when(gatewayMetricsService.getGatewayIndexSearchMetrics(Arrays.asList("value"), 0L, 0L, 0,
                 "indexName")).thenReturn(variousLineChartMetrics1);
 
@@ -800,7 +770,8 @@ class GatewayMetricsManagerTest {
 
         // Configure GatewayMetricsService.getGatewayIndexSearchMetrics(...).
         final List<VariousLineChartMetrics> variousLineChartMetrics2 = Arrays.asList(new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L))))));
+                Arrays.asList(
+                        new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0))));
         when(gatewayMetricsService.getGatewayIndexSearchMetrics(Arrays.asList("value"), 0L, 0L, 0, 0))
                 .thenReturn(variousLineChartMetrics2);
 
@@ -813,6 +784,45 @@ class GatewayMetricsManagerTest {
         assertThat(result).isEqualTo(expectedResult);
     }
 
+    @Test
+    void getGatewayIndexMetricsGatewayMetricsServiceGetGatewayIndexSearchMetricsReturnsNoItemsTest() {
+        // Setup
+        final GatewayIndexDTO dto = new GatewayIndexDTO("indexName", 0);
+        final Result<List<VariousLineChartMetricsVO>> expectedResult = Result.buildFail(
+                Arrays.asList(new VariousLineChartMetricsVO("type", Arrays.asList(
+                        new MetricsContentVO("cluster", "name", Arrays.asList(new MetricsContentCellVO(0.0, 0L)))))));
+
+        // Configure GatewayMetricsService.getGatewayIndexWriteMetrics(...).
+        final List<VariousLineChartMetrics> variousLineChartMetrics = Arrays.asList(new VariousLineChartMetrics("type",
+                Arrays.asList(
+                        new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0))));
+        when(gatewayMetricsService.getGatewayIndexWriteMetrics(Arrays.asList("value"), 0L, 0L, 0,
+                "indexName")).thenReturn(variousLineChartMetrics);
+
+        // Configure GatewayMetricsService.getGatewayIndexSearchMetrics(...).
+        final List<VariousLineChartMetrics> variousLineChartMetrics1 = Arrays.asList(new VariousLineChartMetrics("type",
+                Arrays.asList(
+                        new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0))));
+        when(gatewayMetricsService.getGatewayIndexSearchMetrics(Arrays.asList("value"), 0L, 0L, 0,
+                "indexName")).thenReturn(variousLineChartMetrics1);
+
+        // Configure GatewayMetricsService.getGatewayIndexWriteMetrics(...).
+        final List<VariousLineChartMetrics> variousLineChartMetrics2 = Arrays.asList(new VariousLineChartMetrics("type",
+                Arrays.asList(
+                        new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0))));
+        when(gatewayMetricsService.getGatewayIndexWriteMetrics(Arrays.asList("value"), 0L, 0L, 0, 0))
+                .thenReturn(variousLineChartMetrics2);
+
+        when(gatewayMetricsService.getGatewayIndexSearchMetrics(Arrays.asList("value"), 0L, 0L, 0, 0))
+                .thenReturn(Collections.emptyList());
+        when(templateLogicManager.getTemplateLogicNames(0)).thenReturn(Arrays.asList("value"));
+
+        // Run the test
+        final Result<List<VariousLineChartMetricsVO>> result = gatewayMetricsManager.getGatewayIndexMetrics(dto, 0);
+
+        // Verify the results
+        assertThat(result).isEqualTo(expectedResult);
+    }
 
     @Test
     void getGatewayIndexMetricsTemplateLogicManagerReturnsNoItemsTest() {
@@ -824,25 +834,29 @@ class GatewayMetricsManagerTest {
 
         // Configure GatewayMetricsService.getGatewayIndexWriteMetrics(...).
         final List<VariousLineChartMetrics> variousLineChartMetrics = Arrays.asList(new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L))))));
+                Arrays.asList(
+                        new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0))));
         when(gatewayMetricsService.getGatewayIndexWriteMetrics(Arrays.asList("value"), 0L, 0L, 0,
                 "indexName")).thenReturn(variousLineChartMetrics);
 
         // Configure GatewayMetricsService.getGatewayIndexSearchMetrics(...).
         final List<VariousLineChartMetrics> variousLineChartMetrics1 = Arrays.asList(new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L))))));
+                Arrays.asList(
+                        new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0))));
         when(gatewayMetricsService.getGatewayIndexSearchMetrics(Arrays.asList("value"), 0L, 0L, 0,
                 "indexName")).thenReturn(variousLineChartMetrics1);
 
         // Configure GatewayMetricsService.getGatewayIndexWriteMetrics(...).
         final List<VariousLineChartMetrics> variousLineChartMetrics2 = Arrays.asList(new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L))))));
+                Arrays.asList(
+                        new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0))));
         when(gatewayMetricsService.getGatewayIndexWriteMetrics(Arrays.asList("value"), 0L, 0L, 0, 0))
                 .thenReturn(variousLineChartMetrics2);
 
         // Configure GatewayMetricsService.getGatewayIndexSearchMetrics(...).
         final List<VariousLineChartMetrics> variousLineChartMetrics3 = Arrays.asList(new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L))))));
+                Arrays.asList(
+                        new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0))));
         when(gatewayMetricsService.getGatewayIndexSearchMetrics(Arrays.asList("value"), 0L, 0L, 0, 0))
                 .thenReturn(variousLineChartMetrics3);
 
@@ -858,34 +872,43 @@ class GatewayMetricsManagerTest {
     @Test
     void getGatewayAppMetricsTest() {
         // Setup
-        final GatewayAppDTO dto = new GatewayAppDTO("appId", 0);
+        final GatewayProjectDTO dto = new GatewayProjectDTO("projectId", 0);
         final Result<List<VariousLineChartMetricsVO>> expectedResult = Result.buildFail(
                 Arrays.asList(new VariousLineChartMetricsVO("type", Arrays.asList(
                         new MetricsContentVO("cluster", "name", Arrays.asList(new MetricsContentCellVO(0.0, 0L)))))));
 
-        // Configure GatewayMetricsService.getAppCommonMetricsByAppId(...).
+        // Configure GatewayMetricsService.getAppCommonMetricsByProjectId(...).
         final List<VariousLineChartMetrics> variousLineChartMetrics = Arrays.asList(new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L))))));
-        when(gatewayMetricsService.getAppCommonMetricsByAppId(0L, 0L, Arrays.asList("value"), "appId"))
-                .thenReturn(variousLineChartMetrics);
+                Arrays.asList(
+                        new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0))));
+        when(gatewayMetricsService.getAppCommonMetricsByProjectId(0L, 0L, Arrays.asList("value"),
+                "projectId")).thenReturn(variousLineChartMetrics);
 
-        // Configure GatewayMetricsService.getAppCountMetricsByAppId(...).
-        final VariousLineChartMetrics variousLineChartMetrics1 = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
-        when(gatewayMetricsService.getAppCountMetricsByAppId(0L, 0L, "appId")).thenReturn(variousLineChartMetrics1);
+        // Configure GatewayMetricsService.getAppCountMetricsByProjectId(...).
+        final VariousLineChartMetrics variousLineChartMetrics1 = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
+        when(gatewayMetricsService.getAppCountMetricsByProjectId(0L, 0L, "projectId"))
+                .thenReturn(variousLineChartMetrics1);
 
         // Configure GatewayMetricsService.getAppCommonMetrics(...).
         final List<VariousLineChartMetrics> variousLineChartMetrics2 = Arrays.asList(new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L))))));
+                Arrays.asList(
+                        new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0))));
         when(gatewayMetricsService.getAppCommonMetrics(0L, 0L, Arrays.asList("value"), 0))
                 .thenReturn(variousLineChartMetrics2);
 
         // Configure GatewayMetricsService.getAppCountMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics3 = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics3 = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getAppCountMetrics(0L, 0L, 0)).thenReturn(variousLineChartMetrics3);
 
-        when(appManager.listIds()).thenReturn(Result.buildFail(Arrays.asList("value")));
+        // Configure ProjectService.getProjectBriefList(...).
+        final ProjectBriefVO projectBriefVO = new ProjectBriefVO();
+        projectBriefVO.setId(0);
+        projectBriefVO.setProjectCode("projectCode");
+        projectBriefVO.setProjectName("projectName");
+        final List<ProjectBriefVO> projectBriefVOS = Arrays.asList(projectBriefVO);
+        when(projectService.getProjectBriefList()).thenReturn(projectBriefVOS);
 
         // Run the test
         final Result<List<VariousLineChartMetricsVO>> result = gatewayMetricsManager.getGatewayAppMetrics(dto);
@@ -895,32 +918,40 @@ class GatewayMetricsManagerTest {
     }
 
     @Test
-    void getGatewayAppMetricsGatewayMetricsServiceGetAppCommonMetricsByAppIdReturnsNoItemsTest() {
+    void getGatewayAppMetricsGatewayMetricsServiceGetAppCommonMetricsByProjectIdReturnsNoItemsTest() {
         // Setup
-        final GatewayAppDTO dto = new GatewayAppDTO("appId", 0);
+        final GatewayProjectDTO dto = new GatewayProjectDTO("projectId", 0);
         final Result<List<VariousLineChartMetricsVO>> expectedResult = Result.buildFail(
                 Arrays.asList(new VariousLineChartMetricsVO("type", Arrays.asList(
                         new MetricsContentVO("cluster", "name", Arrays.asList(new MetricsContentCellVO(0.0, 0L)))))));
-        when(gatewayMetricsService.getAppCommonMetricsByAppId(0L, 0L, Arrays.asList("value"), "appId"))
-                .thenReturn(Collections.emptyList());
+        when(gatewayMetricsService.getAppCommonMetricsByProjectId(0L, 0L, Arrays.asList("value"),
+                "projectId")).thenReturn(Collections.emptyList());
 
-        // Configure GatewayMetricsService.getAppCountMetricsByAppId(...).
-        final VariousLineChartMetrics variousLineChartMetrics = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
-        when(gatewayMetricsService.getAppCountMetricsByAppId(0L, 0L, "appId")).thenReturn(variousLineChartMetrics);
+        // Configure GatewayMetricsService.getAppCountMetricsByProjectId(...).
+        final VariousLineChartMetrics variousLineChartMetrics = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
+        when(gatewayMetricsService.getAppCountMetricsByProjectId(0L, 0L, "projectId"))
+                .thenReturn(variousLineChartMetrics);
 
         // Configure GatewayMetricsService.getAppCommonMetrics(...).
         final List<VariousLineChartMetrics> variousLineChartMetrics1 = Arrays.asList(new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L))))));
+                Arrays.asList(
+                        new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0))));
         when(gatewayMetricsService.getAppCommonMetrics(0L, 0L, Arrays.asList("value"), 0))
                 .thenReturn(variousLineChartMetrics1);
 
         // Configure GatewayMetricsService.getAppCountMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics2 = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics2 = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getAppCountMetrics(0L, 0L, 0)).thenReturn(variousLineChartMetrics2);
 
-        when(appManager.listIds()).thenReturn(Result.buildFail(Arrays.asList("value")));
+        // Configure ProjectService.getProjectBriefList(...).
+        final ProjectBriefVO projectBriefVO = new ProjectBriefVO();
+        projectBriefVO.setId(0);
+        projectBriefVO.setProjectCode("projectCode");
+        projectBriefVO.setProjectName("projectName");
+        final List<ProjectBriefVO> projectBriefVOS = Arrays.asList(projectBriefVO);
+        when(projectService.getProjectBriefList()).thenReturn(projectBriefVOS);
 
         // Run the test
         final Result<List<VariousLineChartMetricsVO>> result = gatewayMetricsManager.getGatewayAppMetrics(dto);
@@ -932,31 +963,39 @@ class GatewayMetricsManagerTest {
     @Test
     void getGatewayAppMetricsGatewayMetricsServiceGetAppCommonMetricsReturnsNoItemsTest() {
         // Setup
-        final GatewayAppDTO dto = new GatewayAppDTO("appId", 0);
+        final GatewayProjectDTO dto = new GatewayProjectDTO("projectId", 0);
         final Result<List<VariousLineChartMetricsVO>> expectedResult = Result.buildFail(
                 Arrays.asList(new VariousLineChartMetricsVO("type", Arrays.asList(
                         new MetricsContentVO("cluster", "name", Arrays.asList(new MetricsContentCellVO(0.0, 0L)))))));
 
-        // Configure GatewayMetricsService.getAppCommonMetricsByAppId(...).
+        // Configure GatewayMetricsService.getAppCommonMetricsByProjectId(...).
         final List<VariousLineChartMetrics> variousLineChartMetrics = Arrays.asList(new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L))))));
-        when(gatewayMetricsService.getAppCommonMetricsByAppId(0L, 0L, Arrays.asList("value"), "appId"))
-                .thenReturn(variousLineChartMetrics);
+                Arrays.asList(
+                        new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0))));
+        when(gatewayMetricsService.getAppCommonMetricsByProjectId(0L, 0L, Arrays.asList("value"),
+                "projectId")).thenReturn(variousLineChartMetrics);
 
-        // Configure GatewayMetricsService.getAppCountMetricsByAppId(...).
-        final VariousLineChartMetrics variousLineChartMetrics1 = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
-        when(gatewayMetricsService.getAppCountMetricsByAppId(0L, 0L, "appId")).thenReturn(variousLineChartMetrics1);
+        // Configure GatewayMetricsService.getAppCountMetricsByProjectId(...).
+        final VariousLineChartMetrics variousLineChartMetrics1 = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
+        when(gatewayMetricsService.getAppCountMetricsByProjectId(0L, 0L, "projectId"))
+                .thenReturn(variousLineChartMetrics1);
 
         when(gatewayMetricsService.getAppCommonMetrics(0L, 0L, Arrays.asList("value"), 0))
                 .thenReturn(Collections.emptyList());
 
         // Configure GatewayMetricsService.getAppCountMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics2 = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics2 = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getAppCountMetrics(0L, 0L, 0)).thenReturn(variousLineChartMetrics2);
 
-        when(appManager.listIds()).thenReturn(Result.buildFail(Arrays.asList("value")));
+        // Configure ProjectService.getProjectBriefList(...).
+        final ProjectBriefVO projectBriefVO = new ProjectBriefVO();
+        projectBriefVO.setId(0);
+        projectBriefVO.setProjectCode("projectCode");
+        projectBriefVO.setProjectName("projectName");
+        final List<ProjectBriefVO> projectBriefVOS = Arrays.asList(projectBriefVO);
+        when(projectService.getProjectBriefList()).thenReturn(projectBriefVOS);
 
         // Run the test
         final Result<List<VariousLineChartMetricsVO>> result = gatewayMetricsManager.getGatewayAppMetrics(dto);
@@ -966,114 +1005,39 @@ class GatewayMetricsManagerTest {
     }
 
     @Test
-    void getGatewayAppMetricsAppManagerReturnsNoItemTest() {
+    void getGatewayAppMetricsProjectServiceReturnsNoItemsTest() {
         // Setup
-        final GatewayAppDTO dto = new GatewayAppDTO("appId", 0);
+        final GatewayProjectDTO dto = new GatewayProjectDTO("projectId", 0);
         final Result<List<VariousLineChartMetricsVO>> expectedResult = Result.buildFail(
                 Arrays.asList(new VariousLineChartMetricsVO("type", Arrays.asList(
                         new MetricsContentVO("cluster", "name", Arrays.asList(new MetricsContentCellVO(0.0, 0L)))))));
 
-        // Configure GatewayMetricsService.getAppCommonMetricsByAppId(...).
+        // Configure GatewayMetricsService.getAppCommonMetricsByProjectId(...).
         final List<VariousLineChartMetrics> variousLineChartMetrics = Arrays.asList(new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L))))));
-        when(gatewayMetricsService.getAppCommonMetricsByAppId(0L, 0L, Arrays.asList("value"), "appId"))
-                .thenReturn(variousLineChartMetrics);
+                Arrays.asList(
+                        new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0))));
+        when(gatewayMetricsService.getAppCommonMetricsByProjectId(0L, 0L, Arrays.asList("value"),
+                "projectId")).thenReturn(variousLineChartMetrics);
 
-        // Configure GatewayMetricsService.getAppCountMetricsByAppId(...).
-        final VariousLineChartMetrics variousLineChartMetrics1 = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
-        when(gatewayMetricsService.getAppCountMetricsByAppId(0L, 0L, "appId")).thenReturn(variousLineChartMetrics1);
+        // Configure GatewayMetricsService.getAppCountMetricsByProjectId(...).
+        final VariousLineChartMetrics variousLineChartMetrics1 = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
+        when(gatewayMetricsService.getAppCountMetricsByProjectId(0L, 0L, "projectId"))
+                .thenReturn(variousLineChartMetrics1);
 
         // Configure GatewayMetricsService.getAppCommonMetrics(...).
         final List<VariousLineChartMetrics> variousLineChartMetrics2 = Arrays.asList(new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L))))));
+                Arrays.asList(
+                        new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0))));
         when(gatewayMetricsService.getAppCommonMetrics(0L, 0L, Arrays.asList("value"), 0))
                 .thenReturn(variousLineChartMetrics2);
 
         // Configure GatewayMetricsService.getAppCountMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics3 = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics3 = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getAppCountMetrics(0L, 0L, 0)).thenReturn(variousLineChartMetrics3);
 
-        when(appManager.listIds()).thenReturn(Result.buildSucc());
-
-        // Run the test
-        final Result<List<VariousLineChartMetricsVO>> result = gatewayMetricsManager.getGatewayAppMetrics(dto);
-
-        // Verify the results
-        assertThat(result).isEqualTo(expectedResult);
-    }
-
-    @Test
-    void getGatewayAppMetricsAppManagerReturnsNoItemsTest() {
-        // Setup
-        final GatewayAppDTO dto = new GatewayAppDTO("appId", 0);
-        final Result<List<VariousLineChartMetricsVO>> expectedResult = Result.buildFail(
-                Arrays.asList(new VariousLineChartMetricsVO("type", Arrays.asList(
-                        new MetricsContentVO("cluster", "name", Arrays.asList(new MetricsContentCellVO(0.0, 0L)))))));
-
-        // Configure GatewayMetricsService.getAppCommonMetricsByAppId(...).
-        final List<VariousLineChartMetrics> variousLineChartMetrics = Arrays.asList(new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L))))));
-        when(gatewayMetricsService.getAppCommonMetricsByAppId(0L, 0L, Arrays.asList("value"), "appId"))
-                .thenReturn(variousLineChartMetrics);
-
-        // Configure GatewayMetricsService.getAppCountMetricsByAppId(...).
-        final VariousLineChartMetrics variousLineChartMetrics1 = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
-        when(gatewayMetricsService.getAppCountMetricsByAppId(0L, 0L, "appId")).thenReturn(variousLineChartMetrics1);
-
-        // Configure GatewayMetricsService.getAppCommonMetrics(...).
-        final List<VariousLineChartMetrics> variousLineChartMetrics2 = Arrays.asList(new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L))))));
-        when(gatewayMetricsService.getAppCommonMetrics(0L, 0L, Arrays.asList("value"), 0))
-                .thenReturn(variousLineChartMetrics2);
-
-        // Configure GatewayMetricsService.getAppCountMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics3 = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
-        when(gatewayMetricsService.getAppCountMetrics(0L, 0L, 0)).thenReturn(variousLineChartMetrics3);
-
-        when(appManager.listIds()).thenReturn(Result.buildFail(Collections.emptyList()));
-
-        // Run the test
-        final Result<List<VariousLineChartMetricsVO>> result = gatewayMetricsManager.getGatewayAppMetrics(dto);
-
-        // Verify the results
-        assertThat(result).isEqualTo(expectedResult);
-    }
-
-    @Test
-    void getGatewayAppMetricsAppManagerReturnsFailureTest() {
-        // Setup
-        final GatewayAppDTO dto = new GatewayAppDTO("appId", 0);
-        final Result<List<VariousLineChartMetricsVO>> expectedResult = Result.buildFail(
-                Arrays.asList(new VariousLineChartMetricsVO("type", Arrays.asList(
-                        new MetricsContentVO("cluster", "name", Arrays.asList(new MetricsContentCellVO(0.0, 0L)))))));
-
-        // Configure GatewayMetricsService.getAppCommonMetricsByAppId(...).
-        final List<VariousLineChartMetrics> variousLineChartMetrics = Arrays.asList(new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L))))));
-        when(gatewayMetricsService.getAppCommonMetricsByAppId(0L, 0L, Arrays.asList("value"), "appId"))
-                .thenReturn(variousLineChartMetrics);
-
-        // Configure GatewayMetricsService.getAppCountMetricsByAppId(...).
-        final VariousLineChartMetrics variousLineChartMetrics1 = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
-        when(gatewayMetricsService.getAppCountMetricsByAppId(0L, 0L, "appId")).thenReturn(variousLineChartMetrics1);
-
-        // Configure GatewayMetricsService.getAppCommonMetrics(...).
-        final List<VariousLineChartMetrics> variousLineChartMetrics2 = Arrays.asList(new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L))))));
-        when(gatewayMetricsService.getAppCommonMetrics(0L, 0L, Arrays.asList("value"), 0))
-                .thenReturn(variousLineChartMetrics2);
-
-        // Configure GatewayMetricsService.getAppCountMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics3 = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
-        when(gatewayMetricsService.getAppCountMetrics(0L, 0L, 0)).thenReturn(variousLineChartMetrics3);
-
-        when(appManager.listIds()).thenReturn(Result.buildFail());
+        when(projectService.getProjectBriefList()).thenReturn(Collections.emptyList());
 
         // Run the test
         final Result<List<VariousLineChartMetricsVO>> result = gatewayMetricsManager.getGatewayAppMetrics(dto);
@@ -1091,24 +1055,24 @@ class GatewayMetricsManagerTest {
                         new MetricsContentVO("cluster", "name", Arrays.asList(new MetricsContentCellVO(0.0, 0L)))))));
 
         // Configure GatewayMetricsService.getDslCountMetricsByMd5(...).
-        final VariousLineChartMetrics variousLineChartMetrics = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getDslCountMetricsByMd5(0L, 0L, "dslMd5", 0)).thenReturn(variousLineChartMetrics);
 
         // Configure GatewayMetricsService.getDslTotalCostMetricsByMd5(...).
-        final VariousLineChartMetrics variousLineChartMetrics1 = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics1 = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getDslTotalCostMetricsByMd5(0L, 0L, "dslMd5", 0))
                 .thenReturn(variousLineChartMetrics1);
 
         // Configure GatewayMetricsService.getDslCountMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics2 = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics2 = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getDslCountMetrics(0L, 0L, 0, 0)).thenReturn(variousLineChartMetrics2);
 
         // Configure GatewayMetricsService.getDslTotalCostMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics3 = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics3 = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getDslTotalCostMetrics(0L, 0L, 0, 0)).thenReturn(variousLineChartMetrics3);
 
         when(gatewayMetricsService.getDslMd5List(0L, 0L, 0)).thenReturn(Arrays.asList("value"));
@@ -1126,24 +1090,24 @@ class GatewayMetricsManagerTest {
         final GatewayDslDTO dto = new GatewayDslDTO("dslMd5", 0);
 
         // Configure GatewayMetricsService.getDslCountMetricsByMd5(...).
-        final VariousLineChartMetrics variousLineChartMetrics = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getDslCountMetricsByMd5(0L, 0L, "dslMd5", 0)).thenReturn(variousLineChartMetrics);
 
         // Configure GatewayMetricsService.getDslTotalCostMetricsByMd5(...).
-        final VariousLineChartMetrics variousLineChartMetrics1 = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics1 = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getDslTotalCostMetricsByMd5(0L, 0L, "dslMd5", 0))
                 .thenReturn(variousLineChartMetrics1);
 
         // Configure GatewayMetricsService.getDslCountMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics2 = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics2 = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getDslCountMetrics(0L, 0L, 0, 0)).thenReturn(variousLineChartMetrics2);
 
         // Configure GatewayMetricsService.getDslTotalCostMetrics(...).
-        final VariousLineChartMetrics variousLineChartMetrics3 = new VariousLineChartMetrics("type",
-                Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)))));
+        final VariousLineChartMetrics variousLineChartMetrics3 = new VariousLineChartMetrics("type", Arrays.asList(
+                new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0)));
         when(gatewayMetricsService.getDslTotalCostMetrics(0L, 0L, 0, 0)).thenReturn(variousLineChartMetrics3);
 
         when(gatewayMetricsService.getDslMd5List(0L, 0L, 0)).thenReturn(Collections.emptyList());

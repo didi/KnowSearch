@@ -21,12 +21,14 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.ProjectCon
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.ProjectExtendVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectSearchTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
 import com.didichuxing.datachannel.arius.admin.common.tuple.Tuples;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.VerifyCodeFactory;
+import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.project.ESUserService;
@@ -49,6 +51,7 @@ import com.didiglobal.logi.security.service.ProjectService;
 import com.didiglobal.logi.security.service.RoleService;
 import com.didiglobal.logi.security.service.UserProjectService;
 import com.didiglobal.logi.security.service.UserService;
+import com.didiglobal.logi.security.util.HttpRequestUtil;
 import com.google.common.collect.Lists;
 import java.util.Collections;
 import java.util.List;
@@ -59,6 +62,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -92,24 +96,38 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
     private UserProjectService   userProjectService;
     @Autowired
     private RoleService          roleService;
+    @Autowired
+    private RoleTool roleTool;
     
     @Override
-    public Result<ProjectExtendVO> createProject(ProjectExtendSaveDTO saveDTO, String operator) {
+    public Result<ProjectExtendVO> createProject(ProjectExtendSaveDTO saveDTO, String operator, Integer operatorId) {
         try {
             // 1. 创建项目
             ProjectSaveDTO project = saveDTO.getProject();
             // 2. 创建项目配置
             ProjectConfigDTO config = saveDTO.getConfig();
             // 将项目中的所有者、用户提取出来后，使用biz层中的逻辑进行添加
-            List<Integer> ownerIdList = project.getOwnerIdList();
-            List<Integer> userIdList = project.getUserIdList();
+            List<Integer> ownerIdList = Optional.ofNullable(project.getOwnerIdList()).orElse(Lists.newArrayList());
+            List<Integer> userIdList = Optional.ofNullable(project.getUserIdList()).orElse(Lists.newArrayList());
             project.setOwnerIdList(Collections.emptyList());
             project.setUserIdList(Collections.emptyList());
+            //当所有者没有传入进来的时候
+            if (CollectionUtils.isEmpty(ownerIdList)) {
+                if (operatorId.equals(-1)) {
+                    return Result.buildFail("当前操作人id为空");
+                }
+                ownerIdList.add(operatorId);
+        
+            }
+            //谁创建、谁包含
+            if (!ownerIdList.contains(operatorId)){
+                 ownerIdList.add(operatorId);
+            }
             
             // 3. 创建项目
             ProjectVO projectVO = projectService.createProject(project, operator);
             // 4. 转换
-            ProjectExtendVO projectExtendVO = ConvertUtil.obj2Obj(project, ProjectExtendVO.class);
+            ProjectExtendVO projectExtendVO = ConvertUtil.obj2Obj(projectVO, ProjectExtendVO.class);
             // 5. 添加拥有者和成员
             addOwnerAndUsers(operator, ownerIdList, userIdList, projectVO, projectExtendVO);
             
@@ -129,6 +147,9 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
                     TriggerWayEnum.MANUAL_TRIGGER, project.getProjectName(), operator));
             //创建es user
             createESUserDefault(projectVO, operator);
+            if (Objects.isNull(project.getId())){
+                projectExtendVO.setId(projectExtendVO.getConfig().getProjectId());
+            }
             return Result.<ProjectExtendVO>buildSucc(projectExtendVO);
         } catch (LogiSecurityException e) {
             return Result.buildFail(e.getMessage());
@@ -243,12 +264,18 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
      * 条件分页查询项目信息
      *
      * @param queryDTO 条件信息
+     * @param request
      * @return 项目分页信息
      */
     @Override
-    public PagingResult<ProjectExtendVO> getProjectPage(ProjectQueryExtendDTO queryDTO) {
+    public PagingResult<ProjectExtendVO> getProjectPage(ProjectQueryExtendDTO queryDTO, HttpServletRequest request) {
+        //如果当前操作人不是管理员的角色，则只应该获取属于自己的项目，不能获取全部的项目
+        String operator = HttpRequestUtil.getOperator(request);
+        Integer operatorId = HttpRequestUtil.getOperatorId(request);
+        if (StringUtils.isNotBlank(operator) && !roleTool.isAdmin(operator)) {
+            queryDTO.setChargeUsername(operator);
+        }
         final ProjectQueryDTO projectQueryDTO = ConvertUtil.obj2Obj(queryDTO, ProjectQueryDTO.class);
-        
         if (Objects.isNull(queryDTO.getSearchType())) {
             final PagingData<ProjectVO> projectPage = projectService.getProjectPage(projectQueryDTO);
             final List<ProjectVO> bizData = projectPage.getBizData();
@@ -257,7 +284,15 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
             
             return PagingResult.success(new PagingData<>(projectExtendVOList, projectPage.getPagination()));
         } else {
-            final List<Integer> projectIds = esUserService.getProjectIdBySearchType(queryDTO.getSearchType());
+            final List<Integer> esUserProjectIds = esUserService.getProjectIdBySearchType(queryDTO.getSearchType());
+            final List<Integer> projectIds = Lists.newArrayList();
+            if (StringUtils.isNotBlank(operator) && !roleTool.isAdmin(operator)) {
+                userProjectService.getProjectIdListByUserIdList(Collections.singletonList(operatorId)).stream()
+                        .filter(esUserProjectIds::contains).forEach(projectIds::add);
+            } else {
+                projectIds.addAll(esUserProjectIds);
+            }
+            
             final PagingData<ProjectVO> projectPage = projectService.getProjectPage(projectQueryDTO, projectIds);
             final List<ProjectExtendVO> projectExtendVOList = ConvertUtil.list2List(projectPage.getBizData(),
                     ProjectExtendVO.class);
@@ -300,7 +335,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
                     ownerIdList,
                     (projectId, userList) -> userProjectService.updateOwnerProject(projectId, userList),
                     ProjectVO::getOwnerList, OperateTypeEnum.APPLICATION_OWNER_CHANGE,
-                    Boolean.FALSE
+                    OperationEnum.EDIT
     
             );
             if (operationProjectOwnerResult.failed()){
@@ -310,7 +345,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
             final Result<Void> operationProjectUserResult = operationProjectMemberOrOwner(operator,
                     saveDTO.getProject().getId(),
                     userIdList, (projectId, userList) -> userProjectService.updateUserProject(projectId, userList),
-                    ProjectVO::getUserList, OperateTypeEnum.APPLICATION_USER_CHANGE, Boolean.FALSE
+                    ProjectVO::getUserList, OperateTypeEnum.APPLICATION_USER_CHANGE, OperationEnum.EDIT
     
             );
             if (operationProjectUserResult.failed()) {
@@ -331,22 +366,20 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
      * @param operationConsumerFunc    更新/添加操作
      * @param  operationFuncMapper      函数映射器 需要获取的mapper userList/ownerList
      * @param operateTypeEnum 操作类型枚举
-     * @param isDeleteOp       是否是删除操作
+     * @param operation       是否是删除操作
      * @return {@code Result<Void>}
      */
     private Result<Void> operationProjectMemberOrOwner(String operator, Integer projectId,
                                                        List<Integer> userOrOwnerList,
                                                        BiConsumer<Integer, List<Integer>> operationConsumerFunc,
                                                        Function<ProjectVO, List<UserBriefVO>>  operationFuncMapper,
-                                                       OperateTypeEnum operateTypeEnum, Boolean isDeleteOp ) {
+                                                       OperateTypeEnum operateTypeEnum, OperationEnum operation ) {
         if (CollectionUtils.isNotEmpty(userOrOwnerList)) {
-            if (Boolean.FALSE.equals(isDeleteOp)) {
-                //超级项目侧校验添加的用户收否存在管理员角色
-                final Result<Void> result = checkProject(projectId, userOrOwnerList);
+           //超级项目侧校验添加的用户收否存在管理员角色
+                final Result<Void> result = checkProject(projectId, userOrOwnerList,operation);
                 if (result.failed()) {
                     return result;
                 }
-            }
             //操作前的项目信息
             final ProjectVO beforeProjectVo = projectService.getProjectDetailByProjectId(projectId);
             final String projectName = beforeProjectVo.getProjectName();
@@ -395,7 +428,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
             final Result<Void> operationProjectUserResult = operationProjectMemberOrOwner(operator,
                     projectId, userIdList,
                     (id, userList) -> userProjectService.saveUserProject(id, userList), ProjectVO::getUserList,
-                    OperateTypeEnum.APPLICATION_USER_CHANGE,Boolean.FALSE
+                    OperateTypeEnum.APPLICATION_USER_CHANGE,OperationEnum.ADD
             );
             if (operationProjectUserResult.failed()){
                 return operationProjectUserResult;
@@ -429,7 +462,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
                     Collections.singletonList(userId),
                     (id, userList) -> userList.stream().map(user -> Tuples.of(id, user))
                             .forEach(delProjectUserConsumer),
-                    ProjectVO::getOwnerList, OperateTypeEnum.APPLICATION_USER_CHANGE, Boolean.TRUE
+                    ProjectVO::getOwnerList, OperateTypeEnum.APPLICATION_USER_CHANGE, OperationEnum.DELETE
     
             );
             if (operationProjectOwnerResult.failed()) {
@@ -454,7 +487,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
             final Result<Void> operationProjectOwnerResult = operationProjectMemberOrOwner(operator,
                     projectId, ownerIdList,
                     (id, ownerList) -> userProjectService.saveOwnerProject(id, ownerList), ProjectVO::getOwnerList,
-                    OperateTypeEnum.APPLICATION_OWNER_CHANGE,Boolean.FALSE
+                    OperateTypeEnum.APPLICATION_OWNER_CHANGE,OperationEnum.ADD
     
             );
             if (operationProjectOwnerResult.failed()) {
@@ -484,7 +517,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
                     Collections.singletonList(ownerId),
                     (id, userList) -> userList.stream().map(user -> Tuples.of(id, user))
                             .forEach(delProjectUserConsumer), ProjectVO::getOwnerList,
-                    OperateTypeEnum.APPLICATION_USER_CHANGE, Boolean.TRUE
+                    OperateTypeEnum.APPLICATION_USER_CHANGE, OperationEnum.DELETE
     
             );
             if (operationProjectOwnerResult.failed()) {
@@ -617,7 +650,10 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
         }
     }
     
-    private Result<Void> checkProject(Integer projectId, List<Integer> userIdList) {
+    private Result<Void> checkProject(Integer projectId, List<Integer> userIdList, OperationEnum operation) {
+        if (operation.equals(OperationEnum.DELETE)){
+            return Result.buildSucc();
+        }
         if (CollectionUtils.isEmpty(userIdList)) {
             return Result.buildParamIllegal("用户id不存在");
         }
@@ -638,8 +674,18 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
             return Result.buildParamIllegal(String.format("传入用户:%s不存在", notExitsIds));
         }
         //超级项目侧校验添加的用户收否存在管理员角色
-        if (!checkAddProjectUserOrOwnerIsAdminRole(projectId, userIdList)) {
-            return Result.buildFail("超级项目只被允许添加拥有管理员角色的用户");
+        if (operation.equals(OperationEnum.EDIT)) {
+            if (AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
+                Predicate<List<RoleBriefVO>> checkContainsAdminRoleFunc = roleBriefList -> roleBriefList.stream()
+                        .anyMatch(roleBriefVO -> AuthConstant.ADMIN_ROLE_ID.equals(roleBriefVO.getId()));
+                /*当前用户列表中存在管理员*/
+                if (userIdList.stream().map(roleService::getRoleBriefListByUserId)
+                        .noneMatch(checkContainsAdminRoleFunc)) {
+                    return Result.buildFail("超级项目只被允许添加拥有管理员角色的用户");
+        
+                }
+            }
+        
         }
         
         return Result.buildSucc();
@@ -682,19 +728,6 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
         }
     }
     
-    /**
-     * 检查添加超级项目用户的合法性
-     *
-     * @param projectId  项目id
-     * @param userIdList 用户id列表
-     * @return boolean true:包含管理员角色可以添加
-     */
-    private boolean checkAddProjectUserOrOwnerIsAdminRole(Integer projectId, List<Integer> userIdList) {
-        Predicate<List<RoleBriefVO>> checkContainsAdminRoleFunc = roleBriefList -> roleBriefList.stream()
-                .anyMatch(roleBriefVO -> AuthConstant.ADMIN_ROLE_ID.equals(roleBriefVO.getId()));
-        return AuthConstant.SUPER_PROJECT_ID.equals(projectId) && userIdList.stream()
-                .map(roleService::getRoleBriefListByUserId).allMatch(checkContainsAdminRoleFunc);
-        
-    }
+
    
 }

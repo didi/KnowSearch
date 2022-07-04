@@ -1,10 +1,12 @@
 package com.didichuxing.datachannel.arius.admin.biz.cluster;
 
+import java.util.List;
+
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRegionWithNodeInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostWithRegionInfoVO;
-import java.util.List;
+import com.didichuxing.datachannel.arius.admin.common.exception.AdminTaskException;
 
 /**
  * @author ohushenglin_v
@@ -61,4 +63,14 @@ public interface ClusterNodeManager {
      * @return
      */
     Result listClusterLogicNodeByName(String clusterLogicName);
+
+
+    /**
+     * 采集集群节点数据
+     *
+     * @param cluster 集群
+     * @return boolean
+     * @throws AdminTaskException 管理任务异常
+     */
+    boolean collectNodeSettings(String cluster) throws AdminTaskException;
 }
