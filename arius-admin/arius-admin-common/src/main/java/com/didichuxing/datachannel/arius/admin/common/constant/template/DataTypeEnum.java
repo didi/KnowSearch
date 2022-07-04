@@ -1,5 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.common.constant.template;
 
+import java.util.Arrays;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 /**
  * @author d06679
  * @date 2019/3/29
@@ -68,6 +72,12 @@ public enum DataTypeEnum {
         }
 
         return false;
+    }
+    
+    public static final Map<Integer,String> code2DescMap(){
+       return Arrays.stream(DataTypeEnum.values())
+                .filter(dataTypeEnum -> !UNKNOWN.equals(dataTypeEnum))
+                .collect(Collectors.toMap(DataTypeEnum::getCode,DataTypeEnum::getDesc));
     }
 
 }
