@@ -85,7 +85,9 @@ public class ProjectV3Controller {
 	@ResponseBody
 	@ApiOperation(value = "创建项目", notes = "创建项目")
 	public Result<ProjectExtendVO> create(@RequestBody ProjectExtendSaveDTO saveDTO, HttpServletRequest request) {
-		return projectExtendManager.createProject(saveDTO, HttpRequestUtil.getOperator(request));
+		
+		return projectExtendManager.createProject(saveDTO, HttpRequestUtil.getOperator(request),
+				HttpRequestUtil.getOperatorId(request));
 	}
 	
 	@DeleteMapping("/{id}")
@@ -135,8 +137,8 @@ public class ProjectV3Controller {
 	
 	@PostMapping("/page")
 	@ApiOperation(value = "分页查询项目列表", notes = "分页和条件查询")
-	public PagingResult<ProjectExtendVO> page(@RequestBody ProjectQueryExtendDTO queryDTO) {
-		return projectExtendManager.getProjectPage(queryDTO);
+	public PagingResult<ProjectExtendVO> page(@RequestBody ProjectQueryExtendDTO queryDTO,HttpServletRequest request) {
+		return projectExtendManager.getProjectPage(queryDTO,request);
 	}
 	
 	@PutMapping("/{id}/owner")
