@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.template;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterLogicManager;
@@ -60,7 +61,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @date 2019/5/15
  */
 @RestController
-@RequestMapping(V3_OP + "/template")
+@RequestMapping(V3 + "/template")
 @Api(tags = "Console-用户侧索引模板接口(REST)")
 public class TemplateController extends BaseTemplateController {
 

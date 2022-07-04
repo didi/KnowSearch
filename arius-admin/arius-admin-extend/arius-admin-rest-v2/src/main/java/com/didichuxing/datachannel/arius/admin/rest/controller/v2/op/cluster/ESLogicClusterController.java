@@ -36,6 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping({ V2_OP })
 @Api(tags = "es集群逻辑集群接口(REST)")
+@Deprecated
 public class ESLogicClusterController {
     @Autowired
     private ClusterNodeManager      clusterNodeManager;

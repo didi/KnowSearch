@@ -41,10 +41,7 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
     private static final String           VALUE             = "value";
     private static final FutureUtil<Void> futureUtil        = FutureUtil.init("AriusStatsNodeInfoESDAO",  10,10,500);
 
-    private static final long             ONE_MIN           = 60 * 1000;
-    
-   
-    
+
     @PostConstruct
     public void init() {
         super.indexName = dataCentreUtil.getAriusStatsNodeInfo();
@@ -386,7 +383,7 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
             return new ArrayList<>();
         }
 
-        long startTimeForOneInterval = timePoint - topTimeStep * ONE_MIN;
+        long startTimeForOneInterval = timePoint - topTimeStep;
         long endTimeForOneInterval = timePoint;
 
 
