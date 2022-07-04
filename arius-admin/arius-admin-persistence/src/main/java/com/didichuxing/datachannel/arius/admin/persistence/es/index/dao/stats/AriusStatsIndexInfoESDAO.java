@@ -1143,7 +1143,7 @@ public class AriusStatsIndexInfoESDAO extends BaseAriusStatsESDAO {
             return  new ArrayList<>();
         }
 
-        long startTimeForOneInterval = timePoint - topTimeStep * 60 * 1000;
+        long startTimeForOneInterval = timePoint - topTimeStep;
         long endTimeForOneInterval = timePoint;
 
         String interval = "1m";
