@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.cluster.logic;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterRegionManager;
@@ -30,7 +31,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @date 2020/10/10
  */
 @RestController
-@RequestMapping(V3_OP + "/logic/cluster/region")
+@RequestMapping(V3 + "/logic/cluster/region")
 @Api(tags = "ES逻辑集群region接口(REST)")
 public class ESLogicClusterRegionController {
 
