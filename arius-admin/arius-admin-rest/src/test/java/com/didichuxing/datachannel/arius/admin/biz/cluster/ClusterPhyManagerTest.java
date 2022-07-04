@@ -8,6 +8,7 @@ import static org.mockito.MockitoAnnotations.openMocks;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
+import com.didichuxing.datachannel.arius.admin.common.exception.AdminTaskException;
 import org.apache.commons.beanutils.BeanUtils;
 import org.elasticsearch.common.unit.ByteSizeUnit;
 import org.elasticsearch.common.unit.ByteSizeValue;
@@ -480,7 +481,7 @@ class ClusterPhyManagerTest {
     }
     
     @Test
-    void testJoinCluster() throws InvocationTargetException, IllegalAccessException {
+    void testJoinCluster() throws InvocationTargetException, IllegalAccessException, AdminTaskException {
         ClusterJoinDTO param = new ClusterJoinDTO(
                 0, 0, "clusterPhyName", "operator", "esVersion", Lists.newArrayList(),
             "desc", "passwd", 4, "{\"createSource\":1}", "cn", "acs", 1);

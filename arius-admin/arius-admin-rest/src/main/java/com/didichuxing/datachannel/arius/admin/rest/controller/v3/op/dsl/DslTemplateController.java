@@ -10,6 +10,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.dsl.template.DslT
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayJoinQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.DslTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.GatewayJoinVO;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -45,7 +46,7 @@ public class DslTemplateController {
 
     @PostMapping("/page")
     @ApiOperation(value = "分页获取DSL模版信息", notes = "根据一些条件分页获取DSL模版信息")
-    public PaginationResult<DslTemplateVO> page(@RequestBody DslTemplateConditionDTO query, HttpServletRequest request) {
+    public PaginationResult<DslTemplateVO> page(@RequestBody DslTemplateConditionDTO query, HttpServletRequest request) throws NotFindSubclassException {
         return dslTemplateManager.getDslTemplatePage(HttpRequestUtil.getProjectId(request), query);
     }
 

@@ -8,7 +8,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType
  * @author d06679
  * @date 2019/3/13
  */
-public class AriusGatewayException extends AriusRunTimeException {
+public class AriusGatewayException extends AdminOperateException {
 
     public AriusGatewayException(String message) {
         super(message, ResultType.ARIUS_GATEWAY_ERROR);

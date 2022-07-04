@@ -61,6 +61,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESCluste
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.event.ecm.EcmTaskEditEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.resource.ClusterPhyHealthEvent;
+import com.didichuxing.datachannel.arius.admin.common.exception.AdminTaskException;
 import com.didichuxing.datachannel.arius.admin.common.exception.EcmRemoteException;
 import com.didichuxing.datachannel.arius.admin.common.threadpool.AriusScheduleThreadPool;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
@@ -211,7 +212,7 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result<EcmOperateAppBase> savaAndActionEcmTask(Long taskId, String operator) {
+    public Result<EcmOperateAppBase> savaAndActionEcmTask(Long taskId, String operator) throws EcmRemoteException {
         //1. 校验ECM任务有效性
         EcmTask ecmTask = getEcmTask(taskId);
         if (AriusObjUtils.isNull(ecmTask)) {
@@ -276,7 +277,7 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
     }
 
     @Override
-    public Result<EcmOperateAppBase> actionClusterEcmTask(Long taskId, String operator) {
+    public Result<EcmOperateAppBase> actionClusterEcmTask(Long taskId, String operator) throws EcmRemoteException {
         //1. 校验ECM任务有效性
         EcmTask ecmTask = getEcmTask(taskId);
         if (AriusObjUtils.isNull(ecmTask)) {
@@ -325,7 +326,7 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
 
     @Override
     public Result<EcmOperateAppBase> actionClusterEcmTask(Long taskId, EcmActionEnum ecmActionEnum, String hostname,
-                                                          String operator) {
+                                                          String operator) throws EcmRemoteException {
         EcmTaskPO ecmTask = ecmTaskDao.getById(taskId);
         if (AriusObjUtils.isNull(ecmTask)) {
             return Result.buildParamIllegal("集群任务不存在");
@@ -489,7 +490,7 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
     }
 
     @Override
-    public EcmTaskStatusEnum refreshEcmTask(EcmTask ecmTask) {
+    public EcmTaskStatusEnum refreshEcmTask(EcmTask ecmTask) throws AdminTaskException {
         if ((SUCCESS.getValue().equals(ecmTask.getStatus()) || CANCEL.getValue().equals(ecmTask.getStatus()))) {
             return EcmTaskStatusEnum.SUCCESS;
         }
@@ -659,7 +660,7 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
      * @param mergedStatusEnum    任务状态
      * @return
      */
-    private Result<Void> postProcess(EcmTask ecmTask, EcmTaskStatusEnum mergedStatusEnum) {
+    private Result<Void> postProcess(EcmTask ecmTask, EcmTaskStatusEnum mergedStatusEnum) throws AdminTaskException {
         if (!SUCCESS.getValue().equals(mergedStatusEnum.getValue()) && !hasRemoteTaskFailed(mergedStatusEnum)) {
             return Result.buildSucc();
         }
@@ -694,7 +695,7 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
      * @param ecmTask ecm任务
      * @param mergedStatusEnum 总的任务执行情况
      */
-    private void saveOrEditHostInfoFromEcmTask(EcmTask ecmTask, EcmTaskStatusEnum mergedStatusEnum) {
+    private void saveOrEditHostInfoFromEcmTask(EcmTask ecmTask, EcmTaskStatusEnum mergedStatusEnum) throws AdminTaskException {
         if (!EcmTaskStatusEnum.SUCCESS.equals(mergedStatusEnum)) {
             return;
         }
@@ -707,7 +708,7 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
         }
     }
 
-    private void addHostInfoFromTaskOrder(EcmTask ecmTask) {
+    private void addHostInfoFromTaskOrder(EcmTask ecmTask) throws AdminTaskException {
         // 从ecm任务的工单中获取节点全量的信息
         Result<OrderDetailBaseVO> getOrderDetailResult = workOrderManager.getById(ecmTask.getWorkOrderId());
         if (getOrderDetailResult.failed()) {
@@ -757,7 +758,11 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
     private void delayCollectNodeSettingsTask(List<EcmParamBase> ecmParamBases) {
         ariusScheduleThreadPool.submitScheduleAtFixedDelayTask(() -> {
             String clusterPhyName = getClusterPhyNameFromEcmParamBases(ecmParamBases);
-            clusterRoleHostService.collectClusterNodeSettings(clusterPhyName);
+            try {
+                clusterRoleHostService.collectClusterNodeSettings(clusterPhyName);
+            } catch (AdminTaskException e) {
+                e.printStackTrace();
+            }
         }, 30, 600);
     }
 

@@ -56,6 +56,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.template.Template
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.AmsRemoteException;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.mapping.AriusTypeProperty;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
@@ -170,7 +171,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
      * @return result
      */
     @Override
-    public List<ProjectBriefVO> getLogicTemplateProjectAccess(Integer logicId) {
+    public List<ProjectBriefVO> getLogicTemplateProjectAccess(Integer logicId) throws AmsRemoteException {
         Result<Map<Integer, Long>> result = templateSattisService.getTemplateAccessProjectIds(logicId, 7);
         if (result.failed()) {
             throw new AmsRemoteException("获取访问模板的project列表失败");
@@ -474,7 +475,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     }
 
     @Override
-    public PaginationResult<ConsoleTemplateVO> pageGetConsoleTemplateVOS(TemplateConditionDTO condition, Integer projectId) {
+    public PaginationResult<ConsoleTemplateVO> pageGetConsoleTemplateVOS(TemplateConditionDTO condition, Integer projectId) throws NotFindSubclassException {
         BaseHandle baseHandle     = handleFactory.getByHandlerNamePer(TEMPLATE_LOGIC.getPageSearchType());
         if (baseHandle instanceof TemplateLogicPageSearchHandle) {
             TemplateLogicPageSearchHandle handle = (TemplateLogicPageSearchHandle) baseHandle;
@@ -875,7 +876,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
      * @param excludeLabelIds 排除的标签ID列表
      * @return
      */
-    private List<TemplateLabel> fetchLabels(String includeLabelIds, String excludeLabelIds) {
+    private List<TemplateLabel> fetchLabels(String includeLabelIds, String excludeLabelIds) throws AmsRemoteException {
         Result<List<TemplateLabel>> result = templateLabelService.listByLabelIds(includeLabelIds,
                 excludeLabelIds);
         if (result.failed()) {

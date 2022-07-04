@@ -6,6 +6,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRegionWithNodeInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostWithRegionInfoVO;
+import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminTaskException;
 
 /**
@@ -29,7 +30,7 @@ public interface ClusterNodeManager {
      * @return Result<Long>
      */
     Result<List<Long>> createMultiNode2Region(List<ClusterRegionWithNodeInfoDTO> params, String operator,
-                                              Integer projectId);
+                                              Integer projectId) throws AdminOperateException;
 
     /**
      * 编辑节点的region属性
@@ -39,7 +40,7 @@ public interface ClusterNodeManager {
      * @param projectId
      * @return Result<Boolean>
      */
-    Result<Boolean> editMultiNode2Region(List<ClusterRegionWithNodeInfoDTO> params, String operator, Integer projectId);
+    Result<Boolean> editMultiNode2Region(List<ClusterRegionWithNodeInfoDTO> params, String operator, Integer projectId) throws AdminOperateException;
 
     /**
      * 获取物理集群节点列表

@@ -6,6 +6,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.Temp
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.srv.TemplateSrv;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.srv.UnavailableTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv.TemplateWithSrvVO;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
+
 import java.util.List;
 
 /**
@@ -42,7 +44,7 @@ public interface TemplateSrvManager {
      * @param condition
      * @return
      */
-    PaginationResult<TemplateWithSrvVO> pageGetTemplateWithSrv(TemplateQueryDTO condition);
+    PaginationResult<TemplateWithSrvVO> pageGetTemplateWithSrv(TemplateQueryDTO condition) throws NotFindSubclassException;
 
     /**
      * 开启模板服务

@@ -6,6 +6,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
+import lombok.SneakyThrows;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Service;
@@ -43,6 +44,7 @@ import com.google.common.collect.Lists;
  */
 @Service("ecmOpTaskHandler")
 public class ECMOpTaskHandler extends AbstractOpTaskHandler implements ApplicationListener<EcmTaskEditEvent> {
+    @SneakyThrows
     @Override
     public void onApplicationEvent(EcmTaskEditEvent event) {
         EcmTask ecmTask = event.getEditTask();

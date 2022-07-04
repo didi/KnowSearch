@@ -8,6 +8,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.WorkOrderVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.OrderStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
@@ -160,7 +161,7 @@ public abstract class BaseWorkOrderHandler implements WorkOrderHandler {
      * @param workOrder 工单
      * @return result
      */
-    protected abstract Result<Void> validateConsoleParam(WorkOrder workOrder);
+    protected abstract Result<Void> validateConsoleParam(WorkOrder workOrder) throws NotFindSubclassException;
 
     /**
      * 生成标题

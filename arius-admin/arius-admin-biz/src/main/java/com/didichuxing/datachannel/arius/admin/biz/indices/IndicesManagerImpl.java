@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -114,7 +115,7 @@ public class IndicesManagerImpl implements IndicesManager {
     private static final String DEFAULT_SORT_TERM = "timestamp";
 
     @Override
-    public PaginationResult<IndexCatCellVO> pageGetIndex(IndexQueryDTO condition, Integer projectId) {
+    public PaginationResult<IndexCatCellVO> pageGetIndex(IndexQueryDTO condition, Integer projectId) throws NotFindSubclassException {
         BaseHandle baseHandle     = handleFactory.getByHandlerNamePer(PageSearchHandleTypeEnum.INDEX.getPageSearchType());
         if (baseHandle instanceof IndexPageSearchHandle) {
             IndexPageSearchHandle handle = (IndexPageSearchHandle) baseHandle;

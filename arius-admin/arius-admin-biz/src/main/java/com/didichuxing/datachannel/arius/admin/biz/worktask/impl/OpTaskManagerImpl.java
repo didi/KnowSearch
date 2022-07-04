@@ -10,6 +10,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.po.task.OpTaskPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskHandleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
@@ -40,7 +41,7 @@ public class OpTaskManagerImpl implements OpTaskManager {
     private UserService  userService;
 
     @Override
-    public Result<OpTask> addTask(OpTaskDTO opTaskDTO) {
+    public Result<OpTask> addTask(OpTaskDTO opTaskDTO) throws NotFindSubclassException {
         if (AriusObjUtils.isNull(opTaskDTO.getCreator())) {
             return Result.buildParamIllegal("提交人为空");
         }
@@ -61,7 +62,7 @@ public class OpTaskManagerImpl implements OpTaskManager {
     }
 
     @Override
-    public boolean existUnClosedTask(Integer key, Integer type) {
+    public boolean existUnClosedTask(Integer key, Integer type) throws NotFindSubclassException {
         OpTaskHandleEnum taskHandleEnum = OpTaskHandleEnum.valueOfType(type);
 
         OpTaskHandler handler = (OpTaskHandler) handleFactory.getByHandlerNamePer(taskHandleEnum.getMessage());
@@ -106,7 +107,7 @@ public class OpTaskManagerImpl implements OpTaskManager {
     }
 
     @Override
-    public Result<Void> processTask(OpTaskProcessDTO processDTO) {
+    public Result<Void> processTask(OpTaskProcessDTO processDTO) throws NotFindSubclassException {
         if (AriusObjUtils.isNull(processDTO.getTaskId())) {
             return Result.buildParamIllegal("任务id为空");
         }

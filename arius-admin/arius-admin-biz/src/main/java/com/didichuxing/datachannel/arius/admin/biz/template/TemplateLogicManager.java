@@ -11,6 +11,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectTemplateAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
+import com.didichuxing.datachannel.arius.admin.common.exception.AmsRemoteException;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import java.util.List;
 import org.springframework.stereotype.Component;
@@ -39,7 +41,7 @@ public interface TemplateLogicManager {
      * @param logicId logicId
      * @return result
      */
-    List<ProjectBriefVO> getLogicTemplateProjectAccess(Integer logicId);
+    List<ProjectBriefVO> getLogicTemplateProjectAccess(Integer logicId) throws AmsRemoteException;
 
 
 
@@ -124,7 +126,7 @@ public interface TemplateLogicManager {
      * @param projectId      项目
      * @return
      */
-    PaginationResult<ConsoleTemplateVO> pageGetConsoleTemplateVOS(TemplateConditionDTO condition, Integer projectId);
+    PaginationResult<ConsoleTemplateVO> pageGetConsoleTemplateVOS(TemplateConditionDTO condition, Integer projectId) throws NotFindSubclassException;
 
     /**
      * 校验创建模板名称是否合法

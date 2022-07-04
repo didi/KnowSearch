@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.biz.project;
 
+import com.didichuxing.datachannel.arius.admin.common.exception.OperateForbiddenException;
 import com.didiglobal.logi.security.common.Result;
 import com.didiglobal.logi.security.common.dto.account.AccountLoginDTO;
 import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
@@ -47,5 +48,5 @@ public interface LoginManager {
      * @throws IOException ioexception
      */
     boolean interceptorCheck(HttpServletRequest request, HttpServletResponse response, String requestMappingValue,
-                             List<String> whiteMappingValues) throws IOException;
+                             List<String> whiteMappingValues) throws IOException, OperateForbiddenException;
 }

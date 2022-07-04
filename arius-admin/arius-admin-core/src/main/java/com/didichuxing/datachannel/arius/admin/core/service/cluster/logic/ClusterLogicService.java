@@ -15,6 +15,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.Ro
 import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterLogicDiskUsedInfoPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 
 /**
  * 逻辑集群service
@@ -167,7 +168,7 @@ public interface ClusterLogicService {
      * @param  operator              操作人
      * @return ESPlugin
      */
-    Result<Long> addPlugin(Long logicClusterId, PluginDTO pluginDTO, String operator);
+    Result<Long> addPlugin(Long logicClusterId, PluginDTO pluginDTO, String operator) throws NotFindSubclassException;
 
     /**
      * 转移逻辑集群
