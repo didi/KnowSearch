@@ -1,11 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.core.service.es.impl;
 
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_OPERATE_TIMEOUT;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.VERSION;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.VERSION_INNER_NUMBER;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.VERSION_NUMBER;
-
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.NodeAttrInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -38,15 +32,6 @@ import com.didiglobal.logi.log.LogFactory;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import java.net.InetAddress;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.compress.utils.Sets;
 import org.apache.commons.lang3.StringUtils;
@@ -55,6 +40,12 @@ import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.rest.RestStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.net.InetAddress;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.*;
 
 /**
  * @author d06679
@@ -450,7 +441,6 @@ public class ESClusterServiceImpl implements ESClusterService {
 
     private List<TaskMissionAnalysisVO> buildTaskMission(JSONObject responseJson) {
         List<TaskMissionAnalysisVO> vos = new ArrayList<>();
-
         JSONObject nodes = responseJson.getJSONObject(NODES);
         nodes.keySet().forEach(key -> {
             Optional.ofNullable((JSONObject) nodes.get(key)).map(o -> o.getJSONObject(TASKS)).ifPresent(nodeTasks -> {
@@ -460,7 +450,7 @@ public class ESClusterServiceImpl implements ESClusterService {
                     Optional.ofNullable(nodeInfo)
                             .ifPresent(o -> {
                                 taskMissionAnalysisVO.setAction(o.getString(ACTION));
-                                taskMissionAnalysisVO.setNode(o.getString(NODE));
+                                taskMissionAnalysisVO.setNode(nodes.getJSONObject(key).getString("name"));
                                 taskMissionAnalysisVO.setDescription(o.getString(DESCRIPTION));
                                 taskMissionAnalysisVO.setStartTimeInMillis(o.getLong(START_TIME_IN_MILLIS));
                                 taskMissionAnalysisVO.setRunningTimeInNanos(o.getInteger(RUNNING_TIME_IN_NANOS));
@@ -471,4 +461,5 @@ public class ESClusterServiceImpl implements ESClusterService {
         });
         return vos;
     }
+
 }
