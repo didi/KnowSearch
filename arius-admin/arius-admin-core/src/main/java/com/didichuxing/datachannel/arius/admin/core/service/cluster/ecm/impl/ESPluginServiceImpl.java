@@ -16,6 +16,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.PluginTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
@@ -127,7 +128,7 @@ public class ESPluginServiceImpl implements ESPluginService {
     }
 
     @Override
-    public Result<Long> addESPlugin(PluginDTO pluginDTO) {
+    public Result<Long> addESPlugin(PluginDTO pluginDTO) throws NotFindSubclassException {
         // 1.对插件信息的参数进行校验
         Result<Void> resultCheck = paramCheck(pluginDTO, ADD, null);
         if (resultCheck.failed()) {
@@ -210,7 +211,7 @@ public class ESPluginServiceImpl implements ESPluginService {
     }
 
     @Override
-    public Result<Long> deletePluginById(Long id, String operator) {
+    public Result<Long> deletePluginById(Long id, String operator) throws NotFindSubclassException {
         PluginDTO pluginDTO = new PluginDTO();
         pluginDTO.setId(id);
 
@@ -265,7 +266,7 @@ public class ESPluginServiceImpl implements ESPluginService {
     }
 
     @Override
-    public Result<String> addESPlugins(List<PluginDTO> pluginDTOS) {
+    public Result<String> addESPlugins(List<PluginDTO> pluginDTOS) throws NotFindSubclassException {
         List<String> addFail = Lists.newArrayList();
 
         // 分批次上传插件，并记录上传失败的插件名称

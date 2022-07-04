@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
@@ -109,7 +110,7 @@ public class ESPhyClusterController {
     @ResponseBody
     @ApiOperation(value = "按条件分页获取物理集群列表")
     public PaginationResult<ClusterPhyVO> pageGetClusterPhys(HttpServletRequest request,
-                                                                         @RequestBody ClusterPhyConditionDTO condition) {
+                                                                         @RequestBody ClusterPhyConditionDTO condition) throws NotFindSubclassException {
         return clusterPhyManager.pageGetClusterPhys(condition, HttpRequestUtil.getProjectId(request));
     }
 

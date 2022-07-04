@@ -22,6 +22,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEn
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.OperationTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
@@ -56,7 +57,7 @@ public class ClusterOpPluginRestartHandler extends BaseClusterOpRestartHandler {
     private EcmTaskManager ecmTaskManager;
 
     @Override
-    protected Result<Void> validateConsoleParam(WorkOrder workOrder) {
+    protected Result<Void> validateConsoleParam(WorkOrder workOrder) throws NotFindSubclassException {
         PhyClusterPluginOperationContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
                 PhyClusterPluginOperationContent.class);
 

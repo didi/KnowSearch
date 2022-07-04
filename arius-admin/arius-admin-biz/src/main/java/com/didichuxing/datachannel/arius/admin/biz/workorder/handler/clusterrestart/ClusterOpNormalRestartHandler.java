@@ -15,6 +15,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.deta
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import java.util.ArrayList;
@@ -31,7 +32,7 @@ import org.springframework.stereotype.Service;
 public class ClusterOpNormalRestartHandler extends BaseClusterOpRestartHandler {
 
     @Override
-    protected Result<Void> validateConsoleParam(WorkOrder workOrder) {
+    protected Result<Void> validateConsoleParam(WorkOrder workOrder) throws NotFindSubclassException {
         ClusterRestartContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
             ClusterRestartContent.class);
 

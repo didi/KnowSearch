@@ -3,6 +3,8 @@ package com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESPackageDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.espackage.ESPackage;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
+
 import java.util.List;
 
 /**
@@ -48,7 +50,7 @@ public interface ESPackageService {
      * @param operator 操作者
      * @return 删除es安装包数量
      */
-    Result<Long> deleteESPackage(Long id, String operator);
+    Result<Long> deleteESPackage(Long id, String operator) throws NotFindSubclassException;
 
     /**
      * 根据根据版本和类型查询一个程序包

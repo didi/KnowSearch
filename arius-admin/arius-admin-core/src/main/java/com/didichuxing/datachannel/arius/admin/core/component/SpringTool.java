@@ -77,7 +77,7 @@ public class SpringTool implements ApplicationContextAware, DisposableBean {
         SpringTool.clearHolder();
     }
 
-    public static String getUserName() {
+    public static String getUserName() throws OperateForbiddenException {
         ServletRequestAttributes servletRequestAttributes = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes());
         if(null == servletRequestAttributes) {
             throw new OperateForbiddenException(String.format("请携带操作人信息,HTTP_HEADER_KEY:%s",HttpRequestUtil.USER));

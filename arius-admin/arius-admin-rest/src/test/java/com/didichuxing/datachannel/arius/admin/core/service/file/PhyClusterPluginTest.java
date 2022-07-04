@@ -4,6 +4,7 @@ import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.PluginDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESPluginService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.extend.storage.FileStorageService;
@@ -42,7 +43,7 @@ public class PhyClusterPluginTest extends AriusAdminApplicationTest {
     }
 
     @Test
-    public void addESPluginTest() {
+    public void addESPluginTest() throws NotFindSubclassException {
         Mockito.when(clusterPhyService.getClusterById(-1)).thenReturn(null);
         Mockito.when(clusterPhyService.getClusterById(1)).thenReturn(CustomDataSource.esClusterPhyFactory());
         PluginDTO pluginDTO = CustomDataSource.getESPluginDTO();
@@ -62,7 +63,7 @@ public class PhyClusterPluginTest extends AriusAdminApplicationTest {
     }
 
     @Test
-    public void deletePluginByIdTest() {
+    public void deletePluginByIdTest() throws NotFindSubclassException {
         Mockito.when(esPluginDAO.delete(Mockito.anyLong())).thenReturn(1);
         Mockito.when(esPluginDAO.getById(-1L)).thenReturn(null);
         Mockito.when(esPluginDAO.getById(1L)).thenReturn(CustomDataSource.getESPluginPO());

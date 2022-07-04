@@ -39,7 +39,7 @@ public class AriusOpThreadPool implements Executor {
 
     @PostConstruct
     public void init() {
-        LOG.info("class=AriusOpThreadPool||method=init||AriusOpThreadPool init start.");
+        LOG.info("class=AriusOpThreadPool||method=init||AriusOpThreadPool init start..");
         pool = Executors.newFixedThreadPool(poolSize, springThreadFactory);
         Runtime.getRuntime().addShutdownHook(new Thread() {
 

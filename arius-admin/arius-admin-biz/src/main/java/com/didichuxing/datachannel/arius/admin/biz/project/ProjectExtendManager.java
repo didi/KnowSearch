@@ -5,10 +5,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectExtend
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectQueryExtendDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.ProjectBriefExtendVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.ProjectExtendVO;
-import com.didiglobal.logi.security.common.PagingData;
 import com.didiglobal.logi.security.common.PagingResult;
-import com.didiglobal.logi.security.common.dto.project.ProjectBriefQueryDTO;
-import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import com.didiglobal.logi.security.common.vo.project.ProjectDeleteCheckVO;
 import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
 import com.didiglobal.logi.security.exception.LogiSecurityException;
@@ -150,13 +147,7 @@ public interface ProjectExtendManager {
      */
     Result<ProjectDeleteCheckVO> checkBeforeDelete(Integer projectId);
 
-    /**
-     * 分页查询项目简要信息
-     *
-     * @param queryDTO 查询条件
-     * @return 简要信息List
-     */
-    PagingData<ProjectBriefVO> getProjectBriefPage(ProjectBriefQueryDTO queryDTO);
+
 
     /**
      * 校验项目是否存在

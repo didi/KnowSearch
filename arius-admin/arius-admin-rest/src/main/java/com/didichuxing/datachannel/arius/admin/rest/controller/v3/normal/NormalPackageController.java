@@ -6,6 +6,7 @@ import com.didichuxing.datachannel.arius.admin.biz.espackage.ESPackageManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESPackageDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.espackage.ESPackageVO;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -62,7 +63,7 @@ public class NormalPackageController {
     @DeleteMapping("/{id}")
     @ResponseBody
     @ApiOperation(value = "删除程序包接口", notes = "")
-    public Result<Long> deletePackage(HttpServletRequest request, @PathVariable Long id) {
+    public Result<Long> deletePackage(HttpServletRequest request, @PathVariable Long id) throws NotFindSubclassException {
         return packageManager.deleteESPackage(id, HttpRequestUtil.getOperator(request),HttpRequestUtil.getProjectId(request));
     }
 }

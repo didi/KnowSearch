@@ -13,6 +13,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPhy
 import com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESMachineNormsPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.esplugin.PluginPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESMachineNormsService;
@@ -251,7 +252,7 @@ public class ClusterLogicServiceTest extends AriusAdminApplicationTest {
     }
 
     @Test
-    public void addPluginTest() {
+    public void addPluginTest() throws NotFindSubclassException {
         Integer clusterId = new Integer(5);
         List<Integer> clusterIdList = Arrays.asList(clusterId);
         Mockito.when(clusterRegionService.listPhysicClusterId(Mockito.anyLong())).thenReturn(new ArrayList<>());

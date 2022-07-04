@@ -5,6 +5,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicCl
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionWithNodeInfoVO;
+import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
+
 import java.util.List;
 
 public interface ClusterRegionManager {
@@ -37,7 +39,7 @@ public interface ClusterRegionManager {
      * @param isAddClusterLogicFlag 是否要添加逻辑集群
      */
     Result<Void> batchBindRegionToClusterLogic(ESLogicClusterWithRegionDTO param, String operator,
-                                               boolean isAddClusterLogicFlag);
+                                               boolean isAddClusterLogicFlag) throws AdminOperateException;
 
     /**
      * 解绑逻辑集群已经绑定的region

@@ -6,6 +6,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.PluginDTO
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.esplugin.PluginPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.PluginTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
@@ -49,7 +50,7 @@ public class PluginServiceTest extends AriusAdminApplicationTest {
     /**
      * 这里由于涉及到在文件系统中上传文件的操作，所以这里这里直接进行数据表的mock
      */
-    public void addESPluginTest() {
+    public void addESPluginTest() throws NotFindSubclassException {
         PluginDTO pluginDTO = CustomDataSource.esPluginDTOFactory();
         Assertions.assertEquals("插件为空", esPluginService.addESPlugin(null).getMessage());
         Assertions.assertEquals("物理集群id为空", esPluginService.addESPlugin(pluginDTO).getMessage());
@@ -86,7 +87,7 @@ public class PluginServiceTest extends AriusAdminApplicationTest {
     }
 
     @Test
-    public void deletePluginByIdTest() {
+    public void deletePluginByIdTest() throws NotFindSubclassException {
         PluginDTO pluginDTO = CustomDataSource.esPluginDTOFactory();
         Assertions.assertEquals("非运维人员不能删除插件", esPluginService.deletePluginById(null, CustomDataSource.OPERATOR).getMessage());
         Assertions.assertEquals("插件id为空", esPluginService.deletePluginById(null, "admin").getMessage());

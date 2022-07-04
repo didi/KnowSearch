@@ -2,15 +2,6 @@ package com.didichuxing.datachannel.arius.admin.core.service.cluster.region.impl
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.DELETE;
 
-import java.util.*;
-import java.util.stream.Collectors;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -50,6 +41,18 @@ import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * @author ohushenglin_v
@@ -192,6 +195,7 @@ public class ClusterRegionServiceImpl implements ClusterRegionService {
                             .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
                             .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
                             .content(DELETE.getDesc())
+                            .userOperation(operator)
                             .bizId(Math.toIntExact(regionId))
                     .build());
         }
