@@ -5,6 +5,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESPackage
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.espackage.ESPackage;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.espackage.ESPackageVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.espackage.AriusESPackageEnum;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusOptional;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ESVersionUtil;
@@ -106,7 +107,7 @@ public class ESPackageManager {
      * @param projectId
      * @return
      */
-    public Result<Long> deleteESPackage(Long id, String operator, Integer projectId) {
+    public Result<Long> deleteESPackage(Long id, String operator, Integer projectId) throws NotFindSubclassException {
         final Result<Void> result = ProjectUtils.checkProjectCorrectly(i -> i, projectId, projectId);
         if (result.failed()){
             return Result.buildFail(result.getMessage());

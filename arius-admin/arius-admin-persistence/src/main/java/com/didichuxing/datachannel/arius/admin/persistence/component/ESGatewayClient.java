@@ -107,7 +107,7 @@ public class ESGatewayClient {
      *
      */
     @PostConstruct
-    public void init() {
+    public void init() throws AriusGatewayException {
         LOGGER.info("class=ESGatewayClient||method=init||ESGatewayClient init start.");
         // 多个es user
         String[] esUsers = StringUtils.splitByWholeSeparatorPreserveAllTokens(esUser, COMMA);

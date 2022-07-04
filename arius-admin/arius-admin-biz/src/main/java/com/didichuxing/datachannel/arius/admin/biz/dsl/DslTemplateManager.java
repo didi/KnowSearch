@@ -4,6 +4,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResu
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.dsl.template.DslTemplateConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.DslTemplateVO;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
+
 import java.util.List;
 
 /**
@@ -46,5 +48,5 @@ public interface DslTemplateManager {
      * @param queryDTO 查询条件
      * @return 分页数据
      */
-    PaginationResult<DslTemplateVO> getDslTemplatePage(Integer projectId, DslTemplateConditionDTO queryDTO);
+    PaginationResult<DslTemplateVO> getDslTemplatePage(Integer projectId, DslTemplateConditionDTO queryDTO) throws NotFindSubclassException;
 }

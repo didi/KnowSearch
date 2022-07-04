@@ -6,6 +6,8 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
+import com.didichuxing.datachannel.arius.admin.common.exception.AdminTaskException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -53,7 +55,7 @@ public class ESPhyClusterNodeController {
     @PostMapping("/divide-region")
     @ResponseBody
     @ApiOperation(value = "节点划分且创建region")
-    public Result<List<Long>> createMultiNode2Region(HttpServletRequest request, @RequestBody List<ClusterRegionWithNodeInfoDTO> params) {
+    public Result<List<Long>> createMultiNode2Region(HttpServletRequest request, @RequestBody List<ClusterRegionWithNodeInfoDTO> params) throws AdminOperateException {
         
         return clusterNodeManager.createMultiNode2Region(params, HttpRequestUtil.getOperator(request),
                 HttpRequestUtil.getProjectId(request));
@@ -62,7 +64,7 @@ public class ESPhyClusterNodeController {
     @PutMapping("/divide-region")
     @ResponseBody
     @ApiOperation(value = "编辑多个region中的节点信息（扩缩容）")
-    public Result<Boolean> editMultiNode2Region(HttpServletRequest request, @RequestBody List<ClusterRegionWithNodeInfoDTO> params) {
+    public Result<Boolean> editMultiNode2Region(HttpServletRequest request, @RequestBody List<ClusterRegionWithNodeInfoDTO> params) throws AdminOperateException {
        
         return clusterNodeManager.editMultiNode2Region(params, HttpRequestUtil.getOperator(request),HttpRequestUtil.getProjectId(request));
     }
@@ -85,7 +87,7 @@ public class ESPhyClusterNodeController {
     @ResponseBody
     @ApiOperation(value = "采集集群节点配置信息接口【三方接口】", tags = "【三方接口】")
     @ApiImplicitParam(type = "String", name = "phyClusterName", value = "物理集群名称", required = true)
-    public Result<Void> collectNodeSettings(@PathVariable String phyClusterName) {
+    public Result<Void> collectNodeSettings(@PathVariable String phyClusterName) throws AdminTaskException {
         return Result.build(clusterNodeManager.collectNodeSettings(phyClusterName));
     }
 

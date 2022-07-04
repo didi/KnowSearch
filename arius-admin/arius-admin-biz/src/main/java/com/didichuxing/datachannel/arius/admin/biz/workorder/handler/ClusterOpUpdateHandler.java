@@ -22,6 +22,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
@@ -60,7 +61,7 @@ public class ClusterOpUpdateHandler extends BaseWorkOrderHandler {
     private OpTaskManager opTaskManager;
 
     @Override
-    protected Result<Void> validateConsoleParam(WorkOrder workOrder) {
+    protected Result<Void> validateConsoleParam(WorkOrder workOrder) throws NotFindSubclassException {
         ClusterUpdateContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
             ClusterUpdateContent.class);
 
@@ -111,7 +112,7 @@ public class ClusterOpUpdateHandler extends BaseWorkOrderHandler {
     }
 
     @Override
-    protected Result<Void> doProcessAgree(WorkOrder workOrder, String approver) {
+    protected Result<Void> doProcessAgree(WorkOrder workOrder, String approver) throws NotFindSubclassException {
         ClusterUpdateContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
             ClusterUpdateContent.class);
 

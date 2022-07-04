@@ -20,7 +20,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.event.metrics.MetricsMonitorCollectTimeEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.metrics.MetricsMonitorIndexEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.metrics.MetricsMonitorNodeEvent;
-import com.didichuxing.datachannel.arius.admin.common.exception.ESRunTimeException;
+import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
@@ -223,9 +223,9 @@ public class MonitorClusterJob {
      * 通过datanode并发去获取节点stats
      * @param esClient
      * @return
-     * @throws ESRunTimeException
+     * @throws AdminOperateException
      */
-    private Map<String, ClusterNodeStats> getClusterNodeStatsConcurrently(ESClient esClient) throws ESRunTimeException{
+    private Map<String, ClusterNodeStats> getClusterNodeStatsConcurrently(ESClient esClient) throws AdminOperateException{
         try {
             long startTime = System.currentTimeMillis();
             long expectEndTime = startTime + CLIENT_TO_WITH_MILLS;
@@ -245,7 +245,7 @@ public class MonitorClusterJob {
                     try {
                         if (System.currentTimeMillis() > expectEndTime) {
                             // 总任务已经超时，不再执行
-                            throw new ESRunTimeException(TIME_OUT);
+                            throw new AdminOperateException(TIME_OUT);
                         }
                         response = esClient.admin().cluster().prepareExecute(ESNodesStatsAction.INSTANCE)
                                 .setNodesIds(nodeIdBatch.toArray(new String[0]))
@@ -276,11 +276,11 @@ public class MonitorClusterJob {
             return clusterNodeStatsMap;
         } catch (Exception e) {
             LOGGER.error("class=MonitorClusterJob||method=getClusterNodeStatsConcurrently||getClusterNodeStats for cluster {} error, e->", esClient.getClusterName(), e);
-            throw new ESRunTimeException(TIME_OUT, e.getCause());
+            throw new AdminOperateException(TIME_OUT, e.getCause());
         }
     }
 
-    private Map<String, ClusterNodeStats> getClusterNodeStats(ESClient esClient) {
+    private Map<String, ClusterNodeStats> getClusterNodeStats(ESClient esClient) throws AdminOperateException {
         boolean isConcurrentCollect = ariusConfigInfoService.booleanSetting(CONFIG_VALUE_GROUP,
                 NODE_STAT_COLLECT_CONCURRENT, false);
 
@@ -408,7 +408,7 @@ public class MonitorClusterJob {
                     try {
                         if (System.currentTimeMillis() > expectEndTime) {
                             // 总任务已经超时，不再执行
-                            throw new ESRunTimeException(TIME_OUT);
+                            throw new AdminOperateException(TIME_OUT);
                         }
 
                         response = esClient.admin().indices().prepareExecute( ESIndexStatsAction.INSTANCE)

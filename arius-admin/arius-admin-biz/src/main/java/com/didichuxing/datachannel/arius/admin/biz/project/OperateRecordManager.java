@@ -4,6 +4,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResu
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.oprecord.OperateRecordDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.operaterecord.OperateRecordVO;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 
 public interface OperateRecordManager {
     /**
@@ -13,7 +14,7 @@ public interface OperateRecordManager {
      * @param projectId
      * @return {@code PagingResult<OplogVO>}
      */
-    PaginationResult<OperateRecordVO> pageOplogPage(OperateRecordDTO queryDTO,Integer projectId);
+    PaginationResult<OperateRecordVO> pageOplogPage(OperateRecordDTO queryDTO,Integer projectId) throws NotFindSubclassException;
     
     /**
      * 获取oplog

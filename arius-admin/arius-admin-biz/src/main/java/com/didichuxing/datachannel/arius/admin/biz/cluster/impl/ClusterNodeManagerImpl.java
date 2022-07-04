@@ -9,6 +9,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +31,6 @@ import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.Ope
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.event.region.RegionEditEvent;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminTaskException;
-import com.didichuxing.datachannel.arius.admin.common.exception.AriusRunTimeException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
@@ -111,7 +111,7 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Result<List<Long>> createMultiNode2Region(List<ClusterRegionWithNodeInfoDTO> params, String operator,
-                                                     Integer projectId) {
+                                                     Integer projectId) throws AdminOperateException {
         final Result<Void> result = ProjectUtils.checkProjectCorrectly(i -> i, projectId,projectId);
         if (result.failed()){
             return Result.buildFail(result.getMessage());
@@ -145,7 +145,7 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
                                     .build());
                     regionIdLis.add(addRegionRet.getData());
                 }else {
-                    throw new AriusRunTimeException(addRegionRet.getMessage(), FAIL);
+                    throw new AdminOperateException(addRegionRet.getMessage(), FAIL);
                 }
             }
         }
@@ -155,14 +155,14 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Result<Boolean> editMultiNode2Region(List<ClusterRegionWithNodeInfoDTO> params, String operator,
-                                                Integer projectId) {
+                                                Integer projectId) throws AdminOperateException {
          final Result<Void> result = ProjectUtils.checkProjectCorrectly(i -> i, projectId,projectId);
         if (result.failed()){
             return Result.buildFail(result.getMessage());
         }
         for (ClusterRegionWithNodeInfoDTO param : params) {
             Result<Boolean> editNode2RegionRet = editNode2Region(param);
-            if (editNode2RegionRet.failed()) { throw new AriusRunTimeException(editNode2RegionRet.getMessage(), FAIL);}
+            if (editNode2RegionRet.failed()) { throw new AdminOperateException(editNode2RegionRet.getMessage(), FAIL);}
         }
 
         // 发布region变更的事件，对模板和索引生效
@@ -262,7 +262,7 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
         return Result.buildSucc();
     }
 
-    private Result<Boolean> editNode2Region(ClusterRegionWithNodeInfoDTO param) {
+    private Result<Boolean> editNode2Region(ClusterRegionWithNodeInfoDTO param) throws AdminOperateException {
         Result<Boolean> checkRet = baseCheckParamValid(param);
         if (checkRet.failed()) {
             return Result.buildFrom(checkRet);

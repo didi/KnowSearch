@@ -16,6 +16,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexMappi
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexSettingVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexShardInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
 
 /**
@@ -29,7 +30,7 @@ public interface IndicesManager {
      * @param projectId         项目
      * @return              List<IndexCatInfoVO>
      */
-    PaginationResult<IndexCatCellVO> pageGetIndex(IndexQueryDTO condition, Integer projectId);
+    PaginationResult<IndexCatCellVO> pageGetIndex(IndexQueryDTO condition, Integer projectId) throws NotFindSubclassException;
 
     /**
      * 创建索引

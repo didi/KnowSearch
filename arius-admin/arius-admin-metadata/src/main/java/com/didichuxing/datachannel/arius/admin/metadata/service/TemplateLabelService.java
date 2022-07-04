@@ -180,7 +180,7 @@ public class TemplateLabelService {
      * @return result result
      */
     public Result<Boolean> updateTemplateLabel(Integer logicId, Set<String> shouldAdds, Set<String> shouldDels,
-                                      String operator) {
+                                      String operator) throws AmsRemoteException {
         List<Label> allLabels = listTemplateLabel(logicId);
 
         Set<String> oldLabelIdSet = allLabels.stream().map(Label::getLabelId).collect(Collectors.toSet());

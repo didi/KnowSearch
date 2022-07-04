@@ -2,6 +2,7 @@ package com.didichuxing.datachannel.arius.admin.biz.worktask.handler;
 
 import java.util.Date;
 
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.alibaba.fastjson.JSON;
@@ -49,7 +50,7 @@ public abstract class AbstractOpTaskHandler implements OpTaskHandler {
     protected ClusterPhyService clusterPhyService;
 
     @Override
-    public Result<OpTask> addTask(OpTask opTask) {
+    public Result<OpTask> addTask(OpTask opTask) throws NotFindSubclassException {
         if (AriusObjUtils.isNull(opTask.getExpandData())) {
             return Result.buildParamIllegal("提交内容为空");
         }

@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.task.resource;
 
+import com.didichuxing.datachannel.arius.admin.common.exception.AdminTaskException;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
 import com.didichuxing.datachannel.arius.admin.task.BaseConcurrentClusterTask;
 import com.didichuxing.datachannel.arius.admin.task.TaskConcurrentConstants;
@@ -68,7 +69,7 @@ public class ClusterNodeSettingCollectorRandomTask extends BaseConcurrentCluster
      * @param cluster 集群名字
      */
     @Override
-    public boolean executeByCluster(String cluster) {
+    public boolean executeByCluster(String cluster) throws AdminTaskException {
         return clusterRoleHostService.collectClusterNodeSettings(cluster);
     }
 }

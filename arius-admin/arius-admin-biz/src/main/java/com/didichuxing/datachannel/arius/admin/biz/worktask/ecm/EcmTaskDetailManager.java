@@ -4,6 +4,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.EcmTaskDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.EcmTaskDetailProgress;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.response.EcmSubTaskLog;
+import com.didichuxing.datachannel.arius.admin.common.exception.AdminTaskException;
 
 import java.util.List;
 
@@ -57,7 +58,7 @@ public interface EcmTaskDetailManager {
      * @param  workOrderTaskId 工单任务ID
      * @return result
      */
-    Result<EcmTaskDetailProgress> getEcmTaskDetailInfo(Long workOrderTaskId);
+    Result<EcmTaskDetailProgress> getEcmTaskDetailInfo(Long workOrderTaskId) throws AdminTaskException;
 
     /**
      * 获取waiting状态TaskDetail
