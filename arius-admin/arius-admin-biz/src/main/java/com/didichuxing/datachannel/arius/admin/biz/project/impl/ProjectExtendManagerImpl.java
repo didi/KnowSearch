@@ -36,7 +36,6 @@ import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectConfi
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didiglobal.logi.security.common.PagingData;
 import com.didiglobal.logi.security.common.PagingResult;
-import com.didiglobal.logi.security.common.dto.project.ProjectBriefQueryDTO;
 import com.didiglobal.logi.security.common.dto.project.ProjectQueryDTO;
 import com.didiglobal.logi.security.common.dto.project.ProjectSaveDTO;
 import com.didiglobal.logi.security.common.enums.project.ProjectUserCode;
@@ -53,6 +52,7 @@ import com.didiglobal.logi.security.service.UserProjectService;
 import com.didiglobal.logi.security.service.UserService;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -268,42 +268,65 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
      * @return 项目分页信息
      */
     @Override
-    public PagingResult<ProjectExtendVO> getProjectPage(ProjectQueryExtendDTO queryDTO, HttpServletRequest request) {
-        //如果当前操作人不是管理员的角色，则只应该获取属于自己的项目，不能获取全部的项目
+    public PagingResult<ProjectExtendVO> getProjectPage(ProjectQueryExtendDTO queryDTO,
+                                                            HttpServletRequest request) {
+         final List<Integer> projectIds = Lists.newArrayList();
+         final List<Integer> esUserByProjectIds = Lists.newArrayList();
+        //当查询模式不为空
+        if (Objects.nonNull(queryDTO.getSearchType())) {
+            final List<Integer> projectIdBySearchType = esUserService.getProjectIdBySearchType(
+                    queryDTO.getSearchType());
+            if (CollectionUtils.isEmpty(projectIdBySearchType)) {
+                return PagingResult.success(new PagingData<>(Collections.emptyList(),PagingData.Pagination.builder()
+                        .build()));
+            } else {
+                esUserByProjectIds.addAll(projectIdBySearchType);
+            
+            }
+        }
         String operator = HttpRequestUtil.getOperator(request);
         Integer operatorId = HttpRequestUtil.getOperatorId(request);
+        //如果当前操作人不是管理员的角色，则只应该获取属于自己的项目，不能获取全部的项目
         if (StringUtils.isNotBlank(operator) && !roleTool.isAdmin(operator)) {
-            queryDTO.setChargeUsername(operator);
-        }
-        final ProjectQueryDTO projectQueryDTO = ConvertUtil.obj2Obj(queryDTO, ProjectQueryDTO.class);
-        if (Objects.isNull(queryDTO.getSearchType())) {
-            final PagingData<ProjectVO> projectPage = projectService.getProjectPage(projectQueryDTO);
-            final List<ProjectVO> bizData = projectPage.getBizData();
-            final List<ProjectExtendVO> projectExtendVOList = ConvertUtil.list2List(bizData, ProjectExtendVO.class);
-            projectExtendVOList.forEach(this::setAdminProjectExtendVO);
             
-            return PagingResult.success(new PagingData<>(projectExtendVOList, projectPage.getPagination()));
-        } else {
-            final List<Integer> esUserProjectIds = esUserService.getProjectIdBySearchType(queryDTO.getSearchType());
-            final List<Integer> projectIds = Lists.newArrayList();
-            if (StringUtils.isNotBlank(operator) && !roleTool.isAdmin(operator)) {
-                userProjectService.getProjectIdListByUserIdList(Collections.singletonList(operatorId)).stream()
-                        .filter(esUserProjectIds::contains).forEach(projectIds::add);
+            final List<Integer> operatorIdByProjectIds = userProjectService.getProjectIdListByUserIdList(
+                    Collections.singletonList(operatorId));
+            //esUserByProjectIds、operatorIdByProjectIds取交集
+            if (CollectionUtils.isNotEmpty(esUserByProjectIds)) {
+                projectIds.addAll(Sets.intersection(Sets.newHashSet(esUserByProjectIds),
+                        Sets.newHashSet(operatorIdByProjectIds)));
             } else {
-                projectIds.addAll(esUserProjectIds);
+                projectIds.addAll(operatorIdByProjectIds);
             }
             
-            final PagingData<ProjectVO> projectPage = projectService.getProjectPage(projectQueryDTO, projectIds);
-            final List<ProjectExtendVO> projectExtendVOList = ConvertUtil.list2List(projectPage.getBizData(),
-                    ProjectExtendVO.class);
-            for (ProjectExtendVO projectExtendVO : projectExtendVOList) {
-                setAdminProjectExtendVO(projectExtendVO);
-                final ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectExtendVO.getId());
-                projectExtendVO.setConfig(ConvertUtil.obj2Obj(projectConfig, ProjectConfigVO.class));
-            }
-            return PagingResult.success(new PagingData<>(projectExtendVOList, projectPage.getPagination()));
-            
+        } else {
+            projectIds.addAll(esUserByProjectIds);
         }
+        /**
+         * 1.管理员角色的用户
+         * 	应用列表:全部展示()
+         * 	编辑能力:应该具备
+         * 	删除能力:应该具备
+         * 2.非管理员角色的用户:
+         * 	应用列表:
+         * 		非检索状态下:展示自己拥有的应用列表
+         * 		编辑能力:应该具备
+         * 		删除能力:应该具备
+         * 		检索状态下 :  假如A应用不属于当前的用户,是否可以被检索出来(不能)
+         * 		编辑能力   :  假如A应用不属于当前的用户,是否可以被编辑(不能)
+         * 		删除能力  :   假如A应用不属于当前的用户,是否可以被删除 (不能)
+         */
+        final ProjectQueryDTO projectQueryDTO = ConvertUtil.obj2Obj(queryDTO, ProjectQueryDTO.class);
+    
+        final PagingData<ProjectVO> projectPage = projectService.getProjectPage(projectQueryDTO, projectIds);
+        final List<ProjectExtendVO> projectExtendVOList = ConvertUtil.list2List(projectPage.getBizData(),
+                ProjectExtendVO.class);
+        for (ProjectExtendVO projectExtendVO : projectExtendVOList) {
+            setAdminProjectExtendVO(projectExtendVO);
+            final ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectExtendVO.getId());
+            projectExtendVO.setConfig(ConvertUtil.obj2Obj(projectConfig, ProjectConfigVO.class));
+        }
+        return PagingResult.success(new PagingData<>(projectExtendVOList, projectPage.getPagination()));
     }
     
     /**
@@ -541,16 +564,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
         return Result.buildSucc(projectService.checkBeforeDelete(projectId));
     }
     
-    /**
-     * 分页查询项目简要信息
-     *
-     * @param queryDTO 查询条件
-     * @return 简要信息List
-     */
-    @Override
-    public PagingData<ProjectBriefVO> getProjectBriefPage(ProjectBriefQueryDTO queryDTO) {
-        return projectService.getProjectBriefPage(queryDTO);
-    }
+
     
     /**
      * 校验项目是否存在
