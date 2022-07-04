@@ -1,6 +1,6 @@
-package com.didichuxing.datachannel.arius.admin.rest.controller.v2.thirdpart;
+package com.didichuxing.datachannel.arius.admin.rest.controller.v3.white.thirdpart;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V2_THIRD_PART;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_THIRD_PART;
 import static com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant.GATEWAY_GET_PROJECT_TICKET;
 import static com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant.GATEWAY_GET_PROJECT_TICKET_NAME;
 
@@ -39,10 +39,9 @@ import org.springframework.web.bind.annotation.RestController;
  * @date 2019/3/13
  */
 @RestController
-@RequestMapping(V2_THIRD_PART + "/gateway")
+@RequestMapping(V3_THIRD_PART + "/gateway")
 @Api(tags = "第三方gateway接口(REST)")
-@Deprecated
-public class ThirdpartGatewayController {
+public class ThirdpartGatewayV3Controller {
 
     @Autowired
     private GatewayManager gatewayManager;
