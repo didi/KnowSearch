@@ -60,15 +60,16 @@ public class ESClusterServiceImpl implements ESClusterService {
     private ESClusterDAO      esClusterDAO;
 
     private final String ACKNOWLEDGED = "acknowledged";
-    private final String SHARDS       = "_shards";
+    private final String SHARDS = "_shards";
     private final String FAILED = "failed";
     private final String DESCRIPTION = "description";
     private final String START_TIME_IN_MILLIS = "start_time_in_millis";
     private final String RUNNING_TIME_IN_NANOS = "running_time_in_nanos";
     private final String ACTION = "action";
-    private final String NODE = "node";
+    private final String NAME = "name";
     private final String NODES = "nodes";
     private final String TASKS = "tasks";
+
 
     /**
      * 关闭集群re balance
@@ -446,11 +447,12 @@ public class ESClusterServiceImpl implements ESClusterService {
             Optional.ofNullable((JSONObject) nodes.get(key)).map(o -> o.getJSONObject(TASKS)).ifPresent(nodeTasks -> {
                 nodeTasks.forEach((key1, val) -> {
                     JSONObject nodeInfo = (JSONObject) val;
+                    String nodeName = nodes.getJSONObject(key).getString(NAME);
                     TaskMissionAnalysisVO taskMissionAnalysisVO = new TaskMissionAnalysisVO();
                     Optional.ofNullable(nodeInfo)
                             .ifPresent(o -> {
                                 taskMissionAnalysisVO.setAction(o.getString(ACTION));
-                                taskMissionAnalysisVO.setNode(nodes.getJSONObject(key).getString("name"));
+                                taskMissionAnalysisVO.setNode(nodeName);
                                 taskMissionAnalysisVO.setDescription(o.getString(DESCRIPTION));
                                 taskMissionAnalysisVO.setStartTimeInMillis(o.getLong(START_TIME_IN_MILLIS));
                                 taskMissionAnalysisVO.setRunningTimeInNanos(o.getInteger(RUNNING_TIME_IN_NANOS));
