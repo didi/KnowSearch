@@ -8,6 +8,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterWithRegionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionVO;
+import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
@@ -67,7 +68,7 @@ public class ESLogicClusterRegionController {
     @ResponseBody
     @ApiOperation(value = "绑定逻辑集群region接口", notes = "")
     public Result<Void> bindingLogicClusterRegion(HttpServletRequest request,
-                                                  @RequestBody ESLogicClusterWithRegionDTO param) {
+                                                  @RequestBody ESLogicClusterWithRegionDTO param) throws AdminOperateException {
         param.setProjectId(HttpRequestUtil.getProjectId(request));
         return clusterRegionManager.batchBindRegionToClusterLogic(param, HttpRequestUtil.getOperator(request),
             Boolean.FALSE);

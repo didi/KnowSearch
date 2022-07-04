@@ -13,6 +13,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PluginVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.ecm.ESClusterNodeSepcVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
@@ -72,7 +73,7 @@ public class ESLogicClusterOpV3Controller {
     @ResponseBody
     @ApiOperation(value = "条件获取逻辑集群列表")
     public PaginationResult<ClusterLogicVO> pageGetClusterLogics(HttpServletRequest request,
-                                                                     @RequestBody ClusterLogicConditionDTO condition) {
+                                                                     @RequestBody ClusterLogicConditionDTO condition) throws NotFindSubclassException {
         return clusterLogicManager.pageGetClusterLogics(condition, HttpRequestUtil.getProjectId(request));
     }
     

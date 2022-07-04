@@ -5,6 +5,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskProcessDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
+
 import java.util.List;
 
 /**
@@ -21,7 +23,7 @@ public interface OpTaskManager {
      * @return Result
      * @throws AdminOperateException 异常
      */
-    Result<OpTask> addTask(OpTaskDTO opTaskDTO);
+    Result<OpTask> addTask(OpTaskDTO opTaskDTO) throws NotFindSubclassException;
 
     /**
      * 判断一个任务是否存在
@@ -29,7 +31,7 @@ public interface OpTaskManager {
      * @param type 任务类型
      * @return
      */
-    boolean existUnClosedTask(Integer key, Integer type);
+    boolean existUnClosedTask(Integer key, Integer type) throws NotFindSubclassException;
 
     /**
      * 插入一条任务
@@ -66,7 +68,7 @@ public interface OpTaskManager {
      * @param processDTO 任务
      * @return Result
      */
-    Result<Void> processTask(OpTaskProcessDTO processDTO);
+    Result<Void> processTask(OpTaskProcessDTO processDTO) throws NotFindSubclassException;
     
     /**获取最新任务
      * 通过businessKey获取最新的任务

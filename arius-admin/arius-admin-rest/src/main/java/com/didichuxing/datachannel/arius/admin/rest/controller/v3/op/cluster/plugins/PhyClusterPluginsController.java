@@ -8,6 +8,7 @@ import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPluginsManager
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.PluginDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PluginVO;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -50,7 +51,7 @@ public class PhyClusterPluginsController {
     @PostMapping("")
     @ResponseBody
     @ApiOperation(value = "上传插件")
-    public Result<Long> add(HttpServletRequest request,PluginDTO param) {
+    public Result<Long> add(HttpServletRequest request,PluginDTO param) throws NotFindSubclassException {
        
         return clusterPluginsManager.addPlugins(param,HttpRequestUtil.getProjectId(request));
     }
@@ -58,7 +59,7 @@ public class PhyClusterPluginsController {
     @DeleteMapping("/{pluginId}")
     @ResponseBody
     @ApiOperation(value = "删除ES本地插件信息")
-    public Result<Long> deleteEsClusterConfig(HttpServletRequest request, @PathVariable(value = "pluginId") Long pluginId) {
+    public Result<Long> deleteEsClusterConfig(HttpServletRequest request, @PathVariable(value = "pluginId") Long pluginId) throws NotFindSubclassException {
         
         return clusterPluginsManager.deletePluginById(pluginId, HttpRequestUtil.getOperator(request),
                 HttpRequestUtil.getProjectId(request));

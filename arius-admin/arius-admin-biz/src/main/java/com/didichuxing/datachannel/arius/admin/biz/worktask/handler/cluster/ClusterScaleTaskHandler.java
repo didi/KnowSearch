@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
@@ -64,7 +65,7 @@ public class ClusterScaleTaskHandler extends AbstractClusterTaskHandler {
     }
 
     @Override
-    Result<Void> validateHostParam(String param) {
+    Result<Void> validateHostParam(String param) throws NotFindSubclassException {
         ClusterIndecreaseHostContent content = ConvertUtil.str2ObjByJson(param, ClusterIndecreaseHostContent.class);
 
         if (AriusObjUtils.isNull(content.getPhyClusterId())) {

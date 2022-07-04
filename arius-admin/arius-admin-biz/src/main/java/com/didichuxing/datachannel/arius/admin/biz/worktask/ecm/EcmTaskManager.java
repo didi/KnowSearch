@@ -9,6 +9,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.ecm.EcmTaskD
 import com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmTaskStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.ecm.EcmTask;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.task.ecm.EcmTaskPO;
+import com.didichuxing.datachannel.arius.admin.common.exception.AdminTaskException;
+import com.didichuxing.datachannel.arius.admin.common.exception.EcmRemoteException;
 import com.didichuxing.datachannel.arius.admin.remote.zeus.bean.constant.EcmActionEnum;
 
 /**
@@ -57,7 +59,7 @@ public interface EcmTaskManager {
      * @param  operator  操作人
      * @return result
      */
-    Result<EcmOperateAppBase> savaAndActionEcmTask(Long taskId, String operator);
+    Result<EcmOperateAppBase> savaAndActionEcmTask(Long taskId, String operator) throws EcmRemoteException;
 
     /**
      * 重试集群任务：将任务状态改为waiting 同时将zeus任务的id置空
@@ -73,7 +75,7 @@ public interface EcmTaskManager {
      * @param  operator  操作人
      * @return result
      */
-    Result<EcmOperateAppBase> actionClusterEcmTask(Long taskId, String operator);
+    Result<EcmOperateAppBase> actionClusterEcmTask(Long taskId, String operator) throws EcmRemoteException;
 
     /**
      * 继续执行单个Ecm任务
@@ -83,7 +85,7 @@ public interface EcmTaskManager {
      * @param operator
      * @return
      */
-    Result<EcmOperateAppBase> actionClusterEcmTask(Long taskId, EcmActionEnum ecmActionEnum, String hostname, String operator);
+    Result<EcmOperateAppBase> actionClusterEcmTask(Long taskId, EcmActionEnum ecmActionEnum, String hostname, String operator) throws EcmRemoteException;
 
     /**
      * 取消工单部署集群节点
@@ -113,7 +115,7 @@ public interface EcmTaskManager {
      * @param ecmTask
      * @return
      */
-    EcmTaskStatusEnum refreshEcmTask(EcmTask ecmTask);
+    EcmTaskStatusEnum refreshEcmTask(EcmTask ecmTask) throws AdminTaskException;
 
     /**
      * 根据ID修改任务信息
