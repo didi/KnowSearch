@@ -271,6 +271,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
     public PagingResult<ProjectExtendVO> getProjectPage(ProjectQueryExtendDTO queryDTO, HttpServletRequest request) {
         //如果当前操作人不是管理员的角色，则只应该获取属于自己的项目，不能获取全部的项目
         String operator = HttpRequestUtil.getOperator(request);
+        Integer operatorId = HttpRequestUtil.getOperatorId(request);
         if (StringUtils.isNotBlank(operator) && !roleTool.isAdmin(operator)) {
             queryDTO.setChargeUsername(operator);
         }
@@ -283,7 +284,15 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
             
             return PagingResult.success(new PagingData<>(projectExtendVOList, projectPage.getPagination()));
         } else {
-            final List<Integer> projectIds = esUserService.getProjectIdBySearchType(queryDTO.getSearchType());
+            final List<Integer> esUserProjectIds = esUserService.getProjectIdBySearchType(queryDTO.getSearchType());
+            final List<Integer> projectIds = Lists.newArrayList();
+            if (StringUtils.isNotBlank(operator) && !roleTool.isAdmin(operator)) {
+                userProjectService.getProjectIdListByUserIdList(Collections.singletonList(operatorId)).stream()
+                        .filter(esUserProjectIds::contains).forEach(projectIds::add);
+            } else {
+                projectIds.addAll(esUserProjectIds);
+            }
+            
             final PagingData<ProjectVO> projectPage = projectService.getProjectPage(projectQueryDTO, projectIds);
             final List<ProjectExtendVO> projectExtendVOList = ConvertUtil.list2List(projectPage.getBizData(),
                     ProjectExtendVO.class);

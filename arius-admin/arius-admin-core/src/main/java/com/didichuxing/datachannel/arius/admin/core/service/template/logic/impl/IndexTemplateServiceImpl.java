@@ -1361,9 +1361,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
         if (AriusObjUtils.isNull(param.getExpireTime())) {
             return Result.buildParamIllegal("保存时长为空");
         }
-        if (AriusObjUtils.isNull(param.getResponsible())) {
-            return Result.buildParamIllegal("责任人为空");
-        }
+      
         if (AriusObjUtils.isNull(param.getExpression())) {
             return Result.buildParamIllegal("表达式为空");
         }
