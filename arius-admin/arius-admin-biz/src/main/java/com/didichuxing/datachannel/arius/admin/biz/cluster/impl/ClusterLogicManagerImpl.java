@@ -637,10 +637,14 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         return Result.buildSucc(collect);
     }
 
+    @Override
+    public Result<List<PluginVO>> getClusterLogicPlugins(Long clusterId) {
+       return Result.buildSucc(
+                ConvertUtil.list2List(clusterLogicService.getClusterLogicPlugins(clusterId), PluginVO.class));
+    }
 
 
-
-/**************************************************** private method ****************************************************/
+    /**************************************************** private method ****************************************************/
 
     private ClusterPhyVO getPhyNameByLogic(Long clusterLogicId) {
         ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(clusterLogicId);
