@@ -16,7 +16,6 @@ import com.didichuxing.datachannel.arius.admin.common.event.auth.ProjectLogicClu
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
@@ -25,11 +24,9 @@ import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectClust
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.project.ProjectLogicClusterAuthDAO;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-import com.didiglobal.logi.security.common.vo.project.ProjectVO;
 import com.didiglobal.logi.security.service.ProjectService;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -471,10 +468,7 @@ public class ProjectClusterLogicAuthServiceImpl implements ProjectClusterLogicAu
             return Result.buildParamIllegal("权限类型为空");
         }
 
-        if (AriusObjUtils.isNull(authDTO.getResponsible())) {
-            return Result.buildParamIllegal("责任人为空");
-        }
-
+       
         // 重复添加不做幂等，抛出错误
         if (null != logicClusterAuthDAO.getByProjectIdAndLogicClusterId(projectId, logicClusterId)) {
             return Result.buildDuplicate("权限已存在");
