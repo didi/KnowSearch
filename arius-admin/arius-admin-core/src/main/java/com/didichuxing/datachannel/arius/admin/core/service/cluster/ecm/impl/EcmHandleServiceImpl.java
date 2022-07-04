@@ -5,20 +5,6 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.resource.E
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum.ES_HOST;
 import static java.util.Objects.nonNull;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.function.BiFunction;
-
-import javax.annotation.PostConstruct;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -34,6 +20,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.Cluste
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.espackage.ESPackage;
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.ESClusterMethodNameEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
@@ -51,11 +38,22 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.Clust
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.remote.zeus.bean.constant.EcmActionEnum;
+import com.didiglobal.logi.security.service.ProjectService;
 import com.didiglobal.logi.security.service.UserService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
-
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.BiFunction;
+import javax.annotation.PostConstruct;
 import lombok.NoArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * ES集群表 服务实现类
@@ -92,6 +90,8 @@ public class EcmHandleServiceImpl implements EcmHandleService {
 
     @Autowired
     private UserService userService;
+    @Autowired
+    private ProjectService projectService;
 
     private AriusTaskThreadPool                 ariusTaskThreadPool;
 
@@ -495,6 +495,7 @@ public class EcmHandleServiceImpl implements EcmHandleService {
                     operateTypeEnum -> operateRecordService.save(
                             new OperateRecord.Builder().operationTypeEnum(operateTypeEnum)
                                     .content(String.format("物理集群 %s 开始进行 %s 操作", clusterId, methodName))
+                                     .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
                                     .triggerWayEnum(TriggerWayEnum.TIMING_TASK).bizId(clusterId).userOperation(operator)
                                     .build()));
              
