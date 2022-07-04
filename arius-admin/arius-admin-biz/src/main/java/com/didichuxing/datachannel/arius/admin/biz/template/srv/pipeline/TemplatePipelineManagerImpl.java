@@ -26,6 +26,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePhyPO;
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
@@ -37,6 +38,7 @@ import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexT
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplatePhyDAO;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.logi.security.service.ProjectService;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,6 +67,8 @@ public class TemplatePipelineManagerImpl extends BaseTemplateSrv implements Temp
 
     @Autowired
     private IndexTemplateDAO    indexTemplateDAO;
+    @Autowired
+    private ProjectService projectService;
 
     @Override
     public TemplateServiceEnum templateService() {
@@ -305,10 +309,10 @@ public class TemplatePipelineManagerImpl extends BaseTemplateSrv implements Temp
             operateRecordService.save(new OperateRecord.Builder().operationTypeEnum(
                             OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_EDIT_SETTING).userOperation(SYSTEM.getDesc())
                     .triggerWayEnum(TriggerWayEnum.TIMING_TASK)
+                     .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
                     .content("rateLimitOld:" + rateLimitOld + ",rateLimitNew:" + rateLimitNew)
                     .bizId(templatePhysical.getId()).build());
-            //operateRecordService.save(TEMPLATE_CONFIG, EDIT, templatePhysical.getId(),
-            //        "rateLimitOld:" + rateLimitOld + ",rateLimitNew:" + rateLimitNew, SYSTEM.getDesc());
+          
 
             return esSuccess;
         }

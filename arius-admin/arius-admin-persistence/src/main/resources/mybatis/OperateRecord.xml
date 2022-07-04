@@ -48,7 +48,7 @@
 		select
 		<include refid="Base_Column_List"/>
 		from operate_record
-		<trim prefix="where" prefixOverrides="and">
+		<where >
 			<if test="id != null">
 				and id = #{id}
 			</if>
@@ -83,10 +83,10 @@
 				                                                                                         #{content}) OR
 				     content LIKE CONCAT('%', #{content}, '%'))
 			</if>
-			 <if test="sortTerm != null">
-            order by ${sortTerm} ${sortType}
-        </if>
-		</trim>
+		</where>
+		<if test="sortTerm != null">
+			order by ${sortTerm} ${sortType}
+		</if>
 		LIMIT #{from},#{size}
 	</select>
 	
@@ -104,7 +104,7 @@
 	        parameterType="com.didichuxing.datachannel.arius.admin.common.bean.dto.oprecord.OperateRecordDTO">
 		select count(id)
 		from operate_record
-		<trim prefix="where" prefixOverrides="and">
+		<where >
 			<if test="id != null">
 				and id = #{id}
 			</if>
@@ -139,7 +139,7 @@
 				                                                                                         #{content}) OR
 				     content LIKE CONCAT('%', #{content}, '%'))
 			</if>
-		</trim>
+		</where>
 		ORDER BY id
 	</select>
 	<select id="getById"
