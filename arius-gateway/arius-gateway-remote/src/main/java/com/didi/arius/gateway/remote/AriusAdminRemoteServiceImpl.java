@@ -37,16 +37,16 @@ public class AriusAdminRemoteServiceImpl implements AriusAdminRemoteService {
     private String adminUrl;
     private static final Map<String, String> headerParams = new HashMap<>();
 
-    private static final String APPID_SUFFIX              = "/v2/thirdpart/gateway/project";
-    private static final String DATACENTER_SUFFIX         = "/v2/thirdpart/common/cluster";
-    private static final String SCHEMA_SUFFIX             = "/v2/thirdpart/gateway/template";
-    private static final String GATEWAY_NODES_SUFFIX      = "/v2/thirdpart/gateway/alivecount";
-    private static final String TEMPLATE_INFO_SUFFIX      = "/v2/thirdpart/gateway/deploy-info";
-    private static final String CONFIG_LIST_SUFFIX        = "/v2/thirdpart/common/config/query";
-    private static final String GATEWAY_HEARTBEAT_SUFFIX  = "/v2/thirdpart/gateway/heartbeat";
-    private static final String GET_DSL_TEMPLATES_SUFFIX  = "/v2/thirdpart/gateway/dsl/scroll-dsl-template";
-    private static final String ADD_TEMPLATE_ALIAS = "/v2/thirdpart/gateway/alias";
-    private static final String DEL_TEMPLATE_ALIAS = "/v2/thirdpart/gateway/alias";
+    private static final String APPID_SUFFIX              = "/v3/thirdpart/gateway/project";
+    private static final String DATACENTER_SUFFIX         = "/v3/thirdpart/common/cluster";
+    private static final String SCHEMA_SUFFIX             = "/v3/thirdpart/gateway/template";
+    private static final String GATEWAY_NODES_SUFFIX      = "/v3/thirdpart/gateway/alivecount";
+    private static final String TEMPLATE_INFO_SUFFIX      = "/v3/thirdpart/gateway/deploy-info";
+    private static final String CONFIG_LIST_SUFFIX        = "/v3/thirdpart/common/config/query";
+    private static final String GATEWAY_HEARTBEAT_SUFFIX  = "/v3/thirdpart/gateway/heartbeat";
+    private static final String GET_DSL_TEMPLATES_SUFFIX  = "/v3/thirdpart/gateway/dsl/scroll-dsl-template";
+    private static final String ADD_TEMPLATE_ALIAS = "/v3/thirdpart/gateway/alias";
+    private static final String DEL_TEMPLATE_ALIAS = "/v3/thirdpart/gateway/alias";
 
 
     private static final String SCHEMA_PARAME_CLUSTER         = "cluster";
