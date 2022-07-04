@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
-import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -45,6 +44,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.index.IndexBlockE
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.mapping.AriusIndexTemplateSetting;
 import com.didichuxing.datachannel.arius.admin.common.util.*;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
@@ -484,6 +484,11 @@ public class IndicesManagerImpl implements IndicesManager {
 
     @Override
     public Result<IndexCatCellVO> getIndexCatInfo(String cluster, String indexName, Integer projectId) {
+        Result<String> getClusterRet = getClusterPhyByClusterNameAndProjectId(cluster, projectId);
+        if (getClusterRet.failed()) {
+            return Result.buildFrom(getClusterRet);
+        }
+        String phyCluster = getClusterRet.getData();
         Integer queryProjectId = null;
         if (!AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
             queryProjectId = projectId;
@@ -495,7 +500,7 @@ public class IndicesManagerImpl implements IndicesManager {
             return Result.buildFail("获取单个索引详情信息失败");
         }
         //设置索引阻塞信息
-        List<IndexCatCell> finalIndexCatCellList = esIndexService.buildIndexAliasesAndBlockInfo(cluster,
+        List<IndexCatCell> finalIndexCatCellList = esIndexService.buildIndexAliasesAndBlockInfo(phyCluster,
             totalHitAndIndexCatCellListTuple.getV2());
         List<IndexCatCellVO> indexCatCellVOList = ConvertUtil.list2List(finalIndexCatCellList, IndexCatCellVO.class);
 

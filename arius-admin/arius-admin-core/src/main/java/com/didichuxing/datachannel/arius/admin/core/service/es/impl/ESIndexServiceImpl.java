@@ -12,7 +12,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.rest.RestStatus;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,7 +22,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.IndexCatCell;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.IndexResponse;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.IndicesDistributionVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.index.IndexBlockEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.BatchProcessor;
@@ -777,28 +775,24 @@ public class ESIndexServiceImpl implements ESIndexService {
         Tuple<Boolean, Boolean> writeAndReadBlockFromMerge = new Tuple<>();
         //build from es setUp settings
         Tuple<Boolean, Boolean> writeAndReadBlockFromSetUpSettingTuple = new Tuple<>();
-        writeAndReadBlockFromSetUpSettingTuple.setV1(null);
-        writeAndReadBlockFromSetUpSettingTuple.setV2( null);
-        Optional.ofNullable(indexConfig.getSettings()).filter(MapUtils::isNotEmpty).map(JSON::toJSONString).map(JSON::parseObject).ifPresent(settingsObj -> {
-            writeAndReadBlockFromSetUpSettingTuple.setV1(settingsObj.getBoolean(READ));
-            writeAndReadBlockFromSetUpSettingTuple.setV2(settingsObj.getBoolean(WRITE));
-        });
-
+        Optional.ofNullable(indexConfig).map(IndexConfig::getSettings).filter(MapUtils::isNotEmpty)
+            .map(JSON::toJSONString).map(JSON::parseObject).ifPresent(settingsObj -> {
+                writeAndReadBlockFromSetUpSettingTuple.setV1(settingsObj.getBoolean(READ));
+                writeAndReadBlockFromSetUpSettingTuple.setV2(settingsObj.getBoolean(WRITE));
+            });
         //build from es default settings
         Tuple<Boolean, Boolean> writeAndReadBlockFromDefaultSettingTuple = new Tuple<>();
-        writeAndReadBlockFromDefaultSettingTuple.setV1(null);
-        writeAndReadBlockFromDefaultSettingTuple.setV2(null);
-        Optional.ofNullable(indexConfig.getOther(DEFAULTS)).map(Object::toString).map(JSON::parseObject).map(defaultObj -> defaultObj.getJSONObject(INDEX))
-                .map(indexSettings -> indexSettings.getJSONObject(BLOCKS)).ifPresent(blocksObj -> {
-                    if (null != blocksObj.get(IndexBlockEnum.READ.getType())) {
-                        writeAndReadBlockFromDefaultSettingTuple
-                                .setV1(blocksObj.getBoolean(IndexBlockEnum.READ.getType()));
-                    }
-                    if (null != blocksObj.get(IndexBlockEnum.WRITE.getType())) {
-                        writeAndReadBlockFromDefaultSettingTuple
-                                .setV2(blocksObj.getBoolean(IndexBlockEnum.WRITE.getType()));
-                    }
-                });
+        Optional.ofNullable(indexConfig).map(config -> config.getOther(DEFAULTS)).map(Object::toString)
+            .map(JSON::parseObject).map(defaultObj -> defaultObj.getJSONObject(INDEX))
+            .map(indexSettings -> indexSettings.getJSONObject(BLOCKS)).ifPresent(blocksObj -> {
+                if (null != blocksObj.get(IndexBlockEnum.READ.getType())) {
+                    writeAndReadBlockFromDefaultSettingTuple.setV1(blocksObj.getBoolean(IndexBlockEnum.READ.getType()));
+                }
+                if (null != blocksObj.get(IndexBlockEnum.WRITE.getType())) {
+                    writeAndReadBlockFromDefaultSettingTuple
+                        .setV2(blocksObj.getBoolean(IndexBlockEnum.WRITE.getType()));
+                }
+            });
 
         //set read block info
         if (null != writeAndReadBlockFromSetUpSettingTuple.getV1()) {
