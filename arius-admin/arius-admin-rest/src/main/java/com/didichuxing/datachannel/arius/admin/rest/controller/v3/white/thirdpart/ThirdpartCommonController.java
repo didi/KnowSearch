@@ -1,6 +1,6 @@
-package com.didichuxing.datachannel.arius.admin.rest.controller.v2.thirdpart;
+package com.didichuxing.datachannel.arius.admin.rest.controller.v3.white.thirdpart;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V2_THIRD_PART;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_THIRD_PART;
 
 import com.didichuxing.datachannel.arius.admin.biz.thardpart.CommonManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping(V2_THIRD_PART + "/common")
+@RequestMapping(V3_THIRD_PART + "/common")
 @Api(tags = "第三方公共接口(REST)")
 public class ThirdpartCommonController {
 
@@ -37,7 +37,7 @@ public class ThirdpartCommonController {
 
     }
 
-    @GetMapping("/cluster/getByName")
+    @GetMapping("/cluster/name")
     @ResponseBody
     @ApiOperation(value = "获取集群接口【三方接口】",tags = "【三方接口】" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "String", name = "cluster", value = "集群名称", required = true) })

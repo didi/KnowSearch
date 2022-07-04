@@ -13,6 +13,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.Template
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateSettingDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateSettingVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.DataTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
@@ -21,6 +22,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import java.util.List;
+import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -48,6 +50,12 @@ public class TemplateLogicV3Controller {
     @Autowired
     private TemplateLogicSettingsManager templateLogicSettingsManager;
 
+    @GetMapping("/data-type")
+    @ResponseBody
+    @ApiOperation(value = "获取逻辑模版创建的类型")
+    public Result<Map<Integer,String>> templateLogicDataType(HttpServletRequest request) {
+        return Result.buildSucc(DataTypeEnum.code2DescMap());
+    }
     @GetMapping("/names")
     @ResponseBody
     @ApiOperation(value = "获取逻辑模板名称列表接口")
