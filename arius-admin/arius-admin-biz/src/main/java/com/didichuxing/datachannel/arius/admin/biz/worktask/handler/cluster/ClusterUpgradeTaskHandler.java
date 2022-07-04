@@ -5,6 +5,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.resource.E
 import java.util.List;
 
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
@@ -41,7 +42,7 @@ public class ClusterUpgradeTaskHandler extends AbstractClusterTaskHandler {
     }
 
     @Override
-    Result<Void> validateHostParam(String param) {
+    Result<Void> validateHostParam(String param) throws NotFindSubclassException {
         ClusterUpdateContent content = ConvertUtil.str2ObjByJson(param, ClusterUpdateContent.class);
 
         if (AriusObjUtils.isNull(content.getPhyClusterId())) {

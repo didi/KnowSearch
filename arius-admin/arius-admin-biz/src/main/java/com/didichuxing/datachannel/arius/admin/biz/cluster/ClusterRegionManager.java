@@ -5,13 +5,10 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicCl
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionWithNodeInfoVO;
+import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
+
 import java.util.List;
 
-/**
- * @Author: lanxinzheng
- * @Date: 2021/1/7
- * @Comment:
- */
 public interface ClusterRegionManager {
 
     /**
@@ -42,7 +39,7 @@ public interface ClusterRegionManager {
      * @param isAddClusterLogicFlag 是否要添加逻辑集群
      */
     Result<Void> batchBindRegionToClusterLogic(ESLogicClusterWithRegionDTO param, String operator,
-                                               boolean isAddClusterLogicFlag);
+                                               boolean isAddClusterLogicFlag) throws AdminOperateException;
 
     /**
      * 解绑逻辑集群已经绑定的region
@@ -69,5 +66,5 @@ public interface ClusterRegionManager {
      * @param clusterName         物理集群名称
      * @return                    Result<List<ClusterRegionVO>>
      */
-    Result<List<ClusterRegionVO>> listNoEmptyClusterRegionByClusterName(String clusterName);
+    Result<List<ClusterRegionVO>> listNotEmptyClusterRegionByClusterName(String clusterName);
 }

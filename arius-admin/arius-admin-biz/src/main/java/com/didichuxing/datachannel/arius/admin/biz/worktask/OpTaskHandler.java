@@ -3,6 +3,7 @@ package com.didichuxing.datachannel.arius.admin.biz.worktask;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 
 /**
  * @author d06679
@@ -18,7 +19,7 @@ public interface OpTaskHandler extends BaseHandle {
      * @param opTask 任务数据
      * @return result
      */
-    Result<OpTask> addTask(OpTask opTask);
+    Result<OpTask> addTask(OpTask opTask) throws NotFindSubclassException;
 
     /**
      * 判断一个任务是否存在，参数待定

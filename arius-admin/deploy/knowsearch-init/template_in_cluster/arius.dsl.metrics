@@ -111,6 +111,9 @@
             "appid":{
                 "type":"long"
             },
+            "projectId":{
+                "type":"long"
+            },
             "dsl":{
                 "ignore_above":1024,
                 "type":"keyword"

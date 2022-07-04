@@ -2,6 +2,15 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.cluster.ph
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
 
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+
+import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
+import com.didichuxing.datachannel.arius.admin.common.exception.AdminTaskException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterNodeManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -9,19 +18,10 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRe
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostWithRegionInfoVO;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
+
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
-import java.util.List;
-import javax.servlet.http.HttpServletRequest;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
 
 /**
  * @author ohushenglin_v
@@ -52,19 +52,19 @@ public class ESPhyClusterNodeController {
         return clusterNodeManager.listDivide2ClusterNodeInfo(clusterId);
     }
 
-    @PostMapping("/divide/region")
+    @PostMapping("/divide-region")
     @ResponseBody
     @ApiOperation(value = "节点划分且创建region")
-    public Result<List<Long>> createMultiNode2Region(HttpServletRequest request, @RequestBody List<ClusterRegionWithNodeInfoDTO> params) {
+    public Result<List<Long>> createMultiNode2Region(HttpServletRequest request, @RequestBody List<ClusterRegionWithNodeInfoDTO> params) throws AdminOperateException {
         
         return clusterNodeManager.createMultiNode2Region(params, HttpRequestUtil.getOperator(request),
                 HttpRequestUtil.getProjectId(request));
     }
 
-    @PutMapping("/divide/region")
+    @PutMapping("/divide-region")
     @ResponseBody
     @ApiOperation(value = "编辑多个region中的节点信息（扩缩容）")
-    public Result<Boolean> editMultiNode2Region(HttpServletRequest request, @RequestBody List<ClusterRegionWithNodeInfoDTO> params) {
+    public Result<Boolean> editMultiNode2Region(HttpServletRequest request, @RequestBody List<ClusterRegionWithNodeInfoDTO> params) throws AdminOperateException {
        
         return clusterNodeManager.editMultiNode2Region(params, HttpRequestUtil.getOperator(request),HttpRequestUtil.getProjectId(request));
     }
@@ -83,5 +83,12 @@ public class ESPhyClusterNodeController {
         return Result.buildSucc(clusterPhyManager.listNodeNameByProjectId(HttpRequestUtil.getProjectId(request)));
     }
 
+    @PutMapping("/{phyClusterName}/collect-settings")
+    @ResponseBody
+    @ApiOperation(value = "采集集群节点配置信息接口【三方接口】", tags = "【三方接口】")
+    @ApiImplicitParam(type = "String", name = "phyClusterName", value = "物理集群名称", required = true)
+    public Result<Void> collectNodeSettings(@PathVariable String phyClusterName) throws AdminTaskException {
+        return Result.build(clusterNodeManager.collectNodeSettings(phyClusterName));
+    }
 
 }

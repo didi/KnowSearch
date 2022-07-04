@@ -23,6 +23,8 @@ import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.OrderStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
+import com.didichuxing.datachannel.arius.admin.common.exception.OperateForbiddenException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
@@ -111,7 +113,7 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
     }
 
     @Override
-    public Result<Void> process(WorkOrderProcessDTO processDTO) {
+    public Result<Void> process(WorkOrderProcessDTO processDTO) throws NotFindSubclassException {
         Result<Void> checkProcessResult = checkProcessValid(processDTO);
         if (checkProcessResult.failed()) {
             return checkProcessResult;
@@ -301,7 +303,7 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
     }
 
     @Override
-    public OrderInfoDetail getBaseDetail(WorkOrderPO orderPO) {
+    public OrderInfoDetail getBaseDetail(WorkOrderPO orderPO) throws NotFindSubclassException {
         if (AriusObjUtils.isNull(orderPO)) {
             return null;
         }
@@ -344,7 +346,7 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
     }
 
     @Override
-    public Result<List<WorkOrderVO>> getOrderApprovalListByStatus(Integer status) {
+    public Result<List<WorkOrderVO>> getOrderApprovalListByStatus(Integer status) throws OperateForbiddenException {
         List<WorkOrderPO> orderDOList = new ArrayList<>();
 
         String userName = SpringTool.getUserName();
@@ -394,7 +396,7 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
         return Result.buildSucc();
     }
 
-    private void initWorkOrderDTO(WorkOrderDTO workOrderDTO) {
+    private void initWorkOrderDTO(WorkOrderDTO workOrderDTO) throws OperateForbiddenException {
         workOrderDTO.setSubmitor(SpringTool.getUserName());
     }
 
@@ -420,7 +422,7 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
         return Result.buildSucc();
     }
 
-    private Result<Void> doProcessByWorkOrderHandle(WorkOrderPO orderPO, WorkOrderProcessDTO processDTO) {
+    private Result<Void> doProcessByWorkOrderHandle(WorkOrderPO orderPO, WorkOrderProcessDTO processDTO) throws NotFindSubclassException {
         WorkOrderHandler handler = (WorkOrderHandler) handleFactory.getByHandlerNamePer(orderPO.getType());
 
         Result<Void> checkAuthResult = handler.checkAuthority(orderPO, processDTO.getAssignee());

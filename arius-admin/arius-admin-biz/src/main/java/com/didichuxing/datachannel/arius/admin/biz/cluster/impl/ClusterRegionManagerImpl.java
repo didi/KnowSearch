@@ -2,6 +2,18 @@ package com.didichuxing.datachannel.arius.admin.biz.cluster.impl;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType.FAIL;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterRegionManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.TemplateSrvManager;
@@ -15,12 +27,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.Cluster
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionWithNodeInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.exception.AriusRunTimeException;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.*;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
@@ -29,15 +36,6 @@ import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecord
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Sets;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class ClusterRegionManagerImpl implements ClusterRegionManager {
@@ -102,7 +100,7 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
         if (CollectionUtils.isEmpty(clusterRegions)) {
             return Result.buildFail(String.format("物理集群[%s]无划分region, 请先进行region划分", phyCluster));
         }
-        return Result.buildSucc(ConvertUtil.list2List(clusterRegions, ClusterRegionVO.class));
+        return Result.buildSucc(ConvertUtil.list2List(clusterRegions, ClusterRegionVO.class,regionVO -> regionVO.setClusterName(phyCluster)));
     }
 
     /**
@@ -116,7 +114,9 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
             return null;
         }
 
-        ClusterRegionVO logicClusterRegionVO = new ClusterRegionVO();
+        ClusterRegionVO logicClusterRegionVO = ConvertUtil.obj2Obj(region, ClusterRegionVO.class, regionVO -> {
+            regionVO.setClusterName(region.getPhyClusterName());
+        });
         logicClusterRegionVO.setId(region.getId());
         logicClusterRegionVO.setLogicClusterIds(region.getLogicClusterIds());
         logicClusterRegionVO.setClusterName(region.getPhyClusterName());
@@ -126,7 +126,7 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Result<Void> batchBindRegionToClusterLogic(ESLogicClusterWithRegionDTO param, String operator,
-                                                      boolean isAddClusterLogicFlag) {
+                                                      boolean isAddClusterLogicFlag) throws AdminOperateException {
         //1. 前置校验
         if (AriusObjUtils.isNull(param)) {
             return Result.buildParamIllegal("参数为空");
@@ -138,7 +138,13 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
 
         //2. 集群合法关联性校验
         param.getClusterRegionDTOS().stream().distinct()
-            .forEach(clusterRegionDTO -> checkCanBeBound(param.getId(), clusterRegionDTO, param.getType()));
+            .forEach(clusterRegionDTO -> {
+                try {
+                    checkCanBeBound(param.getId(), clusterRegionDTO, param.getType());
+                } catch (AdminOperateException e) {
+                    e.printStackTrace();
+                }
+            });
 
         //3. 逻辑集群绑定的物理集群版本一致性校验
         Result<Void> phyClusterVersionsResult = boundPhyClusterVersionsCheck(param);
@@ -182,7 +188,7 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
         if (CollectionUtils.isEmpty(clusterRegions)) { return Result.buildSucc();}
 
         // 构建region中的节点信息
-        List<ClusterRegionWithNodeInfoVO> clusterRegionWithNodeInfoVOS = ConvertUtil.list2List(clusterRegions, ClusterRegionWithNodeInfoVO.class);
+        List<ClusterRegionWithNodeInfoVO> clusterRegionWithNodeInfoVOS = ConvertUtil.list2List(clusterRegions, ClusterRegionWithNodeInfoVO.class,region->region.setClusterName(clusterName));
         for (ClusterRegionWithNodeInfoVO clusterRegionWithNodeInfoVO : clusterRegionWithNodeInfoVOS) {
             Result<List<ClusterRoleHost>> ret = clusterRoleHostService.listByRegionId(clusterRegionWithNodeInfoVO.getId().intValue());
             if (ret.success() && CollectionUtils.isNotEmpty(ret.getData())) {
@@ -197,7 +203,7 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
     }
 
     @Override
-    public Result<List<ClusterRegionVO>> listNoEmptyClusterRegionByClusterName(String clusterName) {
+    public Result<List<ClusterRegionVO>> listNotEmptyClusterRegionByClusterName(String clusterName) {
         Result<List<ClusterRegionWithNodeInfoVO>> ret = listClusterRegionWithNodeInfoByClusterName(clusterName);
         if (ret.failed()) { return Result.buildFrom(ret);}
 
@@ -217,7 +223,6 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
      * 对于逻辑集群绑定的物理集群的版本进行一致性校验
      *
      * @param param     逻辑集群Region
-     * @param projectId
      * @return
      */
     private Result<Void> boundPhyClusterVersionsCheck(ESLogicClusterWithRegionDTO param) {
@@ -247,15 +252,15 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
      * @param clusterRegionDTO       region信息
      * @param clusterLogicType       逻辑集群类型
      */
-    private void checkCanBeBound(Long clusterLogicId, ClusterRegionDTO clusterRegionDTO, Integer clusterLogicType) {
+    private void checkCanBeBound(Long clusterLogicId, ClusterRegionDTO clusterRegionDTO, Integer clusterLogicType) throws AdminOperateException {
         Result<Boolean> validResult = clusterContextManager.canClusterLogicAssociatedPhyCluster(clusterLogicId,
             clusterRegionDTO.getPhyClusterName(), clusterRegionDTO.getId(), clusterLogicType);
         if (validResult.failed()) {
-            throw new AriusRunTimeException(validResult.getMessage(), FAIL);
+            throw new AdminOperateException(validResult.getMessage(), FAIL);
         }
     }
 
-    private Result<Void> doBindRegionToClusterLogic(ESLogicClusterWithRegionDTO param, String operator) {
+    private Result<Void> doBindRegionToClusterLogic(ESLogicClusterWithRegionDTO param, String operator) throws AdminOperateException {
         List<ClusterRegionDTO> clusterRegionDTOS = param.getClusterRegionDTOS();
         if (CollectionUtils.isEmpty(clusterRegionDTOS)) {
             return Result.buildParamIllegal("region相关参数非法");
@@ -265,7 +270,7 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
             Result<Void> bindRegionResult = clusterRegionService.bindRegion(clusterRegionDTO.getId(), param.getId(), null,
                     operator);
             if (bindRegionResult.failed()) {
-                throw new AriusRunTimeException(bindRegionResult.getMessage(), FAIL);
+                throw new AdminOperateException(bindRegionResult.getMessage(), FAIL);
             }
         }
 

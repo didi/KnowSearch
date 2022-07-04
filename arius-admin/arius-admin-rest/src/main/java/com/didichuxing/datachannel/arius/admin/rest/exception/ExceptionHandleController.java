@@ -7,11 +7,7 @@ import com.didichuxing.datachannel.arius.admin.biz.project.LoginManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ResultWorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
-import com.didichuxing.datachannel.arius.admin.common.exception.AriusRunTimeException;
-import com.didichuxing.datachannel.arius.admin.common.exception.BaseException;
-import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
-import com.didichuxing.datachannel.arius.admin.common.exception.OperateForbiddenException;
-import com.didichuxing.datachannel.arius.admin.common.exception.WorkOrderOperateException;
+import com.didichuxing.datachannel.arius.admin.common.exception.*;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.exception.LogiSecurityException;
@@ -58,8 +54,8 @@ public class ExceptionHandleController implements ThrowsAdvice {
         return handlerExceptionWithResult(e, e.getResultType());
     }
 
-    @ExceptionHandler(AriusRunTimeException.class)
-    public Result<Object> handleBaseRunTimeException(AriusRunTimeException e) {
+    @ExceptionHandler(AdminOperateException.class)
+    public Result<Object> handleBaseRunTimeException(AdminOperateException e) {
         return handlerExceptionWithResult(e, e.getResultType());
     }
 

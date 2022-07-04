@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.common.constant.operaterecord;
 
-import com.didichuxing.datachannel.arius.admin.common.tuple.Tuple;
-import com.didichuxing.datachannel.arius.admin.common.tuple.Tuple2;
+import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
+import com.didichuxing.datachannel.arius.admin.common.tuple.Tuples;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
@@ -40,7 +40,7 @@ public enum OperateTypeEnum {
      * 物理集群： 信息修改
      */
     PHYSICAL_CLUSTER_INFO_MODIFY(NewModuleEnum.PHYSICAL_CLUSTER, "物理集群信息修改",6),
-     PHYSICAL_CLUSTER_START(NewModuleEnum.PHYSICAL_CLUSTER, "启动",53),
+     PHYSICAL_CLUSTER_START(NewModuleEnum.PHYSICAL_CLUSTER, "启动",57),
     /**
      * 物理集群:升级
      */
@@ -54,7 +54,7 @@ public enum OperateTypeEnum {
      */
     PHYSICAL_CLUSTER_GATEWAY_CHANGE(NewModuleEnum.PHYSICAL_CLUSTER, "GATEWAY变更",9),
     /**
-     * 物理集群：配置文件变更 todo
+     * 物理集群：配置文件变更 todo op-task/cluster-config-add
      */
     PHYSICAL_CLUSTER_CONF_FILE_CHANGE(NewModuleEnum.PHYSICAL_CLUSTER, "配置文件变更", 10),
     /**
@@ -108,7 +108,7 @@ public enum OperateTypeEnum {
      */
     TENANT_INFO_MODIFY(NewModuleEnum.TENANT, "租户信息修改",22),
     /**
-     * 索引模板管理：模板创建 todo
+     * 索引模板管理：模板创建 todo 新建模版
      */
     INDEX_TEMPLATE_MANAGEMENT_CREATE(NewModuleEnum.INDEX_MANAGEMENT, "模板创建",23),
     /**
@@ -149,7 +149,7 @@ public enum OperateTypeEnum {
      */
     TEMPLATE_SERVICE(NewModuleEnum.TEMPLATE_SERVICE, "模板服务",33),
     /**
-     * 索引管理:创建 todo
+     * 索引管理:创建
      */
     INDEX_MANAGEMENT_CREATE(NewModuleEnum.INDEX_MANAGEMENT, "索引创建",34),
     /**
@@ -160,7 +160,7 @@ public enum OperateTypeEnum {
      * 索引管理:别名调整
      */
     INDEX_MANAGEMENT_ALIAS_MODIFY(NewModuleEnum.INDEX_MANAGEMENT, "别名调整", 36),
-    INDEX_MANAGEMENT_LABEL_MODIFY(NewModuleEnum.INDEX_MANAGEMENT, "标签调整", 36),
+    INDEX_MANAGEMENT_LABEL_MODIFY(NewModuleEnum.INDEX_MANAGEMENT, "标签调整", 56),
     /**
      * 索引管理:索引读写变更
      */
@@ -178,7 +178,7 @@ public enum OperateTypeEnum {
      */
     QUERY_TEMPLATE_DSL_CURRENT_LIMIT_ADJUSTMENT(NewModuleEnum.QUERY_TEMPLATE, "DSL限流调整",40),
     /**
-     * 查询模板:DSL查询模板禁用 todo
+     * 查询模板:DSL查询模板禁用
      */
     QUERY_TEMPLATE_DISABLE(NewModuleEnum.QUERY_TEMPLATE, "DSL查询模板禁用",41),
     /**
@@ -194,18 +194,8 @@ public enum OperateTypeEnum {
      */
     SETTING_DELETE(NewModuleEnum.SETTING, "删除配置",44),
     
-    /**
-     * sense操作添加 todo
-     */
-    SENSE_OP_ADD(NewModuleEnum.SENSE_OP, "新增配置",45),
-    SENSE_OP_EDIT(NewModuleEnum.SENSE_OP, "修改配置",45),
-    /**
-     * sense操作删除 todo
-     */
-    SENSE_OP_DELETE(NewModuleEnum.SENSE_OP, "删除配置",46),
-    /**
-     * sense操作编辑 todo
-     */
+ 
+    
     ES_CLUSTER_PLUGINS_ADD(NewModuleEnum.ES_CLUSTER_PLUGINS, "新增插件", 47),
     ES_CLUSTER_PLUGINS_EDIT(NewModuleEnum.ES_CLUSTER_PLUGINS, "编辑插件", 48),
     ES_CLUSTER_PLUGINS_DELETE(NewModuleEnum.ES_CLUSTER_PLUGINS, "删除配置", 49),
@@ -213,7 +203,7 @@ public enum OperateTypeEnum {
     
     ES_CLUSTER_CONFIG_ADD(NewModuleEnum.ES_CLUSTER_CONFIG, "新增集群配置", 51),
     ES_CLUSTER_CONFIG_EDIT(NewModuleEnum.ES_CLUSTER_CONFIG, "编辑集群配置", 52),
-    ROLE_MANAGER_DELETE(NewModuleEnum.ROLE_MANAGER, "删除角色", 53),
+    ROLE_MANAGER_DELETE(NewModuleEnum.ROLE_MANAGER, "删除角色", 58),
     ROLE_MANAGER_CREATE(NewModuleEnum.ROLE_MANAGER, "创建角色", 53),
     ROLE_MANAGER_UNBIND_USER(NewModuleEnum.ROLE_MANAGER, "角色解绑用户", 54),
     ROLE_MANAGER_BIND_USER(NewModuleEnum.ROLE_MANAGER, "角色绑定用户", 55);
@@ -249,21 +239,19 @@ public enum OperateTypeEnum {
         final NewModuleEnum moduleEnum = NewModuleEnum.getModuleEnum(module);
         if (Objects.isNull(moduleEnum)) {
             return   Arrays.stream(OperateTypeEnum.values())
-                 .map(operateTypeEnum -> Tuple.of(operateTypeEnum.getOperationType(),operateTypeEnum.getCode()))
+                 .map(operateTypeEnum -> Tuples.of(operateTypeEnum.getOperationType(),operateTypeEnum.getCode()))
                  .distinct()
-                .collect(Collectors.toMap(Tuple2::_2, Tuple2::_1));
+                .collect(Collectors.toMap(TupleTwo::v2, TupleTwo::v1));
         }
         return Arrays.stream(OperateTypeEnum.values())
                 .filter(operationTypeEnum -> operationTypeEnum.getModule().equals(moduleEnum))
-                 .map(operateTypeEnum -> Tuple.of(operateTypeEnum.getOperationType(),operateTypeEnum.getCode()))
+                 .map(operateTypeEnum -> Tuples.of(operateTypeEnum.getOperationType(),operateTypeEnum.getCode()))
                  .distinct()
-                .collect(Collectors.toMap(Tuple2::_2, Tuple2::_1));
+                .collect(Collectors.toMap(TupleTwo::v2, TupleTwo::v1));
     }
      public static OperateTypeEnum getOperationTypeEnum(Integer code) {
         return Arrays.stream(OperateTypeEnum.values()).filter(operationTypeEnum -> operationTypeEnum.getCode().equals(code))
                 .findFirst().orElse(null);
     }
-    
-    
     
 }

@@ -5,6 +5,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResu
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.oprecord.OperateRecordDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.operaterecord.OperateRecordVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
@@ -41,8 +42,10 @@ public class OperateRecordPageSearchHandle extends AbstractPageSearchHandle<Oper
     @Override
     protected void initCondition(OperateRecordDTO condition, Integer projectId) {
         if (StringUtils.isBlank(condition.getProjectName())) {
-            final ProjectBriefVO projectBriefVO = projectService.getProjectBriefByProjectId(projectId);
-            condition.setProjectName(projectBriefVO.getProjectName());
+            if (!AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
+                final ProjectBriefVO projectBriefVO = projectService.getProjectBriefByProjectId(projectId);
+                condition.setProjectName(projectBriefVO.getProjectName());
+            }
         }
         condition.setFrom((condition.getPage() - 1) * condition.getSize());
         

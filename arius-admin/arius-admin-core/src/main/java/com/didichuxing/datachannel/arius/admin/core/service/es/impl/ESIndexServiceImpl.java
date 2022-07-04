@@ -1,11 +1,20 @@
 package com.didichuxing.datachannel.arius.admin.core.service.es.impl;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.getBigIndicesRequestContent;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.BLOCKS;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.DEFAULTS;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.INDEX;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.READ;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.WRITE;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.*;
+
+import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.rest.RestStatus;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -39,24 +48,6 @@ import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.rest.RestStatus;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 /**
  * @author d06679
@@ -77,13 +68,22 @@ public class ESIndexServiceImpl implements ESIndexService {
 
 
     @Override
-    public boolean syncCreateIndex(String cluster, String indexName, String mapping, String setting, int retryCount) throws ESOperateException {
-        return createIndexInner(cluster, indexName, mapping, setting, retryCount);
+    public boolean syncCreateIndex(String cluster, String indexName, int retryCount) throws ESOperateException {
+        return ESOpTimeoutRetry.esRetryExecute("createIndex", retryCount,
+            () -> esIndexDAO.createIndex(cluster, indexName));
+    }
+
+    @Override
+    public boolean syncCreateIndex(String cluster, String indexName, IndexConfig indexConfig,
+                                   int retryCount) throws ESOperateException {
+        return ESOpTimeoutRetry.esRetryExecute("createIndexWithConfig", retryCount,
+            () -> esIndexDAO.createIndexWithConfig(cluster, indexName, indexConfig));
     }
 
     @Override
     public boolean syncDelIndex(String cluster, String indexName, int retryCount) throws ESOperateException {
-        return deleteIndexInner(cluster, indexName, retryCount);
+        return ESOpTimeoutRetry.esRetryExecute("deleteIndex", retryCount,
+            () -> esIndexDAO.deleteIndex(cluster, indexName));
     }
 
     /**
@@ -737,14 +737,9 @@ public class ESIndexServiceImpl implements ESIndexService {
     }
 
     @Override
-    public List<IndicesDistributionVO> indicesDistribution(String cluster) {
+    public List<CatIndexResult> indicesDistribution(String cluster) {
         List<CatIndexResult> catIndexResultList = esIndexDAO.catIndices(cluster);
-        // 把 List<CatIndexResult> 转为 List<IndicesDistributionVO>
-        return catIndexResultList.stream().map(catIndexResult -> {
-            IndicesDistributionVO vo = new IndicesDistributionVO();
-            BeanUtils.copyProperties(catIndexResult, vo);
-            return vo;
-        }).collect(Collectors.toList());
+        return catIndexResultList;
     }
 
     @Override
@@ -877,16 +872,6 @@ public class ESIndexServiceImpl implements ESIndexService {
         }
 
         return true;
-    }
-
-    private boolean createIndexInner(String cluster, String indexName, String mapping, String setting, int retryCount) throws ESOperateException {
-        return ESOpTimeoutRetry.esRetryExecute("createIndex", retryCount,
-            () -> esIndexDAO.createIndex(cluster, indexName, mapping, setting));
-    }
-
-    private boolean deleteIndexInner(String cluster, String indexName, int retryCount) throws ESOperateException {
-        return ESOpTimeoutRetry.esRetryExecute("deleteIndex", retryCount,
-            () -> esIndexDAO.deleteIndex(cluster, indexName));
     }
 
     private boolean batchDeleteIndicesInner(String cluster, String indices, int retryCount) {

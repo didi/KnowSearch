@@ -1,6 +1,20 @@
 package com.didi.arius.gateway.core.service.arius.impl;
 
+import static com.didi.arius.gateway.common.utils.AppUtil.isAdminAppid;
+
 import java.util.*;
+
+import javax.annotation.PostConstruct;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
+import org.elasticsearch.gateway.GatewayException;
+import org.elasticsearch.rest.RestStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -26,20 +40,8 @@ import com.didi.arius.gateway.elasticsearch.client.gateway.direct.DirectResponse
 import com.didi.arius.gateway.remote.AriusAdminRemoteService;
 import com.didi.arius.gateway.remote.response.*;
 import com.google.common.collect.Maps;
+
 import lombok.NoArgsConstructor;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.MapUtils;
-import org.elasticsearch.gateway.GatewayException;
-import org.elasticsearch.rest.RestStatus;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
-import javax.annotation.PostConstruct;
-
-import static com.didi.arius.gateway.common.utils.AppUtil.isAdminAppid;
 
 @Service
 @NoArgsConstructor
@@ -284,10 +286,8 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
             indexTemplate.setDeployStatus(IndexTemplate.DeployStatus.integerToStatus(indexTemplateResponse.getBaseInfo().getDeployStatus()));
             indexTemplate.setAliases(indexTemplateResponse.getBaseInfo().getAliases());
             indexTemplate.setIngestPipeline(indexTemplateResponse.getBaseInfo().getIngestPipeline());
-            indexTemplate.setBlockRead(null == indexTemplateResponse.getBaseInfo().getBlockRead() ? false :
-                    indexTemplateResponse.getBaseInfo().getBlockRead());
-            indexTemplate.setBlockWrite(null == indexTemplateResponse.getBaseInfo().getBlockWrite() ? false :
-                    indexTemplateResponse.getBaseInfo().getBlockWrite());
+            indexTemplate.setBlockRead(null != indexTemplateResponse.getBaseInfo().getBlockRead() && indexTemplateResponse.getBaseInfo().getBlockRead());
+            indexTemplate.setBlockWrite(null != indexTemplateResponse.getBaseInfo().getBlockWrite() && indexTemplateResponse.getBaseInfo().getBlockWrite());
 
 
             TemplateClusterInfo masterInfo = new TemplateClusterInfo();
@@ -321,10 +321,9 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
 
         bootLogger.info("resetTemplateInfo add indexTemplateMap size={}", response.getData().size());
 
-        indexTemplateMap = newIndexTemplateMap;
-
         IndexTireBuilder builder = new IndexTireBuilder(indexTemplateMap);
         indexTire = builder.build();
+        indexTemplateMap = newIndexTemplateMap;
 
         String indexTemplateLog = JSON.toJSONString(indexTemplateMap);
         bootLogger.info("resetTemplateInfo end, newIndexTemplateMap size={}, detail={}", indexTemplateMap.size(), indexTemplateLog);

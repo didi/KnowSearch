@@ -8,15 +8,7 @@ package com.didichuxing.datachannel.arius.admin.common.constant.cluster;
  * @Date 2022/6/1
  * @Version 1.0
  */
-public enum ClusterQuickCommandEnum {
-    /**
-     * node_state分析
-     */
-    NODE_STATE("GET", "_nodes/stats"),
-    /**
-     * indices分布
-     */
-    INDICES("GET", "_cat/indices"),
+public enum ClusterQuickCommandMethodsEnum {
     /**
      * shard分布
      */
@@ -49,7 +41,7 @@ public enum ClusterQuickCommandEnum {
     private String method;
     private String uri;
 
-    ClusterQuickCommandEnum(String method, String uri) {
+    ClusterQuickCommandMethodsEnum(String method, String uri) {
         this.method = method;
         this.uri = uri;
     }

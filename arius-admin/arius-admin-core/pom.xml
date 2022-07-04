@@ -13,7 +13,7 @@
     <artifactId>arius-admin-core</artifactId>
 
     <dependencies>
-    
+
         <dependency>
             <groupId>io.github.zqrferrari</groupId>
             <artifactId>logi-security-spring-boot-starter</artifactId>

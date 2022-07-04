@@ -1,6 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v2.console.template;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V2_CONSOLE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping.TemplateLogicMappingManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -29,7 +30,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(V2_CONSOLE + "/template")
-@Api(tags = "Console-用户侧索引模板mapping接口(REST)")
+@Api(tags = "Console-用户侧索引模板mapping接口(REST)：见："+V3_OP)
+@Deprecated
 public class ConsoleTemplateSchemaController extends BaseConsoleTemplateController {
 
     @Autowired

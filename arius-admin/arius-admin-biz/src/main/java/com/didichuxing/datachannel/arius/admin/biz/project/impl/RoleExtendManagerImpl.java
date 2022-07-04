@@ -21,12 +21,15 @@ import com.didiglobal.logi.security.common.vo.role.RoleDeleteCheckVO;
 import com.didiglobal.logi.security.common.vo.role.RoleVO;
 import com.didiglobal.logi.security.exception.LogiSecurityException;
 import com.didiglobal.logi.security.service.RoleService;
+import com.didiglobal.logi.security.service.UserProjectService;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import com.google.common.collect.Lists;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -42,6 +45,8 @@ public class RoleExtendManagerImpl implements RoleExtendManager {
 	private RoleService roleService;
 	@Autowired
 	private OperateRecordService operateRecordService;
+	@Autowired
+	private UserProjectService userProjectService;
 	
 	/**
 	 * @param id
@@ -49,11 +54,18 @@ public class RoleExtendManagerImpl implements RoleExtendManager {
 	 * @return
 	 */
 	@Override
-	public Result<Void> deleteRoleByRoleId(Integer id, HttpServletRequest request) {
+	public Result deleteRoleByRoleId(Integer id, HttpServletRequest request) {
 		if (AuthConstant.RESOURCE_OWN_ROLE_ID.equals(id) || AuthConstant.ADMIN_ROLE_ID.equals(id)) {
 			return Result.buildFail(String.format("属于内置角色:[%s]，不可以被删除", id));
 		}
 		try {
+			
+			final RoleDeleteCheckVO roleDeleteCheckVO = roleService.checkBeforeDelete(id);
+			if (CollectionUtils.isNotEmpty(roleDeleteCheckVO.getUserNameList())){
+				final RoleVO roleVO = roleService.getRoleDetailByRoleId(id);
+				return Result.buildFailWithMsg(roleDeleteCheckVO,String.format("角色:[%s]已经分配给用了,不允许删除,请先解除分配的用户再试！",
+						roleVO.getRoleName()));
+			}
 			roleService.deleteRoleByRoleId(id, request);
 			operateRecordService.save(new OperateRecord.Builder()
 							.userOperation(HttpRequestUtil.getOperator(request))
@@ -115,6 +127,11 @@ public class RoleExtendManagerImpl implements RoleExtendManager {
 	public Result<Void> deleteUserFromRole(Integer roleId, Integer userId, HttpServletRequest request) {
 		try {
 			roleService.deleteUserFromRole(roleId, userId, request);
+			//如果改角色为超级管理员、那么需要一并删除超级项目的管理能力
+			if (AuthConstant.ADMIN_ROLE_ID.equals(roleId)) {
+				userProjectService.delOwnerProject(AuthConstant.SUPER_PROJECT_ID, Collections.singletonList(userId));
+				userProjectService.delUserProject(AuthConstant.SUPER_PROJECT_ID, Collections.singletonList(userId));
+			}
 			operateRecordService.save(new OperateRecord.Builder().userOperation(HttpRequestUtil.getOperator(request))
 					.operationTypeEnum(OperateTypeEnum.ROLE_MANAGER_UNBIND_USER)
 					.content(String.format("角色:[%d]解绑的用户:[%d]", roleId, userId))
@@ -168,10 +185,7 @@ public class RoleExtendManagerImpl implements RoleExtendManager {
 		return Result.buildSucc(roleService.getRoleBriefListByRoleName(roleName));
 	}
 	
-	@Override
-	public Result<RoleDeleteCheckVO> checkBeforeDelete(Integer roleId) {
-		return Result.buildSucc(roleService.checkBeforeDelete(roleId));
-	}
+
 	
 
 }

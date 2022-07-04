@@ -1,8 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v2.console.template;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V2_CONSOLE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterLogicManager;
+import com.didichuxing.datachannel.arius.admin.biz.indices.IndicesManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.pipeline.TemplatePipelineManager;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
@@ -24,9 +26,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTe
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateCyclicalRollInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
+import com.didichuxing.datachannel.arius.admin.common.exception.AmsRemoteException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
 import com.didiglobal.logi.log.ILog;
@@ -60,7 +62,8 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 @RequestMapping(V2_CONSOLE + "/template")
-@Api(tags = "Console-用户侧索引模板接口(REST)")
+@Api(tags = "Console-用户侧索引模板接口(REST)：见："+V3_OP)
+@Deprecated
 public class ConsoleTemplateController extends BaseConsoleTemplateController {
 
     private static final ILog        LOGGER = LogFactory.getLog(ConsoleTemplateController.class);
@@ -76,7 +79,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
     private IndexTemplatePhyService indexTemplatePhyService;
 
     @Autowired
-    private ESIndexService           esIndexService;
+    private IndicesManager          indicesManager;
 
     @Autowired
     private TemplateLogicManager     templateLogicManager;
@@ -132,7 +135,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
         consoleTemplateDetail.setDisableIndexRollover(Optional.ofNullable(indexTemplateService.getTemplateConfig(logicId))
                 .map(IndexTemplateConfig::getDisableIndexRollover)
                 .orElse(null)
-        
+
         );
 
         return Result.buildSucc(consoleTemplateDetail);
@@ -160,7 +163,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
     @ResponseBody
     @ApiOperation(value = "获取索引清理信息接口【三方接口】",tags = "【三方接口】" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "索引ID", required = true) })
-    public Result<ConsoleTemplateClearVO> getLogicTemplateClearInfo(@RequestParam("logicId") Integer logicId) {
+    public Result<ConsoleTemplateClearVO> getLogicTemplateClearInfo(@RequestParam("logicId") Integer logicId) throws AmsRemoteException {
         IndexTemplateWithPhyTemplates templateLogicWithPhysical = indexTemplateService
             .getLogicTemplateWithPhysicalsById(logicId);
 
@@ -176,7 +179,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
         consoleTemplateClearVO.setLogicId(templateLogicWithPhysical.getId());
         consoleTemplateClearVO.setName(templateLogicWithPhysical.getName());
         consoleTemplateClearVO
-            .setIndices(indexTemplatePhyService.getMatchNoVersionIndexNames(templateLogicWithPhysical.getMasterPhyTemplate().getId()));
+            .setIndices(indicesManager.listIndexNameByTemplatePhyId(templateLogicWithPhysical.getMasterPhyTemplate().getId()));
         consoleTemplateClearVO.setAccessApps(templateLogicManager.getLogicTemplateProjectAccess(logicId));
 
         return Result.buildSucc(consoleTemplateClearVO);
@@ -200,7 +203,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
     @ResponseBody
     @ApiOperation(value = "获取将要索引下线信息接口【三方接口】",tags = "【三方接口】" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "索引ID", required = true) })
-    public Result<ConsoleTemplateDeleteVO> getLogicTemplateDeleteInfo(@RequestParam("logicId") Integer logicId) {
+    public Result<ConsoleTemplateDeleteVO> getLogicTemplateDeleteInfo(@RequestParam("logicId") Integer logicId) throws AmsRemoteException {
         //与上清理索引信息接口实现合并
         IndexTemplateWithPhyTemplates templateLogicWithPhysical = indexTemplateService
             .getLogicTemplateWithPhysicalsById(logicId);
@@ -235,7 +238,8 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
         if (checkAuthResult.failed()) {
             return checkAuthResult;
         }
-        return templateLogicManager.delTemplate(logicId, HttpRequestUtil.getOperator(request));
+        return templateLogicManager.delTemplate(logicId, HttpRequestUtil.getOperator(request),
+                HttpRequestUtil.getProjectId(request));
     }
 
     @GetMapping("/indices/list")
@@ -267,8 +271,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
         List<IndexTemplatePhy> physicalMasters = templateLogicWithPhysical.fetchMasterPhysicalTemplates();
         for (IndexTemplatePhy physicalMaster : physicalMasters) {
             try {
-                catIndexResults.addAll(esIndexService.syncCatIndexByExpression(physicalMaster.getCluster(),
-                    physicalMaster.getExpression()));
+                catIndexResults.addAll(indicesManager.listIndexCatInfoByTemplatePhyId(physicalMaster.getId()));
             } catch (Exception e) {
                 LOGGER.warn("class=ConsoleTemplateController||method=TemplateCyclicalRollInfoVO||logicId={}||errMsg={}", logicId, e.getMessage(), e);
             }
@@ -314,7 +317,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
         }
         try {
             return indexTemplateService.updateTemplateWriteRateLimit(consoleTemplateRateLimitDTO,
-                    HttpRequestUtil.getOperator(request));
+                    HttpRequestUtil.getOperator(request),HttpRequestUtil.getProjectId(request));
         } catch (ESOperateException e) {
             LOGGER.info("限流调整失败", e);
             return Result.buildFail("限流调整失败！");

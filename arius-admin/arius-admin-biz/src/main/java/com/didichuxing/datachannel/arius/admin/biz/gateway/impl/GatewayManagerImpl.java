@@ -324,7 +324,7 @@ public class GatewayManagerImpl implements GatewayManager {
 
     @Override
     public Result<String> sqlExplain(String sql, Integer projectId) {
-        if (projectId == null ||esUserService.checkDefaultESUserByProject(projectId)) {
+        if (projectId == null ||!esUserService.checkDefaultESUserByProject(projectId)) {
             return Result.buildParamIllegal("对应的projectId字段非法");
         }
         final ESUser esUser = esUserService.getDefaultESUserByProject(projectId);
@@ -334,7 +334,7 @@ public class GatewayManagerImpl implements GatewayManager {
 
     @Override
     public Result<String> directSqlSearch(String sql, String phyClusterName, Integer projectId) {
-        if (projectId == null ||esUserService.checkDefaultESUserByProject(projectId)) {
+        if (projectId == null ||!esUserService.checkDefaultESUserByProject(projectId)) {
             return Result.buildParamIllegal("对应的projectId字段非法");
         }
          final ESUser esUser = esUserService.getDefaultESUserByProject(projectId);

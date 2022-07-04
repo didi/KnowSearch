@@ -11,6 +11,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.TaskTypeVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.WorkTaskVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didiglobal.logi.log.ILog;
@@ -68,7 +69,7 @@ public class OpTaskController {
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "path", dataType = "String", name = "type", value = "任务类型", required = true) })
     public Result<WorkTaskVO> submit(HttpServletRequest request,
                                      @PathVariable(value = "type") Integer type,
-                                     @RequestBody OpTaskDTO workTaskDTO) {
+                                     @RequestBody OpTaskDTO workTaskDTO) throws NotFindSubclassException {
         String dataCenter = workTaskDTO.getDataCenter();
         String user = HttpRequestUtil.getOperator(request);
 
@@ -112,7 +113,7 @@ public class OpTaskController {
     @ApiOperation(value = "提交任务接口", notes = "")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "path", dataType = "String", name = "type", value = "任务类型", required = true) })
     public Result<WorkTaskVO> addTask(HttpServletRequest request, @PathVariable(value = "type") String code,
-                                     @RequestBody OpTaskDTO opTaskDTO) {
+                                     @RequestBody OpTaskDTO opTaskDTO) throws NotFindSubclassException {
         String dataCenter = opTaskDTO.getDataCenter();
         String user = HttpRequestUtil.getOperator(request);
 

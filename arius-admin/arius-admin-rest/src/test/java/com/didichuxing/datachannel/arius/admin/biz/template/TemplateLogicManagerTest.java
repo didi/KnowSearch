@@ -67,7 +67,7 @@ public class TemplateLogicManagerTest extends AriusAdminApplicationTest {
         Integer templateId = 37519;
         Result<Void> result = null;
         try {
-            result = templateLogicManager.upgrade(templateId, "admin");
+            result = templateLogicManager.upgrade(templateId, "admin", 1);
         } catch (AdminOperateException e) {
             e.printStackTrace();
         }

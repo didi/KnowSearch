@@ -215,7 +215,7 @@ public class DslStatisService {
         return dslTemplatePO;
     }
 
-    public OperateRecord buildDslSettingOperatorRecord(String bizId, OperateTypeEnum operateType, String operator,
+    protected OperateRecord buildDslSettingOperatorRecord(String bizId, OperateTypeEnum operateType, String operator,
                                                           String content, ProjectBriefVO projectBriefVO) {
      
 

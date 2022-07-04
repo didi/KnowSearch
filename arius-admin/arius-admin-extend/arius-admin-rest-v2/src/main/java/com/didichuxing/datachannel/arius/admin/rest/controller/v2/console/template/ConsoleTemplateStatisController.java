@@ -1,5 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v2.console.template;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V2_CONSOLE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
+
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyStaticsManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESIndexStats;
@@ -8,18 +11,19 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import java.util.List;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V2_CONSOLE;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @NoArgsConstructor
 @RestController()
 @RequestMapping(V2_CONSOLE + "/template/statis")
-@Api(tags = "Console-用户侧索引模板统计信息接口(REST)")
+@Api(tags = "Console-用户侧索引模板统计信息接口(REST)：见："+V3_OP)
+@Deprecated
 public class ConsoleTemplateStatisController extends BaseConsoleTemplateController {
 
     @Autowired

@@ -25,8 +25,8 @@ import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.Ope
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
+import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminTaskException;
-import com.didichuxing.datachannel.arius.admin.common.exception.AriusRunTimeException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.Getter;
@@ -143,9 +143,9 @@ public class ClusterRoleHostServiceImpl implements ClusterRoleHostService {
     }
 
     @Override
-    public boolean editNodeRegionId(List<Integer> nodeIds, Integer regionId) throws AriusRunTimeException{
-        if (CollectionUtils.isEmpty(nodeIds)) { throw new AriusRunTimeException("节点不存在", ResultType.ILLEGAL_PARAMS);}
-        if (null == regionId) { throw new AriusRunTimeException("regionId为空", ResultType.ILLEGAL_PARAMS);}
+    public boolean editNodeRegionId(List<Integer> nodeIds, Integer regionId) throws AdminOperateException{
+        if (CollectionUtils.isEmpty(nodeIds)) { throw new AdminOperateException("节点不存在", ResultType.ILLEGAL_PARAMS);}
+        if (null == regionId) { throw new AdminOperateException("regionId为空", ResultType.ILLEGAL_PARAMS);}
 
         return clusterRoleHostDAO.updateRegionId(nodeIds, regionId) >= 1;
     }
@@ -694,7 +694,7 @@ public class ClusterRoleHostServiceImpl implements ClusterRoleHostService {
         return flag.get();
     }
 
-    private boolean addAndEditNodes(String cluster, List<ESClusterRoleHostPO> shouldAdd, List<ESClusterRoleHostPO> shouldEdit) {
+    private boolean addAndEditNodes(String cluster, List<ESClusterRoleHostPO> shouldAdd, List<ESClusterRoleHostPO> shouldEdit) throws AdminTaskException {
         clusterRoleHostDAO.offlineByCluster(cluster);
         boolean flag = addNodeBatch(shouldAdd);
         if (flag) {

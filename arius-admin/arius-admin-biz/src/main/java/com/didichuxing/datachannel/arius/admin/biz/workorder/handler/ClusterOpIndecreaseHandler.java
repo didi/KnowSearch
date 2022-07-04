@@ -31,6 +31,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.Getter;
@@ -82,7 +83,7 @@ public class ClusterOpIndecreaseHandler extends BaseWorkOrderHandler {
     private OpTaskManager opTaskManager;
 
     @Override
-    protected Result validateConsoleParam(WorkOrder workOrder) {
+    protected Result validateConsoleParam(WorkOrder workOrder) throws NotFindSubclassException {
 
         ClusterBaseContent baseContent = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
             ClusterBaseContent.class);

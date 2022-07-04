@@ -130,6 +130,14 @@ public class ClusterRegionServiceImpl implements ClusterRegionService {
     }
 
     @Override
+    public List<ClusterRegion> listRegionByPhyClusterNames(List<String> phyClusterNames) {
+        if (CollectionUtils.isNotEmpty(phyClusterNames)) {
+            return ConvertUtil.list2List(clusterRegionDAO.listByPhyClusterNames(phyClusterNames), ClusterRegion.class);
+        }
+        return Lists.newArrayList();
+    }
+
+    @Override
     public List<ClusterRegion> listAllBoundRegions() {
         return ConvertUtil.list2List(clusterRegionDAO.listBoundRegions(), ClusterRegion.class);
     }
@@ -187,6 +195,7 @@ public class ClusterRegionServiceImpl implements ClusterRegionService {
                             .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
                             .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
                             .content(DELETE.getDesc())
+                            .userOperation(operator)
                             .bizId(Math.toIntExact(regionId))
                     .build());
         }
@@ -195,7 +204,7 @@ public class ClusterRegionServiceImpl implements ClusterRegionService {
     }
 
     @Override
-    public Result<Void> deleteByClusterPhy(String clusterPhyName, String operator) {
+    public Result<Void> deleteByClusterPhy(String clusterPhyName) {
         return Result.build(0 < clusterRegionDAO.deleteByClusterPhyName(clusterPhyName));
     }
 
@@ -433,8 +442,9 @@ public class ClusterRegionServiceImpl implements ClusterRegionService {
 
         // 获取物理集群对应的逻辑集群，进行去重的操作
         Set<Long> logicClusterIds = Sets.newHashSet();
-        clusterRegions.forEach(clusterRegion -> logicClusterIds.addAll(new HashSet<>(ListUtils.string2LongList(clusterRegion.getLogicClusterIds()))));
-        return logicClusterIds;
+        clusterRegions.forEach(clusterRegion -> logicClusterIds
+            .addAll(new HashSet<>(ListUtils.string2LongList(clusterRegion.getLogicClusterIds()))));
+        return logicClusterIds.stream().filter(logicClusterId -> logicClusterId > 0).collect(Collectors.toSet());
     }
 
     @Override

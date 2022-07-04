@@ -1,9 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.biz.worktask.ecm.impl;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmHostStatusEnum.CANCELLED;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmHostStatusEnum.FAILED;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmHostStatusEnum.KILL_FAILED;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmHostStatusEnum.SUCCESS;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmHostStatusEnum.*;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmTaskStatusEnum.CANCEL;
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.ADD;
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.EDIT;
@@ -13,6 +10,20 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.resource.E
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum.ES_HOST;
 import static com.didichuxing.datachannel.arius.admin.remote.zeus.bean.constant.ZeusClusterActionEnum.EXPAND;
 import static com.didichuxing.datachannel.arius.admin.remote.zeus.bean.constant.ZeusClusterActionEnum.SHRINK;
+
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -50,6 +61,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESCluste
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.event.ecm.EcmTaskEditEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.resource.ClusterPhyHealthEvent;
+import com.didichuxing.datachannel.arius.admin.common.exception.AdminTaskException;
 import com.didichuxing.datachannel.arius.admin.common.exception.EcmRemoteException;
 import com.didichuxing.datachannel.arius.admin.common.threadpool.AriusScheduleThreadPool;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
@@ -67,26 +79,8 @@ import com.didichuxing.datachannel.arius.admin.remote.zeus.bean.constant.EcmActi
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+
 import lombok.NoArgsConstructor;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * ES工单任务管理
@@ -218,7 +212,7 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result<EcmOperateAppBase> savaAndActionEcmTask(Long taskId, String operator) {
+    public Result<EcmOperateAppBase> savaAndActionEcmTask(Long taskId, String operator) throws EcmRemoteException {
         //1. 校验ECM任务有效性
         EcmTask ecmTask = getEcmTask(taskId);
         if (AriusObjUtils.isNull(ecmTask)) {
@@ -235,7 +229,7 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
         //2. 创建ES物理集群信息
         Result<Long> saveResult = ecmHandleService.saveESCluster(ecmParamBaseList);
         if (saveResult.failed()) {
-            return Result.buildFail("创建集群信息失败");
+            return Result.buildFrom(saveResult);
         }
 
         //3. 回写ES集群Id到到ECMTask
@@ -283,7 +277,7 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
     }
 
     @Override
-    public Result<EcmOperateAppBase> actionClusterEcmTask(Long taskId, String operator) {
+    public Result<EcmOperateAppBase> actionClusterEcmTask(Long taskId, String operator) throws EcmRemoteException {
         //1. 校验ECM任务有效性
         EcmTask ecmTask = getEcmTask(taskId);
         if (AriusObjUtils.isNull(ecmTask)) {
@@ -332,7 +326,7 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
 
     @Override
     public Result<EcmOperateAppBase> actionClusterEcmTask(Long taskId, EcmActionEnum ecmActionEnum, String hostname,
-                                                          String operator) {
+                                                          String operator) throws EcmRemoteException {
         EcmTaskPO ecmTask = ecmTaskDao.getById(taskId);
         if (AriusObjUtils.isNull(ecmTask)) {
             return Result.buildParamIllegal("集群任务不存在");
@@ -496,7 +490,7 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
     }
 
     @Override
-    public EcmTaskStatusEnum refreshEcmTask(EcmTask ecmTask) {
+    public EcmTaskStatusEnum refreshEcmTask(EcmTask ecmTask) throws AdminTaskException {
         if ((SUCCESS.getValue().equals(ecmTask.getStatus()) || CANCEL.getValue().equals(ecmTask.getStatus()))) {
             return EcmTaskStatusEnum.SUCCESS;
         }
@@ -666,7 +660,7 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
      * @param mergedStatusEnum    任务状态
      * @return
      */
-    private Result<Void> postProcess(EcmTask ecmTask, EcmTaskStatusEnum mergedStatusEnum) {
+    private Result<Void> postProcess(EcmTask ecmTask, EcmTaskStatusEnum mergedStatusEnum) throws AdminTaskException {
         if (!SUCCESS.getValue().equals(mergedStatusEnum.getValue()) && !hasRemoteTaskFailed(mergedStatusEnum)) {
             return Result.buildSucc();
         }
@@ -701,7 +695,7 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
      * @param ecmTask ecm任务
      * @param mergedStatusEnum 总的任务执行情况
      */
-    private void saveOrEditHostInfoFromEcmTask(EcmTask ecmTask, EcmTaskStatusEnum mergedStatusEnum) {
+    private void saveOrEditHostInfoFromEcmTask(EcmTask ecmTask, EcmTaskStatusEnum mergedStatusEnum) throws AdminTaskException {
         if (!EcmTaskStatusEnum.SUCCESS.equals(mergedStatusEnum)) {
             return;
         }
@@ -714,7 +708,7 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
         }
     }
 
-    private void addHostInfoFromTaskOrder(EcmTask ecmTask) {
+    private void addHostInfoFromTaskOrder(EcmTask ecmTask) throws AdminTaskException {
         // 从ecm任务的工单中获取节点全量的信息
         Result<OrderDetailBaseVO> getOrderDetailResult = workOrderManager.getById(ecmTask.getWorkOrderId());
         if (getOrderDetailResult.failed()) {
@@ -764,7 +758,11 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
     private void delayCollectNodeSettingsTask(List<EcmParamBase> ecmParamBases) {
         ariusScheduleThreadPool.submitScheduleAtFixedDelayTask(() -> {
             String clusterPhyName = getClusterPhyNameFromEcmParamBases(ecmParamBases);
-            clusterRoleHostService.collectClusterNodeSettings(clusterPhyName);
+            try {
+                clusterRoleHostService.collectClusterNodeSettings(clusterPhyName);
+            } catch (AdminTaskException e) {
+                e.printStackTrace();
+            }
         }, 30, 600);
     }
 

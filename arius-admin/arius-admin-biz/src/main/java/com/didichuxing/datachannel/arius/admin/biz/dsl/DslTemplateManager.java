@@ -4,6 +4,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResu
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.dsl.template.DslTemplateConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.DslTemplateVO;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 
 import java.util.List;
 
@@ -14,20 +15,24 @@ public interface DslTemplateManager {
 
     /**
      * 根据projectid修改查询模版限流值
-     * @param projectId 应用账号
+     *
+     * @param projectId          应用账号
+     * @param operator
      * @param dslTemplateMd5List dsl模板MD5，待修改限流值
-     * @param queryLimit 限流值
+     * @param queryLimit         限流值
      * @return Result<Boolean>
      */
-    Result<Boolean> updateDslTemplateQueryLimit(Integer projectId, List<String> dslTemplateMd5List, Double queryLimit);
+    Result<Boolean> updateDslTemplateQueryLimit(Integer projectId, String operator, List<String> dslTemplateMd5List, Double queryLimit);
 
     /**
      * 更新查询模版的 启用|停用 状态
-     * @param projectId 应用账号
+     *
+     * @param projectId      应用账号
+     * @param operator
      * @param dslTemplateMd5 dsl模板MD5
      * @return Result<Boolean>
      */
-    Result<Boolean> changeDslTemplateStatus(Integer projectId, String dslTemplateMd5);
+    Result<Boolean> changeDslTemplateStatus(Integer projectId, String operator, String dslTemplateMd5);
 
     /**
      * 根据dslTemplateMd5查找DSL模版详情
@@ -43,5 +48,5 @@ public interface DslTemplateManager {
      * @param queryDTO 查询条件
      * @return 分页数据
      */
-    PaginationResult<DslTemplateVO> getDslTemplatePage(Integer projectId, DslTemplateConditionDTO queryDTO);
+    PaginationResult<DslTemplateVO> getDslTemplatePage(Integer projectId, DslTemplateConditionDTO queryDTO) throws NotFindSubclassException;
 }

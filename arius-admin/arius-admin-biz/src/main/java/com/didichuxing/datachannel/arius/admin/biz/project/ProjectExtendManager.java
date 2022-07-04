@@ -5,16 +5,12 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectExtend
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectQueryExtendDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.ProjectBriefExtendVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.ProjectExtendVO;
-import com.didiglobal.logi.security.common.PagingData;
 import com.didiglobal.logi.security.common.PagingResult;
-import com.didiglobal.logi.security.common.dto.project.ProjectBriefQueryDTO;
-import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import com.didiglobal.logi.security.common.vo.project.ProjectDeleteCheckVO;
 import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
 import com.didiglobal.logi.security.exception.LogiSecurityException;
 import java.util.List;
-
-
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * 基于logi的扩展能力
@@ -26,12 +22,13 @@ public interface ProjectExtendManager {
 	    /**
          * 创建项目
          *
-         * @param saveDTO  项目信息
-         * @param operator 请求信息
+         * @param saveDTO    项目信息
+         * @param operator   请求信息
+         * @param operatorId
          * @return 项目信息
          * @throws LogiSecurityException 项目相关的错误信息
          */
-    Result<ProjectExtendVO> createProject(ProjectExtendSaveDTO saveDTO, String operator);
+    Result<ProjectExtendVO> createProject(ProjectExtendSaveDTO saveDTO, String operator, Integer operatorId);
 
     /**
      * 获取项目详情，通过项目id
@@ -80,9 +77,10 @@ public interface ProjectExtendManager {
      * 条件分页查询项目信息
      *
      * @param queryDTO 条件信息
+     * @param request
      * @return 项目分页信息
      */
-    PagingResult<ProjectExtendVO> getProjectPage(ProjectQueryExtendDTO queryDTO);
+    PagingResult<ProjectExtendVO> getProjectPage(ProjectQueryExtendDTO queryDTO, HttpServletRequest request);
 
   
 
@@ -149,13 +147,7 @@ public interface ProjectExtendManager {
      */
     Result<ProjectDeleteCheckVO> checkBeforeDelete(Integer projectId);
 
-    /**
-     * 分页查询项目简要信息
-     *
-     * @param queryDTO 查询条件
-     * @return 简要信息List
-     */
-    PagingData<ProjectBriefVO> getProjectBriefPage(ProjectBriefQueryDTO queryDTO);
+
 
     /**
      * 校验项目是否存在

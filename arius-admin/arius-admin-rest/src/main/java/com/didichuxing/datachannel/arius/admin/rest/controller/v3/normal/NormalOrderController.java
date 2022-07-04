@@ -11,6 +11,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.OrderTypeVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.WorkOrderVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.detail.OrderDetailBaseVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
+import com.didichuxing.datachannel.arius.admin.common.exception.OperateForbiddenException;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
@@ -61,7 +63,7 @@ public class NormalOrderController {
     @PutMapping("/{orderId}")
     @ResponseBody
     @ApiOperation(value = "审核")
-    public Result<Void> process(@PathVariable(value = "orderId") Long orderId, @RequestBody WorkOrderProcessDTO processDTO) {
+    public Result<Void> process(@PathVariable(value = "orderId") Long orderId, @RequestBody WorkOrderProcessDTO processDTO) throws NotFindSubclassException, OperateForbiddenException {
         //设置当前操作人
         processDTO.setAssignee( SpringTool.getUserName() );
         return workOrderManager.process(processDTO);
@@ -70,7 +72,7 @@ public class NormalOrderController {
     @DeleteMapping("/{orderId}")
     @ResponseBody
     @ApiOperation(value = "工单撤销")
-    public Result<Void> cancelOrder(@PathVariable(value = "orderId") Long orderId) {
+    public Result<Void> cancelOrder(@PathVariable(value = "orderId") Long orderId) throws OperateForbiddenException {
         return workOrderManager.cancelOrder(orderId, SpringTool.getUserName());
     }
 
@@ -85,14 +87,14 @@ public class NormalOrderController {
     @ResponseBody
     @ApiOperation(value = "工单申请列表")
     public Result<List<WorkOrderVO>> getOrderApplyList(HttpServletRequest httpServletRequest,
-                                                       @RequestParam(value = "status") Integer status) {
+                                                       @RequestParam(value = "status") Integer status) throws OperateForbiddenException {
         return workOrderManager.getOrderApplyList(SpringTool.getUserName(), status, HttpRequestUtil.getProjectId(httpServletRequest));
     }
 
     @GetMapping("/approvals")
     @ResponseBody
     @ApiOperation(value = "工单审核列表")
-    public Result<List<WorkOrderVO>> getOrderApprovalList(@RequestParam(value = "status", required = false) Integer status) {
+    public Result<List<WorkOrderVO>> getOrderApprovalList(@RequestParam(value = "status", required = false) Integer status) throws OperateForbiddenException {
         return workOrderManager.getOrderApprovalListByStatus(status);
     }
 }

@@ -14,6 +14,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.Template
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateSettingVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -47,7 +48,7 @@ public class TemplateLogicV3Controller {
     @Autowired
     private TemplateLogicSettingsManager templateLogicSettingsManager;
 
-    @GetMapping("/listNames")
+    @GetMapping("/names")
     @ResponseBody
     @ApiOperation(value = "获取逻辑模板名称列表接口")
     public Result<List<String>> listTemplateLogicNames(HttpServletRequest request) {
@@ -58,25 +59,25 @@ public class TemplateLogicV3Controller {
     @ResponseBody
     @ApiOperation(value = "模糊查询模板列表")
     public PaginationResult<ConsoleTemplateVO> pageGetConsoleTemplateVOS(HttpServletRequest request,
-                                                                         @RequestBody TemplateConditionDTO condition) {
+                                                                         @RequestBody TemplateConditionDTO condition) throws NotFindSubclassException {
         return templateLogicManager.pageGetConsoleTemplateVOS(condition, HttpRequestUtil.getProjectId(request));
     }
 
-    @GetMapping("/{templateName}/nameCheck")
+    @GetMapping("/{templateName}/name-check")
     @ResponseBody
     @ApiOperation(value = "校验模板名称是否合法")
     public Result<Void> checkTemplateValidForCreate(@PathVariable("templateName") String templateName) {
         return templateLogicManager.checkTemplateValidForCreate(templateName);
     }
 
-    @GetMapping("/{templateId}/checkEditMapping/")
+    @GetMapping("/{templateId}/check-edit-mapping/")
     @ResponseBody
     @ApiOperation(value = "校验可否编辑模板mapping")
     public Result<Boolean> checkTemplateEditMapping(@PathVariable Integer templateId) {
         return templateLogicManager.checkTemplateEditMapping(templateId);
     }
 
-    @GetMapping("/{templateId}/{templateSrvId}/checkEditTemplateSrv/")
+    @GetMapping("/{templateId}/{templateSrvId}/check-edit-template-srv/")
     @ResponseBody
     @ApiOperation(value = "校验模板是否可以使用指定的索引模板服务，例如是否可以编辑mapping,setting等")
     @ApiImplicitParams({
@@ -98,7 +99,8 @@ public class TemplateLogicV3Controller {
     public Result<Void> switchRolloverStatus(@PathVariable Integer templateLogicId, @PathVariable Integer status,
                                                HttpServletRequest request) {
         String operator = HttpRequestUtil.getOperator(request);
-        return templateLogicManager.switchRolloverStatus(templateLogicId, status, operator);
+        return templateLogicManager.switchRolloverStatus(templateLogicId, status, operator,
+                HttpRequestUtil.getProjectId(request));
     }
 
     @PutMapping("/setting")
@@ -139,11 +141,12 @@ public class TemplateLogicV3Controller {
         return templateLogicManager.create(param, HttpRequestUtil.getOperator(request), HttpRequestUtil.getProjectId(request));
     }
 
-    @PutMapping("/edit")
+    @PutMapping()
     @ResponseBody
     @ApiOperation(value = "用户编辑模板")
     public Result<Void> editTemplate(HttpServletRequest request, @RequestBody IndexTemplateDTO param) {
-        return templateLogicManager.newEditTemplate(param, HttpRequestUtil.getOperator(request));
+        return templateLogicManager.newEditTemplate(param, HttpRequestUtil.getOperator(request),
+                HttpRequestUtil.getProjectId(request));
     }
 
     @DeleteMapping("/{templateId}/{indices}/clear-indices")
@@ -155,7 +158,7 @@ public class TemplateLogicV3Controller {
         return templateLogicManager.clearIndices(templateId, indices, HttpRequestUtil.getProjectId(request));
     }
 
-    @PutMapping("/{templateId}/{shardNum}/adjustShard")
+    @PutMapping("/{templateId}/{shardNum}/adjust-shard")
     @ResponseBody
     @ApiOperation(value = "扩缩容")
     public Result<Void> adjustShard(HttpServletRequest request,
@@ -168,8 +171,9 @@ public class TemplateLogicV3Controller {
     @PutMapping("/{templateId}/upgrade")
     @ResponseBody
     @ApiOperation(value = "升版本")
-    public Result<Void> upgrade(HttpServletRequest request, @RequestBody Integer templateId) throws AdminOperateException {
-        return templateLogicManager.upgrade(templateId, HttpRequestUtil.getOperator(request));
+    public Result<Void> upgrade(HttpServletRequest request, @PathVariable Integer templateId) throws AdminOperateException {
+        return templateLogicManager.upgrade(templateId, HttpRequestUtil.getOperator(request),
+                HttpRequestUtil.getProjectId(request));
     }
 
     @GetMapping("{clusterPhyName}/phy/templates")
