@@ -667,53 +667,6 @@ public class ESIndexServiceImpl implements ESIndexService {
         }
         return esIndexDAO.editAlias(cluster, putAliasNodeList);
     }
-
-    private Result<Void> checkAliases(String cluster, String index, List<String> addAliases, List<String> deleteAliases) {
-        if (!esIndexDAO.exist(cluster, index)) {
-            return Result.buildParamIllegal(String.format("索引【%s】不存在", index));
-        }
-        if (CollectionUtils.isEmpty(addAliases) && CollectionUtils.isEmpty(deleteAliases)) {
-            return Result.buildParamIllegal("要操作的别名不存在");
-        }
-        List<PutAliasNode> putAliasNodeList = new ArrayList<>();
-        Map<String, List<String>> aliasIndexNodeMap = syncGetIndexAliasesByIndices(cluster, index);
-        Set<String> aliasSet = new HashSet<>();
-        Optional.ofNullable(aliasIndexNodeMap.get(index)).map(aliasSet::addAll);
-        if (CollectionUtils.isNotEmpty(deleteAliases)) {
-            Set<String> notExistsAlias = new HashSet<>();
-
-            deleteAliases.stream().filter(StringUtils::isNotBlank).forEach(aliasName -> {
-                PutAliasNode putAliasNode = new PutAliasNode();
-                putAliasNode.setIndex(index);
-                putAliasNode.setAlias(aliasName);
-                putAliasNode.setType(PutAliasType.REMOVE);
-                if (aliasSet.contains(aliasName)) {
-                    notExistsAlias.add(aliasName);
-                }
-                putAliasNodeList.add(putAliasNode);
-            });
-            if (!notExistsAlias.isEmpty()) {
-                return Result.buildParamIllegal(String.format("要删除的别名【%s】不存在", StringUtils.join(notExistsAlias, ",")));
-            }
-        }
-        if (CollectionUtils.isNotEmpty(addAliases)) {
-            addAliases.stream().filter(StringUtils::isNotBlank).forEach(aliasName -> {
-                PutAliasNode putAliasNode = new PutAliasNode();
-                putAliasNode.setIndex(index);
-                putAliasNode.setAlias(aliasName);
-                putAliasNode.setType(PutAliasType.ADD);
-                if (!aliasSet.contains(aliasName)) {
-                    putAliasNodeList.add(putAliasNode);
-                }
-            });
-        }
-
-        if (CollectionUtils.isNotEmpty(putAliasNodeList)) {
-            return esIndexDAO.editAlias(cluster, putAliasNodeList);
-        }
-        return Result.buildSucc();
-    }
-
     @Override
     public Result<Void> rollover(String cluster, String alias, String conditions) {
         return esIndexDAO.rollover(cluster, alias, conditions);
