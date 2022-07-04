@@ -84,10 +84,6 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
 
     @Autowired
     private ProjectService projectService;
-    @Autowired
-    private RoleTool roleTool;
-
-
 
     @Autowired
     private IndexTemplatePhyService indexTemplatePhyService;
