@@ -143,7 +143,7 @@ public class TemplateController extends BaseTemplateController {
     @ApiOperation(value = "用户编辑模板接口【三方接口】",tags = "【三方接口】", notes = "支持修改数据类型、责任人、备注")
     public Result<Void> modifyConsoleTemplate(HttpServletRequest request,
                                         @RequestBody ConsoleTemplateUpdateDTO templateLogicDTO) throws AdminOperateException {
-        return templateLogicManager.editTemplate(ConvertUtil.obj2Obj(templateLogicDTO, IndexTemplateDTO.class),
+        return templateLogicManager.newEditTemplate(ConvertUtil.obj2Obj(templateLogicDTO, IndexTemplateDTO.class),
             HttpRequestUtil.getOperator(request),HttpRequestUtil.getProjectId(request));
     }
 
