@@ -57,9 +57,9 @@
             keyColumn="id" keyProperty="id">
         insert into project_arius_resource_logic
         (`name`, `type`, project_id, data_center, responsible,  memo, quota, `level`, config_json,
-         health)
+         health,`data_node_spec`)
         values (#{name}, #{type}, #{projectId}, #{dataCenter}, #{responsible},
-                #{memo}, #{quota}, #{level}, #{configJson}, #{health})
+                #{memo}, #{quota}, #{level}, #{configJson}, #{health},#{dataNodeSpec})
     </insert>
 
     <update id="update" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterLogicPO">

@@ -126,7 +126,8 @@ public class AriusConfigV3Controller {
     @ResponseBody
     @ApiOperation(value = "获取节点规格列表")
     public Result<List<String>> listClusterNodeSpecification() {
-        return Result.buildSucc(new ArrayList<>(ariusConfigInfoService.stringSettingSplit2Set(AriusConfigConstant.ARIUS_COMMON_GROUP,
+        return Result.buildSucc(new ArrayList<>(
+                ariusConfigInfoService.stringSettingSplit2Set(AriusConfigConstant.ARIUS_COMMON_GROUP,
                 AriusConfigConstant.CLUSTER_NODE_SPECIFICATION_LIST, AriusConfigConstant.CLUSTER_NODE_SPECIFICATION_LIST_DEFAULT_VALUE, COMMA)));
     }
 }
