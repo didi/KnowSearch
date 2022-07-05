@@ -8,10 +8,12 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhySettings;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.rest.controller.v2.console.template.BaseConsoleTemplateController;
+import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,10 +34,11 @@ public class TemplateSettingController extends BaseConsoleTemplateController {
     @PutMapping("/{logicId}")
     @ResponseBody
     @ApiOperation(value = "更新索引Setting接口" )
-    public Result<Void> modifySetting(@PathVariable("logicId") Integer logicId,
+    public Result<Void> modifySetting(HttpServletRequest request, @PathVariable("logicId") Integer logicId,
                                       @RequestBody String settingDTO) {
         IndexTemplatePhySettings settings = new IndexTemplatePhySettings(JSONObject.parseObject(settingDTO));
-        return templateLogicSettingsManager.updateSettings(logicId, settings);
+        return templateLogicSettingsManager.updateSettings(logicId, settings, HttpRequestUtil.getOperator(request),
+                HttpRequestUtil.getProjectId(request));
     }
     
     @GetMapping("")
