@@ -39,6 +39,7 @@ import com.didiglobal.logi.elasticsearch.client.utils.JsonUtils;
 import com.didiglobal.logi.security.service.ProjectService;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -223,14 +224,12 @@ public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrv implements
     
         List<IndexTemplatePhy> templatePhysicals = templateLogicWithPhysical.fetchMasterPhysicalTemplates();
 
-        if (!isTemplateSrvOpen(templatePhysicals)) {
-            return Result.buildFail("集群没有开启" + templateServiceName());
-        }
+       
     
         //获取变更前的setting
-        TemplateConfig templateConfig = esTemplateService.syncGetTemplateConfig(
+        TemplateConfig templateConfig = Optional.ofNullable(esTemplateService.syncGetTemplateConfig(
                 templateLogicWithPhysical.getMasterPhyTemplate().getCluster(),
-                templateLogicWithPhysical.getMasterPhyTemplate().getName());
+                templateLogicWithPhysical.getMasterPhyTemplate().getName())).orElse(new TemplateConfig());
         JSONObject beforeSetting= MapUtils.isNotEmpty(templateConfig.getSetttings())?
                 JsonUtils.reFlat(templateConfig.getSetttings()):new JSONObject();
         //变更后的setting
