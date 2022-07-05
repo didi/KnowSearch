@@ -432,8 +432,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     }
 
     @Override
-    public Result<Void> editTemplate(IndexTemplateDTO param, String operator, Integer projectId)
-            throws AdminOperateException {
+    public Result<Void> editTemplate(IndexTemplateDTO param, String operator, Integer projectId) throws AdminOperateException {
         return indexTemplateService.editTemplate(param, operator,projectId);
     }
 

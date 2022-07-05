@@ -13,12 +13,14 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterLogicConditionDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterLogicNodeConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterWithRegionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatCellDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateClearDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicContext;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicStatis;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ProjectClusterLogicAuth;
@@ -432,7 +434,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         if (checkProjectCorrectly.failed()) {
             return checkProjectCorrectly;
         }
-        Result<Void> result = clusterLogicService.deleteClusterLogicById(logicClusterId, operator, projectId);
+
         ClusterLogicTemplateIndexDetailDTO templateIndexVO = getTemplateIndexVO(logicClusterId, projectId);
 
         for (IndexTemplateLogicAggregate agg : templateIndexVO.getTemplateLogicAggregates()) {
@@ -445,6 +447,11 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
 
         indicesManager.deleteIndex(templateIndexVO.getCatIndexResults(),projectId,operator);
 
+        //将region解绑
+        ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(logicClusterId);
+        clusterRegionService.unbindRegion(clusterRegion.getId(),logicClusterId,operator,projectId);
+
+        Result<Void> result = clusterLogicService.deleteClusterLogicById(logicClusterId, operator, projectId);
         if (result.success()) {
 			SpringTool.publish(new ClusterLogicEvent(logicClusterId, projectId));
             //操作记录 集群下线
