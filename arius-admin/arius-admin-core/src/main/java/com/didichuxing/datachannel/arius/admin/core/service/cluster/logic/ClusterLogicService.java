@@ -1,8 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.core.service.cluster.logic;
 
-import java.util.List;
-import java.util.Set;
-
 import com.didichuxing.datachannel.arius.admin.common.bean.common.LogicResourceConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Plugin;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -12,15 +9,17 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.PluginDTO
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterNodeSepc;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterLogicDiskUsedInfoPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 
+import java.util.List;
+import java.util.Set;
+
 /**
  * 逻辑集群service
  * @author d06679
- * @date 2019/3/25
+ * @date  2019/3/25
  */
 public interface ClusterLogicService {
 
@@ -42,18 +41,18 @@ public interface ClusterLogicService {
      *
      * @param logicClusterId 逻辑集群ID
      * @param operator       操作人
-     * @param projectId
+     * @param projectId     项目id
      * @return result
-     * @throws AdminOperateException
+     * @throws AdminOperateException admin操作异常
      */
     Result<Void> deleteClusterLogicById(Long logicClusterId, String operator, Integer projectId) throws AdminOperateException;
 
     /**
      * 判断逻辑集群是否有模板
-     * @param logicClusterId
-     * @return
+     * @param logicClusterId 逻辑集群id
+     * @return true/false
      */
-    Boolean hasLogicClusterWithTemplates(Long logicClusterId);
+    boolean hasLogicClusterWithTemplates(Long logicClusterId);
 
     /**
      * 新建逻辑集群
@@ -67,7 +66,7 @@ public interface ClusterLogicService {
      *
      * @param param     参数
      * @param operation 操作
-     * @param projectId
+     * @param projectId 项目id
      * @return result
      */
     Result<Void> validateClusterLogicParams(ESLogicClusterDTO param, OperationEnum operation, Integer projectId);
@@ -77,7 +76,7 @@ public interface ClusterLogicService {
      *
      * @param param     参数
      * @param operator  操作人
-     * @param projectId
+     * @param projectId 项目id
      * @return result
      */
     Result<Void> editClusterLogic(ESLogicClusterDTO param, String operator, Integer projectId);
@@ -143,21 +142,21 @@ public interface ClusterLogicService {
     /**
      * 获取逻辑集群的所有role
      * @param logicClusterId 逻辑集群ID
-     * @return
+     * @return ClusterRoleInfo
      */
     List<ClusterRoleInfo> getClusterLogicRole(Long logicClusterId);
 
     /**
      * 获取逻辑集群datanode的规格信息
-     * @param logicClusterId
-     * @return
+     * @param logicClusterId 逻辑集群ID
+     * @return 规格信息
      */
     Set<RoleClusterNodeSepc> getLogicDataNodeSepc(Long logicClusterId);
 
     /**
      * 根据逻辑集群ID获取插件信息
      * @param  logicClusterId 逻辑集群ID
-     * @return config
+     * @return config 插件信息
      */
     List<Plugin> getClusterLogicPlugins(Long logicClusterId);
 
@@ -166,7 +165,7 @@ public interface ClusterLogicService {
      * @param  logicClusterId        逻辑集群ID
      * @param  pluginDTO           插件信息
      * @param  operator              操作人
-     * @return ESPlugin
+     * @return ESPlugin             成功
      */
     Result<Long> addPlugin(Long logicClusterId, PluginDTO pluginDTO, String operator) throws NotFindSubclassException;
 
@@ -176,7 +175,7 @@ public interface ClusterLogicService {
      * @param targetProjectId          项目Id
      * @param targetResponsible    目标负责人
      * @param submitor             提交人
-     * @return
+     * @return 成功/失败
      */
     Result<Void> transferClusterLogic(Long clusterLogicId, Integer targetProjectId, String targetResponsible, String submitor);
 
@@ -188,7 +187,7 @@ public interface ClusterLogicService {
     /**
      * 模糊查询统计总命中数
      * @param param 模糊查询条件
-     * @return
+     * @return 命中数
      */
     Long fuzzyClusterLogicHitByCondition(ClusterLogicConditionDTO param);
 

@@ -44,7 +44,7 @@ public interface ClusterLogicManager {
 
     /**
      * 获取APP拥有的集群列表
-     * @param projectId
+     * @param projectId 项目id
      * @return
      */
     Result<List<ClusterLogicVO>> getProjectLogicClusters(Integer projectId);
@@ -67,14 +67,14 @@ public interface ClusterLogicManager {
     /**
      * 获取集群详情
      * @param clusterId
-     * @param projectId
+     * @param projectId 项目id
      * @return
      */
     Result<ClusterLogicVO> getProjectLogicClusters(Long clusterId, Integer projectId);
 
     /**
      * 根据项目和集群类型获取逻辑集群(项目对其有管理权限)名称列表
-     * @param projectId
+     * @param projectId 项目id
      * @param type
      * @return
      */
@@ -115,7 +115,7 @@ public interface ClusterLogicManager {
     /**
      * 获取所有逻辑集群列表接口
      * @param param
-     * @param projectId
+     * @param projectId 项目id
      * @return
      */
     List<ClusterLogicVO> getClusterLogics(ESLogicClusterDTO param, Integer projectId);
@@ -174,7 +174,7 @@ public interface ClusterLogicManager {
     /**
      * 组合查询带分页信息的逻辑集群列表
      * @param condition
-     * @param projectId
+     * @param projectId 项目id
      * @return
      */
     PaginationResult<ClusterLogicVO> pageGetClusterLogics(ClusterLogicConditionDTO condition, Integer projectId) throws NotFindSubclassException;
@@ -190,18 +190,10 @@ public interface ClusterLogicManager {
      * 获取我的集群下索引和模板的数量
      * @param clusterId
      * @param operator
-     * @param projectId
+     * @param projectId 项目id
      * @return
      */
     Result<ClusterLogicTemplateIndexCountVO> indexTemplateCount(Long clusterId, String operator, Integer projectId);
-
-
-    /**
-     * 逻辑集群下的节点信息分页查询
-     * @param condition 分页参数
-     * @return PaginationResult
-     */
-    PaginationResult<ESClusterRoleHostVO> nodesPage(Long clusterLogicId,ClusterLogicNodeConditionDTO condition);
 
     /**
      * 获取预估磁盘大小
@@ -213,7 +205,7 @@ public interface ClusterLogicManager {
 
     /**
      * 根据项目和集群类型获取逻辑集群(项目对其有管理权限)名称列表
-     * @param projectId
+     * @param projectId 项目id
      * @param type
      * @return
      */
@@ -221,17 +213,22 @@ public interface ClusterLogicManager {
 
     /**
      * 根据projectId获取项目下的逻辑集群
-     * @param projectId
+     * @param projectId 项目id
      * @return
      */
     List<String> listClusterLogicNameByProjectId(Integer projectId);
 
     /**
      * 根据项目id获取集群的映射关系
-     * @param projectId
+     * @param projectId 项目id
      * @return
      */
     Result<List<Tuple<String, ClusterPhyVO>>> getClusterRelationByProjectId(Integer projectId);
 
+    /**
+     *  获取逻辑集群插件列表
+     * @param clusterId 逻辑集群id
+     * @return 插件列表
+     */
     Result<List<PluginVO>> getClusterLogicPlugins(Long clusterId);
 }

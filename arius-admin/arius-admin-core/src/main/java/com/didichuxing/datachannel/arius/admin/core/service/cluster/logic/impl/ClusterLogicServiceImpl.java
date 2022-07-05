@@ -1,21 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.impl;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.DEFAULT_CLUSTER_HEALTH;
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.ADD;
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.EDIT;
-import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.DATA_NODE;
-import static java.util.stream.Collectors.toList;
-
-import java.util.*;
-import java.util.stream.Collectors;
-
-import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.LogicResourceConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Plugin;
@@ -31,19 +15,16 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.Ro
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ProjectClusterLogicAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterLogicDiskUsedInfoPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterLogicPO;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESClusterRoleHostPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESMachineNormsPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.esplugin.PluginPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
-import com.didichuxing.datachannel.arius.admin.common.constant.SortConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.util.*;
-import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESMachineNormsService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESPluginService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
@@ -52,20 +33,25 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.Clust
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectClusterLogicAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
-import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats.AriusStatsNodeInfoESDAO;
-import com.didichuxing.datachannel.arius.admin.persistence.mysql.ecm.ESClusterRoleHostDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.resource.LogicClusterDAO;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-import com.didiglobal.logi.security.common.vo.project.ProjectVO;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.Nullable;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.DEFAULT_CLUSTER_HEALTH;
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.ADD;
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.EDIT;
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.DATA_NODE;
-import static java.util.stream.Collectors.toList;
 
 /**
  * @author d06679
@@ -83,10 +69,10 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
     private ProjectClusterLogicAuthService logicClusterAuthService;
 
     @Autowired
-    private ProjectService projectService;
+    private ProjectService             projectService;
 
     @Autowired
-    private IndexTemplatePhyService indexTemplatePhyService;
+    private IndexTemplatePhyService    indexTemplatePhyService;
 
     @Autowired
     private ESPluginService            esPluginService;
@@ -102,12 +88,6 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
 
     @Autowired
     private ClusterRoleHostService clusterRoleHostService;
-
-    @Autowired
-    private AriusStatsNodeInfoESDAO ariusStatsNodeInfoESDAO;
-
-    @Autowired
-    private ESClusterRoleHostDAO clusterRoleHostDAO ;
 
     /**
      * 条件查询逻辑集群
@@ -137,7 +117,7 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
      *
      * @param logicClusterId 资源id
      * @param operator       操作人
-     * @param projectId
+     * @param projectId     项目id
      * @return result
      */
     @Override
@@ -166,7 +146,7 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
     }
 
     @Override
-    public Boolean hasLogicClusterWithTemplates(Long logicClusterId) {
+    public boolean hasLogicClusterWithTemplates(Long logicClusterId) {
         ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(logicClusterId);
         if (null == clusterRegion) { return false;}
 
@@ -200,7 +180,7 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
      *
      * @param param     参数
      * @param operation 操作
-     * @param projectId
+     * @param projectId 项目id
      * @return result
      */
     @Override
@@ -272,10 +252,8 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
         }
 
         // 获取有权限的逻辑集群id
-        Set<Long> hasAuthLogicClusterIds = logicClusterAuthService.getAllLogicClusterAuths(projectId).stream()
-                .map(ProjectClusterLogicAuth::getLogicClusterId).collect(Collectors.toSet());
-
-        return new ArrayList<>(hasAuthLogicClusterIds);
+        return logicClusterAuthService.getAllLogicClusterAuths(projectId).stream()
+                .map(ProjectClusterLogicAuth::getLogicClusterId).distinct().collect(Collectors.toList());
     }
 
     /**
@@ -456,7 +434,7 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
 
     /**
      * @param clusterLogicId 集群逻辑id
-     * @return
+     * @return ProjectId 项目id
      */
     @Override
     public Integer getProjectIdById(Long clusterLogicId) {
@@ -523,8 +501,8 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
      *
      * @param param     逻辑集群
      * @param operation 操作类型
-     * @param projectId
-     * @return
+     * @param projectId 项目id
+     * @return  Result
      */
     private Result<Void> checkLogicClusterParams(ESLogicClusterDTO param, OperationEnum operation, Integer projectId) {
         if (AriusObjUtils.isNull(param)) {
@@ -537,43 +515,61 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
         }
 
         if (ADD.equals(operation)) {
-            Result<Void> isFieldNullResult = isFieldNull(param);
-            if (isFieldNullResult.failed()) {
+            Result<Void> isFieldNullResult = addVoidResult(param);
+            if (isFieldNullResult != null) {
                 return isFieldNullResult;
             }
-
-            ClusterLogicPO logicPO = logicClusterDAO.getByName(param.getName());
-            if (!AriusObjUtils.isNull(logicPO)) {
-                return Result.buildDuplicate("逻辑集群重复");
-            }
         } else if (EDIT.equals(operation)) {
-            if (AriusObjUtils.isNull(param.getId())) {
-                return Result.buildParamIllegal("逻辑集群ID为空");
-            }
-
-            ClusterLogicPO oldPO = logicClusterDAO.getById(param.getId());
-            if (oldPO == null) {
-                return Result.buildNotExist("逻辑集群不存在");
-            }
-            //当param中projectid存在
-            if (Objects.nonNull(param.getProjectId())) {
-                final Result<Void> result = ProjectUtils.checkProjectCorrectly(ClusterLogicPO::getProjectId, oldPO,
-                        param.getProjectId());
-                if (result.failed()) {
-                    return result;
-                }
-
-            } else {
-                //校验路径
-                final Result<Void> result = ProjectUtils.checkProjectCorrectly(ClusterLogicPO::getProjectId, oldPO,
-                       projectId);
-                if (result.failed()) {
-                    return result;
-                }
+            Result<Void> editVoidResult = editVoidResult(param, projectId);
+            if (editVoidResult != null) {
+                return editVoidResult;
             }
         }
 
         return Result.buildSucc();
+    }
+
+    @Nullable
+    private Result<Void> addVoidResult(ESLogicClusterDTO param) {
+        Result<Void> isFieldNullResult = isFieldNull(param);
+        if (isFieldNullResult.failed()) {
+            return isFieldNullResult;
+        }
+
+        ClusterLogicPO logicPO = logicClusterDAO.getByName(param.getName());
+        if (!AriusObjUtils.isNull(logicPO)) {
+            return Result.buildDuplicate("逻辑集群重复");
+        }
+        return null;
+    }
+
+    @Nullable
+    private Result<Void> editVoidResult(ESLogicClusterDTO param, Integer projectId) {
+        if (AriusObjUtils.isNull(param.getId())) {
+            return Result.buildParamIllegal("逻辑集群ID为空");
+        }
+
+        ClusterLogicPO oldPO = logicClusterDAO.getById(param.getId());
+        if (oldPO == null) {
+            return Result.buildNotExist("逻辑集群不存在");
+        }
+        //当param中projectid存在
+        if (Objects.nonNull(param.getProjectId())) {
+            final Result<Void> result = ProjectUtils.checkProjectCorrectly(ClusterLogicPO::getProjectId, oldPO,
+                    param.getProjectId());
+            if (result.failed()) {
+                return result;
+            }
+
+        } else {
+            //校验路径
+            final Result<Void> result = ProjectUtils.checkProjectCorrectly(ClusterLogicPO::getProjectId, oldPO,
+                    projectId);
+            if (result.failed()) {
+                return result;
+            }
+        }
+        return null;
     }
 
     private Result<Void> isFieldNull(ESLogicClusterDTO param) {
@@ -605,14 +601,14 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
      * 解析插件ID列表
      *
      * @param pluginIdsStr 插件ID格式化字符串
-     * @return
+     * @return List<Long>
      */
     private List<Long> parsePluginIds(String pluginIdsStr) {
         List<Long> pluginIds = new ArrayList<>();
         if (StringUtils.isNotBlank(pluginIdsStr)) {
             String[] arr = StringUtils.split(pluginIdsStr, ",");
-            for (int i = 0; i < arr.length; ++i) {
-                pluginIds.add(Long.parseLong(arr[i]));
+            for (String s : arr) {
+                pluginIds.add(Long.parseLong(s));
             }
         }
         return pluginIds;

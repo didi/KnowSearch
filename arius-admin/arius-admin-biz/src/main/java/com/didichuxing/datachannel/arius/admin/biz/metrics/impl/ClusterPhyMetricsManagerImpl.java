@@ -106,9 +106,9 @@ public class ClusterPhyMetricsManagerImpl implements ClusterPhyMetricsManager {
                 if (clusterRegion == null) {
                     return Result.buildFail();
                 }
-                List<String> itemNamesUnderClusterLogic = new ArrayList<>();
+                List<String> itemNamesUnderClusterLogic;
                 //获取逻辑集群下面的节点，索引，模板的名称列表
-                buildItemsUnderClusterLogic(metricsTypeEnum, clusterRegion, itemNamesUnderClusterLogic);
+                itemNamesUnderClusterLogic = buildItemsUnderClusterLogic(metricsTypeEnum, clusterRegion);
                 param.setItemNamesUnderClusterLogic(itemNamesUnderClusterLogic);
                 param.setClusterPhyName(clusterRegion.getPhyClusterName());
             }
@@ -199,10 +199,10 @@ public class ClusterPhyMetricsManagerImpl implements ClusterPhyMetricsManager {
      * 获取逻辑集群下的节点，索引，模板信息
      * @param metricsTypeEnum 类型
      * @param clusterRegion 逻辑集群关联的region
-     * @param nodeNamesUnderClusterLogic  节点，索引，模板信息
-     * @return
+     * @return  节点，索引，模板信息 名称集合
      */
-    private List<String> buildItemsUnderClusterLogic(ClusterPhyTypeMetricsEnum metricsTypeEnum, ClusterRegion clusterRegion, List<String> nodeNamesUnderClusterLogic) {
+    private List<String> buildItemsUnderClusterLogic(ClusterPhyTypeMetricsEnum metricsTypeEnum, ClusterRegion clusterRegion) {
+        List<String> nodeNamesUnderClusterLogic;
         //节点名称列表
         switch (metricsTypeEnum){
             case NODE:
@@ -221,7 +221,8 @@ public class ClusterPhyMetricsManagerImpl implements ClusterPhyMetricsManager {
                         indexTemplate.getExpression())));
                 nodeNamesUnderClusterLogic =  catIndexResultList.stream().map(CatIndexResult::getIndex).collect(Collectors.toList());
                 break;
-
+            default:
+                nodeNamesUnderClusterLogic = new ArrayList<>();
         }
         return nodeNamesUnderClusterLogic;
     }
