@@ -39,6 +39,7 @@ public class LogicClusterCreateContent extends BaseContent {
     /**
      * 责任人
      */
+    @Deprecated
     private String  responsible;
 
     /**

@@ -30,7 +30,8 @@ public class ESUserDTO extends BaseDTO {
     private String  verifyCode;
     
 
-    @ApiModelProperty("责任人:当前责任都为admin")
+    @ApiModelProperty("责任人:后续进行下线，无需再使用")
+    @Deprecated
     private String  responsible;
 
     @ApiModelProperty("备注")

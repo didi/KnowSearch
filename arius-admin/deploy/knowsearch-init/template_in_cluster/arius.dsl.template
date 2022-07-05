@@ -8,7 +8,9 @@
             "number_of_shards":"4",
             "mapping":{
                 "single_type":"true"
-            }
+            },
+            "number_of_replicas":"1",
+            "refresh_interval": "1s"
         }
     },
     "mappings":{

@@ -1,8 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.BaseVO;
-import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectClusterLogicAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectClusterLogicAuthEnum;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.List;
@@ -53,7 +53,8 @@ public class ClusterLogicVO extends BaseVO implements Comparable<ClusterLogicVO>
     @ApiModelProperty("gateway地址")
     private String                       gatewayAddress;
 
-    @ApiModelProperty("责任人")
+    @ApiModelProperty("责任人：后续进行下线")
+    @Deprecated
     private String                       responsible;
 
     @ApiModelProperty("备注")
