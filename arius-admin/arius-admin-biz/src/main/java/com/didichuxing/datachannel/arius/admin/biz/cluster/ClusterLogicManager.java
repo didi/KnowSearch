@@ -1,5 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.biz.cluster;
 
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -16,9 +20,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTe
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
-
-import javax.servlet.http.HttpServletRequest;
-import java.util.List;
 
 /**
  * @description: 逻辑集群manager
@@ -234,4 +235,13 @@ public interface ClusterLogicManager {
     Result<List<Tuple<String, ClusterPhyVO>>> getClusterRelationByProjectId(Integer projectId);
 
     Result<List<PluginVO>> getClusterLogicPlugins(Long clusterId);
+
+    /**
+     * 集群通过创建模板列表逻辑
+     *
+     * @param projectId 项目id
+     * @param type      类型
+     * @return {@link Result}<{@link List}<{@link ClusterLogicVO}>>
+     */
+    Result<List<ClusterLogicVO>> listLogicClusterThatCanCreateTemplateByProjectAndType(Integer projectId, Integer type);
 }

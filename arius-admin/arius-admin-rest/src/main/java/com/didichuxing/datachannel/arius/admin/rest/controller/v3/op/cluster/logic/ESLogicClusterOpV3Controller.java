@@ -1,5 +1,14 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.cluster.logic;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
+
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterLogicManager;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
@@ -14,19 +23,12 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.ecm.ESClusterNodeS
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
-import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
-import javax.servlet.http.HttpServletRequest;
-import java.util.List;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
 
 /**
  * @author guoyoupeng_v
@@ -67,6 +69,15 @@ public class ESLogicClusterOpV3Controller {
     public Result<List<ClusterLogicVO>> getAppLogicClusterInfoByType(HttpServletRequest request,
                                                                        @PathVariable Integer type) {
         return clusterLogicManager.getProjectLogicClusterInfoByType(HttpRequestUtil.getProjectId(request), type);
+    }
+
+    @GetMapping("/{type}/can-create-template")
+    @ResponseBody
+    @ApiOperation(value = "根据项目和集群类型获取逻辑集群(项目对其有管理权限)名称列表")
+    public Result<List<ClusterLogicVO>> getLogicClusterByType(HttpServletRequest request,
+                                                                     @PathVariable Integer type) {
+        //这里筛选出可以创建模版的逻辑集群；
+        return clusterLogicManager.listLogicClusterThatCanCreateTemplateByProjectAndType(HttpRequestUtil.getProjectId(request), type);
     }
 
     @PostMapping("/page")
