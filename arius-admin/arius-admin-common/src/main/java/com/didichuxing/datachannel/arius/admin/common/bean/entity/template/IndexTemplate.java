@@ -71,6 +71,7 @@ public class IndexTemplate extends BaseEntity implements  Comparable<IndexTempla
     /**
      * 责任人
      */
+    @Deprecated
     private String  responsible;
 
     /**

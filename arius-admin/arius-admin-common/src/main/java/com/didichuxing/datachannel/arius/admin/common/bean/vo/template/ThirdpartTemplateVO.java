@@ -84,7 +84,8 @@ public class ThirdpartTemplateVO extends BaseVO {
     @ApiModelProperty("成本部门名称")
     private String  libraDepartment;
 
-    @ApiModelProperty("责任人")
+    @ApiModelProperty("责任人：后续下线无需使用")
+    @Deprecated
     private String  responsible;
 
     @ApiModelProperty("时间字段")

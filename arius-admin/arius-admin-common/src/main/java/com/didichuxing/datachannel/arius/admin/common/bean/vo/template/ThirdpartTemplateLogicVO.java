@@ -55,13 +55,14 @@ public class ThirdpartTemplateLogicVO extends BaseVO {
     @ApiModelProperty("热数据保存天数")
     private Integer    hotTime;
 
-    @ApiModelProperty("成本部门ID")
+    @ApiModelProperty("成本部门ID：后续进行下线，无需使用")
     private String     libraDepartmentId;
 
-    @ApiModelProperty("成本部门名称")
+    @ApiModelProperty("成本部门名称：后续进行下线，无需使用")
+    @Deprecated
     private String     libraDepartment;
 
-    @ApiModelProperty("责任人")
+    @ApiModelProperty("责任人：后续进行下线，无需再使用")
     private String     responsible;
 
     @ApiModelProperty("时间字段")
@@ -70,10 +71,12 @@ public class ThirdpartTemplateLogicVO extends BaseVO {
     /**
      * id地钻
      */
-    @ApiModelProperty("主键字段")
+    @ApiModelProperty("主键字段：后续要下线无需使用")
+    @Deprecated
     private String     idField;
 
-    @ApiModelProperty("routing字段")
+    @ApiModelProperty("routing字段：后续下线，无需使用")
+    @Deprecated
     private String     routingField;
 
     @ApiModelProperty("表达式")
