@@ -12,7 +12,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.rest.RestStatus;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,7 +22,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.IndexCatCell;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.IndexResponse;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.IndicesDistributionVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.index.IndexBlockEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.BatchProcessor;
@@ -669,53 +667,6 @@ public class ESIndexServiceImpl implements ESIndexService {
         }
         return esIndexDAO.editAlias(cluster, putAliasNodeList);
     }
-
-    private Result<Void> checkAliases(String cluster, String index, List<String> addAliases, List<String> deleteAliases) {
-        if (!esIndexDAO.exist(cluster, index)) {
-            return Result.buildParamIllegal(String.format("索引【%s】不存在", index));
-        }
-        if (CollectionUtils.isEmpty(addAliases) && CollectionUtils.isEmpty(deleteAliases)) {
-            return Result.buildParamIllegal("要操作的别名不存在");
-        }
-        List<PutAliasNode> putAliasNodeList = new ArrayList<>();
-        Map<String, List<String>> aliasIndexNodeMap = syncGetIndexAliasesByIndices(cluster, index);
-        Set<String> aliasSet = new HashSet<>();
-        Optional.ofNullable(aliasIndexNodeMap.get(index)).map(aliasSet::addAll);
-        if (CollectionUtils.isNotEmpty(deleteAliases)) {
-            Set<String> notExistsAlias = new HashSet<>();
-
-            deleteAliases.stream().filter(StringUtils::isNotBlank).forEach(aliasName -> {
-                PutAliasNode putAliasNode = new PutAliasNode();
-                putAliasNode.setIndex(index);
-                putAliasNode.setAlias(aliasName);
-                putAliasNode.setType(PutAliasType.REMOVE);
-                if (aliasSet.contains(aliasName)) {
-                    notExistsAlias.add(aliasName);
-                }
-                putAliasNodeList.add(putAliasNode);
-            });
-            if (!notExistsAlias.isEmpty()) {
-                return Result.buildParamIllegal(String.format("要删除的别名【%s】不存在", StringUtils.join(notExistsAlias, ",")));
-            }
-        }
-        if (CollectionUtils.isNotEmpty(addAliases)) {
-            addAliases.stream().filter(StringUtils::isNotBlank).forEach(aliasName -> {
-                PutAliasNode putAliasNode = new PutAliasNode();
-                putAliasNode.setIndex(index);
-                putAliasNode.setAlias(aliasName);
-                putAliasNode.setType(PutAliasType.ADD);
-                if (!aliasSet.contains(aliasName)) {
-                    putAliasNodeList.add(putAliasNode);
-                }
-            });
-        }
-
-        if (CollectionUtils.isNotEmpty(putAliasNodeList)) {
-            return esIndexDAO.editAlias(cluster, putAliasNodeList);
-        }
-        return Result.buildSucc();
-    }
-
     @Override
     public Result<Void> rollover(String cluster, String alias, String conditions) {
         return esIndexDAO.rollover(cluster, alias, conditions);
@@ -777,28 +728,24 @@ public class ESIndexServiceImpl implements ESIndexService {
         Tuple<Boolean, Boolean> writeAndReadBlockFromMerge = new Tuple<>();
         //build from es setUp settings
         Tuple<Boolean, Boolean> writeAndReadBlockFromSetUpSettingTuple = new Tuple<>();
-        writeAndReadBlockFromSetUpSettingTuple.setV1(null);
-        writeAndReadBlockFromSetUpSettingTuple.setV2( null);
-        Optional.ofNullable(indexConfig.getSettings()).filter(MapUtils::isNotEmpty).map(JSON::toJSONString).map(JSON::parseObject).ifPresent(settingsObj -> {
-            writeAndReadBlockFromSetUpSettingTuple.setV1(settingsObj.getBoolean(READ));
-            writeAndReadBlockFromSetUpSettingTuple.setV2(settingsObj.getBoolean(WRITE));
-        });
-
+        Optional.ofNullable(indexConfig).map(IndexConfig::getSettings).filter(MapUtils::isNotEmpty)
+            .map(JSON::toJSONString).map(JSON::parseObject).ifPresent(settingsObj -> {
+                writeAndReadBlockFromSetUpSettingTuple.setV1(settingsObj.getBoolean(READ));
+                writeAndReadBlockFromSetUpSettingTuple.setV2(settingsObj.getBoolean(WRITE));
+            });
         //build from es default settings
         Tuple<Boolean, Boolean> writeAndReadBlockFromDefaultSettingTuple = new Tuple<>();
-        writeAndReadBlockFromDefaultSettingTuple.setV1(null);
-        writeAndReadBlockFromDefaultSettingTuple.setV2(null);
-        Optional.ofNullable(indexConfig.getOther(DEFAULTS)).map(Object::toString).map(JSON::parseObject).map(defaultObj -> defaultObj.getJSONObject(INDEX))
-                .map(indexSettings -> indexSettings.getJSONObject(BLOCKS)).ifPresent(blocksObj -> {
-                    if (null != blocksObj.get(IndexBlockEnum.READ.getType())) {
-                        writeAndReadBlockFromDefaultSettingTuple
-                                .setV1(blocksObj.getBoolean(IndexBlockEnum.READ.getType()));
-                    }
-                    if (null != blocksObj.get(IndexBlockEnum.WRITE.getType())) {
-                        writeAndReadBlockFromDefaultSettingTuple
-                                .setV2(blocksObj.getBoolean(IndexBlockEnum.WRITE.getType()));
-                    }
-                });
+        Optional.ofNullable(indexConfig).map(config -> config.getOther(DEFAULTS)).map(Object::toString)
+            .map(JSON::parseObject).map(defaultObj -> defaultObj.getJSONObject(INDEX))
+            .map(indexSettings -> indexSettings.getJSONObject(BLOCKS)).ifPresent(blocksObj -> {
+                if (null != blocksObj.get(IndexBlockEnum.READ.getType())) {
+                    writeAndReadBlockFromDefaultSettingTuple.setV1(blocksObj.getBoolean(IndexBlockEnum.READ.getType()));
+                }
+                if (null != blocksObj.get(IndexBlockEnum.WRITE.getType())) {
+                    writeAndReadBlockFromDefaultSettingTuple
+                        .setV2(blocksObj.getBoolean(IndexBlockEnum.WRITE.getType()));
+                }
+            });
 
         //set read block info
         if (null != writeAndReadBlockFromSetUpSettingTuple.getV1()) {
