@@ -13,6 +13,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePhyPO;
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
@@ -266,6 +267,7 @@ public class TemplateExpireManagerImpl extends BaseTemplateSrv implements Templa
                 operateRecordService.save(new OperateRecord.Builder()
                         
                                 .content(String.format("根据模板过期时间删除过期索引：集群%s;索引:%s", cluster, ListUtils.strList2String(shouldDelList)))
+                                .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
                                 .operationTypeEnum(OperateTypeEnum.INDEX_MANAGEMENT_DELETE)
                                 .triggerWayEnum(TriggerWayEnum.TIMING_TASK)
                                 .userOperation(AriusUser.SYSTEM.getDesc())
@@ -308,13 +310,13 @@ public class TemplateExpireManagerImpl extends BaseTemplateSrv implements Templa
         if (succ) {
             List<String> indexTemplatePhyNameList = templatePhysicals.stream().map(IndexTemplatePhy::getName)
                 .collect(Collectors.toList());
-             operateRecordService.save(new OperateRecord.Builder()
-                        
-                                .content(String.format("删除已删除模板关联的索引：集群%s; 模板%s", cluster, ListUtils.strList2String(indexTemplatePhyNameList)))
-                                .operationTypeEnum(OperateTypeEnum.INDEX_MANAGEMENT_DELETE)
-                                .triggerWayEnum(TriggerWayEnum.TIMING_TASK)
-                                .userOperation(AriusUser.SYSTEM.getDesc())
-                        .build());
+            operateRecordService.save(new OperateRecord.Builder()
+            
+                    .content(String.format("删除已删除模板关联的索引：集群%s; 模板%s", cluster,
+                            ListUtils.strList2String(indexTemplatePhyNameList)))
+                    .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
+                    .operationTypeEnum(OperateTypeEnum.INDEX_MANAGEMENT_DELETE)
+                    .triggerWayEnum(TriggerWayEnum.TIMING_TASK).userOperation(AriusUser.SYSTEM.getDesc()).build());
         
         }
         
