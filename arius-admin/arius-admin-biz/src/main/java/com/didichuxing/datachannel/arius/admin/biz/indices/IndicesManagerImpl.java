@@ -158,13 +158,7 @@ public class IndicesManagerImpl implements IndicesManager {
                 .operationTypeEnum(OperateTypeEnum.INDEX_MANAGEMENT_CREATE).userOperation(operator)
                 .project(projectService.getProjectBriefByProjectId(projectId)).bizId(indexCreateDTO.getIndex())
                 .build());
-        try {
-            indexCatInfoCollector.collectIndexCatInfoByCluster(phyCluster);
-        } catch (Exception e) {
-            LOGGER.error("class=IndicesManagerImpl||method=createIndex||msg=collectIndexCatInfoByCluster failed||index={}" + indexCreateDTO.getIndex(), e);
-            return Result.buildFail("索引创建成功，采集任务执行失败，请3分钟后再查询！");
-        }
-        return Result.buildSucc();
+        return Result.buildSuccWithMsg("索引创建成功，请五分钟后再进行查询与操作！");
     }
 
     @Override
