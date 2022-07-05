@@ -57,6 +57,15 @@ public class IndexCatInfoCollector extends AbstractMetaDataJob {
     private final Cache<String, Object> notCollectorIndexNameCache = CacheBuilder.newBuilder()
             .expireAfterWrite(60, TimeUnit.MINUTES).maximumSize(10000).build();
     private Map<Long, String>     logicClusterId2NameMap     = Maps.newConcurrentMap();
+
+    private void initLogicClusterId2NameMap() {
+        List<ClusterLogic> logicClusterList = clusterLogicService.listAllClusterLogics();
+        if (CollectionUtils.isNotEmpty(logicClusterList)) {
+            logicClusterId2NameMap = logicClusterList.stream()
+                    .collect(Collectors.toConcurrentMap(ClusterLogic::getId, ClusterLogic::getName, (o1, o2) -> o1));
+        }
+    }
+
     @Override
     public Object handleJobTask(String params) {
         List<IndexCatCellPO> indexCatInfoList     =   Lists.newArrayList();
@@ -66,11 +75,7 @@ public class IndexCatInfoCollector extends AbstractMetaDataJob {
         if (CollectionUtils.isEmpty(clusterPhyNameList)) {
             return JOB_SUCCESS;
         }
-        List<ClusterLogic> logicClusterList = clusterLogicService.listAllClusterLogics();
-        if (CollectionUtils.isNotEmpty(logicClusterList)) {
-            logicClusterId2NameMap = logicClusterList.stream()
-                .collect(Collectors.toConcurrentMap(ClusterLogic::getId, ClusterLogic::getName, (o1, o2) -> o1));
-        }
+        initLogicClusterId2NameMap();
 
         long currentTimeMillis = System.currentTimeMillis();
         BatchProcessor.BatchProcessResult<String, List<IndexCatCellPO>> batchResult
@@ -107,94 +112,111 @@ public class IndexCatInfoCollector extends AbstractMetaDataJob {
         }
     }
 
+    public void collectIndexCatInfoByCluster(String cluster) {
+        initLogicClusterId2NameMap();
+        List<IndexCatCellPO> indexCatInfoList = getIndexCatCells(cluster);
+        //移除已删除索引, 不采集
+        List<IndexCatCellPO> finalSaveIndexCatList = indexCatInfoList.stream().filter(this::filterNotCollectorIndexCat)
+            .collect(Collectors.toList());
+        indexCatESDAO.batchInsert(finalSaveIndexCatList);
+    }
 
     public List<IndexCatCellPO> getIndexInfoFromEs(List<String> clusterNameList) {
         List<IndexCatCellPO> catIndexCellList = Lists.newArrayList();
         for (String clusterName : clusterNameList) {
-            long timeMillis                      = System.currentTimeMillis();
-            List<CatIndexResult> catIndexResults = esIndexService.syncCatIndex(clusterName, RETRY_TIMES);
-            if (CollectionUtils.isEmpty(catIndexResults)) {
-                LOGGER.warn("class=IndexCatInfoCollector||method=getIndexInfoFromEs||clusterName={}||index empty",
-                    clusterName);
-                continue;
+            List<IndexCatCellPO> indexCatCells = getIndexCatCells(clusterName);
+            if (null != indexCatCells && !indexCatCells.isEmpty()) {
+                catIndexCellList.addAll(indexCatCells);
             }
-            Map<String, Tuple<Long, Long>> indicesSegmentCountMap = esIndexService
-                .syncGetIndicesSegmentCount(clusterName);
-
-            // 2. 获取物理集群下所有逻辑模板
-            List<IndexTemplatePhyWithLogic> indexTemplatePhyWithLogicList = indexTemplatePhyService
-                .getTemplateByPhyCluster(clusterName);
-           
-            if (CollectionUtils.isEmpty(indexTemplatePhyWithLogicList)) {
-                LOGGER.warn("class=IndexCatInfoCollector||method=getIndexCatInfo||clusterName={}||index template empty",
-                    clusterName);
-            }
-
-            List<IndexCatCellPO> indexCatCellPOS = buildIndexCatCellPOS(catIndexResults, indicesSegmentCountMap,
-                    indexTemplatePhyWithLogicList, clusterName, timeMillis);
-            catIndexCellList.addAll(indexCatCellPOS);
         }
 
         return catIndexCellList;
     }
 
-    private List<IndexCatCellPO> buildIndexCatCellPOS(List<CatIndexResult> catIndexResults,Map<String, Tuple<Long, Long>> indicesSegmentCountMap,List<IndexTemplatePhyWithLogic> indexTemplateList, String clusterName, long timeMillis) {
+    private List<IndexCatCellPO> getIndexCatCells(String clusterName) {
+        long timeMillis                      = System.currentTimeMillis();
+        List<CatIndexResult> catIndexResults = esIndexService.syncCatIndex(clusterName, RETRY_TIMES);
+        if (CollectionUtils.isEmpty(catIndexResults)) {
+            LOGGER.warn("class=IndexCatInfoCollector||method=getIndexInfoFromEs||clusterName={}||index empty",
+                    clusterName);
+            return Lists.newArrayList();
+        }
+        Map<String, Tuple<Long, Long>> indicesSegmentCountMap = esIndexService
+            .syncGetIndicesSegmentCount(clusterName);
+
+        // 2. 获取物理集群下所有逻辑模板
+        List<IndexTemplatePhyWithLogic> indexTemplatePhyWithLogicList = indexTemplatePhyService
+            .getTemplateByPhyCluster(clusterName);
+
+        if (CollectionUtils.isEmpty(indexTemplatePhyWithLogicList)) {
+            LOGGER.warn("class=IndexCatInfoCollector||method=getIndexCatInfo||clusterName={}||index template empty",
+                clusterName);
+        }
+        
+        return buildIndexCatCells(catIndexResults, indicesSegmentCountMap, indexTemplatePhyWithLogicList, clusterName,
+            timeMillis);
+    }
+
+    private List<IndexCatCellPO> buildIndexCatCells(List<CatIndexResult> catIndexResults, Map<String, Tuple<Long, Long>> indicesSegmentCountMap, List<IndexTemplatePhyWithLogic> indexTemplateList, String clusterName, long timeMillis) {
         List<IndexCatCellPO> indexCatCellList = Lists.newArrayList();
         for (CatIndexResult catIndexResult : catIndexResults) {
-            IndexCatCellPO indexCatCellPO = new IndexCatCellPO();
-            if (!AriusObjUtils.isBlack(catIndexResult.getStoreSize())) {
-                indexCatCellPO.setStoreSize(SizeUtil.getUnitSize(catIndexResult.getStoreSize()));
-            }
-            if (!AriusObjUtils.isBlack(catIndexResult.getPriStoreSize())) {
-                indexCatCellPO.setPriStoreSize(SizeUtil.getUnitSize(catIndexResult.getPriStoreSize()));
-            }
-            if (!AriusObjUtils.isBlack(catIndexResult.getDocsCount())) {
-                indexCatCellPO.setDocsCount(Long.parseLong(catIndexResult.getDocsCount()));
-            }
-            if (!AriusObjUtils.isBlack(catIndexResult.getDocsDeleted())) {
-                indexCatCellPO.setDocsDeleted(Long.parseLong(catIndexResult.getDocsDeleted()));
-            }
-            if (!AriusObjUtils.isBlack(catIndexResult.getRep())) {
-                indexCatCellPO.setRep(Long.parseLong(catIndexResult.getRep()));
-            }
-            if (!AriusObjUtils.isBlack(catIndexResult.getPri())) {
-                indexCatCellPO.setPri(Long.parseLong(catIndexResult.getPri()));
-            }
-            if (!AriusObjUtils.isBlack(catIndexResult.getStatus())) {
-                indexCatCellPO.setStatus(catIndexResult.getStatus());
-            }
-            if (!AriusObjUtils.isBlack(catIndexResult.getHealth())) {
-                indexCatCellPO.setHealth(catIndexResult.getHealth());
-            }
-            if (!AriusObjUtils.isBlack(catIndexResult.getIndex())) {
-                indexCatCellPO.setIndex(catIndexResult.getIndex());
-            }
-            Optional.ofNullable(indicesSegmentCountMap).map(map -> map.get(catIndexResult.getIndex()))
+            IndexCatCellPO indexCatCell = buildIndexCatCell(indicesSegmentCountMap, indexTemplateList, clusterName, timeMillis, catIndexResult);
+            indexCatCellList.add(indexCatCell);
+        }
+        return indexCatCellList;
+    }
+
+    private IndexCatCellPO buildIndexCatCell(Map<String, Tuple<Long, Long>> indicesSegmentCountMap, List<IndexTemplatePhyWithLogic> indexTemplateList, String clusterName, long timeMillis, CatIndexResult catIndexResult) {
+        IndexCatCellPO indexCatCell = new IndexCatCellPO();
+        if (!AriusObjUtils.isBlack(catIndexResult.getStoreSize())) {
+            indexCatCell.setStoreSize(SizeUtil.getUnitSize(catIndexResult.getStoreSize()));
+        }
+        if (!AriusObjUtils.isBlack(catIndexResult.getPriStoreSize())) {
+            indexCatCell.setPriStoreSize(SizeUtil.getUnitSize(catIndexResult.getPriStoreSize()));
+        }
+        if (!AriusObjUtils.isBlack(catIndexResult.getDocsCount())) {
+            indexCatCell.setDocsCount(Long.parseLong(catIndexResult.getDocsCount()));
+        }
+        if (!AriusObjUtils.isBlack(catIndexResult.getDocsDeleted())) {
+            indexCatCell.setDocsDeleted(Long.parseLong(catIndexResult.getDocsDeleted()));
+        }
+        if (!AriusObjUtils.isBlack(catIndexResult.getRep())) {
+            indexCatCell.setRep(Long.parseLong(catIndexResult.getRep()));
+        }
+        if (!AriusObjUtils.isBlack(catIndexResult.getPri())) {
+            indexCatCell.setPri(Long.parseLong(catIndexResult.getPri()));
+        }
+        if (!AriusObjUtils.isBlack(catIndexResult.getStatus())) {
+            indexCatCell.setStatus(catIndexResult.getStatus());
+        }
+        if (!AriusObjUtils.isBlack(catIndexResult.getHealth())) {
+            indexCatCell.setHealth(catIndexResult.getHealth());
+        }
+        if (!AriusObjUtils.isBlack(catIndexResult.getIndex())) {
+            indexCatCell.setIndex(catIndexResult.getIndex());
+        }
+        Optional.ofNullable(indicesSegmentCountMap).map(map -> map.get(catIndexResult.getIndex()))
                 .ifPresent(tuple -> {
-                    indexCatCellPO.setTotalSegmentCount(tuple.v1());
-                    indexCatCellPO.setPrimariesSegmentCount(tuple.v2());
+                    indexCatCell.setTotalSegmentCount(tuple.v1());
+                    indexCatCell.setPrimariesSegmentCount(tuple.v2());
                 });
 
-            indexCatCellPO.setCluster(clusterName);
-            indexCatCellPO.setClusterPhy(clusterName);
-            indexCatCellPO.setTimestamp(timeMillis);
-            if (CollectionUtils.isNotEmpty(indexTemplateList)) {
-                indexTemplateList.stream()
+        indexCatCell.setCluster(clusterName);
+        indexCatCell.setClusterPhy(clusterName);
+        indexCatCell.setTimestamp(timeMillis);
+        if (CollectionUtils.isNotEmpty(indexTemplateList)) {
+            indexTemplateList.stream()
                     .filter(indexTemplate -> IndexNameUtils.indexExpMatch(catIndexResult.getIndex(),
-                        indexTemplate.getExpression()))
+                            indexTemplate.getExpression()))
                     .map(IndexTemplatePhyWithLogic::getLogicTemplate).forEach(indexTemplate -> {
                         String clusterLogic = logicClusterId2NameMap.get(indexTemplate.getResourceId());
-                        indexCatCellPO.setClusterLogic(clusterLogic);
-                        indexCatCellPO.setResourceId(indexTemplate.getResourceId());
-                        indexCatCellPO.setTemplateId(indexTemplate.getId());
-                        indexCatCellPO.setProjectId(indexTemplate.getProjectId());
+                        indexCatCell.setClusterLogic(clusterLogic);
+                        indexCatCell.setResourceId(indexTemplate.getResourceId());
+                        indexCatCell.setTemplateId(indexTemplate.getId());
+                        indexCatCell.setProjectId(indexTemplate.getProjectId());
                     });
-            }
-
-            indexCatCellList.add(indexCatCellPO);
         }
-
-        return indexCatCellList;
+        return indexCatCell;
     }
 
     private boolean filterNotCollectorIndexCat(IndexCatCellPO indexCatCellPO) {
