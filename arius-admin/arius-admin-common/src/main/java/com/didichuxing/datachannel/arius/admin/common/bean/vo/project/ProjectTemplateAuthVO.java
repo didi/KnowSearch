@@ -42,6 +42,7 @@ public class ProjectTemplateAuthVO extends BaseVO {
     @ApiModelProperty("所属逻辑集群名称")
     private String logicClusterName;
 
-    @ApiModelProperty("权限责任人")
+    @ApiModelProperty("权限责任人：后续进行下线，无需再使用")
+    @Deprecated
     private String responsible;
 }

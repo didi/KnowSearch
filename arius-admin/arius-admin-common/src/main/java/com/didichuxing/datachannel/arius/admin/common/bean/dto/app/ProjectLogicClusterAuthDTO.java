@@ -33,7 +33,8 @@ public class ProjectLogicClusterAuthDTO extends BaseDTO {
     @ApiModelProperty("权限类型，0：超管权限，1：配置管理权限，2：访问权限")
     private Integer type;
 
-    @ApiModelProperty("责任人")
+    @ApiModelProperty("责任人:请勿在使用，后续会进行下线")
+    @Deprecated
     private String responsible;
 
 }
