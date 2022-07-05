@@ -9,7 +9,8 @@
                 "single_type":"true"
             },
             "number_of_shards":"4",
-            "number_of_routing_size":"1"
+            "number_of_routing_size":"1",
+            "refresh_interval": "1s"
         }
     },
     "mappings":{
