@@ -20,6 +20,7 @@ import com.didiglobal.logi.security.common.vo.role.RoleBriefVO;
 import com.didiglobal.logi.security.common.vo.role.RoleDeleteCheckVO;
 import com.didiglobal.logi.security.common.vo.role.RoleVO;
 import com.didiglobal.logi.security.exception.LogiSecurityException;
+import com.didiglobal.logi.security.service.ProjectService;
 import com.didiglobal.logi.security.service.RoleService;
 import com.didiglobal.logi.security.service.UserProjectService;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
@@ -47,6 +48,8 @@ public class RoleExtendManagerImpl implements RoleExtendManager {
 	private OperateRecordService operateRecordService;
 	@Autowired
 	private UserProjectService userProjectService;
+	@Autowired
+	private ProjectService projectService;
 	
 	/**
 	 * @param id
@@ -71,6 +74,7 @@ public class RoleExtendManagerImpl implements RoleExtendManager {
 							.userOperation(HttpRequestUtil.getOperator(request))
 							.operationTypeEnum(OperateTypeEnum.ROLE_MANAGER_DELETE)
 							.content(String.format("删除角色:[%d]",id))
+						.project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
 							.triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
 					.build()
 			
@@ -114,6 +118,7 @@ public class RoleExtendManagerImpl implements RoleExtendManager {
 			operateRecordService.save(new OperateRecord.Builder().userOperation(HttpRequestUtil.getOperator(request))
 					.operationTypeEnum(OperateTypeEnum.ROLE_MANAGER_CREATE).content(String.format("新增角色:[%s]",
 							saveDTO.getRoleName()))
+						.project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
 					.triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).build()
 			
 			);
@@ -135,6 +140,7 @@ public class RoleExtendManagerImpl implements RoleExtendManager {
 			operateRecordService.save(new OperateRecord.Builder().userOperation(HttpRequestUtil.getOperator(request))
 					.operationTypeEnum(OperateTypeEnum.ROLE_MANAGER_UNBIND_USER)
 					.content(String.format("角色:[%d]解绑的用户:[%d]", roleId, userId))
+							.project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
 					.triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).build()
 			
 			);
@@ -163,6 +169,7 @@ public class RoleExtendManagerImpl implements RoleExtendManager {
 				operateRecordService.save(
 						new OperateRecord.Builder().userOperation(HttpRequestUtil.getOperator(request))
 								.operationTypeEnum(OperateTypeEnum.ROLE_MANAGER_BIND_USER)
+								.project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
 								.content(String.format("角色:[%d]解绑的用户:[%d]", assignDTO.getId(), userId))
 								.triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).build());
 			}

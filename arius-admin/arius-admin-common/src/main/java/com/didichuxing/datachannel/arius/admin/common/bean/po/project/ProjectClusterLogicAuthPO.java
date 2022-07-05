@@ -39,5 +39,6 @@ public class ProjectClusterLogicAuthPO extends BasePO  {
     /**
      * 责任人列表，id列表，英文逗号分隔
      */
+    @Deprecated
     private String  responsible;
 }

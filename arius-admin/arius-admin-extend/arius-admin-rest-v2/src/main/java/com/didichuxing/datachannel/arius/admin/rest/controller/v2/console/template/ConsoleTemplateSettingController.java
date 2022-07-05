@@ -44,7 +44,7 @@ public class ConsoleTemplateSettingController extends BaseConsoleTemplateControl
             return checkAuthResult;
         }
 
-        return templateLogicSettingsManager.modifySetting(settingDTO, HttpRequestUtil.getOperator(request));
+        return Result.buildFail("已经废弃");
     }
 
     @GetMapping("")
