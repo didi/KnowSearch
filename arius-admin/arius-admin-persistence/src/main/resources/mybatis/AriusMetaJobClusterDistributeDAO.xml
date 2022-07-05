@@ -19,37 +19,37 @@
     <select id="getAllTask" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from es_cluster_monitor_task
+        from arius_meta_job_cluster_distribute
     </select>
 
     <select id="getAllTaskByDataCentre" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from es_cluster_monitor_task
+        from arius_meta_job_cluster_distribute
         where dataCentre = #{dataCentre}
     </select>
 
     <select id="getTaskByHost" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from es_cluster_monitor_task
+        from arius_meta_job_cluster_distribute
         where monitor_host = #{monitorHost} order by monitor_time desc limit #{size}
     </select>
 
     <update id="updateMonitorHost" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.monitor.AriusMetaJobClusterDistributePO">
-        update es_cluster_monitor_task
+        update arius_meta_job_cluster_distribute
         set monitor_host = #{destMonitorHost}, monitor_time = #{monitorTime}
         where id = #{id} and monitor_host = #{monitorHost}
     </update>
 
     <update id="updateMonitorTime" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.monitor.AriusMetaJobClusterDistributePO">
-        update es_cluster_monitor_task
+        update arius_meta_job_cluster_distribute
         set monitor_time = #{monitorTime}
         where id = #{id} and monitor_host = #{monitorHost}
     </update>
 
     <insert id="insertBatch" parameterType="java.util.List">
-        insert into es_cluster_monitor_task
+        insert into arius_meta_job_cluster_distribute
         (cluster_id)
         values
         <foreach collection="list" index="index" item="item" separator=",">
@@ -61,7 +61,7 @@
         <selectKey resultType="java.lang.Long" keyProperty="id" order="AFTER">
             SELECT LAST_INSERT_ID()
         </selectKey>
-        insert into es_cluster_monitor_task
+        insert into arius_meta_job_cluster_distribute
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="clusterId != null">
                 cluster_id,
@@ -111,7 +111,7 @@
     </insert>
 
     <delete id="deleteBatch" parameterType="list">
-        delete from es_cluster_monitor_task
+        delete from arius_meta_job_cluster_distribute
         where id in
         <foreach collection="list" item="id" open="(" separator="," close=")">
             #{id}
