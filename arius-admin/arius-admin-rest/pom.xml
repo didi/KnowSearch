@@ -90,11 +90,6 @@
             <artifactId>arius-admin-remote</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>com.didichuxing.datachannel</groupId>
-            <artifactId>arius-admin-rest-v2</artifactId>
-        </dependency>
-
         <!-- https://mvnrepository.com/artifact/net.bytebuddy/byte-buddy -->
         <dependency>
             <groupId>net.bytebuddy</groupId>
