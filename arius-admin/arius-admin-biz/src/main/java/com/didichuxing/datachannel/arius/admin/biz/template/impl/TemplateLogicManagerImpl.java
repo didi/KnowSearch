@@ -74,7 +74,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectLogic
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateLabelService;
-import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateSattisService;
+import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateStatsService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
@@ -106,7 +106,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     private ProjectLogicTemplateAuthService projectLogicTemplateAuthService;
 
     @Autowired
-    private TemplateSattisService       templateSattisService;
+    private TemplateStatsService templateStatsService;
 
     @Autowired
     private TemplateLabelService        templateLabelService;
@@ -172,7 +172,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
      */
     @Override
     public List<ProjectBriefVO> getLogicTemplateProjectAccess(Integer logicId) throws AmsRemoteException {
-        Result<Map<Integer, Long>> result = templateSattisService.getTemplateAccessProjectIds(logicId, 7);
+        Result<Map<Integer, Long>> result = templateStatsService.getTemplateAccessProjectIds(logicId, 7);
         if (result.failed()) {
             throw new AmsRemoteException("获取访问模板的project列表失败");
         }
@@ -432,8 +432,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     }
 
     @Override
-    public Result<Void> editTemplate(IndexTemplateDTO param, String operator, Integer projectId)
-            throws AdminOperateException {
+    public Result<Void> editTemplate(IndexTemplateDTO param, String operator, Integer projectId) throws AdminOperateException {
         return indexTemplateService.editTemplate(param, operator,projectId);
     }
 
@@ -915,7 +914,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
      */
     private List<IndexTemplateValue> fetchTemplateValues() {
         List<IndexTemplateValue> templateValues = Lists.newArrayList();
-        Result<List<IndexTemplateValue>> listTemplateValueResult = templateSattisService.listTemplateValue();
+        Result<List<IndexTemplateValue>> listTemplateValueResult = templateStatsService.listTemplateValue();
         if (listTemplateValueResult.success()) {
             templateValues.addAll(listTemplateValueResult.getData());
         }

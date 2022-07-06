@@ -1,0 +1,50 @@
+package com.didichuxing.datachannel.arius.admin.biz.task.handler.cluster;
+
+import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
+import org.springframework.stereotype.Service;
+
+import com.didichuxing.datachannel.arius.admin.biz.task.content.ClusterOfflineContent;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.ecm.EcmTaskDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
+
+import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+
+/**
+ * 物理集群下线
+ * @author ohushenglin_v
+ * @date 2022-05-24
+ */
+@Service("clusterOfflineTaskHandler")
+public class ClusterOfflineTaskHandler extends AbstractClusterTaskHandler {
+    @Override
+    Result<Void> validateHostParam(String param) throws NotFindSubclassException {
+        ClusterOfflineContent content = ConvertUtil.obj2ObjByJSON(param, ClusterOfflineContent.class);
+
+        if (AriusObjUtils.isNull(content.getPhyClusterId())) {
+            return Result.buildParamIllegal("物理集群id为空");
+        }
+
+        ClusterPhy clusterPhy = clusterPhyService.getClusterById(content.getPhyClusterId().intValue());
+        if (AriusObjUtils.isNull(clusterPhy)) {
+            return Result.buildParamIllegal("物理集群不存在");
+        }
+
+        if (opTaskManager.existUnClosedTask(content.getPhyClusterId().intValue(),
+            OpTaskTypeEnum.CLUSTER_OFFLINE.getType())) {
+            return Result.buildParamIllegal("该集群上存在未完成的任务");
+        }
+
+        return Result.buildSucc();
+    }
+
+    @Override
+    Result<Void> buildHostEcmTaskDTO(EcmTaskDTO ecmTaskDTO, String param, String creator) {
+        ClusterOfflineContent content = ConvertUtil.obj2ObjByJSON(param, ClusterOfflineContent.class);
+        ecmTaskDTO.setPhysicClusterId(content.getPhyClusterId());
+        ecmTaskDTO.setOrderType(OpTaskTypeEnum.CLUSTER_OFFLINE.getType());
+        return Result.buildSucc();
+    }
+}

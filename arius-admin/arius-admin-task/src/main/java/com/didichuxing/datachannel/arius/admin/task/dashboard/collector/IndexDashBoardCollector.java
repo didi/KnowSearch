@@ -8,13 +8,14 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
+import com.didichuxing.datachannel.arius.admin.metadata.service.ESIndicesStatsService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.ShardMetrics;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.shard.Segments;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.shard.Segment;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.DashBoardStats;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.IndexMetrics;
 import com.didichuxing.datachannel.arius.admin.common.constant.index.IndexStatusEnum;
@@ -24,7 +25,6 @@ import com.didichuxing.datachannel.arius.admin.common.util.MappingConfigUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.MetricsUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESShardService;
-import com.didichuxing.datachannel.arius.admin.metadata.service.ESIndicesStaticsService;
 import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
 import com.didiglobal.logi.elasticsearch.client.response.setting.index.IndexConfig;
 import com.didiglobal.logi.log.ILog;
@@ -48,7 +48,7 @@ public class IndexDashBoardCollector extends BaseDashboardCollector {
     private ESIndexService          esIndexService;
 
     @Autowired
-    private ESIndicesStaticsService esIndicesStaticsService;
+    private ESIndicesStatsService esIndicesStatsService;
 
     private static final Map<String/*cluster@index*/, IndexMetrics /*上一次采集到的索引数据*/> index2LastTimeIndexMetricsMap = Maps.newConcurrentMap();
 
@@ -61,7 +61,7 @@ public class IndexDashBoardCollector extends BaseDashboardCollector {
 
 
         List<DashBoardStats> dashBoardStatsList = Lists.newArrayList();
-        AtomicReference<List<Segments>>                                segmentsListRef         = new AtomicReference<>(Lists.newArrayList());
+        AtomicReference<List<Segment>>                                segmentsListRef         = new AtomicReference<>(Lists.newArrayList());
         AtomicReference<Tuple<List<ShardMetrics>, List<ShardMetrics>>> bigAndSmallListTupleRef = new AtomicReference<>();
         AtomicReference<Map<String, IndexConfig>>                      index2IndexConfigMapRef = new AtomicReference<>(Maps.newHashMap());
         AtomicReference<Map<String, Double>>                      index2IndexingIndexIncrementMapRef = new AtomicReference<>(Maps.newHashMap());
@@ -85,8 +85,8 @@ public class IndexDashBoardCollector extends BaseDashboardCollector {
                 ShardMetrics::getIndex, c -> c);
 
         // 获取集群segments
-        Map<String, List<Segments>> index2SegmentsListMap = ConvertUtil.list2MapOfList(segmentsListRef.get(),
-                Segments::getIndex, c -> c);
+        Map<String, List<Segment>> index2SegmentsListMap = ConvertUtil.list2MapOfList(segmentsListRef.get(),
+                Segment::getIndex, c -> c);
 
         for (CatIndexResult index : catIndexResults) {
             DashBoardStats dashBoardStats = buildInitDashBoardStats(currentTime);
@@ -114,10 +114,10 @@ public class IndexDashBoardCollector extends BaseDashboardCollector {
             }
             indexMetrics.setMappingNum((long) mappingNum);
             // 7. 索引Segements个数
-            List<Segments> indexSegmentsList = index2SegmentsListMap.getOrDefault(index.getIndex(), Lists.newArrayList());
-            indexMetrics.setSegmentNum((long) indexSegmentsList.size());
+            List<Segment> indexSegmentList = index2SegmentsListMap.getOrDefault(index.getIndex(), Lists.newArrayList());
+            indexMetrics.setSegmentNum((long) indexSegmentList.size());
             // 8. 索引Segements内存大小（MB）
-            indexMetrics.setSegmentMemSize(indexSegmentsList.stream().mapToDouble(Segments::getMemoSize).sum() * BYTE_TO_MB);
+            indexMetrics.setSegmentMemSize(indexSegmentList.stream().mapToDouble(Segment::getMemoSize).sum() * BYTE_TO_MB);
             // 9. 写入文档数突增个数 （上个时间间隔的两倍）
             double indexingIndexIncrementValue = index2IndexingIndexIncrementMapRef.get().getOrDefault(index.getIndex(),0d);
             indexMetrics.setDocUprushNum((long) indexingIndexIncrementValue);
@@ -146,7 +146,7 @@ public class IndexDashBoardCollector extends BaseDashboardCollector {
         Map<String, Double> index2CurrentSearchQueryMap = Maps.newHashMap();
         List<List<String>> indexListList = Lists.partition(indexList, 20);
         for (List<String> subIndexList : indexListList) {
-            index2CurrentSearchQueryMap.putAll(esIndicesStaticsService.getIndex2CurrentSearchQueryMap(cluster, subIndexList));
+            index2CurrentSearchQueryMap.putAll(esIndicesStatsService.getIndex2CurrentSearchQueryMap(cluster, subIndexList));
         }
 
         // 计算索引列表SearchQuery突增量
@@ -176,7 +176,7 @@ public class IndexDashBoardCollector extends BaseDashboardCollector {
         Map<String, Double> index2CurrentIndexingIndexMap = Maps.newHashMap();
         List<List<String>> indexListList = Lists.partition(indexList, 20);
         for (List<String> subIndexList : indexListList) {
-            index2CurrentIndexingIndexMap.putAll(esIndicesStaticsService.getIndex2CurrentIndexingIndexMap(cluster, subIndexList));
+            index2CurrentIndexingIndexMap.putAll(esIndicesStatsService.getIndex2CurrentIndexingIndexMap(cluster, subIndexList));
         }
 
         // 计算索引列表IndexingIndex突增量

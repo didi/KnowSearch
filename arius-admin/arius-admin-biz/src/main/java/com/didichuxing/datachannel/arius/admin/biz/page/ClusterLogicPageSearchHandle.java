@@ -72,9 +72,6 @@ public class ClusterLogicPageSearchHandle extends AbstractPageSearchHandle<Clust
         if (null == clusterLogicVO) {
             return;
         }
-//        setResponsible(clusterLogicVO);
-        setProjectName(clusterLogicVO);
-        setClusterPhyFlagAndDataNodeNum(clusterLogicVO);
         setDiskUsedInfo(clusterLogicVO);
     }
 
@@ -95,30 +92,6 @@ public class ClusterLogicPageSearchHandle extends AbstractPageSearchHandle<Clust
         clusterLogicVO.setDiskUsagePercent(new BigDecimal((double)diskUsage/diskTotal).setScale(4, BigDecimal.ROUND_HALF_UP).doubleValue());
     }
 
-    private void setResponsible(ClusterLogicVO clusterLogicVO) {
-        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(clusterLogicVO.getId());
-        if (clusterLogic == null) {
-            return;
-        }
-        clusterLogicVO.setResponsible(clusterLogic.getResponsible());
-    }
-
-    private void setClusterPhyFlagAndDataNodeNum(ClusterLogicVO clusterLogicVO) {
-        ClusterLogicContext clusterLogicContext = clusterContextManager.getClusterLogicContext(clusterLogicVO.getId());
-        if (null == clusterLogicContext || CollectionUtils.isEmpty(clusterLogicContext.getAssociatedClusterPhyNames())) {
-            clusterLogicVO.setPhyClusterAssociated(false);
-            clusterLogicVO.setDataNodesNumber(0);
-        } else {
-            clusterLogicVO.setPhyClusterAssociated(true);
-            clusterLogicVO.setDataNodesNumber(clusterLogicContext.getAssociatedDataNodeNum());
-        }
-    }
-
-    private void setProjectName(ClusterLogicVO clusterLogicVO) {
-        Optional.ofNullable(clusterLogicVO.getProjectId())
-                .map(projectService::getProjectBriefByProjectId)
-                .map(ProjectBriefVO::getProjectName).ifPresent(clusterLogicVO::setProjectName);
-    }
     @Override
     protected Result<Boolean> checkCondition(ClusterLogicConditionDTO clusterLogicConditionDTO, Integer projectId) {
 

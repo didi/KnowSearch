@@ -21,7 +21,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.rest.swagger.SwaggerConfiguration;
-import com.didichuxing.datachannel.arius.admin.rest.web.WebConstants;
+import com.didichuxing.datachannel.arius.admin.rest.web.WebConstant;
 import com.didichuxing.datachannel.arius.admin.rest.web.WebRequestLogFilter;
 
 import com.didiglobal.logi.log.ILog;
@@ -122,7 +122,7 @@ public class AriusAdminApplication {
             @Override
             public void doFilter(ServletRequest request, ServletResponse response,
                                  FilterChain chain) throws IOException, ServletException {
-                ((HttpServletResponse) response).setHeader(WebConstants.X_REQUEST_ID, LogFactory.getFlag());
+                ((HttpServletResponse) response).setHeader(WebConstant.X_REQUEST_ID, LogFactory.getFlag());
                 chain.doFilter(request, response);
             }
 

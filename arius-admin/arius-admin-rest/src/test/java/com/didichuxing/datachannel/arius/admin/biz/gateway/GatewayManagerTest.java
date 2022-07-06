@@ -29,7 +29,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectLogic
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicAliasService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
-import com.didichuxing.datachannel.arius.admin.metadata.service.DslStatisService;
+import com.didichuxing.datachannel.arius.admin.metadata.service.DslStatisticsService;
 import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
@@ -56,13 +56,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class GatewayManagerTest {
     @Autowired
     private GatewayManager gatewayManager;
-    
+
     // @Test
     public void directSqlSearchTest() {
         String sql = "SELECT * FROM arius.dsl.template LIMIT 10";
         Assertions.assertEquals("", gatewayManager.directSqlSearch(sql, null, 1));
     }
-    
+
     @Mock
     private ESUserService                   mockEsUserService;
     @Mock
@@ -74,21 +74,21 @@ public class GatewayManagerTest {
     @Mock
     private IndexTemplatePhyService         mockIndexTemplatePhyService;
     @Mock
-    private TemplateLogicAliasesManager     mockTemplateLogicAliasesManager;
+    private TemplateLogicAliasManager       mockTemplateLogicAliasManager;
     @Mock
     private GatewayService                  mockGatewayService;
     @Mock
     private AriusConfigInfoService          mockAriusConfigInfoService;
     @Mock
-    private DslStatisService                mockDslStatisService;
+    private DslStatisticsService mockDslStatisticsService;
     @Mock
     private TemplateLogicAliasService       mockTemplateLogicAliasService;
     @Mock
     private ProjectConfigService            mockProjectConfigService;
-        protected HttpHeaders headers;
+    protected HttpHeaders                   headers;
 
     @InjectMocks
-    private GatewayManagerImpl gatewayManagerImplUnderTest;
+    private GatewayManagerImpl              gatewayManagerImplUnderTest;
     
     @BeforeEach
     void setUp() {
@@ -214,7 +214,7 @@ public class GatewayManagerTest {
         
         // Configure TemplateLogicAliasesManager.listAlias(...).
         final List<IndexTemplateAlias> indexTemplateAliases = Arrays.asList(new IndexTemplateAlias(0, 0, "name"));
-        when(mockTemplateLogicAliasesManager.listAlias()).thenReturn(indexTemplateAliases);
+        when(mockTemplateLogicAliasManager.listAlias()).thenReturn(indexTemplateAliases);
         
         // Run the test
         final Result<Map<String, GatewayTemplatePhysicalVO>> result = gatewayManagerImplUnderTest.getTemplateMap(
@@ -239,7 +239,7 @@ public class GatewayManagerTest {
         
         // Configure TemplateLogicAliasesManager.listAlias(...).
         final List<IndexTemplateAlias> indexTemplateAliases = Arrays.asList(new IndexTemplateAlias(0, 0, "name"));
-        when(mockTemplateLogicAliasesManager.listAlias(Arrays.asList(new IndexTemplateWithPhyTemplates(Arrays.asList(
+        when(mockTemplateLogicAliasManager.listAlias(Arrays.asList(new IndexTemplateWithPhyTemplates(Arrays.asList(
                 new IndexTemplatePhy(0L, 0, "name", "expression", "cluster", "rack", 0, 0, 0, 0, 0, "config",
                         0)))))).thenReturn(indexTemplateAliases);
         
@@ -275,7 +275,7 @@ public class GatewayManagerTest {
                                 0.0, 0.0, 0.0, 0.0, 0.0, "logTime", "indiceSample", "dslTemplate", 0L, "dslType",
                                 "indices", "dslTemplateMd5", 0.0, 0.0, 0L, 0, "dsl", 0.0, "flinkTime", 0.0, false,
                                 false, false, "checkMode", 0L, "version", "dslTag")), "scrollId"));
-        when(mockDslStatisService.scrollSearchDslTemplate(new ScrollDslTemplateRequest())).thenReturn(
+        when(mockDslStatisticsService.scrollSearchDslTemplate(new ScrollDslTemplateRequest())).thenReturn(
                 scrollDslTemplateResponseResult);
         
         // Run the test

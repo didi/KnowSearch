@@ -5,7 +5,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.esconfig.E
 import static com.didichuxing.datachannel.arius.admin.common.constant.esconfig.EsConfigActionEnum.EDIT;
 
 import com.alibaba.fastjson.JSON;
-import com.didichuxing.datachannel.arius.admin.biz.worktask.content.ClusterConfigRestartContent;
+import com.didichuxing.datachannel.arius.admin.biz.task.content.ClusterConfigRestartContent;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.EcmParamBase;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESConfigDTO;

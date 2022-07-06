@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
+import com.didichuxing.datachannel.arius.admin.metadata.service.ESClusterPhyStatsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -11,7 +12,6 @@ import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.ClusterMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.DashBoardStats;
 import com.didichuxing.datachannel.arius.admin.common.util.MetricsUtils;
-import com.didichuxing.datachannel.arius.admin.metadata.service.ESClusterPhyStaticsService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
@@ -25,7 +25,7 @@ import com.google.common.collect.Maps;
 public class ClusterDashBoardCollector extends BaseDashboardCollector {
     private static final ILog            LOGGER = LogFactory.getLog(ClusterDashBoardCollector.class);
     @Autowired
-    protected ESClusterPhyStaticsService esClusterPhyStaticsService;
+    protected ESClusterPhyStatsService esClusterPhyStatsService;
 
     private static final Map<String/*集群名称*/, ClusterMetrics /*上一次采集到的集群数据*/> cluster2LastTimeClusterMetricsMap = Maps.newConcurrentMap();
 
@@ -38,21 +38,21 @@ public class ClusterDashBoardCollector extends BaseDashboardCollector {
         clusterMetrics.setTimestamp(startTime);
         clusterMetrics.setCluster(cluster);
         // 1. 写入耗时
-        clusterMetrics.setIndexingLatency(esClusterPhyStaticsService.getClusterIndexingLatency(cluster));
+        clusterMetrics.setIndexingLatency(esClusterPhyStatsService.getClusterIndexingLatency(cluster));
         // 2. 查询耗时
-        clusterMetrics.setSearchLatency(esClusterPhyStaticsService.getClusterSearchLatency(cluster));
+        clusterMetrics.setSearchLatency(esClusterPhyStatsService.getClusterSearchLatency(cluster));
         //4. 集群shard总数
-        clusterMetrics.setShardNum(esClusterPhyStaticsService.getClustersShardTotal(cluster));
+        clusterMetrics.setShardNum(esClusterPhyStatsService.getClustersShardTotal(cluster));
         // 5. 写入请求数
-        clusterMetrics.setIndexReqNum(esClusterPhyStaticsService.getCurrentIndexTotal(cluster));
+        clusterMetrics.setIndexReqNum(esClusterPhyStatsService.getCurrentIndexTotal(cluster));
         // 6. 网关成功率、失败率
-        Tuple<Double/*成功率*/, Double/*失败率*/> gatewaySuccessRateAndFailureRate = esClusterPhyStaticsService.getGatewaySuccessRateAndFailureRate(cluster);
+        Tuple<Double/*成功率*/, Double/*失败率*/> gatewaySuccessRateAndFailureRate = esClusterPhyStatsService.getGatewaySuccessRateAndFailureRate(cluster);
         clusterMetrics.setGatewaySucPer(gatewaySuccessRateAndFailureRate.getV1());
         clusterMetrics.setGatewayFailedPer(gatewaySuccessRateAndFailureRate.getV2());
         // 7. 集群Pending task数
-        clusterMetrics.setPendingTaskNum(esClusterPhyStaticsService.getPendingTaskTotal(cluster));
+        clusterMetrics.setPendingTaskNum(esClusterPhyStatsService.getPendingTaskTotal(cluster));
         // 8. 集群http连接数
-        clusterMetrics.setHttpNum(esClusterPhyStaticsService.getHttpConnectionTotal(cluster));
+        clusterMetrics.setHttpNum(esClusterPhyStatsService.getHttpConnectionTotal(cluster));
         //9. 查询请求数突增量 （上个时间间隔请求数的两倍）
         clusterMetrics.setReqUprushNum(getReqUprushNum(cluster));
         //10.写入文档数突增量（上个时间间隔的写文档数的两倍
@@ -92,7 +92,7 @@ public class ClusterDashBoardCollector extends BaseDashboardCollector {
         if (null == clusterMetrics) { return 0L;}
 
         Long lastTimeDocNum     = clusterMetrics.getDocUprushNum();
-        Long currentTimeDocNum  = esClusterPhyStaticsService.getCurrentIndexTotal(cluster);
+        Long currentTimeDocNum  = esClusterPhyStatsService.getCurrentIndexTotal(cluster);
         return MetricsUtils.computerUprushNum(currentTimeDocNum.doubleValue(), lastTimeDocNum.doubleValue()).longValue();
     }
 
@@ -107,7 +107,7 @@ public class ClusterDashBoardCollector extends BaseDashboardCollector {
         if (null == clusterMetrics) { return 0L;}
 
         Long lastTimeQueryTotal = clusterMetrics.getReqUprushNum();
-        Long currentQueryTotal  = esClusterPhyStaticsService.getCurrentQueryTotal(cluster);
+        Long currentQueryTotal  = esClusterPhyStatsService.getCurrentQueryTotal(cluster);
 
         return MetricsUtils.computerUprushNum(currentQueryTotal.doubleValue(), lastTimeQueryTotal.doubleValue()).longValue();
     }
