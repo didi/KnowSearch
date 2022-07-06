@@ -1,33 +1,25 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.project;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
-import static com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant.GET_USER_PROJECT_ID_LIST_TICKET;
-import static com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant.GET_USER_PROJECT_ID_LIST_TICKET_NAME;
+
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 
 import com.didichuxing.datachannel.arius.admin.biz.project.ESUserManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.ConsoleESUserVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.ConsoleESUserWithVerifyCodeVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.ESUserVO;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import java.util.List;
-import javax.servlet.http.HttpServletRequest;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
 
 /**
  * 项目关联的es user
@@ -53,22 +45,6 @@ public class ESUserV3Controller {
                                                 @PathVariable("projectId") Integer projectId,
                                                 @RequestBody ESUserDTO appDTO) {
         return esUserManager.registerESUser(appDTO, projectId, HttpRequestUtil.getOperator(request));
-    }
-    
-    @GetMapping("/get-no-code-login")
-    @ResponseBody
-    @ApiOperation(value = "查询用户可以免密登陆的es user接口", notes = "该接口包含APP的校验码等敏感信息,需要调用方提供ticket")
-    @ApiImplicitParams({
-            @ApiImplicitParam(paramType = "header", dataType = "String", name = "X-ARIUS-APP-TICKET", value = "接口ticket", required = true) })
-    public Result<List<ConsoleESUserWithVerifyCodeVO>> getNoCodeESUser(HttpServletRequest request) {
-        String ticket = HttpRequestUtil.getHeaderValue(GET_USER_PROJECT_ID_LIST_TICKET_NAME);
-    
-        if (!StringUtils.equals(GET_USER_PROJECT_ID_LIST_TICKET, ticket)) {
-            return Result.buildParamIllegal("ticket错误");
-        }
-        final String operator = HttpRequestUtil.getOperator(request);
-        final Integer projectId = HttpRequestUtil.getProjectId(request);
-        return esUserManager.getNoCodeESUser(projectId, operator);
     }
     
     @GetMapping("/project/{projectId}")

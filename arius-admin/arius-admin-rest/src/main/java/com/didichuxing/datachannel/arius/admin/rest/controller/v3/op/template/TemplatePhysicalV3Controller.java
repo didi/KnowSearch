@@ -1,6 +1,13 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.template;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
+
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -9,25 +16,15 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.Template
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.IndexTemplatePhysicalVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import java.util.List;
-import javax.servlet.http.HttpServletRequest;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Created by linyunan on 2021-07-30
  */
 @RestController
-@RequestMapping(V3_OP + "/template/physical")
+@RequestMapping(V3 + "/template/physical")
 @Api(tags = "索引模板管理接口(REST)")
 public class TemplatePhysicalV3Controller {
 
@@ -55,7 +52,7 @@ public class TemplatePhysicalV3Controller {
         return Result.buildSucc(templatePhyManager.getCanCopyTemplatePhyClusterPhyNames(templatePhyId));
     }
 
-    @PutMapping("/multipleEdit")
+    @PutMapping("/multiple-edit")
     @ResponseBody
     @ApiOperation(value = "编辑多个物理模板接口", notes = "")
     public Result<Boolean> multipleEdit(HttpServletRequest request,
