@@ -6,15 +6,15 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.resource.E
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandler;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.utils.OpOrderTaskConverter;
-import com.didichuxing.datachannel.arius.admin.biz.worktask.OpTaskManager;
-import com.didichuxing.datachannel.arius.admin.biz.worktask.content.ClusterBaseContent;
-import com.didichuxing.datachannel.arius.admin.biz.worktask.content.ClusterIndecreaseDockerContent;
-import com.didichuxing.datachannel.arius.admin.biz.worktask.content.ClusterIndecreaseHostContent;
+import com.didichuxing.datachannel.arius.admin.biz.task.OpTaskManager;
+import com.didichuxing.datachannel.arius.admin.biz.task.content.ClusterBaseContent;
+import com.didichuxing.datachannel.arius.admin.biz.task.content.ClusterIndecreaseDockerContent;
+import com.didichuxing.datachannel.arius.admin.biz.task.content.ClusterIndecreaseHostContent;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.ESClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.EcmParamBase;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.host.HostsParamBase;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.host.HostsScaleActionParam;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.host.HostParamBase;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.host.HostScaleActionParam;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.ecm.EcmTaskDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
@@ -306,10 +306,10 @@ public class ClusterOpIndecreaseHandler extends BaseWorkOrderHandler {
             }
             for (EcmParamBase ecmParamBase : ecmParamBaseList) {
                 if (roleName.equals(ecmParamBase.getRoleName())) {
-                    HostsParamBase hostsParamBase = (HostsParamBase) ecmParamBase;
+                    HostParamBase hostParamBase = (HostParamBase) ecmParamBase;
 
-                    HostsScaleActionParam hostScaleActionParam = ConvertUtil.obj2Obj(hostsParamBase,
-                        HostsScaleActionParam.class);
+                    HostScaleActionParam hostScaleActionParam = ConvertUtil.obj2Obj(hostParamBase,
+                        HostScaleActionParam.class);
                     hostScaleActionParam.setPidCount(pidCount);
                     hostScaleActionParam.setHostList(hostnameList);
                     hostScaleActionParam.setNodeNumber(hostnameList.size());

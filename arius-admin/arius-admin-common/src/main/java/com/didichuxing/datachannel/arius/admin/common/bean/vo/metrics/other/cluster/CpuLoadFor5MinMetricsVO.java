@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.percentiles.ESPercentilesMetricsVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.percentiles.ESPercentileMetricsVO;
 import io.swagger.annotations.ApiModel;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,5 +11,5 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @ApiModel("CPU5分钟负载指标信息")
-public class CpuLoadFor5MinMetricsVO extends ESPercentilesMetricsVO {
+public class CpuLoadFor5MinMetricsVO extends ESPercentileMetricsVO {
 }

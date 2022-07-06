@@ -52,7 +52,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.ESResponse
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.setting.ESClusterGetSettingsAllAction;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.setting.ESClusterGetSettingsAllRequest;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.setting.ESClusterGetSettingsAllResponse;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ECSegmentsOnIps;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ECSegmentOnIp;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStatsResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterTaskStatsResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.stats.ESClusterThreadPO;
@@ -350,9 +350,9 @@ public class ESClusterDAO extends BaseESDAO {
      * @param clusterName 集群名称
      * @return
      */
-    public List<ECSegmentsOnIps> getSegmentsOfIpByCluster(String clusterName) {
+    public List<ECSegmentOnIp> getSegmentsOfIpByCluster(String clusterName) {
         ESClient client = esOpClient.getESClient(clusterName);
-        List<ECSegmentsOnIps> ecSegmentsOnIps = null;
+        List<ECSegmentOnIp> ecSegmentOnIps = null;
         if (Objects.isNull(client)) {
             LOGGER.error("class=ESClusterDAO||method=getClusterStats||clusterName={}||errMsg=esClient is null", clusterName);
             return new ArrayList<>();
@@ -362,13 +362,13 @@ public class ESClusterDAO extends BaseESDAO {
             DirectResponse directResponse = client.direct(directRequest).actionGet(30, TimeUnit.SECONDS);
             if (directResponse.getRestStatus() == RestStatus.OK
                     && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
-                ecSegmentsOnIps = JSONArray.parseArray(directResponse.getResponseContent(), ECSegmentsOnIps.class);
+                ecSegmentOnIps = JSONArray.parseArray(directResponse.getResponseContent(), ECSegmentOnIp.class);
                 }
         } catch (Exception e) {
             LOGGER.warn("class=ESClusterDAO||method=getSegmentsOfIpByCluster||cluster={}||mg=get es segments fail", clusterName, e);
             return new ArrayList<>();
         }
-        return ecSegmentsOnIps;
+        return ecSegmentOnIps;
     }
 
 

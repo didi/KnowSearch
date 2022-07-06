@@ -2,7 +2,7 @@ package com.didichuxing.datachannel.arius.admin.task.dashboard.collector;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.BYTE_TO_MB;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.shard.Segments;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.shard.Segment;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.DashBoardStats;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.TemplateMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
@@ -40,7 +40,7 @@ public class TemplateDashBoardCollector extends BaseDashboardCollector {
             LOGGER.error("class=TemplateDashBoardCollector||method=collectSingleCluster||errMsg=clusterTemplateList is null");
             return;
         }
-        List<Segments> segments = esShardService.syncGetSegments(cluster);
+        List<Segment> segments = esShardService.syncGetSegments(cluster);
         if (segments.isEmpty()) {
             LOGGER.error("class=TemplateDashBoardCollector||method=collectSingleCluster||errMsg=segments is null");
             return;
@@ -79,14 +79,14 @@ public class TemplateDashBoardCollector extends BaseDashboardCollector {
     }
 
 
-    private void buildTemplateStats(TemplateMetrics templateMetrics, List<Segments> clusterSegments, String expression) {
+    private void buildTemplateStats(TemplateMetrics templateMetrics, List<Segment> clusterSegments, String expression) {
         //这里传入的segments 是整个cluster 所有segments，先按照template expression 过滤出该模板所有的segments
-        List<Segments> matchExpSegments = clusterSegments
+        List<Segment> matchExpSegments = clusterSegments
                 .stream()
                 .filter(s -> IndexNameUtils.indexExpMatch(s.getIndex(), expression))
                 .collect(Collectors.toList());
 
         templateMetrics.setSegmentNum((long) matchExpSegments.size());
-        templateMetrics.setSegmentMemSize(matchExpSegments.stream().mapToDouble(Segments::getMemoSize).sum() * BYTE_TO_MB);
+        templateMetrics.setSegmentMemSize(matchExpSegments.stream().mapToDouble(Segment::getMemoSize).sum() * BYTE_TO_MB);
     }
 }

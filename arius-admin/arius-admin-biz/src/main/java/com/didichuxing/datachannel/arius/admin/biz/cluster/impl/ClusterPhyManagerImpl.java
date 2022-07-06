@@ -33,7 +33,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.Cluste
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhyContext;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterTags;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterTag;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.setting.ESClusterGetSettingsAllResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStatsResponse;
@@ -1179,7 +1179,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         if (AriusObjUtils.isNull(param)) {
             return Result.buildParamIllegal("参数为空");
         }
-        ClusterTags clusterTags = ConvertUtil.str2ObjByJson(param.getTags(), ClusterTags.class);
+        ClusterTag clusterTag = ConvertUtil.str2ObjByJson(param.getTags(), ClusterTag.class);
 
         if (AriusObjUtils.isNull(operator)) {
             return Result.buildParamIllegal("操作人不存在");
@@ -1193,7 +1193,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             return Result.buildParamIllegal("非支持的集群资源类型");
         }
 
-        if (ESClusterCreateSourceEnum.ES_IMPORT != ESClusterCreateSourceEnum.valueOf(clusterTags.getCreateSource())) {
+        if (ESClusterCreateSourceEnum.ES_IMPORT != ESClusterCreateSourceEnum.valueOf(clusterTag.getCreateSource())) {
             return Result.buildParamIllegal("非集群接入来源");
         }
 

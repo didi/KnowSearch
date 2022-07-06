@@ -3,7 +3,7 @@ package com.didichuxing.datachannel.arius.admin.core.service.es;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.MovingShardMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.ShardMetrics;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.shard.Segments;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.shard.Segment;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.ShardAssignmentDescriptionVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.ShardDistributionVO;
 
@@ -39,7 +39,7 @@ public interface ESShardService {
      * @param clusterName
      * @return
      */
-    List<Segments> syncGetSegments(String clusterName);
+    List<Segment> syncGetSegments(String clusterName);
 
     /**
      * shard分布
