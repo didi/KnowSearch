@@ -7,10 +7,10 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.resource.E
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum.ES_HOST;
 
 import com.alibaba.fastjson.JSON;
-import com.didichuxing.datachannel.arius.admin.biz.worktask.content.ClusterBaseContent;
-import com.didichuxing.datachannel.arius.admin.biz.worktask.content.ClusterIndecreaseDockerContent;
-import com.didichuxing.datachannel.arius.admin.biz.worktask.content.ClusterNewDockerContent;
-import com.didichuxing.datachannel.arius.admin.biz.worktask.content.ClusterNewHostContent;
+import com.didichuxing.datachannel.arius.admin.biz.task.content.ClusterBaseContent;
+import com.didichuxing.datachannel.arius.admin.biz.task.content.ClusterIndecreaseDockerContent;
+import com.didichuxing.datachannel.arius.admin.biz.task.content.ClusterNewDockerContent;
+import com.didichuxing.datachannel.arius.admin.biz.task.content.ClusterNewHostContent;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.ESClusterRoleDocker;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.ESClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.EcmParamBase;
