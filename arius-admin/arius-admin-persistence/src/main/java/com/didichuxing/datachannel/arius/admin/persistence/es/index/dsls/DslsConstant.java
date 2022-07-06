@@ -56,14 +56,7 @@ public class DslsConstant {
      * 获取网关数量
      */
     public static final String GET_GATEWAY_COUNT                                             = "AriusStatsClusterPhyInfoEsDao/getGatewayCount";
-    /**
-     * 获得网关成功数
-     */
-    public static final String GET_GATEWAY_SUCCESS_COUNT                                     = "AriusStatsClusterPhyInfoEsDao/getGatewaySuccessCount";
-    /**
-     * 获得网关失败数
-     */
-    public static final String GET_GATEWAY_FAILURE_COUNT                                     = "AriusStatsClusterPhyInfoEsDao/getGatewayFailureCount";
+
 
     /************************************************************** AriusStatsIndexInfoEsDao **************************************************************/
     /**
