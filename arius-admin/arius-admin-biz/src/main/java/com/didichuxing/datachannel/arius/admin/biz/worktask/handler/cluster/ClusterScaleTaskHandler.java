@@ -20,8 +20,8 @@ import com.didichuxing.datachannel.arius.admin.biz.worktask.content.ClusterIndec
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.ESClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.EcmParamBase;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.host.HostsParamBase;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.host.HostsScaleActionParam;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.host.HostParamBase;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.host.HostScaleActionParam;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.ecm.EcmTaskDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
@@ -159,10 +159,10 @@ public class ClusterScaleTaskHandler extends AbstractClusterTaskHandler {
             }
             for (EcmParamBase ecmParamBase : ecmParamBaseList) {
                 if (roleName.equals(ecmParamBase.getRoleName())) {
-                    HostsParamBase hostsParamBase = (HostsParamBase) ecmParamBase;
+                    HostParamBase hostParamBase = (HostParamBase) ecmParamBase;
 
-                    HostsScaleActionParam hostScaleActionParam = ConvertUtil.obj2Obj(hostsParamBase,
-                            HostsScaleActionParam.class);
+                    HostScaleActionParam hostScaleActionParam = ConvertUtil.obj2Obj(hostParamBase,
+                            HostScaleActionParam.class);
                     hostScaleActionParam.setPidCount(pidCount);
                     hostScaleActionParam.setHostList(hostnameList);
                     hostScaleActionParam.setNodeNumber(hostnameList.size());

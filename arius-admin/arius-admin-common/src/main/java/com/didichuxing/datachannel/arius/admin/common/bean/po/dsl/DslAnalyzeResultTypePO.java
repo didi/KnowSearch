@@ -2,10 +2,10 @@ package com.didichuxing.datachannel.arius.admin.common.bean.po.dsl;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONField;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.DslTemplates;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.ErrorDsls;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.DslTemplate;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.ErrorDsl;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.SearchOverview;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.SlowDsls;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.SlowDsl;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.BaseESPO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -31,7 +31,7 @@ public class DslAnalyzeResultTypePO extends BaseESPO {
     /**
      * 查询模板信息
      */
-    private DslTemplates dslTemplates;
+    private DslTemplate dslTemplate;
     /**
      *  查询概述
      */
@@ -39,11 +39,11 @@ public class DslAnalyzeResultTypePO extends BaseESPO {
     /**
      * 慢查信息
      */
-    private SlowDsls slowDsls;
+    private SlowDsl slowDsl;
     /**
      * 异常查询
      */
-    private ErrorDsls errorDsls;
+    private ErrorDsl errorDsl;
     /**
      * 数据类型
      */

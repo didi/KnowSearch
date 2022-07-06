@@ -38,9 +38,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.EcmParamBa
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.EcmTaskBasic;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.EcmTaskDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.elasticcloud.ElasticCloudCommonActionParam;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.host.HostsCreateActionParam;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.host.HostsParamBase;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.host.HostsScaleActionParam;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.host.HostCreateActionParam;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.host.HostParamBase;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.host.HostScaleActionParam;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.response.EcmOperateAppBase;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.response.EcmTaskStatus;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
@@ -179,8 +179,8 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
             && ESClusterTypeEnum.ES_HOST.getCode() == ecmTaskBasic.getType()) {
             // 集群新建的工单, 该信息从参数中获取
             Map<String, EcmParamBase> ecmParamBaseMap = OpOrderTaskConverter.convert2EcmParamBaseMap(ecmTask);
-            HostsCreateActionParam ecmCreateParamBase = (HostsCreateActionParam) ecmParamBaseMap
-                .getOrDefault(MASTER_NODE.getDesc(), new HostsCreateActionParam());
+            HostCreateActionParam ecmCreateParamBase = (HostCreateActionParam) ecmParamBaseMap
+                .getOrDefault(MASTER_NODE.getDesc(), new HostCreateActionParam());
             ecmTaskBasic.setClusterName(ecmCreateParamBase.getPhyClusterName());
             ecmTaskBasic.setIdc(ecmCreateParamBase.getIdc());
             ecmTaskBasic.setNsTree(ecmCreateParamBase.getNsTree());
@@ -261,8 +261,8 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
 
         //2.将角色列表中的zeus任务id设置为空
         for (EcmParamBase ecmParamBase : ecmParamBaseList) {
-            HostsParamBase hostsParamBase = (HostsParamBase) ecmParamBase;
-            hostsParamBase.setTaskId(null);
+            HostParamBase hostParamBase = (HostParamBase) ecmParamBase;
+            hostParamBase.setTaskId(null);
         }
         ecmTask.setHandleData(JSONArray.toJSONString(ecmParamBaseList));
 
@@ -555,15 +555,15 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
         if (Objects.equals(OpTaskTypeEnum.CLUSTER_NEW.getType(), orderType)) {
             result = ecmHandleService.startESCluster(ecmParamBase, operator);
         } else if (Objects.equals(OpTaskTypeEnum.CLUSTER_EXPAND.getType(), orderType)) {
-            if (ecmParamBase instanceof HostsScaleActionParam) {
-                HostsScaleActionParam hostScaleActionParam = (HostsScaleActionParam) ecmParamBase;
+            if (ecmParamBase instanceof HostScaleActionParam) {
+                HostScaleActionParam hostScaleActionParam = (HostScaleActionParam) ecmParamBase;
                 hostScaleActionParam.setAction(EXPAND.getValue());
             }
 
             result = ecmHandleService.scaleESCluster(ecmParamBase, operator);
         } else if (Objects.equals(OpTaskTypeEnum.CLUSTER_SHRINK.getType(), orderType)) {
-            if (ecmParamBase instanceof HostsScaleActionParam) {
-                HostsScaleActionParam hostScaleActionParam = (HostsScaleActionParam) ecmParamBase;
+            if (ecmParamBase instanceof HostScaleActionParam) {
+                HostScaleActionParam hostScaleActionParam = (HostScaleActionParam) ecmParamBase;
                 hostScaleActionParam.setAction(SHRINK.getValue());
             }
 
@@ -722,12 +722,12 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
 
         // 更新es_cluster_role_info中的podNumber
         for (EcmParamBase ecmParamBase : OpOrderTaskConverter.convert2EcmParamBaseList(ecmTask)) {
-            HostsParamBase hostsParamBase = (HostsParamBase) ecmParamBase;
-            if (CollectionUtils.isEmpty(hostsParamBase.getHostList())) {
+            HostParamBase hostParamBase = (HostParamBase) ecmParamBase;
+            if (CollectionUtils.isEmpty(hostParamBase.getHostList())) {
                 continue;
             }
 
-            ClusterRoleInfo clusterRoleInfo = clusterRoleService.getByClusterNameAndRole(baseClusterHostOrderDetail.getPhyClusterName(), hostsParamBase.getRoleName());
+            ClusterRoleInfo clusterRoleInfo = clusterRoleService.getByClusterNameAndRole(baseClusterHostOrderDetail.getPhyClusterName(), hostParamBase.getRoleName());
             if (clusterRoleInfo == null) {
                 continue;
             }
@@ -835,20 +835,20 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
 
     private List<String> buildClusterReadAndWriteAddressForHostWhenCreate(List<EcmParamBase> ecmParamBases) {
         List<String> clusterPhyAddress = Lists.newArrayList();
-        List<HostsParamBase> hostsParamBases = ConvertUtil.list2List(ecmParamBases, HostsParamBase.class);
-        List<HostsParamBase> builds = hostsParamBases.stream()
+        List<HostParamBase> hostParamBases = ConvertUtil.list2List(ecmParamBases, HostParamBase.class);
+        List<HostParamBase> builds = hostParamBases.stream()
                 .filter(hostParam -> filterValidHttpAddressEcmParamBase(CLIENT_NODE.getDesc(), hostParam))
                 .collect(Collectors.toList());
         //没有client角色, 用master角色节点作为http读写地址
         if (CollectionUtils.isEmpty(builds)) {
-            builds = hostsParamBases.stream()
+            builds = hostParamBases.stream()
                     .filter(hostParam -> filterValidHttpAddressEcmParamBase(MASTER_NODE.getDesc(), hostParam))
                     .collect(Collectors.toList());
         }
 
-        for (HostsParamBase hostsParamBase : builds) {
-            List<String> hostList = hostsParamBase.getHostList();
-            hostList.forEach(host -> clusterPhyAddress.add(host + ":" + hostsParamBase.getPort()));
+        for (HostParamBase hostParamBase : builds) {
+            List<String> hostList = hostParamBase.getHostList();
+            hostList.forEach(host -> clusterPhyAddress.add(host + ":" + hostParamBase.getPort()));
         }
 
         return clusterPhyAddress;
@@ -860,21 +860,21 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
         List<String> masterHttpAddresses = getAddressesByByRoleAndClusterId(physicClusterId, MASTER_NODE.getDesc());
 
         // 扩缩容的时候会在原始的角色地址列表中修改缩容的地址端口
-        List<HostsParamBase> hostsParamBases = ConvertUtil.list2List(ecmParamBases, HostsParamBase.class);
-        for (HostsParamBase hostsParamBase : hostsParamBases) {
-            if (CollectionUtils.isEmpty(hostsParamBase.getHostList())) {
+        List<HostParamBase> hostParamBases = ConvertUtil.list2List(ecmParamBases, HostParamBase.class);
+        for (HostParamBase hostParamBase : hostParamBases) {
+            if (CollectionUtils.isEmpty(hostParamBase.getHostList())) {
                 continue;
             }
 
             // 获取扩缩容中当前角色的地址端口列表
-            List<String> shouldOperateAddresses = hostsParamBase
+            List<String> shouldOperateAddresses = hostParamBase
                     .getHostList()
                     .stream()
-                    .map(hostname -> hostname + ":" + hostsParamBase.getPort())
+                    .map(hostname -> hostname + ":" + hostParamBase.getPort())
                     .collect(Collectors.toList());
 
             // 根据扩缩容和角色的类型对masternode和clientnode做对应删除增加操作
-            if (hostsParamBase.getRoleName().equals(CLIENT_NODE.getDesc())) {
+            if (hostParamBase.getRoleName().equals(CLIENT_NODE.getDesc())) {
                 if (orderType.equals(OpTaskTypeEnum.CLUSTER_SHRINK.getType())) {
                     clientHttpAddresses.removeAll(shouldOperateAddresses);
                 }
@@ -884,7 +884,7 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
                 }
             }
 
-            if (hostsParamBase.getRoleName().equals(MASTER_NODE.getDesc())) {
+            if (hostParamBase.getRoleName().equals(MASTER_NODE.getDesc())) {
                 if (orderType.equals(OpTaskTypeEnum.CLUSTER_SHRINK.getType())) {
                     masterHttpAddresses.removeAll(shouldOperateAddresses);
                 }
@@ -914,13 +914,13 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
         return Lists.newArrayList();
     }
 
-    private boolean filterValidHttpAddressEcmParamBase(String role, HostsParamBase hostsParamBase) {
+    private boolean filterValidHttpAddressEcmParamBase(String role, HostParamBase hostParamBase) {
         if (null == role) {
             return false;
         }
 
-        return role.equals(hostsParamBase.getRoleName()) && CollectionUtils.isNotEmpty(hostsParamBase.getHostList())
-               && null != hostsParamBase.getPort();
+        return role.equals(hostParamBase.getRoleName()) && CollectionUtils.isNotEmpty(hostParamBase.getHostList())
+               && null != hostParamBase.getPort();
     }
 
     /**
@@ -942,21 +942,21 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
      */
     private void deleteRoleClusterAndHost(EcmTaskStatusEnum mergedStatusEnum, EcmTask ecmTask) {
         for (EcmParamBase ecmParamBase : OpOrderTaskConverter.convert2EcmParamBaseList(ecmTask)) {
-            HostsParamBase hostsParamBase = (HostsParamBase) ecmParamBase;
-            if (CollectionUtils.isEmpty(hostsParamBase.getHostList())) {
+            HostParamBase hostParamBase = (HostParamBase) ecmParamBase;
+            if (CollectionUtils.isEmpty(hostParamBase.getHostList())) {
                 continue;
             }
 
-            ClusterRoleInfo clusterRoleInfo = clusterRoleService.getByClusterNameAndRole(hostsParamBase.getPhyClusterName(), hostsParamBase.getRoleName());
+            ClusterRoleInfo clusterRoleInfo = clusterRoleService.getByClusterNameAndRole(hostParamBase.getPhyClusterName(), hostParamBase.getRoleName());
             if (null == clusterRoleInfo) {
                 continue;
             }
 
             // 删除es_cluster_role_host_info数据
-            clusterRoleHostService.deleteByHostNameAndRoleId(hostsParamBase.getHostList(), clusterRoleInfo.getId());
+            clusterRoleHostService.deleteByHostNameAndRoleId(hostParamBase.getHostList(), clusterRoleInfo.getId());
 
             // 更新es_cluster_role_info数据中pod的数量 角色节点数目小于角色缩容数目相同，则返回
-            if (clusterRoleInfo.getPodNumber() < hostsParamBase.getHostList().size()) {
+            if (clusterRoleInfo.getPodNumber() < hostParamBase.getHostList().size()) {
                 return;
             }
 
@@ -1005,8 +1005,8 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
 
         Tuple<String, String> tuple = new Tuple<>();
         if (ecmTask.getType().equals(ESClusterTypeEnum.ES_HOST.getCode())) {
-            tuple = getImageAndVersion(ecmParamBases, HostsParamBase::getImageName, HostsParamBase::getEsVersion,
-                HostsParamBase.class);
+            tuple = getImageAndVersion(ecmParamBases, HostParamBase::getImageName, HostParamBase::getEsVersion,
+                HostParamBase.class);
         }
 
         if (ecmTask.getType().equals(ESClusterTypeEnum.ES_DOCKER.getCode())) {
@@ -1143,7 +1143,7 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
     }
 
     private void saveTaskDetailInfoWithoutZeusTaskId(EcmParamBase ecmParamBase, Long taskId, EcmTaskStatusEnum taskStatusEnum) {
-        HostsParamBase hostParamBase = (HostsParamBase) ecmParamBase;
+        HostParamBase hostParamBase = (HostParamBase) ecmParamBase;
         for (String hostname : hostParamBase.getHostList()) {
             EcmTaskDetail ecmTaskDetail = new EcmTaskDetail();
             ecmTaskDetail.setWorkOrderTaskId(taskId);

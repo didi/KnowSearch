@@ -10,7 +10,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfi
 import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.REQUEST_INTERCEPTOR_SWITCH_OPEN;
 
 import com.didichuxing.datachannel.arius.admin.biz.project.LoginManager;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.GlobalParams;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.GlobalParam;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
@@ -68,8 +68,8 @@ public class PermissionInterceptor implements HandlerInterceptor {
 
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
-        GlobalParams.CURRENT_USER.remove();
-        GlobalParams.CURRENT_PROJECT_ID.remove();
+        GlobalParam.CURRENT_USER.remove();
+        GlobalParam.CURRENT_PROJECT_ID.remove();
     }
 
     /**

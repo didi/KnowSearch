@@ -18,7 +18,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.EcmParamBase;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.EsConfigAction;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.elasticcloud.ElasticCloudCommonActionParam;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.host.HostsParamBase;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.host.HostParamBase;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskProcessDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.esconfig.ESConfig;
@@ -90,16 +90,16 @@ public class ECMOpTaskHandler extends AbstractOpTaskHandler implements Applicati
         List<EcmParamBase> ecmParamBaseList = OpOrderTaskConverter.convert2EcmParamBaseList(ecmTask);
 
         if (ESClusterTypeEnum.ES_HOST.getCode() == ecmTask.getType()) {
-            List<HostsParamBase> hostsParamBases = ConvertUtil.list2List(ecmParamBaseList, HostsParamBase.class);
-            for(HostsParamBase hostsParamBase:hostsParamBases) {
-                if(null == hostsParamBase.getEsConfigAction()) {
+            List<HostParamBase> hostParamBases = ConvertUtil.list2List(ecmParamBaseList, HostParamBase.class);
+            for(HostParamBase hostParamBase : hostParamBases) {
+                if(null == hostParamBase.getEsConfigAction()) {
                     return;
                 }
             }
-            actionType = hostsParamBases.stream().map(HostsParamBase::getEsConfigAction)
+            actionType = hostParamBases.stream().map(HostParamBase::getEsConfigAction)
                     .map(EsConfigAction::getActionType).findAny().orElse(null);
 
-            hostsParamBases.stream()
+            hostParamBases.stream()
                     .filter(r -> !AriusObjUtils.isNull(r) && !AriusObjUtils.isNull(r.getEsConfigAction())
                             && CollectionUtils.isNotEmpty(r.getEsConfigAction().getActionEsConfigIds()))
                     .forEach(param -> actionEsConfigIds.addAll(param.getEsConfigAction().getActionEsConfigIds()));
@@ -188,8 +188,8 @@ public class ECMOpTaskHandler extends AbstractOpTaskHandler implements Applicati
         if(CollectionUtils.isEmpty(ecmParamBases)) {
             return;
         }
-        HostsParamBase hostsParamBase = (HostsParamBase) ecmParamBases.get(0);
-        if(AriusObjUtils.isNull(hostsParamBase.getEsPluginAction())) {
+        HostParamBase hostParamBase = (HostParamBase) ecmParamBases.get(0);
+        if(AriusObjUtils.isNull(hostParamBase.getEsPluginAction())) {
             return;
         }
 

@@ -12,7 +12,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.EcmParamBa
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.EsConfigAction;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.EsPluginAction;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.elasticcloud.ElasticCloudCommonActionParam;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.host.HostsParamBase;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.host.HostParamBase;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.response.EcmOperateAppBase;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.response.EcmSubTaskLog;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.response.EcmTaskStatus;
@@ -296,35 +296,35 @@ public class EcmHandleServiceImpl implements EcmHandleService {
 
     private Result<EcmParamBase> buildHostParamBase(ClusterPhy clusterPhy, String roleName, List<String> masterHostList,
                                             Multimap<String, Long> role2ConfigIdsMultiMap, Long pluginId, Integer actionType) {
-        HostsParamBase hostsParamBase = new HostsParamBase();
-        hostsParamBase.setPhyClusterId(clusterPhy.getId().longValue());
-        hostsParamBase.setPhyClusterName(clusterPhy.getCluster());
-        hostsParamBase.setRoleName(roleName);
-        hostsParamBase.setType(clusterPhy.getType());
-        hostsParamBase.setMasterHostList(masterHostList);
+        HostParamBase hostParamBase = new HostParamBase();
+        hostParamBase.setPhyClusterId(clusterPhy.getId().longValue());
+        hostParamBase.setPhyClusterName(clusterPhy.getCluster());
+        hostParamBase.setRoleName(roleName);
+        hostParamBase.setType(clusterPhy.getType());
+        hostParamBase.setMasterHostList(masterHostList);
 
         // ES集群配置回调设置, 在事件回调处调用
         if (!AriusObjUtils.isNull(role2ConfigIdsMultiMap) && !AriusObjUtils.isNull(actionType)) {
             List<Long> configs = (List<Long>) role2ConfigIdsMultiMap.get(roleName);
-            hostsParamBase.setEsConfigAction(new EsConfigAction(actionType, configs));
+            hostParamBase.setEsConfigAction(new EsConfigAction(actionType, configs));
         }
 
         // ES集群插件回调设置, 在事件回调处调用
         if (!AriusObjUtils.isNull(pluginId)) {
-            hostsParamBase.setEsPluginAction(new EsPluginAction(actionType, pluginId));
+            hostParamBase.setEsPluginAction(new EsPluginAction(actionType, pluginId));
         }
 
         ClusterRoleInfo clusterRoleInfo = clusterRoleService.getByClusterIdAndRole(clusterPhy.getId().longValue(),
                 roleName);
         if (null == clusterRoleInfo) {
-            hostsParamBase.setEsVersion(clusterPhy.getEsVersion());
+            hostParamBase.setEsVersion(clusterPhy.getEsVersion());
             // 根据物理集群的版本号获取对应的镜像地址
             ESPackage esPackage = esPackageService.getByVersionAndType(clusterPhy.getEsVersion(), clusterPhy.getType());
             if (AriusObjUtils.isNull(esPackage)) {
                 return Result.buildParamIllegal(String.format("传入的版本号: %s 有误", clusterPhy.getEsVersion()));
             }
-            hostsParamBase.setImageName(esPackage.getUrl());
-            return Result.buildSucc(hostsParamBase);
+            hostParamBase.setImageName(esPackage.getUrl());
+            return Result.buildSucc(hostParamBase);
         }
 
         // 根绝role_cluster获取对应ecm操作的es集群版本号
@@ -333,20 +333,20 @@ public class EcmHandleServiceImpl implements EcmHandleService {
             return Result.buildParamIllegal(String.format("传入的版本号: %s 有误", clusterRoleInfo.getEsVersion()));
         }
 
-        hostsParamBase.setPidCount(clusterRoleInfo.getPidCount());
-        hostsParamBase.setEsVersion(clusterRoleInfo.getEsVersion());
-        hostsParamBase.setImageName(esPackage.getUrl());
+        hostParamBase.setPidCount(clusterRoleInfo.getPidCount());
+        hostParamBase.setEsVersion(clusterRoleInfo.getEsVersion());
+        hostParamBase.setImageName(esPackage.getUrl());
 
         List<String> hostList = clusterRoleHostService
                 .getHostNamesByRoleAndClusterId(clusterPhy.getId().longValue(), roleName);
-        hostsParamBase.setHostList(hostList);
+        hostParamBase.setHostList(hostList);
         if (!CollectionUtils.isEmpty(hostList)) {
-            hostsParamBase.setNodeNumber(hostList.size());
+            hostParamBase.setNodeNumber(hostList.size());
         } else {
-            hostsParamBase.setNodeNumber(0);
+            hostParamBase.setNodeNumber(0);
         }
 
-        return Result.buildSucc(hostsParamBase);
+        return Result.buildSucc(hostParamBase);
     }
 
     private Result<EcmParamBase> buildElasticCloudParamBase(ClusterPhy clusterPhy, String roleName,
@@ -392,14 +392,14 @@ public class EcmHandleServiceImpl implements EcmHandleService {
             return Result.buildNotExist(UNKNOWN_TYPE);
         }
 
-        if (actionParamBase instanceof HostsParamBase) {
+        if (actionParamBase instanceof HostParamBase) {
             // 增加对应角色的端口号注入
-            HostsParamBase hostsParamBase = (HostsParamBase) actionParamBase;
-            Result<String> result = getPortFromHost(clusterId, hostsParamBase.getRoleName());
+            HostParamBase hostParamBase = (HostParamBase) actionParamBase;
+            Result<String> result = getPortFromHost(clusterId, hostParamBase.getRoleName());
             if(result.failed()) {
                 return Result.buildFrom(result);
             }
-            hostsParamBase.setPort(result.getData());
+            hostParamBase.setPort(result.getData());
         }
 
         actionParamBase.setPhyClusterId(clusterId);

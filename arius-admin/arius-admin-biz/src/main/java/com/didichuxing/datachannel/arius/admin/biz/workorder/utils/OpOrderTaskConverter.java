@@ -17,9 +17,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.EcmParamBa
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.elasticcloud.ElasticCloudCommonActionParam;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.elasticcloud.ElasticCloudCreateActionParam;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.elasticcloud.ElasticCloudScaleActionParam;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.host.HostsCreateActionParam;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.host.HostsParamBase;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.host.HostsScaleActionParam;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.host.HostCreateActionParam;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.host.HostParamBase;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.host.HostScaleActionParam;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.ecm.EcmTask;
 import com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant;
 
@@ -107,8 +107,8 @@ public class OpOrderTaskConverter {
         if (OpTaskTypeEnum.CLUSTER_NEW.equals(opTaskTypeEnum)) {
             ClusterNewHostContent clusterOpNewHostContent = (ClusterNewHostContent) clusterBaseContent;
             for (String roleName : Arrays.asList(MASTER_NODE.getDesc(), CLIENT_NODE.getDesc(), DATA_NODE.getDesc())) {
-                HostsCreateActionParam hostCreateActionParam = ConvertUtil.obj2Obj(clusterOpNewHostContent,
-                        HostsCreateActionParam.class);
+                HostCreateActionParam hostCreateActionParam = ConvertUtil.obj2Obj(clusterOpNewHostContent,
+                        HostCreateActionParam.class);
                 hostCreateActionParam.setPhyClusterId(ClusterConstant.INVALID_VALUE);
                 hostCreateActionParam.setRoleName(roleName);
                 hostCreateActionParam.setImageName("");
@@ -123,25 +123,25 @@ public class OpOrderTaskConverter {
                     continue;
                 }
                 if (MASTER_NODE.getDesc().equals(esClusterRoleHost.getRole())) {
-                    HostsCreateActionParam masterCreateAction = (HostsCreateActionParam) ecmParamBaseList.get(0);
+                    HostCreateActionParam masterCreateAction = (HostCreateActionParam) ecmParamBaseList.get(0);
                     masterCreateAction.getHostList().add(esClusterRoleHost.getHostname());
                     masterCreateAction.setPort(esClusterRoleHost.getPort());
 
                 } else if (CLIENT_NODE.getDesc().equals(esClusterRoleHost.getRole())) {
-                    HostsCreateActionParam clientCreateAction = ((HostsCreateActionParam) ecmParamBaseList.get(1));
+                    HostCreateActionParam clientCreateAction = ((HostCreateActionParam) ecmParamBaseList.get(1));
                     clientCreateAction.getHostList().add(esClusterRoleHost.getHostname());
                     clientCreateAction.setPort(esClusterRoleHost.getPort());
 
                 } else if (DATA_NODE.getDesc().equals(esClusterRoleHost.getRole())) {
-                    HostsCreateActionParam dataCreateAction = ((HostsCreateActionParam) ecmParamBaseList.get(2));
+                    HostCreateActionParam dataCreateAction = ((HostCreateActionParam) ecmParamBaseList.get(2));
                     dataCreateAction.getHostList().add(esClusterRoleHost.getHostname());
                     dataCreateAction.setPort(esClusterRoleHost.getPort());
                 }
             }
 
-            List<String> masterHostList = ((HostsCreateActionParam) ecmParamBaseList.get(0)).getHostList();
+            List<String> masterHostList = ((HostCreateActionParam) ecmParamBaseList.get(0)).getHostList();
             for (EcmParamBase ecmParamBase : ecmParamBaseList) {
-                HostsCreateActionParam hostCreateActionParam = (HostsCreateActionParam) ecmParamBase;
+                HostCreateActionParam hostCreateActionParam = (HostCreateActionParam) ecmParamBase;
                 hostCreateActionParam.setMasterHostList(masterHostList);
                 hostCreateActionParam.setNodeNumber(hostCreateActionParam.getHostList().size());
             }
@@ -200,13 +200,13 @@ public class OpOrderTaskConverter {
         List<EcmParamBase> ecmParamBaseList;
         if (Objects.equals(OpTaskTypeEnum.CLUSTER_NEW.getType(), ecmTask.getOrderType())) {
             ecmParamBaseList = new ArrayList<>(
-                    ConvertUtil.str2ObjArrayByJson(ecmTask.getHandleData(), HostsCreateActionParam.class));
+                    ConvertUtil.str2ObjArrayByJson(ecmTask.getHandleData(), HostCreateActionParam.class));
         } else if (Objects.equals(OpTaskTypeEnum.CLUSTER_EXPAND.getType(), ecmTask.getOrderType())
                 || Objects.equals(OpTaskTypeEnum.CLUSTER_SHRINK.getType(), ecmTask.getOrderType())) {
             ecmParamBaseList = new ArrayList<>(
-                    JSON.parseArray(ecmTask.getHandleData(), HostsScaleActionParam.class));
+                    JSON.parseArray(ecmTask.getHandleData(), HostScaleActionParam.class));
         } else {
-            ecmParamBaseList = new ArrayList<>(JSON.parseArray(ecmTask.getHandleData(), HostsParamBase.class));
+            ecmParamBaseList = new ArrayList<>(JSON.parseArray(ecmTask.getHandleData(), HostParamBase.class));
         }
         return ecmParamBaseList;
     }

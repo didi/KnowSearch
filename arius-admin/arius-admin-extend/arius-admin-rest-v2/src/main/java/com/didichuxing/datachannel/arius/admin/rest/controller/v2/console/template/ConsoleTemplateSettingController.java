@@ -3,10 +3,10 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v2.console.templ
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V2_CONSOLE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.setting.TemplateLogicSettingsManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.setting.TemplateLogicSettingManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateSettingDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhySettings;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhySetting;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class ConsoleTemplateSettingController extends BaseConsoleTemplateController {
 
     @Autowired
-    private TemplateLogicSettingsManager templateLogicSettingsManager;
+    private TemplateLogicSettingManager templateLogicSettingManager;
 
     @PutMapping("")
     @ResponseBody
@@ -51,7 +51,7 @@ public class ConsoleTemplateSettingController extends BaseConsoleTemplateControl
     @ResponseBody
     @ApiOperation(value = "获取索引Setting接口" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "索引ID", required = true) })
-    public Result<IndexTemplatePhySettings> getTemplateSettings(@RequestParam("logicId") Integer logicId) throws AdminOperateException {
-        return templateLogicSettingsManager.getSettings(logicId);
+    public Result<IndexTemplatePhySetting> getTemplateSettings(@RequestParam("logicId") Integer logicId) throws AdminOperateException {
+        return templateLogicSettingManager.getSettings(logicId);
     }
 }
