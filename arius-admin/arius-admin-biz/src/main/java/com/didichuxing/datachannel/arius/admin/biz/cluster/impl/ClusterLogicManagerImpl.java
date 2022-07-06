@@ -1,6 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.biz.cluster.impl;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.REGION_NOT_BOUND_LOGIC_CLUSTER_ID;
 import static com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum.CLUSTER_LOGIC;
 import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum.GREEN;
 import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum.RED;
@@ -353,42 +352,6 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
                 ConvertUtil.list2List(clusterLogicService.listClusterLogics(logicClusterDTO), ClusterLogicVO.class));
     }
 
-    @Override
-    public Result<List<ClusterLogicVO>> listLogicClusterThatCanCreateTemplateByProjectAndType(Integer projectId,
-                                                                                              Integer type) {
-        ESLogicClusterDTO logicClusterDTO = new ESLogicClusterDTO();
-        logicClusterDTO.setProjectId(projectId);
-        logicClusterDTO.setType(type);
-
-        List<ClusterLogic> logicClusterList = clusterLogicService.listClusterLogics(logicClusterDTO);
-        if (CollectionUtils.isEmpty(logicClusterList)) {
-            return Result.buildSucc(Lists.newArrayList());
-        }
-        List<ClusterRegion> regions = clusterRegionService.getClusterRegionsByLogicIds(
-            logicClusterList.stream().map(ClusterLogic::getId).collect(Collectors.toList()));
-        Set<Long> regionNotEmptyLogicClusterIds = Sets.newHashSet();
-        regions.stream()
-            .filter(region -> StringUtils.isNotBlank(region.getLogicClusterIds())
-                              && !REGION_NOT_BOUND_LOGIC_CLUSTER_ID.equals(region.getLogicClusterIds()))
-            .filter(clusterRegion -> {
-                Result<List<ClusterRoleHost>> roleHostResult = clusterRoleHostService
-                    .listByRegionId(Math.toIntExact(clusterRegion.getId()));
-                return roleHostResult.success() && CollectionUtils.isNotEmpty(roleHostResult.getData());
-            }).map(ClusterRegion::getLogicClusterIds).forEach(logicClusterIds -> {
-                for (String str : StringUtils.split(logicClusterIds, ",")) {
-                    try {
-                        regionNotEmptyLogicClusterIds.add(Long.valueOf(str));
-                    } catch (NumberFormatException e) {
-                        //pass
-                    }
-                }
-            });
-
-        return Result.buildSucc(ConvertUtil.list2List(logicClusterList.stream()
-            .filter(logicCluster -> regionNotEmptyLogicClusterIds.contains(logicCluster.getId()))
-            .collect(Collectors.toList()), ClusterLogicVO.class));
-    }
-
     /**
      * 获取逻辑集群所有逻辑模板列表
      * @param request 请求
@@ -684,6 +647,21 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
                 ConvertUtil.list2List(clusterLogicService.getClusterLogicPlugins(clusterId), PluginVO.class));
     }
 
+    @Override
+    public Result<Boolean> checkLogicClusterRegionIsNotEmpty(Long logicClusterId) {
+        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(logicClusterId);
+        if (null == clusterLogic) {
+            return Result.buildWithMsg(false, "逻辑集群不存在！");
+        }
+        ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(logicClusterId);
+        if (null == clusterRegion) {
+            return Result.buildWithMsg(false, "逻辑集群Region不存在！");
+        }
+        Result<List<ClusterRoleHost>> roleHostResult = clusterRoleHostService
+            .listByRegionId(Math.toIntExact(clusterRegion.getId()));
+
+        return Result.buildSucc(roleHostResult.success() && CollectionUtils.isNotEmpty(roleHostResult.getData()));
+    }
 
     /**************************************************** private method ****************************************************/
 
