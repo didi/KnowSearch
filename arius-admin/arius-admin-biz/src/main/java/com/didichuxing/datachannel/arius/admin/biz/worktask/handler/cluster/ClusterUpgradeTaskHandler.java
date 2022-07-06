@@ -14,7 +14,7 @@ import com.didichuxing.datachannel.arius.admin.biz.worktask.content.ClusterUpdat
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.EcmParamBase;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.elasticcloud.ElasticCloudCommonActionParam;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.host.HostsParamBase;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.host.HostParamBase;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.ecm.EcmTaskDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.espackage.ESPackage;
@@ -84,9 +84,9 @@ public class ClusterUpgradeTaskHandler extends AbstractClusterTaskHandler {
             ESPackage esPackage = esPackageService.getByVersionAndType(content.getEsVersion(), ecmParamBase.getType());
 
             if (ecmParamBase.getType().equals(ES_HOST.getCode())) {
-                ((HostsParamBase) ecmParamBase).setEsVersion(content.getEsVersion());
+                ((HostParamBase) ecmParamBase).setEsVersion(content.getEsVersion());
                 if (!AriusObjUtils.isNull(esPackage) && !AriusObjUtils.isBlack(esPackage.getUrl())) {
-                    ((HostsParamBase) ecmParamBase).setImageName(esPackage.getUrl());
+                    ((HostParamBase) ecmParamBase).setImageName(esPackage.getUrl());
                 }
             } else {
                 ((ElasticCloudCommonActionParam) ecmParamBase).setEsVersion(content.getEsVersion());

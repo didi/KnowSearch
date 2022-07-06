@@ -4,7 +4,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.setting.TemplateLogicSettingsManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.setting.TemplateLogicSettingManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
@@ -48,7 +48,7 @@ public class TemplateLogicV3Controller {
     private TemplateLogicManager         templateLogicManager;
 
     @Autowired
-    private TemplateLogicSettingsManager templateLogicSettingsManager;
+    private TemplateLogicSettingManager templateLogicSettingManager;
 
     @GetMapping("/data-type")
     @ResponseBody
@@ -122,7 +122,7 @@ public class TemplateLogicV3Controller {
             return checkAuthResult;
         }
 
-        return templateLogicSettingsManager.customizeSetting(settingDTO, HttpRequestUtil.getOperator(request));
+        return templateLogicSettingManager.customizeSetting(settingDTO, HttpRequestUtil.getOperator(request));
     }
 
     @GetMapping("/setting")
@@ -131,7 +131,7 @@ public class TemplateLogicV3Controller {
     @ApiImplicitParams({@ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "索引ID", required = true)})
     @Deprecated
     public Result<TemplateSettingVO> getTemplateSettings(@RequestParam("logicId") Integer logicId) throws AdminOperateException {
-        return templateLogicSettingsManager.buildTemplateSettingVO(logicId);
+        return templateLogicSettingManager.buildTemplateSettingVO(logicId);
     }
 
     @GetMapping("/templates")

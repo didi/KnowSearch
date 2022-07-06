@@ -24,7 +24,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.Clust
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.metrics.UserMetricsConfigService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
-import com.didichuxing.datachannel.arius.admin.metadata.service.NodeStatisService;
+import com.didichuxing.datachannel.arius.admin.metadata.service.NodeStatsService;
 import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
 import com.didiglobal.logi.security.service.ProjectService;
 import org.junit.jupiter.api.Test;
@@ -62,7 +62,7 @@ class ClusterPhyMetricsManagerTest {
     @Mock
     private UserMetricsConfigService userMetricsConfigService;
     @Mock
-    private NodeStatisService nodeStatisService;
+    private NodeStatsService nodeStatsService;
     @Mock
     private HandleFactory handleFactory;
     @Mock
@@ -1044,7 +1044,7 @@ class ClusterPhyMetricsManagerTest {
         // Configure NodeStatisService.getClusterTaskDetail(...).
         final List<ESClusterTaskDetail> esClusterTaskDetails = Arrays.asList(
                 new ESClusterTaskDetail("taskId", "node", "action", 0L, 0L, "runningTimeString", "description"));
-        when(nodeStatisService.getClusterTaskDetail("clusterPhyName", "node", 0L, 0L)).thenReturn(esClusterTaskDetails);
+        when(nodeStatsService.getClusterTaskDetail("clusterPhyName", "node", 0L, 0L)).thenReturn(esClusterTaskDetails);
 
         // Run the test
         final Result<List<ESClusterTaskDetailVO>> result = clusterPhyMetricsManager.getClusterPhyTaskDetail(
@@ -1058,7 +1058,7 @@ class ClusterPhyMetricsManagerTest {
     void getClusterPhyTaskDetailNodeStatisServiceReturnsNoItemsTest() {
         // Setup
         when(projectService.checkProjectExist(0)).thenReturn(false);
-        when(nodeStatisService.getClusterTaskDetail("clusterPhyName", "node", 0L, 0L))
+        when(nodeStatsService.getClusterTaskDetail("clusterPhyName", "node", 0L, 0L))
                 .thenReturn(Collections.emptyList());
 
         // Run the test

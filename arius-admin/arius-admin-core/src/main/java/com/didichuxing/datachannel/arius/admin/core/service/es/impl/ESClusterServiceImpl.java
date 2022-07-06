@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.NodeAttrInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.setting.ESClusterGetSettingsAllResponse;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ECSegmentsOnIps;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ECSegmentOnIp;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStatsResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterTaskStatsResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterThreadStats;
@@ -262,7 +262,7 @@ public class ESClusterServiceImpl implements ESClusterService {
     @Override
     public Map<String, Integer> synGetSegmentsOfIpByCluster(String clusterName) {
         Map<String, Integer> segmentsOnIpMap = Maps.newHashMap();
-        for (ECSegmentsOnIps ecSegmentsOnIp : esClusterDAO.getSegmentsOfIpByCluster(clusterName)) {
+        for (ECSegmentOnIp ecSegmentsOnIp : esClusterDAO.getSegmentsOfIpByCluster(clusterName)) {
             if (segmentsOnIpMap.containsKey(ecSegmentsOnIp.getIp())) {
                 Integer newSegments = segmentsOnIpMap.get(ecSegmentsOnIp.getIp()) + Integer.parseInt(ecSegmentsOnIp.getSegment());
                 segmentsOnIpMap.put(ecSegmentsOnIp.getIp(), newSegments);

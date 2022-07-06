@@ -3,9 +3,9 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.template;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
 
 import com.alibaba.fastjson.JSONObject;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.setting.TemplateLogicSettingsManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.setting.TemplateLogicSettingManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhySettings;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhySetting;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.rest.controller.v2.console.template.BaseConsoleTemplateController;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
@@ -30,14 +30,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class TemplateSettingController extends BaseConsoleTemplateController {
 
     @Autowired
-    private TemplateLogicSettingsManager templateLogicSettingsManager;
+    private TemplateLogicSettingManager templateLogicSettingManager;
     @PutMapping("/{logicId}")
     @ResponseBody
     @ApiOperation(value = "更新索引Setting接口" )
     public Result<Void> modifySetting(HttpServletRequest request, @PathVariable("logicId") Integer logicId,
                                       @RequestBody String settingDTO) {
-        IndexTemplatePhySettings settings = new IndexTemplatePhySettings(JSONObject.parseObject(settingDTO));
-        return templateLogicSettingsManager.updateSettings(logicId, settings, HttpRequestUtil.getOperator(request),
+        IndexTemplatePhySetting settings = new IndexTemplatePhySetting(JSONObject.parseObject(settingDTO));
+        return templateLogicSettingManager.updateSettings(logicId, settings, HttpRequestUtil.getOperator(request),
                 HttpRequestUtil.getProjectId(request));
     }
     
@@ -45,9 +45,9 @@ public class TemplateSettingController extends BaseConsoleTemplateController {
     @ResponseBody
     @ApiOperation(value = "获取索引Setting接口" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "索引ID", required = true) })
-    public Result<IndexTemplatePhySettings> getTemplateSettings(@RequestParam("logicId") Integer logicId) throws
+    public Result<IndexTemplatePhySetting> getTemplateSettings(@RequestParam("logicId") Integer logicId) throws
                                                                                                           AdminOperateException {
-        return templateLogicSettingsManager.getSettings(logicId);
+        return templateLogicSettingManager.getSettings(logicId);
     }
     
    

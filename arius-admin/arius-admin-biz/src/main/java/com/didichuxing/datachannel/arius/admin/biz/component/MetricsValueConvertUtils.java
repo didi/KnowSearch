@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.component;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.*;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.percentiles.ESPercentilesMetricsVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.percentiles.ESPercentileMetricsVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.MetricsContent;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.MetricsContentCell;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.VariousLineChartMetrics;
@@ -224,15 +224,15 @@ public class MetricsValueConvertUtils {
 		}
 	}
 
-	public static void doOptimizeForPercentiles(List<? extends ESPercentilesMetricsVO> percentilesMetricsVOList) {
+	public static void doOptimizeForPercentiles(List<? extends ESPercentileMetricsVO> percentilesMetricsVOList) {
 		if (CollectionUtils.isEmpty(percentilesMetricsVOList)) return;
 
 		for (int i = 0; i < percentilesMetricsVOList.size(); i++) {
-			ESPercentilesMetricsVO currentMetrics = percentilesMetricsVOList.get(i);
-			ESPercentilesMetricsVO frontMetrics   = null;
-			ESPercentilesMetricsVO backMetrics    = null;
+			ESPercentileMetricsVO currentMetrics = percentilesMetricsVOList.get(i);
+			ESPercentileMetricsVO frontMetrics   = null;
+			ESPercentileMetricsVO backMetrics    = null;
 			// The forward second time point of the current time slice is still zero
-			ESPercentilesMetricsVO backNextMetrics= null;
+			ESPercentileMetricsVO backNextMetrics= null;
 
 			if (i == 0) backMetrics = percentilesMetricsVOList.get(i + 1);
 			else if (i == percentilesMetricsVOList.size() - 1) frontMetrics = percentilesMetricsVOList.get(i - 1);
