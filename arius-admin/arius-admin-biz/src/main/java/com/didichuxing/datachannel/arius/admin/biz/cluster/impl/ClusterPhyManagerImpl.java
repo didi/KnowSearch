@@ -17,7 +17,7 @@ import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.page.ClusterPhyPageSearchHandle;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping.TemplatePhyMappingManager;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.pipeline.TemplatePipelineManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.pipeline.PipelineManager;
 import com.didichuxing.datachannel.arius.admin.common.Triple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord.Builder;
@@ -161,7 +161,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     private TemplatePhyMappingManager                        templatePhyMappingManager;
 
     @Autowired
-    private TemplatePipelineManager                          templatePipelineManager;
+    private PipelineManager templatePipelineManager;
 
     @Autowired
     private IndexTemplateService indexTemplateService;

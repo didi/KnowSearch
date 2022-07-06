@@ -1,39 +1,55 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum.TEMPLATE_SRV;
+
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.BaseTemplateSrvInterface;
+import com.didichuxing.datachannel.arius.admin.biz.page.TemplateSrvPageSearchHandle;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.BaseTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.TemplateQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicContext;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterTemplateSrv;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithClusterAndMasterTemplate;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.srv.TemplateSrv;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.srv.UnavailableTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterTemplateSrvVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv.TemplateWithSrvVO;
+import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.NewTemplateSrvEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
+import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ESVersionUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
+import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-import com.didiglobal.logi.security.service.UserService;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import org.apache.commons.collections4.CollectionUtils;
@@ -43,76 +59,248 @@ import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-@Service("templateSrvService")
+/**
+ * @author chengxiang
+ * @date 2022/5/9
+ */
+@Service("newTemplateSrvService")
 @DependsOn("springTool")
-@Deprecated
 public class TemplateSrvManagerImpl implements TemplateSrvManager {
-    protected static final ILog   LOGGER                      = LogFactory.getLog(TemplateSrvManagerImpl.class);
+    protected static final ILog LOGGER = LogFactory.getLog(TemplateSrvManagerImpl.class);
+    
+      private static final String   NO_PERMISSION_CONTENT       = "只有运维或者研发才有权限操作";
+
+    private static final String   CLUSTER_LOGIC_NOT_EXISTS    = "逻辑集群不存在";
+    private static final String   PHYSICAL_CLUSTER_NOT_EXISTS = "物理集群不存在";
+
+    private final Map<Integer, BaseTemplateSrv> BASE_TEMPLATE_SRV_MAP = Maps.newConcurrentMap();
+
+    /**
+     * 本地cache 加快无效索引服务过滤
+     */
+    private static final Cache<Integer, String/*ESClusterVersionEnum*/> LOGIC_TEMPLATE_ID_2_ASSOCIATED_CLUSTER_VERSION_ENUM_CACHE
+            = CacheBuilder.newBuilder().expireAfterWrite(10, TimeUnit.MINUTES).maximumSize(10000).build();
 
     @Autowired
-    private ClusterPhyService     clusterPhyService;
+    private IndexTemplateService indexTemplateService;
 
+    @Autowired
+    private ClusterPhyService   clusterPhyService;
+
+    @Autowired
+    private HandleFactory       handleFactory;
+    @Autowired
+    private RoleTool             roleTool;
+    @Autowired
+    private OperateRecordService operateRecordService;
     @Autowired
     private ClusterLogicService   clusterLogicService;
-
-    @Autowired
-    private ClusterRegionService  clusterRegionService;
-
-    @Autowired
-    private OperateRecordService  operateRecordService;
-
-    @Autowired
-    private UserService userService;
-    @Autowired
-    private RoleTool roleTool;
-
     @Autowired
     private ClusterContextManager clusterContextManager;
 
-    private static final String   COMMA                       = ",";
-
-    private static final String   PHYSICAL_CLUSTER_NOT_EXISTS = "物理集群不存在";
-
-    private static final String   NO_PERMISSION_CONTENT       = "只有运维或者研发才有权限操作";
-
-    private static final String   CLUSTER_LOGIC_NOT_EXISTS    = "逻辑集群不存在";
-
-    Map<Integer, BaseTemplateSrvInterface> templateHandlerMap = new HashMap<>();
-
     @PostConstruct
     public void init() {
-        LOGGER.info("class=TemplateSrvManagerImpl||method=init||TemplateSrvManagerImpl init start.");
-        Map<String, BaseTemplateSrvInterface> strTemplateHandlerMap = SpringTool.getBeansOfType(BaseTemplateSrvInterface.class);
-
-        strTemplateHandlerMap.forEach((key, val) -> {
+        Map<String, BaseTemplateSrv> strTemplateSrvHandleMap = SpringTool.getBeansOfType(BaseTemplateSrv.class);
+        strTemplateSrvHandleMap.forEach((k, v) -> {
             try {
-                TemplateServiceEnum templateServiceEnum = val.templateService();
-
-                if (null != templateServiceEnum) {
-                    templateHandlerMap.put(templateServiceEnum.getCode(), val);
-
-                    LOGGER.warn("class=TemplateSrvManager||method=init||templateSrvName={}||esVersion={}",
-                        templateServiceEnum.getServiceName(), templateServiceEnum.getEsClusterVersion());
-                }
+                NewTemplateSrvEnum srvEnum = v.templateSrv();
+                BASE_TEMPLATE_SRV_MAP.put(srvEnum.getCode(), v);
             } catch (Exception e) {
-                LOGGER.warn("class=TemplateSrvManager||method=init||templateSrvName={}||esVersion={}", key);
+                LOGGER.error("class=TemplateSrvManagerImpl||method=init||error=", e);
             }
         });
-        LOGGER.info("class=TemplateSrvManagerImpl||method=init||TemplateSrvManagerImpl init finished.");
+        LOGGER.info("class=TemplateSrvManagerImpl||method=init||init finish");
     }
 
     @Override
-    public ClusterTemplateSrv getTemplateServiceBySrvId(int srvId) {
-        return convertFromEnum(TemplateServiceEnum.getById(srvId));
+    public Result<List<TemplateSrv>> getTemplateOpenSrv(Integer logicTemplateId) {
+        try {
+            IndexTemplate template = indexTemplateService.getLogicTemplateById(logicTemplateId);
+            if (null == template) {
+                return Result.buildNotExist("逻辑模板不存在");
+            }
+
+            return Result.buildSucc(TemplateSrv.codeStr2SrvList(template.getOpenSrv()));
+        } catch (Exception e) {
+            LOGGER.error("class=TemplateSrvManagerImpl||method=getTemplateOpenSrv||logicTemplateId={}", logicTemplateId, e);
+            return Result.buildFail( "获取模板开启服务失败");
+        }
     }
 
     @Override
-    public List<String> getPhyClusterByOpenTemplateSrv(int srvId) {
-        List<ClusterPhy> clusterPhies = clusterPhyService.listAllClusters();
-        return getPhyClusterByOpenTemplateSrv(clusterPhies, srvId);
+    public boolean isTemplateSrvOpen(Integer logicTemplateId, Integer srvCode) {
+        Result<List<TemplateSrv>> openSrvResult = getTemplateOpenSrv(logicTemplateId);
+        if (openSrvResult.failed()) {
+            return false;
+        }
+
+        List<TemplateSrv> openSrv = openSrvResult.getData();
+        for (TemplateSrv srv : openSrv) {
+            if (srvCode.equals(srv.getSrvCode())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
+    public List<UnavailableTemplateSrv> getUnavailableSrv(Integer logicTemplateId) {
+        List<UnavailableTemplateSrv> unavailableSrvList = Lists.newCopyOnWriteArrayList();
+        List<NewTemplateSrvEnum> allSrvList = NewTemplateSrvEnum.getAll();
+        for (NewTemplateSrvEnum srvEnum : allSrvList) {
+            String esVersionFromESCluster = getLogicTemplateAssociatedEsVersionByLogicTemplateId(logicTemplateId);
+            if (ESVersionUtil.isHigher(srvEnum.getEsClusterVersion().getVersion(), esVersionFromESCluster)) {
+                unavailableSrvList.add(new UnavailableTemplateSrv(
+                        srvEnum.getCode(),
+                        srvEnum.getServiceName(),
+                        srvEnum.getEsClusterVersion().getVersion(),
+                        String.format("不支持该模板服务, 模板[%s]归属集群目前版本[%s], 模板服务需要的最低版本为[%s]",
+                                logicTemplateId, esVersionFromESCluster, srvEnum.getEsClusterVersion().getVersion())));
+            }
+        }
+        return unavailableSrvList;
+    }
+
+    @Override
+    public PaginationResult<TemplateWithSrvVO> pageGetTemplateWithSrv(TemplateQueryDTO condition) throws NotFindSubclassException {
+        BaseHandle baseHandle = handleFactory.getByHandlerNamePer(TEMPLATE_SRV.getPageSearchType());
+        if (baseHandle instanceof TemplateSrvPageSearchHandle) {
+            TemplateSrvPageSearchHandle handler = (TemplateSrvPageSearchHandle) baseHandle;
+            return handler.doPage(condition,condition.getProjectId() );
+        }
+        return PaginationResult.buildFail("没有找到对应的处理器");
+    }
+
+    @Override
+    public Result<Void> openSrv(Integer srvCode, List<Integer> templateIdList, String operator, Integer projectId) {
+        BaseTemplateSrv srvHandle = BASE_TEMPLATE_SRV_MAP.get(srvCode);
+        if (null == srvHandle) { return Result.buildParamIllegal("未找到对应的服务");}
+
+        try {
+            return srvHandle.openSrv(templateIdList,operator,projectId);
+        } catch (AdminOperateException e) {
+            LOGGER.error("class=TemplateSrvManagerImpl||method=openSrv||templateIdList={}||srvCode={}" +
+                    "||errMsg=failed to open template srv", ListUtils.intList2String(templateIdList), srvCode);
+            return Result.buildFail(e.getMessage());
+        }
+    }
+
+    @Override
+    public Result<Void> closeSrv(Integer srvCode, List<Integer> templateIdList, String operator, Integer projectId) {
+        BaseTemplateSrv srvHandle = BASE_TEMPLATE_SRV_MAP.get(srvCode);
+        if (null == srvHandle) { return Result.buildParamIllegal("未找到对应服务");}
+
+        try {
+            return srvHandle.closeSrv(templateIdList,operator,projectId);
+        } catch (AdminOperateException e) {
+            LOGGER.error("class=TemplateSrvManagerImpl||method=closeSrv||templateIdList={}||srvCode={}" +
+                    "||errMsg=failed to open template srv", ListUtils.intList2String(templateIdList), srvCode);
+            return Result.buildFail(e.getMessage());
+        }
+    }
+
+
+    private String getLogicTemplateAssociatedEsVersionByLogicTemplateId(Integer logicTemplateId) {
+        try {
+            return LOGIC_TEMPLATE_ID_2_ASSOCIATED_CLUSTER_VERSION_ENUM_CACHE.get(logicTemplateId,
+                    () -> {
+                        IndexTemplateLogicWithClusterAndMasterTemplate template = indexTemplateService.getLogicTemplateWithClusterAndMasterTemplate(logicTemplateId);
+                        if (null == template || null == template.getMasterTemplate()) {
+                            LOGGER.warn("class=TemplateSrvPageSearchHandle||method=getLogicTemplateAssociatedEsVersionByLogicTemplateId" +
+                                            "||templateId={}||errMsg=masterPhyTemplate is null",
+                                    logicTemplateId);
+                            return "";
+                        }
+
+                        String masterCluster = template.getMasterTemplate().getCluster();
+                        ClusterPhy clusterPhy = clusterPhyService.getClusterByName(masterCluster);
+                        if (null == clusterPhy) {
+                            LOGGER.warn("class=TemplateSrvPageSearchHandle||method=getLogicTemplateAssociatedEsVersionByLogicTemplateId" +
+                                            "||templateId={}||errMsg=clusterPhy of template is null",
+                                    logicTemplateId);
+                            return "";
+                        }
+
+                        return clusterPhy.getEsVersion();
+                    });
+        } catch (ExecutionException e) {
+            LOGGER.error("class=TemplateSrvPageSearchHandle||method=getLogicTemplateAssociatedEsVersionByLogicTemplateId" +
+                            "||templateId={}||errMsg={}",
+                    logicTemplateId, e.getMessage(), e);
+            return "";
+        }
+    }
+    
+    @Override
+    public List<Integer> getPhyClusterTemplateSrvIds(String phyCluster) {
+        Result<List<ClusterTemplateSrv>> ret =clusterPhyService. getPhyClusterTemplateSrv(phyCluster);
+        if (ret.success()) {
+            return ret.getData().stream().map(ClusterTemplateSrv::getServiceId).collect(Collectors.toList());
+        }
+        return Lists.newArrayList();
+    }
+    
+    /**
+     * @param phyClusterName
+     * @param clusterTemplateSrvIdList
+     * @param operator
+     * @return
+     */
+    @Override
+    public Result<Boolean> replaceTemplateServes(String phyClusterName, List<Integer> clusterTemplateSrvIdList, String operator) {
+         if (!isRDOrOP(operator)) {
+            return Result.buildNotExist(NO_PERMISSION_CONTENT);
+        }
+        ClusterPhy clusterPhy = clusterPhyService.getClusterByName(phyClusterName);
+        if (null == clusterPhy) {
+            return Result.buildNotExist(PHYSICAL_CLUSTER_NOT_EXISTS);
+        }
+
+        clusterPhy.setTemplateSrvs(ListUtils.intList2String(clusterTemplateSrvIdList));
+        return clusterPhyService.editCluster(ConvertUtil.obj2Obj(clusterPhy, ClusterPhyDTO.class), operator);
+    }
+    
+    /**
+     * @param clusterPhy 物理集群名称
+     * @param operator   操作人
+     * @return
+     */
+      @Override
+    public Result<Boolean> delAllTemplateSrvByClusterPhy(String clusterPhy, String operator) {
+        if (!isRDOrOP(operator)) {
+            return Result.buildNotExist(NO_PERMISSION_CONTENT);
+        }
+
+        ClusterPhy cluster = clusterPhyService.getClusterByName(clusterPhy);
+        if (null == cluster) {
+            return Result.buildNotExist(PHYSICAL_CLUSTER_NOT_EXISTS);
+        }
+        cluster.setTemplateSrvs("");
+        Result<Boolean> result = clusterPhyService.editCluster(ConvertUtil.obj2Obj(cluster, ClusterPhyDTO.class),
+                operator);
+        if (result.success()) {
+            operateRecordService.save(new OperateRecord.Builder()
+                            .bizId(clusterPhy)
+                            .userOperation(operator)
+                            .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                            .operationTypeEnum(OperateTypeEnum.INDEX_MANAGEMENT_DELETE)
+                            .content(clusterPhy + "物理集群绑定逻辑集群，删除索引服务：")
+                    .build());
+        }
+
+        return result;
+    }
+    
+    private boolean isRDOrOP(String operator) {
+        return roleTool.isAdmin(operator);
+    }
+    
+    /**
+     * @param clusterPhies
+     * @param srvId
+     * @return
+     */
+      @Override
     public List<String> getPhyClusterByOpenTemplateSrv(List<ClusterPhy> clusterPhies, int srvId) {
         List<String> clusterPhyNames = new ArrayList<>();
         if (CollectionUtils.isEmpty(clusterPhies)) {
@@ -125,36 +313,10 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
         });
         return clusterPhyNames;
     }
-
-    @Override
-    public boolean isPhyClusterOpenTemplateSrv(String phyCluster, int srvId) {
+     public boolean isPhyClusterOpenTemplateSrv(ClusterPhy phyCluster, int srvId) {
         try {
-            Result<List<ClusterTemplateSrv>> result = getPhyClusterTemplateSrv(phyCluster);
-            if (null == result || result.failed()) {
-                return false;
-            }
-
-            List<ClusterTemplateSrv> clusterTemplateSrvs = result.getData();
-            for (ClusterTemplateSrv templateSrv : clusterTemplateSrvs) {
-                if (srvId == templateSrv.getServiceId()) {
-                    return true;
-                }
-            }
-
-            return false;
-        } catch (Exception e) {
-            LOGGER.warn("class=TemplateSrvManager||method=isPhyClusterOpenTemplateSrv||phyCluster={}||srvId={}",
-                phyCluster, srvId, e);
-
-            return true;
-        }
-    }
-
-    @Override
-    public boolean isPhyClusterOpenTemplateSrv(ClusterPhy phyCluster, int srvId) {
-        try {
-            Result<List<ClusterTemplateSrv>> result = getPhyClusterTemplateSrv(phyCluster);
-            if (null == result || result.failed()) {
+            Result<List<ClusterTemplateSrv>> result = clusterPhyService. getPhyClusterTemplateSrv(phyCluster);
+            if (result.failed()) {
                 return false;
             }
 
@@ -173,89 +335,8 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
             return true;
         }
     }
-
-    @Override
-    public Result<List<ClusterTemplateSrv>> getPhyClusterSelectableTemplateSrv(String phyCluster) {
-        ClusterPhy clusterPhy = clusterPhyService.getClusterByName(phyCluster);
-        if (null == clusterPhy) {
-            return Result.buildNotExist(PHYSICAL_CLUSTER_NOT_EXISTS);
-        }
-
-        List<ClusterTemplateSrv> templateServices = new ArrayList<>();
-        String clusterVersion = clusterPhy.getEsVersion();
-
-        for (TemplateServiceEnum templateServiceEnum : TemplateServiceEnum.allTemplateSrv()) {
-            String templateSrvVersion = templateServiceEnum.getEsClusterVersion().getVersion();
-
-            if (!templateServiceEnum.isDefaultSrv()) {
-                continue;
-            }
-
-            if (ESVersionUtil.isHigher(clusterVersion, templateSrvVersion)) {
-                templateServices.add(convertFromEnum(templateServiceEnum));
-            }
-        }
-
-        return Result.buildSucc(templateServices);
-    }
-
-    @Override
-    public Result<List<ESClusterTemplateSrvVO>> getClusterLogicSelectableTemplateSrv(Long clusterLogicId) {
-        if (Boolean.FALSE.equals(clusterLogicService.isClusterLogicExists(clusterLogicId))) {
-            return Result.buildFail(CLUSTER_LOGIC_NOT_EXISTS);
-        }
-
-        ClusterLogicContext clusterLogicContext = clusterContextManager.getClusterLogicContext(clusterLogicId);
-        if (null == clusterLogicContext) {
-            LOGGER.error(
-                "class=TemplateSrvManagerImpl||method=getClusterLogicSelectableTemplateSrv||clusterLogicId={}||errMsg=failed to getClusterLogicContextFromCache",
-                clusterLogicId);
-            return Result.buildFail();
-        }
-
-        List<String> associatedClusterPhyNames = clusterLogicContext.getAssociatedClusterPhyNames();
-        if (CollectionUtils.isNotEmpty(associatedClusterPhyNames)) {
-            Result<List<ClusterTemplateSrv>> ret = getPhyClusterSelectableTemplateSrv(
-                    associatedClusterPhyNames.get(0));
-            if (ret.failed()) {
-                return Result.buildFrom(ret);
-            }
-
-            return Result.buildSucc(ConvertUtil.list2List(ret.getData(), ESClusterTemplateSrvVO.class));
-        }
-
-        return Result.buildSucc();
-    }
-
-    @Override
-    public Result<List<ClusterTemplateSrv>> getPhyClusterTemplateSrv(String phyCluster) {
-        ClusterPhy clusterPhy = clusterPhyService.getClusterByName(phyCluster);
-        return getPhyClusterTemplateSrv(clusterPhy);
-    }
-
-    @Override
-    public Result<List<ClusterTemplateSrv>> getPhyClusterTemplateSrv(ClusterPhy clusterPhy) {
-        if (null == clusterPhy) {
-            return Result.buildNotExist(PHYSICAL_CLUSTER_NOT_EXISTS);
-        }
-
-        String templateSrvs = clusterPhy.getTemplateSrvs();
-        if (StringUtils.isBlank(templateSrvs)) {
-            return Result.buildSucc(new ArrayList<>(), "该物理集群无索引服务");
-        }
-
-        List<ClusterTemplateSrv> templateServices = new ArrayList<>();
-        for (String strId : StringUtils.split(templateSrvs, COMMA)) {
-            ClusterTemplateSrv templateSrv = getTemplateServiceBySrvId(Integer.parseInt(strId));
-            if (null != templateSrv) {
-                templateServices.add(templateSrv);
-            }
-        }
-
-        return Result.buildSucc(templateServices);
-    }
-
-    @Override
+    
+       @Override
     public Result<List<ESClusterTemplateSrvVO>> getClusterLogicTemplateSrv(Long clusterLogicId) {
         if (Boolean.FALSE.equals(clusterLogicService.isClusterLogicExists(clusterLogicId))) {
             return Result.buildFail(CLUSTER_LOGIC_NOT_EXISTS);
@@ -271,7 +352,7 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
 
         List<String> associatedClusterPhyNames = clusterLogicContext.getAssociatedClusterPhyNames();
         if (CollectionUtils.isNotEmpty(associatedClusterPhyNames)) {
-            Result<List<ClusterTemplateSrv>> ret = getPhyClusterTemplateSrv(associatedClusterPhyNames.get(0));
+            Result<List<ClusterTemplateSrv>> ret = clusterPhyService.getPhyClusterTemplateSrv(associatedClusterPhyNames.get(0));
             if (ret.success()) {
                 return Result.buildSucc(ConvertUtil.list2List(ret.getData(), ESClusterTemplateSrvVO.class));
             }
@@ -279,38 +360,106 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
 
         return Result.buildSucc();
     }
-
-    @Override
-    public List<Integer> getPhyClusterTemplateSrvIds(String phyCluster) {
-        Result<List<ClusterTemplateSrv>> ret = getPhyClusterTemplateSrv(phyCluster);
-        if (ret.success()) {
-            return ret.getData().stream().map(ClusterTemplateSrv::getServiceId).collect(Collectors.toList());
-        }
-        return Lists.newArrayList();
-    }
-
-    @Override
-    public Result<List<ClusterTemplateSrv>> getLogicClusterTemplateSrv(Long logicClusterId) {
-        List<String> phyClusterNames = clusterRegionService.listPhysicClusterNames(logicClusterId);
-        if (CollectionUtils.isEmpty(phyClusterNames)) {
-            return Result.buildNotExist("逻辑集群对应的物理集群不存在");
+    
+        @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Result<Boolean> addTemplateSrvForClusterLogic(Long clusterLogicId, String templateSrvId, String operator,
+                                                         Integer projectId) {
+        if (!isRDOrOP(operator)) {
+            return Result.buildNotExist(NO_PERMISSION_CONTENT);
         }
 
-        Set<ClusterTemplateSrv> templateServiceTotals = new HashSet<>();
+        if (Boolean.FALSE.equals(clusterLogicService.isClusterLogicExists(clusterLogicId))) {
+            return Result.buildFail(CLUSTER_LOGIC_NOT_EXISTS);
+        }
 
-        for (String phyClusterName : phyClusterNames) {
-            Result<List<ClusterTemplateSrv>> templateSrvsRet = getPhyClusterTemplateSrv(phyClusterName);
-            if (null != templateSrvsRet && templateSrvsRet.success()) {
-                templateServiceTotals.addAll(templateSrvsRet.getData());
+        ClusterLogicContext clusterLogicContext = clusterContextManager.getClusterLogicContext(clusterLogicId);
+        if (null == clusterLogicContext) {
+            LOGGER.error(
+                "class=TemplateSrvManagerImpl||method=addTemplateSrvForClusterLogic||clusterLogicId={}||errMsg=failed to getClusterLogicContextFromCache",
+                clusterLogicId);
+            return Result.buildFail();
+        }
+
+        List<String> associatedClusterPhyNames = clusterLogicContext.getAssociatedClusterPhyNames();
+        if (CollectionUtils.isEmpty(associatedClusterPhyNames)) {
+            return Result.buildSucc();
+        }
+        //校验项目操作的正确性
+        final Integer clusterLogicBelongsToProjectId = clusterLogicService.getProjectIdById(clusterLogicId);
+        final Result<Void> result = ProjectUtils.checkProjectCorrectly(i -> i, clusterLogicBelongsToProjectId,
+                projectId);
+        if (result.failed()) {
+            return Result.buildFail(result.getMessage());
+        }
+
+
+        for (String associatedClusterPhyName : associatedClusterPhyNames) {
+            try {
+                Result<Boolean> ret = checkTemplateSrv(associatedClusterPhyName, templateSrvId, operator);
+                if (ret.failed()) {
+                    throw new ESOperateException("逻辑集群添加索引服务失败");
+                }
+            } catch (ESOperateException e) {
+                LOGGER.error(
+                    "class=TemplateSrvManagerImpl||method=addTemplateSrvForClusterLogic||clusterLogicId={}||errMsg={}",
+                    clusterLogicId, e.getMessage());
             }
         }
 
-        return Result.buildSucc(new ArrayList<>(templateServiceTotals));
+        return Result.buildSucc();
     }
+     @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Result<Boolean> delTemplateSrvForClusterLogic(Long clusterLogicId, String templateSrvId, String operator,
+                                                         Integer projectId) {
+        if (!isRDOrOP(operator)) {
+            return Result.buildNotExist(NO_PERMISSION_CONTENT);
+        }
 
-    @Override
-    public Result<Boolean> checkTemplateSrv(String phyCluster, String templateSrvId, String operator) {
-        ClusterTemplateSrv clusterTemplateSrv = getTemplateServiceBySrvId(Integer.parseInt(templateSrvId));
+        if (Boolean.FALSE.equals(clusterLogicService.isClusterLogicExists(clusterLogicId))) {
+            return Result.buildFail(CLUSTER_LOGIC_NOT_EXISTS);
+        }
+
+        ClusterLogicContext clusterLogicContext = clusterContextManager.getClusterLogicContext(clusterLogicId);
+        if (null == clusterLogicContext) {
+            LOGGER.error(
+                    "class=TemplateSrvManagerImpl||method=addTemplateSrvForClusterLogic||clusterLogicId={}||errMsg=failed to getClusterLogicContextFromCache",
+                    clusterLogicId);
+            return Result.buildFail();
+        }
+
+        List<String> associatedClusterPhyNames = clusterLogicContext.getAssociatedClusterPhyNames();
+        if (CollectionUtils.isEmpty(associatedClusterPhyNames)) {
+            return Result.buildSucc();
+        }
+        //校验项目操作的正确性
+        final Integer clusterLogicBelongsToProjectId = clusterLogicService.getProjectIdById(clusterLogicId);
+        final Result<Void> result = ProjectUtils.checkProjectCorrectly(i -> i, clusterLogicBelongsToProjectId,
+                projectId);
+        if (result.failed()) {
+            return Result.buildFail(result.getMessage());
+        }
+
+
+        for (String associatedClusterPhyName : associatedClusterPhyNames) {
+            try {
+                Result<Boolean> ret = delTemplateSrv(associatedClusterPhyName, templateSrvId, operator);
+                if (ret.failed()) {
+                    throw new ESOperateException("逻辑集群删除索引服务失败");
+                }
+            } catch (ESOperateException e) {
+                LOGGER.error(
+                    "class=TemplateSrvManagerImpl||method=delTemplateSrvForClusterLogic||clusterLogicId={}||errMsg={}",
+                    clusterLogicId, e.getMessage());
+            }
+        }
+
+        return Result.buildSucc();
+
+    }
+       public Result<Boolean> checkTemplateSrv(String phyCluster, String templateSrvId, String operator) {
+        ClusterTemplateSrv clusterTemplateSrv = TemplateServiceEnum.convertFromEnum(TemplateServiceEnum.getById(Integer.parseInt(templateSrvId)));
         if (null == clusterTemplateSrv) {
             return Result.buildNotExist("对应的索引服务不存在");
         }
@@ -348,77 +497,26 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
                               .operationTypeEnum(OperateTypeEnum.INDEXING_SERVICE_RUN)
                               .userOperation(operator)
                       .build());
-            
+
         }
         return result;
     }
-
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public Result<Boolean> addTemplateSrvForClusterLogic(Long clusterLogicId, String templateSrvId, String operator,
-                                                         Integer projectId) {
-        if (!isRDOrOP(operator)) {
-            return Result.buildNotExist(NO_PERMISSION_CONTENT);
+     /**
+     * 根据物理集群名称和模板服务的映射id校验是否能够开启指定的模板服务
+     * @param phyCluster 物理集群名称
+     * @param templateSrvId 模板服务id
+     * @return 校验结果
+     */
+    private Result<Boolean> validCanOpenTemplateSrvId(String phyCluster, String templateSrvId) {
+        TemplateServiceEnum templateServiceEnum = TemplateServiceEnum.getById(Integer.parseInt(templateSrvId));
+        if (templateServiceEnum == null ||
+            AriusObjUtils.isNull(BASE_TEMPLATE_SRV_MAP.get(Integer.parseInt(templateSrvId)))) {
+            return Result.buildFail("指定模板服务id有误");
         }
 
-        if (Boolean.FALSE.equals(clusterLogicService.isClusterLogicExists(clusterLogicId))) {
-            return Result.buildFail(CLUSTER_LOGIC_NOT_EXISTS);
-        }
-
-        ClusterLogicContext clusterLogicContext = clusterContextManager.getClusterLogicContext(clusterLogicId);
-        if (null == clusterLogicContext) {
-            LOGGER.error(
-                "class=TemplateSrvManagerImpl||method=addTemplateSrvForClusterLogic||clusterLogicId={}||errMsg=failed to getClusterLogicContextFromCache",
-                clusterLogicId);
-            return Result.buildFail();
-        }
-
-        List<String> associatedClusterPhyNames = clusterLogicContext.getAssociatedClusterPhyNames();
-        if (CollectionUtils.isEmpty(associatedClusterPhyNames)) {
-            return Result.buildSucc();
-        }
-        //校验项目操作的正确性
-        final Integer clusterLogicBelongsToProjectId = clusterLogicService.getProjectIdById(clusterLogicId);
-        final Result<Void> result = ProjectUtils.checkProjectCorrectly(i -> i, clusterLogicBelongsToProjectId,
-                projectId);
-        if (result.failed()) {
-            return Result.buildFail(result.getMessage());
-        }
-    
-
-        for (String associatedClusterPhyName : associatedClusterPhyNames) {
-            try {
-                Result<Boolean> ret = checkTemplateSrv(associatedClusterPhyName, templateSrvId, operator);
-                if (ret.failed()) {
-                    throw new ESOperateException("逻辑集群添加索引服务失败");
-                }
-            } catch (ESOperateException e) {
-                LOGGER.error(
-                    "class=TemplateSrvManagerImpl||method=addTemplateSrvForClusterLogic||clusterLogicId={}||errMsg={}",
-                    clusterLogicId, e.getMessage());
-            }
-        }
-
-        return Result.buildSucc();
+        return BASE_TEMPLATE_SRV_MAP.get(Integer.parseInt(templateSrvId)).checkOpenTemplateSrvByCluster(phyCluster);
     }
-
-    @Override
-    public Result<Boolean> replaceTemplateServes(String phyCluster, List<Integer> templateSrvIds, String operator) {
-        if (!isRDOrOP(operator)) {
-            return Result.buildNotExist(NO_PERMISSION_CONTENT);
-        }
-        ClusterPhy clusterPhy = clusterPhyService.getClusterByName(phyCluster);
-        if (null == clusterPhy) {
-            return Result.buildNotExist(PHYSICAL_CLUSTER_NOT_EXISTS);
-        }
-
-        clusterPhy.setTemplateSrvs(ListUtils.intList2String(templateSrvIds));
-        return clusterPhyService.editCluster(ConvertUtil.obj2Obj(clusterPhy, ClusterPhyDTO.class), operator);
-
-    }
-
-    @Override
-    public Result<Boolean> delTemplateSrv(String phyCluster, String templateSrvId, String operator) {
+       public Result<Boolean> delTemplateSrv(String phyCluster, String templateSrvId, String operator) {
         ClusterPhy clusterPhy = clusterPhyService.getClusterByName(phyCluster);
         if (null == clusterPhy) {
             return Result.buildNotExist(PHYSICAL_CLUSTER_NOT_EXISTS);
@@ -450,15 +548,9 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
         }
         return result;
     }
-
+    
     @Override
-    @Transactional(rollbackFor = Exception.class)
-    public Result<Boolean> delTemplateSrvForClusterLogic(Long clusterLogicId, String templateSrvId, String operator,
-                                                         Integer projectId) {
-        if (!isRDOrOP(operator)) {
-            return Result.buildNotExist(NO_PERMISSION_CONTENT);
-        }
-
+    public Result<List<ESClusterTemplateSrvVO>> getClusterLogicSelectableTemplateSrv(Long clusterLogicId) {
         if (Boolean.FALSE.equals(clusterLogicService.isClusterLogicExists(clusterLogicId))) {
             return Result.buildFail(CLUSTER_LOGIC_NOT_EXISTS);
         }
@@ -466,94 +558,45 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
         ClusterLogicContext clusterLogicContext = clusterContextManager.getClusterLogicContext(clusterLogicId);
         if (null == clusterLogicContext) {
             LOGGER.error(
-                    "class=TemplateSrvManagerImpl||method=addTemplateSrvForClusterLogic||clusterLogicId={}||errMsg=failed to getClusterLogicContextFromCache",
-                    clusterLogicId);
+                "class=TemplateSrvManagerImpl||method=getClusterLogicSelectableTemplateSrv||clusterLogicId={}||errMsg=failed to getClusterLogicContextFromCache",
+                clusterLogicId);
             return Result.buildFail();
         }
 
         List<String> associatedClusterPhyNames = clusterLogicContext.getAssociatedClusterPhyNames();
-        if (CollectionUtils.isEmpty(associatedClusterPhyNames)) {
-            return Result.buildSucc();
-        }
-        //校验项目操作的正确性
-        final Integer clusterLogicBelongsToProjectId = clusterLogicService.getProjectIdById(clusterLogicId);
-        final Result<Void> result = ProjectUtils.checkProjectCorrectly(i -> i, clusterLogicBelongsToProjectId,
-                projectId);
-        if (result.failed()) {
-            return Result.buildFail(result.getMessage());
-        }
-    
-
-        for (String associatedClusterPhyName : associatedClusterPhyNames) {
-            try {
-                Result<Boolean> ret = delTemplateSrv(associatedClusterPhyName, templateSrvId, operator);
-                if (ret.failed()) {
-                    throw new ESOperateException("逻辑集群删除索引服务失败");
-                }
-            } catch (ESOperateException e) {
-                LOGGER.error(
-                    "class=TemplateSrvManagerImpl||method=delTemplateSrvForClusterLogic||clusterLogicId={}||errMsg={}",
-                    clusterLogicId, e.getMessage());
+        if (CollectionUtils.isNotEmpty(associatedClusterPhyNames)) {
+            Result<List<ClusterTemplateSrv>> ret = getPhyClusterSelectableTemplateSrv(
+                    associatedClusterPhyNames.get(0));
+            if (ret.failed()) {
+                return Result.buildFrom(ret);
             }
+
+            return Result.buildSucc(ConvertUtil.list2List(ret.getData(), ESClusterTemplateSrvVO.class));
         }
 
         return Result.buildSucc();
-
     }
-
-    @Override
-    public Result<Boolean> delAllTemplateSrvByClusterPhy(String clusterPhy, String operator) {
-        if (!isRDOrOP(operator)) {
-            return Result.buildNotExist(NO_PERMISSION_CONTENT);
-        }
-
-        ClusterPhy cluster = clusterPhyService.getClusterByName(clusterPhy);
-        if (null == cluster) {
+    public Result<List<ClusterTemplateSrv>> getPhyClusterSelectableTemplateSrv(String phyCluster) {
+        ClusterPhy clusterPhy = clusterPhyService.getClusterByName(phyCluster);
+        if (null == clusterPhy) {
             return Result.buildNotExist(PHYSICAL_CLUSTER_NOT_EXISTS);
         }
-        cluster.setTemplateSrvs("");
-        Result<Boolean> result = clusterPhyService.editCluster(ConvertUtil.obj2Obj(cluster, ClusterPhyDTO.class),
-                operator);
-        if (result.success()) {
-            operateRecordService.save(new OperateRecord.Builder()
-                            .bizId(clusterPhy)
-                            .userOperation(operator)
-                            .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                            .operationTypeEnum(OperateTypeEnum.INDEX_MANAGEMENT_DELETE)
-                            .content(clusterPhy + "物理集群绑定逻辑集群，删除索引服务：")
-                    .build());
+
+        List<ClusterTemplateSrv> templateServices = new ArrayList<>();
+        String clusterVersion = clusterPhy.getEsVersion();
+
+        for (TemplateServiceEnum templateServiceEnum : TemplateServiceEnum.allTemplateSrv()) {
+            String templateSrvVersion = templateServiceEnum.getEsClusterVersion().getVersion();
+
+            if (!templateServiceEnum.isDefaultSrv()) {
+                continue;
+            }
+
+            if (ESVersionUtil.isHigher(clusterVersion, templateSrvVersion)) {
+                templateServices.add(TemplateServiceEnum.convertFromEnum(templateServiceEnum));
+            }
         }
 
-        return result;
-    }
-
-    /**************************************** private method ****************************************************/
-    private ClusterTemplateSrv convertFromEnum(TemplateServiceEnum serviceEnum) {
-        ClusterTemplateSrv clusterTemplateSrv = new ClusterTemplateSrv();
-        clusterTemplateSrv.setServiceId(serviceEnum.getCode());
-        clusterTemplateSrv.setServiceName(serviceEnum.getServiceName());
-        clusterTemplateSrv.setEsVersion(serviceEnum.getEsClusterVersion().getVersion());
-
-        return clusterTemplateSrv;
-    }
-
-    private boolean isRDOrOP(String operator) {
-        return roleTool.isAdmin(operator);
-    }
-
-    /**
-     * 根据物理集群名称和模板服务的映射id校验是否能够开启指定的模板服务
-     * @param phyCluster 物理集群名称
-     * @param templateSrvId 模板服务id
-     * @return 校验结果
-     */
-    private Result<Boolean> validCanOpenTemplateSrvId(String phyCluster, String templateSrvId) {
-        TemplateServiceEnum templateServiceEnum = TemplateServiceEnum.getById(Integer.parseInt(templateSrvId));
-        if (templateServiceEnum == null ||
-                AriusObjUtils.isNull(templateHandlerMap.get(Integer.parseInt(templateSrvId)))) {
-            return Result.buildFail("指定模板服务id有误");
-        }
-
-        return templateHandlerMap.get(Integer.parseInt(templateSrvId)).checkOpenTemplateSrvByCluster(phyCluster);
+        return Result.buildSucc(templateServices);
     }
 }

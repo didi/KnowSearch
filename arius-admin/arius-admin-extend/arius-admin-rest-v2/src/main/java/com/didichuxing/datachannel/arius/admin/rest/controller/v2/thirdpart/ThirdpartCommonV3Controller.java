@@ -34,7 +34,8 @@ public class ThirdpartCommonV3Controller {
     @ResponseBody
     @ApiOperation(value = "获取物理集群列表接口【三方接口】",tags = "【三方接口】" )
     public Result<List<ThirdPartClusterVO>> listDataCluster() {
-        return commonManager.listDataCluster();
+         return Result.buildFail("接口已经下线：迁移到v3");
+        //return commonManager.listDataCluster();
 
     }
 
@@ -43,7 +44,8 @@ public class ThirdpartCommonV3Controller {
     @ApiOperation(value = "获取集群接口【三方接口】",tags = "【三方接口】" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "String", name = "cluster", value = "集群名称", required = true) })
     public Result<ThirdPartClusterVO> getDataCluster(@RequestParam("cluster") String cluster) {
-        return commonManager.getDataCluster(cluster);
+         return Result.buildFail("接口已经下线：迁移到v3");
+        //return commonManager.getDataCluster(cluster);
 
     }
     
@@ -51,6 +53,7 @@ public class ThirdpartCommonV3Controller {
     @ResponseBody
     @ApiOperation(value = "获取配置列表接口", notes = "")
     public Result<List<ThirdpartConfigVO>> queryConfig(@RequestBody AriusConfigInfoDTO param) {
-        return commonManager.queryConfig(param);
+         return Result.buildFail("接口已经下线：迁移到v3");
+        //return commonManager.queryConfig(param);
     }
 }
