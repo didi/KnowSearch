@@ -45,7 +45,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ESVersionUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.impl.IndexTemplateServiceImpl;
-import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateSattisService;
+import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateStatsService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateConfigDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateTypeDAO;
 import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
@@ -90,7 +90,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
     private TemplatePhyMappingManager       templatePhyMappingManager;
 
     @Autowired
-    private TemplateSattisService           templateSattisService;
+    private TemplateStatsService templateStatsService;
 
     @Autowired
     private TemplatePreCreateManager        templatePreCreateManager;
@@ -290,7 +290,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
 
         List<MappingOptimize> mappingOptimizes = new ArrayList<>();
         for (IndexTemplatePhy master : templatePhysicals) {
-            Result<MappingOptimize> getMappingOptimizeResult = templateSattisService
+            Result<MappingOptimize> getMappingOptimizeResult = templateStatsService
                     .getMappingOptimize(master.getCluster(), master.getName());
 
             if (getMappingOptimizeResult.failed()) {

@@ -22,7 +22,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.Clust
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.metrics.UserMetricsConfigService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
-import com.didichuxing.datachannel.arius.admin.metadata.service.NodeStatisService;
+import com.didichuxing.datachannel.arius.admin.metadata.service.NodeStatsService;
 import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
@@ -57,7 +57,7 @@ public class ClusterPhyMetricsManagerImpl implements ClusterPhyMetricsManager {
 
 
     @Autowired
-    private NodeStatisService            nodeStatisService;
+    private NodeStatsService nodeStatsService;
 
     @Autowired
     private HandleFactory                handleFactory;
@@ -190,7 +190,7 @@ public class ClusterPhyMetricsManagerImpl implements ClusterPhyMetricsManager {
         if (!projectService.checkProjectExist(projectId)) {
             return Result.buildParamIllegal(String.format("There is no project id:%s", projectId));
         }
-        return Result.buildSucc(ConvertUtil.list2List(nodeStatisService.getClusterTaskDetail(clusterPhyName, node, Long.parseLong(startTime), Long.parseLong(endTime)),
+        return Result.buildSucc(ConvertUtil.list2List(nodeStatsService.getClusterTaskDetail(clusterPhyName, node, Long.parseLong(startTime), Long.parseLong(endTime)),
                 ESClusterTaskDetailVO.class));
     }
 

@@ -21,8 +21,8 @@ import org.springframework.stereotype.Service;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.MovingShardMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.ShardMetrics;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.shard.Segments;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.shard.SegmentsPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.shard.Segment;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.shard.SegmentPO;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESShardService;
 import com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESShardDAO;
@@ -79,10 +79,10 @@ public class ESShardServiceImpl implements ESShardService {
     }
 
     @Override
-    public List<Segments> syncGetSegments(String clusterName) {
+    public List<Segment> syncGetSegments(String clusterName) {
         String segmentsPartInfoRequestContent = getSegmentsPartInfoRequestContent();
-        List<SegmentsPO> segmentsPOS = esShardDAO.commonGet(clusterName, segmentsPartInfoRequestContent, SegmentsPO.class);
-        return ConvertUtil.list2List(segmentsPOS, Segments.class);
+        List<SegmentPO> segmentPOS = esShardDAO.commonGet(clusterName, segmentsPartInfoRequestContent, SegmentPO.class);
+        return ConvertUtil.list2List(segmentPOS, Segment.class);
     }
 
     @Override

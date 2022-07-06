@@ -6,7 +6,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfi
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.gateway.GatewayManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.TemplateSrvManager;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.aliases.TemplateLogicAliasesManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.aliases.TemplateLogicAliasManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Alias;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.GatewayHeartbeat;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.IndexTemplatePhysicalConfig;
@@ -43,7 +43,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectLogic
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicAliasService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
-import com.didichuxing.datachannel.arius.admin.metadata.service.DslStatisService;
+import com.didichuxing.datachannel.arius.admin.metadata.service.DslStatisticsService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
@@ -95,7 +95,7 @@ public class GatewayManagerImpl implements GatewayManager {
     private IndexTemplatePhyService indexTemplatePhyService;
 
     @Autowired
-    private TemplateLogicAliasesManager templateLogicAliasesManager;
+    private TemplateLogicAliasManager templateLogicAliasManager;
 
     @Autowired
     private GatewayService gatewayService;
@@ -104,7 +104,7 @@ public class GatewayManagerImpl implements GatewayManager {
     private AriusConfigInfoService ariusConfigInfoService;
 
     @Autowired
-    private DslStatisService dslStatisService;
+    private DslStatisticsService dslStatisticsService;
 
     @Autowired
     private TemplateSrvManager templateSrvManager;
@@ -245,7 +245,7 @@ public class GatewayManagerImpl implements GatewayManager {
         Map<Integer, IndexTemplate> templateId2IndexTemplateLogicMap = indexTemplateService
                 .getAllLogicTemplatesMap();
 
-        List<IndexTemplateAlias> aliases = templateLogicAliasesManager.listAlias();
+        List<IndexTemplateAlias> aliases = templateLogicAliasManager.listAlias();
         Multimap<Integer, IndexTemplateAlias> logicId2IndexTemplateAliasMultiMap = ConvertUtil.list2MulMap(aliases,
                 IndexTemplateAlias::getLogicId);
 
@@ -281,7 +281,7 @@ public class GatewayManagerImpl implements GatewayManager {
         List<IndexTemplateWithPhyTemplates> logicWithPhysicals = indexTemplateService
                 .listTemplateWithPhysicalByDataCenter(dataCenter);
 
-        List<IndexTemplateAlias> logicWithAliases = templateLogicAliasesManager.listAlias(logicWithPhysicals);
+        List<IndexTemplateAlias> logicWithAliases = templateLogicAliasManager.listAlias(logicWithPhysicals);
         Multimap<Integer, IndexTemplateAlias> logicId2IndexTemplateAliasMultiMap = ConvertUtil
                 .list2MulMap(logicWithAliases, IndexTemplateAlias::getLogicId);
 
@@ -309,7 +309,7 @@ public class GatewayManagerImpl implements GatewayManager {
 
     @Override
     public Result<ScrollDslTemplateResponse> scrollSearchDslTemplate(ScrollDslTemplateRequest request) {
-        return dslStatisService.scrollSearchDslTemplate(request);
+        return dslStatisticsService.scrollSearchDslTemplate(request);
     }
 
     @Override
