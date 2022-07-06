@@ -44,7 +44,7 @@ public class OpTaskDCDRController {
         return templateDCDRManager.getDCDRSingleTemplateMasterSlaveSwitchDetailVO(taskId, templateId);
     }
 
-    @PostMapping("/switchMasterSlave")
+    @PostMapping("/switch-master-slave")
     @ResponseBody
     @ApiOperation(value = "DCDR主从切换接口", notes = "")
     public Result<WorkTaskVO> dcdrSwitchMasterSlave(HttpServletRequest request,
