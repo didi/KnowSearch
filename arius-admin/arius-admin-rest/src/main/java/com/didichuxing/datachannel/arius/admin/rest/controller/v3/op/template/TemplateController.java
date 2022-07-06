@@ -17,6 +17,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithCluster;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateCapacityVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateClearVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateDeleteVO;
@@ -99,26 +100,24 @@ public class TemplateController extends BaseTemplateController {
         return Result.buildSucc(templateLogicManager.getConsoleTemplatesVOS(projectId));
     }
 
-    @GetMapping("/{logicId}")
+    @GetMapping("/detail/{logicId}")
     @ResponseBody
     @ApiOperation(value = "获取索引详细信息接口【三方接口】",tags = "【三方接口】" )
-    @ApiImplicitParams({ @ApiImplicitParam(paramType = "path", dataType = "Integer", name = "logicId", value = "索引ID", required = true) })
-    @Deprecated
-    public Result<ConsoleTemplateDetailVO> getConsoleTemplateDetail(HttpServletRequest request,
-                                                                    @PathVariable("logicId") Integer logicId) {
+    @ApiImplicitParam(type = "Integer", name = "logicId", value = "逻辑模板ID", required = true)
+    public Result<ConsoleTemplateDetailVO> detail(HttpServletRequest request, @PathVariable Integer logicId) {
         IndexTemplateWithCluster indexTemplateLogicWithCluster = indexTemplateService
-            .getLogicTemplateWithCluster(logicId);
+                .getLogicTemplateWithCluster(logicId);
 
         if (null == indexTemplateLogicWithCluster || CollectionUtils.isEmpty(indexTemplateLogicWithCluster.getLogicClusters())) {
             return Result.buildFail("模板对应资源不存在!");
         }
 
         ConsoleTemplateDetailVO consoleTemplateDetail = ConvertUtil.obj2Obj(indexTemplateLogicWithCluster,
-            ConsoleTemplateDetailVO.class);
+                ConsoleTemplateDetailVO.class);
 
         consoleTemplateDetail.setCyclicalRoll(indexTemplateLogicWithCluster.getExpression().endsWith("*"));
         consoleTemplateDetail
-            .setCluster(templateLogicManager.jointCluster(indexTemplateLogicWithCluster.getLogicClusters()));
+                .setCluster(templateLogicManager.jointCluster(indexTemplateLogicWithCluster.getLogicClusters()));
 
         // 仅对有一个逻辑集群的情况设置集群类型与等级
         if (indexTemplateLogicWithCluster.getLogicClusters().size() == 1) {
@@ -139,7 +138,6 @@ public class TemplateController extends BaseTemplateController {
 
         return Result.buildSucc(consoleTemplateDetail);
     }
-
     @PutMapping("")
     @ResponseBody
     @ApiOperation(value = "用户编辑模板接口【三方接口】",tags = "【三方接口】", notes = "支持修改数据类型、责任人、备注")
@@ -246,9 +244,6 @@ public class TemplateController extends BaseTemplateController {
             required = true) })
     public Result<List<Tuple<String, String>>> getLogicTemplatesByProjectId(HttpServletRequest request,
                                                                             @PathVariable("projectId") Integer projectId) {
-
-      
-
         return indexTemplateService.listLogicTemplatesByProjectId(projectId);
     }
 
