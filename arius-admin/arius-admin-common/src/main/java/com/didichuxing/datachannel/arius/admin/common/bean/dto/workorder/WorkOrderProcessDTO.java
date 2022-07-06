@@ -29,8 +29,8 @@ public class WorkOrderProcessDTO {
     @ApiModelProperty("审批人")
     private String              assignee;
 
-    @ApiModelProperty("审批人appid")
-    private Integer             assigneeAppid;
+    @ApiModelProperty("审批人projectId")
+    private Integer assigneeProjectId;
 
     @ApiModelProperty("是否自动审批")
     private Boolean             checkAuthority;

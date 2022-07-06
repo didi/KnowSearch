@@ -9,22 +9,23 @@ import lombok.NoArgsConstructor;
 /**
  * Created by linyunan on 2021-06-04
  */
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel(description = "集群Region")
 public class ClusterRegionDTO {
-
-	@ApiModelProperty("主键")
+    @ApiModelProperty("主键")
     private Long   id;
 
-	@ApiModelProperty("逻辑集群ID")
+    @ApiModelProperty("region 名称")
+    private String name;
+
+    @ApiModelProperty("逻辑集群ID")
     private String logicClusterIds;
 
-	@ApiModelProperty("物理集群名称")
+    @ApiModelProperty("物理集群名称")
     private String phyClusterName;
 
-	@ApiModelProperty("Rack列表")
-    private String racks;
+    @ApiModelProperty("配置项")
+    private String config;
 }

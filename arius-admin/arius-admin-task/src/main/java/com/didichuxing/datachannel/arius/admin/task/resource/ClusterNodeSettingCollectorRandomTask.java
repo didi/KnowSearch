@@ -1,6 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.task.resource;
 
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterHostService;
+import com.didichuxing.datachannel.arius.admin.common.exception.AdminTaskException;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
 import com.didichuxing.datachannel.arius.admin.task.BaseConcurrentClusterTask;
 import com.didichuxing.datachannel.arius.admin.task.TaskConcurrentConstants;
 import com.didiglobal.logi.log.ILog;
@@ -17,7 +18,7 @@ public class ClusterNodeSettingCollectorRandomTask extends BaseConcurrentCluster
     private static final ILog LOGGER = LogFactory.getLog(ClusterNodeSettingCollectorRandomTask.class);
 
     @Autowired
-    private RoleClusterHostService roleClusterHostService;
+    private ClusterRoleHostService clusterRoleHostService;
 
     @Override
     public TaskResult execute(JobContext jobContext) throws Exception {
@@ -68,7 +69,7 @@ public class ClusterNodeSettingCollectorRandomTask extends BaseConcurrentCluster
      * @param cluster 集群名字
      */
     @Override
-    public boolean executeByCluster(String cluster) {
-        return roleClusterHostService.collectClusterNodeSettings(cluster);
+    public boolean executeByCluster(String cluster) throws AdminTaskException {
+        return clusterRoleHostService.collectClusterNodeSettings(cluster);
     }
 }

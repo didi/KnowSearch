@@ -12,9 +12,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ClusterLogicTransferOrderDetail extends AbstractOrderDetail {
 
-    private Integer targetAppId;
+    private Integer targetProjectId;
 
-    private Integer sourceAppId;
+    private Integer sourceProjectId;
 
     private Long    clusterLogicId;
 

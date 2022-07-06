@@ -6,6 +6,7 @@ import com.didi.arius.gateway.common.exception.QueryDslLengthException;
 import com.didi.arius.gateway.common.metadata.AppDetail;
 import com.didi.arius.gateway.common.metadata.JoinLogContext;
 import com.didi.arius.gateway.common.metadata.QueryContext;
+import com.didi.arius.gateway.common.utils.AppUtil;
 import com.didi.arius.gateway.common.utils.Convert;
 import com.didi.arius.gateway.core.component.QueryConfig;
 import com.didi.arius.gateway.core.es.http.RestActionListenerImpl;
@@ -24,6 +25,7 @@ import com.didi.arius.gateway.elasticsearch.client.model.ESActionRequest;
 import com.didi.arius.gateway.rest.http.IRestHandler;
 import com.didi.arius.gateway.rest.http.RestController;
 import com.didiglobal.logi.log.LogGather;
+import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.rest.*;
 import org.elasticsearch.rest.support.RestUtils;
 import org.slf4j.Logger;
@@ -142,9 +144,10 @@ public abstract class BaseHttpRestController implements IRestHandler {
     }
 
     protected void preRequest(QueryContext queryContext) {
-        if (queryContext.isFromKibana()) {
+        if (queryContext.isFromKibana() || (AppUtil.isAdminAppid(queryContext.getAppDetail())
+                                            && StringUtils.isNotBlank(queryContext.getClusterId()))) {
             // 如果是来自 kibana 的请求，则设置为原生查询
-            queryContext.setSearchType(AppDetail.RequestType.Origin_Cluster.getType());
+            queryContext.setSearchType(AppDetail.RequestType.ORIGIN_CLUSTER.getType());
         }
         if (queryContext.getPostBody() != null && queryContext.getPostBody().length() > queryConfig.getDslMaxLength()) {
             throw new QueryDslLengthException(String.format("query length(%d) > %d exception", queryContext.getPostBody().length(), queryConfig.getDslMaxLength()));
@@ -167,8 +170,10 @@ public abstract class BaseHttpRestController implements IRestHandler {
             joinLogContext.setDslLen(queryContext.getPostBody().length());
             joinLogContext.setDsl(queryContext.getPostBody().replaceAll("\\n", " "));
             joinLogContext.setTimeStamp(System.currentTimeMillis());
-            traceLogger.info("_com_request_in||traceid={}||spanid={}||type=http||appid={}||requestId={}||uri={}||remoteAddr={}||requestLen={}||name={}",
-                    queryContext.getTraceid(), queryContext.getSpanid(), queryContext.getAppid(), queryContext.getRequestId(), queryContext.getUri(), queryContext.getRemoteAddr(), queryContext.getPostBody().length(), name());
+            joinLogContext.setProjectId(queryContext.getProjectId());
+            traceLogger.info("_com_request_in||traceid={}||spanid={}||type=http||appid={}||projectId={}||requestId={}||uri={}||remoteAddr={}||requestLen={}||name={}",
+                    queryContext.getTraceid(), queryContext.getSpanid(), queryContext.getAppid(), queryContext.getProjectId(),
+                    queryContext.getRequestId(), queryContext.getUri(), queryContext.getRemoteAddr(), queryContext.getPostBody().length(), name());
         } else {
             LogGather.recordInfoLog(QueryConsts.DLFLAG_PREFIX + "query_request_" + queryContext.getAppid() + "_" + name(), String.format("requestId=%s||method=%s||uri=%s||queryString=%s||remoteAddr=%s||postBodyLen=%d",
                     queryContext.getRequestId(), queryContext.getMethod(), queryContext.getUri(), queryContext.getQueryString(), queryContext.getRemoteAddr(), queryContext.getPostBody().length()));

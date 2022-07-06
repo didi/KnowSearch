@@ -1,13 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.vo.template;
 
-import java.util.Date;
-
-import com.didichuxing.datachannel.arius.admin.common.bean.common.QuotaUsage;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.BaseVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.DataTypeEnum;
-
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -28,7 +25,7 @@ public class ThirdpartTemplateLogicVO extends BaseVO {
     private String     name;
 
     @ApiModelProperty("所属应用ID")
-    private Integer    appId;
+    private Integer projectId;
 
     /**
      * 用户数据类型
@@ -58,13 +55,14 @@ public class ThirdpartTemplateLogicVO extends BaseVO {
     @ApiModelProperty("热数据保存天数")
     private Integer    hotTime;
 
-    @ApiModelProperty("成本部门ID")
+    @ApiModelProperty("成本部门ID：后续进行下线，无需使用")
     private String     libraDepartmentId;
 
-    @ApiModelProperty("成本部门名称")
+    @ApiModelProperty("成本部门名称：后续进行下线，无需使用")
+    @Deprecated
     private String     libraDepartment;
 
-    @ApiModelProperty("责任人")
+    @ApiModelProperty("责任人：后续进行下线，无需再使用")
     private String     responsible;
 
     @ApiModelProperty("时间字段")
@@ -73,10 +71,12 @@ public class ThirdpartTemplateLogicVO extends BaseVO {
     /**
      * id地钻
      */
-    @ApiModelProperty("主键字段")
+    @ApiModelProperty("主键字段：后续要下线无需使用")
+    @Deprecated
     private String     idField;
 
-    @ApiModelProperty("routing字段")
+    @ApiModelProperty("routing字段：后续下线，无需使用")
+    @Deprecated
     private String     routingField;
 
     @ApiModelProperty("表达式")
@@ -90,12 +90,6 @@ public class ThirdpartTemplateLogicVO extends BaseVO {
      */
     @ApiModelProperty("配额")
     private Double     quota;
-
-    /**
-     * quota磁盘利用率
-     */
-    @ApiModelProperty("配额使用情况")
-    private QuotaUsage quotaUsage;
 
     /**
      * 创建时间

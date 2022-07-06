@@ -1,5 +1,15 @@
 package com.didi.arius.gateway.core.service.arius.impl;
 
+import java.util.List;
+
+import javax.annotation.PostConstruct;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
 import com.didi.arius.gateway.common.consts.QueryConsts;
 import com.didi.arius.gateway.common.metadata.DSLTemplate;
 import com.didi.arius.gateway.common.utils.Convert;
@@ -9,18 +19,11 @@ import com.didi.arius.gateway.core.service.arius.DslTemplateService;
 import com.didi.arius.gateway.remote.AriusAdminRemoteService;
 import com.didi.arius.gateway.remote.response.DSLTemplateListResponse;
 import com.didi.arius.gateway.remote.response.DSLTemplateResponse;
+
 import lombok.NoArgsConstructor;
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
-import javax.annotation.PostConstruct;
-import java.util.List;
 
 @Service
 @NoArgsConstructor
@@ -136,13 +139,6 @@ public class DslTemplateServiceImpl implements DslTemplateService{
                     try {
                         String key = response.getKey();
 
-                        if (response.getEnable() != null && !response.getEnable()) {
-                            removeDSLTemplate(key);
-
-                            bootLogger.info("dsl_remove||key={}", key);
-                            continue ;
-                        }
-
                         boolean queryForbidden = isQueryForbidden(response);
 
                         double queryLimit = queryConfig.getDslQPSLimit();
@@ -173,7 +169,7 @@ public class DslTemplateServiceImpl implements DslTemplateService{
     }
 
     private boolean isQueryForbidden(DSLTemplateResponse response) {
-        boolean queryForbidden = false;
+        boolean queryForbidden = response.getEnable() != null && !response.getEnable();
         if (response.getCheckMode() != null && QueryConsts.CHECK_MODE_BLACK.equals(response.getCheckMode())) {
             queryForbidden = true;
         }

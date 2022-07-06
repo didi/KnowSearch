@@ -1,34 +1,42 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.capacityplan.impl;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.BYTE_TO_G;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.G_PER_SHARD;
+import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum.INDEX_PLAN;
+
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.BaseTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.capacityplan.IndexPlanManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhysicalDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplatePhysicalUpgradeDTO;
-import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateConfig;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
-import com.didichuxing.datachannel.arius.admin.common.util.*;
+import com.didichuxing.datachannel.arius.admin.common.util.AriusDateUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.IndexNameUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.TemplateUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didiglobal.logi.elasticsearch.client.response.indices.stats.IndexNodes;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.BYTE_TO_G;
-import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.G_PER_SHARD;
-import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum.INDEX_PLAN;
 
 /**
  * @author cjm
@@ -55,7 +63,7 @@ public class IndexPlanManagerImpl extends BaseTemplateSrv implements IndexPlanMa
         }
 
         // 获取所有的索引物理模版
-        List<IndexTemplatePhy> templatePhyList = templatePhyService.getNormalTemplateByCluster(phyClusterName);
+        List<IndexTemplatePhy> templatePhyList = indexTemplatePhyService.getNormalTemplateByCluster(phyClusterName);
         if (CollectionUtils.isEmpty(templatePhyList)) {
             LOGGER.info("class=CapacityPlanManagerImpl||method=indexRollover||cluster={}||msg=IndexRolloverTask no template", phyClusterName);
             return true;
@@ -63,7 +71,7 @@ public class IndexPlanManagerImpl extends BaseTemplateSrv implements IndexPlanMa
 
         for(IndexTemplatePhy phyTemplate : templatePhyList) {
             // 判断该索引模版是否开启当前索引服务
-            IndexTemplateConfig config = templateLogicService.getTemplateConfig(phyTemplate.getLogicId());
+            IndexTemplateConfig config = indexTemplateService.getTemplateConfig(phyTemplate.getLogicId());
             if (config == null || config.getDisableIndexRollover()) {
                 LOGGER.info(
                         "class=CapacityPlanManagerImpl||method=indexRollover||cluster={}||template={}||msg=skip indexRollover",
@@ -72,7 +80,7 @@ public class IndexPlanManagerImpl extends BaseTemplateSrv implements IndexPlanMa
             }
 
             // 获取逻辑模版信息
-            IndexTemplateLogic logiTemplate = templateLogicService.getLogicTemplateById(phyTemplate.getLogicId());
+            IndexTemplate logiTemplate = indexTemplateService.getLogicTemplateById(phyTemplate.getLogicId());
 
             // 根据索引分区规则，获取当天或当月或不分区带有版本信息的索引的名字
             String indexName = getIndexNameByDateFormat(logiTemplate, phyTemplate);
@@ -112,7 +120,7 @@ public class IndexPlanManagerImpl extends BaseTemplateSrv implements IndexPlanMa
             return Result.buildFail(phyClusterName + "没有开启" + templateServiceName());
         }
 
-        List<IndexTemplatePhy> templatePhyList = templatePhyService.listTemplate();
+        List<IndexTemplatePhy> templatePhyList = indexTemplatePhyService.listTemplate();
 
         if (AriusObjUtils.isEmptyList(templatePhyList)) {
             return Result.buildSucc();
@@ -132,7 +140,7 @@ public class IndexPlanManagerImpl extends BaseTemplateSrv implements IndexPlanMa
     }
 
     @Override
-    public void initShardRoutingAndAdjustShard(IndexTemplatePhysicalDTO param) {
+    public void initShardRoutingAndAdjustShard(IndexTemplatePhyDTO param) {
         int shard = param.getShard();
         if (shard >= 320) {
             param.setShardRouting(32);
@@ -165,7 +173,7 @@ public class IndexPlanManagerImpl extends BaseTemplateSrv implements IndexPlanMa
         return (shard / shardRouting + 1) * shardRouting;
     }
 
-    private String getIndexNameByDateFormat(IndexTemplateLogic logiTemplate, IndexTemplatePhy phyTemplate) {
+    private String getIndexNameByDateFormat(IndexTemplate logiTemplate, IndexTemplatePhy phyTemplate) {
         if(TemplateUtils.isSaveByDay(logiTemplate.getDateFormat())) {
             // 按天分区则获取模版对应当天索引拼接版本信息
             return IndexNameUtils.genDailyIndexNameWithVersion(phyTemplate.getName(), 0, phyTemplate.getVersion());
@@ -231,7 +239,7 @@ public class IndexPlanManagerImpl extends BaseTemplateSrv implements IndexPlanMa
      * @throws ESOperateException e
      */
     private Result<String> adjustShardCount(IndexTemplatePhy templatePhy) throws ESOperateException {
-        IndexTemplateLogic logicTemplate = templateLogicService.getLogicTemplateById(templatePhy.getLogicId());
+        IndexTemplate logicTemplate = indexTemplateService.getLogicTemplateById(templatePhy.getLogicId());
         if (!TemplateUtils.isSaveByDay(logicTemplate.getDateFormat())) {
             // 非按天滚动，无需调整主shard个数
             return Result.buildSucc();
@@ -255,7 +263,7 @@ public class IndexPlanManagerImpl extends BaseTemplateSrv implements IndexPlanMa
 
     private Result<Void> editTemplateWithoutCheck(IndexTemplatePhy templatePhy, Integer shardNum, String operator) throws ESOperateException {
         // 计算 ShardRouting，并通过 ShardRouting 再计算 shard
-        IndexTemplatePhysicalDTO param = new IndexTemplatePhysicalDTO();
+        IndexTemplatePhyDTO param = new IndexTemplatePhyDTO();
         param.setShard(templatePhy.getShard());
         param.setShardRouting(templatePhy.getShardRouting());
         initShardRoutingAndAdjustShard(param);
@@ -273,11 +281,11 @@ public class IndexPlanManagerImpl extends BaseTemplateSrv implements IndexPlanMa
         }
 
         // 更新
-        return templatePhyService.updateTemplateShardNum(templatePhy, shardNum, operator);
+        return indexTemplatePhyService.updateTemplateShardNum(templatePhy, shardNum, operator);
     }
 
     private Long getMaxStoreInRecentSevenDayByTemplatePhyId(Long templatePhyId) {
-        IndexTemplatePhy templatePhy = templatePhyService.getTemplateById(templatePhyId);
+        IndexTemplatePhy templatePhy = indexTemplatePhyService.getTemplateById(templatePhyId);
         if(templatePhy == null) {
             // 该模版不存在
             return 0L;

@@ -1,9 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.JOB_SUCCESS;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.LOGIC_CLUSTER;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
@@ -11,31 +9,32 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.Cluster
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStats;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStatsCells;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.stats.ClusterLogicStatisPO;
-import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.common.event.metrics.MetricsMonitorLogicClusterEvent;
 import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpHostUtil;
+import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.monitorTask.ClusterMonitorTaskService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.monitortask.AriusMetaJobClusterDistributeService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.metadata.job.AbstractMetaDataJob;
 import com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.MonitorMetricsSender;
 import com.didichuxing.datachannel.arius.admin.metadata.service.ESClusterLogicStaticsService;
 import com.google.common.collect.Lists;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import javax.annotation.PostConstruct;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.JOB_SUCCESS;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.LOGIC_CLUSTER;
-
 /**
  * 集群维度采集监控数据，包含 es节点存活检查；es集群tps/qps掉底报警
+ * @author ohushenglin_v
  */
 @Component
 public class LogicClusterMonitorJobHandler extends AbstractMetaDataJob {
@@ -45,13 +44,13 @@ public class LogicClusterMonitorJobHandler extends AbstractMetaDataJob {
     @Autowired
     private ClusterLogicService clusterLogicService;
     @Autowired
-    private ClusterMonitorTaskService clusterMonitorTaskService;
+    private AriusMetaJobClusterDistributeService ariusMetaJobClusterDistributeService;
     @Autowired
     private MonitorMetricsSender monitorMetricsSender;
     @Autowired
     private ESClusterLogicStaticsService clusterLogicStaticsService;
     @Autowired
-    private RegionRackService regionRackService;
+    private ClusterRegionService clusterRegionService;
 
     private final String hostName = HttpHostUtil.HOST_NAME;
 
@@ -70,7 +69,7 @@ public class LogicClusterMonitorJobHandler extends AbstractMetaDataJob {
 
     private void handleLogicClusterStats() {
         // 获取单台机器监控采集的集群名称列表, 当分布式部署分组采集，可分摊采集压力
-        List<ClusterPhy> monitorCluster = clusterMonitorTaskService.getSingleMachineMonitorCluster(hostName);
+        List<ClusterPhy> monitorCluster = ariusMetaJobClusterDistributeService.getSingleMachineMonitorCluster(hostName);
         // 2. do handle
         if (CollectionUtils.isNotEmpty(monitorCluster)) {
             Set<String> monitorClusterSet = monitorCluster.stream().map(ClusterPhy::getCluster).collect(Collectors.toSet());
@@ -81,7 +80,7 @@ public class LogicClusterMonitorJobHandler extends AbstractMetaDataJob {
     private void doHandleLogicClusterStats(Set<String> monitorClusterSet) {
         List<ESClusterStats> esLogicClusterStatsList = Lists.newCopyOnWriteArrayList();
         List<ClusterLogic> clusterLogicList = clusterLogicService.listAllClusterLogics();
-        List<ClusterRegion> regionList = regionRackService.listAllBoundRegions();
+        List<ClusterRegion> regionList = clusterRegionService.listAllBoundRegions();
         if (CollectionUtils.isEmpty(clusterLogicList) || CollectionUtils.isEmpty(regionList)) {
             LOGGER.info("class=ClusterMonitorJobHandler||method=doHandleLogicClusterStats||msg=ClusterLogic is empty");
             return;
@@ -130,8 +129,6 @@ public class LogicClusterMonitorJobHandler extends AbstractMetaDataJob {
                 esClusterStats.setStatis(esClusterStatsBean);
                 esClusterStats.setCluster(logicCluster.getName());
                 // 设置集群arius id
-//                esClusterStats.setClusterId(String.valueOf(logicCluster.getId()));
-//                esClusterStats.setClusterGuid(logicCluster.getGuid());
                 esClusterStats.setPhysicCluster(LOGIC_CLUSTER);
                 esClusterStats.setTimestamp(collectTime);
                 esClusterStats.setDataCenter(logicCluster.getDataCenter());

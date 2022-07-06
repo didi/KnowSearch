@@ -1,37 +1,38 @@
 package com.didichuxing.datachannel.arius.admin.biz.workorder.handler;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandler;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.ClusterDeleteContent;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
-import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.ClusterDeleteOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
+import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
+import java.util.List;
+import java.util.stream.Collectors;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
- * Created by linyunan on 2021-06-11
+ * @author linyunan
+ * @date 2021-06-11
  */
 @Service
+@Deprecated
 public class ClusterDeleteHandler extends BaseWorkOrderHandler {
     protected static final ILog    LOGGER = LogFactory.getLog(ClusterDeleteHandler.class);
 
@@ -45,7 +46,7 @@ public class ClusterDeleteHandler extends BaseWorkOrderHandler {
     private ClusterPhyService      clusterPhyService;
 
     @Autowired
-    private TemplatePhyService     templatePhyService;
+    private IndexTemplatePhyService indexTemplatePhyService;
 
     @Override
     protected Result<Void> validateConsoleParam(WorkOrder workOrder) {
@@ -60,7 +61,7 @@ public class ClusterDeleteHandler extends BaseWorkOrderHandler {
                 ListUtils.strList2String(clusterLogicIdList)));
         }
 
-        List<String> templatePhyNameList = templatePhyService.getNormalTemplateByCluster(content.getPhyClusterName())
+        List<String> templatePhyNameList = indexTemplatePhyService.getNormalTemplateByCluster(content.getPhyClusterName())
             .stream().map(IndexTemplatePhy::getName).collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(templatePhyNameList)) {
             return Result.buildFail(String.format("物理集群[%s]中已经存在模板[%s]", content.getPhyClusterName(),
@@ -102,8 +103,8 @@ public class ClusterDeleteHandler extends BaseWorkOrderHandler {
             return Result.buildFail(String.format("物理集群[%s]不存在", content.getPhyClusterName()));
         }
 
-        Result<Boolean> deleteClusterResult = clusterPhyManager.deleteClusterInfo(clusterPhy.getId(), workOrder.getSubmitor(),
-            workOrder.getSubmitorAppid());
+        Result<Boolean> deleteClusterResult = clusterPhyManager.deleteCluster(clusterPhy.getId(), workOrder.getSubmitor(),
+                AuthConstant.SUPER_PROJECT_ID);
         if (deleteClusterResult.failed()) {
             return Result.buildFail(deleteClusterResult.getMessage());
         }
@@ -122,7 +123,7 @@ public class ClusterDeleteHandler extends BaseWorkOrderHandler {
     }
 
     @Override
-    public List<AriusUserInfo> getApproverList(AbstractOrderDetail detail) {
+    public List<UserBriefVO> getApproverList(AbstractOrderDetail detail) {
         return getOPList();
     }
 

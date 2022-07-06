@@ -4,6 +4,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Plugin;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.PluginDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.esplugin.PluginPO;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 
 import java.util.List;
 
@@ -31,7 +32,7 @@ public interface ESPluginService {
      * @param pluginDTO ES插件
      * @return result
      */
-    Result<Long> addESPlugin(PluginDTO pluginDTO);
+    Result<Long> addESPlugin(PluginDTO pluginDTO) throws NotFindSubclassException;
 
     /**
      * 修改 plugin （只允许修改描述信息）
@@ -55,7 +56,7 @@ public interface ESPluginService {
      * @param id 插件ID
      * @return result
      */
-    Result<Long> deletePluginById(Long id, String operator);
+    Result<Long> deletePluginById(Long id, String operator) throws NotFindSubclassException;
 
     /**
      * 获取全部系统默认插件
@@ -76,6 +77,6 @@ public interface ESPluginService {
      * @param  param ES插件的集合
      * @return result
      */
-    Result<String> addESPlugins(List<PluginDTO> param);
+    Result<String> addESPlugins(List<PluginDTO> param) throws NotFindSubclassException;
 
 }

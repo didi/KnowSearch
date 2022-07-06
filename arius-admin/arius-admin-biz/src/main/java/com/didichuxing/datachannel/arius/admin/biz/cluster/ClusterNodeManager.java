@@ -1,51 +1,77 @@
 package com.didichuxing.datachannel.arius.admin.biz.cluster;
 
-import java.util.Collection;
 import java.util.List;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.common.RackMetaMetric;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESRoleClusterHostVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHost;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRegionWithNodeInfoDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostWithRegionInfoVO;
+import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
+import com.didichuxing.datachannel.arius.admin.common.exception.AdminTaskException;
 
 /**
- * ES集群工具类
- *
- * @author wangshu
- * @date 2020/09/10
+ * @author ohushenglin_v
+ * @date 2022-05-30
  */
 public interface ClusterNodeManager {
     /**
-     * 逻辑集群节点转换
+     * 获取可划分至region的节点信息
+     * @param clusterId   物理集群Id
+     * @return            Result<List<ESClusterRoleHostVO>>
+     */
+    Result<List<ESClusterRoleHostWithRegionInfoVO>> listDivide2ClusterNodeInfo(Long clusterId);
+
+    /**
+     * 划分指定节点至region
      *
-     * @param clusterNodes       物理集群节点
+     * @param params    集群带节点信息的Region实体
+     * @param operator  操作者
+     * @param projectId
+     * @return Result<Long>
+     */
+    Result<List<Long>> createMultiNode2Region(List<ClusterRegionWithNodeInfoDTO> params, String operator,
+                                              Integer projectId) throws AdminOperateException;
+
+    /**
+     * 编辑节点的region属性
+     *
+     * @param params    集群带节点信息的Region实体
+     * @param operator  操作者
+     * @param projectId
+     * @return Result<Boolean>
+     */
+    Result<Boolean> editMultiNode2Region(List<ClusterRegionWithNodeInfoDTO> params, String operator, Integer projectId) throws AdminOperateException;
+
+    /**
+     * 获取物理集群节点列表
+     *
+     * @param clusterId 集群id
+     * @return {@link Result}<{@link List}<{@link ESClusterRoleHostVO}>>
+     */
+    Result<List<ESClusterRoleHostVO>> listClusterPhyNode(Integer clusterId);
+
+    /**
+     * 获取逻辑集群节点列表
+     *
+     * @param clusterId 集群id
+     * @return {@link Result}<{@link List}<{@link ESClusterRoleHostVO}>>
+     */
+    Result<List<ESClusterRoleHostVO>> listClusterLogicNode(Integer clusterId);
+
+    /**
+     * 通过逻辑集群名称获取节点
+     * @param clusterLogicName
      * @return
      */
-    List<ESRoleClusterHostVO> convertClusterLogicNodes(List<RoleClusterHost> clusterNodes);
+    Result listClusterLogicNodeByName(String clusterLogicName);
+
 
     /**
-     * 获取rack的资源统计信息
+     * 采集集群节点数据
      *
-     * @param clusterName 集群名字
-     * @param racks       racks
-     * @return list
+     * @param cluster 集群
+     * @return boolean
+     * @throws AdminTaskException 管理任务异常
      */
-    Result<List<RackMetaMetric>> metaAndMetric(String clusterName, Collection<String> racks);
-
-    /**
-     * 获取rack的元信息
-     *
-     * @param clusterName 集群名字
-     * @param racks       rack
-     * @return list
-     */
-    Result<List<RackMetaMetric>> meta(String clusterName, Collection<String> racks);
-
-    /**
-     * 物理集群节点转换
-     * @param nodesInfo
-     * @param clusterPhyName 物理集群名称
-     * @return
-     */
-    List<ESRoleClusterHostVO> convertClusterPhyNodes(List<RoleClusterHost> nodesInfo, String clusterPhyName);
+    boolean collectNodeSettings(String cluster) throws AdminTaskException;
 }

@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 public class TemplateNotifyESPO extends BaseESPO {
     int logicTemplateId;
 
-    int    appid;
+    int projectId;
 
     String templateName;
 

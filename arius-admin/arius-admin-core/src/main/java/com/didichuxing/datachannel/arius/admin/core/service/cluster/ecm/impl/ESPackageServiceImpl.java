@@ -1,27 +1,33 @@
 package com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.impl;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.ADD;
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.DELETE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.EDIT;
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.UNKNOWN;
+
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESPackageDTO;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.espackage.ESPackage;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.espackage.ESPackagePO;
 import com.didichuxing.datachannel.arius.admin.common.constant.FileCompressionType;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ESVersionUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
+import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESPackageService;
-import com.didichuxing.datachannel.arius.admin.core.service.common.AriusUserInfoService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.extend.storage.FileStorageService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.ecm.ESPackageDAO;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.logi.security.service.UserService;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.*;
 
 /**
  * @author linyunan
@@ -35,10 +41,15 @@ public class ESPackageServiceImpl implements ESPackageService {
     private ESPackageDAO         esPackageDAO;
 
     @Autowired
-    private AriusUserInfoService ariusUserInfoService;
+    private UserService userService;
+    @Autowired
+    private RoleTool roleTool;
 
     @Autowired
     private FileStorageService   fileStorageService;
+
+    @Autowired
+    private ClusterPhyService clusterPhyService;
 
     private static final Long MULTI_PART_FILE_SIZE_MAX = 1024 * 1024 * 500L;
 
@@ -65,7 +76,7 @@ public class ESPackageServiceImpl implements ESPackageService {
     }
 
     @Override
-    public Result<ESPackage> updateESPackage(ESPackageDTO esPackageDTO, String operator) {
+    public Result<ESPackage> updateESPackage(ESPackageDTO esPackageDTO, String operator, Integer projectId) {
         Result<Void> checkResult = checkValid(esPackageDTO, operator, EDIT);
         if (checkResult.failed()) {
             return Result.buildFrom(checkResult);
@@ -77,6 +88,10 @@ public class ESPackageServiceImpl implements ESPackageService {
                 return Result.buildFrom(uploadResult);
             }
         }
+        final Result<Void> result = ProjectUtils.checkProjectCorrectly(id -> id, projectId, projectId);
+        if (result.failed()){
+            return Result.buildFail(result.getMessage());
+        }
 
         return updatePackageToDB(esPackageDTO);
     }
@@ -87,7 +102,7 @@ public class ESPackageServiceImpl implements ESPackageService {
     }
 
     @Override
-    public Result<Long> deleteESPackage(Long id, String operator) {
+    public Result<Long> deleteESPackage(Long id, String operator) throws NotFindSubclassException {
         // 集群版本删除操作时进行的参数校验
         ESPackageDTO esPackageDTO = new ESPackageDTO();
         esPackageDTO.setId(id);
@@ -135,7 +150,7 @@ public class ESPackageServiceImpl implements ESPackageService {
     }
 
     private boolean isHostType(ESPackageDTO esPackageDTO) {
-        return esPackageDTO.getManifest() == ESClusterTypeEnum.ES_HOST.getCode();
+        return null == esPackageDTO.getManifest() || esPackageDTO.getManifest() == ESClusterTypeEnum.ES_HOST.getCode();
     }
 
     private Result<Void> checkValid(ESPackageDTO esPackageDTO, String operator, OperationEnum operation) {
@@ -143,7 +158,7 @@ public class ESPackageServiceImpl implements ESPackageService {
             return Result.buildParamIllegal("安装包为空");
         }
 
-        if (!ariusUserInfoService.isOPByDomainAccount(operator)) {
+        if (!roleTool.isAdmin(operator)) {
             return Result.buildFail("非运维人员不能更新ES安装包!");
         }
 
@@ -174,6 +189,11 @@ public class ESPackageServiceImpl implements ESPackageService {
             if(esPackagePO == null) {
                 return Result.buildFail("对应id的集群版本不存在");
             }
+
+            if (clusterPhyService.isClusterExistsByPackageId(esPackageDTO.getId())) {
+               return Result.buildFail("版本已绑定集群无法删除");
+            }
+
         }
 
         if (!AriusObjUtils.isNull(packageByVersion)) {

@@ -1,34 +1,41 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.aliases.impl;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum.TEMPLATE_ALIASES;
 
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.aliases.TemplateLogicAliasesManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.aliases.TemplatePhyAliasesManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.BaseTemplateSrv;
+import com.didichuxing.datachannel.arius.admin.common.Tuple;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.alias.ConsoleAliasDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.alias.ConsoleLogicTemplateAliasesDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.alias.ConsoleLogicTemplateDeleteAliasesDTO;
-import com.didichuxing.datachannel.arius.admin.common.Tuple;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppTemplateAuth;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ProjectTemplateAuth;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateAlias;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyAlias;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppLogicTemplateAuthService;
+import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectLogicTemplateAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
+import com.google.common.collect.Lists;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.TEMPLATE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.EDIT_TEMPLATE_ALIASES;
-import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum.TEMPLATE_ALIASES;
 
 /**
  * @author zqr
@@ -48,7 +55,7 @@ public class TemplateLogicAliasesManagerImpl extends BaseTemplateSrv implements 
     private ESIndexService              esIndexService;
 
     @Autowired
-    private AppLogicTemplateAuthService appLogicTemplateAuthService;
+    private ProjectLogicTemplateAuthService projectLogicTemplateAuthService;
 
     @Override
     public TemplateServiceEnum templateService() {
@@ -67,7 +74,7 @@ public class TemplateLogicAliasesManagerImpl extends BaseTemplateSrv implements 
      */
     @Override
     public List<IndexTemplateAlias> listAlias() {
-        return listAlias(templateLogicService.getAllLogicTemplateWithPhysicals());
+        return listAlias(indexTemplateService.listAllLogicTemplateWithPhysicals());
     }
 
     /**
@@ -76,10 +83,10 @@ public class TemplateLogicAliasesManagerImpl extends BaseTemplateSrv implements 
      * @return list
      */
     @Override
-    public List<IndexTemplateAlias> listAlias(List<IndexTemplateLogicWithPhyTemplates> templateLogicList) {
+    public List<IndexTemplateAlias> listAlias(List<IndexTemplateWithPhyTemplates> templateLogicList) {
         List<IndexTemplateAlias> aliases = new ArrayList<>();
         Set<String> clusters = new HashSet<>();
-        for (IndexTemplateLogicWithPhyTemplates templateLogicWithPhyTemplates : templateLogicList) {
+        for (IndexTemplateWithPhyTemplates templateLogicWithPhyTemplates : templateLogicList) {
             if (null != templateLogicWithPhyTemplates && null != templateLogicWithPhyTemplates.getMasterPhyTemplate()
                     && StringUtils.isNotBlank(templateLogicWithPhyTemplates.getMasterPhyTemplate().getCluster())) {
                 clusters.add(templateLogicWithPhyTemplates.getMasterPhyTemplate().getCluster());
@@ -88,8 +95,12 @@ public class TemplateLogicAliasesManagerImpl extends BaseTemplateSrv implements 
 
         try {
             Map<String, List<IndexTemplatePhyAlias>> map =  templatePhyAliasesManager.fetchAllTemplateAliases(new ArrayList<>(clusters));
-            for (IndexTemplateLogicWithPhyTemplates templateLogic : templateLogicList) {
-                for (IndexTemplatePhyAlias physicalAlias : map.get(templateLogic.getName())) {
+            for (IndexTemplateWithPhyTemplates templateLogic : templateLogicList) {
+                final List<IndexTemplatePhyAlias> indexTemplatePhyAliases = Optional.ofNullable(templateLogic)
+                        .map(IndexTemplate::getName)
+                        .filter(map::containsKey)
+                        .map(map::get).orElse(Lists.newArrayList());
+                for (IndexTemplatePhyAlias physicalAlias :indexTemplatePhyAliases) {
                     aliases.add(fetchAlias(templateLogic.getId(), physicalAlias));
                 }
             }
@@ -130,7 +141,15 @@ public class TemplateLogicAliasesManagerImpl extends BaseTemplateSrv implements 
 
         Result<Void> operationResult = createTemplateAliases(aliases.getLogicId(), aliases.getAliases());
         if (operationResult.success()) {
-            operateRecordService.save(TEMPLATE, EDIT_TEMPLATE_ALIASES, aliases.getLogicId(), "-", operator);
+            operateRecordService.save(new OperateRecord.Builder()
+                    
+                            .operationTypeEnum(OperateTypeEnum.INDEX_MANAGEMENT_ALIAS_MODIFY)
+                            .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                            .bizId(aliases.getLogicId())
+                            .content("别名创建")
+                            .userOperation(operator)
+                    
+                    .build());
         }
 
         return operationResult;
@@ -154,7 +173,13 @@ public class TemplateLogicAliasesManagerImpl extends BaseTemplateSrv implements 
 
         Result<Void> operationResult = modifyTemplateAliases(aliases.getLogicId(), aliases.getAliases());
         if (operationResult.success()) {
-            operateRecordService.save(TEMPLATE, EDIT_TEMPLATE_ALIASES, aliases.getLogicId(), "-", operator);
+             operateRecordService.save(new OperateRecord.Builder()
+                            .operationTypeEnum(OperateTypeEnum.INDEX_MANAGEMENT_ALIAS_MODIFY)
+                            .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                            .bizId(aliases.getLogicId())
+                             .content("别名修改")
+                            .userOperation(operator)
+                    .build());
         }
 
         return operationResult;
@@ -173,7 +198,13 @@ public class TemplateLogicAliasesManagerImpl extends BaseTemplateSrv implements 
         Result<Void> operationResult = deleteTemplateAliases(deleteAliasesDTO.getLogicId(), deleteAliasesDTO.getAliases());
 
         if (operationResult.success()) {
-            operateRecordService.save(TEMPLATE, EDIT_TEMPLATE_ALIASES, deleteAliasesDTO.getLogicId(), "-", operator);
+                  operateRecordService.save(new OperateRecord.Builder()
+                    
+                            .operationTypeEnum(OperateTypeEnum.INDEX_MANAGEMENT_ALIAS_MODIFY)
+                          .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).bizId(deleteAliasesDTO.getLogicId())
+                          .content("删除索引别名").userOperation(operator)
+                    
+                    .build());
         }
 
         return operationResult;
@@ -283,30 +314,31 @@ public class TemplateLogicAliasesManagerImpl extends BaseTemplateSrv implements 
     /**
      * 获取模板具体的别名
      *
-     * @param appId appId
+     * @param projectId projectId
      */
     @Override
-    public Result<List<Tuple<String/*index*/, String/*aliases*/>>> getAllTemplateAliasesByAppid(Integer appId) {
+    public Result<List<Tuple<String/*index*/, String/*aliases*/>>> getAllTemplateAliasesByProjectId(Integer projectId) {
         List<Tuple<String, String>> aliases = new ArrayList<>();
 
-        List<AppTemplateAuth> appTemplateAuths = appLogicTemplateAuthService.getTemplateAuthsByAppId(appId);
-        if (CollectionUtils.isEmpty(appTemplateAuths)) {
+        List<ProjectTemplateAuth> projectTemplateAuths = projectLogicTemplateAuthService.getTemplateAuthsByProjectId(
+                projectId);
+        if (CollectionUtils.isEmpty(projectTemplateAuths)) {
             return Result.build(true);
         }
 
-        appTemplateAuths.parallelStream().forEach(appTemplateAuth -> {
-            IndexTemplateLogicWithPhyTemplates logicWithPhysical = this.templateLogicService
+        projectTemplateAuths.parallelStream().forEach(appTemplateAuth -> {
+            IndexTemplateWithPhyTemplates logicWithPhysical = this.indexTemplateService
                 .getLogicTemplateWithPhysicalsById(appTemplateAuth.getTemplateId());
 
             if (null != logicWithPhysical && logicWithPhysical.hasPhysicals()) {
-                IndexTemplatePhy indexTemplatePhysical = logicWithPhysical.getPhysicals().get(0);
+                IndexTemplatePhy indexTemplatePhysicalInfo = logicWithPhysical.getPhysicals().get(0);
 
-                if (!isTemplateSrvOpen(indexTemplatePhysical.getCluster())) {
+                if (!isTemplateSrvOpen(indexTemplatePhysicalInfo.getCluster())) {
                     return;
                 }
 
-                aliases.addAll(esIndexService.syncGetIndexAliasesByExpression(indexTemplatePhysical.getCluster(),
-                    indexTemplatePhysical.getExpression()));
+                aliases.addAll(esIndexService.syncGetIndexAliasesByExpression(indexTemplatePhysicalInfo.getCluster(),
+                    indexTemplatePhysicalInfo.getExpression()));
             }
         });
 
@@ -324,7 +356,7 @@ public class TemplateLogicAliasesManagerImpl extends BaseTemplateSrv implements 
             return Result.buildNotExist("非法的逻辑ID： " + logicId);
         }
 
-        IndexTemplateLogicWithPhyTemplates templateLogicWithPhysical = templateLogicService
+        IndexTemplateWithPhyTemplates templateLogicWithPhysical = indexTemplateService
             .getLogicTemplateWithPhysicalsById(logicId);
 
         if (templateLogicWithPhysical == null) {

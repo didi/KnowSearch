@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.vo.template;
 
-import com.didichuxing.datachannel.arius.admin.common.constant.app.AppTemplateAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectTemplateAuthEnum;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -19,13 +19,13 @@ import lombok.NoArgsConstructor;
 public class ConsoleTemplatePhyVO extends IndexTemplatePhysicalVO {
 
     @ApiModelProperty("归属项目ID")
-    private Integer appId;
+    private Integer projectId;
 
     @ApiModelProperty("归属项目名称")
-    private String  appName;
+    private String projectName;
 
     /**
-     * @see AppTemplateAuthEnum
+     * @see ProjectTemplateAuthEnum
      */
     @ApiModelProperty("当前App拥有的权限类型（-1 无权限 ;1:管理；2:读写；3:读）")
     private Integer authType;

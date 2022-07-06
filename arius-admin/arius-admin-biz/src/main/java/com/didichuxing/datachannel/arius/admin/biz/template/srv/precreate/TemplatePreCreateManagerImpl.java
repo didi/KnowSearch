@@ -1,23 +1,28 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.precreate;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum.TEMPLATE_PRE_CREATE;
+
+import java.util.List;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.BaseTemplateSrv;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.dcdr.TemplateDcdrManager;
-import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.dcdr.TemplateDCDRManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.threadpool.AriusOpThreadPool;
 import com.didichuxing.datachannel.arius.admin.common.util.IndexNameFactory;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum.TEMPLATE_PRE_CREATE;
+import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
+import com.didiglobal.logi.elasticsearch.client.response.setting.index.IndexConfig;
+import com.didiglobal.logi.elasticsearch.client.response.setting.template.TemplateConfig;
 
 /**
  * 索引预创建服务实现
@@ -28,13 +33,18 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.template.T
 public class TemplatePreCreateManagerImpl extends BaseTemplateSrv implements TemplatePreCreateManager {
 
     @Autowired
-    private TemplateDcdrManager templateDcdrManager;
+    private TemplateDCDRManager templateDcdrManager;
 
     @Autowired
     private ESIndexService           esIndexService;
 
     @Autowired
+    private ESTemplateService esTemplateService;
+
+    @Autowired
     private AriusOpThreadPool        ariusOpThreadPool;
+
+    public static final String START = "*";
 
     @Override
     public TemplateServiceEnum templateService() {
@@ -47,7 +57,7 @@ public class TemplatePreCreateManagerImpl extends BaseTemplateSrv implements Tem
             return false;
         }
 
-        List<IndexTemplatePhy> physicals = templatePhyService.getNormalTemplateByCluster(phyCluster);
+        List<IndexTemplatePhy> physicals = indexTemplatePhyService.getNormalTemplateByCluster(phyCluster);
         if (CollectionUtils.isEmpty(physicals)) {
             LOGGER.info(
                 "class=ESClusterPhyServiceImpl||method=preCreateIndex||cluster={}||msg=PreCreateIndexTask no template",
@@ -57,7 +67,7 @@ public class TemplatePreCreateManagerImpl extends BaseTemplateSrv implements Tem
 
         int succeedCount = 0;
         for (IndexTemplatePhy physical : physicals) {
-            IndexTemplateConfig config = templateLogicService.getTemplateConfig(physical.getLogicId());
+            IndexTemplateConfig config = indexTemplateService.getTemplateConfig(physical.getLogicId());
             if (config == null || !config.getPreCreateFlags()) {
                 LOGGER.warn(
                     "class=ESClusterPhyServiceImpl||method=preCreateIndex||cluster={}||template={}||msg=skip preCreateIndex",
@@ -91,13 +101,13 @@ public class TemplatePreCreateManagerImpl extends BaseTemplateSrv implements Tem
      */
     @Override
     public boolean reBuildTomorrowIndex(Integer logicId, int retryCount) throws ESOperateException {
-        List<IndexTemplatePhy> indexTemplatePhys = templatePhyService.getTemplateByLogicId(logicId);
-        if (CollectionUtils.isEmpty(indexTemplatePhys)) {
+        List<IndexTemplatePhy> indexTemplatePhies = indexTemplatePhyService.getTemplateByLogicId(logicId);
+        if (CollectionUtils.isEmpty(indexTemplatePhies)) {
             return true;
         }
 
         boolean succ = true;
-        for (IndexTemplatePhy indexTemplatePhy : indexTemplatePhys) {
+        for (IndexTemplatePhy indexTemplatePhy : indexTemplatePhies) {
             if (syncDeleteTomorrowIndexByPhysicalId(indexTemplatePhy.getId(), retryCount)) {
                 succ = succ && syncCreateTomorrowIndexByPhysicalId(indexTemplatePhy.getId(), retryCount);
             }
@@ -135,7 +145,7 @@ public class TemplatePreCreateManagerImpl extends BaseTemplateSrv implements Tem
      * @throws ESOperateException
      */
     private boolean syncDeleteTomorrowIndexByPhysicalId(Long physicalId, int retryCount) throws ESOperateException {
-        IndexTemplatePhyWithLogic physicalWithLogic = templatePhyService.getTemplateWithLogicById(physicalId);
+        IndexTemplatePhyWithLogic physicalWithLogic = indexTemplatePhyService.getTemplateWithLogicById(physicalId);
         if (physicalWithLogic == null || !physicalWithLogic.hasLogic()) {
             return false;
         }
@@ -159,17 +169,17 @@ public class TemplatePreCreateManagerImpl extends BaseTemplateSrv implements Tem
      * @throws ESOperateException
      */
     private boolean syncCreateTodayIndexByPhysicalId(Long physicalId, int retryCount) throws ESOperateException {
-        IndexTemplatePhyWithLogic physicalWithLogic = templatePhyService.getTemplateWithLogicById(physicalId);
+        IndexTemplatePhyWithLogic physicalWithLogic = indexTemplatePhyService.getTemplateWithLogicById(physicalId);
         if (physicalWithLogic == null || !physicalWithLogic.hasLogic()) {
             return false;
         }
         String todayIndexName = IndexNameFactory.get(physicalWithLogic.getExpression(),
             physicalWithLogic.getLogicTemplate().getDateFormat(), 0, physicalWithLogic.getVersion());
-        return esIndexService.syncCreateIndex(physicalWithLogic.getCluster(), todayIndexName, retryCount);
+        return createIndex(todayIndexName, physicalWithLogic, retryCount);
     }
 
     private boolean syncCreateTomorrowIndexByPhysicalId(Long physicalId, int retryCount) throws ESOperateException {
-        IndexTemplatePhyWithLogic physicalWithLogic = templatePhyService.getTemplateWithLogicById(physicalId);
+        IndexTemplatePhyWithLogic physicalWithLogic = indexTemplatePhyService.getTemplateWithLogicById(physicalId);
         if (physicalWithLogic == null || !physicalWithLogic.hasLogic()) {
             return false;
         }
@@ -183,6 +193,32 @@ public class TemplatePreCreateManagerImpl extends BaseTemplateSrv implements Tem
 
         String tomorrowIndexName = IndexNameFactory.getNoVersion(physicalWithLogic.getExpression(),
             physicalWithLogic.getLogicTemplate().getDateFormat(), 1);
-        return esIndexService.syncCreateIndex(physicalWithLogic.getCluster(), tomorrowIndexName, retryCount);
+        return createIndex(tomorrowIndexName, physicalWithLogic, retryCount);
+    }
+
+    private boolean createIndex(String indexName, IndexTemplatePhyWithLogic physicalWithLogic,
+                                int retryCount) throws ESOperateException {
+        IndexConfig indexConfig = null;
+        if (!StringUtils.endsWith(physicalWithLogic.getExpression(), START) && physicalWithLogic.getVersion() > 0) {
+            indexConfig = generateIndexConfig(physicalWithLogic);
+        }
+        if (null != indexConfig) {
+            return esIndexService.syncCreateIndex(physicalWithLogic.getCluster(), indexName, indexConfig, retryCount);
+        }
+        return esIndexService.syncCreateIndex(physicalWithLogic.getCluster(), indexName, retryCount);
+    }
+
+    private IndexConfig generateIndexConfig(IndexTemplatePhyWithLogic physicalWithLogic) {
+        TemplateConfig templateConfig = esTemplateService.syncGetTemplateConfig(physicalWithLogic.getCluster(),
+                physicalWithLogic.getName());
+        if (null == templateConfig) {
+            return null;
+        }
+        IndexConfig indexConfig = new IndexConfig();
+        indexConfig.setMappings(templateConfig.getMappings());
+        indexConfig.setSettings(templateConfig.getSetttings());
+        indexConfig.setAliases(templateConfig.getAliases());
+        indexConfig.setVersion(templateConfig.getVersion());
+        return indexConfig;
     }
 }

@@ -12,8 +12,8 @@ import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * @author d06679
- * @date 2019/3/29
+ * @author chengxiang
+ * @date 2022/5/10
  */
 @Data
 @NoArgsConstructor
@@ -81,6 +81,11 @@ public class IndexTemplatePhy extends BaseEntity {
      * 配置 json格式
      */
     private String config;
+
+    /**
+     * regionId
+     */
+    private Integer regionId;
 
     /**
      * 获取并且解析config

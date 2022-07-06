@@ -1,5 +1,24 @@
 package com.didi.arius.gateway.core.es.http;
 
+import static com.didi.arius.gateway.common.consts.RestConsts.SCROLL_SPLIT;
+import static com.didi.arius.gateway.elasticsearch.client.utils.LogUtils.setWriteLog;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+import org.apache.commons.collections.MapUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.common.Strings;
+import org.elasticsearch.common.bytes.BytesReference;
+import org.elasticsearch.common.collect.Tuple;
+import org.elasticsearch.common.xcontent.XContentParser;
+import org.elasticsearch.common.xcontent.json.JsonXContent;
+import org.elasticsearch.rest.RestResponse;
+import org.elasticsearch.rest.support.RestUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.alibaba.fastjson.JSON;
 import com.didi.arius.gateway.common.consts.QueryConsts;
 import com.didi.arius.gateway.common.consts.RestConsts;
@@ -38,24 +57,6 @@ import com.didi.arius.gateway.elasticsearch.client.gateway.search.response.Failu
 import com.didi.arius.gateway.elasticsearch.client.gateway.search.response.src.Hit;
 import com.didi.arius.gateway.elasticsearch.client.model.ESActionRequest;
 import com.google.common.collect.Lists;
-import org.apache.commons.collections.MapUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.common.Strings;
-import org.elasticsearch.common.bytes.BytesReference;
-import org.elasticsearch.common.collect.Tuple;
-import org.elasticsearch.common.xcontent.XContentParser;
-import org.elasticsearch.common.xcontent.json.JsonXContent;
-import org.elasticsearch.rest.RestResponse;
-import org.elasticsearch.rest.support.RestUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static com.didi.arius.gateway.common.consts.RestConsts.SCROLL_SPLIT;
-import static com.didi.arius.gateway.elasticsearch.client.utils.LogUtils.setWriteLog;
 
 public abstract class HttpRestHandler extends ESBase {
     protected static final Logger logger = LoggerFactory.getLogger(HttpRestHandler.class);
@@ -111,7 +112,7 @@ public abstract class HttpRestHandler extends ESBase {
     }
 
     protected boolean isOriginCluster(QueryContext queryContext){
-        return queryContext.getSearchType() == AppDetail.RequestType.Origin_Cluster.getType();
+        return queryContext.getSearchType() == AppDetail.RequestType.ORIGIN_CLUSTER.getType();
     }
 
     protected void checkWriteIndicesAndTemplateBlockWrite(QueryContext queryContext) {
@@ -240,8 +241,24 @@ public abstract class HttpRestHandler extends ESBase {
         directRequest(client, queryContext, listener);
     }
 
-    protected void directRequest(ESClient client, QueryContext queryContext, RestActionListenerImpl<DirectResponse> listener) {
-        String uri = queryContext.getUri();
+    protected void directRequest(ESClient client, QueryContext queryContext, DirectRequest directRequest) {
+        RestActionListenerImpl<DirectResponse> listener = new RestActionListenerImpl<>(queryContext);
+        if (this instanceof RestSearchAction) {
+            dslAuditService.auditDSL(queryContext, queryContext.getRequest().content(), queryContext.getIndices().toArray(new String[] {}));
+            listener = newDirectSearchListener(queryContext);
+        } else if (this instanceof RestBaseWriteAction) {
+            listener = newDirectWriteListener(queryContext);
+        }
+        client.direct(directRequest, listener);
+    }
+
+    protected void directRequest(ESClient client, QueryContext queryContext,
+                                 RestActionListenerImpl<DirectResponse> listener) {
+        DirectRequest directRequest = buildDirectRequest(queryContext, queryContext.getUri());
+        client.direct(directRequest, listener);
+    }
+
+    protected DirectRequest buildDirectRequest(QueryContext queryContext, String uri) {
         String queryString = queryContext.getQueryString() == null ? "" : queryContext.getQueryString();
 
         Map<String, String> paramsMap = new HashMap<>();
@@ -254,8 +271,7 @@ public abstract class HttpRestHandler extends ESBase {
 
         directRequest.putHeader("requestId", queryContext.getRequestId());
         directRequest.putHeader("Authorization", queryContext.getRequest().getHeader("Authorization"));
-
-        client.direct(directRequest, listener);
+        return directRequest;
     }
 
     protected void preSearchProcess(QueryContext queryContext, ESClient client, ESSearchRequest esSearchRequest) {

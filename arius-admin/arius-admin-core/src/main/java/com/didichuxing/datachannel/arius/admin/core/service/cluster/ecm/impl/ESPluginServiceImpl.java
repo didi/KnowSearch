@@ -1,39 +1,54 @@
 package com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.impl;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.ADD;
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.DELETE;
+
+import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Plugin;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.PluginDTO;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.esplugin.PluginPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PluginVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.FileCompressionType;
 import com.didichuxing.datachannel.arius.admin.common.constant.PluginTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.util.*;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
+import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.ESVersionUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
+import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESPluginService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
-import com.didichuxing.datachannel.arius.admin.core.service.common.AriusUserInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
 import com.didichuxing.datachannel.arius.admin.core.service.extend.storage.FileStorageService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.ecm.ESPluginDAO;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.logi.security.service.UserService;
+import com.google.common.collect.Maps;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.compress.utils.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.ES_CLUSTER_PLUGINS;
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.*;
 
 /**
  * ES插件包管理 服务实现类
@@ -51,7 +66,7 @@ public class ESPluginServiceImpl implements ESPluginService {
     private static final Long MULTI_PART_FILE_SIZE_MAX = 1024 * 1024 * 100L;
 
     @Autowired
-    private AriusUserInfoService ariusUserInfoService;
+    private UserService userService;
 
     @Autowired
     private ClusterPhyService esClusterPhyService;
@@ -66,6 +81,8 @@ public class ESPluginServiceImpl implements ESPluginService {
     private FileStorageService fileStorageService;
 
     private static final String SEPARATOR = "-";
+    @Autowired
+    private RoleTool roleTool;
 
 
     /**
@@ -111,7 +128,7 @@ public class ESPluginServiceImpl implements ESPluginService {
     }
 
     @Override
-    public Result<Long> addESPlugin(PluginDTO pluginDTO) {
+    public Result<Long> addESPlugin(PluginDTO pluginDTO) throws NotFindSubclassException {
         // 1.对插件信息的参数进行校验
         Result<Void> resultCheck = paramCheck(pluginDTO, ADD, null);
         if (resultCheck.failed()) {
@@ -172,18 +189,29 @@ public class ESPluginServiceImpl implements ESPluginService {
         boolean succ = (1 == esPluginDAO.updateDesc(oldPlugin.getId(), pluginDTO.getDesc()));
 
         if (succ) {
-            operateRecordService.save(ES_CLUSTER_PLUGINS, EDIT, pluginDTO.getId(), "", operator);
+            PluginPO newPluginPo = esPluginDAO.getById(oldPlugin.getId());
+            PluginVO oldPluginVO = ConvertUtil.obj2Obj(oldPlugin, PluginVO.class);
+            PluginVO newPluginVO = ConvertUtil.obj2Obj(newPluginPo, PluginVO.class);
+            Map</*apiModelPropertyValue*/String,/*修改后的apiModelPropertyValue*/String> apiModelPropertyValueModify=
+                    Maps.newHashMap();
+            apiModelPropertyValueModify.put("上传插件类型: 0 系统默认插件, 1 ES能力插件, 2 平台能力插件","上传插件类型");
+            operateRecordService.save(new OperateRecord.Builder().bizId(pluginDTO.getId()).userOperation(operator)
+                    .operationTypeEnum(OperateTypeEnum.ES_CLUSTER_PLUGINS_EDIT)
+                    .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                    .content(AriusObjUtils.findChangedWithClearByBeanVo(oldPluginVO, newPluginVO,apiModelPropertyValueModify)).build()
+                    
+                    
+            );
         }
         return Result.build(succ);
     }
-
     @Override
     public PluginPO getESPluginById(Long id) {
         return esPluginDAO.getById(id);
     }
 
     @Override
-    public Result<Long> deletePluginById(Long id, String operator) {
+    public Result<Long> deletePluginById(Long id, String operator) throws NotFindSubclassException {
         PluginDTO pluginDTO = new PluginDTO();
         pluginDTO.setId(id);
 
@@ -203,7 +231,13 @@ public class ESPluginServiceImpl implements ESPluginService {
         // 删除DB插件信息
         boolean succ = (1 == esPluginDAO.delete(id));
         if (succ) {
-            operateRecordService.save(ES_CLUSTER_PLUGINS, DELETE, id, "", operator);
+            operateRecordService.save(new OperateRecord.Builder()
+                            .bizId(pluginDTO.getId())
+                            .userOperation(operator)
+                            .operationTypeEnum(OperateTypeEnum.ES_CLUSTER_PLUGINS_DELETE)
+                            .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                            .build()
+                    );
         }
 
         return Result.build(succ, id);
@@ -232,7 +266,7 @@ public class ESPluginServiceImpl implements ESPluginService {
     }
 
     @Override
-    public Result<String> addESPlugins(List<PluginDTO> pluginDTOS) {
+    public Result<String> addESPlugins(List<PluginDTO> pluginDTOS) throws NotFindSubclassException {
         List<String> addFail = Lists.newArrayList();
 
         // 分批次上传插件，并记录上传失败的插件名称
@@ -268,7 +302,7 @@ public class ESPluginServiceImpl implements ESPluginService {
     }
 
     private Result<Void> handleDelete(PluginDTO pluginDTO, String operator) {
-        if (!ariusUserInfoService.isOPByDomainAccount(operator)) {
+        if (!roleTool.isAdmin(operator)) {
             return Result.buildFail("非运维人员不能删除插件");
         }
 

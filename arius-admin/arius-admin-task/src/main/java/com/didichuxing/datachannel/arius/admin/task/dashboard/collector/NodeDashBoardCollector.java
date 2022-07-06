@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats.AriusStatsClusterTaskInfoESDAO;
 import org.apache.commons.collections4.CollectionUtils;
@@ -12,12 +13,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.DashBoardStats;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.NodeMetrics;
 import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.RoleClusterHostService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterNodeService;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodesstats.ClusterNodeStats;
 import com.didiglobal.logi.elasticsearch.client.response.model.fs.FSTotal;
@@ -54,7 +54,7 @@ public class NodeDashBoardCollector extends BaseDashboardCollector {
     protected ESClusterNodeService                                          esClusterNodeService;
 
     @Autowired
-    protected RoleClusterHostService                                        roleClusterHostService;
+    protected ClusterRoleHostService clusterRoleHostService;
 
     @Autowired
     protected AriusStatsClusterTaskInfoESDAO                                ariusStatsClusterTaskInfoESDAO;
@@ -62,9 +62,9 @@ public class NodeDashBoardCollector extends BaseDashboardCollector {
     private static final FutureUtil futureUtil                              = FutureUtil.init("NodeDashBoardCollector",10,10,100);
 
     @Override
-    public void collectSingleCluster(String cluster, long currentTime) {
-        List<RoleClusterHost> roleClusterHostList = roleClusterHostService.getNodesByCluster(cluster);
-        if (CollectionUtils.isEmpty(roleClusterHostList)) { return;}
+    public void collectSingleCluster(String cluster, long startTime) {
+        List<ClusterRoleHost> clusterRoleHostList = clusterRoleHostService.getNodesByCluster(cluster);
+        if (CollectionUtils.isEmpty(clusterRoleHostList)) { return;}
 
         AtomicReference<Map<String, ClusterNodeStats>> clusterNodeStatsMapAtomic       = new AtomicReference<>(Maps.newHashMap());
         AtomicReference<Map<String, Long>>             node2ShardNumMapAtomic          = new AtomicReference<>(Maps.newHashMap());
@@ -93,13 +93,13 @@ public class NodeDashBoardCollector extends BaseDashboardCollector {
         }
 
         List<DashBoardStats> dashBoardStatsList = Lists.newArrayList();
-        for (RoleClusterHost roleClusterHost : roleClusterHostList) {
-            DashBoardStats dashBoardStats = buildInitDashBoardStats(currentTime);
-            String nodeName = roleClusterHost.getNodeSet();
+        for (ClusterRoleHost clusterRoleHost : clusterRoleHostList) {
+            DashBoardStats dashBoardStats = buildInitDashBoardStats(startTime);
+            String nodeName = clusterRoleHost.getNodeSet();
 
             String uniqueNodeKey    = CommonUtils.getUniqueKey(cluster, nodeName);
             NodeMetrics nodeMetrics = nodeName2NodeMetricsMap.getOrDefault(uniqueNodeKey, new NodeMetrics());
-            nodeMetrics.setTimestamp(currentTime);
+            nodeMetrics.setTimestamp(startTime);
             nodeMetrics.setCluster(cluster);
             nodeMetrics.setNode(nodeName);
 
@@ -120,6 +120,11 @@ public class NodeDashBoardCollector extends BaseDashboardCollector {
             buildSearchRejectedNum(nodeMetrics, clusterNodeStats, uniqueNodeKey);
             //8. 节点执行任务耗时
             nodeMetrics.setTaskConsuming(clusterNodesTaskTotalCostAtomic.get().getOrDefault(nodeName, 0d).longValue());
+
+            long currentTimeMillis = System.currentTimeMillis();
+            long currentTime = CommonUtils.monitorTimestamp2min(currentTimeMillis);
+            long elapsedTime = currentTime -startTime;
+            nodeMetrics.setElapsedTime(elapsedTime);
 
             // 设置dashboard中节点维度指标数据
             dashBoardStats.setNode(nodeMetrics);

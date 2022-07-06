@@ -1,11 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster;
 
-import java.util.List;
-
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.BaseDTO;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum;
-
 import io.swagger.annotations.ApiModelProperty;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -26,34 +24,23 @@ public class ClusterJoinDTO extends BaseDTO {
     private Integer                    type;
 
     @ApiModelProperty("所属项目id")
-    private Integer                    appId;
+    private Integer projectId;
 
     @ApiModelProperty("集群名字")
     private String                     cluster;
 
-    @ApiModelProperty("责任人")
+    @ApiModelProperty("责任人：后续进行下线，无需在使用")
+    @Deprecated
     private String                     responsible;
 
     @ApiModelProperty("es版本")
     private String                     esVersion;
 
     @ApiModelProperty("集群角色 对应主机列表")
-    private List<ESRoleClusterHostDTO> roleClusterHosts;
+    private List<ESClusterRoleHostDTO> roleClusterHosts;
 
     @ApiModelProperty("描述")
     private String                     phyClusterDesc;
-
-    @ApiModelProperty("是否划分集群")
-    private Boolean                    divide;
-
-    @ApiModelProperty("Region Racks列表, value 为r1, r2、r3")
-    private List<String>               regionRacks;
-
-    @ApiModelProperty("逻辑集群名称")
-    private String                     logicCluster;
-
-    @ApiModelProperty("集群接入开启的索引服务")
-    private String                     templateSrvs;
 
     @ApiModelProperty("集群认证信息：'user:password'")
     private String                     password;
@@ -63,4 +50,13 @@ public class ClusterJoinDTO extends BaseDTO {
 
     @ApiModelProperty("集群展示用属性标签，如「集群所属资源类型」等等")
     private String tags;
+
+    @ApiModelProperty("数据中心")
+    private String                     dataCenter;
+
+    @ApiModelProperty("IaaS平台类型")
+    private String                    platformType;
+
+    @ApiModelProperty("集群资源类型(-1 未知 1 共享 2 独立 3 独享)")
+    private Integer                    resourceType;
 }

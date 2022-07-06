@@ -29,8 +29,8 @@ public class DslMetricsService {
     @Autowired
     private DslMetricsESDAO dslMetricsESDAO;
 
-    public Result<List<DslTemplate>> getDSLMetricsInfoByAppId(Integer appId, Long startDate, Long endDate) {
-        List<DslTemplatePO> dslTemplatePos = dslTemplateESDAO.getDslMertricsByAppid(appId, startDate, endDate);
+    public Result<List<DslTemplate>> getDSLMetricsInfoByProjectId(Integer projectId, Long startDate, Long endDate) {
+        List<DslTemplatePO> dslTemplatePos = dslTemplateESDAO.getDslMetricsByProjectId(projectId, startDate, endDate);
 
         if (CollectionUtils.isEmpty(dslTemplatePos)) {
             return Result.buildSucc(new ArrayList<>());
@@ -47,18 +47,18 @@ public class DslMetricsService {
         return Result.buildSucc(ConvertUtil.list2List(dslTemplatePos, DslTemplate.class));
     }
 
-    public Result<List<DslMetrics>> getDetailMetrics(int appId, String dslTemplateMd5, Long startDate, Long endDate) {
+    public Result<List<DslMetrics>> getDetailMetrics(int projectId, String dslTemplateMd5, Long startDate, Long endDate) {
         return Result.buildSucc(ConvertUtil.list2List(
-                dslMetricsESDAO.getDslDetailMetricByAppidAndDslTemplateMd5(appId, dslTemplateMd5, startDate, endDate),
+                dslMetricsESDAO.getDslDetailMetricByProjectIdAndDslTemplateMd5(projectId, dslTemplateMd5, startDate, endDate),
                 DslMetrics.class));
     }
 
-    public Result<SearchDslTemplateResponse> getDslTemplateByCondition(Integer appId, String searchKeyword, String dslTag,
+    public Result<SearchDslTemplateResponse> getDslTemplateByCondition(Integer projectId, String searchKeyword, String dslTag,
                                                                        String sortInfo, Long from, Long size,
                                                                        Long startDate, Long endDate) {
         SearchDslTemplateResponse response = new SearchDslTemplateResponse();
 
-        Tuple<Long, List<DslTemplatePO>> dslTemplatePos = dslTemplateESDAO.getDslTemplateByCondition(appId,
+        Tuple<Long, List<DslTemplatePO>> dslTemplatePos = dslTemplateESDAO.getDslTemplateByCondition(projectId,
                 searchKeyword, dslTag, sortInfo, from, size, startDate, endDate);
 
         if (null == dslTemplatePos) {

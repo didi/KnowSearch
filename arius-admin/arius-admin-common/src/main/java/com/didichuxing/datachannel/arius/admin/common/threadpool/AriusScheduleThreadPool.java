@@ -1,14 +1,13 @@
 package com.didichuxing.datachannel.arius.admin.common.threadpool;
 
-import java.util.concurrent.Executors;
+import org.springframework.stereotype.Component;
+
+import javax.annotation.PostConstruct;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import javax.annotation.PostConstruct;
-
-import org.springframework.stereotype.Component;
 
 @Component
 public class AriusScheduleThreadPool {
@@ -18,8 +17,7 @@ public class AriusScheduleThreadPool {
 
     @PostConstruct
     public void init() {
-        scheduleThreadPool = Executors.newScheduledThreadPool(scheduleThreadNum,
-            new DesmondThreadFactory("scheduleThreadPool"));
+        scheduleThreadPool = new ScheduledThreadPoolExecutor(scheduleThreadNum, new DesmondThreadFactory("scheduleThreadPool"));
     }
 
     public void submitScheduleAtFixedRateTask(Runnable runnable, long initialDelay, long period) {
@@ -50,6 +48,6 @@ public class AriusScheduleThreadPool {
                 t.setPriority( Thread.NORM_PRIORITY );
             }
             return t;
-        };
+        }
     }
 }

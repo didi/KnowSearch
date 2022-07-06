@@ -21,19 +21,14 @@ public abstract class BaseExtendFactory {
 
     private static final ILog LOGGER = LogFactory.getLog(BaseExtendFactory.class);
 
-    public  <T> T getByClassNamePer(String classNamePre, Class<T> clazz) {
+    public  <T> T getByClassNamePer(String classNamePre, Class<T> clazz) throws NotFindSubclassException {
         T handler = null;
-        try {
-            handler = doGet(classNamePre, clazz);
-        } catch (NotFindSubclassException e) {
-            LOGGER.error("class=BaseExtendFactory||method=getByClassNamePer||handleNamePre={}||msg={}", classNamePre,
-                e.getMessage());
-        }
+        handler = doGet(classNamePre, clazz);
 
         return handler;
     }
 
-    private <T> T doGet(String classNamePre, Class<T> clazz) {
+    private <T> T doGet(String classNamePre, Class<T> clazz) throws NotFindSubclassException {
         Map<String, T> beans = null;
         try {
             beans = SpringTool.getBeansOfType(clazz);

@@ -2,7 +2,6 @@ package com.didichuxing.datachannel.arius.admin.common.bean.vo.template;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.BaseVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.DataTypeEnum;
-
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -61,9 +60,10 @@ public class BaseTemplateVO extends BaseVO {
     private String libraDepartment;
 
     @ApiModelProperty("索引应用ID")
-    private Integer appId;
+    private Integer projectId;
 
-    @ApiModelProperty("责任人")
+    @ApiModelProperty("责任人：后续进行下线，无需再使用")
+    @Deprecated
     private String responsible;
 
     @ApiModelProperty("时间字段")

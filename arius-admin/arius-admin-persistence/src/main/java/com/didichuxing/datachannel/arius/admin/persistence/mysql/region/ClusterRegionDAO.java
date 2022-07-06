@@ -1,23 +1,23 @@
 package com.didichuxing.datachannel.arius.admin.persistence.mysql.region;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterRegionPO;
-import org.springframework.stereotype.Repository;
-
 import java.util.List;
 
-/**
- * @author wangshu
- * @date 2020/09/15
- */
+import org.springframework.stereotype.Repository;
+
+import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterRegionPO;
+
 @Repository
 public interface ClusterRegionDAO {
 
     ClusterRegionPO getById(Long regionId);
 
-    List<ClusterRegionPO> listByLogicClusterId(Long logicClusterId);
+    ClusterRegionPO getByName(String regionName);
+
+    ClusterRegionPO getByLogicClusterId(Long logicClusterId);
 
     List<ClusterRegionPO> getByPhyClusterName(String phyClusterName);
 
+    List<ClusterRegionPO> listByPhyClusterNames(List<String> phyClusterNames);
     int insert(ClusterRegionPO param);
 
     int update(ClusterRegionPO param);
@@ -36,5 +36,4 @@ public interface ClusterRegionDAO {
      * @return
      */
     List<ClusterRegionPO> listBoundRegionsByCondition(ClusterRegionPO condt);
-
 }

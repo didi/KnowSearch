@@ -2,7 +2,7 @@ package com.didichuxing.datachannel.arius.admin.common.bean.dto.template;
 
 import java.util.List;
 
-import com.didichuxing.datachannel.arius.admin.common.constant.app.AppTemplateAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectTemplateAuthEnum;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -17,9 +17,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel(description = "条件查询索引模板信息")
-public class TemplateConditionDTO extends IndexTemplateLogicDTO {
+public class TemplateConditionDTO extends IndexTemplateDTO {
     /**
-     * @see AppTemplateAuthEnum
+     * @see ProjectTemplateAuthEnum
      */
     @ApiModelProperty("当前项目拥有的权限（1:管理；2:读写；3:读; -1无权限）")
     private Integer      authType;
@@ -27,7 +27,7 @@ public class TemplateConditionDTO extends IndexTemplateLogicDTO {
     @ApiModelProperty("所属集群")
     private List<String> clusterPhies;
 
-    @ApiModelProperty("是否开启 hasDCDR  位点差checkPointDiff")
+    @ApiModelProperty("排序字段")
     private String       sortTerm;
 
     @ApiModelProperty(value = "是否降序排序（默认降序）", dataType = "Boolean", required = false)

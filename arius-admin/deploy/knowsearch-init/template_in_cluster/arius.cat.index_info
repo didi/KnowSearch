@@ -5,18 +5,12 @@
     ],
     "settings":{
         "index":{
-            "routing":{
-                "allocation":{
-                    "include":{
-                        "rack":""
-                    }
-                }
-            },
             "mapping":{
                 "single_type":"true"
             },
             "number_of_shards":"4",
-            "number_of_routing_size":"1"
+            "number_of_routing_size":"1",
+            "refresh_interval": "1s"
         }
     },
     "mappings":{
@@ -24,13 +18,31 @@
             "enabled":true
         },
         "properties":{
-            "priStoreSize":{
-                "type":"long"
+            "cluster": {
+                "type": "keyword"
             },
-            "cluster":{
-                "type":"keyword"
+            "clusterPhy": {
+                "type": "keyword"
             },
-            "pri":{
+            "clusterLogic": {
+                "type": "keyword"
+            },
+            "resourceId": {
+                "type": "long"
+            },
+            "templateId": {
+                "type": "integer"
+            },
+            "totalSegmentCount": {
+                "type": "long"
+            },
+            "primariesSegmentCount": {
+                "type": "long"
+            },
+            "priStoreSize": {
+                "type": "long"
+            },
+            "pri": {
                 "type":"long"
             },
             "index":{

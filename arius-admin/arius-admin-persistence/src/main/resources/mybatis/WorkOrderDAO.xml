@@ -7,7 +7,7 @@
         <id column="id"                   jdbcType="BIGINT"       property="id" />
         <result column="type"             jdbcType="VARCHAR"      property="type" />
         <result column="title"            jdbcType="VARCHAR"      property="title" />
-        <result column="approver_app_id"  jdbcType="INTEGER"      property="approverAppId" />
+        <result column="approver_project_id"  jdbcType="INTEGER"      property="approverProjectId" />
         <result column="applicant"        jdbcType="VARCHAR"      property="applicant" />
         <result column="extensions"       jdbcType="LONGVARCHAR"  property="extensions" />
         <result column="description"      jdbcType="LONGVARCHAR"  property="description" />
@@ -17,64 +17,79 @@
         <result column="status"            jdbcType="INTEGER"     property="status" />
         <result column="create_time"       jdbcType="TIMESTAMP"   property="createTime" />
         <result column="update_time"       jdbcType="TIMESTAMP"   property="updateTime" />
-        <result column="applicant_app_id"  jdbcType="INTEGER"     property="applicantAppId" />
+        <result column="applicant_project_id"  jdbcType="INTEGER"     property="applicantProjectId" />
     </resultMap>
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        id, type, title,  applicant,approver_app_id, extensions, description, approver, finish_time, opinion, status, create_time, update_time, applicant_app_id
+        id, type, title,  applicant,approver_project_id, extensions, description, approver, finish_time, opinion, status, create_time, update_time, applicant_project_id
     </sql>
     
     
   <insert id="insert" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO" useGeneratedKeys="true" keyProperty="id">
-    insert into work_order (
-    type,title, applicant, applicant_app_id, description, extensions,approver_app_id
+    insert into arius_work_order_info (
+    type,title, applicant, applicant_project_id, description, extensions,approver_project_id
     )
     values (
-    #{type},#{title}, #{applicant}, #{applicantAppId}, #{description},#{extensions},
-    #{approverAppId}
+    #{type},#{title}, #{applicant}, #{applicantProjectId}, #{description},#{extensions},
+    #{approverProjectId}
     )
   </insert>
 
   <select id="list" resultMap="BaseResultMap">
     select <include refid="Base_Column_List"/>
-    from work_order
+    from arius_work_order_info
     order by create_time desc
   </select>
 
   <select id="getById" parameterType="java.lang.Long" resultMap="BaseResultMap">
     select <include refid="Base_Column_List"/>
-    from work_order
+    from arius_work_order_info
     where id=#{id}
   </select>
 
   <update id="updateOrderStatusById" parameterType="java.util.Map">
-    update work_order
+    update arius_work_order_info
     set status = #{status}, update_time=now()
     where id = #{id}
   </update>
 
   <update id="update" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO">
-    update work_order
+    update arius_work_order_info
     set approver = #{approver}, finish_time=now(), opinion= #{opinion}, status = #{status}, update_time=now()
     where id = #{id}
   </update>
 
-  <select id="listByApplicantAndStatus" parameterType="java.util.Map" resultMap="BaseResultMap">
+  <select id="listByApplicantAndStatusAndProjectId" parameterType="java.util.Map" resultMap="BaseResultMap">
     select <include refid="Base_Column_List"/>
-    from work_order
+    from arius_work_order_info
     where applicant=#{applicant}
     <trim>
       <if test="status!=null">
         and status=#{status}
       </if>
+    <if test="applicantProjectId!=null">
+      and applicant_project_id=#{applicantProjectId}
+    </if>
+    </trim>
+    order by status,create_time desc
+  </select>
+  <select id="listByApplicantAndStatus" parameterType="java.util.Map" resultMap="BaseResultMap">
+    select <include refid="Base_Column_List"/>
+    from arius_work_order_info
+    where applicant=#{applicant}
+    <trim>
+      <if test="status!=null">
+        and status=#{status}
+      </if>
+ 
     </trim>
     order by status,create_time desc
   </select>
 
   <select id="listByApproverAndStatus" parameterType="java.util.Map" resultMap="BaseResultMap">
     select <include refid="Base_Column_List"/>
-    from work_order
+    from arius_work_order_info
     where approver=#{approver}
     <trim>
       <if test="status!=null">
@@ -86,13 +101,13 @@
 
   <select id="listByStatus" parameterType="java.lang.Integer" resultMap="BaseResultMap">
     select <include refid="Base_Column_List"/>
-    from work_order
+    from arius_work_order_info
     where status=#{status}
     order by create_time desc
   </select>
 
   <update id="updateExtensionsById" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO">
-    UPDATE work_order SET
+    UPDATE arius_work_order_info SET
       extensions=#{extensions},
       update_time=now()
     WHERE id = #{id}
@@ -100,7 +115,7 @@
 
   <select id="listByHandleTime" parameterType="java.util.Map" resultMap="BaseResultMap">
     select <include refid="Base_Column_List"/>
-    from work_order
+    from arius_work_order_info
     where finish_time >= #{startTime} and #{endTime} >= finish_time
   </select>
 

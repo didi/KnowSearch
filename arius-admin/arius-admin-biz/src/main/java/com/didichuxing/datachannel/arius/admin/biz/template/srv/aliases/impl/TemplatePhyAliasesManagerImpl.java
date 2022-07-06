@@ -7,7 +7,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminESOpRetryConstants;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.logic.impl.TemplateLogicServiceImpl;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.impl.IndexTemplateServiceImpl;
 import com.didiglobal.logi.elasticsearch.client.response.setting.template.TemplateConfig;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
@@ -28,7 +28,7 @@ import java.util.Map;
 @Service
 public class TemplatePhyAliasesManagerImpl implements TemplatePhyAliasesManager {
 
-    private static final ILog sLogger = LogFactory.getLog(TemplateLogicServiceImpl.class);
+    private static final ILog sLogger = LogFactory.getLog(IndexTemplateServiceImpl.class);
 
     @Autowired
     private ESTemplateService esTemplateService;

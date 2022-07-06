@@ -1,5 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.biz.workorder.impl;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.workorder.BpmAuditTypeEnum.AGREE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.workorder.BpmAuditTypeEnum.DISAGREE;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.WorkOrderHandler;
@@ -7,43 +10,45 @@ import com.didichuxing.datachannel.arius.admin.biz.workorder.WorkOrderManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.workorder.WorkOrderDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.workorder.WorkOrderProcessDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.OrderTypeVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.WorkOrderSubmittedVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.WorkOrderVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.detail.OrderDetailBaseVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.user.AriusUserInfoVO;
-import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
-import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.OrderDetail;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.OrderInfoDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
-import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
-import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
-import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.AriusWorkOrderInfoSubmittedVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.OrderTypeVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.WorkOrderVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.detail.OrderDetailBaseVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.OrderStatusEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
+import com.didichuxing.datachannel.arius.admin.common.exception.OperateForbiddenException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
-import com.didichuxing.datachannel.arius.admin.core.service.common.AriusUserInfoService;
+import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
+import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
+import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.workorder.WorkOrderDAO;
+import com.didiglobal.logi.security.common.entity.dept.Dept;
+import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
+import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
+import com.didiglobal.logi.security.service.DeptService;
+import com.didiglobal.logi.security.service.ProjectService;
+import com.didiglobal.logi.security.service.UserService;
 import com.google.common.collect.Lists;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.workorder.BpmAuditTypeEnum.AGREE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.workorder.BpmAuditTypeEnum.DISAGREE;
 
 /**
  * @author d06679
@@ -54,41 +59,41 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
 
     private static final Logger  LOGGER           = LoggerFactory.getLogger(WorkOrderManagerImpl.class);
 
-    private static final int     APP_ID_TO_CREATE = -99;
+    private static final int PROJECT_ID_TO_CREATE = -99;
 
     @Autowired
     private HandleFactory        handleFactory;
 
     @Autowired
-    private AppService           appService;
+    private ProjectService projectService;
+    @Autowired
+    private UserService userService;
 
     @Autowired
-    private WorkOrderDAO         orderDao;
-
+    private WorkOrderDAO orderDao;
     @Autowired
-    private AriusUserInfoService ariusUserInfoService;
+    private DeptService deptService;
+    @Autowired
+    private RoleTool roleTool;
+
+
 
     @Override
     public Result<List<OrderTypeVO>> getOrderTypes() {
-        List<OrderTypeVO> orderTypeVOS = new ArrayList<>();
-
-        for (WorkOrderTypeEnum elem : WorkOrderTypeEnum.values()) {
-            if (WorkOrderTypeEnum.UNKNOWN.getName().equals(elem.getName())) {
-                continue;
-            }
-
-            orderTypeVOS.add(new OrderTypeVO(elem.getName(), elem.getMessage()));
-        }
-
-        return Result.buildSucc(orderTypeVOS);
+        List<OrderTypeVO> orderTypeVOList = new ArrayList<>();
+        orderTypeVOList.add(new OrderTypeVO(WorkOrderTypeEnum.LOGIC_CLUSTER_CREATE.getName(),
+                WorkOrderTypeEnum.LOGIC_CLUSTER_CREATE.getMessage()));
+        orderTypeVOList.add(new OrderTypeVO(WorkOrderTypeEnum.LOGIC_CLUSTER_INDECREASE.getName(),
+                WorkOrderTypeEnum.LOGIC_CLUSTER_INDECREASE.getMessage()));
+        return Result.buildSucc(orderTypeVOList);
     }
 
     @Override
-    public Result<WorkOrderSubmittedVO> submit(WorkOrderDTO workOrderDTO) throws AdminOperateException {
+    public Result<AriusWorkOrderInfoSubmittedVO> submit(WorkOrderDTO workOrderDTO) throws AdminOperateException {
 
-        String workOrderJSONString = JSON.toJSONString(workOrderDTO);
+        String workOrderJsonString = JSON.toJSONString(workOrderDTO);
         LOGGER.info("class=WorkOrderManagerImpl||method=WorkOrderController.process||workOrderDTO={}||envInfo={}||dataCenter={}",
-            workOrderJSONString, EnvUtil.getStr(), workOrderDTO.getDataCenter());
+            workOrderJsonString, EnvUtil.getStr(), workOrderDTO.getDataCenter());
 
         initWorkOrderDTO(workOrderDTO);
 
@@ -108,7 +113,7 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
     }
 
     @Override
-    public Result<Void> process(WorkOrderProcessDTO processDTO) {
+    public Result<Void> process(WorkOrderProcessDTO processDTO) throws NotFindSubclassException {
         Result<Void> checkProcessResult = checkProcessValid(processDTO);
         if (checkProcessResult.failed()) {
             return checkProcessResult;
@@ -125,8 +130,8 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
     @Override
     public int insert(WorkOrderPO orderPO) {
         try {
-            if (orderPO.getApproverAppId() == null) {
-                orderPO.setApproverAppId(AdminConstant.DEFAULT_APP_ID);
+            if (orderPO.getApproverProjectId() == null) {
+                orderPO.setApproverProjectId(AuthConstant.SUPER_PROJECT_ID);
             }
             orderDao.insert(orderPO);
             return orderPO.getId().intValue();
@@ -215,6 +220,25 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
     }
 
     @Override
+    public Result<List<WorkOrderVO>> getOrderApplyList(String applicant, Integer status, Integer projectId) {
+        List<WorkOrderVO> orderDOList = Lists.newArrayList();
+        try {
+            orderDOList = ConvertUtil.list2List(orderDao.listByApplicantAndStatusAndProjectId(applicant, status,projectId),
+                WorkOrderVO.class);
+        } catch (Exception e) {
+            LOGGER.error(
+                "class=WorkOrderManagerImpl||method=getOrderApplyList||applicant={}||status={}||msg=get apply order failed!",
+                applicant, status, e);
+        }
+        return Result.buildSucc(orderDOList);
+    }
+    
+    /**
+     * @param applicant
+     * @param status
+     * @return
+     */
+    @Override
     public Result<List<WorkOrderVO>> getOrderApplyList(String applicant, Integer status) {
         List<WorkOrderVO> orderDOList = Lists.newArrayList();
         try {
@@ -227,11 +251,12 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
         }
         return Result.buildSucc(orderDOList);
     }
-
+    
     @Override
     public List<WorkOrderPO> getApprovalList(String approver) {
         try {
-            if (!ariusUserInfoService.isOPByDomainAccount(approver)) {
+            //是用户 但不是管理员
+            if (!roleTool.isAdmin(approver) && Objects.nonNull(userService.getUserBriefByUserName(approver))) {
                 return orderDao.listByApproverAndStatus(approver, null);
             }
             return orderDao.list();
@@ -246,7 +271,7 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
     @Override
     public List<WorkOrderPO> getPassApprovalList(String approver) {
         try {
-            if (!ariusUserInfoService.isOPByDomainAccount(approver)) {
+            if (!roleTool.isAdmin(approver)) {
                 return orderDao.listByApproverAndStatus(approver, OrderStatusEnum.PASSED.getCode());
             }
             return orderDao.listByStatus(OrderStatusEnum.PASSED.getCode());
@@ -268,8 +293,8 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
                 "class=WorkOrderManagerImpl||method=getWaitApprovalList||userName={}||msg=get wait order list failed!",
                 userName, e);
         }
-
-        if (ariusUserInfoService.isOPByDomainAccount(userName) || ariusUserInfoService.isRDByDomainAccount(userName)) {
+        
+        if (roleTool.isAdmin(userName)) {
             return orderList;
         } else {
             orderList = handleOrderList(userName, orderList);
@@ -278,12 +303,12 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
     }
 
     @Override
-    public OrderDetail getBaseDetail(WorkOrderPO orderPO) {
+    public OrderInfoDetail getBaseDetail(WorkOrderPO orderPO) throws NotFindSubclassException {
         if (AriusObjUtils.isNull(orderPO)) {
             return null;
         }
 
-        OrderDetail detailBaseDTO = new OrderDetail();
+        OrderInfoDetail detailBaseDTO = new OrderInfoDetail();
         detailBaseDTO.setDescription(orderPO.getDescription());
         detailBaseDTO.setCreateTime(orderPO.getCreateTime());
         detailBaseDTO.setFinishTime(orderPO.getFinishTime());
@@ -292,8 +317,13 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
         detailBaseDTO.setStatus(orderPO.getStatus());
         detailBaseDTO.setType(orderPO.getType());
         detailBaseDTO.setTitle(orderPO.getTitle());
-        detailBaseDTO.setApplicantAppId(orderPO.getApplicantAppId());
-        detailBaseDTO.setAppDeptName("");
+        detailBaseDTO.setApplicantProjectId(orderPO.getApplicantProjectId());
+        UserBriefVO userBriefVO = userService.getUserBriefByUserName(orderPO.getApplicant());
+        Map<Integer, Dept> map = deptService.getAllDeptMap();
+        if (Objects.nonNull(userBriefVO) && map.containsKey(userBriefVO.getDeptId())) {
+            detailBaseDTO.setAppDeptName(map.get(userBriefVO.getDeptId()).getDeptName());
+        
+        }
 
         WorkOrderTypeEnum typeEnum = WorkOrderTypeEnum.valueOfName(orderPO.getType());
         if (WorkOrderTypeEnum.UNKNOWN.equals(typeEnum)) {
@@ -310,12 +340,13 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
                 "class=WorkOrderManagerImpl||method=getBaseDetail||extensions={}||msg=get order detail failed!",
                 orderPO.getExtensions(), e);
         }
-        detailBaseDTO.setApplicant(ariusUserInfoService.getByDomainAccount(orderPO.getApplicant()));
+        UserBriefVO briefVO = userService.getUserBriefByUserName(orderPO.getApplicant());
+        detailBaseDTO.setApplicant(briefVO);
         return detailBaseDTO;
     }
 
     @Override
-    public Result<List<WorkOrderVO>> getOrderApprovalListByStatus(Integer status) {
+    public Result<List<WorkOrderVO>> getOrderApprovalListByStatus(Integer status) throws OperateForbiddenException {
         List<WorkOrderPO> orderDOList = new ArrayList<>();
 
         String userName = SpringTool.getUserName();
@@ -350,32 +381,30 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
             return Result.buildNotExist("工单类型不存在");
         }
 
-        if (AriusObjUtils.isNull(ariusUserInfoService.getByDomainAccount(workOrderDTO.getSubmitor()))) {
+        if (AriusObjUtils.isNull(userService.getUserBriefByUserName(workOrderDTO.getSubmitor()))) {
             return Result.buildParamIllegal("提交人非法");
         }
-
-        if (!WorkOrderTypeEnum.APP_CREATE.getName().equals(workOrderDTO.getType())) {
-            if (AriusObjUtils.isNull(workOrderDTO.getSubmitorAppid())) {
-                return Result.buildParamIllegal("提交APPID为空");
-            }
-            if (APP_ID_TO_CREATE != workOrderDTO.getSubmitorAppid()
-                && !appService.isAppExists(workOrderDTO.getSubmitorAppid())) {
-                return Result.buildNotExist("提交appId不存在");
-            }
+    
+        if (AriusObjUtils.isNull(workOrderDTO.getSubmitorProjectId())) {
+            return Result.buildParamIllegal("提交projectID为空");
+        }
+        if (PROJECT_ID_TO_CREATE != workOrderDTO.getSubmitorProjectId() && !projectService.checkProjectExist(
+                workOrderDTO.getSubmitorProjectId())) {
+            return Result.buildNotExist("提交projectId不存在");
         }
 
         return Result.buildSucc();
     }
 
-    private void initWorkOrderDTO(WorkOrderDTO workOrderDTO) {
+    private void initWorkOrderDTO(WorkOrderDTO workOrderDTO) throws OperateForbiddenException {
         workOrderDTO.setSubmitor(SpringTool.getUserName());
     }
 
-    private WorkOrderSubmittedVO convert2WorkOrderSubmittedVO(WorkOrderPO workOrderPO) {
+    private AriusWorkOrderInfoSubmittedVO convert2WorkOrderSubmittedVO(WorkOrderPO workOrderPO) {
         if (AriusObjUtils.isNull(workOrderPO)) {
             return null;
         }
-        WorkOrderSubmittedVO vo = new WorkOrderSubmittedVO();
+        AriusWorkOrderInfoSubmittedVO vo = new AriusWorkOrderInfoSubmittedVO();
         vo.setId(workOrderPO.getId());
         vo.setTitle(workOrderPO.getTitle());
         return vo;
@@ -393,7 +422,7 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
         return Result.buildSucc();
     }
 
-    private Result<Void> doProcessByWorkOrderHandle(WorkOrderPO orderPO, WorkOrderProcessDTO processDTO) {
+    private Result<Void> doProcessByWorkOrderHandle(WorkOrderPO orderPO, WorkOrderProcessDTO processDTO) throws NotFindSubclassException {
         WorkOrderHandler handler = (WorkOrderHandler) handleFactory.getByHandlerNamePer(orderPO.getType());
 
         Result<Void> checkAuthResult = handler.checkAuthority(orderPO, processDTO.getAssignee());
@@ -425,7 +454,7 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
         workOrder.setId(orderPO.getId());
         workOrder.setTitle(orderPO.getTitle());
         workOrder.setSubmitor(orderPO.getApplicant());
-        workOrder.setSubmitorAppid(orderPO.getApplicantAppId());
+        workOrder.setSubmitorProjectId(orderPO.getApplicantProjectId());
         workOrder.setType(orderPO.getType());
         workOrder.setOpinion(processDTO.getComment());
         //合并两Json属性
@@ -435,23 +464,23 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
         return workOrder;
     }
 
-    private OrderDetailBaseVO convert2DetailBaseVO(OrderDetail orderDetail) {
+    private OrderDetailBaseVO convert2DetailBaseVO(OrderInfoDetail orderInfoDetail) {
         OrderDetailBaseVO baseVO = new OrderDetailBaseVO();
 
-        baseVO.setId(orderDetail.getId());
-        baseVO.setType(orderDetail.getType());
-        baseVO.setStatus(orderDetail.getStatus());
-        baseVO.setAppDeptName(orderDetail.getAppDeptName());
-        baseVO.setApplicant(ConvertUtil.obj2Obj(orderDetail.getApplicant(), AriusUserInfoVO.class));
-        baseVO.setApplicantAppId(orderDetail.getApplicantAppId());
-        baseVO.setApplicantAppName(getApplicantAppName(orderDetail.getApplicantAppId()));
-        baseVO.setApproverList(ConvertUtil.list2List(orderDetail.getApproverList(), AriusUserInfoVO.class));
-        baseVO.setFinishTime(orderDetail.getFinishTime());
-        baseVO.setCreateTime(orderDetail.getCreateTime());
-        baseVO.setTitle(orderDetail.getTitle());
-        baseVO.setOpinion(orderDetail.getOpinion());
-        baseVO.setDescription(orderDetail.getDescription());
-        baseVO.setDetail(JSON.toJSONString(orderDetail.getDetail()));
+        baseVO.setId(orderInfoDetail.getId());
+        baseVO.setType(orderInfoDetail.getType());
+        baseVO.setStatus(orderInfoDetail.getStatus());
+        baseVO.setAppDeptName(orderInfoDetail.getAppDeptName());
+        baseVO.setApplicant(orderInfoDetail.getApplicant());
+        baseVO.setApplicantProjectId(orderInfoDetail.getApplicantProjectId());
+        baseVO.setApplicantAppName(getApplicantAppName(orderInfoDetail.getApplicantProjectId()));
+        baseVO.setApproverList(orderInfoDetail.getApproverList());
+        baseVO.setFinishTime(orderInfoDetail.getFinishTime());
+        baseVO.setCreateTime(orderInfoDetail.getCreateTime());
+        baseVO.setTitle(orderInfoDetail.getTitle());
+        baseVO.setOpinion(orderInfoDetail.getOpinion());
+        baseVO.setDescription(orderInfoDetail.getDescription());
+        baseVO.setDetail(JSON.toJSONString(orderInfoDetail.getDetail()));
 
         return baseVO;
     }
@@ -466,10 +495,10 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
                     return false;
                 }
 
-                List<AriusUserInfo> ariusUserInfos = handler.getApproverList(abstractOrderDetail);
+                List<UserBriefVO> ariusUserInfos = handler.getApproverList(abstractOrderDetail);
 
-                for (AriusUserInfo ariusUserInfo : ariusUserInfos) {
-                    if (userName.equals(ariusUserInfo.getDomainAccount())) {
+                for (UserBriefVO userBriefVO : ariusUserInfos) {
+                    if (userName.equals(userBriefVO.getUserName())) {
                         return true;
                     }
                 }
@@ -482,10 +511,10 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
         return orderList;
     }
 
-    private String getApplicantAppName(Integer applicantAppId) {
-        App app = appService.getAppById(applicantAppId);
-        if (null != app) {
-            return app.getName();
+    private String getApplicantAppName(Integer applicantProjectId) {
+        ProjectBriefVO briefVO = projectService.getProjectBriefByProjectId(applicantProjectId);
+        if (null != briefVO) {
+            return briefVO.getProjectName();
         }
 
         return null;

@@ -28,8 +28,8 @@ public class GatewayJoinVO {
     @ApiModelProperty("请求id")
     private String requestId;
 
-    @ApiModelProperty("appid")
-    private Integer appid;
+    @ApiModelProperty("projectId")
+    private Integer projectId;
 
     @ApiModelProperty("索引名称")
     private String indices;

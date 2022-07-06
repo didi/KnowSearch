@@ -2,7 +2,7 @@ package com.didichuxing.datachannel.arius.admin.common.constant;
 
 import java.util.Set;
 
-import com.didichuxing.datachannel.arius.admin.common.constant.app.AppTemplateAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectTemplateAuthEnum;
 import com.google.common.collect.Sets;
 
 /**
@@ -13,32 +13,32 @@ public enum SecurityRoleAuthEnum {
                                   /**
                                    * 管理权限
                                    */
-                                  OWN(AppTemplateAuthEnum.OWN, "own_rw", Sets.newHashSet("all")),
+                                  OWN(ProjectTemplateAuthEnum.OWN, "own_rw", Sets.newHashSet("all")),
 
                                   /**
                                    * 读写权限
                                    */
-                                  RW(AppTemplateAuthEnum.RW, "rw", Sets.newHashSet("read", "write")),
+                                  RW(ProjectTemplateAuthEnum.RW, "rw", Sets.newHashSet("read", "write")),
 
                                   /**
                                    * 读权限
                                    */
-                                  R(AppTemplateAuthEnum.R, "r", Sets.newHashSet("read"));
+                                  R(ProjectTemplateAuthEnum.R, "r", Sets.newHashSet("read"));
 
-    private final AppTemplateAuthEnum appTemplateAuthEnum;
+    private final ProjectTemplateAuthEnum projectTemplateAuthEnum;
 
     private final String              authName;
 
     private final Set<String>         privilegeSet;
 
-    SecurityRoleAuthEnum(AppTemplateAuthEnum appTemplateAuthEnum, String authName, Set<String> privilegeSet) {
-        this.appTemplateAuthEnum = appTemplateAuthEnum;
+    SecurityRoleAuthEnum(ProjectTemplateAuthEnum projectTemplateAuthEnum, String authName, Set<String> privilegeSet) {
+        this.projectTemplateAuthEnum = projectTemplateAuthEnum;
         this.authName = authName;
         this.privilegeSet = privilegeSet;
     }
 
-    public AppTemplateAuthEnum getAppTemplateAuthEnum() {
-        return appTemplateAuthEnum;
+    public ProjectTemplateAuthEnum getAppTemplateAuthEnum() {
+        return projectTemplateAuthEnum;
     }
 
     public String getAuthName() {
@@ -49,9 +49,9 @@ public enum SecurityRoleAuthEnum {
         return privilegeSet;
     }
 
-    public static SecurityRoleAuthEnum valueByAuth(AppTemplateAuthEnum appTemplateAuthEnum) {
+    public static SecurityRoleAuthEnum valueByAuth(ProjectTemplateAuthEnum projectTemplateAuthEnum) {
         for (SecurityRoleAuthEnum securityRoleAuthEnum : SecurityRoleAuthEnum.values()) {
-            if (securityRoleAuthEnum.getAppTemplateAuthEnum().equals(appTemplateAuthEnum)) {
+            if (securityRoleAuthEnum.getAppTemplateAuthEnum().equals(projectTemplateAuthEnum)) {
                 return securityRoleAuthEnum;
             }
         }

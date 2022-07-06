@@ -23,6 +23,11 @@ public class ClusterRegionPO extends BasePO {
     private Long id;
 
     /**
+     * region 名称
+     */
+    private String name;
+
+    /**
      * 绑定到的逻辑集群ID列表，用逗号隔开, 为空则没有被绑定
      */
     private String logicClusterIds;
@@ -33,8 +38,8 @@ public class ClusterRegionPO extends BasePO {
     private String phyClusterName;
 
     /**
-     * Rack列表
+     * 配置项
      */
-    private String racks;
+    private String config;
 
 }

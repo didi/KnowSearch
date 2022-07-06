@@ -1,24 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.METRICS;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.SUM;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsContant.TIMESTAMP;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyNodeMetricsEnum.CPU_LOAD_AVERAGE_15M;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyNodeMetricsEnum.CPU_LOAD_AVERAGE_1M;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyNodeMetricsEnum.CPU_LOAD_AVERAGE_5M;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyNodeMetricsEnum.CPU_USAGE_PERCENT;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyNodeMetricsEnum.INDICES_INDEXING_CONSUME;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyNodeMetricsEnum.INDICES_QUERY_CONSUME;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyNodeMetricsEnum.TRANS_RX_SIZE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyNodeMetricsEnum.TRANS_TX_SIZE;
-
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.TopMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.VariousLineChartMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESNodeStats;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.stats.NodeRackStatisPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterLogicDiskUsedInfoPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AriusStatsEnum;
-import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.IndexNameUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.MetricsUtils;
@@ -28,18 +15,18 @@ import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESAggr
 import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESAggrMap;
 import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESBucket;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-import javax.annotation.PostConstruct;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.PostConstruct;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.METRICS;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.TIMESTAMP;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.AggMetricsTypeEnum.SUM;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyNodeMetricsEnum.*;
 
 @Component
 public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
@@ -52,10 +39,9 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
     public static final String            OPEN_HTTP         = "open_http";
     public static final String            OPEN_HTTP_FIELD   = "http-current_open";
     private static final String           VALUE             = "value";
-    private static final FutureUtil<Void> futureUtil = FutureUtil.init("AriusStatsNodeInfoESDAO",  10,10,500);
-    
-   
-    
+    private static final FutureUtil<Void> futureUtil        = FutureUtil.init("AriusStatsNodeInfoESDAO",  10,10,500);
+
+
     @PostConstruct
     public void init() {
         super.indexName = dataCentreUtil.getAriusStatsNodeInfo();
@@ -65,7 +51,7 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
 
     /**
      * 根据集群名称，获取集群[now-2m, now-1m]总的接收的流量
-     * @param cluster
+     * @param cluster 集群
      * @return
      */
     public Double getClusterRx(String cluster) {
@@ -129,7 +115,7 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
         String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
 
         return gatewayClient.performRequest(metadataClusterName, realIndex, TYPE, dsl,
-            this::getAvgAndPercentilesFromESQueryResponse, 3);
+                this::getAvgAndPercentilesFromESQueryResponse, 3);
     }
 
     /**
@@ -144,7 +130,7 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
         String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
 
         return gatewayClient.performRequest(metadataClusterName, realIndex, TYPE, dsl,
-            this::getAvgAndPercentilesFromESQueryResponse, 3);
+                this::getAvgAndPercentilesFromESQueryResponse, 3);
     }
 
     /**
@@ -168,7 +154,7 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
      */
     public double getClusterIndexingLatency(String cluster) {
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_CLUSTER_INDEXING_LATENCY_MAX, cluster,
-                NOW_2M, NOW_1M, INDICES_INDEXING_CONSUME.getType());
+                NOW_2M, NOW_1M, INDICES_INDEXING_LATENCY.getType());
         String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
 
         return gatewayClient.performRequest(realIndex, TYPE, dsl, s -> getSumFromESQueryResponse(s, "sum"), 3);
@@ -179,7 +165,7 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
      */
     public double getClusterSearchLatency(String cluster) {
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_CLUSTER_SEARCH_LATENCY_MAX, cluster,
-                NOW_2M, NOW_1M, INDICES_QUERY_CONSUME.getType());
+                NOW_2M, NOW_1M, INDICES_QUERY_LATENCY.getType());
         String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
 
         return gatewayClient.performRequest(realIndex, TYPE, dsl, s -> getSumFromESQueryResponse(s, "sum"), 3);
@@ -190,7 +176,7 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
      */
     public Map<String, Double> getClusterIndexingLatencyAvgAndPercentiles(String cluster) {
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.AGG_CLUSTER_REAL_TIME_AVG_AND_PERCENT, cluster,
-                NOW_2M, NOW_1M, INDICES_INDEXING_CONSUME.getType(), INDICES_INDEXING_CONSUME.getType());
+                NOW_2M, NOW_1M, INDICES_INDEXING_LATENCY.getType(), INDICES_INDEXING_LATENCY.getType());
         String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
 
         return gatewayClient.performRequestWithRouting(metadataClusterName, cluster, realIndex, TYPE, dsl,
@@ -202,7 +188,7 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
      */
     public Map<String, Double> getClusterSearchLatencyAvgAndPercentiles(String cluster) {
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.AGG_CLUSTER_REAL_TIME_AVG_AND_PERCENT, cluster,
-                NOW_2M, NOW_1M, INDICES_QUERY_CONSUME.getType(), INDICES_QUERY_CONSUME.getType());
+                NOW_2M, NOW_1M, INDICES_QUERY_LATENCY.getType(), INDICES_QUERY_LATENCY.getType());
         String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
 
         return gatewayClient.performRequest(metadataClusterName, realIndex, TYPE, dsl,
@@ -219,33 +205,6 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
 
         return gatewayClient.performRequest(metadataClusterName, realIndex, TYPE, dsl,
             this::getAvgAndPercentilesFromESQueryResponse, 3);
-    }
-
-    /**
-     * 根据集群和rack信息获取rack相关的统计信息
-     * @param clusterName
-     * @param rackList
-     * @return
-     */
-    public List<NodeRackStatisPO> getRackStatis(String clusterName, List<String> rackList) {
-        Map<String/*rackName*/, NodeRackStatisPO> nodeRackStatisMap = Maps.newHashMap();
-
-        // 由于近15分钟存在跨天情况，需要获取最近2天对应索引名称
-        String indexNames = genIndexNames(2);
-        String rackFormat = CommonUtils.strConcat(rackList);
-
-        int minuteSpan = 15;
-
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.AGG_RECENT_NODE_METRICS_BY_CLUSTER, clusterName,
-            rackFormat, minuteSpan);
-
-        ESQueryResponse esQueryResponse = gatewayClient.performRequest(indexNames, TYPE, dsl);
-        handleESQueryResponse(clusterName, nodeRackStatisMap, esQueryResponse);
-
-        List<NodeRackStatisPO> nodeRackStatisPOS = Lists.newLinkedList();
-        handleRackList(clusterName, rackList, nodeRackStatisMap, nodeRackStatisPOS);
-
-        return nodeRackStatisPOS;
     }
 
     /**
@@ -287,6 +246,23 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
         });
 
         return totalPhySize[0];
+    }
+
+    public List<VariousLineChartMetrics> getTopNNodeAggMetricsWithStep(String clusterPhyName, List<String> nodeNamesUnderClusterLogic,List<String> metricsTypes,
+                                                               Integer topNu,String topMethod,Integer topTimeStep, String aggType,
+                                                               Long startTime, Long endTime) {
+        List<VariousLineChartMetrics> buildMetrics = Lists.newCopyOnWriteArrayList();
+        //获取TopN指标节点名称信息
+        List<TopMetrics> topNIndexMetricsList = getTopNNodeMetricsInfoWithStep(clusterPhyName,nodeNamesUnderClusterLogic, metricsTypes, topNu,topMethod,topTimeStep,
+                esNodesMaxNum, startTime, endTime);
+        //构建多个指标TopN数据
+        for (TopMetrics topMetrics : topNIndexMetricsList) {
+            futureUtil.runnableTask(() -> buildTopNSingleMetricsForNode(buildMetrics, clusterPhyName, aggType,
+                    esNodesMaxNum, startTime, endTime, topMetrics));
+        }
+        futureUtil.waitExecute();
+
+        return buildMetrics;
     }
 
     /**
@@ -359,30 +335,66 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
     private List<TopMetrics> getTopNNodeMetricsInfo(String clusterPhyName, List<String> metricsTypes, Integer topNu,
                                                     String aggType, int esNodesMaxNum, Long startTime, Long endTime) {
 
-        int retryTime = 0;
-        List<VariousLineChartMetrics> variousLineChartMetrics = new ArrayList<>();
-        do {
-            // 获取有数据的第一个时间点
-            Long timePoint = getHasDataTime(clusterPhyName, startTime, endTime, DslsConstant.GET_HAS_NODE_METRICS_DATA_TIME);
-            //没有数据则提前终止
-            if (null == timePoint) { break;}
+        List<VariousLineChartMetrics> variousLineChartMetrics;
+        // 获取有数据的第一个时间点
+        Long timePoint = getHasDataTime(clusterPhyName, startTime, endTime, DslsConstant.GET_HAS_NODE_METRICS_DATA_TIME);
+        //没有数据则提前终止
+        if (null == timePoint) {
+            return new ArrayList<>();
+        }
 
-            Tuple<Long, Long> firstInterval = MetricsUtils.getSortInterval(endTime - startTime, timePoint);
-            long startTimeForOneInterval    = firstInterval.getV1();
-            long endTimeForOneInterval      = firstInterval.getV2();
+        Tuple<Long, Long> firstInterval = MetricsUtils.getSortInterval(endTime - startTime, timePoint);
+        long startTimeForOneInterval = firstInterval.getV1();
+        long endTimeForOneInterval = firstInterval.getV2();
 
-            String interval = MetricsUtils.getInterval(endTime - startTime);
+        String interval = MetricsUtils.getInterval(endTime - startTime);
 
-            String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_AGG_CLUSTER_PHY_NODES_INFO, clusterPhyName,
-                    startTimeForOneInterval, endTimeForOneInterval, esNodesMaxNum, interval, buildAggsDSL(metricsTypes, aggType));
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_AGG_CLUSTER_PHY_NODES_INFO, clusterPhyName,
+                startTimeForOneInterval, endTimeForOneInterval, esNodesMaxNum, interval, buildAggsDSL(metricsTypes, aggType));
 
-            String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTimeForOneInterval,
-                    endTimeForOneInterval);
+        String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTimeForOneInterval,
+                endTimeForOneInterval);
 
-            variousLineChartMetrics = gatewayClient.performRequestWithRouting(metadataClusterName, null,
-                    realIndexName, TYPE, dsl, s -> fetchMultipleAggMetrics(s, null, metricsTypes, topNu), 3);
-        }while (retryTime++ > 3 && CollectionUtils.isEmpty(variousLineChartMetrics));
+        variousLineChartMetrics = gatewayClient.performRequestWithRouting(metadataClusterName, null,
+                realIndexName, TYPE, dsl, s -> fetchMultipleAggMetrics(s, null, metricsTypes, topNu), 3);
+        return variousLineChartMetrics.stream().map(this::buildTopMetrics).collect(Collectors.toList());
+    }
 
+    /**
+     *  获取最新时间分片中指标数值前TopN的节点名称
+     *  如果延迟后的最新时间分片的指标值为null，最新时间迭代 - 1, 直到不为空, 迭代上限为3次。
+     *
+     * @param clusterPhyName   集群名称
+     * @param metricsTypes     指标类型
+     * @param topNu            topN
+     * @param esNodesMaxNum    聚合节点数量最大值（agg bucket number）
+     * @param startTime        开始时间
+     * @param endTime          结束时间
+     * @return
+     */
+    private List<TopMetrics> getTopNNodeMetricsInfoWithStep(String clusterPhyName,List<String> nodeNamesUnderClusterLogic, List<String> metricsTypes, Integer topNu, String topMethod, Integer topTimeStep,
+                                                            int esNodesMaxNum, Long startTime, Long endTime) {
+
+        List<VariousLineChartMetrics> variousLineChartMetrics;
+        // 获取有数据的第一个时间点
+        Long timePoint = getHasDataTime(clusterPhyName, startTime, endTime, DslsConstant.GET_HAS_NODE_METRICS_DATA_TIME);
+        //没有数据则提前终止
+        if (null == timePoint) {
+            return new ArrayList<>();
+        }
+
+        long startTimeForOneInterval = timePoint - topTimeStep;
+        long endTimeForOneInterval = timePoint;
+
+
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_AGG_CLUSTER_NODE_INFO_WITH_STEP, clusterPhyName,
+                startTimeForOneInterval, endTimeForOneInterval, esNodesMaxNum, STEP_INTERVAL, buildAggsDSL(metricsTypes, topMethod), buildAggsDSLWithStep(metricsTypes, topMethod));
+
+        String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTimeForOneInterval,
+                endTimeForOneInterval);
+
+        variousLineChartMetrics = gatewayClient.performRequestWithRouting(metadataClusterName, null,
+                realIndexName, TYPE, dsl, s -> fetchMultipleAggMetricsWithStep(s, metricsTypes, topNu, topMethod, nodeNamesUnderClusterLogic), 3);
         return variousLineChartMetrics.stream().map(this::buildTopMetrics).collect(Collectors.toList());
     }
 
@@ -477,90 +489,26 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
     private String getIndexNameByNowTimestamp(String indexName){
       return IndexNameUtils.genCurrentDailyIndexName(indexName);
     }
-    private void handleESQueryResponse(String clusterName, Map<String, NodeRackStatisPO> nodeRackStatisMap, ESQueryResponse esQueryResponse) {
+
+    private ClusterLogicDiskUsedInfoPO buildDiskInfoESQueryResponse(ESQueryResponse esQueryResponse) {
+        ClusterLogicDiskUsedInfoPO clusterLogicDiskUsedInfoPO = new ClusterLogicDiskUsedInfoPO();
         if (esQueryResponse != null && esQueryResponse.getAggs() != null) {
             Map<String, ESAggr> esAggrMap = esQueryResponse.getAggs().getEsAggrMap();
-            if (esAggrMap != null && esAggrMap.containsKey("minute_bucket")) {
-                ESAggr minuteBucketESAggr = esAggrMap.get("minute_bucket");
-                handleMinuteBucketESAggr(clusterName, nodeRackStatisMap, minuteBucketESAggr);
-            }
-        }
-    }
-
-    private void handleMinuteBucketESAggr(String clusterName, Map<String, NodeRackStatisPO> nodeRackStatisMap, ESAggr minuteBucketESAggr) {
-        if (minuteBucketESAggr != null && CollectionUtils.isNotEmpty(minuteBucketESAggr.getBucketList())) {
-            for (ESBucket esBucket : minuteBucketESAggr.getBucketList()) {
-                ESAggr groupByRackAggr = esBucket.getAggrMap().get("groupByRack");
-
-                if (groupByRackAggr != null && CollectionUtils.isNotEmpty(groupByRackAggr.getBucketList())) {
-                    handleBucketList(clusterName, nodeRackStatisMap, groupByRackAggr);
+            if (esAggrMap != null && esAggrMap.containsKey("hist")) {
+                ESAggr minuteBucketESAggr = esAggrMap.get("hist");
+                List<ESBucket> esBuckets = minuteBucketESAggr.getBucketList();
+                if (esBuckets.size()!=0){
+                    Map<String, ESAggr> aggrMap =  esBuckets.get(0).getAggrMap();
+                    Double total =Double.valueOf(aggrMap.get("diskTotal").getUnusedMap().get(VALUE).toString());
+                    Double free =Double.valueOf( aggrMap.get("diskFree").getUnusedMap().get(VALUE).toString());
+                    Double used = total- free;
+                    Double percent = used/total;
+                    clusterLogicDiskUsedInfoPO.setDiskTotal(total.longValue());
+                    clusterLogicDiskUsedInfoPO.setDiskUsage(used.longValue());
+                    clusterLogicDiskUsedInfoPO.setDiskUsagePercent(percent);
                 }
             }
         }
+        return clusterLogicDiskUsedInfoPO;
     }
-
-    private void handleRackList(String clusterName, List<String> rackList, Map<String, NodeRackStatisPO> nodeRackStatisMap, List<NodeRackStatisPO> nodeRackStatisPOS) {
-        NodeRackStatisPO nodeRackStatisPO;
-        for (String rack : rackList) {
-            if (nodeRackStatisMap.containsKey(rack)) {
-                nodeRackStatisPOS.add(nodeRackStatisMap.get(rack));
-            } else {
-                LOGGER.warn("class=AriusStatsNodeInfoEsDao||method=getRackStatis||msg={} {} set default value",
-                        clusterName, rack);
-                nodeRackStatisPO = new NodeRackStatisPO(clusterName, rack, 0.0, 0.0, 0, 0d, 0);
-
-                nodeRackStatisPOS.add(nodeRackStatisPO);
-            }
-        }
-    }
-
-    private void handleBucketList(String clusterName, Map<String, NodeRackStatisPO> nodeRackStatisMap, ESAggr groupByRackAggr) {
-        for (ESBucket rackBucket : groupByRackAggr.getBucketList()) {
-            ESAggr sumFreeDiskAggr = rackBucket.getAggrMap().get("sumFreeDisk");
-            ESAggr sumTotalDiskAggr = rackBucket.getAggrMap().get("sumTotalDisk");
-            ESAggr avgCpuUsageAggr = rackBucket.getAggrMap().get("avgCpuUsage");
-            ESAggr docsCountAggr = rackBucket.getAggrMap().get("docsCount");
-            String rackName = rackBucket.getUnusedMap().get("key").toString();
-
-            if (!nodeRackStatisMap.containsKey(rackName)) {
-                handleNodeRackStatisPO(clusterName, nodeRackStatisMap, sumFreeDiskAggr, sumTotalDiskAggr, avgCpuUsageAggr, docsCountAggr, rackName);
-            }
-        }
-    }
-
-    private void handleNodeRackStatisPO(String clusterName, Map<String, NodeRackStatisPO> nodeRackStatisMap,
-                                        ESAggr sumFreeDiskAggr, ESAggr sumTotalDiskAggr,
-                                        ESAggr avgCpuUsageAggr, ESAggr docsCountAggr,
-                                        String rackName) {
-        NodeRackStatisPO nodeRackStatisPO;
-        nodeRackStatisPO = new NodeRackStatisPO(clusterName, rackName, 0.0, 0.0, 0, 0d, 0);
-
-        if (sumTotalDiskAggr != null && sumTotalDiskAggr.getUnusedMap().containsKey(VALUE)
-                && sumTotalDiskAggr.getUnusedMap().get(VALUE) != null) {
-            nodeRackStatisPO.setTotalDiskG(
-                    Double.valueOf(sumTotalDiskAggr.getUnusedMap().get(VALUE).toString())
-                            / ONE_GB);
-        }
-        if (sumFreeDiskAggr != null && sumFreeDiskAggr.getUnusedMap().containsKey(VALUE)
-                && sumFreeDiskAggr.getUnusedMap().get(VALUE) != null) {
-            nodeRackStatisPO.setDiskFreeG(
-                    Double.valueOf(sumFreeDiskAggr.getUnusedMap().get(VALUE).toString())
-                            / ONE_GB);
-        }
-        if (avgCpuUsageAggr != null && avgCpuUsageAggr.getUnusedMap().containsKey(VALUE)
-                && avgCpuUsageAggr.getUnusedMap().get(VALUE) != null) {
-            nodeRackStatisPO.setCpuUsedPercent(
-                    Double.valueOf(avgCpuUsageAggr.getUnusedMap().get(VALUE).toString()));
-        }
-        if (docsCountAggr != null && docsCountAggr.getUnusedMap().containsKey(VALUE)
-                && docsCountAggr.getUnusedMap().get(VALUE) != null) {
-            nodeRackStatisPO.setDocNu(Double
-                    .valueOf(docsCountAggr.getUnusedMap().get(VALUE).toString()).longValue());
-        }
-
-        nodeRackStatisMap.put(rackName, nodeRackStatisPO);
-    }
-    
-    
-  
 }

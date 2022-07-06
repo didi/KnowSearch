@@ -1,5 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.JOB_FAILED;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.JOB_SUCCESS;
+
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -7,33 +10,8 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import com.alibaba.fastjson.JSON;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.IndexTemplatePhysicalConfig;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.AmsTemplatePhysicalConfVO;
-import com.didichuxing.datachannel.arius.admin.common.Triple;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.MulityTypeTemplatesInfo;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.MonitorTaskInfo;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithPhyTemplates;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.monitor.ClusterMonitorTaskPO;
-import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.HttpHostUtil;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
-import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
-import com.didichuxing.datachannel.arius.admin.metadata.job.AbstractMetaDataJob;
-import com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.metrics.CollectMetrics;
-import com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.metrics.MetricsRegister;
-import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpClient;
-import com.didichuxing.datachannel.arius.admin.persistence.mysql.monitor.ClusterMonitorTaskDAO;
-import com.didiglobal.logi.elasticsearch.client.ESClient;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-import lombok.NoArgsConstructor;
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -43,32 +21,58 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
+import com.alibaba.fastjson.JSON;
+import com.didichuxing.datachannel.arius.admin.common.Triple;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.IndexTemplatePhysicalConfig;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.MulityTypeTemplatesInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.MonitorTaskInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.monitor.AriusMetaJobClusterDistributePO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.AmsTemplatePhysicalConfVO;
+import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.HttpHostUtil;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
+import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
+import com.didichuxing.datachannel.arius.admin.metadata.job.AbstractMetaDataJob;
+import com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.metrics.CollectMetrics;
+import com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.metrics.MetricsRegister;
+import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpClient;
+import com.didichuxing.datachannel.arius.admin.persistence.mysql.monitor.AriusMetaJobClusterDistributeDAO;
+import com.didiglobal.logi.elasticsearch.client.ESClient;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.JOB_FAILED;
-import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.JOB_SUCCESS;
+import lombok.NoArgsConstructor;
 
 
 /**
  * 通过查数据库观察每个节点采集es集群名称
  *
  * select * from cluster_monitor_task_v2 where monitor_time > '2020-07-10 15:01:10' and datacentre='cn' order by monitor_host desc  limit 20
+ * @author didi
  */
 @Component
 @NoArgsConstructor
 public class MonitorJobHandler extends AbstractMetaDataJob {
 
+    public static final long TASK_TIMEOUT_TIME = 220 * 1000L;
     @Autowired
-    private ClusterMonitorTaskDAO       clusterMonitorTaskDAO;
+    private AriusMetaJobClusterDistributeDAO ariusMetaJobClusterDistributeDAO;
 
     @Autowired
     private ClusterPhyService           phyClusterService;
 
     @Autowired
-    private TemplatePhyService          templatePhyService;
+    private IndexTemplatePhyService indexTemplatePhyService;
 
     @Autowired
-    private TemplateLogicService        templateLogicService;
+    private IndexTemplateService indexTemplateService;
 
     @Autowired
     private ESOpClient                  esOpClient;
@@ -98,9 +102,12 @@ public class MonitorJobHandler extends AbstractMetaDataJob {
     private List<CollectMetrics> ingestWorkOrders      = Lists.newCopyOnWriteArrayList();
     private List<CollectMetrics> dcdrWorkOrders        = Lists.newCopyOnWriteArrayList();
 
-    private Map<String/*clusterName*/, Triple<ESClient, ClusterMonitorTaskPO, ClusterPhy>> localTask = new HashMap<>();
+    /**
+     * key：clusterName
+     */
+    private Map<String, Triple<ESClient, AriusMetaJobClusterDistributePO, ClusterPhy>> localTask = new HashMap<>();
 
-    private Set<String> notMonitorCluster = Sets.newHashSet();
+    private final Set<String> notMonitorCluster = Sets.newHashSet();
 
     @Value("${monitorJob.threadPool.initsize:20}")
     private int  poolSize;
@@ -116,8 +123,9 @@ public class MonitorJobHandler extends AbstractMetaDataJob {
 
     /**
      * 监控采集任务执行情况
+     * key：clusterName
      */
-    private Map<String/*clusterName*/, MonitorTaskInfo> monitorTaskInfoMap = Maps.newConcurrentMap();
+    private Map<String, MonitorTaskInfo> monitorTaskInfoMap = Maps.newConcurrentMap();
 
     @PostConstruct
     public void init(){
@@ -142,14 +150,14 @@ public class MonitorJobHandler extends AbstractMetaDataJob {
         }
 
         List<ClusterPhy>           clusterPhyList  =  dataSourceFilter(phyClusterService.listAllClusters());
-        List<ClusterMonitorTaskPO> allTaskPOList   =  clusterMonitorTaskDAO.getAllTaskByDataCentre(dataCentre);
+        List<AriusMetaJobClusterDistributePO> allTaskPOList   =  ariusMetaJobClusterDistributeDAO.getAllTaskByDataCentre(dataCentre);
 
         int jobTotalNu = allWorders.size();
 
         //计算本机需要采集的具体es集群
         if (needReAcquireCluster(jobTotalNu, clusterPhyList, allTaskPOList)) {
-            allTaskPOList = clusterMonitorTaskDAO.getAllTaskByDataCentre(dataCentre);
-            List<ClusterMonitorTaskPO> lockedTasks = acquireOwnCluster(jobTotalNu, allTaskPOList);
+            allTaskPOList = ariusMetaJobClusterDistributeDAO.getAllTaskByDataCentre(dataCentre);
+            List<AriusMetaJobClusterDistributePO> lockedTasks = acquireOwnCluster(jobTotalNu, allTaskPOList);
 
             localTask.clear();
             localTask     = getLocalTaskInfo(lockedTasks, clusterPhyList);
@@ -167,28 +175,6 @@ public class MonitorJobHandler extends AbstractMetaDataJob {
     @Override
     public Object handleJobTask(String params) {
         return JOB_SUCCESS;
-    }
-
-    /**
-     * 测试使用，能够根据名称采集监控信息
-     * @param cluster 集群名称
-     */
-    public void monitorCluster(String cluster) {
-        List<ClusterMonitorTaskPO> lockedTasks = new ArrayList<>();
-
-        List<ClusterPhy> clusterPhies = dataSourceFilter(phyClusterService.listAllClusters());
-        List<ClusterMonitorTaskPO> allTaskPOs      = clusterMonitorTaskDAO.getAllTaskByDataCentre(dataCentre);
-
-        for (ClusterMonitorTaskPO clusterMonitorTaskPO : allTaskPOs) {
-            if (clusterMonitorTaskPO.getCluster().equals(cluster)) {
-                lockedTasks.add( clusterMonitorTaskPO );
-                break;
-            }
-        }
-
-        localTask = getLocalTaskInfo(lockedTasks, clusterPhies);
-
-        collectData(localTask);
     }
 
     /**************************************** private methods ****************************************/
@@ -216,7 +202,7 @@ public class MonitorJobHandler extends AbstractMetaDataJob {
      */
     private boolean needReAcquireCluster(int jobTotalNu,
                                          List<ClusterPhy> clusterPhies,
-                                         List<ClusterMonitorTaskPO> allTaskPOs){
+                                         List<AriusMetaJobClusterDistributePO> allTaskPOs){
         //allTaskPOs是空，重新分配
         //allTaskPOs发生了变动，重新分配
         if (CollectionUtils.isEmpty(allTaskPOs) ||
@@ -233,7 +219,7 @@ public class MonitorJobHandler extends AbstractMetaDataJob {
 
         //30分钟之内没有执行任务，重新分配
         Long now = System.currentTimeMillis();
-        for (ClusterMonitorTaskPO taskPO : allTaskPOs) {
+        for (AriusMetaJobClusterDistributePO taskPO : allTaskPOs) {
             if (now - taskPO.getMonitorTime().getTime() > MONITOR_TASK_CHECK_MINUTES_WITH_MILLS) {
                 return true;
             }
@@ -247,10 +233,10 @@ public class MonitorJobHandler extends AbstractMetaDataJob {
      * @param clusterPhies
      * @param allTaskPOs
      */
-    private void updateMonitorTaskByDataSource(List<ClusterPhy> clusterPhies, List<ClusterMonitorTaskPO> allTaskPOs) {
-        Map<Integer, ClusterMonitorTaskPO> deletedCluster = Maps.newHashMap();
+    private void updateMonitorTaskByDataSource(List<ClusterPhy> clusterPhies, List<AriusMetaJobClusterDistributePO> allTaskPOs) {
+        Map<Integer, AriusMetaJobClusterDistributePO> deletedCluster = Maps.newHashMap();
         if (CollectionUtils.isNotEmpty(allTaskPOs)) {
-            for (ClusterMonitorTaskPO taskPO : allTaskPOs) {
+            for (AriusMetaJobClusterDistributePO taskPO : allTaskPOs) {
                 deletedCluster.put(taskPO.getClusterId(), taskPO);
             }
         }
@@ -264,10 +250,10 @@ public class MonitorJobHandler extends AbstractMetaDataJob {
             }
         }
 
-        List<ClusterMonitorTaskPO> newTasks = Lists.newArrayList();
+        List<AriusMetaJobClusterDistributePO> newTasks = Lists.newArrayList();
 
         for (ClusterPhy dataSource : newCluster.values()) {
-            ClusterMonitorTaskPO newTask = new ClusterMonitorTaskPO();
+            AriusMetaJobClusterDistributePO newTask = new AriusMetaJobClusterDistributePO();
             newTask.setClusterId(dataSource.getId());
             newTask.setCluster(dataSource.getCluster());
             newTask.setDataCentre(dataSource.getDataCenter());
@@ -278,9 +264,9 @@ public class MonitorJobHandler extends AbstractMetaDataJob {
                 newCluster.keySet(), deletedCluster.keySet());
 
         if (CollectionUtils.isNotEmpty(newTasks)) {
-            for (ClusterMonitorTaskPO taskEntity : newTasks) {
+            for (AriusMetaJobClusterDistributePO taskEntity : newTasks) {
                 try {
-                    clusterMonitorTaskDAO.insert(taskEntity);
+                    ariusMetaJobClusterDistributeDAO.insert(taskEntity);
                 } catch (Exception e) {
                     LOGGER.error("class=MonitorJobHandler||method=updateMonitorTaskByDataSource||cluster={}||msg=insert taskEntity failed!",
                             taskEntity.getClusterId(), e);
@@ -289,11 +275,11 @@ public class MonitorJobHandler extends AbstractMetaDataJob {
         }
 
         List<Long> deleteIds = Lists.newArrayList();
-        for (ClusterMonitorTaskPO oldTask : deletedCluster.values()) {
+        for (AriusMetaJobClusterDistributePO oldTask : deletedCluster.values()) {
             deleteIds.add(oldTask.getId());
         }
         if (CollectionUtils.isNotEmpty(deleteIds)) {
-            clusterMonitorTaskDAO.deleteBatch(deleteIds);
+            ariusMetaJobClusterDistributeDAO.deleteBatch(deleteIds);
         }
     }
 
@@ -303,7 +289,7 @@ public class MonitorJobHandler extends AbstractMetaDataJob {
      * @param taskPOs
      * @return
      */
-    private List<ClusterMonitorTaskPO> acquireOwnCluster(int jobTotalNu, List<ClusterMonitorTaskPO> taskPOs) {
+    private List<AriusMetaJobClusterDistributePO> acquireOwnCluster(int jobTotalNu, List<AriusMetaJobClusterDistributePO> taskPOs) {
         Collections.sort(taskPOs, (o1, o2) -> {
             Long o1Time = o1.getMonitorTime().getTime();
             Long o2Time = o2.getMonitorTime().getTime();
@@ -356,7 +342,7 @@ public class MonitorJobHandler extends AbstractMetaDataJob {
                 hostName, taskCount, JSON.toJSON(taskPOs), EnvUtil.getStr());
 
         //顺序遍历列表,尝试抢占任务,每台AMS节点只能抢占taskCount个任务
-        List<ClusterMonitorTaskPO> lockedTasks = Lists.newArrayList();
+        List<AriusMetaJobClusterDistributePO> lockedTasks = Lists.newArrayList();
         for (int i = 0; i < taskPOs.size() && taskCount > 0; i++) {
             if (tryLockTask(taskPOs.get(i), hostName)) {
                 taskCount--;
@@ -372,37 +358,37 @@ public class MonitorJobHandler extends AbstractMetaDataJob {
 
     /**
      * 任务抢占的逻辑
-     * @param clusterMonitorTaskPO
+     * @param ariusMetaJobClusterDistributePO
      * @param hostName
      * @return
      */
-    private boolean tryLockTask(ClusterMonitorTaskPO clusterMonitorTaskPO, String hostName) {
+    private boolean tryLockTask(AriusMetaJobClusterDistributePO ariusMetaJobClusterDistributePO, String hostName) {
         // 某个集群不是本节点负责采集并且据上次monitor时间大于配置的30分钟，则尝试更新数据库
-        if (!hostName.equals(clusterMonitorTaskPO.getMonitorHost())
-                && clusterMonitorTaskPO.getMonitorTime().getTime() + MONITOR_TASK_CHECK_MINUTES_WITH_MILLS > System.currentTimeMillis()) {
+        if (!hostName.equals(ariusMetaJobClusterDistributePO.getMonitorHost())
+                && ariusMetaJobClusterDistributePO.getMonitorTime().getTime() + MONITOR_TASK_CHECK_MINUTES_WITH_MILLS > System.currentTimeMillis()) {
             LOGGER.info("class=MonitorJobHandler||method=tryLockTask||cluster={}||monitorHostName={}||monitorTime={}",
-                    clusterMonitorTaskPO.getCluster(), clusterMonitorTaskPO.getMonitorHost(), clusterMonitorTaskPO.getMonitorTime().toString());
+                    ariusMetaJobClusterDistributePO.getCluster(), ariusMetaJobClusterDistributePO.getMonitorHost(), ariusMetaJobClusterDistributePO.getMonitorTime().toString());
             return false;
         }
 
-        clusterMonitorTaskPO.setDestMonitorHost(hostName);
-        clusterMonitorTaskPO.setMonitorTime(new Date());
-        clusterMonitorTaskPO.setGmtModify(new Date());
+        ariusMetaJobClusterDistributePO.setDestMonitorHost(hostName);
+        ariusMetaJobClusterDistributePO.setMonitorTime(new Date());
+        ariusMetaJobClusterDistributePO.setGmtModify(new Date());
 
         //updateMonitorHost不能设置monitorHost
-        return clusterMonitorTaskDAO.updateMonitorHost(clusterMonitorTaskPO) == 1;
+        return ariusMetaJobClusterDistributeDAO.updateMonitorHost(ariusMetaJobClusterDistributePO) == 1;
     }
 
-    private Map<String/*clusterName*/, Triple<ESClient, ClusterMonitorTaskPO, ClusterPhy>> getLocalTaskInfo (
-            List<ClusterMonitorTaskPO> localTasks, List<ClusterPhy> clusterPhies){
-        Map<Integer/*clusterId*/, ClusterMonitorTaskPO> localTaskMap = new HashMap<>();
-        for (ClusterMonitorTaskPO taskPO : localTasks) {
+    private Map<String/*clusterName*/, Triple<ESClient, AriusMetaJobClusterDistributePO, ClusterPhy>> getLocalTaskInfo (
+            List<AriusMetaJobClusterDistributePO> localTasks, List<ClusterPhy> clusterPhies){
+        Map<Integer/*clusterId*/, AriusMetaJobClusterDistributePO> localTaskMap = new HashMap<>(localTasks.size());
+        for (AriusMetaJobClusterDistributePO taskPO : localTasks) {
             localTaskMap.put(taskPO.getClusterId(), taskPO);
         }
 
         List<ClusterPhy> dataSources = clusterPhies.stream().filter(cluster -> localTaskMap.containsKey(cluster.getId())).collect(Collectors.toList());
 
-        Map<String/*clusterName*/, Triple<ESClient, ClusterMonitorTaskPO, ClusterPhy>> stringTripleMap = new HashMap<>();
+        Map<String/*clusterName*/, Triple<ESClient, AriusMetaJobClusterDistributePO, ClusterPhy>> stringTripleMap = new HashMap<>(dataSources.size());
         for (ClusterPhy esDataSource : dataSources) {
             String   cluster   = esDataSource.getCluster();
             ESClient esClient = esOpClient.getESClient(cluster);
@@ -436,15 +422,15 @@ public class MonitorJobHandler extends AbstractMetaDataJob {
 
     private Map<String/*templateName*/, AmsTemplatePhysicalConfVO> listTypeMappingIndex(String dataCenter) {
         Map<String/*templateName*/, AmsTemplatePhysicalConfVO> resultMap = Maps.newHashMap();
-        List<IndexTemplateLogicWithPhyTemplates> logicWithPhysicals = templateLogicService
-                .getTemplateWithPhysicalByDataCenter(dataCenter);
+        List<IndexTemplateWithPhyTemplates> logicWithPhysicals = indexTemplateService
+                .listTemplateWithPhysicalByDataCenter(dataCenter);
 
         String templateConfig = null;
         AmsTemplatePhysicalConfVO item = null;
-        for (IndexTemplateLogicWithPhyTemplates logicWithPhysical : logicWithPhysicals) {
+        for (IndexTemplateWithPhyTemplates logicWithPhysical : logicWithPhysicals) {
             if (logicWithPhysical.hasPhysicals()) {
                 try {
-                    templateConfig = logicWithPhysical.getAnyOne().getConfig();
+                    templateConfig = logicWithPhysical.getMasterPhyTemplate().getConfig();
                     if (StringUtils.isNotBlank(templateConfig)) {
                         IndexTemplatePhysicalConfig config = JSON.parseObject(templateConfig,
                                 IndexTemplatePhysicalConfig.class);
@@ -517,11 +503,11 @@ public class MonitorJobHandler extends AbstractMetaDataJob {
         }
 
         long blockSize = threadPool.getQueue().size();
-        if (blockSize > 10) {
+        if (blockSize > WARN_BLOCK_SIZE) {
             LOGGER.warn("class=MonitorJobHandler||method=checkThreadPool||blockSize={}||msg=collect thread pool has block task", blockSize);
         }
 
-        if (blockSize > 30) {
+        if (blockSize > ERROR_BLOCK_SIZE) {
             LOGGER.error("class=MonitorJobHandler||method=checkThreadPool||blockSize={}||msg=collect thread pool is too busy. thread pool recreate", blockSize);
             threadPool.shutdownNow();
             threadPool = null;
@@ -535,14 +521,14 @@ public class MonitorJobHandler extends AbstractMetaDataJob {
      * 采集本机负责的es集群信息
      * @param localTask
      */
-    private void collectData(Map<String/*clusterName*/, Triple<ESClient, ClusterMonitorTaskPO, ClusterPhy>> localTask) {
+    private void collectData(Map<String/*clusterName*/, Triple<ESClient, AriusMetaJobClusterDistributePO, ClusterPhy>> localTask) {
         //清空上个周期的集群缓存, 防止撑爆内存
         metricsRegister.clearComputeValueRegister();
 
         // 从admin获取所有模板信息
-        List<IndexTemplatePhyWithLogic> indexTemplates = templatePhyService.listTemplateWithLogic();
+        List<IndexTemplatePhyWithLogic> indexTemplates = indexTemplatePhyService.listTemplateWithLogic();
 
-        Map<String,List<IndexTemplatePhyWithLogic>> indexTemplatesMap = new ConcurrentHashMap<>();
+        Map<String,List<IndexTemplatePhyWithLogic>> indexTemplatesMap = new ConcurrentHashMap<>(16);
         if(CollectionUtils.isNotEmpty(indexTemplates)){
             indexTemplatesMap.putAll(indexTemplates.stream().collect(Collectors.groupingBy(IndexTemplatePhy::getCluster)));
         }
@@ -555,7 +541,7 @@ public class MonitorJobHandler extends AbstractMetaDataJob {
             try {
                 MonitorTaskInfo monitorTaskInfo = monitorTaskInfoMap.computeIfAbsent(clusterName, key -> new MonitorTaskInfo(clusterName, 0L, 0L, false));
                 // 如果该集群上一个任务还在运行 并且上个任务开始时间据现在220s(请求超时为50s*4+20s处理时间)内，则返回
-                if (monitorTaskInfo.getRunning() && ((System.currentTimeMillis() - monitorTaskInfo.getStartTick()) < 220 * 1000L)) {
+                if (monitorTaskInfo.getRunning() && ((System.currentTimeMillis() - monitorTaskInfo.getStartTick()) < TASK_TIMEOUT_TIME)) {
                     LOGGER.warn("class=MonitorJobHandler||method=collectData||clusterName={}||msg=task is running, monitorTaskInfo {}", clusterName, JSON.toJSONString(monitorTaskInfo));
                     //TODO 未超时的任务先不停掉避免数据时间点缺失
                     //return;
@@ -570,12 +556,12 @@ public class MonitorJobHandler extends AbstractMetaDataJob {
                                 Long startTime = System.currentTimeMillis();
                                 monitorTaskInfo.setRunning(true);
                                 monitorTaskInfo.setStartTick(startTime);
-                                ClusterMonitorTaskPO taskEntity = taskEntityTuple.v2();
+                                AriusMetaJobClusterDistributePO taskEntity = taskEntityTuple.v2();
 
                                 Thread.currentThread().setName("monitor-cluster-data-collect-" + clusterName);
                                 ESClient esClient = esOpClient.getESClient(clusterName);
                                 if (esClient == null) {
-                                    int effectCount = clusterMonitorTaskDAO.deleteBatch(Lists.newArrayList(taskEntity.getId()));
+                                    int effectCount = ariusMetaJobClusterDistributeDAO.deleteBatch(Lists.newArrayList(taskEntity.getId()));
                                     LOGGER.error("class=MonitorJobHandler||method=collectData||clusterName={}||errMsg=fail to get esClient, then delete it result {}", clusterName, effectCount);
                                     monitorTaskInfo.setRunning(false);
                                     return;
@@ -606,7 +592,7 @@ public class MonitorJobHandler extends AbstractMetaDataJob {
                                 taskEntity.setGmtModify(new Date());
                                 taskEntity.setMonitorHost(hostName);
 
-                                boolean taskUpdateSuc = clusterMonitorTaskDAO.updateMonitorTime(taskEntity) == 1;
+                                boolean taskUpdateSuc = ariusMetaJobClusterDistributeDAO.updateMonitorTime(taskEntity) == 1;
                                 long totalCost = System.currentTimeMillis() - startTime;
 
                                 monitorTaskInfo.setTotalCost(totalCost);

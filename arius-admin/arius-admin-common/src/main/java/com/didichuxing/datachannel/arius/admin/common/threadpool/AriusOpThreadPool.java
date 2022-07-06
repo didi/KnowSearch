@@ -1,24 +1,15 @@
 package com.didichuxing.datachannel.arius.admin.common.threadpool;
 
-import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
-
-import javax.annotation.PostConstruct;
-
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
 import org.springframework.stereotype.Component;
 
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
+import javax.annotation.PostConstruct;
+import java.util.List;
+import java.util.concurrent.*;
 /**
  * 异步操作线程池
  */
@@ -39,8 +30,11 @@ public class AriusOpThreadPool implements Executor {
 
     @PostConstruct
     public void init() {
-        LOG.info("class=AriusOpThreadPool||method=init||AriusOpThreadPool init start.");
-        pool = Executors.newFixedThreadPool(poolSize, springThreadFactory);
+        LOG.info("class=AriusOpThreadPool||method=init||AriusOpThreadPool init start..");
+        new ThreadPoolExecutor(poolSize, poolSize,
+                0L, TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<Runnable>(),
+                springThreadFactory);
         Runtime.getRuntime().addShutdownHook(new Thread() {
 
             @Override

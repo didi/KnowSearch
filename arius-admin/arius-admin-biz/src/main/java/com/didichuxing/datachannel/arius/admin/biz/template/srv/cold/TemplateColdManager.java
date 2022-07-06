@@ -1,9 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.cold;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
-import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
-
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import java.util.Set;
 
 /**
@@ -40,14 +38,4 @@ public interface TemplateColdManager {
      * @return
      */
     Result<Integer> batchChangeHotDay(Integer days, String operator);
-
-    /**
-     * 修改热数据的rack
-     * @param physicalId 物理模板id
-     * @param tgtRack 目标rack
-     * @param retryCount 重试次数
-     * @throws ESOperateException e
-     * @return true/false
-     */
-    boolean updateHotIndexRack(Long physicalId, String tgtRack, int retryCount) throws ESOperateException;
 }

@@ -19,9 +19,9 @@ admin.url.kibana: http://10.160.80.135:8061/
 admin.thread.size.op: 20
 
 #gateway相关配置
-es.gateway.url: 10.190.34.104,10.190.13.74,10.190.13.155
+es.gateway.url: 10.190.32.30,10.190.44.150,10.190.42.122
 es.gateway.port: 8200
-es.appid: 1
+es.user: 1
 es.password: azAWiJhxkho33ac
 scroll.timeout: 60s
 
@@ -77,7 +77,7 @@ integrate.test.operator: admin
 
 #日志相关配置
 logging.pattern.file: "[%level][%d{yyyy-MM-dd'T'HH:mm:ss.SSS}][%t] %msg%xEx%n"
-logging.config: classpath:log4j2-dev.xml
+logging.config: classpath:log4j2-test.xml
 logging.path: .
 logging.file.max-history: 5
 
@@ -134,9 +134,15 @@ spring:
     log-exipre: 3 # 日志保存天数，以天为单位
     app_name: arius_test03
     claim-strategy: com.didiglobal.logi.job.core.consensual.RandomConsensual
+  logi-security:
+    app-name: know_search
+    driver-class-name: ${spring.datasource.druid.driver-class-name}
+    jdbc-url: ${spring.datasource.druid.url}
+    password: ${spring.datasource.druid.password}
+    username: ${spring.datasource.druid.username}
+    resource-extend-bean-name: resourceExtendManager
   application:
     admin:
       enabled:
   transaction:
     default-timeout: 60
-

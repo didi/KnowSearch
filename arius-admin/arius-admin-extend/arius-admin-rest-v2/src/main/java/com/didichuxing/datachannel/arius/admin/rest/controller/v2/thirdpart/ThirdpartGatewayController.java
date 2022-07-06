@@ -1,14 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v2.thirdpart;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V2_THIRD_PART;
-
-import java.util.List;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant.GATEWAY_GET_PROJECT_TICKET;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant.GATEWAY_GET_PROJECT_TICKET_NAME;
 
 import com.didichuxing.datachannel.arius.admin.biz.gateway.GatewayManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.GatewayHeartbeat;
@@ -16,11 +10,28 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.alias.IndexTemplateAliasDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.ScrollDslTemplateRequest;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.ScrollDslTemplateResponse;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.GatewayAppVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.GatewayESUserVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.GatewayTemplateDeployInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.GatewayTemplatePhysicalVO;
-
-import io.swagger.annotations.*;
+import com.didiglobal.logi.security.util.HttpRequestUtil;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import java.util.List;
+import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  *
@@ -30,6 +41,7 @@ import io.swagger.annotations.*;
 @RestController
 @RequestMapping(V2_THIRD_PART + "/gateway")
 @Api(tags = "第三方gateway接口(REST)")
+@Deprecated
 public class ThirdpartGatewayController {
 
     @Autowired
@@ -50,22 +62,26 @@ public class ThirdpartGatewayController {
         return gatewayManager.heartbeat(clusterName);
     }
 
-    @GetMapping("/aliveNodeName")
+    @GetMapping("/alive-node-name")
     @ResponseBody
     @ApiOperation(value = "获取gateway存活节点名称列表接口" )
     public Result<List<String>> getGatewayAliveNodeNames(HttpServletRequest request) {
         return gatewayManager.getGatewayAliveNodeNames("Normal");
     }
 
-    @GetMapping("/listApp")
+    @GetMapping("/project")
     @ResponseBody
-    @ApiOperation(value = "获取APP列表接口", notes = "获取app列表,包含APP全部元信息")
+    @ApiOperation(value = "获取APP列表接口", notes = "获取es user列表,包含es user全部元信息")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "header", dataType = "String", name = "X-ARIUS-GATEWAY-TICKET", value = "接口ticket", required = true) })
-    public Result<List<GatewayAppVO>> listApp(HttpServletRequest request) {
-        return gatewayManager.listApp(request);
+    public Result<List<GatewayESUserVO>> listApp(HttpServletRequest request) {
+        String ticket = HttpRequestUtil.getHeaderValue(GATEWAY_GET_PROJECT_TICKET_NAME);
+        if (!GATEWAY_GET_PROJECT_TICKET.equals(ticket)) {
+            return Result.buildParamIllegal("ticket错误");
+        }
+        return gatewayManager.listESUserByProject();
     }
 
-    @GetMapping("/getTemplateMap")
+    @GetMapping("/template")
     @ResponseBody
     @ApiOperation(value = "获取模板信息", notes = "以map结构组织,key是表达式")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "String", name = "cluster", value = "集群名称", required = true) })
@@ -73,7 +89,7 @@ public class ThirdpartGatewayController {
         return gatewayManager.getTemplateMap(cluster);
     }
 
-    @GetMapping("/listDeployInfo")
+    @GetMapping("/deploy-info")
     @ResponseBody
     @ApiOperation(value = "获取模板信息", notes = "主主从结构组织")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "String", name = "dataCenter", value = "数据中心", required = true) })
@@ -81,21 +97,21 @@ public class ThirdpartGatewayController {
         return gatewayManager.listDeployInfo(dataCenter);
     }
 
-    @PostMapping(path = "dsl/scrollDslTemplates")
+    @PostMapping(path = "dsl/scroll-dsl-template")
     @ApiOperation(value = "滚动获取查询模板数据", notes = "滚动获取查询模板数据", httpMethod = "POST")
     public Result<ScrollDslTemplateResponse> scrollSearchDslTemplate(@ApiParam(name="request", value="滚动查询参数", required = true)
                                                                      @RequestBody ScrollDslTemplateRequest request) {
         return gatewayManager.scrollSearchDslTemplate(request);
     }
 
-    @PostMapping(path = "/addAlias")
+    @PostMapping(path = "/alias")
     @ResponseBody
     @ApiOperation(value = "设置一个模板的别名", notes = "设置一个模板的别名")
     public Result<Boolean> addAlias(@RequestBody IndexTemplateAliasDTO indexTemplateAliasDTO){
         return gatewayManager.addAlias(indexTemplateAliasDTO);
     }
 
-    @PostMapping(path = "/delAlias")
+    @DeleteMapping(path = "/alias")
     @ResponseBody
     @ApiOperation(value = "删除一个模板的别名", notes = "删除一个模板的别名")
     public Result<Boolean> delAlias(@RequestBody IndexTemplateAliasDTO indexTemplateAliasDTO){

@@ -1,31 +1,31 @@
 package com.didichuxing.datachannel.arius.admin.biz.workorder.handler;
 
 import com.alibaba.fastjson.JSON;
+import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandler;
+import com.didichuxing.datachannel.arius.admin.biz.workorder.content.TemplateTransferContent;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
-import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord.template.TemplateOperateRecord;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.TemplateTransferOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TemplateOperateRecordEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
+import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
-import com.didichuxing.datachannel.arius.admin.core.service.common.AriusUserInfoService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
-import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandler;
-import com.didichuxing.datachannel.arius.admin.biz.workorder.content.TemplateTransferContent;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
+import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
+import com.didiglobal.logi.security.service.ProjectService;
+import com.didiglobal.logi.security.service.UserService;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 /**
  * @author d06679
@@ -35,13 +35,14 @@ import java.util.List;
 public class TemplateTransferHandler extends BaseWorkOrderHandler {
 
     @Autowired
-    private TemplateLogicService    templateLogicService;
+    private IndexTemplateService indexTemplateService;
+
+ 
 
     @Autowired
-    private AriusUserInfoService    ariusUserInfoService;
-
+    private ProjectService projectService;
     @Autowired
-    private AppService              appService;
+    private UserService    userService;
 
     /**
      * 工单是否自动审批
@@ -60,13 +61,13 @@ public class TemplateTransferHandler extends BaseWorkOrderHandler {
     }
 
     @Override
-    public List<AriusUserInfo> getApproverList(AbstractOrderDetail detail) {
-        return getRDOrOPList();
+    public List<UserBriefVO> getApproverList(AbstractOrderDetail detail) {
+        return getOPList();
     }
 
     @Override
     public Result<Void> checkAuthority(WorkOrderPO orderPO, String userName) {
-        if (isRDOrOP(userName)) {
+        if (isOP(userName)) {
             return Result.buildSucc();
         }
         return Result.buildFail(ResultType.OPERATE_FORBIDDEN_ERROR.getMessage());
@@ -93,23 +94,19 @@ public class TemplateTransferHandler extends BaseWorkOrderHandler {
             return Result.buildParamIllegal("索引名字为空");
         }
 
-        if (AriusObjUtils.isNull(content.getTgtAppId())) {
+        if (AriusObjUtils.isNull(content.getTgtProjectId())) {
             return Result.buildParamIllegal("应用id为空");
         }
 
-        if (AriusObjUtils.isNull(content.getTgtResponsible())) {
-            return Result.buildParamIllegal("责任人为空");
-        }
 
-        if (AriusObjUtils.isNull(ariusUserInfoService.getByDomainAccount(content.getTgtResponsible()))) {
-            return Result.buildParamIllegal("责任人非法");
-        }
+        
 
-        if (AriusObjUtils.isNull(templateLogicService.getLogicTemplateById(content.getId()))) {
+
+        if (AriusObjUtils.isNull(indexTemplateService.getLogicTemplateById(content.getId()))) {
             return Result.buildNotExist("索引不存在");
         }
 
-        if (AriusObjUtils.isNull(appService.getAppById(content.getTgtAppId()))) {
+        if (!projectService.checkProjectExist(content.getTgtProjectId())) {
             return Result.buildNotExist("应用不存在");
         }
 
@@ -136,24 +133,24 @@ public class TemplateTransferHandler extends BaseWorkOrderHandler {
         TemplateTransferContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
             TemplateTransferContent.class);
 
-        if (AriusObjUtils.isNull(content.getSourceAppId())) {
-            return Result.buildParamIllegal("原appId为空");
+        if (AriusObjUtils.isNull(content.getSourceProjectId())) {
+            return Result.buildParamIllegal("原projectId为空");
         }
 
-        if (AriusObjUtils.isNull(content.getTgtAppId())) {
-            return Result.buildParamIllegal("目标appId为空");
+        if (AriusObjUtils.isNull(content.getTgtProjectId())) {
+            return Result.buildParamIllegal("目标projectId为空");
         }
 
-        if (content.getTgtAppId().equals(content.getSourceAppId())) {
+        if (content.getTgtProjectId().equals(content.getSourceProjectId())) {
             return Result.buildFail("无效转让, 原始项目Id和目标项目ID相同");
         }
 
-        if (appService.isSuperApp(workOrder.getSubmitorAppid())) {
+        if (AuthConstant.SUPER_PROJECT_ID.equals(workOrder.getSubmitorProjectId())) {
             return Result.buildSucc();
         }
 
-        IndexTemplateLogic templateLogic = templateLogicService.getLogicTemplateById(content.getId());
-        if (!templateLogic.getAppId().equals(workOrder.getSubmitorAppid())) {
+        IndexTemplate templateLogic = indexTemplateService.getLogicTemplateById(content.getId());
+        if (!templateLogic.getProjectId().equals(workOrder.getSubmitorProjectId())) {
             return Result.buildOpForBidden("您无权对该索引进行转让操作");
         }
 
@@ -182,12 +179,23 @@ public class TemplateTransferHandler extends BaseWorkOrderHandler {
         TemplateTransferContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
             TemplateTransferContent.class);
 
-        Result<Void> result = templateLogicService.turnOverLogicTemplate(content.getId(), content.getTgtAppId(),
+        Result<Void> result = indexTemplateService.turnOverLogicTemplate(content.getId(),
+                content.getSourceProjectId(),content.getTgtProjectId(),
             content.getTgtResponsible(), workOrder.getSubmitor());
 
         if (result.success()) {
-            operateRecordService.save(ModuleEnum.TEMPLATE, OperationEnum.EDIT, content.getId(), JSON.toJSONString(
-                    new TemplateOperateRecord(TemplateOperateRecordEnum.TRANSFER.getCode(), "模板从 appId:" + content.getSourceAppId() + "转移到 appId:" + content.getTgtAppId())), approver);
+              operateRecordService.save(new OperateRecord.Builder()
+                              .operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE)
+                              .userOperation(approver)
+                              .content(JSON.toJSONString(
+                    new TemplateOperateRecord(TemplateOperateRecordEnum.TRANSFER.getCode(),
+                            "模板从 project:" + projectService.getProjectBriefByProjectId(content.getSourceProjectId()).getProjectName() + "转移到 project:" +
+                            projectService.getProjectBriefByProjectId(content.getTgtProjectId()).getProjectName())))
+                              .project(projectService.getProjectBriefByProjectId(workOrder.getSubmitorProjectId()))
+                      .build());
+            //operateRecordService.save(ModuleEnum.TEMPLATE, OperationEnum.EDIT, content.getId(), JSON.toJSONString(
+            //        new TemplateOperateRecord(TemplateOperateRecordEnum.TRANSFER.getCode(),
+            //                "模板从 projectId:" + content.getSourceProjectId() + "转移到 projectId:" + content.getTgtProjectId())), approver);
         }
 
         return Result.buildFrom(result);

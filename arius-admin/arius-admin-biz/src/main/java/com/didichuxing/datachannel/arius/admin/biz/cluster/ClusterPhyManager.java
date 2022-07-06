@@ -8,17 +8,21 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResu
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterJoinDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyConditionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterSettingDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterPhyVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PluginVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESRoleClusterHostVO;
-import com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleCluster;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PluginVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterDynamicConfigsTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 
+/**
+ *
+ * @author ohushenglin_v
+ * @date 2022-05-10
+ */
 public interface ClusterPhyManager {
 
     /**
@@ -46,76 +50,69 @@ public interface ClusterPhyManager {
     boolean isClusterExists(String clusterName);
 
     /**
-     * 释放racks
-     * @param cluster    集群名称
-     * @param racks      要释放的racks，逗号分隔
-     * @param retryCount 重试次数
-     * @return result
+     * 获取控制台物理集群信息列表(ZH有使用)
+     * @param param 查询参数
+     * @return 物理集群列表
      */
-    Result<Void> releaseRacks(String cluster, String racks, int retryCount);
-
-    /**
-     * 获取控制台物理集群信息列表
-     * @param currentAppId 当前登录项目
-     */
-    List<ConsoleClusterPhyVO> getConsoleClusterPhyVOS(ESClusterDTO param, Integer currentAppId);
-
-    List<ConsoleClusterPhyVO> getConsoleClusterPhyVOS(ESClusterDTO param);
+    List<ClusterPhyVO> listClusterPhys(ClusterPhyDTO param);
 
     /**
      * 构建客户端需要的数据
      *
      * @param clusterPhyList  集群列表源数据
-     * @param appId           当前项目
      * @return
      */
-    List<ConsoleClusterPhyVO> buildClusterInfo(List<ClusterPhy> clusterPhyList, Integer appId);
-
-    /**
-     * 获取单个控制台物理集群信息
-     * @param currentAppId 当前登录项目
-     */
-    ConsoleClusterPhyVO getConsoleClusterPhyVO(Integer clusterId, Integer currentAppId);
+    List<ClusterPhyVO> buildClusterInfo(List<ClusterPhy> clusterPhyList);
 
     /**
      * 获取单个物理集群overView信息
      * @param clusterId 物理集群id
-     * @param currentAppId 当前登录项目
+     * @param currentProjectId 当前登录项目
+     * @return 物理集群信息
      */
-    ConsoleClusterPhyVO getConsoleClusterPhy(Integer clusterId, Integer currentAppId);
-
-    /**
-     * 获取物理集群节点划分信息
-     */
-    Result<List<ESRoleClusterHostVO>> getClusterPhyRegionInfos(Integer clusterPyhId);
+    ClusterPhyVO getClusterPhyOverview(Integer clusterId, Integer currentProjectId);
 
     /**
      * 获取逻辑集群可关联region的物理集群名称列表
      * @param clusterLogicType 逻辑集群类型
      * @param clusterLogicId   逻辑集群Id
-     * @see ResourceLogicTypeEnum
+     * @see ClusterResourceTypeEnum
+     * @return 物理集群名称
      */
     Result<List<String>> listCanBeAssociatedRegionOfClustersPhys(Integer clusterLogicType, Long clusterLogicId);
 
     /**
      * 获取新建逻辑集群可关联的物理集群名称
      * @param clusterLogicType  逻辑集群类型
-     * @see ResourceLogicTypeEnum
+     * @see ClusterResourceTypeEnum
+     * @return 物理集群名称
      */
     Result<List<String>> listCanBeAssociatedClustersPhys(Integer clusterLogicType);
 
     /**
      * 集群接入
-     * Tuple<Long, String> 逻辑集群Id, 物理集群名称
+     * @param param 逻辑集群Id, 物理集群名称
+     * @param operator 操作人
+     * @return  ClusterPhyVO
      */
-	Result<Tuple<Long, String>> clusterJoin(ClusterJoinDTO param, String operator);
+	Result<ClusterPhyVO> joinCluster(ClusterJoinDTO param, String operator);
 
     /**
-     * 删除接入集群
-     * 删除顺序: region ——> clusterLogic ——> clusterHost ——> clusterRole  ——> cluster
+     * 删除接入集群 删除顺序: region ——> clusterLogic ——> clusterHost ——> clusterRole  ——> cluster
+     *
+     * @param clusterId 集群id
+     * @param operator  操作人
+     * @param projectId
+     * @return {@link Result}<{@link Void}>
      */
-    Result<Void> deleteClusterJoin(Integer clusterId, String operator);
+    Result<Void> deleteClusterJoin(Integer clusterId, String operator, Integer projectId);
 
+    /**
+     * 插件列表
+     *
+     * @param cluster 集群
+     * @return {@link Result}<{@link List}<{@link PluginVO}>>
+     */
     Result<List<PluginVO>> listPlugins(String cluster);
 
     /**
@@ -127,10 +124,13 @@ public interface ClusterPhyManager {
 
     /**
      * 更新集群下的动态配置信息
-     * @param param 配置信息参数
+     *
+     * @param param     配置信息参数
+     * @param operator
+     * @param projectId
      * @return result
      */
-    Result<Boolean> updatePhyClusterDynamicConfig(ClusterSettingDTO param);
+    Result<Boolean> updatePhyClusterDynamicConfig(ClusterSettingDTO param, String operator, Integer projectId);
 
     /**
      * 获取集群下的属性配置
@@ -141,81 +141,90 @@ public interface ClusterPhyManager {
 
     /**
      * 获取APP有管理、读写、读权限的物理集群名称列表
+     *
+     * @param projectId projectId
+     * @return {@link List}<{@link String}>
      */
-	List<String> getAppClusterPhyNames(Integer appId);
+    List<String> listClusterPhyNameByProjectId(Integer projectId);
 
     /**
      * 根据模板所在集群，获取与该集群相同版本号的集群名称列表
+     * @param projectId      projectId
+     * @param templateId 模板id
+     * @return {@link Result}<{@link List}<{@link String}>>
      */
-    Result<List<String>> getTemplateSameVersionClusterNamesByTemplateId(Integer appId, Integer templateId);
+    Result<List<String>> getTemplateSameVersionClusterNamesByTemplateId(Integer projectId, Integer templateId);
 
     /**
      * 获取物理集群节点名称列表
+     * @param clusterPhyName 集群phy名称
+     * @return {@link List}<{@link String}>
      */
-    List<String> getAppClusterPhyNodeNames(String clusterPhyName);
+    List<String> listClusterPhyNodeName(String clusterPhyName);
 
     /**
      * 构建单个物理集群统计信息
-     * @param cluster
+     * @param cluster 集群
      */
-    void buildPhyClusterStatics(ConsoleClusterPhyVO cluster);
+    void buildPhyClusterStatics(ClusterPhyVO cluster);
 
     /**
      * 获取APP可查看的物理集群节点名称列表
-     * @param appId
+     * @param projectId projectId
+     * @return {@link List}<{@link String}>
      */
-    List<String> getAppNodeNames(Integer appId);
+    List<String> listNodeNameByProjectId(Integer projectId);
 
     /**
      * 物理集群信息删除 (host信息、角色信息、集群信息、region信息)
-     * @param clusterPhyId
-     * @param operator
-     * @param appId
-     * @return
+     *
+     * @param clusterPhyId 物理集群ID
+     * @param operator     操作人
+     * @param projectId
+     * @return {@link Result}<{@link Boolean}>
      */
-    Result<Boolean> deleteClusterInfo(Integer clusterPhyId, String operator, Integer appId);
+    Result<Boolean> deleteCluster(Integer clusterPhyId, String operator, Integer projectId);
 
-    Result<Boolean> addCluster(ESClusterDTO param, String operator, Integer appId);
+    /**
+     * 添加集群
+     *
+     * @param param    参数
+     * @param operator 操作人
+     * @param projectId    projectId
+     * @return {@link Result}<{@link Boolean}>
+     */
+    Result<Boolean> addCluster(ClusterPhyDTO param, String operator, Integer projectId);
 
-    Result<Boolean> editCluster(ESClusterDTO param, String operator, Integer appId);
+    /**
+     * 编辑集群
+     *
+     * @param param    参数
+     * @param operator 操作人
+     * @return {@link Result}<{@link Boolean}>
+     */
+    Result<Boolean> editCluster(ClusterPhyDTO param, String operator);
 
     /**
      * 条件组合、分页查询
      * @param condition
-     * @param appId
+     * @param projectId
      * @return
      */
-    PaginationResult<ConsoleClusterPhyVO> pageGetConsoleClusterPhyVOS(ClusterPhyConditionDTO condition, Integer appId);
-
-    /**
-     * 获取项目下指定权限的物理集群列表
-     * @param appId
-     * @param authType
-     * @return
-     */
-    List<ClusterPhy> getClusterPhyByAppIdAndAuthType(Integer appId, Integer authType);
-
-    /**
-     * 获取项目下有管理权限的物理集群列表
-     * @param appId
-     * @return
-     */
-    List<ClusterPhy> getAppAccessClusterPhyList(Integer appId);
-
-    /**
-     * 获取项目下有访问权限的物理集群列表
-     * @param appId
-     * @return
-     */
-    List<ClusterPhy> getAppOwnAuthClusterPhyList(Integer appId);
+    PaginationResult<ClusterPhyVO> pageGetClusterPhys(ClusterPhyConditionDTO condition, Integer projectId) throws NotFindSubclassException;
 
     /**
      * 构建物理集群角色信息
      * @param cluster
      */
-    void buildClusterRole(ConsoleClusterPhyVO cluster);
+    void buildClusterRole(ClusterPhyVO cluster);
 
-    void buildClusterRole(ConsoleClusterPhyVO cluster, List<RoleCluster> roleClusters);
+    /**
+     * 构建集群作用
+     *
+     * @param cluster      集群
+     * @param clusterRoleInfos 集群角色
+     */
+    void buildClusterRole(ClusterPhyVO cluster, List<ClusterRoleInfo> clusterRoleInfos);
 
     /**
      * 更新物理集群状态
@@ -252,17 +261,11 @@ public interface ClusterPhyManager {
     /**
      * 删除存在集群
      * @param clusterPhyName
-     * @param appId
+     * @param projectId
      * @param operator
      * @return
      */
-    Result<Boolean> deleteClusterExit(String clusterPhyName, Integer appId, String operator);
-
-    /**
-     * 构建物理集群所属项目和所属的appId的信息
-     * @param consoleClusterPhyVO 物理集群看板视图
-     */
-    void buildBelongAppIdsAndNames(ConsoleClusterPhyVO consoleClusterPhyVO);
+    Result<Boolean> deleteClusterExit(String clusterPhyName, Integer projectId, String operator);
 
     /**
      *  根据逻辑集群类型和已选中的物理集群名称筛选出es版本一致的物理集群名称列表
@@ -280,20 +283,28 @@ public interface ClusterPhyManager {
     Result<List<String>> getPhyClusterNameWithSameEsVersionAfterBuildLogic(Long clusterLogicId);
 
     /**
-     * 为一个正在接入的物理集群校验是否可以添加索引服务
-     * @param clusterJoinDTO 物理集群接入DTO
-     * @param strId 索引服务id
-     * @param operator 操作人员
-     * @return 校验结果
+     * 更新集群网关
+     *
+     * @param param    参数
+     * @param operator 操作人
+     * @return {@link Result}<{@link ClusterPhyVO}>
      */
-    Result<Boolean> checkTemplateServiceWhenJoin(ClusterJoinDTO clusterJoinDTO, String strId, String operator);
+    Result<ClusterPhyVO> updateClusterGateway(ClusterPhyDTO param, String operator);
 
     /**
-     * 根据物理集群名称和当前模板审批的工单获取可以绑定的rack列表
-     * @param clusterPhy 物理集群名称
-     * @param clusterLogic 逻辑集群名称
-     * @param templateSize 模板设置的数据大小
-     * @return 可以绑定的rack列表
+     * 根据集群ID获取物理集群角色
+     *
+     * @param clusterId 集群id
+     * @return {@link List}<{@link ClusterRoleInfo}>
      */
-    Result<Set<String>> getValidRacksListByTemplateSize(String clusterPhy, String clusterLogic, String templateSize);
+    List<ClusterRoleInfo> listClusterRolesByClusterId(Integer clusterId);
+
+    /**
+     * 按照资源类型查询物理集群名称列表
+     *
+     * @param clusterResourceType 集群资源类型
+     * @param projectId           项目id
+     * @return {@link Result}<{@link List}<{@link String}>>
+     */
+    Result<List<String>> listClusterPhyNameByResourceType(Integer clusterResourceType, Integer projectId);
 }

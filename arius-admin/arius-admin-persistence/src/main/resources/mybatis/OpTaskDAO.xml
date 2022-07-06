@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.didichuxing.datachannel.arius.admin.persistence.mysql.task.OpTaskDAO">
+  <resultMap id="WorkTaskMap" type="com.didichuxing.datachannel.arius.admin.common.bean.po.task.OpTaskPO">
+    <result column="title" jdbcType="VARCHAR" property="title"/>
+    <result column="task_type" jdbcType="INTEGER" property="taskType"/>
+    <result column="business_key" jdbcType="VARCHAR" property="businessKey"/>
+    <result column="status" jdbcType="VARCHAR" property="status"/>
+    <result column="creator" jdbcType="VARCHAR" property="creator"/>
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+    <result column="delete_flag" jdbcType="BOOLEAN" property="deleteFlag"/>
+    <result column="expand_data" jdbcType="LONGVARCHAR" property="expandData"/>
+  </resultMap>
+    
+    <sql id="columns">
+        <![CDATA[
+        id, title, task_type, business_key, `status`, creator, create_time, update_time, delete_flag, expand_data
+        ]]>
+    </sql>
+    
+    <sql id="where">
+        <where>
+           <if test="id != null and '' != id">
+                AND id = #{id}
+            </if>
+           <if test="title != null and '' != title">
+                AND title = #{title}
+            </if>
+           <if test="taskType != null and '' != taskType">
+                AND task_type = #{taskType}
+            </if>
+           <if test="businessKey != null and '' != businessKey">
+                AND business_key = #{businessKey}
+            </if>
+           <if test="status != null">
+                AND status = #{status}
+            </if>
+           <if test="creator != null and '' != creator">
+                AND creator = #{creator}
+            </if>
+           <if test="deleteFlag != null and '' != deleteFlag">
+                AND delete_flag = #{deleteFlag}
+            </if>
+           <if test="expandData != null and '' != expandData">
+                AND expand_data = #{expandData}
+            </if>
+        </where>
+    </sql>
+    
+    <select id="getById" resultMap="WorkTaskMap">
+        SELECT <include refid="columns" />
+        <![CDATA[
+            FROM
+                arius_op_task
+            WHERE 
+                id = #{id} 
+        ]]>
+    </select>
+
+    <select id="getLatestTask" resultMap="WorkTaskMap">
+        SELECT <include refid="columns" />
+        <![CDATA[
+            FROM
+                arius_op_task
+            WHERE
+                 business_key LIKE CONCAT(#{businessKey},'%')
+                 AND task_type = #{taskType}
+                order by id desc limit 1
+        ]]>
+    </select>
+
+    <select id="getPendingTask" resultMap="WorkTaskMap">
+        SELECT <include refid="columns" />
+        <![CDATA[
+            FROM
+                arius_op_task
+            WHERE
+                business_key LIKE CONCAT(#{businessKey},'%')
+                AND task_type = #{taskType}
+                and status in ('waiting','pause','running')
+                limit 1
+        ]]>
+    </select>
+
+    <select id="getPendingTaskByType" resultMap="WorkTaskMap">
+        SELECT <include refid="columns" />
+        FROM
+            arius_op_task
+        WHERE task_type = #{taskType}
+        AND status in ('waiting','pause','running')
+    </select>
+
+    <select id="getSuccessTaskByType" resultMap="WorkTaskMap">
+        SELECT <include refid="columns" />
+        FROM
+        arius_op_task
+        WHERE task_type = #{taskType}
+        AND status in ('success')
+    </select>
+
+    <select id="listAll" resultMap="WorkTaskMap">
+        SELECT
+        <include refid="columns" />
+        FROM
+        arius_op_task
+        where  delete_flag = '0' order by id  desc
+    </select>
+    
+    <select id="listByCondition" resultMap="WorkTaskMap">
+        SELECT
+            <include refid="columns" />
+        FROM
+            arius_op_task 
+        <include refid="where"/>
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        <![CDATA[
+            INSERT INTO arius_op_task (
+                title,
+                task_type,
+                business_key,
+                status,
+                creator,
+                create_time,
+                update_time,
+                delete_flag,
+                expand_data
+            ) VALUES (
+                #{title},
+                #{taskType},
+                #{businessKey},
+                #{status},
+                #{creator},
+                #{createTime},
+                #{updateTime},
+                #{deleteFlag},
+                #{expandData}
+            )
+        ]]>
+    </insert>
+
+    <update id="update">
+            UPDATE
+                arius_op_task
+            <set>
+                <if test="title != null and '' != title">
+                	<![CDATA[ title = #{title} ]]>,
+                </if>
+                <if test="taskType != null and '' != taskType">
+                	<![CDATA[ task_type = #{taskType} ]]>,
+                </if>
+                <if test="businessKey != null and '' != businessKey">
+                	<![CDATA[ business_key = #{businessKey} ]]>,
+                </if>
+                <if test="status != null">
+                	<![CDATA[ status = #{status} ]]>,
+                </if>
+                <if test="updateTime != null">
+                	<![CDATA[ update_time = #{updateTime} ]]>,
+                </if>
+                <if test="deleteFlag != null and '' != deleteFlag">
+                	<![CDATA[ delete_flag = #{deleteFlag} ]]>,
+                </if>
+                <if test="expandData != null and '' != expandData">
+                	<![CDATA[ expand_data = #{expandData} ]]>
+                </if>
+            </set>
+            <where>
+                id = #{id}
+            </where>
+    </update>
+
+</mapper>

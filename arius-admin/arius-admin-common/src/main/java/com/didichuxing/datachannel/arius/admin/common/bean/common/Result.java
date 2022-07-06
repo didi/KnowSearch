@@ -8,6 +8,8 @@ import io.swagger.annotations.ApiModelProperty;
 
 /**
  * Service服务执行的结果
+ @author ohushenglin_v
+ @date 2022-05-10
  */
 @ApiModel(description = "返回结构")
 public class Result<T> extends BaseResult {
@@ -145,6 +147,18 @@ public class Result<T> extends BaseResult {
         } else {
             result.setCode(ResultType.FAIL.getCode());
             result.setMessage(ResultType.FAIL.getMessage());
+        }
+        return result;
+    }
+
+    public static <T> Result<T> buildWithMsg(boolean succ, String msg) {
+        Result<T> result = new Result<>();
+        if (succ) {
+            result.setCode(ResultType.SUCCESS.getCode());
+            result.setMessage(msg);
+        } else {
+            result.setCode(ResultType.FAIL.getCode());
+            result.setMessage(msg);
         }
         return result;
     }

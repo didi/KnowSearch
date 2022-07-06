@@ -1,17 +1,15 @@
 package com.didichuxing.datachannel.arius.admin.core.service.es.impl;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.getBigIndicesRequestContent;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.*;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.rest.RestStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,19 +17,27 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.IndexCatCell;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.IndexResponse;
+import com.didichuxing.datachannel.arius.admin.common.constant.index.IndexBlockEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.BatchProcessor;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpTimeoutRetry;
 import com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESIndexDAO;
 import com.didiglobal.logi.elasticsearch.client.gateway.direct.DirectResponse;
+import com.didiglobal.logi.elasticsearch.client.request.index.putalias.PutAliasNode;
+import com.didiglobal.logi.elasticsearch.client.request.index.putalias.PutAliasType;
 import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
 import com.didiglobal.logi.elasticsearch.client.response.indices.getalias.AliasIndexNode;
 import com.didiglobal.logi.elasticsearch.client.response.indices.stats.IndexNodes;
+import com.didiglobal.logi.elasticsearch.client.response.model.indices.CommonStat;
+import com.didiglobal.logi.elasticsearch.client.response.model.indices.Segments;
 import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
 import com.didiglobal.logi.elasticsearch.client.response.setting.index.IndexConfig;
 import com.didiglobal.logi.elasticsearch.client.response.setting.index.MultiIndexsConfig;
@@ -53,14 +59,29 @@ public class ESIndexServiceImpl implements ESIndexService {
     @Autowired
     private ESIndexDAO        esIndexDAO;
 
+    @Autowired
+    private ClusterRoleHostService clusterRoleHostService;
+
+
+
+
     @Override
     public boolean syncCreateIndex(String cluster, String indexName, int retryCount) throws ESOperateException {
-        return createIndexInner(cluster, indexName, retryCount);
+        return ESOpTimeoutRetry.esRetryExecute("createIndex", retryCount,
+            () -> esIndexDAO.createIndex(cluster, indexName));
+    }
+
+    @Override
+    public boolean syncCreateIndex(String cluster, String indexName, IndexConfig indexConfig,
+                                   int retryCount) throws ESOperateException {
+        return ESOpTimeoutRetry.esRetryExecute("createIndexWithConfig", retryCount,
+            () -> esIndexDAO.createIndexWithConfig(cluster, indexName, indexConfig));
     }
 
     @Override
     public boolean syncDelIndex(String cluster, String indexName, int retryCount) throws ESOperateException {
-        return deleteIndexInner(cluster, indexName, retryCount);
+        return ESOpTimeoutRetry.esRetryExecute("deleteIndex", retryCount,
+            () -> esIndexDAO.deleteIndex(cluster, indexName));
     }
 
     /**
@@ -96,6 +117,11 @@ public class ESIndexServiceImpl implements ESIndexService {
             return "";
         }
         return mappingConfig.toJson().toString();
+    }
+
+    @Override
+    public boolean syncUpdateIndexMapping(String cluster, String index, MappingConfig mappingConfig) {
+        return esIndexDAO.updateIndexMapping(cluster, index, mappingConfig);
     }
 
     @Override
@@ -147,6 +173,12 @@ public class ESIndexServiceImpl implements ESIndexService {
                                        String defaultValue, int retryCount) throws ESOperateException {
         return ESOpTimeoutRetry.esRetryExecute("putIndexSetting", retryCount,
             () -> esIndexDAO.putIndexSetting(cluster, indices, settingName, settingValue, defaultValue));
+    }
+
+    @Override
+    public boolean syncPutIndexSetting(String cluster, List<String> indices, Map<String, String> settingMap, Integer retryCount) throws  ESOperateException{
+        return ESOpTimeoutRetry.esRetryExecute("putIndexSettingBatch", retryCount,
+                () -> esIndexDAO.putIndexSetting(cluster, indices, settingMap));
     }
 
     @Override
@@ -212,6 +244,27 @@ public class ESIndexServiceImpl implements ESIndexService {
 
         return ret;
     }
+    @Override
+    public Map<String,List<String>> syncGetIndexAliasesByIndices(String cluster, String... indices) {
+        Map<String/*index*/, AliasIndexNode> aliasIndexNodeMap = esIndexDAO.getAliasesByIndices(cluster, indices);
+        if (aliasIndexNodeMap == null) {
+            LOGGER.warn(
+                    "class=ESIndexServiceImpl||method=syncGetIndexNameByExpression||msg=no alias||cluster={}||expression={}",
+                    cluster, indices);
+            return new HashMap<>();
+        }
+
+        Map<String, List<String>> ret = new HashMap<>();
+        aliasIndexNodeMap.forEach((index, aliasIndexNode) -> {
+            Optional.ofNullable(aliasIndexNode.getAliases()).map(Map::keySet).ifPresent(set -> {
+                List<String> aliases = ret.getOrDefault(index, Lists.newArrayList());
+                aliases.addAll(set);
+                ret.put(index, aliases);
+            });
+        });
+
+        return ret;
+    }
 
     /**
      * 批量删除索引
@@ -273,21 +326,18 @@ public class ESIndexServiceImpl implements ESIndexService {
         return esIndexDAO.deleteByQuery(cluster, String.join(",", delIndices), delQueryDsl);
     }
 
-    /**
-     * 修改表达式对应索引的rack
-     *
-     * @param cluster    cluster
-     * @param indices 表达式
-     * @param tgtRack tgtRack
-     * @param retryCount 重试次数
-     * @return true/false
-     * @throws ESOperateException
-     */
     @Override
-    public boolean syncBatchUpdateRack(String cluster, List<String> indices, String tgtRack,
-                                       int retryCount) throws ESOperateException {
-        return ESOpTimeoutRetry.esRetryExecute("syncUpdateRackByExpression", retryCount,
-            () -> esIndexDAO.batchUpdateIndexRack(cluster, indices, tgtRack));
+    public boolean syncBatchUpdateRegion(String cluster, List<String> indices, Integer tgtRegionId,
+                                         int retryCount) throws ESOperateException {
+        Set<String> nodeNames = new HashSet<>();
+        Result<List<ClusterRoleHost>> clusterRoleHostResult = clusterRoleHostService.listByRegionId(tgtRegionId);
+        if (clusterRoleHostResult.failed()) {
+            return false;
+        }
+        clusterRoleHostResult.getData().stream().forEach(clusterRoleHost -> nodeNames.add(clusterRoleHost.getNodeSet()));
+
+        return ESOpTimeoutRetry.esRetryExecute("syncBatchUpdateRegion", retryCount,
+            () -> esIndexDAO.batchUpdateIndexRegion(cluster, indices, nodeNames));
     }
 
     /**
@@ -422,6 +472,30 @@ public class ESIndexServiceImpl implements ESIndexService {
     }
 
     /**
+     * 获取集群中索引segment数量
+     *
+     * @param clusterPhyName 物理集群名称
+     * @return {@link Map}<{@link String}, {@link Tuple}<{@link Long}, {@link Long}>>
+     */
+    @Override
+    public Map<String, Tuple<Long, Long>> syncGetIndicesSegmentCount(String clusterPhyName) {
+        Map<String, IndexNodes> indexNodesMap = esIndexDAO.getIndexStats(clusterPhyName, null);
+        Map<String, Tuple<Long, Long>> retMap = new HashMap<>();
+        if (MapUtils.isNotEmpty(indexNodesMap)) {
+            indexNodesMap.forEach((key, val) -> {
+                Tuple<Long, Long> tuple = new Tuple<>();
+                Optional.ofNullable(val).map(IndexNodes::getTotal).map(CommonStat::getSegments).map(Segments::getCount)
+                    .ifPresent(tuple::setV1);
+                Optional.ofNullable(val).map(IndexNodes::getPrimaries).map(CommonStat::getSegments)
+                    .map(Segments::getCount).ifPresent(tuple::setV2);
+                retMap.put(key, tuple);
+            });
+
+        }
+        return retMap;
+    }
+    
+    /**
      * 过滤原始索引
      */
     private boolean filterOriginalIndices(CatIndexResult catIndexResult) {
@@ -535,7 +609,161 @@ public class ESIndexServiceImpl implements ESIndexService {
         return totalCheckpoint;
     }
 
+    @Override
+    public Result<Void> addAliases(String cluster, String index, List<String> aliases) {
+        if (!esIndexDAO.exist(cluster, index)) {
+            return Result.buildParamIllegal(String.format("索引【%s】不存在", index));
+        }
+        if (CollectionUtils.isEmpty(aliases)) {
+            return Result.buildParamIllegal("要操作的别名不存在");
+        }
+        List<PutAliasNode> putAliasNodeList = new ArrayList<>();
+        Map<String, List<String>> aliasIndexNodeMap = syncGetIndexAliasesByIndices(cluster, index);
+        Set<String> aliasSet = new HashSet<>();
+        Optional.ofNullable(aliasIndexNodeMap.get(index)).map(aliasSet::addAll);
+
+        aliases.stream().filter(StringUtils::isNotBlank).forEach(aliasName -> {
+            PutAliasNode putAliasNode = new PutAliasNode();
+            putAliasNode.setIndex(index);
+            putAliasNode.setAlias(aliasName);
+            putAliasNode.setType(PutAliasType.ADD);
+            if (!aliasSet.contains(aliasName)) {
+                putAliasNodeList.add(putAliasNode);
+            }
+        });
+
+        if (CollectionUtils.isNotEmpty(putAliasNodeList)) {
+            return esIndexDAO.editAlias(cluster, putAliasNodeList);
+        }
+        return Result.buildSucc();
+    }
+
+    @Override
+    public Result<Void> deleteAliases(String cluster, String index, List<String> aliases) {
+        if (!esIndexDAO.exist(cluster, index)) {
+            return Result.buildParamIllegal(String.format("索引【%s】不存在", index));
+        }
+        if (CollectionUtils.isEmpty(aliases)) {
+            return Result.buildParamIllegal("要操作的别名不存在");
+        }
+        List<PutAliasNode> putAliasNodeList = new ArrayList<>();
+        Map<String, List<String>> aliasIndexNodeMap = syncGetIndexAliasesByIndices(cluster, index);
+        Set<String> aliasSet = new HashSet<>();
+        Optional.ofNullable(aliasIndexNodeMap.get(index)).map(aliasSet::addAll);
+        Set<String> notExistsAlias = new HashSet<>();
+
+        aliases.stream().filter(StringUtils::isNotBlank).forEach(aliasName -> {
+            PutAliasNode putAliasNode = new PutAliasNode();
+            putAliasNode.setIndex(index);
+            putAliasNode.setAlias(aliasName);
+            putAliasNode.setType(PutAliasType.REMOVE);
+            if (!aliasSet.contains(aliasName)) {
+                notExistsAlias.add(aliasName);
+            }
+            putAliasNodeList.add(putAliasNode);
+        });
+        if (!notExistsAlias.isEmpty()) {
+            return Result.buildParamIllegal(String.format("要删除的别名【%s】不存在", StringUtils.join(notExistsAlias, ",")));
+        }
+        return esIndexDAO.editAlias(cluster, putAliasNodeList);
+    }
+    @Override
+    public Result<Void> rollover(String cluster, String alias, String conditions) {
+        return esIndexDAO.rollover(cluster, alias, conditions);
+    }
+
+    @Override
+    public Result<Void> forceMerge(String cluster, String index, Integer maxNumSegments, Boolean onlyExpungeDeletes) {
+        return esIndexDAO.forceMerge(cluster, index, maxNumSegments, onlyExpungeDeletes);
+    }
+
+    @Override
+    public Result<Void> shrink(String cluster, String index, String targetIndex, String config) {
+        return esIndexDAO.shrink(cluster, index, targetIndex, config);
+    }
+
+    @Override
+    public Result<Void> split(String cluster, String index, String targetIndex, String config) {
+        return esIndexDAO.split(cluster, index, targetIndex, config);
+    }
+
+    @Override
+    public List<CatIndexResult> indicesDistribution(String cluster) {
+        List<CatIndexResult> catIndexResultList = esIndexDAO.catIndices(cluster);
+        return catIndexResultList;
+    }
+
+    @Override
+    public List<IndexCatCell> buildIndexAliasesAndBlockInfo(String cluster, List<IndexCatCell> indexCatCellList) {
+        if (CollectionUtils.isNotEmpty(indexCatCellList)) {
+            List<String> indexNameList = indexCatCellList.stream().map(IndexCatCell::getIndex)
+                .collect(Collectors.toList());
+            Map<String, IndexConfig> name2IndexConfigMap = this.syncGetIndexSetting(cluster, indexNameList, 3);
+
+            Map<String, List<String>> aliasMap = this.syncGetIndexAliasesByIndices(cluster,
+                indexNameList.toArray(new String[0]));
+            indexCatCellList.forEach(indexCatCell -> {
+                indexCatCell.setAliases(aliasMap.getOrDefault(indexCatCell.getIndex(), Lists.newArrayList()));
+
+                IndexConfig indexConfig = name2IndexConfigMap.get(indexCatCell.getIndex());
+                Tuple<Boolean, Boolean> writeAndReadBlockFromMerge = getWriteAndReadBlock(indexConfig);
+
+                indexCatCell
+                    .setReadFlag(writeAndReadBlockFromMerge.getV1() != null && writeAndReadBlockFromMerge.getV1());
+                indexCatCell
+                    .setWriteFlag(writeAndReadBlockFromMerge.getV2() != null && writeAndReadBlockFromMerge.getV2());
+            });
+        } else {
+            LOGGER.warn(
+                "class=IndicesPageSearchHandle||method=buildBlockInfo||cluster={}||index={}||errMsg=index is empty",
+                cluster);
+        }
+        return indexCatCellList;
+    }
+
     /***************************************** private method ****************************************************/
+
+
+    private Tuple<Boolean, Boolean> getWriteAndReadBlock(IndexConfig indexConfig) {
+        Tuple<Boolean, Boolean> writeAndReadBlockFromMerge = new Tuple<>();
+        //build from es setUp settings
+        Tuple<Boolean, Boolean> writeAndReadBlockFromSetUpSettingTuple = new Tuple<>();
+        Optional.ofNullable(indexConfig).map(IndexConfig::getSettings).filter(MapUtils::isNotEmpty)
+            .map(JSON::toJSONString).map(JSON::parseObject).ifPresent(settingsObj -> {
+                writeAndReadBlockFromSetUpSettingTuple.setV1(settingsObj.getBoolean(READ));
+                writeAndReadBlockFromSetUpSettingTuple.setV2(settingsObj.getBoolean(WRITE));
+            });
+        //build from es default settings
+        Tuple<Boolean, Boolean> writeAndReadBlockFromDefaultSettingTuple = new Tuple<>();
+        Optional.ofNullable(indexConfig).map(config -> config.getOther(DEFAULTS)).map(Object::toString)
+            .map(JSON::parseObject).map(defaultObj -> defaultObj.getJSONObject(INDEX))
+            .map(indexSettings -> indexSettings.getJSONObject(BLOCKS)).ifPresent(blocksObj -> {
+                if (null != blocksObj.get(IndexBlockEnum.READ.getType())) {
+                    writeAndReadBlockFromDefaultSettingTuple.setV1(blocksObj.getBoolean(IndexBlockEnum.READ.getType()));
+                }
+                if (null != blocksObj.get(IndexBlockEnum.WRITE.getType())) {
+                    writeAndReadBlockFromDefaultSettingTuple
+                        .setV2(blocksObj.getBoolean(IndexBlockEnum.WRITE.getType()));
+                }
+            });
+
+        //set read block info
+        if (null != writeAndReadBlockFromSetUpSettingTuple.getV1()) {
+            writeAndReadBlockFromMerge.setV1(writeAndReadBlockFromSetUpSettingTuple.getV1());
+        } else if (null != writeAndReadBlockFromDefaultSettingTuple.getV1()) {
+            writeAndReadBlockFromMerge.setV1(writeAndReadBlockFromDefaultSettingTuple.getV1());
+        }
+
+        //set write block info
+        if (null != writeAndReadBlockFromSetUpSettingTuple.getV2()) {
+            writeAndReadBlockFromMerge.setV2(writeAndReadBlockFromSetUpSettingTuple.getV2());
+        } else if (null != writeAndReadBlockFromDefaultSettingTuple.getV2()) {
+            writeAndReadBlockFromMerge.setV2(writeAndReadBlockFromDefaultSettingTuple.getV2());
+        }
+
+        return writeAndReadBlockFromMerge;
+    }
+    
     private Result<Void> refreshIndex(String cluster, List<String> indexNames) {
         BatchProcessor.BatchProcessResult<String, Boolean> result = new BatchProcessor<String, Boolean>()
             .batchList(indexNames).batchSize(30).processor(items -> esIndexDAO.refreshIndex(cluster, items))
@@ -591,16 +819,6 @@ public class ESIndexServiceImpl implements ESIndexService {
         }
 
         return true;
-    }
-
-    private boolean createIndexInner(String cluster, String indexName, int retryCount) throws ESOperateException {
-        return ESOpTimeoutRetry.esRetryExecute("createIndex", retryCount,
-            () -> esIndexDAO.createIndex(cluster, indexName));
-    }
-
-    private boolean deleteIndexInner(String cluster, String indexName, int retryCount) throws ESOperateException {
-        return ESOpTimeoutRetry.esRetryExecute("deleteIndex", retryCount,
-            () -> esIndexDAO.deleteIndex(cluster, indexName));
     }
 
     private boolean batchDeleteIndicesInner(String cluster, String indices, int retryCount) {

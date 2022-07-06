@@ -23,9 +23,9 @@ import lombok.NoArgsConstructor;
 public class DslAnalyzeResultQpsPO extends BaseESPO {
 
     /**
-     * 应用id
+     * projectid
      */
-    private Integer appid;
+    private Integer projectId;
 
     /**
      * 查询模板的md5值
@@ -63,7 +63,7 @@ public class DslAnalyzeResultQpsPO extends BaseESPO {
     @JSONField(serialize = false)
     @Override
     public String getKey() {
-        return String.format("%d_%s_%s", this.appid, this.dslTemplateMd5, date);
+        return String.format("%d_%s_%s", this.projectId, this.dslTemplateMd5, date);
     }
 
     @Override
@@ -72,25 +72,25 @@ public class DslAnalyzeResultQpsPO extends BaseESPO {
     }
 
     /**
-     * 构建AppidTemplateQpsInfo
+     * 构建ProjectIdTemplateQpsInfo
      *
      * @param maxQpsTimeTuple
-     * @param appid
+     * @param projectId
      * @param dslTemplateMd5
      * @param date
      * @return
      */
-    public static DslAnalyzeResultQpsPO buildAppIdTemplateQpsInfo(Tuple<Long, Long> maxQpsTimeTuple,
-                                                                  Integer appid, String dslTemplateMd5, String date) {
-        DslAnalyzeResultQpsPO appidTemplateQpsInfo = new DslAnalyzeResultQpsPO();
-        appidTemplateQpsInfo.setAppid(appid);
-        appidTemplateQpsInfo.setDslTemplateMd5(dslTemplateMd5);
-        appidTemplateQpsInfo.setSearchCount(maxQpsTimeTuple.v2());
-        appidTemplateQpsInfo.setDate(date);
-        appidTemplateQpsInfo.setTimeStamp(maxQpsTimeTuple.v1());
-        appidTemplateQpsInfo.setAriusType("qps");
+    public static DslAnalyzeResultQpsPO buildProjectIdTemplateQpsInfo(Tuple<Long, Long> maxQpsTimeTuple,
+                                                                      Integer projectId, String dslTemplateMd5, String date) {
+        DslAnalyzeResultQpsPO dslAnalyzeResultQps = new DslAnalyzeResultQpsPO();
+        dslAnalyzeResultQps.setProjectId(projectId);
+        dslAnalyzeResultQps.setDslTemplateMd5(dslTemplateMd5);
+        dslAnalyzeResultQps.setSearchCount(maxQpsTimeTuple.v2());
+        dslAnalyzeResultQps.setDate(date);
+        dslAnalyzeResultQps.setTimeStamp(maxQpsTimeTuple.v1());
+        dslAnalyzeResultQps.setAriusType("qps");
 
-        return appidTemplateQpsInfo;
+        return dslAnalyzeResultQps;
     }
 
 }

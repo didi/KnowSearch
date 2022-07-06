@@ -18,7 +18,6 @@ public enum ModuleEnum {
                         /** 模板 */
                         TEMPLATE(1, "模板"),
 
-                        APP(2, "应用"),
 
                         WORK_ORDER(3, "工单"),
 
@@ -26,9 +25,7 @@ public enum ModuleEnum {
 
                         CLUSTER(5, "集群"),
 
-                        CONFIG(6, "通用配置"),
 
-                        RESOURCE_CONFIG(7, "集群资源配置"),
 
                         SCHEDULE(8, "定时任务"),
 

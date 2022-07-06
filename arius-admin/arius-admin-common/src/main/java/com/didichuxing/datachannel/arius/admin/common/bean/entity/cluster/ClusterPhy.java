@@ -2,16 +2,22 @@ package com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster;
 
 import java.util.List;
 
-import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.BaseEntity;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleCluster;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHost;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * 物理集群
+ * @author ohushenglin_v
+ * @date 2022-05-10
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -136,12 +142,12 @@ public class ClusterPhy extends BaseEntity implements Comparable<ClusterPhy> {
     /**
      * ES的角色
      */
-    private List<RoleCluster>     roleClusters;
+    private List<ClusterRoleInfo> clusterRoleInfos;
 
     /**
      * ES的角色的机器节点
      */
-    private List<RoleClusterHost> roleClusterHosts;
+    private List<ClusterRoleHost> clusterRoleHosts;
 
     /**
      * client运行模式，读写共享还是读写分离
@@ -167,6 +173,21 @@ public class ClusterPhy extends BaseEntity implements Comparable<ClusterPhy> {
     private Long                  diskUsage;
     private Double                diskUsagePercent;
 
+    /**
+     * IaaS平台类型
+     */
+    private String                platformType;
+
+    /**
+     * 集群资源类型(-1 未知 1 共享 2 独立 3 独享)
+     * @see ClusterResourceTypeEnum
+     */
+    private Integer               resourceType;
+
+    /**
+     * 网关地址
+     */
+    private String                gatewayUrl;
     @Override
     public int compareTo(ClusterPhy o) {
         if (null == o) {

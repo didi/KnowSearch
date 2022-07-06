@@ -1,31 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.core.service.es.impl;
 
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant.*;
-
-import java.net.InetAddress;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-
-import com.didichuxing.datachannel.arius.admin.common.bean.po.stats.ESClusterThreadPO;
-import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterConnectionStatus;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.compress.utils.Sets;
-import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.common.transport.InetSocketTransportAddress;
-import org.elasticsearch.common.transport.TransportAddress;
-import org.elasticsearch.rest.RestStatus;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.NodeAllocationInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.NodeAttrInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.setting.ESClusterGetSettingsAllResponse;
@@ -33,16 +8,16 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ECSegmen
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStatsResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterTaskStatsResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterThreadStats;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.stats.ESClusterThreadPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.PendingTaskAnalysisVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.TaskMissionAnalysisVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterConnectionStatus;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.SizeUtil;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpTimeoutRetry;
-import com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateContant;
+import com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant;
 import com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESClusterDAO;
 import com.didiglobal.logi.elasticsearch.client.ESClient;
 import com.didiglobal.logi.elasticsearch.client.gateway.direct.DirectRequest;
@@ -57,6 +32,20 @@ import com.didiglobal.logi.log.LogFactory;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.compress.utils.Sets;
+import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.elasticsearch.common.transport.TransportAddress;
+import org.elasticsearch.rest.RestStatus;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.net.InetAddress;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.*;
 
 /**
  * @author d06679
@@ -70,8 +59,17 @@ public class ESClusterServiceImpl implements ESClusterService {
     @Autowired
     private ESClusterDAO      esClusterDAO;
 
-    @Autowired
-    private ClusterPhyService clusterPhyService;
+    private final String ACKNOWLEDGED = "acknowledged";
+    private final String SHARDS = "_shards";
+    private final String FAILED = "failed";
+    private final String DESCRIPTION = "description";
+    private final String START_TIME_IN_MILLIS = "start_time_in_millis";
+    private final String RUNNING_TIME_IN_NANOS = "running_time_in_nanos";
+    private final String ACTION = "action";
+    private final String NAME = "name";
+    private final String NODES = "nodes";
+    private final String TASKS = "tasks";
+
 
     /**
      * 关闭集群re balance
@@ -114,7 +112,7 @@ public class ESClusterServiceImpl implements ESClusterService {
                                         Integer retryCount) throws ESOperateException {
         return ESOpTimeoutRetry.esRetryExecute("syncPutRemoteCluster", retryCount,
             () -> esClusterDAO.putPersistentRemoteClusters(cluster,
-                String.format(ESOperateContant.REMOTE_CLUSTER_FORMAT, remoteCluster), tcpAddresses));
+                String.format(ESOperateConstant.REMOTE_CLUSTER_FORMAT, remoteCluster), tcpAddresses));
     }
 
     /**
@@ -309,111 +307,6 @@ public class ESClusterServiceImpl implements ESClusterService {
         return nodeAttributes;
     }
 
-    /**
-     * rack对应的可使用磁盘大小 key->rack value->diskSize
-     */
-    @Override
-    public Map<String, Float> getAllocationInfoOfRack(String cluster) {
-        //获取节点关于可以使用的磁盘资源的信息
-        Map<String, String> canUseDiskOnNodeMap = ConvertUtil.list2Map(esClusterDAO.getNodeAllocationInfoByCluster(cluster),
-                NodeAllocationInfo::getNode, NodeAllocationInfo::getTotalDiskSize);
-        if (MapUtils.isEmpty(canUseDiskOnNodeMap)) {
-            LOGGER.warn("class=ESClusterServiceImpl||method=getAllocationInfoOfRack||msg=cant get node allocation");
-            return null;
-        }
-
-        //获取指定集群下的节点attr标签值
-        Map<String, Float> allocationInfoOfRackMap = Maps.newHashMap();
-        List<NodeAttrInfo> nodeAttrInfos = esClusterDAO.syncGetAllNodesAttributes(cluster);
-        if (CollectionUtils.isEmpty(nodeAttrInfos)) {
-            LOGGER.warn("class=ESClusterServiceImpl||method=getAllocationInfoOfRack||msg=cant get node attributes");
-            return null;
-        }
-
-        //对设置有rack标签的节点进行过滤，获取对应rack下的可使用磁盘空间
-        nodeAttrInfos.stream().filter(nodeAttrInfo -> "rack".equals(nodeAttrInfo.getAttribute())).forEach(
-                nodeAttrInfo -> {
-                    //获取rack对应的设置数值
-                    String attrRack = nodeAttrInfo.getValue();
-                    //根据rack指定节点获取节点的可使用磁盘空间,es集群获取的raw数据都是以gb结尾，例如123.5gb
-                    String canUseDiskDateOfNode = canUseDiskOnNodeMap.get(nodeAttrInfo.getNode());
-                    //对应可使用磁盘信息为空则跳出本次循环
-                    if (StringUtils.isBlank(canUseDiskDateOfNode)) {
-                        return;
-                    }
-
-                    //对应指定rack的可使用磁盘空间大小进行操作
-                    Float newDiskSize = Float.valueOf(SizeUtil.getUnitSize(canUseDiskDateOfNode));
-                    if (allocationInfoOfRackMap.containsKey(attrRack)) {
-                        allocationInfoOfRackMap.put(attrRack, newDiskSize + allocationInfoOfRackMap.get(attrRack));
-                    } else {
-                        allocationInfoOfRackMap.put(attrRack, newDiskSize);
-                    }
-
-                    //移除掉节点allocation_map中的节点名称
-                    canUseDiskOnNodeMap.remove(nodeAttrInfo.getNode());
-                }
-        );
-
-        if(MapUtils.isEmpty(canUseDiskOnNodeMap)) {
-            return allocationInfoOfRackMap;
-        }
-
-        // 剩余的没有设置rack的节点全部作为rack为*来进行保存
-        final float[] diskNumber = {0f};
-        canUseDiskOnNodeMap.values().forEach(s -> diskNumber[0] = SizeUtil.getUnitSize(s) + diskNumber[0]);
-        allocationInfoOfRackMap.put("*", diskNumber[0]);
-
-        return allocationInfoOfRackMap;
-    }
-
-    @Override
-    public Result<Set<String>> getClusterRackByHttpAddress(String addresses, String password) {
-        Set<String> racks = new HashSet<>();
-        ESClient client = new ESClient();
-        client.addTransportAddresses(addresses);
-
-        if (StringUtils.isNotBlank(password)) {
-            client.setPassword(password);
-        }
-
-        try {
-            client.start();
-            ESClusterNodesSettingResponse response = client.admin().cluster().prepareNodesSetting().execute()
-                    .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
-
-            if (RestStatus.OK.getStatus() == response.getRestStatus().getStatus()) {
-                for (Map.Entry<String, ClusterNodeSettings> entry : response.getNodes().entrySet()) {
-                    // 获取节点的roles角色信息
-                    List<String> roles = JSONArray.parseArray(JSON.toJSONString(entry.getValue().getRoles()), String.class);
-                    // 低版本(2.3.3)的集群在nodes中不存在roles属性，关于角色的信息需要从node的settings中获取
-                    if (CollectionUtils.isEmpty(roles)) {
-                        // 获取setting.node中的角色信息
-                        JSONObject nodeRole = entry.getValue().getSettings().getJSONObject("node");
-                        if (AriusObjUtils.isNull(nodeRole) || !nodeRole.containsKey(ES_ROLE_DATA) || nodeRole.getBoolean(ES_ROLE_DATA)) {
-                            setRacksForDateRole(racks, entry);
-                        }
-                        continue;
-                    }
-
-                    // 高版本可以通过node含有的roles属性判断节点角色
-                    if (roles.contains(ES_ROLE_DATA)) {
-                        setRacksForDateRole(racks, entry);
-                    }
-                }
-
-                return Result.buildSucc(racks);
-            } else {
-                return Result.buildParamIllegal(String.format("通过地址:%s获取rack失败", addresses));
-            }
-        } catch (Exception e) {
-            LOGGER.error("class=ESClusterServiceImpl||method=getClusterRackByHttpAddress||msg=get rack error||httpAddress={}||msg=client start error", addresses);
-            return Result.buildParamIllegal(String.format("通过地址:%s获取rack失败", addresses));
-        } finally {
-            client.close();
-        }
-    }
-
     @Override
     public Result<Void> checkSameCluster(String password, List<String> addresses){
         Set<String> clusters = new HashSet<>();
@@ -481,7 +374,7 @@ public class ESClusterServiceImpl implements ESClusterService {
         try {
             client.start();
             DirectRequest directRequest = new DirectRequest("GET", "");
-            DirectResponse directResponse = client.direct(directRequest).actionGet(30, TimeUnit.SECONDS);
+            client.direct(directRequest).actionGet(30, TimeUnit.SECONDS);
             return ClusterConnectionStatus.NORMAL;
         } catch (Exception e) {
             LOGGER.warn("class=ESClusterServiceImpl||method=checkClusterWithoutPassword||address={}||mg=get es segments fail", addresses, e);
@@ -500,12 +393,12 @@ public class ESClusterServiceImpl implements ESClusterService {
         List<ESClusterThreadPO> threadStats = esClusterDAO.syncGetThreadStatsByCluster(cluster);
         ESClusterThreadStats esClusterThreadStats = new ESClusterThreadStats(cluster, 0L, 0L, 0L, 0L, 0L, 0L);
         if (threadStats != null) {
-            esClusterThreadStats.setManagement(threadStats.stream().filter(thread -> thread.getThreadName().equals("management")).mapToLong(ESClusterThreadPO::getQueueNum).sum());
-            esClusterThreadStats.setRefresh(threadStats.stream().filter(thread -> thread.getThreadName().equals("refresh")).mapToLong(ESClusterThreadPO::getQueueNum).sum());
-            esClusterThreadStats.setFlush(threadStats.stream().filter(thread -> thread.getThreadName().equals("flush")).mapToLong(ESClusterThreadPO::getQueueNum).sum());
-            esClusterThreadStats.setMerge(threadStats.stream().filter(thread -> thread.getThreadName().equals("force_merge")).mapToLong(ESClusterThreadPO::getQueueNum).sum());
-            esClusterThreadStats.setSearch(threadStats.stream().filter(thread -> thread.getThreadName().equals("search")).mapToLong(ESClusterThreadPO::getQueueNum).sum());
-            esClusterThreadStats.setWrite(threadStats.stream().filter(thread -> thread.getThreadName().equals("write")).mapToLong(ESClusterThreadPO::getQueueNum).sum());
+            esClusterThreadStats.setManagement(threadStats.stream().filter(thread -> "management".equals(thread.getThreadName())).mapToLong(ESClusterThreadPO::getQueueNum).sum());
+            esClusterThreadStats.setRefresh(threadStats.stream().filter(thread -> "refresh".equals(thread.getThreadName())).mapToLong(ESClusterThreadPO::getQueueNum).sum());
+            esClusterThreadStats.setFlush(threadStats.stream().filter(thread -> "flush".equals(thread.getThreadName())).mapToLong(ESClusterThreadPO::getQueueNum).sum());
+            esClusterThreadStats.setMerge(threadStats.stream().filter(thread -> "force_merge".equals(thread.getThreadName())).mapToLong(ESClusterThreadPO::getQueueNum).sum());
+            esClusterThreadStats.setSearch(threadStats.stream().filter(thread -> "search".equals(thread.getThreadName())).mapToLong(ESClusterThreadPO::getQueueNum).sum());
+            esClusterThreadStats.setWrite(threadStats.stream().filter(thread ->"write".equals(thread.getThreadName())).mapToLong(ESClusterThreadPO::getQueueNum).sum());
         }
         return esClusterThreadStats;
     }
@@ -515,18 +408,60 @@ public class ESClusterServiceImpl implements ESClusterService {
         return esClusterDAO.getClusterHealthAtIndicesLevel(phyClusterName);
     }
 
-    /***************************************** private method ****************************************************/
-    /**
-     * 根据node的atrributes获取当前节点的rack配置信息
-     * @param racks rack列表
-     * @param entry 当前node的entry
-     */
-    private void setRacksForDateRole(Set<String> racks, Map.Entry<String, ClusterNodeSettings> entry) {
-        if (AriusObjUtils.isNull(entry.getValue().getAttributes())
-                || AriusObjUtils.isNull(entry.getValue().getAttributes().getRack())) {
-            racks.add("*");
-        } else {
-            racks.add(entry.getValue().getAttributes().getRack());
-        }
+    @Override
+    public List<PendingTaskAnalysisVO> pendingTaskAnalysis(String cluster) {
+        String response = esClusterDAO.pendingTask(cluster);
+        return  Optional.ofNullable(response).map(JSONObject::parseObject).map(jsonObject->jsonObject.getJSONArray(TASKS))
+                .map(tasks->JSONObject.parseArray(tasks.toJSONString(), PendingTaskAnalysisVO.class)).orElse(new ArrayList<>());
     }
+
+    @Override
+    public List<TaskMissionAnalysisVO> taskMissionAnalysis(String cluster) {
+        String response = esClusterDAO.taskMission(cluster);
+        return Optional.ofNullable(response).map(JSONObject::parseObject).map(jsonObject -> buildTaskMission(jsonObject)).orElse(new ArrayList<>());
+    }
+
+    @Override
+    public String hotThreadAnalysis(String cluster) {
+        String response = esClusterDAO.hotThread(cluster);
+        return response;
+    }
+
+    @Override
+    public boolean abnormalShardAllocationRetry(String cluster) {
+        String response = esClusterDAO.abnormalShardAllocationRetry(cluster);
+        return  Optional.ofNullable(response).map(JSONObject::parseObject).map(jsonObject ->jsonObject.getBoolean(ACKNOWLEDGED)).orElse(false);
+    }
+
+    @Override
+    public boolean clearFieldDataMemory(String cluster) {
+        String response = esClusterDAO.clearFieldDataMemory(cluster);
+        return  Optional.ofNullable(response).map(JSONObject::parseObject).map(jsonObject -> jsonObject.getJSONObject(SHARDS))
+                .map(shards->shards.getInteger(FAILED)).map(failed->failed.equals(0)).orElse(false);
+    }
+
+    private List<TaskMissionAnalysisVO> buildTaskMission(JSONObject responseJson) {
+        List<TaskMissionAnalysisVO> vos = new ArrayList<>();
+        JSONObject nodes = responseJson.getJSONObject(NODES);
+        nodes.keySet().forEach(key -> {
+            Optional.ofNullable((JSONObject) nodes.get(key)).map(o -> o.getJSONObject(TASKS)).ifPresent(nodeTasks -> {
+                nodeTasks.forEach((key1, val) -> {
+                    JSONObject nodeInfo = (JSONObject) val;
+                    String nodeName = nodes.getJSONObject(key).getString(NAME);
+                    TaskMissionAnalysisVO taskMissionAnalysisVO = new TaskMissionAnalysisVO();
+                    Optional.ofNullable(nodeInfo)
+                            .ifPresent(o -> {
+                                taskMissionAnalysisVO.setAction(o.getString(ACTION));
+                                taskMissionAnalysisVO.setNode(nodeName);
+                                taskMissionAnalysisVO.setDescription(o.getString(DESCRIPTION));
+                                taskMissionAnalysisVO.setStartTimeInMillis(o.getLong(START_TIME_IN_MILLIS));
+                                taskMissionAnalysisVO.setRunningTimeInNanos(o.getInteger(RUNNING_TIME_IN_NANOS));
+                                vos.add(taskMissionAnalysisVO);
+                            });
+                });
+            });
+        });
+        return vos;
+    }
+
 }

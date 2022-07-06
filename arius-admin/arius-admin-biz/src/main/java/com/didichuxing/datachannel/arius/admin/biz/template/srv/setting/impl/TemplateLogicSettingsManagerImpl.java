@@ -1,5 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.setting.impl;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum.TEMPLATE_SETTING;
+import static com.didichuxing.datachannel.arius.admin.common.mapping.AriusIndexTemplateSetting.ASYNC;
+import static com.didichuxing.datachannel.arius.admin.common.mapping.AriusIndexTemplateSetting.NUMBER_OF_REPLICAS_KEY;
+import static com.didichuxing.datachannel.arius.admin.common.mapping.AriusIndexTemplateSetting.REQUEST;
+import static com.didichuxing.datachannel.arius.admin.common.mapping.AriusIndexTemplateSetting.TRANSLOG_DURABILITY_KEY;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -8,30 +14,37 @@ import com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping.Template
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.precreate.TemplatePreCreateManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.setting.TemplateLogicSettingsManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.setting.TemplatePhySettingsManager;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateSettingDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateSettingDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateSettingVO;
-import com.didichuxing.datachannel.arius.admin.common.mapping.AriusIndexTemplateSetting;
-import com.didichuxing.datachannel.arius.admin.common.mapping.AriusTypeProperty;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithMapping;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhySettings;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithMapping;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateSettingVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import com.didichuxing.datachannel.arius.admin.common.mapping.AriusIndexTemplateSetting;
+import com.didichuxing.datachannel.arius.admin.common.mapping.AriusTypeProperty;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
+import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
+import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
+import com.didiglobal.logi.elasticsearch.client.response.setting.template.TemplateConfig;
+import com.didiglobal.logi.elasticsearch.client.utils.JsonUtils;
+import com.didiglobal.logi.security.service.ProjectService;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.Map;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum.TEMPLATE_SETTING;
-import static com.didichuxing.datachannel.arius.admin.common.mapping.AriusIndexTemplateSetting.*;
 
 /**
  * 索引setting服务实现
@@ -49,6 +62,12 @@ public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrv implements
 
     @Autowired
     private TemplatePreCreateManager templatePreCreateManager;
+    @Autowired
+    private ESTemplateService        esTemplateService;
+    @Autowired
+    private OperateRecordService operateRecordService;
+    @Autowired
+    private ProjectService       projectService;
 
     @Override
     public TemplateServiceEnum templateService() {
@@ -57,7 +76,7 @@ public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrv implements
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result<Void> modifySetting(ConsoleTemplateSettingDTO settingDTO, String operator) throws AdminOperateException {
+    public Result<Void> modifySetting(ConsoleTemplateSettingDTO settingDTO, String operator, Integer projectId) throws AdminOperateException {
 
         LOGGER.info("class=TemplateLogicServiceImpl||method=modifySetting||operator={}||setting={}", operator,
             JSON.toJSONString(settingDTO));
@@ -154,7 +173,7 @@ public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrv implements
      */
     @Override
     public Result<Void> updateSettings(Integer logicId, String operator, AriusIndexTemplateSetting settings) {
-        IndexTemplateLogicWithPhyTemplates templateLogicWithPhysical = templateLogicService
+        IndexTemplateWithPhyTemplates templateLogicWithPhysical = indexTemplateService
             .getLogicTemplateWithPhysicalsById(logicId);
 
         if (templateLogicWithPhysical == null) {
@@ -183,6 +202,63 @@ public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrv implements
         return Result.buildSucc();
     }
 
+    @Override
+    public Result<Void> updateSettings(Integer logicId, IndexTemplatePhySettings settings, String operator,
+                                       Integer projectId) {
+        
+        IndexTemplateWithPhyTemplates templateLogicWithPhysical = indexTemplateService
+                .getLogicTemplateWithPhysicalsById(logicId);
+
+        if (templateLogicWithPhysical == null) {
+            return Result.buildNotExist("逻辑模板不存在, ID:" + logicId);
+        }
+
+        if (!templateLogicWithPhysical.hasPhysicals()) {
+            return Result.buildNotExist("物理模板不存在，ID:" + logicId);
+        }
+        final Result<Void> result = ProjectUtils.checkProjectCorrectly(IndexTemplateWithPhyTemplates::getProjectId,
+                templateLogicWithPhysical, projectId);
+        if (result.failed()) {
+            return result;
+        }
+    
+        List<IndexTemplatePhy> templatePhysicals = templateLogicWithPhysical.fetchMasterPhysicalTemplates();
+
+       
+    
+        //获取变更前的setting
+        TemplateConfig templateConfig = Optional.ofNullable(esTemplateService.syncGetTemplateConfig(
+                templateLogicWithPhysical.getMasterPhyTemplate().getCluster(),
+                templateLogicWithPhysical.getMasterPhyTemplate().getName())).orElse(new TemplateConfig());
+        JSONObject beforeSetting= MapUtils.isNotEmpty(templateConfig.getSetttings())?
+                JsonUtils.reFlat(templateConfig.getSetttings()):new JSONObject();
+        //变更后的setting
+        JSONObject afterSetting=settings.getSettings();
+        
+        for (IndexTemplatePhy templatePhysical : templatePhysicals) {
+            try {
+                templatePhySettingsManager.mergeTemplateSettings(logicId, templatePhysical.getCluster(), templatePhysical.getName(),  settings);
+            } catch (AdminOperateException adminOperateException) {
+                return Result.buildFail(adminOperateException.getMessage());
+            }
+        }
+
+        try {
+            templatePreCreateManager.reBuildTomorrowIndex(logicId, 3);
+        } catch (Exception e) {
+            LOGGER.error("class=TemplateLogicServiceImpl||method=updateSettings||logicId:{}", logicId, e);
+        }
+        operateRecordService.save(
+                new OperateRecord.Builder().project(projectService.getProjectBriefByProjectId(projectId))
+                        .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).userOperation(operator)
+                        .operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_EDIT_SETTING)
+                        .content(ProjectUtils.getChangeByAfterAndBeforeJson(beforeSetting, afterSetting))
+                        .bizId(logicId)
+                        .build());
+
+        return Result.buildSucc();
+    }
+
     /**
      * 通过逻辑ID获取Settings
      * @param logicId 逻辑ID
@@ -190,7 +266,7 @@ public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrv implements
      */
     @Override
     public Result<IndexTemplatePhySettings> getTemplateSettings(Integer logicId) {
-        IndexTemplateLogicWithPhyTemplates templateLogicWithPhysical = templateLogicService
+        IndexTemplateWithPhyTemplates templateLogicWithPhysical = indexTemplateService
             .getLogicTemplateWithPhysicalsById(logicId);
 
         if (templateLogicWithPhysical == null) {
@@ -221,7 +297,7 @@ public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrv implements
      * @return
      */
     private JSONArray getDynamicTemplatesByLogicTemplate(Integer logicId) {
-        Result<IndexTemplateLogicWithMapping> templateWithMapping = templateLogicMappingManager.getTemplateWithMapping(logicId);
+        Result<IndexTemplateWithMapping> templateWithMapping = templateLogicMappingManager.getTemplateWithMapping(logicId);
         if (templateWithMapping.failed()) {
             LOGGER.warn("class=TemplateLogicServiceImpl||method=getDynamicTemplatesByLogicTemplate||logicTemplateId={}||msg={}",
                     logicId, templateWithMapping.getMessage());

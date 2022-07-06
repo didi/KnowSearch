@@ -14,12 +14,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESZeusHostInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 
 /**
- * Created by linyunan on 2021-09-14
+ * @author linyunan
+ * @date 2021-09-14
  */
 @Component
 public class ZeusCollectManagerImpl implements ZeusCollectManager {
@@ -29,8 +30,10 @@ public class ZeusCollectManagerImpl implements ZeusCollectManager {
 
     @Autowired
     private ClusterPhyService                                           clusterPhyService;
-
-    private final Map<String/*clusterPhyName*/, Integer/*clientCount*/> clusterPhyName2ClientCountMap = new ConcurrentHashMap<>();
+    /**
+     * Map<clusterPhyName, clientCount>
+     */
+    private final Map<String, Integer> clusterPhyName2ClientCountMap = new ConcurrentHashMap<>();
 
     @Override
     public synchronized Result<Boolean> updateHttpAddressFromZeus(ESZeusHostInfoDTO esZeusHostInfoDTO) {
@@ -48,7 +51,7 @@ public class ZeusCollectManagerImpl implements ZeusCollectManager {
             return Result.buildSucc();
         }
 
-        ESClusterDTO clusterDTO = new ESClusterDTO();
+        ClusterPhyDTO clusterDTO = new ClusterPhyDTO();
         clusterDTO.setId(clusterPhy.getId());
 
         //如果集群存在client, 用client代替master作为集群读写访问入口
@@ -69,7 +72,7 @@ public class ZeusCollectManagerImpl implements ZeusCollectManager {
 
             if (clusterPhyName2ClientCountMap.get(esZeusHostInfoDTO.getClusterPhyName()) >= 0) {
                 buildESClusterDTOFromZeus(clusterDTO, clusterPhy, esZeusHostInfoDTO);
-                clusterPhyManager.editCluster(clusterDTO, null, null);
+                clusterPhyManager.editCluster(clusterDTO, null);
                 clusterPhyName2ClientCountMapAddOne(esZeusHostInfoDTO.getClusterPhyName());
             }
         }
@@ -77,12 +80,12 @@ public class ZeusCollectManagerImpl implements ZeusCollectManager {
         if (MASTER_NODE.getDesc().equals(esZeusHostInfoDTO.getRole()) &&
 				null == clusterPhyName2ClientCountMap.get(esZeusHostInfoDTO.getClusterPhyName())) {
             buildESClusterDTOFromZeus(clusterDTO, clusterPhy, esZeusHostInfoDTO);
-            clusterPhyManager.editCluster(clusterDTO, null, null);
+            clusterPhyManager.editCluster(clusterDTO, null);
         }
         return Result.buildSucc();
     }
 
-    private void buildESClusterDTOFromZeus(ESClusterDTO clusterDTO, ClusterPhy clusterPhy, ESZeusHostInfoDTO esZeusHostInfoDTO) {
+    private void buildESClusterDTOFromZeus(ClusterPhyDTO clusterDTO, ClusterPhy clusterPhy, ESZeusHostInfoDTO esZeusHostInfoDTO) {
 		String httpAddress = clusterPhy.getHttpAddress();
 		List<String> httpAddressList = ListUtils.string2StrList(httpAddress);
 		if (httpAddressList.contains(esZeusHostInfoDTO.getHttpAddress())) {

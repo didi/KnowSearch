@@ -9,14 +9,13 @@
     "logicCluster": "logi-em-matedata-cluster",
     "phyClusterDesc": "",
     "regionRacks": [],
-    "roleClusterHosts": [
+    "clusterRoleHosts": [
         {
             "cluster": "logi-em-matedata-cluster",
             "id": 0,
             "ip": "10.96.65.63",
             "nodeSet": "",
             "port": 8060,
-            "rack": "",
             "role": 3,
             "roleClusterId": 0,
             "status": 0

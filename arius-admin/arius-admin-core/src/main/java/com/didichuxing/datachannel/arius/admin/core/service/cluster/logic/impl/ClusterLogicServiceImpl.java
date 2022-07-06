@@ -1,49 +1,46 @@
 package com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.Plugin;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.LogicResourceConfig;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Plugin;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterLogicConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.PluginDTO;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppClusterLogicAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicRackInfo;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicWithRack;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleCluster;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterHost;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleClusterNodeSepc;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ProjectClusterLogicAuth;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterLogicPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESMachineNormsPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.esplugin.PluginPO;
-import com.didichuxing.datachannel.arius.admin.common.constant.SortConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.util.*;
-import com.didichuxing.datachannel.arius.admin.core.component.ResponsibleConvertTool;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppClusterLogicAuthService;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESMachineNormsService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESPluginService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicNodeService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.RegionRackService;
-import com.didichuxing.datachannel.arius.admin.core.service.extend.employee.EmployeeService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
+import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectClusterLogicAuthService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.resource.LogicClusterDAO;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-import com.google.common.collect.ArrayListMultimap;
+import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,10 +48,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.DEFAULT_CLUSTER_HEALTH;
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.ADD;
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.EDIT;
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.DATA_NODE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.DEFAULT_CLUSTER_HEALTH;
 
 /**
  * @author d06679
@@ -69,22 +66,13 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
     private LogicClusterDAO            logicClusterDAO;
 
     @Autowired
-    private AppClusterLogicAuthService logicClusterAuthService;
+    private ProjectClusterLogicAuthService logicClusterAuthService;
 
     @Autowired
-    private RegionRackService          rackService;
+    private ProjectService             projectService;
 
     @Autowired
-    private AppService                 appService;
-
-    @Autowired
-    private EmployeeService            employeeService;
-
-    @Autowired
-    private ResponsibleConvertTool     responsibleConvertTool;
-
-    @Autowired
-    private TemplatePhyService         templatePhyService;
+    private IndexTemplatePhyService    indexTemplatePhyService;
 
     @Autowired
     private ESPluginService            esPluginService;
@@ -93,13 +81,13 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
     private ClusterPhyService          clusterPhyService;
 
     @Autowired
-    private ClusterLogicNodeService    clusterLogicNodeService;
-
-    @Autowired
     private ESMachineNormsService      esMachineNormsService;
 
     @Autowired
-    private RegionRackService          regionRackService;
+    private ClusterRegionService       clusterRegionService;
+
+    @Autowired
+    private ClusterRoleHostService clusterRoleHostService;
 
     /**
      * 条件查询逻辑集群
@@ -109,9 +97,9 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
      */
     @Override
     public List<ClusterLogic> listClusterLogics(ESLogicClusterDTO param) {
-        return responsibleConvertTool.list2List(
-            logicClusterDAO.listByCondition(responsibleConvertTool.obj2Obj(param, ClusterLogicPO.class)),
-            ClusterLogic.class);
+        return ConvertUtil.list2List(
+            logicClusterDAO.listByCondition(ConvertUtil.obj2Obj(param, ClusterLogicPO.class)),
+                ClusterLogic.class);
     }
 
     /**
@@ -121,63 +109,7 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
      */
     @Override
     public List<ClusterLogic> listAllClusterLogics() {
-        return responsibleConvertTool.list2List(logicClusterDAO.listAll(), ClusterLogic.class);
-    }
-
-    /**
-     * 获取所有资源
-     *
-     * @return
-     */
-    @Override
-    public List<ClusterLogicWithRack> listAllClusterLogicsWithRackInfo() {
-
-        // 所有逻辑集群rack信息
-        List<ClusterLogicRackInfo> allLogicClusterRackInfos = regionRackService.listAllLogicClusterRacks();
-
-        // 逻辑集群ID到逻辑集群rack信息的Multimap
-        Multimap<Long, ClusterLogicRackInfo> logicClusterId2RackInfoMap = ArrayListMultimap.create();
-        for (ClusterLogicRackInfo param : allLogicClusterRackInfos) {
-            List<Long> logicClusterIds = ListUtils.string2LongList(param.getLogicClusterIds());
-            logicClusterIds.forEach(logicClusterId -> logicClusterId2RackInfoMap.put(logicClusterId, param));
-        }
-
-        List<ClusterLogicPO> logicClusters = logicClusterDAO.listAll();
-        List<ClusterLogicWithRack> logicClustersWithRackInfo = Lists.newArrayList();
-        for (ClusterLogicPO logicCluster : logicClusters) {
-            ClusterLogicWithRack logicClusterWithRackInfo = responsibleConvertTool.obj2Obj(logicCluster,
-                ClusterLogicWithRack.class);
-            logicClusterWithRackInfo.setItems(logicClusterId2RackInfoMap.get(logicCluster.getId()));
-            logicClustersWithRackInfo.add(logicClusterWithRackInfo);
-        }
-
-        return logicClustersWithRackInfo;
-    }
-
-    /**
-     * 获取逻辑集群，返回结果里包含逻辑集群拥有的rack信息
-     *
-     * @return
-     */
-    @Override
-    public ClusterLogicWithRack getClusterLogicWithRackInfoById(Long logicClusterId) {
-        // 所有逻辑集群rack信息
-        List<ClusterLogicRackInfo> allLogicClusterRackInfos = regionRackService.listAllLogicClusterRacks();
-
-        // 逻辑集群ID到逻辑集群rack信息的Multimap
-        Multimap<Long, ClusterLogicRackInfo> logicClusterId2RackInfoMap = ArrayListMultimap.create();
-        for (ClusterLogicRackInfo param : allLogicClusterRackInfos) {
-            List<Long> logicClusterIds = ListUtils.string2LongList(param.getLogicClusterIds());
-            logicClusterIds.forEach(logicId -> logicClusterId2RackInfoMap.put(logicId, param));
-        }
-
-        ClusterLogicPO clusterLogicPO = logicClusterDAO.getById(logicClusterId);
-
-        ClusterLogicWithRack logicClusterWithRackInfo = responsibleConvertTool.obj2Obj(clusterLogicPO,
-            ClusterLogicWithRack.class);
-        logicClusterWithRackInfo.setItems(logicClusterId2RackInfoMap.get(clusterLogicPO.getId()));
-
-        return logicClusterWithRackInfo;
+        return ConvertUtil.list2List(logicClusterDAO.listAll(), ClusterLogic.class);
     }
 
     /**
@@ -185,11 +117,12 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
      *
      * @param logicClusterId 资源id
      * @param operator       操作人
+     * @param projectId     项目id
      * @return result
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result<Void> deleteClusterLogicById(Long logicClusterId, String operator) throws AdminOperateException {
+    public Result<Void> deleteClusterLogicById(Long logicClusterId, String operator, Integer projectId) throws AdminOperateException {
         ClusterLogicPO logicCluster = logicClusterDAO.getById(logicClusterId);
         if (logicCluster == null) {
             return Result.buildNotExist("逻辑集群不存在");
@@ -198,19 +131,10 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
         if (hasLogicClusterWithTemplates(logicClusterId)) {
             return Result.build(ResultType.IN_USE_ERROR.getCode(), "逻辑集群使用中");
         }
-
-        List<ClusterLogicRackInfo> racks = rackService.listLogicClusterRacks(logicClusterId);
-        if (CollectionUtils.isEmpty(racks)) {
-            LOGGER.info("class=ClusterLogicServiceImpl||method=delResource||resourceId={}||msg=delResource no items!",
-                logicClusterId);
-        } else {
-            LOGGER.info(
-                "class=ClusterLogicServiceImpl||method=delResource||resourceId={}||itemSize={}||msg=delResource has items!",
-                logicClusterId, racks.size());
-
-            for (ClusterLogicRackInfo item : racks) {
-                rackService.deleteRackById(item.getId());
-            }
+        final Result<Void> result = ProjectUtils.checkProjectCorrectly(ClusterLogicPO::getProjectId, logicCluster,
+                projectId);
+        if (result.failed()){
+            return result;
         }
 
         boolean succeed = (logicClusterDAO.delete(logicClusterId) > 0);
@@ -222,29 +146,12 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
     }
 
     @Override
-    public Boolean hasLogicClusterWithTemplates(Long logicClusterId) {
-        List<ClusterLogicRackInfo> clusterLogicRackInfos = regionRackService.listLogicClusterRacks(logicClusterId);
-        if (CollectionUtils.isEmpty(clusterLogicRackInfos)) {
-            return false;
-        }
+    public boolean hasLogicClusterWithTemplates(Long logicClusterId) {
+        ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(logicClusterId);
+        if (null == clusterRegion) { return false;}
 
-        // 获取逻辑逻辑集群内的所有rack, 按着cluster分组
-        Multimap<String, String> clusterRackMultiMap = ConvertUtil.list2MulMap(clusterLogicRackInfos,
-            ClusterLogicRackInfo::getPhyClusterName, ClusterLogicRackInfo::getRack);
-
-        for (Map.Entry<String, Collection<String>> entry : clusterRackMultiMap.asMap().entrySet()) {
-            String cluster = entry.getKey();
-            Collection<String> racks = entry.getValue();
-
-            List<IndexTemplatePhy> templatePhysicals = templatePhyService.getNormalTemplateByCluster(cluster);
-            for (IndexTemplatePhy physical : templatePhysicals) {
-                if (RackUtils.hasIntersect(physical.getRack(), racks)) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
+        Result<List<IndexTemplatePhy>> ret = indexTemplatePhyService.listByRegionId(clusterRegion.getId().intValue());
+        return ret.success() && CollectionUtils.isNotEmpty(ret.getData());
     }
 
     /**
@@ -255,7 +162,7 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
      */
     @Override
     public Result<Long> createClusterLogic(ESLogicClusterDTO param) {
-        Result<Void> checkResult = validateClusterLogicParams(param, ADD);
+        Result<Void> checkResult = validateClusterLogicParams(param, ADD, param.getProjectId());
         if (checkResult.failed()) {
             LOGGER.warn("class=ClusterLogicServiceImpl||method=createClusterLogic||msg={}", checkResult.getMessage());
             return Result.buildFrom(checkResult);
@@ -263,7 +170,7 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
 
         initLogicCluster(param);
 
-        ClusterLogicPO logicPO = responsibleConvertTool.obj2Obj(param, ClusterLogicPO.class);
+        ClusterLogicPO logicPO = ConvertUtil.obj2Obj(param, ClusterLogicPO.class);
         boolean succeed = logicClusterDAO.insert(logicPO) == 1;
         return Result.build(succeed, logicPO.getId());
     }
@@ -273,16 +180,17 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
      *
      * @param param     参数
      * @param operation 操作
+     * @param projectId 项目id
      * @return result
      */
     @Override
-    public Result<Void> validateClusterLogicParams(ESLogicClusterDTO param, OperationEnum operation) {
-        return checkLogicClusterParams(param, operation);
+    public Result<Void> validateClusterLogicParams(ESLogicClusterDTO param, OperationEnum operation, Integer projectId) {
+        return checkLogicClusterParams(param, operation,projectId);
     }
 
     @Override
-    public Result<Void> editClusterLogic(ESLogicClusterDTO param, String operator) {
-        Result<Void> checkResult = validateClusterLogicParams(param, EDIT);
+    public Result<Void> editClusterLogic(ESLogicClusterDTO param, String operator, Integer projectId) {
+        Result<Void> checkResult = validateClusterLogicParams(param, EDIT,projectId);
         if (checkResult.failed()) {
             LOGGER.warn("class=ClusterLogicServiceImpl||method=editResource||msg={}", checkResult.getMessage());
             return checkResult;
@@ -293,7 +201,7 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
 
     @Override
     public Result<Void> editClusterLogicNotCheck(ESLogicClusterDTO param, String operator) {
-        ClusterLogicPO paramPO = responsibleConvertTool.obj2Obj(param, ClusterLogicPO.class);
+        ClusterLogicPO paramPO = ConvertUtil.obj2Obj(param, ClusterLogicPO.class);
         boolean succ = (1 == logicClusterDAO.update(paramPO));
 
         return Result.build(succ);
@@ -301,12 +209,12 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
 
     @Override
     public ClusterLogic getClusterLogicById(Long logicClusterId) {
-        return responsibleConvertTool.obj2Obj(logicClusterDAO.getById(logicClusterId), ClusterLogic.class);
+        return ConvertUtil.obj2Obj(logicClusterDAO.getById(logicClusterId), ClusterLogic.class);
     }
 
     @Override
     public ClusterLogic getClusterLogicByName(String logicClusterName) {
-        return responsibleConvertTool.obj2Obj(logicClusterDAO.getByName(logicClusterName), ClusterLogic.class);
+        return ConvertUtil.obj2Obj(logicClusterDAO.getByName(logicClusterName), ClusterLogic.class);
     }
 
     /**
@@ -325,60 +233,58 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
     }
 
     /**
-     * 查询指定app所创建的逻辑集群
+     * 查询指定project所创建的逻辑集群
      *
-     * @param appId APPID
+     * @param projectId project
      * @return list
      */
     @Override
-    public List<ClusterLogic> getOwnedClusterLogicListByAppId(Integer appId) {
-        return responsibleConvertTool.list2List(logicClusterDAO.listByAppId(appId), ClusterLogic.class);
+    public List<ClusterLogic> getOwnedClusterLogicListByProjectId(Integer projectId) {
+        return ConvertUtil.list2List(logicClusterDAO.listByProjectId(projectId), ClusterLogic.class);
     }
 
     @Override
-    public List<Long> getHasAuthClusterLogicIdsByAppId(Integer appId){
-        if (appId == null) {
+    public List<Long> getHasAuthClusterLogicIdsByProjectId(Integer projectId){
+        if (projectId == null) {
             LOGGER.error(
-                    "class=ClusterLogicServiceImpl||method=getHasAuthClusterLogicsByAppId||errMsg=获取有权限逻辑集群时appId为null");
+                    "class=ClusterLogicServiceImpl||method=getHasAuthClusterLogicsByProjectId||errMsg=获取有权限逻辑集群时projectId为null");
             return new ArrayList<>();
         }
 
         // 获取有权限的逻辑集群id
-        Set<Long> hasAuthLogicClusterIds = logicClusterAuthService.getAllLogicClusterAuths(appId).stream()
-                .map(AppClusterLogicAuth::getLogicClusterId).collect(Collectors.toSet());
-
-        return new ArrayList<>(hasAuthLogicClusterIds);
+        return logicClusterAuthService.getAllLogicClusterAuths(projectId).stream()
+                .map(ProjectClusterLogicAuth::getLogicClusterId).distinct().collect(Collectors.toList());
     }
 
     /**
      * 查询指定app有权限的逻辑集群（包括申请权限）
      *
-     * @param appId APP ID
+     * @param projectId APP ID
      * @return 逻辑集群列表
      */
     @Override
-    public List<ClusterLogic> getHasAuthClusterLogicsByAppId(Integer appId) {
-        if (appId == null) {
+    public List<ClusterLogic> getHasAuthClusterLogicsByProjectId(Integer projectId) {
+        if (projectId == null) {
             LOGGER.error(
-                "class=ClusterLogicServiceImpl||method=getHasAuthClusterLogicsByAppId||errMsg=获取有权限逻辑集群时appId为null");
+                "class=ClusterLogicServiceImpl||method=getHasAuthClusterLogicsByProjectId||errMsg=获取有权限逻辑集群时projectId为null");
             return new ArrayList<>();
         }
 
         // 获取有权限的逻辑集群id
-        Set<Long> hasAuthLogicClusterIds = logicClusterAuthService.getAllLogicClusterAuths(appId).stream()
-            .map(AppClusterLogicAuth::getLogicClusterId).collect(Collectors.toSet());
+        Set<Long> hasAuthLogicClusterIds = logicClusterAuthService.getAllLogicClusterAuths(projectId).stream()
+            .map(ProjectClusterLogicAuth::getLogicClusterId).collect(Collectors.toSet());
 
         // 批量获取有权限的集群
         List<ClusterLogicPO> hasAuthLogicClusters = !hasAuthLogicClusterIds.isEmpty()
             ? logicClusterDAO.listByIds(hasAuthLogicClusterIds)
             : new ArrayList<>();
 
-        // 获取作为owner的集群, 这里权限管控逻辑参看 getClusterLogicByAppIdAndAuthType
+        // 获取作为owner的集群, 这里权限管控逻辑参看 getClusterLogicByProjectIdAndAuthType
         List<ClusterLogicPO> ownedLogicClusters;
-        if (appService.isSuperApp(appId)) {
+        if (AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
             ownedLogicClusters = logicClusterDAO.listAll();
         } else {
-            ownedLogicClusters = logicClusterDAO.listByAppId(appId);
+            ownedLogicClusters = logicClusterDAO.listByProjectId(projectId);
         }
 
         // 综合
@@ -388,57 +294,11 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
             }
         }
 
-        return responsibleConvertTool.list2List(hasAuthLogicClusters, ClusterLogic.class);
+        return ConvertUtil.list2List(hasAuthLogicClusters, ClusterLogic.class);
     }
-
     @Override
     public Boolean isClusterLogicExists(Long resourceId) {
         return null != logicClusterDAO.getById(resourceId);
-    }
-
-    /**
-     * 获取rack匹配到的逻辑集群
-     *
-     * @param cluster 集群
-     * @param racks   rack
-     * @return count
-     */
-    @Override
-    public ClusterLogic getClusterLogicByRack(String cluster, String racks) {
-
-        List<ClusterLogicRackInfo> logicClusterRackInfos = regionRackService.listAssignedRacksByClusterName(cluster);
-
-        if (CollectionUtils.isEmpty(logicClusterRackInfos)) {
-            return null;
-        }
-
-        // 获取逻辑逻辑集群内的所有rack, 按着resourceId分组
-        Multimap<Long, String> logicClusterId2RackMultiMap = ArrayListMultimap.create();
-        for (ClusterLogicRackInfo param : logicClusterRackInfos) {
-            List<Long> logicClusterIds = ListUtils.string2LongList(param.getLogicClusterIds());
-            logicClusterIds.forEach(logicClusterId -> logicClusterId2RackMultiMap.put(logicClusterId, param.getRack()));
-        }
-
-        // 遍历逻辑集群，获取与给定的racks有交集的逻辑集群
-        for (Map.Entry<Long, Collection<String>> entry : logicClusterId2RackMultiMap.asMap().entrySet()) {
-            if (RackUtils.hasIntersect(racks, entry.getValue())) {
-                return getClusterLogicById(entry.getKey());
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * 根据责任人查询
-     *
-     * @param responsibleId 责任人id
-     * @return list
-     */
-    @Override
-    public List<ClusterLogic> getLogicClusterByOwnerId(Long responsibleId) {
-        return responsibleConvertTool.list2List(logicClusterDAO.listByResponsible(String.valueOf(responsibleId)),
-            ClusterLogic.class);
     }
 
     /**
@@ -457,16 +317,16 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
 
     @Override
     public Set<RoleClusterNodeSepc> getLogicDataNodeSepc(Long logicClusterId) {
-        List<RoleCluster> roleClusters = getClusterLogicRole(logicClusterId);
+        List<ClusterRoleInfo> clusterRoleInfos = getClusterLogicRole(logicClusterId);
 
         Set<RoleClusterNodeSepc> esRoleClusterDataNodeSepcs = new HashSet<>();
 
-        if (CollectionUtils.isNotEmpty(roleClusters)) {
-            for (RoleCluster roleCluster : roleClusters) {
-                if (DATA_NODE.getDesc().equals(roleCluster.getRole())) {
+        if (CollectionUtils.isNotEmpty(clusterRoleInfos)) {
+            for (ClusterRoleInfo clusterRoleInfo : clusterRoleInfos) {
+                if (DATA_NODE.getDesc().equals(clusterRoleInfo.getRole())) {
                     RoleClusterNodeSepc roleClusterNodeSepc = new RoleClusterNodeSepc();
                     roleClusterNodeSepc.setRole(DATA_NODE.getDesc());
-                    roleClusterNodeSepc.setSpec(roleCluster.getMachineSpec());
+                    roleClusterNodeSepc.setSpec(clusterRoleInfo.getMachineSpec());
 
                     esRoleClusterDataNodeSepcs.add(roleClusterNodeSepc);
                 }
@@ -486,13 +346,13 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
     }
 
     @Override
-    public List<RoleCluster> getClusterLogicRole(Long logicClusterId) {
-        List<RoleCluster> roleClusters = new ArrayList<>();
+    public List<ClusterRoleInfo> getClusterLogicRole(Long logicClusterId) {
+        List<ClusterRoleInfo> clusterRoleInfos = new ArrayList<>();
 
         try {
             ClusterLogicPO clusterLogicPO = logicClusterDAO.getById(logicClusterId);
 
-            List<String> phyClusterNames = rackService.listPhysicClusterNames(logicClusterId);
+            List<String> phyClusterNames = clusterRegionService.listPhysicClusterNames(logicClusterId);
             if (CollectionUtils.isEmpty(phyClusterNames)) {
                 return new ArrayList<>();
             }
@@ -503,35 +363,35 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
                 return new ArrayList<>();
             }
 
-            List<RoleCluster> esRolePhyClusters = clusterPhy.getRoleClusters();
-            List<RoleClusterHost> esRolePhyClusterHosts = clusterPhy.getRoleClusterHosts();
+            List<ClusterRoleInfo> esRolePhyClusters = clusterPhy.getClusterRoleInfos();
+            List<ClusterRoleHost> esRolePhyClusterHosts = clusterPhy.getClusterRoleHosts();
 
-            for (RoleCluster roleCluster : esRolePhyClusters) {
+            for (ClusterRoleInfo clusterRoleInfo : esRolePhyClusters) {
 
-                List<RoleClusterHost> roleClusterHosts = new ArrayList<>();
+                List<ClusterRoleHost> clusterRoleHosts = new ArrayList<>();
 
                 //如果是datanode节点，那么使用逻辑集群申请的节点个数和阶段规格配置
-                if (DATA_NODE.getDesc().equals(roleCluster.getRoleClusterName())) {
-                    setLogicClusterService(logicClusterId, clusterLogicPO, roleCluster, roleClusterHosts);
+                if (DATA_NODE.getDesc().equals(clusterRoleInfo.getRoleClusterName())) {
+                    setLogicClusterInfo(logicClusterId, clusterLogicPO, clusterRoleInfo, clusterRoleHosts);
                 } else {
-                    setPhyClusterService(esRolePhyClusterHosts, roleCluster, roleClusterHosts);
+                    setPhyClusterInfo(esRolePhyClusterHosts, clusterRoleInfo, clusterRoleHosts);
                 }
 
-                roleCluster.setRoleClusterHosts(roleClusterHosts);
-                roleCluster.setPodNumber(roleClusterHosts.size());
-                roleClusters.add(roleCluster);
+                clusterRoleInfo.setClusterRoleHosts(clusterRoleHosts);
+                clusterRoleInfo.setPodNumber(clusterRoleHosts.size());
+                clusterRoleInfos.add(clusterRoleInfo);
             }
         } catch (Exception e) {
             LOGGER.warn("class=ClusterLogicServiceImpl||method=acquireLogicClusterRole||logicClusterId={}",
                 logicClusterId, e);
         }
 
-        return roleClusters;
+        return clusterRoleInfos;
     }
 
     @Override
     public List<Plugin> getClusterLogicPlugins(Long logicClusterId) {
-        List<String> clusterNameList = rackService.listPhysicClusterNames(logicClusterId);
+        List<String> clusterNameList = clusterRegionService.listPhysicClusterNames(logicClusterId);
         if (AriusObjUtils.isEmptyList(clusterNameList)) {
             return new ArrayList<>();
         }
@@ -572,11 +432,20 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
         return new ArrayList<>(pluginMap.values());
     }
 
+    /**
+     * @param clusterLogicId 集群逻辑id
+     * @return ProjectId 项目id
+     */
     @Override
-    public Result<Long> addPlugin(Long logicClusterId, PluginDTO pluginDTO, String operator) {
+    public Integer getProjectIdById(Long clusterLogicId) {
+        return logicClusterDAO.getProjectIdById(clusterLogicId);
+    }
+
+    @Override
+    public Result<Long> addPlugin(Long logicClusterId, PluginDTO pluginDTO, String operator) throws NotFindSubclassException {
 
         if (null != logicClusterId) {
-            List<Integer> clusterIdList = rackService.listPhysicClusterId(logicClusterId);
+            List<Integer> clusterIdList = clusterRegionService.listPhysicClusterId(logicClusterId);
             if (AriusObjUtils.isEmptyList(clusterIdList)) {
                 return Result.buildFail("对应物理集群不存在");
             }
@@ -588,24 +457,26 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
     }
 
     @Override
-    public Result<Void> transferClusterLogic(Long clusterLogicId, Integer targetAppId, String targetResponsible,
+    public Result<Void> transferClusterLogic(Long clusterLogicId, Integer targetProjectId, String targetResponsible,
                                              String submitor) {
 
         ESLogicClusterDTO esLogicClusterDTO = new ESLogicClusterDTO();
         esLogicClusterDTO.setId(clusterLogicId);
-        esLogicClusterDTO.setAppId(targetAppId);
+        esLogicClusterDTO.setProjectId(targetProjectId);
         esLogicClusterDTO.setResponsible(targetResponsible);
         return editClusterLogicNotCheck(esLogicClusterDTO, submitor);
     }
 
     @Override
     public List<ClusterLogic> pagingGetClusterLogicByCondition(ClusterLogicConditionDTO param) {
-        String sortTerm = null == param.getSortTerm() ? SortConstant.ID : param.getSortTerm();
-        String sortType = param.getOrderByDesc() ? SortConstant.DESC : SortConstant.ASC;
-
-        return ConvertUtil.list2List(logicClusterDAO.pagingByCondition(param.getName(), param.getAppId(),
-                        param.getType(), param.getHealth(), (param.getPage() - 1) * param.getSize(), param.getSize(), sortTerm, sortType),
-            ClusterLogic.class);
+        List<ClusterLogicPO> clusters = Lists.newArrayList();
+        try {
+            clusters = logicClusterDAO.pagingByCondition(param);
+        } catch (Exception e) {
+            e.printStackTrace();
+            LOGGER.error("class=ClusterPhyServiceImpl||method=pagingGetClusterPhyByCondition||msg={}", e.getMessage(), e);
+        }
+        return ConvertUtil.list2List(clusters, ClusterLogic.class);
     }
 
     @Override
@@ -618,15 +489,22 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
         return ConvertUtil.list2List(logicClusterDAO.listByIds(new HashSet<>(clusterLogicIdList)), ClusterLogic.class);
     }
 
+    @Override
+    public List<ClusterLogic> listClusterLogicByProjectIdAndName(Integer projectId, String clusterName) {
+        return ConvertUtil.list2List(logicClusterDAO.listByNameAndProjectId(clusterName, projectId),
+                ClusterLogic.class);
+    }
+
     /***************************************** private method ****************************************************/
     /**
      * Check逻辑集群参数
      *
      * @param param     逻辑集群
      * @param operation 操作类型
-     * @return
+     * @param projectId 项目id
+     * @return  Result
      */
-    private Result<Void> checkLogicClusterParams(ESLogicClusterDTO param, OperationEnum operation) {
+    private Result<Void> checkLogicClusterParams(ESLogicClusterDTO param, OperationEnum operation, Integer projectId) {
         if (AriusObjUtils.isNull(param)) {
             return Result.buildParamIllegal("逻辑集群信息为空");
         }
@@ -637,27 +515,61 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
         }
 
         if (ADD.equals(operation)) {
-            Result<Void> isFieldNullResult = isFieldNull(param);
-            if (isFieldNullResult.failed()) {
+            Result<Void> isFieldNullResult = addVoidResult(param);
+            if (isFieldNullResult != null) {
                 return isFieldNullResult;
             }
-
-            ClusterLogicPO logicPO = logicClusterDAO.getByName(param.getName());
-            if (!AriusObjUtils.isNull(logicPO)) {
-                return Result.buildDuplicate("逻辑集群重复");
-            }
         } else if (EDIT.equals(operation)) {
-            if (AriusObjUtils.isNull(param.getId())) {
-                return Result.buildParamIllegal("逻辑集群ID为空");
-            }
-
-            ClusterLogicPO oldPO = logicClusterDAO.getById(param.getId());
-            if (oldPO == null) {
-                return Result.buildNotExist("逻辑集群不存在");
+            Result<Void> editVoidResult = editVoidResult(param, projectId);
+            if (editVoidResult != null) {
+                return editVoidResult;
             }
         }
 
         return Result.buildSucc();
+    }
+
+    @Nullable
+    private Result<Void> addVoidResult(ESLogicClusterDTO param) {
+        Result<Void> isFieldNullResult = isFieldNull(param);
+        if (isFieldNullResult.failed()) {
+            return isFieldNullResult;
+        }
+
+        ClusterLogicPO logicPO = logicClusterDAO.getByName(param.getName());
+        if (!AriusObjUtils.isNull(logicPO)) {
+            return Result.buildDuplicate("逻辑集群重复");
+        }
+        return null;
+    }
+
+    @Nullable
+    private Result<Void> editVoidResult(ESLogicClusterDTO param, Integer projectId) {
+        if (AriusObjUtils.isNull(param.getId())) {
+            return Result.buildParamIllegal("逻辑集群ID为空");
+        }
+
+        ClusterLogicPO oldPO = logicClusterDAO.getById(param.getId());
+        if (oldPO == null) {
+            return Result.buildNotExist("逻辑集群不存在");
+        }
+        //当param中projectid存在
+        if (Objects.nonNull(param.getProjectId())) {
+            final Result<Void> result = ProjectUtils.checkProjectCorrectly(ClusterLogicPO::getProjectId, oldPO,
+                    param.getProjectId());
+            if (result.failed()) {
+                return result;
+            }
+
+        } else {
+            //校验路径
+            final Result<Void> result = ProjectUtils.checkProjectCorrectly(ClusterLogicPO::getProjectId, oldPO,
+                    projectId);
+            if (result.failed()) {
+                return result;
+            }
+        }
+        return null;
     }
 
     private Result<Void> isFieldNull(ESLogicClusterDTO param) {
@@ -667,30 +579,20 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
         if (AriusObjUtils.isNull(param.getType())) {
             return Result.buildParamIllegal("类型为空");
         }
-        if (AriusObjUtils.isNull(param.getAppId())) {
+        if (AriusObjUtils.isNull(param.getProjectId())) {
             return Result.buildParamIllegal("应用ID为空");
-        }
-
-        if (AriusObjUtils.isNull(param.getResponsible())) {
-            return Result.buildParamIllegal("责任人为空");
         }
         return Result.buildSucc();
     }
 
     private Result<Void> isIllegal(ESLogicClusterDTO param) {
-        ResourceLogicTypeEnum typeEnum = ResourceLogicTypeEnum.valueOf(param.getType());
-        if (ResourceLogicTypeEnum.UNKNOWN.equals(typeEnum)) {
+        ClusterResourceTypeEnum typeEnum = ClusterResourceTypeEnum.valueOf(param.getType());
+        if (ClusterResourceTypeEnum.UNKNOWN.equals(typeEnum)) {
             return Result.buildParamIllegal("新建逻辑集群提交内容中集群类型非法");
         }
 
-        if (param.getAppId() != null && !appService.isAppExists(param.getAppId())) {
+        if (param.getProjectId() != null && !projectService.checkProjectExist(param.getProjectId())) {
             return Result.buildParamIllegal("应用ID非法");
-        }
-
-        for (String responsible : ListUtils.string2StrList(param.getResponsible())) {
-            if (employeeService.checkUsers(responsible).failed()) {
-                return Result.buildParamIllegal("责任人非法");
-            }
         }
         return Result.buildSucc();
     }
@@ -699,14 +601,14 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
      * 解析插件ID列表
      *
      * @param pluginIdsStr 插件ID格式化字符串
-     * @return
+     * @return List<Long>
      */
     private List<Long> parsePluginIds(String pluginIdsStr) {
         List<Long> pluginIds = new ArrayList<>();
         if (StringUtils.isNotBlank(pluginIdsStr)) {
             String[] arr = StringUtils.split(pluginIdsStr, ",");
-            for (int i = 0; i < arr.length; ++i) {
-                pluginIds.add(Long.parseLong(arr[i]));
+            for (String s : arr) {
+                pluginIds.add(Long.parseLong(s));
             }
         }
         return pluginIds;
@@ -714,20 +616,13 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
 
     private void initLogicCluster(ESLogicClusterDTO param) {
 
-        if (AriusObjUtils.isNull(param.getLibraDepartment())) {
-            param.setLibraDepartment("");
-        }
-
-        if (AriusObjUtils.isNull(param.getLibraDepartmentId())) {
-            param.setLibraDepartmentId("");
-        }
-
+  
         if (AriusObjUtils.isNull(param.getConfigJson())) {
             param.setConfigJson("");
         }
 
-        if (!AriusObjUtils.isNull(param.getDataNodeNu())) {
-            param.setQuota((double) param.getDataNodeNu());
+        if (!AriusObjUtils.isNull(param.getDataNodeNum())) {
+            param.setQuota((double) param.getDataNodeNum());
         }
 
         if (AriusObjUtils.isNull(param.getDataCenter())) {
@@ -742,33 +637,44 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
             param.setMemo("");
         }
 
+        if (AriusObjUtils.isNull(param.getQuota())) {
+            param.setQuota(0.00);
+        }
+
         if (null == param.getHealth()) {
             param.setHealth(DEFAULT_CLUSTER_HEALTH);
         }
     }
 
-    private void setPhyClusterService(List<RoleClusterHost> esRolePhyClusterHosts, RoleCluster roleCluster,
-                                      List<RoleClusterHost> roleClusterHosts) {
-        for (RoleClusterHost roleClusterHost : esRolePhyClusterHosts) {
-            if (roleClusterHost.getRoleClusterId().longValue() == roleCluster.getId().longValue()) {
-                roleClusterHosts.add(ConvertUtil.obj2Obj(roleClusterHost, RoleClusterHost.class));
+    private void setPhyClusterInfo(List<ClusterRoleHost> esRolePhyClusterHosts, ClusterRoleInfo clusterRoleInfo,
+                                   List<ClusterRoleHost> clusterRoleHosts) {
+        for (ClusterRoleHost clusterRoleHost : esRolePhyClusterHosts) {
+            if (clusterRoleHost.getRoleClusterId().longValue() == clusterRoleInfo.getId().longValue()) {
+                clusterRoleHosts.add(ConvertUtil.obj2Obj(clusterRoleHost, ClusterRoleHost.class));
             }
         }
     }
 
-    private void setLogicClusterService(Long logicClusterId, ClusterLogicPO clusterLogicPO, RoleCluster roleCluster,
-                                        List<RoleClusterHost> roleClusterHosts) {
-        roleCluster.setPodNumber(clusterLogicPO.getDataNodeNu());
-        roleCluster.setMachineSpec(clusterLogicPO.getDataNodeSpec());
+    private void setLogicClusterInfo(Long logicClusterId, ClusterLogicPO clusterLogicPO, ClusterRoleInfo clusterRoleInfo,
+                                     List<ClusterRoleHost> clusterRoleHosts) {
+        clusterRoleInfo.setPodNumber(clusterLogicPO.getDataNodeNu());
+        clusterRoleInfo.setMachineSpec(clusterLogicPO.getDataNodeSpec());
 
-        List<RoleClusterHost> roleClusterHostList = clusterLogicNodeService.getLogicClusterNodes(logicClusterId);
+        ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(logicClusterId);
+        if (null == clusterRegion) { return;}
 
-        for (RoleClusterHost clusterHost : roleClusterHostList) {
-            RoleClusterHost roleClusterHost = new RoleClusterHost();
-            roleClusterHost.setHostname(clusterHost.getHostname());
-            roleClusterHost.setRole(DATA_NODE.getCode());
+        Result<List<ClusterRoleHost>> ret = clusterRoleHostService.listByRegionId(clusterRegion.getId().intValue());
+        if (ret.failed() || CollectionUtils.isEmpty(ret.getData())) {
+            LOGGER.error("class=ClusterLogicServiceImpl||method=setLogicClusterInfo||errMsg={}", ret.getMessage());
+            return;
+        }
 
-            roleClusterHosts.add(roleClusterHost);
+        for (ClusterRoleHost clusterHost : ret.getData()) {
+            ClusterRoleHost clusterRoleHost = new ClusterRoleHost();
+            clusterRoleHost.setHostname(clusterHost.getHostname());
+            clusterRoleHost.setRole(DATA_NODE.getCode());
+
+            clusterRoleHosts.add(clusterRoleHost);
         }
     }
 }

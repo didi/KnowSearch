@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?><!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.didichuxing.datachannel.arius.admin.persistence.mysql.project.ProjectConfigDAO">
+	<resultMap id="BaseResultMap" type="com.didichuxing.datachannel.arius.admin.common.bean.po.project.ProjectConfigPO">
+		<result column="project_id" jdbcType="INTEGER" property="projectId"/>
+		<result column="dsl_analyze_enable" jdbcType="INTEGER" property="dslAnalyzeEnable"/>
+		<result column="aggr_analyze_enable" jdbcType="INTEGER" property="aggrAnalyzeEnable"/>
+		<result column="is_source_separated" jdbcType="TINYINT" property="isSourceSeparated"/>
+		<result column="analyze_response_enable" jdbcType="TINYINT" property="analyzeResponseEnable"/>
+		<result column="slow_query_times" jdbcType="INTEGER" property="slowQueryTimes"/>
+		<result column="memo" jdbcType="INTEGER" property="memo"/>
+		<result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+		<result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+	</resultMap>
+	
+	<sql id="Base_Column_List">
+		project_id
+		,
+		dsl_analyze_enable,
+		aggr_analyze_enable,
+		is_source_separated,
+		analyze_response_enable,
+		create_time,
+		update_time,
+		slow_query_times,
+		    memo
+	</sql>
+	
+	
+	<select id="getByProjectId" parameterType="integer" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List"/>
+		from project_arius_config where project_id = #{projectId}
+	</select>
+	
+	<select id="listAll" resultMap="BaseResultMap">
+		select
+		<include refid="Base_Column_List"/>
+		from project_arius_config where is_active = 1
+	</select>
+	<select id="checkProjectConfigByProjectId" resultType="java.lang.Boolean">
+		select count(project_id)
+		from project_arius_config
+		where project_id = #{projectId}
+			and is_active = 1
+	</select>
+	
+	
+	<insert id="insert" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.project.ProjectConfigPO" >
+		insert into project_arius_config
+		(project_id, dsl_analyze_enable, aggr_analyze_enable, is_source_separated, analyze_response_enable,
+		 slow_query_times, memo)
+		values (#{projectId}, #{dslAnalyzeEnable}, #{aggrAnalyzeEnable}, #{isSourceSeparated}, #{aggrAnalyzeEnable},
+		        #{slowQueryTimes}, #{memo})
+	</insert>
+	
+	<update id="update" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.project.ProjectConfigPO">
+		update project_arius_config
+		<trim prefix="set" prefixOverrides=",">
+			<if test="dslAnalyzeEnable != null">
+				dsl_analyze_enable = #{dslAnalyzeEnable}
+			</if>
+			<if test="aggrAnalyzeEnable != null">
+				, aggr_analyze_enable = #{aggrAnalyzeEnable}
+			</if>
+			<if test="isSourceSeparated != null">
+				, is_source_separated = #{isSourceSeparated}
+			</if>
+			<if test="analyzeResponseEnable != null">
+				, analyze_response_enable = #{analyzeResponseEnable}
+			</if>
+			<if test="slowQueryTimes != null">
+				, slow_query_times = #{slowQueryTimes}
+			</if>
+			<if test="memo != null">
+				,memo=#{memo}
+			</if>
+		</trim>
+		where project_id = #{projectId} and is_active = 1
+	</update>
+	<update id="deleteByProjectId">
+		update project_arius_config
+		set is_active=0
+		where project_id = #{projectId}
+	</update>
+</mapper>

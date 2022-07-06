@@ -1,11 +1,15 @@
 package com.didichuxing.datachannel.arius.admin.core.service.gateway;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ESUser;
 import java.util.List;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.GatewayHeartbeat;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.gateway.GatewayNode;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.gateway.GatewayClusterNode;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 
+/**
+ * @author didi
+ */
 public interface GatewayService {
 
     /**
@@ -34,16 +38,16 @@ public interface GatewayService {
      * @param timeout  存活超时时间
      * @return list
      */
-    List<GatewayNode> getAliveNode(String clusterName, long timeout);
+    List<GatewayClusterNode> getAliveNode(String clusterName, long timeout);
 
     /**
      * sql语句直接操作,可以进行sql语句的直接查询,也可以进行sql到dsl语句的转换
      *
-     * @param sql     sql查询语句
+     * @param sql            sql查询语句
      * @param phyClusterName 指定查询物理集群名
-     * @param appId   项目id
-     * @param postFix sql语句操作后缀
+     * @param esUser         项目id
+     * @param postFix        sql语句操作后缀
      * @return 数据查询结果
      */
-    Result<String> sqlOperate(String sql, String phyClusterName, Integer appId, String postFix);
+    Result<String> sqlOperate(String sql, String phyClusterName, ESUser  esUser, String postFix);
 }

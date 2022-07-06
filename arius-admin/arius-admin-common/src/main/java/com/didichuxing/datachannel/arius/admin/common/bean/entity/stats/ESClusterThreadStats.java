@@ -1,6 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.stats;
 
-import com.alibaba.fastjson.annotation.JSONField;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.BaseEntity;
 import lombok.AllArgsConstructor;
 import lombok.Data;

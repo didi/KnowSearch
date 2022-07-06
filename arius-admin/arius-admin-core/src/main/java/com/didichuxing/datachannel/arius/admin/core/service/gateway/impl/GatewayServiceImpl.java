@@ -1,38 +1,38 @@
 package com.didichuxing.datachannel.arius.admin.core.service.gateway.impl;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.common.GatewayHeartbeat;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ESUser;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.gateway.GatewayClusterNode;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.gateway.GatewayClusterNodePO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.gateway.GatewayClusterPO;
+import com.didichuxing.datachannel.arius.admin.common.constant.GatewaySqlConstant;
+import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.BaseHttpUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.core.service.gateway.GatewayService;
+import com.didichuxing.datachannel.arius.admin.persistence.component.ESGatewayClient;
+import com.didichuxing.datachannel.arius.admin.persistence.mysql.gateway.GatewayClusterDAO;
+import com.didichuxing.datachannel.arius.admin.persistence.mysql.gateway.GatewayClusterNodeDAO;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import com.didichuxing.datachannel.arius.admin.common.bean.common.GatewayHeartbeat;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.gateway.GatewayNode;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.gateway.GatewayClusterPO;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.gateway.GatewayNodePO;
-import com.didichuxing.datachannel.arius.admin.common.constant.GatewaySqlConstant;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.BaseHttpUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
-import com.didichuxing.datachannel.arius.admin.core.service.gateway.GatewayService;
-import com.didichuxing.datachannel.arius.admin.persistence.component.ESGatewayClient;
-import com.didichuxing.datachannel.arius.admin.persistence.mysql.gateway.GatewayClusterDAO;
-import com.didichuxing.datachannel.arius.admin.persistence.mysql.gateway.GatewayNodeDAO;
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
+import javax.annotation.PostConstruct;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
-
+/**
+ * @author didi
+ */
 @Service
 @NoArgsConstructor
 public class GatewayServiceImpl implements GatewayService {
@@ -46,10 +46,10 @@ public class GatewayServiceImpl implements GatewayService {
     private ESGatewayClient esGatewayClient;
 
     @Autowired
-    private GatewayNodeDAO    gatewayNodeDAO;
+    private GatewayClusterNodeDAO gatewayClusterNodeDAO;
 
-    @Autowired
-    private AppService appService;
+   
+    
 
     private Set<String>       clusterNames;
 
@@ -101,7 +101,7 @@ public class GatewayServiceImpl implements GatewayService {
         }
 
         long time = System.currentTimeMillis() - gapTime;
-        return Result.buildSucc(gatewayNodeDAO.aliveCountByClusterNameAndTime(clusterName, new Date(time)));
+        return Result.buildSucc(gatewayClusterNodeDAO.aliveCountByClusterNameAndTime(clusterName, new Date(time)));
     }
 
     /**
@@ -115,26 +115,25 @@ public class GatewayServiceImpl implements GatewayService {
     }
 
     @Override
-    public List<GatewayNode> getAliveNode(String clusterName, long timeout) {
+    public List<GatewayClusterNode> getAliveNode(String clusterName, long timeout) {
         Date time = new Date(System.currentTimeMillis() - timeout);
-        return ConvertUtil.list2List(gatewayNodeDAO.listAliveNodeByClusterNameAndTime(clusterName, time),
-            GatewayNode.class);
+        return ConvertUtil.list2List(gatewayClusterNodeDAO.listAliveNodeByClusterNameAndTime(clusterName, time),
+            GatewayClusterNode.class);
     }
 
     @Override
-    public Result<String> sqlOperate(String sql, String phyClusterName, Integer appId, String postFix) {
-        Result<String> result = preSqlParamCheck(sql, appId, postFix);
+    public Result<String> sqlOperate(String sql, String phyClusterName, ESUser esUser, String postFix) {
+        Result<String> result = preSqlParamCheck(sql, postFix);
         if (result.failed()) {
             return Result.buildFrom(result);
         }
 
 
         String url = GatewaySqlConstant.DEFAULT_HTTP_PRE_FIX + esGatewayClient.getSingleGatewayAddress() + postFix;
-//        String url = GatewaySqlConstant.DEFAULT_HTTP_PRE_FIX + esGatewayClient.getGatewayAddress() + postFix;
 
         try {
             // gateway的sql语句操作接口直接以字符串的形式返还结果
-            String sqlResponse = BaseHttpUtil.postForString(url, sql, buildGatewayHeader(phyClusterName, appId));
+            String sqlResponse = BaseHttpUtil.postForString(url, sql, buildGatewayHeader(phyClusterName, esUser));
             return Result.buildSucc(sqlResponse, "");
         } catch (Exception e) {
             LOGGER.error("class=GatewayManageServiceImpl||method=directSqlSearch||postFix={}||errMsg={}", postFix, e);
@@ -142,24 +141,21 @@ public class GatewayServiceImpl implements GatewayService {
         return Result.buildFail();
     }
 
-    private Result<String> preSqlParamCheck(String sql, Integer appId, String postFix) {
+    private Result<String> preSqlParamCheck(String sql,  String postFix) {
         if (StringUtils.isBlank(sql)) {
             return Result.buildParamIllegal("查询的sql语句为空");
         }
         if (StringUtils.isBlank(postFix)) {
             return Result.buildParamIllegal("查询gateway的路径后缀为空");
         }
-        List<Integer> appIds = appService.listApps().stream().map(App::getId).collect(Collectors.toList());
-        if (appId == null || !appIds.contains(appId)) {
-            return Result.buildParamIllegal("对应的appId字段非法");
-        }
+        
         return Result.buildSucc();
     }
 
-    private Map<String, String> buildGatewayHeader(String phyClusterName, Integer appId) {
+    private Map<String, String> buildGatewayHeader(String phyClusterName, ESUser esUser) {
         Map<String, String> headers = Maps.newHashMap();
-        App app = appService.getAppById(appId);
-        Header header = BaseHttpUtil.buildHttpHeader(String.valueOf(appId), app.getVerifyCode());
+        
+        Header header = BaseHttpUtil.buildHttpHeader(String.valueOf(esUser.getId()), esUser.getVerifyCode());
         headers.put("Content-Type", "application/json;charset=utf-8");
         headers.put(header.getName(), header.getValue());
         if(!AriusObjUtils.isBlack(phyClusterName)) {
@@ -188,12 +184,12 @@ public class GatewayServiceImpl implements GatewayService {
     }
 
     private boolean recordHeartbeat(GatewayHeartbeat heartbeat) {
-        GatewayNodePO gatewayNodePO = new GatewayNodePO();
-        gatewayNodePO.setClusterName(heartbeat.getClusterName().trim());
-        gatewayNodePO.setHeartbeatTime(new Date());
-        gatewayNodePO.setHostName(heartbeat.getHostName().trim());
-        gatewayNodePO.setPort(heartbeat.getPort());
-        return gatewayNodeDAO.recordGatewayNode(gatewayNodePO) > 0;
+        GatewayClusterNodePO gatewayClusterNodePO = new GatewayClusterNodePO();
+        gatewayClusterNodePO.setClusterName(heartbeat.getClusterName().trim());
+        gatewayClusterNodePO.setHeartbeatTime(new Date());
+        gatewayClusterNodePO.setHostName(heartbeat.getHostName().trim());
+        gatewayClusterNodePO.setPort(heartbeat.getPort());
+        return gatewayClusterNodeDAO.recordGatewayNode(gatewayClusterNodePO) > 0;
     }
 
     private void saveGatewayCluster(String clusterName) {

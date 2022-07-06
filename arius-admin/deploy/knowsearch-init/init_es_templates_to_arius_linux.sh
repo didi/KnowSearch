@@ -21,9 +21,6 @@ department=$6
 logicClusterId=$7
 # 物理集群名
 phyClusterName=$8
-# 给模板分配的rack，如果有多个则逗号分隔
-rack=$9
-
 # 管理员用户cookie里的ecmc-user
 ecmcUser=${10}
 
@@ -71,11 +68,6 @@ if [ -z ${phyClusterName} ]; then
     exit 1
 fi
 
-if [ -z ${rack} ]; then
-    echo "error: rack not specified."
-    exit 1
-fi
-
 if [ -z ${templateDir} ]; then
     echo "error: templateDir not specified."
     exit 1
@@ -105,9 +97,6 @@ for file in `ls ${templateDir}`
 
         # 物理集群名
         sed -i "s/\"cluster\":.*/\"cluster\": \"${phyClusterName}\",/g" ${file}
-
-        # rack
-        sed -i "s/\"rack\":.*/\"rack\": \"${rack}\",/g" ${file}
 
         # 物理模板角色
         sed -i "s/\"role\":.*/\"role\": 1,/g" ${file}

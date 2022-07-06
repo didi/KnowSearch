@@ -1,56 +1,61 @@
 package com.didichuxing.datachannel.arius.admin.biz.workorder.handler;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.CREATE_MASTER_NODE_MIN_NUMBER;
+import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.MASTER_NODE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum.ES_DOCKER;
+import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum.ES_HOST;
+
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandler;
-import com.didichuxing.datachannel.arius.admin.biz.workorder.content.ClusterOpBaseContent;
-import com.didichuxing.datachannel.arius.admin.biz.workorder.content.ClusterOpNewDockerContent;
-import com.didichuxing.datachannel.arius.admin.biz.workorder.content.ClusterOpNewHostContent;
-import com.didichuxing.datachannel.arius.admin.biz.workorder.utils.WorkOrderTaskConverter;
-import com.didichuxing.datachannel.arius.admin.biz.worktask.WorkTaskManager;
+import com.didichuxing.datachannel.arius.admin.biz.workorder.utils.OpOrderTaskConverter;
+import com.didichuxing.datachannel.arius.admin.biz.worktask.OpTaskManager;
+import com.didichuxing.datachannel.arius.admin.biz.worktask.content.ClusterBaseContent;
+import com.didichuxing.datachannel.arius.admin.biz.worktask.content.ClusterNewDockerContent;
+import com.didichuxing.datachannel.arius.admin.biz.worktask.content.ClusterNewHostContent;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.ESClusterRoleDocker;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.ESClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.EcmParamBase;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.WorkTaskDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.ecm.EcmTaskDTO;
-import com.didichuxing.datachannel.arius.admin.common.constant.ecm.EcmTaskTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
-import com.didichuxing.datachannel.arius.admin.common.constant.task.WorkTaskTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.WorkTask;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.ClusterOpNewDockerOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.ClusterOpNewHostOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
+import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESPackageService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
+import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
 import com.google.common.collect.Maps;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.*;
-import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum.ES_DOCKER;
-import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum.ES_HOST;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.CREATE_MASTER_NODE_MIN_NUMBER;
-
+/**
+ * 集群op新处理程序
+ *
+ * @author
+ * @date 2022/05/09
+ */
 @Service("clusterOpNewHandler")
+@Deprecated
 public class ClusterOpNewHandler extends BaseWorkOrderHandler {
 
     @Autowired
-    private WorkTaskManager     workTaskManager;
+    private OpTaskManager opTaskManager;
 
     @Autowired
     private ClusterPhyService esClusterPhyService;
@@ -67,7 +72,7 @@ public class ClusterOpNewHandler extends BaseWorkOrderHandler {
             return Result.buildFrom(initResult);
         }
 
-        ClusterOpBaseContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(), ClusterOpBaseContent.class);
+        ClusterBaseContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(), ClusterBaseContent.class);
         Result<Void> doValidateHostTypeResult = validateClusterMasterNodeNumber(content, workOrder);
         if (doValidateHostTypeResult.failed()) {
             return doValidateHostTypeResult;
@@ -87,7 +92,7 @@ public class ClusterOpNewHandler extends BaseWorkOrderHandler {
             return Result.buildFrom(doValidRoleClusterPort);
         }
 
-        ClusterOpNewHostContent clusterOpNewHostContent = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(), ClusterOpNewHostContent.class);
+        ClusterNewHostContent clusterOpNewHostContent = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(), ClusterNewHostContent.class);
         // es版本的
         if (null == esPackageService.getByVersionAndType(clusterOpNewHostContent.getEsVersion(), ES_HOST.getCode())) {
             return Result.buildFail(ES_HOST.getDesc() + "类型版本为" + clusterOpNewHostContent.getEsVersion() + "的程序包不存在");
@@ -98,7 +103,7 @@ public class ClusterOpNewHandler extends BaseWorkOrderHandler {
 
     @Override
     protected String getTitle(WorkOrder workOrder) {
-        ClusterOpBaseContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(), ClusterOpBaseContent.class);
+        ClusterBaseContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(), ClusterBaseContent.class);
         WorkOrderTypeEnum workOrderTypeEnum = WorkOrderTypeEnum.valueOfName(workOrder.getType());
         if (workOrderTypeEnum == null) {
             return "";
@@ -122,42 +127,42 @@ public class ClusterOpNewHandler extends BaseWorkOrderHandler {
 
     @Override
     protected Result<Void> doProcessAgree(WorkOrder workOrder, String approver) throws AdminOperateException {
-        ClusterOpBaseContent clusterOpBaseContent = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
-            ClusterOpBaseContent.class);
+        ClusterBaseContent clusterBaseContent = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
+            ClusterBaseContent.class);
 
         EcmTaskDTO ecmTaskDTO = new EcmTaskDTO();
         ecmTaskDTO.setWorkOrderId(workOrder.getId());
         ecmTaskDTO.setTitle(workOrder.getTitle());
-        ecmTaskDTO.setOrderType(EcmTaskTypeEnum.NEW.getCode());
-        ecmTaskDTO.setType(clusterOpBaseContent.getType());
+        ecmTaskDTO.setOrderType(OpTaskTypeEnum.CLUSTER_NEW.getType());
+        ecmTaskDTO.setType(clusterBaseContent.getType());
         ecmTaskDTO.setCreator(workOrder.getSubmitor());
         ecmTaskDTO.setPhysicClusterId(ClusterConstant.INVALID_VALUE);
 
         // 工单数据 转 handle data
         List<EcmParamBase> ecmParamBaseList = null;
-        if (ES_DOCKER.getCode() == clusterOpBaseContent.getType()) {
-            ecmParamBaseList = WorkOrderTaskConverter.convert2EcmParamBaseList(ESClusterTypeEnum.ES_DOCKER,
-                EcmTaskTypeEnum.NEW,
-                ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(), ClusterOpNewDockerContent.class));
-        } else if (ES_HOST.getCode() == clusterOpBaseContent.getType()) {
+        if (ES_DOCKER.getCode() == clusterBaseContent.getType()) {
+            ecmParamBaseList = OpOrderTaskConverter.convert2EcmParamBaseList(ESClusterTypeEnum.ES_DOCKER,
+                OpTaskTypeEnum.CLUSTER_NEW,
+                ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(), ClusterNewDockerContent.class));
+        } else if (ES_HOST.getCode() == clusterBaseContent.getType()) {
             // 获取并且设置新建集群工单内容中的集群创建人信息
-            ClusterOpNewHostContent clusterOpNewHostContent = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(), ClusterOpNewHostContent.class);
+            ClusterNewHostContent clusterOpNewHostContent = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(), ClusterNewHostContent.class);
             clusterOpNewHostContent.setCreator(workOrder.getSubmitor());
 
-            ecmParamBaseList = WorkOrderTaskConverter.convert2EcmParamBaseList(ESClusterTypeEnum.ES_HOST,
-                EcmTaskTypeEnum.NEW, clusterOpNewHostContent);
+            ecmParamBaseList = OpOrderTaskConverter.convert2EcmParamBaseList(ESClusterTypeEnum.ES_HOST,
+                OpTaskTypeEnum.CLUSTER_NEW, clusterOpNewHostContent);
         } else {
             return Result.buildFail("集群类型(Docker|Host)错误");
         }
 
         ecmTaskDTO.setEcmParamBaseList(ecmParamBaseList);
 
-        WorkTaskDTO workTaskDTO = new WorkTaskDTO();
-        workTaskDTO.setTaskType(WorkTaskTypeEnum.CLUSTER_NEW.getType());
-        workTaskDTO.setCreator(workOrder.getSubmitor());
-        workTaskDTO.setExpandData(ConvertUtil.obj2Json(ecmTaskDTO));
+        OpTaskDTO opTaskDTO = new OpTaskDTO();
+        opTaskDTO.setTaskType(OpTaskTypeEnum.CLUSTER_NEW.getType());
+        opTaskDTO.setCreator(workOrder.getSubmitor());
+        opTaskDTO.setExpandData(ConvertUtil.obj2Json(ecmTaskDTO));
 
-        Result<WorkTask> result = workTaskManager.addTask(workTaskDTO);
+        Result<OpTask> result = opTaskManager.addTask(opTaskDTO);
         if (null == result || result.failed()) {
             return Result.buildFail("生成集群新建操作任务失败!");
         }
@@ -172,17 +177,17 @@ public class ClusterOpNewHandler extends BaseWorkOrderHandler {
 
     @Override
     public AbstractOrderDetail getOrderDetail(String extensions) {
-        ClusterOpBaseContent clusterOpBaseContent = ConvertUtil.obj2ObjByJSON(JSON.parse(extensions),
-            ClusterOpBaseContent.class);
+        ClusterBaseContent clusterBaseContent = ConvertUtil.obj2ObjByJSON(JSON.parse(extensions),
+            ClusterBaseContent.class);
 
-        if (ES_DOCKER.getCode() == clusterOpBaseContent.getType()) {
-            ClusterOpNewDockerContent content = JSON.parseObject(JSON.parse(extensions).toString(),
-                ClusterOpNewDockerContent.class);
+        if (ES_DOCKER.getCode() == clusterBaseContent.getType()) {
+            ClusterNewDockerContent content = JSON.parseObject(JSON.parse(extensions).toString(),
+                ClusterNewDockerContent.class);
 
             return ConvertUtil.obj2Obj(content, ClusterOpNewDockerOrderDetail.class);
-        } else if (ES_HOST.getCode() == clusterOpBaseContent.getType()) {
-            ClusterOpNewHostContent content = JSON.parseObject(JSON.parse(extensions).toString(),
-                ClusterOpNewHostContent.class);
+        } else if (ES_HOST.getCode() == clusterBaseContent.getType()) {
+            ClusterNewHostContent content = JSON.parseObject(JSON.parse(extensions).toString(),
+                ClusterNewHostContent.class);
 
             return ConvertUtil.obj2Obj(content, ClusterOpNewHostOrderDetail.class);
         } else {
@@ -191,7 +196,7 @@ public class ClusterOpNewHandler extends BaseWorkOrderHandler {
     }
 
     @Override
-    public List<AriusUserInfo> getApproverList(AbstractOrderDetail detail) {
+    public List<UserBriefVO> getApproverList(AbstractOrderDetail detail) {
         return getOPList();
     }
 
@@ -205,7 +210,7 @@ public class ClusterOpNewHandler extends BaseWorkOrderHandler {
     
     /*******************************************private************************************************/
 
-    private Result<Void> validateClusterMasterNodeNumber(ClusterOpBaseContent content, WorkOrder workOrder) {
+    private Result<Void> validateClusterMasterNodeNumber(ClusterBaseContent content, WorkOrder workOrder) {
         if (ES_HOST.getCode() == content.getType()) {
             return validateClusterMasterNodeNumberESHost(workOrder);
         } else if (ES_DOCKER.getCode() == content.getType()) {
@@ -215,7 +220,7 @@ public class ClusterOpNewHandler extends BaseWorkOrderHandler {
     }
 
     private Result<Void> initParam(WorkOrder workOrder) {
-        ClusterOpNewHostContent clusterOpNewHostContent = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(), ClusterOpNewHostContent.class);
+        ClusterNewHostContent clusterOpNewHostContent = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(), ClusterNewHostContent.class);
 
         // 校验pid_count（单节点实例数字段）,如果为null，则设置默认值1
         if (null == clusterOpNewHostContent.getPidCount()) {
@@ -223,7 +228,7 @@ public class ClusterOpNewHandler extends BaseWorkOrderHandler {
         }
 
         // 对于address字段进行ip和端口号的拆分
-        List<ESClusterRoleHost> roleClusterHosts = clusterOpNewHostContent.getRoleClusterHosts();
+        List<ESClusterRoleHost> roleClusterHosts = clusterOpNewHostContent.getClusterRoleHosts();
 
         for (ESClusterRoleHost esClusterRoleHost : roleClusterHosts) {
             if(null == esClusterRoleHost.getAddress()) {
@@ -244,9 +249,9 @@ public class ClusterOpNewHandler extends BaseWorkOrderHandler {
     }
 
     private Result<Void> validateClusterMasterNodeNumberESDocker(WorkOrder workOrder) {
-        ClusterOpBaseContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(), ClusterOpNewDockerContent.class);
+        ClusterBaseContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(), ClusterNewDockerContent.class);
 
-        List<ESClusterRoleDocker> roleClusterDockers = ((ClusterOpNewDockerContent) content).getRoleClusters();
+        List<ESClusterRoleDocker> roleClusterDockers = ((ClusterNewDockerContent) content).getRoleClusters();
         if (CollectionUtils.isEmpty(roleClusterDockers)) {
             return Result.buildParamIllegal("集群角色为空");
         }
@@ -270,9 +275,9 @@ public class ClusterOpNewHandler extends BaseWorkOrderHandler {
     }
 
     private Result<Void> validateClusterMasterNodeNumberESHost(WorkOrder workOrder) {
-        ClusterOpBaseContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(), ClusterOpNewHostContent.class);
+        ClusterBaseContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(), ClusterNewHostContent.class);
 
-        List<ESClusterRoleHost> roleClusterHosts = ((ClusterOpNewHostContent) content).getRoleClusterHosts();
+        List<ESClusterRoleHost> roleClusterHosts = ((ClusterNewHostContent) content).getClusterRoleHosts();
         if (CollectionUtils.isEmpty(roleClusterHosts)) {
             return Result.buildParamIllegal("集群角色为空");
         }
@@ -293,8 +298,8 @@ public class ClusterOpNewHandler extends BaseWorkOrderHandler {
     }
 
     private Result<Void> validRoleClusterPort(WorkOrder workOrder) {
-        ClusterOpNewHostContent clusterOpNewHostContent = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(), ClusterOpNewHostContent.class);
-        List<ESClusterRoleHost> roleClusterHosts = clusterOpNewHostContent.getRoleClusterHosts();
+        ClusterNewHostContent clusterOpNewHostContent = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(), ClusterNewHostContent.class);
+        List<ESClusterRoleHost> roleClusterHosts = clusterOpNewHostContent.getClusterRoleHosts();
 
         Map<Object, Object> roleClusterPortMap = Maps.newHashMap();
         for (ESClusterRoleHost esClusterRoleHost : roleClusterHosts) {

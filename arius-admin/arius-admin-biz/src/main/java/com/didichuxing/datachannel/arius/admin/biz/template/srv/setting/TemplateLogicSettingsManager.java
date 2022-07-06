@@ -3,10 +3,10 @@ package com.didichuxing.datachannel.arius.admin.biz.template.srv.setting;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateSettingDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateSettingDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateSettingVO;
-import com.didichuxing.datachannel.arius.admin.common.mapping.AriusIndexTemplateSetting;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhySettings;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateSettingVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
+import com.didichuxing.datachannel.arius.admin.common.mapping.AriusIndexTemplateSetting;
 
 /**
  * 逻辑模板settings service
@@ -17,12 +17,14 @@ public interface TemplateLogicSettingsManager {
 
     /**
      * 修改模板Setting
+     *
      * @param settingDTO Setting
-     * @param operator 操作者
+     * @param operator   操作者
+     * @param projectId
      * @return Result
      * @throws AdminOperateException
      */
-    Result<Void> modifySetting(ConsoleTemplateSettingDTO settingDTO, String operator) throws AdminOperateException;
+    Result<Void> modifySetting(ConsoleTemplateSettingDTO settingDTO, String operator, Integer projectId) throws AdminOperateException;
 
     /**
      * 修改模板Setting(仅开放对于副本设置和异步translog落盘方式的设置)
@@ -53,7 +55,19 @@ public interface TemplateLogicSettingsManager {
      * @param settings settings
      * @return
      */
+    @Deprecated
     Result<Void> updateSettings(Integer logicId, String operator, AriusIndexTemplateSetting settings);
+
+    /**
+     * 更新settings信息
+     *
+     * @param logicId   逻辑ID
+     * @param settings  settings
+     * @param operator
+     * @param projectId
+     * @return
+     */
+    Result<Void> updateSettings(Integer logicId, IndexTemplatePhySettings settings, String operator, Integer projectId);
 
     /**
      * 更加逻辑ID获取Settings

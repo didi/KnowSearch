@@ -1,35 +1,41 @@
 package com.didichuxing.datachannel.arius.admin.metadata.service;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum.INDEX_MANAGEMENT_LABEL_MODIFY;
 
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Label;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.TemplateLabel;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateLabelPO;
+import com.didichuxing.datachannel.arius.admin.common.constant.UpdateIndexTemplateLabelParam;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateLabelEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AmsRemoteException;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateLabelEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.UpdateIndexTemplateLabelParam;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateLabelPO;
-import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.template.TemplateLabelESDAO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.oprecord.OperateRecordDTO;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
+import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.template.TemplateLabelESDAO;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 /**
  * 索引模板标签服务
@@ -42,18 +48,9 @@ public class TemplateLabelService {
     private static final ILog LOGGER = LogFactory.getLog( TemplateLabelService.class);
 
     public static final String TEMPLATE_HAS_DELETED_DOC   = "21140";
-    public static final String TEMPLATE_DSL_REVIEW_LABEL  = "11101";
+ 
     public static final String TEMPLATE_IMPORTANT_LABEL   = "11102";
-    public static final String TEMPLATE_QUOTA_USAGE_LOW   = "32220";
-    public static final String TEMPLATE_QUOTA_USAGE_HIGH  = "32321";
-    public static final String TEMPLATE_FULL_LINK_SUPPORT = "12103";
-    public static final String TEMPLATE_EXPIRE_TIME_LONG  = "32222";
-    public static final String TEMPLATE_INVALID           = "22348";
-    public static final String TEMPLATE_SUSPEND_GOVERN    = "12104";
-    public static final String TEMPLATE_ERROR_QUERY       = "22243";
-    public static final String TEMPLATE_SLOW_QUERY        = "22244";
-    public static final String TEMPLATE_NO_DATA           = "22345";
-    public static final String TEMPLATE_NO_QUERY          = "22347";
+  
     public static final String TEMPLATE_HAVE_DCDR         = "12149";
 
 
@@ -61,16 +58,10 @@ public class TemplateLabelService {
     private TemplateLabelESDAO indexTemplateLabelDAO;
 
     @Autowired
-    private TemplateLogicService templateLogicService;
+    private IndexTemplateService indexTemplateService;
 
     @Autowired
     private OperateRecordService operateRecordService;
-
-    public Result<List<Label>> listAllLabel() throws AmsRemoteException {
-        List<TemplateLabelPO> templateLabelPOS = indexTemplateLabelDAO.listAll();
-
-        return Result.buildSucc(ConvertUtil.list2List(templateLabelPOS, Label.class));
-    }
 
     /**
      * 模板是否有删除操作
@@ -82,10 +73,11 @@ public class TemplateLabelService {
         return labelMap.containsKey(TEMPLATE_HAS_DELETED_DOC);
     }
 
+
     /**
      * 是否是重要索引
-     * @param logicId
-     * @return
+     * @param logicId  索引ID
+     * @return boolean
      */
     public boolean isImportantIndex(Integer logicId) {
         Map<String, TemplateLabelPO> labelMap = ConvertUtil.list2Map( listIndexTemplateLabelPO(logicId), TemplateLabelPO::getLabelId);
@@ -146,23 +138,8 @@ public class TemplateLabelService {
         return Result.buildSucc(templateLabels);
     }
 
-    /**
-     * 根据表达式获取模板id
-     *
-     * @return list
-     */
-    public Result<List<TemplateLabel>> listDslReviewTemplates() {
-        return listByLabelId(TEMPLATE_DSL_REVIEW_LABEL);
-    }
 
-    /**
-     * 根据表达式获取模板id
-     *
-     * @return list
-     */
-    public Result<List<TemplateLabel>> listInvalidTemplates() {
-        return listByLabelId(TEMPLATE_INVALID);
-    }
+
 
     public Result<List<TemplateLabel>> listHaveDcdrTemplates() {
         return listByLabelId(TEMPLATE_HAVE_DCDR);
@@ -200,10 +177,10 @@ public class TemplateLabelService {
      * @param shouldAdds 需要添加的
      * @param shouldDels 需要删除的
      * @param operator   operator
-     * @return result
+     * @return result result
      */
     public Result<Boolean> updateTemplateLabel(Integer logicId, Set<String> shouldAdds, Set<String> shouldDels,
-                                      String operator) {
+                                      String operator) throws AmsRemoteException {
         List<Label> allLabels = listTemplateLabel(logicId);
 
         Set<String> oldLabelIdSet = allLabels.stream().map(Label::getLabelId).collect(Collectors.toSet());
@@ -227,7 +204,7 @@ public class TemplateLabelService {
     /**
      * 批量保存结果
      *
-     * @return
+     * @return boolean
      */
     public boolean batchInsert(List<TemplateLabelPO> list) {
         Date now = new Date();
@@ -238,7 +215,7 @@ public class TemplateLabelService {
     /**
      * 批量删除
      *
-     * @return
+     * @return boolean
      */
     public boolean batchDelete(List<String> docIds) {
         return indexTemplateLabelDAO.batchDelete(docIds);
@@ -247,8 +224,8 @@ public class TemplateLabelService {
     /**
      * 获取指定索引模板的所有标签
      *
-     * @param logicTemplateId
-     * @return
+     * @param logicTemplateId  模板id
+     * @return List<TemplateLabelPO>
      */
     public List<TemplateLabelPO> listIndexTemplateLabelPO(Integer logicTemplateId) {
         return indexTemplateLabelDAO.getLabelByLogicTemplateId(logicTemplateId);
@@ -257,21 +234,13 @@ public class TemplateLabelService {
     /**
      * 根据标签ID获取标签
      *
-     * @param labelId
-     * @return
+     * @param labelId 索引模板标签
+     * @return List<TemplateLabelPO>
      */
     public List<TemplateLabelPO> listPOByLabelId(String labelId) {
         return indexTemplateLabelDAO.getLabelByLabelId(labelId);
     }
 
-    /**
-     * 根据标签ID获取标签
-     *
-     * @return
-     */
-    public List<TemplateLabelPO> listAllPO() {
-        return indexTemplateLabelDAO.listAll();
-    }
 
     /**
      * 根据条件查询
@@ -283,7 +252,7 @@ public class TemplateLabelService {
     public Map<Integer/*indexTemplateId*/, Collection<TemplateLabelPO>> listAllIndexTemplateLabelByLabelIds(String includeLabelIds, String excludeLabelIds) {
         Map<Integer/*indexTemplateId*/, Collection<TemplateLabelPO>> retMap = new ConcurrentHashMap<>();
 
-        List<IndexTemplateLogic> templateLogics = templateLogicService.getAllLogicTemplates();
+        List<IndexTemplate> templateLogics = indexTemplateService.listAllLogicTemplates();
 
         templateLogics.parallelStream().forEach(indexTemplate -> {
             Integer templateId = indexTemplate.getId();
@@ -308,8 +277,8 @@ public class TemplateLabelService {
      * 修改指定索引模板的标签
      * 全量覆盖的方式
      *
-     * @param param
-     * @return
+     * @param param UpdateIndexTemplateLabelParam
+     * @return boolean
      */
     public boolean updateIndexTemplateLabel(UpdateIndexTemplateLabelParam param) {
         int indexTemplateId = param.getTemplateId();
@@ -375,9 +344,9 @@ public class TemplateLabelService {
 
         //记录操作记录
         if (change) {
-            OperateRecordDTO operateRecord = buildLabelSettingOperatorRecord(
-                    String.valueOf(indexTemplateId), OperationEnum.EDIT_LABELS.getCode(), operator,
-                    getEditContent(deleteMap.values(), news)
+            OperateRecord operateRecord = buildLabelSettingOperatorRecord(
+                    indexTemplateId, INDEX_MANAGEMENT_LABEL_MODIFY, operator,
+                    getEditContent(deleteMap.values(), news),null
             );
             operateRecordService.save(operateRecord);
         }
@@ -394,7 +363,7 @@ public class TemplateLabelService {
      * @return
      */
     private String getEditContent(Collection<TemplateLabelPO> deletes, List<TemplateLabelPO> news) {
-        StringBuilder stringBuilder = new StringBuilder("");
+        StringBuilder stringBuilder = new StringBuilder();
         if (CollectionUtils.isNotEmpty(deletes)) {
             stringBuilder.append("删除标签:");
             for (TemplateLabelPO po : deletes) {
@@ -449,19 +418,15 @@ public class TemplateLabelService {
      * 构建索引标签配置操作记录
      *
      * @param bizId
-     * @param operateId
+     * @param operateType
      * @param operator
      * @param content
      * @return
      */
-    private OperateRecordDTO buildLabelSettingOperatorRecord(String bizId, Integer operateId, String operator, String content) {
-        OperateRecordDTO operateRecord = new OperateRecordDTO();
-        operateRecord.setBizId(bizId);
-        operateRecord.setModuleId(ModuleEnum.TEMPLATE.getCode());
-        operateRecord.setOperateId(operateId);
-        operateRecord.setOperator(operator);
-        operateRecord.setContent(content);
-
-        return operateRecord;
+    private OperateRecord buildLabelSettingOperatorRecord(Object bizId, OperateTypeEnum operateType, String operator,
+                                                          String content, ProjectBriefVO projectBriefVO) {
+    
+        return new OperateRecord.Builder().content(content).operationTypeEnum(operateType).project(projectBriefVO)
+                .userOperation(operator).bizId(bizId).build();
     }
 }

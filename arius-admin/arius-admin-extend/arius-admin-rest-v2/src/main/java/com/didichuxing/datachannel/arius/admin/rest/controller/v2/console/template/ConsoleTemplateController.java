@@ -1,54 +1,60 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v2.console.template;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V2_CONSOLE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-
-import com.didichuxing.datachannel.arius.admin.common.bean.common.QuotaUsage;
+import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterLogicManager;
+import com.didichuxing.datachannel.arius.admin.biz.indices.IndicesManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.pipeline.TemplatePipelineManager;
+import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateClearDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateRateLimitDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateUpdateDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateLogicDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.ConsoleAppVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.*;
-import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
-import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
-import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterLogicManager;
-import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.pipeline.TemplatePipelineManager;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.quota.TemplateQuotaManager;
-import com.didichuxing.datachannel.arius.admin.common.Tuple;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.quota.ESTemplateQuotaUsage;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.quota.LogicTemplateQuotaUsage;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithCluster;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithPhyTemplates;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
-import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithCluster;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateCapacityVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateClearVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateDeleteVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateDetailVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateRateLimitVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateCyclicalRollInfoVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
+import com.didichuxing.datachannel.arius.admin.common.exception.AmsRemoteException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
-import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
+import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
+import com.didiglobal.logi.security.util.HttpRequestUtil;
 import com.google.common.collect.Lists;
-
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import javax.servlet.http.HttpServletRequest;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * @author d06679
@@ -56,27 +62,24 @@ import io.swagger.annotations.ApiOperation;
  */
 @RestController
 @RequestMapping(V2_CONSOLE + "/template")
-@Api(tags = "Console-用户侧索引模板接口(REST)")
+@Api(tags = "Console-用户侧索引模板接口(REST)：见："+V3_OP)
+@Deprecated
 public class ConsoleTemplateController extends BaseConsoleTemplateController {
 
     private static final ILog        LOGGER = LogFactory.getLog(ConsoleTemplateController.class);
 
     private static final String INDEX_NOT_EXISTS_TIPS = "索引不存在";
-    private static final String APP_IS_NOT_EXIST = "应用不存在";
+ 
     public static final int MAX_PERCENT = 10000;
     public static final int MIN_PERCENT = -99;
 
-    @Autowired
-    private AppService               appService;
+   
 
     @Autowired
-    private TemplateQuotaManager     templateQuotaManager;
+    private IndexTemplatePhyService indexTemplatePhyService;
 
     @Autowired
-    private TemplatePhyService       templatePhyService;
-
-    @Autowired
-    private ESIndexService           esIndexService;
+    private IndicesManager          indicesManager;
 
     @Autowired
     private TemplateLogicManager     templateLogicManager;
@@ -89,27 +92,25 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
 
     @GetMapping("/list")
     @ResponseBody
-    @ApiOperation(value = "获取索引列表", notes = "包含权限、集群信息、权限信息；")
-    @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "appId", value = "应用ID，不会过滤索引，会影响权限信息", required = true) })
-    public Result<List<ConsoleTemplateVO>> getConsoleTemplates(@RequestParam(value = "appId", required = false) Integer appId,
+    @ApiOperation(value = "获取索引列表【三方接口】",tags = "【三方接口】", notes = "包含权限、集群信息、权限信息；")
+    @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "projectId", value = "应用ID，不会过滤索引，会影响权限信息", required = true) })
+    public Result<List<ConsoleTemplateVO>> getConsoleTemplates(@RequestParam(value = "projectId", required = false) Integer projectId,
                                                                @RequestParam(value = "dataCenter", required = false, defaultValue = "") String dataCenter) {
-        App app = appService.getAppById(appId);
-        if (null == app) {
-            return Result.buildNotExist(APP_IS_NOT_EXIST);
-        }
-        return Result.buildSucc(templateLogicManager.getConsoleTemplatesVOS(appId));
+       
+        return Result.buildSucc(templateLogicManager.getConsoleTemplatesVOS(projectId));
     }
 
     @GetMapping("/get")
     @ResponseBody
-    @ApiOperation(value = "获取索引详细信息接口" )
+    @ApiOperation(value = "获取索引详细信息接口【三方接口】",tags = "【三方接口】" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "索引ID", required = true) })
+    @Deprecated
     public Result<ConsoleTemplateDetailVO> getConsoleTemplateDetail(HttpServletRequest request,
                                                                     @RequestParam("logicId") Integer logicId) {
-        IndexTemplateLogicWithCluster indexTemplateLogicWithCluster = templateLogicService
+        IndexTemplateWithCluster indexTemplateLogicWithCluster = indexTemplateService
             .getLogicTemplateWithCluster(logicId);
 
-        if (null == indexTemplateLogicWithCluster) {
+        if (null == indexTemplateLogicWithCluster || CollectionUtils.isEmpty(indexTemplateLogicWithCluster.getLogicClusters())) {
             return Result.buildFail("模板对应资源不存在!");
         }
 
@@ -125,50 +126,45 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
             consoleTemplateDetail.setClusterType(indexTemplateLogicWithCluster.getLogicClusters().get(0).getType());
             consoleTemplateDetail.setClusterLevel(indexTemplateLogicWithCluster.getLogicClusters().get(0).getLevel());
         }
-        consoleTemplateDetail.setAppName(getAppName(indexTemplateLogicWithCluster.getAppId()));
+        consoleTemplateDetail.setAppName(getAppName(indexTemplateLogicWithCluster.getProjectId()));
         consoleTemplateDetail.setIndices(getLogicTemplateIndices(logicId));
 
-        Result<Void> checkAuthResult = checkAppAuth(logicId, HttpRequestUtils.getAppId(request));
+        Result<Void> checkAuthResult = checkAppAuth(logicId, HttpRequestUtil.getProjectId(request));
         consoleTemplateDetail.setEditable(checkAuthResult.success());
         // 获取indexRollover功能开启状态
-        consoleTemplateDetail.setDisableIndexRollover(templateLogicService.getTemplateConfig(logicId).getDisableIndexRollover());
+        consoleTemplateDetail.setDisableIndexRollover(Optional.ofNullable(indexTemplateService.getTemplateConfig(logicId))
+                .map(IndexTemplateConfig::getDisableIndexRollover)
+                .orElse(null)
+
+        );
 
         return Result.buildSucc(consoleTemplateDetail);
     }
 
     @PutMapping("/update")
     @ResponseBody
-    @ApiOperation(value = "用户编辑模板接口", notes = "支持修改数据类型、责任人、备注")
+    @ApiOperation(value = "用户编辑模板接口【三方接口】",tags = "【三方接口】", notes = "支持修改数据类型、责任人、备注")
     public Result<Void> modifyConsoleTemplate(HttpServletRequest request,
                                         @RequestBody ConsoleTemplateUpdateDTO templateLogicDTO) throws AdminOperateException {
-        return templateLogicManager.editTemplate(ConvertUtil.obj2Obj(templateLogicDTO, IndexTemplateLogicDTO.class),
-            HttpRequestUtils.getOperator(request));
+        return templateLogicManager.editTemplate(ConvertUtil.obj2Obj(templateLogicDTO, IndexTemplateDTO.class),
+            HttpRequestUtil.getOperator(request),HttpRequestUtil.getProjectId(request));
     }
 
     @GetMapping("/capacity")
     @ResponseBody
-    @ApiOperation(value = "获取索引配额信息接口" )
+    @ApiOperation(value = "获取索引配额信息接口【三方接口】",tags = "【三方接口】" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "索引ID", required = true) })
+    @Deprecated
     public Result<ConsoleTemplateCapacityVO> getLogicTemplateCapacity(@RequestParam("logicId") Integer logicId) {
-        IndexTemplateLogic templateLogic = templateLogicService.getLogicTemplateById(logicId);
-        if (templateLogic == null) {
-            return Result.buildParamIllegal(INDEX_NOT_EXISTS_TIPS);
-        }
-
-        ConsoleTemplateCapacityVO templateCapacityVO = ConvertUtil.obj2Obj(templateLogic,
-            ConsoleTemplateCapacityVO.class);
-        templateCapacityVO.setCyclicalRoll(templateLogic.getExpression().endsWith("*"));
-        templateCapacityVO.setTopUsage(getQuotaUsage(templateLogic.getId()));
-        templateCapacityVO.setCurrentUsage(fetchLogicTemplateCurrentUsage(logicId));
-        return Result.buildSucc(templateCapacityVO);
+        return Result.buildSucc();
     }
 
     @GetMapping("/clearInfo")
     @ResponseBody
-    @ApiOperation(value = "获取索引清理信息接口" )
+    @ApiOperation(value = "获取索引清理信息接口【三方接口】",tags = "【三方接口】" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "索引ID", required = true) })
-    public Result<ConsoleTemplateClearVO> getLogicTemplateClearInfo(@RequestParam("logicId") Integer logicId) {
-        IndexTemplateLogicWithPhyTemplates templateLogicWithPhysical = templateLogicService
+    public Result<ConsoleTemplateClearVO> getLogicTemplateClearInfo(@RequestParam("logicId") Integer logicId) throws AmsRemoteException {
+        IndexTemplateWithPhyTemplates templateLogicWithPhysical = indexTemplateService
             .getLogicTemplateWithPhysicalsById(logicId);
 
         if (templateLogicWithPhysical == null) {
@@ -183,34 +179,33 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
         consoleTemplateClearVO.setLogicId(templateLogicWithPhysical.getId());
         consoleTemplateClearVO.setName(templateLogicWithPhysical.getName());
         consoleTemplateClearVO
-            .setIndices(templatePhyService.getMatchNoVersionIndexNames(templateLogicWithPhysical.getAnyOne().getId()));
-        consoleTemplateClearVO.setAccessApps(
-            ConvertUtil.list2List(templateLogicManager.getLogicTemplateAppAccess(logicId), ConsoleAppVO.class));
+            .setIndices(indicesManager.listIndexNameByTemplatePhyId(templateLogicWithPhysical.getMasterPhyTemplate().getId()));
+        consoleTemplateClearVO.setAccessApps(templateLogicManager.getLogicTemplateProjectAccess(logicId));
 
         return Result.buildSucc(consoleTemplateClearVO);
     }
 
     @PutMapping("/clearInfo")
     @ResponseBody
-    @ApiOperation(value = "清理索引信息接口" )
-    @ApiImplicitParams({ @ApiImplicitParam(paramType = "header", dataType = "String", name = "X-ARIUS-APP-ID", value = "应用ID", required = true) })
+    @ApiOperation(value = "清理索引信息接口【三方接口】",tags = "【三方接口】" )
+    @ApiImplicitParams({ @ApiImplicitParam(paramType = "header", dataType = "String", name = HttpRequestUtil.PROJECT_ID, value = "应用ID", required = true) })
     public Result<Void> clearLogicTemplateIndices(HttpServletRequest request,
                                             @RequestBody ConsoleTemplateClearDTO clearDTO) throws ESOperateException {
-        Result<Void> checkAuthResult = checkAppAuth(clearDTO.getLogicId(), HttpRequestUtils.getAppId(request));
+        Result<Void> checkAuthResult = checkAppAuth(clearDTO.getLogicId(), HttpRequestUtil.getProjectId(request));
         if (checkAuthResult.failed()) {
             return checkAuthResult;
         }
 
-        return clusterLogicManager.clearIndices(clearDTO, HttpRequestUtils.getOperator(request));
+        return clusterLogicManager.clearIndices(clearDTO, HttpRequestUtil.getOperator(request));
     }
 
     @GetMapping("/deleteInfo")
     @ResponseBody
-    @ApiOperation(value = "获取将要索引下线信息接口" )
+    @ApiOperation(value = "获取将要索引下线信息接口【三方接口】",tags = "【三方接口】" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "索引ID", required = true) })
-    public Result<ConsoleTemplateDeleteVO> getLogicTemplateDeleteInfo(@RequestParam("logicId") Integer logicId) {
+    public Result<ConsoleTemplateDeleteVO> getLogicTemplateDeleteInfo(@RequestParam("logicId") Integer logicId) throws AmsRemoteException {
         //与上清理索引信息接口实现合并
-        IndexTemplateLogicWithPhyTemplates templateLogicWithPhysical = templateLogicService
+        IndexTemplateWithPhyTemplates templateLogicWithPhysical = indexTemplateService
             .getLogicTemplateWithPhysicalsById(logicId);
         if (templateLogicWithPhysical == null) {
             return Result.buildParamIllegal(INDEX_NOT_EXISTS_TIPS);
@@ -225,38 +220,38 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
         }
 
         consoleTemplateDeleteVO.setAccessApps(
-            ConvertUtil.list2List(templateLogicManager.getLogicTemplateAppAccess(logicId), ConsoleAppVO.class));
+           templateLogicManager.getLogicTemplateProjectAccess(logicId));
 
         return Result.buildSucc(consoleTemplateDeleteVO);
     }
 
     @DeleteMapping("/deleteInfo")
     @ResponseBody
-    @ApiOperation(value = "下线索引信息接口" )
-    @ApiImplicitParams({ @ApiImplicitParam(paramType = "header", dataType = "String", name = "X-ARIUS-APP-ID", value = "应用ID", required = true),
+    @ApiOperation(value = "下线索引信息接口【三方接口】",tags = "【三方接口】" )
+    @ApiImplicitParams({ @ApiImplicitParam(paramType = "header", dataType = "String", name = HttpRequestUtil.PROJECT_ID, value
+            = "应用ID",
+            required = true),
                          @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "索引ID", required = true) })
     public Result<Void> deleteTemplate(HttpServletRequest request,
                                  @RequestParam("logicId") Integer logicId) throws AdminOperateException {
-        Result<Void> checkAuthResult = checkAppAuth(logicId, HttpRequestUtils.getAppId(request));
+        Result<Void> checkAuthResult = checkAppAuth(logicId, HttpRequestUtil.getProjectId(request));
         if (checkAuthResult.failed()) {
             return checkAuthResult;
         }
-        return templateLogicManager.delTemplate(logicId, HttpRequestUtils.getOperator(request));
+        return templateLogicManager.delTemplate(logicId, HttpRequestUtil.getOperator(request),
+                HttpRequestUtil.getProjectId(request));
     }
 
     @GetMapping("/indices/list")
     @ResponseBody
-    @ApiOperation(value = "获取App Id所有模板的索引" )
-    @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "appId", value = "应用ID", required = true) })
-    public Result<List<Tuple<String, String>>> getLogicTemplatesByAppId(HttpServletRequest request,
-                                                                        @RequestParam("appId") Integer appId) {
+    @ApiOperation(value = "获取App Id所有模板的索引【三方接口】",tags = "【三方接口】" )
+    @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "projectId", value = "应用ID", required = true) })
+    public Result<List<Tuple<String, String>>> getLogicTemplatesByProjectId(HttpServletRequest request,
+                                                                            @RequestParam("projectId") Integer projectId) {
 
-        App app = appService.getAppById(appId);
-        if (null == app) {
-            return Result.buildNotExist("应用不存在");
-        }
+      
 
-        return templateLogicService.getLogicTemplatesByAppId(appId);
+        return indexTemplateService.listLogicTemplatesByProjectId(projectId);
     }
 
     @GetMapping("/cyclicalRoll")
@@ -265,7 +260,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "索引ID", required = true) })
     public Result<List<TemplateCyclicalRollInfoVO>> getCyclicalRollInfo(HttpServletRequest request,
                                                                         @RequestParam("logicId") Integer logicId) {
-        IndexTemplateLogicWithPhyTemplates templateLogicWithPhysical = templateLogicService
+        IndexTemplateWithPhyTemplates templateLogicWithPhysical = indexTemplateService
             .getLogicTemplateWithPhysicalsById(logicId);
         if (templateLogicWithPhysical == null) {
             return Result.buildParamIllegal(INDEX_NOT_EXISTS_TIPS);
@@ -276,8 +271,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
         List<IndexTemplatePhy> physicalMasters = templateLogicWithPhysical.fetchMasterPhysicalTemplates();
         for (IndexTemplatePhy physicalMaster : physicalMasters) {
             try {
-                catIndexResults.addAll(esIndexService.syncCatIndexByExpression(physicalMaster.getCluster(),
-                    physicalMaster.getExpression()));
+                catIndexResults.addAll(indicesManager.listIndexCatInfoByTemplatePhyId(physicalMaster.getId()));
             } catch (Exception e) {
                 LOGGER.warn("class=ConsoleTemplateController||method=TemplateCyclicalRollInfoVO||logicId={}||errMsg={}", logicId, e.getMessage(), e);
             }
@@ -291,18 +285,18 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
      */
     @GetMapping(path = "/rateLimit")
     @ResponseBody
-    @ApiOperation(value = "获取模板当前限流值接口" )
+    @ApiOperation(value = "获取模板当前限流值接口【三方接口】",tags = "【三方接口】" )
     @ApiImplicitParams({@ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "索引ID", required = true)})
-    public Result<ConsoleTemplateRateLimitVO> getTemplateRateLimit(@RequestParam("logicId") Integer logicId) throws Exception {    // 一个逻辑模板可能有master slave两种，限流查看时，默认查看master即可
-        List<IndexTemplatePhy> indexTemplatePhysical = templatePhyService.getTemplateByLogicId(logicId);
+    public Result<ConsoleTemplateRateLimitVO> getTemplateRateLimit(@RequestParam("logicId") Integer logicId)  {    // 一个逻辑模板可能有master slave两种，限流查看时，默认查看master即可
+        List<IndexTemplatePhy> indexTemplatePhysicalInfo = indexTemplatePhyService.getTemplateByLogicId(logicId);
         ConsoleTemplateRateLimitVO consoleTemplateRateLimitVO = new ConsoleTemplateRateLimitVO();
-        IndexTemplatePhy indexTemplatePhysicalMaster = new IndexTemplatePhy();
-        for (IndexTemplatePhy item : indexTemplatePhysical) {
+        IndexTemplatePhy indexTemplatePhysicalMasterInfo = new IndexTemplatePhy();
+        for (IndexTemplatePhy item : indexTemplatePhysicalInfo) {
             if (TemplateDeployRoleEnum.MASTER.getCode().equals(item.getRole())) {
-                indexTemplatePhysicalMaster = item;
+                indexTemplatePhysicalMasterInfo = item;
             }
         }
-        consoleTemplateRateLimitVO.setRateLimit(templatePipelineManager.getRateLimit(indexTemplatePhysicalMaster));
+        consoleTemplateRateLimitVO.setRateLimit(templatePipelineManager.getRateLimit(indexTemplatePhysicalMasterInfo));
         return Result.buildSucc(consoleTemplateRateLimitVO);
     }
 
@@ -314,35 +308,20 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
      */
     @PutMapping(path = "/rateLimit")
     @ResponseBody
-    @ApiOperation(value = "更新模板当前限流值接口" )
-    public Result updateTemplateRateLimit(@RequestBody ConsoleTemplateRateLimitDTO consoleTemplateRateLimitDTO) {
+    @ApiOperation(value = "更新模板当前限流值接口【三方接口】",tags = "【三方接口】" )
+    public Result updateTemplateRateLimit(HttpServletRequest request,@RequestBody ConsoleTemplateRateLimitDTO consoleTemplateRateLimitDTO) {
         // 判断调整比例是否在区间内
         int percent = (int) Math.ceil(100.0 * (consoleTemplateRateLimitDTO.getAdjustRateLimit() - consoleTemplateRateLimitDTO.getCurRateLimit()) / consoleTemplateRateLimitDTO.getCurRateLimit());
         if (percent < MIN_PERCENT || percent > MAX_PERCENT) {
             return Result.buildFail("限流调整值变化太大，一次调整比例在100倍以内");
         }
         try {
-            return templateLogicService.updateTemplateWriteRateLimit(consoleTemplateRateLimitDTO);
+            return indexTemplateService.updateTemplateWriteRateLimit(consoleTemplateRateLimitDTO,
+                    HttpRequestUtil.getOperator(request),HttpRequestUtil.getProjectId(request));
         } catch (ESOperateException e) {
             LOGGER.info("限流调整失败", e);
             return Result.buildFail("限流调整失败！");
         }
-    }
-
-    /**
-     * 获取逻辑模板使用率
-     *
-     * @param logicId 逻辑模板ID
-     * @return
-     */
-    private QuotaUsage getQuotaUsage(Integer logicId) {
-        LogicTemplateQuotaUsage templateQuotaUsage = templateQuotaManager.getLogicTemplateQuotaUsage(logicId,
-                7 * AdminConstant.MILLIS_PER_DAY);
-        QuotaUsage topUsage = ConvertUtil.obj2Obj(templateQuotaUsage, QuotaUsage.class);
-        topUsage.setQuotaDiskUsage(templateQuotaUsage.getActualDiskG() / templateQuotaUsage.getQuotaDiskG());
-        topUsage.setQuotaCpuUsage(templateQuotaUsage.getActualCpuCount() / templateQuotaUsage.getQuotaCpuCount());
-
-        return topUsage;
     }
 
     /**
@@ -352,11 +331,11 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
      * @return
      */
     private List<String> getLogicTemplateIndices(Integer logicId) {
-        IndexTemplateLogicWithPhyTemplates templateLogicWithPhysical = templateLogicService
+        IndexTemplateWithPhyTemplates templateLogicWithPhysical = indexTemplateService
             .getLogicTemplateWithPhysicalsById(logicId);
 
-        if (null != templateLogicWithPhysical && null != templateLogicWithPhysical.getAnyOne()) {
-            return templatePhyService.getMatchNoVersionIndexNames(templateLogicWithPhysical.getAnyOne().getId());
+        if (null != templateLogicWithPhysical && null != templateLogicWithPhysical.getMasterPhyTemplate()) {
+            return indexTemplatePhyService.getMatchNoVersionIndexNames(templateLogicWithPhysical.getMasterPhyTemplate().getId());
         }
 
         return new ArrayList<>();
@@ -365,35 +344,15 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
     /**
      * 获取App名称
      *
-     * @param appId App Id
+     * @param projectId projectId
      * @return
      */
-    private String getAppName(Integer appId) {
-        App app = appService.getAppById(appId);
-        if (app != null) {
-            return app.getName();
+    private String getAppName(Integer projectId) {
+        ProjectBriefVO projectBriefVO = projectService.getProjectBriefByProjectId(projectId);
+        if (projectBriefVO != null) {
+            return projectBriefVO.getProjectName();
         }
 
         return StringUtils.EMPTY;
-    }
-
-    /**
-     * 获取逻辑模板当前使用率
-     *
-     * @param logicId 逻辑模板ID
-     * @return
-     */
-    private QuotaUsage fetchLogicTemplateCurrentUsage(Integer logicId) {
-        ESTemplateQuotaUsage esTemplateQuotaUsage = templateQuotaManager.getByLogicId(logicId);
-
-        QuotaUsage currentUsage = ConvertUtil.obj2Obj(esTemplateQuotaUsage, QuotaUsage.class);
-        if (esTemplateQuotaUsage != null) {
-            currentUsage
-                .setQuotaDiskUsage(esTemplateQuotaUsage.getActualDiskG() / esTemplateQuotaUsage.getQuotaDiskG());
-            currentUsage
-                .setQuotaCpuUsage(esTemplateQuotaUsage.getActualCpuCount() / esTemplateQuotaUsage.getQuotaCpuCount());
-        }
-
-        return currentUsage;
     }
 }

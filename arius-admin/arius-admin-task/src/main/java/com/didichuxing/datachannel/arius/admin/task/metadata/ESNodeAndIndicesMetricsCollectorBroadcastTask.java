@@ -11,7 +11,7 @@ import com.didiglobal.logi.job.common.TaskResult;
 import com.didiglobal.logi.job.core.job.Job;
 import com.didiglobal.logi.job.core.job.JobContext;
 
-@Task(name = "ESNodeAndIndicesMetricsCollectorBroadcastTask", description = "节点指标信息采集调度任务", cron = "0 0/1 * * * ? *", autoRegister = true, consensual = ConsensualEnum.BROADCAST)
+@Task(name = "ESNodeAndIndicesMetricsCollectorBroadcastTask", description = "节点和索引指标信息采集调度任务", cron = "0 0/1 * * * ? *", autoRegister = true, consensual = ConsensualEnum.BROADCAST)
 public class ESNodeAndIndicesMetricsCollectorBroadcastTask implements Job {
     private static final Logger LOGGER = LoggerFactory.getLogger(ESNodeAndIndicesMetricsCollectorBroadcastTask.class);
 

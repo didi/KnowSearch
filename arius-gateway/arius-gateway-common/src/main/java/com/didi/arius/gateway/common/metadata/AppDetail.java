@@ -13,6 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 public class AppDetail {
     private int id;
+    private Integer projectId;
 
     /**
      * appid授权的索引列表
@@ -66,7 +67,7 @@ public class AppDetail {
     public enum RequestType {
         CLUSTER(0),
         INDEX(1),
-        Origin_Cluster(2);
+        ORIGIN_CLUSTER(2);
 
         int type;
 

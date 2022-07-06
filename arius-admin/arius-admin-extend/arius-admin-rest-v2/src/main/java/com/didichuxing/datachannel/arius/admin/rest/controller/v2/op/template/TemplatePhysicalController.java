@@ -2,26 +2,29 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v2.op.template;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V2_OP;
 
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhysicalDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplatePhysicalCopyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplatePhyVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
-import com.didichuxing.datachannel.arius.admin.common.util.HttpRequestUtils;
-
+import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import java.util.List;
+import javax.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * @author d06679
@@ -43,10 +46,10 @@ public class TemplatePhysicalController {
      */
     @PostMapping("/list")
     @ResponseBody
-    @ApiOperation(value = "获取物理模板列表接口")
-    public Result<List<ConsoleTemplatePhyVO>> list(@RequestBody IndexTemplatePhysicalDTO param,
+    @ApiOperation(value = "获取物理模板列表接口【三方接口】",tags = "【三方接口】")
+    public Result<List<ConsoleTemplatePhyVO>> list(@RequestBody IndexTemplatePhyDTO param,
                                                    HttpServletRequest request) {
-        return Result.buildSucc(templatePhyManager.getConsoleTemplatePhyVOS(param, HttpRequestUtils.getAppId(request)));
+        return Result.buildSucc(templatePhyManager.getConsoleTemplatePhyVOS(param, HttpRequestUtil.getProjectId(request)));
     }
 
     @DeleteMapping("/del")
@@ -55,7 +58,7 @@ public class TemplatePhysicalController {
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Long", name = "physicalId", value = "物理模板ID", required = true) })
     public Result<Void> delete(HttpServletRequest request,
                          @RequestParam(value = "physicalId") Long physicalId) throws ESOperateException {
-        return templatePhyManager.delTemplate(physicalId, HttpRequestUtils.getOperator(request));
+        return templatePhyManager.delTemplate(physicalId, HttpRequestUtil.getOperator(request));
     }
 
     @PutMapping("/copy")
@@ -63,7 +66,7 @@ public class TemplatePhysicalController {
     @ApiOperation(value = "复制物理模板接口" )
     public Result<Void> copy(HttpServletRequest request,
                              @RequestBody TemplatePhysicalCopyDTO param) throws AdminOperateException {
-        return templatePhyManager.copyTemplate(param, HttpRequestUtils.getOperator(request));
+        return templatePhyManager.copyTemplate(param, HttpRequestUtil.getOperator(request));
     }
 
 }

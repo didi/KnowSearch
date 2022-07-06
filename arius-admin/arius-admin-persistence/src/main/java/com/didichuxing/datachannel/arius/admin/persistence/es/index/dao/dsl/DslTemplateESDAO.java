@@ -82,8 +82,8 @@ public class DslTemplateESDAO extends BaseESDAO {
 
         List<DslTemplatePO> list = getTemplatesByDsl(dsl);
         List<String> ids = Lists.newLinkedList();
-        for (DslTemplatePO DslTemplatePO : list) {
-            ids.add(DslTemplatePO.getKey());
+        for (DslTemplatePO dslTemplate : list) {
+            ids.add(dslTemplate.getKey());
         }
 
         return updateClient.batchDelete(indexName, typeName, ids);
@@ -95,7 +95,7 @@ public class DslTemplateESDAO extends BaseESDAO {
      * @param checkModeList
      * @return
      */
-    public boolean updateCheckModeByByAppidDslTemplate(List<DslCheckMode> checkModeList) {
+    public boolean updateCheckModeByByProjectIdDslTemplate(List<DslCheckMode> checkModeList) {
         String ariusModifyTime = DateTimeUtil.getCurrentFormatDateTime();
         List<DslTemplatePO> list = Lists.newLinkedList();
         DslTemplatePO item = null;
@@ -104,7 +104,7 @@ public class DslTemplateESDAO extends BaseESDAO {
             item = new DslTemplatePO();
             item.setCheckMode(dslCheckMode.getCheckMode());
             item.setAriusModifyTime(ariusModifyTime);
-            item.setAppid(dslCheckMode.getAppid());
+            item.setProjectId(dslCheckMode.getProjectId());
             item.setDslTemplateMd5(dslCheckMode.getDslTemplateMd5());
 
             list.add(item);
@@ -119,7 +119,7 @@ public class DslTemplateESDAO extends BaseESDAO {
      * @param dslQueryLimitList
      * @return
      */
-    public boolean updateQueryLimitByAppidDslTemplate(List<DslQueryLimit> dslQueryLimitList) {
+    public boolean updateQueryLimitByProjectIdDslTemplate(List<DslQueryLimit> dslQueryLimitList) {
         String ariusModifyTime = DateTimeUtil.getCurrentFormatDateTime();
         List<DslTemplatePO> list = Lists.newLinkedList();
         DslTemplatePO item = null;
@@ -130,7 +130,7 @@ public class DslTemplateESDAO extends BaseESDAO {
             // 强制设置查询限流值设置为 true
             item.setForceSetQueryLimit(true);
             item.setAriusModifyTime(ariusModifyTime);
-            item.setAppid(dslQueryLimit.getAppid());
+            item.setProjectId(dslQueryLimit.getProjectId());
             item.setDslTemplateMd5(dslQueryLimit.getDslTemplateMd5());
 
             list.add(item);
@@ -148,7 +148,7 @@ public class DslTemplateESDAO extends BaseESDAO {
     public Map<String, DslTemplatePO> getDslTemplateByKeys(List<? extends DslBase> dslBases) {
         Map<String, DslTemplatePO> result = Maps.newHashMap();
         for (DslBase dslBase : dslBases) {
-            result.put(dslBase.getAppidDslTemplateMd5(), getDslTemplateByKey(dslBase.getAppid(), dslBase.getDslTemplateMd5()));
+            result.put(dslBase.getProjectIdDslTemplateMd5(), getDslTemplateByKey(dslBase.getProjectId(), dslBase.getDslTemplateMd5()));
         }
         return result;
     }
@@ -156,12 +156,12 @@ public class DslTemplateESDAO extends BaseESDAO {
     /**
      * 根据主键id获取查询模板
      *
-     * @param appid
+     * @param projectId
      * @param dslTemplateMd5
      * @return
      */
-    public DslTemplatePO getDslTemplateByKey(Integer appid, String dslTemplateMd5) {
-        return getDslTemplateByKey(String.format("%d_%s", appid, dslTemplateMd5));
+    public DslTemplatePO getDslTemplateByKey(Integer projectId, String dslTemplateMd5) {
+        return getDslTemplateByKey(String.format("%d_%s", projectId, dslTemplateMd5));
     }
 
     /**
@@ -175,14 +175,14 @@ public class DslTemplateESDAO extends BaseESDAO {
     }
 
     /**
-     * 获取某个appid的所有查询模板数据,已排除老查询模板
+     * 获取某个project id的所有查询模板数据,已排除老查询模板
      *
-     * @param appid
+     * @param projectId
      * @return
      */
-    public List<DslTemplatePO> getAllDslTemplatePOByAppid(Integer appid) {
+    public List<DslTemplatePO> getAllDslTemplateByProjectId(Integer projectId) {
 
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_DSL_TEMPLATE_BY_APPID, SCROLL_SIZE, appid);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_DSL_TEMPLATE_BY_PROJECT_ID, SCROLL_SIZE, projectId);
 
         return getTemplatesByDsl(dsl);
     }
@@ -223,23 +223,23 @@ public class DslTemplateESDAO extends BaseESDAO {
         return getTemplatesByDsl(dsl);
     }
 
-    public List<DslTemplatePO> getDslMertricsByAppid(Integer appId, Long startDate, Long endDate) {
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_DSL_TEMPLATE_BY_APPID_AND_RANGE, 10000, startDate, endDate, appId);
+    public List<DslTemplatePO> getDslMetricsByProjectId(Integer projectId, Long startDate, Long endDate) {
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_DSL_TEMPLATE_BY_PROJECT_ID_AND_RANGE, 10000, startDate, endDate, projectId);
 
         return gatewayClient.performRequest(indexName, typeName, dsl, DslTemplatePO.class);
     }
 
-    private String buildQueryCriteriaDsl(Integer appId, String dslTemplateMd5, String queryIndex, Long startTime, Long endTime) {
-        return "[" + buildQueryCriteriaCell(appId, dslTemplateMd5, queryIndex, startTime, endTime) +"]";
+    private String buildQueryCriteriaDsl(Integer projectId, String dslTemplateMd5, String queryIndex, Long startTime, Long endTime) {
+        return "[" + buildQueryCriteriaCell(projectId, dslTemplateMd5, queryIndex, startTime, endTime) +"]";
     }
 
-    private String buildQueryCriteriaCell(Integer appId, String dslTemplateMd5, String queryIndex, Long startTime, Long endTime) {
+    private String buildQueryCriteriaCell(Integer projectId, String dslTemplateMd5, String queryIndex, Long startTime, Long endTime) {
         List<String> cellList = Lists.newArrayList();
 
         // 最近时间范围条件
         cellList.add(DSLSearchUtils.getTermCellForRangeSearch(startTime, endTime, "timeStamp"));
-        // appId 条件
-        cellList.add(DSLSearchUtils.getTermCellForExactSearch(appId, "appid"));
+        // projectId 条件
+        cellList.add(DSLSearchUtils.getTermCellForExactSearch(projectId, "appid"));
 
         if (StringUtils.isNotBlank(dslTemplateMd5)) {
             // 优先使用 dslTemplateMd5 条件
@@ -254,11 +254,11 @@ public class DslTemplateESDAO extends BaseESDAO {
     /**
      * 根据查询条件分页获取DSL模板数据
      *
-     * @param appId    应用id
+     * @param projectId    应用id
      * @param queryDTO 查询条件
      */
-    public Tuple<Long, List<DslTemplatePO>> getDslTemplatePage(Integer appId, DslTemplateConditionDTO queryDTO) {
-        String queryCriteriaDsl = buildQueryCriteriaDsl(appId, queryDTO.getDslTemplateMd5(),
+    public Tuple<Long, List<DslTemplatePO>> getDslTemplatePage(Integer projectId, DslTemplateConditionDTO queryDTO) {
+        String queryCriteriaDsl = buildQueryCriteriaDsl(projectId, queryDTO.getDslTemplateMd5(),
                 queryDTO.getQueryIndex(), queryDTO.getStartTime(), queryDTO.getEndTime());
 
         // 排序条件，默认根据使用时间排序 desc
@@ -279,12 +279,12 @@ public class DslTemplateESDAO extends BaseESDAO {
     /**
      * 根据查询条件获取查询模板数据
      *
-     * @param appId
+     * @param projectId
      * @param startDate
      * @param endDate
      * @return
      */
-    public Tuple<Long, List<DslTemplatePO>> getDslTemplateByCondition(Integer appId, String searchKeyword, String dslTag, String sortInfo, Long from, Long size, Long startDate, Long endDate) {
+    public Tuple<Long, List<DslTemplatePO>> getDslTemplateByCondition(Integer projectId, String searchKeyword, String dslTag, String sortInfo, Long from, Long size, Long startDate, Long endDate) {
         try {
             String dsl = null;
             JSONArray mustJson = new JSONArray();
@@ -292,8 +292,8 @@ public class DslTemplateESDAO extends BaseESDAO {
             // 根据最近使用的时间（timeStamp字段）来筛选
             mustJson.add(JSON.parse(String.format("{\"range\":{\"timeStamp\":{\"gte\":%d,\"lte\":%d}}}", startDate, endDate)));
 
-            if (appId != null) {
-                mustJson.add(JSON.parse(String.format("{\"term\":{\"appid\":{\"value\":%d}}}", appId)));
+            if (projectId != null) {
+                mustJson.add(JSON.parse(String.format("{\"term\":{\"appid\":{\"value\":%d}}}", projectId)));
             }
             if (StringUtils.isNoneBlank(searchKeyword)) {
                 mustJson.add(JSON.parse(String.format("{\"wildcard\":{\"my_all_fields\":\"%s\"}}", searchKeyword)));
@@ -367,27 +367,27 @@ public class DslTemplateESDAO extends BaseESDAO {
     }
 
     /**
-     * 获取某个appid的查询模板个数,已排除老版本查询模板
+     * 获取某个projectId的查询模板个数,已排除老版本查询模板
      *
-     * @param appId
+     * @param projectId
      * @return
      */
-    public Long getTemplateCountByAppId(Integer appId) {
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_DSL_TEMPLATE_COUNT_BY_APPID, appId);
+    public Long getTemplateCountByProjectId(Integer projectId) {
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_DSL_TEMPLATE_COUNT_BY_PROJECT_ID, projectId);
 
         return gatewayClient.performRequestAndGetTotalCount(indexName, typeName, dsl);
     }
 
     /**
-     * 获取某个appid的新增查询模板个数,已排除老查询模板
+     * 获取某个projectId的新增查询模板个数,已排除老查询模板
      *
-     * @param appId
+     * @param projectId
      * @param date
      * @param today
      * @return
      */
-    public Long getIncreaseTemplateCountByAppId(Integer appId, String date, String today) {
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_INCREASE_DSL_TEMPLATE_BY_APPID, appId, date, today);
+    public Long getIncreaseTemplateCountByProjectId(Integer projectId, String date, String today) {
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_INCREASE_DSL_TEMPLATE_BY_PROJECT_ID, projectId, date, today);
 
         return gatewayClient.performRequestAndGetTotalCount(indexName, typeName, dsl);
     }
@@ -410,8 +410,8 @@ public class DslTemplateESDAO extends BaseESDAO {
 
         gatewayClient.queryWithScroll(this.indexName, typeName, dsl, SCROLL_SIZE, null, DslTemplatePO.class, resultList -> {
             if (resultList != null) {
-                for (DslTemplatePO DslTemplatePO : resultList) {
-                    dslMap.computeIfAbsent(DslTemplatePO.getDslTemplateMd5(), key -> Sets.newLinkedHashSet()).add(DslTemplatePO.getDsl());
+                for (DslTemplatePO dslTemplate : resultList) {
+                    dslMap.computeIfAbsent(dslTemplate.getDslTemplateMd5(), key -> Sets.newLinkedHashSet()).add(dslTemplate.getDsl());
                 }
             }
         });
@@ -425,21 +425,21 @@ public class DslTemplateESDAO extends BaseESDAO {
      * @param indexName
      * @return
      */
-    public Map<String/*dskMd5*/, Set<String>/*dsls*/> getTemplateMD5ByIndexNameAndAppId(String indexName, String appId, Integer dayOffset) {
+    public Map<String/*dskMd5*/, Set<String>/*dsls*/> getTemplateMD5ByIndexNameAndProjectId(String indexName, String projectId, Integer dayOffset) {
 
         Map<String/*dskMd5*/, Set<String>/*dsls*/> dslMap = Maps.newHashMap();
 
         String dsl = null;
         if (dayOffset == -1) {
-            dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_DSL_TEMPLATES_BY_INDEXNAME_APPID, SCROLL_SIZE, indexName, appId);
+            dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_DSL_TEMPLATES_BY_INDEXNAME_PROJECT_ID, SCROLL_SIZE, indexName, projectId);
         } else {
-            dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_DSL_TEMPLATES_BY_INDEXNAME_APPID_WITH_DAY_RANGE, SCROLL_SIZE, indexName, appId, dayOffset);
+            dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_DSL_TEMPLATES_BY_INDEXNAME_PROJECT_ID_WITH_DAY_RANGE, SCROLL_SIZE, indexName, projectId, dayOffset);
         }
 
         gatewayClient.queryWithScroll(this.indexName, typeName, dsl, SCROLL_SIZE, null, DslTemplatePO.class, resultList -> {
             if (resultList != null) {
-                for (DslTemplatePO DslTemplatePO : resultList) {
-                    dslMap.computeIfAbsent(DslTemplatePO.getDslTemplateMd5(), key -> Sets.newLinkedHashSet()).add(DslTemplatePO.getDsl());
+                for (DslTemplatePO dslTemplate : resultList) {
+                    dslMap.computeIfAbsent(dslTemplate.getDslTemplateMd5(), key -> Sets.newLinkedHashSet()).add(dslTemplate.getDsl());
                 }
             }
         });

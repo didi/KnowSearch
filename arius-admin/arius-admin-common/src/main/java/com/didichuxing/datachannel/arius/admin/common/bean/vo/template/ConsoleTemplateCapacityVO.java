@@ -1,6 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.vo.template;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.common.QuotaUsage;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.BaseVO;
 
 import io.swagger.annotations.ApiModel;
@@ -45,11 +44,4 @@ public class ConsoleTemplateCapacityVO extends BaseVO {
      */
     @ApiModelProperty("配额")
     private Double quota;
-
-    @ApiModelProperty("峰值利用率")
-    private QuotaUsage topUsage;
-
-    @ApiModelProperty("实时利用率")
-    private QuotaUsage currentUsage;
-
 }

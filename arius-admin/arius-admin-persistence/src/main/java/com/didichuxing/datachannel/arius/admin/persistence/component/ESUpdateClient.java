@@ -1,15 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.persistence.component;
 
-import java.net.InetSocketAddress;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
-
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.BaseESPO;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPO;
-import com.didichuxing.datachannel.arius.admin.persistence.mysql.resource.ClusterDAO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPhyPO;
+import com.didichuxing.datachannel.arius.admin.persistence.mysql.resource.PhyClusterDAO;
 import com.didiglobal.logi.elasticsearch.client.ESClient;
 import com.didiglobal.logi.elasticsearch.client.gateway.document.ESIndexRequest;
 import com.didiglobal.logi.elasticsearch.client.gateway.document.ESIndexResponse;
@@ -24,6 +18,12 @@ import com.didiglobal.logi.elasticsearch.client.response.indices.deletebyquery.E
 import com.didiglobal.logi.elasticsearch.client.response.indices.refreshindex.ESIndicesRefreshIndexResponse;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import java.net.InetSocketAddress;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
+import javax.annotation.PostConstruct;
 import lombok.NoArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -33,8 +33,6 @@ import org.elasticsearch.common.transport.TransportAddress;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
-import javax.annotation.PostConstruct;
 
 /**
  * @Author: D10865
@@ -49,6 +47,7 @@ import javax.annotation.PostConstruct;
 public class ESUpdateClient {
 
     private static final ILog             LOGGER            = LogFactory.getLog(ESUpdateClient.class);
+    public static final int MAX_RETRY_CONT = 5;
 
     /**
      * 集群名称
@@ -73,7 +72,7 @@ public class ESUpdateClient {
     private String                        beforeHttpAddress = null;
 
     @Autowired
-    private ClusterDAO                    clusterDAO;
+    private PhyClusterDAO clusterDAO;
 
     public static final int               MAX_RETRY_CNT     = 5;
 
@@ -83,7 +82,7 @@ public class ESUpdateClient {
     @PostConstruct
     public void init() {
         LOGGER.info("class=ESUpdateClient||method=init||ESUpdateClient init start.");
-        List<ClusterPO> clusterPOS = clusterDAO.listAll();
+        List<ClusterPhyPO> clusterPOS = clusterDAO.listAll();
         setDataSourceList(clusterPOS);
         LOGGER.info("class=ESUpdateClient||method=init||ESUpdateClient init finished.");
     }
@@ -304,7 +303,7 @@ public class ESUpdateClient {
                 if (response == null) {
                     continue;
                 }
-
+                //todo 存在失败的情况需要解析 缺陷
                 return response.getRestStatus().getStatus() == HttpStatus.SC_OK && !response.getErrors();
             }
         } catch (Exception e) {
@@ -373,7 +372,7 @@ public class ESUpdateClient {
         int retryCount = 0;
 
         // 如果esClient为空或者重试次数小于5次，循环获取
-        while (esClient == null && retryCount < 5) {
+        while (esClient == null && retryCount < MAX_RETRY_CONT) {
             try {
                 ++retryCount;
                 esClient = updateClientPool.poll(3, TimeUnit.SECONDS);
@@ -451,13 +450,13 @@ public class ESUpdateClient {
      * 初始化访问es集群的客户端
      *
      */
-    private void setDataSourceList(List<ClusterPO> dataSourceList) {
+    private void setDataSourceList(List<ClusterPhyPO> dataSourceList) {
         if (dataSourceList == null) {
             LOGGER.error("class=ESUpdateClient||method=setDataSourceList||errMsg=fail to get es clusters");
             return;
         }
 
-        ClusterPO updateClusterDataSource = getUpdateClusterDataSource(dataSourceList);
+        ClusterPhyPO updateClusterDataSource = getUpdateClusterDataSource(dataSourceList);
 
         if (updateClusterDataSource == null) {
             LOGGER.error("class=UpdateClient||method=setDataSourceList||errMsg=fail to get es cluster info {}",
@@ -507,9 +506,9 @@ public class ESUpdateClient {
         }
     }
 
-    private ClusterPO getUpdateClusterDataSource(List<ClusterPO> dataSourceList) {
-        ClusterPO updateClusterDataSource = null;
-        for (ClusterPO dataSource : dataSourceList) {
+    private ClusterPhyPO getUpdateClusterDataSource(List<ClusterPhyPO> dataSourceList) {
+        ClusterPhyPO updateClusterDataSource = null;
+        for (ClusterPhyPO dataSource : dataSourceList) {
             if (metadataClusterName.equals(dataSource.getCluster())) {
                 updateClusterDataSource = dataSource;
                 break;

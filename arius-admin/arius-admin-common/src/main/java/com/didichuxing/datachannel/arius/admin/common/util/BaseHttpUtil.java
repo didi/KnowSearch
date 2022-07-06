@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.common.util;
 
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
-import com.didichuxing.datachannel.arius.admin.common.exception.AriusRunTimeException;
+import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import org.apache.commons.lang3.StringUtils;
@@ -47,15 +47,15 @@ public class BaseHttpUtil {
 
     private BaseHttpUtil() {}
 
-    public static String post(String url, Map<String, Object> params) {
+    public static String post(String url, Map<String, Object> params) throws AdminOperateException {
         return post(url, params, (Map)null, (String)null, (String)null);
     }
 
-    public static String postEncode(String url, Map<String, Object> params, String reqEncode, String resEncode) {
+    public static String postEncode(String url, Map<String, Object> params, String reqEncode, String resEncode) throws AdminOperateException {
         return post(url, params, (Map)null, reqEncode, resEncode);
     }
 
-    public static String post(String url, Map<String, Object> params, Map<String, String> headers, String reqEncode, String resEncode) {
+    public static String post(String url, Map<String, Object> params, Map<String, String> headers, String reqEncode, String resEncode) throws AdminOperateException {
         HttpPost post = new HttpPost(url);
         if(StringUtils.isBlank(reqEncode)) {
             reqEncode = UTF8;
@@ -109,7 +109,7 @@ public class BaseHttpUtil {
                     post.getParams().setParameter(COOKIE_POLICY, COMPATIBILITY);
                     break;
                 } catch (UnsupportedEncodingException var20) {
-                    throw new AriusRunTimeException(EXCEPTION_1, var20, ResultType.FAIL);
+                    throw new AdminOperateException(EXCEPTION_1, var20, ResultType.FAIL);
                 }
             }
         }
@@ -121,7 +121,7 @@ public class BaseHttpUtil {
             HttpEntity entity = HTTP_CLIENT.execute(post).getEntity();
             response = EntityUtils.toString(entity, resEncode);
         } catch (Exception var18) {
-            throw new AriusRunTimeException(EXCEPTION_2 + url, var18, ResultType.FAIL);
+            throw new AdminOperateException(EXCEPTION_2 + url, var18, ResultType.FAIL);
         } finally {
             post.releaseConnection();
         }
@@ -133,7 +133,7 @@ public class BaseHttpUtil {
         return response;
     }
 
-    public static String postForString(String url, String content, Map<String, String> headers) {
+    public static String postForString(String url, String content, Map<String, String> headers) throws AdminOperateException {
         HttpPost post = new HttpPost(url);
 
         Iterator<Map.Entry<String, String>> var4;
@@ -154,7 +154,7 @@ public class BaseHttpUtil {
                 post.setEntity(requestBody);
                 post.getParams().setParameter(COOKIE_POLICY, COMPATIBILITY);
             } catch (UnsupportedEncodingException var12) {
-                throw new AriusRunTimeException(EXCEPTION_1, var12, ResultType.FAIL);
+                throw new AdminOperateException(EXCEPTION_1, var12, ResultType.FAIL);
             }
         }
 
@@ -166,7 +166,7 @@ public class BaseHttpUtil {
             response = EntityUtils.toString(entity, UTF8);
             EntityUtils.consume(entity);
         } catch (Exception var10) {
-            throw new AriusRunTimeException(EXCEPTION_2 + url, var10, ResultType.FAIL);
+            throw new AdminOperateException(EXCEPTION_2 + url, var10, ResultType.FAIL);
         } finally {
             post.releaseConnection();
         }
@@ -177,7 +177,7 @@ public class BaseHttpUtil {
 
         return response;
     }
-    public static String deleteForString(String url, String content, Map<String, String> headers) {
+    public static String deleteForString(String url, String content, Map<String, String> headers) throws AdminOperateException {
         HttpDelete post = new HttpDelete(url);
 
         Iterator<Map.Entry<String, String>> var4;
@@ -197,7 +197,7 @@ public class BaseHttpUtil {
                 requestBody.setContentLength((long)content.getBytes(UTF8).length);
                 post.getParams().setParameter(COOKIE_POLICY, COMPATIBILITY);
             } catch (UnsupportedEncodingException var12) {
-                throw new AriusRunTimeException(EXCEPTION_1, var12, ResultType.FAIL);
+                throw new AdminOperateException(EXCEPTION_1, var12, ResultType.FAIL);
             }
         }
 
@@ -209,7 +209,7 @@ public class BaseHttpUtil {
             response = EntityUtils.toString(entity, UTF8);
             EntityUtils.consume(entity);
         } catch (Exception var10) {
-            throw new AriusRunTimeException(EXCEPTION_2 + url, var10, ResultType.FAIL);
+            throw new AdminOperateException(EXCEPTION_2 + url, var10, ResultType.FAIL);
         } finally {
             post.releaseConnection();
         }
@@ -221,7 +221,7 @@ public class BaseHttpUtil {
         return response;
     }
 
-    public static String putForString(String url, String content, Map<String, String> headers) {
+    public static String putForString(String url, String content, Map<String, String> headers) throws AdminOperateException {
         HttpPut post = new HttpPut(url);
 
         Iterator<Map.Entry<String, String>> var4;
@@ -242,7 +242,7 @@ public class BaseHttpUtil {
                  post.setEntity(requestBody);
                 post.getParams().setParameter(COOKIE_POLICY, COMPATIBILITY);
             } catch (UnsupportedEncodingException var12) {
-                throw new AriusRunTimeException(EXCEPTION_1, var12, ResultType.FAIL);
+                throw new AdminOperateException(EXCEPTION_1, var12, ResultType.FAIL);
             }
         }
 
@@ -254,7 +254,7 @@ public class BaseHttpUtil {
             response = EntityUtils.toString(entity, UTF8);
             EntityUtils.consume(entity);
         } catch (Exception var10) {
-            throw new AriusRunTimeException(EXCEPTION_2 + url, var10, ResultType.FAIL);
+            throw new AdminOperateException(EXCEPTION_2 + url, var10, ResultType.FAIL);
         } finally {
             post.releaseConnection();
         }
@@ -267,7 +267,7 @@ public class BaseHttpUtil {
     }
 
 
-    public static String get(String url, Map<String, String> params) {
+    public static String get(String url, Map<String, String> params) throws AdminOperateException {
         Iterator<Map.Entry<String, String>> var3;
         if(params != null) {
             StringBuilder builder = (new StringBuilder(url)).append('?');
@@ -289,7 +289,7 @@ public class BaseHttpUtil {
             HttpEntity entity = HTTP_CLIENT.execute(get).getEntity();
             response = EntityUtils.toString(entity, UTF8);
         } catch (Exception var8) {
-            throw new AriusRunTimeException(EXCEPTION_2 + url, var8, ResultType.FAIL);
+            throw new AdminOperateException(EXCEPTION_2 + url, var8, ResultType.FAIL);
         } finally {
             get.releaseConnection();
         }
@@ -301,7 +301,7 @@ public class BaseHttpUtil {
         return response;
     }
 
-    public static String get(String url, Map<String, String> params, Map<String, String> headers) {
+    public static String get(String url, Map<String, String> params, Map<String, String> headers) throws AdminOperateException {
         if (params != null) {
             StringBuilder builder = new StringBuilder(url).append('?');
             for (Map.Entry<String, String> e : params.entrySet()) {
@@ -322,7 +322,7 @@ public class BaseHttpUtil {
             HttpEntity entity = HTTP_CLIENT.execute(get).getEntity();
             response = EntityUtils.toString(entity, UTF8);
         } catch (Exception e) {
-            throw new AriusRunTimeException(EXCEPTION_2 + url, e, ResultType.FAIL);
+            throw new AdminOperateException(EXCEPTION_2 + url, e, ResultType.FAIL);
         } finally {
             get.releaseConnection();
         }
@@ -333,14 +333,14 @@ public class BaseHttpUtil {
         return response;
     }
 
-    public static Header buildHttpHeader(String appid, String passWord) {
+    public static Header buildHttpHeader(String esUser, String passWord) {
         // 构建认证信息的header
         Header header = null;
         try {
-            header = new BasicHeader("Authorization", "Basic " + Base64.getEncoder().encodeToString(String.format("%s:%s", appid, passWord).getBytes(UTF8)));
+            header = new BasicHeader("Authorization", "Basic " + Base64.getEncoder().encodeToString(String.format("%s:%s", esUser, passWord).getBytes(UTF8)));
         } catch (UnsupportedEncodingException e) {
-            LOGGER.error("class=BaseHttpUtil||method=buildHttpHeader||appid={}||passWord={}||errMsg=encoding error",
-                    appid, passWord, e);
+            LOGGER.error("class=BaseHttpUtil||method=buildHttpHeader||esUser={}||passWord={}||errMsg=encoding error",
+                    esUser, passWord, e);
         }
 
         return header;

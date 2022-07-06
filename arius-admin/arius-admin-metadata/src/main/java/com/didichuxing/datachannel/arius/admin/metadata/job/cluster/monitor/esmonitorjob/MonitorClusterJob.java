@@ -1,28 +1,31 @@
 package com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob;
 
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.INDEX_STAT_COLLECT_CONCURRENT;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.NODE_STAT_COLLECT_CONCURRENT;
+import static com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.node.ESNodesStatsRequest.HTTP;
 
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.MulityTypeTemplatesInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESDataTempBean;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESIndexDCDRStats;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESIndexStats;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESIndexToNodeStats;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESIndexToNodeTempBean;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESIngestStats;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESNodeStats;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESNodeToIndexStats;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESNodeToIndexTempBean;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
-import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.common.event.metrics.MetricsMonitorCollectTimeEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.metrics.MetricsMonitorIndexEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.metrics.MetricsMonitorNodeEvent;
-import com.didichuxing.datachannel.arius.admin.common.exception.ESRunTimeException;
+import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.HttpHostUtil;
+import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.index.ESIndexStatsAction;
 import com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.index.ESIndexStatsResponse;
@@ -46,6 +49,7 @@ import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatI
 import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.ESIndicesCatIndicesResponse;
 import com.didiglobal.logi.elasticsearch.client.response.indices.stats.IndexNodes;
 import com.didiglobal.logi.elasticsearch.client.response.model.indices.CommonStat;
+import com.didiglobal.logi.elasticsearch.client.response.model.indices.Docs;
 import com.didiglobal.logi.elasticsearch.client.response.model.node.NodeAttributes;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
@@ -54,14 +58,27 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.common.StopWatch;
 import org.springframework.beans.BeanUtils;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.INDEX_STAT_COLLECT_CONCURRENT;
-import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.NODE_STAT_COLLECT_CONCURRENT;
-import static com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.node.ESNodesStatsRequest.HTTP;
 
 /**
  * 每个集群的采集任务
@@ -75,6 +92,7 @@ public class MonitorClusterJob {
 
     private static final String[]   DATA_FORMATS = new String[] {"_YYYYMM", "YYYYMM", "YYYYMMdd", "_YYYYMMdd", "YYYY-MM-dd", "_YYYY-MM-dd",
                                                                  "MMdd", "YYMM", "_YYMM", "YY-MM", "_YYYY-MM", "YYYY",  "_YYYY.MM.dd", "YYYY.MM.dd"};
+    public static final int GROUP = 3;
 
     private Pattern pattern   = Pattern.compile("(.*)(_v[1-9]\\d*)(.*)");
 
@@ -123,8 +141,8 @@ public class MonitorClusterJob {
 
     private String                      clusterName;
 
-    private static final FutureUtil<ESNodesStatsResponse>   nodeStatsFuture   = FutureUtil.init("MonitorClusterJob-nodeStats",  10,10,20);
-    private static final FutureUtil<ESIndexStatsResponse>   indexStatsFuture  = FutureUtil.init("MonitorClusterJob-indexStats",  10,10,20);
+    private static final FutureUtil<ESNodesStatsResponse> NODE_STATS_FUTURE = FutureUtil.init("MonitorClusterJob-nodeStats",  10,10,20);
+    private static final FutureUtil<ESIndexStatsResponse> INDEX_STATS_FUTURE = FutureUtil.init("MonitorClusterJob-indexStats",  10,10,20);
 
     private StopWatch indexStopWatch        = new StopWatch();
     private StopWatch nodeStopWatch         = new StopWatch();
@@ -205,9 +223,9 @@ public class MonitorClusterJob {
      * 通过datanode并发去获取节点stats
      * @param esClient
      * @return
-     * @throws ESRunTimeException
+     * @throws AdminOperateException
      */
-    private Map<String, ClusterNodeStats> getClusterNodeStatsConcurrently(ESClient esClient) throws ESRunTimeException{
+    private Map<String, ClusterNodeStats> getClusterNodeStatsConcurrently(ESClient esClient) throws AdminOperateException{
         try {
             long startTime = System.currentTimeMillis();
             long expectEndTime = startTime + CLIENT_TO_WITH_MILLS;
@@ -221,13 +239,13 @@ public class MonitorClusterJob {
             // 3.分批次并行获取节点指标
             for (List<String> nodeIdBatch : nodeIdBatches) {
                 // 总任务超时时间也作为子任务超时时间
-                nodeStatsFuture.callableTask(() -> {
+                NODE_STATS_FUTURE.callableTask(() -> {
                     ESNodesStatsResponse response = new ESNodesStatsResponse();
                     response.setNodes(new HashMap<>());
                     try {
                         if (System.currentTimeMillis() > expectEndTime) {
                             // 总任务已经超时，不再执行
-                            throw new ESRunTimeException(TIME_OUT);
+                            throw new AdminOperateException(TIME_OUT);
                         }
                         response = esClient.admin().cluster().prepareExecute(ESNodesStatsAction.INSTANCE)
                                 .setNodesIds(nodeIdBatch.toArray(new String[0]))
@@ -241,7 +259,7 @@ public class MonitorClusterJob {
             }
 
             // 4.获取所有批次结果
-            List<ESNodesStatsResponse> nodeStatsResponseList = nodeStatsFuture.waitResult();
+            List<ESNodesStatsResponse> nodeStatsResponseList = NODE_STATS_FUTURE.waitResult();
 
             // 5.合并批次结果
             Map<String, ClusterNodeStats> clusterNodeStatsMap = new HashMap<>();
@@ -258,11 +276,11 @@ public class MonitorClusterJob {
             return clusterNodeStatsMap;
         } catch (Exception e) {
             LOGGER.error("class=MonitorClusterJob||method=getClusterNodeStatsConcurrently||getClusterNodeStats for cluster {} error, e->", esClient.getClusterName(), e);
-            throw new ESRunTimeException(TIME_OUT, e.getCause());
+            throw new AdminOperateException(TIME_OUT, e.getCause());
         }
     }
 
-    private Map<String, ClusterNodeStats> getClusterNodeStats(ESClient esClient) {
+    private Map<String, ClusterNodeStats> getClusterNodeStats(ESClient esClient) throws AdminOperateException {
         boolean isConcurrentCollect = ariusConfigInfoService.booleanSetting(CONFIG_VALUE_GROUP,
                 NODE_STAT_COLLECT_CONCURRENT, false);
 
@@ -363,7 +381,7 @@ public class MonitorClusterJob {
     private List<String> getClusterOpenIndexNames(ESClient esClient) {
         ESIndicesCatIndicesResponse esIndicesCatIndicesResponse = esClient.admin().indices().prepareCatIndices().execute().actionGet(CLIENT_TO_WITH_MILLS);
         return esIndicesCatIndicesResponse.getCatIndexResults().stream().filter(
-                catIndexResult -> catIndexResult.getStatus().equalsIgnoreCase("open")).map( CatIndexResult::getIndex).collect( Collectors.toList());
+                catIndexResult -> "open".equalsIgnoreCase(catIndexResult.getStatus())).map( CatIndexResult::getIndex).collect( Collectors.toList());
     }
 
     /**
@@ -384,13 +402,13 @@ public class MonitorClusterJob {
             // 分批次并行获取节点指标
             for (List<String> indexNameBatch : indexNameBatches) {
                 // 总任务超时时间也作为子任务超时时间
-                indexStatsFuture.callableTask(()  -> {
+                INDEX_STATS_FUTURE.callableTask(()  -> {
                     ESIndexStatsResponse response = new ESIndexStatsResponse();
                     response.setIndicesMap(new HashMap<>());
                     try {
                         if (System.currentTimeMillis() > expectEndTime) {
                             // 总任务已经超时，不再执行
-                            throw new ESRunTimeException(TIME_OUT);
+                            throw new AdminOperateException(TIME_OUT);
                         }
 
                         response = esClient.admin().indices().prepareExecute( ESIndexStatsAction.INSTANCE)
@@ -405,7 +423,7 @@ public class MonitorClusterJob {
             }
 
             // 获取所有批次结果
-            List<ESIndexStatsResponse> indicesStatsResponseList = indexStatsFuture.waitResult();
+            List<ESIndexStatsResponse> indicesStatsResponseList = INDEX_STATS_FUTURE.waitResult();
 
             // 合并批次结果
             int shardFailedNum = 0;
@@ -451,6 +469,7 @@ public class MonitorClusterJob {
     }
 
     /**
+     * todo：alibaba规范 方法总行数超过80行
      * 采集索引信息
      * @param esClient
      * @param metricsRegister
@@ -491,9 +510,10 @@ public class MonitorClusterJob {
 
                     Map map = JSON.parseObject(JSON.toJSONString(indexStats.getPrimaries()), Map.class);
                     List<ESDataTempBean> esDataTempBeans = aggrAndComputeData(map, indexWorkOrders, base, metricsRegister);
-
+                    
                     esDataTempBeans.addAll(genIndexTotalCommonStatsMetric(indexStats.getTotal().getStore().getSizeInBytes(),
-                        indexStats.getTotal().getDocs().getCount(), base));
+                            Optional.ofNullable(indexStats).map(IndexNodes::getTotal).map(CommonStat::getDocs)
+                                    .map(Docs::getCount).orElse(0L), base));
 
                     ESIndexStats esIndexStats = buildESIndexStats(base, esDataTempBeans);
 
@@ -1162,7 +1182,7 @@ public class MonitorClusterJob {
     private String genIndexNameClear(String indexName, String expression, String dateFormat) {
         Matcher m = pattern.matcher(indexName);
 
-        if (!m.find() || StringUtils.isNotBlank(m.group(3))) {
+        if (!m.find() || StringUtils.isNotBlank(m.group(GROUP))) {
             //校验是否是当前模板的
             if (indexName.length() != (expression.length() - 1 + dateFormat.length())) {
                 return "";

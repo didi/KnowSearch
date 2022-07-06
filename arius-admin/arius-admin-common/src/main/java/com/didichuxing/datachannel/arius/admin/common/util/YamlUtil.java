@@ -70,7 +70,9 @@ public class YamlUtil {
             return YML_NAME_TO_PROPERTIES.get(ymlPath).get(key);
         }
         Map<String, String> properties = getYmlByFileName(ymlPath);
-        if (properties == null) return null;
+
+        if (properties == null) {return null;}
+
         return properties.get(key);
     }
 

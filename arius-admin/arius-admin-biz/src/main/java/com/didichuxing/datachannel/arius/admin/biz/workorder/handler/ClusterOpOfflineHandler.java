@@ -2,42 +2,48 @@ package com.didichuxing.datachannel.arius.admin.biz.workorder.handler;
 
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandler;
-import com.didichuxing.datachannel.arius.admin.biz.workorder.content.ClusterOpOfflineContent;
-import com.didichuxing.datachannel.arius.admin.biz.worktask.WorkTaskManager;
+import com.didichuxing.datachannel.arius.admin.biz.worktask.OpTaskManager;
+import com.didichuxing.datachannel.arius.admin.biz.worktask.content.ClusterOfflineContent;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.WorkTaskDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.ecm.EcmTaskDTO;
-import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
-import com.didichuxing.datachannel.arius.admin.common.constant.task.WorkTaskTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.arius.AriusUserInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.WorkTask;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.ClusterOpOfflineOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
+import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
+import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
-import com.didichuxing.datachannel.arius.admin.core.service.common.AriusUserInfoService;
+import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
+/**
+ * @author ohushenglin_v
+ * @date 2022-05-24
+ */
 @Service("clusterOpOfflineHandler")
+@Deprecated
 public class ClusterOpOfflineHandler extends BaseWorkOrderHandler {
 
-    @Autowired
-    private AriusUserInfoService ariusUserInfoService;
+   
 
     @Autowired
     private ClusterPhyService esClusterPhyService;
 
     @Autowired
-    private WorkTaskManager workTaskManager;
+    private OpTaskManager opTaskManager;
+    @Autowired
+    private RoleTool roleTool;
 
     /**
      * 工单是否自动审批
@@ -52,13 +58,13 @@ public class ClusterOpOfflineHandler extends BaseWorkOrderHandler {
 
     @Override
     public AbstractOrderDetail getOrderDetail(String extensions) {
-        ClusterOpOfflineContent content = JSON.parseObject(extensions, ClusterOpOfflineContent.class);
+        ClusterOfflineContent content = JSON.parseObject(extensions, ClusterOfflineContent.class);
 
         return ConvertUtil.obj2Obj(content, ClusterOpOfflineOrderDetail.class);
     }
 
     @Override
-    public List<AriusUserInfo> getApproverList(AbstractOrderDetail detail) {
+    public List<UserBriefVO> getApproverList(AbstractOrderDetail detail) {
         return getOPList();
     }
 
@@ -79,9 +85,9 @@ public class ClusterOpOfflineHandler extends BaseWorkOrderHandler {
      * @return result
      */
     @Override
-    protected Result<Void> validateConsoleParam(WorkOrder workOrder) {
-        ClusterOpOfflineContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
-            ClusterOpOfflineContent.class);
+    protected Result<Void> validateConsoleParam(WorkOrder workOrder) throws NotFindSubclassException {
+        ClusterOfflineContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
+            ClusterOfflineContent.class);
 
         if (AriusObjUtils.isNull(content.getPhyClusterId())) {
             return Result.buildParamIllegal("物理集群id为空");
@@ -92,7 +98,7 @@ public class ClusterOpOfflineHandler extends BaseWorkOrderHandler {
             return Result.buildParamIllegal("物理集群不存在");
         }
 
-        if (workTaskManager.existUnClosedTask(content.getPhyClusterId().intValue(), WorkTaskTypeEnum.CLUSTER_OFFLINE.getType())) {
+        if (opTaskManager.existUnClosedTask(content.getPhyClusterId().intValue(), OpTaskTypeEnum.CLUSTER_OFFLINE.getType())) {
             return Result.buildParamIllegal("该集群上存在未完成的任务");
         }
 
@@ -101,8 +107,8 @@ public class ClusterOpOfflineHandler extends BaseWorkOrderHandler {
 
     @Override
     protected String getTitle(WorkOrder workOrder) {
-        ClusterOpOfflineContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
-            ClusterOpOfflineContent.class);
+        ClusterOfflineContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
+            ClusterOfflineContent.class);
         WorkOrderTypeEnum workOrderTypeEnum = WorkOrderTypeEnum.valueOfName(workOrder.getType());
         if (workOrderTypeEnum == null) {
             return "";
@@ -118,7 +124,8 @@ public class ClusterOpOfflineHandler extends BaseWorkOrderHandler {
      */
     @Override
     protected Result<Void> validateConsoleAuth(WorkOrder workOrder) {
-        if (!ariusUserInfoService.isOPByDomainAccount(workOrder.getSubmitor())) {
+        //管理员能扩缩容
+        if (!roleTool.isAdmin(workOrder.getSubmitor())) {
             return Result.buildOpForBidden("非运维人员不能操作集群扩缩容！");
         }
 
@@ -144,8 +151,8 @@ public class ClusterOpOfflineHandler extends BaseWorkOrderHandler {
      */
     @Override
     protected Result<Void> doProcessAgree(WorkOrder workOrder, String approver) throws AdminOperateException {
-        ClusterOpOfflineContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
-            ClusterOpOfflineContent.class);
+        ClusterOfflineContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
+            ClusterOfflineContent.class);
 
         EcmTaskDTO ecmTaskDTO = new EcmTaskDTO();
         ecmTaskDTO.setPhysicClusterId(content.getPhyClusterId());
@@ -154,11 +161,11 @@ public class ClusterOpOfflineHandler extends BaseWorkOrderHandler {
         ecmTaskDTO.setOrderType(5);
         ecmTaskDTO.setCreator(workOrder.getSubmitor());
 
-        WorkTaskDTO workTaskDTO = new WorkTaskDTO();
-        workTaskDTO.setCreator(workOrder.getSubmitor());
-        workTaskDTO.setExpandData(JSON.toJSONString(ecmTaskDTO));
-        workTaskDTO.setTaskType(WorkTaskTypeEnum.CLUSTER_OFFLINE.getType());
-        Result<WorkTask> result = workTaskManager.addTask(workTaskDTO);
+        OpTaskDTO opTaskDTO = new OpTaskDTO();
+        opTaskDTO.setCreator(workOrder.getSubmitor());
+        opTaskDTO.setExpandData(JSON.toJSONString(ecmTaskDTO));
+        opTaskDTO.setTaskType(OpTaskTypeEnum.CLUSTER_OFFLINE.getType());
+        Result<OpTask> result = opTaskManager.addTask(opTaskDTO);
         if (null == result || result.failed()) {
             return Result.buildFail("生成集群新建操作任务失败!");
         }

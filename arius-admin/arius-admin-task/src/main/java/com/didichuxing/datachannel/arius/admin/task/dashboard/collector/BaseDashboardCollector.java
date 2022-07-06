@@ -12,7 +12,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.Clust
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.MonitorMetricsSender;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats.AriusStatsDashBoardInfoESDAO;
 
@@ -27,7 +27,7 @@ public abstract class BaseDashboardCollector {
     protected ClusterLogicService          clusterLogicService;
 
     @Autowired
-    protected TemplateLogicService         templateLogicService;
+    protected IndexTemplateService indexTemplateService;
 
     @Autowired
     protected ESClusterService             esClusterService;
@@ -44,10 +44,24 @@ public abstract class BaseDashboardCollector {
     @Autowired
     protected AriusStatsDashBoardInfoESDAO ariusStatsDashBoardInfoESDAO;
 
+    /**
+     * 采集单个集群
+     * @param cluster 集群名称
+     * @param currentTime   当前时间戳
+     */
     public abstract void collectSingleCluster(String cluster, long currentTime);
 
+    /**
+     * 采集多个集群
+     * @param clusterList   集群列表
+     * @param currentTime   时间戳
+     */
     public abstract void collectAllCluster(List<String> clusterList, long currentTime);
 
+    /**
+     * 获取任务名称
+     * @return 任务名称
+     */
     public abstract String getName();
 
     protected DashBoardStats buildInitDashBoardStats(Long timestamp){

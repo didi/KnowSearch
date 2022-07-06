@@ -11,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+import lombok.SneakyThrows;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpRequest;
@@ -67,6 +68,7 @@ public class RestTemplateConfig {
 
     private class LogHttpRequestInterceptor implements ClientHttpRequestInterceptor {
 
+        @SneakyThrows
         @Override
         public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution) {
             ClientHttpResponse response = null;
@@ -78,8 +80,8 @@ public class RestTemplateConfig {
                 traceRequest(request, subFlag, body);
 
                 request.getHeaders().add(Constants.FLAG, LogFactory.getFlag());
-                request.getHeaders().add("traceid", LogFactory.getFlag());
-                request.getHeaders().add("spanid", subFlag);
+                request.getHeaders().add(Constants.TRACE_ID, LogFactory.getFlag());
+                request.getHeaders().add(Constants.SPAN_ID, subFlag);
 
                 response = execution.execute(request, body);
 
@@ -100,11 +102,11 @@ public class RestTemplateConfig {
 
         private void traceRequest(HttpRequest request, String subFlag, byte[] body) throws IOException {
             REQ_LOGGER.info("class=LogHttpRequestInterceptor||method=traceRequest||remoteRequest||url={}||method={}||headers={}||body={}||subFlag={}",
-                    request.getURI(), request.getMethod(), JSON.toJSONString(request.getHeaders()), new String(body, "UTF-8"), subFlag);
+                    request.getURI(), request.getMethod(), JSON.toJSONString(request.getHeaders()), new String(body, StandardCharsets.UTF_8), subFlag);
         }
 
         private void traceResponse(HttpRequest request, ClientHttpResponse response, IOException exception,
-                                   String subFlag, long nanoTime) throws IOException {
+                                   String subFlag, long nanoTime) throws IOException, ThirdPartRemoteException {
             String url = simpleUrl(request);
             StringBuilder inputStringBuilder = new StringBuilder();
             if (response == null) {
@@ -116,7 +118,7 @@ public class RestTemplateConfig {
 
             try {
                 try (BufferedReader bufferedReader = new BufferedReader(
-                    new InputStreamReader(response.getBody(), "UTF-8"))) {
+                    new InputStreamReader(response.getBody(), StandardCharsets.UTF_8))) {
 
                     boolean first = true;
                     String line = bufferedReader.readLine();

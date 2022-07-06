@@ -99,6 +99,7 @@ public class ESDataTempBean extends BaseESPO implements CollectBean  {
      */
     private boolean             sendToN9e = false;
 
+    @Override
     public String getKey() {
         return getKeyPre() + valueName;
     }

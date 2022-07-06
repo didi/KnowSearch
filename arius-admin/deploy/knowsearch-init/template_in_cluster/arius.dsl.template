@@ -6,16 +6,11 @@
     "settings":{
         "index":{
             "number_of_shards":"4",
-            "routing":{
-                "allocation":{
-                    "include":{
-                        "rack":""
-                    }
-                }
-            },
             "mapping":{
                 "single_type":"true"
-            }
+            },
+            "number_of_replicas":"1",
+            "refresh_interval": "1s"
         }
     },
     "mappings":{
@@ -179,6 +174,9 @@
                 "type":"keyword"
             },
             "appid":{
+                "type":"long"
+            },
+             "projectId":{
                 "type":"long"
             },
             "queryLimit":{

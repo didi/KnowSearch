@@ -1,18 +1,20 @@
 package com.didichuxing.datachannel.arius.admin.core.service.cluster.physic;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Plugin;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyConditionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterSettingDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.RoleCluster;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 
+/**
+ * @author ohushenglin_v
+ * @date 2022-05-30
+ */
 public interface ClusterPhyService {
 
     /**
@@ -21,15 +23,16 @@ public interface ClusterPhyService {
      * @return 集群列表
      *
      */
-    List<ClusterPhy> listClustersByCondt(ESClusterDTO params);
+    List<ClusterPhy> listClustersByCondt(ClusterPhyDTO params);
 
     /**
      * 删除物理集群
+     *
      * @param clusterId 集群id
-     * @param operator 操作人
+     * @param projectId
      * @return 成功 true 失败 false
      */
-    Result<Boolean> deleteClusterById(Integer clusterId, String operator);
+    Result<Boolean> deleteClusterById(Integer clusterId, Integer projectId);
 
     /**
      * 新建物理集群
@@ -37,7 +40,7 @@ public interface ClusterPhyService {
      * @param operator 操作人
      * @return 成功 true 失败 false
      */
-    Result<Boolean> createCluster(ESClusterDTO param, String operator);
+    Result<Boolean> createCluster(ClusterPhyDTO param, String operator);
 
     /**
      * 编辑物理集群信息
@@ -46,7 +49,7 @@ public interface ClusterPhyService {
      * @return 成功 true 失败 false
      *
      */
-    Result<Boolean> editCluster(ESClusterDTO param, String operator);
+    Result<Boolean> editCluster(ClusterPhyDTO param, String operator);
 
     /**
      * 根据集群名字查询集群
@@ -57,8 +60,9 @@ public interface ClusterPhyService {
 
     /**
      * 更新物理集群插件列表
-     * @param pluginIds 插件id列表
+     * @param pluginIds    插件id列表
      * @param phyClusterId 物理集群id
+     * @return {@link Result}<{@link Void}>
      */
     Result<Void> updatePluginIdsById(String pluginIds, Integer phyClusterId);
 
@@ -67,7 +71,13 @@ public interface ClusterPhyService {
      * @return 集群列表,如果没有返回空列表
      */
     List<ClusterPhy> listAllClusters();
-    List<String>  listAllClusterNameList();
+
+    /**
+     * 获取所有集群名称列表
+     *
+     * @return {@link List}<{@link String}>
+     */
+    List<String> listClusterNames();
 
     /**
      * 根据names列出所有集群
@@ -84,45 +94,6 @@ public interface ClusterPhyService {
     boolean isClusterExists(String clusterName);
 
     /**
-     * 集群是否存在于列表中
-     * @param list 集群列表
-     * @param clusterName 集群名字
-     * @return
-     */
-    boolean isClusterExistsByList(List<ClusterPhy> list, String clusterName);
-    /**
-     * rack是否存在
-     *
-     * @param cluster 集群名字
-     * @param racks   rack名字  支持逗号间隔
-     * @return true 存在
-     */
-    default boolean isRacksExists(String cluster, String racks) {
-        return true;
-    }
-
-    /**
-     * 获取集群全部的rack
-     * @param cluster cluster
-     * @return set
-     */
-    Set<String> getClusterRacks(String cluster);
-
-    /**
-     * 获取集群热存Rack列表
-     * @param cluster 集群名称
-     * @return
-     */
-    Set<String> listHotRacks(String cluster);
-
-    /**
-     * 获取冷存Rack列表
-     * @param cluster 集群名称
-     * @return
-     */
-    Set<String> listColdRacks(String cluster);
-
-    /**
      * 获取集群插件列表
      * @param cluster 集群名称
      * @return
@@ -137,27 +108,13 @@ public interface ClusterPhyService {
     ClusterPhy getClusterById(Integer phyClusterId);
 
     /**
-     * 获取写节点的个数
-     * @param cluster 集群
-     * @return count
-     */
-    int getWriteClientCount(String cluster);
-
-    /**
      * 确保集群配置了DCDR的远端集群地址，如果没有配置尝试配置
      * @param cluster 集群
      * @param remoteCluster 远端集群
      * @throws ESOperateException
      * @return
      */
-    boolean ensureDcdrRemoteCluster(String cluster, String remoteCluster) throws ESOperateException;
-
-    /**
-     * 获取物理集群角色
-     * @param clusterId  物理集群ID
-     * @return 物理集群的角色列表
-     */
-    List<RoleCluster> listPhysicClusterRoles(Integer clusterId);
+    boolean ensureDCDRRemoteCluster(String cluster, String remoteCluster) throws ESOperateException;
 
     /**
      * 更新集群的动态配置信息
@@ -175,6 +132,8 @@ public interface ClusterPhyService {
 
     /**
      * 模糊分页查询物理集群列表信息，仅获取部分属性
+     * @param param 参数
+     * @return {@link List}<{@link ClusterPhy}>
      */
     List<ClusterPhy> pagingGetClusterPhyByCondition(ClusterPhyConditionDTO param);
 
@@ -186,19 +145,10 @@ public interface ClusterPhyService {
     Long fuzzyClusterPhyHitByCondition(ClusterPhyConditionDTO param);
 
     /**
-     * 获取集群rack的信息,http es 地址
-     * @param addresses client地址
-     * @param password client连接需要的密码
-     * @return 需要添加的rack列表
+     * 是否存在绑定指定安装包的集群
+     *
+     * @param packageId 安装包名
+     * @return true or false
      */
-    Result<Set<String>> getClusterRackByHttpAddress(String addresses, String password);
-
-    /**
-     * 获取指定rack的磁盘可使用的磁盘大小
-     * @param clusterPhyName 物理集群名称
-     * @param racks 指定的rack列表，用逗号隔开的字符串
-     * @param allocationInfoOfRack rack对应的磁盘使用总大小
-     * @return 指定rack的总的磁盘大小，单位是字节数目
-     */
-    Float getSurplusDiskSizeOfRacks(String clusterPhyName, String racks, Map</*rack信息*/String, /*rack对应的总磁盘大小*/Float> allocationInfoOfRack);
+    boolean isClusterExistsByPackageId(Long packageId);
 }

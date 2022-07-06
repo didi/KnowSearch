@@ -6,6 +6,7 @@ import java.util.Set;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterLogicConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterLogicPO;
 
 /**
@@ -17,6 +18,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterLog
 public interface LogicClusterDAO {
 
     List<ClusterLogicPO> listByCondition(ClusterLogicPO param);
+
+    List<ClusterLogicPO> listByNameAndProjectId(@Param("name")String name,@Param("projectId")Integer projectId);
 
     int insert(ClusterLogicPO param);
 
@@ -32,16 +35,16 @@ public interface LogicClusterDAO {
 
     ClusterLogicPO getLastCommon();
 
-    List<ClusterLogicPO> listByAppId(Integer appId);
+    List<ClusterLogicPO> listByProjectId(@Param("projectId") Integer projectId);
 
     List<ClusterLogicPO> listAll();
 
     List<ClusterLogicPO> listByResponsible(String responsible);
 
-    List<ClusterLogicPO> pagingByCondition(@Param("name") String name,  @Param("appId") Integer appId,
-                                           @Param("type") Integer type, @Param("health") Integer health,
-                                           @Param("from") Long from,    @Param("size") Long size,
-                                           @Param("sortTerm") String sortTerm, @Param("sortType") String sortType);
+
+
+    List<ClusterLogicPO> pagingByCondition(ClusterLogicConditionDTO param);
 
     Long getTotalHitByCondition(ClusterLogicPO param);
+    Integer getProjectIdById(@Param("resourceId") Long id);
 }

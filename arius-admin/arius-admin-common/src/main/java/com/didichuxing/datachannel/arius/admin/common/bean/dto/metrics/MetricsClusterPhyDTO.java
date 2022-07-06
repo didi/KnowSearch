@@ -19,8 +19,11 @@ import lombok.NoArgsConstructor;
 @ApiModel(description = "指标信息")
 public class MetricsClusterPhyDTO extends BaseDTO {
 
-    @ApiModelProperty("集群名称")
+    @ApiModelProperty("物理集群名称")
     private String       clusterPhyName;
+
+    @ApiModelProperty("逻辑集群名称")
+    private String       clusterLogicName;
 
     @ApiModelProperty("开始时间")
     private Long         startTime;
@@ -36,4 +39,16 @@ public class MetricsClusterPhyDTO extends BaseDTO {
 
     @ApiModelProperty("Top-Level:5,10,15,20")
     private Integer      topNu;
+
+    @ApiModelProperty("Top计算时间步长:1,5,10,15")
+    private Integer      topTimeStep;
+
+    @ApiModelProperty("Top计算方式:max,avg")
+    private String      topMethod;
+
+    /**
+     * 逻辑集群下的节点名，索引名，索引模板名
+     */
+    private List<String> itemNamesUnderClusterLogic;
+
 }

@@ -6,7 +6,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.alias.Co
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.alias.ConsoleLogicTemplateDeleteAliasesDTO;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateAlias;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithPhyTemplates;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyAlias;
 
 import java.util.List;
@@ -23,7 +23,7 @@ public interface TemplateLogicAliasesManager {
      * 获取别名
      * @return list
      */
-    List<IndexTemplateAlias> listAlias(List<IndexTemplateLogicWithPhyTemplates> templateLogicList);
+    List<IndexTemplateAlias> listAlias(List<IndexTemplateWithPhyTemplates> templateLogicList);
 
     /**
      * 获取别名
@@ -64,11 +64,11 @@ public interface TemplateLogicAliasesManager {
     Result<Void> deleteTemplateAliases(ConsoleLogicTemplateDeleteAliasesDTO deleteAliasesDTO, String operator);
 
     /**
-     * getAllTemplateAliasesByAppid
-     * @param appId
+     * getAllTemplateAliasesByProjectId
+     * @param projectId
      * @return
      */
-    Result<List<Tuple<String/*index*/, String/*aliases*/>>> getAllTemplateAliasesByAppid(Integer appId);
+    Result<List<Tuple<String/*index*/, String/*aliases*/>>> getAllTemplateAliasesByProjectId(Integer projectId);
 
     /**
      * 根据逻辑模板ID获取对应别名详情列表

@@ -1,15 +1,21 @@
 package com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.impl;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.esconfig.EsConfigActionEnum.ADD;
+import static com.didichuxing.datachannel.arius.admin.common.constant.esconfig.EsConfigActionEnum.EDIT;
+
+import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESConfigDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESZeusConfigDTO;
-import com.didichuxing.datachannel.arius.admin.common.constant.esconfig.EsConfigActionEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.esconfig.ESConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.esconfig.ESConfigPO;
+import com.didichuxing.datachannel.arius.admin.common.constant.esconfig.EsConfigActionEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESClusterConfigService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
@@ -17,18 +23,12 @@ import com.didichuxing.datachannel.arius.admin.persistence.mysql.ecm.ESClusterCo
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
+import java.util.List;
+import java.util.Objects;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.Objects;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.esconfig.EsConfigActionEnum.ADD;
-import static com.didichuxing.datachannel.arius.admin.common.constant.esconfig.EsConfigActionEnum.EDIT;
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum.ES_CLUSTER_CONFIG;
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.CLUSTER_CONFIG;
 
 /**
  * @author lyn
@@ -152,7 +152,11 @@ public class ESClusterConfigServiceImpl implements ESClusterConfigService {
         ESConfigPO esConfigPo = ConvertUtil.obj2Obj(param, ESConfigPO.class);
         boolean success = (1 == esClusterConfigDAO.insertSelective(esConfigPo));
         if (success) {
-            operateRecordService.save(ES_CLUSTER_CONFIG, CLUSTER_CONFIG, param.getId(), "", operator);
+            operateRecordService.save(
+                    new OperateRecord.Builder().operationTypeEnum(OperateTypeEnum.ES_CLUSTER_CONFIG_EDIT)
+                            .bizId(param.getId()).userOperation(operator).triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                            .build());
+            //operateRecordService.save(ES_CLUSTER_CONFIG, CLUSTER_CONFIG, param.getId(), "", operator);
             return Result.buildSucc(esConfigPo.getId());
         }
 
@@ -183,7 +187,13 @@ public class ESClusterConfigServiceImpl implements ESClusterConfigService {
     public Result<Void> deleteEsClusterConfig(Long configId, String operator) {
         boolean success = (1 == esClusterConfigDAO.delete(configId));
         if (success) {
-            operateRecordService.save(ES_CLUSTER_CONFIG, OperationEnum.DELETE, configId, "", operator);
+              operateRecordService.save(new OperateRecord.Builder()
+                              .operationTypeEnum(OperateTypeEnum.ES_CLUSTER_CONFIG_DELETE)
+                              .bizId(configId)
+                              .userOperation(operator)
+                              .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                      .build());
+            //operateRecordService.save(ES_CLUSTER_CONFIG, OperationEnum.DELETE, configId, "", operator);
             return Result.buildSucc();
         }
 
@@ -201,16 +211,24 @@ public class ESClusterConfigServiceImpl implements ESClusterConfigService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result<Void> editConfigDesc(ESConfigDTO param, String operator) {
-        Result<Void> result = checkEditConfigValid(param);
+    public Result<Void> editConfigDesc(ESConfigDTO param, String operator, Integer projectId) {
+        Result<Void> result = checkEditConfigValid(param,projectId);
         if (result.failed()) {
             return result;
         }
 
         try {
+            final ESConfigPO beforeChangeESConfig = esClusterConfigDAO.getValidEsConfigById(param.getId());
             boolean success = 1 == esClusterConfigDAO.update(ConvertUtil.obj2Obj(param, ESConfigPO.class));
+             final ESConfigPO afterChangeESConfig = esClusterConfigDAO.getValidEsConfigById(param.getId());
             if (success) {
-                operateRecordService.save(ES_CLUSTER_CONFIG, CLUSTER_CONFIG, param.getId(), "", operator);
+                operateRecordService.save(new OperateRecord.Builder()
+                                .content(ProjectUtils.getChangeByAfterAndBeforeJson(afterChangeESConfig,beforeChangeESConfig))
+                                .userOperation(operator)
+                                .operationTypeEnum(OperateTypeEnum.ES_CLUSTER_CONFIG_EDIT)
+                                .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                                .bizId(Math.toIntExact(param.getId()))
+                        .build());
                 return Result.buildSucc();
             }
 
@@ -323,7 +341,7 @@ public class ESClusterConfigServiceImpl implements ESClusterConfigService {
         return Result.buildSucc();
     }
 
-    private Result<Void> checkEditConfigValid(ESConfigDTO param) {
+    private Result<Void> checkEditConfigValid(ESConfigDTO param, Integer projectId) {
         if (AriusObjUtils.isNull(param.getId())) {
             return Result.buildParamIllegal("集群配置Id为空");
         }
@@ -340,7 +358,11 @@ public class ESClusterConfigServiceImpl implements ESClusterConfigService {
         if (esConfig.getConfigData().equals(param.getConfigData())) {
             return Result.buildParamIllegal("不允许修改集群配置数据信息");
         }
-
+        final Result<Void> result = ProjectUtils.checkProjectCorrectly(i -> i, projectId, projectId);
+        if (result.failed()){
+            return result;
+        }
+    
         return Result.buildSucc();
     }
 }

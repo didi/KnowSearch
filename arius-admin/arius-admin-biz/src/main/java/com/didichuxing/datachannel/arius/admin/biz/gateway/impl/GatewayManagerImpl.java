@@ -1,5 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.biz.gateway.impl;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.APP_DEFAULT_READ_AUTH_INDICES;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_COMMON_GROUP;
+
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.gateway.GatewayManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.TemplateSrvManager;
@@ -9,75 +12,87 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.GatewayHeartbe
 import com.didichuxing.datachannel.arius.admin.common.bean.common.IndexTemplatePhysicalConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.alias.IndexTemplateAliasDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.app.GatewayAppVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.gateway.GatewayNodeVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.ScrollDslTemplateRequest;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.ScrollDslTemplateResponse;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.gateway.GatewayClusterNode;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ESUser;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ProjectConfig;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ProjectTemplateAuth;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateAlias;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.gateway.GatewayClusterNodeVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.GatewayESUserVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.GatewayTemplateDeployInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.GatewayTemplatePhysicalDeployVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.GatewayTemplatePhysicalVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.GatewayTemplateVO;
-import com.didichuxing.datachannel.arius.admin.common.constant.app.AppTemplateAuthEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.App;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppConfig;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.app.AppTemplateAuth;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.ScrollDslTemplateRequest;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.ScrollDslTemplateResponse;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.gateway.GatewayNode;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateAlias;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogic;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithPhyTemplates;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.GatewaySqlConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectTemplateAuthEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.TemplateUtils;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppLogicTemplateAuthService;
-import com.didichuxing.datachannel.arius.admin.core.service.app.AppService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.gateway.GatewayService;
+import com.didichuxing.datachannel.arius.admin.core.service.project.ESUserService;
+import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectConfigService;
+import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectLogicTemplateAuthService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicAliasService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.physic.TemplatePhyService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.DslStatisService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
+import com.didiglobal.logi.security.service.ProjectService;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.servlet.http.HttpServletRequest;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.APP_DEFAULT_READ_AUTH_INDICES;
-import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_COMMON_GROUP;
-
+/**
+ * @author didi
+ */
 @Component
 public class GatewayManagerImpl implements GatewayManager {
 
     private static final ILog LOGGER                      = LogFactory.getLog(GatewayManagerImpl.class);
 
-    private static final String                 GATEWAY_GET_APP_TICKET      = "xTc59aY72";
-    private static final String                 GATEWAY_GET_APP_TICKET_NAME = "X-ARIUS-GATEWAY-TICKET";
 
     private static final int                    TIMEOUT                     = 10 * 60 * 1000;
+    
+    @Autowired
+    private ESUserService  esUserService;
+    @Autowired
+    private ProjectService projectService;
 
     @Autowired
-    private AppService appService;
+    private ProjectLogicTemplateAuthService projectLogicTemplateAuthService;
 
     @Autowired
-    private AppLogicTemplateAuthService appLogicTemplateAuthService;
+    private IndexTemplateService indexTemplateService;
 
     @Autowired
-    private TemplateLogicService templateLogicService;
-
-    @Autowired
-    private TemplatePhyService templatePhyService;
+    private IndexTemplatePhyService indexTemplatePhyService;
 
     @Autowired
     private TemplateLogicAliasesManager templateLogicAliasesManager;
@@ -95,8 +110,12 @@ public class GatewayManagerImpl implements GatewayManager {
     private TemplateSrvManager templateSrvManager;
 
     @Autowired
-    private TemplateLogicAliasService templateLogicAliasService;
-
+    private    TemplateLogicAliasService templateLogicAliasService;
+    @Autowired
+    private ProjectConfigService projectConfigService;
+    
+    private final Cache<String, Object> projectESUserListCache = CacheBuilder.newBuilder()
+            .expireAfterWrite(1, TimeUnit.MINUTES).maximumSize(100).build();
     @Override
     public Result<Void> heartbeat(GatewayHeartbeat heartbeat) {
         return gatewayService.heartbeat(heartbeat);
@@ -108,68 +127,122 @@ public class GatewayManagerImpl implements GatewayManager {
     }
 
     @Override
-    public Result<List<GatewayNodeVO>> getGatewayAliveNode(String clusterName) {
+    public Result<List<GatewayClusterNodeVO>> getGatewayAliveNode(String clusterName) {
         return Result
-                .buildSucc( ConvertUtil.list2List(gatewayService.getAliveNode(clusterName, TIMEOUT), GatewayNodeVO.class));
+                .buildSucc( ConvertUtil.list2List(gatewayService.getAliveNode(clusterName, TIMEOUT), GatewayClusterNodeVO.class));
     }
 
     @Override
     public Result<List<String>> getGatewayAliveNodeNames(String clusterName) {
-        List<GatewayNode> aliveNodes = gatewayService.getAliveNode(clusterName, TIMEOUT);
+        List<GatewayClusterNode> aliveNodes = gatewayService.getAliveNode(clusterName, TIMEOUT);
         List<String> list = Lists.newArrayList();
         if (aliveNodes != null && !aliveNodes.isEmpty()) {
-            list = aliveNodes.stream().map(GatewayNode::getHostName).collect(Collectors.toList());
+            list = aliveNodes.stream().map(GatewayClusterNode::getHostName).collect(Collectors.toList());
         }
         return Result.buildSucc(list);
     }
+    
+    private List<ESUser> listESUsers() {
+        final List<Integer> projectIds = projectService.getProjectBriefList().stream().map(ProjectBriefVO::getId)
+                .collect(Collectors.toList());
+        return esUserService.listESUsers(projectIds);
+    }
+    
+    private Map<Integer, String> listProject() {
+        return projectService.getProjectBriefList().stream()
+                .collect(Collectors.toMap(ProjectBriefVO::getId, ProjectBriefVO::getProjectName));
+    }
+    private Map<Integer, String> listProjectWithCache() {
+        try {
+            return (Map<Integer, String>) projectESUserListCache.get("listProject", this::listProject);
+        } catch (ExecutionException e) {
+            return listProject();
+        }
+    }
+    private List<ESUser> listESUserWithCache() {
+        try {
+            return (List<ESUser>) projectESUserListCache.get("listESUsers", this::listESUsers);
+        } catch (ExecutionException e) {
+            return listESUsers();
+        }
+    }
+    
+    private Map<Integer/*projectId*/, ProjectConfig> listProjectConfig() {
+       
+        return projectConfigService.projectId2ProjectConfigMap();
+    }
+    
+    private Map<Integer/*projectId*/, ProjectConfig> listProjectConfigWithCache() {
+        try {
+            return (Map<Integer/*projectId*/, ProjectConfig>) projectESUserListCache.get("listProjectConfig", this::listProjectConfig);
+        } catch (ExecutionException e) {
+            return listProjectConfig();
+        }
+    }
+   
 
     @Override
-    public Result<List<GatewayAppVO>> listApp(HttpServletRequest request) {
-        String ticket = request.getHeader(GATEWAY_GET_APP_TICKET_NAME);
-        if (!GATEWAY_GET_APP_TICKET.equals(ticket)) {
-            return Result.buildParamIllegal("ticket错误");
-        }
-
+    public Result<List<GatewayESUserVO>> listESUserByProject() {
         // 查询出所有的应用
-        List<App> apps = appService.listAppWithCache();
-
+        List<ESUser> esUsers = listESUserWithCache();
+        final Map<Integer/*projectId*/, /*es user*/List<Integer>> projectIdEsUsersMap = esUsers.stream().collect(
+                Collectors.groupingBy(ESUser::getProjectId, Collectors.mapping(ESUser::getId, Collectors.toList())));
+        final Map<Integer/*projectId*/, String/*projectName*/> projectId2ProjectNameMap = listProjectWithCache();
+        Map<Integer/*projectId*/, ProjectConfig> projectId2ProjectConfigMap = listProjectConfigWithCache();
+    
         // 查询出所有的权限
-        Map<Integer, Collection<AppTemplateAuth>> appId2AppTemplateAuthsMap = appLogicTemplateAuthService.getAllAppTemplateAuths();
-
-        // 查询出所有的配置
-        List<AppConfig> appConfigs = appService.listConfigWithCache();
-        Map<Integer, AppConfig> appId2AppConfigMap = ConvertUtil.list2Map(appConfigs, AppConfig::getAppId);
-
-        String defaultRIndices = ariusConfigInfoService.stringSetting(ARIUS_COMMON_GROUP,
+        Map<Integer/*projectId*/, Collection<ProjectTemplateAuth>> projectId2ProjectTemplateAuthsMap =
+                projectLogicTemplateAuthService.getAllProjectTemplateAuths();
+        Map<Integer/*es user*/, Collection<ProjectTemplateAuth>> esUser2ProjectTemplateAuthsMap=Maps.newHashMap();
+        Map<Integer/*es user*/,String/*projectName*/> esUser2ProjectNameMap=Maps.newHashMap();
+        Map<Integer/*es user*/, ProjectConfig> esUser2ESUserConfigMap = Maps.newHashMap();
+        //转换
+        for (Entry<Integer, List<Integer>> projectIdESUsersEntry : projectIdEsUsersMap.entrySet()) {
+            final Integer projectId = projectIdESUsersEntry.getKey();
+            for (Integer esuser : projectIdESUsersEntry.getValue()) {
+                Optional.ofNullable(projectId2ProjectTemplateAuthsMap.get(projectId)).ifPresent(
+                        projectTemplateAuths -> esUser2ProjectTemplateAuthsMap.put(esuser, projectTemplateAuths));
+                Optional.ofNullable(projectId2ProjectNameMap.get(projectId))
+                        .ifPresent(projectName -> esUser2ProjectNameMap.put(esuser, projectName));
+                Optional.ofNullable(projectId2ProjectConfigMap.get(projectId))
+                        .ifPresent(projectConfig -> esUser2ESUserConfigMap.put(esuser, projectConfig));
+            }
+        }
+        String defaultIndices = ariusConfigInfoService.stringSetting(ARIUS_COMMON_GROUP,
                 APP_DEFAULT_READ_AUTH_INDICES, "");
 
-        Map<Integer, IndexTemplateLogic> templateId2IndexTemplateLogicMap = templateLogicService
+        Map<Integer/*id*/, IndexTemplate> templateId2IndexTemplateLogicMap = indexTemplateService
                 .getAllLogicTemplatesMap();
 
-        Map<Integer, List<String>> aliasMap = templateLogicAliasService.listAliasMapWithCache();
-
-        List<GatewayAppVO> appVOS = apps.parallelStream().map(app -> {
+        Map<Integer/*logicId*/, List<String>> aliasMap = templateLogicAliasService.listAliasMapWithCache();
+        
+        List<GatewayESUserVO> appVOList = esUsers.parallelStream().map(user -> {
             try {
-                return buildAppVO(app, appId2AppTemplateAuthsMap, appId2AppConfigMap,templateId2IndexTemplateLogicMap, defaultRIndices, aliasMap);
+                final GatewayESUserVO gatewayESUserVO = buildESUserVO(user, esUser2ProjectTemplateAuthsMap,
+                        esUser2ESUserConfigMap, templateId2IndexTemplateLogicMap, defaultIndices, aliasMap);
+                final Integer esUser = gatewayESUserVO.getId();
+                if (esUser2ProjectNameMap.containsKey(esUser)) {
+                    gatewayESUserVO.setName(esUser2ProjectNameMap.get(esUser));
+                }
+                return gatewayESUserVO;
             } catch (Exception e) {
                 LOGGER.warn("class=GatewayManagerImpl||method=listApp||errMsg={}||stackTrace={}", e.getMessage(), JSON.toJSONString(e.getStackTrace()), e);
             }
             return null;
         }).filter(Objects::nonNull).collect(Collectors.toList());
-
-        return Result.buildSucc(appVOS);
+        return Result.buildSucc(appVOList);
     }
 
     @Override
     public Result<Map<String, GatewayTemplatePhysicalVO>> getTemplateMap(String cluster) {
-        List<IndexTemplatePhy> indexTemplatePhysicals = templatePhyService
+        List<IndexTemplatePhy> indexTemplatePhysicalInfos = indexTemplatePhyService
                 .getNormalTemplateByCluster(cluster);
 
-        if (CollectionUtils.isEmpty(indexTemplatePhysicals)) {
+        if (CollectionUtils.isEmpty(indexTemplatePhysicalInfos)) {
             return Result.buildSucc( Maps.newHashMap());
         }
 
-        Map<Integer, IndexTemplateLogic> templateId2IndexTemplateLogicMap = templateLogicService
+        Map<Integer, IndexTemplate> templateId2IndexTemplateLogicMap = indexTemplateService
                 .getAllLogicTemplatesMap();
 
         List<IndexTemplateAlias> aliases = templateLogicAliasesManager.listAlias();
@@ -177,7 +250,7 @@ public class GatewayManagerImpl implements GatewayManager {
                 IndexTemplateAlias::getLogicId);
 
         Map<String, GatewayTemplatePhysicalVO> result = Maps.newHashMap();
-        for (IndexTemplatePhy templatePhysical : indexTemplatePhysicals) {
+        for (IndexTemplatePhy templatePhysical : indexTemplatePhysicalInfos) {
             try {
                 GatewayTemplatePhysicalVO templatePhysicalVO = ConvertUtil.obj2Obj(templatePhysical,
                         GatewayTemplatePhysicalVO.class);
@@ -205,8 +278,8 @@ public class GatewayManagerImpl implements GatewayManager {
 
     @Override
     public Result<Map<String, GatewayTemplateDeployInfoVO>> listDeployInfo(String dataCenter) {
-        List<IndexTemplateLogicWithPhyTemplates> logicWithPhysicals = templateLogicService
-                .getTemplateWithPhysicalByDataCenter(dataCenter);
+        List<IndexTemplateWithPhyTemplates> logicWithPhysicals = indexTemplateService
+                .listTemplateWithPhysicalByDataCenter(dataCenter);
 
         List<IndexTemplateAlias> logicWithAliases = templateLogicAliasesManager.listAlias(logicWithPhysicals);
         Multimap<Integer, IndexTemplateAlias> logicId2IndexTemplateAliasMultiMap = ConvertUtil
@@ -215,7 +288,7 @@ public class GatewayManagerImpl implements GatewayManager {
         List<String> pipelineClusterSet = templateSrvManager.getPhyClusterByOpenTemplateSrv(TemplateServiceEnum.TEMPLATE_PIPELINE.getCode());
 
         Map<String, GatewayTemplateDeployInfoVO> result = Maps.newHashMap();
-        for (IndexTemplateLogicWithPhyTemplates logicWithPhysical : logicWithPhysicals) {
+        for (IndexTemplateWithPhyTemplates logicWithPhysical : logicWithPhysicals) {
             if (logicWithPhysical.hasPhysicals()) {
                 try {
                     GatewayTemplateDeployInfoVO gatewayTemplateDeployInfoVO = buildGatewayTemplateDeployInfoVO(logicWithPhysical,
@@ -250,13 +323,22 @@ public class GatewayManagerImpl implements GatewayManager {
     }
 
     @Override
-    public Result<String> sqlExplain(String sql, Integer appId) {
-        return gatewayService.sqlOperate(sql, null, appId, GatewaySqlConstant.SQL_EXPLAIN);
+    public Result<String> sqlExplain(String sql, Integer projectId) {
+        if (projectId == null ||!esUserService.checkDefaultESUserByProject(projectId)) {
+            return Result.buildParamIllegal("对应的projectId字段非法");
+        }
+        final ESUser esUser = esUserService.getDefaultESUserByProject(projectId);
+        
+        return gatewayService.sqlOperate(sql, null, esUser, GatewaySqlConstant.SQL_EXPLAIN);
     }
 
     @Override
-    public Result<String> directSqlSearch(String sql, String phyClusterName, Integer appId) {
-        return gatewayService.sqlOperate(sql, phyClusterName, appId, GatewaySqlConstant.SQL_SEARCH);
+    public Result<String> directSqlSearch(String sql, String phyClusterName, Integer projectId) {
+        if (projectId == null ||!esUserService.checkDefaultESUserByProject(projectId)) {
+            return Result.buildParamIllegal("对应的projectId字段非法");
+        }
+         final ESUser esUser = esUserService.getDefaultESUserByProject(projectId);
+        return gatewayService.sqlOperate(sql, phyClusterName, esUser, GatewaySqlConstant.SQL_SEARCH);
     }
 
     /**************************************** private method *************************************************/
@@ -285,87 +367,94 @@ public class GatewayManagerImpl implements GatewayManager {
         return deployVO;
     }
 
-    private GatewayAppVO buildAppVO(
-            App app, Map<Integer, Collection<AppTemplateAuth>> appId2AppTemplateAuthsMap,
-            Map<Integer, AppConfig> appId2AppConfigMap,
-            Map<Integer, IndexTemplateLogic> templateId2IndexTemplateLogicMap,
+    private GatewayESUserVO buildESUserVO(
+            ESUser esUser, Map<Integer/*es user*/, Collection<ProjectTemplateAuth>> esUser2ProjectTemplateAuthsMap,
+            Map<Integer, ProjectConfig> esUser2ESUserConfigMap,
+            Map<Integer, IndexTemplate> templateId2IndexTemplateLogicMap,
             String defaultReadPermissionIndexes, Map<Integer, List<String>> aliasMap) {
 
-        GatewayAppVO gatewayAppVO = ConvertUtil.obj2Obj(app, GatewayAppVO.class);
+        GatewayESUserVO gatewayESUserVO = ConvertUtil.obj2Obj(esUser, GatewayESUserVO.class);
 
-        if (StringUtils.isBlank(gatewayAppVO.getDataCenter())) {
-            gatewayAppVO.setDataCenter("cn");
+        if (StringUtils.isBlank(gatewayESUserVO.getDataCenter())) {
+            gatewayESUserVO.setDataCenter("cn");
         }
 
-        if (StringUtils.isNotBlank(app.getIp())) {
-            gatewayAppVO.setIp(Lists.newArrayList(app.getIp().split(",")));
+        if (StringUtils.isNotBlank(esUser.getIp())) {
+            gatewayESUserVO.setIp(Lists.newArrayList(esUser.getIp().split(",")));
         } else {
-            gatewayAppVO.setIp(Lists.newArrayList());
+            gatewayESUserVO.setIp(Lists.newArrayList());
         }
 
-        gatewayAppVO.setIsRoot(app.getIsRoot());
-        if (AdminConstant.YES.equals(app.getIsRoot())) {
-            gatewayAppVO.setIndexExp(Lists.newArrayList("*"));
-            gatewayAppVO.setWIndexExp(Lists.newArrayList("*"));
+        gatewayESUserVO.setIsRoot(esUser.getIsRoot());
+        if (AdminConstant.YES.equals(esUser.getIsRoot())) {
+            gatewayESUserVO.setIndexExp(Lists.newArrayList("*"));
+            gatewayESUserVO.setWIndexExp(Lists.newArrayList("*"));
         } else {
             List<String> readPermissionIndexExpressions = new ArrayList<>();
             List<String> writePermissionIndexExpressions = new ArrayList<>();
 
-            if (StringUtils.isNotBlank(app.getIndexExp())) {
-                readPermissionIndexExpressions.addAll(Lists.newArrayList(app.getIndexExp().split(",")));
+            if (StringUtils.isNotBlank(esUser.getIndexExp())) {
+                readPermissionIndexExpressions.addAll(Lists.newArrayList(esUser.getIndexExp().split(",")));
             }
             readPermissionIndexExpressions.addAll( Arrays.asList(defaultReadPermissionIndexes.split(",")));
-
-            if (appId2AppTemplateAuthsMap.containsKey(app.getId())) {
-                Collection<AppTemplateAuth> templateAuthCollection = appId2AppTemplateAuthsMap.get(app.getId());
+            //判断key 是否属于该项目下的es user
+            if (esUser2ProjectTemplateAuthsMap.containsKey(esUser.getId())) {
+                //获取该项目下的es user
+                Collection<ProjectTemplateAuth> templateAuthCollection =
+                        esUser2ProjectTemplateAuthsMap.get(esUser.getId());
                 if (!templateAuthCollection.isEmpty()) {
-                    fetchPermissionIndexExpressions(app.getId(), templateAuthCollection, templateId2IndexTemplateLogicMap,aliasMap, readPermissionIndexExpressions,writePermissionIndexExpressions);
+                    
+                    fetchPermissionIndexExpressions(esUser.getId(), templateAuthCollection,
+                        templateId2IndexTemplateLogicMap,aliasMap, readPermissionIndexExpressions,writePermissionIndexExpressions);
                 } else {
-                    LOGGER.warn("class=GatewayManagerImpl||method=buildAppVO||appId={}||msg=app has no permission.", app.getId());
+                    LOGGER.warn("class=GatewayManagerImpl||method=buildAppVO||esUser={}||msg=esUser has no permission.",
+                            esUser.getId());
                 }
             }
 
-            gatewayAppVO.setIndexExp(readPermissionIndexExpressions);
-            gatewayAppVO.setWIndexExp(writePermissionIndexExpressions);
+            gatewayESUserVO.setIndexExp(readPermissionIndexExpressions);
+            gatewayESUserVO.setWIndexExp(writePermissionIndexExpressions);
         }
 
-        AppConfig config = appId2AppConfigMap.get(app.getId());
+        ProjectConfig config = esUser2ESUserConfigMap.get(esUser.getId());
         if (config != null) {
-            gatewayAppVO.setDslAnalyzeEnable(config.getDslAnalyzeEnable());
-            gatewayAppVO.setAggrAnalyzeEnable(config.getAggrAnalyzeEnable());
-            gatewayAppVO.setAnalyzeResponseEnable(config.getAnalyzeResponseEnable());
+            gatewayESUserVO.setDslAnalyzeEnable(config.getDslAnalyzeEnable());
+            gatewayESUserVO.setAggrAnalyzeEnable(config.getAggrAnalyzeEnable());
+            gatewayESUserVO.setAnalyzeResponseEnable(config.getAnalyzeResponseEnable());
         } else {
-            LOGGER.warn("class=GatewayManagerImpl||method=buildAppVO||appId={}||msg=app config is not exists.", app.getId());
+            LOGGER.warn("class=GatewayManagerImpl||method=buildAppVO||esUser={}||msg=esUser config is not exists.",
+                    esUser.getId());
         }
 
-        return gatewayAppVO;
+        return gatewayESUserVO;
     }
 
     /**
-     * 获取当前app所有读写权限索引列表
-     * @param appId appId
-     * @param appTemplateAuthCollection app模板权限集合
+     * 获取当前项目所有读写权限索引列表
+     * @param esUserId es user
+     * @param projectTemplateAuthCollection project模板权限集合
      * @param templateId2IndexTemplateLogicMap  模板Id跟模板详情映射
-     * @param indexExpressions  当前app读权限列表
-     * @param writeExpressions  当前app写权限列表
+     * @param indexExpressions  当前esUser读权限列表
+     * @param writeExpressions  当前esUser写权限列表
      */
-    private void fetchPermissionIndexExpressions(Integer appId, Collection<AppTemplateAuth> appTemplateAuthCollection,
-                                                 Map<Integer, IndexTemplateLogic> templateId2IndexTemplateLogicMap,
+    private void fetchPermissionIndexExpressions(Integer esUserId,
+                                                 Collection<ProjectTemplateAuth> projectTemplateAuthCollection,
+                                                 Map<Integer, IndexTemplate> templateId2IndexTemplateLogicMap,
                                                  Map<Integer, List<String>> aliasMap,
                                                  List<String> indexExpressions, List<String> writeExpressions) {
-        if (CollectionUtils.isNotEmpty(appTemplateAuthCollection)) {
-            appTemplateAuthCollection.stream().forEach(auth -> {
+        if (CollectionUtils.isNotEmpty(projectTemplateAuthCollection)) {
+            projectTemplateAuthCollection.stream().forEach(auth -> {
                 List<String> alias = aliasMap.getOrDefault(auth.getTemplateId(), new ArrayList<>(0));
                 String expression;
                 try {
                     expression = templateId2IndexTemplateLogicMap.get(auth.getTemplateId()).getExpression();
                 } catch (Exception e) {
-                    LOGGER.warn("class=GatewayManagerImpl||method=fetchPermissionIndexExpressions||appId={}||templateId={}||msg=template not exists.", appId, auth.getTemplateId());
+                    LOGGER.warn("class=GatewayManagerImpl||method=fetchPermissionIndexExpressions||projectId={}||templateId={}||msg=template not exists.", esUserId, auth.getTemplateId());
                     return;
                 }
                 indexExpressions.add(expression);
                 indexExpressions.addAll(alias);
-                if (AppTemplateAuthEnum.OWN.getCode().equals(auth.getType()) || AppTemplateAuthEnum.RW.getCode().equals(auth.getType())) {
+                if (ProjectTemplateAuthEnum.OWN.getCode().equals(auth.getType()) || ProjectTemplateAuthEnum.RW.getCode().equals(auth.getType())) {
                     writeExpressions.add(expression);
                     writeExpressions.addAll(alias);
                 }
@@ -373,7 +462,7 @@ public class GatewayManagerImpl implements GatewayManager {
         }
     }
 
-    private GatewayTemplateDeployInfoVO buildGatewayTemplateDeployInfoVO(IndexTemplateLogicWithPhyTemplates logicWithPhysical,
+    private GatewayTemplateDeployInfoVO buildGatewayTemplateDeployInfoVO(IndexTemplateWithPhyTemplates logicWithPhysical,
                                                                          Multimap<Integer, IndexTemplateAlias> logicId2IndexTemplateAliasMultiMap,
                                                                          List<String> pipelineClusterSet) {
         if(null == logicWithPhysical || null ==logicWithPhysical.getMasterPhyTemplate()){
@@ -401,11 +490,11 @@ public class GatewayManagerImpl implements GatewayManager {
         return deployInfoVO;
     }
 
-    private GatewayTemplatePhysicalDeployVO genMasterInfo(IndexTemplateLogicWithPhyTemplates logicWithPhysical) {
+    private GatewayTemplatePhysicalDeployVO genMasterInfo(IndexTemplateWithPhyTemplates logicWithPhysical) {
         return buildPhysicalDeployVO(logicWithPhysical.getMasterPhyTemplate());
     }
 
-    private List<GatewayTemplatePhysicalDeployVO> genSlaveInfos(IndexTemplateLogicWithPhyTemplates logicWithPhysical) {
+    private List<GatewayTemplatePhysicalDeployVO> genSlaveInfos(IndexTemplateWithPhyTemplates logicWithPhysical) {
         List<GatewayTemplatePhysicalDeployVO> slavesInfos = Lists.newArrayList();
         for (IndexTemplatePhy physical : logicWithPhysical.getPhysicals()) {
             if (physical.getRole().equals( TemplateDeployRoleEnum.MASTER.getCode())) {
