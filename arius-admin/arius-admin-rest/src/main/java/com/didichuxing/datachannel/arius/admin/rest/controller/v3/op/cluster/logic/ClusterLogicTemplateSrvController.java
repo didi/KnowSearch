@@ -2,7 +2,7 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.cluster.lo
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
-import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.TemplateSrvManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.TemplateSrvManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterTemplateSrvVO;
 import com.didiglobal.logi.security.util.HttpRequestUtil;

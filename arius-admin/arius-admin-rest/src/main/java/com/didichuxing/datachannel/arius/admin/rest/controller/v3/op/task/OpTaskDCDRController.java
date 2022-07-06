@@ -2,7 +2,7 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.task;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
-import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.dcdr.TemplateDCDRManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.dcdr.TemplateDCDRManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.DCDRMasterSlaveSwitchDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.WorkTaskVO;

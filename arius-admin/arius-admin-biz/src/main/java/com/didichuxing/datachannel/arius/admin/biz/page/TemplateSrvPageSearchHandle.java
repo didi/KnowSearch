@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.biz.page;
 
-import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.TemplateSrvManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.TemplateSrvManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.PageDTO;

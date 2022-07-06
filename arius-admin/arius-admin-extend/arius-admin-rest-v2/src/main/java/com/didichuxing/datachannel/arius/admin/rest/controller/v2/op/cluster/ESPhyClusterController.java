@@ -4,8 +4,8 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion
 
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterNodeManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
-import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.expire.ExpireManager;
-import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.precreate.PreCreateManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.expire.ExpireManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.precreate.PreCreateManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterRoleHostDTO;

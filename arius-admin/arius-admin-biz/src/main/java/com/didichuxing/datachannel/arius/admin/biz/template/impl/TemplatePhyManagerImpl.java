@@ -15,8 +15,8 @@ import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOpe
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyManager;
-import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.indexplan.IndexPlanManager;
-import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.precreate.PreCreateManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.indexplan.IndexPlanManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.precreate.PreCreateManager;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.IndexTemplatePhysicalConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;

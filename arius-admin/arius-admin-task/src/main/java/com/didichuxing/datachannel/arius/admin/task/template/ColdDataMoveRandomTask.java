@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.task.template;
 
-import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.cold.ColdManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.cold.ColdManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.task.BaseConcurrentClusterTask;
 import com.didichuxing.datachannel.arius.admin.task.TaskConcurrentConstants;

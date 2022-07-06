@@ -5,8 +5,8 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfi
 
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.gateway.GatewayManager;
-import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.TemplateSrvManager;
-import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.aliases.TemplateLogicAliasManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.TemplateSrvManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.aliases.TemplateLogicAliasManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Alias;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.GatewayHeartbeat;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.IndexTemplatePhysicalConfig;

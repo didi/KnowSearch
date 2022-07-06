@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.task.template;
 
 
-import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.expire.ExpireManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.expire.ExpireManager;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.task.BaseConcurrentClusterTask;
 import com.didichuxing.datachannel.arius.admin.task.TaskConcurrentConstants;

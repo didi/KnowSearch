@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.task.template.new_srv;
 
-import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.cold.ColdManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.cold.ColdManager;
 import com.didichuxing.datachannel.arius.admin.task.BaseConcurrentTemplateTask;
 import com.didiglobal.logi.job.common.TaskResult;
 import com.didiglobal.logi.job.core.job.Job;

@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.biz.listener;
 
-import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.pipeline.PipelineManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.pipeline.PipelineManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.event.template.LogicTemplateModifyEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.template.PhysicalTemplateAddEvent;
