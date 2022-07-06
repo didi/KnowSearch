@@ -494,7 +494,7 @@ public class IndicesManagerImpl implements IndicesManager {
             queryProjectId = projectId;
         }
         Tuple<Long, List<IndexCatCell>> totalHitAndIndexCatCellListTuple = esIndexCatService
-            .syncGetCatIndexInfo(cluster, indexName, null, queryProjectId, 0L, 1L, DEFAULT_SORT_TERM, true);
+            .syncGetCatIndexInfo(cluster, indexName, null,null, queryProjectId, 0L, 1L, DEFAULT_SORT_TERM, true);
         if (null == totalHitAndIndexCatCellListTuple
             || CollectionUtils.isEmpty(totalHitAndIndexCatCellListTuple.getV2())) {
             return Result.buildFail("获取单个索引详情信息失败");

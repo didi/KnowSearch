@@ -5,6 +5,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResu
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.IndexCatCell;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.IndicesDistributionVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexCatCellVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.index.IndexStatusEnum;
@@ -14,37 +15,39 @@ import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexCatService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.google.common.collect.Lists;
-import java.util.List;
-import java.util.Map;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+import java.util.Map;
+
+/**
+ * 快捷命令索引分布.
+ *
+ * @ClassName QuickCommandIndicesDistributionPageSearchHandle
+ * @Author gyp
+ * @Date 2022/7/6
+ * @Version 1.0
+ */
 @Component
-public class IndexPageSearchHandle extends AbstractPageSearchHandle<IndexQueryDTO, IndexCatCellVO> {
+public class QuickCommandIndicesDistributionPageSearchHandle extends AbstractPageSearchHandle<IndexQueryDTO, IndicesDistributionVO> {
     private static final String DEFAULT_SORT_TERM = "timestamp";
 
     @Autowired
     private ESIndexCatService   esIndexCatService;
 
     @Autowired
-    private ESIndexService      esIndexService;
+    private ESIndexService esIndexService;
     private static final FutureUtil<Void> INDEX_BUILD_FUTURE = FutureUtil.init("INDEX_BUILD_FUTURE", 10, 10, 100);
 
 
     @Override
     protected Result<Boolean> checkCondition(IndexQueryDTO condition, Integer projectId) {
-
-        if (StringUtils.isNotBlank(condition.getHealth()) && !IndexStatusEnum.isStatusExit(condition.getHealth())) {
-            return Result.buildParamIllegal(String.format("健康状态%s非法", condition.getHealth()));
+        if (StringUtils.isBlank(condition.getCluster())) {
+            return Result.buildParamIllegal(String.format("集群名称不能为空"));
         }
-
-        String indexName = condition.getIndex();
-        if (!AriusObjUtils.isBlack(indexName) && (indexName.startsWith("*") || indexName.startsWith("?"))) {
-            return Result.buildParamIllegal("索引名称不允许带类似*, ?等通配符查询");
-        }
-
         return Result.buildSucc(true);
     }
 
@@ -63,34 +66,26 @@ public class IndexPageSearchHandle extends AbstractPageSearchHandle<IndexQueryDT
         }
     }
 
-    /**
-     * 获取索引Cat/index信息
-     *
-     * 业务上限制ES深分页(不考虑10000条之后的数据), 由前端限制
-     */
     @Override
-    protected PaginationResult<IndexCatCellVO> buildPageData(IndexQueryDTO condition, Integer projectId) {
+    protected PaginationResult<IndicesDistributionVO> buildPageData(IndexQueryDTO condition, Integer projectId) {
         try {
             String queryCluster = condition.getCluster();
             // 使用超级项目访问时，queryProjectId为null
             Integer queryProjectId = null;
-            if (!AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
-                queryProjectId = projectId;
-            }
             Tuple<Long, List<IndexCatCell>> totalHitAndIndexCatCellListTuple = esIndexCatService.syncGetCatIndexInfo(
-                queryCluster, condition.getIndex(), condition.getHealth(),condition.getStatus(), queryProjectId,
-                (condition.getPage() - 1) * condition.getSize(), condition.getSize(), condition.getSortTerm(),
-                condition.getOrderByDesc());
+                    queryCluster, condition.getIndex(), condition.getHealth(),condition.getStatus(), queryProjectId,
+                    (condition.getPage() - 1) * condition.getSize(), condition.getSize(), condition.getSortTerm(),
+                    condition.getOrderByDesc());
             if (null == totalHitAndIndexCatCellListTuple) {
                 LOGGER.warn("class=IndicesPageSearchHandle||method=getIndexCatCellsFromES||clusters={}||index={}||"
-                            + "errMsg=get empty index cat info from es",
-                    condition.getCluster(), condition.getIndex());
+                                + "errMsg=get empty index cat info from es",
+                        condition.getCluster(), condition.getIndex());
                 return PaginationResult.buildSucc(Lists.newArrayList(), 0, condition.getPage(), condition.getSize());
             }
 
             //设置索引阻塞信息
-            List<IndexCatCell> finalIndexCatCellList = batchFetchIndexAliasesAndBlockInfo(totalHitAndIndexCatCellListTuple.getV2());
-            List<IndexCatCellVO> indexCatCellVOList = ConvertUtil.list2List(finalIndexCatCellList, IndexCatCellVO.class);
+//            List<IndexCatCell> finalIndexCatCellList = batchFetchIndexAliasesAndBlockInfo(totalHitAndIndexCatCellListTuple.getV2());
+            List<IndicesDistributionVO> indexCatCellVOList = ConvertUtil.list2List(totalHitAndIndexCatCellListTuple.getV2(), IndicesDistributionVO.class);
 
             return PaginationResult.buildSucc(indexCatCellVOList, totalHitAndIndexCatCellListTuple.getV1(),
                     condition.getPage(), condition.getSize());

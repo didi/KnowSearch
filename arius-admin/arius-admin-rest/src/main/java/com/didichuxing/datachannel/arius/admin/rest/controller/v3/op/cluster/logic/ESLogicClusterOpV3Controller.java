@@ -97,15 +97,6 @@ public class ESLogicClusterOpV3Controller {
                 clusterLogicManager.getClusterLogic(clusterLogicId, HttpRequestUtil.getProjectId(request)));
     }
     
-    @GetMapping("/{logicClusterId}/{templateSize}/sizeCheck")
-    @ResponseBody
-    @ApiOperation(value = "校验模板大小资源是否充足,主要是为了避免用户反复的进行模板创建操作，对于申请的权限做一定的限制")
-    public Result<Void> checkTemplateValidForCreate(@PathVariable("logicClusterId") Long logicClusterId,
-                                                    @PathVariable("templateSize") String templateSize) {
-
-        return Result.buildSucc();
-    }
-    
     @PutMapping()
     @ResponseBody
     @ApiOperation(value = "编辑逻辑集群接口")
