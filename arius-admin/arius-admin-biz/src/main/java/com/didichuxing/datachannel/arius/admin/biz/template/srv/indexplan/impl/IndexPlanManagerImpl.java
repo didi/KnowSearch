@@ -44,8 +44,8 @@ import org.springframework.stereotype.Service;
 @Service("newIndexPlanManagerImpl")
 public class IndexPlanManagerImpl extends BaseTemplateSrvImpl implements IndexPlanManager {
 
-    private final static Integer singleShardMaxSize = 50;
-    private final static Integer singleShardRecommendSize = 30;
+    private final static Integer SINGLE_SHARD_MAX_SIZE       = 50;
+    private final static Integer SINGLE_SHARD_RECOMMEND_SIZE = 30;
     
     /**
      * (key, value) = (模板id, 该模版对应索引近七天某一天占用磁盘容量最大值)
@@ -92,10 +92,10 @@ public class IndexPlanManagerImpl extends BaseTemplateSrvImpl implements IndexPl
             long curSizeInBytes = indexNodes.getPrimaries().getStore().getSizeInBytes();
             double curSizeInGb = curSizeInBytes * BYTE_TO_G;
 
-            if(curSizeInGb >= primaryShardCnt * singleShardMaxSize) {
+            if(curSizeInGb >= primaryShardCnt * SINGLE_SHARD_MAX_SIZE) {
                 // 如果大于（主shard个数 * 推荐的单个shard大小50G），直接升版本
                 updateTemplateVersion(templatePhy);
-            } else if(curSizeInGb >= primaryShardCnt * singleShardRecommendSize && TemplateUtils.isSaveByDay(template.getDateFormat())){
+            } else if(curSizeInGb >= primaryShardCnt * SINGLE_SHARD_RECOMMEND_SIZE && TemplateUtils.isSaveByDay(template.getDateFormat())){
                 // 如果大于（主shard个数 * 推荐的单个shard大小30G），并且索引模版是按天创建索引
                 // 获取该索引模版对应索引近7天占用磁盘的最大值
                 Long sizeInBytesMax = getMaxStoreInRecentSevenDayByTemplatePhyId(templatePhy.getId());
@@ -223,7 +223,7 @@ public class IndexPlanManagerImpl extends BaseTemplateSrvImpl implements IndexPl
         String[] indexNameSplits = indexNames.split(",");
 
         List<String> indexNameList = Lists.newArrayList();
-        Map<String/*不包括版本的索引名字*/, Long/*索引占用磁盘的大小*/> indexStoreSizeInBytesMap = new HashMap<>();
+        Map<String/*不包括版本的索引名字*/, Long/*索引占用磁盘的大小*/> indexStoreSizeInBytesMap = Maps.newHashMap();
         for (String indexName : indexNameSplits) {
             // 当天某个索引，可能有多个版本（xxx-2021-10-10、xxx-2021-10-10-v2），所以用*来匹配
             indexNameList.add(indexName + "*");

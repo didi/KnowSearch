@@ -126,4 +126,21 @@ public interface TemplateSrvManager {
      */
     Result<Boolean> delTemplateSrvForClusterLogic(Long clusterLogicId, String templateSrvId, String operator,
                                                   Integer projectId);
+    
+    
+        /**
+     * 判断物理集群是否打开了某个索引服务
+     * @param phyCluster        物理集群名称
+     * @param srvId
+     * @return
+     */
+    boolean isPhyClusterOpenTemplateSrv(String phyCluster, int srvId);
+    
+    /**
+     * 查询开启了某个索引服务的物理集群列表
+     *
+     * @param srvId
+     * @return
+     */
+    List<String> getPhyClusterByOpenTemplateSrv(int srvId);
 }

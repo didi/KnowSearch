@@ -599,4 +599,47 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
 
         return Result.buildSucc(templateServices);
     }
+    
+    /**
+     * 判断物理集群是否打开了某个索引服务
+     *
+     * @param phyCluster 物理集群名称
+     * @param srvId
+     * @return
+     */
+        @Override
+    public boolean isPhyClusterOpenTemplateSrv(String phyCluster, int srvId) {
+        try {
+            Result<List<ClusterTemplateSrv>> result =clusterPhyService. getPhyClusterTemplateSrv(phyCluster);
+            if (null == result || result.failed()) {
+                return false;
+            }
+
+            List<ClusterTemplateSrv> clusterTemplateSrvs = result.getData();
+            for (ClusterTemplateSrv templateSrv : clusterTemplateSrvs) {
+                if (srvId == templateSrv.getServiceId()) {
+                    return true;
+                }
+            }
+
+            return false;
+        } catch (Exception e) {
+            LOGGER.warn("class=TemplateSrvManager||method=isPhyClusterOpenTemplateSrv||phyCluster={}||srvId={}",
+                phyCluster, srvId, e);
+
+            return true;
+        }
+    }
+    
+    /**
+     * 查询开启了某个索引服务的物理集群列表
+     *
+     * @param srvId
+     * @return
+     */
+      @Override
+    public List<String> getPhyClusterByOpenTemplateSrv(int srvId) {
+        List<ClusterPhy> clusterPhies = clusterPhyService.listAllClusters();
+        return getPhyClusterByOpenTemplateSrv(clusterPhies, srvId);
+    }
 }
