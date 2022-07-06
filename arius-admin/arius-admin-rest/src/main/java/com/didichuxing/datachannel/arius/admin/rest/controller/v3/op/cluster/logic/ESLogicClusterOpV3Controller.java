@@ -71,15 +71,6 @@ public class ESLogicClusterOpV3Controller {
         return clusterLogicManager.getProjectLogicClusterInfoByType(HttpRequestUtil.getProjectId(request), type);
     }
 
-    @GetMapping("/{type}/can-create-template")
-    @ResponseBody
-    @ApiOperation(value = "根据项目和集群类型获取逻辑集群(项目对其有管理权限)名称列表")
-    public Result<List<ClusterLogicVO>> getLogicClusterByType(HttpServletRequest request,
-                                                                     @PathVariable Integer type) {
-        //这里筛选出可以创建模版的逻辑集群；
-        return clusterLogicManager.listLogicClusterThatCanCreateTemplateByProjectAndType(HttpRequestUtil.getProjectId(request), type);
-    }
-
     @PostMapping("/page")
     @ResponseBody
     @ApiOperation(value = "条件获取逻辑集群列表")
@@ -96,14 +87,12 @@ public class ESLogicClusterOpV3Controller {
         return Result.buildSucc(
                 clusterLogicManager.getClusterLogic(clusterLogicId, HttpRequestUtil.getProjectId(request)));
     }
-    
-    @GetMapping("/{logicClusterId}/{templateSize}/sizeCheck")
-    @ResponseBody
-    @ApiOperation(value = "校验模板大小资源是否充足,主要是为了避免用户反复的进行模板创建操作，对于申请的权限做一定的限制")
-    public Result<Void> checkTemplateValidForCreate(@PathVariable("logicClusterId") Long logicClusterId,
-                                                    @PathVariable("templateSize") String templateSize) {
 
-        return Result.buildSucc();
+    @GetMapping("/{clusterLogicId}/check-region-not-empty")
+    @ResponseBody
+    @ApiOperation(value = "检查逻辑集群所拥有的region是否不为空")
+    public Result<Boolean> checkLogicClusterRegionIsNotEmpty(@PathVariable("clusterLogicId") Long clusterLogicId) {
+        return clusterLogicManager.checkLogicClusterRegionIsNotEmpty(clusterLogicId);
     }
     
     @PutMapping()
