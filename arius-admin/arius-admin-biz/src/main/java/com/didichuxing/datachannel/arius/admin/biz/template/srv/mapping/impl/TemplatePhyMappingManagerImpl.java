@@ -1,9 +1,9 @@
-package com.didichuxing.datachannel.arius.admin.biz.template.new_srv.mapping.impl;
+package com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
-import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.mapping.TemplatePhyMappingManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping.TemplatePhyMappingManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminESOpRetryConstants;

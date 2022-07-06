@@ -1,8 +1,8 @@
-package com.didichuxing.datachannel.arius.admin.biz.template.new_srv.aliases.impl;
+package com.didichuxing.datachannel.arius.admin.biz.template.srv.aliases.impl;
 
-import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.aliases.TemplateLogicAliasesManager;
-import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.aliases.TemplatePhyAliasesManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.base.impl.BaseTemplateSrvImpl;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.aliases.TemplateLogicAliasesManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.aliases.TemplatePhyAliasesManager;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;

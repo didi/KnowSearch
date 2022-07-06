@@ -1,4 +1,4 @@
-package com.didichuxing.datachannel.arius.admin.biz.template.new_srv.dcdr;
+package com.didichuxing.datachannel.arius.admin.biz.template.srv.dcdr;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum.MASTER;
 import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum.SLAVE;

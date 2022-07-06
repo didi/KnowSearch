@@ -1,7 +1,7 @@
-package com.didichuxing.datachannel.arius.admin.biz.template.new_srv.aliases.impl;
+package com.didichuxing.datachannel.arius.admin.biz.template.srv.aliases.impl;
 
 import com.alibaba.fastjson.JSONObject;
-import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.aliases.TemplatePhyAliasesManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.aliases.TemplatePhyAliasesManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyAlias;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyAliases;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminESOpRetryConstants;

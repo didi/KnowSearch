@@ -1,8 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.new_srv.precreate.impl;
 
 import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.base.impl.BaseTemplateSrvImpl;
-import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.dcdr.TemplateDCDRManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.precreate.PreCreateManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.dcdr.TemplateDCDRManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;

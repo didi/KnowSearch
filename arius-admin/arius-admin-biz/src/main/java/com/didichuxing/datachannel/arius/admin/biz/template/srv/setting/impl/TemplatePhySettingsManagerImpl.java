@@ -1,7 +1,7 @@
-package com.didichuxing.datachannel.arius.admin.biz.template.new_srv.setting.impl;
+package com.didichuxing.datachannel.arius.admin.biz.template.srv.setting.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.setting.TemplatePhySettingsManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.setting.TemplatePhySettingsManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord.template.TemplateSettingOperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhySettings;

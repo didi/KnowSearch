@@ -1,4 +1,4 @@
-package com.didichuxing.datachannel.arius.admin.biz.template.new_srv.mapping.impl;
+package com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping.impl;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.DEFAULT_INDEX_MAPPING_TYPE;
 
@@ -6,9 +6,9 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.base.impl.BaseTemplateSrvImpl;
-import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.mapping.TemplateLogicMappingManager;
-import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.mapping.TemplatePhyMappingManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.precreate.PreCreateManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping.TemplateLogicMappingManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping.TemplatePhyMappingManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.MappingOptimize;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.MappingOptimizeItem;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
