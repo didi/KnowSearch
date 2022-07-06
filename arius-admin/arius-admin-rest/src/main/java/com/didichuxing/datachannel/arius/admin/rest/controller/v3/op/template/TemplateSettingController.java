@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import com.alibaba.fastjson.JSONObject;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.setting.TemplateLogicSettingManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.setting.TemplateLogicSettingsManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhySetting;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
@@ -25,7 +25,7 @@ import io.swagger.annotations.ApiOperation;
 public class TemplateSettingController {
 
     @Autowired
-    private TemplateLogicSettingManager templateLogicSettingManager;
+    private TemplateLogicSettingsManager templateLogicSettingManager;
     @PutMapping("/{logicId}")
     @ResponseBody
     @ApiOperation(value = "更新索引Setting接口" )

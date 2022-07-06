@@ -1,10 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.aliases.impl;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum.TEMPLATE_ALIASES;
-
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.aliases.TemplateLogicAliasManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.aliases.TemplatePhyAliasManager;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.BaseTemplateSrv;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.impl.BaseTemplateSrvImpl;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -19,11 +17,11 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.NewTemplateSrvEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
-import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectLogicTemplateAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
+import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectLogicTemplateAuthService;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -42,7 +40,7 @@ import org.springframework.stereotype.Service;
  * @date 2020-09-09
  */
 @Service
-public class TemplateLogicAliasManagerImpl extends BaseTemplateSrv implements TemplateLogicAliasManager {
+public class TemplateLogicAliasManagerImpl extends BaseTemplateSrvImpl implements TemplateLogicAliasManager {
 
     private static final String OPERATION_FAILED_TIPS = "操作失败，请重试！";
 
@@ -56,12 +54,15 @@ public class TemplateLogicAliasManagerImpl extends BaseTemplateSrv implements Te
 
     @Autowired
     private ProjectLogicTemplateAuthService projectLogicTemplateAuthService;
-
+    
+    /**
+     * @return
+     */
     @Override
-    public TemplateServiceEnum templateService() {
-        return TEMPLATE_ALIASES;
+    public NewTemplateSrvEnum templateSrv() {
+        return NewTemplateSrvEnum.TEMPLATE_ALIASES;
     }
-
+    
     @Override
     public Result<List<IndexTemplatePhyAlias>> getAliases(Integer logicId) {
         return fetchTemplateAliasesByLogicId(logicId);

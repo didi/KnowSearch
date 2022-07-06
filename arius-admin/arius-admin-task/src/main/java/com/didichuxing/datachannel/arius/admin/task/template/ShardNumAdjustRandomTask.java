@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.task.template;
 
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.capacityplan.IndexPlanManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.indexplan.IndexPlanManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.task.BaseConcurrentClusterTask;

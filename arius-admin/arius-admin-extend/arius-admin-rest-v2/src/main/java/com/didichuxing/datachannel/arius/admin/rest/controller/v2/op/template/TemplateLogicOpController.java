@@ -5,9 +5,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.OpLogicTemplateVO;
-import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
-import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import java.util.List;
@@ -33,8 +31,9 @@ public class TemplateLogicOpController {
     @ApiOperation(value = "获取逻辑模板列表接口【三方接口】",tags = "【三方接口】" )
 
     public Result<List<OpLogicTemplateVO>> list(@RequestBody IndexTemplateDTO param) {
-        return Result
-            .buildSucc(ConvertUtil.list2List(indexTemplateService.listLogicTemplates(param), OpLogicTemplateVO.class));
+         return Result.buildFail("接口已经下线：迁移到v3");
+        //return Result
+        //    .buildSucc(ConvertUtil.list2List(indexTemplateService.listLogicTemplates(param), OpLogicTemplateVO.class));
     }
 
     @RequestMapping(path = "/blockRead", method = RequestMethod.PUT)
@@ -42,8 +41,9 @@ public class TemplateLogicOpController {
     @ApiOperation(value = "是否禁读" )
 
     public Result updateBlockReadState(HttpServletRequest request, @RequestBody IndexTemplateDTO param) {
-        return indexTemplateService.updateBlockReadState(param.getId(), param.getBlockRead(),
-            HttpRequestUtil.getOperator(request));
+         return Result.buildFail("接口已经下线：迁移到v3");
+        //return indexTemplateService.updateBlockReadState(param.getId(), param.getBlockRead(),
+        //    HttpRequestUtil.getOperator(request));
     }
 
     @RequestMapping(path = "/blockWrite", method = RequestMethod.PUT)
@@ -51,8 +51,9 @@ public class TemplateLogicOpController {
     @ApiOperation(value = "是否禁写" )
 
     public Result updateBlockWriteState(HttpServletRequest request, @RequestBody IndexTemplateDTO param) {
-        return indexTemplateService.updateBlockWriteState(param.getId(), param.getBlockWrite(),
-            HttpRequestUtil.getOperator(request));
+         return Result.buildFail("接口已经下线：迁移到v3");
+        //return indexTemplateService.updateBlockWriteState(param.getId(), param.getBlockWrite(),
+        //    HttpRequestUtil.getOperator(request));
     }
 
 }

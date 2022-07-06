@@ -3,7 +3,7 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.template;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
 
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.setting.TemplateLogicSettingManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.setting.TemplateLogicSettingsManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.*;
@@ -44,7 +44,7 @@ public class TemplateLogicV3Controller {
     private TemplateLogicManager         templateLogicManager;
 
     @Autowired
-    private TemplateLogicSettingManager templateLogicSettingManager;
+    private TemplateLogicSettingsManager templateLogicSettingManager;
 
     @GetMapping("/data-type")
     @ResponseBody

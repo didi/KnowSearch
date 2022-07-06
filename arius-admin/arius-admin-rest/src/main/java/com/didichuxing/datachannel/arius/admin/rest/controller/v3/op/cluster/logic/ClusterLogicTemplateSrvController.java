@@ -1,7 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.cluster.logic;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
 import java.util.List;
 

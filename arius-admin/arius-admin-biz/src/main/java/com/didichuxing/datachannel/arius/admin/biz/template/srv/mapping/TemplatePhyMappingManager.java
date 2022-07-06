@@ -1,10 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping;
 
-import java.util.Set;
-
-import com.didichuxing.datachannel.arius.admin.common.mapping.AriusTypeProperty;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.mapping.AriusTypeProperty;
 import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
+import java.util.Set;
 
 /**
  * 物理模板的mapping服务

@@ -3,7 +3,7 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v2.console.templ
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V2_CONSOLE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.setting.TemplateLogicSettingManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.setting.TemplateLogicSettingsManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateSettingDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhySetting;
@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class ConsoleTemplateSettingController extends BaseConsoleTemplateController {
 
     @Autowired
-    private TemplateLogicSettingManager templateLogicSettingManager;
+    private TemplateLogicSettingsManager templateLogicSettingManager;
 
     @PutMapping("")
     @ResponseBody
@@ -44,7 +44,8 @@ public class ConsoleTemplateSettingController extends BaseConsoleTemplateControl
             return checkAuthResult;
         }
 
-        return Result.buildFail("已经废弃");
+        //return Result.buildFail("已经废弃");
+         return Result.buildFail("接口已经下线：迁移到v3");
     }
 
     @GetMapping("")
@@ -52,6 +53,7 @@ public class ConsoleTemplateSettingController extends BaseConsoleTemplateControl
     @ApiOperation(value = "获取索引Setting接口" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "索引ID", required = true) })
     public Result<IndexTemplatePhySetting> getTemplateSettings(@RequestParam("logicId") Integer logicId) throws AdminOperateException {
-        return templateLogicSettingManager.getSettings(logicId);
+        //return templateLogicSettingsManager.getSettings(logicId);
+         return Result.buildFail("接口已经下线：迁移到v3");
     }
 }

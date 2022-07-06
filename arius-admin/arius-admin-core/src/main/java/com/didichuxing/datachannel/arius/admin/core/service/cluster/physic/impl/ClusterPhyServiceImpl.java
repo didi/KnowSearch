@@ -2,15 +2,6 @@ package com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.impl
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.DEFAULT_CLUSTER_HEALTH;
 
-import java.util.*;
-import java.util.stream.Collectors;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Plugin;
@@ -19,6 +10,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPh
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterSettingDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPhyPO;
@@ -44,8 +36,20 @@ import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.NoArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author didi
@@ -72,9 +76,11 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
 
     @Autowired
     private ClusterRoleHostService clusterRoleHostService;
-
-    private static final String DEFAULT_WRITE_ACTION = "RestBulkAction,RestDeleteAction,RestIndexAction,RestUpdateAction";
-
+    
+    private static final String DEFAULT_WRITE_ACTION        = "RestBulkAction,RestDeleteAction,RestIndexAction,RestUpdateAction";
+    private static final String PHYSICAL_CLUSTER_NOT_EXISTS = "物理集群不存在";
+    
+    private static final String COMMA_SYMBOL = ",";
     /**
      * 条件查询
      * @param params 条件
@@ -364,7 +370,63 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
     public boolean isClusterExistsByPackageId(Long packageId) {
         return clusterDAO.getTotalHitByPackageId(packageId) > 0;
     }
+    
+    /**
+     * @param phyCluster
+     * @return
+     */
+    @Override
+    public Result<List<ClusterTemplateSrv>> getPhyClusterTemplateSrv(String phyCluster) {
+        ClusterPhy clusterPhy = getClusterByName(phyCluster);
+    
+        if (null == clusterPhy) {
+            return Result.buildNotExist(PHYSICAL_CLUSTER_NOT_EXISTS);
+        }
 
+        String templateSrvs = clusterPhy.getTemplateSrvs();
+        if (StringUtils.isBlank(templateSrvs)) {
+            return Result.buildSucc(new ArrayList<>(), "该物理集群无索引服务");
+        }
+    
+        List<ClusterTemplateSrv> templateServices = Arrays.stream( StringUtils.split(templateSrvs, COMMA_SYMBOL))
+                .filter(StringUtils::isNumeric)
+                .map(Integer::parseInt)
+                .map(TemplateServiceEnum::getById)
+                .filter(Objects::nonNull)
+                .map(TemplateServiceEnum::convertFromEnum)
+                .distinct()
+                .collect(Collectors.toList());
+    
+        return Result.buildSucc(templateServices);
+    }
+    
+    /**
+     * @param phyCluster
+     * @return
+     */
+    @Override
+    public Result<List<ClusterTemplateSrv>> getPhyClusterTemplateSrv(ClusterPhy phyCluster) {
+       if (null == phyCluster) {
+            return Result.buildNotExist(PHYSICAL_CLUSTER_NOT_EXISTS);
+        }
+
+        String templateSrvs = phyCluster.getTemplateSrvs();
+        if (StringUtils.isBlank(templateSrvs)) {
+            return Result.buildSucc(new ArrayList<>(), "该物理集群无索引服务");
+        }
+
+         List<ClusterTemplateSrv> templateServices = Arrays.stream( StringUtils.split(templateSrvs, COMMA_SYMBOL))
+                .filter(StringUtils::isNumeric)
+                .map(Integer::parseInt)
+                .map(TemplateServiceEnum::getById)
+                .filter(Objects::nonNull)
+                .map(TemplateServiceEnum::convertFromEnum)
+                .distinct()
+                .collect(Collectors.toList());
+    
+        return Result.buildSucc(templateServices);
+    }
+    
     /**************************************** private method ***************************************************/
     private List<String> genTcpAddr(String httpAddress, int tcpPort) {
         try {
