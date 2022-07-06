@@ -159,7 +159,7 @@ public class DslsConstant {
     /**
      * 查询第一个时间分片中指标数值的逻辑模板指标信息
      */
-    public static final String GET_MULTIPLE_TEMPLATE_FIRST_INTERVAL_AGG_METRICS_WITH_STEP    = "AriusStatsIndexInfoEsDao/getAggMultipleIndicesMetricsWithStep";
+    public static final String GET_MULTIPLE_TEMPLATE_FIRST_INTERVAL_AGG_METRICS_WITH_STEP    = "AriusStatsIndexInfoEsDao/getAggMultipleTemplateMetricsWithStep";
 
     /**
      * 查询topN索引聚合信息

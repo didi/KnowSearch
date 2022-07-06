@@ -20,7 +20,7 @@ public interface ESIndexCatService {
      * @param projectId        应用id
      * @return Tuple<Long, List<IndexCatCell>>   key1 -> 命中总数, key2 索引列表
      */
-    Tuple<Long, List<IndexCatCell>> syncGetCatIndexInfo(String cluster, String index, String health, Integer projectId,
+    Tuple<Long, List<IndexCatCell>> syncGetCatIndexInfo(String cluster, String index, String health,String status, Integer projectId,
                                                         Long from, Long size, String sortTerm, Boolean orderByDesc);
 
     /**
