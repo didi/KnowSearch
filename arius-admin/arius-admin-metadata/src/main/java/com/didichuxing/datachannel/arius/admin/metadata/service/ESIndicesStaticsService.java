@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsClusterPhyIndicesDTO;
@@ -41,6 +42,9 @@ public class ESIndicesStaticsService {
         return ariusStatsIndexInfoESDAO.getTopNIndicesAggMetricsWithStep(clusterPhyName, metricsTypes, topNu,topMethod,topTimeStep, aggType, startTime, endTime);
     }
 
+    @Value("${es.metrics.indices.buckets.max.num}")
+    protected int                                                         indicesBucketsMaxNum;
+
     /**
      * 获取并且聚合对应的物理集群的模板指标类型
      * @param param 模板指标类型
@@ -61,7 +65,6 @@ public class ESIndicesStaticsService {
             return ariusStatsIndexInfoESDAO.getAggSingleTemplateMetrics(clusterPhyName, metricsTypes, logicTemplateId, aggType,
                     startTime, endTime);
         }
-
         return ariusStatsIndexInfoESDAO.getTopNTemplateAggMetricsWithStep(clusterPhyName, metricsTypes, topNu,topMethod,topTimeStep, aggType,
                 startTime, endTime);
     }
