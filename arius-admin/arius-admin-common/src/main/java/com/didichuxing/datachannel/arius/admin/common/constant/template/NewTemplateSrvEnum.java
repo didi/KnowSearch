@@ -1,9 +1,13 @@
 package com.didichuxing.datachannel.arius.admin.common.constant.template;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.ESClusterVersionEnum.ES_2_3_3_100;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ESClusterVersionEnum.ES_6_6_1_700;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ESClusterVersionEnum.ES_6_6_1_902;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ESClusterVersionEnum.ES_6_6_6_800;
+
 import com.didichuxing.datachannel.arius.admin.common.constant.ESClusterVersionEnum;
 import java.util.Arrays;
 import java.util.List;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ESClusterVersionEnum.*;
 
 /**
  * @author chengxiang
@@ -34,7 +38,23 @@ public enum NewTemplateSrvEnum {
     /**
      * 冷热分离：提供SSD和HDD两种类型的磁盘来保存索引，从而降低成本.
      */
-    TEMPLATE_COLD(5, "冷热分离", ES_6_6_1_700);
+    TEMPLATE_COLD(5, "冷热分离", ES_6_6_1_700),
+        /**
+     * 索引别名：支持通过接口来设置和修改索引别名.
+     */
+    TEMPLATE_ALIASES(6, "索引别名", ES_6_6_1_700),
+        /**
+     * 跨集群同步（DCDR）：跨集群数据复制功能，用于集群间的数据复制，类似ES官方的CCR能力.
+     */
+    TEMPLATE_DCDR(10, "跨集群同步(DCDR)", ES_6_6_1_902),
+        /**
+     * Mapping 设置 ：提供修改索引的 mapping 的信息的功能.
+     */
+    TEMPLATE_MAPPING(4, "Mapping设置", ES_6_6_1_700),
+        /**
+     * Setting 设置 ：提供修改索引 Setting 的信息的功能.
+     */
+    TEMPLATE_SETTING(5, "Setting设置", ES_6_6_1_700);
 
     private Integer code;
 

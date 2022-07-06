@@ -1,7 +1,12 @@
 package com.didichuxing.datachannel.arius.admin.biz.listener;
 
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.pipeline.TemplatePipelineManager;
-import com.didichuxing.datachannel.arius.admin.common.event.template.*;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.pipeline.PipelineManager;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.event.template.LogicTemplateModifyEvent;
+import com.didichuxing.datachannel.arius.admin.common.event.template.PhysicalTemplateAddEvent;
+import com.didichuxing.datachannel.arius.admin.common.event.template.PhysicalTemplateDeleteEvent;
+import com.didichuxing.datachannel.arius.admin.common.event.template.PhysicalTemplateModifyEvent;
+import com.didichuxing.datachannel.arius.admin.common.event.template.TemplateEvent;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
@@ -22,7 +27,7 @@ public class TemplateEventPipelineListener implements ApplicationListener<Templa
     private static final ILog       LOGGER = LogFactory.getLog(TemplateEventPipelineListener.class);
 
     @Autowired
-    private TemplatePipelineManager templatePipelineManager;
+    private PipelineManager templatePipelineManager;
 
     /**
      * Handle an application event.
@@ -64,7 +69,9 @@ public class TemplateEventPipelineListener implements ApplicationListener<Templa
 
     private void handleLogicTemplateModifyEvent(LogicTemplateModifyEvent event) {
         LogicTemplateModifyEvent e = event;
-        if (templatePipelineManager.editFromTemplateLogic(e.getOldTemplate(), e.getNewTemplate())) {
+        final Result<Void> result = templatePipelineManager.editFromTemplateLogic(e.getOldTemplate(),
+                e.getNewTemplate());
+        if (result.success()) {
             LOGGER.info("class=TemplateEventPipelineListener||method=onApplicationEvent||msg=LogicTemplateModifyEvent||templateName={}||msg=succ",
                 e.getOldTemplate().getName());
         } else {

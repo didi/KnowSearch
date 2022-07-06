@@ -1,5 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.FIELD;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricTopTypeEnum.listNoNegativeMetricTypes;
+import static com.didichuxing.datachannel.arius.admin.common.constant.routing.ESRoutingConstant.CLUSTER_PHY_HEALTH_ROUTING;
+
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.DashboardTopMetrics;
@@ -13,32 +18,34 @@ import com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoard
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricOtherTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricTopTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.OneLevelTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.util.*;
+import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.IndexNameUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.MetricsUtils;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dsls.DslsConstant;
 import com.didiglobal.logi.elasticsearch.client.response.query.query.ESQueryResponse;
 import com.didiglobal.logi.elasticsearch.client.response.query.query.hits.ESHit;
 import com.didiglobal.logi.elasticsearch.client.response.query.query.hits.ESHits;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Component;
-
-import javax.annotation.PostConstruct;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.FIELD;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricTopTypeEnum.listNoNegativeMetricTypes;
-import static com.didichuxing.datachannel.arius.admin.common.constant.routing.ESRoutingConstant.CLUSTER_PHY_HEALTH_ROUTING;
+import javax.annotation.PostConstruct;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Component;
 
 @Component
 public class AriusStatsDashBoardInfoESDAO extends BaseAriusStatsESDAO {
     private static final FutureUtil<Void> FUTURE_UTIL = FutureUtil.init("AriusStatsDashBoardInfoESDAO",  10,10,500);
     public static final String            GTE         = "gte";
     public static final String            CLUSTER     = "cluster";
+    public static final String EMPTY_STR = "";
     
     @PostConstruct
     public void init() {
@@ -400,18 +407,19 @@ public class AriusStatsDashBoardInfoESDAO extends BaseAriusStatsESDAO {
      * @return
      */
     private String getFinalDslByOneLevelType(String oneLevelType, String topClustersStr, String topNameStr, Long startTime, Long endTime,
-                                             int dashboardClusterMaxNum, String interval, String aggsDsl) {
+                                             int dashboardClusterMaxNum, String interval, String aggsDsl,
+                                             String noNegativeStr) {
 
         // 处理特殊类型dsl（如 clusterThreadPoolQueue）
         if (OneLevelTypeEnum.CLUSTER_THREAD_POOL_QUEUE.getType().equals(oneLevelType)) {
-            return dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_TOP_DASHBOARD_CLUSTER_AGG_METRICS_INFO, oneLevelType,
+            return dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_TOP_DASHBOARD_CLUSTER_AGG_METRICS_INFO, noNegativeStr,oneLevelType,
                     CLUSTER, topNameStr, oneLevelType, startTime, endTime, oneLevelType, CLUSTER,
                     dashboardClusterMaxNum, oneLevelType, interval, startTime, endTime, aggsDsl);
         }
 
         // 获取 cluster维度 相关全文dsl
         if (OneLevelTypeEnum.CLUSTER.getType().equals(oneLevelType)) {
-            return dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_TOP_DASHBOARD_CLUSTER_AGG_METRICS_INFO, oneLevelType,
+            return dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_TOP_DASHBOARD_CLUSTER_AGG_METRICS_INFO, noNegativeStr,oneLevelType,
                     oneLevelType, topNameStr, oneLevelType, startTime, endTime, oneLevelType, oneLevelType,
                     dashboardClusterMaxNum, oneLevelType, interval, startTime, endTime, aggsDsl);
         }
@@ -419,7 +427,7 @@ public class AriusStatsDashBoardInfoESDAO extends BaseAriusStatsESDAO {
         // 获取 非cluster维度 相关全文dsl
         if (OneLevelTypeEnum.listNoClusterOneLevelType().contains(oneLevelType)) {
             return dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_TOP_DASHBOARD_NO_CLUSTER_AGG_METRICS_INFO,
-                    oneLevelType, topClustersStr,
+                    noNegativeStr,oneLevelType, topClustersStr,
                     oneLevelType, oneLevelType, topNameStr, oneLevelType, startTime, endTime,
                     oneLevelType, oneLevelType, oneLevelType,
                     dashboardClusterMaxNum, oneLevelType, interval, startTime, endTime, aggsDsl);
@@ -453,11 +461,16 @@ public class AriusStatsDashBoardInfoESDAO extends BaseAriusStatsESDAO {
 
         String interval          = MetricsUtils.getIntervalForDashBoard(endTime - startTime);
         List<String> metricsKeys = Lists.newArrayList(dashboardTopMetrics.getType());
-
+        String noNegativeStr = EMPTY_STR;
+        if (listNoNegativeMetricTypes().contains(dashboardTopMetrics.getType())) {
+            noNegativeStr = buildTermNoNegativeDsl(dashboardTopMetrics.getType(), oneLevelType);
+        }
         String aggsDsl = dynamicBuildDashboardAggsDSLForTop(oneLevelType, metricsKeys, aggType);
-
-        String dsl = getFinalDslByOneLevelType(oneLevelType, topClustersStr, topNameStr, startTime, endTime, dashboardClusterMaxNum, interval, aggsDsl);
-        if (null == dsl) { return;}
+        String dsl = getFinalDslByOneLevelType(oneLevelType, topClustersStr, topNameStr, startTime, endTime,
+                dashboardClusterMaxNum, interval, aggsDsl,noNegativeStr);
+        if (null == dsl) {
+            return;
+        }
 
         String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTime, endTime);
         List<VariousLineChartMetrics> variousLineChartMetrics = gatewayClient.performRequestWithRouting(metadataClusterName,
@@ -467,6 +480,22 @@ public class AriusStatsDashBoardInfoESDAO extends BaseAriusStatsESDAO {
         filterValidMetricsInfo(variousLineChartMetrics, dashboardTopMetrics);
 
         buildMetrics.addAll(variousLineChartMetrics);
+    }
+    
+    /**
+     * { *     "range":{ *         “field”:{ * *             gte:0 *         } *     } * },
+     *
+     * @param type * @return {@link String}
+     */
+    private String buildTermNoNegativeDsl(String type, String oneLevelType) {
+        Map range = new HashMap<String, Map<String, Object>>() {{
+            put("range", new HashMap<String, Object>() {{
+                put(String.format("%s.%s", oneLevelType, type), new HashMap<String, Object>() {{
+                    put("gte", 0);
+                }});
+            }});
+        }};
+        return String.format("%s,", JSON.toJSONString(range));
     }
 
     /**

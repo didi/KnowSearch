@@ -3,7 +3,7 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.template;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
 
 import com.alibaba.fastjson.JSONObject;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.setting.TemplateLogicSettingManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.setting.TemplateLogicSettingsManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhySetting;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class TemplateSettingController extends BaseConsoleTemplateController {
 
     @Autowired
-    private TemplateLogicSettingManager templateLogicSettingManager;
+    private TemplateLogicSettingsManager templateLogicSettingManager;
     @PutMapping("/{logicId}")
     @ResponseBody
     @ApiOperation(value = "更新索引Setting接口" )
