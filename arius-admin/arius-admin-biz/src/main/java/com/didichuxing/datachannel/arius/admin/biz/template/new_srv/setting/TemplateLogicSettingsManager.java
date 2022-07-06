@@ -1,4 +1,4 @@
-package com.didichuxing.datachannel.arius.admin.biz.template.srv.setting;
+package com.didichuxing.datachannel.arius.admin.biz.template.new_srv.setting;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateSettingDTO;
@@ -13,7 +13,7 @@ import com.didichuxing.datachannel.arius.admin.common.mapping.AriusIndexTemplate
  * @author wangshu
  * @date 2020/09/02
  */
-public interface TemplateLogicSettingManager {
+public interface TemplateLogicSettingsManager {
 
     /**
      * 修改模板Setting

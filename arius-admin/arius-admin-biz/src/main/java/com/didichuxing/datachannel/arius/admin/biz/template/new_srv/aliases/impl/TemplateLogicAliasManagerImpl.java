@@ -1,8 +1,8 @@
-package com.didichuxing.datachannel.arius.admin.biz.template.srv.aliases.impl;
+package com.didichuxing.datachannel.arius.admin.biz.template.new_srv.aliases.impl;
 
+import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.aliases.TemplateLogicAliasManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.aliases.TemplatePhyAliasManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.base.impl.BaseTemplateSrvImpl;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.aliases.TemplateLogicAliasesManager;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.aliases.TemplatePhyAliasesManager;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -40,7 +40,7 @@ import org.springframework.stereotype.Service;
  * @date 2020-09-09
  */
 @Service
-public class TemplateLogicAliasesManagerImpl extends BaseTemplateSrvImpl implements TemplateLogicAliasesManager {
+public class TemplateLogicAliasManagerImpl extends BaseTemplateSrvImpl implements TemplateLogicAliasManager {
 
     private static final String OPERATION_FAILED_TIPS = "操作失败，请重试！";
 

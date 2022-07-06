@@ -3,7 +3,7 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v2.op.template;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V2;
 
 import com.alibaba.fastjson.JSONObject;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping.TemplatePhyMappingManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.mapping.TemplatePhyMappingManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

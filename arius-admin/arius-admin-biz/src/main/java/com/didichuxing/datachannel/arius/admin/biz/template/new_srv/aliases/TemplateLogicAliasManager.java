@@ -1,4 +1,4 @@
-package com.didichuxing.datachannel.arius.admin.biz.template.srv.aliases;
+package com.didichuxing.datachannel.arius.admin.biz.template.new_srv.aliases;
 
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;

@@ -5,7 +5,7 @@ import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import com.didichuxing.datachannel.arius.admin.biz.gateway.impl.GatewayManagerImpl;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.aliases.TemplateLogicAliasesManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.aliases.TemplateLogicAliasManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.GatewayHeartbeat;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.alias.IndexTemplateAliasDTO;
@@ -72,11 +72,11 @@ public class GatewayManagerTest {
     @Mock
     private IndexTemplateService            mockIndexTemplateService;
     @Mock
-    private IndexTemplatePhyService         mockIndexTemplatePhyService;
+    private IndexTemplatePhyService   mockIndexTemplatePhyService;
     @Mock
-    private TemplateLogicAliasManager       mockTemplateLogicAliasManager;
+    private TemplateLogicAliasManager mockTemplateLogicAliasManager;
     @Mock
-    private GatewayService                  mockGatewayService;
+    private GatewayService            mockGatewayService;
     @Mock
     private AriusConfigInfoService          mockAriusConfigInfoService;
     @Mock

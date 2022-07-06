@@ -1,4 +1,4 @@
-package com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping;
+package com.didichuxing.datachannel.arius.admin.biz.template.new_srv.mapping;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.mapping.AriusTypeProperty;
