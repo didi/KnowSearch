@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.cluster.logic;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
 import java.util.List;
@@ -18,7 +19,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
 @RestController
-@RequestMapping(V3_OP + "/logic/cluster/templateSrv")
+@RequestMapping(V3+ "/logic/cluster/templateSrv")
 @Api(tags = "ES逻辑集群索引服务接口(REST)")
 @Deprecated
 public class ClusterLogicTemplateSrvController {

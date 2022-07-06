@@ -1,7 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.dsl;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
-
 import com.didichuxing.datachannel.arius.admin.biz.dsl.DslMetricsManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.DslMetricsVO;
@@ -12,8 +10,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import java.util.List;
-import javax.servlet.http.HttpServletRequest;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,16 +17,21 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
+import java.util.List;
+
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
+
 @NoArgsConstructor
 @RestController()
-@RequestMapping(V3_OP + "/dsl/metrics")
+@RequestMapping(V3 + "/dsl/metrics")
 @Api(tags = "DSL指标接口(REST)")
 public class DslMetricsController {
 
     @Autowired
     private DslMetricsManager dslMetricsManager;
 
-    @GetMapping(path = "/project.do")
+    @GetMapping(path = "/project")
     @ApiOperation(value = "根据projectId获取dsl的指标信息【三方接口】", tags = "【三方接口】",notes = "根据projectId获取dsl的指标信息", httpMethod = "GET")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "projectId", value = "应用账号", required = false, example = "1"),
@@ -44,7 +45,7 @@ public class DslMetricsController {
         return dslMetricsManager.getDSLMetricsInfoByProjectId(projectId, startDate, endDate);
     }
 
-    @GetMapping(path = "/detail.do")
+    @GetMapping(path = "/detail")
     @ApiOperation(value = "根据projectId和模板名称获取dsl的指标信息【三方接口】",tags = "【三方接口】",notes = "根据projectId获取dsl的指标信息",
             httpMethod = "GET")
     @ApiImplicitParams({
@@ -61,7 +62,7 @@ public class DslMetricsController {
         return dslMetricsManager.getDetailMetrics(projectId, dslTemplateMd5, startDate, endDate);
     }
 
-    @GetMapping(path = "/condition.do")
+    @GetMapping(path = "/condition")
     @ApiOperation(value = "根据查询条件获取查询模板数据", notes = "根据查询条件获取查询模板数据", httpMethod = "GET")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "projectId", value = "应用账号", required = false, example = "1"),
