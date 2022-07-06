@@ -1,9 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.setting;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhySetting;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhySetting;
-
 import java.util.Map;
 
 public interface TemplatePhySettingManager {

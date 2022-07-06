@@ -1,20 +1,12 @@
 package com.didichuxing.datachannel.arius.admin.biz.cluster.impl;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.REGION_NOT_BOUND_LOGIC_CLUSTER_ID;
 import static com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum.CLUSTER_LOGIC;
-import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum.*;
+import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum.GREEN;
+import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum.RED;
+import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum.UNKNOWN;
+import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum.YELLOW;
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.DATA_NODE;
 import static com.didichuxing.datachannel.arius.admin.common.util.SizeUtil.getUnitSize;
-
-import java.util.*;
-import java.util.stream.Collectors;
-
-import javax.servlet.http.HttpServletRequest;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
@@ -23,7 +15,6 @@ import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterRegionManager;
 import com.didichuxing.datachannel.arius.admin.biz.indices.IndicesManager;
 import com.didichuxing.datachannel.arius.admin.biz.page.ClusterLogicPageSearchHandle;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.TemplateSrvManager;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
@@ -46,7 +37,14 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESMachineNormsPO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicTemplateIndexCountVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicTemplateIndexDetailDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterStatusVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PluginVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.ecm.ESClusterNodeSepcVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
@@ -62,7 +60,11 @@ import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateExcepti
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
 import com.didichuxing.datachannel.arius.admin.common.tuple.Tuples;
-import com.didichuxing.datachannel.arius.admin.common.util.*;
+import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.ClusterUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESMachineNormsService;
@@ -87,6 +89,17 @@ import com.didiglobal.logi.security.service.ProjectService;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import javax.servlet.http.HttpServletRequest;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 @Component
 public class ClusterLogicManagerImpl implements ClusterLogicManager {
@@ -108,8 +121,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     @Autowired
     private ClusterRoleHostService       clusterRoleHostService;
 
-    @Autowired
-    private TemplateSrvManager            templateSrvManager;
+   
 
     @Autowired
     private IndexTemplateService          indexTemplateService;
@@ -338,42 +350,6 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         logicClusterDTO.setType(type);
         return Result.buildSucc(
                 ConvertUtil.list2List(clusterLogicService.listClusterLogics(logicClusterDTO), ClusterLogicVO.class));
-    }
-
-    @Override
-    public Result<List<ClusterLogicVO>> listLogicClusterThatCanCreateTemplateByProjectAndType(Integer projectId,
-                                                                                              Integer type) {
-        ESLogicClusterDTO logicClusterDTO = new ESLogicClusterDTO();
-        logicClusterDTO.setProjectId(projectId);
-        logicClusterDTO.setType(type);
-
-        List<ClusterLogic> logicClusterList = clusterLogicService.listClusterLogics(logicClusterDTO);
-        if (CollectionUtils.isEmpty(logicClusterList)) {
-            return Result.buildSucc(Lists.newArrayList());
-        }
-        List<ClusterRegion> regions = clusterRegionService.getClusterRegionsByLogicIds(
-            logicClusterList.stream().map(ClusterLogic::getId).collect(Collectors.toList()));
-        Set<Long> regionNotEmptyLogicClusterIds = Sets.newHashSet();
-        regions.stream()
-            .filter(region -> StringUtils.isNotBlank(region.getLogicClusterIds())
-                              && !REGION_NOT_BOUND_LOGIC_CLUSTER_ID.equals(region.getLogicClusterIds()))
-            .filter(clusterRegion -> {
-                Result<List<ClusterRoleHost>> roleHostResult = clusterRoleHostService
-                    .listByRegionId(Math.toIntExact(clusterRegion.getId()));
-                return roleHostResult.success() && CollectionUtils.isNotEmpty(roleHostResult.getData());
-            }).map(ClusterRegion::getLogicClusterIds).forEach(logicClusterIds -> {
-                for (String str : StringUtils.split(logicClusterIds, ",")) {
-                    try {
-                        regionNotEmptyLogicClusterIds.add(Long.valueOf(str));
-                    } catch (NumberFormatException e) {
-                        //pass
-                    }
-                }
-            });
-
-        return Result.buildSucc(ConvertUtil.list2List(logicClusterList.stream()
-            .filter(logicCluster -> regionNotEmptyLogicClusterIds.contains(logicCluster.getId()))
-            .collect(Collectors.toList()), ClusterLogicVO.class));
     }
 
     /**
@@ -671,6 +647,21 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
                 ConvertUtil.list2List(clusterLogicService.getClusterLogicPlugins(clusterId), PluginVO.class));
     }
 
+    @Override
+    public Result<Boolean> checkLogicClusterRegionIsNotEmpty(Long logicClusterId) {
+        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(logicClusterId);
+        if (null == clusterLogic) {
+            return Result.buildWithMsg(false, "逻辑集群不存在！");
+        }
+        ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(logicClusterId);
+        if (null == clusterRegion) {
+            return Result.buildWithMsg(false, "逻辑集群Region不存在！");
+        }
+        Result<List<ClusterRoleHost>> roleHostResult = clusterRoleHostService
+            .listByRegionId(Math.toIntExact(clusterRegion.getId()));
+
+        return Result.buildSucc(roleHostResult.success() && CollectionUtils.isNotEmpty(roleHostResult.getData()));
+    }
 
     /**************************************************** private method ****************************************************/
 

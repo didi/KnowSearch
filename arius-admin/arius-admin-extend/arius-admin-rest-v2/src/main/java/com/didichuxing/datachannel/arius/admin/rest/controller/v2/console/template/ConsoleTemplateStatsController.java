@@ -45,7 +45,8 @@ public class ConsoleTemplateStatsController extends BaseConsoleTemplateControlle
     public Result<List<ESIndexStats>> getIndexStatis(@RequestParam(value = "templateId") Long logicTemplateId,
                                                      @RequestParam(value = "startDate") Long startDate,
                                                      @RequestParam(value = "endDate") Long endDate) {
-        return templatePhyStaticsManager.getIndexStatics(logicTemplateId, startDate, endDate);
+        //return templatePhyStaticsManager.getIndexStatics(logicTemplateId, startDate, endDate);
+         return Result.buildFail("接口已经下线：迁移到v3");
     }
 
     /**
@@ -58,6 +59,7 @@ public class ConsoleTemplateStatsController extends BaseConsoleTemplateControlle
     @ApiOperation(value = "根据模板id，查询模板的基本统计信息【三方接口】",tags = "【三方接口】" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Long", name = "templateId", value = "模板id", required = true) })
     public Result<TemplateStatsInfoVO> getTemplateBaseStatisInfo(@RequestParam(value = "templateId") Long logicTemplateId) {
-        return templatePhyStaticsManager.getTemplateBaseStatisticalInfoByLogicTemplateId(logicTemplateId);
+        //return templatePhyStaticsManager.getTemplateBaseStatisticalInfoByLogicTemplateId(logicTemplateId);
+         return Result.buildFail("接口已经下线：迁移到v3");
     }
 }

@@ -3,7 +3,6 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v2.console.templ
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V2_CONSOLE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
-import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyStaticsManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ProjectIdTemplateAccessCountVO;
 import io.swagger.annotations.Api;
@@ -11,7 +10,6 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import java.util.List;
 import java.util.Map;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -23,8 +21,8 @@ import org.springframework.web.bind.annotation.RestController;
 @Deprecated
 public class ConsoleTemplateAccessController extends BaseConsoleTemplateController {
 
-    @Autowired
-    private TemplatePhyStaticsManager templatePhyStaticsManager;
+    //@Autowired
+    //private TemplatePhyStaticsManager templatePhyStaticsManager;
 
     /**
      * 根据模板Id获取[startDate, endDate]的projectId访问统计信息
@@ -45,7 +43,8 @@ public class ConsoleTemplateAccessController extends BaseConsoleTemplateControll
 
             @ApiParam(name="endDate", value="结束时刻", required = true)
             @RequestParam(value = "endDate")        Long endDate){
-        return templatePhyStaticsManager.getAccessAppInfos(logicTemplateId, startDate, endDate);
+         return Result.buildFail("接口已经下线：迁移到v3");
+        //return templatePhyStaticsManager.getAccessAppInfos(logicTemplateId, startDate, endDate);
     }
 
     /**
@@ -63,6 +62,7 @@ public class ConsoleTemplateAccessController extends BaseConsoleTemplateControll
 
             @ApiParam(name="days", value="最近多少天", required = true)
             @RequestParam(value = "days")          int days){
-        return templatePhyStaticsManager.getAccessStatsInfoByTemplateIdAndDays(logicTemplateId, days);
+         return Result.buildFail("接口已经下线：迁移到v3");
+        //return templatePhyStaticsManager.getAccessStatsInfoByTemplateIdAndDays(logicTemplateId, days);
     }
 }

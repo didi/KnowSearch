@@ -71,15 +71,6 @@ public class ESLogicClusterOpV3Controller {
         return clusterLogicManager.getProjectLogicClusterInfoByType(HttpRequestUtil.getProjectId(request), type);
     }
 
-    @GetMapping("/{type}/can-create-template")
-    @ResponseBody
-    @ApiOperation(value = "根据项目和集群类型获取逻辑集群(项目对其有管理权限)名称列表")
-    public Result<List<ClusterLogicVO>> getLogicClusterByType(HttpServletRequest request,
-                                                                     @PathVariable Integer type) {
-        //这里筛选出可以创建模版的逻辑集群；
-        return clusterLogicManager.listLogicClusterThatCanCreateTemplateByProjectAndType(HttpRequestUtil.getProjectId(request), type);
-    }
-
     @PostMapping("/page")
     @ResponseBody
     @ApiOperation(value = "条件获取逻辑集群列表")
@@ -95,6 +86,13 @@ public class ESLogicClusterOpV3Controller {
     public Result<ClusterLogicVO> detail(HttpServletRequest request, @PathVariable Long clusterLogicId) {
         return Result.buildSucc(
                 clusterLogicManager.getClusterLogic(clusterLogicId, HttpRequestUtil.getProjectId(request)));
+    }
+
+    @GetMapping("/{clusterLogicId}/check-region-not-empty")
+    @ResponseBody
+    @ApiOperation(value = "检查逻辑集群所拥有的region是否不为空")
+    public Result<Boolean> checkLogicClusterRegionIsNotEmpty(@PathVariable("clusterLogicId") Long clusterLogicId) {
+        return clusterLogicManager.checkLogicClusterRegionIsNotEmpty(clusterLogicId);
     }
     
     @PutMapping()

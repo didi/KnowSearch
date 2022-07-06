@@ -4,6 +4,7 @@ import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.MetricsContent;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.MetricsContentCell;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.VariousLineChartMetrics;
+import com.didichuxing.datachannel.arius.admin.common.constant.ESConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.GatewayMetricsTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.DSLSearchUtils;
@@ -20,7 +21,6 @@ import com.google.common.collect.Lists;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
@@ -36,6 +36,8 @@ public class GatewayNodeMetricsDAO extends BaseESDAO {
     private static final String AGG_KEY_TIMESTAMP = "group_by_timeStamp";
     private static final String AGG_KEY_FIELD = "group_by_field";
     private static final String KEY = "key";
+    private static final String GATEWAY_SUCCESS_COUNT = "gatewaySuccessCount";
+    private static final String DOC_COUNT             = "doc_count";
     /**
      * 成功率/失败率 百分比 最小值
      */
@@ -44,6 +46,8 @@ public class GatewayNodeMetricsDAO extends BaseESDAO {
      * 成功率/失败率 百分百 总值
      */
     private static final double SUM_RATE=100.0;
+    private static final String           NOW_2M            = "now-2m";
+    private static final String           NOW_1M            = "now-1m";
     private String indexName;
 
     @PostConstruct
@@ -248,46 +252,32 @@ public class GatewayNodeMetricsDAO extends BaseESDAO {
      * @return {@code Tuple<Double, Double>} tuple.1:成功率；tuple.2:失败率
      */
     public Tuple<Double/*成功率*/, Double/*失败率*/> getGatewaySuccessRateAndFailureRate(String cluster) {
-        String realIndexName = IndexNameUtils.genDailyIndexName(indexName, System.currentTimeMillis(), System.currentTimeMillis());
-        
-        //网关总数
-        String gatewayCountDsl = dslLoaderUtil.getFormatDslByFileName(
-            DslsConstant.GET_GATEWAY_COUNT, cluster);
-        
-        Long gatewayCountTotal =
-            getTotal(cluster,realIndexName,gatewayCountDsl);
-        //网关成功数
-        String gatewaySuccessDsl = dslLoaderUtil.getFormatDslByFileName(
-            DslsConstant.GET_GATEWAY_SUCCESS_COUNT, cluster);
-        Long gatewaySuccessTotal = getTotal(cluster,realIndexName,gatewaySuccessDsl);
-        
-        
-        //网关失败数
-        String gatewayFailureDsl = dslLoaderUtil.getFormatDslByFileName(
-            DslsConstant.GET_GATEWAY_FAILURE_COUNT, cluster);
-        Long gatewayFailureTotal = getTotal(cluster,realIndexName,gatewayFailureDsl);
-    
-        final boolean isTrue = Double.isNaN(gatewayCountTotal.doubleValue()) || Objects.equals(0L,
-            gatewayCountTotal);
-        double successRate = isTrue ? -1.0 :
-            CommonUtils.divideDoubleAndFormatDouble(gatewaySuccessTotal.doubleValue(),
-                gatewayCountTotal.doubleValue(), 2, 1);
-        double failureRate = isTrue ? -1.0 :
-            Double.isNaN(gatewayCountTotal.doubleValue()) ? -1.0
-                : CommonUtils.divideDoubleAndFormatDouble(gatewayFailureTotal.doubleValue(),
-                    gatewayCountTotal.doubleValue(), 2, 1);
-        double  success=-1;
-        double failed=-1;
-        if (successRate>ZERO){
-            success=successRate*100;
-            failed=SUM_RATE-success;
-        }else if (failureRate > ZERO){
-            failed=failureRate*100;
-            success=SUM_RATE-failed;
+        String realIndexName = IndexNameUtils.genDailyIndexName(indexName, System.currentTimeMillis(),
+                System.currentTimeMillis());//网关总数
+        String gatewayCountDsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_COUNT, cluster, NOW_2M,
+                NOW_1M);
+        Tuple</*count总数*/Long, /*成功率总数*/Long> gatewayCountTotalAndGatewaySuccessCountTuple = gatewayClient.performRequest(
+                cluster, realIndexName, TYPE, gatewayCountDsl,
+                esQueryResponse -> Optional.ofNullable(esQueryResponse).map(response -> {
+                    Long totalCount = Long.valueOf(
+                            response.getHits().getUnusedMap().getOrDefault(ESConstant.HITS_TOTAL, "0")
+                                    .toString());
+                    Long gatewaySuccessCount = Optional.ofNullable(response.getAggs()).map(ESAggrMap::getEsAggrMap)
+                            .map(aggrMap -> aggrMap.get(GATEWAY_SUCCESS_COUNT)).map(ESAggr::getUnusedMap)
+                            .map(aggrMap -> aggrMap.get(DOC_COUNT)).map(String::valueOf).map(Long::valueOf).orElse(0L);
+                    return new Tuple<>(totalCount, gatewaySuccessCount);
+                }).orElse(new Tuple<>(0L, 0L)), 3);
+        // 网关成功数
+        double successRate = CommonUtils.divideDoubleAndFormatDouble(
+                gatewayCountTotalAndGatewaySuccessCountTuple.getV2().doubleValue(),
+                gatewayCountTotalAndGatewaySuccessCountTuple.getV1().doubleValue(), 2, 1);
+        double success = -1;
+        double failed = -1;
+        if (successRate > ZERO) {
+            success = successRate * 100;
+            failed = SUM_RATE - success;
         }
-        
-        
-        return new Tuple<Double, Double>(success,failed);
+        return new Tuple<>(success, failed);
     }
     
    
