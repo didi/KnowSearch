@@ -11,7 +11,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.template.logic.impl.
 import com.didiglobal.logi.elasticsearch.client.response.setting.template.TemplateConfig;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-import java.util.HashMap;
+import com.google.common.collect.Maps;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections4.CollectionUtils;
@@ -27,7 +27,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class TemplatePhyAliasManagerImpl implements TemplatePhyAliasManager {
 
-    private static final ILog sLogger = LogFactory.getLog(IndexTemplateServiceImpl.class);
+    private static final ILog Logger = LogFactory.getLog(IndexTemplateServiceImpl.class);
 
     @Autowired
     private ESTemplateService esTemplateService;
@@ -58,7 +58,7 @@ public class TemplatePhyAliasManagerImpl implements TemplatePhyAliasManager {
     public Map<String, List<IndexTemplatePhyAlias>> fetchAllTemplateAliases(List<String> clusters) throws ESOperateException {
         Map<String, TemplateConfig> templateConfigMap = fetchAllTemplateConfig(clusters);
 
-        Map<String, List<IndexTemplatePhyAlias>> templatePhyAliasMap = new HashMap<>();
+        Map<String, List<IndexTemplatePhyAlias>> templatePhyAliasMap = Maps.newHashMap();
 
         templateConfigMap.forEach((x,y) -> {
             IndexTemplatePhyAliases templateAliases = new IndexTemplatePhyAliases(y.getAliases());
@@ -215,8 +215,8 @@ public class TemplatePhyAliasManagerImpl implements TemplatePhyAliasManager {
                                          List<IndexTemplatePhyAlias> templateAliases) throws ESOperateException {
         TemplateConfig templateConfig = fetchTemplateConfig(cluster, templateName);
         if (CollectionUtils.isEmpty(templateAliases)) {
-            sLogger.info("class=TemplatePhyAliasesManagerImpl||method=deleteTemplateAliases||"
-                         + "msg=templateNotFound||cluster={}||template={}",
+            Logger.info("class=TemplatePhyAliasesManagerImpl||method=deleteTemplateAliases||"
+                        + "msg=templateNotFound||cluster={}||template={}",
                 cluster, templateName);
             throw new ESOperateException("非法的参数");
         }
@@ -270,8 +270,8 @@ public class TemplatePhyAliasManagerImpl implements TemplatePhyAliasManager {
 
         TemplateConfig templateConfig = esTemplateService.syncGetTemplateConfig(cluster, templateName);
         if (templateConfig == null) {
-            sLogger.info("class=TemplatePhyAliasesManagerImpl||method=deleteTemplateAlias||"
-                         + "msg=templateNotFound||cluster={}||template={}",
+            Logger.info("class=TemplatePhyAliasesManagerImpl||method=deleteTemplateAlias||"
+                        + "msg=templateNotFound||cluster={}||template={}",
                 cluster, templateName);
             throw new ESOperateException("模板配置不存在");
         }
@@ -287,8 +287,8 @@ public class TemplatePhyAliasManagerImpl implements TemplatePhyAliasManager {
 
         Map<String,TemplateConfig> templateConfigMap = esTemplateService.syncGetAllTemplates(clusters);
         if (templateConfigMap == null) {
-            sLogger.info("class=TemplatePhyAliasesManagerImpl||method=deleteTemplateAlias||"
-                            + "msg=templateNotFound||cluster={}",
+            Logger.info("class=TemplatePhyAliasesManagerImpl||method=deleteTemplateAlias||"
+                        + "msg=templateNotFound||cluster={}",
                     clusters);
             throw new ESOperateException("模板配置不存在");
         }

@@ -23,6 +23,7 @@ import com.didiglobal.logi.elasticsearch.client.response.setting.index.MultiInde
 import com.didiglobal.logi.elasticsearch.client.response.setting.template.TemplateConfig;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.google.common.collect.Maps;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -249,7 +250,7 @@ public class TemplatePhyMappingManagerImpl implements TemplatePhyMappingManager 
      * @return
      */
     private Map<String, String> createDefaultSettings(String indexName, Map<String, TypeConfig> typeConfigMap) {
-        Map<String, String> settings = new HashMap<>();
+        Map<String, String> settings = Maps.newHashMap();
         settings.put("index.mapping.total_fields.limit", "100000");
         if (typeConfigMap != null) {
             if (typeConfigMap.containsKey("_default_")) {
