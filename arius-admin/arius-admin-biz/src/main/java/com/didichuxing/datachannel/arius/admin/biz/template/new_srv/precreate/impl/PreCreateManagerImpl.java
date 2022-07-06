@@ -1,16 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.new_srv.precreate.impl;
 
-import java.util.List;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.base.impl.BaseTemplateSrvImpl;
+import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.dcdr.TemplateDCDRManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.precreate.PreCreateManager;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.dcdr.TemplateDCDRManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.NewTemplateSrvEnum;
@@ -22,6 +16,11 @@ import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
 import com.didiglobal.logi.elasticsearch.client.response.setting.index.IndexConfig;
 import com.didiglobal.logi.elasticsearch.client.response.setting.template.TemplateConfig;
+import java.util.List;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * @author chengxiang, zqr
@@ -207,5 +206,98 @@ public class PreCreateManagerImpl extends BaseTemplateSrvImpl implements PreCrea
         return esIndexService.syncDelIndex(physicalWithLogic.getCluster(), tomorrowIndexName, retryCount);
     }
 
+    /////////////////////////////srv
+     @Override
+    public boolean preCreateIndex(String phyCluster, int retryCount) {
+        if (!isTemplateSrvOpen(phyCluster)) {
+            return false;
+        }
 
+        List<IndexTemplatePhy> physicals = indexTemplatePhyService.getNormalTemplateByCluster(phyCluster);
+        if (CollectionUtils.isEmpty(physicals)) {
+            LOGGER.info(
+                "class=ESClusterPhyServiceImpl||method=preCreateIndex||cluster={}||msg=PreCreateIndexTask no template",
+                phyCluster);
+            return true;
+        }
+
+        int succeedCount = 0;
+        for (IndexTemplatePhy physical : physicals) {
+            IndexTemplateConfig config = indexTemplateService.getTemplateConfig(physical.getLogicId());
+            if (config == null || !config.getPreCreateFlags()) {
+                LOGGER.warn(
+                    "class=ESClusterPhyServiceImpl||method=preCreateIndex||cluster={}||template={}||msg=skip preCreateIndex",
+                    phyCluster, physical.getName());
+                continue;
+            }
+
+            try {
+                if (syncCreateTomorrowIndexByPhysicalId(physical.getId(), retryCount)) {
+                    succeedCount++;
+                } else {
+                    LOGGER.warn(
+                        "class=ESClusterPhyServiceImpl||method=preCreateIndex||cluster={}||template={}||msg=preCreateIndex fail",
+                        phyCluster, physical.getName());
+                }
+            } catch (Exception e) {
+                LOGGER.error("class=ESClusterPhyServiceImpl||method=preCreateIndex||errMsg={}||cluster={}||template={}",
+                    e.getMessage(), phyCluster, physical.getName(), e);
+            }
+        }
+
+        return succeedCount * 1.0 / physicals.size() > 0.7;
+    }
+
+    /**
+     * 重建明天索引
+     *
+     * @param logicId    逻辑模板id
+     * @param retryCount 重试次数
+     * @return true/false
+     */
+    @Override
+    public boolean reBuildTomorrowIndex(Integer logicId, int retryCount) throws ESOperateException {
+        List<IndexTemplatePhy> indexTemplatePhies = indexTemplatePhyService.getTemplateByLogicId(logicId);
+        if (CollectionUtils.isEmpty(indexTemplatePhies)) {
+            return true;
+        }
+
+        boolean succ = true;
+        for (IndexTemplatePhy indexTemplatePhy : indexTemplatePhies) {
+            if (syncDeleteTomorrowIndexByPhysicalId(indexTemplatePhy.getId(), retryCount)) {
+                succ = succ && syncCreateTomorrowIndexByPhysicalId(indexTemplatePhy.getId(), retryCount);
+            }
+        }
+
+        return succ;
+    }
+
+    /**
+     * 异步创建今天索引
+     * @param physicalId 物理模板id
+     * @param retryCount 重试次数
+     */
+    @Override
+    public void asyncCreateTodayAndTomorrowIndexByPhysicalId(Long physicalId, int retryCount) {
+        ariusOpThreadPool.execute(() -> {
+            try {
+                syncCreateTomorrowIndexByPhysicalId(physicalId, retryCount);
+                syncCreateTodayIndexByPhysicalId(physicalId, retryCount);
+            } catch (ESOperateException e) {
+                LOGGER.error(
+                    "class=ESIndexServiceImpl||method=asyncCreateTodayIndexAsyncByPhysicalId||errMsg={}||physicalId={}",
+                    e.getMessage(), physicalId, e);
+            }
+        });
+    }
+
+  
+
+
+
+    
+
+ 
+
+  
 }

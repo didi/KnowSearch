@@ -55,6 +55,7 @@ import org.springframework.stereotype.Service;
  * 该方法中加事务主要是为了防止MySQL主从延时导致数据不一致，后期优化时需要将该方法中需要的数据通过spring事务机制传递过来
  * @date 2019-09-03
  */
+@Deprecated
 @Service
 public class TemplatePipelineManagerImpl extends BaseTemplateSrv implements TemplatePipelineManager {
     private static final ILog   LOGGER = LogFactory.getLog(TemplatePipelineManagerImpl.class);
@@ -312,7 +313,7 @@ public class TemplatePipelineManagerImpl extends BaseTemplateSrv implements Temp
                      .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
                     .content("rateLimitOld:" + rateLimitOld + ",rateLimitNew:" + rateLimitNew)
                     .bizId(templatePhysical.getId()).build());
-          
+
 
             return esSuccess;
         }

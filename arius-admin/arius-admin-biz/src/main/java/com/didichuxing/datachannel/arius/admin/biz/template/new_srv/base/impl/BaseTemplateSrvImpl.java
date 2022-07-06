@@ -1,5 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.new_srv.base.impl;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.MILLIS_PER_DAY;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_COMMON_GROUP;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.CLUSTERS_INDEX_EXPIRE_DELETE_AHEAD;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.INDEX_OPERATE_AHEAD_SECONDS;
+import static com.didichuxing.datachannel.arius.admin.common.util.IndexNameFactory.genIndexNameClear;
+
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.TemplateSrvManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.base.BaseTemplateSrv;
@@ -8,19 +14,26 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithClusterAndMasterTemplate;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.constant.ESClusterVersionEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
 import com.didichuxing.datachannel.arius.admin.common.tuple.Tuples;
+import com.didichuxing.datachannel.arius.admin.common.util.AriusDateUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ESVersionUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.IndexNameFactory;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.TemplateUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
+import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
@@ -28,7 +41,12 @@ import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import java.util.Date;
 import java.util.List;
+import java.util.Set;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,11 +70,15 @@ public abstract class BaseTemplateSrvImpl implements BaseTemplateSrv {
     protected TemplateSrvManager      templateSrvManager;
 
     @Autowired
-    private ClusterPhyService         clusterPhyService;
+    protected ClusterPhyService         clusterPhyService;
     @Autowired
     protected OperateRecordService operateRecordService;
     @Autowired
-    protected ProjectService       projectService;
+    protected ProjectService         projectService;
+    @Autowired
+    protected AriusConfigInfoService ariusConfigInfoService;
+   
+    
     @Override
     public boolean isTemplateSrvOpen(Integer templateId) {
         return templateSrvManager.isTemplateSrvOpen(templateId, templateSrv().getCode());
@@ -198,4 +220,144 @@ public abstract class BaseTemplateSrvImpl implements BaseTemplateSrv {
         }
     }
     
+    
+    
+     ///////////////////////////////////srv
+     @Override
+    public boolean isTemplateSrvOpen(String phyClusterName) {
+        boolean enable =isPhyClusterOpenTemplateSrv(phyClusterName, templateSrv().getCode());
+
+        LOGGER.info("class=BaseTemplateSrv||method=enableTemplateSrv||clusterName={}||enable={}||templateSrv={}",
+            phyClusterName, enable, templateServiceName());
+
+        return enable;
+    }
+
+    @Override
+    public boolean isTemplateSrvOpen(List<IndexTemplatePhy> indexTemplatePhies) {
+        for (IndexTemplatePhy indexTemplatePhy : indexTemplatePhies) {
+            if (!isTemplateSrvOpen(indexTemplatePhy.getCluster())) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    @Override
+    public Result<Boolean> checkOpenTemplateSrvByCluster(String phyCluster){
+        return Result.buildSucc(Boolean.TRUE);
+    }
+
+    @Override
+    public Result<Boolean> checkOpenTemplateSrvWhenClusterJoin(String httpAddresses, String password) {
+        return Result.buildSucc(Boolean.TRUE);
+    }
+
+    @Override
+    public String templateServiceName() {
+        return templateSrv().getServiceName();
+    }
+    ////////private
+    private boolean isPhyClusterOpenTemplateSrv(String phyCluster, int srvId) {
+        try {
+            Result<List<ClusterTemplateSrv>> result =clusterPhyService. getPhyClusterTemplateSrv(phyCluster);
+            if (null == result || result.failed()) {
+                return false;
+            }
+        
+            List<ClusterTemplateSrv> clusterTemplateSrvs = result.getData();
+            for (ClusterTemplateSrv templateSrv : clusterTemplateSrvs) {
+                if (srvId == templateSrv.getServiceId()) {
+                    return true;
+                }
+            }
+        
+            return false;
+        } catch (Exception e) {
+            LOGGER.warn("class=TemplateSrvManager||method=isPhyClusterOpenTemplateSrv||phyCluster={}||srvId={}",
+                    phyCluster, srvId, e);
+        
+            return true;
+        }
+    }
+    
+    
+     protected Set<String> getIndexByBeforeDay(IndexTemplatePhyWithLogic physicalWithLogic, int days) {
+        try {
+            IndexTemplate logicTemplate = physicalWithLogic.getLogicTemplate();
+
+            if (!physicalWithLogic.getExpression().endsWith("*")) {
+                return Sets.newHashSet();
+            }
+
+            if (!TemplateUtils.isSaveByDay(logicTemplate.getDateFormat())
+                    && !TemplateUtils.isSaveByMonth(logicTemplate.getDateFormat())) {
+                return Sets.newHashSet();
+            }
+
+            List<String> indices = indexTemplatePhyService.getMatchIndexNames(physicalWithLogic.getId());
+            if (CollectionUtils.isEmpty(indices)) {
+                LOGGER.info("class=TemplatePhyManagerImpl||method=getIndexByBeforeDay||template={}||msg=no match indices", logicTemplate.getName());
+                return Sets.newHashSet();
+            }
+
+            return getFinalIndexSet(physicalWithLogic, days, logicTemplate, indices);
+        } catch (Exception e) {
+            LOGGER.warn("class=TemplatePhyManagerImpl||method=getIndexByBeforeDay||templateName={}||errMsg={}", physicalWithLogic.getName(),
+                    e.getMessage(), e);
+        }
+
+        return Sets.newHashSet();
+    }
+    private Set<String> getFinalIndexSet(IndexTemplatePhyWithLogic physicalWithLogic, int days, IndexTemplate logicTemplate, List<String> indices) {
+        Set<String> finalIndexSet = Sets.newHashSet();
+        for (String indexName : indices) {
+            if (StringUtils.isBlank(indexName)) {
+                continue;
+            }
+
+            Date indexTime = IndexNameFactory.genIndexTimeByIndexName(
+                    genIndexNameClear(indexName, logicTemplate.getExpression()), logicTemplate.getExpression(),
+                    logicTemplate.getDateFormat());
+
+            if (indexTime == null) {
+                LOGGER.warn(
+                        "class=TemplatePhyManagerImpl||method=getIndexByBeforeDay||template={}||indexName={}||msg=template parse index time fail",
+                        logicTemplate.getName(), indexName);
+                continue;
+            }
+
+            if (TemplateUtils.isSaveByMonth(logicTemplate.getDateFormat())) {
+                // 需要将索引时间定为当月的最后一天 确保最后一天的数据能被保留到保存时长
+                indexTime = AriusDateUtils.getLastDayOfTheMonth(indexTime);
+            }
+
+            if (needOperateAhead(physicalWithLogic)) {
+                int aheadSeconds = ariusConfigInfoService.intSetting(ARIUS_COMMON_GROUP,
+                        INDEX_OPERATE_AHEAD_SECONDS, 2 * 60 * 60);
+                indexTime = AriusDateUtils.getBeforeSeconds(indexTime, aheadSeconds);
+            }
+
+            long timeIntervalDay = (System.currentTimeMillis() - indexTime.getTime()) / MILLIS_PER_DAY;
+            if (timeIntervalDay < days) {
+                LOGGER.info(
+                        "class=TemplatePhyManagerImpl||method=getIndexByBeforeDay||template={}||indexName={}||timeIntervalDay={}||msg=index not match",
+                        logicTemplate.getName(), indexName, timeIntervalDay);
+                continue;
+            }
+
+            LOGGER.info("class=TemplatePhyManagerImpl||method=getIndexByBeforeDay||indexName={}||indexTime={}||timeIntervalDay={}", indexName,
+                    indexTime, timeIntervalDay);
+
+            finalIndexSet.add(indexName);
+        }
+        return finalIndexSet;
+    }
+    private boolean needOperateAhead(IndexTemplatePhyWithLogic physicalWithLogic) {
+        Set<String> clusterSet = ariusConfigInfoService.stringSettingSplit2Set(ARIUS_COMMON_GROUP,
+                CLUSTERS_INDEX_EXPIRE_DELETE_AHEAD, "", ",");
+        return clusterSet.contains(physicalWithLogic.getCluster());
+    }
+
 }

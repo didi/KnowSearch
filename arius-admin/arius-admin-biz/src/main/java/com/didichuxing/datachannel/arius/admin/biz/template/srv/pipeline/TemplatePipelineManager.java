@@ -2,14 +2,15 @@ package com.didichuxing.datachannel.arius.admin.biz.template.srv.pipeline;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 
 /**
  * @author d06679
  * @date 2019-09-03
  */
+@Deprecated
 public interface TemplatePipelineManager {
 
     /**

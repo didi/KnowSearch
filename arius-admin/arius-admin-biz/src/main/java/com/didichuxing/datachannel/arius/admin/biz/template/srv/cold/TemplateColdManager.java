@@ -8,6 +8,7 @@ import java.util.Set;
  * @author zqr
  * @date 2020-09-09
  */
+@Deprecated
 public interface TemplateColdManager {
 
     /**

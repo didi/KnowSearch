@@ -10,6 +10,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.Ope
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -62,10 +63,12 @@ public interface IndexTemplatePhyService {
 
     /**
      * 删除
+     *
      * @param cluster 物理集群名称
-     * @param name 模板名称
+     * @param name    模板名称
+     * @return
      */
-    void deleteDirtyByClusterAndName(String cluster, String name);
+    Boolean deleteDirtyByClusterAndName(String cluster, String name);
 
     /**
      * 删除
@@ -272,4 +275,14 @@ public interface IndexTemplatePhyService {
      * @return    Result<List<IndexTemplatePhy>>
      */
     Result<List<IndexTemplatePhy>> listByRegionId(Integer regionId);
+    
+    IndexTemplatePhyWithLogic buildIndexTemplatePhysicalWithLogicByPhysicalId(Long physicalId);
+    
+    List<IndexTemplatePhyPO> getByClusterAndNameAndStatus(String cluster, String name, int code);
+    
+    Collection<IndexTemplatePhyPO> getByClusterAndStatus(String cluster, int code);
+    
+    boolean updateStatus(Long physicalId, int code);
+    
+    boolean updateByIndexTemplatePhyPO(IndexTemplatePhyPO physicalPO);
 }

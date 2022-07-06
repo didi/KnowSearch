@@ -1,16 +1,16 @@
 package com.didichuxing.datachannel.arius.admin.task.template;
 
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.cold.TemplateColdManager;
-import com.didichuxing.datachannel.arius.admin.task.TaskConcurrentConstants;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.cold.ColdManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.task.BaseConcurrentClusterTask;
+import com.didichuxing.datachannel.arius.admin.task.TaskConcurrentConstants;
 import com.didiglobal.logi.job.annotation.Task;
 import com.didiglobal.logi.job.common.TaskResult;
 import com.didiglobal.logi.job.core.job.Job;
 import com.didiglobal.logi.job.core.job.JobContext;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Created by d06679 on 2018/3/14.
@@ -21,7 +21,7 @@ public class ColdDataMoveRandomTask extends BaseConcurrentClusterTask implements
     private static final ILog LOGGER = LogFactory.getLog(ColdDataMoveRandomTask.class);
 
     @Autowired
-    private TemplateColdManager templateColdManager;
+    private ColdManager templateColdManager;
 
     @Override
     public TaskResult execute(JobContext jobContext) throws Exception {

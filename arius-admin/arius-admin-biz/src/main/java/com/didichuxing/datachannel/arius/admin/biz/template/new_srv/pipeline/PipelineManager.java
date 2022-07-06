@@ -3,6 +3,8 @@ package com.didichuxing.datachannel.arius.admin.biz.template.new_srv.pipeline;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 
 /**
  * @author chengxiang, d06679
@@ -53,5 +55,60 @@ public interface PipelineManager {
      * @return
      */
     Integer getRateLimit(Integer templatePhyId);
+    
+    
+    
+    
+    //////////////////////////SRV
+        /**
+     * 修复模板的pipeline
+     * @param logicId
+     * @return
+     */
+    Result<Void> repairPipeline(Integer logicId) throws ESOperateException;
+
+    /**
+     * 同步pipeline
+     * @param indexTemplatePhysicalInfo  物理模板
+     * @param logicWithPhysical 逻辑模板
+     */
+    void syncPipeline(IndexTemplatePhy indexTemplatePhysicalInfo, IndexTemplateWithPhyTemplates logicWithPhysical);
+
+    /**
+     * 创建
+     * @param indexTemplatePhysicalInfo 物理模板
+     * @param logicWithPhysical 逻辑模板
+     * @return true/false
+     */
+    boolean createPipeline(IndexTemplatePhy indexTemplatePhysicalInfo,
+                           IndexTemplateWithPhyTemplates logicWithPhysical) throws ESOperateException;
+
+    /**
+     * 删除
+     * @param indexTemplatePhysicalInfo 物理模板
+     * @return true/false
+     */
+    boolean deletePipeline(IndexTemplatePhy indexTemplatePhysicalInfo) throws ESOperateException;
+
+    
+
+    /**
+     * 修改物理字段
+     * @param oldTemplate 物理模板
+     * @return true/false
+     */
+    boolean editFromTemplatePhysical(IndexTemplatePhy oldTemplate, IndexTemplatePhy newTemplate,
+                                     IndexTemplateWithPhyTemplates logicWithPhysical) throws ESOperateException;
+
+    /**
+     * 调整限流值
+     *
+     * @param indexTemplatePhysicalInfo 名字
+     * @param percent 百分比 [-99, 1000]
+     * @return true/false
+     */
+    boolean editRateLimitByPercent(IndexTemplatePhy indexTemplatePhysicalInfo, Integer percent) throws ESOperateException;
+
+    Integer getRateLimit(IndexTemplatePhy indexTemplatePhysicalMasterInfo);
 
 }

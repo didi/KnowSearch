@@ -1,7 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.new_srv.cold;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 
 /**
  * @author chengxiang, zqr
@@ -22,4 +21,23 @@ public interface ColdManager {
      * @return
      */
     int fetchClusterDefaultHotDay(String phyCluster);
+    
+    ///////////////srv
+        /**
+     * move2ColdNode
+     * @param cluster
+     * @return
+     */
+    Result<Boolean> move2ColdNode(String cluster);
+
+
+    
+
+    /**
+     * batchChangeHotDay
+     * @param days
+     * @param operator
+     * @return
+     */
+    Result<Integer> batchChangeHotDay(Integer days, String operator);
 }

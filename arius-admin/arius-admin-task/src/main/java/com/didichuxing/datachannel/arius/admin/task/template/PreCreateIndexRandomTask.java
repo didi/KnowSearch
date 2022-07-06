@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.task.template;
 
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.precreate.TemplatePreCreateManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.precreate.PreCreateManager;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.task.BaseConcurrentClusterTask;
 import com.didichuxing.datachannel.arius.admin.task.TaskConcurrentConstants;
@@ -26,7 +26,7 @@ public class PreCreateIndexRandomTask extends BaseConcurrentClusterTask implemen
     private static final ILog  LOGGER = LogFactory.getLog(PreCreateIndexRandomTask.class);
 
     @Autowired
-    private TemplatePreCreateManager templatePreCreateManager;
+    private PreCreateManager templatePreCreateManager;
 
     @Override
     public TaskResult execute(JobContext jobContext) throws Exception {

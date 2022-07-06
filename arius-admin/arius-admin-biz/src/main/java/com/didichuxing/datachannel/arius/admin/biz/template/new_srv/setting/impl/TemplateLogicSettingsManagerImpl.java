@@ -1,6 +1,5 @@
-package com.didichuxing.datachannel.arius.admin.biz.template.srv.setting.impl;
+package com.didichuxing.datachannel.arius.admin.biz.template.new_srv.setting.impl;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum.TEMPLATE_SETTING;
 import static com.didichuxing.datachannel.arius.admin.common.mapping.AriusIndexTemplateSetting.ASYNC;
 import static com.didichuxing.datachannel.arius.admin.common.mapping.AriusIndexTemplateSetting.NUMBER_OF_REPLICAS_KEY;
 import static com.didichuxing.datachannel.arius.admin.common.mapping.AriusIndexTemplateSetting.REQUEST;
@@ -9,11 +8,11 @@ import static com.didichuxing.datachannel.arius.admin.common.mapping.AriusIndexT
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.BaseTemplateSrv;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping.TemplateLogicMappingManager;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.precreate.TemplatePreCreateManager;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.setting.TemplateLogicSettingsManager;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.setting.TemplatePhySettingsManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.base.impl.BaseTemplateSrvImpl;
+import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.mapping.TemplateLogicMappingManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.precreate.PreCreateManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.setting.TemplateLogicSettingsManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.setting.TemplatePhySettingsManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateSettingDTO;
@@ -25,18 +24,16 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateSettingVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.NewTemplateSrvEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.mapping.AriusIndexTemplateSetting;
 import com.didichuxing.datachannel.arius.admin.common.mapping.AriusTypeProperty;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
-import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
 import com.didiglobal.logi.elasticsearch.client.response.setting.template.TemplateConfig;
 import com.didiglobal.logi.elasticsearch.client.utils.JsonUtils;
-import com.didiglobal.logi.security.service.ProjectService;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -52,7 +49,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @date 2020-09-09
  */
 @Service
-public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrv implements TemplateLogicSettingsManager {
+public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrvImpl implements TemplateLogicSettingsManager {
 
     @Autowired
     private TemplatePhySettingsManager templatePhySettingsManager;
@@ -61,19 +58,20 @@ public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrv implements
     private TemplateLogicMappingManager templateLogicMappingManager;
 
     @Autowired
-    private TemplatePreCreateManager templatePreCreateManager;
+    private PreCreateManager  templatePreCreateManager;
     @Autowired
-    private ESTemplateService        esTemplateService;
-    @Autowired
-    private OperateRecordService operateRecordService;
-    @Autowired
-    private ProjectService       projectService;
-
+    private ESTemplateService esTemplateService;
+    
+    
+    
+    /**
+     * @return
+     */
     @Override
-    public TemplateServiceEnum templateService() {
-        return TEMPLATE_SETTING;
+    public NewTemplateSrvEnum templateSrv() {
+        return NewTemplateSrvEnum.TEMPLATE_SETTING;
     }
-
+    
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Result<Void> modifySetting(ConsoleTemplateSettingDTO settingDTO, String operator, Integer projectId) throws AdminOperateException {

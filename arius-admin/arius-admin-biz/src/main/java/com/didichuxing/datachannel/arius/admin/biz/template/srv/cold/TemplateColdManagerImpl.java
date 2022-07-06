@@ -39,6 +39,7 @@ import org.springframework.stereotype.Service;
  * @date 2020-09-09
  */
 @Service
+@Deprecated
 public class TemplateColdManagerImpl extends BaseTemplateSrv implements TemplateColdManager {
 
     public static final int MAX_HOT_DAY = 2;
@@ -46,7 +47,7 @@ public class TemplateColdManagerImpl extends BaseTemplateSrv implements Template
     @Autowired
     private AriusConfigInfoService ariusConfigInfoService;
 
-  
+
     @Autowired
     private IndexTemplateDAO indexTemplateDAO;
 
@@ -215,9 +216,9 @@ public class TemplateColdManagerImpl extends BaseTemplateSrv implements Template
         operateRecordService.save(
                 new OperateRecord.Builder().userOperation(operator).operationTypeEnum(OperateTypeEnum.SETTING_MODIFY)
                         .bizId(-1)
-                    
+
                         .content("deltaHotDays:" + days + ";editCount:" + count).build());
-      
+
 
         return Result.buildSucc(count);
     }

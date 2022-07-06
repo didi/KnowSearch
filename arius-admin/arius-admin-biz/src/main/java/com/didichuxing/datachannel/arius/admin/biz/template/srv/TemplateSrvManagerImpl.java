@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv;
 
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.BaseTemplateSrvInterface;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.BaseTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
@@ -77,12 +77,12 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
 
     private static final String   CLUSTER_LOGIC_NOT_EXISTS    = "逻辑集群不存在";
 
-    Map<Integer, BaseTemplateSrvInterface> templateHandlerMap = new HashMap<>();
+    Map<Integer, BaseTemplateSrv> templateHandlerMap = new HashMap<>();
 
     @PostConstruct
     public void init() {
         LOGGER.info("class=TemplateSrvManagerImpl||method=init||TemplateSrvManagerImpl init start.");
-        Map<String, BaseTemplateSrvInterface> strTemplateHandlerMap = SpringTool.getBeansOfType(BaseTemplateSrvInterface.class);
+        Map<String, BaseTemplateSrv> strTemplateHandlerMap = SpringTool.getBeansOfType(BaseTemplateSrv.class);
 
         strTemplateHandlerMap.forEach((key, val) -> {
             try {
@@ -103,7 +103,7 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
 
     @Override
     public ClusterTemplateSrv getTemplateServiceBySrvId(int srvId) {
-        return convertFromEnum(TemplateServiceEnum.getById(srvId));
+        return TemplateServiceEnum.convertFromEnum(TemplateServiceEnum.getById(srvId));
     }
 
     @Override
@@ -192,7 +192,7 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
             }
 
             if (ESVersionUtil.isHigher(clusterVersion, templateSrvVersion)) {
-                templateServices.add(convertFromEnum(templateServiceEnum));
+                templateServices.add(TemplateServiceEnum.convertFromEnum(templateServiceEnum));
             }
         }
 
@@ -348,7 +348,7 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
                               .operationTypeEnum(OperateTypeEnum.INDEXING_SERVICE_RUN)
                               .userOperation(operator)
                       .build());
-            
+
         }
         return result;
     }
@@ -384,7 +384,7 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
         if (result.failed()) {
             return Result.buildFail(result.getMessage());
         }
-    
+
 
         for (String associatedClusterPhyName : associatedClusterPhyNames) {
             try {
@@ -482,7 +482,7 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
         if (result.failed()) {
             return Result.buildFail(result.getMessage());
         }
-    
+
 
         for (String associatedClusterPhyName : associatedClusterPhyNames) {
             try {
@@ -527,15 +527,7 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
         return result;
     }
 
-    /**************************************** private method ****************************************************/
-    private ClusterTemplateSrv convertFromEnum(TemplateServiceEnum serviceEnum) {
-        ClusterTemplateSrv clusterTemplateSrv = new ClusterTemplateSrv();
-        clusterTemplateSrv.setServiceId(serviceEnum.getCode());
-        clusterTemplateSrv.setServiceName(serviceEnum.getServiceName());
-        clusterTemplateSrv.setEsVersion(serviceEnum.getEsClusterVersion().getVersion());
 
-        return clusterTemplateSrv;
-    }
 
     private boolean isRDOrOP(String operator) {
         return roleTool.isAdmin(operator);

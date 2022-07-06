@@ -3,6 +3,7 @@ package com.didichuxing.datachannel.arius.admin.biz.template.srv.precreate;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 
+@Deprecated
 public interface TemplatePreCreateManager {
 
     /**

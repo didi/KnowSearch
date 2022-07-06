@@ -5,8 +5,7 @@ import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import com.didichuxing.datachannel.arius.admin.biz.gateway.impl.GatewayManagerImpl;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.TemplateSrvManager;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.aliases.TemplateLogicAliasesManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.aliases.TemplateLogicAliasesManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.GatewayHeartbeat;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.alias.IndexTemplateAliasDTO;
@@ -82,8 +81,6 @@ public class GatewayManagerTest {
     private AriusConfigInfoService          mockAriusConfigInfoService;
     @Mock
     private DslStatisService                mockDslStatisService;
-    @Mock
-    private TemplateSrvManager              mockTemplateSrvManager;
     @Mock
     private TemplateLogicAliasService       mockTemplateLogicAliasService;
     @Mock
@@ -246,7 +243,6 @@ public class GatewayManagerTest {
                 new IndexTemplatePhy(0L, 0, "name", "expression", "cluster", "rack", 0, 0, 0, 0, 0, "config",
                         0)))))).thenReturn(indexTemplateAliases);
         
-        when(mockTemplateSrvManager.getPhyClusterByOpenTemplateSrv(0)).thenReturn(Arrays.asList("value"));
         
         // Run the test
         final Result<Map<String, GatewayTemplateDeployInfoVO>> result = gatewayManagerImplUnderTest.listDeployInfo(

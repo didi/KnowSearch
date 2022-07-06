@@ -9,18 +9,22 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplatePhysicalUpgradeDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.NewTemplateSrvEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusDateUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.IndexNameUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.TemplateUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didiglobal.logi.elasticsearch.client.response.indices.stats.IndexNodes;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -363,5 +367,94 @@ public class IndexPlanManagerImpl extends BaseTemplateSrvImpl implements IndexPl
         }
         return (shard / shardRouting + 1) * shardRouting;
     }
+    
+    
+    /////////////////////////SRV
+     @Override
+    public boolean indexRollover(String phyClusterName) {
+        LOGGER.info("class=CapacityPlanManagerImpl||method=indexRollover||cluster={}||msg=start indexRollover", phyClusterName);
+        // 判断指定物理集群是否开启了当前索引服务
+        if (!isTemplateSrvOpen(phyClusterName)) {
+            return false;
+        }
+
+        // 获取所有的索引物理模版
+        List<IndexTemplatePhy> templatePhyList = indexTemplatePhyService.getNormalTemplateByCluster(phyClusterName);
+        if (CollectionUtils.isEmpty(templatePhyList)) {
+            LOGGER.info("class=CapacityPlanManagerImpl||method=indexRollover||cluster={}||msg=IndexRolloverTask no template", phyClusterName);
+            return true;
+        }
+
+        for(IndexTemplatePhy phyTemplate : templatePhyList) {
+            // 判断该索引模版是否开启当前索引服务
+            IndexTemplateConfig config = indexTemplateService.getTemplateConfig(phyTemplate.getLogicId());
+            if (config == null || config.getDisableIndexRollover()) {
+                LOGGER.info(
+                        "class=CapacityPlanManagerImpl||method=indexRollover||cluster={}||template={}||msg=skip indexRollover",
+                        phyClusterName, phyTemplate.getName());
+                continue;
+            }
+
+            // 获取逻辑模版信息
+            IndexTemplate logiTemplate = indexTemplateService.getLogicTemplateById(phyTemplate.getLogicId());
+
+            // 根据索引分区规则，获取当天或当月或不分区带有版本信息的索引的名字
+            String indexName = getIndexNameByDateFormat(logiTemplate, phyTemplate);
+
+            // 获取indexNodes信息（该索引对应的元信息）
+            IndexNodes indexNodes = getIndexNodes(indexName, phyClusterName);
+            // 获取索引的主shard个数，这里不能直接从数据库获取，因为可能会被改变，所以从ES中获取
+            Integer primaryShardCnt = esIndexService.syncGetIndexPrimaryShardNumber(phyClusterName, indexName);
+            if(primaryShardCnt == null || indexNodes == null) {
+                continue;
+            }
+
+            // 当天最高版本的索引占用磁盘的容量
+            long curSizeInBytes = indexNodes.getPrimaries().getStore().getSizeInBytes();
+            double curSizeInGb = curSizeInBytes * BYTE_TO_G;
+
+            if(curSizeInGb >= primaryShardCnt * 50) {
+                // 如果大于（主shard个数 * 推荐的单个shard大小50G），直接升版本
+                updateTemplateVersion(phyTemplate);
+            } else if(curSizeInGb >= primaryShardCnt * 30 && TemplateUtils.isSaveByDay(logiTemplate.getDateFormat())){
+                // 如果大于（主shard个数 * 推荐的单个shard大小30G），并且索引模版是按天创建索引
+                // 获取该索引模版对应索引近7天占用磁盘的最大值
+                Long sizeInBytesMax = getMaxStoreInRecentSevenDayByTemplatePhyId((phyTemplate.getId()));
+                // 比较两者大小，大于则升版本
+                if(curSizeInBytes > sizeInBytesMax) {
+                    updateTemplateVersion(phyTemplate);
+                }
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public Result<Void> adjustShardCountByPhyClusterName(String phyClusterName) {
+        LOGGER.info("class=CapacityPlanManagerImpl||method=adjustShardCountByPhyClusterName||cluster={}||msg=start adjustShardCount", phyClusterName);
+        if(!isTemplateSrvOpen(phyClusterName)) {
+            return Result.buildFail(phyClusterName + "没有开启" + templateServiceName());
+        }
+
+        List<IndexTemplatePhy> templatePhyList = indexTemplatePhyService.listTemplate();
+
+        if (AriusObjUtils.isEmptyList(templatePhyList)) {
+            return Result.buildSucc();
+        }
+
+        Multimap<Integer/*逻辑模版id*/, IndexTemplatePhy/*物理模版*/> multimap =
+                ConvertUtil.list2MulMap(templatePhyList, IndexTemplatePhy::getLogicId);
+
+        for (Integer templateLogicId : multimap.keySet()) {
+            try {
+                governPerTemplate(multimap.get(templateLogicId));
+            } catch (Exception e) {
+                LOGGER.warn("class=CapacityPlanManagerImpl||method=adjustShardCountByPhyClusterName||templateLogicId={}||errMsg={}", templateLogicId, e.getMessage(), e);
+            }
+        }
+        return Result.buildSucc();
+    }
+    
+
 
 }

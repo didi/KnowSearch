@@ -6,6 +6,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTem
 /**
  * @author cjm
  */
+@Deprecated
 public interface IndexPlanManager {
 
     /**

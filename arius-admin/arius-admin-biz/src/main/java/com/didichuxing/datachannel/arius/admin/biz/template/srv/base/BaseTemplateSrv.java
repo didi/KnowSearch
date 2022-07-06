@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @author admin
  * @date 2022/05/09
  */
+@Deprecated
 public abstract class BaseTemplateSrv implements BaseTemplateSrvInterface {
 
     protected static final ILog    LOGGER = LogFactory.getLog(BaseTemplateSrv.class);

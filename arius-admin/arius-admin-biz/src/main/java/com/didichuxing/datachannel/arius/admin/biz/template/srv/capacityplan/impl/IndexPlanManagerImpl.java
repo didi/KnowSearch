@@ -42,6 +42,7 @@ import org.springframework.stereotype.Service;
  * @author cjm
  */
 @Service
+@Deprecated
 public class IndexPlanManagerImpl extends BaseTemplateSrv implements IndexPlanManager {
 
     @Autowired

@@ -5,13 +5,15 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfi
 
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.gateway.GatewayManager;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.TemplateSrvManager;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.aliases.TemplateLogicAliasesManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.TemplateSrvManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.aliases.TemplateLogicAliasesManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Alias;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.GatewayHeartbeat;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.IndexTemplatePhysicalConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.alias.IndexTemplateAliasDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.ScrollDslTemplateRequest;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.ScrollDslTemplateResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.gateway.GatewayClusterNode;
@@ -35,6 +37,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.template.Template
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.TemplateUtils;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.gateway.GatewayService;
 import com.didichuxing.datachannel.arius.admin.core.service.project.ESUserService;
@@ -113,6 +116,8 @@ public class GatewayManagerImpl implements GatewayManager {
     private    TemplateLogicAliasService templateLogicAliasService;
     @Autowired
     private ProjectConfigService projectConfigService;
+    @Autowired
+    private ClusterPhyService    clusterPhyService;
     
     private final Cache<String, Object> projectESUserListCache = CacheBuilder.newBuilder()
             .expireAfterWrite(1, TimeUnit.MINUTES).maximumSize(100).build();
@@ -285,7 +290,7 @@ public class GatewayManagerImpl implements GatewayManager {
         Multimap<Integer, IndexTemplateAlias> logicId2IndexTemplateAliasMultiMap = ConvertUtil
                 .list2MulMap(logicWithAliases, IndexTemplateAlias::getLogicId);
 
-        List<String> pipelineClusterSet = templateSrvManager.getPhyClusterByOpenTemplateSrv(TemplateServiceEnum.TEMPLATE_PIPELINE.getCode());
+        List<String> pipelineClusterSet = getPhyClusterByOpenTemplateSrv(TemplateServiceEnum.TEMPLATE_PIPELINE.getCode());
 
         Map<String, GatewayTemplateDeployInfoVO> result = Maps.newHashMap();
         for (IndexTemplateWithPhyTemplates logicWithPhysical : logicWithPhysicals) {
@@ -503,5 +508,45 @@ public class GatewayManagerImpl implements GatewayManager {
             slavesInfos.add(buildPhysicalDeployVO(physical));
         }
         return slavesInfos;
+    }
+    
+    public List<String> getPhyClusterByOpenTemplateSrv(int srvId) {
+        List<ClusterPhy> clusterPhies = clusterPhyService.listAllClusters();
+        return getPhyClusterByOpenTemplateSrv(clusterPhies, srvId);
+    }
+    
+      public List<String> getPhyClusterByOpenTemplateSrv(List<ClusterPhy> clusterPhies, int srvId) {
+        List<String> clusterPhyNames = new ArrayList<>();
+        if (CollectionUtils.isEmpty(clusterPhies)) {
+            return clusterPhyNames;
+        }
+        clusterPhies
+                .stream()
+                .filter(clusterPhy ->isPhyClusterOpenTemplateSrv(clusterPhy, srvId))
+                .map(ClusterPhy::getCluster)
+                .forEach(clusterPhyNames::add);
+        return clusterPhyNames;
+    }
+     public boolean isPhyClusterOpenTemplateSrv(ClusterPhy phyCluster, int srvId) {
+        try {
+            Result<List<ClusterTemplateSrv>> result =clusterPhyService. getPhyClusterTemplateSrv(phyCluster);
+            if ( result.failed()) {
+                return false;
+            }
+
+            List<ClusterTemplateSrv> clusterTemplateSrvs = result.getData();
+            for (ClusterTemplateSrv templateSrv : clusterTemplateSrvs) {
+                if (srvId == templateSrv.getServiceId()) {
+                    return true;
+                }
+            }
+
+            return false;
+        } catch (Exception e) {
+            LOGGER.warn("class=TemplateSrvManager||method=isPhyClusterOpenTemplateSrv||phyCluster={}||srvId={}",
+                    phyCluster, srvId, e);
+
+            return true;
+        }
     }
 }

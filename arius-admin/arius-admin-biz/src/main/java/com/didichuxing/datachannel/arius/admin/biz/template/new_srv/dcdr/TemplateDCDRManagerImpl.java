@@ -1,11 +1,10 @@
-package com.didichuxing.datachannel.arius.admin.biz.template.srv.dcdr;
+package com.didichuxing.datachannel.arius.admin.biz.template.new_srv.dcdr;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum.MASTER;
 import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum.SLAVE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum.TEMPLATE_DCDR;
 
 import com.alibaba.fastjson.JSON;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.BaseTemplateSrv;
+import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.base.impl.BaseTemplateSrvImpl;
 import com.didichuxing.datachannel.arius.admin.biz.worktask.OpTaskManager;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
@@ -35,8 +34,8 @@ import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.Ope
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.NewTemplateSrvEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDCDRStepEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
@@ -87,7 +86,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @date 2020-09-09
  */
 @Service
-public class TemplateDCDRManagerImpl extends BaseTemplateSrv implements TemplateDCDRManager {
+public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements TemplateDCDRManager {
 
     private static final ILog          LOGGER                    = LogFactory.getLog( TemplateDCDRManagerImpl.class);
 
@@ -164,9 +163,16 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrv implements Template
     private static final int TRY_TIMES_THREE=3;
     
 
+    
+    
+    /**
+     * @return
+     */
     @Override
-    public TemplateServiceEnum templateService() { return TEMPLATE_DCDR; }
-
+    public NewTemplateSrvEnum templateSrv() {
+        return NewTemplateSrvEnum.TEMPLATE_DCDR;
+    }
+    
     private AriusTaskThreadPool ariusTaskThreadPool;
 
     private Cache<Integer, ReentrantLock> taskId2ReentrantLockCache = CacheBuilder.newBuilder()

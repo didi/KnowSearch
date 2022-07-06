@@ -1,7 +1,7 @@
-package com.didichuxing.datachannel.arius.admin.biz.template.srv.aliases.impl;
+package com.didichuxing.datachannel.arius.admin.biz.template.new_srv.aliases.impl;
 
 import com.alibaba.fastjson.JSONObject;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.aliases.TemplatePhyAliasesManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.aliases.TemplatePhyAliasesManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyAlias;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyAliases;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminESOpRetryConstants;
@@ -11,14 +11,13 @@ import com.didichuxing.datachannel.arius.admin.core.service.template.logic.impl.
 import com.didiglobal.logi.elasticsearch.client.response.setting.template.TemplateConfig;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * 模板别名服务

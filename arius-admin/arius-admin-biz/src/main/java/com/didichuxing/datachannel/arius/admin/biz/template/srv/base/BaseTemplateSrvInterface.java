@@ -11,6 +11,7 @@ import java.util.List;
  * @author admin
  * @date 2022/05/09
  */
+@Deprecated
 public interface BaseTemplateSrvInterface {
 
     /**

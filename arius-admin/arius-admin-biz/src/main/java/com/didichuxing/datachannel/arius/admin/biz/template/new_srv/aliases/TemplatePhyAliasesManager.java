@@ -1,8 +1,7 @@
-package com.didichuxing.datachannel.arius.admin.biz.template.srv.aliases;
+package com.didichuxing.datachannel.arius.admin.biz.template.new_srv.aliases;
 
-import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyAlias;
-
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import java.util.List;
 import java.util.Map;
 

@@ -2,31 +2,33 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v2.op.cluster;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V2_OP;
 
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-
-import com.didichuxing.datachannel.arius.admin.common.exception.AdminTaskException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterNodeManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.expire.TemplateExpireManager;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.precreate.TemplatePreCreateManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.expire.ExpireManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.precreate.PreCreateManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterRoleHostDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
+import com.didichuxing.datachannel.arius.admin.common.exception.AdminTaskException;
 import com.didichuxing.datachannel.arius.admin.common.threadpool.AriusOpThreadPool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
-import com.didiglobal.logi.security.util.HttpRequestUtil;
-
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import java.util.List;
+import javax.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * @author ohushenglin_v
@@ -39,10 +41,10 @@ import io.swagger.annotations.ApiOperation;
 public class ESPhyClusterController {
 
     @Autowired
-    private TemplatePreCreateManager templatePreCreateManager;
+    private PreCreateManager templatePreCreateManager;
 
     @Autowired
-    private TemplateExpireManager    templateExpireManager;
+    private ExpireManager templateExpireManager;
 
     @Autowired
     private ClusterRoleHostService clusterRoleHostService;
@@ -61,7 +63,8 @@ public class ESPhyClusterController {
     @ApiOperation(value = "获取集群列表接口【三方接口】",tags = "【三方接口】")
     @Deprecated
     public Result<List<ClusterPhyVO>> list(@RequestBody ClusterPhyDTO param, HttpServletRequest request) {
-        return Result.buildSucc(clusterPhyManager.listClusterPhys(param));
+         return Result.buildFail("接口已经下线：迁移到v3");
+        //return Result.buildSucc(clusterPhyManager.listClusterPhys(param));
     }
 
     @PutMapping("/add")
@@ -69,7 +72,8 @@ public class ESPhyClusterController {
     @ApiOperation(value = "新建集群接口【三方接口】",tags = "【三方接口】" )
     @Deprecated
     public Result<Boolean> add(HttpServletRequest request, @RequestBody ClusterPhyDTO param) {
-        return clusterPhyManager.addCluster(param, HttpRequestUtil.getOperator(request), HttpRequestUtil.getProjectId(request));
+         return Result.buildFail("接口已经下线：迁移到v3");
+        //return clusterPhyManager.addCluster(param, HttpRequestUtil.getOperator(request), HttpRequestUtil.getProjectId(request));
     }
 
     @PostMapping("/edit")
@@ -77,7 +81,8 @@ public class ESPhyClusterController {
     @ApiOperation(value = "编辑集群接口" )
     @Deprecated
     public Result<Boolean> edit(HttpServletRequest request, @RequestBody ClusterPhyDTO param) {
-        return clusterPhyManager.editCluster(param, HttpRequestUtil.getOperator(request));
+         return Result.buildFail("接口已经下线：迁移到v3");
+        //return clusterPhyManager.editCluster(param, HttpRequestUtil.getOperator(request));
     }
 
     @PostMapping("/collectClusterNodeSettings")
@@ -86,7 +91,8 @@ public class ESPhyClusterController {
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "String", name = "cluster", value = "集群名称", required = true) })
     @Deprecated
     public Result<Void> collectClusterNodeSettings(@RequestParam(value = "cluster") String cluster) throws AdminTaskException {
-        return Result.build(clusterRoleHostService.collectClusterNodeSettings(cluster));
+         return Result.buildFail("接口已经下线：迁移到v3");
+        //return Result.build(clusterRoleHostService.collectClusterNodeSettings(cluster));
     }
 
     @PostMapping("/node/list")
@@ -94,7 +100,8 @@ public class ESPhyClusterController {
     @ApiOperation(value = "获取集群节点列表接口【三方接口】",tags = "【三方接口】" )
     @Deprecated
     public Result<List<ESClusterRoleHostVO>> nodeList(@RequestBody ESClusterRoleHostDTO param) {
-       return Result.buildSucc();
+         return Result.buildFail("接口已经下线：迁移到v3");
+       //return Result.buildSucc();
     }
 
     @GetMapping("/node/getByCluster")
@@ -103,7 +110,8 @@ public class ESPhyClusterController {
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "String", name = "cluster", value = "集群名称", required = true) })
     @Deprecated
     public Result<List<ESClusterRoleHostVO>> getNodesByCluster(@RequestParam(value = "cluster") String cluster) {
-        return Result.buildSucc();
+         return Result.buildFail("接口已经下线：迁移到v3");
+        //return Result.buildSucc();
     }
 
     @PostMapping("/deleteExpireIndex")
@@ -112,8 +120,9 @@ public class ESPhyClusterController {
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "String", name = "cluster", value = "集群名称", required = true) })
     @Deprecated
     public Result<Void> deleteExpireIndex(@RequestParam(value = "cluster") String cluster) {
-        ariusOpThreadPool.execute(() -> templateExpireManager.deleteExpireIndex(cluster));
-        return Result.buildSucc();
+        //ariusOpThreadPool.execute(() -> templateExpireManager.deleteExpireIndex(cluster));
+        //return Result.buildSucc();
+         return Result.buildFail("接口已经下线：迁移到v3");
     }
 
     @PostMapping("/preCreateIndex")
@@ -122,7 +131,8 @@ public class ESPhyClusterController {
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "String", name = "cluster", value = "集群名称", required = true) })
     @Deprecated
     public Result<Void> preCreateIndex(@RequestParam(value = "cluster") String cluster) {
-        ariusOpThreadPool.execute(() -> templatePreCreateManager.preCreateIndex(cluster, 0));
-        return Result.buildSucc();
+        //ariusOpThreadPool.execute(() -> templatePreCreateManager.preCreateIndex(cluster, 0));
+        //return Result.buildSucc();
+         return Result.buildFail("接口已经下线：迁移到v3");
     }
 }

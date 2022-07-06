@@ -3,9 +3,9 @@ package com.didichuxing.datachannel.arius.admin.biz.template.srv.expire;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
-
 import java.util.Set;
 
+@Deprecated
 public interface TemplateExpireManager {
 
     /**

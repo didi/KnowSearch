@@ -3,7 +3,7 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v2.console.templ
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V2_CONSOLE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping.TemplateLogicMappingManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.mapping.TemplateLogicMappingManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateSchemaDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateFieldConvertVO;
@@ -62,7 +62,8 @@ public class ConsoleTemplateSchemaController extends BaseConsoleTemplateControll
     @ApiOperation(value = "获取索引Schema信息接口【三方接口】",tags = "【三方接口】" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "索引ID", required = true) })
     public Result<ConsoleTemplateSchemaVO> getSchema(@RequestParam("logicId") Integer logicId) {
-        return templateLogicMappingManager.getSchema(logicId);
+         return Result.buildFail("接口已经下线：迁移到v3");
+        //return templateLogicMappingManager.getSchema(logicId);
     }
 
     @PutMapping("/schema")
@@ -77,8 +78,9 @@ public class ConsoleTemplateSchemaController extends BaseConsoleTemplateControll
             return checkAuthResult;
         }
 
-        return templateLogicMappingManager.modifySchema(schemaDTO, HttpRequestUtil.getOperator(request),
-                HttpRequestUtil.getProjectId(request));
+        //return templateLogicMappingManager.modifySchema(schemaDTO, HttpRequestUtil.getOperator(request),
+        //        HttpRequestUtil.getProjectId(request));
+         return Result.buildFail("接口已经下线：迁移到v3");
     }
 
 }

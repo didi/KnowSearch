@@ -60,8 +60,9 @@ public class ESLogicClusterController {
 
     public Result<ClusterLogicVO> getLogicClusterById(@RequestParam("resourceId") Long resourceId,
                                                       HttpServletRequest request) {
-        return Result.buildSucc(
-            clusterLogicManager.getConsoleClusterVOByIdAndProjectId(resourceId, HttpRequestUtil.getProjectId(request)));
+         return Result.buildFail("接口已经下线：迁移到v3");
+        //return Result.buildSucc(
+        //    clusterLogicManager.getConsoleClusterVOByIdAndProjectId(resourceId, HttpRequestUtil.getProjectId(request)));
     }
 
     @DeleteMapping("/resource/del")
@@ -71,8 +72,9 @@ public class ESLogicClusterController {
 
     public Result<Void> deleteLogicClusterById(HttpServletRequest request,
                                          @RequestParam(value = "resourceId") Long resourceId) throws AdminOperateException {
-        return clusterLogicManager.deleteLogicCluster(resourceId, HttpRequestUtil.getOperator(request),
-            HttpRequestUtil.getProjectId(request));
+         return Result.buildFail("接口已经下线：迁移到v3");
+        //return clusterLogicManager.deleteLogicCluster(resourceId, HttpRequestUtil.getOperator(request),
+        //    HttpRequestUtil.getProjectId(request));
     }
 
     @PutMapping("/resource/add")
@@ -80,8 +82,9 @@ public class ESLogicClusterController {
     @ApiOperation(value = "新建带有region信息的逻辑集群接口【三方接口】",tags = "【三方接口】" )
 
     public Result<Long> createLogicCluster(HttpServletRequest request, @RequestBody ESLogicClusterDTO param) {
-        return clusterLogicManager.addLogicCluster(param, HttpRequestUtil.getOperator(request),
-            HttpRequestUtil.getProjectId(request));
+         return Result.buildFail("接口已经下线：迁移到v3");
+        //return clusterLogicManager.addLogicCluster(param, HttpRequestUtil.getOperator(request),
+        //    HttpRequestUtil.getProjectId(request));
     }
 
     @PostMapping("/resource/edit")
@@ -89,7 +92,8 @@ public class ESLogicClusterController {
     @ApiOperation(value = "编辑逻辑集群接口【三方接口】",tags = "【三方接口】" )
 
     public Result<Void> modifyLogicCluster(HttpServletRequest request, @RequestBody ESLogicClusterDTO param) {
-        return clusterLogicManager.editLogicCluster(param, HttpRequestUtil.getOperator(request),HttpRequestUtil.getProjectId(request));
+         return Result.buildFail("接口已经下线：迁移到v3");
+        //return clusterLogicManager.editLogicCluster(param, HttpRequestUtil.getOperator(request),HttpRequestUtil.getProjectId(request));
     }
 
     @GetMapping("/logic/cluster/nodes")
@@ -98,6 +102,7 @@ public class ESLogicClusterController {
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Long", name = "clusterId", value = "逻辑集群ID", required = true) })
     @Deprecated
     public Result<List<ESClusterRoleHostVO>> getLogicClusterNodes(@RequestParam(value = "clusterId") Long clusterId) {
-        return Result.buildSucc();
+         return Result.buildFail("接口已经下线：迁移到v3");
+        //return Result.buildSucc();
     }
 }

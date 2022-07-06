@@ -1,15 +1,14 @@
-package com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping.impl;
+package com.didichuxing.datachannel.arius.admin.biz.template.new_srv.mapping.impl;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.DEFAULT_INDEX_MAPPING_TYPE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum.TEMPLATE_MAPPING;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.BaseTemplateSrv;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping.TemplateLogicMappingManager;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping.TemplatePhyMappingManager;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.precreate.TemplatePreCreateManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.base.impl.BaseTemplateSrvImpl;
+import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.mapping.TemplateLogicMappingManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.mapping.TemplatePhyMappingManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.precreate.PreCreateManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.MappingOptimize;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.MappingOptimizeItem;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
@@ -30,7 +29,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTe
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.NewTemplateSrvEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.mapping.AnalyzerEnum;
 import com.didichuxing.datachannel.arius.admin.common.mapping.AriusTypeProperty;
@@ -81,7 +80,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @date 2019-06-13
  */
 @Service("templateLogicMappingManagerImpl")
-public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements TemplateLogicMappingManager {
+public class TemplateLogicMappingManagerImpl extends BaseTemplateSrvImpl implements TemplateLogicMappingManager {
 
     private static final ILog              LOGGER = LogFactory.getLog(IndexTemplateServiceImpl.class);
 
@@ -93,7 +92,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
     private TemplateSattisService           templateSattisService;
 
     @Autowired
-    private TemplatePreCreateManager        templatePreCreateManager;
+    private PreCreateManager templatePreCreateManager;
 
     @Autowired
     private IndexTemplateConfigDAO         templateConfigDAO;
@@ -111,11 +110,15 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
     private static final String DOC_VALUES_STR = "doc_values";
     private static final String INDEX_STR      = "index";
 
+    
+    /**
+     * @return
+     */
     @Override
-    public TemplateServiceEnum templateService() {
-        return TEMPLATE_MAPPING;
+    public NewTemplateSrvEnum templateSrv() {
+        return NewTemplateSrvEnum.TEMPLATE_MAPPING;
     }
-
+    
     /**
      * 查询指定的逻辑模板的Field信息
      *
