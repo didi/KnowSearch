@@ -72,11 +72,11 @@ public class IndexCatESDAO extends BaseESDAO {
      * @param orderByDesc  是否降序
      * @return             Tuple<Long, List<IndexCatCellPO>> 命中数 具体数据
      */
-    public Tuple<Long, List<IndexCatCellPO>> getCatIndexInfo(String cluster, String index, String health, Integer projectId,
+    public Tuple<Long, List<IndexCatCellPO>> getCatIndexInfo(String cluster, String index, String health,String status, Integer projectId,
                                                              Long from,
                                                              Long size, String sortTerm, Boolean orderByDesc) {
         Tuple<Long, List<IndexCatCellPO>> totalHitAndIndexCatCellListTuple;
-        String queryTermDsl =  buildQueryTermDsl(cluster, index, health, projectId);
+        String queryTermDsl =  buildQueryTermDsl(cluster, index, health,status, projectId);
         String sortType     =  buildSortType(orderByDesc);
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_CAT_INDEX_INFO_BY_CONDITION,
             queryTermDsl, sortTerm, sortType, from, size);
@@ -141,11 +141,11 @@ public class IndexCatESDAO extends BaseESDAO {
      * @param health
      * @return
      */
-    private String buildQueryTermDsl(String cluster, String index, String health, Integer projectId) {
-        return "[" + buildTermCell(cluster, index, health, projectId) +"]";
+    private String buildQueryTermDsl(String cluster, String index, String health,String status, Integer projectId) {
+        return "[" + buildTermCell(cluster, index, health,status, projectId) +"]";
     }
 
-    private String buildTermCell(String cluster, String index, String health, Integer projectId) {
+    private String buildTermCell(String cluster, String index, String health,String status, Integer projectId) {
         List<String> termCellList = Lists.newArrayList();
         //projectId == null 时，属于超级项目访问；
         if (null == projectId) {
@@ -166,6 +166,11 @@ public class IndexCatESDAO extends BaseESDAO {
         //get index status term
         if (IndexStatusEnum.isStatusExit(health)) {
             termCellList.add(DSLSearchUtils.getTermCellForExactSearch(health, "health"));
+        }
+
+        //get index status term
+        if (IndexStatusEnum.isStatusExit(status)) {
+            termCellList.add(DSLSearchUtils.getTermCellForExactSearch(status, "status"));
         }
 
         //get index deleteFlag term
