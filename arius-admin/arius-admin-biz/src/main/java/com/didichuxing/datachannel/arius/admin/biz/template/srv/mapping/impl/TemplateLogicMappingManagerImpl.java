@@ -55,6 +55,7 @@ import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import java.util.ArrayList;
@@ -508,7 +509,6 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrvImpl impleme
                     .content("-").triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
             
                     .build());
-            //operateRecordService.save(TEMPLATE, EDIT_TEMPLATE_MAPPING, schemaDTO.getLogicId(), "-", operator);
 
             // 重建明天索引
             templatePreCreateManager.reBuildTomorrowIndex(schemaDTO.getLogicId(), 3);
@@ -847,7 +847,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrvImpl impleme
     }
 
     private MappingConfig convert2Mapping(String type, List<Field> fields) {
-        Map<String, TypeDefine> mappingTypes = new HashMap<>();
+        Map<String, TypeDefine> mappingTypes = Maps.newHashMap();
 
         for (Field field : fields) {
             // fields -> type
@@ -935,7 +935,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrvImpl impleme
      * @return
      */
     private List<Field> diffField(List<Field> src, List<Field> dst) {
-        Map<String, Field> srcMap = new HashMap<>();
+        Map<String, Field> srcMap =Maps.newHashMap();
 
         for (Field field : src) {
             srcMap.put(field.getName(), field);
@@ -1094,8 +1094,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrvImpl impleme
             // 就一个type，修改模板的id和routing字段
             IndexTemplateDTO templateLogicDTO = new IndexTemplateDTO();
             templateLogicDTO.setId(schemaDTO.getLogicId());
-            templateLogicDTO.setIdField(typeProperties.get(0).getIdField());
-            templateLogicDTO.setRoutingField(typeProperties.get(0).getRoutingField());
+            
             templateLogicDTO.setDateField(typeProperties.get(0).getDateField());
             templateLogicDTO.setDateFieldFormat(typeProperties.get(0).getDateFieldFormat());
             Result<Void>  editDateFieldResult = indexTemplateService.editTemplate(templateLogicDTO, operator,projectId);
@@ -1177,8 +1176,6 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrvImpl impleme
         templateLogicDTO.setId(schemaDTO.getLogicId());
         templateLogicDTO.setDateField(specialField.getDateField());
         templateLogicDTO.setDateFieldFormat(specialField.getDateFieldFormat());
-        templateLogicDTO.setIdField(specialField.getIdField());
-        templateLogicDTO.setRoutingField(specialField.getRoutingField());
         return indexTemplateService.editTemplate(templateLogicDTO, operator,projectId);
     }
 

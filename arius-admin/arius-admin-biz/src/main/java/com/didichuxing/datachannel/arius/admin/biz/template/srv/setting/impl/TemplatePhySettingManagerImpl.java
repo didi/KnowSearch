@@ -98,8 +98,6 @@ public class TemplatePhySettingManagerImpl implements TemplatePhySettingManager 
                              .content(JSON.toJSONString(new TemplateSettingOperateRecord(oldTemplateSettings, newTemplateSettings)))
                              .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
                      .build());
-            //operateRecordService.save(TEMPLATE_CONFIG, EDIT, logicId,
-            //        JSON.toJSONString(new TemplateSettingOperateRecord(oldTemplateSettings, newTemplateSettings)), operator);
         }
         return result;
     }

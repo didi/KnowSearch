@@ -1,13 +1,18 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.cluster.phy;
 
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyQuickCommandManager;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.*;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
+import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
@@ -41,6 +46,14 @@ public class ESPhyClusterQuickCommandController {
     @ApiOperation(value = "indices分布")
     public Result<List<IndicesDistributionVO>> indicesDistribution(@PathVariable String cluster) {
         return clusterPhyQuickCommandManager.indicesDistribution(cluster);
+    }
+
+    @PostMapping("/indices-distribution")
+    @ResponseBody
+    @ApiOperation(value = "indices分布")
+    public PaginationResult<IndicesDistributionVO> indicesDistribution(HttpServletRequest request,
+                                                                       @RequestBody IndexQueryDTO condition) throws NotFindSubclassException {
+        return clusterPhyQuickCommandManager.indicesDistributionPage(condition, HttpRequestUtil.getProjectId(request));
     }
 
     @PutMapping("/{cluster}/shard-distribution")
