@@ -14,84 +14,102 @@ public class AriusConfigConstant {
     }
 
     /**
-     * arius的common配置
+     * arius的common配置组
      */
-    public static final String ARIUS_COMMON_GROUP                              = "arius.common.group";
-
-    public static final String ARIUS_TEMPLATE_COLD                             = "arius.template.cold";
+    public static final String ARIUS_COMMON_GROUP                                      = "arius.common.group";
 
     /**
-     * dashboard限制阈值
+     * 集群版本列表
      */
-    public static final String DASHBOARD_THRESHOLD                             = "dashboard.threshold";
+    public static final String CLUSTER_PACKAGE_VERSION_LIST                            = "cluster.package.version_list";
+
+    /**
+     * 数据中心列表
+     */
+    public static final String CLUSTER_DATA_CENTER_LIST                                = "cluster.data.center_list";
+
+    /**
+     * 集群资源列表
+     */
+    public static final String CLUSTER_RESOURCE_TYPE_LIST                              = "cluster.resource.type_list";
+
+    /**
+     * 节点数量列表
+     */
+    public static final String CLUSTER_NODE_COUNT_LIST                                 = "cluster.node.count_list";
+
+    /**
+     * 模板时间格式列表
+     */
+    public static final String LOGIC_TEMPLATE_TIME_FORMAT_LIST                         = "logic.template.time_format_list";
+
+    /**
+     * 节点规格列表
+     */
+    public static final String CLUSTER_NODE_SPECIFICATION_LIST                         = "cluster.node.specification_list";
+
+    /**
+     * 历史索引模板shard分配是否自动调整
+     */
+    public static final String HISTORY_TEMPLATE_PHYSIC_INDICES_ALLOCATION_IS_EFFECTIVE = "history.template.physic.indices.allocation.is_effective";
+
+    /**
+     * 请求是否拦截鉴权
+     */
+    public static final String REQUEST_INTERCEPTOR_SWITCH_OPEN                         = "request.interceptor.switch.open";
 
 
-    public static final String ARIUS_QUOTA_CONFIG_GROUP                        = "arius.quota.config.group";
 
-    public static final String ARIUS_QUOTA_CONFIG_TPS_PER_CPU_WITH_REPLICA     = "arius.quota.config.tps.per.cpu.with.replica";
-
-    public static final String ARIUS_QUOTA_CONFIG_TPS_PER_CPU_NO_REPLICA       = "arius.quota.config.tps.per.cpu.NO.replica";
-
-    public static final String ARIUS_QUOTA_CONFIG_COST_PER_G_PER_MONTH         = "arius.quota.config.cost.per.g.per.month";
-
-    public static final String QUOTA_DYNAMIC_LIMIT_BLACK_LOGIC_ID              = "quota.dynamic.limit.black.logic_id";
-
-    public static final String QUOTA_DYNAMIC_LIMIT_BLACK_CLUSTER               = "quota.dynamic.limit.black.cluster";
-
-    public static final String QUOTA_DYNAMIC_LIMIT_BLACK_APP_IDS               = "quota.dynamic.limit.black.app_ids";
-
-    public static final String ARIUS_WO_AUTO_PROCESS_CREATE_TEMPLATE_DISK_MAXG = "arius.wo.auto.process.create.template.disk.maxG";
+    /**
+     * meta监控配置组
+     */
+    public static final String ARIUS_META_MONITOR_GROUP                                = "arius.meta.monitor.group";
 
     /**
      * 节点是否并行获取
      */
-    public static final String NODE_STAT_COLLECT_CONCURRENT                    = "node_stat.collect.concurrent";
+    public static final String NODE_STAT_COLLECT_CONCURRENT                            = "node_stat.collect.concurrent";
 
     /**
      * 索引是否并行获取
      */
-    public static final String INDEX_STAT_COLLECT_CONCURRENT                   = "index_stat.collect.concurrent";
+    public static final String INDEX_STAT_COLLECT_CONCURRENT                           = "index_stat.collect.concurrent";
 
-    public static final String INDEX_TEMPLATE_COLD_DAY_DEFAULT                 = "index_template.cold.day.default";
 
-    public static final String REQUEST_INTERCEPTOR_SWITCH_OPEN                 = "request.interceptor.switch.open";
-
-    public static final String INDEX_OPERATE_AHEAD_SECONDS                     = "index.operate.ahead.seconds";
-
-    public static final String CLUSTERS_INDEX_EXPIRE_DELETE_AHEAD              = "clusters.index.expire.delete.ahead";
-
-    public static final String APP_DEFAULT_READ_AUTH_INDICES                   = "app.default.read.auth.indices";
 
     /**
-     * 集群安装包版本列表
+     * dashboard阈值配置组
      */
-    public static final String CLUSTER_PACKAGE_VERSION_LIST                    = "cluster.package.version_list";
+    public static final String ARIUS_DASHBOARD_THRESHOLD_GROUP                         = "arius.dashboard.threshold.group";
 
-    public static final String CLUSTER_DATA_CENTER_LIST                        = "cluster.data.center_list";
 
-    public static final String CLUSTER_RESOURCE_TYPE_LIST                      = "cluster.resource.type_list";
 
-    public static final String CLUSTER_NODE_COUNT_LIST                         = "cluster.node.count_list";
 
-    public static final String LOGIC_TEMPLATE_TIME_FORMAT_LIST                 = "logic.template.time_format_list";
+    /**
+     * 模板冷热配置组
+     */
+    public static final String ARIUS_TEMPLATE_COLD_GROUP                               = "arius.template.cold.group";
 
-    public static final String CLUSTER_NODE_SPECIFICATION_LIST                 = "cluster.node.specification_list";
+    /**
+     * 索引模板默认冷存天数
+     */
+    public static final String INDEX_TEMPLATE_COLD_DAY_DEFAULT                         = "index_template.cold.day.default";
 
-    public static final String TEMPLATE_PHYSIC_INDICES_ALLOCATION_IS_EFFECTIVE = "template.physic.indices.allocation.is_effective";
+
 
     /**
      * default value
      */
-    public static final String CLUSTER_PACKAGE_VERSION_LIST_DEFAULT_VALUE      = "7.6.2,7.6.0,7.6.0.1400,6.6.1.900";
+    public static final String CLUSTER_PACKAGE_VERSION_LIST_DEFAULT_VALUE              = "7.6.2,7.6.0,7.6.0.1400,6.6.1.900";
 
-    public static final String CLUSTER_DATA_CENTER_LIST_DEFAULT_VALUE          = "cn,en";
+    public static final String CLUSTER_DATA_CENTER_LIST_DEFAULT_VALUE                  = "cn,en";
 
-    public static final String CLUSTER_RESOURCE_TYPE_LIST_DEFAULT_VALUE        = "信创,acs,vmware";
+    public static final String CLUSTER_RESOURCE_TYPE_LIST_DEFAULT_VALUE                = "信创,acs,vmware";
 
-    public static final String CLUSTER_NODE_COUNT_LIST_DEFAULT_VALUE           = "2,4,6,8,10,20";
+    public static final String CLUSTER_NODE_COUNT_LIST_DEFAULT_VALUE                   = "2,4,6,8,10,20";
 
-    public static final String LOGIC_TEMPLATE_TIME_FORMAT_LIST_DEFAULT_VALUE   = "yyyy-MM-dd HH:mm:ss,yyyy-MM-dd HH:mm:ss.SSS,yyyy-MM-dd HH:mm:ss.SSS Z,"
-                                                                                 + "yyyy-MM-dd'T'HH:mm:ss,yyyy-MM-dd'T'HH:mm:ss.SSS,yyyy-MM-dd'T'HH:mm:ssZ,yyyy-MM-dd'T'HH:mm:ss.SSSZ,yyyy/MM/dd HH:mm:ss,epoch_second,epoch_millis,yyyy-MM-dd";
-    public static final String CLUSTER_NODE_SPECIFICATION_LIST_DEFAULT_VALUE   = "16c-64g-3072g,16c-48g-3072g";
+    public static final String LOGIC_TEMPLATE_TIME_FORMAT_LIST_DEFAULT_VALUE           = "yyyy-MM-dd HH:mm:ss,yyyy-MM-dd HH:mm:ss.SSS,yyyy-MM-dd HH:mm:ss.SSS Z,"
+                                                                                         + "yyyy-MM-dd'T'HH:mm:ss,yyyy-MM-dd'T'HH:mm:ss.SSS,yyyy-MM-dd'T'HH:mm:ssZ,yyyy-MM-dd'T'HH:mm:ss.SSSZ,yyyy/MM/dd HH:mm:ss,epoch_second,epoch_millis,yyyy-MM-dd";
+    public static final String CLUSTER_NODE_SPECIFICATION_LIST_DEFAULT_VALUE           = "16c-64g-3072g,16c-48g-3072g";
 
 }

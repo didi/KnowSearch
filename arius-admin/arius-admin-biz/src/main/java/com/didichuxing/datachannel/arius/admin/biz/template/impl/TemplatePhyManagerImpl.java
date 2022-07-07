@@ -1,9 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.impl;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.MILLIS_PER_DAY;
-import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_COMMON_GROUP;
-import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.CLUSTERS_INDEX_EXPIRE_DELETE_AHEAD;
-import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.INDEX_OPERATE_AHEAD_SECONDS;
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.EDIT;
 import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum.MASTER;
 import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum.SLAVE;
@@ -72,14 +69,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+
+import java.util.*;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -732,12 +723,6 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         return Result.buildSucc();
     }
 
-    private boolean needOperateAhead(IndexTemplatePhyWithLogic physicalWithLogic) {
-        Set<String> clusterSet = ariusConfigInfoService.stringSettingSplit2Set(ARIUS_COMMON_GROUP,
-                CLUSTERS_INDEX_EXPIRE_DELETE_AHEAD, "", ",");
-        return clusterSet.contains(physicalWithLogic.getCluster());
-    }
-
     private Result<Void> checkMetaInner(IndexTemplatePhy templatePhysical,
                                         Map<Integer, IndexTemplate> logicId2IndexTemplateLogicMap,
                                         Set<String> esClusters) {
@@ -894,12 +879,6 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
             if (TemplateUtils.isSaveByMonth(logicTemplate.getDateFormat())) {
                 // 需要将索引时间定为当月的最后一天 确保最后一天的数据能被保留到保存时长
                 indexTime = AriusDateUtils.getLastDayOfTheMonth(indexTime);
-            }
-
-            if (needOperateAhead(physicalWithLogic)) {
-                int aheadSeconds = ariusConfigInfoService.intSetting(ARIUS_COMMON_GROUP,
-                        INDEX_OPERATE_AHEAD_SECONDS, 2 * 60 * 60);
-                indexTime = AriusDateUtils.getBeforeSeconds(indexTime, aheadSeconds);
             }
 
             long timeIntervalDay = (System.currentTimeMillis() - indexTime.getTime()) / MILLIS_PER_DAY;
