@@ -148,6 +148,11 @@ public class DslsConstant {
      */
     public static final String GET_MULTIPLE_INDEX_FIRST_INTERVAL_AGG_METRICS                 = "AriusStatsIndexInfoEsDao/getAggMultipleIndicesMetrics";
 
+    /**
+     * 查询第一个时间分片中指标数值的索引指标信息
+     */
+    public static final String GET_MULTIPLE_INDEX_FIRST_INTERVAL_AGG_METRICS_WITH_STEP       = "AriusStatsIndexInfoEsDao/getAggMultipleIndicesMetricsWithStep";
+
 
     /**
      * 查询第一个时间分片中指标数值的逻辑模板指标信息

@@ -23,7 +23,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
 @RestController
-@RequestMapping({V3_OP + "/gateway/metrics", V3 + "/metrics/gateway" })
+@RequestMapping({ V3 + "/metrics/gateway" })
 @Api(tags = "Gateway指标监控信息")
 public class GatewayMetricsController {
 

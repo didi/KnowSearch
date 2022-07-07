@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel(description = "索引清理信息")
-public class ConsoleTemplateClearDTO extends BaseDTO {
+public class TemplateClearDTO extends BaseDTO {
 
     @ApiModelProperty("索引ID")
     private Integer      logicId;

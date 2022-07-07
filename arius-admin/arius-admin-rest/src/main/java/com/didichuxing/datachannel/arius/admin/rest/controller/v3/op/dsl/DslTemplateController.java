@@ -1,7 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.dsl;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
-
 import com.didichuxing.datachannel.arius.admin.biz.dsl.DslTemplateManager;
 import com.didichuxing.datachannel.arius.admin.biz.gateway.GatewayJoinLogManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
@@ -16,25 +14,21 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import java.util.List;
-import javax.servlet.http.HttpServletRequest;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.List;
+
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
 
 /**
  * @author cjm
  */
 @NoArgsConstructor
 @RestController()
-@RequestMapping(V3_OP + "/dsl/template")
+@RequestMapping(V3 + "/dsl/template")
 @Api(tags = "DSL模版管理接口(REST)")
 public class DslTemplateController {
 
@@ -58,7 +52,7 @@ public class DslTemplateController {
         return dslTemplateManager.getDslTemplateDetail(HttpRequestUtil.getProjectId(request), dslTemplateMd5);
     }
 
-    @PutMapping(path = "/change/status/{dslTemplateMd5}")
+    @PutMapping(path = "/status/{dslTemplateMd5}")
     @ApiOperation(value = "根据dslTemplateMd5修改DSL模版状态（启用或停用）", notes = "调用该接口，直接对状态取反")
     @ApiImplicitParam(name = "dslTemplateMd5", value = "查询模板MD5List", required = true)
     public Result<Boolean> changeStatus(@PathVariable(value = "dslTemplateMd5") String dslTemplateMd5,
@@ -67,7 +61,7 @@ public class DslTemplateController {
                 HttpRequestUtil.getOperator(request), dslTemplateMd5);
     }
 
-    @PutMapping(path = "/update/queryLimit")
+    @PutMapping(path = "/query-limit")
     @ApiOperation(value = "根据dslTemplateMd5修改查询模版限流值", notes = "可批量修改")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "dslTemplateMd5List", value = "查询模板MD5List", required = true),

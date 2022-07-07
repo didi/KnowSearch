@@ -87,12 +87,12 @@ public class ESLogicClusterOpV3Controller {
         return Result.buildSucc(
                 clusterLogicManager.getClusterLogic(clusterLogicId, HttpRequestUtil.getProjectId(request)));
     }
-
+    
     @GetMapping("/{clusterLogicId}/check-region-not-empty")
     @ResponseBody
     @ApiOperation(value = "检查逻辑集群所拥有的region是否不为空")
     public Result<Boolean> checkLogicClusterRegionIsNotEmpty(@PathVariable("clusterLogicId") Long clusterLogicId) {
-        return clusterLogicManager.checkLogicClusterRegionIsNotEmpty(clusterLogicId);
+        return clusterLogicManager.isLogicClusterRegionIsNotEmpty(clusterLogicId);
     }
     
     @PutMapping()
@@ -103,20 +103,20 @@ public class ESLogicClusterOpV3Controller {
                 HttpRequestUtil.getProjectId(request));
     }
     
-    @DeleteMapping("{clusterId}")
+    @DeleteMapping("{clusterLogicId}")
     @ResponseBody
     @ApiOperation(value = "下线集群")
     
-    public Result<Void> delete(HttpServletRequest request, @PathVariable Long clusterId) throws AdminOperateException {
-        return clusterLogicManager.deleteLogicCluster(clusterId, HttpRequestUtil.getOperator(request),
+    public Result<Void> delete(HttpServletRequest request, @PathVariable Long clusterLogicId) throws AdminOperateException {
+        return clusterLogicManager.deleteLogicCluster(clusterLogicId, HttpRequestUtil.getOperator(request),
                 HttpRequestUtil.getProjectId(request));
     }
     
-    @GetMapping("/index-template-count/{clusterId}")
+    @GetMapping("/index-template-count/{clusterLogicId}")
     @ResponseBody
     @ApiOperation(value = "提示用户索引和模板的数量")
-    public Result<ClusterLogicTemplateIndexCountVO> indexTemplateCount(HttpServletRequest request, @PathVariable Long clusterId) {
-        return clusterLogicManager.indexTemplateCount(clusterId, HttpRequestUtil.getOperator(request),
+    public Result<ClusterLogicTemplateIndexCountVO> indexTemplateCount(HttpServletRequest request, @PathVariable Long clusterLogicId) {
+        return clusterLogicManager.indexTemplateCount(clusterLogicId, HttpRequestUtil.getOperator(request),
                 HttpRequestUtil.getProjectId(request));
     }
 
