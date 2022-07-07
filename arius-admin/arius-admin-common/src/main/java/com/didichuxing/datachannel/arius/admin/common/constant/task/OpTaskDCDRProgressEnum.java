@@ -33,9 +33,9 @@ public enum OpTaskDCDRProgressEnum {
         this.value = value;
     }
 
-    private Integer progress;
+    private final Integer progress;
 
-    private String  value;
+    private final String  value;
 
     public Integer getProgress() {
         return progress;

@@ -139,9 +139,9 @@ public enum ClusterPhyIndicesMetricsEnum {
         this.desc = desc;
     }
 
-    private String type;
+    private final String type;
 
-    private String desc;
+    private final String desc;
 
     public static boolean hasExist(String metricsType) {
         if (null == metricsType) {

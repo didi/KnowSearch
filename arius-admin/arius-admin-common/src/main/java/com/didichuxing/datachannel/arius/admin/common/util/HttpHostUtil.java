@@ -78,7 +78,7 @@ public class HttpHostUtil {
         int portStartIndex = url.lastIndexOf(":");
         if (portStartIndex > 0) {
             httpHost = url.substring(0, portStartIndex).replace("http://", "");
-            int portEndIndex = url.substring(portStartIndex).indexOf("/", 0);
+            int portEndIndex = url.substring(portStartIndex).indexOf("/");
             if (portEndIndex > 0) {
                 baseUrl = url.substring(portStartIndex + portEndIndex);
                 port = Integer.valueOf(url.substring(portStartIndex + 1, portStartIndex + portEndIndex));

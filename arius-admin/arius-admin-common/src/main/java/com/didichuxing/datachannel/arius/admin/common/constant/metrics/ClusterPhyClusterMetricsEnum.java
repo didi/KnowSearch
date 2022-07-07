@@ -121,9 +121,9 @@ public enum ClusterPhyClusterMetricsEnum {
         this.desc = desc;
     }
 
-    private String type;
+    private final String type;
 
-    private String desc;
+    private final String desc;
 
     public String getDesc() {
         return desc;

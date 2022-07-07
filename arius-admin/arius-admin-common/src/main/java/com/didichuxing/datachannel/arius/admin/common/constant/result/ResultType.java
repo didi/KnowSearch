@@ -72,8 +72,8 @@ public enum ResultType {
                         NOT_SUPPORT_ERROR(10030, "接口不再支持"),
     ;
 
-    private Integer code;
-    private String  message;
+    private final Integer code;
+    private final String  message;
 
     ResultType(int code, String message) {
         this.code = code;

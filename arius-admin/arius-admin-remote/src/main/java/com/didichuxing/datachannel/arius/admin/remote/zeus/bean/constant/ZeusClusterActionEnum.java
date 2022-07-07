@@ -19,7 +19,7 @@ public enum ZeusClusterActionEnum {
 
                                    RESTART("restart");
 
-    private String value;
+    private final String value;
 
     ZeusClusterActionEnum(String value) {
         this.value = value;

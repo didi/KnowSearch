@@ -20,9 +20,9 @@ public enum AriusESPackageEnum {
         this.desc = desc;
     }
 
-    private int     code;
-    private int     versionLength;
-    private String  desc;
+    private final int     code;
+    private final int     versionLength;
+    private final String  desc;
 
     public int getCode() {
         return code;

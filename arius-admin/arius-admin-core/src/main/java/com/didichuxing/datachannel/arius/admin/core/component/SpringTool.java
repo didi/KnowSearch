@@ -27,7 +27,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 public class SpringTool implements ApplicationContextAware, DisposableBean {
     private static ApplicationContext applicationContext = null;
 
-    private static Logger             logger             = LoggerFactory.getLogger(SpringTool.class);
+    private static final Logger             logger             = LoggerFactory.getLogger(SpringTool.class);
 
     /**
      * 去的存储在静态变量中的ApplicationContext

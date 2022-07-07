@@ -30,7 +30,7 @@ public class ESIndexStatsRequest extends ESBroadcastTimeoutRequest<ESIndexStatsR
     public static String MERGE = "merge";
     public static String REQUEST_CACHE = "request_cache";
 
-    private Set<String> flags = new HashSet<>();
+    private final Set<String> flags = new HashSet<>();
     private IndicesStatsLevel level = null;
 
     /**

@@ -27,9 +27,9 @@ public enum TemplateDCDRStepEnum {
         this.value = value;
     }
 
-    private int    step;
+    private final int    step;
 
-    private String value;
+    private final String value;
 
     public int getStep() {
         return step;

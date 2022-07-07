@@ -9,9 +9,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
  */
 public class LogicTemplateModifyEvent extends LogicTemplateEvent {
 
-    private IndexTemplate oldTemplate;
+    private final IndexTemplate oldTemplate;
 
-    private IndexTemplate newTemplate;
+    private final IndexTemplate newTemplate;
 
     /**
      * Create a new ApplicationEvent.

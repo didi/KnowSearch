@@ -26,9 +26,9 @@ public enum ProjectSearchTypeEnum {
         this.desc = desc;
     }
 
-    private int    code;
+    private final int    code;
 
-    private String desc;
+    private final String desc;
 
     public int getCode() {
         return code;

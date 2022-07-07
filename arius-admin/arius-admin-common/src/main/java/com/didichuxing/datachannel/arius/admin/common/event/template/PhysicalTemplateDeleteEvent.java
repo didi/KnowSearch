@@ -9,7 +9,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
  */
 public class PhysicalTemplateDeleteEvent extends PhysicalTemplateEvent {
 
-    private IndexTemplatePhy delTemplate;
+    private final IndexTemplatePhy delTemplate;
 
     /**
      * Create a new ApplicationEvent.

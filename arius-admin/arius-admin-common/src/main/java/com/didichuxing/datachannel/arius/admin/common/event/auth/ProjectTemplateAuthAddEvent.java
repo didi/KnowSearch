@@ -8,7 +8,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.Projec
  */
 public class ProjectTemplateAuthAddEvent extends ProjectAuthEvent {
 
-    private ProjectTemplateAuth projectTemplateAuth;
+    private final ProjectTemplateAuth projectTemplateAuth;
 
     public ProjectTemplateAuthAddEvent(Object source, ProjectTemplateAuth projectTemplateAuth) {
         super(source);

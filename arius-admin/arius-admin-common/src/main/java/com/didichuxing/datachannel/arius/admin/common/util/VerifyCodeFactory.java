@@ -16,7 +16,7 @@ public class VerifyCodeFactory {
 
     private static final String  CHAR_SET = "abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-    private static List<String> charList;
+    private static final List<String> charList;
 
     private static final Random random = new Random();
 

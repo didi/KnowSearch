@@ -9,9 +9,9 @@ public enum TemplateLabelAttributeEnum {
     USER("2", "用户侧");
 
 
-    private String id;
+    private final String id;
 
-    private String attribute;
+    private final String attribute;
 
 
     TemplateLabelAttributeEnum(String id, String attribute) {

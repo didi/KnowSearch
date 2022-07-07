@@ -76,7 +76,7 @@ public class ClusterLogicServiceTest extends AriusAdminApplicationTest {
     @Autowired
     private ClusterLogicService clusterLogicService;
 
-    private static String OPERATOR = "wpk";
+    private static final String OPERATOR = "wpk";
 
     @BeforeEach
     public void mockRules() {

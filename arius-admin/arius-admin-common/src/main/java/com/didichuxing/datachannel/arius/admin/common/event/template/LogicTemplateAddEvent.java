@@ -10,7 +10,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 @Deprecated
 public class LogicTemplateAddEvent extends LogicTemplateEvent {
 
-    private IndexTemplate newTemplate;
+    private final IndexTemplate newTemplate;
 
     /**
      * Create a new ApplicationEvent.

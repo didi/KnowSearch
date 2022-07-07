@@ -175,7 +175,7 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
     
     private AriusTaskThreadPool ariusTaskThreadPool;
 
-    private Cache<Integer, ReentrantLock> taskId2ReentrantLockCache = CacheBuilder.newBuilder()
+    private final Cache<Integer, ReentrantLock> taskId2ReentrantLockCache = CacheBuilder.newBuilder()
             .expireAfterWrite(30, TimeUnit.MINUTES).maximumSize(100).build();
 
     @PostConstruct

@@ -7,13 +7,13 @@ import java.util.List;
 
 public class MetricsMonitorNodeEvent extends MetaDataMetricsEvent {
 
-    private List<ESDataTempBean> esDataTempBeans;
+    private final List<ESDataTempBean> esDataTempBeans;
 
-    private List<ESNodeStats> esNodeStatsList;
+    private final List<ESNodeStats> esNodeStatsList;
 
-    private Integer clusterLevel;
+    private final Integer clusterLevel;
 
-    private String hostName;
+    private final String hostName;
 
     /**
      * Create a new ApplicationEvent.

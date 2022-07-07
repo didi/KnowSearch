@@ -10,9 +10,9 @@ public enum TemplateLabelLevelEnum {
 
                                     RED("3", "red");
 
-    private String id;
+    private final String id;
 
-    private String level;
+    private final String level;
 
     TemplateLabelLevelEnum(String id, String level) {
         this.id = id;

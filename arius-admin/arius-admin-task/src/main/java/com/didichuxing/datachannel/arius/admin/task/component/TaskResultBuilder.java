@@ -2,7 +2,7 @@ package com.didichuxing.datachannel.arius.admin.task.component;
 import com.didiglobal.logi.job.common.TaskResult;
 
 public class TaskResultBuilder {
-    private StringBuffer failMsg = new StringBuffer();
+    private final StringBuffer failMsg = new StringBuffer();
 
     public void append(String msg) {
         failMsg.append(msg + '\n');

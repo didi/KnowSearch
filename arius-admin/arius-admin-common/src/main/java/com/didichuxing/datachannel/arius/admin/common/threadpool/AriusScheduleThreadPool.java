@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 public class AriusScheduleThreadPool {
 
     private ScheduledExecutorService scheduleThreadPool;
-    private int                      scheduleThreadNum = 1 << 5;
+    private final int                      scheduleThreadNum = 1 << 5;
 
     @PostConstruct
     public void init() {

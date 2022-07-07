@@ -50,7 +50,7 @@ public class AriusObjUtils {
         if(src == null || dest == null) {
             return "";
         }
-        StringBuilder content = new StringBuilder("");
+        StringBuilder content = new StringBuilder();
         try {
             Map<String, Method> destMethodMap = Maps.newHashMap();
             for (Method destMethod : dest.getClass().getMethods()) {
@@ -91,7 +91,7 @@ public class AriusObjUtils {
         if(src == null || dest == null) {
             return "";
         }
-        StringBuilder content = new StringBuilder("");
+        StringBuilder content = new StringBuilder();
         try {
             Map<String, Method> destMethodMap = Maps.newHashMap();
             for (Method destMethod : dest.getClass().getMethods()) {

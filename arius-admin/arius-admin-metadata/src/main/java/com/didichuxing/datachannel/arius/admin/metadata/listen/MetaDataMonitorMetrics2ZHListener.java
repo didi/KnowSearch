@@ -34,7 +34,7 @@ public class MetaDataMonitorMetrics2ZHListener implements ApplicationListener<Me
     //@Value("${zh.metrics.kafka.topic}")
     private String zhMetricsKafkaTopic;
 
-    private ThreadPoolExecutor esExecutor = new ThreadPoolExecutor(10, 20, 1000, TimeUnit.MILLISECONDS,
+    private final ThreadPoolExecutor esExecutor = new ThreadPoolExecutor(10, 20, 1000, TimeUnit.MILLISECONDS,
             new LinkedBlockingDeque<>(4000),
             new NamedThreadFactory("Arius-Meta-MonitorMetricsSender-ZH"),
             (r, e) -> LOGGER.warn("class=MetaDataMonitorMetrics2ZHListener||msg=Arius-Meta-MonitorMetricsSender-ZH Deque is blocked, taskCount:{}" + e.getTaskCount()));

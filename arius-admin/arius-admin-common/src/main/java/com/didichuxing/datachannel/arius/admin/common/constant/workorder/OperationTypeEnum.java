@@ -15,9 +15,9 @@ public enum OperationTypeEnum {
     UNKNOWN(-1, "UNKNOWN")
     ;
 
-    private Integer code;
+    private final Integer code;
 
-    private String message;
+    private final String message;
 
     OperationTypeEnum(Integer code, String message) {
         this.code = code;

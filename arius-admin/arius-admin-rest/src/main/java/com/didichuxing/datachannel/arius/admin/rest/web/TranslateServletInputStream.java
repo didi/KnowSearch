@@ -12,7 +12,7 @@ import javax.servlet.ServletInputStream;
  */
 public class TranslateServletInputStream extends ServletInputStream {
 
-    private ByteArrayInputStream inputStream;
+    private final ByteArrayInputStream inputStream;
 
     private boolean              finished = false;
 

@@ -10,7 +10,7 @@ import java.util.List;
  */
 public class RegionEditEvent extends ApplicationEvent {
 
-    private List<Long> regionIdList;
+    private final List<Long> regionIdList;
 
     public RegionEditEvent(Object source, List<Long> regionIdList) {
         super(source);

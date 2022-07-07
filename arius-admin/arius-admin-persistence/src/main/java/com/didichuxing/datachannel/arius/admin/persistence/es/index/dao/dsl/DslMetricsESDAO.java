@@ -35,7 +35,7 @@ public class DslMetricsESDAO extends BaseESDAO {
     /**
      * type名称，主键id是topic_partition_offset
      */
-    private String            typeName  = "type";
+    private final String            typeName  = "type";
 
     @PostConstruct
     public void init(){

@@ -55,7 +55,7 @@ public enum AriusStatsEnum {
      */
     DASHBOARD_INFO("dashboard_info");
 
-    private String type;
+    private final String type;
 
     AriusStatsEnum(String type) {
         this.type = type;

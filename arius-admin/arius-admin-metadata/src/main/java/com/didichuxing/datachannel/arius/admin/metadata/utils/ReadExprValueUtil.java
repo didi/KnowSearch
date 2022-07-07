@@ -111,11 +111,7 @@ public class ReadExprValueUtil {
             return false;
         } else if ((o1.equals("*") || o1.equals("/")) && (o2.equals("*") || o2.equals("/"))) {
             return true;
-        } else if ((o1.equals("+") || o1.equals("-")) && (o2.equals("+") || o2.equals("-"))) {
-            return true;
-        } else {
-            return false;
-        }
+        } else return (o1.equals("+") || o1.equals("-")) && (o2.equals("+") || o2.equals("-"));
     }
 
     /**

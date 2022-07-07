@@ -14,9 +14,9 @@ public enum OrderStatusEnum {
 
                              CANCELLED(3, "取消");
 
-    private Integer code;
+    private final Integer code;
 
-    private String  message;
+    private final String  message;
 
     OrderStatusEnum(Integer code, String message) {
         this.code = code;

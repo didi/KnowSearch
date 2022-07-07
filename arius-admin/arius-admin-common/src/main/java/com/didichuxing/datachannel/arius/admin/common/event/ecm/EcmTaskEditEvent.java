@@ -8,7 +8,7 @@ import org.springframework.context.ApplicationEvent;
  */
 public class EcmTaskEditEvent extends ApplicationEvent {
 
-    private EcmTask editTask;
+    private final EcmTask editTask;
 
     /**
      * Create a new ApplicationEvent.

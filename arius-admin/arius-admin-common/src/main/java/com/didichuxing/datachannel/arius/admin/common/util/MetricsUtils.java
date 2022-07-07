@@ -194,9 +194,9 @@ public class MetricsUtils {
         TWENTY_MIN("20m"),
         ONE_HOUR("1h");
 
-        private String str;
+        private final String str;
 
-        private Interval(String str) {
+        Interval(String str) {
             this.str = str;
         }
 

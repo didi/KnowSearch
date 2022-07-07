@@ -181,10 +181,6 @@ public class ClusterPhyPO extends BasePO {
             return false;
         } else if (StringUtils.isNotBlank(other.getEsVersion()) && !other.getEsVersion().equals(esVersion)) {
             return false;
-        } else if (StringUtils.isNotBlank(esVersion) && !esVersion.equals(other.getEsVersion())) {
-            return false;
-        }
-
-        return true;
+        } else return !StringUtils.isNotBlank(esVersion) || esVersion.equals(other.getEsVersion());
     }
 }

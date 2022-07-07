@@ -57,9 +57,9 @@ public enum TypeEnum {
         this.desc = desc;
     }
 
-    private String code;
+    private final String code;
 
-    private String desc;
+    private final String desc;
 
     public String getCode() {
         return code;

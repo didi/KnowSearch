@@ -37,10 +37,10 @@ public enum IndicatorsType {
      **/
     UNKNOWN(-1, 0, "", "");
 
-    private int    code;
-    private int    weight;
-    private String name;
-    private String desc;
+    private final int    code;
+    private final int    weight;
+    private final String name;
+    private final String desc;
 
     IndicatorsType(int code, int weight, String name, String desc){
         this.code   = code;

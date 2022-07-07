@@ -26,8 +26,8 @@ public enum ClusterConnectionStatus {
         this.desc = desc;
     }
 
-    private Integer code;
-    private String desc;
+    private final Integer code;
+    private final String desc;
 
     public Integer getCode() {
         return code;

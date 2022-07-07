@@ -19,8 +19,8 @@ public enum OperateRecordSortEnum {
      */
     OPERATE_RECORD_ID("id","id");
     
-    private String sortField;
-    private String sortTerm;
+    private final String sortField;
+    private final String sortTerm;
     
     OperateRecordSortEnum(String sortField, String sortTerm) {
         this.sortField = sortField;

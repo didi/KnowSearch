@@ -119,9 +119,9 @@ public enum ClusterDynamicConfigsEnum {
             ClusterDynamicConfigsTypeEnum.ZEN,
             ClusterDynamicConfigTypeCheckFunUtil::timeCheck);
 
-    private String name;
-    private ClusterDynamicConfigsTypeEnum clusterDynamicConfigsType;
-    private Function<String, Boolean> checkFun;
+    private final String name;
+    private final ClusterDynamicConfigsTypeEnum clusterDynamicConfigsType;
+    private final Function<String, Boolean> checkFun;
 
     ClusterDynamicConfigsEnum(String name, ClusterDynamicConfigsTypeEnum clusterDynamicConfigsType, Function<String, Boolean> checkFun) {
         this.name = name;

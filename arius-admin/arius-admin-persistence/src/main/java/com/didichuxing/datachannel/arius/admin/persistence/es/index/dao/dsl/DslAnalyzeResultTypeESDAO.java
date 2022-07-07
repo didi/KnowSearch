@@ -23,7 +23,7 @@ public class DslAnalyzeResultTypeESDAO extends BaseESDAO {
     /**
      * type名称
      */
-    private String typeName = "type";
+    private final String typeName = "type";
 
     private static final int SCROLL_SIZE = 5000;
 

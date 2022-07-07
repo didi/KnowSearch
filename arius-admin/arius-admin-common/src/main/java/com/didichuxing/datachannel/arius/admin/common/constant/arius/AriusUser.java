@@ -22,7 +22,7 @@ public enum AriusUser {
         this.desc = desc;
     }
 
-    private String desc;
+    private final String desc;
 
     public String getDesc() {
         return desc;

@@ -94,7 +94,7 @@ public class MonitorClusterJob {
                                                                  "MMdd", "YYMM", "_YYMM", "YY-MM", "_YYYY-MM", "YYYY",  "_YYYY.MM.dd", "YYYY.MM.dd"};
     public static final int GROUP = 3;
 
-    private Pattern pattern   = Pattern.compile("(.*)(_v[1-9]\\d*)(.*)");
+    private final Pattern pattern   = Pattern.compile("(.*)(_v[1-9]\\d*)(.*)");
 
     private static final String COMPUTE       = "compute";
     private static final String ES_NODE       = "es.node.";
@@ -105,49 +105,49 @@ public class MonitorClusterJob {
     private static final int    INDICES_COLLECT_BATCH_SIZE  = 30;
 
     //key: cluster@templateName
-    private Cache<String, IndexTemplatePhyWithLogic> indexTemplateCache = CacheBuilder.newBuilder()
+    private final Cache<String, IndexTemplatePhyWithLogic> indexTemplateCache = CacheBuilder.newBuilder()
             .expireAfterWrite(60, TimeUnit.MINUTES).maximumSize(10000).build();
 
     //采集指标
-    private List<CollectMetrics> indexWorkOrders;
-    private List<CollectMetrics> indexToNodeWorkOrders;
-    private List<CollectMetrics> nodeWorkOrders;
-    private List<CollectMetrics> nodeToIndexWorkOrders;
-    private List<CollectMetrics> ingestWorkOrders;
-    private List<CollectMetrics> dcdrWorkOrders;
+    private final List<CollectMetrics> indexWorkOrders;
+    private final List<CollectMetrics> indexToNodeWorkOrders;
+    private final List<CollectMetrics> nodeWorkOrders;
+    private final List<CollectMetrics> nodeToIndexWorkOrders;
+    private final List<CollectMetrics> ingestWorkOrders;
+    private final List<CollectMetrics> dcdrWorkOrders;
 
     //缓存索引和节点的对应关系
-    private List<ESIndexToNodeTempBean> indexToNodeTemps      = new CopyOnWriteArrayList<>();
+    private final List<ESIndexToNodeTempBean> indexToNodeTemps      = new CopyOnWriteArrayList<>();
 
     //缓存nodeid 与 发送给es的指标数据映射关系
-    private Map<String, ESNodeStats>    nodeIdEsNodeStatsMap  = new ConcurrentHashMap<>();
+    private final Map<String, ESNodeStats>    nodeIdEsNodeStatsMap  = new ConcurrentHashMap<>();
 
-    private List<IndexTemplatePhyWithLogic>      indexTemplates        = new CopyOnWriteArrayList<>();
+    private final List<IndexTemplatePhyWithLogic>      indexTemplates        = new CopyOnWriteArrayList<>();
 
-    private ESClient                    esClient;
+    private final ESClient                    esClient;
 
-    private MonitorMetricsSender        monitorMetricsSender;
+    private final MonitorMetricsSender        monitorMetricsSender;
 
-    private MetricsRegister             metricsRegister;
+    private final MetricsRegister             metricsRegister;
 
-    private Set<String>                 clusterNodeIps = Collections.synchronizedSet(new HashSet<>());
+    private final Set<String>                 clusterNodeIps = Collections.synchronizedSet(new HashSet<>());
 
-    private ClusterPhy                  clusterPhy;
+    private final ClusterPhy                  clusterPhy;
 
     // 多type索引 启用查询映射的信息
-    private MulityTypeTemplatesInfo     mulityTypeTemplatesInfo;
+    private final MulityTypeTemplatesInfo     mulityTypeTemplatesInfo;
 
-    private AriusConfigInfoService      ariusConfigInfoService;
+    private final AriusConfigInfoService      ariusConfigInfoService;
 
-    private String                      clusterName;
+    private final String                      clusterName;
 
     private static final FutureUtil<ESNodeStatsResponse> NODE_STATS_FUTURE = FutureUtil.init("MonitorClusterJob-nodeStats",  10,10,20);
     private static final FutureUtil<ESIndexStatsResponse> INDEX_STATS_FUTURE = FutureUtil.init("MonitorClusterJob-indexStats",  10,10,20);
 
-    private StopWatch indexStopWatch        = new StopWatch();
-    private StopWatch nodeStopWatch         = new StopWatch();
-    private StopWatch dcdrStopWatch         = new StopWatch();
-    private StopWatch index2NodeStopWatch   = new StopWatch();
+    private final StopWatch indexStopWatch        = new StopWatch();
+    private final StopWatch nodeStopWatch         = new StopWatch();
+    private final StopWatch dcdrStopWatch         = new StopWatch();
+    private final StopWatch index2NodeStopWatch   = new StopWatch();
 
     // 配置组
     private static final String CONFIG_VALUE_GROUP = "arius.meta.monitor";
@@ -1203,9 +1203,7 @@ public class MonitorClusterJob {
 
         if (StringUtils.isNotBlank(indexNameNoVersion)) {
             String indexNameForTemplate = expression.replace("*", "") + dataFormat;
-            if (indexNameNoVersion.length() == indexNameForTemplate.length()) {
-                return true;
-            }
+            return indexNameNoVersion.length() == indexNameForTemplate.length();
         }
 
         return false;

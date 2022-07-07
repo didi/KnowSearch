@@ -95,9 +95,9 @@ public class EnvUtil {
         PRESSURE("pressure"),
         ONLINECN("online");
 
-        private String str;
+        private final String str;
 
-        private EnvType(String str) {
+        EnvType(String str) {
             this.str = str;
         }
 

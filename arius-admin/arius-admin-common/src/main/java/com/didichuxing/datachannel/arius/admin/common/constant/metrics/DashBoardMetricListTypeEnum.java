@@ -39,9 +39,9 @@ public enum DashBoardMetricListTypeEnum {
         this.desc = desc;
     }
 
-    private OneLevelTypeEnum oneLevelTypeEnum;
-    private String type;
-    private String desc;
+    private final OneLevelTypeEnum oneLevelTypeEnum;
+    private final String type;
+    private final String desc;
 
     public String getType() {
         return type;

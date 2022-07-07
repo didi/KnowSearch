@@ -101,13 +101,13 @@ public enum TemplateServiceEnum {
      */
     TEMPLATE_ADJUST_SHARD(16, "扩缩容", ES_2_3_3_100, 0);
 
-    private Integer code;
+    private final Integer code;
 
-    private String serviceName;
+    private final String serviceName;
 
-    private Integer defaultSrv;
+    private final Integer defaultSrv;
 
-    private ESClusterVersionEnum esClusterVersion;
+    private final ESClusterVersionEnum esClusterVersion;
 
     public Integer getCode() {
         return code;

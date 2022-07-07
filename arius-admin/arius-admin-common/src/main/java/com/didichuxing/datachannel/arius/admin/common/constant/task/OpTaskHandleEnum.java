@@ -35,9 +35,9 @@ public enum OpTaskHandleEnum {
         this.message = message;
     }
 
-    private Integer type;
+    private final Integer type;
 
-    private String  message;
+    private final String  message;
 
     public Integer getType() {
         return type;

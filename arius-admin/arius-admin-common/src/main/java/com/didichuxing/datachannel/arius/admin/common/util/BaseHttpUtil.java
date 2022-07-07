@@ -23,6 +23,7 @@ import org.apache.http.util.EntityUtils;
 import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
@@ -48,11 +49,11 @@ public class BaseHttpUtil {
     private BaseHttpUtil() {}
 
     public static String post(String url, Map<String, Object> params) throws AdminOperateException {
-        return post(url, params, (Map)null, (String)null, (String)null);
+        return post(url, params, null, null, null);
     }
 
     public static String postEncode(String url, Map<String, Object> params, String reqEncode, String resEncode) throws AdminOperateException {
-        return post(url, params, (Map)null, reqEncode, resEncode);
+        return post(url, params, null, reqEncode, resEncode);
     }
 
     public static String post(String url, Map<String, Object> params, Map<String, String> headers, String reqEncode, String resEncode) throws AdminOperateException {
@@ -78,7 +79,7 @@ public class BaseHttpUtil {
                     String k = (String)e.getKey();
                     Object v = e.getValue();
                     if(v == null) {
-                        httpParams.add(new BasicNameValuePair(k, (String)null));
+                        httpParams.add(new BasicNameValuePair(k, null));
                     } else if(!v.getClass().isArray()) {
                         httpParams.add(new BasicNameValuePair(k, v.toString()));
                     } else {
@@ -89,7 +90,7 @@ public class BaseHttpUtil {
                             if(element != null) {
                                 httpParams.add(new BasicNameValuePair(k, element.toString()));
                             } else {
-                                httpParams.add(new BasicNameValuePair(k, (String)null));
+                                httpParams.add(new BasicNameValuePair(k, null));
                             }
                         }
                     }
@@ -147,15 +148,11 @@ public class BaseHttpUtil {
                 }
             }
 
-            try {
-                BasicHttpEntity requestBody = new BasicHttpEntity();
-                requestBody.setContent(new ByteArrayInputStream(content.getBytes(UTF8)));
-                requestBody.setContentLength((long)content.getBytes(UTF8).length);
-                post.setEntity(requestBody);
-                post.getParams().setParameter(COOKIE_POLICY, COMPATIBILITY);
-            } catch (UnsupportedEncodingException var12) {
-                throw new AdminOperateException(EXCEPTION_1, var12, ResultType.FAIL);
-            }
+            BasicHttpEntity requestBody = new BasicHttpEntity();
+            requestBody.setContent(new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8)));
+            requestBody.setContentLength(content.getBytes(StandardCharsets.UTF_8).length);
+            post.setEntity(requestBody);
+            post.getParams().setParameter(COOKIE_POLICY, COMPATIBILITY);
         }
 
         var4 = null;
@@ -191,14 +188,10 @@ public class BaseHttpUtil {
                 }
             }
 
-            try {
-                BasicHttpEntity requestBody = new BasicHttpEntity();
-                requestBody.setContent(new ByteArrayInputStream(content.getBytes(UTF8)));
-                requestBody.setContentLength((long)content.getBytes(UTF8).length);
-                post.getParams().setParameter(COOKIE_POLICY, COMPATIBILITY);
-            } catch (UnsupportedEncodingException var12) {
-                throw new AdminOperateException(EXCEPTION_1, var12, ResultType.FAIL);
-            }
+            BasicHttpEntity requestBody = new BasicHttpEntity();
+            requestBody.setContent(new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8)));
+            requestBody.setContentLength(content.getBytes(StandardCharsets.UTF_8).length);
+            post.getParams().setParameter(COOKIE_POLICY, COMPATIBILITY);
         }
 
         var4 = null;
@@ -235,15 +228,11 @@ public class BaseHttpUtil {
                 }
             }
 
-            try {
-                BasicHttpEntity requestBody = new BasicHttpEntity();
-                requestBody.setContent(new ByteArrayInputStream(content.getBytes(UTF8)));
-                requestBody.setContentLength((long)content.getBytes(UTF8).length);
-                 post.setEntity(requestBody);
-                post.getParams().setParameter(COOKIE_POLICY, COMPATIBILITY);
-            } catch (UnsupportedEncodingException var12) {
-                throw new AdminOperateException(EXCEPTION_1, var12, ResultType.FAIL);
-            }
+            BasicHttpEntity requestBody = new BasicHttpEntity();
+            requestBody.setContent(new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8)));
+            requestBody.setContentLength(content.getBytes(StandardCharsets.UTF_8).length);
+            post.setEntity(requestBody);
+            post.getParams().setParameter(COOKIE_POLICY, COMPATIBILITY);
         }
 
         var4 = null;
@@ -274,8 +263,8 @@ public class BaseHttpUtil {
             var3 = params.entrySet().iterator();
 
             while(var3.hasNext()) {
-                Map.Entry<String, String> e = (Map.Entry)var3.next();
-                builder.append((String)e.getKey()).append('=').append((String)e.getValue()).append('&');
+                Map.Entry<String, String> e = var3.next();
+                builder.append(e.getKey()).append('=').append(e.getValue()).append('&');
             }
 
             url = builder.toString();
@@ -336,12 +325,7 @@ public class BaseHttpUtil {
     public static Header buildHttpHeader(String esUser, String passWord) {
         // 构建认证信息的header
         Header header = null;
-        try {
-            header = new BasicHeader("Authorization", "Basic " + Base64.getEncoder().encodeToString(String.format("%s:%s", esUser, passWord).getBytes(UTF8)));
-        } catch (UnsupportedEncodingException e) {
-            LOGGER.error("class=BaseHttpUtil||method=buildHttpHeader||esUser={}||passWord={}||errMsg=encoding error",
-                    esUser, passWord, e);
-        }
+        header = new BasicHeader("Authorization", "Basic " + Base64.getEncoder().encodeToString(String.format("%s:%s", esUser, passWord).getBytes(StandardCharsets.UTF_8)));
 
         return header;
     }

@@ -55,9 +55,9 @@ public class TemplateLogicAliasServiceImpl implements TemplateLogicAliasService 
     @Autowired
     private CacheSwitch cacheSwitch;
 
-    private Cache<Integer, List<String>> templateLogicAliasCache = CacheBuilder
+    private final Cache<Integer, List<String>> templateLogicAliasCache = CacheBuilder
             .newBuilder().expireAfterWrite(60, TimeUnit.MINUTES).maximumSize(1000).build();
-    private Cache<String, Map<Integer, List<String>>> templateAliasMapCache = CacheBuilder
+    private final Cache<String, Map<Integer, List<String>>> templateAliasMapCache = CacheBuilder
             .newBuilder().expireAfterWrite(1, TimeUnit.MINUTES).maximumSize(100).build();
 
     /**

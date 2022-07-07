@@ -37,7 +37,7 @@ public enum ESClusterVersionEnum {
 
     ES_7_6_0_1202("7.6.0.1202");
 
-    private String version;
+    private final String version;
 
     public String getVersion(){
         return version;

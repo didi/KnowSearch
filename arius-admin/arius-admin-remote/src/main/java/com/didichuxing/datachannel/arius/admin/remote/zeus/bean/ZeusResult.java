@@ -13,9 +13,6 @@ public class ZeusResult {
     private String msg;
 
     public boolean failed() {
-        if (msg == null || msg.isEmpty()) {
-            return false;
-        }
-        return true;
+        return msg != null && !msg.isEmpty();
     }
 }

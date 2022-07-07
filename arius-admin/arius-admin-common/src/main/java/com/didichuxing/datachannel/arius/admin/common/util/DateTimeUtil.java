@@ -42,7 +42,7 @@ public class DateTimeUtil {
     private static final String PATTERN_3 = "yyyy-MM-dd HH:mm:ss";
 
     // 不同日期格式的正则匹配
-    private static Map<String, Pattern> dateFormatPattern = Maps.newHashMap();
+    private static final Map<String, Pattern> dateFormatPattern = Maps.newHashMap();
 
     private DateTimeUtil() {}
 

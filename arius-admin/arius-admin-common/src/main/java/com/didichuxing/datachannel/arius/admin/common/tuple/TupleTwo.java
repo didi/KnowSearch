@@ -31,11 +31,7 @@ public class TupleTwo<T1, T2> implements Tuples, Comparable<TupleTwo<T1, T2>>, S
             }
             
             final int check2 = t2Comp.compare(t1.v2, t2.v2);
-            if (check2 != 0) {
-                return check2;
-            }
-            
-            return 0;
+            return check2;
         };
     }
     
@@ -51,11 +47,7 @@ public class TupleTwo<T1, T2> implements Tuples, Comparable<TupleTwo<T1, T2>>, S
         }
         
         final int check2 = t1.v2.compareTo(t2.v2);
-        if (check2 != 0) {
-            return check2;
-        }
-        
-        return 0;
+        return check2;
     }
     
     public T1 v1() {

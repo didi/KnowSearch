@@ -59,20 +59,12 @@ public class Field {
             return false;
         }
 
-        if(!isEqual(sortType, field.sortType)) {
-            return false;
-        }
-
-        return true;
+        return isEqual(sortType, field.sortType);
     }
 
     private boolean isEqual(Object o1, Object o2) {
         if (o1 == null) {
-            if (o2 == null) {
-                return true;
-            } else {
-                return false;
-            }
+            return o2 == null;
         }
 
         return o1.equals(o2);

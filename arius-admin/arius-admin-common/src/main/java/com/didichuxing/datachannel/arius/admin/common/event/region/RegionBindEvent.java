@@ -10,11 +10,11 @@ import org.springframework.context.ApplicationEvent;
  */
 public class RegionBindEvent extends ApplicationEvent {
 
-    private ClusterRegion clusterRegion;
+    private final ClusterRegion clusterRegion;
 
-    private Integer share;
+    private final Integer share;
 
-    private String operator;
+    private final String operator;
 
     public RegionBindEvent(Object source,
                            ClusterRegion clusterRegion,

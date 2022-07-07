@@ -66,9 +66,9 @@ public enum WorkOrderTypeEnum {
         this.message = message;
     }
 
-    private String name;
+    private final String name;
 
-    private String message;
+    private final String message;
 
     public String getName() {
         return name;

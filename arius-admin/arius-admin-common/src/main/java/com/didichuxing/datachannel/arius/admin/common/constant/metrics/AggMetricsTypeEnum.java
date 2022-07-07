@@ -16,9 +16,9 @@ public enum AggMetricsTypeEnum {
 		this.type = type;
 	}
 
-	private int    code;
+	private final int    code;
 
-	private String type;
+	private final String type;
 
 	public int getCode() {
 		return code;

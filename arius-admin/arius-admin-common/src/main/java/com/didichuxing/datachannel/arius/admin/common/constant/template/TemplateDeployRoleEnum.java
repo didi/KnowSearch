@@ -17,9 +17,9 @@ public enum TemplateDeployRoleEnum {
         this.desc = desc;
     }
 
-    private Integer code;
+    private final Integer code;
 
-    private String  desc;
+    private final String  desc;
 
     public Integer getCode() {
         return code;

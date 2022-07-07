@@ -86,12 +86,8 @@ public class ESUserServiceImpl implements ESUserService {
         ESUserPO param = obj2Obj(esUserDTO, ESUserPO.class);
         final int countByProjectId = esUserDAO.countByProjectId(esUserDTO.getProjectId());
         //如果项目中已经存在es user，那么setDefaultDisplay为false
-        if (countByProjectId == 0) {
-            //新创建的项目会默认创建一个es user ，作为当前项目的默认es user
-            param.setDefaultDisplay(true);
-        } else {
-            param.setDefaultDisplay(false);
-        }
+        //新创建的项目会默认创建一个es user ，作为当前项目的默认es user
+        param.setDefaultDisplay(countByProjectId == 0);
         
         boolean succ = (esUserDAO.insert(param) == 1);
        

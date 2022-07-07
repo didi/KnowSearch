@@ -8,11 +8,11 @@ import java.util.Map;
 
 public class MetricsMonitorClusterEvent extends MetaDataMetricsEvent {
 
-    private List<ESClusterStats> esClusterStatsList;
+    private final List<ESClusterStats> esClusterStatsList;
 
-    private Map<ClusterPhy, ESClusterHealthResponse> clusterHealthResponseMap;
+    private final Map<ClusterPhy, ESClusterHealthResponse> clusterHealthResponseMap;
 
-    private String hostName;
+    private final String hostName;
 
     /**
      * Create a new ApplicationEvent.

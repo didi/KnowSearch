@@ -36,8 +36,8 @@ public enum ClusterDynamicConfigsTypeEnum {
                 clusterDynamicConfigsTypeEnum != ClusterDynamicConfigsTypeEnum.UNKNOWN).collect(Collectors.toList());
     }
 
-    private int code;
-    private String type;
+    private final int code;
+    private final String type;
 
     public String getType() {
         return type;

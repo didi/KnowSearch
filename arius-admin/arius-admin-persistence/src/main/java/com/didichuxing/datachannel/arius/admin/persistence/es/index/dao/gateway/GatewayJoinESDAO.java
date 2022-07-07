@@ -60,7 +60,7 @@ public class GatewayJoinESDAO extends BaseESDAO {
     /**
      * type名称
      */
-    private String typeName   = "type";
+    private final String typeName   = "type";
 
     @PostConstruct
     public void init() {

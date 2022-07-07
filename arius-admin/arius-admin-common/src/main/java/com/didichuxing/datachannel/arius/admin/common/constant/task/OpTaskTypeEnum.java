@@ -47,9 +47,9 @@ public enum OpTaskTypeEnum {
         this.apiPath = apiPath;
     }
 
-    private Integer type;
+    private final Integer type;
 
-    private String  message;
+    private final String  message;
     private String  apiPath;
 
     public Integer getType() {

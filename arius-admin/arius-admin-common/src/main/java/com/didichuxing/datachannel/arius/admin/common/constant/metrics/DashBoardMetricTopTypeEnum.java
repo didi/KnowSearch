@@ -44,9 +44,9 @@ public enum DashBoardMetricTopTypeEnum {
         this.desc = desc;
     }
 
-    private OneLevelTypeEnum oneLevelTypeEnum;
-    private String desc;
-    private String type;
+    private final OneLevelTypeEnum oneLevelTypeEnum;
+    private final String desc;
+    private final String type;
 
     public String getType() {
         return type;

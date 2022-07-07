@@ -240,7 +240,7 @@ public class ClusterPhyServiceTest {
     @Test
     public void getRoutingAllocationAwarenessAttributesTest() {
         Assertions.assertTrue(ClusterPhyService.getRoutingAllocationAwarenessAttributes(existCluster).isEmpty());
-        Mockito.when(esClusterService.syncGetAllNodesAttributes(Mockito.anyString())).thenReturn(new HashSet<String>(){{add("aaa");}});;
+        Mockito.when(esClusterService.syncGetAllNodesAttributes(Mockito.anyString())).thenReturn(new HashSet<String>(){{add("aaa");}});
         Assertions.assertFalse(ClusterPhyService.getRoutingAllocationAwarenessAttributes(cluster).isEmpty());
     }
 

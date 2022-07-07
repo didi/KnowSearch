@@ -95,7 +95,7 @@ public class EcmHandleServiceImpl implements EcmHandleService {
 
     private AriusTaskThreadPool                 ariusTaskThreadPool;
 
-    private Map<Integer, AbstractEcmBaseHandle> ecmBaseHandleMap                 = new HashMap<>();
+    private final Map<Integer, AbstractEcmBaseHandle> ecmBaseHandleMap                 = new HashMap<>();
 
     private static final int                    DELETE_ODIN_TREE_MAX_RETRY_TIMES = 1 << 6;
 

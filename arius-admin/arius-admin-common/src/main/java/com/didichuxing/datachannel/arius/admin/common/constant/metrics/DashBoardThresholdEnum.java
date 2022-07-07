@@ -27,10 +27,10 @@ public enum DashBoardThresholdEnum {
         this.value = value;
     }
 
-    private String name;
-    private String desc;
+    private final String name;
+    private final String desc;
 
-    private String value;
+    private final String value;
 
     public String getName() {
         return name;
