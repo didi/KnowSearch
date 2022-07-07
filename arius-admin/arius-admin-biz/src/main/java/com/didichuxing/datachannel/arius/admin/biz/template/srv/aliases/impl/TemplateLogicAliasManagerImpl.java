@@ -343,7 +343,7 @@ public class TemplateLogicAliasManagerImpl extends BaseTemplateSrvImpl implement
             }
         });
 
-        return Result.buildSucc(aliases.stream().collect(Collectors.toList()));
+        return Result.buildSucc(aliases);
     }
 
     /**************************************** private method ****************************************************/
@@ -395,13 +395,13 @@ public class TemplateLogicAliasManagerImpl extends BaseTemplateSrvImpl implement
 
     /**
      * 转换别名列表
-     * @param aliasDTOS 别名DTO列表
+     * @param aliasList 别名DTO列表
      * @return
      */
-    private List<IndexTemplatePhyAlias> convertAliases(List<ConsoleAliasDTO> aliasDTOS) {
+    private List<IndexTemplatePhyAlias> convertAliases(List<ConsoleAliasDTO> aliasList) {
         List<IndexTemplatePhyAlias> aliases = new ArrayList<>();
-        if (CollectionUtils.isNotEmpty(aliasDTOS)) {
-            for (ConsoleAliasDTO aliasDTO: aliasDTOS) {
+        if (CollectionUtils.isNotEmpty(aliasList)) {
+            for (ConsoleAliasDTO aliasDTO: aliasList) {
                 aliases.add(convertAlias(aliasDTO));
             }
         }

@@ -115,7 +115,7 @@ public class ExpireManagerImpl extends BaseTemplateSrvImpl implements ExpireMana
         return succ;
     }
 
-    private boolean deleteDeletingTemplateExpireIndex(Integer logicTemplateId) {
+    private Boolean deleteDeletingTemplateExpireIndex(Integer logicTemplateId) {
         List<IndexTemplatePhy> templatePhyList = indexTemplatePhyService.getTemplateByLogicIdAndStatus(logicTemplateId, TemplatePhysicalStatusEnum.INDEX_DELETING.getCode());
         if (CollectionUtils.isEmpty(templatePhyList)) {
             LOGGER.info("class=ExpireManagerImpl||method=deleteDeletingTemplateExpireIndex||logicTemplateId={}||msg=no deleting template", logicTemplateId);
@@ -326,7 +326,7 @@ public class ExpireManagerImpl extends BaseTemplateSrvImpl implements ExpireMana
                 Optional.ofNullable(getExpireIndex(physicalId)).map(Tuple::getV2).orElse(Sets.newHashSet());
 
         LOGGER
-            .error("class=TemplatePhyServiceImpl||method=deleteExpireIndices||physicalId={}||logicId={}||status={}"
+            .error("class=ExpireManagerImpl||method=deleteExpireIndices||physicalId={}||logicId={}||status={}"
                    + "||name={}||shouldDeleteIndices={}",
                 physicalId, templatePhysical.getLogicId(), templatePhysical.getStatus(), templatePhysical.getName(),
                 JSON.toJSONString(shouldDels));
@@ -522,7 +522,7 @@ public class ExpireManagerImpl extends BaseTemplateSrvImpl implements ExpireMana
 
         }
 
-        return getIndexByBeforeDay(templatePhysicalWithLogic, expireTime);
+        return templatePhyManager.getIndexByBeforeDay(templatePhysicalWithLogic, expireTime);
     }
 
     private boolean deleteDeletingTemplateExpireIndexByCluster(String cluster, int retryCount) {
