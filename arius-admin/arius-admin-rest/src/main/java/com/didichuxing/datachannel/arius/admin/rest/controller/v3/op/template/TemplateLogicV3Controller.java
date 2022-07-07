@@ -163,7 +163,8 @@ public class TemplateLogicV3Controller {
     public Result<Void> clearIndices(HttpServletRequest request,
                                      @PathVariable("templateId") Integer templateId,
                                      @PathVariable("indices")    List<String> indices) {
-        return templateLogicManager.clearIndices(templateId, indices, HttpRequestUtil.getProjectId(request));
+        return templateLogicManager.clearIndices(templateId, indices, HttpRequestUtil.getProjectId(request),
+                HttpRequestUtil.getOperator(request));
     }
 
     @PutMapping("/{templateId}/{shardNum}/adjust-shard")

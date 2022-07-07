@@ -14,6 +14,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.template.T
 import static com.didichuxing.datachannel.arius.admin.core.service.template.physic.impl.IndexTemplatePhyServiceImpl.NOT_CHECK;
 
 import com.alibaba.fastjson.JSON;
+import com.didichuxing.datachannel.arius.admin.biz.indices.IndicesManager;
 import com.didichuxing.datachannel.arius.admin.biz.page.TemplateLogicPageSearchHandle;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyManager;
@@ -159,6 +160,8 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     private ClusterLogicService         clusterLogicService;
 
     private final static Integer RETRY_TIMES = 3;
+    @Autowired
+    private IndicesManager indicesManager;
 
 
 
@@ -701,14 +704,13 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         // 转化为视图列表展示
         List<ConsoleTemplateVO> consoleTemplateVOLists = new ArrayList<>();
         templateByPhyCluster.stream()
-                //todo：Object.isnull
                 .filter(indexTemplatePhyWithLogic->indexTemplatePhyWithLogic.getLogicTemplate()!=null)
                 .forEach(indexTemplatePhyWithLogic -> consoleTemplateVOLists.add(buildTemplateVO(indexTemplatePhyWithLogic)));
         return Result.buildSucc(consoleTemplateVOLists);
     }
 
     @Override
-    public Result<Void> clearIndices(Integer templateId, List<String> indices, Integer projectId) {
+    public Result<Void> clearIndices(Integer templateId, List<String> indices, Integer projectId, String operator) {
         if (CollectionUtils.isEmpty(indices)) { return Result.buildParamIllegal("清理索引不能为空");}
 
         IndexTemplateWithPhyTemplates templateLogicWithPhysical = indexTemplateService.getLogicTemplateWithPhysicalsById(templateId);
@@ -725,9 +727,19 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         List<IndexTemplatePhy> indexTemplatePhyList = Optional.ofNullable(templateLogicWithPhysical)
                 .map(IndexTemplateWithPhyTemplates::getPhysicals)
                 .orElse(Lists.newArrayList());
+        List<String> clusterList=Lists.newArrayList();
         for (IndexTemplatePhy templatePhysical : indexTemplatePhyList) {
              succ = indices.size() == esIndexService.syncBatchDeleteIndices(templatePhysical.getCluster(), indices, RETRY_TIMES);
+             clusterList.add(templatePhysical.getCluster());
+            
         }
+        
+    
+        for (String cluster : clusterList) {
+            indicesManager.updateIndexFlagInvalid(cluster, indices);
+        
+        }
+        
         return Result.build(succ);
     }
 

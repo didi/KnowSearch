@@ -192,7 +192,7 @@ public interface TemplateLogicManager {
     /**
      * 清除索引
      */
-    Result<Void> clearIndices(Integer templateId, List<String> indices, Integer projectId);
+    Result<Void> clearIndices(Integer templateId, List<String> indices, Integer projectId, String operator);
 
     /**
      * 执行调整shard 数量

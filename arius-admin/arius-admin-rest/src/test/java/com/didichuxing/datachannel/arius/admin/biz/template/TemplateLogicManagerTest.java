@@ -58,7 +58,8 @@ public class TemplateLogicManagerTest extends AriusAdminApplicationTest {
 
     @Test
     public void clearIndicesTest() {
-        Result<Void> result = templateLogicManager.clearIndices(37519, Arrays.asList("lcx_template_0411_2022-05-25_v1"), 1);
+        Result<Void> result = templateLogicManager.clearIndices(37519, Arrays.asList("lcx_template_0411_2022-05-25_v1"), 1,
+                "");
         Assertions.assertTrue(result.success());
     }
 
