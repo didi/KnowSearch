@@ -59,7 +59,8 @@ public class ProjectTemplateAuthController {
 
         fillTemplateAuthVO(templateAuths);
 
-        return Result.buildSucc(templateAuths);
+         return Result.buildFail("接口已经下线：迁移到v3");
+        //return Result.buildSucc(templateAuths);
     }
 
     @PostMapping("/add")
@@ -73,7 +74,8 @@ public class ProjectTemplateAuthController {
     @ResponseBody
     @ApiOperation(value = "更新APP权限接口" )
     public Result<Void> updateTemplateAuth(HttpServletRequest request, @RequestBody ProjectTemplateAuthDTO authDTO) {
-        return projectLogicTemplateAuthManager.updateTemplateAuth(authDTO, HttpRequestUtil.getOperator(request));
+         return Result.buildFail("接口已经下线：迁移到v3");
+        //return projectLogicTemplateAuthManager.updateTemplateAuth(authDTO, HttpRequestUtil.getOperator(request));
     }
 
     @DeleteMapping("/delete")
@@ -81,7 +83,8 @@ public class ProjectTemplateAuthController {
     @ApiOperation(value = "删除APP权限接口" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Long", name = "authId", value = "权限ID", required = true) })
     public Result<Void> deleteTemplateAuth(HttpServletRequest request, @RequestParam("authId") Long authId) {
-        return projectLogicTemplateAuthService.deleteTemplateAuth(authId, HttpRequestUtil.getOperator(request));
+         return Result.buildFail("接口已经下线：迁移到v3");
+        //return projectLogicTemplateAuthService.deleteTemplateAuth(authId, HttpRequestUtil.getOperator(request));
     }
 
     @PutMapping("/checkMeta")
@@ -89,7 +92,8 @@ public class ProjectTemplateAuthController {
     @ApiOperation(value = "权限元数据校验接口" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "boolean", name = "delete", value = "是否删除脏数据", required = true) })
     public Result<Void> deleteExcessTemplateAuthsIfNeed(@RequestParam("delete") boolean delete) {
-        return Result.build(projectLogicTemplateAuthService.deleteRedundancyTemplateAuths(delete));
+         return Result.buildFail("接口已经下线：迁移到v3");
+        //return Result.build(projectLogicTemplateAuthService.deleteRedundancyTemplateAuths(delete));
     }
 
     /********************************************private********************************************/

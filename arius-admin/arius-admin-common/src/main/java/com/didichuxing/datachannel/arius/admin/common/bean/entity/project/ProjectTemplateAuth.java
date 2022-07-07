@@ -39,6 +39,7 @@ public class ProjectTemplateAuth extends BaseEntity {
     /**
      * 责任人列表
      */
+    @Deprecated
     private String responsible;
 
 }

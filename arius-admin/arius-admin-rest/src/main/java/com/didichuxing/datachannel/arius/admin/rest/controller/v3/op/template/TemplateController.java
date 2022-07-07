@@ -1,12 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.template;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterLogicManager;
 import com.didichuxing.datachannel.arius.admin.biz.indices.IndicesManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.pipeline.TemplatePipelineManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.pipeline.PipelineManager;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateClearDTO;
@@ -24,6 +23,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTe
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateRateLimitVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateCyclicalRollInfoVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.*;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.AmsRemoteException;
@@ -40,22 +40,17 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
 
 /**
  * @author d06679
@@ -88,7 +83,7 @@ public class TemplateController extends BaseTemplateController {
     private ClusterLogicManager      clusterLogicManager;
 
     @Autowired
-    private TemplatePipelineManager templatePipelineManager;
+    private PipelineManager templatePipelineManager;
 
     @GetMapping("/{projectId}")
     @ResponseBody
@@ -99,26 +94,24 @@ public class TemplateController extends BaseTemplateController {
         return Result.buildSucc(templateLogicManager.getConsoleTemplatesVOS(projectId));
     }
 
-    @GetMapping("/{logicId}")
+    @GetMapping("/detail/{logicId}")
     @ResponseBody
-    @ApiOperation(value = "获取索引详细信息接口【三方接口】",tags = "【三方接口】" )
-    @ApiImplicitParams({ @ApiImplicitParam(paramType = "path", dataType = "Integer", name = "logicId", value = "索引ID", required = true) })
-    @Deprecated
-    public Result<ConsoleTemplateDetailVO> getConsoleTemplateDetail(HttpServletRequest request,
-                                                                    @PathVariable("logicId") Integer logicId) {
+    @ApiOperation(value = "获取模板详细信息接口【三方接口】",tags = "【三方接口】" )
+    @ApiImplicitParam(type = "Integer", name = "logicId", value = "逻辑模板ID", required = true)
+    public Result<ConsoleTemplateDetailVO> detail(HttpServletRequest request, @PathVariable Integer logicId) {
         IndexTemplateWithCluster indexTemplateLogicWithCluster = indexTemplateService
-            .getLogicTemplateWithCluster(logicId);
+                .getLogicTemplateWithCluster(logicId);
 
         if (null == indexTemplateLogicWithCluster || CollectionUtils.isEmpty(indexTemplateLogicWithCluster.getLogicClusters())) {
             return Result.buildFail("模板对应资源不存在!");
         }
 
         ConsoleTemplateDetailVO consoleTemplateDetail = ConvertUtil.obj2Obj(indexTemplateLogicWithCluster,
-            ConsoleTemplateDetailVO.class);
+                ConsoleTemplateDetailVO.class);
 
         consoleTemplateDetail.setCyclicalRoll(indexTemplateLogicWithCluster.getExpression().endsWith("*"));
         consoleTemplateDetail
-            .setCluster(templateLogicManager.jointCluster(indexTemplateLogicWithCluster.getLogicClusters()));
+                .setCluster(templateLogicManager.jointCluster(indexTemplateLogicWithCluster.getLogicClusters()));
 
         // 仅对有一个逻辑集群的情况设置集群类型与等级
         if (indexTemplateLogicWithCluster.getLogicClusters().size() == 1) {
@@ -139,7 +132,6 @@ public class TemplateController extends BaseTemplateController {
 
         return Result.buildSucc(consoleTemplateDetail);
     }
-
     @PutMapping("")
     @ResponseBody
     @ApiOperation(value = "用户编辑模板接口【三方接口】",tags = "【三方接口】", notes = "支持修改数据类型、责任人、备注")
@@ -246,9 +238,6 @@ public class TemplateController extends BaseTemplateController {
             required = true) })
     public Result<List<Tuple<String, String>>> getLogicTemplatesByProjectId(HttpServletRequest request,
                                                                             @PathVariable("projectId") Integer projectId) {
-
-      
-
         return indexTemplateService.listLogicTemplatesByProjectId(projectId);
     }
 

@@ -2,8 +2,8 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.task;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
-import com.didichuxing.datachannel.arius.admin.biz.worktask.ecm.EcmTaskDetailManager;
-import com.didichuxing.datachannel.arius.admin.biz.worktask.ecm.EcmTaskManager;
+import com.didichuxing.datachannel.arius.admin.biz.task.ecm.EcmTaskDetailManager;
+import com.didichuxing.datachannel.arius.admin.biz.task.ecm.EcmTaskManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.EcmTaskBasic;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.response.EcmOperateAppBase;

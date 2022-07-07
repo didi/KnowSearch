@@ -1,7 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.biz.cluster;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexCatCellVO;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 
 import java.util.List;
 
@@ -77,4 +81,12 @@ public interface ClusterPhyQuickCommandManager {
      * @return
      */
     Result<Void> clearFieldDataMemory(String cluster);
+
+    /**
+     * 条件获取索引列表信息 ,携带可读可写标志位
+     * @param condition     查询条件
+     * @param projectId         项目
+     * @return              List<IndexCatInfoVO>
+     */
+    PaginationResult<IndicesDistributionVO> indicesDistributionPage(IndexQueryDTO condition, Integer projectId) throws NotFindSubclassException;
 }

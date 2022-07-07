@@ -19,15 +19,18 @@ import com.didiglobal.logi.security.common.vo.role.AssignInfoVO;
 import com.didiglobal.logi.security.common.vo.role.RoleBriefVO;
 import com.didiglobal.logi.security.common.vo.role.RoleDeleteCheckVO;
 import com.didiglobal.logi.security.common.vo.role.RoleVO;
+import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
 import com.didiglobal.logi.security.exception.LogiSecurityException;
+import com.didiglobal.logi.security.service.ProjectService;
 import com.didiglobal.logi.security.service.RoleService;
 import com.didiglobal.logi.security.service.UserProjectService;
+import com.didiglobal.logi.security.service.UserService;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import com.google.common.collect.Lists;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
+import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +50,10 @@ public class RoleExtendManagerImpl implements RoleExtendManager {
 	private OperateRecordService operateRecordService;
 	@Autowired
 	private UserProjectService userProjectService;
+	@Autowired
+	private ProjectService projectService;
+	@Autowired
+	private UserService userService;
 	
 	/**
 	 * @param id
@@ -59,18 +66,20 @@ public class RoleExtendManagerImpl implements RoleExtendManager {
 			return Result.buildFail(String.format("属于内置角色:[%s]，不可以被删除", id));
 		}
 		try {
-			
+			final RoleBriefVO roleBriefByRoleId = roleService.getRoleBriefByRoleId(id);
 			final RoleDeleteCheckVO roleDeleteCheckVO = roleService.checkBeforeDelete(id);
 			if (CollectionUtils.isNotEmpty(roleDeleteCheckVO.getUserNameList())){
 				final RoleVO roleVO = roleService.getRoleDetailByRoleId(id);
 				return Result.buildFailWithMsg(roleDeleteCheckVO,String.format("角色:[%s]已经分配给用了,不允许删除,请先解除分配的用户再试！",
 						roleVO.getRoleName()));
 			}
+			
 			roleService.deleteRoleByRoleId(id, request);
 			operateRecordService.save(new OperateRecord.Builder()
 							.userOperation(HttpRequestUtil.getOperator(request))
 							.operationTypeEnum(OperateTypeEnum.ROLE_MANAGER_DELETE)
-							.content(String.format("删除角色:[%d]",id))
+							.content(String.format("删除角色:[%s]",roleBriefByRoleId.getRoleName()))
+						.project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
 							.triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
 					.build()
 			
@@ -114,6 +123,7 @@ public class RoleExtendManagerImpl implements RoleExtendManager {
 			operateRecordService.save(new OperateRecord.Builder().userOperation(HttpRequestUtil.getOperator(request))
 					.operationTypeEnum(OperateTypeEnum.ROLE_MANAGER_CREATE).content(String.format("新增角色:[%s]",
 							saveDTO.getRoleName()))
+						.project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
 					.triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).build()
 			
 			);
@@ -132,9 +142,14 @@ public class RoleExtendManagerImpl implements RoleExtendManager {
 				userProjectService.delOwnerProject(AuthConstant.SUPER_PROJECT_ID, Collections.singletonList(userId));
 				userProjectService.delUserProject(AuthConstant.SUPER_PROJECT_ID, Collections.singletonList(userId));
 			}
+			final RoleBriefVO roleBriefByRoleId = roleService.getRoleBriefByRoleId(roleId);
+			final UserBriefVO userBriefVO = userService.getUserBriefListByUserIdList(Collections.singletonList(userId))
+					.get(0);
 			operateRecordService.save(new OperateRecord.Builder().userOperation(HttpRequestUtil.getOperator(request))
 					.operationTypeEnum(OperateTypeEnum.ROLE_MANAGER_UNBIND_USER)
-					.content(String.format("角色:[%d]解绑的用户:[%d]", roleId, userId))
+					.content(String.format("角色:[%s]解绑的用户:[%s]", roleBriefByRoleId.getRoleName(),
+							userBriefVO.getUserName()))
+							.project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
 					.triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).build()
 			
 			);
@@ -158,15 +173,34 @@ public class RoleExtendManagerImpl implements RoleExtendManager {
 	public Result<Void> assignRoles(RoleAssignDTO assignDTO, HttpServletRequest request) {
 		try {
 			roleService.assignRoles(assignDTO, request);
-			final List<Integer> userIds = Optional.ofNullable(assignDTO.getIdList()).orElse(Lists.newArrayList());
-			for (Integer userId : userIds) {
-				operateRecordService.save(
+			
+			List<Integer> userIds=Lists.newArrayList();
+			List<Integer> roleIds=Lists.newArrayList();
+			
+			if (Boolean.TRUE.equals(assignDTO.getFlag())) {
+				//true：N个角色分配给1个用户
+				userIds.add(assignDTO.getId());
+				roleIds.addAll(assignDTO.getIdList());
+				
+			} else {
+				//false：1个角色分配给N个用户
+				userIds.addAll(assignDTO.getIdList());
+				roleIds.add(assignDTO.getId());
+				
+			}
+			String roleNames =
+					roleIds.stream().map(roleService::getRoleBriefByRoleId).map(RoleBriefVO::getRoleName).sorted().distinct()
+							.collect(Collectors.joining(","));
+			String userNames =
+					userService.getUserBriefListByUserIdList(userIds).stream().map(UserBriefVO::getUserName).sorted().distinct().collect(
+							Collectors.joining(","));
+			
+			operateRecordService.save(
 						new OperateRecord.Builder().userOperation(HttpRequestUtil.getOperator(request))
 								.operationTypeEnum(OperateTypeEnum.ROLE_MANAGER_BIND_USER)
-								.content(String.format("角色:[%d]解绑的用户:[%d]", assignDTO.getId(), userId))
+								.project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
+								.content(String.format("角色列表:[%s]解绑的用户列表:[%s]", roleNames, userNames))
 								.triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).build());
-			}
-			
 		
 			return Result.buildSucc();
 			

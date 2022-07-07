@@ -18,18 +18,18 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordina
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.*;
 import com.didichuxing.datachannel.arius.admin.common.util.*;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESShardService;
+import com.didichuxing.datachannel.arius.admin.metadata.service.ESClusterPhyStatsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsClusterPhyDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.percentiles.BasePercentilesMetrics;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.percentiles.BasePercentileMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStatsResponse;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyClusterMetricsEnum;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterNodeService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
-import com.didichuxing.datachannel.arius.admin.metadata.service.ESClusterPhyStaticsService;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodesstats.ClusterNodeStats;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
@@ -44,7 +44,7 @@ public class ClusterOverviewMetricsHandle {
     private static final ILog          LOGGER     = LogFactory.getLog(ClusterOverviewMetricsHandle.class);
 
     @Autowired
-    private ESClusterPhyStaticsService esClusterPhyStaticsService;
+    private ESClusterPhyStatsService esClusterPhyStatsService;
 
     @Autowired
     private ESClusterService           esClusterService;
@@ -387,9 +387,9 @@ public class ClusterOverviewMetricsHandle {
      * 获取集群维度分位统计信息
      */
     private void aggPercentilesMetrics(ESClusterOverviewMetricsVO metrics, String clusterMetricsType, String aggType,
-                                       Long startTime, Long endTime, Consumer<List<BasePercentilesMetrics>> function) {
+                                       Long startTime, Long endTime, Consumer<List<BasePercentileMetrics>> function) {
 
-        List<BasePercentilesMetrics> aggPercentilesMetrics = esClusterPhyStaticsService.getAggPercentilesMetrics(
+        List<BasePercentileMetrics> aggPercentilesMetrics = esClusterPhyStatsService.getAggPercentilesMetrics(
             metrics.getClusterName(), clusterMetricsType, aggType, startTime, endTime);
 
         Collections.sort(aggPercentilesMetrics);
@@ -403,7 +403,7 @@ public class ClusterOverviewMetricsHandle {
 
     private void aggDiskInfoMetrics(ESClusterOverviewMetricsVO metrics, String aggType, Long startTime,
                                     Long endTime) {
-        List<DiskInfoMetrics> diskInfoMetrics = esClusterPhyStaticsService
+        List<DiskInfoMetrics> diskInfoMetrics = esClusterPhyStatsService
             .getAggClusterPhyMetrics(metrics.getClusterName(), aggType, startTime, endTime, DiskInfoMetrics.class);
         List<DiskInfoMetricsVO> diskInfoMetricsVOS = ConvertUtil.list2List(diskInfoMetrics, DiskInfoMetricsVO.class);
         Collections.sort(diskInfoMetricsVOS);
@@ -412,7 +412,7 @@ public class ClusterOverviewMetricsHandle {
 
     private void aggShardNuMetrics(ESClusterOverviewMetricsVO metrics, String aggType, Long startTime,
                                    Long endTime) {
-        List<ShardInfoMetrics> shardInfoMetrics = esClusterPhyStaticsService
+        List<ShardInfoMetrics> shardInfoMetrics = esClusterPhyStatsService
             .getAggClusterPhyMetrics(metrics.getClusterName(), aggType, startTime, endTime, ShardInfoMetrics.class);
 
         List<ShardInfoMetricsVO> shardInfoMetricsVOS = ConvertUtil.list2List(shardInfoMetrics,
@@ -423,7 +423,7 @@ public class ClusterOverviewMetricsHandle {
 
     private void aggTaskCount(ESClusterOverviewMetricsVO metrics, String aggType, Long startTime,
                                    Long endTime) {
-        List<TaskCountMetrics> taskCountMetrics = esClusterPhyStaticsService
+        List<TaskCountMetrics> taskCountMetrics = esClusterPhyStatsService
                 .getAggClusterPhyMetrics(metrics.getClusterName(), aggType, startTime, endTime, TaskCountMetrics.class);
 
         List<TaskCountMetricVO> taskCountMetricVOS = ConvertUtil.list2List(taskCountMetrics,
@@ -434,7 +434,7 @@ public class ClusterOverviewMetricsHandle {
 
     private void aggWriteTpsMetrics(ESClusterOverviewMetricsVO metrics, String aggType, Long startTime,
                                     Long endTime) {
-        List<WriteTPSMetrics> writeTPSMetrics = esClusterPhyStaticsService
+        List<WriteTPSMetrics> writeTPSMetrics = esClusterPhyStatsService
             .getAggClusterPhyMetrics(metrics.getClusterName(), aggType, startTime, endTime, WriteTPSMetrics.class);
 
         List<WriteTPSMetricsVO> writeTPSMetricsVOS = ConvertUtil.list2List(writeTPSMetrics, WriteTPSMetricsVO.class);
@@ -444,7 +444,7 @@ public class ClusterOverviewMetricsHandle {
 
     private void aggReadTpsMetrics(ESClusterOverviewMetricsVO metrics, String aggType, Long startTime,
                                    Long endTime) {
-        List<ReadQPSMetrics> readQPSMetrics = esClusterPhyStaticsService
+        List<ReadQPSMetrics> readQPSMetrics = esClusterPhyStatsService
             .getAggClusterPhyMetrics(metrics.getClusterName(), aggType, startTime, endTime, ReadQPSMetrics.class);
 
         List<ReadQPSMetricsVO> readQPSMetricsVOS = ConvertUtil.list2List(readQPSMetrics, ReadQPSMetricsVO.class);
@@ -453,7 +453,7 @@ public class ClusterOverviewMetricsHandle {
     }
 
     private void aggSendTransMetrics(ESClusterOverviewMetricsVO metrics, String aggType, Long startTime, Long endTime) {
-        List<SendTransMetrics> readQPSMetrics = esClusterPhyStaticsService
+        List<SendTransMetrics> readQPSMetrics = esClusterPhyStatsService
                 .getAggClusterPhyMetrics(metrics.getClusterName(), aggType, startTime, endTime, SendTransMetrics.class);
 
         List<SendTransMetricsVO> sendTransMetricsVOS = ConvertUtil.list2List(readQPSMetrics, SendTransMetricsVO.class);
@@ -462,7 +462,7 @@ public class ClusterOverviewMetricsHandle {
     }
 
     private void aggRecvTransMetrics(ESClusterOverviewMetricsVO metrics, String aggType, Long startTime, Long endTime) {
-        List<RecvTransMetrics> readQPSMetrics = esClusterPhyStaticsService
+        List<RecvTransMetrics> readQPSMetrics = esClusterPhyStatsService
                 .getAggClusterPhyMetrics(metrics.getClusterName(), aggType, startTime, endTime, RecvTransMetrics.class);
 
         List<RecvTransMetricsVO> recvTransMetricsVOS = ConvertUtil.list2List(readQPSMetrics, RecvTransMetricsVO.class);

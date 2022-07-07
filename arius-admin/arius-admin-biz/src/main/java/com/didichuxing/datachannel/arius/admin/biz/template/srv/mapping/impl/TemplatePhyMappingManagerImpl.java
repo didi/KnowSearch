@@ -5,11 +5,11 @@ import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping.TemplatePhyMappingManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
-import com.didichuxing.datachannel.arius.admin.common.mapping.AriusTypeProperty;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminESOpRetryConstants;
+import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import com.didichuxing.datachannel.arius.admin.common.mapping.AriusTypeProperty;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusIndexMappingConfigUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.IndexNameFactory;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
@@ -23,13 +23,18 @@ import com.didiglobal.logi.elasticsearch.client.response.setting.index.MultiInde
 import com.didiglobal.logi.elasticsearch.client.response.setting.template.TemplateConfig;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.google.common.collect.Maps;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import lombok.NoArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.*;
 
 /**
  * @author zhonghua
@@ -245,7 +250,7 @@ public class TemplatePhyMappingManagerImpl implements TemplatePhyMappingManager 
      * @return
      */
     private Map<String, String> createDefaultSettings(String indexName, Map<String, TypeConfig> typeConfigMap) {
-        Map<String, String> settings = new HashMap<>();
+        Map<String, String> settings = Maps.newHashMap();
         settings.put("index.mapping.total_fields.limit", "100000");
         if (typeConfigMap != null) {
             if (typeConfigMap.containsKey("_default_")) {

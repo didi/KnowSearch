@@ -8,6 +8,8 @@ public enum PageSearchHandleTypeEnum {
         CLUSTER_PHY("clusterPhyPageSearch"),
         INDEX("indexPageSearch"),
         TEMPLATE_SRV("templateSrvPageSearch"),
+
+        QUICK_COMMAND_INDEX("quickCommandIndicesDistributionPageSearch"),
         OPERATE_RECORD("operateRecordPageSearch");
        private String pageSearchType;
 

@@ -2,7 +2,6 @@ package com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.PageDTO;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
-
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -41,7 +40,8 @@ public class ESLogicClusterDTO extends PageDTO {
     @ApiModelProperty("数据节点个数")
     private Integer  dataNodeNum;
 
-    @ApiModelProperty("责任人")
+    @ApiModelProperty("责任人：后续进行下线，无需再使用")
+    @Deprecated
     private String  responsible;
 
 

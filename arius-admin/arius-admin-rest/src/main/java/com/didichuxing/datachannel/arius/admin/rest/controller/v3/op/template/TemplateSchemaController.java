@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.template;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
 
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping.TemplateLogicMappingManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping(V3_OP + "/template")
+@RequestMapping(V3 + "/template")
 @Api(tags = "Console-用户侧索引模板mapping接口(REST)")
 public class TemplateSchemaController extends BaseTemplateController {
 

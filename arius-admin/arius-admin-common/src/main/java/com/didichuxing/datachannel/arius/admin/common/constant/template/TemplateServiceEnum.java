@@ -1,14 +1,19 @@
 package com.didichuxing.datachannel.arius.admin.common.constant.template;
 
-import com.didichuxing.datachannel.arius.admin.common.constant.ESClusterVersionEnum;
-import org.apache.commons.collections4.CollectionUtils;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ESClusterVersionEnum.ES_2_3_3_100;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ESClusterVersionEnum.ES_6_6_1_700;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ESClusterVersionEnum.ES_6_6_1_902;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ESClusterVersionEnum.ES_6_6_6_800;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ESClusterVersionEnum.ES_7_6_0_1100;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterTemplateSrv;
+import com.didichuxing.datachannel.arius.admin.common.constant.ESClusterVersionEnum;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.ESClusterVersionEnum.*;
+import org.apache.commons.collections4.CollectionUtils;
 
 /**
  * @author zqr
@@ -155,5 +160,16 @@ public enum TemplateServiceEnum {
         return String.join(",", serviceEnumList.stream()
                 .map(t -> String.valueOf(t.getCode()))
                 .collect(Collectors.toList()));
+    }
+    
+    public static ClusterTemplateSrv convertFromEnum(TemplateServiceEnum serviceEnum) {
+        if (Objects.isNull(serviceEnum)){
+            return null;
+        }
+        ClusterTemplateSrv clusterTemplateSrv = new ClusterTemplateSrv();
+        clusterTemplateSrv.setServiceId(serviceEnum.getCode());
+        clusterTemplateSrv.setServiceName(serviceEnum.getServiceName());
+        clusterTemplateSrv.setEsVersion(serviceEnum.getEsClusterVersion().getVersion());
+        return clusterTemplateSrv;
     }
 }

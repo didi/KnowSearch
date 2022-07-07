@@ -6,6 +6,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.Template
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.SortTermEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.DataTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
@@ -59,7 +60,10 @@ public class TemplateLogicPageSearchHandle extends AbstractPageSearchHandle<Temp
 
     @Override
     protected void initCondition(TemplateConditionDTO condition, Integer projectId) {
-        condition.setProjectId(projectId);
+        if (!AuthConstant.SUPER_PROJECT_ID.equals(projectId)){
+            condition.setProjectId(projectId);
+        }
+        
     }
 
     @Override

@@ -50,6 +50,7 @@ public class ClusterLogic extends BaseEntity implements  Comparable<ClusterLogic
     /**
      * 责任人
      */
+    @Deprecated
     private String  responsible;
 
     /**

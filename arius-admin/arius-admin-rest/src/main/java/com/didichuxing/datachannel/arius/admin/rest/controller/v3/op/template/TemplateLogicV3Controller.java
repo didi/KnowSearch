@@ -13,6 +13,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.Template
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateSettingDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateSettingVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.DataTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
@@ -21,6 +22,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import java.util.List;
+import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -46,8 +48,14 @@ public class TemplateLogicV3Controller {
     private TemplateLogicManager         templateLogicManager;
 
     @Autowired
-    private TemplateLogicSettingsManager templateLogicSettingsManager;
+    private TemplateLogicSettingsManager templateLogicSettingManager;
 
+    @GetMapping("/data-type")
+    @ResponseBody
+    @ApiOperation(value = "获取逻辑模版创建的类型")
+    public Result<Map<Integer,String>> templateLogicDataType(HttpServletRequest request) {
+        return Result.buildSucc(DataTypeEnum.code2DescMap());
+    }
     @GetMapping("/names")
     @ResponseBody
     @ApiOperation(value = "获取逻辑模板名称列表接口")
@@ -70,7 +78,7 @@ public class TemplateLogicV3Controller {
         return templateLogicManager.checkTemplateValidForCreate(templateName);
     }
 
-    @GetMapping("/{templateId}/check-edit-mapping/")
+    @GetMapping("/{templateId}/check-edit-mapping")
     @ResponseBody
     @ApiOperation(value = "校验可否编辑模板mapping")
     public Result<Boolean> checkTemplateEditMapping(@PathVariable Integer templateId) {
@@ -114,7 +122,7 @@ public class TemplateLogicV3Controller {
             return checkAuthResult;
         }
 
-        return templateLogicSettingsManager.customizeSetting(settingDTO, HttpRequestUtil.getOperator(request));
+        return templateLogicSettingManager.customizeSetting(settingDTO, HttpRequestUtil.getOperator(request));
     }
 
     @GetMapping("/setting")
@@ -123,7 +131,7 @@ public class TemplateLogicV3Controller {
     @ApiImplicitParams({@ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "索引ID", required = true)})
     @Deprecated
     public Result<TemplateSettingVO> getTemplateSettings(@RequestParam("logicId") Integer logicId) throws AdminOperateException {
-        return templateLogicSettingsManager.buildTemplateSettingVO(logicId);
+        return templateLogicSettingManager.buildTemplateSettingVO(logicId);
     }
 
     @GetMapping("/templates")

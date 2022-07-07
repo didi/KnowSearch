@@ -1,11 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.dto.template;
 
-import java.util.List;
-
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.PageDTO;
-
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -46,7 +44,8 @@ public class IndexTemplateDTO extends PageDTO {
 
   
 
-    @ApiModelProperty("责任人")
+    @ApiModelProperty("责任人：后续再使用")
+    @Deprecated
     private String                    responsible;
 
     @ApiModelProperty("时间分区字段")
@@ -56,11 +55,11 @@ public class IndexTemplateDTO extends PageDTO {
     private String                    dateFieldFormat;
 
     @Deprecated
-    @ApiModelProperty("主键字段")
+    @ApiModelProperty("主键字段：后续下线，无需使用")
     private String                    idField;
 
     @Deprecated
-    @ApiModelProperty("routing字段")
+    @ApiModelProperty("routing字段：后续下线，无需使用")
     private String                    routingField;
 
     @ApiModelProperty("表达式")

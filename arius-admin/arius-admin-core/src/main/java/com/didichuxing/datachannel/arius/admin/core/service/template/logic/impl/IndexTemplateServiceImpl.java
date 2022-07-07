@@ -1066,6 +1066,33 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
     public Integer getProjectIdByTemplateLogicId(Integer templateLogicId) {
         return indexTemplateDAO.getProjectIdByTemplateLogicId(templateLogicId);
     }
+    
+    /**
+     * @param logicId
+     * @return
+     */
+    @Override
+    public IndexTemplatePO getLogicTemplatePOById(Integer logicId) {
+        return indexTemplateDAO.getById(logicId);
+    }
+    
+    /**
+     * @param editTemplate
+     * @return
+     */
+    @Override
+    public boolean update(IndexTemplatePO editTemplate) {
+        return indexTemplateDAO.update(editTemplate)==1;
+    }
+    
+    /**
+     * @param days
+     * @return
+     */
+    @Override
+    public int batchChangeHotDay(Integer days) {
+     return indexTemplateDAO.batchChangeHotDay(days);
+    }
     /**************************************** private method ****************************************************/
     /**
      * 转换逻辑模板，获取并组合对应的物理模板信息

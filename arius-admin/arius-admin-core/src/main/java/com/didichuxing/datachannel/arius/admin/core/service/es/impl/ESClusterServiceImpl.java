@@ -1,16 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.core.service.es.impl;
 
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_OPERATE_TIMEOUT;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.VERSION;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.VERSION_INNER_NUMBER;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.VERSION_NUMBER;
-
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.NodeAttrInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.setting.ESClusterGetSettingsAllResponse;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ECSegmentsOnIps;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ECSegmentOnIp;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStatsResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterTaskStatsResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterThreadStats;
@@ -38,15 +32,6 @@ import com.didiglobal.logi.log.LogFactory;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import java.net.InetAddress;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.compress.utils.Sets;
 import org.apache.commons.lang3.StringUtils;
@@ -55,6 +40,12 @@ import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.rest.RestStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.net.InetAddress;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.*;
 
 /**
  * @author d06679
@@ -69,15 +60,16 @@ public class ESClusterServiceImpl implements ESClusterService {
     private ESClusterDAO      esClusterDAO;
 
     private final String ACKNOWLEDGED = "acknowledged";
-    private final String SHARDS       = "_shards";
+    private final String SHARDS = "_shards";
     private final String FAILED = "failed";
     private final String DESCRIPTION = "description";
     private final String START_TIME_IN_MILLIS = "start_time_in_millis";
     private final String RUNNING_TIME_IN_NANOS = "running_time_in_nanos";
     private final String ACTION = "action";
-    private final String NODE = "node";
+    private final String NAME = "name";
     private final String NODES = "nodes";
     private final String TASKS = "tasks";
+
 
     /**
      * 关闭集群re balance
@@ -270,7 +262,7 @@ public class ESClusterServiceImpl implements ESClusterService {
     @Override
     public Map<String, Integer> synGetSegmentsOfIpByCluster(String clusterName) {
         Map<String, Integer> segmentsOnIpMap = Maps.newHashMap();
-        for (ECSegmentsOnIps ecSegmentsOnIp : esClusterDAO.getSegmentsOfIpByCluster(clusterName)) {
+        for (ECSegmentOnIp ecSegmentsOnIp : esClusterDAO.getSegmentsOfIpByCluster(clusterName)) {
             if (segmentsOnIpMap.containsKey(ecSegmentsOnIp.getIp())) {
                 Integer newSegments = segmentsOnIpMap.get(ecSegmentsOnIp.getIp()) + Integer.parseInt(ecSegmentsOnIp.getSegment());
                 segmentsOnIpMap.put(ecSegmentsOnIp.getIp(), newSegments);
@@ -450,17 +442,17 @@ public class ESClusterServiceImpl implements ESClusterService {
 
     private List<TaskMissionAnalysisVO> buildTaskMission(JSONObject responseJson) {
         List<TaskMissionAnalysisVO> vos = new ArrayList<>();
-
         JSONObject nodes = responseJson.getJSONObject(NODES);
         nodes.keySet().forEach(key -> {
             Optional.ofNullable((JSONObject) nodes.get(key)).map(o -> o.getJSONObject(TASKS)).ifPresent(nodeTasks -> {
                 nodeTasks.forEach((key1, val) -> {
                     JSONObject nodeInfo = (JSONObject) val;
+                    String nodeName = nodes.getJSONObject(key).getString(NAME);
                     TaskMissionAnalysisVO taskMissionAnalysisVO = new TaskMissionAnalysisVO();
                     Optional.ofNullable(nodeInfo)
                             .ifPresent(o -> {
                                 taskMissionAnalysisVO.setAction(o.getString(ACTION));
-                                taskMissionAnalysisVO.setNode(o.getString(NODE));
+                                taskMissionAnalysisVO.setNode(nodeName);
                                 taskMissionAnalysisVO.setDescription(o.getString(DESCRIPTION));
                                 taskMissionAnalysisVO.setStartTimeInMillis(o.getLong(START_TIME_IN_MILLIS));
                                 taskMissionAnalysisVO.setRunningTimeInNanos(o.getInteger(RUNNING_TIME_IN_NANOS));
@@ -471,4 +463,5 @@ public class ESClusterServiceImpl implements ESClusterService {
         });
         return vos;
     }
+
 }

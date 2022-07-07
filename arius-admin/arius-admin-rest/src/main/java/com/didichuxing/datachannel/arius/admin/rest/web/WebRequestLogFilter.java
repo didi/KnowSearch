@@ -164,7 +164,7 @@ public class WebRequestLogFilter implements Ordered, Filter {
         Map<String, String> params = new HashMap<>();
         params.put("refer", request.getHeader("referer"));
         params.put("agent", request.getHeader("User-Agent"));
-        params.put(WebConstants.USER_HEADER_KEY, request.getHeader(WebConstants.USER_HEADER_KEY));
+        params.put(WebConstant.USER_HEADER_KEY, request.getHeader(WebConstant.USER_HEADER_KEY));
 
         return params;
     }

@@ -1107,7 +1107,7 @@ public class AriusStatsIndexInfoESDAO extends BaseAriusStatsESDAO {
         long endTimeForOneInterval = timePoint;
 
         String dsl = dslLoaderUtil.getFormatDslByFileName(
-                DslsConstant.GET_MULTIPLE_TEMPLATE_FIRST_INTERVAL_AGG_METRICS_WITH_STEP, clusterPhyName, startTimeForOneInterval,
+                DslsConstant.GET_MULTIPLE_INDEX_FIRST_INTERVAL_AGG_METRICS_WITH_STEP, clusterPhyName, startTimeForOneInterval,
                 endTimeForOneInterval, indicesBucketsMaxNum, STEP_INTERVAL, buildAggsDSL(metricsTypes, topMethod),buildAggsDSLWithStep(metricsTypes, topMethod));
 
         String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTimeForOneInterval,
@@ -1143,7 +1143,7 @@ public class AriusStatsIndexInfoESDAO extends BaseAriusStatsESDAO {
             return  new ArrayList<>();
         }
 
-        long startTimeForOneInterval = timePoint - topTimeStep * 60 * 1000;
+        long startTimeForOneInterval = timePoint - topTimeStep;
         long endTimeForOneInterval = timePoint;
 
         String interval = "1m";

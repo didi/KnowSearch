@@ -9,8 +9,28 @@
               "%s"
             ]
           }
+        },
+        {
+          "range": {
+            "timeStamp": {
+              "gte": "%s",
+              "lte": "%s"
+            }
+          }
         }
       ]
+    }
+  },
+  "aggs": {
+    "gatewaySuccessCount": {
+      "filter": {
+        "terms": {
+          "status": [
+            200,
+            201
+          ]
+        }
+      }
     }
   }
 }

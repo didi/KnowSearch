@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
-import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -45,6 +44,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.index.IndexBlockE
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.mapping.AriusIndexTemplateSetting;
 import com.didichuxing.datachannel.arius.admin.common.util.*;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
@@ -151,14 +151,14 @@ public class IndicesManagerImpl implements IndicesManager {
             esIndexService.syncCreateIndex(phyCluster, indexCreateDTO.getIndex(), indexConfig, RETRY_COUNT);
         } catch (Exception e) {
             LOGGER.error("class=IndicesManagerImpl||method=createIndex||msg=create index failed||index={}" + indexCreateDTO.getIndex(), e);
-            return Result.buildFail();
+            return Result.buildFail("索引创建失败，请联系管理员检查集群后重新创建！");
         }
         operateRecordService.save(new OperateRecord.Builder().content(
                         String.format("物理集群:[%s],创建索引：[%s]", indexCreateDTO.getCluster(), indexCreateDTO.getIndex()))
                 .operationTypeEnum(OperateTypeEnum.INDEX_MANAGEMENT_CREATE).userOperation(operator)
                 .project(projectService.getProjectBriefByProjectId(projectId)).bizId(indexCreateDTO.getIndex())
                 .build());
-        return Result.buildSucc();
+        return Result.buildSuccWithMsg("索引创建成功，请五分钟后再进行查询与操作！");
     }
 
     @Override
@@ -484,18 +484,23 @@ public class IndicesManagerImpl implements IndicesManager {
 
     @Override
     public Result<IndexCatCellVO> getIndexCatInfo(String cluster, String indexName, Integer projectId) {
+        Result<String> getClusterRet = getClusterPhyByClusterNameAndProjectId(cluster, projectId);
+        if (getClusterRet.failed()) {
+            return Result.buildFrom(getClusterRet);
+        }
+        String phyCluster = getClusterRet.getData();
         Integer queryProjectId = null;
         if (!AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
             queryProjectId = projectId;
         }
         Tuple<Long, List<IndexCatCell>> totalHitAndIndexCatCellListTuple = esIndexCatService
-            .syncGetCatIndexInfo(cluster, indexName, null, queryProjectId, 0L, 1L, DEFAULT_SORT_TERM, true);
+            .syncGetCatIndexInfo(cluster, indexName, null,null, queryProjectId, 0L, 1L, DEFAULT_SORT_TERM, true);
         if (null == totalHitAndIndexCatCellListTuple
             || CollectionUtils.isEmpty(totalHitAndIndexCatCellListTuple.getV2())) {
             return Result.buildFail("获取单个索引详情信息失败");
         }
         //设置索引阻塞信息
-        List<IndexCatCell> finalIndexCatCellList = esIndexService.buildIndexAliasesAndBlockInfo(cluster,
+        List<IndexCatCell> finalIndexCatCellList = esIndexService.buildIndexAliasesAndBlockInfo(phyCluster,
             totalHitAndIndexCatCellListTuple.getV2());
         List<IndexCatCellVO> indexCatCellVOList = ConvertUtil.list2List(finalIndexCatCellList, IndexCatCellVO.class);
 

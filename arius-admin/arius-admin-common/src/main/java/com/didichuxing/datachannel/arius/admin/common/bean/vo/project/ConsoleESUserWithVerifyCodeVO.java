@@ -36,7 +36,8 @@ public class ConsoleESUserWithVerifyCodeVO extends BaseVO {
     @Deprecated
     private String  department;
 
-    @ApiModelProperty("责任人")
+    @ApiModelProperty("责任人：后续进行下线，无需再使用")
+    @Deprecated
     private String  responsible;
 
     @ApiModelProperty("备注")

@@ -13,7 +13,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyIndicesMetricsEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
-import com.didichuxing.datachannel.arius.admin.metadata.service.ESIndicesStaticsService;
+import com.didichuxing.datachannel.arius.admin.metadata.service.ESIndicesStatsService;
 import java.util.List;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +28,7 @@ import org.springframework.stereotype.Service;
 @Service("clusterPhyTemplateMetricsHandler")
 public class PhyTemplateClusterMetricsHandler extends BaseClusterMetricsHandle {
     @Autowired
-    private ESIndicesStaticsService esIndicesStaticsService;
+    private ESIndicesStatsService esIndicesStatsService;
 
     @Autowired
     private IndexTemplateService indexTemplateService;
@@ -46,7 +46,7 @@ public class PhyTemplateClusterMetricsHandler extends BaseClusterMetricsHandle {
 
     @Override
     protected List<VariousLineChartMetrics> getAggClusterPhyMetrics(MetricsClusterPhyDTO param) {
-        List<VariousLineChartMetrics> aggClusterPhyTemplateMetrics = esIndicesStaticsService.getAggClusterPhyTemplateMetrics((MetricsClusterPhyTemplateDTO) param);
+        List<VariousLineChartMetrics> aggClusterPhyTemplateMetrics = esIndicesStatsService.getAggClusterPhyTemplateMetrics((MetricsClusterPhyTemplateDTO) param);
         // 逻辑模板id转化为逻辑模板名称
         convertTemplateIdToName(aggClusterPhyTemplateMetrics);
 

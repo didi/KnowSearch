@@ -1,15 +1,14 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping.impl;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.DEFAULT_INDEX_MAPPING_TYPE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum.TEMPLATE_MAPPING;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.BaseTemplateSrv;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.impl.BaseTemplateSrvImpl;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping.TemplateLogicMappingManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping.TemplatePhyMappingManager;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.precreate.TemplatePreCreateManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.precreate.PreCreateManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.MappingOptimize;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.MappingOptimizeItem;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
@@ -30,7 +29,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTe
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.NewTemplateSrvEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.mapping.AnalyzerEnum;
 import com.didichuxing.datachannel.arius.admin.common.mapping.AriusTypeProperty;
@@ -45,7 +44,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ESVersionUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.impl.IndexTemplateServiceImpl;
-import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateSattisService;
+import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateStatsService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateConfigDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateTypeDAO;
 import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
@@ -56,6 +55,7 @@ import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import java.util.ArrayList;
@@ -81,7 +81,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @date 2019-06-13
  */
 @Service("templateLogicMappingManagerImpl")
-public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements TemplateLogicMappingManager {
+public class TemplateLogicMappingManagerImpl extends BaseTemplateSrvImpl implements TemplateLogicMappingManager {
 
     private static final ILog              LOGGER = LogFactory.getLog(IndexTemplateServiceImpl.class);
 
@@ -90,10 +90,10 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
     private TemplatePhyMappingManager       templatePhyMappingManager;
 
     @Autowired
-    private TemplateSattisService           templateSattisService;
+    private TemplateStatsService templateStatsService;
 
     @Autowired
-    private TemplatePreCreateManager        templatePreCreateManager;
+    private PreCreateManager templatePreCreateManager;
 
     @Autowired
     private IndexTemplateConfigDAO         templateConfigDAO;
@@ -111,11 +111,15 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
     private static final String DOC_VALUES_STR = "doc_values";
     private static final String INDEX_STR      = "index";
 
+    
+    /**
+     * @return
+     */
     @Override
-    public TemplateServiceEnum templateService() {
-        return TEMPLATE_MAPPING;
+    public NewTemplateSrvEnum templateSrv() {
+        return NewTemplateSrvEnum.TEMPLATE_MAPPING;
     }
-
+    
     /**
      * 查询指定的逻辑模板的Field信息
      *
@@ -290,7 +294,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
 
         List<MappingOptimize> mappingOptimizes = new ArrayList<>();
         for (IndexTemplatePhy master : templatePhysicals) {
-            Result<MappingOptimize> getMappingOptimizeResult = templateSattisService
+            Result<MappingOptimize> getMappingOptimizeResult = templateStatsService
                     .getMappingOptimize(master.getCluster(), master.getName());
 
             if (getMappingOptimizeResult.failed()) {
@@ -505,7 +509,6 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
                     .content("-").triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
             
                     .build());
-            //operateRecordService.save(TEMPLATE, EDIT_TEMPLATE_MAPPING, schemaDTO.getLogicId(), "-", operator);
 
             // 重建明天索引
             templatePreCreateManager.reBuildTomorrowIndex(schemaDTO.getLogicId(), 3);
@@ -844,7 +847,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
     }
 
     private MappingConfig convert2Mapping(String type, List<Field> fields) {
-        Map<String, TypeDefine> mappingTypes = new HashMap<>();
+        Map<String, TypeDefine> mappingTypes = Maps.newHashMap();
 
         for (Field field : fields) {
             // fields -> type
@@ -932,7 +935,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
      * @return
      */
     private List<Field> diffField(List<Field> src, List<Field> dst) {
-        Map<String, Field> srcMap = new HashMap<>();
+        Map<String, Field> srcMap =Maps.newHashMap();
 
         for (Field field : src) {
             srcMap.put(field.getName(), field);
@@ -1091,8 +1094,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
             // 就一个type，修改模板的id和routing字段
             IndexTemplateDTO templateLogicDTO = new IndexTemplateDTO();
             templateLogicDTO.setId(schemaDTO.getLogicId());
-            templateLogicDTO.setIdField(typeProperties.get(0).getIdField());
-            templateLogicDTO.setRoutingField(typeProperties.get(0).getRoutingField());
+            
             templateLogicDTO.setDateField(typeProperties.get(0).getDateField());
             templateLogicDTO.setDateFieldFormat(typeProperties.get(0).getDateFieldFormat());
             Result<Void>  editDateFieldResult = indexTemplateService.editTemplate(templateLogicDTO, operator,projectId);
@@ -1174,8 +1176,6 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrv implements 
         templateLogicDTO.setId(schemaDTO.getLogicId());
         templateLogicDTO.setDateField(specialField.getDateField());
         templateLogicDTO.setDateFieldFormat(specialField.getDateFieldFormat());
-        templateLogicDTO.setIdField(specialField.getIdField());
-        templateLogicDTO.setRoutingField(specialField.getRoutingField());
         return indexTemplateService.editTemplate(templateLogicDTO, operator,projectId);
     }
 

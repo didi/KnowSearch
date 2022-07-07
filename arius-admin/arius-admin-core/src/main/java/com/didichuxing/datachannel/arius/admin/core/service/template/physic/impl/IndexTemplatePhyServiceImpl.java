@@ -45,6 +45,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -187,8 +188,8 @@ public class IndexTemplatePhyServiceImpl implements IndexTemplatePhyService {
     }
 
     @Override
-    public void deleteDirtyByClusterAndName(String cluster, String name) {
-        indexTemplatePhyDAO.deleteDirtyByClusterAndName(cluster, name);
+    public Boolean deleteDirtyByClusterAndName(String cluster, String name) {
+       return indexTemplatePhyDAO.deleteDirtyByClusterAndName(cluster, name) > 0;
     }
 
     /**
@@ -715,8 +716,60 @@ public class IndexTemplatePhyServiceImpl implements IndexTemplatePhyService {
         }
         return Result.buildSucc(ConvertUtil.list2List(indexTemplatePhyPOS, IndexTemplatePhy.class));
     }
-
-
+    
+    /**
+     * @param physicalId
+     * @return
+     */
+    @Override
+    public IndexTemplatePhyWithLogic buildIndexTemplatePhysicalWithLogicByPhysicalId(Long physicalId) {
+        IndexTemplatePhyPO physicalPO = indexTemplatePhyDAO.getNormalAndDeletingById(physicalId);
+        return buildIndexTemplatePhysicalWithLogic(physicalPO);
+    }
+    
+    /**
+     * @param cluster
+     * @param name
+     * @param code
+     * @return
+     */
+    @Override
+    public List<IndexTemplatePhyPO> getByClusterAndNameAndStatus(String cluster, String name, int code) {
+        return  indexTemplatePhyDAO
+                .getByClusterAndNameAndStatus(cluster, name, code);
+    }
+    
+    /**
+     * @param cluster
+     * @param code
+     * @return
+     */
+    @Override
+    public Collection<IndexTemplatePhyPO> getByClusterAndStatus(String cluster, int code) {
+        return indexTemplatePhyDAO.getByClusterAndStatus(cluster, code);
+    }
+    
+    /**
+     * @param physicalId
+     * @param code
+     * @return
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean updateStatus(Long physicalId, int code) {
+        return 1 == indexTemplatePhyDAO.updateStatus(physicalId,code);
+    
+    }
+    
+    /**
+     * @param physicalPO
+     * @return
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean updateByIndexTemplatePhyPO(IndexTemplatePhyPO physicalPO) {
+        return indexTemplatePhyDAO.update(physicalPO)==1;
+    }
     /**************************************************** private method ****************************************************/
     private List<IndexTemplatePhyWithLogic> batchBuildTemplatePhysicalWithLogic(List<IndexTemplatePhyPO> indexTemplatePhyPOS) {
         if (CollectionUtils.isEmpty(indexTemplatePhyPOS)) {

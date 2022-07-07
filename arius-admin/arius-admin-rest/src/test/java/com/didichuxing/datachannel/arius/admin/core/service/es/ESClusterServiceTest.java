@@ -5,11 +5,11 @@ import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.NodeAttrInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsDashboardTopNDTO;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ECSegmentsOnIps;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ECSegmentOnIp;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStatsResponse;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.metadata.service.DashBoardMetricsService;
-import com.didichuxing.datachannel.arius.admin.metadata.service.ESClusterPhyStaticsService;
+import com.didichuxing.datachannel.arius.admin.metadata.service.ESClusterPhyStatsService;
 import com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESClusterDAO;
 import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.ESClusterHealthResponse;
@@ -40,7 +40,7 @@ public class ESClusterServiceTest extends AriusAdminApplicationTest {
     @Autowired
     private ESClusterService esClusterService;
     @Autowired
-    private ESClusterPhyStaticsService esClusterPhyStaticsService;
+    private ESClusterPhyStatsService esClusterPhyStatsService;
     @Autowired
     private DashBoardMetricsService dashBoardMetricsService;
     
@@ -62,26 +62,26 @@ public class ESClusterServiceTest extends AriusAdminApplicationTest {
     @Test
     public void   getClustersShardTotalTest(){
         Mockito.when(esClusterDAO.configReBalanceOperate(Mockito.any(), Mockito.any())).thenReturn(true);
-        Assertions.assertEquals(6020L,esClusterPhyStaticsService.getClustersShardTotal(
+        Assertions.assertEquals(6020L, esClusterPhyStatsService.getClustersShardTotal(
             CustomDataSource.PHY_CLUSTER_NAME_LOGI));
     
     }
     @Test
     public void getWriteRequestTotalTest(){
         Mockito.when(esClusterDAO.configReBalanceOperate(Mockito.any(), Mockito.any())).thenReturn(true);
-        Assertions.assertEquals(115018L,esClusterPhyStaticsService.getCurrentIndexTotal(
+        Assertions.assertEquals(115018L, esClusterPhyStatsService.getCurrentIndexTotal(
             CustomDataSource.PHY_CLUSTER_NAME_LOGI));
     }
     @Test
     public void getHttpConnectionTotalTest(){
         Mockito.when(esClusterDAO.configReBalanceOperate(Mockito.any(), Mockito.any())).thenReturn(true);
-        Assertions.assertEquals(954L,esClusterPhyStaticsService.getHttpConnectionTotal(
+        Assertions.assertEquals(954L, esClusterPhyStatsService.getHttpConnectionTotal(
             CustomDataSource.PHY_CLUSTER_NAME_LOGI));
     }
     @Test
     public void getGatewaySuccessRateAndFailureRateTest(){
         Mockito.when(esClusterDAO.configReBalanceOperate(Mockito.any(), Mockito.any())).thenReturn(true);
-        final Tuple<Double, Double> rateAndFailureRate = esClusterPhyStaticsService.getGatewaySuccessRateAndFailureRate(
+        final Tuple<Double, Double> rateAndFailureRate = esClusterPhyStatsService.getGatewaySuccessRateAndFailureRate(
             CustomDataSource.PHY_CLUSTER_NAME_LOGI);
         Assertions.assertEquals(0.99,rateAndFailureRate.getV1());
         Assertions.assertEquals(0L,rateAndFailureRate.getV2());
@@ -89,14 +89,14 @@ public class ESClusterServiceTest extends AriusAdminApplicationTest {
     @Test
     public void getPendingTaskTotalTest(){
         Mockito.when(esClusterDAO.configReBalanceOperate(Mockito.any(), Mockito.any())).thenReturn(true);
-        Assertions.assertEquals(0L,esClusterPhyStaticsService.getPendingTaskTotal(CustomDataSource.PHY_CLUSTER_NAME_LOGI));
+        Assertions.assertEquals(0L, esClusterPhyStatsService.getPendingTaskTotal(CustomDataSource.PHY_CLUSTER_NAME_LOGI));
     
     }
     @Test
     public void getQueryRequestsIncrementTest(){
         Mockito.when(esClusterDAO.configReBalanceOperate(Mockito.any(), Mockito.any())).thenReturn(true);
         Assertions.assertEquals(0L,
-            esClusterPhyStaticsService.getCurrentQueryTotal(CustomDataSource.PHY_CLUSTER_NAME_LOGI));
+            esClusterPhyStatsService.getCurrentQueryTotal(CustomDataSource.PHY_CLUSTER_NAME_LOGI));
     }
 
     
@@ -175,15 +175,15 @@ public class ESClusterServiceTest extends AriusAdminApplicationTest {
 
     @Test
     public void synGetSegmentsOfIpByClusterTest() {
-        List<ECSegmentsOnIps> list = new ArrayList<>();
-        ECSegmentsOnIps ecSegmentsOnIps = new ECSegmentsOnIps();
-        ecSegmentsOnIps.setSegment("1");
-        ecSegmentsOnIps.setIp("127.0.0.1");
-        ECSegmentsOnIps ecSegmentsOnIps2 = new ECSegmentsOnIps();
-        ecSegmentsOnIps2.setSegment("2");
-        ecSegmentsOnIps2.setIp("127.0.0.1");
-        list.add(ecSegmentsOnIps);
-        list.add(ecSegmentsOnIps2);
+        List<ECSegmentOnIp> list = new ArrayList<>();
+        ECSegmentOnIp ecSegmentOnIp = new ECSegmentOnIp();
+        ecSegmentOnIp.setSegment("1");
+        ecSegmentOnIp.setIp("127.0.0.1");
+        ECSegmentOnIp ecSegmentOnIp2 = new ECSegmentOnIp();
+        ecSegmentOnIp2.setSegment("2");
+        ecSegmentOnIp2.setIp("127.0.0.1");
+        list.add(ecSegmentOnIp);
+        list.add(ecSegmentOnIp2);
         Mockito.when(esClusterDAO.getSegmentsOfIpByCluster(Mockito.any())).thenReturn(list);
         Assertions.assertEquals(1, esClusterService.synGetSegmentsOfIpByCluster(CustomDataSource.PHY_CLUSTER_NAME).size());
     }

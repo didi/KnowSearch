@@ -15,8 +15,8 @@ import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOpe
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyManager;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.capacityplan.IndexPlanManager;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.precreate.TemplatePreCreateManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.indexplan.IndexPlanManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.precreate.PreCreateManager;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.IndexTemplatePhysicalConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
@@ -34,10 +34,10 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplatePhyVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.IndexTemplatePhysicalVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
-import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectTemplateAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TemplateOperateRecordEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectTemplateAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplatePhysicalStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.event.template.PhysicalTemplateAddEvent;
@@ -52,12 +52,12 @@ import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.IndexNameFactory;
 import com.didichuxing.datachannel.arius.admin.common.util.TemplateUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
-import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectLogicTemplateAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
+import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectLogicTemplateAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.impl.IndexTemplatePhyServiceImpl;
@@ -121,7 +121,7 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
     private ESTemplateService           esTemplateService;
 
     @Autowired
-    private TemplatePreCreateManager    templatePreCreateManager;
+    private PreCreateManager templatePreCreateManager;
 
     @Autowired
     private IndexPlanManager indexPlanManager;
@@ -425,8 +425,6 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
 
         initParamWhenAdd(param);
 
-        // 为了解决写入的长尾问题，引擎增加了逻辑shard的概念，这里需要计算逻辑shard的值，并调整源shard个数
-        indexPlanManager.initShardRoutingAndAdjustShard(param);
         Result<Long> result = indexTemplatePhyService.insert(param);
         Long physicalId = result.getData();
         if (result.success()) {

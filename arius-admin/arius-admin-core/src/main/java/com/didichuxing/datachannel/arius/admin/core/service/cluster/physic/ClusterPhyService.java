@@ -1,15 +1,15 @@
 package com.didichuxing.datachannel.arius.admin.core.service.cluster.physic;
 
-import java.util.List;
-import java.util.Set;
-
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Plugin;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterSettingDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author ohushenglin_v
@@ -151,4 +151,9 @@ public interface ClusterPhyService {
      * @return true or false
      */
     boolean isClusterExistsByPackageId(Long packageId);
+    
+    
+    Result<List<ClusterTemplateSrv>> getPhyClusterTemplateSrv(String phyCluster);
+    
+    Result<List<ClusterTemplateSrv>> getPhyClusterTemplateSrv(ClusterPhy phyCluster);
 }

@@ -41,6 +41,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(V2_THIRD_PART + "/gateway")
 @Api(tags = "第三方gateway接口(REST)")
+@Deprecated
 public class ThirdpartGatewayController {
 
     @Autowired
@@ -77,7 +78,8 @@ public class ThirdpartGatewayController {
         if (!GATEWAY_GET_PROJECT_TICKET.equals(ticket)) {
             return Result.buildParamIllegal("ticket错误");
         }
-        return gatewayManager.listESUserByProject();
+         return Result.buildFail("接口已经下线：迁移到v3");
+        //return gatewayManager.listESUserByProject();
     }
 
     @GetMapping("/template")
@@ -85,7 +87,8 @@ public class ThirdpartGatewayController {
     @ApiOperation(value = "获取模板信息", notes = "以map结构组织,key是表达式")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "String", name = "cluster", value = "集群名称", required = true) })
     public Result<Map<String, GatewayTemplatePhysicalVO>> getTemplateMap(@RequestParam("cluster") String cluster) {
-        return gatewayManager.getTemplateMap(cluster);
+         return Result.buildFail("接口已经下线：迁移到v3");
+        //return gatewayManager.getTemplateMap(cluster);
     }
 
     @GetMapping("/deploy-info")
@@ -93,7 +96,8 @@ public class ThirdpartGatewayController {
     @ApiOperation(value = "获取模板信息", notes = "主主从结构组织")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "String", name = "dataCenter", value = "数据中心", required = true) })
     public Result<Map<String, GatewayTemplateDeployInfoVO>> listDeployInfo(@RequestParam(value = "dataCenter") String dataCenter) {
-        return gatewayManager.listDeployInfo(dataCenter);
+         return Result.buildFail("接口已经下线：迁移到v3");
+        //return gatewayManager.listDeployInfo(dataCenter);
     }
 
     @PostMapping(path = "dsl/scroll-dsl-template")

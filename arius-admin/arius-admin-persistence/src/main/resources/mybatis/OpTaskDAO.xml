@@ -53,7 +53,7 @@
         SELECT <include refid="columns" />
         <![CDATA[
             FROM
-                arius_work_task
+                arius_op_task
             WHERE 
                 id = #{id} 
         ]]>
@@ -63,7 +63,7 @@
         SELECT <include refid="columns" />
         <![CDATA[
             FROM
-                arius_work_task
+                arius_op_task
             WHERE
                  business_key LIKE CONCAT(#{businessKey},'%')
                  AND task_type = #{taskType}
@@ -75,7 +75,7 @@
         SELECT <include refid="columns" />
         <![CDATA[
             FROM
-                arius_work_task
+                arius_op_task
             WHERE
                 business_key LIKE CONCAT(#{businessKey},'%')
                 AND task_type = #{taskType}
@@ -87,7 +87,7 @@
     <select id="getPendingTaskByType" resultMap="WorkTaskMap">
         SELECT <include refid="columns" />
         FROM
-            arius_work_task
+            arius_op_task
         WHERE task_type = #{taskType}
         AND status in ('waiting','pause','running')
     </select>
@@ -95,7 +95,7 @@
     <select id="getSuccessTaskByType" resultMap="WorkTaskMap">
         SELECT <include refid="columns" />
         FROM
-        arius_work_task
+        arius_op_task
         WHERE task_type = #{taskType}
         AND status in ('success')
     </select>
@@ -104,7 +104,7 @@
         SELECT
         <include refid="columns" />
         FROM
-        arius_work_task
+        arius_op_task
         where  delete_flag = '0' order by id  desc
     </select>
     
@@ -112,13 +112,13 @@
         SELECT
             <include refid="columns" />
         FROM
-            arius_work_task 
+            arius_op_task 
         <include refid="where"/>
     </select>
 
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
         <![CDATA[
-            INSERT INTO arius_work_task (
+            INSERT INTO arius_op_task (
                 title,
                 task_type,
                 business_key,
@@ -144,7 +144,7 @@
 
     <update id="update">
             UPDATE
-                arius_work_task
+                arius_op_task
             <set>
                 <if test="title != null and '' != title">
                 	<![CDATA[ title = #{title} ]]>,
