@@ -620,6 +620,9 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         if (param.getConfig() == null) {
             param.setConfig("");
         }
+        if (param.getShardRouting()==null){
+            param.setShardRouting(1);
+        }
 
         IndexTemplatePhysicalConfig indexTemplatePhysicalConfig = new IndexTemplatePhysicalConfig();
         if (StringUtils.isNotBlank(param.getConfig())) {

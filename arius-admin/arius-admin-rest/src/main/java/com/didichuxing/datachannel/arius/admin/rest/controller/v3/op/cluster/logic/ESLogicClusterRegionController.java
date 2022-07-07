@@ -32,7 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @date 2020/10/10
  */
 @RestController
-@RequestMapping(V3 + "/logic/cluster/region")
+@RequestMapping(V3 + "/cluster/logic/region")
 @Api(tags = "ES逻辑集群region接口(REST)")
 public class ESLogicClusterRegionController {
 
@@ -42,7 +42,7 @@ public class ESLogicClusterRegionController {
     @Autowired
     private ClusterRegionManager clusterRegionManager;
 
-    @GetMapping("/list")
+    @GetMapping("")
     @ResponseBody
     @ApiOperation(value = "查询逻辑集群region列表接口", notes = "")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Long", name = "logicClusterId", value = "logicClusterId", required = true) })
@@ -52,7 +52,7 @@ public class ESLogicClusterRegionController {
         return Result.buildSucc(clusterRegionManager.buildLogicClusterRegionVO(regions));
     }
 
-    @DeleteMapping("/delete")
+    @DeleteMapping("")
     @ResponseBody
     @ApiOperation(value = "解绑逻辑集群region接口", notes = "")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Long", name = "regionId", value = "regionId", required = true) })
