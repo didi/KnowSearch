@@ -26,12 +26,13 @@ public abstract class BaseIndicesController {
     protected Result<Boolean> checkClusterValid(List<String> clusterPhyNames) {
         if (CollectionUtils.isEmpty(clusterPhyNames)) { return Result.buildSucc();}
 
-        List<String> filterClustersFromBiz = Lists.newArrayList("didi-cluster-test");
+        // 暂时代码写死，防止页面上通过配置修改
+        List<String> filterClustersFromDidi = Lists.newArrayList("didi-cluster-test");
 
         Set<String> filterClustersFromAriusConfig = ariusConfigInfoService.stringSettingSplit2Set(
                 "arius.cluster.blacklist", "cluster.phy.name", "", ",");
 
-        filterClustersFromAriusConfig.addAll(filterClustersFromBiz);
+        filterClustersFromAriusConfig.addAll(filterClustersFromDidi);
 
         for (String clusterPhyName : clusterPhyNames) {
             if (filterClustersFromAriusConfig.contains(clusterPhyName)) {
