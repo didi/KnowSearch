@@ -6,11 +6,7 @@ import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.setting.TemplateLogicSettingsManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateWithCreateInfoDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateClearDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateConditionDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateSettingDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateSettingVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.DataTypeEnum;
@@ -109,12 +105,6 @@ public class TemplateLogicV3Controller {
         String operator = HttpRequestUtil.getOperator(request);
         return templateLogicManager.switchRolloverStatus(templateLogicId, status, operator,
                 HttpRequestUtil.getProjectId(request));
-    }
-    @GetMapping("/time-format")
-     @ResponseBody
-    @ApiOperation(value = "获取平台配置的时间格式集合")
-    public Result<List<String>> listTimeFormat(HttpServletRequest request) {
-        return templateLogicManager.getTemplateTimeFormat();
     }
 
     @PutMapping("/setting")
