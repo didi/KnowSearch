@@ -988,7 +988,6 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
                     .content(String.format("数据库写入限流值修改%s->%s", dto.getCurRateLimit(), dto.getAdjustRateLimit()))
                     .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).userOperation(operator).bizId(dto.getLogicId())
                     .build());
-            //operateRecordService.save(TEMPLATE, EDIT, dto.getLogicId(), String.format("数据库写入限流值修改%s->%s", dto.getCurRateLimit(), dto.getAdjustRateLimit()), dto.getSubmitor());
             SpringTool.publish(new LogicTemplateModifyEvent(this, ConvertUtil.obj2Obj(oldPO, IndexTemplate.class), getLogicTemplateById(oldPO.getId())));
             return Result.buildSucc();
         }
