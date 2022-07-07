@@ -27,7 +27,12 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.TemplateLabel;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateConfigDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhyDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateWithCreateInfoDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateClearDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord.template.TemplateOperateRecord;
@@ -64,6 +69,7 @@ import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
+import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
@@ -158,6 +164,17 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     private final static Integer RETRY_TIMES = 3;
     @Autowired
     private IndicesManager indicesManager;
+    @Autowired
+    private AriusConfigInfoService ariusConfigInfoService;
+    
+    /**
+     * 时间格式模板
+     */
+    private final static String TEMPLATE_TIME_FORMAT_GROUP="template.time.type";
+    /**
+     * 模板时间格式value
+     */
+    private final static String TEMPLATE_TIME_FORMAT_VALUE_NAME="format";
 
 
 
@@ -832,7 +849,17 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
 
         return Result.buildSucc(vos);
     }
-
+    
+    /**
+     * @return
+     */
+    @Override
+    public Result<List<String>> getTemplateTimeFormat() {
+        final List<String> timeFormatList = ariusConfigInfoService.objectSetting(TEMPLATE_TIME_FORMAT_GROUP,
+                TEMPLATE_TIME_FORMAT_VALUE_NAME, Lists.<String>newArrayList(), List.class);
+        return Result.buildSucc(timeFormatList);
+    }
+    
     /**************************************** private method ***************************************************/
     /**
      * 校验逻辑模板Master ROLE物理模板是否存在
