@@ -92,7 +92,7 @@ public class ESLogicClusterOpV3Controller {
     @ResponseBody
     @ApiOperation(value = "检查逻辑集群所拥有的region是否不为空")
     public Result<Boolean> checkLogicClusterRegionIsNotEmpty(@PathVariable("clusterLogicId") Long clusterLogicId) {
-        return clusterLogicManager.checkLogicClusterRegionIsNotEmpty(clusterLogicId);
+        return clusterLogicManager.isLogicClusterRegionIsNotEmpty(clusterLogicId);
     }
     
     @PutMapping()
@@ -103,12 +103,12 @@ public class ESLogicClusterOpV3Controller {
                 HttpRequestUtil.getProjectId(request));
     }
     
-    @DeleteMapping("{logicClusterId}")
+    @DeleteMapping("{clusterLogicId}")
     @ResponseBody
     @ApiOperation(value = "下线集群")
     
-    public Result<Void> delete(HttpServletRequest request, @PathVariable Long logicClusterId) throws AdminOperateException {
-        return clusterLogicManager.deleteLogicCluster(logicClusterId, HttpRequestUtil.getOperator(request),
+    public Result<Void> delete(HttpServletRequest request, @PathVariable Long clusterLogicId) throws AdminOperateException {
+        return clusterLogicManager.deleteLogicCluster(clusterLogicId, HttpRequestUtil.getOperator(request),
                 HttpRequestUtil.getProjectId(request));
     }
     

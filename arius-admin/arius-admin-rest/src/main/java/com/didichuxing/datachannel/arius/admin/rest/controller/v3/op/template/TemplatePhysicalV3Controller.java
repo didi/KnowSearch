@@ -24,7 +24,7 @@ import io.swagger.annotations.ApiOperation;
  * Created by linyunan on 2021-07-30
  */
 @RestController
-@RequestMapping(V3 + "/template/physical")
+@RequestMapping(V3 + "/templates/physical")
 @Api(tags = "索引模板管理接口(REST)")
 public class TemplatePhysicalV3Controller {
 
@@ -52,7 +52,7 @@ public class TemplatePhysicalV3Controller {
         return Result.buildSucc(templatePhyManager.getCanCopyTemplatePhyClusterPhyNames(templatePhyId));
     }
 
-    @PutMapping("/multiple-edit")
+    @PutMapping("")
     @ResponseBody
     @ApiOperation(value = "编辑多个物理模板接口", notes = "")
     public Result<Boolean> multipleEdit(HttpServletRequest request,
@@ -60,7 +60,7 @@ public class TemplatePhysicalV3Controller {
         return templatePhyManager.editMultipleTemplate(params, HttpRequestUtil.getOperator(request));
     }
 
-    @PostMapping("/multiple-upgrade")
+    @PostMapping("/upgrade")
     @ResponseBody
     @ApiOperation(value = "升级多个物理模板接口", notes = "")
     public Result<Boolean> multipleUpgrade(HttpServletRequest request,

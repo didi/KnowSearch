@@ -241,5 +241,5 @@ public interface ClusterLogicManager {
      * @param logicClusterId 逻辑集群id
      * @return {@link Result}<{@link Boolean}>
      */
-    Result<Boolean> checkLogicClusterRegionIsNotEmpty(Long logicClusterId);
+    Result<Boolean> isLogicClusterRegionIsNotEmpty(Long logicClusterId);
 }
