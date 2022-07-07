@@ -153,7 +153,7 @@ public class TemplateLogicV3Controller {
                 HttpRequestUtil.getProjectId(request));
     }
 
-    @DeleteMapping("/indices ")
+    @DeleteMapping("/indices")
     @ResponseBody
     @ApiOperation(value = "清理索引")
     public Result<Void> clearIndices(HttpServletRequest request,@RequestBody TemplateClearDTO clearDTO) {
