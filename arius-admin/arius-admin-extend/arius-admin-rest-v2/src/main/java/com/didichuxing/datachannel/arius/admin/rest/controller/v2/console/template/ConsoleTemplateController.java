@@ -9,7 +9,7 @@ import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.pipeline.PipelineManager;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateClearDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateClearDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateRateLimitDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateUpdateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateConfig;
@@ -191,7 +191,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
     @ApiOperation(value = "清理索引信息接口【三方接口】",tags = "【三方接口】" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "header", dataType = "String", name = HttpRequestUtil.PROJECT_ID, value = "应用ID", required = true) })
     public Result<Void> clearLogicTemplateIndices(HttpServletRequest request,
-                                            @RequestBody ConsoleTemplateClearDTO clearDTO) throws ESOperateException {
+                                            @RequestBody TemplateClearDTO clearDTO) throws ESOperateException {
         Result<Void> checkAuthResult = checkAppAuth(clearDTO.getLogicId(), HttpRequestUtil.getProjectId(request));
         if (checkAuthResult.failed()) {
             return checkAuthResult;

@@ -10,7 +10,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterLogicConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterWithRegionDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateClearDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateClearDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicTemplateIndexCountVO;
@@ -105,7 +105,7 @@ public interface ClusterLogicManager {
      * @return
      * @throws ESOperateException
      */
-    Result<Void> clearIndices(ConsoleTemplateClearDTO clearDTO, String operator) throws ESOperateException;
+    Result<Void> clearIndices(TemplateClearDTO clearDTO, String operator) throws ESOperateException;
 
     /**
      * 获取逻辑集群分派的物理集群列表
@@ -241,5 +241,5 @@ public interface ClusterLogicManager {
      * @param logicClusterId 逻辑集群id
      * @return {@link Result}<{@link Boolean}>
      */
-    Result<Boolean> checkLogicClusterRegionIsNotEmpty(Long logicClusterId);
+    Result<Boolean> isLogicClusterRegionIsNotEmpty(Long logicClusterId);
 }
