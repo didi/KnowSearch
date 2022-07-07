@@ -1092,6 +1092,12 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
     public int batchChangeHotDay(Integer days) {
      return indexTemplateDAO.batchChangeHotDay(days);
     }
+
+    @Override
+    public List<Integer> listAllTemplateIds() {
+        return indexTemplateDAO.listAllIds();
+    }
+
     /**************************************** private method ****************************************************/
     /**
      * 转换逻辑模板，获取并组合对应的物理模板信息

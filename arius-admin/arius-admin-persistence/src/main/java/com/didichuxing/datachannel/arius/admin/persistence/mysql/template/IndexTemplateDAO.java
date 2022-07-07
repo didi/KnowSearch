@@ -52,4 +52,6 @@ public interface IndexTemplateDAO {
     List<String> listAllNames();
     
     Integer getProjectIdByTemplateLogicId(@Param("logicId")Integer templateLogicId);
+
+    List<Integer> listAllIds();
 }

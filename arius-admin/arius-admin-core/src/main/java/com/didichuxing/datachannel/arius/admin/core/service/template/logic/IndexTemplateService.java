@@ -404,4 +404,11 @@ public interface IndexTemplateService {
     boolean update(IndexTemplatePO editTemplate);
     
     int batchChangeHotDay(Integer days);
+
+    /**
+     * 获取全局所有模版id
+     *
+     * @return
+     */
+    List<Integer> listAllTemplateIds();
 }
