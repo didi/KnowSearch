@@ -5,7 +5,7 @@ import com.didichuxing.datachannel.arius.admin.biz.metrics.GatewayMetricsManager
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.*;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.GlobalParams;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.GlobalParam;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.GatewayOverviewMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.MetricsContent;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.MetricsContentCell;
@@ -58,7 +58,7 @@ public class GatewayMetricsManagerImpl implements GatewayMetricsManager {
 
     @Override
     public Result<List<String>> getDslMd5List(Integer projectId, Long startTime, Long endTime) {
-        projectId = projectId != null ? projectId : GlobalParams.CURRENT_PROJECT_ID.get();
+        projectId = projectId != null ? projectId : GlobalParam.CURRENT_PROJECT_ID.get();
         if (endTime == null) {
             endTime = System.currentTimeMillis();
         }

@@ -14,23 +14,20 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.template.T
 import static com.didichuxing.datachannel.arius.admin.core.service.template.physic.impl.IndexTemplatePhyServiceImpl.NOT_CHECK;
 
 import com.alibaba.fastjson.JSON;
+import com.didichuxing.datachannel.arius.admin.biz.indices.IndicesManager;
 import com.didichuxing.datachannel.arius.admin.biz.page.TemplateLogicPageSearchHandle;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyManager;
-import com.didichuxing.datachannel.arius.admin.biz.template.new_srv.precreate.PreCreateManager;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.cold.TemplateColdManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.cold.ColdManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.dcdr.TemplateDCDRManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.precreate.PreCreateManager;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.IndexTemplateValue;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.TemplateLabel;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateConfigDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhyDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateWithCreateInfoDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateConditionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord.template.TemplateOperateRecord;
@@ -74,7 +71,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectLogic
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateLabelService;
-import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateSattisService;
+import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateStatsService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
@@ -106,13 +103,13 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     private ProjectLogicTemplateAuthService projectLogicTemplateAuthService;
 
     @Autowired
-    private TemplateSattisService       templateSattisService;
+    private TemplateStatsService templateStatsService;
 
     @Autowired
     private TemplateLabelService        templateLabelService;
 
     @Autowired
-    private TemplateColdManager         templateColdManager;
+    private ColdManager templateColdManager;
 
     @Autowired
     private IndexTemplateService        indexTemplateService;
@@ -159,6 +156,8 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     private ClusterLogicService         clusterLogicService;
 
     private final static Integer RETRY_TIMES = 3;
+    @Autowired
+    private IndicesManager indicesManager;
 
 
 
@@ -172,7 +171,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
      */
     @Override
     public List<ProjectBriefVO> getLogicTemplateProjectAccess(Integer logicId) throws AmsRemoteException {
-        Result<Map<Integer, Long>> result = templateSattisService.getTemplateAccessProjectIds(logicId, 7);
+        Result<Map<Integer, Long>> result = templateStatsService.getTemplateAccessProjectIds(logicId, 7);
         if (result.failed()) {
             throw new AmsRemoteException("获取访问模板的project列表失败");
         }
@@ -701,14 +700,15 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         // 转化为视图列表展示
         List<ConsoleTemplateVO> consoleTemplateVOLists = new ArrayList<>();
         templateByPhyCluster.stream()
-                //todo：Object.isnull
                 .filter(indexTemplatePhyWithLogic->indexTemplatePhyWithLogic.getLogicTemplate()!=null)
                 .forEach(indexTemplatePhyWithLogic -> consoleTemplateVOLists.add(buildTemplateVO(indexTemplatePhyWithLogic)));
         return Result.buildSucc(consoleTemplateVOLists);
     }
 
     @Override
-    public Result<Void> clearIndices(Integer templateId, List<String> indices, Integer projectId) {
+    public Result<Void> clearIndices(TemplateClearDTO clearDTO, Integer projectId) {
+        List<String> indices = clearDTO.getDelIndices();
+        Integer templateId = clearDTO.getLogicId();
         if (CollectionUtils.isEmpty(indices)) { return Result.buildParamIllegal("清理索引不能为空");}
 
         IndexTemplateWithPhyTemplates templateLogicWithPhysical = indexTemplateService.getLogicTemplateWithPhysicalsById(templateId);
@@ -725,9 +725,19 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         List<IndexTemplatePhy> indexTemplatePhyList = Optional.ofNullable(templateLogicWithPhysical)
                 .map(IndexTemplateWithPhyTemplates::getPhysicals)
                 .orElse(Lists.newArrayList());
+        List<String> clusterList=Lists.newArrayList();
         for (IndexTemplatePhy templatePhysical : indexTemplatePhyList) {
              succ = indices.size() == esIndexService.syncBatchDeleteIndices(templatePhysical.getCluster(), indices, RETRY_TIMES);
+             clusterList.add(templatePhysical.getCluster());
+            
         }
+        
+    
+        for (String cluster : clusterList) {
+            indicesManager.updateIndexFlagInvalid(cluster, indices);
+        
+        }
+        
         return Result.build(succ);
     }
 
@@ -914,7 +924,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
      */
     private List<IndexTemplateValue> fetchTemplateValues() {
         List<IndexTemplateValue> templateValues = Lists.newArrayList();
-        Result<List<IndexTemplateValue>> listTemplateValueResult = templateSattisService.listTemplateValue();
+        Result<List<IndexTemplateValue>> listTemplateValueResult = templateStatsService.listTemplateValue();
         if (listTemplateValueResult.success()) {
             templateValues.addAll(listTemplateValueResult.getData());
         }

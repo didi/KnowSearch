@@ -8,13 +8,15 @@ import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterLogicConditionDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterLogicNodeConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterWithRegionDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateClearDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateClearDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicTemplateIndexCountVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PluginVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.ecm.ESClusterNodeSepcVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
@@ -103,7 +105,7 @@ public interface ClusterLogicManager {
      * @return
      * @throws ESOperateException
      */
-    Result<Void> clearIndices(ConsoleTemplateClearDTO clearDTO, String operator) throws ESOperateException;
+    Result<Void> clearIndices(TemplateClearDTO clearDTO, String operator) throws ESOperateException;
 
     /**
      * 获取逻辑集群分派的物理集群列表
@@ -234,11 +236,10 @@ public interface ClusterLogicManager {
     Result<List<PluginVO>> getClusterLogicPlugins(Long clusterId);
 
     /**
-     * 集群通过创建模板列表逻辑
+     * 检查逻辑集群的reigon是否不为空
      *
-     * @param projectId 项目id
-     * @param type      类型
-     * @return {@link Result}<{@link List}<{@link ClusterLogicVO}>>
+     * @param logicClusterId 逻辑集群id
+     * @return {@link Result}<{@link Boolean}>
      */
-    Result<List<ClusterLogicVO>> listLogicClusterThatCanCreateTemplateByProjectAndType(Integer projectId, Integer type);
+    Result<Boolean> isLogicClusterRegionIsNotEmpty(Long logicClusterId);
 }

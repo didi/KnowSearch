@@ -6,13 +6,12 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterLogicManager;
 import com.didichuxing.datachannel.arius.admin.biz.indices.IndicesManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.pipeline.TemplatePipelineManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.pipeline.PipelineManager;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateClearDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateClearDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateRateLimitDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateUpdateDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithCluster;
@@ -88,7 +87,7 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
     private ClusterLogicManager      clusterLogicManager;
 
     @Autowired
-    private TemplatePipelineManager templatePipelineManager;
+    private PipelineManager templatePipelineManager;
 
     @GetMapping("/list")
     @ResponseBody
@@ -96,8 +95,8 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "projectId", value = "应用ID，不会过滤索引，会影响权限信息", required = true) })
     public Result<List<ConsoleTemplateVO>> getConsoleTemplates(@RequestParam(value = "projectId", required = false) Integer projectId,
                                                                @RequestParam(value = "dataCenter", required = false, defaultValue = "") String dataCenter) {
-       
-        return Result.buildSucc(templateLogicManager.getConsoleTemplatesVOS(projectId));
+        return Result.buildFail("接口已经下线：迁移到v3");
+        //return Result.buildSucc(templateLogicManager.getConsoleTemplatesVOS(projectId));
     }
 
     @GetMapping("/get")
@@ -137,8 +136,8 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
                 .orElse(null)
 
         );
-
-        return Result.buildSucc(consoleTemplateDetail);
+ return Result.buildFail("接口已经下线：迁移到v3");
+        //return Result.buildSucc(consoleTemplateDetail);
     }
 
     @PutMapping("/update")
@@ -146,8 +145,9 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
     @ApiOperation(value = "用户编辑模板接口【三方接口】",tags = "【三方接口】", notes = "支持修改数据类型、责任人、备注")
     public Result<Void> modifyConsoleTemplate(HttpServletRequest request,
                                         @RequestBody ConsoleTemplateUpdateDTO templateLogicDTO) throws AdminOperateException {
-        return templateLogicManager.editTemplate(ConvertUtil.obj2Obj(templateLogicDTO, IndexTemplateDTO.class),
-            HttpRequestUtil.getOperator(request),HttpRequestUtil.getProjectId(request));
+         return Result.buildFail("接口已经下线：迁移到v3");
+        //return templateLogicManager.editTemplate(ConvertUtil.obj2Obj(templateLogicDTO, IndexTemplateDTO.class),
+        //    HttpRequestUtil.getOperator(request),HttpRequestUtil.getProjectId(request));
     }
 
     @GetMapping("/capacity")
@@ -156,7 +156,8 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "索引ID", required = true) })
     @Deprecated
     public Result<ConsoleTemplateCapacityVO> getLogicTemplateCapacity(@RequestParam("logicId") Integer logicId) {
-        return Result.buildSucc();
+         return Result.buildFail("接口已经下线：迁移到v3");
+        //return Result.buildSucc();
     }
 
     @GetMapping("/clearInfo")
@@ -181,8 +182,8 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
         consoleTemplateClearVO
             .setIndices(indicesManager.listIndexNameByTemplatePhyId(templateLogicWithPhysical.getMasterPhyTemplate().getId()));
         consoleTemplateClearVO.setAccessApps(templateLogicManager.getLogicTemplateProjectAccess(logicId));
-
-        return Result.buildSucc(consoleTemplateClearVO);
+ return Result.buildFail("接口已经下线：迁移到v3");
+        //return Result.buildSucc(consoleTemplateClearVO);
     }
 
     @PutMapping("/clearInfo")
@@ -190,13 +191,13 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
     @ApiOperation(value = "清理索引信息接口【三方接口】",tags = "【三方接口】" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "header", dataType = "String", name = HttpRequestUtil.PROJECT_ID, value = "应用ID", required = true) })
     public Result<Void> clearLogicTemplateIndices(HttpServletRequest request,
-                                            @RequestBody ConsoleTemplateClearDTO clearDTO) throws ESOperateException {
+                                            @RequestBody TemplateClearDTO clearDTO) throws ESOperateException {
         Result<Void> checkAuthResult = checkAppAuth(clearDTO.getLogicId(), HttpRequestUtil.getProjectId(request));
         if (checkAuthResult.failed()) {
             return checkAuthResult;
         }
-
-        return clusterLogicManager.clearIndices(clearDTO, HttpRequestUtil.getOperator(request));
+ return Result.buildFail("接口已经下线：迁移到v3");
+        //return clusterLogicManager.clearIndices(clearDTO, HttpRequestUtil.getOperator(request));
     }
 
     @GetMapping("/deleteInfo")
@@ -221,8 +222,8 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
 
         consoleTemplateDeleteVO.setAccessApps(
            templateLogicManager.getLogicTemplateProjectAccess(logicId));
-
-        return Result.buildSucc(consoleTemplateDeleteVO);
+ return Result.buildFail("接口已经下线：迁移到v3");
+        //return Result.buildSucc(consoleTemplateDeleteVO);
     }
 
     @DeleteMapping("/deleteInfo")
@@ -238,8 +239,9 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
         if (checkAuthResult.failed()) {
             return checkAuthResult;
         }
-        return templateLogicManager.delTemplate(logicId, HttpRequestUtil.getOperator(request),
-                HttpRequestUtil.getProjectId(request));
+         return Result.buildFail("接口已经下线：迁移到v3");
+        //return templateLogicManager.delTemplate(logicId, HttpRequestUtil.getOperator(request),
+        //        HttpRequestUtil.getProjectId(request));
     }
 
     @GetMapping("/indices/list")
@@ -250,8 +252,8 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
                                                                             @RequestParam("projectId") Integer projectId) {
 
       
-
-        return indexTemplateService.listLogicTemplatesByProjectId(projectId);
+ return Result.buildFail("接口已经下线：迁移到v3");
+        //return indexTemplateService.listLogicTemplatesByProjectId(projectId);
     }
 
     @GetMapping("/cyclicalRoll")
@@ -276,8 +278,8 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
                 LOGGER.warn("class=ConsoleTemplateController||method=TemplateCyclicalRollInfoVO||logicId={}||errMsg={}", logicId, e.getMessage(), e);
             }
         }
-
-        return Result.buildSucc(ConvertUtil.list2List(catIndexResults, TemplateCyclicalRollInfoVO.class));
+ return Result.buildFail("接口已经下线：迁移到v3");
+        //return Result.buildSucc(ConvertUtil.list2List(catIndexResults, TemplateCyclicalRollInfoVO.class));
     }
 
     /**
@@ -297,7 +299,8 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
             }
         }
         consoleTemplateRateLimitVO.setRateLimit(templatePipelineManager.getRateLimit(indexTemplatePhysicalMasterInfo));
-        return Result.buildSucc(consoleTemplateRateLimitVO);
+         return Result.buildFail("接口已经下线：迁移到v3");
+        //return Result.buildSucc(consoleTemplateRateLimitVO);
     }
 
     /**
@@ -313,15 +316,16 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
         // 判断调整比例是否在区间内
         int percent = (int) Math.ceil(100.0 * (consoleTemplateRateLimitDTO.getAdjustRateLimit() - consoleTemplateRateLimitDTO.getCurRateLimit()) / consoleTemplateRateLimitDTO.getCurRateLimit());
         if (percent < MIN_PERCENT || percent > MAX_PERCENT) {
-            return Result.buildFail("限流调整值变化太大，一次调整比例在100倍以内");
+            //return Result.buildFail("限流调整值变化太大，一次调整比例在100倍以内");
         }
-        try {
-            return indexTemplateService.updateTemplateWriteRateLimit(consoleTemplateRateLimitDTO,
-                    HttpRequestUtil.getOperator(request),HttpRequestUtil.getProjectId(request));
-        } catch (ESOperateException e) {
-            LOGGER.info("限流调整失败", e);
-            return Result.buildFail("限流调整失败！");
-        }
+        //try {
+            //return indexTemplateService.updateTemplateWriteRateLimit(consoleTemplateRateLimitDTO,
+            //        HttpRequestUtil.getOperator(request),HttpRequestUtil.getProjectId(request));
+        //} catch (ESOperateException e) {
+        //    LOGGER.info("限流调整失败", e);
+            //return Result.buildFail("限流调整失败！");
+        //}
+         return Result.buildFail("接口已经下线：迁移到v3");
     }
 
     /**

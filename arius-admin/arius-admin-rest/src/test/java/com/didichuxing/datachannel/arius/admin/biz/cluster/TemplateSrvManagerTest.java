@@ -5,13 +5,10 @@ import com.didichuxing.datachannel.arius.admin.biz.template.srv.TemplateSrvManag
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterJoinDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterRoleHostDTO;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
-import org.junit.jupiter.api.Assertions;
+import java.util.Collections;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Collections;
 
 @Transactional
 @Rollback
@@ -19,21 +16,7 @@ public class TemplateSrvManagerTest extends AriusAdminApplicationTest {
     @Autowired
     private TemplateSrvManager templateSrvManager;
 
-    /**
-     * 测试新建集群开启冷热分离服务
-     */
-    // @Test
-    public void addTemplateSrvTest1() {
-        //没有设置冷节点的集群
-        String clusterName = "dc-es02";
-        Assertions.assertTrue(templateSrvManager.checkTemplateSrv(clusterName,
-                TemplateServiceEnum.TEMPLATE_COLD.getCode().toString(), "wpk").failed());
 
-        //有设置冷节点的集群
-        clusterName = "cold_hot_test";
-        Assertions.assertTrue(templateSrvManager.checkTemplateSrv(clusterName,
-                TemplateServiceEnum.TEMPLATE_COLD.getCode().toString(), "wpk" ).success());
-    }
 
     /**
      * 测试接入集群开启冷热分离服务

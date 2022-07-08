@@ -2,7 +2,7 @@ package com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esm
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.INDEX_STAT_COLLECT_CONCURRENT;
 import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.NODE_STAT_COLLECT_CONCURRENT;
-import static com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.node.ESNodesStatsRequest.HTTP;
+import static com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.node.ESNodeStatsRequest.HTTP;
 
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.MulityTypeTemplatesInfo;
@@ -33,10 +33,10 @@ import com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmo
 import com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.metrics.DCDRMetrics;
 import com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.metrics.ESNodeToIndexComputer;
 import com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.metrics.MetricsRegister;
-import com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.node.ESNodesAction;
-import com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.node.ESNodesResponse;
-import com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.node.ESNodesStatsAction;
-import com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.node.ESNodesStatsResponse;
+import com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.node.ESNodeAction;
+import com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.node.ESNodeResponse;
+import com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.node.ESNodeStatsAction;
+import com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.node.ESNodeStatsResponse;
 import com.didichuxing.datachannel.arius.admin.metadata.utils.MonitorUtil;
 import com.didiglobal.logi.elasticsearch.client.ESClient;
 import com.didiglobal.logi.elasticsearch.client.request.dcdr.DCDRIndexStats;
@@ -141,7 +141,7 @@ public class MonitorClusterJob {
 
     private String                      clusterName;
 
-    private static final FutureUtil<ESNodesStatsResponse> NODE_STATS_FUTURE = FutureUtil.init("MonitorClusterJob-nodeStats",  10,10,20);
+    private static final FutureUtil<ESNodeStatsResponse> NODE_STATS_FUTURE = FutureUtil.init("MonitorClusterJob-nodeStats",  10,10,20);
     private static final FutureUtil<ESIndexStatsResponse> INDEX_STATS_FUTURE = FutureUtil.init("MonitorClusterJob-indexStats",  10,10,20);
 
     private StopWatch indexStopWatch        = new StopWatch();
@@ -211,7 +211,7 @@ public class MonitorClusterJob {
      * @param esClient esClient
      */
     private List<String> getClusterNodeIds(ESClient esClient, long timeLimitMillis) {
-        ESNodesResponse nodesResponse = esClient.admin().cluster().prepareExecute(ESNodesAction.INSTANCE).
+        ESNodeResponse nodesResponse = esClient.admin().cluster().prepareExecute(ESNodeAction.INSTANCE).
                 addFlag(HTTP).execute().actionGet(timeLimitMillis);
         if (nodesResponse.getFailedNodes() > 0) {
             LOGGER.warn("class=MonitorClusterJob||method=getClusterNodeIds||collect node id has part of the failure, failed nodes:[{}]", nodesResponse.getFailedNodes());
@@ -240,14 +240,14 @@ public class MonitorClusterJob {
             for (List<String> nodeIdBatch : nodeIdBatches) {
                 // 总任务超时时间也作为子任务超时时间
                 NODE_STATS_FUTURE.callableTask(() -> {
-                    ESNodesStatsResponse response = new ESNodesStatsResponse();
+                    ESNodeStatsResponse response = new ESNodeStatsResponse();
                     response.setNodes(new HashMap<>());
                     try {
                         if (System.currentTimeMillis() > expectEndTime) {
                             // 总任务已经超时，不再执行
                             throw new AdminOperateException(TIME_OUT);
                         }
-                        response = esClient.admin().cluster().prepareExecute(ESNodesStatsAction.INSTANCE)
+                        response = esClient.admin().cluster().prepareExecute(ESNodeStatsAction.INSTANCE)
                                 .setNodesIds(nodeIdBatch.toArray(new String[0]))
                                 .level(IndicesStatsLevel.INDICES.getStr()).execute().actionGet(CLIENT_TO_WITH_MILLS);
                     } catch (Exception e) {
@@ -259,11 +259,11 @@ public class MonitorClusterJob {
             }
 
             // 4.获取所有批次结果
-            List<ESNodesStatsResponse> nodeStatsResponseList = NODE_STATS_FUTURE.waitResult();
+            List<ESNodeStatsResponse> nodeStatsResponseList = NODE_STATS_FUTURE.waitResult();
 
             // 5.合并批次结果
             Map<String, ClusterNodeStats> clusterNodeStatsMap = new HashMap<>();
-            for (ESNodesStatsResponse nodesStatsResponse : nodeStatsResponseList) {
+            for (ESNodeStatsResponse nodesStatsResponse : nodeStatsResponseList) {
                 clusterNodeStatsMap.putAll(nodesStatsResponse.getNodes());
             }
 

@@ -1,16 +1,12 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.template;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.setting.TemplateLogicSettingsManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateWithCreateInfoDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateConditionDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateSettingDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateSettingVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.DataTypeEnum;
@@ -40,7 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
  * Created by linyunan on 2021-07-30
  */
 @RestController
-@RequestMapping({ V3_OP + "/template/logic", V3 + "/template/logic" })
+@RequestMapping({  V3 + "/template/logic" })
 @Api(tags = "逻辑模板接口(REST)")
 public class TemplateLogicV3Controller {
 
@@ -48,7 +44,7 @@ public class TemplateLogicV3Controller {
     private TemplateLogicManager         templateLogicManager;
 
     @Autowired
-    private TemplateLogicSettingsManager templateLogicSettingsManager;
+    private TemplateLogicSettingsManager templateLogicSettingManager;
 
     @GetMapping("/data-type")
     @ResponseBody
@@ -78,7 +74,7 @@ public class TemplateLogicV3Controller {
         return templateLogicManager.checkTemplateValidForCreate(templateName);
     }
 
-    @GetMapping("/{templateId}/check-edit-mapping/")
+    @GetMapping("/{templateId}/check-edit-mapping")
     @ResponseBody
     @ApiOperation(value = "校验可否编辑模板mapping")
     public Result<Boolean> checkTemplateEditMapping(@PathVariable Integer templateId) {
@@ -122,7 +118,7 @@ public class TemplateLogicV3Controller {
             return checkAuthResult;
         }
 
-        return templateLogicSettingsManager.customizeSetting(settingDTO, HttpRequestUtil.getOperator(request));
+        return templateLogicSettingManager.customizeSetting(settingDTO, HttpRequestUtil.getOperator(request));
     }
 
     @GetMapping("/setting")
@@ -131,7 +127,7 @@ public class TemplateLogicV3Controller {
     @ApiImplicitParams({@ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "索引ID", required = true)})
     @Deprecated
     public Result<TemplateSettingVO> getTemplateSettings(@RequestParam("logicId") Integer logicId) throws AdminOperateException {
-        return templateLogicSettingsManager.buildTemplateSettingVO(logicId);
+        return templateLogicSettingManager.buildTemplateSettingVO(logicId);
     }
 
     @GetMapping("/templates")
@@ -142,7 +138,7 @@ public class TemplateLogicV3Controller {
         return templateLogicManager.getTemplateVOByPhyCluster(cluster);
     }
 
-    @PostMapping("/create")
+    @PostMapping("")
     @ResponseBody
     @ApiOperation(value = "创建逻辑模板")
     public Result<Void> createTemplate(HttpServletRequest request, @RequestBody IndexTemplateWithCreateInfoDTO param) throws AdminOperateException{
@@ -157,13 +153,11 @@ public class TemplateLogicV3Controller {
                 HttpRequestUtil.getProjectId(request));
     }
 
-    @DeleteMapping("/{templateId}/{indices}/clear-indices")
+    @DeleteMapping("/indices")
     @ResponseBody
     @ApiOperation(value = "清理索引")
-    public Result<Void> clearIndices(HttpServletRequest request,
-                                     @PathVariable("templateId") Integer templateId,
-                                     @PathVariable("indices")    List<String> indices) {
-        return templateLogicManager.clearIndices(templateId, indices, HttpRequestUtil.getProjectId(request));
+    public Result<Void> clearIndices(HttpServletRequest request,@RequestBody TemplateClearDTO clearDTO) {
+        return templateLogicManager.clearIndices(clearDTO, HttpRequestUtil.getProjectId(request));
     }
 
     @PutMapping("/{templateId}/{shardNum}/adjust-shard")
@@ -197,4 +191,5 @@ public class TemplateLogicV3Controller {
     public Result<List<ConsoleTemplateVO>> listTemplateVOByLogicCluster(HttpServletRequest request,@PathVariable String clusterLogicName) {
         return templateLogicManager.listTemplateVOByLogicCluster(clusterLogicName, HttpRequestUtil.getProjectId(request));
     }
+
 }

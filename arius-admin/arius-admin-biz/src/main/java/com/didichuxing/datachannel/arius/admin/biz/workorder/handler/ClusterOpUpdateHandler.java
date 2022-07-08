@@ -4,12 +4,12 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.resource.E
 
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandler;
-import com.didichuxing.datachannel.arius.admin.biz.worktask.OpTaskManager;
-import com.didichuxing.datachannel.arius.admin.biz.worktask.content.ClusterUpdateContent;
+import com.didichuxing.datachannel.arius.admin.biz.task.OpTaskManager;
+import com.didichuxing.datachannel.arius.admin.biz.task.content.ClusterUpdateContent;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.EcmParamBase;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.elasticcloud.ElasticCloudCommonActionParam;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.host.HostsParamBase;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.host.HostParamBase;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.ecm.EcmTaskDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
@@ -136,9 +136,9 @@ public class ClusterOpUpdateHandler extends BaseWorkOrderHandler {
             ESPackage esPackage = esPackageService.getByVersionAndType(content.getEsVersion(), ecmParamBase.getType());
 
             if (ecmParamBase.getType().equals(ES_HOST.getCode())) {
-                ((HostsParamBase) ecmParamBase).setEsVersion(content.getEsVersion());
+                ((HostParamBase) ecmParamBase).setEsVersion(content.getEsVersion());
                 if (!AriusObjUtils.isNull(esPackage) && !AriusObjUtils.isBlack(esPackage.getUrl())) {
-                    ((HostsParamBase) ecmParamBase).setImageName(esPackage.getUrl());
+                    ((HostParamBase) ecmParamBase).setImageName(esPackage.getUrl());
                 }
             } else {
                 ((ElasticCloudCommonActionParam) ecmParamBase).setEsVersion(content.getEsVersion());

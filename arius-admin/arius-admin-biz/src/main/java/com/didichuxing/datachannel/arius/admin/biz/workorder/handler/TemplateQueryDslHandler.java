@@ -15,9 +15,9 @@ import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectLogicTemplateAuthService;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandler;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.TemplateQueryDslContent;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.AuditDsls;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.AuditDsl;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.DslInfo;
-import com.didichuxing.datachannel.arius.admin.metadata.service.DslStatisService;
+import com.didichuxing.datachannel.arius.admin.metadata.service.DslStatisticsService;
 import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -37,7 +37,7 @@ public class TemplateQueryDslHandler extends BaseWorkOrderHandler {
     private ProjectLogicTemplateAuthService projectLogicTemplateAuthService;
 
     @Autowired
-    private DslStatisService dslStatisService;
+    private DslStatisticsService dslStatisticsService;
 
     /**
      * 工单是否自动审批
@@ -167,8 +167,8 @@ public class TemplateQueryDslHandler extends BaseWorkOrderHandler {
         dslInfos.add(dslInfo);
 
         // 修改模板quota及保存时长信息
-        AuditDsls auditDsls = new AuditDsls(workOrder.getSubmitorProjectId(), workOrder.getSubmitor(), dslInfos);
-        Result<String> result = dslStatisService.auditDsl(auditDsls);
+        AuditDsl auditDsl = new AuditDsl(workOrder.getSubmitorProjectId(), workOrder.getSubmitor(), dslInfos);
+        Result<String> result = dslStatisticsService.auditDsl(auditDsl);
 
         return Result.buildFrom(result);
     }

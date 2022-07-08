@@ -56,14 +56,7 @@ public class DslsConstant {
      * 获取网关数量
      */
     public static final String GET_GATEWAY_COUNT                                             = "AriusStatsClusterPhyInfoEsDao/getGatewayCount";
-    /**
-     * 获得网关成功数
-     */
-    public static final String GET_GATEWAY_SUCCESS_COUNT                                     = "AriusStatsClusterPhyInfoEsDao/getGatewaySuccessCount";
-    /**
-     * 获得网关失败数
-     */
-    public static final String GET_GATEWAY_FAILURE_COUNT                                     = "AriusStatsClusterPhyInfoEsDao/getGatewayFailureCount";
+
 
     /************************************************************** AriusStatsIndexInfoEsDao **************************************************************/
     /**
@@ -155,11 +148,16 @@ public class DslsConstant {
      */
     public static final String GET_MULTIPLE_INDEX_FIRST_INTERVAL_AGG_METRICS                 = "AriusStatsIndexInfoEsDao/getAggMultipleIndicesMetrics";
 
+    /**
+     * 查询第一个时间分片中指标数值的索引指标信息
+     */
+    public static final String GET_MULTIPLE_INDEX_FIRST_INTERVAL_AGG_METRICS_WITH_STEP       = "AriusStatsIndexInfoEsDao/getAggMultipleIndicesMetricsWithStep";
+
 
     /**
      * 查询第一个时间分片中指标数值的逻辑模板指标信息
      */
-    public static final String GET_MULTIPLE_TEMPLATE_FIRST_INTERVAL_AGG_METRICS_WITH_STEP    = "AriusStatsIndexInfoEsDao/getAggMultipleIndicesMetricsWithStep";
+    public static final String GET_MULTIPLE_TEMPLATE_FIRST_INTERVAL_AGG_METRICS_WITH_STEP    = "AriusStatsIndexInfoEsDao/getAggMultipleTemplateMetricsWithStep";
 
     /**
      * 查询topN索引聚合信息

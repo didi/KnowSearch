@@ -1,26 +1,26 @@
 package com.didichuxing.datachannel.arius.admin.core.service.es;
 
-import java.util.List;
-
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.IndexCatCell;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.IndexShardInfo;
+import java.util.List;
 
 public interface ESIndexCatService {
 
     /**
      * 分页获取CatIndex信息
-     * @param index        索引名称
-     * @param cluster cluster
-     * @param health       索引健康状态
-     * @param from         起始点
-     * @param size         当前页数量
-     * @param sortTerm     排序字段
-     * @param orderByDesc  降序标识
-     * @param projectId        应用id
-     * @return Tuple<Long, List<IndexCatCell>>   key1 -> 命中总数, key2 索引列表
+     *
+     * @param cluster     cluster
+     * @param index       索引名称
+     * @param health      索引健康状态
+     * @param projectId   应用id
+     * @param from        起始点
+     * @param size        当前页数量
+     * @param sortTerm    排序字段
+     * @param orderByDesc 降序标识
+     * @return Tuple<Long, List < IndexCatCell>>   key1 -> 命中总数, key2 索引列表
      */
-    Tuple<Long, List<IndexCatCell>> syncGetCatIndexInfo(String cluster, String index, String health, Integer projectId,
+    Tuple<Long, List<IndexCatCell>> syncGetCatIndexInfo(String cluster, String index, String health,String status, Integer projectId,
                                                         Long from, Long size, String sortTerm, Boolean orderByDesc);
 
     /**

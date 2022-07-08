@@ -78,7 +78,7 @@ public class IndexPageSearchHandle extends AbstractPageSearchHandle<IndexQueryDT
                 queryProjectId = projectId;
             }
             Tuple<Long, List<IndexCatCell>> totalHitAndIndexCatCellListTuple = esIndexCatService.syncGetCatIndexInfo(
-                queryCluster, condition.getIndex(), condition.getHealth(), queryProjectId,
+                queryCluster, condition.getIndex(), condition.getHealth(),condition.getStatus(), queryProjectId,
                 (condition.getPage() - 1) * condition.getSize(), condition.getSize(), condition.getSortTerm(),
                 condition.getOrderByDesc());
             if (null == totalHitAndIndexCatCellListTuple) {
