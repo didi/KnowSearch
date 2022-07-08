@@ -27,7 +27,12 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.TemplateLabel;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateConfigDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhyDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateWithCreateInfoDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateClearDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord.template.TemplateOperateRecord;
@@ -213,7 +218,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         operateRecordService.save(new OperateRecord.Builder()
                         .bizId(indexTemplateDTO.getId())
                         .userOperation(operator)
-                        .content(JSON.toJSONString(new TemplateOperateRecord(TemplateOperateRecordEnum.NEW.getCode(), "新增模板")))
+                        .content(String.format("模版创建：%s",param.getName()))
                         .project(projectService.getProjectBriefByProjectId(projectId))
                         .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
                         .operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_CREATE)

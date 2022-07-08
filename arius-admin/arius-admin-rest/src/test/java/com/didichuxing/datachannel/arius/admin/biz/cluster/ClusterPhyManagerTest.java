@@ -54,6 +54,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.template.physic.Inde
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpClient;
 import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
 import com.didiglobal.logi.security.service.ProjectService;
+import com.didiglobal.logi.security.util.HttpRequestUtil;
 import com.google.common.collect.Lists;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
@@ -501,31 +502,31 @@ class ClusterPhyManagerTest {
         ESClusterRoleHostDTO roleHostDTO=   new ESClusterRoleHostDTO(0L, 0L,
                 "hostname", "", CLUSTER, "port", false, 0, 0, "nodeSet", 0, "attributes");
         assertEquals(Result.buildParamIllegal("参数为空").getMessage(),
-            clusterPhyManager.joinCluster(null, "admin").getMessage());
+            clusterPhyManager.joinCluster(null, "admin", HttpRequestUtil.getProjectId(request)).getMessage());
         assertEquals(Result.buildParamIllegal("操作人不存在").getMessage(),
-            clusterPhyManager.joinCluster(param, null).getMessage());
+            clusterPhyManager.joinCluster(param, null, HttpRequestUtil.getProjectId(request)).getMessage());
         assertEquals(Result.buildParamIllegal("非支持的集群类型").getMessage(),
-            clusterPhyManager.joinCluster(param, "admin").getMessage());
+            clusterPhyManager.joinCluster(param, "admin", HttpRequestUtil.getProjectId(request)).getMessage());
         param.setType(4);
         param.setResourceType(0);
         assertEquals(Result.buildParamIllegal("非支持的集群资源类型").getMessage(),
-            clusterPhyManager.joinCluster(param, "admin").getMessage());
+            clusterPhyManager.joinCluster(param, "admin", HttpRequestUtil.getProjectId(request)).getMessage());
         param.setResourceType(1);
         assertEquals(Result.buildParamIllegal("非集群接入来源").getMessage(),
-            clusterPhyManager.joinCluster(param, "admin").getMessage());
+            clusterPhyManager.joinCluster(param, "admin", HttpRequestUtil.getProjectId(request)).getMessage());
         param.setTags("{\"createSource\":0}");
         assertEquals(Result.buildParamIllegal("非支持的接入规则").getMessage(),
-            clusterPhyManager.joinCluster(param, "admin").getMessage());
+            clusterPhyManager.joinCluster(param, "admin", HttpRequestUtil.getProjectId(request)).getMessage());
         param.setImportRule(1);
         assertEquals(Result.buildParamIllegal("集群节点信息为空").getMessage(),
-            clusterPhyManager.joinCluster(param, "admin").getMessage());
+            clusterPhyManager.joinCluster(param, "admin", HttpRequestUtil.getProjectId(request)).getMessage());
         param.setRoleClusterHosts(Collections.singletonList(roleHostDTO));
         assertEquals(Result.buildParamIllegal("接入集群中端口号存在异常[port]").getMessage(),
-            clusterPhyManager.joinCluster(param, "admin").getMessage());
+            clusterPhyManager.joinCluster(param, "admin", HttpRequestUtil.getProjectId(request)).getMessage());
         roleHostDTO.setPort("997");
         param.setRoleClusterHosts(Collections.singletonList(roleHostDTO));
         assertEquals(Result.buildParamIllegal("集群缺少类型为masternode的节点").getMessage(),
-            clusterPhyManager.joinCluster(param, "admin").getMessage());
+            clusterPhyManager.joinCluster(param, "admin", HttpRequestUtil.getProjectId(request)).getMessage());
         roleHostDTO.setRole(3);
         roleHostDTO.setIp("127.0.0.1");
         ESClusterRoleHostDTO clientNode = new ESClusterRoleHostDTO();
@@ -536,28 +537,28 @@ class ClusterPhyManagerTest {
         dataNode.setRole(1);
         param.setRoleClusterHosts(Arrays.asList(roleHostDTO, roleHostDTO, clientNode, clientNode, dataNode, dataNode));
         assertEquals(Result.buildParamIllegal("集群ip:127.0.0.1重复, 请重新输入").getMessage(),
-            clusterPhyManager.joinCluster(param, "admin").getMessage());
+            clusterPhyManager.joinCluster(param, "admin", HttpRequestUtil.getProjectId(request)).getMessage());
         param.setRoleClusterHosts(Arrays.asList(roleHostDTO, clientNode, clientNode, dataNode, dataNode));
         assertEquals(Result.buildParamIllegal("集群ip:127.0.0.1重复, 请重新输入").getMessage(),
-            clusterPhyManager.joinCluster(param, "admin").getMessage());
+            clusterPhyManager.joinCluster(param, "admin", HttpRequestUtil.getProjectId(request)).getMessage());
         param.setRoleClusterHosts(Arrays.asList(roleHostDTO, clientNode, dataNode, dataNode));
         assertEquals(Result.buildParamIllegal("集群ip:127.0.0.1重复, 请重新输入").getMessage(),
-            clusterPhyManager.joinCluster(param, "admin").getMessage());
+            clusterPhyManager.joinCluster(param, "admin", HttpRequestUtil.getProjectId(request)).getMessage());
 
         param.setImportRule(0);
         roleHostDTO.setIp("");
         param.setRoleClusterHosts(Arrays.asList(roleHostDTO, roleHostDTO,roleHostDTO));
         assertEquals(Result.buildParamIllegal(String.format("集群%s的节点个数要求大于等于1，且不重复", param.getCluster())).getMessage(),
-                clusterPhyManager.joinCluster(param, "admin").getMessage());
+                clusterPhyManager.joinCluster(param, "admin", HttpRequestUtil.getProjectId(request)).getMessage());
         roleHostDTO.setIp("127.0.0.1");
         param.setRoleClusterHosts(Arrays.asList(roleHostDTO, clientNode,dataNode));
         assertEquals(Result.buildParamIllegal("集群ip:127.0.0.1重复, 请重新输入").getMessage(),
-            clusterPhyManager.joinCluster(param, "admin").getMessage());
+            clusterPhyManager.joinCluster(param, "admin", HttpRequestUtil.getProjectId(request)).getMessage());
 
         param.setRoleClusterHosts(Collections.singletonList(roleHostDTO));
         when(mockClusterPhyService.isClusterExists(CLUSTER)).thenReturn(true);
         assertEquals(Result.buildParamIllegal(String.format("物理集群名称:%s已存在", param.getCluster())).getMessage(),
-            clusterPhyManager.joinCluster(param, "admin").getMessage());
+            clusterPhyManager.joinCluster(param, "admin", HttpRequestUtil.getProjectId(request)).getMessage());
 
         when(mockClusterPhyService.isClusterExists(CLUSTER)).thenReturn(false);
         when(mockClusterRoleHostService.buildESClientHttpAddressesStr(Mockito.anyList()))
@@ -565,23 +566,23 @@ class ClusterPhyManagerTest {
         when(mockEsClusterService.checkClusterPassword("esClientHttpAddressesStr", null))
             .thenReturn(ClusterConnectionStatus.DISCONNECTED);
         assertEquals(Result.buildParamIllegal("集群离线未能连通").getMessage(),
-                clusterPhyManager.joinCluster(param, "admin").getMessage());
+                clusterPhyManager.joinCluster(param, "admin", HttpRequestUtil.getProjectId(request)).getMessage());
         
         when(mockEsClusterService.checkClusterPassword("esClientHttpAddressesStr",null))
                 .thenReturn(ClusterConnectionStatus.NORMAL);
         assertEquals(Result.buildParamIllegal("未设置密码的集群，请勿输入账户信息").getMessage(),
-                clusterPhyManager.joinCluster(param, "admin").getMessage());
+                clusterPhyManager.joinCluster(param, "admin", HttpRequestUtil.getProjectId(request)).getMessage());
 
         when(mockEsClusterService.checkClusterPassword("esClientHttpAddressesStr", null))
                 .thenReturn(ClusterConnectionStatus.UNAUTHORIZED);
         when(mockEsClusterService.checkClusterPassword("esClientHttpAddressesStr", "passwd"))
             .thenReturn(ClusterConnectionStatus.UNAUTHORIZED);
         assertEquals(Result.buildParamIllegal("集群的账户信息错误").getMessage(),
-            clusterPhyManager.joinCluster(param, "admin").getMessage());
+            clusterPhyManager.joinCluster(param, "admin", HttpRequestUtil.getProjectId(request)).getMessage());
 
         param.setPassword(null);
         assertEquals(Result.buildParamIllegal("集群设置有密码，请输入账户信息").getMessage(),
-            clusterPhyManager.joinCluster(param, "admin").getMessage());
+            clusterPhyManager.joinCluster(param, "admin", HttpRequestUtil.getProjectId(request)).getMessage());
 
         when(mockEsClusterService.checkClusterPassword("esClientHttpAddressesStr",null))
                 .thenReturn(ClusterConnectionStatus.NORMAL);
@@ -590,7 +591,7 @@ class ClusterPhyManagerTest {
         when(mockEsClusterService.checkSameCluster(Mockito.any(), Mockito.any()))
                 .thenReturn(Result.buildFail());
         assertEquals(Result.buildParamIllegal("禁止同时接入超过两个不同集群节点").getMessage(),
-                clusterPhyManager.joinCluster(param, "admin").getMessage());
+                clusterPhyManager.joinCluster(param, "admin", HttpRequestUtil.getProjectId(request)).getMessage());
 
         when(mockEsClusterService.checkSameCluster(Mockito.any(),  Mockito.any()))
                 .thenReturn(Result.buildSucc());
@@ -599,7 +600,7 @@ class ClusterPhyManagerTest {
         when(mockEsClusterService.synGetESVersionByHttpAddress("esClientHttpAddressesStr", null))
                 .thenReturn(null);
         assertEquals(Result.buildParamIllegal(String.format("%s无法获取es版本", "esClientHttpAddressesStr")).getMessage(),
-                clusterPhyManager.joinCluster(param, "admin").getMessage());
+                clusterPhyManager.joinCluster(param, "admin", HttpRequestUtil.getProjectId(request)).getMessage());
 
         when(mockEsClusterService.synGetESVersionByHttpAddress("esClientHttpAddressesStr", null))
                 .thenReturn("7.6.0.1401");
@@ -607,7 +608,7 @@ class ClusterPhyManagerTest {
         when(mockClusterRoleHostService.collectClusterNodeSettings(CLUSTER)).thenReturn(true);
         when(mockClusterPhyService
                 .createCluster(Mockito.any(),Mockito.anyString())).thenReturn(Result.buildSucc());
-        assertTrue(clusterPhyManager.joinCluster(param, "admin").success());
+        assertTrue(clusterPhyManager.joinCluster(param, "admin", HttpRequestUtil.getProjectId(request)).success());
         verify(mockEsOpClient).connect(CLUSTER);
         verify(mockClusterRoleHostService).collectClusterNodeSettings(CLUSTER);
 
@@ -617,7 +618,7 @@ class ClusterPhyManagerTest {
   
         when(mockClusterPhyService.editCluster(Mockito.any(),Mockito.anyString()))
                 .thenReturn(Result.buildFail(null));
-        assertTrue(clusterPhyManager.joinCluster(param, "admin").success());
+        assertTrue(clusterPhyManager.joinCluster(param, "admin", HttpRequestUtil.getProjectId(request)).success());
         
         verify(mockClusterRoleHostService).saveClusterNodeSettings(Mockito.any());
 

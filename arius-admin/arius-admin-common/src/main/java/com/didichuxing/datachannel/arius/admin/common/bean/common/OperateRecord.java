@@ -179,6 +179,20 @@ public class OperateRecord {
 		public OperateRecord build() {
 			return new OperateRecord(this);
 		}
+			public OperateRecord buildDefaultManualTrigger() {
+			this.triggerWayEnum=TriggerWayEnum.MANUAL_TRIGGER;
+			return new OperateRecord(this);
+		}
+		
+		public OperateRecord buildDefaultSystemTrigger() {
+			this.triggerWayEnum=TriggerWayEnum.SYSTEM_TRIGGER;
+			return new OperateRecord(this);
+		}
+		
+		public OperateRecord buildDefaultTimingTask() {
+			this.triggerWayEnum=TriggerWayEnum.TIMING_TASK;
+			return new OperateRecord(this);
+		}
 		
 	}
 	
