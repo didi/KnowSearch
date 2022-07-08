@@ -9,7 +9,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 @Profile("!test")
-public class CustomConfigure implements WebMvcConfigurer {
+public class AriusWebMvcConfigurer implements WebMvcConfigurer {
 
     @Autowired
     private PermissionInterceptor permissionInterceptor;

@@ -164,7 +164,7 @@ public class TemplateAccessESDAO extends BaseESDAO {
         String endDate   = getDateStr(new Date());
 
         List<TemplateAccessCountPO> list = getAllTemplateAccessByTemplateDateRange(template, startDate, endDate);
-        Long count = 0l;
+        Long count = 0L;
         for (TemplateAccessCountPO po : list) {
             count += po.getCount();
         }
