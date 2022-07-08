@@ -1,16 +1,14 @@
 package com.didichuxing.datachannel.arius.admin.task.dashboard.collector;
 
-import java.util.List;
-
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterThreadStats;
-import org.apache.commons.beanutils.BeanUtils;
-import org.springframework.stereotype.Component;
-
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.ClusterThreadPoolQueueMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.DashBoardStats;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /**
  * Created by linyunan on 3/11/22
@@ -48,7 +46,7 @@ public class ClusterThreadPoolDashBoardCollector extends BaseDashboardCollector 
         try {
             ESClusterThreadStats esClusterThreadStats = esClusterService.syncGetThreadStatsByCluster(cluster);
             if (esClusterThreadStats != null) {
-                BeanUtils.copyProperties(clusterThreadPoolQueueMetrics, esClusterThreadStats);
+                org.springframework.beans.BeanUtils.copyProperties(clusterThreadPoolQueueMetrics, esClusterThreadStats);
             }
         } catch (Exception e) {
             LOGGER.error("buildClusterThreadPoolQueueMetrics error{}", e);
