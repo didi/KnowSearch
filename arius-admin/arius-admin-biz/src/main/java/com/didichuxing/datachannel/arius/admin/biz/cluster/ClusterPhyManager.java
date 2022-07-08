@@ -1,9 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.biz.cluster;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterJoinDTO;
@@ -17,6 +13,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PluginVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterDynamicConfigsTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  *
@@ -91,11 +90,13 @@ public interface ClusterPhyManager {
 
     /**
      * 集群接入
-     * @param param 逻辑集群Id, 物理集群名称
-     * @param operator 操作人
-     * @return  ClusterPhyVO
+     *
+     * @param param     逻辑集群Id, 物理集群名称
+     * @param operator  操作人
+     * @param projectId
+     * @return ClusterPhyVO
      */
-	Result<ClusterPhyVO> joinCluster(ClusterJoinDTO param, String operator);
+	Result<ClusterPhyVO> joinCluster(ClusterJoinDTO param, String operator, Integer projectId);
 
     /**
      * 删除接入集群 删除顺序: region ——> clusterLogic ——> clusterHost ——> clusterRole  ——> cluster
