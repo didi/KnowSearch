@@ -427,16 +427,22 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result<ClusterPhyVO> joinCluster(ClusterJoinDTO param, String operator) {
+    public Result<ClusterPhyVO> joinCluster(ClusterJoinDTO param, String operator, Integer projectId) {
         try {
-            
+            if (param.getProjectId()==null){
+                param.setProjectId(projectId);
+            }
             Result<Void> checkResult = checkClusterJoin(param, operator);
             if (checkResult.failed()) {
                 return Result.buildFail(checkResult.getMessage());
             }
             String esClientHttpAddressesStr = clusterRoleHostService
                 .buildESClientHttpAddressesStr(param.getRoleClusterHosts());
-
+            for (ESClusterRoleHostDTO roleClusterHost : param.getRoleClusterHosts()) {
+                if (roleClusterHost.getRegionId()==null){
+                    roleClusterHost.setRegionId(-1);
+                }
+            }
             Result<Void> initResult = initClusterJoin(param, operator, esClientHttpAddressesStr);
             if (initResult.failed()) {
                 return Result.buildFail(initResult.getMessage());
@@ -1288,7 +1294,6 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             return esVersionSetResult;
         }
 
-        param.setResponsible(operator);
         return Result.buildSucc();
     }
 

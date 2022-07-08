@@ -62,7 +62,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -479,6 +478,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrvImpl impleme
                 !clusterIsHighVersion(schemaDTO.getLogicId())) {
             return Result.buildParamIllegal("该功能只支持高版本(6.5.1以上)es， 请使用JSON格式");
         }
+          Result<ConsoleTemplateSchemaVO> oldSchemaVO = getSchema(schemaDTO.getLogicId());
 
         Result<Void> saveSpecialFieldResult = saveSpecialField(schemaDTO, operator,projectId);
         if (saveSpecialFieldResult.failed()) {
@@ -501,12 +501,14 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrvImpl impleme
         
         Result<Void> result = updateFields(schemaDTO.getLogicId(), schemaDTO.getFields(), schemaDTO.getRemoveFieldNames());
         if (result.success()) {
+            //JSonu
             // 记录操作记录
-            
+             Result<ConsoleTemplateSchemaVO> newSchemaVO = getSchema(schemaDTO.getLogicId());
             operateRecordService.save(new OperateRecord.Builder().project(
                             Optional.ofNullable(projectId).map(projectService::getProjectBriefByProjectId).orElse(null))
-                    .userOperation(operator).operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_EDIT_MAPPING)
-                    .content("-").triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                    .userOperation(operator)
+                    .operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_EDIT_MAPPING)
+                     .content(JSON.toJSONString(new TemplateSchemaOperateRecord(oldSchemaVO.getData(), newSchemaVO.getData()))).triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
             
                     .build());
 
