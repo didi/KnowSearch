@@ -1,8 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.biz.gateway.impl;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.APP_DEFAULT_READ_AUTH_INDICES;
-import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_COMMON_GROUP;
-
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.gateway.GatewayManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.TemplateSrvManager;
@@ -71,6 +68,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
 
 /**
  * @author didi
@@ -212,8 +210,6 @@ public class GatewayManagerImpl implements GatewayManager {
                         .ifPresent(projectConfig -> esUser2ESUserConfigMap.put(esuser, projectConfig));
             }
         }
-        String defaultIndices = ariusConfigInfoService.stringSetting(ARIUS_COMMON_GROUP,
-                APP_DEFAULT_READ_AUTH_INDICES, "");
 
         Map<Integer/*id*/, IndexTemplate> templateId2IndexTemplateLogicMap = indexTemplateService
                 .getAllLogicTemplatesMap();
@@ -223,7 +219,7 @@ public class GatewayManagerImpl implements GatewayManager {
         List<GatewayESUserVO> appVOList = esUsers.parallelStream().map(user -> {
             try {
                 final GatewayESUserVO gatewayESUserVO = buildESUserVO(user, esUser2ProjectTemplateAuthsMap,
-                        esUser2ESUserConfigMap, templateId2IndexTemplateLogicMap, defaultIndices, aliasMap);
+                        esUser2ESUserConfigMap, templateId2IndexTemplateLogicMap, "", aliasMap);
                 final Integer esUser = gatewayESUserVO.getId();
                 if (esUser2ProjectNameMap.containsKey(esUser)) {
                     gatewayESUserVO.setName(esUser2ProjectNameMap.get(esUser));

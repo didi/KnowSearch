@@ -6,8 +6,6 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
-import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
-import com.didichuxing.datachannel.arius.admin.common.exception.AdminTaskException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,6 +15,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRegionWithNodeInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostWithRegionInfoVO;
+import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
+import com.didichuxing.datachannel.arius.admin.common.exception.AdminTaskException;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 
 import io.swagger.annotations.Api;
@@ -83,12 +83,12 @@ public class ESPhyClusterNodeController {
         return Result.buildSucc(clusterPhyManager.listNodeNameByProjectId(HttpRequestUtil.getProjectId(request)));
     }
 
-    @PutMapping("/{phyClusterName}/collect-settings")
+    @PutMapping("/{clusterPhyName}/collect-settings")
     @ResponseBody
     @ApiOperation(value = "采集集群节点配置信息接口【三方接口】", tags = "【三方接口】")
     @ApiImplicitParam(type = "String", name = "phyClusterName", value = "物理集群名称", required = true)
-    public Result<Void> collectNodeSettings(@PathVariable String phyClusterName) throws AdminTaskException {
-        return Result.build(clusterNodeManager.collectNodeSettings(phyClusterName));
+    public Result<Void> collectNodeSettings(@PathVariable String clusterPhyName) throws AdminTaskException {
+        return Result.build(clusterNodeManager.collectNodeSettings(clusterPhyName));
     }
 
 }

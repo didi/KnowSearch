@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping({ V3_OP + "/template/dcdr", V3 + "/template/dcdr" })
+@RequestMapping({ V3 + "/template/dcdr" })
 @Api(tags = "模板DCDR接口(REST)")
 public class TemplateDCDRController {
 
@@ -39,7 +39,7 @@ public class TemplateDCDRController {
                 HttpRequestUtil.getOperator(request),HttpRequestUtil.getProjectId(request));
     }
 
-    @GetMapping("/{templateId}/dcdrInfo")
+    @GetMapping("/{templateId}")
     @ResponseBody
     @ApiOperation("获取模板DCDR详情")
     public Result<TemplateDCDRInfoVO> getTemplateDCDRInfo(@PathVariable("templateId") Integer templateId) {

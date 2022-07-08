@@ -1,7 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.INDEX_STAT_COLLECT_CONCURRENT;
-import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.NODE_STAT_COLLECT_CONCURRENT;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.*;
 import static com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.node.ESNodeStatsRequest.HTTP;
 
 import com.alibaba.fastjson.JSON;
@@ -149,8 +148,6 @@ public class MonitorClusterJob {
     private final StopWatch dcdrStopWatch         = new StopWatch();
     private final StopWatch index2NodeStopWatch   = new StopWatch();
 
-    // 配置组
-    private static final String CONFIG_VALUE_GROUP = "arius.meta.monitor";
 
     public MonitorClusterJob(ESClient esClient,
                              String ariusClusterName,
@@ -281,7 +278,7 @@ public class MonitorClusterJob {
     }
 
     private Map<String, ClusterNodeStats> getClusterNodeStats(ESClient esClient) throws AdminOperateException {
-        boolean isConcurrentCollect = ariusConfigInfoService.booleanSetting(CONFIG_VALUE_GROUP,
+        boolean isConcurrentCollect = ariusConfigInfoService.booleanSetting(ARIUS_META_MONITOR_GROUP,
                 NODE_STAT_COLLECT_CONCURRENT, false);
 
         Map<String, ClusterNodeStats> clusterNodeStatsMap;
@@ -449,7 +446,7 @@ public class MonitorClusterJob {
     }
 
     private Map<String, IndexNodes> getIndexStats(ESClient esClient){
-        boolean isConcurrentCollect = ariusConfigInfoService.booleanSetting(CONFIG_VALUE_GROUP,
+        boolean isConcurrentCollect = ariusConfigInfoService.booleanSetting(ARIUS_META_MONITOR_GROUP,
                 INDEX_STAT_COLLECT_CONCURRENT, false);
 
         // key-索引名，value-索引stats

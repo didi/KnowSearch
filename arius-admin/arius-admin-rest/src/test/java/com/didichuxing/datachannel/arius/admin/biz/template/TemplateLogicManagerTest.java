@@ -2,6 +2,7 @@ package com.didichuxing.datachannel.arius.admin.biz.template;
 
 import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateClearDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateWithCreateInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.util.RandomGenerator;
@@ -58,7 +59,10 @@ public class TemplateLogicManagerTest extends AriusAdminApplicationTest {
 
     @Test
     public void clearIndicesTest() {
-        Result<Void> result = templateLogicManager.clearIndices(37519, Arrays.asList("lcx_template_0411_2022-05-25_v1"), 1);
+        TemplateClearDTO clearDTO = new TemplateClearDTO();
+        clearDTO.setLogicId(37519);
+        clearDTO.setDelIndices(Arrays.asList("lcx_template_0411_2022-05-25_v1"));
+        Result<Void> result = templateLogicManager.clearIndices(clearDTO , 1);
         Assertions.assertTrue(result.success());
     }
 
