@@ -32,6 +32,8 @@ import java.util.List;
 public class JudgeTemplateBlockWriteTask implements Job {
     private static final Logger LOGGER = LoggerFactory.getLogger(JudgeTemplateBlockWriteTask.class);
 
+    public static final String ADMIN = "admin";
+
     @Autowired
     private IndexTemplateService indexTemplateService;
 
@@ -56,7 +58,7 @@ public class JudgeTemplateBlockWriteTask implements Job {
 
             // 判断是否禁写
             if (templateIndicesDiskSum >= templateDiskSize){
-                indexTemplateService.updateBlockWriteState(templateId, true, "admin");
+                indexTemplateService.updateBlockWriteState(templateId, true, ADMIN);
             }
         }
 
@@ -71,14 +73,14 @@ public class JudgeTemplateBlockWriteTask implements Job {
      * @return 该模版所有索引/分区占用磁盘总和
      */
     private Double getTemplateIndicesDiskSum(Integer templateId){
-        // 根据逻辑模版id获取对应的物理模版详情   一个逻辑模版可能涉及多个物理模版（由于region）
+        // 根据逻辑模版id获取对应的物理模版详情   （一个逻辑模版可能涉及多个物理模版）
         IndexTemplateWithPhyTemplates templateLogicWithPhysical = indexTemplateService
                 .getLogicTemplateWithPhysicalsById(templateId);
 
         // 当前逻辑模版分区（索引）列表
         List<CatIndexResult> catIndexResults = Lists.newArrayList();
 
-        // 获取逻辑索引模板所有的master物理所有模板列表
+        // 获取逻辑索引模板所在master集群的模板列表
         List<IndexTemplatePhy> physicalMasters = templateLogicWithPhysical.fetchMasterPhysicalTemplates();
         for (IndexTemplatePhy physicalMaster : physicalMasters) {
             try {
