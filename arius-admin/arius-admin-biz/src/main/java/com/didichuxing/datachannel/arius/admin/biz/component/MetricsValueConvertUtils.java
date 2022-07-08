@@ -1,15 +1,16 @@
 package com.didichuxing.datachannel.arius.admin.biz.component;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.*;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.percentiles.ESPercentileMetricsVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.MetricsContent;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.MetricsContentCell;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.VariousLineChartMetrics;
-import org.apache.commons.collections4.CollectionUtils;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyNodeMetricsEnum.getPercentMetricsType;
 
 import java.util.List;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyNodeMetricsEnum.getPercentMetricsType;
+import org.apache.commons.collections4.CollectionUtils;
+
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.MetricsContent;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.MetricsContentCell;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.VariousLineChartMetrics;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.percentiles.ESPercentileMetricsVO;
 
 /**
  * Created by linyunan on 2021-09-07
@@ -48,7 +49,7 @@ public class MetricsValueConvertUtils {
 
 	/***************************************************cluster overview**********************************************************/
 	public static void doOptimizeForWriteTps(List<WriteTPSMetricsVO> writeTpsList) {
-		if (CollectionUtils.isEmpty(writeTpsList)) return;
+		if (CollectionUtils.isEmpty(writeTpsList)) {return;}
 
 		for (int i = 0; i < writeTpsList.size(); i++) {
 			WriteTPSMetricsVO currentMetrics = writeTpsList.get(i);
@@ -56,10 +57,10 @@ public class MetricsValueConvertUtils {
 			WriteTPSMetricsVO backMetrics    = null;
 			WriteTPSMetricsVO backNextMetrics    = null;
 
-			if (i == 0) backMetrics = writeTpsList.get(i + 1);
-			else if (i == writeTpsList.size() - 1) frontMetrics = writeTpsList.get(i - 1);
+			if (i == 0) {backMetrics = writeTpsList.get(i + 1);}
+			else if (i == writeTpsList.size() - 1) {frontMetrics = writeTpsList.get(i - 1);}
 			else {
-				if (i != writeTpsList.size() - 2) backNextMetrics = writeTpsList.get(i + 2);
+				if (i != writeTpsList.size() - 2) {backNextMetrics = writeTpsList.get(i + 2);}
 				backMetrics  = writeTpsList.get(i + 1);
 				frontMetrics = writeTpsList.get(i - 1);
 			}
@@ -74,7 +75,7 @@ public class MetricsValueConvertUtils {
 	}
 
 	public static void doOptimizeForReadTps(List<ReadQPSMetricsVO> readTpsList) {
-		if (CollectionUtils.isEmpty(readTpsList)) return;
+		if (CollectionUtils.isEmpty(readTpsList)) {return;}
 
 		for (int i = 0; i < readTpsList.size(); i++) {
 			ReadQPSMetricsVO currentMetrics = readTpsList.get(i);
@@ -82,10 +83,10 @@ public class MetricsValueConvertUtils {
 			ReadQPSMetricsVO backMetrics    = null;
 			ReadQPSMetricsVO backNextMetrics    = null;
 
-			if (i == 0) backMetrics = readTpsList.get(i + 1);
-			else if (i == readTpsList.size() - 1) frontMetrics = readTpsList.get(i - 1);
+			if (i == 0) {backMetrics = readTpsList.get(i + 1);}
+			else if (i == readTpsList.size() - 1) {frontMetrics = readTpsList.get(i - 1);}
 			else {
-				if (i != readTpsList.size() - 2) backNextMetrics = readTpsList.get(i + 2);
+				if (i != readTpsList.size() - 2) {backNextMetrics = readTpsList.get(i + 2);}
 				backMetrics  = readTpsList.get(i + 1);
 				frontMetrics = readTpsList.get(i - 1);
 			}
@@ -100,7 +101,7 @@ public class MetricsValueConvertUtils {
 	}
 
 	public static void doOptimizeForShardNu(List<ShardInfoMetricsVO> shardNuList) {
-		if (CollectionUtils.isEmpty(shardNuList)) return;
+		if (CollectionUtils.isEmpty(shardNuList)) {return;}
 
 		for (int i = 0; i < shardNuList.size(); i++) {
 			ShardInfoMetricsVO currentMetrics = shardNuList.get(i);
@@ -108,10 +109,10 @@ public class MetricsValueConvertUtils {
 			ShardInfoMetricsVO backMetrics    = null;
 			ShardInfoMetricsVO backNextMetrics    = null;
 
-			if (i == 0) backMetrics = shardNuList.get(i + 1);
-			else if (i == shardNuList.size() - 1) frontMetrics = shardNuList.get(i - 1);
+			if (i == 0) {backMetrics = shardNuList.get(i + 1);}
+			else if (i == shardNuList.size() - 1) {frontMetrics = shardNuList.get(i - 1);}
 			else {
-				if (i != shardNuList.size() - 2) backNextMetrics = shardNuList.get(i + 2);
+				if (i != shardNuList.size() - 2) {backNextMetrics = shardNuList.get(i + 2);}
 				backMetrics  = shardNuList.get(i + 1);
 				frontMetrics = shardNuList.get(i - 1);
 			}
@@ -133,7 +134,7 @@ public class MetricsValueConvertUtils {
 	}
 
 	public static void doOptimizeForDiskInfo(List<DiskInfoMetricsVO> diskInfoList) {
-		if (CollectionUtils.isEmpty(diskInfoList)) return;
+		if (CollectionUtils.isEmpty(diskInfoList)) {return;}
 
 		for (int i = 0; i < diskInfoList.size(); i++) {
 			DiskInfoMetricsVO currentMetrics = diskInfoList.get(i);
@@ -141,10 +142,10 @@ public class MetricsValueConvertUtils {
 			DiskInfoMetricsVO backMetrics        = null;
 			DiskInfoMetricsVO backNextMetrics    = null;
 
-			if (i == 0) backMetrics = diskInfoList.get(i + 1);
-			else if (i == diskInfoList.size() - 1) frontMetrics = diskInfoList.get(i - 1);
+			if (i == 0) {backMetrics = diskInfoList.get(i + 1);}
+			else if (i == diskInfoList.size() - 1) {frontMetrics = diskInfoList.get(i - 1);}
 			else {
-				if (i != diskInfoList.size() - 2) backNextMetrics = diskInfoList.get(i + 2);
+				if (i != diskInfoList.size() - 2) {backNextMetrics = diskInfoList.get(i + 2);}
 				backMetrics  = diskInfoList.get(i + 1);
 				frontMetrics = diskInfoList.get(i - 1);
 			}
@@ -173,7 +174,7 @@ public class MetricsValueConvertUtils {
 	}
 
 	public static void doOptimizeForSendTransSize(List<SendTransMetricsVO> sendTransSizeList) {
-		if (CollectionUtils.isEmpty(sendTransSizeList)) return;
+		if (CollectionUtils.isEmpty(sendTransSizeList)) {return;}
 
 		for (int i = 0; i < sendTransSizeList.size(); i++) {
 			SendTransMetricsVO currentMetrics = sendTransSizeList.get(i);
@@ -181,10 +182,10 @@ public class MetricsValueConvertUtils {
 			SendTransMetricsVO backMetrics    = null;
 			SendTransMetricsVO backNextMetrics    = null;
 
-			if (i == 0) backMetrics = sendTransSizeList.get(i + 1);
-			else if (i == sendTransSizeList.size() - 1) frontMetrics = sendTransSizeList.get(i - 1);
+			if (i == 0) {backMetrics = sendTransSizeList.get(i + 1);}
+			else if (i == sendTransSizeList.size() - 1) {frontMetrics = sendTransSizeList.get(i - 1);}
 			else {
-				if (i != sendTransSizeList.size() - 2) backNextMetrics = sendTransSizeList.get(i + 2);
+				if (i != sendTransSizeList.size() - 2) {backNextMetrics = sendTransSizeList.get(i + 2);}
 				backMetrics  = sendTransSizeList.get(i + 1);
 				frontMetrics = sendTransSizeList.get(i - 1);
 			}
@@ -199,7 +200,7 @@ public class MetricsValueConvertUtils {
 	}
 
 	public static void doOptimizeForRecvTransSize(List<RecvTransMetricsVO> recvTransSizeList) {
-		if (CollectionUtils.isEmpty(recvTransSizeList)) return;
+		if (CollectionUtils.isEmpty(recvTransSizeList)) {return;}
 
 		for (int i = 0; i < recvTransSizeList.size(); i++) {
 			RecvTransMetricsVO currentMetrics = recvTransSizeList.get(i);
@@ -207,10 +208,10 @@ public class MetricsValueConvertUtils {
 			RecvTransMetricsVO backMetrics    = null;
 			RecvTransMetricsVO backNextMetrics    = null;
 
-			if (i == 0) backMetrics = recvTransSizeList.get(i + 1);
-			else if (i == recvTransSizeList.size() - 1) frontMetrics = recvTransSizeList.get(i - 1);
+			if (i == 0) {backMetrics = recvTransSizeList.get(i + 1);}
+			else if (i == recvTransSizeList.size() - 1) {frontMetrics = recvTransSizeList.get(i - 1);}
 			else {
-				if (i != recvTransSizeList.size() - 2) backNextMetrics = recvTransSizeList.get(i + 2);
+				if (i != recvTransSizeList.size() - 2) {backNextMetrics = recvTransSizeList.get(i + 2);}
 				backMetrics  = recvTransSizeList.get(i + 1);
 				frontMetrics = recvTransSizeList.get(i - 1);
 			}
@@ -225,7 +226,7 @@ public class MetricsValueConvertUtils {
 	}
 
 	public static void doOptimizeForPercentiles(List<? extends ESPercentileMetricsVO> percentilesMetricsVOList) {
-		if (CollectionUtils.isEmpty(percentilesMetricsVOList)) return;
+		if (CollectionUtils.isEmpty(percentilesMetricsVOList)) {return;}
 
 		for (int i = 0; i < percentilesMetricsVOList.size(); i++) {
 			ESPercentileMetricsVO currentMetrics = percentilesMetricsVOList.get(i);
@@ -234,10 +235,10 @@ public class MetricsValueConvertUtils {
 			// The forward second time point of the current time slice is still zero
 			ESPercentileMetricsVO backNextMetrics= null;
 
-			if (i == 0) backMetrics = percentilesMetricsVOList.get(i + 1);
-			else if (i == percentilesMetricsVOList.size() - 1) frontMetrics = percentilesMetricsVOList.get(i - 1);
+			if (i == 0) {backMetrics = percentilesMetricsVOList.get(i + 1);}
+			else if (i == percentilesMetricsVOList.size() - 1) {frontMetrics = percentilesMetricsVOList.get(i - 1);}
 			else {
-				if (i != percentilesMetricsVOList.size() - 2) backNextMetrics = percentilesMetricsVOList.get(i + 2);
+				if (i != percentilesMetricsVOList.size() - 2) {backNextMetrics = percentilesMetricsVOList.get(i + 2);}
 				backMetrics  = percentilesMetricsVOList.get(i + 1);
 				frontMetrics = percentilesMetricsVOList.get(i - 1);
 			}
@@ -286,17 +287,17 @@ public class MetricsValueConvertUtils {
 
 	/***************************************************cluster node*************************************************/
 	public static void doOptimizeQueryBurrForNodeOrIndicesMetrics(List<VariousLineChartMetrics> variousLineChartMetrics) {
-		if (CollectionUtils.isEmpty(variousLineChartMetrics)) return;
+		if (CollectionUtils.isEmpty(variousLineChartMetrics)) {return;}
 		//multiple view
 		variousLineChartMetrics.parallelStream().forEach(variousLineChartMetric-> {
 			List<MetricsContent> metricsContentList = variousLineChartMetric.getMetricsContents();
-			if (CollectionUtils.isEmpty(metricsContentList)) return;
+			if (CollectionUtils.isEmpty(metricsContentList)) {return;}
 			//multiple line
 			for (MetricsContent metricsContent : metricsContentList) {
 
 				//multiple port
 				List<MetricsContentCell> metricsContentCellList = metricsContent.getMetricsContentCells();
-				if (CollectionUtils.isEmpty(metricsContentCellList)) return;
+				if (CollectionUtils.isEmpty(metricsContentCellList)) {return;}
 
 				for (int i = 0; i < metricsContentCellList.size(); i++) {
 					compensateAbnormalValue(metricsContentCellList, i);
@@ -329,15 +330,15 @@ public class MetricsValueConvertUtils {
 
 	/***************************************************cluster indices*************************************************/
 	private static double compute(double currentValue, double frontValue, double backValue, double backNextValue) {
-		if (0 >= backNextValue) return 0;
+		if (0 >= backNextValue) {return 0;}
 
 		double tempMax;
 		double finalMax;
-		if (0 >= frontValue) tempMax = Math.max(currentValue, 0);
-		else tempMax = Math.max(currentValue, frontValue);
+		if (0 >= frontValue) {tempMax = Math.max(currentValue, 0);}
+		else {tempMax = Math.max(currentValue, frontValue);}
 
-		if (0 >= backValue) finalMax = Math.max(tempMax, 0);
-		else finalMax = Math.max(tempMax, backValue);
+		if (0 >= backValue) {finalMax = Math.max(tempMax, 0);}
+		else {finalMax = Math.max(tempMax, backValue);}
 
 		return finalMax;
 	}

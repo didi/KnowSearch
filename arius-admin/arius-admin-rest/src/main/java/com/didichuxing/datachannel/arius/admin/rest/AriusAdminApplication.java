@@ -89,7 +89,6 @@ public class AriusAdminApplication {
             EnvUtil.setLoadActiveProfiles(args);
             SwaggerConfiguration.initEnv(args);
             ApplicationContext ctx = SpringApplication.run(AriusAdminApplication.class, args);
-            EnvUtil.setLoadActiveProfiles(ctx.getEnvironment().getActiveProfiles());
             for (String profile : ctx.getEnvironment().getActiveProfiles()) {
                 LOGGER.info("class=AriusAdminApplication||method=main||Spring Boot use profile: {}", profile);
             }

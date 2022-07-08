@@ -1,8 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.rest.web;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.commons.lang3.StringUtils;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * 比较杂的工具类
@@ -10,9 +10,9 @@ import org.apache.commons.lang3.StringUtils;
  * @author wangxiaoxue
  * @version $Id: URLHelper.java, v 0.1 2015年7月16日 上午10:44:10 Administrator Exp $
  */
-public class URLHelper {
+public class UrlHelper {
 
-    private URLHelper(){}
+    private UrlHelper(){}
 
     private static final String UK = "unknown";
 
