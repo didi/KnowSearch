@@ -350,7 +350,8 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
 
 
     @Override
-    public Result<WorkTaskVO> batchDCDRSwitchMaster2Slave(DCDRMasterSlaveSwitchDTO dcdrMasterSlaveSwitchDTO, String operator) {
+    public Result<WorkTaskVO> batchDCDRSwitchMaster2Slave(DCDRMasterSlaveSwitchDTO dcdrMasterSlaveSwitchDTO, String operator,
+                                                          Integer projectId) {
         Result<OpTask> workTaskResult = Result.buildSucc();
         try {
             //1. 批量校验模板DCDR是否可以切换, 仅有一个模板校验不通过结果为不通过。
@@ -378,7 +379,7 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
 
             //2.4 保存任务
             opTaskDTO.setExpandData(ConvertUtil.obj2Json(dcdrTasksDetail));
-            workTaskResult = opTaskManager.addTask(opTaskDTO);
+            workTaskResult = opTaskManager.addTask(opTaskDTO, projectId);
             if (workTaskResult.failed()) {
                 return Result.buildFrom(workTaskResult);
             }

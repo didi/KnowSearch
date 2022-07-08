@@ -62,11 +62,14 @@ public interface TemplateDCDRManager {
 
     /**
      * 批量DCDR主从切换
+     *
      * @param dcdrMasterSlaveSwitchDTO
      * @param operator
+     * @param projectId
      * @return
      */
-    Result<WorkTaskVO> batchDCDRSwitchMaster2Slave(DCDRMasterSlaveSwitchDTO dcdrMasterSlaveSwitchDTO, String operator);
+    Result<WorkTaskVO> batchDCDRSwitchMaster2Slave(DCDRMasterSlaveSwitchDTO dcdrMasterSlaveSwitchDTO, String operator,
+                                                   Integer projectId);
 
     /**
      * 根据任务id和模板id取消DCDR主从切换
