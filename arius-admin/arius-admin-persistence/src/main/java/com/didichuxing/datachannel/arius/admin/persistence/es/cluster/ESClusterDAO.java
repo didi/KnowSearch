@@ -80,6 +80,7 @@ import com.didiglobal.logi.elasticsearch.client.response.cluster.updatesetting.E
 import com.didiglobal.logi.elasticsearch.client.response.indices.getalias.ESIndicesGetAliasResponse;
 import com.didiglobal.logi.elasticsearch.client.utils.JsonUtils;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -308,6 +309,26 @@ public class ESClusterDAO extends BaseESDAO {
             return null;
         }
     }
+      public Map<String, ClusterNodeSettings> getPartOfSettingsByCluster(String cluster,Integer tryTimes) {
+        ESClusterNodesSettingResponse response =null;
+        try {
+            ESClient client = esOpClient.getESClient(cluster);
+            if (null == client) { return null;}
+            do {
+                response = client.admin().cluster().prepareNodesSetting().execute()
+                    .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+            }while (tryTimes-- > 0 && null == response);
+           
+            
+        } catch (Exception e) {
+            LOGGER.warn("class=ESClusterDAO||method=getPartOfSettingsByCluster||cluster={}||mg=get es setting fail", cluster, e);
+             return null;
+        }
+        if (response==null){
+            return Maps.newHashMap();
+        }
+        return response.getNodes();
+    }
 
     /**
      * 获取部分ES集群nodeSetting
@@ -325,6 +346,32 @@ public class ESClusterDAO extends BaseESDAO {
             LOGGER.warn("class=ESClusterDAO||method=getPartOfSettingsByCluster||cluster={}||mg=get es setting fail", cluster, e);
             return null;
         }
+    }
+     /**
+     * 获取全量ES集群nodeSetting
+     * @param cluster
+     * @return
+     */
+    public Map<String, ClusterNodeInfo> getAllSettingsByCluster(String cluster,Integer tryTimes) {
+         ESClusterNodesResponse response=null;
+        try {
+            ESClient client = esOpClient.getESClient(cluster);
+            if (null == client) {
+                LOGGER.warn("class=ESClusterDAO||method=getAllSettingsByCluster||cluster={}||mg=ESClient is empty", cluster);
+                return null;
+            }
+            do {
+                response = client.admin().cluster().prepareNodes().execute()
+                        .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+            } while (tryTimes-- > 0 && null == response);
+        } catch (Exception e) {
+            LOGGER.warn("class=ESClusterDAO||method=getAllSettingsByCluster||cluster={}||mg=get es setting fail", cluster, e);
+            return null;
+        }
+        if (response==null){
+            return Maps.newHashMap();
+        }
+        return response.getNodes();
     }
 
     /**

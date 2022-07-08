@@ -293,12 +293,12 @@ public class ESClusterServiceImpl implements ESClusterService {
 
     @Override
     public Map<String, ClusterNodeInfo> syncGetAllSettingsByCluster(String cluster) {
-        return esClusterDAO.getAllSettingsByCluster(cluster);
+        return esClusterDAO.getAllSettingsByCluster(cluster,3);
     }
 
     @Override
     public Map<String, ClusterNodeSettings> syncGetPartOfSettingsByCluster(String cluster) {
-        return esClusterDAO.getPartOfSettingsByCluster(cluster);
+        return esClusterDAO.getPartOfSettingsByCluster(cluster,3);
     }
 
     @Override

@@ -46,6 +46,7 @@ import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -523,8 +524,15 @@ public class ClusterRoleHostServiceImpl implements ClusterRoleHostService {
 
         // 从ES集群获取节点全量的信息
         Map<String, ClusterNodeInfo> clusterNodeInfoMap = esClusterService.syncGetAllSettingsByCluster(cluster);
+        if (MapUtils.isEmpty(clusterNodeInfoMap)) {
+            return Collections.emptyList();
+        }
         // 获取高低版本通用的节点角色信息
-        Map<String, ClusterNodeSettings> clusterNodeSettingsMap = esClusterService.syncGetPartOfSettingsByCluster(cluster);
+        Map<String, ClusterNodeSettings> clusterNodeSettingsMap = esClusterService.syncGetPartOfSettingsByCluster(
+                cluster);
+        if (MapUtils.isEmpty(clusterNodeSettingsMap)) {
+            return Collections.emptyList();
+        }
 
         if (MapUtils.isEmpty(clusterNodeSettingsMap) || MapUtils.isEmpty(clusterNodeInfoMap)) {
             return clusterNodeInfoListFromES;
