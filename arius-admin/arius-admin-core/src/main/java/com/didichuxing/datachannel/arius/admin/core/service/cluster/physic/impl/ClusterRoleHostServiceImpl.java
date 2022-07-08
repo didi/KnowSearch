@@ -555,7 +555,7 @@ public class ClusterRoleHostServiceImpl implements ClusterRoleHostService {
             buildMultiRoleListForESNode(clusterNodeInfoListFromES, clusterNodeInfo);
         }
 
-        return CollectionUtils.isEmpty(clusterNodeInfoListFromES) ? (List<ClusterNodeInfo>) clusterNodeInfoMap.values() : clusterNodeInfoListFromES;
+        return CollectionUtils.isEmpty(clusterNodeInfoListFromES) ? Lists.newArrayList(clusterNodeInfoMap.values())  : clusterNodeInfoListFromES;
     }
 
     /**
