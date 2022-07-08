@@ -22,6 +22,7 @@ import com.didichuxing.datachannel.arius.admin.metadata.service.DashBoardMetrics
 import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import org.apache.commons.collections4.CollectionUtils;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -193,6 +194,24 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
      * 根据系统配置筛选
      */
     private void  filterBySystemConfiguration(List<MetricList> listMetrics, String oneLevelType) throws AdminOperateException{
+        Map<DashBoardMetricListTypeEnum, Double> thresholdValues = getDashBoardMetricThresholdValues();
+
+        for (MetricList metric : listMetrics) {
+            DashBoardMetricListTypeEnum key = DashBoardMetricListTypeEnum.valueOfType(metric.getType());
+            if (thresholdValues.get(key) != null&&thresholdValues.containsKey(key)) {
+                Double configValue =  thresholdValues.get(metric.getType());
+                metric.setMetricListContents(metric.getMetricListContents().stream()
+                        .filter(metricListContent -> metricListContent.getValue() > configValue).collect(Collectors.toList()));
+            }
+        }
+    }
+
+    /**
+     * 获取dashboard指标阈值
+     * @return
+     */
+    @NotNull
+    private Map<DashBoardMetricListTypeEnum, Double> getDashBoardMetricThresholdValues() {
         Map<DashBoardMetricListTypeEnum, Double> thresholdValues = new HashMap<>();
         //根据系统配置筛选,如果库里有对应的指标，就使用配置的指标
         thresholdValues.put(INDEX_SMALL_SHARD,ariusConfigInfoService.doubleSetting(ARIUS_DASHBOARD_THRESHOLD_GROUP,
@@ -209,16 +228,7 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
                 INDEX_SEGMENT_NUM_THRESHOLD, 100D));
         thresholdValues.put(INDEX_MAPPING_NUM,ariusConfigInfoService.doubleSetting(ARIUS_DASHBOARD_THRESHOLD_GROUP,
                 INDEX_MAPPING_NUM_THRESHOLD, 100D));
-
-
-        for (MetricList metric : listMetrics) {
-            DashBoardMetricListTypeEnum key = DashBoardMetricListTypeEnum.valueOfType(metric.getType());
-            if (thresholdValues.get(key) != null&&thresholdValues.containsKey(key)) {
-                Double configValue =  thresholdValues.get(metric.getType());
-                metric.setMetricListContents(metric.getMetricListContents().stream()
-                        .filter(metricListContent -> metricListContent.getValue() > configValue).collect(Collectors.toList()));
-            }
-        }
+        return thresholdValues;
     }
 
     /**
