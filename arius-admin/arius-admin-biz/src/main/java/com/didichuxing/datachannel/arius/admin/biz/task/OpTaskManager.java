@@ -6,7 +6,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskProces
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
-
 import java.util.List;
 
 /**
@@ -19,11 +18,13 @@ public interface OpTaskManager {
 
     /**
      * 提交一个任务
+     *
      * @param opTaskDTO 任务数据
+     * @param projectId
      * @return Result
      * @throws AdminOperateException 异常
      */
-    Result<OpTask> addTask(OpTaskDTO opTaskDTO) throws NotFindSubclassException;
+    Result<OpTask> addTask(OpTaskDTO opTaskDTO, Integer projectId) throws NotFindSubclassException;
 
     /**
      * 判断一个任务是否存在

@@ -31,7 +31,7 @@ public class AriusOpThreadPool implements Executor {
     @PostConstruct
     public void init() {
         LOG.info("class=AriusOpThreadPool||method=init||AriusOpThreadPool init start..");
-        new ThreadPoolExecutor(poolSize, poolSize,
+        pool = new ThreadPoolExecutor(poolSize, poolSize,
                 0L, TimeUnit.MILLISECONDS,
                 new LinkedBlockingQueue<Runnable>(),
                 springThreadFactory);

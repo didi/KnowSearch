@@ -608,7 +608,7 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
                     finalRateLimitNew, templatePhysical.getVersion(), templateLogicWithPhysical.getIdField(),
                     templateLogicWithPhysical.getRoutingField()));
             operateRecordService.save(new OperateRecord.Builder().operationTypeEnum(
-                            OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_EDIT_SETTING).userOperation(SYSTEM.getDesc())
+                            OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_INFO_MODIFY).userOperation(SYSTEM.getDesc())
                     .triggerWayEnum(TriggerWayEnum.TIMING_TASK)
                      .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
                     .content("rateLimitOld:" + rateLimitOld + ",rateLimitNew:" + rateLimitNew)
