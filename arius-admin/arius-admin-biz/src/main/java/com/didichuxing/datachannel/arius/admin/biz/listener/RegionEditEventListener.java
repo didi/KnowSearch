@@ -153,7 +153,7 @@ public class RegionEditEventListener implements ApplicationListener<RegionEditEv
     private void updateIndicesAllocationSetting(String cluster, String templateName,
                                                 Set<String> nodeNames) throws ESOperateException {
         if (ariusConfigInfoService.booleanSetting(AriusConfigConstant.ARIUS_COMMON_GROUP,
-            AriusConfigConstant.TEMPLATE_PHYSIC_INDICES_ALLOCATION_IS_EFFECTIVE, true)) {
+            AriusConfigConstant.HISTORY_TEMPLATE_PHYSIC_INDICES_ALLOCATION_IS_EFFECTIVE, true)) {
             boolean response = esIndexService.syncPutIndexSetting(cluster,
                 Collections.singletonList(templateName + "*"), TEMPLATE_INDEX_INCLUDE_NODE_NAME,
                 String.join(COMMA, nodeNames), "", RETRY_COUNT);

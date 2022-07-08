@@ -30,8 +30,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.DASHBOARD_THRESHOLD;
-
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_DASHBOARD_THRESHOLD_GROUP;
 /**
  * Created by linyunan on 3/14/22
  */
@@ -198,7 +197,7 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
             //配置的指标项：oneLevelType +"_"+ metric.getType() eg:index_segmentMemSize
             String key = oneLevelType + "_" + metric.getType();
             if (thresholdValues.get(metric.getType()) != null&&thresholdValues.containsKey(key)) {
-                String valueStr = ariusConfigInfoService.stringSetting(DASHBOARD_THRESHOLD, metric.getType(), thresholdValues.get(key));
+                String valueStr = ariusConfigInfoService.stringSetting(ARIUS_DASHBOARD_THRESHOLD_GROUP, metric.getType(), thresholdValues.get(key));
                 Double configValue =  conversionType(valueStr,v->Double.valueOf(v),String.format("平台配置:[%S]错误,需要类型:%S",key,Double.class.getSimpleName()));
                 metric.setMetricListContents(metric.getMetricListContents().stream()
                         .filter(metricListContent -> metricListContent.getValue() > configValue).collect(Collectors.toList()));
