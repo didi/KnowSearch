@@ -67,8 +67,8 @@ public enum ClusterHealthEnum {
         return desc;
     }
 
-    private final Integer code;
-    private final String desc;
+    private Integer code;
+    private String desc;
 
     public static boolean isExitByCode(Integer code) {
         if (null == code) {

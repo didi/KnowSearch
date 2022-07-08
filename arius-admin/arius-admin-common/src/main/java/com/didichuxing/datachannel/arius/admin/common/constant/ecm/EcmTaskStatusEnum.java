@@ -31,7 +31,7 @@ public enum EcmTaskStatusEnum {
 
     UNKNOWN("unknown");
 
-    private final String value;
+    private String value;
 
     EcmTaskStatusEnum(String value) {
         this.value = value;

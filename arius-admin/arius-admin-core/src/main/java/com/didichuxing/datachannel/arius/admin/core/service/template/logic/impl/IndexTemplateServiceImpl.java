@@ -134,7 +134,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
     @Autowired
     private ClusterRegionService clusterRegionService;
 
-    private final Cache<String, List<IndexTemplate>> templateListCache = CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES).maximumSize(10).build();
+    private Cache<String, List<IndexTemplate>> templateListCache = CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES).maximumSize(10).build();
 
     /**
      * 条件查询

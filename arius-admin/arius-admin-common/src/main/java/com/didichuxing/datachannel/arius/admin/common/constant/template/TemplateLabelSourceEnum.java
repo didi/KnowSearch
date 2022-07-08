@@ -12,9 +12,9 @@ public enum TemplateLabelSourceEnum {
     PLATFORM_GOVERN("3", "平台治理");
 
 
-    private final String id;
+    private String id;
 
-    private final String source;
+    private String source;
 
 
     TemplateLabelSourceEnum(String id, String source) {

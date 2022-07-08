@@ -23,7 +23,7 @@ public enum PercentilesEnum {
         this.type = type;
     }
 
-    private final String type;
+    private String type;
 
     public String getType() {
         return type;

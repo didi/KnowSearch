@@ -15,7 +15,7 @@ public enum EcmActionEnum {
     CANCEL("cancel")
 
     ;
-    private final String action;
+    private String action;
 
     EcmActionEnum(String action) {
         this.action = action;

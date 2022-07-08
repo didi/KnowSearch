@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class AriusScheduleThreadPool {
 
     private ScheduledExecutorService scheduleThreadPool;
-    private final int                      scheduleThreadNum = 1 << 5;
+    private int                      scheduleThreadNum = 1 << 5;
 
     @PostConstruct
     public void init() {

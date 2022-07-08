@@ -10,9 +10,9 @@ import org.springframework.context.ApplicationEvent;
  */
 public class RegionUnbindEvent extends ApplicationEvent {
 
-    private final ClusterRegion clusterRegion;
+    private ClusterRegion clusterRegion;
 
-    private final String operator;
+    private String operator;
 
     public RegionUnbindEvent(Object source,
                              ClusterRegion clusterRegion,

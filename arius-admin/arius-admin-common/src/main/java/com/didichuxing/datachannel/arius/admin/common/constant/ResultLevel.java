@@ -8,10 +8,10 @@ public enum ResultLevel {
     MINOR(5,    "Minor"),
     FINE(6,     "Fine");
 
-    private final int    code;
-    private final String name;
+    private int    code;
+    private String name;
 
-    ResultLevel(int code, String name){
+    private ResultLevel(int code, String name){
         this.code = code;
         this.name = name;
     }

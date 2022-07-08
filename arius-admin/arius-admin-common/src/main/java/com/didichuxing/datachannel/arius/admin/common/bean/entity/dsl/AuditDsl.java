@@ -34,6 +34,10 @@ public class AuditDsl {
             return false;
         }
 
-        return !CollectionUtils.isEmpty(dslInfos);
+        if (CollectionUtils.isEmpty(dslInfos)) {
+            return false;
+        }
+
+        return true;
     }
 }

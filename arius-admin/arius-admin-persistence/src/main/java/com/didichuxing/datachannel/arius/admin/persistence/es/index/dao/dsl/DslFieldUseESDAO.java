@@ -25,11 +25,11 @@ public class DslFieldUseESDAO extends BaseESDAO {
     /**
      * type名称
      */
-    private final String typeName = "type";
+    private String typeName = "type";
     /**
      * 滚动查询大小
      */
-    private final int scrollSize = 1000;
+    private int scrollSize = 1000;
 
     @PostConstruct
     public void init(){

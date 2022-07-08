@@ -6,7 +6,7 @@ public enum ClusterHealthStatus {
     YELLOW((byte) 1),
     RED((byte) 2);
 
-    private final byte value;
+    private byte value;
 
     ClusterHealthStatus(byte value) {
         this.value = value;

@@ -151,9 +151,13 @@ public class IndexNameUtils {
             }
         }
 
-        // index has chars left
-        // index also to end
-        return indexPointer >= index.length();
+        if (indexPointer < index.length()) {
+            // index has chars left
+            return false;
+        } else {
+            // index also to end
+            return true;
+        }
     }
 
     /**
@@ -205,7 +209,11 @@ public class IndexNameUtils {
 
             // 去掉_vx版本号信息
             tmpTemplateExp = removeIndexNameVersionIfHas(tmpTemplateExp);
-            return lastStr.equals(tmpTemplateExp);
+            if (lastStr.equals(tmpTemplateExp)) {
+                return true;
+            }
+
+            return false;
 
             // 查询使用的索引名称含有*，例如btb_b2b.crius*hna*_2019-03-07
         } else {
@@ -223,11 +231,19 @@ public class IndexNameUtils {
             // 去掉lastStr日期部分
             lastStr = removeIndexNameDateIfHas(lastStr);
             if (StringUtils.isBlank(lastStr)) {
-                return isMatchIndexPartPositiveSequence(tmpTemplateExp, indexSplits, indexSplits.length - 1);
+                if (isMatchIndexPartPositiveSequence(tmpTemplateExp, indexSplits, indexSplits.length - 1)) {
+                    return true;
+                } else {
+                    return false;
+                }
 
             } else {
                 indexSplits[indexSplits.length - 1] = lastStr;
-                return isMatchIndexPartPositiveSequence(tmpTemplateExp, indexSplits, indexSplits.length);
+                if (isMatchIndexPartPositiveSequence(tmpTemplateExp, indexSplits, indexSplits.length)) {
+                    return true;
+                } else {
+                    return false;
+                }
             }
         }
     }
@@ -268,7 +284,11 @@ public class IndexNameUtils {
         }
 
         // 如果只有一个序号, 匹配部分为索引表达式中间
-        return indexList.size() != 1 || indexList.get(0) <= 0;
+        if (indexList.size() == 1 && indexList.get(0) > 0) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -361,7 +381,11 @@ public class IndexNameUtils {
         if (!searchIndexName.endsWith("*") && indexSplits.length <= 1) {
             String trimSearchIndexName = StringUtils.removeEnd(searchIndexName , "*");
             // 如果查询索引名称和索引表达式相同，例如arius.dsl.template -> arius.dsl.template
-            return trimSearchIndexName.equals(templateExp);
+            if (trimSearchIndexName.equals(templateExp)) {
+                return true;
+            } else {
+                return false;
+            }
 
         } else {
             // 查看*分隔之后最后一个分段
@@ -373,7 +397,11 @@ public class IndexNameUtils {
             // *之后为空串
             if (StringUtils.isBlank(lastStr)) {
                 // 各个分段进行匹配
-                return isMatchIndexPartPositiveSequence(templateExp, indexSplits, indexSplits.length - 1);
+                if (isMatchIndexPartPositiveSequence(templateExp, indexSplits, indexSplits.length - 1)) {
+                    return true;
+                } else {
+                    return false;
+                }
             }
 
             // 如果lastStr包含_，而索引表达式不包含_
@@ -387,7 +415,11 @@ public class IndexNameUtils {
             }
 
             // 各个分段进行匹配
-            return isMatchIndexPartPositiveSequence(templateExp, indexSplits, indexSplits.length);
+            if (isMatchIndexPartPositiveSequence(templateExp, indexSplits, indexSplits.length)) {
+                return true;
+            } else {
+                return false;
+            }
 
         }
     }

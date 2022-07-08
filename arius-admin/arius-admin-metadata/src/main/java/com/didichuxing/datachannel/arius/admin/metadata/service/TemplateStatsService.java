@@ -332,9 +332,10 @@ public class TemplateStatsService {
                 TypeDefine typeDefine = typeMap.get(type).get(field);
 
                 boolean index = false;
-                boolean docValue = sort.containsKey(field) || group.containsKey(field);
+                boolean docValue = false;
 
                 // sort/group
+                if(sort.containsKey(field) || group.containsKey(field)){docValue = true;}
 
                 // where
                 if(where.containsKey(field)){index = true;}

@@ -248,8 +248,12 @@ public class TemplatePhyAliasManagerImpl implements TemplatePhyAliasManager {
      * @return
      */
     private boolean isValidAlias(String cluster, String templateName, IndexTemplatePhyAlias templateAlias) {
-        return !StringUtils.isBlank(cluster) && templateAlias != null && !StringUtils.isBlank(templateName)
-                && !StringUtils.isBlank(templateAlias.getAlias());
+        if (StringUtils.isBlank(cluster) || templateAlias == null || StringUtils.isBlank(templateName)
+            || StringUtils.isBlank(templateAlias.getAlias())) {
+            return false;
+        }
+
+        return true;
     }
 
     /**

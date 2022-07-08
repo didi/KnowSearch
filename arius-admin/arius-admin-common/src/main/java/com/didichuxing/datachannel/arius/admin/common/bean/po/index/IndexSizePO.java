@@ -78,7 +78,11 @@ public class IndexSizePO extends BaseESPO {
             return false;
         }
 
-        return compressionRatio > 0;
+        if(compressionRatio<=0) {
+            return false;
+        }
+
+        return true;
     }
 
 

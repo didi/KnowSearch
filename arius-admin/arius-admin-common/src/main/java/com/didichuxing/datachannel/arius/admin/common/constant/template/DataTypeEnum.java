@@ -30,11 +30,11 @@ public enum DataTypeEnum {
         this.label = label;
     }
 
-    private final int code;
+    private int code;
 
-    private final String desc;
+    private String desc;
 
-    private final String label;
+    private String label;
 
     public int getCode() {
         return code;

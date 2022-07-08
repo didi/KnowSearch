@@ -8,7 +8,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.Projec
  */
 public class ProjectTemplateAuthDeleteEvent extends ProjectAuthEvent {
 
-    private final ProjectTemplateAuth projectTemplateAuth;
+    private ProjectTemplateAuth projectTemplateAuth;
 
     public ProjectTemplateAuthDeleteEvent(Object source, ProjectTemplateAuth projectTemplateAuth) {
         super(source);

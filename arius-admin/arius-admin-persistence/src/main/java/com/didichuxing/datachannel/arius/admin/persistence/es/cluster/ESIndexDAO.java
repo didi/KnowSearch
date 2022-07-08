@@ -226,7 +226,7 @@ public class ESIndexDAO extends BaseESDAO {
                 builder.setIncludeTypeName(true);
             }
             ESIndicesUpdateMappingResponse response = builder.execute()
-                    .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+                    .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);;
 
             if (!response.getAcknowledged().booleanValue()) {
                 return false;

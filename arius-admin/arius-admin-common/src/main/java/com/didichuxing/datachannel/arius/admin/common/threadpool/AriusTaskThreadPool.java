@@ -22,7 +22,7 @@ public class AriusTaskThreadPool {
 
     private ExecutorService     pool;
 
-    private final ThreadFactory springThreadFactory = new CustomizableThreadFactory("AriusTaskThreadPool");
+    private ThreadFactory springThreadFactory = new CustomizableThreadFactory("AriusTaskThreadPool");
 
     public void init(int poolSize, String taskName, int queueLen) {
         this.poolSize   = poolSize;

@@ -106,22 +106,22 @@ public enum GatewayMetricsTypeEnum {
 	/**
 	 * 分组名称
 	 */
-	private final String group;
+	private String group;
 
 	/**
 	 * 指标名
 	 */
-	private final String type;
+	private String type;
 
 	/**
 	 * dsl聚合自定义key
 	 */
-	private final String aggKey;
+	private String aggKey;
 
 	/**
 	 * 描述信息
 	 */
-	private final String desc;
+	private String desc;
 
 
 	public String getType() {

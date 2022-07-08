@@ -15,7 +15,7 @@ public class MapUtils {
             return "";
         }
 
-        StringBuilder content = new StringBuilder();
+        StringBuilder content = new StringBuilder("");
         try {
             for (String key : src.keySet()) {
                 String destValue = dest.get(key);

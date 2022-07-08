@@ -2,15 +2,15 @@ package com.didichuxing.datachannel.arius.admin.common.event.metrics;
 
 public class MetricsMonitorCollectTimeEvent extends MetaDataMetricsEvent {
 
-    private final String cluster;
+    private String cluster;
 
-    private final Integer clusterLevel;
+    private Integer clusterLevel;
 
-    private final String type;
+    private String type;
 
-    private final double time;
+    private double time;
 
-    private final String hostName;
+    private String hostName;
 
     /**
      * Create a new ApplicationEvent.

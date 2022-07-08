@@ -85,9 +85,9 @@ public enum MetricsTypeEnum {
         this.secondMetricsType = secondMetricsType;
     }
 
-    private final int code;
-    private final String firstMetricsType;
-    private final String secondMetricsType;
+    private int code;
+    private String firstMetricsType;
+    private String secondMetricsType;
 
     public int getCode() {
         return code;

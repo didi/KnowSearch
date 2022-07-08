@@ -15,7 +15,7 @@ public enum BpmAuditTypeEnum {
 
                               SUBMIT("submit");
 
-    private final String value;
+    private String value;
 
     BpmAuditTypeEnum(String value) {
         this.value = value;

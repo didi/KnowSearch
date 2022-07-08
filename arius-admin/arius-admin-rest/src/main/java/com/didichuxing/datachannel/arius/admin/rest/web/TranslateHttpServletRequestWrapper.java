@@ -16,7 +16,7 @@ import java.io.InputStreamReader;
  */
 class TranslateHttpServletRequestWrapper extends HttpServletRequestWrapper {
 
-    private final String body;
+    private String body;
     private String encoding = "UTF-8";
 
     public TranslateHttpServletRequestWrapper(HttpServletRequest request) throws IOException{

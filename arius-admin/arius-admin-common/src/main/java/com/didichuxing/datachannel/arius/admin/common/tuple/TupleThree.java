@@ -50,7 +50,11 @@ public class TupleThree<T1, T2, T3> implements Tuples, Comparable<TupleThree<T1,
             }
             
             final int check3 = t3Comp.compare(t1.v3, t2.v3);
-            return check3;
+            if (check3 != 0) {
+                return check3;
+            }
+            
+            return 0;
         };
     }
     
@@ -77,7 +81,11 @@ public class TupleThree<T1, T2, T3> implements Tuples, Comparable<TupleThree<T1,
         }
         
         final int check3 = t1.v3.compareTo(t2.v3);
-        return check3;
+        if (check3 != 0) {
+            return check3;
+        }
+        
+        return 0;
     }
     
     @Override

@@ -150,7 +150,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
             if (Objects.isNull(project.getId())){
                 projectExtendVO.setId(projectExtendVO.getConfig().getProjectId());
             }
-            return Result.buildSucc(projectExtendVO);
+            return Result.<ProjectExtendVO>buildSucc(projectExtendVO);
         } catch (LogiSecurityException e) {
             return Result.buildFail(e.getMessage());
         }

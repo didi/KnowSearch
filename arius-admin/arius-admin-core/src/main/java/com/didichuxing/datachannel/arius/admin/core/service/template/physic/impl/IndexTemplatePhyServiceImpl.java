@@ -110,7 +110,7 @@ public class IndexTemplatePhyServiceImpl implements IndexTemplatePhyService {
     private CacheSwitch                                    cacheSwitch;
     @Autowired
     private ProjectService projectService;
-    private final Cache<String, List<?>> templatePhyListCache = CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES).maximumSize(10).build();
+    private Cache<String, List<?>> templatePhyListCache = CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES).maximumSize(10).build();
 
     /**
      * 条件查询

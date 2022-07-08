@@ -57,7 +57,7 @@ public class ESIndicesSimpleStatsRequest extends ESBroadcastRequest<ESIndicesSim
     public static String MERGE = "merge";
     public static String REQUEST_CACHE = "request_cache";
 
-    private final Set<String> flags = new HashSet<>();
+    private Set<String> flags = new HashSet<>();
     private IndicesStatsLevel level = null;
 
     /**

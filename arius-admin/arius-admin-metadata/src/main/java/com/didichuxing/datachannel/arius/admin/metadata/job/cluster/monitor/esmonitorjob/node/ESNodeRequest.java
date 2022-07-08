@@ -13,7 +13,7 @@ import java.util.Set;
 
 public class ESNodeRequest extends BaseTimeoutRequest<ESNodeRequest> {
     private String nodeIds;
-    private final Set<String> flags = new HashSet<>();
+    private Set<String> flags = new HashSet<>();
 
     public ESNodeRequest clear() {
         flags.clear();

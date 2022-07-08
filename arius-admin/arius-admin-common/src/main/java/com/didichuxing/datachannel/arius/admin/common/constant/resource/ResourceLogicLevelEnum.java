@@ -17,9 +17,9 @@ public enum ResourceLogicLevelEnum {
         this.desc = desc;
     }
 
-    private final int    code;
+    private int    code;
 
-    private final String desc;
+    private String desc;
 
     public int getCode() {
         return code;

@@ -99,11 +99,11 @@ public class BatchProcessor<S, R> {
 
     public static class BatchProcessResult<S, R> {
 
-        private final List<R>                 resultList = Lists.newArrayList();
+        private List<R>                 resultList = Lists.newArrayList();
 
-        private final List<S>                 failList   = Lists.newArrayList();
+        private List<S>                 failList   = Lists.newArrayList();
 
-        private final Map<List<S>, Exception> errorMap   = Maps.newHashMap();
+        private Map<List<S>, Exception> errorMap   = Maps.newHashMap();
 
         void addFail(List<S> fails) {
             this.failList.addAll(fails);

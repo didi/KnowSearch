@@ -21,9 +21,9 @@ public enum OpTaskStatusEnum {
         this.value = value;
     }
 
-    private final String status;
+    private String status;
 
-    private final String value;
+    private String value;
 
     public String getStatus() {
         return status;

@@ -24,7 +24,7 @@ public class IndexAccessESDAO extends BaseESDAO {
     /**
      * type名称
      */
-    private final String typeName = "type";
+    private String typeName = "type";
 
     @PostConstruct
     public void init(){

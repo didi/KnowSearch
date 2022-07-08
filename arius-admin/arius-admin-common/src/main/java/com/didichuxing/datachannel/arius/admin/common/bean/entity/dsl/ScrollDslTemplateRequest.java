@@ -51,7 +51,11 @@ public class ScrollDslTemplateRequest {
             return false;
         }
 
-        return this.scrollSize != null;
+        if (this.scrollSize == null) {
+            return false;
+        }
+
+        return true;
     }
 
 }

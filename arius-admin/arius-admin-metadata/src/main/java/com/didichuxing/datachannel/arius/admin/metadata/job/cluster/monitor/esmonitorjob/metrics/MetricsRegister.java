@@ -11,17 +11,17 @@ public class MetricsRegister {
     /**
      * 缓存普通的采集自es 发送给odin的数据
      */
-    private final Map<String, ESDataTempBean>         dataBeanRegister;
+    private Map<String, ESDataTempBean>         dataBeanRegister;
     /**
      * 缓存采集自一个node上的索引的指标数据
      */
-    private final Map<String, ESNodeToIndexTempBean>  nodeIndexRegister;
+    private Map<String, ESNodeToIndexTempBean>  nodeIndexRegister;
     /**
      * 缓存需要复合计算的值
      */
-    private final Map<String, Double>                 computeValueRegister;
+    private Map<String, Double>                 computeValueRegister;
 
-    private final Map<String, Tuple<Long, Double>>    clusterNodeCpu;
+    private Map<String, Tuple<Long, Double>>    clusterNodeCpu;
 
     public MetricsRegister(){
         dataBeanRegister        = Maps.newConcurrentMap();

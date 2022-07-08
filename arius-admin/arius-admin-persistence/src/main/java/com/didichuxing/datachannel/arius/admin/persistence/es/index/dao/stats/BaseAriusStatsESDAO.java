@@ -87,7 +87,7 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
     /**
      * 不同维度es监控数据
      */
-    private static final Map<AriusStatsEnum/*stats type*/, BaseAriusStatsESDAO> ariusStatsEsDaoMap    = Maps
+    private static Map<AriusStatsEnum/*stats type*/, BaseAriusStatsESDAO> ariusStatsEsDaoMap    = Maps
         .newConcurrentMap();
 
     public static BaseAriusStatsESDAO getByStatsType(AriusStatsEnum statsType) {

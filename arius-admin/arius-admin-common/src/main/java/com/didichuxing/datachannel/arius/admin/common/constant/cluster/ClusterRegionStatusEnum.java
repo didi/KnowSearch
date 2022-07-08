@@ -30,6 +30,6 @@ public enum ClusterRegionStatusEnum {
         return message;
     }
 
-    private final Integer code;
-    private final String message;
+    private Integer code;
+    private String message;
 }

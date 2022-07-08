@@ -4,7 +4,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ESUser
 
 public class ESUserAddEvent extends AppEvent {
 
-    private final ESUser app;
+    private ESUser app;
 
     /**
      * Create a new ApplicationEvent.

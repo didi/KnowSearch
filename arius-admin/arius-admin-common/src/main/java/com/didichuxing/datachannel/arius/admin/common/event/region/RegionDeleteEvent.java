@@ -10,9 +10,9 @@ import org.springframework.context.ApplicationEvent;
  */
 public class RegionDeleteEvent extends ApplicationEvent {
 
-    private final ClusterRegion clusterRegion;
+    private ClusterRegion clusterRegion;
 
-    private final String operator;
+    private String operator;
 
     public RegionDeleteEvent(Object source,
                              ClusterRegion clusterRegion,

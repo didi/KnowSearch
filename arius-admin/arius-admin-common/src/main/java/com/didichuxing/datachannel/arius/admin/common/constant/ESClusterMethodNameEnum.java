@@ -34,8 +34,8 @@ public enum ESClusterMethodNameEnum {
      */
     ES_CLUSTER_OFFLINE("集群移除",OperateTypeEnum.PHYSICAL_CLUSTER_OFFLINE);
     
-    private final String MethodName;
-    private final OperateTypeEnum operateTypeEnum;
+    private String MethodName;
+    private OperateTypeEnum operateTypeEnum;
     
     ESClusterMethodNameEnum(String methodName, OperateTypeEnum operateTypeEnum) {
         MethodName = methodName;

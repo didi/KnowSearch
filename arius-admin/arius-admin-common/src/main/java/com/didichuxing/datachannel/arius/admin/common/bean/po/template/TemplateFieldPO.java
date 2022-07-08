@@ -185,7 +185,11 @@ public class TemplateFieldPO extends BaseESPO {
         Set<String> key2 = new TreeSet<>();
         key2.addAll(that.templateFieldMap.keySet());
 
-        return StringUtils.join(key1, AdminConstant.COMMA).equals(StringUtils.join(key2, AdminConstant.COMMA));
+        if (!StringUtils.join(key1, AdminConstant.COMMA).equals(StringUtils.join(key2, AdminConstant.COMMA))) {
+            return false;
+        }
+
+        return true;
     }
 
     @Override

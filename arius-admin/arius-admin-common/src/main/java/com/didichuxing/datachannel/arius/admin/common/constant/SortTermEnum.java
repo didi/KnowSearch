@@ -17,7 +17,7 @@ public enum SortTermEnum {
 
     SortTermEnum(String type) { this.type = type;}
 
-    private final String type;
+    private String type;
 
     public String getType() { return type;}
 

@@ -26,7 +26,7 @@ public class AriusOpThreadPool implements Executor {
 
     private ExecutorService     pool;
 
-    private final ThreadFactory springThreadFactory = new CustomizableThreadFactory("AriusOpThreadPool");
+    private ThreadFactory springThreadFactory = new CustomizableThreadFactory("AriusOpThreadPool");
 
     @PostConstruct
     public void init() {

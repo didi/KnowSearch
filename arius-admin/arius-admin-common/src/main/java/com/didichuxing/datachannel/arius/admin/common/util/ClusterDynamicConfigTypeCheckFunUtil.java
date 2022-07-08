@@ -57,7 +57,9 @@ public class ClusterDynamicConfigTypeCheckFunUtil {
     public static boolean floatValueCheck1to100(String value) {
         if(floatCheck(value)) {
             float number = Float.valueOf(value);
-            return number < 100 && number > 1;
+            if(number<100&&number>1) {
+                return true;
+            }
         }
         return false;
     }
@@ -65,7 +67,9 @@ public class ClusterDynamicConfigTypeCheckFunUtil {
     public static boolean floatValueCheckPositive(String value) {
         if(floatCheck(value)) {
             float number = Float.valueOf(value);
-            return number >= 0;
+            if(number>=0) {
+                return true;
+            }
         }
         return false;
     }
@@ -88,7 +92,11 @@ public class ClusterDynamicConfigTypeCheckFunUtil {
             return false;
         }
 
-        return number >= 0 && number <= 120;
+        if (number < 0 || number > 120) {
+            return false;
+        }
+
+        return true;
     }
 
     public static boolean intCheck(String value) {
@@ -116,7 +124,10 @@ public class ClusterDynamicConfigTypeCheckFunUtil {
     }
 
     public static boolean booleanCheck(String value) {
-        return value.equals("true") || value.equals("false");
+        if (value.equals("true") || value.equals("false")) {
+            return true;
+        }
+        return false;
     }
 
     public static boolean reBalanceEnableTypeCheck(String value) {

@@ -56,11 +56,11 @@ public enum NewTemplateSrvEnum {
      */
     TEMPLATE_SETTING(5, "Setting设置", ES_6_6_1_700);
 
-    private final Integer code;
+    private Integer code;
 
-    private final String serviceName;
+    private String serviceName;
 
-    private final ESClusterVersionEnum esClusterVersion;
+    private ESClusterVersionEnum esClusterVersion;
 
     public Integer getCode() {
         return code;

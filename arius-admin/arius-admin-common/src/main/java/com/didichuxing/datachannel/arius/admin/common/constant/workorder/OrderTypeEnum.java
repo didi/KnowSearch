@@ -29,11 +29,11 @@ public enum OrderTypeEnum {
 
     ;
 
-    private final Integer code;
+    private Integer code;
 
-    private final String message;
+    private String message;
 
-    private final String orderName;
+    private String orderName;
 
     OrderTypeEnum(Integer code, String message, String orderName) {
         this.code = code;

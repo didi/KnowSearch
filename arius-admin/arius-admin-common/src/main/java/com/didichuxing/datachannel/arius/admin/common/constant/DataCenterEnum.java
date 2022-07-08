@@ -10,9 +10,9 @@ public enum DataCenterEnum {
         this.desc = desc;
     }
 
-    private final String code;
+    private String code;
 
-    private final String desc;
+    private String desc;
 
     public String getCode() {
         return code;

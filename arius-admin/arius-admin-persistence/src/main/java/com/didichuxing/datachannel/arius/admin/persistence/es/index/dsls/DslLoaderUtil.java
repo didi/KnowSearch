@@ -38,7 +38,7 @@ public class DslLoaderUtil {
     /**
      * 查询语句容器
      */
-    private final Map<String/*fileRelativePath*/, String/*dslContent*/> dslsMap = Maps.newHashMap();
+    private Map<String/*fileRelativePath*/, String/*dslContent*/> dslsMap = Maps.newHashMap();
 
     @PostConstruct
     public void init() {

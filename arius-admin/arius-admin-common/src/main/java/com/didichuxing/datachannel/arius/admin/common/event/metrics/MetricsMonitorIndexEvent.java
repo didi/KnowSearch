@@ -7,13 +7,13 @@ import java.util.List;
 
 public class MetricsMonitorIndexEvent extends MetaDataMetricsEvent {
 
-    private final List<ESDataTempBean> esDataTempBeans;
+    private List<ESDataTempBean> esDataTempBeans;
 
-    private final List<ESIndexStats> esIndexStatsList;
+    private List<ESIndexStats> esIndexStatsList;
 
-    private final Integer clusterLevel;
+    private Integer clusterLevel;
 
-    private final String hostName;
+    private String hostName;
 
     /**
      * Create a new ApplicationEvent.

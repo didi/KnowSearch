@@ -19,9 +19,9 @@ public enum TemplatePhysicalStatusEnum {
         this.desc = desc;
     }
 
-    private final int    code;
+    private int    code;
 
-    private final String desc;
+    private String desc;
 
     private String label;
 

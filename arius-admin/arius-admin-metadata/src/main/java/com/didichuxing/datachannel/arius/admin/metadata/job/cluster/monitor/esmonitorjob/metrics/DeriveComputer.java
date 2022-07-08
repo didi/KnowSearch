@@ -7,9 +7,9 @@ import com.didiglobal.logi.log.LogFactory;
 public class DeriveComputer implements MetricsComputer {
     private static final ILog LOGGER = LogFactory.getLog(DeriveComputer.class);
 
-    private final MetricsRegister     metricsRegister;
+    private MetricsRegister     metricsRegister;
 
-    private final MetricsComputeType  computeType;
+    private MetricsComputeType  computeType;
 
     public DeriveComputer(MetricsComputeType computeType, MetricsRegister metricsRegister) {
         this.computeType     = computeType;

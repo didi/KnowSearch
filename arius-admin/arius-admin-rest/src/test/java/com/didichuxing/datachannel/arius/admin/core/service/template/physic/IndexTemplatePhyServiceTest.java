@@ -56,7 +56,7 @@ public class IndexTemplatePhyServiceTest extends AriusAdminApplicationTest {
     private ClusterRegionService clusterRegionService;
 
     private static final String operator = "System";
-    private static final int size = 10;
+    private static int size = 10;
 
     @Test
     public void updateTemplateNameTest() throws ESOperateException {

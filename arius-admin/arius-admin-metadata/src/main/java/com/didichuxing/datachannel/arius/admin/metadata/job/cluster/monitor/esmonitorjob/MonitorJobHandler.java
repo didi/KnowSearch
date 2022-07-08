@@ -83,12 +83,12 @@ public class MonitorJobHandler extends AbstractMetaDataJob {
     @Autowired
     private AriusConfigInfoService      ariusConfigInfoService;
 
-    private final MetricsRegister             metricsRegister = new MetricsRegister();
+    private MetricsRegister             metricsRegister = new MetricsRegister();
 
-    private final String  hostName     = HttpHostUtil.HOST_NAME;
+    private String  hostName     = HttpHostUtil.HOST_NAME;
     private Integer clusterTotal = -1;
 
-    private final String dataCentre    = EnvUtil.getDC().getCode();
+    private String dataCentre    = EnvUtil.getDC().getCode();
 
     private static final Long  MONITOR_TASK_CHECK_MINUTES_WITH_MILLS = EnvUtil.isOnline() ? (long) (1000 * 60 * 30) : (long) (1000 * 60 * 5);
 
@@ -125,7 +125,7 @@ public class MonitorJobHandler extends AbstractMetaDataJob {
      * 监控采集任务执行情况
      * key：clusterName
      */
-    private final Map<String, MonitorTaskInfo> monitorTaskInfoMap = Maps.newConcurrentMap();
+    private Map<String, MonitorTaskInfo> monitorTaskInfoMap = Maps.newConcurrentMap();
 
     @PostConstruct
     public void init(){

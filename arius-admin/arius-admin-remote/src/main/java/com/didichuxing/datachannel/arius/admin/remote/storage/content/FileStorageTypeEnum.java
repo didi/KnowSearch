@@ -13,9 +13,9 @@ public enum FileStorageTypeEnum {
 
                                  UNKNOWN(-1, "unknown");
 
-    private final Integer code;
+    private Integer code;
 
-    private final String  type;
+    private String  type;
 
     FileStorageTypeEnum(Integer code, String type) {
         this.code = code;

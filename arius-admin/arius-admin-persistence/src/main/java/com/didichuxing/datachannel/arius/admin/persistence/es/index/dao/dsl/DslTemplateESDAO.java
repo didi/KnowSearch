@@ -49,7 +49,7 @@ public class DslTemplateESDAO extends BaseESDAO {
     /**
      * type名称
      */
-    private final String typeName = "type";
+    private String typeName = "type";
     /**
      * 滚动查询大小
      */

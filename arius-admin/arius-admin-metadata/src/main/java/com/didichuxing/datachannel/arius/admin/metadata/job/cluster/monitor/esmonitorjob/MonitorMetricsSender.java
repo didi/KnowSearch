@@ -36,7 +36,7 @@ public class MonitorMetricsSender {
 
     private static final int    THRESHOLD = 100;
 
-    private final ThreadPoolExecutor esExecutor = new ThreadPoolExecutor(30, 60, 6000, TimeUnit.MILLISECONDS,
+    private ThreadPoolExecutor esExecutor = new ThreadPoolExecutor(30, 60, 6000, TimeUnit.MILLISECONDS,
             new LinkedBlockingDeque<>(4000),
             new NamedThreadFactory("Arius-Meta-MonitorMetricsSender-ES"),
             (r, e) -> LOGGER.warn("class=MonitorMetricsSender||msg=Arius-Meta-MonitorMetricsSender-ES Deque is blocked, taskCount:{}" + e.getTaskCount()));

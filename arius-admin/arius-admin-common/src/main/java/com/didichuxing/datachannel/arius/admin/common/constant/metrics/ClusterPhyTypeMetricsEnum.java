@@ -18,11 +18,11 @@ public enum ClusterPhyTypeMetricsEnum {
         this.collectCurveMetricsList = collectCurveMetricsList;
     }
 
-    private final int    code;
+    private int    code;
 
-    private final String type;
+    private String type;
 
-    private final boolean collectCurveMetricsList;
+    private boolean collectCurveMetricsList;
 
     public int getCode() {
         return code;

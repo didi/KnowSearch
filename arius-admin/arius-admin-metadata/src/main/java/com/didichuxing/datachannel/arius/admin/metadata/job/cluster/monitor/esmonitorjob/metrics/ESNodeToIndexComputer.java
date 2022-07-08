@@ -9,9 +9,9 @@ import com.didiglobal.logi.log.LogFactory;
 public class ESNodeToIndexComputer {
     private static final ILog LOGGER = LogFactory.getLog(ESNodeToIndexComputer.class);
 
-    private final MetricsRegister metricsRegister;
+    private MetricsRegister metricsRegister;
 
-    private final MetricsComputeType  computeType;
+    private MetricsComputeType  computeType;
 
     public ESNodeToIndexComputer(MetricsComputeType computeType, MetricsRegister metricsRegister) {
         this.computeType     = computeType;

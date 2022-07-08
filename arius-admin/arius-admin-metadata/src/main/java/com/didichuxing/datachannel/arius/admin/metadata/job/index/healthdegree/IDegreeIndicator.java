@@ -5,9 +5,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.BaseDegr
 import com.didichuxing.datachannel.arius.admin.metadata.job.index.healthdegree.degreeindicator.DegreeParam;
 
 public interface IDegreeIndicator {
-    IndicatorsType getType();
+    public IndicatorsType getType();
 
-    <T extends BaseDegree> T getRealTimePO();
+    public <T extends BaseDegree> T getRealTimePO();
 
-    <T extends BaseDegree> T exec(DegreeParam degreeParam);
+    public <T extends BaseDegree> T exec(DegreeParam degreeParam);
 }

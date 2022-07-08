@@ -14,11 +14,11 @@ public enum TemplateLabelPeriodEnum {
     THREE_MONTH("3", "三个月", ONE_DAY * 90);
 
 
-    private final String id;
+    private String id;
 
-    private final String period;
+    private String period;
 
-    private final Long intervalMillis;
+    private Long intervalMillis;
 
 
     TemplateLabelPeriodEnum(String id, String period, Long intervalMillis) {

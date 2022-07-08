@@ -23,8 +23,8 @@ public enum LevelEnum {
         this.desc = desc;
     }
 
-    private final Integer code;
-    private final String desc;
+    private Integer code;
+    private String desc;
 
     public Integer getCode() {
         return code;

@@ -101,17 +101,17 @@ public enum TemplateLabelEnum {
 
     public static final String LABEL_NAME = "labelName";
 
-    private final String id;
+    private String id;
 
-    private final String name;
+    private String name;
 
-    private final TemplateLabelSourceEnum source;
+    private TemplateLabelSourceEnum source;
 
-    private final TemplateLabelAttributeEnum attribute;
+    private TemplateLabelAttributeEnum attribute;
 
-    private final TemplateLabelLevelEnum level;
+    private TemplateLabelLevelEnum level;
 
-    private final TemplateLabelPeriodEnum period;
+    private TemplateLabelPeriodEnum period;
 
     TemplateLabelEnum(String id, String name, TemplateLabelSourceEnum source, TemplateLabelAttributeEnum attribute, TemplateLabelLevelEnum level, TemplateLabelPeriodEnum period) {
         this.id = id;

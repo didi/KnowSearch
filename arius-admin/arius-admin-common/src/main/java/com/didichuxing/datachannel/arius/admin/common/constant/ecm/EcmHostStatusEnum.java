@@ -43,7 +43,7 @@ public enum EcmHostStatusEnum {
 
                                UNKNOWN("unknown");
 
-    private final String value;
+    private String value;
 
     EcmHostStatusEnum(String value) {
         this.value = value;
@@ -69,8 +69,11 @@ public enum EcmHostStatusEnum {
         if (statusEnumSet == null || statusEnumSet.isEmpty()) {
             return false;
         }
-        return (statusEnumSet.contains(SUCCESS) && statusEnumSet.size() == 1)
-                || (statusEnumSet.contains(IGNORE) && statusEnumSet.size() == 1)
-                || (statusEnumSet.contains(IGNORE) && statusEnumSet.contains(SUCCESS) && statusEnumSet.size() == 2);
+        if ((statusEnumSet.contains(SUCCESS) && statusEnumSet.size() == 1)
+            || (statusEnumSet.contains(IGNORE) && statusEnumSet.size() == 1)
+            || (statusEnumSet.contains(IGNORE) && statusEnumSet.contains(SUCCESS) && statusEnumSet.size() == 2)) {
+            return true;
+        }
+        return false;
     }
 }

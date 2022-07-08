@@ -25,7 +25,7 @@ public class ESNodeStatsRequest extends BaseTimeoutRequest<ESNodeStatsRequest> {
     public static final String BREAKERS = "breakers";
     public static final String SCRIPT = "script";
 
-    private final Set<String> flags = new HashSet<>();
+    private Set<String> flags = new HashSet<>();
     private String[] nodesIds = null;
     private String level = null;
 

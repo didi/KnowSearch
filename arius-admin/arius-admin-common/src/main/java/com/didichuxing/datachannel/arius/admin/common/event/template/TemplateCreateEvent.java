@@ -9,7 +9,7 @@ import org.springframework.context.ApplicationEvent;
  */
 public class TemplateCreateEvent extends ApplicationEvent {
 
-    private final IndexTemplateDTO indexTemplateDTO;
+    private IndexTemplateDTO indexTemplateDTO;
 
     public TemplateCreateEvent(Object source, IndexTemplateDTO indexTemplateDTO) {
         super(source);

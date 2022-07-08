@@ -19,9 +19,9 @@ public enum AnalyzerEnum {
         this.desc = desc;
     }
 
-    private final Integer code;
+    private Integer code;
 
-    private final String  desc;
+    private String  desc;
 
     public Integer getCode() {
         return code;

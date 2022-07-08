@@ -8,9 +8,9 @@ import com.didiglobal.logi.log.LogFactory;
 public class SimpleComputer implements MetricsComputer {
     private static final ILog LOGGER = LogFactory.getLog(SimpleComputer.class);
 
-    private final MetricsRegister   metricsRegister;
+    private MetricsRegister   metricsRegister;
 
-    private final MetricsComputeType computeType;
+    private MetricsComputeType computeType;
 
     public SimpleComputer(MetricsComputeType computeType, MetricsRegister metricsRegister) {
         this.computeType     = computeType;

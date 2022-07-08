@@ -8,7 +8,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
  */
 public abstract class PhysicalTemplateEvent extends TemplateEvent {
 
-    private final IndexTemplateWithPhyTemplates logicWithPhysical;
+    private IndexTemplateWithPhyTemplates logicWithPhysical;
 
     protected PhysicalTemplateEvent(Object source, IndexTemplateWithPhyTemplates logicWithPhysical) {
         super(source);

@@ -9,9 +9,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
  */
 public class PhysicalTemplateModifyEvent extends PhysicalTemplateEvent {
 
-    private final IndexTemplatePhy oldTemplate;
+    private IndexTemplatePhy oldTemplate;
 
-    private final IndexTemplatePhy newTemplate;
+    private IndexTemplatePhy newTemplate;
 
     /**
      * Create a new ApplicationEvent.

@@ -61,11 +61,11 @@ public class ESUpdateClient {
     /**
      * 客户端个数
      */
-    private final int                           clientCount       = 3;
+    private int                           clientCount       = 3;
     /**
      *  更新es数据的客户端连接队列
      */
-    private final LinkedBlockingQueue<ESClient> updateClientPool  = new LinkedBlockingQueue<>(clientCount);
+    private LinkedBlockingQueue<ESClient> updateClientPool  = new LinkedBlockingQueue<>(clientCount);
     /**
      * 之前的http连接地址
      */

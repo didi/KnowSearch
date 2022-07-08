@@ -8,7 +8,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.Projec
  * @date 2020/09/19
  */
 public class ProjectLogicClusterAuthAddEvent extends ProjectAuthEvent {
-    private final ProjectClusterLogicAuth clusterAuth;
+    private ProjectClusterLogicAuth clusterAuth;
 
     public ProjectLogicClusterAuthAddEvent(Object source, ProjectClusterLogicAuth logicClusterAuth) {
         super(source);

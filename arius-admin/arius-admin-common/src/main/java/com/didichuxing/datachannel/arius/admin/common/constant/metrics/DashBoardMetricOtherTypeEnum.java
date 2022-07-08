@@ -17,8 +17,8 @@ public enum DashBoardMetricOtherTypeEnum {
         this.desc = desc;
     }
 
-    private final String type;
-    private final String desc;
+    private String type;
+    private String desc;
 
     public String getType() {
         return type;

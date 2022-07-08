@@ -43,7 +43,7 @@ public class Getter {
         if (inputStream != null) {
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             String line = null;
-            StringBuilder stringBuilder = new StringBuilder();
+            StringBuilder stringBuilder = new StringBuilder("");
             try {
                 while ((line = bufferedReader.readLine()) != null) {
                     stringBuilder.append(line);

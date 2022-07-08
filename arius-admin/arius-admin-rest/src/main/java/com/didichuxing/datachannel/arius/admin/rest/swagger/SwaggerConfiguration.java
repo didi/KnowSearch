@@ -38,7 +38,7 @@ public class SwaggerConfiguration {
 
     private static final ILog   LOGGER = LogFactory.getLog(SwaggerConfiguration.class);
 
-    private static final List<String> envs = Lists.newArrayList();
+    private static List<String> envs = Lists.newArrayList();
 
     @Value("${swagger.enable:false}")
     private boolean enable;

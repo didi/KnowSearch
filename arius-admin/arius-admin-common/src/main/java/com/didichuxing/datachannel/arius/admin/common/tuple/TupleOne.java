@@ -31,7 +31,10 @@ public class TupleOne<T1> implements Tuples, Comparable<TupleOne<T1>>, Serializa
     public static <T1> Comparator<TupleOne<T1>> comparator(Comparator<? super T1> t1Comp) {
         return (Comparator<TupleOne<T1>> & Serializable) (t1, t2) -> {
             final int check1 = t1Comp.compare(t1.V1, t2.V1);
-            return check1;
+            if (check1 != 0) {
+                return check1;
+            }
+            return 0;
         };
     }
     
@@ -41,7 +44,11 @@ public class TupleOne<T1> implements Tuples, Comparable<TupleOne<T1>>, Serializa
         final TupleOne<U1> t2 = (TupleOne<U1>) o2;
         
         final int check1 = t1.V1.compareTo(t2.V1);
-        return check1;
+        if (check1 != 0) {
+            return check1;
+        }
+        
+        return 0;
     }
     
     @Override

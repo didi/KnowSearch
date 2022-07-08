@@ -46,7 +46,7 @@ public class DashboardSingleClusterCollectorBroadcastTask implements Job {
     private static final FutureUtil<Void>             BATCH_COLLECTOR_FUTURE_UTIL     = FutureUtil
         .init("batchCollectorFutureUtil", 30, 30, 1000);
 
-    private final String                                    hostName                     = HttpHostUtil.HOST_NAME;
+    private String                                    hostName                     = HttpHostUtil.HOST_NAME;
 
     private final Map<String, BaseDashboardCollector> BASE_DASHBOARD_COLLECTOR_MAP = SpringTool
         .getBeansOfType(BaseDashboardCollector.class);

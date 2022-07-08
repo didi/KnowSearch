@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class HandleFactory extends BaseExtendFactory {
 
-    private final Map<String, BaseHandle> baseHandleMap = Maps.newConcurrentMap();
+    private Map<String, BaseHandle> baseHandleMap = Maps.newConcurrentMap();
 
     /**
      * 根据类名前缀获取接口BaseHandle的实现类实例
