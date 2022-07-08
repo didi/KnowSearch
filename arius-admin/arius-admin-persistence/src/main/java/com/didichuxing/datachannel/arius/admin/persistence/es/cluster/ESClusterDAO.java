@@ -258,6 +258,32 @@ public class ESClusterDAO extends BaseESDAO {
             return null;
         }
     }
+        /**
+     * 获取集群状态信息
+     *
+     * @param cluster
+     * @return
+     */
+    public ESClusterHealthResponse getClusterHealth(String cluster,Integer tryTimes) {
+        ESClient esClient = esOpClient.getESClient(cluster);
+        if (esClient == null) {
+            LOGGER.error("class=ESClusterDAO||method=getClusterHealth||clusterName={}||errMsg=esClient is null",
+                cluster);
+            return null;
+        }
+        ESClusterHealthResponse esClusterHealthResponse = null;
+        try {
+            ESClusterHealthRequest request = new ESClusterHealthRequest();
+             do {
+                   esClusterHealthResponse = esClient.admin().cluster().health(request)
+                         .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+             }while (tryTimes-- > 0 && null == esClusterHealthResponse);
+        } catch (Exception e) {
+            LOGGER.error("class=ESClusterDAO||method=getClusterHealth||clusterName={}||errMsg=query error. ", cluster,
+                e);
+        }
+        return esClusterHealthResponse;
+    }
 
     /**
      * 获取集群状态信息
