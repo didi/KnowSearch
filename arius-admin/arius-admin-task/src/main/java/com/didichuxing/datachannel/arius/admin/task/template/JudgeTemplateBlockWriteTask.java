@@ -4,6 +4,7 @@ import com.didichuxing.datachannel.arius.admin.biz.indices.IndicesManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
+import com.didichuxing.datachannel.arius.admin.common.util.SizeUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
 import com.didiglobal.logi.job.annotation.Task;
@@ -49,12 +50,12 @@ public class JudgeTemplateBlockWriteTask implements Job {
 
         // 对每个模版进行判断
         for (Integer templateId : templateIds) {
-            // 获取该模版配额磁盘大小，转为mb
+            // 获取该模版配额磁盘大小,单位为gb，转为byte
             IndexTemplate template = indexTemplateService.getLogicTemplateById(templateId);
-            Double templateDiskSize = template.getDiskSize() * 1024;
+            Long templateDiskSize = (long)(template.getDiskSize() * 1024 * 1024 * 1024);
 
             // 获取该模版所有索引/分区占用磁盘总和
-            Double templateIndicesDiskSum = getTemplateIndicesDiskSum(templateId);
+            Long templateIndicesDiskSum = getTemplateIndicesDiskSum(templateId);
 
             // 判断是否禁写
             if (templateIndicesDiskSum >= templateDiskSize){
@@ -72,15 +73,20 @@ public class JudgeTemplateBlockWriteTask implements Job {
      * @param templateId 模版id
      * @return 该模版所有索引/分区占用磁盘总和
      */
-    private Double getTemplateIndicesDiskSum(Integer templateId){
+    private Long getTemplateIndicesDiskSum(Integer templateId){
+        Long templateIndicesDiskSum = 0L;
+
         // 根据逻辑模版id获取对应的物理模版详情   （一个逻辑模版可能涉及多个物理模版）
         IndexTemplateWithPhyTemplates templateLogicWithPhysical = indexTemplateService
                 .getLogicTemplateWithPhysicalsById(templateId);
+        if(templateLogicWithPhysical == null){
+            return templateIndicesDiskSum;
+        }
 
         // 当前逻辑模版分区（索引）列表
         List<CatIndexResult> catIndexResults = Lists.newArrayList();
 
-        // 获取逻辑索引模板所在master集群的模板列表
+        // 获取逻辑索引模板对应物理模版中的master模版
         List<IndexTemplatePhy> physicalMasters = templateLogicWithPhysical.fetchMasterPhysicalTemplates();
         for (IndexTemplatePhy physicalMaster : physicalMasters) {
             try {
@@ -90,33 +96,11 @@ public class JudgeTemplateBlockWriteTask implements Job {
             }
         }
 
-        Double templateIndicesDiskSum = 0.0;
         // 统计逻辑模版所有索引的占用磁盘大小
         for (CatIndexResult catIndexResult : catIndexResults) {
-            // storeSize属性为string类型，因为单位不一样，有b、kb、mb、gb，统一转换为mb
             String storeSize = catIndexResult.getStoreSize();
-            StringBuilder sb = new StringBuilder();
-            int idx = storeSize.length() - 1;
-            while (idx > 0){
-                if (Character.isDigit(storeSize.charAt(idx))){
-                    break;
-                }
-                sb.append(storeSize.charAt(idx));
-                idx--;
-            }
-            Double num = Double.valueOf(storeSize.substring(0, idx + 1));
-            String unit = sb.reverse().toString();
-            Double size = 0.0;
-            if ("mb".equals(unit)){
-                size = num;
-            } else if ("gb".equals(unit)){
-                size = num * 1024;
-            } else if ("kb".equals(unit)){
-                size = num / 1024;
-            } else if ("b".equals(unit)){
-                size = num / 1024 / 1024;
-            }
-
+            // storeSize属性为string类型，把单位统一转换为byte
+            Long size = SizeUtil.getUnitSize(storeSize);
             templateIndicesDiskSum += size;
         }
 
