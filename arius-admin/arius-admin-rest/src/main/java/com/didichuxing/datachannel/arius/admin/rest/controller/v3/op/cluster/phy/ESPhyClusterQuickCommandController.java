@@ -3,6 +3,7 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.cluster.ph
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyQuickCommandManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyQuickCommandQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.*;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
@@ -48,11 +49,12 @@ public class ESPhyClusterQuickCommandController {
         return clusterPhyQuickCommandManager.indicesDistribution(cluster);
     }
 
+
     @PostMapping("/indices-distribution")
     @ResponseBody
     @ApiOperation(value = "indices分布")
     public PaginationResult<IndicesDistributionVO> indicesDistribution(HttpServletRequest request,
-                                                                       @RequestBody IndexQueryDTO condition) throws NotFindSubclassException {
+                                                                       @RequestBody ClusterPhyQuickCommandQueryDTO condition) throws NotFindSubclassException {
         return clusterPhyQuickCommandManager.indicesDistributionPage(condition, HttpRequestUtil.getProjectId(request));
     }
 

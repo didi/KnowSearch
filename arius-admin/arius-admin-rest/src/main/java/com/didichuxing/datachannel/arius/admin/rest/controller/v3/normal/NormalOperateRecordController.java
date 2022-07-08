@@ -79,7 +79,5 @@ public class NormalOperateRecordController {
     public Result<OperateRecordVO> get(@PathVariable Integer id) {
         return operateRecordManager.getOplogDetailByOplogId(id);
     }
-    
-   
 
 }

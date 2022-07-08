@@ -3,6 +3,7 @@ package com.didichuxing.datachannel.arius.admin.biz.page;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyQuickCommandQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.IndexCatCell;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.IndicesDistributionVO;
@@ -32,19 +33,14 @@ import java.util.Map;
  * @Version 1.0
  */
 @Component
-public class QuickCommandIndicesDistributionPageSearchHandle extends AbstractPageSearchHandle<IndexQueryDTO, IndicesDistributionVO> {
+public class QuickCommandIndicesDistributionPageSearchHandle extends AbstractPageSearchHandle<ClusterPhyQuickCommandQueryDTO, IndicesDistributionVO> {
     private static final String DEFAULT_SORT_TERM = "timestamp";
 
     @Autowired
     private ESIndexCatService   esIndexCatService;
 
-    @Autowired
-    private ESIndexService esIndexService;
-    private static final FutureUtil<Void> INDEX_BUILD_FUTURE = FutureUtil.init("INDEX_BUILD_FUTURE", 10, 10, 100);
-
-
     @Override
-    protected Result<Boolean> checkCondition(IndexQueryDTO condition, Integer projectId) {
+    protected Result<Boolean> checkCondition(ClusterPhyQuickCommandQueryDTO condition, Integer projectId) {
         if (StringUtils.isBlank(condition.getCluster())) {
             return Result.buildParamIllegal(String.format("集群名称不能为空"));
         }
@@ -52,7 +48,7 @@ public class QuickCommandIndicesDistributionPageSearchHandle extends AbstractPag
     }
 
     @Override
-    protected void initCondition(IndexQueryDTO condition, Integer projectId) {
+    protected void initCondition(ClusterPhyQuickCommandQueryDTO condition, Integer projectId) {
         if (null == condition.getPage()) {
             condition.setPage(1L);
         }
@@ -67,7 +63,7 @@ public class QuickCommandIndicesDistributionPageSearchHandle extends AbstractPag
     }
 
     @Override
-    protected PaginationResult<IndicesDistributionVO> buildPageData(IndexQueryDTO condition, Integer projectId) {
+    protected PaginationResult<IndicesDistributionVO> buildPageData(ClusterPhyQuickCommandQueryDTO condition, Integer projectId) {
         try {
             String queryCluster = condition.getCluster();
             // 使用超级项目访问时，queryProjectId为null
@@ -95,28 +91,5 @@ public class QuickCommandIndicesDistributionPageSearchHandle extends AbstractPag
                     condition.getCluster(), condition.getIndex(), e.getMessage(), e);
             return PaginationResult.buildFail("获取分页索引列表失败");
         }
-    }
-
-    /**
-     * 批量构建索引实时数据(包含block和aliases)
-     * @param catCellList    索引cat/index基本信息
-     * @return               List<IndexCatCell>
-     */
-    private List<IndexCatCell> batchFetchIndexAliasesAndBlockInfo(List<IndexCatCell> catCellList) {
-        List<IndexCatCell> finalIndexCatCellList = Lists.newCopyOnWriteArrayList(catCellList);
-        Map<String, List<IndexCatCell>> cluster2IndexCatCellListMap = ConvertUtil.list2MapOfList(finalIndexCatCellList,
-                IndexCatCell::getClusterPhy, indexCatCell -> indexCatCell);
-        if (MapUtils.isEmpty(cluster2IndexCatCellListMap)) {
-            return finalIndexCatCellList;
-        }
-
-        cluster2IndexCatCellListMap.forEach((cluster, indexCatCellList) -> {
-            INDEX_BUILD_FUTURE.runnableTask(() -> {
-                esIndexService.buildIndexAliasesAndBlockInfo(cluster, indexCatCellList);
-            });
-        });
-        INDEX_BUILD_FUTURE.waitExecute();
-
-        return finalIndexCatCellList;
     }
 }
