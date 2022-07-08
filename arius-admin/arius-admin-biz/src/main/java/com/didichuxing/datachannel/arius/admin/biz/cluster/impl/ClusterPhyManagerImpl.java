@@ -429,7 +429,6 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     @Transactional(rollbackFor = Exception.class)
     public Result<ClusterPhyVO> joinCluster(ClusterJoinDTO param, String operator) {
         try {
-            
             Result<Void> checkResult = checkClusterJoin(param, operator);
             if (checkResult.failed()) {
                 return Result.buildFail(checkResult.getMessage());
@@ -1268,16 +1267,55 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
         String esClientHttpAddressesStr = clusterRoleHostService.buildESClientHttpAddressesStr(roleClusterHosts);
 
-        //密码验证
+        // 密码验证
         Result<Void> passwdResult = checkClusterWithoutPasswd(param, esClientHttpAddressesStr);
         if (passwdResult.failed()) {
             return passwdResult;
         }
-        //同集群验证
+        // 同集群验证
         Result<Void> sameClusterResult = checkSameCluster(param.getPassword(), clusterRoleHostService.buildESAllRoleHttpAddressesList(roleClusterHosts));
         if (sameClusterResult.failed()) {
             return Result.buildParamIllegal("禁止同时接入超过两个不同集群节点");
         }
+
+        // 校验 是否接入同一集群
+        Result<Void> checkSameClientOrMasterClusterRet = checkSameESClientHttpAddresses(esClientHttpAddressesStr);
+        if (checkSameClientOrMasterClusterRet.failed()) {
+            return Result.buildFrom(checkSameClientOrMasterClusterRet);
+        }
+
+        return Result.buildSucc();
+    }
+
+    /**
+     * 检查ESClientHttpAddresses是否已经存在
+     * @param esClientHttpAddressesStr
+     * @return
+     */
+    private Result<Void> checkSameESClientHttpAddresses(String esClientHttpAddressesStr) {
+        List<ClusterPhy> clusterPhies = clusterPhyService.listAllClusters();
+        if (CollectionUtils.isEmpty(clusterPhies)) { return Result.buildSucc();}
+        
+        // 过滤出目前平台存在的ES集群链接ip:port
+        List<String> existClusterHttpAddress = Lists.newArrayList();
+        List<String> clusterHttpAddressList = clusterPhies.stream().map(ClusterPhy::getHttpAddress)
+                .collect(Collectors.toList());
+        for (String clusterHttpAddress : clusterHttpAddressList) {
+            for (String httpAddress : ListUtils.string2StrList(clusterHttpAddress)) {
+                if (!existClusterHttpAddress.contains(httpAddress.trim())) {
+                    existClusterHttpAddress.add(httpAddress.trim());
+                }
+            }
+        }
+
+        List<String> esClientHttpAddressesFromJoin = ListUtils.string2StrList(esClientHttpAddressesStr);
+        for (String esClientHttpAddressFromJoin : esClientHttpAddressesFromJoin) {
+            if (existClusterHttpAddress.contains(esClientHttpAddressFromJoin.trim())) {
+                return Result.buildFail(String.format("平台已经存在相同的集群，连接信息为[%s], 不允许重复接入",
+                        esClientHttpAddressFromJoin));
+            }
+        }
+        
         return Result.buildSucc();
     }
 
