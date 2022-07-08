@@ -101,7 +101,7 @@ public class TemplateLogicV3Controller {
             @ApiImplicitParam(name = "status", dataType = "Integer", value = "停启rollover能力（1 启用，0 禁用）", required = true)
     })
     public Result<Void> switchRolloverStatus(@PathVariable Integer templateLogicId, @PathVariable Integer status,
-                                               HttpServletRequest request) {
+                                             HttpServletRequest request) {
         String operator = HttpRequestUtil.getOperator(request);
         return templateLogicManager.switchRolloverStatus(templateLogicId, status, operator,
                 HttpRequestUtil.getProjectId(request));
@@ -112,7 +112,7 @@ public class TemplateLogicV3Controller {
     @ApiOperation(value = "更新索引Setting接口", notes = "")
     @ApiImplicitParams({@ApiImplicitParam(paramType = "header", dataType = "String", name = "X-ARIUS-APP-ID", value = "应用ID", required = true)})
     public Result<Void> customizeSetting(HttpServletRequest request,
-                                      @RequestBody TemplateSettingDTO settingDTO) throws AdminOperateException {
+                                         @RequestBody TemplateSettingDTO settingDTO) throws AdminOperateException {
         Result<Void> checkAuthResult = templateLogicManager.checkProjectAuthOnLogicTemplate(settingDTO.getLogicId(), HttpRequestUtil.getProjectId(request));
         if (checkAuthResult.failed()) {
             return checkAuthResult;
