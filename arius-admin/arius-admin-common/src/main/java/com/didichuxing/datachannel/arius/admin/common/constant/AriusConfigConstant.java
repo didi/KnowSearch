@@ -83,6 +83,43 @@ public class AriusConfigConstant {
     public static final String ARIUS_DASHBOARD_THRESHOLD_GROUP                         = "arius.dashboard.threshold.group";
 
 
+    /**
+     * 小Shard列表阈值定义
+     */
+    public static final String INDEX_SHARD_SMALL_THRESHOLD                             = "index.shard.small_threshold";
+
+    /**
+     * 大Shard列表阈值定义
+     */
+    public static final String NODE_SHARD_BIG_THRESHOLD                                = "node.shard.big_threshold";
+
+    /**
+     * 索引模板Segment内存大小列表阈值定义
+     */
+    public static final String INDEX_TEMPLATE_SEGMENT_MEMORY_SIZE_THRESHOLD            = "index.template.segment_memory_size_threshold";
+
+    /**
+     * 索引Segment内存大小列表阈值定义
+     */
+    public static final String INDEX_SEGMENT_MEMORY_SIZE_THRESHOLD                     = "index.segment.memory_size_threshold";
+
+    /**
+     * 索引模板Segment个数阈值定义
+     */
+    public static final String INDEX_TEMPLATE_SEGMENT_COUNT_THRESHOLD                  = "index.template.segment_count_threshold";
+
+    /**
+     * 索引Segment个数阈值定义
+     */
+    public static final String INDEX_SEGMENT_NUM_THRESHOLD                             = "index.segment.num_threshold";
+
+    /**
+     * 索引Mapping个数阈值定义
+     */
+    public static final String INDEX_MAPPING_NUM_THRESHOLD                             = "index.mapping.num_threshold";
+
+
+
 
 
     /**
