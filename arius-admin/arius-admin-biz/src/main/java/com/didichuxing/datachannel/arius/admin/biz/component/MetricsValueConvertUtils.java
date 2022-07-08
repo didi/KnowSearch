@@ -1,17 +1,16 @@
 package com.didichuxing.datachannel.arius.admin.biz.component;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.*;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.percentiles.ESPercentileMetricsVO;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyNodeMetricsEnum.getPercentMetricsType;
+
+import java.util.List;
+
+import org.apache.commons.collections4.CollectionUtils;
+
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.MetricsContent;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.MetricsContentCell;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.VariousLineChartMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.*;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.percentiles.ESPercentilesMetricsVO;
-import org.apache.commons.collections4.CollectionUtils;
-
-import java.util.List;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyNodeMetricsEnum.getPercentMetricsType;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.percentiles.ESPercentileMetricsVO;
 
 /**
  * Created by linyunan on 2021-09-07
@@ -226,7 +225,7 @@ public class MetricsValueConvertUtils {
 		}
 	}
 
-	public static void doOptimizeForPercentiles(List<? extends ESPercentilesMetricsVO> percentilesMetricsVOList) {
+	public static void doOptimizeForPercentiles(List<? extends ESPercentileMetricsVO> percentilesMetricsVOList) {
 		if (CollectionUtils.isEmpty(percentilesMetricsVOList)) {return;}
 
 		for (int i = 0; i < percentilesMetricsVOList.size(); i++) {
