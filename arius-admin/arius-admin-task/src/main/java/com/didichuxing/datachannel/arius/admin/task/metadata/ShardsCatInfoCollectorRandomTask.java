@@ -1,6 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.task.metadata;
 
 import com.didichuxing.datachannel.arius.admin.metadata.job.index.IndexCatInfoCollector;
+import com.didichuxing.datachannel.arius.admin.metadata.job.shard.ShardCatInfoCollector;
 import com.didiglobal.logi.job.annotation.Task;
 import com.didiglobal.logi.job.common.TaskResult;
 import com.didiglobal.logi.job.core.job.Job;
@@ -14,12 +15,12 @@ public class ShardsCatInfoCollectorRandomTask implements Job {
     private static final Logger LOGGER = LoggerFactory.getLogger(ShardsCatInfoCollectorRandomTask.class);
 
     @Autowired
-    private IndexCatInfoCollector indexCatInfoCollector;
+    private ShardCatInfoCollector shardCatInfoCollector;
 
     @Override
     public TaskResult execute(JobContext jobContext) throws Exception {
-        LOGGER.info("class=IndicesCatInfoCollectorRandomTask||method=execute||msg=start");
-        indexCatInfoCollector.handleJobTask("");
+        LOGGER.info("class=ShardsCatInfoCollectorRandomTask||method=execute||msg=start");
+        shardCatInfoCollector.handleJobTask("");
         return TaskResult.SUCCESS;
     }
 }

@@ -44,11 +44,16 @@ public class ESShardDAO extends BaseESDAO {
         return ecSegmentsOnIps;
     }
 
-    public String shardAssignment(String clusterName) {
-        ESClient client = esOpClient.getESClient(clusterName);
+    /**
+     * shard分配说明
+     * @param clusterPhyName 物理集群名称
+     * @return
+     */
+    public String shardAssignment(String clusterPhyName) {
+        ESClient client = esOpClient.getESClient(clusterPhyName);
         String result = null;
         if (Objects.isNull(client)) {
-            LOGGER.error("class=ESClusterDAO||method=shardAssignment||clusterName={}||errMsg=esClient is null", clusterName);
+            LOGGER.error("class=ESClusterDAO||method=shardAssignment||clusterName={}||errMsg=esClient is null", clusterPhyName);
             return null;
         }
         try {
@@ -59,7 +64,7 @@ public class ESShardDAO extends BaseESDAO {
                 result = directResponse.getResponseContent();
             }
         } catch (Exception e) {
-            LOGGER.warn("class=ESClusterDAO||method=shardAssignment||cluster={}||mg=get es segments fail", clusterName, e);
+            LOGGER.warn("class=ESClusterDAO||method=shardAssignment||cluster={}||mg=get es segments fail", clusterPhyName, e);
             return null;
         }
         return result;
