@@ -32,6 +32,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.*;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricListTypeEnum.*;
 
 /**
  * Created by linyunan on 3/14/22
@@ -192,28 +193,27 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
      * 根据系统配置筛选
      */
     private void  filterBySystemConfiguration(List<MetricList> listMetrics, String oneLevelType) throws AdminOperateException{
-        Map<String, Double> thresholdValues = new HashMap<>();
+        Map<DashBoardMetricListTypeEnum, Double> thresholdValues = new HashMap<>();
         //根据系统配置筛选,如果库里有对应的指标，就使用配置的指标
-        thresholdValues.put("indexShardSmallThreshold",ariusConfigInfoService.doubleSetting(ARIUS_DASHBOARD_THRESHOLD_GROUP,
+        thresholdValues.put(INDEX_SMALL_SHARD,ariusConfigInfoService.doubleSetting(ARIUS_DASHBOARD_THRESHOLD_GROUP,
                 INDEX_SHARD_SMALL_THRESHOLD, 1D));
-        thresholdValues.put("nodeShardBigThreshold",ariusConfigInfoService.doubleSetting(ARIUS_DASHBOARD_THRESHOLD_GROUP,
+        thresholdValues.put(NODE_SHARD_NUM,ariusConfigInfoService.doubleSetting(ARIUS_DASHBOARD_THRESHOLD_GROUP,
                 NODE_SHARD_BIG_THRESHOLD, 500D));
-        thresholdValues.put("indexTemplateSegmentMemorySizeThreshold",ariusConfigInfoService.doubleSetting(ARIUS_DASHBOARD_THRESHOLD_GROUP,
+        thresholdValues.put(TEMPLATE_SEGMENT_MEM_NUM,ariusConfigInfoService.doubleSetting(ARIUS_DASHBOARD_THRESHOLD_GROUP,
                 INDEX_TEMPLATE_SEGMENT_MEMORY_SIZE_THRESHOLD, 0D));
-        thresholdValues.put("indexSegmentMemorySizeThreshold",ariusConfigInfoService.doubleSetting(ARIUS_DASHBOARD_THRESHOLD_GROUP,
+        thresholdValues.put(INDEX_SEGMENT_MEM_SIZE,ariusConfigInfoService.doubleSetting(ARIUS_DASHBOARD_THRESHOLD_GROUP,
                 INDEX_SEGMENT_MEMORY_SIZE_THRESHOLD, 0D));
-        thresholdValues.put("indexTemplateSegmentCountThreshold",ariusConfigInfoService.doubleSetting(ARIUS_DASHBOARD_THRESHOLD_GROUP,
+        thresholdValues.put(TEMPLATE_SEGMENT_NUM,ariusConfigInfoService.doubleSetting(ARIUS_DASHBOARD_THRESHOLD_GROUP,
                 INDEX_TEMPLATE_SEGMENT_COUNT_THRESHOLD, 1000D));
-        thresholdValues.put("indexSegmentNumThreshold",ariusConfigInfoService.doubleSetting(ARIUS_DASHBOARD_THRESHOLD_GROUP,
+        thresholdValues.put(INDEX_SEGMENT_NUM,ariusConfigInfoService.doubleSetting(ARIUS_DASHBOARD_THRESHOLD_GROUP,
                 INDEX_SEGMENT_NUM_THRESHOLD, 100D));
-        thresholdValues.put("indexMappingNumThreshold",ariusConfigInfoService.doubleSetting(ARIUS_DASHBOARD_THRESHOLD_GROUP,
+        thresholdValues.put(INDEX_MAPPING_NUM,ariusConfigInfoService.doubleSetting(ARIUS_DASHBOARD_THRESHOLD_GROUP,
                 INDEX_MAPPING_NUM_THRESHOLD, 100D));
 
 
         for (MetricList metric : listMetrics) {
-            //配置的指标项：oneLevelType +"_"+ metric.getType() eg:index_segmentMemSize
-            String key = oneLevelType + "_" + metric.getType();
-            if (thresholdValues.get(metric.getType()) != null&&thresholdValues.containsKey(key)) {
+            DashBoardMetricListTypeEnum key = DashBoardMetricListTypeEnum.valueOfType(metric.getType());
+            if (thresholdValues.get(key) != null&&thresholdValues.containsKey(key)) {
                 Double configValue =  thresholdValues.get(metric.getType());
                 metric.setMetricListContents(metric.getMetricListContents().stream()
                         .filter(metricListContent -> metricListContent.getValue() > configValue).collect(Collectors.toList()));
