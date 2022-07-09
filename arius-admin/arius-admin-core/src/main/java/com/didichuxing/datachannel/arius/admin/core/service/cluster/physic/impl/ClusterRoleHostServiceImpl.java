@@ -50,6 +50,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -621,7 +622,8 @@ public class ClusterRoleHostServiceImpl implements ClusterRoleHostService {
         nodePO.setIp(Getter.withDefault(clusterNodeInfo.getIp(), ""));
         nodePO.setHostname(Getter.withDefault(clusterNodeInfo.getHost(), ""));
         nodePO.setNodeSet(Getter.withDefault(clusterNodeInfo.getName(), ""));
-        nodePO.setAttributes(ConvertUtil.map2String(clusterNodeInfo.getAttributes()));
+        Optional.ofNullable(clusterNodeInfo.getAttributes())
+                .map(ConvertUtil::map2String).ifPresent(nodePO::setAttributes);
 
         HttpInfo httpInfo = clusterNodeInfo.getHttpInfo();
         if (null != httpInfo && null != httpInfo.getPublishAddress()) {

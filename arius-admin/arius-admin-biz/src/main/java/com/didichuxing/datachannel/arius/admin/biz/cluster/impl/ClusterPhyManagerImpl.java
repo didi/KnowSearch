@@ -484,6 +484,12 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             // 这里必须显示事务回滚
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return Result.buildFail("接入失败, 请重新尝试接入集群,多次重试不成功,请联系管理员");
+        } catch (NullPointerException  e){
+            LOGGER.error("class=ClusterPhyManagerImpl||method=clusterJoin||clusterPhy={}||join cluster operation null point exception errMsg={}",
+                param.getCluster(), e);
+            // 这里必须显示事务回滚
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return Result.buildFail("接入集群发生致命错误,请联系管理员");
         } catch (Exception e) {
             LOGGER.error("class=ClusterPhyManagerImpl||method=clusterJoin||clusterPhy={}||errMsg={}",
                     param.getCluster(), e);
