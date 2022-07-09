@@ -469,13 +469,13 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             } else {
                 SpringTool.publish(new ClusterPhyEvent(param.getCluster(), operator));
                 postProcessingForClusterJoin(param);
+                operateRecordService.save(new OperateRecord.Builder().project(
+                                projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
+                        .bizId(saveClusterResult.getData().getId()).content(saveClusterResult.getData().getCluster())
+                        .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_JOIN)
+                        .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).userOperation(operator).build());
             }
-            operateRecordService.save(new OperateRecord.Builder().project(
-                            projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
-                    .bizId(saveClusterResult.getData().getId()).content(saveClusterResult.getData().getCluster())
-                    .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_JOIN)
-                    .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).userOperation(operator)
-                    .build());
+           
 
             return saveClusterResult;
         } catch (AdminOperateException | ElasticsearchTimeoutException e) {
@@ -483,13 +483,13 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
                 param.getCluster(), e);
             // 这里必须显示事务回滚
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-            return Result.buildFail("接入失败, 请重新尝试接入集群,");
+            return Result.buildFail("接入失败, 请重新尝试接入集群,多次重试不成功,请联系管理员");
         } catch (Exception e) {
             LOGGER.error("class=ClusterPhyManagerImpl||method=clusterJoin||clusterPhy={}||errMsg={}",
                     param.getCluster(), e);
               // 这里必须显示事务回滚
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-            return Result.buildFail("操作失败, 请重新尝试接入集群,多次重试不成功,请联系管理员");
+            return Result.buildFail("操作失败,请联系管理员");
         }
         
     }
