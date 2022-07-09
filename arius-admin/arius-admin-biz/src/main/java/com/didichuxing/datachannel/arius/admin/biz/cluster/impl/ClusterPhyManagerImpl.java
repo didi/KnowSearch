@@ -114,6 +114,7 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.ElasticsearchTimeoutException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -429,6 +430,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     private final Consumer<ESClusterRoleHostDTO> roleClusterHostsTrimHostnameAndPort = esClusterRoleHostDTO -> {
         esClusterRoleHostDTO.setCluster(StringUtils.trim(esClusterRoleHostDTO.getCluster()));
         esClusterRoleHostDTO.setHostname(StringUtils.trim(esClusterRoleHostDTO.getHostname()));
+        esClusterRoleHostDTO.setIp(StringUtils.trim(esClusterRoleHostDTO.getIp()));
         esClusterRoleHostDTO.setPort(StringUtils.trim(esClusterRoleHostDTO.getPort()));
         
     };
@@ -436,28 +438,29 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Result<ClusterPhyVO> joinCluster(ClusterJoinDTO param, String operator, Integer projectId) {
-        try {
-            if (param.getProjectId()==null){
-                param.setProjectId(projectId);
+        if (param.getProjectId() == null) {
+            param.setProjectId(projectId);
+        }
+         //这里其实是需要一个内置trim 用来保证传输进行的roleClusterHosts是正确的
+        param.getRoleClusterHosts().forEach(roleClusterHostsTrimHostnameAndPort);
+        Result<Void> checkResult = checkClusterJoin(param, operator);
+        if (checkResult.failed()) {
+            return Result.buildFail(checkResult.getMessage());
+        }
+        String esClientHttpAddressesStr = clusterRoleHostService.buildESClientHttpAddressesStr(
+                param.getRoleClusterHosts());
+        for (ESClusterRoleHostDTO roleClusterHost : param.getRoleClusterHosts()) {
+            if (roleClusterHost.getRegionId() == null) {
+                roleClusterHost.setRegionId(-1);
             }
-            Result<Void> checkResult = checkClusterJoin(param, operator);
-            if (checkResult.failed()) {
-                return Result.buildFail(checkResult.getMessage());
-            }
-            //这里其实是需要一个内置trim 用来保证传输进行的roleClusterHosts是正确的
-            param.getRoleClusterHosts().forEach(roleClusterHostsTrimHostnameAndPort);
-            String esClientHttpAddressesStr = clusterRoleHostService
-                .buildESClientHttpAddressesStr(param.getRoleClusterHosts());
-            for (ESClusterRoleHostDTO roleClusterHost : param.getRoleClusterHosts()) {
-                if (roleClusterHost.getRegionId()==null){
-                    roleClusterHost.setRegionId(-1);
-                }
-            }
-            Result<Void> initResult = initClusterJoin(param,  esClientHttpAddressesStr);
-            if (initResult.failed()) {
-                return Result.buildFail(initResult.getMessage());
-            }
+        }
+        Result<Void> initResult = initClusterJoin(param, esClientHttpAddressesStr);
+        if (initResult.failed()) {
+            return Result.buildFail(initResult.getMessage());
+        }
 
+        try {
+          
             // 1.保存物理集群信息(集群、角色、节点)
             Result<ClusterPhyVO> saveClusterResult = saveClusterPhy(param, operator);
           
@@ -475,21 +478,22 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
                     .build());
 
             return saveClusterResult;
-        } catch (Exception e) {
-            LOGGER.error("class=ClusterPhyManagerImpl||method=clusterJoin||clusterPhy={}||errMsg={}",
+        } catch (AdminOperateException | ElasticsearchTimeoutException e) {
+            LOGGER.error("class=ClusterPhyManagerImpl||method=clusterJoin||clusterPhy={}||es operation errMsg={}",
                 param.getCluster(), e);
             // 这里必须显示事务回滚
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return Result.buildFail("接入失败, 请重新尝试接入集群,");
+        } catch (Exception e) {
+            LOGGER.error("class=ClusterPhyManagerImpl||method=clusterJoin||clusterPhy={}||errMsg={}",
+                    param.getCluster(), e);
+              // 这里必须显示事务回滚
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return Result.buildFail("操作失败, 请重新尝试接入集群,多次重试不成功,请联系管理员");
         }
+        
     }
     
-    private void firstTryConnectionThenAllInformation(ClusterJoinDTO param,String tryConnectionESClientHttpAddressesStr) {
-        String tryConnectionESPassword=param.getPassword();
-        //1.尝试获取版本信息
-        //2.尝试获取集群健康
-
-    }
     
     @Override
     @Transactional(rollbackFor = Exception.class)
