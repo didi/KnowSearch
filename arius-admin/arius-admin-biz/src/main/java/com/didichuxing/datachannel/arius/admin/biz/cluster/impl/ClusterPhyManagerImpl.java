@@ -106,6 +106,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -424,6 +425,13 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
         return Result.buildSucc(clusters);
     }
+    
+    private final Consumer<ESClusterRoleHostDTO> roleClusterHostsTrimHostnameAndPort = esClusterRoleHostDTO -> {
+        esClusterRoleHostDTO.setCluster(StringUtils.trim(esClusterRoleHostDTO.getCluster()));
+        esClusterRoleHostDTO.setHostname(StringUtils.trim(esClusterRoleHostDTO.getHostname()));
+        esClusterRoleHostDTO.setPort(StringUtils.trim(esClusterRoleHostDTO.getPort()));
+        
+    };
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -436,6 +444,8 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             if (checkResult.failed()) {
                 return Result.buildFail(checkResult.getMessage());
             }
+            //这里其实是需要一个内置trim 用来保证传输进行的roleClusterHosts是正确的
+            param.getRoleClusterHosts().forEach(roleClusterHostsTrimHostnameAndPort);
             String esClientHttpAddressesStr = clusterRoleHostService
                 .buildESClientHttpAddressesStr(param.getRoleClusterHosts());
             for (ESClusterRoleHostDTO roleClusterHost : param.getRoleClusterHosts()) {
@@ -443,18 +453,19 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
                     roleClusterHost.setRegionId(-1);
                 }
             }
-            Result<Void> initResult = initClusterJoin(param, operator, esClientHttpAddressesStr);
+            Result<Void> initResult = initClusterJoin(param,  esClientHttpAddressesStr);
             if (initResult.failed()) {
                 return Result.buildFail(initResult.getMessage());
             }
 
             // 1.保存物理集群信息(集群、角色、节点)
             Result<ClusterPhyVO> saveClusterResult = saveClusterPhy(param, operator);
+          
             if (saveClusterResult.failed()) {
                 throw new AdminOperateException(saveClusterResult.getMessage());
             } else {
                 SpringTool.publish(new ClusterPhyEvent(param.getCluster(), operator));
-                postProcessingForClusterJoin(param, operator);
+                postProcessingForClusterJoin(param);
             }
             operateRecordService.save(new OperateRecord.Builder().project(
                             projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
@@ -466,13 +477,20 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             return saveClusterResult;
         } catch (Exception e) {
             LOGGER.error("class=ClusterPhyManagerImpl||method=clusterJoin||clusterPhy={}||errMsg={}",
-                param.getCluster(), e.getMessage());
+                param.getCluster(), e);
             // 这里必须显示事务回滚
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-            return Result.buildFail("操作失败, 请联系管理员");
+            return Result.buildFail("操作失败, 请重新尝试接入集群,多次重试不成功,请联系管理员");
         }
     }
+    
+    private void firstTryConnectionThenAllInformation(ClusterJoinDTO param,String tryConnectionESClientHttpAddressesStr) {
+        String tryConnectionESPassword=param.getPassword();
+        //1.尝试获取版本信息
+        //2.尝试获取集群健康
 
+    }
+    
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Result<Void> deleteClusterJoin(Integer clusterId, String operator, Integer projectId) {
@@ -1326,7 +1344,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         return Result.buildSucc();
     }
 
-    private Result<Void> initClusterJoin(ClusterJoinDTO param, String operator, String esClientHttpAddressesStr) {
+    private Result<Void> initClusterJoin(ClusterJoinDTO param,  String esClientHttpAddressesStr) {
         //获取设置es版本
         Result<Void> esVersionSetResult = initESVersionForClusterJoin(param, esClientHttpAddressesStr);
         if (esVersionSetResult.failed()) {
@@ -1522,7 +1540,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         return triple;
     }
 
-    private void postProcessingForClusterJoin(ClusterJoinDTO param, String operator) throws AdminTaskException {
+    private void postProcessingForClusterJoin(ClusterJoinDTO param) throws AdminTaskException {
         esOpClient.connect(param.getCluster());
 
         if (ESClusterImportRuleEnum.AUTO_IMPORT == ESClusterImportRuleEnum.valueOf(param.getImportRule())) {
@@ -1533,17 +1551,8 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             //2.直接拉es 更新节点信息，去除因为定时任务触发导致的更新延时
             clusterRoleHostService.collectClusterNodeSettings(param.getCluster());
         }
-
         updateClusterHealth(param.getCluster(), AriusUser.SYSTEM.getDesc());
-        //集群接入
-        operateRecordService.save(
-                new OperateRecord.Builder()
-                        .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_JOIN)
-                        .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                        .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
-                        .userOperation(operator)
-                        .content( param.getCluster())
-                        .build());
+      
     }
 
     private void refreshClusterDistInfo() {

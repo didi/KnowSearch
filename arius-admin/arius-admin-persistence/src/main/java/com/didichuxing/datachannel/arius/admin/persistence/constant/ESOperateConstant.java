@@ -19,6 +19,7 @@ public class ESOperateConstant {
      * 操作es超时时间 单位s
      */
     public static final Integer ES_OPERATE_TIMEOUT                  = 30;
+    public static final Integer ES_OPERATE_MIN_TIMEOUT                  = 10;
 
     /**
      * region 配置

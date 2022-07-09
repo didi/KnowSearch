@@ -1,20 +1,17 @@
 package com.didichuxing.datachannel.arius.admin.rest.swagger;
 
+import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
+import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.List;
-
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.bind.annotation.RequestMethod;
-
-import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
-import com.google.common.collect.Lists;
-
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.ParameterBuilder;
 import springfox.documentation.builders.PathSelectors;
@@ -39,10 +36,12 @@ public class SwaggerConfiguration {
     private static final ILog   LOGGER = LogFactory.getLog(SwaggerConfiguration.class);
 
     private static List<String> envs = Lists.newArrayList();
+    private final static   String HEADER="header";
 
     @Value("${swagger.enable:false}")
     private boolean enable;
-
+    @Value(value = "${admin.port.web}")
+    private int               port;
     @Bean
     public Docket createRestApi() {
         String envStr = String.join(",", Lists.newArrayList(envs));
@@ -59,7 +58,9 @@ public class SwaggerConfiguration {
 
         return new Docket(DocumentationType.SWAGGER_2).apiInfo(apiInfo()).select()
             .apis(RequestHandlerSelectors.basePackage("com.didichuxing.datachannel.arius.admin"))
-            .paths(PathSelectors.any()).build().globalOperationParameters(parameters())
+            .paths(PathSelectors.any()).build()
+                .globalOperationParameters(parameters())
+                .useDefaultResponseMessages(true)
             .globalResponseMessage(RequestMethod.GET, responseMessageList)
             .globalResponseMessage(RequestMethod.POST, responseMessageList)
             .globalResponseMessage(RequestMethod.PUT, responseMessageList)
@@ -69,11 +70,11 @@ public class SwaggerConfiguration {
     private List<Parameter> parameters() {
         
         final Parameter user = new ParameterBuilder().name(HttpRequestUtil.USER).description("操作人")
-                .modelRef(new ModelRef("string")).parameterType("header").required(false).defaultValue("").build();
+                .modelRef(new ModelRef("string")).parameterType(HEADER).required(false).defaultValue("").build();
         final Parameter userId = new ParameterBuilder().name(HttpRequestUtil.USER_ID).description("操作人id")
-                .modelRef(new ModelRef("integer")).parameterType("header").required(false).build();
+                .modelRef(new ModelRef("integer")).parameterType(HEADER).required(false).build();
         final Parameter projectId = new ParameterBuilder().name(HttpRequestUtil.PROJECT_ID)
-                .description("项目id:在项目创建后，各个接口都需要带此header").modelRef(new ModelRef("integer")).parameterType("header")
+                .description("项目id:在项目创建后，各个接口都需要带此header").modelRef(new ModelRef("integer")).parameterType(HEADER)
                 .required(false).build();
         
         return Lists.newArrayList(user, userId, projectId);
