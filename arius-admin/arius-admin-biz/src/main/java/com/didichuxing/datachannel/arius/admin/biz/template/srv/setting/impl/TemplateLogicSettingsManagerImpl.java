@@ -17,6 +17,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateSettingDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateSettingDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord.template.TemplateSettingOperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhySetting;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithMapping;
@@ -32,13 +33,9 @@ import com.didichuxing.datachannel.arius.admin.common.mapping.AriusTypeProperty;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
-import com.didiglobal.logi.elasticsearch.client.response.setting.template.TemplateConfig;
-import com.didiglobal.logi.elasticsearch.client.utils.JsonUtils;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -225,13 +222,8 @@ public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrvImpl implem
        
     
         //获取变更前的setting
-        TemplateConfig templateConfig = Optional.ofNullable(esTemplateService.syncGetTemplateConfig(
-                templateLogicWithPhysical.getMasterPhyTemplate().getCluster(),
-                templateLogicWithPhysical.getMasterPhyTemplate().getName())).orElse(new TemplateConfig());
-        JSONObject beforeSetting= MapUtils.isNotEmpty(templateConfig.getSetttings())?
-                JsonUtils.reFlat(templateConfig.getSetttings()):new JSONObject();
-        //变更后的setting
-        JSONObject afterSetting=settings.getSettings();
+        final Result<IndexTemplatePhySetting> beforeSetting = getSettings(logicId);
+       
         
         for (IndexTemplatePhy templatePhysical : templatePhysicals) {
             try {
@@ -246,11 +238,14 @@ public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrvImpl implem
         } catch (Exception e) {
             LOGGER.error("class=TemplateLogicServiceImpl||method=updateSettings||logicId:{}", logicId, e);
         }
+        final Result<IndexTemplatePhySetting> afterSetting = getSettings(logicId);
         operateRecordService.save(
                 new OperateRecord.Builder().project(projectService.getProjectBriefByProjectId(projectId))
                         .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).userOperation(operator)
                         .operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_EDIT_SETTING)
-                        .content(ProjectUtils.getChangeByAfterAndBeforeJson(beforeSetting, afterSetting))
+                        .content(
+                                JSON.toJSONString(
+                                        new TemplateSettingOperateRecord(beforeSetting.getData(), afterSetting.getData())))
                         .bizId(logicId)
                         .build());
 
