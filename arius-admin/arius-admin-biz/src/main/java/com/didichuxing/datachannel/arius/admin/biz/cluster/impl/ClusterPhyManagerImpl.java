@@ -573,11 +573,15 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         final Result<Map<ClusterDynamicConfigsTypeEnum, Map<String, Object>>> beforeChangeConfigs =
                 getPhyClusterDynamicConfigs(
                 param.getClusterName());
+        String changeKey = param.getKey();
+        Object beforeValue = beforeChangeConfigs.getData().values().stream()
+                .filter(clusterDynamicConfigsTypeEnumMapValues -> clusterDynamicConfigsTypeEnumMapValues.containsKey(
+                        changeKey))
+                .map(clusterDynamicConfigsTypeEnumMapValues -> clusterDynamicConfigsTypeEnumMapValues.get(changeKey))
+                .findFirst().orElse("");
+        Object changeValue = param.getValue();
         final ClusterPhy clusterByName = clusterPhyService.getClusterByName(param.getClusterName());
         final Result<Boolean> result = clusterPhyService.updatePhyClusterDynamicConfig(param);
-        final Result<Map<ClusterDynamicConfigsTypeEnum, Map<String, Object>>> afterChangeConfigs =
-                getPhyClusterDynamicConfigs(
-                param.getClusterName());
         if (result.success()){
             
             operateRecordService.save(new OperateRecord.Builder()
@@ -585,7 +589,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
                             .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
                             .userOperation(operator)
                             .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_DYNAMIC_CONF_CHANGE).content(
-                            ProjectUtils.getChangeByAfterAndBeforeJson(afterChangeConfigs,beforeChangeConfigs)
+                            String.format("%s:%s->%s",changeKey, beforeValue, changeValue)
         
                     )
                             .bizId(clusterByName.getId())
