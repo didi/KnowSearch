@@ -78,7 +78,7 @@ public class DslTemplateManagerImpl implements DslTemplateManager {
                 projectId, dslTemplateMd5);
         if (Boolean.TRUE.equals(templateStatus.v3)) {
             OperateRecord operateRecord = new OperateRecord.Builder().content(
-                            "变更前:" + templateStatus.v1 + ";变更后:" + templateStatus.v2)
+                            "变更前:" + templateStatus.v1 + ";变更后:" + templateStatus.v3)
                     .operationTypeEnum(OperateTypeEnum.QUERY_TEMPLATE_DISABLE)
                     .project(projectService.getProjectBriefByProjectId(projectId)).userOperation(operator)
                     .bizId(dslTemplateMd5).buildDefaultManualTrigger();
