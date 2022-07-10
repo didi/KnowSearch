@@ -160,9 +160,9 @@ public class IndicesController extends BaseIndicesController{
         Result<Boolean> checkClusterValidResult = checkClusterValid(params.stream().map(IndicesBlockSettingDTO::getCluster)
                 .distinct().collect(Collectors.toList()));
         if (checkClusterValidResult.failed()) { return Result.buildFrom(checkClusterValidResult);}
-    
-        return Result.buildFrom(indicesManager.editIndexBlockSetting(params, HttpRequestUtil.getProjectId(request),
-                HttpRequestUtil.getOperator(request)));
+        Result<Void> result = indicesManager.editIndexBlockSetting(params, HttpRequestUtil.getProjectId(request),
+                HttpRequestUtil.getOperator(request));
+        return Result.build(result.success()?Boolean.TRUE:Boolean.FALSE);
     }
     
     @GetMapping("/{cluster}/{indexName}/alias")

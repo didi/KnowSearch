@@ -61,7 +61,7 @@ public class DslTemplateManagerImpl implements DslTemplateManager {
                                 String.format("queryLimit %f->%f", entry.getValue(), queryLimit))
                         .operationTypeEnum(OperateTypeEnum.QUERY_TEMPLATE_DSL_CURRENT_LIMIT_ADJUSTMENT)
                         .project(projectService.getProjectBriefByProjectId(projectId)).userOperation(operator)
-                        .bizId(entry.getKey()).build();
+                        .bizId(entry.getKey()).buildDefaultManualTrigger();
                 operateRecordService.save(operateRecord);
             }
             
