@@ -73,7 +73,6 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.Clust
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
-import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterNodeService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectClusterLogicAuthService;
@@ -144,8 +143,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     @Autowired
     private ProjectService                projectService;
 
-    @Autowired
-    private ESClusterNodeService            eSClusterNodeService;
+   
 
     @Autowired
     private ESGatewayClient               esGatewayClient;

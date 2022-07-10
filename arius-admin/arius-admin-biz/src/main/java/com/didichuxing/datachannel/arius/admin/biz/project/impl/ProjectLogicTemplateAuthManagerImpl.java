@@ -128,15 +128,17 @@ public class ProjectLogicTemplateAuthManagerImpl implements ProjectLogicTemplate
      */
     @Override
     public Result<Void> deleteRedundancyTemplateAuths(boolean delete) {
-      return Result.build(projectLogicTemplateAuthService.deleteRedundancyTemplateAuths(true));
+        return Result.build(projectLogicTemplateAuthService.deleteRedundancyTemplateAuths(true));
     }
     
     /**
-     * @param projectId
-     * @return
+     * 得到app模板身份验证
+     *
+     * @param projectId 项目id
+     * @return {@link Result}<{@link List}<{@link ProjectTemplateAuthVO}>>
      */
     @Override
-    public Result<List<ProjectTemplateAuthVO>> getAppTemplateAuths(Integer projectId) {
+    public Result<List<ProjectTemplateAuthVO>> getProjectTemplateAuths(Integer projectId) {
         List<ProjectTemplateAuthVO> templateAuths = ConvertUtil.list2List(
                 projectLogicTemplateAuthService.getProjectActiveTemplateRWAndRAuths(projectId),
                 ProjectTemplateAuthVO.class);

@@ -68,10 +68,10 @@ public interface ClusterRegionManager {
      * @return                    Result<List<ClusterRegionVO>>
      */
     Result<List<ClusterRegionVO>> listNotEmptyClusterRegionByClusterName(String clusterName);
-	
-	Result<Void> deletePhyClusterRegion(Long regionId, String operator, Integer projectId);
     
-     Result<List<ESClusterRoleHostVO>> listClusterRoleHostByRegionId(Long regionId);
+    Result<Void> deletePhyClusterRegion(Long regionId, String operator, Integer projectId);
+    
+    Result<List<ESClusterRoleHostVO>> listClusterRoleHostByRegionId(Long regionId);
     
     Result<List<IndexTemplatePhysicalVO>> listByRegionId(Integer regionId);
 }

@@ -269,7 +269,7 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
         ClusterRegion region = clusterRegionService.getRegionById(regionId);
         Result<Void> voidResult = clusterRegionService.deletePhyClusterRegion(regionId, operator);
         if (voidResult.success()) {
-           
+        
             //CLUSTER_REGION, DELETE, regionId, "", operator
             operateRecordService.save(
                     new OperateRecord.Builder().operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_REGION_CHANGE)
@@ -277,8 +277,7 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
                             .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID)).content(
                                     String.format("cluster:%s,region删除：%s,删除的regionId：%s", region.getPhyClusterName(),
                                             region.getName(), regionId)).userOperation(operator)
-                            .bizId(clusterPhyService.getClusterByName(region.getPhyClusterName()))
-                            .build());
+                            .bizId(clusterPhyService.getClusterByName(region.getPhyClusterName())).build());
         }
     
         return voidResult;

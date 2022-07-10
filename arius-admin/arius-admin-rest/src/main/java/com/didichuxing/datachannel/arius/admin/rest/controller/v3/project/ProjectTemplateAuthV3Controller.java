@@ -41,7 +41,7 @@ public class ProjectTemplateAuthV3Controller {
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "projectId", value = "应用ID", required = true) })
     public Result<List<ProjectTemplateAuthVO>> getAppTemplateAuths(@PathVariable("projectId") Integer projectId) {
        
-        return projectLogicTemplateAuthManager.getAppTemplateAuths(projectId);
+        return projectLogicTemplateAuthManager.getProjectTemplateAuths(projectId);
     }
 
     @PostMapping("")
