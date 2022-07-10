@@ -155,14 +155,13 @@ public class IndicesController extends BaseIndicesController{
     @PutMapping("/block")
     @ResponseBody
     @ApiOperation(value = "批量编辑索引阻塞设置")
-    public Result<Boolean> editIndexBlockSetting(@RequestBody List<IndicesBlockSettingDTO> params,
+    public Result<Void> editIndexBlockSetting(@RequestBody List<IndicesBlockSettingDTO> params,
                                                  HttpServletRequest request) {
         Result<Boolean> checkClusterValidResult = checkClusterValid(params.stream().map(IndicesBlockSettingDTO::getCluster)
                 .distinct().collect(Collectors.toList()));
         if (checkClusterValidResult.failed()) { return Result.buildFrom(checkClusterValidResult);}
-        Result<Void> result = indicesManager.editIndexBlockSetting(params, HttpRequestUtil.getProjectId(request),
+        return indicesManager.editIndexBlockSetting(params, HttpRequestUtil.getProjectId(request),
                 HttpRequestUtil.getOperator(request));
-        return Result.build(result.success()?Boolean.TRUE:Boolean.FALSE);
     }
     
     @GetMapping("/{cluster}/{indexName}/alias")
