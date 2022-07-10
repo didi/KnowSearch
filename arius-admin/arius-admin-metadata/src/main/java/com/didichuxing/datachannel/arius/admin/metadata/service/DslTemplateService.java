@@ -55,7 +55,7 @@ public class DslTemplateService {
         // getEnable() 如果为 null，表示当前是启用状态，反转模版启用状态
         if(dslTemplatePO.getEnable() == null) {
             dslTemplatePO.setEnable(false);
-            
+           statusTuple3=statusTuple3.update1(false);
         } else {
             dslTemplatePO.setEnable(!dslTemplatePO.getEnable());
         }

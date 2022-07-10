@@ -81,7 +81,7 @@ public class DslTemplateManagerImpl implements DslTemplateManager {
                             "变更前:" + templateStatus.v1 + ";变更后:" + templateStatus.v2)
                     .operationTypeEnum(OperateTypeEnum.QUERY_TEMPLATE_DISABLE)
                     .project(projectService.getProjectBriefByProjectId(projectId)).userOperation(operator)
-                    .bizId(dslTemplateMd5).build();
+                    .bizId(dslTemplateMd5).buildDefaultManualTrigger();
             operateRecordService.save(operateRecord);
         }
         return Result.build(templateStatus.v3);
