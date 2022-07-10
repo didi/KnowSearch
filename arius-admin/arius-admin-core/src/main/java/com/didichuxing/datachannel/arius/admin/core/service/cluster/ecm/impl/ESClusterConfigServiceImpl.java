@@ -193,7 +193,6 @@ public class ESClusterConfigServiceImpl implements ESClusterConfigService {
                               .userOperation(operator)
                               .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
                       .build());
-            //operateRecordService.save(ES_CLUSTER_CONFIG, OperationEnum.DELETE, configId, "", operator);
             return Result.buildSucc();
         }
 

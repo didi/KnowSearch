@@ -78,11 +78,10 @@ public interface IndexTemplateService {
      *
      * @param logicTemplateId 模板id
      * @param operator        操作人
-     * @param projectId
      * @return result
      * @throws AdminOperateException
      */
-    Result<Void> delTemplate(Integer logicTemplateId, String operator, Integer projectId) throws AdminOperateException;
+    Result<Void> delTemplate(Integer logicTemplateId, String operator) throws AdminOperateException;
 
     /**
      * 校验模板参数是否合法
@@ -360,7 +359,7 @@ public interface IndexTemplateService {
      * @param operator  操作人
      * @return
      */
-    Result updateBlockReadState(Integer logicId, Boolean blockRead, String operator);
+    Result<Void> updateBlockReadState(Integer logicId, Boolean blockRead, String operator);
 
     /**
      * 修改禁写状态
@@ -369,9 +368,9 @@ public interface IndexTemplateService {
      * @param operator  操作人
      * @return
      */
-    Result updateBlockWriteState(Integer logicId, Boolean blockWrite, String operator);
+    Result<Void> updateBlockWriteState(Integer logicId, Boolean blockWrite, String operator);
 
-    Result updateTemplateWriteRateLimit(ConsoleTemplateRateLimitDTO consoleTemplateRateLimitDTO, String operator, Integer projectId) throws ESOperateException;
+    Result updateTemplateWriteRateLimit(ConsoleTemplateRateLimitDTO consoleTemplateRateLimitDTO) throws ESOperateException;
 
     Result<Void> preCheckTemplateName(String templateName);
 
@@ -404,4 +403,6 @@ public interface IndexTemplateService {
     boolean update(IndexTemplatePO editTemplate);
     
     int batchChangeHotDay(Integer days);
+    
+    String getNameByTemplateLogicId(Integer logicTemplateId);
 }

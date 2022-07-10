@@ -232,4 +232,10 @@
         where is_active = 1
         and package_id = #{packageId}
     </select>
+    <select id="getIdByName" resultType="java.lang.Integer">
+        select id
+        from es_cluster_phy_info
+        where cluster = #{clusterName}
+          and is_active = 1;
+    </select>
 </mapper>

@@ -79,7 +79,7 @@ public class DslTemplateManagerImpl implements DslTemplateManager {
         if (Boolean.TRUE.equals(templateStatus.v3)) {
             OperateRecord operateRecord = new OperateRecord.Builder().content(
                             "变更前:" + templateStatus.v1 + ";变更后:" + templateStatus.v2)
-                    .operationTypeEnum(OperateTypeEnum.QUERY_TEMPLATE_DSL_CURRENT_LIMIT_ADJUSTMENT)
+                    .operationTypeEnum(OperateTypeEnum.QUERY_TEMPLATE_DISABLE)
                     .project(projectService.getProjectBriefByProjectId(projectId)).userOperation(operator)
                     .bizId(dslTemplateMd5).build();
             operateRecordService.save(operateRecord);

@@ -1,9 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.core.service.cluster.region.impl;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.DELETE;
-
 import com.alibaba.fastjson.JSON;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
@@ -14,16 +11,12 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.Cluster
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterRegionPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
-import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.event.region.RegionUnbindEvent;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
@@ -153,15 +146,11 @@ public class ClusterRegionServiceImpl implements ClusterRegionService {
     }
 
     @Override
-    public Result<Void> deletePhyClusterRegion(Long regionId, String operator, Integer projectId) {
+    public Result<Void> deletePhyClusterRegion(Long regionId, String operator) {
         if (regionId == null) { return Result.buildFail("regionId不能为null");}
 
         ClusterRegion region = getRegionById(regionId);
         if (region == null) { return Result.buildFail(String.format(REGION_NOT_EXIST, regionId));}
-        final Result<Void> result = ProjectUtils.checkProjectCorrectly(i -> i, projectId, projectId);
-        if (result.failed()){
-            return result;
-        }
         // 已经绑定过的region不能删除
         if (isRegionBound(region)) {
             // 获取逻辑集群的信息,一个region可能被多个逻辑集群绑定
@@ -187,20 +176,8 @@ public class ClusterRegionServiceImpl implements ClusterRegionService {
             return Result.buildFail(String.format("当前region中存在节点[%s]，需要先进行编辑移除", ListUtils.strList2String(nodeNameList)));
         }
 
-        boolean succeed = clusterRegionDAO.delete(regionId) == 1;
-        if (succeed) {
-            //CLUSTER_REGION, DELETE, regionId, "", operator
-            operateRecordService.save(new OperateRecord.Builder()
-                            .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_REGION_CHANGE)
-                            .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                            .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
-                            .content(DELETE.getDesc())
-                            .userOperation(operator)
-                            .bizId(Math.toIntExact(regionId))
-                    .build());
-        }
-
-        return Result.build(succeed);
+       
+        return Result.build(clusterRegionDAO.delete(regionId) == 1);
     }
 
     @Override
@@ -248,16 +225,7 @@ public class ClusterRegionServiceImpl implements ClusterRegionService {
             // 绑定
             updateRegion(regionId, constructNewLogicIds(logicClusterId,region.getLogicClusterIds()));
             final ClusterRegionPO bindRegion = clusterRegionDAO.getById(regionId);
-            // 发送消息，添加容量规划area（幂等地），添加容量规划容量信息
-            operateRecordService.save(new OperateRecord.Builder()
-                            .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_REGION_CHANGE)
-                            .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                            .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
-                            .content(String.format("region绑定,%s",bindRegion.getName()))
-                            .bizId(Math.toIntExact(logicClusterId))
-                            .userOperation(operator)
-                    
-                    .build());
+          
             return Result.buildSucc();
         } catch (Exception e) {
             LOGGER.error(
@@ -279,7 +247,7 @@ public class ClusterRegionServiceImpl implements ClusterRegionService {
     }
 
     @Override
-    public Result<Void> unbindRegion(Long regionId, Long logicClusterId, String operator, Integer projectId) {
+    public Result<Void> unbindRegion(Long regionId, Long logicClusterId, String operator) {
         try {
             if (regionId == null) {
                 return Result.buildFail("未指定regionId");
@@ -289,11 +257,7 @@ public class ClusterRegionServiceImpl implements ClusterRegionService {
             if (region == null) {
                 return Result.buildFail(String.format(REGION_NOT_EXIST, regionId));
             }
-            //校验操作合法性
-            final Result<Void> result = ProjectUtils.checkProjectCorrectly(i -> i, projectId, projectId);
-            if (result.failed()){
-                return result;
-            }
+           
     
             // 判断在绑定状态
             if (!isRegionBound(region)) {
@@ -316,16 +280,7 @@ public class ClusterRegionServiceImpl implements ClusterRegionService {
             SpringTool.publish(new RegionUnbindEvent(this, region, operator));
 
 
-            // 操作记录
-            operateRecordService.save(new OperateRecord.Builder()
-                            .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_REGION_CHANGE)
-                            .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                            .content(String.format("region解绑:%s", region.getName()))
-                            .project(projectService.getProjectBriefByProjectId(projectId))
-                            .userOperation(operator)
-                            .bizId(Math.toIntExact(logicClusterId))
-                            .build());
-
+          
             return Result.buildSucc();
         } catch (Exception e) {
             LOGGER.error("class=RegionRackServiceImpl||method=unbindRegion||regionId={}||operator={}"

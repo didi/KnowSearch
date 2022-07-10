@@ -5,6 +5,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.result.Res
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterRegionManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.TemplateSrvManager;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRegionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterWithRegionDTO;
@@ -12,9 +13,15 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.Cluste
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionWithNodeInfoVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.IndexTemplatePhysicalVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
@@ -26,8 +33,10 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.Clust
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Sets;
 import java.util.ArrayList;
 import java.util.List;
@@ -64,6 +73,10 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
     
     @Autowired
     private OperateRecordService operateRecordService;
+    @Autowired
+    private ProjectService          projectService;
+     @Autowired
+    private IndexTemplatePhyService physicalService;
 
     /**
      * 构建regionVO
@@ -179,7 +192,28 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
 
     @Override
     public Result<Void> unbindRegion(Long regionId, Long logicClusterId, String operator, Integer projectId) {
-        return clusterRegionService.unbindRegion(regionId, logicClusterId, operator,projectId);
+         //校验操作合法性
+            final Result<Void> result = ProjectUtils.checkProjectCorrectly(i -> i, projectId, projectId);
+            if (result.failed()){
+                return result;
+            }
+        ClusterRegion region = clusterRegionService.getRegionById(regionId);
+        Result<Void> voidResult = clusterRegionService.unbindRegion(regionId, logicClusterId, operator);
+        if (voidResult.success()){
+              // 操作记录
+            operateRecordService.save(new OperateRecord.Builder()
+                            .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_REGION_CHANGE)
+                            .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                            .content(String.format("物理集群：%s,region解绑:%s;解绑逻辑群id:%s", region.getPhyClusterName(),
+                                    region.getName(),logicClusterId))
+                            .project(projectService.getProjectBriefByProjectId(projectId))
+                            .userOperation(operator)
+                            .bizId(clusterPhyService.getClusterByName(region.getPhyClusterName()))
+                            .build());
+        }
+     
+
+        return voidResult;
     }
 
    
@@ -219,7 +253,67 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
 
         return Result.buildSucc(validClusterRegionVOList);
     }
-
+    
+    /**
+     * @param regionId 
+     * @param operator
+     * @param projectId
+     * @return
+     */
+    @Override
+    public Result<Void> deletePhyClusterRegion(Long regionId, String operator, Integer projectId) {
+        final Result<Void> result = ProjectUtils.checkProjectCorrectly(i -> i, projectId, projectId);
+        if (result.failed()) {
+            return result;
+        }
+        ClusterRegion region = clusterRegionService.getRegionById(regionId);
+        Result<Void> voidResult = clusterRegionService.deletePhyClusterRegion(regionId, operator);
+        if (voidResult.success()) {
+           
+            //CLUSTER_REGION, DELETE, regionId, "", operator
+            operateRecordService.save(
+                    new OperateRecord.Builder().operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_REGION_CHANGE)
+                            .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                            .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID)).content(
+                                    String.format("cluster:%s,region删除：%s,删除的regionId：%s", region.getPhyClusterName(),
+                                            region.getName(), regionId)).userOperation(operator)
+                            .bizId(clusterPhyService.getClusterByName(region.getPhyClusterName()))
+                            .build());
+        }
+    
+        return voidResult;
+    }
+    
+    /**
+     * @param regionId
+     * @return
+     */
+    @Override
+    public Result<List<ESClusterRoleHostVO>> listClusterRoleHostByRegionId(Long regionId) {
+        ClusterRegion region = clusterRegionService.getRegionById(regionId);
+        if (region == null) {
+            return Result.buildFail("region不存在");
+        }
+        Result<List<ClusterRoleHost>> ret = clusterRoleHostService.listByRegionId(region.getId().intValue());
+        if (ret.failed()) {
+            return Result.buildFail("获取host失败");
+        
+        }
+        return Result.buildSucc(ConvertUtil.list2List(ret.getData(), ESClusterRoleHostVO.class));
+    }
+    
+    /**
+     * @param regionId
+     * @return
+     */
+    @Override
+    public Result<List<IndexTemplatePhysicalVO>> listByRegionId(Integer regionId) {
+        Result<List<IndexTemplatePhy>> ret = physicalService.listByRegionId(regionId);
+        if (ret.failed()) {
+            return Result.buildFrom(ret);
+        }
+        return Result.buildSucc(ConvertUtil.list2List(ret.getData(), IndexTemplatePhysicalVO.class));
+    }
     /***************************************** private method ****************************************************/
     /**
      * 对于逻辑集群绑定的物理集群的版本进行一致性校验

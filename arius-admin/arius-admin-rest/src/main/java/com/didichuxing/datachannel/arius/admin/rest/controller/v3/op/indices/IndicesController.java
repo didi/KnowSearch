@@ -2,22 +2,6 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.indices;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
-import javax.servlet.http.HttpServletRequest;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.didichuxing.datachannel.arius.admin.biz.indices.IndicesManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -33,10 +17,22 @@ import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateExcepti
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import com.google.common.collect.Lists;
-
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiModelProperty;
 import io.swagger.annotations.ApiOperation;
+import java.util.List;
+import java.util.stream.Collectors;
+import javax.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * @author lyn
@@ -159,7 +155,7 @@ public class IndicesController extends BaseIndicesController{
     @PutMapping("/block")
     @ResponseBody
     @ApiOperation(value = "批量编辑索引阻塞设置")
-    public Result<Boolean> editIndexBlockSetting(@RequestBody List<IndicesBlockSettingDTO> params,
+    public Result<Void> editIndexBlockSetting(@RequestBody List<IndicesBlockSettingDTO> params,
                                                  HttpServletRequest request) {
         Result<Boolean> checkClusterValidResult = checkClusterValid(params.stream().map(IndicesBlockSettingDTO::getCluster)
                 .distinct().collect(Collectors.toList()));
@@ -183,7 +179,7 @@ public class IndicesController extends BaseIndicesController{
         Result<Boolean> checkClusterValidResult = checkClusterValid(Lists.newArrayList(param.getCluster()));
         if (checkClusterValidResult.failed()) { return Result.buildFrom(checkClusterValidResult);}
 
-        return indicesManager.addIndexAliases(param, HttpRequestUtil.getProjectId(request));
+        return indicesManager.addIndexAliases(param, HttpRequestUtil.getProjectId(request),HttpRequestUtil.getOperator(request));
     }
 
     @DeleteMapping("/alias")
@@ -193,7 +189,7 @@ public class IndicesController extends BaseIndicesController{
         Result<Boolean> checkClusterValidResult = checkClusterValid(Lists.newArrayList(param.getCluster()));
         if (checkClusterValidResult.failed()) { return Result.buildFrom(checkClusterValidResult);}
 
-        return indicesManager.deleteIndexAliases(param, HttpRequestUtil.getProjectId(request));
+        return indicesManager.deleteIndexAliases(param, HttpRequestUtil.getProjectId(request),HttpRequestUtil.getOperator(request));
     }
 
     @GetMapping("/{cluster}/{indexName}/shard")

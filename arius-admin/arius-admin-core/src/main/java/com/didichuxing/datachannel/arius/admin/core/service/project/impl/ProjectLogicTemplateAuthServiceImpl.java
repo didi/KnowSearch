@@ -37,7 +37,6 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
@@ -152,13 +151,12 @@ public class ProjectLogicTemplateAuthServiceImpl implements ProjectLogicTemplate
             }
 
             // 新增
-            return addTemplateAuth(new ProjectTemplateAuthDTO(null, projectId, logicTemplateId, auth.getCode(), responsible),
-                operator);
+            return addTemplateAuth(new ProjectTemplateAuthDTO(null, projectId, logicTemplateId, auth.getCode(), responsible));
         } else {
             // 有权限记录
             // 期望删除权限
             if (auth == ProjectTemplateAuthEnum.NO_PERMISSION) {
-                return deleteTemplateAuth(oldAuthPO.getId(), operator);
+                return deleteTemplateAuth(oldAuthPO.getId());
             }
 
             // 期望更新权限信息
@@ -213,12 +211,12 @@ public class ProjectLogicTemplateAuthServiceImpl implements ProjectLogicTemplate
 
     /**
      * 增加权限
-     * @param authDTO  权限信息
-     * @param operator 操作人
+     *
+     * @param authDTO 权限信息
      * @return result
      */
     @Override
-    public Result<Void> addTemplateAuth(ProjectTemplateAuthDTO authDTO, String operator) {
+    public Result<Void> addTemplateAuth(ProjectTemplateAuthDTO authDTO) {
 
         Result<Void> checkResult = validateTemplateAuth(authDTO, OperationEnum.ADD);
         if (checkResult.failed()) {
@@ -227,7 +225,7 @@ public class ProjectLogicTemplateAuthServiceImpl implements ProjectLogicTemplate
             return checkResult;
         }
 
-        return addTemplateAuthWithoutCheck(authDTO, operator);
+        return addTemplateAuthWithoutCheck(authDTO);
     }
 
     /**
@@ -249,12 +247,12 @@ public class ProjectLogicTemplateAuthServiceImpl implements ProjectLogicTemplate
 
     /**
      * 删除模板权限
-     * @param authId   主键
-     * @param operator 操作人
+     *
+     * @param authId 主键
      * @return result
      */
     @Override
-    public Result<Void> deleteTemplateAuth(Long authId, String operator) {
+    public Result<Void> deleteTemplateAuth(Long authId) {
 
         ProjectTemplateAuthPO oldAuthPO = templateAuthDAO.getById(authId);
         if (oldAuthPO == null) {
@@ -267,22 +265,15 @@ public class ProjectLogicTemplateAuthServiceImpl implements ProjectLogicTemplate
             SpringTool.publish(
                 new ProjectTemplateAuthDeleteEvent(this, ConvertUtil.obj2Obj(oldAuthPO,
                         ProjectTemplateAuth.class)));
-         operateRecordService.save(new OperateRecord.Builder()
-                         .operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_OFFLINE)
-                         .bizId(oldAuthPO.getId())
-                         .project(projectService.getProjectBriefByProjectId(oldAuthPO.getProjectId()))
-                         .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                 
-                 .build());
-            //operateRecordService.save(ModuleEnum.LOGIC_TEMPLATE_PERMISSIONS, OperationEnum.DELETE, oldAuthPO.getId(),
-            //    StringUtils.EMPTY, operator);
+      
+          
         }
 
         return Result.build(succeed);
     }
 
     @Override
-    public Result<Void> deleteTemplateAuthByTemplateId(Integer templateId, String operator) {
+    public Result<Void> deleteTemplateAuthByTemplateId(Integer templateId) {
         boolean succeed = false;
         try {
             List<ProjectTemplateAuthPO> oldAppTemplateAuthPO = templateAuthDAO.getByTemplateId(templateId);
@@ -292,25 +283,9 @@ public class ProjectLogicTemplateAuthServiceImpl implements ProjectLogicTemplate
 
             List<Integer> oldTemplateIds = oldAppTemplateAuthPO.stream().map(ProjectTemplateAuthPO::getTemplateId).collect(Collectors.toList());
             succeed = oldTemplateIds.size() == templateAuthDAO.batchDeleteByTemplateIds(oldTemplateIds);
-            if (succeed) {
-                oldAppTemplateAuthPO.stream().map(ProjectTemplateAuthPO::getProjectId
-                ).map(projectService::getProjectBriefByProjectId)
-                        .filter(Objects::nonNull)
-                        .map(ProjectBriefVO::getProjectName)
-                        .forEach(projectName->{
-                            operateRecordService.save(new OperateRecord.Builder()
-                                 .projectName(projectName)
-                                            .operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE_CLEAN)
-                                 .bizId(templateId)
-                                 .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                                 .userOperation(operator)
-                         .build());
-                        });
-                 
-                //operateRecordService.save(ModuleEnum.LOGIC_TEMPLATE_PERMISSIONS, OperationEnum.DELETE, templateId,
-                //        StringUtils.EMPTY, operator);
-            } else {
-                LOGGER.error("class=AppLogicTemplateAuthServiceImpl||method=deleteTemplateAuthByTemplateId||delete infos failed");
+            if (Boolean.FALSE.equals(succeed)) {
+                LOGGER.error(
+                        "class=AppLogicTemplateAuthServiceImpl||method=deleteTemplateAuthByTemplateId||delete infos failed");
             }
         } catch (Exception e) {
             LOGGER.error("class=AppLogicTemplateAuthServiceImpl||method=deleteTemplateAuthByTemplateId||errMsg={}",
@@ -319,7 +294,16 @@ public class ProjectLogicTemplateAuthServiceImpl implements ProjectLogicTemplate
 
         return Result.build(succeed);
     }
-
+    
+    /**
+     * @param authId
+     * @return
+     */
+    @Override
+    public Integer getProjectIdById(Long authId) {
+        return templateAuthDAO.getProjectIdById(authId);
+    }
+    
     /**
      * 获取所有APP的权限
      * @return map, key为projectId，value为app拥有的权限点集合
@@ -385,8 +369,7 @@ public class ProjectLogicTemplateAuthServiceImpl implements ProjectLogicTemplate
                             .project(projectService.getProjectBriefByProjectId(authDTO.getProjectId()))
                     
                     .build());
-            //operateRecordService.save(ModuleEnum.LOGIC_TEMPLATE_PERMISSIONS, OperationEnum.EDIT, oldAuthPO.getId(),
-            //    JSON.toJSONString(newAuthPO), operator);
+          
         }
 
         return Result.build(succeed);
@@ -395,31 +378,17 @@ public class ProjectLogicTemplateAuthServiceImpl implements ProjectLogicTemplate
     /**
      * 增加权限  不做参数校验
      * @param authDTO  权限信息
-     * @param operator 操作人
      * @return result
      */
-    private Result<Void> addTemplateAuthWithoutCheck(ProjectTemplateAuthDTO authDTO, String operator) {
+    private Result<Void> addTemplateAuthWithoutCheck(ProjectTemplateAuthDTO authDTO) {
         ProjectTemplateAuthPO authPO = ConvertUtil.obj2Obj(authDTO, ProjectTemplateAuthPO.class);
-
-        boolean succeed = 1 == templateAuthDAO.insert(authPO);
+        boolean succeed =  1 == templateAuthDAO.insert(authPO);
         if (succeed) {
             // 发送消息
             SpringTool.publish(
-                new ProjectTemplateAuthAddEvent(this, ConvertUtil.obj2Obj(authPO, ProjectTemplateAuth.class)));
-        
-             operateRecordService.save(new OperateRecord.Builder()
-                            .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                            .userOperation(operator)
-                            .operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_INFO_MODIFY)
-                            .bizId(authPO.getId())
-                             .content(JSON.toJSONString(authPO))
-                            .project(projectService.getProjectBriefByProjectId(authDTO.getProjectId()))
-                    
-                    .build());
-            // 记录操作
-            //operateRecordService.save(ModuleEnum.LOGIC_TEMPLATE_PERMISSIONS, OperationEnum.ADD, authPO.getId(),
-            //    JSON.toJSONString(authPO), operator);
+                    new ProjectTemplateAuthAddEvent(this, ConvertUtil.obj2Obj(authPO, ProjectTemplateAuth.class)));
         }
+       
 
         return Result.build(succeed);
     }

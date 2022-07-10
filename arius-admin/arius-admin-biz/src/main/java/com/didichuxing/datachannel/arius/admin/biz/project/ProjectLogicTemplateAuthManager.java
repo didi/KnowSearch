@@ -4,7 +4,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectTemplateAuthDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ProjectTemplateAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
-
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.ProjectTemplateAuthVO;
 import java.util.List;
 
 /**
@@ -25,4 +25,12 @@ public interface ProjectLogicTemplateAuthManager {
      * 更新模板权限
      */
     Result<Void> updateTemplateAuth(ProjectTemplateAuthDTO authDTO, String operator);
+	
+	Result<Void> addTemplateAuth(ProjectTemplateAuthDTO authDTO, String operator, Integer projectId);
+	
+	Result<Void> deleteTemplateAuth(Long authId, String operator, Integer projectId);
+	
+	Result<Void> deleteRedundancyTemplateAuths(boolean  delete);
+	
+	Result<List<ProjectTemplateAuthVO>> getAppTemplateAuths(Integer projectId);
 }

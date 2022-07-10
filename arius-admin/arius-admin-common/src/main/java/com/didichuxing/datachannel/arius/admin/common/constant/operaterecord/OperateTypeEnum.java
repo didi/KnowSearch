@@ -40,7 +40,7 @@ public enum OperateTypeEnum {
      * 物理集群： 信息修改
      */
     PHYSICAL_CLUSTER_INFO_MODIFY(NewModuleEnum.PHYSICAL_CLUSTER, "物理集群信息修改",6),
-     PHYSICAL_CLUSTER_START(NewModuleEnum.PHYSICAL_CLUSTER, "启动",57),
+     //PHYSICAL_CLUSTER_START(NewModuleEnum.PHYSICAL_CLUSTER, "启动",57),
     /**
      * 物理集群:升级
      */

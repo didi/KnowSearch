@@ -471,7 +471,8 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
                 postProcessingForClusterJoin(param);
                 operateRecordService.save(new OperateRecord.Builder().project(
                                 projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
-                        .bizId(saveClusterResult.getData().getId()).content(saveClusterResult.getData().getCluster())
+                        .bizId(saveClusterResult.getData().getId()).content(String.format("集群接入：%s",
+                                saveClusterResult.getData().getCluster()))
                         .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_JOIN)
                         .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).userOperation(operator).build());
             }
@@ -520,7 +521,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             return Result.buildFail(e.getMessage());
         }
         operateRecordService.save(new OperateRecord.Builder()
-                        .content(String.format("删除接入集群：%d",clusterId))
+                        .content(String.format("删除接入集群：%s",clusterPhy.getCluster()))
                         .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_JOIN)
                         .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
                         .project(projectService.getProjectBriefByProjectId(projectId))
@@ -752,7 +753,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
         SpringTool.publish(new ClusterPhyEvent(clusterPhy.getCluster(), operator));
         operateRecordService.save(new OperateRecord.Builder()
-                        .content(clusterPhy.getCluster())
+                        .content(String.format("删除集群：%s",clusterPhy.getCluster()))
                         .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
                         .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_OFFLINE)
                         .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
@@ -773,7 +774,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
                             .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_NEW)
                             .project(projectService.getProjectBriefByProjectId(projectId))
                             .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                            .content(param.getCluster())
+                            .content(String.format("新建集群：%s",param.getCluster()))
                             .userOperation(operator)
                             .build()
                     
@@ -791,11 +792,11 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     
             if (!StringUtils.equals(oldClusterPhy.getDesc(), param.getDesc())) {
                 operateRecordService.save(new Builder().userOperation(operator)
-                        .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_UPGRADE)
+                        .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_INFO_MODIFY)
                         .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
                         .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
                         .bizId(param.getId()).content(String.format("%s,修改集群描述:%s-->%s", oldClusterPhy.getCluster(),
-                                oldClusterPhy.getCluster(), param.getCluster()))
+                                oldClusterPhy.getDesc(), param.getDesc()))
                 
                         .build());
             }
@@ -1005,7 +1006,6 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
                         .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_GATEWAY_CHANGE)
                         .content(String.format("%s,绑定gateway集群gateway_cluster:%s",oldCluster.getCluster(),param.getGatewayUrl()))
                 .build());
-        //todo 这里需要记录操作记录hsl
         return Result.buildSucc(ConvertUtil.obj2Obj(clusterPhy, ClusterPhyVO.class));
     }
     @Override
@@ -1420,8 +1420,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
         List<Long> associatedRegionIds = clusterPhyContext.getAssociatedRegionIds();
         for (Long associatedRegionId : associatedRegionIds) {
-            Result<Void> unbindRegionResult = clusterRegionService.unbindRegion(associatedRegionId, null, operator,
-                    projectId);
+            Result<Void> unbindRegionResult = clusterRegionService.unbindRegion(associatedRegionId, null, operator);
             if (unbindRegionResult.failed()) {
                 throw new AdminOperateException(String.format("解绑region(%s)失败", associatedRegionId));
             } else {
@@ -1431,11 +1430,11 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
                         .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_REGION_CHANGE)
                         .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
                         .project(projectService.getProjectBriefByProjectId(projectId)).userOperation(operator)
-                        .bizId(clusterPhy.getCluster()).build());
+                        .bizId(clusterPhy.getId()).build());
             }
 
             Result<Void> deletePhyClusterRegionResult = clusterRegionService.deletePhyClusterRegion(associatedRegionId,
-                operator, projectId);
+                operator);
             if (deletePhyClusterRegionResult.failed()) {
                 throw new AdminOperateException(String.format("删除region(%s)失败", associatedRegionId));
             } else {
@@ -1446,7 +1445,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
                         .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_REGION_CHANGE)
                         .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
                         .project(projectService.getProjectBriefByProjectId(projectId)).userOperation(operator)
-                        .bizId(clusterPhy.getCluster()).build());
+                        .bizId(clusterPhy.getId()).build());
             }
         }
        

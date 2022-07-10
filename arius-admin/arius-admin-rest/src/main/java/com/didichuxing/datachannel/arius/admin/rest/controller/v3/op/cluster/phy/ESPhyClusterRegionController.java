@@ -4,17 +4,10 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion
 
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterRegionManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionWithNodeInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.IndexTemplatePhysicalVO;
-import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -36,16 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping({ V3 + "/cluster/phy/region" })
 @Api(tags = "ES物理集群region接口(REST)")
 public class ESPhyClusterRegionController {
-
-    @Autowired
-    private ClusterRegionService    clusterRegionService;
-
-    @Autowired
-    private ClusterRoleHostService  clusterRoleHostService;
-
-    @Autowired
-    private IndexTemplatePhyService physicalService;
-
+    
     @Autowired
     private ClusterRegionManager    clusterRegionManager;
 
@@ -61,7 +45,7 @@ public class ESPhyClusterRegionController {
     @ResponseBody
     @ApiOperation(value = "删除物理集群region接口", notes = "")
     public Result<Void> removeRegion(HttpServletRequest request, @PathVariable("regionId") Long regionId) {
-        return clusterRegionService.deletePhyClusterRegion(regionId, HttpRequestUtil.getOperator(request),
+        return clusterRegionManager.deletePhyClusterRegion(regionId, HttpRequestUtil.getOperator(request),
                 HttpRequestUtil.getProjectId(request));
     }
 
@@ -84,16 +68,8 @@ public class ESPhyClusterRegionController {
     @ApiOperation(value = "获取region下的节点列表", notes = "")
     @Deprecated
     public Result<List<ESClusterRoleHostVO>> getRegionNodes(@PathVariable Long regionId) {
-
-        ClusterRegion region = clusterRegionService.getRegionById(regionId);
-        if (region == null) {
-            return Result.buildFail("region不存在");
-        }
-        Result<List<ClusterRoleHost>> ret = clusterRoleHostService.listByRegionId(region.getId().intValue());
-        if (ret.success()) {
-            return Result.buildSucc(ConvertUtil.list2List(ret.getData(), ESClusterRoleHostVO.class));
-        }
-        return Result.buildFail();
+        
+        return clusterRegionManager.listClusterRoleHostByRegionId(regionId);
 
     }
 
@@ -102,8 +78,6 @@ public class ESPhyClusterRegionController {
     @ApiOperation(value = "获取Region物理模板列表接口")
     @Deprecated
     public Result<List<IndexTemplatePhysicalVO>> getRegionPhysicalTemplates(@PathVariable Long regionId) {
-        Result<List<IndexTemplatePhy>> ret = physicalService.listByRegionId(regionId.intValue());
-        if (ret.failed()) { return Result.buildFrom(ret);}
-        return Result.buildSucc(ConvertUtil.list2List(ret.getData(), IndexTemplatePhysicalVO.class));
+        return clusterRegionManager.listByRegionId(regionId.intValue());
     }
 }
