@@ -20,6 +20,9 @@ public class ClusterPhyQuickCommandIndicesQueryDTO extends PageDTO {
     @ApiModelProperty("集群")
     private String cluster;
 
+    @ApiModelProperty("关键字")
+    private String keyword;
+
     @ApiModelProperty("索引名称")
     private String index;
 

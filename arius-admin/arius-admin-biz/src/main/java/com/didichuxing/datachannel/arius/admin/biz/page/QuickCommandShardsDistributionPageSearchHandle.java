@@ -60,13 +60,10 @@ public class QuickCommandShardsDistributionPageSearchHandle extends AbstractPage
             // 使用超级项目访问时，queryProjectId为null
             Integer queryProjectId = null;
             Tuple<Long, List<ShardDistributionVO>> totalHitAndIndexCatCellListTuple = esShardCatService.syncGetCatShardInfo(
-                    queryCluster, condition.getIndex(), queryProjectId,
+                    queryCluster, queryProjectId,
                     (condition.getPage() - 1) * condition.getSize(), condition.getSize(), condition.getSortTerm(),
                     condition.getOrderByDesc());
             if (null == totalHitAndIndexCatCellListTuple) {
-                LOGGER.warn("class=QuickCommandShardsDistributionPageSearchHandle||method=buildPageData||clusters={}||index={}||"
-                                + "errMsg=get empty index cat info from es",
-                        condition.getCluster(), condition.getIndex());
                 return PaginationResult.buildSucc(Lists.newArrayList(), 0, condition.getPage(), condition.getSize());
             }
 
@@ -75,9 +72,6 @@ public class QuickCommandShardsDistributionPageSearchHandle extends AbstractPage
             return PaginationResult.buildSucc(indexCatCellVOList, totalHitAndIndexCatCellListTuple.getV1(),
                     condition.getPage(), condition.getSize());
         } catch (Exception e) {
-            LOGGER.error(
-                    "class=QuickCommandShardsDistributionPageSearchHandle||method=buildPageData||clusters={}||index={}||errMsg={}",
-                    condition.getCluster(), condition.getIndex(), e.getMessage(), e);
             return PaginationResult.buildFail("获取分页shard列表失败");
         }
     }

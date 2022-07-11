@@ -97,18 +97,17 @@ public class ESShardDAO extends BaseESDAO {
     /**
      * 根据条件获取CatIndex信息
      *
-     * @param index        索引名称（可选）
      * @param from         起始值
      * @param size         每页大小
      * @param sortTerm     排序字段
      * @param orderByDesc  是否降序
      * @return             Tuple<Long, List<IndexCatCellPO>> 命中数 具体数据
      */
-    public Tuple<Long, List<ShardCatCellPO>> getCatShardInfo(String cluster, String index, Integer projectId,
+    public Tuple<Long, List<ShardCatCellPO>> getCatShardInfo(String cluster, Integer projectId,
                                                              Long from,
                                                              Long size, String sortTerm, Boolean orderByDesc) {
         Tuple<Long, List<ShardCatCellPO>> totalHitAndIndexCatCellListTuple;
-        String queryTermDsl =  buildQueryTermDsl(cluster, index,projectId);
+        String queryTermDsl =  buildQueryTermDsl(cluster,projectId);
         String sortType     =  buildSortType(orderByDesc);
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_CAT_SHARD_INFO_BY_CONDITION,
                 queryTermDsl, sortTerm, sortType, from, size);
@@ -141,14 +140,13 @@ public class ESShardDAO extends BaseESDAO {
      *                } 	}
      * }
      * @param cluster
-     * @param index
      * @return
      */
-    private String buildQueryTermDsl(String cluster, String index,  Integer projectId) {
-        return "[" + buildTermCell(cluster, index, projectId) +"]";
+    private String buildQueryTermDsl(String cluster,  Integer projectId) {
+        return "[" + buildTermCell(cluster, projectId) +"]";
     }
 
-    private String buildTermCell(String cluster, String index, Integer projectId) {
+    private String buildTermCell(String cluster, Integer projectId) {
         List<String> termCellList = Lists.newArrayList();
         //projectId == null 时，属于超级项目访问；
         if (null == projectId) {
@@ -162,16 +160,6 @@ public class ESShardDAO extends BaseESDAO {
             termCellList.add(DSLSearchUtils.getTermCellForExactSearch(cluster, "clusterLogic"));
 
         }
-
-        //get index dsl term
-        termCellList.add(DSLSearchUtils.getTermCellForWildcardSearch(index, "index"));
-
-        //get index status term
-//        if (IndexStatusEnum.isStatusExit(node)) {
-//            termCellList.add(DSLSearchUtils.getTermCellForExactSearch(node, "node"));
-//        }
-
-
         return ListUtils.strList2String(termCellList);
     }
 

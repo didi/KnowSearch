@@ -34,8 +34,8 @@ public class ESShardCatServiceImpl implements ESShardCatService {
     }
 
     @Override
-    public Tuple<Long, List<ShardDistributionVO>> syncGetCatShardInfo(String queryCluster, String index, Integer queryProjectId, long from, Long size, String sortTerm, Boolean orderByDesc) {
-        Tuple<Long, List<ShardCatCellPO>> hitTotal2catIndexInfoTuplePO = esShardDAO.getCatShardInfo(queryCluster, index,
+    public Tuple<Long, List<ShardDistributionVO>> syncGetCatShardInfo(String queryCluster, Integer queryProjectId, long from, Long size, String sortTerm, Boolean orderByDesc) {
+        Tuple<Long, List<ShardCatCellPO>> hitTotal2catIndexInfoTuplePO = esShardDAO.getCatShardInfo(queryCluster,
                 queryProjectId, from, size, sortTerm, orderByDesc);
         if (null == hitTotal2catIndexInfoTuplePO) {
             return null;
