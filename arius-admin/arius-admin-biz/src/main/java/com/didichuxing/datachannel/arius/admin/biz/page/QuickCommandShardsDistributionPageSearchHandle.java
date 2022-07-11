@@ -60,7 +60,7 @@ public class QuickCommandShardsDistributionPageSearchHandle extends AbstractPage
             // 使用超级项目访问时，queryProjectId为null
             Integer queryProjectId = null;
             Tuple<Long, List<ShardDistributionVO>> totalHitAndIndexCatCellListTuple = esShardCatService.syncGetCatShardInfo(
-                    queryCluster, queryProjectId,
+                    queryCluster, queryProjectId, condition.getKeyword(),
                     (condition.getPage() - 1) * condition.getSize(), condition.getSize(), condition.getSortTerm(),
                     condition.getOrderByDesc());
             if (null == totalHitAndIndexCatCellListTuple) {

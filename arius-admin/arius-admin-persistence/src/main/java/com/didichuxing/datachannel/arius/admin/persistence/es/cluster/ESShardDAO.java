@@ -103,11 +103,11 @@ public class ESShardDAO extends BaseESDAO {
      * @param orderByDesc  是否降序
      * @return             Tuple<Long, List<IndexCatCellPO>> 命中数 具体数据
      */
-    public Tuple<Long, List<ShardCatCellPO>> getCatShardInfo(String cluster, Integer projectId,
+    public Tuple<Long, List<ShardCatCellPO>> getCatShardInfo(String cluster, Integer projectId,String keyword,
                                                              Long from,
                                                              Long size, String sortTerm, Boolean orderByDesc) {
         Tuple<Long, List<ShardCatCellPO>> totalHitAndIndexCatCellListTuple;
-        String queryTermDsl =  buildQueryTermDsl(cluster,projectId);
+        String queryTermDsl =  buildQueryTermDsl(cluster,projectId,keyword);
         String sortType     =  buildSortType(orderByDesc);
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_CAT_SHARD_INFO_BY_CONDITION,
                 queryTermDsl, sortTerm, sortType, from, size);
@@ -142,11 +142,11 @@ public class ESShardDAO extends BaseESDAO {
      * @param cluster
      * @return
      */
-    private String buildQueryTermDsl(String cluster,  Integer projectId) {
-        return "[" + buildTermCell(cluster, projectId) +"]";
+    private String buildQueryTermDsl(String cluster,  Integer projectId,String keyword) {
+        return "[" + buildTermCell(cluster, projectId,keyword) +"]";
     }
 
-    private String buildTermCell(String cluster, Integer projectId) {
+    private String buildTermCell(String cluster, Integer projectId,String keyword) {
         List<String> termCellList = Lists.newArrayList();
         //projectId == null 时，属于超级项目访问；
         if (null == projectId) {
@@ -159,6 +159,9 @@ public class ESShardDAO extends BaseESDAO {
             //get resourceId dsl term
             termCellList.add(DSLSearchUtils.getTermCellForExactSearch(cluster, "clusterLogic"));
 
+        }
+        if (StringUtils.isNotBlank(keyword)){
+            termCellList.add(DSLSearchUtils.getTermCellForWildcardSearch(keyword, "clusterPhy"));
         }
         return ListUtils.strList2String(termCellList);
     }

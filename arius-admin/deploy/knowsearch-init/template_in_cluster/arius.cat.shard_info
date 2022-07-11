@@ -20,7 +20,7 @@
         "properties":{
             "prirep": {
                 "type": "keyword"
-                        },
+            },
             "clusterPhy": {
                 "type": "keyword"
             },
