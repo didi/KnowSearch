@@ -57,12 +57,6 @@ public class GatewayManagerTest {
     @Autowired
     private GatewayManager gatewayManager;
 
-    // @Test
-    public void directSqlSearchTest() {
-        String sql = "SELECT * FROM arius.dsl.template LIMIT 10";
-        Assertions.assertEquals("", gatewayManager.directSqlSearch(sql, null, 1));
-    }
-
     @Mock
     private ESUserService                   mockEsUserService;
     @Mock
@@ -98,7 +92,7 @@ public class GatewayManagerTest {
     }
     
     @Test
-    void testHeartbeat1() {
+    void heartbeatTest1() {
         // Setup
         final GatewayHeartbeat heartbeat = new GatewayHeartbeat("clusterName", "hostName", 0);
         when(mockGatewayService.heartbeat(new GatewayHeartbeat("clusterName", "hostName", 0))).thenReturn(
@@ -111,7 +105,7 @@ public class GatewayManagerTest {
     }
     
     @Test
-    void testHeartbeat2() {
+    void heartbeatTest2() {
         // Setup
         final Result<Integer> expectedResult = Result.buildSucc(0);
         when(mockGatewayService.aliveCount("clusterName", 0L)).thenReturn(Result.buildSucc(0));
@@ -124,7 +118,7 @@ public class GatewayManagerTest {
     }
     
     @Test
-    void testGetGatewayAliveNode() {
+    void getGatewayAliveNodeTest() {
         // Setup
         final Result<List<GatewayClusterNodeVO>> expectedResult = Result.buildFail(Arrays.asList(
                 new GatewayClusterNodeVO(0, "clusterName", "hostName", 0,
@@ -145,7 +139,7 @@ public class GatewayManagerTest {
     }
     
     @Test
-    void testGetGatewayAliveNodeNames() {
+    void getGatewayAliveNodeNamesTest() {
         // Setup
         final Result<List<String>> expectedResult = Result.buildSucc(Arrays.asList("value"));
         
@@ -164,7 +158,7 @@ public class GatewayManagerTest {
     
     
     @Test
-    void testListProject() {
+    void listProjectTest() {
         final MockHttpServletRequest mockHttpServletRequest = new MockHttpServletRequest();
         mockHttpServletRequest.addHeader("X-ARIUS-GATEWAY-TICKET","xTc59aY72");
         // Setup
@@ -201,7 +195,7 @@ public class GatewayManagerTest {
     }
     
     @Test
-    void testGetTemplateMap() {
+    void getTemplateMapTest() {
         // Setup
         final Result<Map<String, GatewayTemplatePhysicalVO>> expectedResult = Result.buildFail(new HashMap<>());
         
@@ -225,7 +219,7 @@ public class GatewayManagerTest {
     }
     
     @Test
-    void testListDeployInfo() {
+    void listDeployInfoTest() {
         // Setup
         final Result<Map<String, GatewayTemplateDeployInfoVO>> expectedResult = Result.buildSucc(new HashMap<>());
         
@@ -253,7 +247,7 @@ public class GatewayManagerTest {
     }
     
     @Test
-    void testScrollSearchDslTemplate() {
+    void scrollSearchDslTemplateTest() {
         // Setup
         final ScrollDslTemplateRequest request = new ScrollDslTemplateRequest();
         request.setScrollSize(0L);
@@ -286,7 +280,7 @@ public class GatewayManagerTest {
     }
     
     @Test
-    void testAddAlias() {
+    void addAliasTest() {
         // Setup
         final IndexTemplateAliasDTO indexTemplateAliasDTO = new IndexTemplateAliasDTO();
         indexTemplateAliasDTO.setLogicId(0);
@@ -303,7 +297,7 @@ public class GatewayManagerTest {
     }
     
     @Test
-    void testDelAlias() {
+    void delAliasTest() {
         // Setup
         final IndexTemplateAliasDTO indexTemplateAliasDTO = new IndexTemplateAliasDTO();
         indexTemplateAliasDTO.setLogicId(0);
@@ -320,7 +314,7 @@ public class GatewayManagerTest {
     }
     
     @Test
-    void testSqlExplain() {
+    void sqlExplainTest() {
         // Setup
         final Result<String> expectedResult = Result.buildFail("value");
         when(mockEsUserService.checkDefaultESUserByProject(0)).thenReturn(false);
@@ -343,7 +337,7 @@ public class GatewayManagerTest {
     }
     
     @Test
-    void testDirectSqlSearch() {
+    void directSqlSearchTest() {
         // Setup
         final Result<String> expectedResult = Result.buildFail("value");
         when(mockEsUserService.checkDefaultESUserByProject(0)).thenReturn(false);
