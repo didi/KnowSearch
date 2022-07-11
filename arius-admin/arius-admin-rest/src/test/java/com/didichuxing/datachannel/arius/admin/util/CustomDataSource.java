@@ -693,4 +693,12 @@ public class CustomDataSource {
         return new ESClusterRoleHostDTO(0L, 0L, "hostname", "ip", "cluster", "port", false, 0, 0, "nodeSet", 0,
             "attributes");
     }
+
+    public static List<Integer> getTemplateIdList() {
+        ArrayList<Integer> list = new ArrayList<>();
+        for (int i = 1; i < SIZE; i++) {
+            list.add(i);
+        }
+        return list;
+    }
 }

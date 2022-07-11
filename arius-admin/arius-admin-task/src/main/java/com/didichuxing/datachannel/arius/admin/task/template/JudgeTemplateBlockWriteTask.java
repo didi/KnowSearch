@@ -55,7 +55,7 @@ public class JudgeTemplateBlockWriteTask implements Job {
             Long templateDiskSize = (long)(template.getDiskSize() * 1024 * 1024 * 1024);
 
             // 获取该模版所有索引/分区占用磁盘总和
-            Long templateIndicesDiskSum = getTemplateIndicesDiskSum(templateId);
+            Long templateIndicesDiskSum = indicesManager.getTemplateIndicesDiskSum(templateId);
 
             // 判断是否禁写
             if (templateIndicesDiskSum >= templateDiskSize){
@@ -64,46 +64,5 @@ public class JudgeTemplateBlockWriteTask implements Job {
         }
 
         return TaskResult.SUCCESS;
-    }
-
-
-    /**
-     * 获取该模版所有索引/分区占用磁盘总和
-     *
-     * @param templateId 模版id
-     * @return 该模版所有索引/分区占用磁盘总和
-     */
-    private Long getTemplateIndicesDiskSum(Integer templateId){
-        Long templateIndicesDiskSum = 0L;
-
-        // 根据逻辑模版id获取对应的物理模版详情   （一个逻辑模版可能涉及多个物理模版）
-        IndexTemplateWithPhyTemplates templateLogicWithPhysical = indexTemplateService
-                .getLogicTemplateWithPhysicalsById(templateId);
-        if(templateLogicWithPhysical == null){
-            return templateIndicesDiskSum;
-        }
-
-        // 当前逻辑模版分区（索引）列表
-        List<CatIndexResult> catIndexResults = Lists.newArrayList();
-
-        // 获取逻辑索引模板对应物理模版中的master模版
-        List<IndexTemplatePhy> physicalMasters = templateLogicWithPhysical.fetchMasterPhysicalTemplates();
-        for (IndexTemplatePhy physicalMaster : physicalMasters) {
-            try {
-                catIndexResults.addAll(indicesManager.listIndexCatInfoByTemplatePhyId(physicalMaster.getId()));
-            } catch (Exception e) {
-                LOGGER.warn("class=JudgeTemplateBlockWriteTask||method=getTemplateIndicesDiskSum||logicId={}||errMsg={}", templateId, e.getMessage(), e);
-            }
-        }
-
-        // 统计逻辑模版所有索引的占用磁盘大小
-        for (CatIndexResult catIndexResult : catIndexResults) {
-            String storeSize = catIndexResult.getStoreSize();
-            // storeSize属性为string类型，把单位统一转换为byte
-            Long size = SizeUtil.getUnitSize(storeSize);
-            templateIndicesDiskSum += size;
-        }
-
-        return templateIndicesDiskSum;
     }
 }

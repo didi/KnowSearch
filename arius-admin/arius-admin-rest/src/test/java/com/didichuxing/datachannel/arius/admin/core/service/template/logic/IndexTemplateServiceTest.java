@@ -22,12 +22,15 @@ import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexT
 import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+
+import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.Put;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -359,4 +362,10 @@ public class IndexTemplateServiceTest extends AriusAdminApplicationTest {
         Assertions.assertTrue(CollectionUtils.isNotEmpty(indexTemplateList));
     }
 
+    @Test
+    public void listAllTemplateIdsTest(){
+        Mockito.when(indexTemplateDAO.listAllIds()).thenReturn(CustomDataSource.getTemplateIdList());
+        List<Integer> templateIds = indexTemplateService.listAllTemplateIds();
+        Assertions.assertFalse(templateIds.isEmpty());
+    }
 }

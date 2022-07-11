@@ -248,4 +248,12 @@ public interface IndicesManager {
      * @return {@link List}<{@link CatIndexResult}>
      */
     List<CatIndexResult> listIndexCatInfoByTemplatePhyId(Long physicalId);
+
+    /**
+     * 获取逻辑模版所有分区占用磁盘总和
+     *
+     * @param templateId 模版id
+     * @return
+     */
+    Long getTemplateIndicesDiskSum(Integer templateId);
 }
