@@ -193,9 +193,7 @@ public class TemplateTransferHandler extends BaseWorkOrderHandler {
                             projectService.getProjectBriefByProjectId(content.getTgtProjectId()).getProjectName())))
                               .project(projectService.getProjectBriefByProjectId(workOrder.getSubmitorProjectId()))
                       .build());
-            //operateRecordService.save(ModuleEnum.TEMPLATE, OperationEnum.EDIT, content.getId(), JSON.toJSONString(
-            //        new TemplateOperateRecord(TemplateOperateRecordEnum.TRANSFER.getCode(),
-            //                "模板从 projectId:" + content.getSourceProjectId() + "转移到 projectId:" + content.getTgtProjectId())), approver);
+           
         }
 
         return Result.buildFrom(result);

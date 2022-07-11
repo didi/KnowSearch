@@ -12,7 +12,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.ProjectTem
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectLogicTemplateAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
-import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -67,7 +66,8 @@ public class ProjectTemplateAuthController {
     @ResponseBody
     @ApiOperation(value = "增加APP权限接口" )
     public Result<Void> addTemplateAuth(HttpServletRequest request, @RequestBody ProjectTemplateAuthDTO authDTO) {
-        return projectLogicTemplateAuthService.addTemplateAuth(authDTO, HttpRequestUtil.getOperator(request));
+        //return projectLogicTemplateAuthService.addTemplateAuth(authDTO, HttpRequestUtil.getOperator(request));
+        return Result.buildFail("接口已经下线：迁移到v3");
     }
 
     @PutMapping("/update")

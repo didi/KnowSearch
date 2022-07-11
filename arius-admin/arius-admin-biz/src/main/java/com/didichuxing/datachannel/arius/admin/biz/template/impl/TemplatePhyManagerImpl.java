@@ -69,8 +69,14 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
-
-import java.util.*;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -128,6 +134,8 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
 
     @Autowired
     private AriusConfigInfoService      ariusConfigInfoService;
+    @Autowired
+    private IndexTemplatePhyService physicalService;
 
     @Autowired
     private ProjectLogicTemplateAuthService projectLogicTemplateAuthService;
@@ -593,6 +601,19 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         }
         return Result.buildSucc(
             ConvertUtil.list2List(indexTemplatePhyService.getTemplateByLogicId(logicId), IndexTemplatePhysicalVO.class));
+    }
+    
+        /**
+     * @param regionId
+     * @return
+     */
+    @Override
+    public Result<List<IndexTemplatePhysicalVO>> listByRegionId(Integer regionId) {
+        Result<List<IndexTemplatePhy>> ret = physicalService.listByRegionId(regionId);
+        if (ret.failed()) {
+            return Result.buildFrom(ret);
+        }
+        return Result.buildSucc(ConvertUtil.list2List(ret.getData(), IndexTemplatePhysicalVO.class));
     }
 
     /**************************************** private method ****************************************************/

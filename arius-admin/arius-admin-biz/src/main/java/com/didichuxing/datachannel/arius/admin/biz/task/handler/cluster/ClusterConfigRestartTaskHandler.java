@@ -1,35 +1,39 @@
 package com.didichuxing.datachannel.arius.admin.biz.task.handler.cluster;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.esconfig.EsConfigActionEnum.*;
+import static com.didichuxing.datachannel.arius.admin.common.constant.esconfig.EsConfigActionEnum.ADD;
+import static com.didichuxing.datachannel.arius.admin.common.constant.esconfig.EsConfigActionEnum.DELETE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.esconfig.EsConfigActionEnum.EDIT;
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum.ES_DOCKER;
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum.ES_HOST;
 
-import java.util.List;
-import java.util.Objects;
-
-import com.didichuxing.datachannel.arius.admin.biz.task.content.ClusterBaseContent;
-import com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant;
-import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Service;
-
 import com.alibaba.fastjson.JSON;
+import com.didichuxing.datachannel.arius.admin.biz.task.content.ClusterBaseContent;
 import com.didichuxing.datachannel.arius.admin.biz.task.content.ClusterConfigRestartContent;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.EcmParamBase;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESConfigDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.ecm.EcmTaskDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.esconfig.ESConfig;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord.template.ESConfigOperateRecode;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.esconfig.EsConfigActionEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
 
 /**
  * @author ohushenglin_v
@@ -37,7 +41,7 @@ import com.google.common.collect.Multimap;
  */
 @Service("clusterConfigRestartTaskHandler")
 public class ClusterConfigRestartTaskHandler extends AbstractClusterTaskHandler {
-
+   
     @Override
     Result<Void> validateHostParam(String param) throws NotFindSubclassException {
         ClusterConfigRestartContent content = ConvertUtil.str2ObjByJson(param, ClusterConfigRestartContent.class);
@@ -117,25 +121,37 @@ public class ClusterConfigRestartTaskHandler extends AbstractClusterTaskHandler 
             roleNameList.add(roleName);
         }
 
-        Multimap<String, Long> role2ConfigIdsMultiMap = saveEsConfigs(content, creator);
+        Multimap<String, Long> role2ConfigIdsMultiMap = saveEsConfigs(content, creator,ecmTaskDTO.getPhysicClusterId());
         Result<List<EcmParamBase>> buildEcmParamBasesResult = ecmHandleService.buildEcmParamBaseListWithConfigAction(
             clusterPhy.getId(), roleNameList, role2ConfigIdsMultiMap, content.getActionType());
-
+            
         if (buildEcmParamBasesResult.failed()) {
             return Result.buildFail(buildEcmParamBasesResult.getMessage());
         }
         ecmTaskDTO.setEcmParamBaseList(buildEcmParamBasesResult.getData());
+      
+        
+        
         return Result.buildSucc();
     }
 
     /**
      * 保存并得到es配置id
      *
-     * @param content  内容
-     * @param approver 审批人
+     * @param content         内容
+     * @param approver        审批人
+     * @param physicClusterId
      * @return {@link Multimap}<{@link String}, {@link Long}>  Multimap<集群角色, 改动的配置id>
      */
-    private Multimap<String, Long> saveEsConfigs(ClusterConfigRestartContent content, String approver) {
+    private Multimap<String, Long> saveEsConfigs(ClusterConfigRestartContent content, String approver,
+                                                 Long physicClusterId) {
+    
+        final List<ESConfigOperateRecode> operateRecodeList = content.getNewEsConfigs().stream()
+                .filter(Objects::nonNull)
+                .map(esConfig -> ESConfigOperateRecode.sourceAndTargetConfigFunc.apply(esConfig,
+                        esClusterConfigService::getEsClusterConfigById))
+                .map(tupleTwo -> ESConfigOperateRecode.sourceTargetDiff(tupleTwo, content.getActionType()))
+                .collect(Collectors.toList());
         Multimap<String, Long> role2ConfigIdsMultiMap = ArrayListMultimap.create();
         if (ADD.getCode() == content.getActionType()) {
             List<ESConfigDTO> newEsConfigs = ConvertUtil.list2List(content.getNewEsConfigs(), ESConfigDTO.class);
@@ -168,7 +184,17 @@ public class ClusterConfigRestartTaskHandler extends AbstractClusterTaskHandler 
             role2ConfigIdsMultiMap = ConvertUtil.list2MulMap(content.getOriginalConfigs(), ESConfig::getEnginName,
                 ESConfig::getId);
         }
+        //配置变更 保存到操作记录
+        for (ESConfigOperateRecode esConfigOperateRecode : operateRecodeList) {
+            final OperateRecord operateRecord = ESConfigOperateRecode.buildESConfigOperateRecode(approver,
+                    projectService::getProjectBriefByProjectId, AuthConstant.SUPER_PROJECT_ID, esConfigOperateRecode,
+                    physicClusterId);
+            operateRecordService.save(operateRecord);
+        }
 
         return role2ConfigIdsMultiMap;
     }
+    
+   
+  
 }

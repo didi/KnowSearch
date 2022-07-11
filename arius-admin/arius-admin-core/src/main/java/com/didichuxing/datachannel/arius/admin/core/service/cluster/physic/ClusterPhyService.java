@@ -152,8 +152,27 @@ public interface ClusterPhyService {
      */
     boolean isClusterExistsByPackageId(Long packageId);
     
-    
+    /**
+     * 得到phy srv集群模板
+     *
+     * @param phyCluster phy集群
+     * @return {@link Result}<{@link List}<{@link ClusterTemplateSrv}>>
+     */
     Result<List<ClusterTemplateSrv>> getPhyClusterTemplateSrv(String phyCluster);
     
+    /**
+     * 得到phy srv集群模板
+     *
+     * @param phyCluster phy集群
+     * @return {@link Result}<{@link List}<{@link ClusterTemplateSrv}>>
+     */
     Result<List<ClusterTemplateSrv>> getPhyClusterTemplateSrv(ClusterPhy phyCluster);
+    
+    /**
+     * 得到id通过名字
+     *
+     * @param phyCluster phy集群
+     * @return {@link Integer}
+     */
+    Integer getIdByName(String phyCluster);
 }

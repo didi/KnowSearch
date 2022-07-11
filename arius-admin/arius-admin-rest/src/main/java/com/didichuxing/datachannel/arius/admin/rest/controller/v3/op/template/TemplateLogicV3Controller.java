@@ -6,7 +6,11 @@ import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.setting.TemplateLogicSettingsManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateWithCreateInfoDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateClearDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateConditionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateSettingDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateSettingVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.DataTypeEnum;
@@ -149,7 +153,7 @@ public class TemplateLogicV3Controller {
     @ResponseBody
     @ApiOperation(value = "用户编辑模板")
     public Result<Void> editTemplate(HttpServletRequest request, @RequestBody IndexTemplateDTO param) {
-        return templateLogicManager.newEditTemplate(param, HttpRequestUtil.getOperator(request),
+        return templateLogicManager.editTemplate(param, HttpRequestUtil.getOperator(request),
                 HttpRequestUtil.getProjectId(request));
     }
 
@@ -157,7 +161,8 @@ public class TemplateLogicV3Controller {
     @ResponseBody
     @ApiOperation(value = "清理索引")
     public Result<Void> clearIndices(HttpServletRequest request,@RequestBody TemplateClearDTO clearDTO) {
-        return templateLogicManager.clearIndices(clearDTO, HttpRequestUtil.getProjectId(request));
+        return templateLogicManager.clearIndices(clearDTO,
+                HttpRequestUtil.getOperator(request), HttpRequestUtil.getProjectId(request));
     }
 
     @PutMapping("/{templateId}/{shardNum}/adjust-shard")

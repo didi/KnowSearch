@@ -9,6 +9,7 @@ import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOpe
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.COUNT;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.DESCRIPTION;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.DOCS;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_OPERATE_MIN_TIMEOUT;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_OPERATE_TIMEOUT;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_ROLE_CLIENT;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_ROLE_COORDINATING_ONLY;
@@ -84,7 +85,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.common.unit.ByteSizeValue;
 import org.elasticsearch.rest.RestStatus;
@@ -195,28 +198,42 @@ public class ESClusterDAO extends BaseESDAO {
      * @param cluster
      * @return map
      */
-    public Map<String/*nodeName*/, List<String>/*pluginName*/> getNode2PluginsMap(String cluster) {
+    public Map<String/*nodeName*/, List<String>/*pluginName*/> getNode2PluginsMap(String cluster,Integer tryTimes) {
         ESClient client = esOpClient.getESClient(cluster);
         if (null == client) { return null;}
 
         ESCatRequest esCatRequest = new ESCatRequest();
         esCatRequest.setUri("plugins");
-
-        ESCatResponse esCatResponse = client.admin().cluster().execute(ESCatAction.INSTANCE, esCatRequest)
-            .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
-
-        List<ESResponsePluginInfo> esResponsePluginInfos = JSON.parseArray(esCatResponse.getResponse().toString(),
-            ESResponsePluginInfo.class);
-        return ConvertUtil.list2MapOfList(esResponsePluginInfos, ESResponsePluginInfo::getName,
-            ESResponsePluginInfo::getComponent);
+        ESCatResponse esCatResponse =null;
+        try {
+            do {
+                esCatResponse = client.admin().cluster().execute(ESCatAction.INSTANCE, esCatRequest)
+                        .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+            } while (tryTimes-- > 0 && null == esCatResponse);
+       } catch (Exception e) {
+            LOGGER.warn("class=ESClusterDAO||method=getNode2PluginsMap||clusterName={}" +
+                    "||errMsg=can't get node  plugin", cluster);
+            return null;
+        }
+        
+        return Optional.ofNullable(esCatResponse).map(ESCatResponse::getResponse).map(Object::toString)
+                .map(esCatResponseString2ESResponsePluginInfoListFunc).map(eSResponsePluginInfoList2MapFunc)
+                .orElse(null);
+                
     }
+    
+    private final Function<List<ESResponsePluginInfo>, Map<String/*nodeName*/, List<String>/*pluginName*/>> eSResponsePluginInfoList2MapFunc = eSResponsePluginInfos -> ConvertUtil.list2MapOfList(
+            eSResponsePluginInfos, ESResponsePluginInfo::getName, ESResponsePluginInfo::getComponent);
+    
+    private final Function<String, List<ESResponsePluginInfo>> esCatResponseString2ESResponsePluginInfoListFunc = esCatResponse -> JSON.parseArray(
+            esCatResponse, ESResponsePluginInfo.class);
 
     /**
      * 获取物理集群下各个节点的资源设置信息
      * @param cluster 物理集群名称
      * @return 集群下的节点资源使用信息列表
      */
-    public List<NodeAllocationInfo> getNodeAllocationInfoByCluster(String cluster) {
+    public List<NodeAllocationInfo> getNodeAllocationInfoByCluster(String cluster,Integer tryTimes) {
         ESClient esClient = esOpClient.getESClient(cluster);
         if (esClient == null) {
             LOGGER.warn("class=ESClusterDAO||method=getNodeAllocationInfoByCluster||clusterName={}" +
@@ -226,120 +243,155 @@ public class ESClusterDAO extends BaseESDAO {
 
         ESCatRequest esCatRequest = new ESCatRequest();
         esCatRequest.setUri("allocation");
-
+        ESCatResponse esCatResponse = null;
         try {
-            ESCatResponse esCatResponse = esClient.admin().cluster().execute(ESCatAction.INSTANCE, esCatRequest)
-                    .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
-            return JSON.parseArray(esCatResponse.getResponse().toString(), NodeAllocationInfo.class);
+            do {
+                esCatResponse = esClient.admin().cluster().execute(ESCatAction.INSTANCE, esCatRequest)
+                        .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+            } while (tryTimes-- > 0 && null == esCatResponse);
+            
         } catch (Exception e) {
             LOGGER.warn("class=ESClusterDAO||method=getNodeAllocationInfoByCluster||clusterName={}" +
                     "||errMsg=can't get allocation info", cluster);
             return null;
         }
+        return Optional.ofNullable(esCatResponse).map(ESCatResponse::getResponse).map(Object::toString)
+                .map(esCatResponseString2NodeAllocationInfoListFunc).orElse(null);
     }
+    
+    private final Function<String, List<NodeAllocationInfo>> esCatResponseString2NodeAllocationInfoListFunc =
+            esCatResponse -> JSON.parseArray(
+            esCatResponse, NodeAllocationInfo.class);
 
     /**
      * 获取集群中索引的别名信息
+     *
      * @param cluster
+     * @param tryTimes
      * @return
      */
-    public ESIndicesGetAliasResponse getClusterAlias(String cluster) {
+    public ESIndicesGetAliasResponse getClusterAlias(String cluster,Integer tryTimes) {
         ESClient client = esOpClient.getESClient(cluster);
         if  (client == null) {
             return null;
         }
+        ESIndicesGetAliasResponse esIndicesGetAliasResponse =null;
         try {
-            return client.admin().indices().prepareAlias().execute().actionGet(ES_OPERATE_TIMEOUT,
-                    TimeUnit.MINUTES);
-
+            do {
+                esIndicesGetAliasResponse = client.admin().indices().prepareAlias().execute()
+                        .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.MINUTES);
+            } while (tryTimes-- > 0 && null == esIndicesGetAliasResponse);
+            
         } catch (Exception e) {
             LOGGER.error("class=ESClusterDAO||method=getClusterAlias||clusterName={}||errMsg=query error. ", cluster,
                     e);
             return null;
         }
+        return esIndicesGetAliasResponse;
     }
-
-    /**
+        /**
      * 获取集群状态信息
      *
      * @param cluster
      * @return
      */
-    public ESClusterHealthResponse getClusterHealth(String cluster) {
+    public ESClusterHealthResponse getClusterHealth(String cluster,Integer tryTimes) {
         ESClient esClient = esOpClient.getESClient(cluster);
         if (esClient == null) {
             LOGGER.error("class=ESClusterDAO||method=getClusterHealth||clusterName={}||errMsg=esClient is null",
                 cluster);
             return null;
         }
-
+        ESClusterHealthResponse esClusterHealthResponse = null;
+        Long minTimeoutNum=1L;
+        Long maxTimeoutNum=tryTimes.longValue();
         try {
             ESClusterHealthRequest request = new ESClusterHealthRequest();
-            return esClient.admin().cluster().health(request).actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+            do {
+                esClusterHealthResponse = esClient.admin().cluster().health(request)
+                        .actionGet(/*降低因为抖动导致的等待时常,等待时常从低到高进行重试*/minTimeoutNum * ES_OPERATE_MIN_TIMEOUT,
+                                TimeUnit.SECONDS);
+                minTimeoutNum++;
+                if (minTimeoutNum > maxTimeoutNum) {
+                    minTimeoutNum = maxTimeoutNum;
+                }
+             }while (tryTimes-- > 0 && null == esClusterHealthResponse);
         } catch (Exception e) {
             LOGGER.error("class=ESClusterDAO||method=getClusterHealth||clusterName={}||errMsg=query error. ", cluster,
                 e);
             return null;
         }
+        return esClusterHealthResponse;
     }
-
-    /**
-     * 获取部分ES集群nodeSetting
-     * @param cluster 集群名称
-     * @return client原生对象列表
-     */
-    public Map<String, ClusterNodeSettings> getPartOfSettingsByCluster(String cluster) {
+    
+    
+      public Map<String, ClusterNodeSettings> getPartOfSettingsByCluster(String cluster,Integer tryTimes) {
+        ESClusterNodesSettingResponse response =null;
         try {
             ESClient client = esOpClient.getESClient(cluster);
             if (null == client) { return null;}
-            ESClusterNodesSettingResponse response = client.admin().cluster().prepareNodesSetting().execute()
+            do {
+                response = client.admin().cluster().prepareNodesSetting().execute()
                     .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
-            return response.getNodes();
+            }while (tryTimes-- > 0 && null == response);
+           
+            
         } catch (Exception e) {
             LOGGER.warn("class=ESClusterDAO||method=getPartOfSettingsByCluster||cluster={}||mg=get es setting fail", cluster, e);
-            return null;
+             return null;
         }
+          return Optional.ofNullable(response).map(ESClusterNodesSettingResponse::getNodes)
+                  .orElse(null);
     }
 
-    /**
+
+     /**
      * 获取全量ES集群nodeSetting
      * @param cluster
      * @return
      */
-    public Map<String, ClusterNodeInfo> getAllSettingsByCluster(String cluster) {
+    public Map<String, ClusterNodeInfo> getAllSettingsByCluster(String cluster,Integer tryTimes) {
+         ESClusterNodesResponse response=null;
         try {
             ESClient client = esOpClient.getESClient(cluster);
             if (null == client) {
                 LOGGER.warn("class=ESClusterDAO||method=getAllSettingsByCluster||cluster={}||mg=ESClient is empty", cluster);
                 return null;
             }
-
-            ESClusterNodesResponse response = client.admin().cluster().prepareNodes().execute()
-                    .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
-            return response.getNodes();
+            do {
+                response = client.admin().cluster().prepareNodes().execute()
+                        .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+            } while (tryTimes-- > 0 && null == response);
         } catch (Exception e) {
             LOGGER.warn("class=ESClusterDAO||method=getAllSettingsByCluster||cluster={}||mg=get es setting fail", cluster, e);
             return null;
         }
+        return Optional.ofNullable(response).map(ESClusterNodesResponse::getNodes).orElse(null);
     }
 
-    public String getESVersionByCluster(String cluster) {
+
+    public String getESVersionByCluster(String cluster,Integer tryTimes) {
         ESClient client = esOpClient.getESClient(cluster);
         String esVersion = null;
         if (Objects.isNull(client)) {
             LOGGER.error("class=ESClusterDAO||method=getESVersionByCluster||clusterName={}||errMsg=esClient is null", cluster);
             return null;
         }
+         DirectResponse directResponse=null;
         try {
             DirectRequest directRequest = new DirectRequest("GET", "");
-            DirectResponse directResponse = client.direct(directRequest).actionGet(30, TimeUnit.SECONDS);
-            if (directResponse.getRestStatus() == RestStatus.OK
-                    && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
-                esVersion = (String) JSONObject.parseObject(directResponse.getResponseContent()).getJSONObject("version").get("number");
-            }
+    
+            do {
+                directResponse = client.direct(directRequest).actionGet(30, TimeUnit.SECONDS);
+            } while (tryTimes-- > 0 && null == directResponse);
         } catch (Exception e) {
             LOGGER.warn("class=ESClusterDAO||method=getESVersionByCluster||cluster={}||mg=get es segments fail", cluster, e);
             return null;
+        }
+        if (directResponse.getRestStatus() == RestStatus.OK && StringUtils.isNoneBlank(
+                directResponse.getResponseContent())) {
+            esVersion = (String) JSONObject.parseObject(directResponse.getResponseContent()).getJSONObject("version")
+                    .get("number");
         }
         return esVersion;
     }

@@ -148,11 +148,11 @@ public class IndexTemplateServiceTest extends AriusAdminApplicationTest {
         Mockito.when(indexTemplateDAO.getById(1)).thenReturn(null);
         Mockito.when(indexTemplateDAO.getById(2)).thenReturn(CustomDataSource.templateLogicSource());
         Mockito.when(indexTemplatePhyService.delTemplateByLogicId(Mockito.anyInt(), Mockito.anyString())).thenReturn(Result.buildSucc());
-        Mockito.when(logicTemplateAuthService.deleteTemplateAuthByTemplateId(Mockito.anyInt(), Mockito.anyString())).thenReturn(Result.buildSucc());
+        Mockito.when(logicTemplateAuthService.deleteTemplateAuthByTemplateId(Mockito.anyInt())).thenReturn(Result.buildSucc());
         // 不存在的 id
-        Assertions.assertTrue(indexTemplateService.delTemplate(1, "admin", projectId).failed());
+        Assertions.assertTrue(indexTemplateService.delTemplate(1, "admin").failed());
         // 存在的 id
-        Assertions.assertTrue(indexTemplateService.delTemplate(2, "admin", projectId).success());
+        Assertions.assertTrue(indexTemplateService.delTemplate(2, "admin").success());
     }
 
     @Test
