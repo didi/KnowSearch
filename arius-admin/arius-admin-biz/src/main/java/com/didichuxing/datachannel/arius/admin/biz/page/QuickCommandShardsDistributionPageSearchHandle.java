@@ -3,12 +3,11 @@ package com.didichuxing.datachannel.arius.admin.biz.page;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyQuickCommandIndicesQueryDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.IndexCatCell;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.IndicesDistributionVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyQuickCommandShardsQueryDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.ShardDistributionVO;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexCatService;
+import com.didichuxing.datachannel.arius.admin.core.service.es.ESShardCatService;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,22 +16,22 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 /**
- * 快捷命令索引分布.
+ * 快捷命令shard分布.
  *
- * @ClassName QuickCommandIndicesDistributionPageSearchHandle
+ * @ClassName QuickCommandShardsDistributionPageSearchHandle
  * @Author gyp
  * @Date 2022/7/6
  * @Version 1.0
  */
 @Component
-public class QuickCommandIndicesDistributionPageSearchHandle extends AbstractPageSearchHandle<ClusterPhyQuickCommandIndicesQueryDTO, IndicesDistributionVO> {
+public class QuickCommandShardsDistributionPageSearchHandle extends AbstractPageSearchHandle<ClusterPhyQuickCommandShardsQueryDTO, ShardDistributionVO> {
     private static final String DEFAULT_SORT_TERM = "timestamp";
 
     @Autowired
-    private ESIndexCatService   esIndexCatService;
+    private ESShardCatService esShardCatService;
 
     @Override
-    protected Result<Boolean> checkCondition(ClusterPhyQuickCommandIndicesQueryDTO condition, Integer projectId) {
+    protected Result<Boolean> checkCondition(ClusterPhyQuickCommandShardsQueryDTO condition, Integer projectId) {
         if (StringUtils.isBlank(condition.getCluster())) {
             return Result.buildParamIllegal(String.format("集群名称不能为空"));
         }
@@ -40,7 +39,7 @@ public class QuickCommandIndicesDistributionPageSearchHandle extends AbstractPag
     }
 
     @Override
-    protected void initCondition(ClusterPhyQuickCommandIndicesQueryDTO condition, Integer projectId) {
+    protected void initCondition(ClusterPhyQuickCommandShardsQueryDTO condition, Integer projectId) {
         if (null == condition.getPage()) {
             condition.setPage(1L);
         }
@@ -55,31 +54,31 @@ public class QuickCommandIndicesDistributionPageSearchHandle extends AbstractPag
     }
 
     @Override
-    protected PaginationResult<IndicesDistributionVO> buildPageData(ClusterPhyQuickCommandIndicesQueryDTO condition, Integer projectId) {
+    protected PaginationResult<ShardDistributionVO> buildPageData(ClusterPhyQuickCommandShardsQueryDTO condition, Integer projectId) {
         try {
             String queryCluster = condition.getCluster();
             // 使用超级项目访问时，queryProjectId为null
             Integer queryProjectId = null;
-            Tuple<Long, List<IndexCatCell>> totalHitAndIndexCatCellListTuple = esIndexCatService.syncGetCatIndexInfo(
-                    queryCluster, condition.getIndex(), condition.getHealth(),condition.getStatus(), queryProjectId,
+            Tuple<Long, List<ShardDistributionVO>> totalHitAndIndexCatCellListTuple = esShardCatService.syncGetCatShardInfo(
+                    queryCluster, condition.getIndex(), queryProjectId,
                     (condition.getPage() - 1) * condition.getSize(), condition.getSize(), condition.getSortTerm(),
                     condition.getOrderByDesc());
             if (null == totalHitAndIndexCatCellListTuple) {
-                LOGGER.warn("class=IndicesPageSearchHandle||method=getIndexCatCellsFromES||clusters={}||index={}||"
+                LOGGER.warn("class=QuickCommandShardsDistributionPageSearchHandle||method=buildPageData||clusters={}||index={}||"
                                 + "errMsg=get empty index cat info from es",
                         condition.getCluster(), condition.getIndex());
                 return PaginationResult.buildSucc(Lists.newArrayList(), 0, condition.getPage(), condition.getSize());
             }
 
-            List<IndicesDistributionVO> indexCatCellVOList = ConvertUtil.list2List(totalHitAndIndexCatCellListTuple.getV2(), IndicesDistributionVO.class);
+            List<ShardDistributionVO> indexCatCellVOList = ConvertUtil.list2List(totalHitAndIndexCatCellListTuple.getV2(), ShardDistributionVO.class);
 
             return PaginationResult.buildSucc(indexCatCellVOList, totalHitAndIndexCatCellListTuple.getV1(),
                     condition.getPage(), condition.getSize());
         } catch (Exception e) {
             LOGGER.error(
-                    "class=IndicesPageSearchHandle||method=getIndexCatCellsFromES||clusters={}||index={}||errMsg={}",
+                    "class=QuickCommandShardsDistributionPageSearchHandle||method=buildPageData||clusters={}||index={}||errMsg={}",
                     condition.getCluster(), condition.getIndex(), e.getMessage(), e);
-            return PaginationResult.buildFail("获取分页索引列表失败");
+            return PaginationResult.buildFail("获取分页shard列表失败");
         }
     }
 }

@@ -5,7 +5,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordina
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.ShardMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.shard.Segment;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.ShardAssignmentDescriptionVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.ShardDistributionVO;
 
 import java.util.List;
 
@@ -41,13 +40,7 @@ public interface ESShardService {
      */
     List<Segment> syncGetSegments(String clusterName);
 
-    /**
-     * shard分布
-     * @param cluster
-     * @return
-     */
-    List<ShardDistributionVO> shardDistribution(String cluster);
-
 
     ShardAssignmentDescriptionVO shardAssignmentDescription(String cluster);
+
 }

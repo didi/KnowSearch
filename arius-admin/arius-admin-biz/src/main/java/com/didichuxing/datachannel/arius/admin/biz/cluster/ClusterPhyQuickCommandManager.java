@@ -2,7 +2,8 @@ package com.didichuxing.datachannel.arius.admin.biz.cluster;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyQuickCommandQueryDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyQuickCommandIndicesQueryDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyQuickCommandShardsQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.*;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 
@@ -32,12 +33,6 @@ public interface ClusterPhyQuickCommandManager {
      */
     Result<List<IndicesDistributionVO>> indicesDistribution(String cluster);
 
-    /**
-     * shard分布
-     * @param cluster
-     * @return
-     */
-    Result<List<ShardDistributionVO>> shardDistribution(String cluster);
 
     /**
      * pending task分析
@@ -85,7 +80,15 @@ public interface ClusterPhyQuickCommandManager {
      * 条件获取索引列表信息 ,携带可读可写标志位
      * @param condition     查询条件
      * @param projectId         项目
-     * @return              List<IndexCatInfoVO>
+     * @return              IndicesDistributionVO
      */
-    PaginationResult<IndicesDistributionVO> indicesDistributionPage(ClusterPhyQuickCommandQueryDTO condition, Integer projectId) throws NotFindSubclassException;
+    PaginationResult<IndicesDistributionVO> indicesDistributionPage(ClusterPhyQuickCommandIndicesQueryDTO condition, Integer projectId) throws NotFindSubclassException;
+
+    /**
+     * 条件获取shard列表信息 ,携带可读可写标志位
+     * @param condition     查询条件
+     * @param projectId         项目
+     * @return             ShardDistributionVO
+     */
+    PaginationResult<ShardDistributionVO> shardDistributionPage(ClusterPhyQuickCommandShardsQueryDTO condition, Integer projectId) throws NotFindSubclassException;
 }

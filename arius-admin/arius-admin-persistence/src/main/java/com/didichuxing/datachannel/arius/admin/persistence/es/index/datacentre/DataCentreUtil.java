@@ -61,6 +61,8 @@ public class DataCentreUtil {
     private String ariusStatsIndexInfo;
     @Value("${es.index.cat.info:arius_cat_index_info}")
     private String ariusCatIndexInfo;
+    @Value("${es.index.cat.info:arius_cat_shard_info}")
+    private String ariusCatShardInfo;
     @Value("${es.cluster.info.index.name:arius_stats_cluster_info}")
     private String ariusStatsClusterInfo;
     @Value("${es.index_node.info.index.name:arius_stats_index_node_info}")
@@ -205,9 +207,13 @@ public class DataCentreUtil {
 
     public String getAriusCatIndexInfo(){return getIndexName(ariusCatIndexInfo);}
 
+    public String getAriusCatShardInfo(){return getIndexName(ariusCatShardInfo);}
+
     public String getAriusStatsClusterTaskInfo(){return getIndexName(ariusStatsClusterTaskInfo);}
 
     public String getAriusStatsDashBoardInfo(){ return ariusStatsDashboardInfo;}
+
+
 
     /*************************************** private method ***************************************/
     private String getIndexName(String originIndexName) {

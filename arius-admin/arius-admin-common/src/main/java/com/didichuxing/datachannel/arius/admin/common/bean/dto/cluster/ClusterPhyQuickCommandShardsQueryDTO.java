@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel(description = "快捷命令索引条件查询实体")
-public class ClusterPhyQuickCommandQueryDTO extends PageDTO {
+public class ClusterPhyQuickCommandShardsQueryDTO extends PageDTO {
 
     @ApiModelProperty("集群")
     private String cluster;

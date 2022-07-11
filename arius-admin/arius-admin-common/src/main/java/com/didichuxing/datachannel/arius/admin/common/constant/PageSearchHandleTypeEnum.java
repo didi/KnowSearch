@@ -10,6 +10,7 @@ public enum PageSearchHandleTypeEnum {
         TEMPLATE_SRV("templateSrvPageSearch"),
 
         QUICK_COMMAND_INDEX("quickCommandIndicesDistributionPageSearch"),
+        QUICK_COMMAND_SHARD("quickCommandShardsDistributionPageSearch"),
         OPERATE_RECORD("operateRecordPageSearch");
        private String pageSearchType;
 

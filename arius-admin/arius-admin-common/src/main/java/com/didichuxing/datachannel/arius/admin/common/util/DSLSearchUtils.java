@@ -76,7 +76,7 @@ public class DSLSearchUtils {
         }
 
         StringBuilder termSb = new StringBuilder();
-        termSb.append("{").append(QUERY_BOOL_MUST_TERM).append("{").append(String.format(PLACE_HOLDER, termKey))
+        termSb.append("{").append(QUERY_BOOL_MUST_TERM).append("{").append(String.format(PLACE_HOLDER, termKey+".keyword"))
             .append("{").append(QUERY_BOOL_MUST_TERM_VALUE).append("\"").append(term).append("\"").append("}")
             .append("}").append("}");
         return termSb.toString();

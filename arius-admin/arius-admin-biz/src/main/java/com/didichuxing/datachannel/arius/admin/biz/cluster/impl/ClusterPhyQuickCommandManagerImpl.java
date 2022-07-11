@@ -2,9 +2,11 @@ package com.didichuxing.datachannel.arius.admin.biz.cluster.impl;
 
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyQuickCommandManager;
 import com.didichuxing.datachannel.arius.admin.biz.page.QuickCommandIndicesDistributionPageSearchHandle;
+import com.didichuxing.datachannel.arius.admin.biz.page.QuickCommandShardsDistributionPageSearchHandle;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyQuickCommandQueryDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyQuickCommandIndicesQueryDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyQuickCommandShardsQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.*;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
@@ -14,10 +16,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
-import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterNodeService;
-import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
-import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
-import com.didichuxing.datachannel.arius.admin.core.service.es.ESShardService;
+import com.didichuxing.datachannel.arius.admin.core.service.es.*;
 import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -45,6 +44,10 @@ public class ClusterPhyQuickCommandManagerImpl implements ClusterPhyQuickCommand
 
     @Autowired
     protected ESIndexService esIndexService;
+
+    @Autowired
+    protected ESShardCatService esShardCatService;
+
     @Autowired
     protected ESShardService esShardService;
 
@@ -70,16 +73,6 @@ public class ClusterPhyQuickCommandManagerImpl implements ClusterPhyQuickCommand
         List<CatIndexResult> catIndexResultList = esIndexService.indicesDistribution(cluster);
         return Result.buildSucc( ConvertUtil.list2List(catIndexResultList,IndicesDistributionVO.class));
     }
-
-    @Override
-    public Result<List<ShardDistributionVO>> shardDistribution(String cluster) {
-        Result<Void> checkResult = checkClusterExistence(cluster);
-        if (checkResult.failed()) {
-            return Result.buildFail(checkResult.getMessage());
-        }
-        return Result.buildSucc(esShardService.shardDistribution(cluster));
-    }
-
     @Override
     public Result<List<PendingTaskAnalysisVO>> pendingTaskAnalysis(String cluster) {
         Result<Void> checkResult = checkClusterExistence(cluster);
@@ -155,10 +148,21 @@ public class ClusterPhyQuickCommandManagerImpl implements ClusterPhyQuickCommand
     }
 
     @Override
-    public PaginationResult<IndicesDistributionVO> indicesDistributionPage(ClusterPhyQuickCommandQueryDTO condition, Integer projectId) throws NotFindSubclassException {
+    public PaginationResult<IndicesDistributionVO> indicesDistributionPage(ClusterPhyQuickCommandIndicesQueryDTO condition, Integer projectId) throws NotFindSubclassException {
         BaseHandle baseHandle     = handleFactory.getByHandlerNamePer(PageSearchHandleTypeEnum.QUICK_COMMAND_INDEX.getPageSearchType());
         if (baseHandle instanceof QuickCommandIndicesDistributionPageSearchHandle) {
             QuickCommandIndicesDistributionPageSearchHandle handle = (QuickCommandIndicesDistributionPageSearchHandle) baseHandle;
+            return handle.doPage(condition, projectId);
+        }
+
+        return PaginationResult.buildFail("获取索引分页信息失败");
+    }
+
+    @Override
+    public PaginationResult<ShardDistributionVO> shardDistributionPage(ClusterPhyQuickCommandShardsQueryDTO condition, Integer projectId) throws NotFindSubclassException {
+        BaseHandle baseHandle     = handleFactory.getByHandlerNamePer(PageSearchHandleTypeEnum.QUICK_COMMAND_SHARD.getPageSearchType());
+        if (baseHandle instanceof QuickCommandShardsDistributionPageSearchHandle) {
+            QuickCommandShardsDistributionPageSearchHandle handle = (QuickCommandShardsDistributionPageSearchHandle) baseHandle;
             return handle.doPage(condition, projectId);
         }
 
