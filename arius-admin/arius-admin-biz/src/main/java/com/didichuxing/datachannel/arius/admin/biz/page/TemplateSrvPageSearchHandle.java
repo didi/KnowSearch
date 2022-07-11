@@ -16,9 +16,11 @@ import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
+import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
@@ -112,6 +114,11 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<Templa
         for (IndexTemplate template : templateList) {
             TemplateWithSrvVO templateWithSrvVO = ConvertUtil.obj2Obj(template, TemplateWithSrvVO.class);
             templateWithSrvVO.setOpenSrv(ConvertUtil.list2List(TemplateSrv.codeStr2SrvList(template.getOpenSrv()), TemplateSrvVO.class));
+             Optional.ofNullable(template)
+                     .map(IndexTemplate::getProjectId)
+                     .map(projectService::getProjectBriefByProjectId)
+                     .map(ProjectBriefVO::getProjectName)
+                     .ifPresent(templateWithSrvVO::setProjectName);
             templateWithSrvVOList.add(templateWithSrvVO);
         }
 
