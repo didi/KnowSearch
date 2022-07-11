@@ -142,9 +142,12 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
 
     @Override
     public Result<Long> saveEcmTask(EcmTaskDTO ecmTaskDTO) {
+        if (CollectionUtils.isEmpty(ecmTaskDTO.getEcmParamBaseList())){
+            return Result.buildFail("工单数据异常");
+        }
+        
         //过滤掉nodeNumber 为0的数据
-        List<EcmParamBase> filteredEcmParamBaseList=
-                Optional.ofNullable( ecmTaskDTO.getEcmParamBaseList()).orElse(Lists.newArrayList()).stream()
+        List<EcmParamBase> filteredEcmParamBaseList=ecmTaskDTO.getEcmParamBaseList().stream()
             .filter(elem -> elem.getNodeNumber() != null && elem.getNodeNumber() > 0).collect(Collectors.toList());
 
         EcmTaskPO ecmTaskPO = ConvertUtil.obj2Obj(ecmTaskDTO, EcmTaskPO.class);

@@ -25,7 +25,6 @@ import com.didichuxing.datachannel.arius.admin.common.util.Getter;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -106,6 +105,9 @@ public class ClusterScaleTaskHandler extends AbstractClusterTaskHandler {
 
         List<EcmParamBase> hostScaleParamBaseList = getHostScaleParamBaseList(content.getPhyClusterId().intValue(),
             content.getClusterRoleHosts(), content.getPidCount());
+        if (CollectionUtils.isEmpty(hostScaleParamBaseList)) {
+            return Result.buildParamIllegal("工单数据转化异常");
+        }
 
         ecmTaskDTO.setClusterNodeRole(ListUtils.strList2String(
             hostScaleParamBaseList.stream().map(EcmParamBase::getRoleName).collect(Collectors.toList())));
@@ -140,9 +142,7 @@ public class ClusterScaleTaskHandler extends AbstractClusterTaskHandler {
 
         List<EcmParamBase> ecmParamBaseList =
                 ecmHandleService.buildEcmParamBaseList(phyClusterId, roleNameList).getData();
-        if (CollectionUtils.isEmpty(ecmParamBaseList)){
-            return Collections.emptyList();
-        }
+        
         return buildHostScaleParamBaseList(roleClusterHosts, pidCount, roleNameList, ecmParamBaseList);
     }
 
