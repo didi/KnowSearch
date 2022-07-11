@@ -1,14 +1,18 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord.template;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONAware;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhySetting;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TemplateOperateRecordEnum;
+import com.didichuxing.datachannel.arius.admin.common.util.DiffUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.DiffUtil.Diff;
+import com.google.common.collect.Lists;
+import java.util.List;
+import java.util.Optional;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
-
-import java.util.Objects;
-import java.util.Optional;
 
 /**
  * @author liuchengxiang
@@ -16,33 +20,44 @@ import java.util.Optional;
  */
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 public class TemplateSettingOperateRecord extends TemplateOperateRecord {
-
+    /**
+     * 旧的schema 设置
+     */
+    private JSONObject OldSettings;
+    
+    /**
+     * 新的schema 设置
+     */
+    private   JSONObject newSetting;
+    private   List<Diff> diffResult=Lists.newArrayList();
+    
+    
     public TemplateSettingOperateRecord(IndexTemplatePhySetting oldConfig, IndexTemplatePhySetting newConfig) {
         this.operateType = TemplateOperateRecordEnum.SETTING.getCode();
-
-        StringBuilder settingChange = new StringBuilder();
-        Optional<JSONObject> oldSetting = Optional.ofNullable(oldConfig.getSettings())
-            .map(json -> json.getJSONObject("index"));
-        Optional<JSONObject> newSetting = Optional.ofNullable(newConfig.getSettings())
-            .map(json -> json.getJSONObject("index"));
-        Optional<Integer> newSettingShardNum = newSetting.map(json -> json.getInteger("number_of_replicas"));
-        Integer oldSettingShardNum = oldSetting.map(json -> json.getInteger("number_of_replicas")).orElse(null);
-        newSettingShardNum.ifPresent(newShardNum -> {
-            if (!Objects.equals(newShardNum, oldSettingShardNum)) {
-                settingChange.append(newShardNum > 0 ? "关闭取消副本" : "开启取消副本").append("，");
-            }
-        });
-        Optional<String> newSettingTranslog = newSetting.map(json -> json.getJSONObject("translog"))
-            .map(json -> json.getString("durability"));
-        String oldSettingTranslog = oldSetting.map(json -> json.getJSONObject("translog"))
-            .map(json -> json.getString("durability")).orElse("");
-        newSettingTranslog.ifPresent(newTranslog -> {
-            if (!StringUtils.equals(oldSettingTranslog, newTranslog)) {
-                settingChange.append(newTranslog.equals("async") ? "开启异步translog" : "关闭异步translog");
-            }
-        });
-        this.operateDesc = settingChange.toString();
+        try {
+            final List<Diff> diffs = DiffUtil.diffJson(
+                    Optional.ofNullable(oldConfig).map(IndexTemplatePhySetting::getSettings)
+                            .map(JSONAware::toJSONString)
+                    
+                            .orElse(""), Optional.ofNullable(newConfig).map(IndexTemplatePhySetting::getSettings)
+                            .map(JSONAware::toJSONString)
+                    
+                            .orElse("")
+    
+            );
+            
+            diffResult.addAll(diffs);
+        } catch (Exception ignore) {
+        }
+        OldSettings = oldConfig.getSettings();
+        newSetting = newConfig.getSettings();
+        
     }
-
+    
+    @Override
+    public String toString() {
+        return JSON.toJSONString(this);
+    }
 }

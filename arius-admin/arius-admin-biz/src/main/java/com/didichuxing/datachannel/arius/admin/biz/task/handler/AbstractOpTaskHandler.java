@@ -61,8 +61,8 @@ public abstract class AbstractOpTaskHandler implements OpTaskHandler {
 
         EcmTaskDTO ecmTaskDTO = ConvertUtil.str2ObjByJson(opTask.getExpandData(), EcmTaskDTO.class);
         Result<Long> ret = ecmTaskManager.saveEcmTask(ecmTaskDTO);
-        if (null == ret || ret.failed()) {
-            return Result.buildFail("生成集群新建操作任务失败!");
+        if (ret.failed()) {
+            return Result.buildFrom(ret);
         }
 
         opTask.setBusinessKey(String.valueOf(ret.getData()));
