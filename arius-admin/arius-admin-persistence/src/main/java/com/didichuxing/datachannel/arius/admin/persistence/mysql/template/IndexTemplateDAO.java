@@ -53,5 +53,7 @@ public interface IndexTemplateDAO {
     
     Integer getProjectIdByTemplateLogicId(@Param("logicId")Integer templateLogicId);
 
+    String getNameByTemplateLogicId(@Param("logicId")Integer logicTemplateId);
+
     List<Integer> listAllIds();
 }

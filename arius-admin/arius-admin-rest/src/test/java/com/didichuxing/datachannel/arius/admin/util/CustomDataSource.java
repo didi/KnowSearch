@@ -28,6 +28,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.Cl
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.project.ESUserPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.project.ProjectClusterLogicAuthPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.project.ProjectConfigPO;
@@ -54,6 +56,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterRe
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum;
+import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
 import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import com.didiglobal.logi.security.common.vo.project.ProjectVO;
 import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
@@ -700,5 +703,35 @@ public class CustomDataSource {
             list.add(i);
         }
         return list;
+    }
+
+    public static IndexTemplateWithPhyTemplates getTemplateWithPhyTemplates(){
+        IndexTemplateWithPhyTemplates templateLogicWithPhysical = new IndexTemplateWithPhyTemplates();
+        IndexTemplatePhy indexTemplatePhy = new IndexTemplatePhy();
+        indexTemplatePhy.setId(1L);
+        indexTemplatePhy.setRole(1);
+        List<IndexTemplatePhy> physicals = new ArrayList<>();
+        physicals.add(indexTemplatePhy);
+        templateLogicWithPhysical.setPhysicals(physicals);
+        return templateLogicWithPhysical;
+    }
+
+    public static IndexTemplatePhyWithLogic getIndexTemplatePhyWithLogic(){
+        IndexTemplatePhyWithLogic indexTemplatePhyWithLogic = new IndexTemplatePhyWithLogic();
+        indexTemplatePhyWithLogic.setVersion(1);
+        indexTemplatePhyWithLogic.setExpression("test*");
+        indexTemplatePhyWithLogic.setCluster("test");
+        return indexTemplatePhyWithLogic;
+    }
+
+    public static List<CatIndexResult> getCatIndexResult(){
+        List<CatIndexResult> catIndexResults = new ArrayList<>();
+        CatIndexResult catIndexResult1 = new CatIndexResult();
+        catIndexResult1.setStoreSize("1b");
+        catIndexResults.add(catIndexResult1);
+        CatIndexResult catIndexResult2 = new CatIndexResult();
+        catIndexResult2.setStoreSize("2b");
+        catIndexResults.add(catIndexResult2);
+        return catIndexResults;
     }
 }

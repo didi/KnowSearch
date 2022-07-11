@@ -705,12 +705,14 @@ public class IndicesManagerImpl implements IndicesManager {
             }
         }
 
-        // 统计逻辑模版所有索引的占用磁盘大小
-        for (CatIndexResult catIndexResult : catIndexResults) {
-            String storeSize = catIndexResult.getStoreSize();
-            // storeSize属性为string类型，把单位统一转换为byte
-            Long size = SizeUtil.getUnitSize(storeSize);
-            templateIndicesDiskSum += size;
+        if (CollectionUtils.isNotEmpty(catIndexResults)) {
+            // 统计逻辑模版所有索引的占用磁盘大小
+            for (CatIndexResult catIndexResult : catIndexResults) {
+                String storeSize = catIndexResult.getStoreSize();
+                // storeSize属性为string类型，把单位统一转换为byte
+                Long size = SizeUtil.getUnitSize(storeSize);
+                templateIndicesDiskSum += size;
+            }
         }
 
         return templateIndicesDiskSum;
