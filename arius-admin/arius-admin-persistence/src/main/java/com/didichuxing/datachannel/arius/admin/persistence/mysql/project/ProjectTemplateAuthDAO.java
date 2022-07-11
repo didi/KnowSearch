@@ -1,11 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.persistence.mysql.project;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.po.project.ProjectTemplateAuthPO;
 import java.util.List;
-
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
-
-import com.didichuxing.datachannel.arius.admin.common.bean.po.project.ProjectTemplateAuthPO;
 
 /**
  * @author d06679
@@ -44,6 +42,6 @@ public interface ProjectTemplateAuthDAO {
     List<ProjectTemplateAuthPO> listWithRwAuths();
 
     List<ProjectTemplateAuthPO> listWithOwnerAuths();
-
-
+    
+    Integer getProjectIdById(Long authId);
 }

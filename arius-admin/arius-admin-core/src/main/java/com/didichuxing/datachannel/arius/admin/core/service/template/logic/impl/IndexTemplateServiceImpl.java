@@ -13,7 +13,6 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.operaterec
 
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateRateLimitDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateConfigDTO;
@@ -22,7 +21,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.Template
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.TemplateQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord.template.TemplateOperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ProjectClusterLogicAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ProjectTemplateAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
@@ -40,10 +38,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.DataCenterEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.LevelEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.SortConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TemplateOperateRecordEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.DataTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
@@ -59,7 +54,6 @@ import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
-import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectClusterLogicAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectLogicTemplateAuthService;
@@ -80,7 +74,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -105,8 +98,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
     @Autowired
     private IndexTemplateTypeDAO        indexTemplateTypeDAO;
 
-    @Autowired
-    private OperateRecordService operateRecordService;
+
 
     @Autowired
     private IndexTemplatePhyService indexTemplatePhyService;
@@ -226,24 +218,19 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
      *
      * @param logicTemplateId 模板id
      * @param operator        操作人
-     * @param projectId
      * @return result
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result<Void> delTemplate(Integer logicTemplateId, String operator, Integer projectId) throws AdminOperateException {
+    public Result<Void> delTemplate(Integer logicTemplateId, String operator) throws AdminOperateException {
         IndexTemplatePO oldPO = indexTemplateDAO.getById(logicTemplateId);
         if (oldPO == null) {
             return Result.buildNotExist(TEMPLATE_NOT_EXIST);
         }
-        final Result<Void> checkProjectCorrectly = ProjectUtils.checkProjectCorrectly(IndexTemplatePO::getProjectId, oldPO,
-                projectId);
-        if (checkProjectCorrectly.failed()){
-            return checkProjectCorrectly;
-        }
+
         boolean succeed = (1 == indexTemplateDAO.delete(logicTemplateId));
         if (succeed) {
-            Result<Void> deleteTemplateAuthResult = logicTemplateAuthService.deleteTemplateAuthByTemplateId(oldPO.getId(), AriusUser.SYSTEM.getDesc());
+            Result<Void> deleteTemplateAuthResult = logicTemplateAuthService.deleteTemplateAuthByTemplateId(oldPO.getId());
             if (deleteTemplateAuthResult.failed()) {
                 throw new AdminOperateException("删除模板失败");
             } else {
@@ -256,15 +243,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
             if (result.failed()) {
                 throw new AdminOperateException("删除模板失败");
             } else {
-                operateRecordService.save(new OperateRecord.Builder()
-                                .bizId(logicTemplateId)
-                                .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                                .content(String.format("模板%d下线", logicTemplateId))
-                                .project(projectService.getProjectBriefByProjectId(oldPO.getProjectId()))
-                                .userOperation(operator)
-                                .operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_OFFLINE)
-                        .build());
-                //operateRecordService.save(TEMPLATE, DELETE, logicTemplateId, String.format("模板%d下线", logicTemplateId), operator);
+
                 LOGGER.info("class=TemplateLogicServiceImpl||method=delTemplate||logicId={}||msg=delTemplateByLogicId succ", logicTemplateId);
             }
 
@@ -347,7 +326,8 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
             return checkResult;
         }
 
-        return editTemplateWithoutCheck(param, operator,projectId);
+
+        return editTemplateWithoutCheck(param, operator);
     }
    
 
@@ -898,27 +878,14 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
      * @throws AdminOperateException
      */
     @Override
-    public Result updateBlockReadState(Integer logicId, Boolean blockRead, String operator) {
+    public Result<Void> updateBlockReadState(Integer logicId, Boolean blockRead, String operator) {
         if (null == logicId || null == blockRead) {
             return Result.buildFail("logicId or blockRead is null");
         }
-        int row = indexTemplateDAO.updateBlockReadState(logicId, blockRead);
-        if (1 != row) {
-            return Result.buildFail("修改禁读状态失败");
-        }
-        final Integer projectId = indexTemplateDAO.getProjectIdByTemplateLogicId(logicId);
     
-        operateRecordService.save(
-                new OperateRecord.Builder().operationTypeEnum(OperateTypeEnum.INDEX_MANAGEMENT_READ_WRITE_CHANGE)
-                        .project(Optional.ofNullable(projectId).map(projectService::getProjectBriefByProjectId)
-                                .orElse(null)).userOperation(operator).content(JSON.toJSONString(
-                                new TemplateOperateRecord(TemplateOperateRecordEnum.READ.getCode(),
-                                        "更新读状态为:" + (blockRead ? "禁用读" : "启用读")))).triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                        .userOperation(operator).bizId(logicId).build());
-        //operateRecordService.save(TEMPLATE, EDIT, logicId,
-        //        JSON.toJSONString(new TemplateOperateRecord(TemplateOperateRecordEnum.READ.getCode(),
-        //        "更新读状态为:" + (blockRead ? "禁用读" : "启用读"))), operator);
-        return Result.buildSucc(row);
+
+
+        return Result.build(1==indexTemplateDAO.updateBlockReadState(logicId, blockRead));
     }
 
     /**
@@ -929,30 +896,16 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
      * @return
      */
     @Override
-    public Result updateBlockWriteState(Integer logicId, Boolean blockWrite, String operator) {
+    public Result<Void> updateBlockWriteState(Integer logicId, Boolean blockWrite, String operator) {
         if (null == logicId || null == blockWrite) {
             return Result.buildFail("logicId or blockWrite is null");
         }
-        int row = indexTemplateDAO.updateBlockWriteState(logicId, blockWrite);
-        if (1 != row) {
-            return Result.buildFail("修改禁写状态失败");
-        }
-        final Integer projectId = indexTemplateDAO.getProjectIdByTemplateLogicId(logicId);
-    
-        operateRecordService.save(
-                new OperateRecord.Builder().operationTypeEnum(OperateTypeEnum.INDEX_MANAGEMENT_READ_WRITE_CHANGE)
-                        .project(Optional.ofNullable(projectId).map(projectService::getProjectBriefByProjectId)
-                                .orElse(null)).userOperation(operator).content(JSON.toJSONString(
-                                new TemplateOperateRecord(TemplateOperateRecordEnum.WRITE.getCode(),
-                                        "更新写状态为:" + (blockWrite ? "禁用写" : "启用写"))))
-                        .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).userOperation(operator).bizId(logicId).build());
-        //operateRecordService.save(TEMPLATE, EDIT, logicId, JSON.toJSONString(new TemplateOperateRecord(TemplateOperateRecordEnum.WRITE.getCode(),
-        //        "更新写状态为:" + (blockWrite ? "禁用写" : "启用写"))), operator);
-        return Result.buildSucc(row);
+
+        return Result.build(indexTemplateDAO.updateBlockWriteState(logicId, blockWrite)==1);
     }
 
     @Override
-    public Result updateTemplateWriteRateLimit(ConsoleTemplateRateLimitDTO dto, String operator,Integer projectId) throws ESOperateException {
+    public Result updateTemplateWriteRateLimit(ConsoleTemplateRateLimitDTO dto) throws ESOperateException {
         List<IndexTemplatePhy> phyList = indexTemplatePhyService.getTemplateByLogicId(dto.getLogicId());
         for (IndexTemplatePhy indexTemplatePhy : phyList) {
             ClusterPhy clusterPhy = clusterPhyService.getClusterByName(indexTemplatePhy.getCluster());
@@ -961,12 +914,6 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
                 return Result.buildFail("指定物理集群没有开启写入限流服务");
             }
         }
-        final Integer projectIdByTemplateLogicId = indexTemplateDAO.getProjectIdByTemplateLogicId(dto.getLogicId());
-        final Result<Void> result = ProjectUtils.checkProjectCorrectly(i -> i, projectIdByTemplateLogicId, projectId);
-        if (result.failed()) {
-            return result;
-        }
-    
         IndexTemplatePO oldPO = indexTemplateDAO.getById(dto.getLogicId());
         IndexTemplatePO editTemplate = ConvertUtil.obj2Obj(dto, IndexTemplatePO.class);
         editTemplate.setId(dto.getLogicId());
@@ -980,14 +927,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
             if (editPhyResult.failed()) {
                 return Result.buildFail("修改限流，修改物理模板失败");
             }
-    
-            operateRecordService.save(new OperateRecord.Builder().operationTypeEnum(
-                            OperateTypeEnum.QUERY_TEMPLATE_DSL_CURRENT_LIMIT_ADJUSTMENT).project(
-                            Optional.ofNullable(projectId).map(projectService::getProjectBriefByProjectId).orElse(null))
-                    .userOperation(operator)
-                    .content(String.format("数据库写入限流值修改%s->%s", dto.getCurRateLimit(), dto.getAdjustRateLimit()))
-                    .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).userOperation(operator).bizId(dto.getLogicId())
-                    .build());
+
             SpringTool.publish(new LogicTemplateModifyEvent(this, ConvertUtil.obj2Obj(oldPO, IndexTemplate.class), getLogicTemplateById(oldPO.getId())));
             return Result.buildSucc();
         }
@@ -1093,6 +1033,15 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
      return indexTemplateDAO.batchChangeHotDay(days);
     }
 
+    /**
+     * @param logicTemplateId
+     * @return
+     */
+    @Override
+    public String getNameByTemplateLogicId(Integer logicTemplateId) {
+        return indexTemplateDAO.getNameByTemplateLogicId(logicTemplateId);
+    }
+
     @Override
     public List<Integer> listAllTemplateIds() {
         return indexTemplateDAO.listAllIds();
@@ -1184,12 +1133,11 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
     /**
      * 编辑逻辑模板   无参数校验
      *
-     * @param param     参数
-     * @param operator  操作人
-     * @param projectId
+     * @param param    参数
+     * @param operator 操作人
      * @return result
      */
-    private Result<Void> editTemplateWithoutCheck(IndexTemplateDTO param, String operator, Integer projectId) throws AdminOperateException {
+    private Result<Void> editTemplateWithoutCheck(IndexTemplateDTO param, String operator) throws AdminOperateException {
 
         if (param.getDateFormat() != null) {
             param.setDateFormat(param.getDateFormat().replace("Y", "y"));
@@ -1197,9 +1145,6 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
 
         IndexTemplatePO oldPO = indexTemplateDAO.getById(param.getId());
         IndexTemplatePO editTemplate = ConvertUtil.obj2Obj(param, IndexTemplatePO.class);
-        if ("".equals(editTemplate.getResponsible())) {
-            editTemplate.setResponsible(null);
-        }
 
         boolean succeed = (1 == indexTemplateDAO.update(editTemplate));
 
@@ -1210,21 +1155,6 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
             if (editPhyResult.failed()) {
                 throw new AdminOperateException("修改物理模板失败");
             }
-
-            // 保存模板修改记录
-             operateRecordService.save(new OperateRecord.Builder()
-                             .userOperation(operator)
-                             .content(JSON.toJSONString(
-                    new TemplateOperateRecord(TemplateOperateRecordEnum.TRANSFER.getCode(),
-                            AriusObjUtils.findChangedWithClear(oldPO, editTemplate))))
-                             .project(projectService.getProjectBriefByProjectId(projectId))
-                             .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                             .bizId(param.getId())
-                             
-                             .operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_INFO_MODIFY)
-                     .build());
-            //operateRecordService.save(ModuleEnum.TEMPLATE, OperationEnum.EDIT, param.getId(), JSON.toJSONString(
-            //        new TemplateOperateRecord(TemplateOperateRecordEnum.TRANSFER.getCode(), AriusObjUtils.findChangedWithClear(oldPO, editTemplate))), operator);
 
             SpringTool.publish(new LogicTemplateModifyEvent(this, ConvertUtil.obj2Obj(oldPO, IndexTemplate.class)
                     , getLogicTemplateById(oldPO.getId())));

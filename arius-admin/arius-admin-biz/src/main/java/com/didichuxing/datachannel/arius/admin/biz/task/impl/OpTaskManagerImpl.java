@@ -71,31 +71,32 @@ public class OpTaskManagerImpl implements OpTaskManager {
         final Result<OpTask> opTaskResult = handler.addTask(ConvertUtil.obj2Obj(opTaskDTO, OpTask.class));
         if (opTaskResult.success()) {
             OperateTypeEnum operationType;
-            String content=opTaskDTO.getTitle();
+            String content;
             switch (typeEnum) {
                 case CLUSTER_NEW:
                     operationType = OperateTypeEnum.PHYSICAL_CLUSTER_NEW;
+                    content=opTaskDTO.getTitle();
                     break;
                 case CLUSTER_OFFLINE:
                     operationType = OperateTypeEnum.PHYSICAL_CLUSTER_OFFLINE;
+                    content=opTaskDTO.getTitle();
                     break;
                 case TEMPLATE_DCDR:
                     operationType = OperateTypeEnum.TEMPLATE_SERVICE_DCDR_SETTING;
+                    content=opTaskDTO.getTitle();
                     break;
                 case CLUSTER_SHRINK:
                 case CLUSTER_EXPAND:
                      operationType = OperateTypeEnum.PHYSICAL_CLUSTER_CAPACITY;
-                    break;
-                case CLUSTER_CONFIG_EDIT:
-                case CLUSTER_CONFIG_ADD:
-                case CLUSTER_CONFIG_DELETE:
-                    operationType = OperateTypeEnum.PHYSICAL_CLUSTER_CONF_FILE_CHANGE;
+                     content=opTaskDTO.getTitle();
                     break;
                 case CLUSTER_RESTART:
                     operationType = OperateTypeEnum.PHYSICAL_CLUSTER_RESTART;
+                    content=opTaskDTO.getTitle();
                     break;
                 case CLUSTER_UPGRADE:
                     operationType = OperateTypeEnum.PHYSICAL_CLUSTER_UPGRADE;
+                    content=opTaskDTO.getTitle();
                     break;
                 default:
                     operationType = null;

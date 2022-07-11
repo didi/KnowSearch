@@ -405,6 +405,15 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
      * @return
      */
     @Override
+    public Integer getIdByName(String phyCluster) {
+        return clusterDAO.getIdByName(phyCluster);
+    }
+    
+    /**
+     * @param phyCluster
+     * @return
+     */
+    @Override
     public Result<List<ClusterTemplateSrv>> getPhyClusterTemplateSrv(ClusterPhy phyCluster) {
        if (null == phyCluster) {
             return Result.buildNotExist(PHYSICAL_CLUSTER_NOT_EXISTS);

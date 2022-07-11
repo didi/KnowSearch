@@ -2,9 +2,9 @@ package com.didichuxing.datachannel.arius.admin.core.service.es;
 
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.AriusAdminApplicationTest;
+import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.NodeAttrInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsDashboardTopNDTO;
-import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ECSegmentOnIp;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStatsResponse;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
@@ -135,13 +135,13 @@ public class ESClusterServiceTest extends AriusAdminApplicationTest {
 
     @Test
     public void syncGetNode2PluginsMapTest() {
-        Mockito.when(esClusterDAO.getNode2PluginsMap(Mockito.any())).thenReturn(new HashMap<>());
+        Mockito.when(esClusterDAO.getNode2PluginsMap(Mockito.any(),Mockito.any())).thenReturn(new HashMap<>());
         Assertions.assertNotNull(esClusterService.syncGetNode2PluginsMap(CustomDataSource.PHY_CLUSTER_NAME));
     }
 
     @Test
     public void syncGetAliasMapTest() {
-        Mockito.when(esClusterDAO.getClusterAlias(Mockito.any())).thenReturn(null);
+        Mockito.when(esClusterDAO.getClusterAlias(Mockito.any(), Mockito.any())).thenReturn(null);
         Assertions.assertTrue(esClusterService.syncGetAliasMap(CustomDataSource.PHY_CLUSTER_NAME).isEmpty());
         ESIndicesGetAliasResponse response = new ESIndicesGetAliasResponse();
         Map<String, AliasIndexNode> m = new HashMap<>();
@@ -151,13 +151,13 @@ public class ESClusterServiceTest extends AriusAdminApplicationTest {
         aliasIndexNode.setAliases(aliases);
         m.put("test1", aliasIndexNode);
         response.setM(m);
-        Mockito.when(esClusterDAO.getClusterAlias(Mockito.any())).thenReturn(response);
+        Mockito.when(esClusterDAO.getClusterAlias(Mockito.any(),Mockito.any() )).thenReturn(response);
         Assertions.assertFalse(esClusterService.syncGetAliasMap(CustomDataSource.PHY_CLUSTER_NAME).isEmpty());
     }
 
     @Test
     public void syncGetClusterHealthTest() {
-        Mockito.when(esClusterDAO.getClusterHealth(Mockito.any())).thenReturn(new ESClusterHealthResponse());
+        Mockito.when(esClusterDAO.getClusterHealth(Mockito.any(),Mockito.anyInt())).thenReturn(new ESClusterHealthResponse());
         Assertions.assertNotNull(esClusterService.syncGetClusterHealth(CustomDataSource.PHY_CLUSTER_NAME));
     }
 
@@ -212,7 +212,7 @@ public class ESClusterServiceTest extends AriusAdminApplicationTest {
     public void syncGetAllSettingsByClusterTest() {
         Map<String, ClusterNodeInfo> map = new HashMap<>();
         map.put("test", new ClusterNodeInfo());
-        Mockito.when(esClusterDAO.getAllSettingsByCluster(Mockito.any())).thenReturn(map);
+        Mockito.when(esClusterDAO.getAllSettingsByCluster(Mockito.any(),Mockito.any())).thenReturn(map);
         Assertions.assertFalse(esClusterService.syncGetAllSettingsByCluster(CustomDataSource.PHY_CLUSTER_NAME).isEmpty());
     }
 
@@ -220,13 +220,13 @@ public class ESClusterServiceTest extends AriusAdminApplicationTest {
     public void syncGetPartOfSettingsByClusterTest() {
         Map<String, ClusterNodeSettings> map = new HashMap<>();
         map.put("test", new ClusterNodeSettings());
-        Mockito.when(esClusterDAO.getPartOfSettingsByCluster(Mockito.any())).thenReturn(map);
+        Mockito.when(esClusterDAO.getPartOfSettingsByCluster(Mockito.any(),Mockito.any())).thenReturn(map);
         Assertions.assertFalse(esClusterService.syncGetPartOfSettingsByCluster(CustomDataSource.PHY_CLUSTER_NAME).isEmpty());
     }
 
     @Test
     public void synGetESVersionByClusterTest() {
-        Mockito.when(esClusterDAO.getESVersionByCluster(Mockito.any())).thenReturn("v");
+        Mockito.when(esClusterDAO.getESVersionByCluster(Mockito.any(),Mockito.any())).thenReturn("v");
         Assertions.assertNotNull(esClusterService.synGetESVersionByCluster(CustomDataSource.PHY_CLUSTER_NAME));
     }
 }
