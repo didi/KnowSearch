@@ -1,6 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.setting.impl;
 
-import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.setting.TemplatePhySettingManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord.template.TemplateSettingOperateRecord;
@@ -97,7 +96,7 @@ public class TemplatePhySettingManagerImpl implements TemplatePhySettingManager 
                              .operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_EDIT_SETTING)
                      
                      
-                             .content(JSON.toJSONString(new TemplateSettingOperateRecord(oldTemplateSettings, newTemplateSettings)))
+                             .content(new TemplateSettingOperateRecord(oldTemplateSettings, newTemplateSettings).toString())
                              .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
                      .build());
         }

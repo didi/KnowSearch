@@ -102,13 +102,14 @@ public class ClusterScaleTaskHandler extends AbstractClusterTaskHandler {
             ClusterIndecreaseHostContent.class);
         ecmTaskDTO.setPhysicClusterId(content.getPhyClusterId());
         ecmTaskDTO.setOrderType(content.getOperationType());
-
-        List<EcmParamBase> hostScaleParamBaseList = getHostScaleParamBaseList(content.getPhyClusterId().intValue(),
-            content.getClusterRoleHosts(), content.getPidCount());
-        if (CollectionUtils.isEmpty(hostScaleParamBaseList)) {
-            return Result.buildParamIllegal("工单数据转化异常");
+    
+        final Result<List<EcmParamBase>> hostScaleParamBaseListResult = getHostScaleParamBaseList(
+                content.getPhyClusterId().intValue(), content.getClusterRoleHosts(), content.getPidCount());
+        if (hostScaleParamBaseListResult.failed()){
+            return Result.buildFrom(hostScaleParamBaseListResult);
         }
-
+         List<EcmParamBase> hostScaleParamBaseList = hostScaleParamBaseListResult.getData();
+    
         ecmTaskDTO.setClusterNodeRole(ListUtils.strList2String(
             hostScaleParamBaseList.stream().map(EcmParamBase::getRoleName).collect(Collectors.toList())));
         ecmTaskDTO.setEcmParamBaseList(hostScaleParamBaseList);
@@ -131,7 +132,7 @@ public class ClusterScaleTaskHandler extends AbstractClusterTaskHandler {
     }
 
 
-    private List<EcmParamBase> getHostScaleParamBaseList(Integer phyClusterId,
+    private Result<List<EcmParamBase>> getHostScaleParamBaseList(Integer phyClusterId,
                                                            List<ESClusterRoleHost> roleClusterHosts, Integer pidCount) {
         List<String> roleNameList = new ArrayList<>();
         for (ESClusterRoleHost clusterRoleHost : roleClusterHosts) {
@@ -139,19 +140,22 @@ public class ClusterScaleTaskHandler extends AbstractClusterTaskHandler {
                 roleNameList.add(clusterRoleHost.getRole());
             }
         }
-
-        List<EcmParamBase> ecmParamBaseList =
-                ecmHandleService.buildEcmParamBaseList(phyClusterId, roleNameList).getData();
+        final Result<List<EcmParamBase>> listResult = ecmHandleService.buildEcmParamBaseList(phyClusterId,
+                roleNameList);
+        if (listResult.failed()){
+            return Result.buildFrom(listResult);
+        }
+        List<EcmParamBase> ecmParamBaseList =listResult.getData();
         
-        return buildHostScaleParamBaseList(roleClusterHosts, pidCount, roleNameList, ecmParamBaseList);
+        
+        return Result.buildSucc(buildHostScaleParamBaseList(roleClusterHosts, pidCount, roleNameList,
+                ecmParamBaseList));
     }
 
     private List<EcmParamBase> buildHostScaleParamBaseList(List<ESClusterRoleHost> roleClusterHosts, Integer pidCount,
                                                              List<String> roleNameList,
                                                              List<EcmParamBase> ecmParamBaseList) {
-        if (CollectionUtils.isEmpty(roleNameList)){
-            return Lists.newArrayList();
-        }
+       
         List<EcmParamBase> hostScaleParamBaseList = Lists.newArrayList();
         for (String roleName : roleNameList) {
             List<String> hostnameList = Lists.newArrayList();
