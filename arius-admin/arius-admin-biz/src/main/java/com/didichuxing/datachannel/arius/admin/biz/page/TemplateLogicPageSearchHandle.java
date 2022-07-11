@@ -14,8 +14,10 @@ import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
+import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import com.google.common.collect.Lists;
 import java.util.List;
+import java.util.Optional;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -78,8 +80,15 @@ public class TemplateLogicPageSearchHandle extends AbstractPageSearchHandle<Temp
     /******************************************private***********************************************/
     private List<ConsoleTemplateVO> buildOtherInfo(List<IndexTemplate> indexTemplateList) {
         if (CollectionUtils.isEmpty(indexTemplateList)) { return Lists.newArrayList();}
-
         List<ConsoleTemplateVO> consoleTemplateVOList = ConvertUtil.list2List(indexTemplateList, ConsoleTemplateVO.class);
+        consoleTemplateVOList.forEach(consoleTemplateVO -> {
+           
+            Optional.ofNullable(consoleTemplateVO.getProjectId())
+                    .map(projectService::getProjectBriefByProjectId)
+                    .map(ProjectBriefVO::getProjectName)
+                    .ifPresent(consoleTemplateVO::setProjectName);
+            
+        });
         //1. 设置逻辑集群
         RESOURCE_BUILD_FUTURE_UTIL
                 .runnableTask(() -> setTemplateClusterName(consoleTemplateVOList))
