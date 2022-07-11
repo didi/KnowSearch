@@ -15,6 +15,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.Cl
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionWithNodeInfoVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
@@ -247,8 +248,36 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
 
         return Result.buildSucc(validClusterRegionVOList);
     }
-
-
+    
+    /**
+     * @param regionId
+     * @param operator
+     * @param projectId
+     * @return
+     */
+    @Override
+    public Result<Void> deletePhyClusterRegion(Long regionId, String operator, Integer projectId) {
+        final Result<Void> result = ProjectUtils.checkProjectCorrectly(i -> i, projectId, projectId);
+        if (result.failed()) {
+            return result;
+        }
+        ClusterRegion region = clusterRegionService.getRegionById(regionId);
+        Result<Void> voidResult = clusterRegionService.deletePhyClusterRegion(regionId, operator);
+        if (voidResult.success()) {
+            
+            //CLUSTER_REGION, DELETE, regionId, "", operator
+            operateRecordService.save(
+                    new OperateRecord.Builder().operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_REGION_CHANGE)
+                            .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                            .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID)).content(
+                                    String.format("cluster:%s,region删除：%s,删除的regionId：%s", region.getPhyClusterName(),
+                                            region.getName(), regionId)).userOperation(operator)
+                            .bizId(clusterPhyService.getClusterByName(region.getPhyClusterName())).build());
+        }
+        
+        return voidResult;
+    }
+    
     
 
     /***************************************** private method ****************************************************/

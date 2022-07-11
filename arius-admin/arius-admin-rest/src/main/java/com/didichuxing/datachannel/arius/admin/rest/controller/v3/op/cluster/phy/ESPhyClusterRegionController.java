@@ -54,7 +54,7 @@ public class ESPhyClusterRegionController {
     @ResponseBody
     @ApiOperation(value = "删除物理集群region接口", notes = "")
     public Result<Void> removeRegion(HttpServletRequest request, @PathVariable("regionId") Long regionId) {
-        return clusterPhyManager.deletePhyClusterRegion(regionId, HttpRequestUtil.getOperator(request),
+        return clusterRegionManager.deletePhyClusterRegion(regionId, HttpRequestUtil.getOperator(request),
                 HttpRequestUtil.getProjectId(request));
     }
 

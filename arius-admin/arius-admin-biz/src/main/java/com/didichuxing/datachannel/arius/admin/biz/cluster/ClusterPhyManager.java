@@ -309,6 +309,5 @@ public interface ClusterPhyManager {
      */
     Result<List<String>> listClusterPhyNameByResourceType(Integer clusterResourceType, Integer projectId);
     
-    Result<Void> deletePhyClusterRegion(Long regionId, String operator, Integer projectId);
 
 }

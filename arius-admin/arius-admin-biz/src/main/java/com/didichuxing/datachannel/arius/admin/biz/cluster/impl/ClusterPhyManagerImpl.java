@@ -1013,35 +1013,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         return clusterRoleService.getAllRoleClusterByClusterId(clusterId);
     }
     
-    /**
-     * @param regionId
-     * @param operator
-     * @param projectId
-     * @return
-     */
-    @Override
-    public Result<Void> deletePhyClusterRegion(Long regionId, String operator, Integer projectId) {
-        final Result<Void> result = ProjectUtils.checkProjectCorrectly(i -> i, projectId, projectId);
-        if (result.failed()) {
-            return result;
-        }
-        ClusterRegion region = clusterRegionService.getRegionById(regionId);
-        Result<Void> voidResult = clusterRegionService.deletePhyClusterRegion(regionId, operator);
-        if (voidResult.success()) {
-            
-            //CLUSTER_REGION, DELETE, regionId, "", operator
-            operateRecordService.save(
-                    new OperateRecord.Builder().operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_REGION_CHANGE)
-                            .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                            .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID)).content(
-                                    String.format("cluster:%s,region删除：%s,删除的regionId：%s", region.getPhyClusterName(),
-                                            region.getName(), regionId)).userOperation(operator)
-                            .bizId(clusterPhyService.getClusterByName(region.getPhyClusterName())).build());
-        }
-        
-        return voidResult;
-    }
-    
+
     /**************************************** private method ***************************************************/
     
     private Result<Boolean> deleteClusterInner(Integer clusterPhyId, Integer projectId) {

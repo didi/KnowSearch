@@ -67,8 +67,7 @@ public interface ClusterRegionManager {
      */
     Result<List<ClusterRegionVO>> listNotEmptyClusterRegionByClusterName(String clusterName);
     
-    
- 
-    
+    Result<Void> deletePhyClusterRegion(Long regionId, String operator, Integer projectId);
+
   
 }
