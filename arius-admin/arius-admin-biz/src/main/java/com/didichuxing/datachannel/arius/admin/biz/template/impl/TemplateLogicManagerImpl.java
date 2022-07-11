@@ -930,7 +930,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
      * @return
      */
     @Override
-    public Result<ConsoleTemplateDetailVO> detail(Integer logicId) {
+    public Result<ConsoleTemplateDetailVO> getDetailVoByLogicId(Integer logicId) {
   IndexTemplateWithCluster indexTemplateLogicWithCluster = indexTemplateService
                 .getLogicTemplateWithCluster(logicId);
 

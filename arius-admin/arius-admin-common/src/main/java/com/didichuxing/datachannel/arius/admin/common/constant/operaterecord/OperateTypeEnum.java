@@ -202,7 +202,7 @@ public enum OperateTypeEnum {
     ES_CLUSTER_CONFIG_DELETE(NewModuleEnum.ES_CLUSTER_CONFIG, "删除集群配置", 50),
     
     ES_CLUSTER_CONFIG_ADD(NewModuleEnum.ES_CLUSTER_CONFIG, "新增集群配置", 51),
-    ES_CLUSTER_CONFIG_EDIT(NewModuleEnum.ES_CLUSTER_CONFIG, "编辑集群配置", 52),
+ 
     ROLE_MANAGER_DELETE(NewModuleEnum.ROLE_MANAGER, "删除角色", 58),
     ROLE_MANAGER_CREATE(NewModuleEnum.ROLE_MANAGER, "创建角色", 53),
     ROLE_MANAGER_UNBIND_USER(NewModuleEnum.ROLE_MANAGER, "角色解绑用户", 54),

@@ -13,12 +13,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.Cluste
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionWithNodeInfoVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.IndexTemplatePhysicalVO;
-import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
@@ -33,7 +29,6 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.Clust
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.service.ProjectService;
@@ -75,8 +70,7 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
     private OperateRecordService operateRecordService;
     @Autowired
     private ProjectService          projectService;
-     @Autowired
-    private IndexTemplatePhyService physicalService;
+  
 
     /**
      * 构建regionVO
@@ -253,66 +247,10 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
 
         return Result.buildSucc(validClusterRegionVOList);
     }
+
+
     
-    /**
-     * @param regionId 
-     * @param operator
-     * @param projectId
-     * @return
-     */
-    @Override
-    public Result<Void> deletePhyClusterRegion(Long regionId, String operator, Integer projectId) {
-        final Result<Void> result = ProjectUtils.checkProjectCorrectly(i -> i, projectId, projectId);
-        if (result.failed()) {
-            return result;
-        }
-        ClusterRegion region = clusterRegionService.getRegionById(regionId);
-        Result<Void> voidResult = clusterRegionService.deletePhyClusterRegion(regionId, operator);
-        if (voidResult.success()) {
-        
-            //CLUSTER_REGION, DELETE, regionId, "", operator
-            operateRecordService.save(
-                    new OperateRecord.Builder().operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_REGION_CHANGE)
-                            .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                            .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID)).content(
-                                    String.format("cluster:%s,region删除：%s,删除的regionId：%s", region.getPhyClusterName(),
-                                            region.getName(), regionId)).userOperation(operator)
-                            .bizId(clusterPhyService.getClusterByName(region.getPhyClusterName())).build());
-        }
-    
-        return voidResult;
-    }
-    
-    /**
-     * @param regionId
-     * @return
-     */
-    @Override
-    public Result<List<ESClusterRoleHostVO>> listClusterRoleHostByRegionId(Long regionId) {
-        ClusterRegion region = clusterRegionService.getRegionById(regionId);
-        if (region == null) {
-            return Result.buildFail("region不存在");
-        }
-        Result<List<ClusterRoleHost>> ret = clusterRoleHostService.listByRegionId(region.getId().intValue());
-        if (ret.failed()) {
-            return Result.buildFail("获取host失败");
-        
-        }
-        return Result.buildSucc(ConvertUtil.list2List(ret.getData(), ESClusterRoleHostVO.class));
-    }
-    
-    /**
-     * @param regionId
-     * @return
-     */
-    @Override
-    public Result<List<IndexTemplatePhysicalVO>> listByRegionId(Integer regionId) {
-        Result<List<IndexTemplatePhy>> ret = physicalService.listByRegionId(regionId);
-        if (ret.failed()) {
-            return Result.buildFrom(ret);
-        }
-        return Result.buildSucc(ConvertUtil.list2List(ret.getData(), IndexTemplatePhysicalVO.class));
-    }
+
     /***************************************** private method ****************************************************/
     /**
      * 对于逻辑集群绑定的物理集群的版本进行一致性校验

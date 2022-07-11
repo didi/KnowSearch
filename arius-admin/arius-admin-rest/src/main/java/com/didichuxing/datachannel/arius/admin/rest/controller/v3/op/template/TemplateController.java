@@ -74,7 +74,7 @@ public class TemplateController extends BaseTemplateController {
     @ApiImplicitParam(type = "Integer", name = "logicId", value = "逻辑模板ID", required = true)
     public Result<ConsoleTemplateDetailVO> detail(HttpServletRequest request, @PathVariable Integer logicId) {
         
-        return templateLogicManager.detail(logicId);
+        return templateLogicManager.getDetailVoByLogicId(logicId);
      
     }
     @PutMapping("")

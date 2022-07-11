@@ -90,12 +90,6 @@ public class OpTaskManagerImpl implements OpTaskManager {
                      operationType = OperateTypeEnum.PHYSICAL_CLUSTER_CAPACITY;
                      content=opTaskDTO.getTitle();
                     break;
-                case CLUSTER_CONFIG_EDIT:
-                case CLUSTER_CONFIG_ADD:
-                case CLUSTER_CONFIG_DELETE:
-                    operationType = OperateTypeEnum.PHYSICAL_CLUSTER_CONF_FILE_CHANGE;
-                    content=opTaskDTO.getTitle();
-                    break;
                 case CLUSTER_RESTART:
                     operationType = OperateTypeEnum.PHYSICAL_CLUSTER_RESTART;
                     content=opTaskDTO.getTitle();

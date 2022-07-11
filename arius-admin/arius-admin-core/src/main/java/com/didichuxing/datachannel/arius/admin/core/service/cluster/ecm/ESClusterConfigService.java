@@ -60,19 +60,12 @@ public interface ESClusterConfigService {
     /**
      * 新增/编辑ES集群配置
      * @param param
-     * @param operator
      * @param actionEnum ADD EDIT
      * @return
      */
     Result<Long> esClusterConfigAction(ESConfigDTO param, EsConfigActionEnum actionEnum, String operator);
 
-    /**
-     * 批量增加Es配置
-     * @param esConfigs
-     * @param operator
-     * @return
-     */
-    List<Long> batchCreateEsClusterConfigs(List<ESConfigDTO> esConfigs, String operator);
+
 
     /**
      * 删除ES集群配置
@@ -100,11 +93,9 @@ public interface ESClusterConfigService {
      * 修改配置详情
      *
      * @param param
-     * @param operator
-     * @param projectId
      * @return
      */
-    Result<Void> editConfigDesc(ESConfigDTO param, String operator, Integer projectId);
+    Result<Void> editConfigDesc(ESConfigDTO param);
 
     /**
      * 删除固定集群角色配置类型下的配置信息
