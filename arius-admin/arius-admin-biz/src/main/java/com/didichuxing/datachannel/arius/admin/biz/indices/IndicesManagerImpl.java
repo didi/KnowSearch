@@ -20,6 +20,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.srv.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.IndexCatCell;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.IndexShardInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord.template.TemplateMappingOperateRecord;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord.template.TemplateSettingOperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
@@ -50,6 +52,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.Clust
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexCatService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
+import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.metadata.job.index.IndexCatInfoCollector;
@@ -66,6 +69,7 @@ import com.google.common.collect.Maps;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
@@ -113,8 +117,9 @@ public class IndicesManagerImpl implements IndicesManager {
 
     @Autowired
     private IndexTemplateService indexTemplateService;
-
-
+    
+    @Autowired
+    private ESTemplateService templateService;
 
     private static final String DEFAULT_SORT_TERM = "timestamp";
 
@@ -381,7 +386,7 @@ public class IndicesManagerImpl implements IndicesManager {
     }
 
     @Override
-    public Result<Void> editMapping(IndexCatCellWithConfigDTO param, Integer projectId) {
+    public Result<Void> editMapping(IndexCatCellWithConfigDTO param, Integer projectId, String operate) {
         Result<String> getClusterRet = getClusterPhyByClusterNameAndProjectId(param.getCluster(), projectId);
         if (getClusterRet.failed()) {
             return Result.buildFrom(getClusterRet);
@@ -396,6 +401,7 @@ public class IndicesManagerImpl implements IndicesManager {
         if (StringUtils.isBlank(mapping)) {
             return Result.buildFail("请传入索引Mapping");
         }
+        final Result<IndexMappingVO> beforeMapping = getMapping(phyCluster, indexName, projectId);
         Result<MappingConfig> mappingRet;
         if (!StringUtils.contains(mapping, "\"properties\"")) {
             //这里为了兼容多 type索引，前端进针对用户输入的内容做封装，所以后端解析封装
@@ -408,8 +414,22 @@ public class IndicesManagerImpl implements IndicesManager {
         if (mappingRet.failed()) {
             return Result.buildFail("mapping 转换异常");
         }
+        final boolean syncUpdateIndexMapping = esIndexService.syncUpdateIndexMapping(phyCluster, indexName, mappingRet.getData());
+        if (syncUpdateIndexMapping) {
+            
+            final Result<IndexMappingVO> afterMapping = getMapping(phyCluster, indexName, projectId);
+            
+            operateRecordService.save(new OperateRecord.Builder().project(
+                            Optional.ofNullable(projectId).map(projectService::getProjectBriefByProjectId).orElse(null))
+                    .userOperation(operate).operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_EDIT_MAPPING)
+                    .content(new TemplateMappingOperateRecord(beforeMapping.getData(), afterMapping.getData()).toString())
+                    .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                
+                    .build());
+        }
+       
 
-        return Result.build(esIndexService.syncUpdateIndexMapping(phyCluster, indexName, mappingRet.getData()));
+        return Result.build(syncUpdateIndexMapping);
     }
 
     @Override
@@ -441,7 +461,7 @@ public class IndicesManagerImpl implements IndicesManager {
     }
 
     @Override
-    public Result<Void> editSetting(IndexCatCellWithConfigDTO param, Integer projectId) throws ESOperateException {
+    public Result<Void> editSetting(IndexCatCellWithConfigDTO param, Integer projectId, String operator) throws ESOperateException {
         Result<String> getClusterRet = getClusterPhyByClusterNameAndProjectId(param.getCluster(), projectId);
         if (getClusterRet.failed()) {
             return Result.buildFrom(getClusterRet);
@@ -452,7 +472,7 @@ public class IndicesManagerImpl implements IndicesManager {
         if (ret.failed()) {
             return Result.buildFrom(ret);
         }
-
+        final Result<IndexSettingVO> beforeSetting = getSetting(phyCluster, indexName, projectId);
         JSONObject settingObj = JSON.parseObject(param.getSetting());
         if (null == settingObj) {
             return Result.buildFail("setting 配置非法");
@@ -463,8 +483,19 @@ public class IndicesManagerImpl implements IndicesManager {
             .map(IndexConfig::getSettings).orElse(Maps.newHashMap());
         final Map<String, String> finalSettingMap = IndexSettingsUtil.getChangedSettings(sourceSettings,
             JsonUtils.flat(settingObj));
-        return Result.build(esIndexService.syncPutIndexSettings(phyCluster, Lists.newArrayList(indexName),
-            finalSettingMap, RETRY_COUNT));
+        final boolean syncPutIndexSettings = esIndexService.syncPutIndexSettings(phyCluster, Lists.newArrayList(indexName),
+                finalSettingMap, RETRY_COUNT);
+        if (syncPutIndexSettings){
+            final Result<IndexSettingVO> afterSetting = getSetting(phyCluster, indexName, projectId);
+            operateRecordService.save(new OperateRecord.Builder().project(
+                            Optional.ofNullable(projectId).map(projectService::getProjectBriefByProjectId).orElse(null))
+                    .userOperation(operator).operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_EDIT_SETTING)
+                    .content(new TemplateSettingOperateRecord(beforeSetting.getData(), afterSetting.getData()).toString())
+                    .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                
+                    .build());
+        }
+        return Result.build(syncPutIndexSettings);
     }
 
     @Override

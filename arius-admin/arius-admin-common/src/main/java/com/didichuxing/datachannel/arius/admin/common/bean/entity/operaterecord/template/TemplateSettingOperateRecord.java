@@ -4,10 +4,10 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONAware;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhySetting;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexSettingVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TemplateOperateRecordEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.DiffUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.DiffUtil.Diff;
-import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
@@ -31,7 +31,6 @@ public class TemplateSettingOperateRecord extends TemplateOperateRecord {
      * 新的schema 设置
      */
     private   JSONObject newSetting;
-    private   List<Diff> diffResult=Lists.newArrayList();
     
     
     public TemplateSettingOperateRecord(IndexTemplatePhySetting oldConfig, IndexTemplatePhySetting newConfig) {
@@ -54,6 +53,19 @@ public class TemplateSettingOperateRecord extends TemplateOperateRecord {
         OldSettings = oldConfig.getSettings();
         newSetting = newConfig.getSettings();
         
+    }
+    
+     public TemplateSettingOperateRecord(IndexSettingVO oldSetting, IndexSettingVO newSettingVo) {
+        OldSettings = oldSetting.getProperties();
+        newSetting = newSettingVo.getProperties();
+        try {
+            final List<Diff> diffs = DiffUtil.diffJson(OldSettings.toJSONString(), newSetting.toJSONString());
+            
+            diffResult.addAll(diffs);
+        } catch (Exception ignore) {
+        }
+        
+        operateType = TemplateOperateRecordEnum.SETTING.getCode();
     }
     
     @Override
