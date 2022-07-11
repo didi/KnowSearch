@@ -95,6 +95,8 @@ public class TemplatePhySettingManagerImpl implements TemplatePhySettingManager 
              operateRecordService.save(new OperateRecord.Builder()
                              .bizId(logicId)
                              .operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_EDIT_SETTING)
+                     
+                     
                              .content(JSON.toJSONString(new TemplateSettingOperateRecord(oldTemplateSettings, newTemplateSettings)))
                              .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
                      .build());

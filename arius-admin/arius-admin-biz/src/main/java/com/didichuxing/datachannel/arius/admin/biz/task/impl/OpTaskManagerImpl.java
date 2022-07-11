@@ -69,7 +69,7 @@ public class OpTaskManagerImpl implements OpTaskManager {
 
         OpTaskHandler handler = (OpTaskHandler) handleFactory.getByHandlerNamePer(taskHandleEnum.getMessage());
         final Result<OpTask> opTaskResult = handler.addTask(ConvertUtil.obj2Obj(opTaskDTO, OpTask.class));
-        if (opTaskResult.failed()) {
+        if (opTaskResult.success()) {
             OperateTypeEnum operationType;
             String content=opTaskDTO.getTitle();
             switch (typeEnum) {
