@@ -1,6 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.core.service.gateway;
 
 import static com.didichuxing.datachannel.arius.admin.util.CustomDataSource.gatewayHeartbeatFactory;
+import static org.mockito.MockitoAnnotations.initMocks;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.GatewayHeartbeat;
 import com.didichuxing.datachannel.arius.admin.core.service.gateway.impl.GatewayServiceImpl;
@@ -10,9 +11,11 @@ import com.didichuxing.datachannel.arius.admin.persistence.mysql.gateway.Gateway
 import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
 import java.util.HashSet;
 import java.util.Set;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -22,22 +25,23 @@ import org.springframework.test.util.ReflectionTestUtils;
  */
 public class GatewayServiceTest {
 
-    GatewayService gatewayService = new GatewayServiceImpl();
-    //通过Mockito.mock()构造对应的mock对象
-    GatewayClusterDAO gatewayClusterDAO = Mockito.mock(GatewayClusterDAO.class);
-    GatewayClusterNodeDAO gatewayClusterNodeDAO = Mockito.mock(GatewayClusterNodeDAO.class);
+    @InjectMocks
+    GatewayServiceImpl gatewayService ;
+    @Mock
+    GatewayClusterDAO gatewayClusterDAO ;
+    @Mock
+    GatewayClusterNodeDAO gatewayClusterNodeDAO ;
+    @Mock
+    ESGatewayClient esGatewayClient ;
+
     Set<String> clusterNames = new HashSet<>();
-    ESGatewayClient esGatewayClient = Mockito.mock(ESGatewayClient.class);
     @BeforeEach
     public void init(){
-        ReflectionTestUtils.setField(gatewayService, "gatewayClusterNodeDAO", gatewayClusterNodeDAO);
-        ReflectionTestUtils.setField(gatewayService,"gatewayClusterDAO",gatewayClusterDAO);
         clusterNames.add("admin");
         //通过反射机制实现对应的对象中参数的赋值
+        initMocks(this);
         ReflectionTestUtils.setField(gatewayService,"clusterNames",clusterNames);
-        //ReflectionTestUtils.setField(gatewayService,"appService",appService);
-        ReflectionTestUtils.setField(gatewayService,"esGatewayClient",esGatewayClient);
-    }
+   }
 
     @Test
     void heartbeatTest() {
