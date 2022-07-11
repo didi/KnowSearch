@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.GatewayHeartbeat;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectTemplateAuthDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRegionDTO;
@@ -27,6 +28,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.Cluste
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
@@ -56,6 +58,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterRe
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
 import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import com.didiglobal.logi.security.common.vo.project.ProjectVO;
@@ -697,8 +700,8 @@ public class CustomDataSource {
             "attributes");
     }
 
-    public static List<Integer> getTemplateIdList() {
-        ArrayList<Integer> list = new ArrayList<>();
+    public static List<Integer> getTemplateIds() {
+        List<Integer> list = new ArrayList<>();
         for (int i = 1; i < SIZE; i++) {
             list.add(i);
         }
@@ -733,5 +736,17 @@ public class CustomDataSource {
         catIndexResult2.setStoreSize("2b");
         catIndexResults.add(catIndexResult2);
         return catIndexResults;
+    }
+
+    public static IndexTemplate getIndexTemplate(){
+        IndexTemplate indexTemplate = new IndexTemplate();
+        indexTemplate.setDiskSize(30.0);
+        return indexTemplate;
+    }
+
+    public static Result<Void> getResult(){
+        Result<Void> result = new Result<>();
+        result.setCode(ResultType.SUCCESS.getCode());
+        return result;
     }
 }
