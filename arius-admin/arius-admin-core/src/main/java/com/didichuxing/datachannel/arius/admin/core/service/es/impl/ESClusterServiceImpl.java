@@ -140,7 +140,7 @@ public class ESClusterServiceImpl implements ESClusterService {
 
     @Override
     public Map<String, List<String>> syncGetNode2PluginsMap(String cluster) {
-        return esClusterDAO.getNode2PluginsMap(cluster);
+        return esClusterDAO.getNode2PluginsMap(cluster,3);
     }
 
     /**
@@ -154,7 +154,7 @@ public class ESClusterServiceImpl implements ESClusterService {
         Map<String, Set<String>> ret = new HashMap<>();
 
         try {
-            ESIndicesGetAliasResponse response = esClusterDAO.getClusterAlias(cluster);
+            ESIndicesGetAliasResponse response = esClusterDAO.getClusterAlias(cluster,3 );
             if(response == null || response.getM() == null) {
                 return ret;
             }
@@ -248,7 +248,7 @@ public class ESClusterServiceImpl implements ESClusterService {
 
     @Override
     public ClusterHealthEnum syncGetClusterHealthEnum(String clusterName) {
-        ESClusterHealthResponse clusterHealthResponse = esClusterDAO.getClusterHealth(clusterName);
+        ESClusterHealthResponse clusterHealthResponse = esClusterDAO.getClusterHealth(clusterName,3);
 
         ClusterHealthEnum clusterHealthEnum = ClusterHealthEnum.UNKNOWN;
         if (clusterHealthResponse != null) {
@@ -288,7 +288,7 @@ public class ESClusterServiceImpl implements ESClusterService {
 
     @Override
     public String synGetESVersionByCluster(String cluster) {
-        return esClusterDAO.getESVersionByCluster(cluster);
+        return esClusterDAO.getESVersionByCluster(cluster,3);
     }
 
     @Override

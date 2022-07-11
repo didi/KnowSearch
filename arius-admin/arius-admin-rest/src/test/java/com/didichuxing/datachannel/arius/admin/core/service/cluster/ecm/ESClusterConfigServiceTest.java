@@ -12,7 +12,6 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.Clust
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.ecm.ESClusterConfigDAO;
 import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
-import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -128,15 +127,7 @@ public class ESClusterConfigServiceTest extends AriusAdminApplicationTest {
         Assertions.assertEquals(esConfigDTO.getDesc(), esClusterConfigDAO.getById(id).getDesc());
     }
 
-    @Test
-    public void batchCreateEsClusterConfigsTest() {
-        ESConfigDTO esConfigDTO = CustomDataSource.esConfigDTOFactory();
-        List<ESConfigDTO> esConfigDTOS = Arrays.asList(esConfigDTO);
-        List<Long> clusterConfig = esClusterConfigService.batchCreateEsClusterConfigs(esConfigDTOS, CustomDataSource.OPERATOR);
-        ESConfigPO esConfigPo = esClusterConfigDAO.getByClusterIdAndTypeAndEnginAndVersion(esConfigDTO.getClusterId(),
-                esConfigDTO.getTypeName(), esConfigDTO.getEnginName(), esConfigDTO.getVersionConfig());
-        Assertions.assertTrue(clusterConfig.stream().anyMatch(l -> l.equals(esConfigPo.getId())));
-    }
+    
 
     @Test
     public void deleteEsClusterConfigTest() {
@@ -164,24 +155,20 @@ public class ESClusterConfigServiceTest extends AriusAdminApplicationTest {
         Integer projectId=1;
         ESConfigDTO esConfigDTO = CustomDataSource.esConfigDTOFactory();
         Assertions.assertEquals(Result.buildParamIllegal("集群配置Id为空").getMessage(),
-                esClusterConfigService.editConfigDesc(esConfigDTO, CustomDataSource.OPERATOR,
-                      projectId  ).getMessage());
+                esClusterConfigService.editConfigDesc(esConfigDTO).getMessage());
         Long clusterId = 1234L;
         esConfigDTO.setClusterId(clusterId);
         Long id = esClusterConfigService.esClusterConfigAction(esConfigDTO, EsConfigActionEnum.ADD, CustomDataSource.OPERATOR).getData();
         esConfigDTO.setId(id);
         esConfigDTO.setDesc("new desc");
-        Assertions.assertTrue(esClusterConfigService.editConfigDesc(esConfigDTO, CustomDataSource.OPERATOR,
-            projectId   ).success());
+        Assertions.assertTrue(esClusterConfigService.editConfigDesc(esConfigDTO).success());
         Assertions.assertEquals(esConfigDTO.getDesc(), esClusterConfigDAO.getById(id).getDesc());
         esConfigDTO.setConfigData("");
         Assertions.assertEquals(Result.buildParamIllegal("不允许修改集群配置数据信息").getMessage(),
-                esClusterConfigService.editConfigDesc(esConfigDTO, CustomDataSource.OPERATOR,
-                        projectId).getMessage());
+                esClusterConfigService.editConfigDesc(esConfigDTO).getMessage());
         esConfigDTO.setId(id + 1);
         Assertions.assertEquals(Result.buildParamIllegal("集群配置不存在").getMessage(),
-                esClusterConfigService.editConfigDesc(esConfigDTO, CustomDataSource.OPERATOR,
-                        projectId).getMessage());
+                esClusterConfigService.editConfigDesc(esConfigDTO).getMessage());
     }
 
     @Test

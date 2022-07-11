@@ -1,10 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.persistence.mysql.ecm;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.po.esconfig.ESConfigPO;
+import java.util.List;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
-
-import java.util.List;
 
 /**
  * @author lyn
@@ -39,4 +38,6 @@ public interface ESClusterConfigDAO {
     int deleteByClusterIdAndTypeAndEngin(@Param("clusterId") Long clusterId,
                                          @Param("type") String type,
                                          @Param("engin") String enginName);
+    
+    Integer getClusterIdByConfigId(@Param("id")Long configId);
 }

@@ -50,7 +50,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
@@ -540,16 +539,15 @@ public class ClusterRoleHostServiceImpl implements ClusterRoleHostService {
 
         // 构建原生集群节点信息列表
         for (Map.Entry</*UUID*/String, ClusterNodeInfo> entry : clusterNodeInfoMap.entrySet()) {
+             if (!clusterNodeSettingsMap.containsKey(entry.getKey())) {
+                continue;
+            }
             // 为纳管2.3.3版本的角色信息，需要从_nodes/settings中获取
             ClusterNodeInfo clusterNodeInfo = entry.getValue();
             // 根据节点的UUID获取对应的全量的角色信息
+            
             ClusterNodeSettings clusterNodeSettings = clusterNodeSettingsMap.get(entry.getKey());
-            // 重新设置clusterNodeInfo的roles列表 todo 后期优化
-            final Boolean clusterNodeSettingsBoolean = Optional.ofNullable(clusterNodeSettings)
-                    .map(setting -> Objects.nonNull(setting.getRoles())).orElse(false);
-            if (Boolean.FALSE.equals(clusterNodeSettingsBoolean)) {
-                continue;
-            }
+            // 重新设置clusterNodeInfo的roles列表
             clusterNodeInfo.setRoles(buildRolesInfoFromSettings(clusterNodeSettings));
             // 构建节点角色的多角色信息
             buildMultiRoleListForESNode(clusterNodeInfoListFromES, clusterNodeInfo);
@@ -624,7 +622,8 @@ public class ClusterRoleHostServiceImpl implements ClusterRoleHostService {
         nodePO.setIp(Getter.withDefault(clusterNodeInfo.getIp(), ""));
         nodePO.setHostname(Getter.withDefault(clusterNodeInfo.getHost(), ""));
         nodePO.setNodeSet(Getter.withDefault(clusterNodeInfo.getName(), ""));
-        nodePO.setAttributes(ConvertUtil.map2String(clusterNodeInfo.getAttributes()));
+        Optional.ofNullable(clusterNodeInfo.getAttributes())
+                .map(ConvertUtil::map2String).ifPresent(nodePO::setAttributes);
 
         HttpInfo httpInfo = clusterNodeInfo.getHttpInfo();
         if (null != httpInfo && null != httpInfo.getPublishAddress()) {

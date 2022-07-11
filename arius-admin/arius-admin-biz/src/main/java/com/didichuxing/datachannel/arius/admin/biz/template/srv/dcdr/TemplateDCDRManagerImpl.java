@@ -239,9 +239,10 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
         if (result.success()) {
             operateRecordService.save(new OperateRecord.Builder().project(
                             projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID)).content(
-                            "创建DCDR链路，主集群：" + templateLogicWithPhysical.getMasterPhyTemplate().getCluster() + "；从集群："
-                            + targetCluster).userOperation(operator).bizId(templateId)
-                    .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                
+                            String.format("创建DCDR链路，主集群：%s，从集群：%s", sourceClusterPhy.getCluster(),
+                                    targetClusterPhy.getCluster()))
+                    .userOperation(operator).bizId(templateId).triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
                     .operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE_DCDR_SETTING)
             
                     .build());

@@ -114,24 +114,24 @@ public class ProjectLogicTemplateAuthServiceTest extends AriusAdminApplicationTe
         //设置Owner权限，这是不允许的
         projectTemplateAuthDTO.setType(ProjectTemplateAuthEnum.OWN.getCode());
         Assertions.assertTrue(
-                projectLogicTemplateAuthService.addTemplateAuth(projectTemplateAuthDTO, CustomDataSource.OPERATOR).failed());
-        Assertions.assertTrue(projectLogicTemplateAuthService.addTemplateAuth(null, null).failed());
+                projectLogicTemplateAuthService.addTemplateAuth(projectTemplateAuthDTO).failed());
+        Assertions.assertTrue(projectLogicTemplateAuthService.addTemplateAuth(null).failed());
         //设置责任人字段为空
         projectTemplateAuthDTO.setResponsible(null);
         Assertions.assertTrue(
-                projectLogicTemplateAuthService.addTemplateAuth(projectTemplateAuthDTO, CustomDataSource.OPERATOR).failed());
+                projectLogicTemplateAuthService.addTemplateAuth(projectTemplateAuthDTO).failed());
         //设置权限字段为空
         projectTemplateAuthDTO.setType(null);
         Assertions.assertTrue(
-                projectLogicTemplateAuthService.addTemplateAuth(projectTemplateAuthDTO, CustomDataSource.OPERATOR).failed());
+                projectLogicTemplateAuthService.addTemplateAuth(projectTemplateAuthDTO).failed());
         //设置不存在的逻辑模板id字段
         projectTemplateAuthDTO.setTemplateId(1111111111);
         Assertions.assertTrue(
-                projectLogicTemplateAuthService.addTemplateAuth(projectTemplateAuthDTO, CustomDataSource.OPERATOR).failed());
+                projectLogicTemplateAuthService.addTemplateAuth(projectTemplateAuthDTO).failed());
         //设置所属的appid字段为空
         projectTemplateAuthDTO.setProjectId(null);
         Assertions.assertTrue(
-                projectLogicTemplateAuthService.addTemplateAuth(projectTemplateAuthDTO, CustomDataSource.OPERATOR).failed());
+                projectLogicTemplateAuthService.addTemplateAuth(projectTemplateAuthDTO).failed());
     }
     
     @Test
@@ -148,7 +148,7 @@ public class ProjectLogicTemplateAuthServiceTest extends AriusAdminApplicationTe
         //设置Owner权限，这是不允许的
         projectTemplateAuthDTO.setType(ProjectTemplateAuthEnum.OWN.getCode());
         Assertions.assertTrue(
-                projectLogicTemplateAuthService.addTemplateAuth(projectTemplateAuthDTO, CustomDataSource.OPERATOR)
+                projectLogicTemplateAuthService.addTemplateAuth(projectTemplateAuthDTO)
                         .failed());
     }
 
@@ -159,10 +159,10 @@ public class ProjectLogicTemplateAuthServiceTest extends AriusAdminApplicationTe
         Mockito.when(templateAuthDAO.getByProjectIdAndTemplateId(
                Mockito.anyInt(),Mockito.anyString())).thenReturn(CustomDataSource.projectTemplateAuthPO());
         //对插入的数据进行删除
-        Assertions.assertTrue(projectLogicTemplateAuthService.deleteTemplateAuth(CustomDataSource.projectTemplateAuthPO().getId(), CustomDataSource.OPERATOR).success());
+        Assertions.assertTrue(projectLogicTemplateAuthService.deleteTemplateAuth(CustomDataSource.projectTemplateAuthPO().getId()).success());
         //确认是否真的被删除
         //null异常情况的判断
-        Assertions.assertTrue(projectLogicTemplateAuthService.deleteTemplateAuth(null,CustomDataSource.OPERATOR).failed());
+        Assertions.assertTrue(projectLogicTemplateAuthService.deleteTemplateAuth(null).failed());
     }
 
     @Test

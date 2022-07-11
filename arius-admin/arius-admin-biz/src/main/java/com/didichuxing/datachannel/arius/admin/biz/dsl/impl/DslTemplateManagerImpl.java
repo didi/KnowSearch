@@ -61,7 +61,7 @@ public class DslTemplateManagerImpl implements DslTemplateManager {
                                 String.format("queryLimit %f->%f", entry.getValue(), queryLimit))
                         .operationTypeEnum(OperateTypeEnum.QUERY_TEMPLATE_DSL_CURRENT_LIMIT_ADJUSTMENT)
                         .project(projectService.getProjectBriefByProjectId(projectId)).userOperation(operator)
-                        .bizId(entry.getKey()).build();
+                        .bizId(entry.getKey()).buildDefaultManualTrigger();
                 operateRecordService.save(operateRecord);
             }
             
@@ -78,10 +78,10 @@ public class DslTemplateManagerImpl implements DslTemplateManager {
                 projectId, dslTemplateMd5);
         if (Boolean.TRUE.equals(templateStatus.v3)) {
             OperateRecord operateRecord = new OperateRecord.Builder().content(
-                            "变更前:" + templateStatus.v1 + ";变更后:" + templateStatus.v2)
-                    .operationTypeEnum(OperateTypeEnum.QUERY_TEMPLATE_DSL_CURRENT_LIMIT_ADJUSTMENT)
+                            "变更前:" + templateStatus.v1 + ";变更后:" + templateStatus.v3)
+                    .operationTypeEnum(OperateTypeEnum.QUERY_TEMPLATE_DISABLE)
                     .project(projectService.getProjectBriefByProjectId(projectId)).userOperation(operator)
-                    .bizId(dslTemplateMd5).build();
+                    .bizId(dslTemplateMd5).buildDefaultManualTrigger();
             operateRecordService.save(operateRecord);
         }
         return Result.build(templateStatus.v3);

@@ -607,12 +607,15 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
                         : templateLogicWithPhysical.getExpireTime(),
                     finalRateLimitNew, templatePhysical.getVersion(), templateLogicWithPhysical.getIdField(),
                     templateLogicWithPhysical.getRoutingField()));
-            operateRecordService.save(new OperateRecord.Builder().operationTypeEnum(
-                            OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_INFO_MODIFY).userOperation(SYSTEM.getDesc())
-                    .triggerWayEnum(TriggerWayEnum.TIMING_TASK)
-                     .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
-                    .content("rateLimitOld:" + rateLimitOld + ",rateLimitNew:" + rateLimitNew)
-                    .bizId(templatePhysical.getId()).build());
+            if (esSuccess) {
+                operateRecordService.save(new OperateRecord.Builder().operationTypeEnum(
+                                OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_INFO_MODIFY).userOperation(SYSTEM.getDesc())
+                        .triggerWayEnum(TriggerWayEnum.TIMING_TASK)
+                        .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
+                        .content(String.format("rateLimit:%s->%s", rateLimitOld, rateLimitNew))
+                        .bizId(templatePhysical.getId()).build());
+            }
+            
           
 
             return esSuccess;

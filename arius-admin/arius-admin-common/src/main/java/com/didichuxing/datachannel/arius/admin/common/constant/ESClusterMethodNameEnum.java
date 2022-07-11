@@ -8,11 +8,10 @@ public enum ESClusterMethodNameEnum {
     /**
      * ES集群状态
      */
-    ES_CLUSTER_status("集群状态",null),
+    ES_CLUSTER_STATUS("集群状态",null),
     /**
      * ES集群开始
      */
-    ES_CLUSTER_start("集群启动",OperateTypeEnum.PHYSICAL_CLUSTER_START),
     /**
      * ES集群能力
      */
@@ -25,10 +24,7 @@ public enum ESClusterMethodNameEnum {
      * ES集群重新启动
      */
     ES_CLUSTER_RESTART("集群重启",OperateTypeEnum.PHYSICAL_CLUSTER_RESTART),
-    /**
-     * ES集群
-     */
-    ES_CLUSTER("集群",OperateTypeEnum.PHYSICAL_CLUSTER_START),
+    
     /**
      * ES集群
      */

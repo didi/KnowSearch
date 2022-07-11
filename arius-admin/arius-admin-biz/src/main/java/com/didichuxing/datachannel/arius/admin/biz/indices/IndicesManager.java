@@ -1,8 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.biz.indices;
 
-import java.util.List;
-import java.util.function.BiFunction;
-
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatCellDTO;
@@ -18,6 +15,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexShard
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
+import java.util.List;
+import java.util.function.BiFunction;
 
 /**
  * @author lyn
@@ -38,7 +37,6 @@ public interface IndicesManager {
      * @param indexCreateDTO
      * @param projectId
      * @param operator
-     * @return
      */
     Result<Void> createIndex(IndexCatCellWithConfigDTO indexCreateDTO, Integer projectId, String operator);
 
@@ -83,24 +81,24 @@ public interface IndicesManager {
     Result<Boolean> closeIndex(List<IndexCatCellDTO> params, Integer projectId, String operator);
     /**
      * 配合删除真实集群索引使用
+     * <p>
+     * 1. 批量设置存储索引cat/index信息的元数据索引中的文档标志位（deleteFlag）为true 2. 采集任务不采集已删除索引
      *
-     * 1. 批量设置存储索引cat/index信息的元数据索引中的文档标志位（deleteFlag）为true
-     * 2. 采集任务不采集已删除索引
-     *
-     * @param cluster          物理集群
-     * @param indexNameList    索引名称列表
+     * @param cluster       物理集群
+     * @param indexNameList 索引名称列表
      * @return
      */
-    Result<Boolean> updateIndexFlagInvalid(String cluster, List<String> indexNameList);
+    Result<Void> updateIndexFlagInvalid(String cluster, List<String> indexNameList);
 
     /**
      * 编辑索引setting阻塞信息
+     *
      * @param params    索引信息列表
-     * @param projectId     项目
+     * @param projectId 项目
      * @param operator  操作人
-     * @return          Boolean
+     * @return Boolean
      */
-    Result<Boolean> editIndexBlockSetting(List<IndicesBlockSettingDTO> params, Integer projectId, String operator);
+    Result<Void> editIndexBlockSetting(List<IndicesBlockSettingDTO> params, Integer projectId, String operator);
 
     /**
      * 获取索引mapping
@@ -158,19 +156,23 @@ public interface IndicesManager {
 
     /**
      * 新增别名
+     *
      * @param param
      * @param projectId 项目
+     * @param operator
      * @return
      */
-    Result<Void> addIndexAliases(IndexCatCellWithConfigDTO param, Integer projectId);
+    Result<Void> addIndexAliases(IndexCatCellWithConfigDTO param, Integer projectId, String operator);
 
     /**
      * 删除别名
+     *
      * @param param
      * @param projectId 项目
+     * @param operator
      * @return
      */
-    Result<Void> deleteIndexAliases(IndexCatCellWithConfigDTO param, Integer projectId);
+    Result<Void> deleteIndexAliases(IndexCatCellWithConfigDTO param, Integer projectId, String operator);
 
     /**
      * 获取索引别名

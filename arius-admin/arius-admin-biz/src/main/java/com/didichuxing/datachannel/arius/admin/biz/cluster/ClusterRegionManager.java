@@ -6,7 +6,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.Cluster
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionWithNodeInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
-
 import java.util.List;
 
 public interface ClusterRegionManager {
@@ -67,4 +66,8 @@ public interface ClusterRegionManager {
      * @return                    Result<List<ClusterRegionVO>>
      */
     Result<List<ClusterRegionVO>> listNotEmptyClusterRegionByClusterName(String clusterName);
+    
+    Result<Void> deletePhyClusterRegion(Long regionId, String operator, Integer projectId);
+
+  
 }
