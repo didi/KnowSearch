@@ -3,10 +3,12 @@ package com.didichuxing.datachannel.arius.admin.biz.template.srv;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
 import com.didichuxing.datachannel.arius.admin.biz.page.TemplateSrvPageSearchHandle;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.BaseTemplateSrv;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.cold.ColdManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.ColdSrvOpenDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.TemplateQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterTemplateSrv;
@@ -48,6 +50,7 @@ import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -92,13 +95,15 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
     private ClusterLogicService   clusterLogicService;
     @Autowired
     private ClusterContextManager clusterContextManager;
+    @Autowired
+    private ColdManager coldManager;
 
     @PostConstruct
     public void init() {
         Map<String, BaseTemplateSrv> strTemplateSrvHandleMap = SpringTool.getBeansOfType(BaseTemplateSrv.class);
         strTemplateSrvHandleMap.forEach((k, v) -> {
             try {
-                NewTemplateSrvEnum srvEnum = v.templateSrv();
+                TemplateServiceEnum srvEnum = v.templateSrv();
                 BASE_TEMPLATE_SRV_MAP.put(srvEnum.getCode(), v);
             } catch (Exception e) {
                 LOGGER.error("class=TemplateSrvManagerImpl||method=init||error=", e);
@@ -167,11 +172,19 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
     }
 
     @Override
-    public Result<Void> openSrv(Integer srvCode, List<Integer> templateIdList, String operator, Integer projectId) {
+    public Result<Void> openSrv(Integer srvCode, List<Integer> templateIdList, String operator, Integer projectId,
+                                ColdSrvOpenDTO data) {
         BaseTemplateSrv srvHandle = BASE_TEMPLATE_SRV_MAP.get(srvCode);
         if (null == srvHandle) { return Result.buildParamIllegal("未找到对应的服务");}
 
         try {
+            if (Objects.nonNull(data)){
+                Result<Integer> result = coldManager.batchChangeHotDay(data.getColdSaveDays(), operator,
+                        templateIdList, projectId);
+                if (result.failed()){
+                    return Result.buildFrom(result);
+                }
+            }
             return srvHandle.openSrv(templateIdList,operator,projectId);
         } catch (AdminOperateException e) {
             LOGGER.error("class=TemplateSrvManagerImpl||method=openSrv||templateIdList={}||srvCode={}" +

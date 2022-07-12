@@ -112,7 +112,7 @@ public class IndicesManagerImpl implements IndicesManager {
 
     @Autowired
     private IndexTemplateService indexTemplateService;
-    
+
     @Autowired
     private ESTemplateService templateService;
 
@@ -177,13 +177,13 @@ public class IndicesManagerImpl implements IndicesManager {
                                     .userOperation(operator)
                                     .content(String.format("删除【%s】集群中的索引：【%s】", cluster,
                                             indexName))
-                                  
+
                                     .project(projectService.getProjectBriefByProjectId(projectId))
                                          .bizId(indexName)
-                            
+
                             .buildDefaultManualTrigger());
                     }
-                   
+
                 }
             }
             return Result.buildSucc();
@@ -238,11 +238,11 @@ public class IndicesManagerImpl implements IndicesManager {
                         new OperateRecord.Builder().project(projectService.getProjectBriefByProjectId(projectId))
                                 .content(String.format("开启【%s】集群中的索引：【%s】", cluster,
                                         indexName)).userOperation(operator)
-                               
+
                                 .bizId(indexName)
                                 .operationTypeEnum(OperateTypeEnum.INDEX_MANAGEMENT_OP_INDEX).buildDefaultManualTrigger());
                 }
-                
+
               
 
             } catch (ESOperateException e) {
@@ -276,12 +276,12 @@ public class IndicesManagerImpl implements IndicesManager {
                             .project(projectService.getProjectBriefByProjectId(projectId))
                             .operationTypeEnum(OperateTypeEnum.INDEX_MANAGEMENT_OP_INDEX).userOperation(operator)
                           .bizId(indexName)
-            
+
                             .buildDefaultManualTrigger()
-    
+
                     );
                 }
-                
+
                 
 
             } catch (ESOperateException e) {
@@ -364,7 +364,7 @@ public class IndicesManagerImpl implements IndicesManager {
                                     .operationTypeEnum(OperateTypeEnum.INDEX_MANAGEMENT_READ_WRITE_CHANGE)
                                     .buildDefaultManualTrigger());
                         }
-                        
+
                     }
                 } catch (ESOperateException e) {
                     LOGGER.error(
@@ -427,19 +427,19 @@ public class IndicesManagerImpl implements IndicesManager {
         }
         final boolean syncUpdateIndexMapping = esIndexService.syncUpdateIndexMapping(phyCluster, indexName, mappingRet.getData());
         if (syncUpdateIndexMapping) {
-            
+
             final Result<IndexMappingVO> afterMapping = getMapping(phyCluster, indexName, projectId);
-            
+
             operateRecordService.save(new OperateRecord.Builder().project(
                             projectService.getProjectBriefByProjectId(projectId))
                     .userOperation(operate).operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_EDIT_MAPPING)
                     .content(new TemplateMappingOperateRecord(beforeMapping.getData(), afterMapping.getData()).toString())
-                  
+
                             .bizId(indexName)
-                
+
                     .buildDefaultManualTrigger());
         }
-       
+
 
         return Result.build(syncUpdateIndexMapping);
     }
@@ -508,9 +508,9 @@ public class IndicesManagerImpl implements IndicesManager {
                             projectService.getProjectBriefByProjectId(projectId))
                     .userOperation(operator).operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_EDIT_SETTING)
                     .content(new TemplateSettingOperateRecord(beforeSetting.getData(), afterSetting.getData()).toString())
-                    
+
                             .bizId(indexName)
-                
+
                     .buildDefaultManualTrigger());
         }
         return Result.build(syncPutIndexSettings);

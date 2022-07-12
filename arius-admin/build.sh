@@ -59,6 +59,7 @@ function make_output() {
         cp -rf ./APP_META $output &&
         cp -rf ./APP_META/Dockerfile $output &&
         mkdir $output/nginx && cp -rf ./APP_META/nginx/conf $output/nginx &&
+        mkdir $output/代码行统计 && cp -rf ./src/test/java/com/didichuxing/datachannel/arius/admin/statMethodLine.txt $output/代码行统计 &&
         mkdir $output/测试覆盖率报告 && mv target/site/jacoco-aggregate output/测试覆盖率报告 &&
         mv target/${module}.jar output  #拷贝目标war包或者jar包等 至output目录下
         echo -e "make output ok."
