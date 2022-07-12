@@ -157,7 +157,7 @@ public final class DiffUtil {
     if (result == null) {
       return;
     }
-    Diff diff = new Diff.DiffBuilder().original(expected).actual(actual).field(field)
+    Diff diff = new Diff.DiffBuilder().source(expected).target(actual).field(field)
         .type(type.name().toLowerCase(
             Locale.ROOT)).build();
     result.add(diff);
@@ -251,11 +251,11 @@ public final class DiffUtil {
     /**
      * 原始
      */
-    private Object original;
+    private Object source;
     /**
      * 实际
      */
-    private Object actual;
+    private Object target;
   }
 
   @Data

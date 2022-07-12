@@ -72,7 +72,7 @@ public class TemplateController extends BaseTemplateController {
     @ResponseBody
     @ApiOperation(value = "获取模板详细信息接口【三方接口】",tags = "【三方接口】" )
     @ApiImplicitParam(type = "Integer", name = "logicId", value = "逻辑模板ID", required = true)
-    public Result<ConsoleTemplateDetailVO> detail(HttpServletRequest request, @PathVariable Integer logicId) {
+    public Result<ConsoleTemplateDetailVO> detail(HttpServletRequest request, @PathVariable("logicId") Integer logicId) {
         
         return templateLogicManager.getDetailVoByLogicId(logicId);
      
