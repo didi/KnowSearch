@@ -25,7 +25,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateSettingVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.template.NewTemplateSrvEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.mapping.AriusIndexTemplateSetting;
@@ -65,8 +65,8 @@ public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrvImpl implem
      * @return
      */
     @Override
-    public NewTemplateSrvEnum templateSrv() {
-        return NewTemplateSrvEnum.TEMPLATE_SETTING;
+    public TemplateServiceEnum templateSrv() {
+        return TemplateServiceEnum.TEMPLATE_SETTING;
     }
     
     @Override

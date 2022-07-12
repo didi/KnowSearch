@@ -28,7 +28,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateM
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.template.NewTemplateSrvEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.mapping.AnalyzerEnum;
 import com.didichuxing.datachannel.arius.admin.common.mapping.AriusTypeProperty;
@@ -114,8 +114,8 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrvImpl impleme
      * @return
      */
     @Override
-    public NewTemplateSrvEnum templateSrv() {
-        return NewTemplateSrvEnum.TEMPLATE_MAPPING;
+    public TemplateServiceEnum templateSrv() {
+        return TemplateServiceEnum.TEMPLATE_MAPPING;
     }
     
     /**

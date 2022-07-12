@@ -13,6 +13,7 @@ import java.util.List;
  * @author chengxiang
  * @date 2022/5/17
  */
+@Deprecated
 public enum NewTemplateSrvEnum {
 
     /**
