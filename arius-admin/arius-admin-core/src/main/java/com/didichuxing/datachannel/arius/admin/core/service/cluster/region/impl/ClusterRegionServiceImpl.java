@@ -164,8 +164,8 @@ public class ClusterRegionServiceImpl implements ClusterRegionService {
                 // 获取被绑定的全部逻辑集群的名称
                 logicClusterNames.add(clusterLogic.getName());
             }
-            return Result.buildFail(String.format("删除region[%s]会同时解绑关联逻辑集群(%s)，请谨慎操作。",
-                    region.getName(), ListUtils.strList2String(logicClusterNames)));
+            return Result.buildFail(String.format("region [%d] 已经被绑定到逻辑集群 [%s]", regionId,
+                    ListUtils.strList2String(logicClusterNames)));
         }
 
         // 校验region是否还存在数据节点，如region中存在数据节点，需要先进行移除
