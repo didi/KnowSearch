@@ -244,8 +244,10 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
             return result;
         }
         ClusterRegion region = clusterRegionService.getRegionById(regionId);
-        Result<Void> voidResult = clusterRegionService.deletePhyClusterRegion(regionId, operator);
-        if (voidResult.success()) {
+        if (null == region) { return Result.buildFail(String.format("region[%s]不存在", regionId));}
+
+        Result<Void> deletResult = clusterRegionService.deletePhyClusterRegion(regionId, operator);
+        if (deletResult.success()) {
             // 释放region中的节点
             Result<List<ClusterRoleHost>> ret = clusterRoleHostService.listByRegionId(regionId.intValue());
             if (ret.failed()) { throw new AdminOperateException(String.format("删除region失败, msg:%s", ret.getMessage()));}
@@ -256,6 +258,8 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
                 ClusterRegionWithNodeInfoDTO clusterRegionWithNodeInfoDTO = new ClusterRegionWithNodeInfoDTO();
                 clusterRegionWithNodeInfoDTO.setId(regionId);
                 clusterRegionWithNodeInfoDTO.setUnBindingNodeIds(unBindingNodeIds);
+                clusterRegionWithNodeInfoDTO.setPhyClusterName(region.getPhyClusterName());
+                clusterRegionWithNodeInfoDTO.setName(region.getName());
 
                 Result<Boolean> editMultiNode2RegionRet = clusterNodeManager.editMultiNode2Region(Lists.newArrayList(clusterRegionWithNodeInfoDTO), operator, projectId);
                 if (editMultiNode2RegionRet.failed()) { throw new AdminOperateException(String.format("删除region失败, msg:%s",
@@ -272,7 +276,7 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
                             .bizId(clusterPhyService.getClusterByName(region.getPhyClusterName())).build());
         }
         
-        return voidResult;
+        return deletResult;
     }
 
     @Override

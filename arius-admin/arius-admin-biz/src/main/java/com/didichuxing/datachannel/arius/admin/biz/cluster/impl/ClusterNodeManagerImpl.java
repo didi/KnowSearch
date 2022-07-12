@@ -280,12 +280,7 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
 
     private Result<Boolean> editNode2Region(ClusterRegionWithNodeInfoDTO param) throws AdminOperateException {
         Result<Boolean> checkRet = baseCheckParamValid(param);
-        if (checkRet.failed()) {
-            return Result.buildFrom(checkRet);
-        }
-        if (!clusterRegionService.isExistByRegionId(param.getId().intValue())) {
-            return Result.buildFail(String.format("regionId[%s]不存在", param.getId()));
-        }
+        if (checkRet.failed()) { return Result.buildFrom(checkRet);}
 
         // 校验bindingNodeIds 和 unBindingNodeIds的重复性
         List<Integer> bindingNodeIds   = param.getBindingNodeIds();
