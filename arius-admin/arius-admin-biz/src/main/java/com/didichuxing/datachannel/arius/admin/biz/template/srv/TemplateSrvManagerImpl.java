@@ -103,7 +103,7 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
         Map<String, BaseTemplateSrv> strTemplateSrvHandleMap = SpringTool.getBeansOfType(BaseTemplateSrv.class);
         strTemplateSrvHandleMap.forEach((k, v) -> {
             try {
-                NewTemplateSrvEnum srvEnum = v.templateSrv();
+                TemplateServiceEnum srvEnum = v.templateSrv();
                 BASE_TEMPLATE_SRV_MAP.put(srvEnum.getCode(), v);
             } catch (Exception e) {
                 LOGGER.error("class=TemplateSrvManagerImpl||method=init||error=", e);
