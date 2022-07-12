@@ -2,6 +2,8 @@ package com.didichuxing.datachannel.arius.admin.biz.template.srv.cold;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 
+import java.util.List;
+
 /**
  * @author chengxiang, zqr
  * @date 2022/5/13
@@ -29,4 +31,6 @@ public interface ColdManager {
      * @return
      */
     Result<Boolean> move2ColdNode(String cluster);
+
+    Result<Integer> batchChangeHotDay(Integer coldSaveDays, String operator, List<Integer> templateIdList, Integer projectId);
 }
