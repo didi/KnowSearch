@@ -1026,11 +1026,14 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
     
     /**
      * @param days
+     * @param templateIdList
      * @return
      */
     @Override
-    public int batchChangeHotDay(Integer days) {
-     return indexTemplateDAO.batchChangeHotDay(days);
+    public int batchChangeHotDay(Integer days, List<Integer> templateIdList) {
+        
+        
+        return  indexTemplateDAO.batchChangeHotDay(days, templateIdList);
     }
     
     /**
