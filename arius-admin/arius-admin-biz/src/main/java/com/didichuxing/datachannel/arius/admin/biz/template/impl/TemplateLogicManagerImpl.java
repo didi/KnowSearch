@@ -37,7 +37,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.Template
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord.template.TemplateOperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ProjectTemplateAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
@@ -590,17 +589,15 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             Result<Void> updateStatusResult = indexTemplateService.updateTemplateConfig(indexTemplateConfigDTO, operator);
             if (updateStatusResult.success()) {
                 // rollover状态修改记录(兼容开启或者关闭)
-                 operateRecordService.save(new OperateRecord.Builder()
-                         
-                                 .bizId(templateLogicId)
-                                 .userOperation(operator)
-                         .project(Optional.of(projectId).map(projectService::getProjectBriefByProjectId).orElse(null))
-                                 .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                                 .content(JSON.toJSONString(
-                        new TemplateOperateRecord(TemplateOperateRecordEnum.ROLLOVER.getCode(), "rollover状态修改为:" + (newDisable ? "关闭" : "开启"))))
-                                 .operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE)
-                         
-                         .build());
+                operateRecordService.save(new OperateRecord.Builder()
+            
+                        .bizId(templateLogicId).userOperation(operator)
+                        .project(Optional.of(projectId).map(projectService::getProjectBriefByProjectId).orElse(null))
+                        .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).content(
+                                String.format("%s:rollover状态修改为:【%s】", TemplateOperateRecordEnum.ROLLOVER.getDesc(),
+                                        (newDisable ? "关闭" : "开启"))).operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE)
+            
+                        .build());
             }
         }
         return Result.buildSucc();

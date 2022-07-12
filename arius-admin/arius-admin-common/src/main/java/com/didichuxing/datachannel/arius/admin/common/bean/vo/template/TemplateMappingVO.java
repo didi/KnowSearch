@@ -1,13 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.vo.template;
 
-import java.util.List;
-
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.BaseVO;
 import com.didichuxing.datachannel.arius.admin.common.mapping.AriusTypeProperty;
 import com.didichuxing.datachannel.arius.admin.common.mapping.Field;
-
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,7 +18,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel(description = "索引schema信息")
-public class ConsoleTemplateSchemaVO extends BaseVO {
+public class TemplateMappingVO extends BaseVO {
 
     @ApiModelProperty("索引ID")
     private Integer                 id;

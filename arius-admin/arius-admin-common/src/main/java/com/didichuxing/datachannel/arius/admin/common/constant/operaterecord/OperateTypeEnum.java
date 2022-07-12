@@ -143,6 +143,8 @@ public enum OperateTypeEnum {
      * 模板服务:模板扩缩容
      */
     TEMPLATE_SERVICE_CAPACITY(NewModuleEnum.TEMPLATE_SERVICE, "模板扩缩容",31),
+    TEMPLATE_SERVICE_EDIT_MAPPING(NewModuleEnum.TEMPLATE_SERVICE, "编辑MAPPING", 60),
+    TEMPLATE_SERVICE_EDIT_SETTING(NewModuleEnum.TEMPLATE_SERVICE, "编辑SETTING", 59),
    
     /**
      * 模板服务

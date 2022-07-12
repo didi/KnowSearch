@@ -112,11 +112,13 @@ public interface IndicesManager {
 
     /**
      * 更新索引mapping
+     *
      * @param param
      * @param projectId
+     * @param operate
      * @return
      */
-    Result<Void> editMapping(IndexCatCellWithConfigDTO param, Integer projectId);
+    Result<Void> editMapping(IndexCatCellWithConfigDTO param, Integer projectId, String operate);
 
     /**
      * 获取索引setting信息
@@ -130,11 +132,13 @@ public interface IndicesManager {
 
     /**
      * 更新索引setting
+     *
      * @param param
      * @param projectId
+     * @param operator
      * @return
      */
-    Result<Void> editSetting(IndexCatCellWithConfigDTO param, Integer projectId) throws ESOperateException;
+    Result<Void> editSetting(IndexCatCellWithConfigDTO param, Integer projectId, String operator) throws ESOperateException;
 
     /**
      * 获取索引shard分配信息

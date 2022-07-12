@@ -39,21 +39,27 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <flatten-maven-plugin.version>1.2.2</flatten-maven-plugin.version>
-         <logi-security-spring-boot-starter.version>2.10.10</logi-security-spring-boot-starter.version>
+        <logi-security-spring-boot-starter.version>2.10.10</logi-security-spring-boot-starter.version>
         <logi-elasticsearch-client.version>1.0.17</logi-elasticsearch-client.version>
-         <java-diff-utils.version>4.11</java-diff-utils.version>
+        <java-diff-utils.version>4.11</java-diff-utils.version>
+        <json-patch.version>1.13</json-patch.version>
     </properties>
 
     <dependencyManagement>
     
         <!--logicommon-->
         <dependencies>
-                 <!--diff文本工具-->
-        <dependency>
-            <groupId>io.github.java-diff-utils</groupId>
-            <artifactId>java-diff-utils</artifactId>
-            <version>${java-diff-utils.version}</version>
-        </dependency>
+            <!--diff文本工具-->
+            <dependency>
+                <groupId>com.github.java-json-tools</groupId>
+                <artifactId>json-patch</artifactId>
+                <version>${json-patch.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.java-diff-utils</groupId>
+                <artifactId>java-diff-utils</artifactId>
+                <version>${java-diff-utils.version}</version>
+            </dependency>
             <dependency>
                 <groupId>io.github.zqrferrari</groupId>
                 <artifactId>logi-security-spring-boot-starter</artifactId>

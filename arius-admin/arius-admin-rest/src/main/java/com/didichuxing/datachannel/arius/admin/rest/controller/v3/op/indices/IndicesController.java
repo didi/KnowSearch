@@ -99,7 +99,7 @@ public class IndicesController extends BaseIndicesController{
         Result<Boolean> checkClusterValidResult = checkClusterValid(Lists.newArrayList(param.getCluster()));
         if (checkClusterValidResult.failed()) { return Result.buildFrom(checkClusterValidResult);}
 
-        return indicesManager.editMapping(param, HttpRequestUtil.getProjectId(request));
+        return indicesManager.editMapping(param, HttpRequestUtil.getProjectId(request),HttpRequestUtil.getOperator(request));
     }
 
     @GetMapping("/{cluster}/{indexName}/mapping")
@@ -117,7 +117,7 @@ public class IndicesController extends BaseIndicesController{
         Result<Boolean> checkClusterValidResult = checkClusterValid(Lists.newArrayList(param.getCluster()));
         if (checkClusterValidResult.failed()) { return Result.buildFrom(checkClusterValidResult);}
 
-        return indicesManager.editSetting(param, HttpRequestUtil.getProjectId(request));
+        return indicesManager.editSetting(param, HttpRequestUtil.getProjectId(request),HttpRequestUtil.getOperator(request));
     }
 
     @GetMapping("/{cluster}/{indexName}/setting")

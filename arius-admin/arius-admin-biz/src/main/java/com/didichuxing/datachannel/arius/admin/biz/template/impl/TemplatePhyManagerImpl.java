@@ -23,7 +23,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.Template
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplatePhysicalUpgradeDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord.template.TemplateOperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
@@ -276,8 +275,7 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         } else {
               operateRecordService.save(new OperateRecord.Builder()
                               .bizId(param.getLogicId())
-                              .content(JSON.toJSONString(new TemplateOperateRecord(TemplateOperateRecordEnum.UPGRADE.getCode(),
-                    "模板版本升级为：" + param.getVersion())))
+                              .content(String.format("模版升级版本：%s",param.getVersion()))
                               .userOperation(operator)
                               .operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE)
                               .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
@@ -371,7 +369,7 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
             if (StringUtils.isNotBlank(editContent)) {
                  operateRecordService.save(new OperateRecord.Builder()
                         .operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE)
-                        .content(JSON.toJSONString(new TemplateOperateRecord(TemplateOperateRecordEnum.CONFIG.getCode(), editContent)))
+                        .content(String.format("%s变更:【%s】",TemplateOperateRecordEnum.CONFIG.getDesc(),editContent))
                         .triggerWayEnum(TriggerWayEnum.SYSTEM_TRIGGER)
                         .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
                         .userOperation(operator)
