@@ -1,11 +1,27 @@
 package com.didichuxing.datachannel.arius.admin.biz.cluster.impl;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType.FAIL;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import com.google.common.collect.Lists;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
+import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterNodeManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterRegionManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.TemplateSrvManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRegionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRegionWithNodeInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterWithRegionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicContext;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
@@ -18,7 +34,11 @@ import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterRe
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
-import com.didichuxing.datachannel.arius.admin.common.util.*;
+import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
@@ -28,18 +48,6 @@ import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Sets;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType.FAIL;
 
 @Component
 public class ClusterRegionManagerImpl implements ClusterRegionManager {
@@ -63,6 +71,9 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
 
     @Autowired
     private ClusterRoleHostService clusterRoleHostService;
+
+    @Autowired
+    private ClusterNodeManager clusterNodeManager;
     
     @Autowired
     private OperateRecordService operateRecordService;
@@ -226,7 +237,8 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
      * @return
      */
     @Override
-    public Result<Void> deletePhyClusterRegion(Long regionId, String operator, Integer projectId) {
+    @Transactional(rollbackFor = Exception.class)
+    public Result<Void> deletePhyClusterRegion(Long regionId, String operator, Integer projectId) throws AdminOperateException{
         final Result<Void> result = ProjectUtils.checkProjectCorrectly(i -> i, projectId, projectId);
         if (result.failed()) {
             return result;
@@ -234,7 +246,22 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
         ClusterRegion region = clusterRegionService.getRegionById(regionId);
         Result<Void> voidResult = clusterRegionService.deletePhyClusterRegion(regionId, operator);
         if (voidResult.success()) {
-            
+            // 释放region中的节点
+            Result<List<ClusterRoleHost>> ret = clusterRoleHostService.listByRegionId(regionId.intValue());
+            if (ret.failed()) { throw new AdminOperateException(String.format("删除region失败, msg:%s", ret.getMessage()));}
+            List<ClusterRoleHost> nodeList = ret.getData();
+            if (CollectionUtils.isNotEmpty(nodeList)) {
+                List<Integer> unBindingNodeIds = nodeList.stream()
+                        .map(ClusterRoleHost::getId).map(Long::intValue).collect(Collectors.toList());
+                ClusterRegionWithNodeInfoDTO clusterRegionWithNodeInfoDTO = new ClusterRegionWithNodeInfoDTO();
+                clusterRegionWithNodeInfoDTO.setId(regionId);
+                clusterRegionWithNodeInfoDTO.setUnBindingNodeIds(unBindingNodeIds);
+
+                Result<Boolean> editMultiNode2RegionRet = clusterNodeManager.editMultiNode2Region(Lists.newArrayList(clusterRegionWithNodeInfoDTO), operator, projectId);
+                if (editMultiNode2RegionRet.failed()) { throw new AdminOperateException(String.format("删除region失败, msg:%s",
+                        editMultiNode2RegionRet.getMessage()));}
+            }
+
             //CLUSTER_REGION, DELETE, regionId, "", operator
             operateRecordService.save(
                     new OperateRecord.Builder().operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_REGION_CHANGE)
