@@ -3,6 +3,7 @@ package com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.mapping.AriusTypeProperty;
 import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
+
 import java.util.Set;
 
 /**
@@ -23,15 +24,6 @@ public interface TemplatePhyMappingManager {
     Result<Void> updateMappingAndMerge(String cluster, String template, String mappings, Set<String> removeFields);
 
     /**
-     * 校验模板mapping 模板还不存在
-     *
-     * @param template 模板名字
-     * @param ariusTypeProperty 属性列表
-     * @return Result
-     */
-    Result<Void> checkMappingForNew(String template, AriusTypeProperty ariusTypeProperty);
-
-    /**
      * 校验模板mapping 模板已经存在
      * @param cluster 集群
      * @param template 模板名字
@@ -47,16 +39,6 @@ public interface TemplatePhyMappingManager {
      * @return result
      */
     Result<MappingConfig> getMapping(String cluster, String template);
-
-    /**
-     * 更新索引mapping
-     * @param cluster 集群
-     * @param expression 模板表达式
-     * @param dataFormat 模板名中的时间格式
-     * @return result
-     */
-    Result<Void> addIndexMapping(String cluster, String expression, String dataFormat, int updateDays,
-                           MappingConfig mappingConfig);
 
     /**
      * 将模板mapping 更新到非滚动index上
@@ -76,4 +58,25 @@ public interface TemplatePhyMappingManager {
      * @return result
      */
     Result<MappingConfig> syncMappingConfig(String cluster, String template, String expression, String dataFormat);
+
+    /**
+     * 更新索引mapping
+     * @param cluster 集群
+     * @param expression 模板表达式
+     * @param dataFormat 模板名中的时间格式
+     * @return result
+     */
+    Result<Void> addIndexMapping(String cluster, String expression, String dataFormat, int updateDays,
+                                 MappingConfig mappingConfig);
+
+    /**
+     * 校验模板mapping 模板还不存在
+     *
+     * @param template 模板名字
+     * @param ariusTypeProperty 属性列表
+     * @return Result
+     */
+    Result<Void> checkMappingForNew(String template, AriusTypeProperty ariusTypeProperty);
+
+
 }

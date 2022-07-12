@@ -1,18 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.pipeline.impl;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.PIPELINE_RATE_LIMIT_MAX_VALUE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser.SYSTEM;
-import static com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESPipelineDAO.DATE_FIELD;
-import static com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESPipelineDAO.DATE_FIELD_FORMAT;
-import static com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESPipelineDAO.EXPIRE_DAY;
-import static com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESPipelineDAO.INDEX_NAME_FORMAT;
-import static com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESPipelineDAO.INDEX_VERSION;
-import static com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESPipelineDAO.MS_TIME_FIELD_ES_FORMAT;
-import static com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESPipelineDAO.MS_TIME_FIELD_PLATFORM_FORMAT;
-import static com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESPipelineDAO.RATE_LIMIT;
-import static com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESPipelineDAO.SECOND_TIME_FIELD_ES_FORMAT;
-import static com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESPipelineDAO.SECOND_TIME_FIELD_PLATFORM_FORMAT;
-
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.impl.BaseTemplateSrvImpl;
@@ -36,11 +23,16 @@ import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpTimeout
 import com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESPipelineDAO;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-import java.util.List;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.PIPELINE_RATE_LIMIT_MAX_VALUE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser.SYSTEM;
+import static com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESPipelineDAO.*;
 
 /**
  * @author chengxiang, d06679
@@ -81,62 +73,6 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
 
         Integer rateLimit = getDynamicRateLimit(indexTemplatePhy);
         return doCreatePipeline(indexTemplatePhy, indexTemplate, rateLimit);
-    }
-
-    @Override
-    public Result<Void> syncPipeline(Integer templatePhyId) {
-        IndexTemplatePhy indexTemplatePhy = indexTemplatePhyService.getTemplateById(templatePhyId.longValue());
-        if (null == indexTemplatePhy) {
-            return Result.buildFail("物理模板不存在");
-        }
-
-        IndexTemplate indexTemplate = indexTemplateService.getLogicTemplateById(indexTemplatePhy.getLogicId());
-        if (null == indexTemplate) {
-            return Result.buildFail("逻辑模板不存在");
-        }
-
-        if (!isTemplateSrvOpen(indexTemplate.getId())) {
-            return Result.buildFail("未开启pipeLine服务");
-        }
-
-        try {
-            ESPipelineProcessor esPipelineProcessor = esPipelineDAO.get(indexTemplatePhy.getCluster(), indexTemplatePhy.getName());
-            if (esPipelineProcessor == null) {
-                // pipeline processor不存在，创建
-                LOGGER.info("class=TemplatePipelineManagerImpl||method=syncPipeline||template={}||msg=pipeline not exist, recreate", indexTemplatePhy.getName());
-                return createPipeline(templatePhyId);
-            }
-                // pipeline processor不一致（有变化），以新元数据创建
-            if (notConsistent(indexTemplatePhy, indexTemplate, esPipelineProcessor)) {
-                LOGGER.info("class=TemplatePipelineManagerImpl||method=syncPipeline||template={}||msg=doCreatePipeline", indexTemplatePhy.getName());
-                return doCreatePipeline(indexTemplatePhy, indexTemplate, esPipelineProcessor.getThrottle().getInteger("rate_limit"));
-            }
-
-            return Result.buildSucc();
-        } catch (Exception e) {
-            LOGGER.warn("class=TemplatePipelineManagerImpl||method=syncPipeline||template={}||errMsg={}", indexTemplatePhy.getCluster(), e.getMessage(), e);
-            return Result.buildFail("sync fail");
-        }
-    }
-
-    @Override
-    public Result<Void> deletePipeline(Integer templatePhyId) {
-        IndexTemplatePhy indexTemplatePhy = indexTemplatePhyService.getTemplateById(templatePhyId.longValue());
-        if (null == indexTemplatePhy) {
-            return Result.buildFail("物理模板不存在");
-        }
-
-        if (!isTemplateSrvOpen(indexTemplatePhy.getLogicId())) {
-            return Result.buildFail("未开启pipeLine服务");
-        }
-
-        try {
-            return Result.build(ESOpTimeoutRetry.esRetryExecute("deletePipeline", RETRY_TIMES,
-                    () -> esPipelineDAO.delete(indexTemplatePhy.getCluster(), indexTemplatePhy.getName())));
-        } catch (Exception e) {
-            LOGGER.error("class=PipelineManagerImpl||method=deletePipeline||template={}||errMsg={}", indexTemplatePhy.getName(), e.getMessage(), e);
-            return Result.buildFail("delete fail");
-        }
     }
 
     @Override
@@ -197,48 +133,6 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
         }
         return Result.buildSucc();
     }
-
-    @Override
-    public Result<Void> editFromTemplatePhysical(IndexTemplatePhy oldTemplate, IndexTemplatePhy newTemplate) {
-        if (!isTemplateSrvOpen(oldTemplate.getLogicId())) {
-            return Result.buildFail("未开启pipeLine服务");
-        }
-
-        if (!AriusObjUtils.isChanged(newTemplate.getVersion(), oldTemplate.getVersion())) {
-            return Result.buildSucc();
-        }
-
-        IndexTemplate indexTemplate = indexTemplateService.getLogicTemplateById(oldTemplate.getLogicId());
-        if (null == indexTemplate) {
-            return Result.buildFail("逻辑模板不存在");
-        }
-
-        Integer rateLimit = getDynamicRateLimit(newTemplate);
-        try {
-            return Result.build(ESOpTimeoutRetry.esRetryExecute("editFromTemplatePhysical", RETRY_TIMES,
-                    () -> esPipelineDAO.save(newTemplate.getCluster(), newTemplate.getName(), indexTemplate.getDateField(),
-                            indexTemplate.getDateFieldFormat(), indexTemplate.getDateFormat(),
-                            indexTemplate.getHotTime() > 0 ? indexTemplate.getHotTime() : indexTemplate.getExpireTime(),
-                            rateLimit, newTemplate.getVersion(), indexTemplate.getIdField(),
-                            indexTemplate.getRoutingField())));
-        } catch (Exception e) {
-            LOGGER.error("class=PipelineManagerImpl||method=editFromTemplatePhysical||template={}||errMsg={}", oldTemplate.getName(), e.getMessage(), e);
-            return Result.buildFail("edit fail");
-        }
-    }
-
-    @Override
-    public Integer getRateLimit(Integer templatePhyId) {
-        IndexTemplatePhy indexTemplatePhy = indexTemplatePhyService.getTemplateById(templatePhyId.longValue());
-        if (null == indexTemplatePhy) {
-            return null;
-        }
-
-        ESPipelineProcessor esPipelineProcessor = esPipelineDAO.get(indexTemplatePhy.getCluster(), indexTemplatePhy.getName());
-        return null != esPipelineProcessor ? esPipelineProcessor.getThrottle().getInteger(RATE_LIMIT) : 0;
-    }
-
-
 
     ///////////////////////////private method/////////////////////////////////////////////
 
@@ -429,41 +323,6 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
         return rateLimit;
     }
     
-    ///////////////////////////////////srv
-      @Override
-    public Result<Void> repairPipeline(Integer logicId) throws ESOperateException {
-        IndexTemplateWithPhyTemplates logicWithPhysical = indexTemplateService
-            .getLogicTemplateWithPhysicalsById(logicId);
-
-        if (logicWithPhysical == null) {
-            return Result.buildFail("索引模板不存在");
-        }
-
-        if (!isTemplateSrvOpen(logicWithPhysical.getPhysicals())) {
-            return Result.buildFail("物理集群没有开启" + templateSrv().getServiceName());
-        }
-
-        for (IndexTemplatePhy templatePhysical : logicWithPhysical.getPhysicals()) {
-            boolean result = createPipeline(templatePhysical, logicWithPhysical);
-            if (!result) {
-                return Result.buildFail(String.format("更新pipeline失败，name=%s, cluster=%s", templatePhysical.getName(),
-                        templatePhysical.getCluster()));
-            }
-        }
-
-        IndexTemplatePO editTemplate =indexTemplateService.getLogicTemplatePOById(logicId);
-        
-        
-        editTemplate.setIngestPipeline(logicWithPhysical.getName());
-
-      
-        if (indexTemplateService.update(editTemplate) ) {
-            return Result.buildFail(String.format("更新模板pipeline字段失败，id=%d", editTemplate.getId()));
-        }
-
-        return Result.build(true);
-    }
-
     /**
      * 同步pipeline
      *
@@ -569,8 +428,71 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
     }
 
     @Override
-    public boolean editRateLimitByPercent(IndexTemplatePhy templatePhysical,
-                                          Integer percent) throws ESOperateException {
+    public Integer getRateLimit(IndexTemplatePhy indexTemplatePhysicalMasterInfo) {
+        ESPipelineProcessor esPipelineProcessor = esPipelineDAO.get(indexTemplatePhysicalMasterInfo.getCluster(), indexTemplatePhysicalMasterInfo.getName());
+        return null != esPipelineProcessor ? esPipelineProcessor.getThrottle().getInteger(RATE_LIMIT) : 0;
+    }
+
+    @Override
+    public Result<Void> syncPipeline(Integer templatePhyId) {
+        IndexTemplatePhy indexTemplatePhy = indexTemplatePhyService.getTemplateById(templatePhyId.longValue());
+        if (null == indexTemplatePhy) {
+            return Result.buildFail("物理模板不存在");
+        }
+
+        IndexTemplate indexTemplate = indexTemplateService.getLogicTemplateById(indexTemplatePhy.getLogicId());
+        if (null == indexTemplate) {
+            return Result.buildFail("逻辑模板不存在");
+        }
+
+        if (!isTemplateSrvOpen(indexTemplate.getId())) {
+            return Result.buildFail("未开启pipeLine服务");
+        }
+
+        try {
+            ESPipelineProcessor esPipelineProcessor = esPipelineDAO.get(indexTemplatePhy.getCluster(), indexTemplatePhy.getName());
+            if (esPipelineProcessor == null) {
+                // pipeline processor不存在，创建
+                LOGGER.info("class=TemplatePipelineManagerImpl||method=syncPipeline||template={}||msg=pipeline not exist, recreate", indexTemplatePhy.getName());
+                return createPipeline(templatePhyId);
+            }
+            // pipeline processor不一致（有变化），以新元数据创建
+            if (notConsistent(indexTemplatePhy, indexTemplate, esPipelineProcessor)) {
+                LOGGER.info("class=TemplatePipelineManagerImpl||method=syncPipeline||template={}||msg=doCreatePipeline", indexTemplatePhy.getName());
+                return doCreatePipeline(indexTemplatePhy, indexTemplate, esPipelineProcessor.getThrottle().getInteger("rate_limit"));
+            }
+
+            return Result.buildSucc();
+        } catch (Exception e) {
+            LOGGER.warn("class=TemplatePipelineManagerImpl||method=syncPipeline||template={}||errMsg={}", indexTemplatePhy.getCluster(), e.getMessage(), e);
+            return Result.buildFail("sync fail");
+        }
+
+    }
+
+    @Override
+    public Result<Void> deletePipeline(Integer templatePhyId) {
+        IndexTemplatePhy indexTemplatePhy = indexTemplatePhyService.getTemplateById(templatePhyId.longValue());
+        if (null == indexTemplatePhy) {
+            return Result.buildFail("物理模板不存在");
+        }
+
+        if (!isTemplateSrvOpen(indexTemplatePhy.getLogicId())) {
+            return Result.buildFail("未开启pipeLine服务");
+        }
+
+        try {
+            return Result.build(ESOpTimeoutRetry.esRetryExecute("deletePipeline", RETRY_TIMES,
+                    () -> esPipelineDAO.delete(indexTemplatePhy.getCluster(), indexTemplatePhy.getName())));
+        } catch (Exception e) {
+            LOGGER.error("class=PipelineManagerImpl||method=deletePipeline||template={}||errMsg={}", indexTemplatePhy.getName(), e.getMessage(), e);
+            return Result.buildFail("delete fail");
+        }
+
+    }
+
+    @Override
+    public boolean editRateLimitByPercent(IndexTemplatePhy templatePhysical, Integer percent) throws ESOperateException {
         if (!isTemplateSrvOpen(templatePhysical.getCluster())) {
             return false;
         }
@@ -591,7 +513,7 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
         rateLimitNew = (rateLimitNew > manualRateLimit) ? manualRateLimit : rateLimitNew;
 
         LOGGER.info("class=TemplatePipelineManagerImpl||method=editRateLimitByPercent||cluster={}||pipelineId={}||percent={}||rateLimit={}->{}",
-            templatePhysical.getCluster(), templatePhysical.getName(), percent, rateLimitOld, rateLimitNew);
+                templatePhysical.getCluster(), templatePhysical.getName(), percent, rateLimitOld, rateLimitNew);
 
         int finalRateLimitNew = rateLimitNew;
 
@@ -600,13 +522,13 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
             saveRateLimitToDB(templatePhysical, finalRateLimitNew);
 
             boolean esSuccess = ESOpTimeoutRetry.esRetryExecute("editFromTemplatePhysical", 3,
-                () -> esPipelineDAO.save(templatePhysical.getCluster(), templatePhysical.getName(),
-                    templateLogicWithPhysical.getDateField(), templateLogicWithPhysical.getDateFieldFormat(),
-                    templateLogicWithPhysical.getDateFormat(),
-                    templateLogicWithPhysical.getHotTime() > 0 ? templateLogicWithPhysical.getHotTime()
-                        : templateLogicWithPhysical.getExpireTime(),
-                    finalRateLimitNew, templatePhysical.getVersion(), templateLogicWithPhysical.getIdField(),
-                    templateLogicWithPhysical.getRoutingField()));
+                    () -> esPipelineDAO.save(templatePhysical.getCluster(), templatePhysical.getName(),
+                            templateLogicWithPhysical.getDateField(), templateLogicWithPhysical.getDateFieldFormat(),
+                            templateLogicWithPhysical.getDateFormat(),
+                            templateLogicWithPhysical.getHotTime() > 0 ? templateLogicWithPhysical.getHotTime()
+                                    : templateLogicWithPhysical.getExpireTime(),
+                            finalRateLimitNew, templatePhysical.getVersion(), templateLogicWithPhysical.getIdField(),
+                            templateLogicWithPhysical.getRoutingField()));
             if (esSuccess) {
                 operateRecordService.save(new OperateRecord.Builder().operationTypeEnum(
                                 OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_INFO_MODIFY).userOperation(SYSTEM.getDesc())
@@ -615,19 +537,42 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
                         .content(String.format("rateLimit:%s->%s", rateLimitOld, rateLimitNew))
                         .bizId(templatePhysical.getId()).build());
             }
-            
-          
-
             return esSuccess;
         }
-
         return true;
     }
 
     @Override
-    public Integer getRateLimit(IndexTemplatePhy indexTemplatePhysicalMasterInfo) {
-        ESPipelineProcessor esPipelineProcessor = esPipelineDAO.get(indexTemplatePhysicalMasterInfo.getCluster(), indexTemplatePhysicalMasterInfo.getName());
-        return null != esPipelineProcessor ? esPipelineProcessor.getThrottle().getInteger(RATE_LIMIT) : 0;
+    public Result<Void> repairPipeline(Integer logicId) throws ESOperateException {
+        IndexTemplateWithPhyTemplates logicWithPhysical = indexTemplateService
+                .getLogicTemplateWithPhysicalsById(logicId);
+
+        if (logicWithPhysical == null) {
+            return Result.buildFail("索引模板不存在");
+        }
+
+        if (!isTemplateSrvOpen(logicWithPhysical.getPhysicals())) {
+            return Result.buildFail("物理集群没有开启" + templateSrv().getServiceName());
+        }
+
+        for (IndexTemplatePhy templatePhysical : logicWithPhysical.getPhysicals()) {
+            boolean result = createPipeline(templatePhysical, logicWithPhysical);
+            if (!result) {
+                return Result.buildFail(String.format("更新pipeline失败，name=%s, cluster=%s", templatePhysical.getName(),
+                        templatePhysical.getCluster()));
+            }
+        }
+
+        IndexTemplatePO editTemplate =indexTemplateService.getLogicTemplatePOById(logicId);
+
+
+        editTemplate.setIngestPipeline(logicWithPhysical.getName());
+
+
+        if (indexTemplateService.update(editTemplate) ) {
+            return Result.buildFail(String.format("更新模板pipeline字段失败，id=%d", editTemplate.getId()));
+        }
+        return Result.build(true);
     }
 
     /**************************************** private method ****************************************************/

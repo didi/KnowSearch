@@ -4,6 +4,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegionConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegionFSInfo;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -50,13 +51,6 @@ public interface ClusterRegionService {
      */
     List<Integer> listPhysicClusterId(Long logicClusterId);
 
-    /**
-     * 获取指定物理集群绑定到指定逻辑集群的region
-     * @param logicClusterId 逻辑集群ID
-     * @param clusterName    物理集群名
-     * @return 物理集群clusterName下的被绑定到逻辑集群logicClusterId的region
-     */
-    List<ClusterRegion> listRegionsByLogicAndPhyCluster(Long logicClusterId, String clusterName);
 
     /**
      * 获取指定物理集群下的region

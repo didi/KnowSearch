@@ -10,10 +10,11 @@ import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateStatsSer
 import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateValueService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-import java.util.List;
-import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author d06679
@@ -45,6 +46,12 @@ public class TemplatePhyStaticsManagerImpl implements TemplatePhyStaticsManager 
                 TemplateStatsInfoVO.class));
     }
 
+
+    @Override
+    public Result<List<ESIndexStats>> getIndexStatics(Long logicTemplateId, Long startDate, Long endDate) {
+        return templateStatsService.getIndexStatis(logicTemplateId, startDate, endDate);
+    }
+
     @Override
     public Result<List<ProjectIdTemplateAccessCountVO>> getAccessAppInfos(int logicTemplateId, Long startDate, Long endDate) {
         return Result.buildSucc(ConvertUtil.list2List(
@@ -52,12 +59,6 @@ public class TemplatePhyStaticsManagerImpl implements TemplatePhyStaticsManager 
                 ProjectIdTemplateAccessCountVO.class));
     }
 
-    @Override
-    public Result<List<ESIndexStats>> getIndexStatics(Long logicTemplateId, Long startDate, Long endDate) {
-        return templateStatsService.getIndexStatis(logicTemplateId, startDate, endDate);
-    }
 
 
-
-  
 }

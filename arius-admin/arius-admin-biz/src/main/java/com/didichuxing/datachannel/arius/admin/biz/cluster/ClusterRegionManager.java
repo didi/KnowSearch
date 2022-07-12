@@ -6,6 +6,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.Cluster
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionWithNodeInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
+
 import java.util.List;
 
 public interface ClusterRegionManager {
@@ -41,18 +42,6 @@ public interface ClusterRegionManager {
                                                boolean isAddClusterLogicFlag) throws AdminOperateException;
 
     /**
-     * 解绑逻辑集群已经绑定的region
-     *
-     * @param regionId       regionId
-     * @param logicClusterId 逻辑集群id
-     * @param operator       operator
-     * @param projectId
-     * @return
-     */
-    Result<Void> unbindRegion(Long regionId, Long logicClusterId, String operator, Integer projectId);
-
-
-    /**
      * 根据物理集群名称获region信息（包含空节点region），包含region中的数据节点信息
      * @param clusterName          物理集群名称
      * @return                     Result<List<ClusterRegionWithNodeInfoVO>>
@@ -66,8 +55,27 @@ public interface ClusterRegionManager {
      * @return                    Result<List<ClusterRegionVO>>
      */
     Result<List<ClusterRegionVO>> listNotEmptyClusterRegionByClusterName(String clusterName);
+
+    /**
+     * 删除物理集群region
+     * @param regionId
+     * @param operator
+     * @param projectId
+     * @return
+     */
     
     Result<Void> deletePhyClusterRegion(Long regionId, String operator, Integer projectId);
+
+    /**
+     * 解绑逻辑集群已经绑定的region
+     *
+     * @param regionId       regionId
+     * @param logicClusterId 逻辑集群id
+     * @param operator       operator
+     * @param projectId
+     * @return
+     */
+    Result<Void> unbindRegion(Long regionId, Long logicClusterId, String operator, Integer projectId);
 
   
 }

@@ -6,6 +6,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterR
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostWithRegionInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminTaskException;
+
 import java.util.List;
 
 /**
@@ -64,7 +65,7 @@ public interface ClusterNodeManager {
      */
     Result listClusterLogicNodeByName(String clusterLogicName);
 
-
+    Result<List<ESClusterRoleHostVO>> listClusterRoleHostByRegionId(Long regionId);
     /**
      * 采集集群节点数据
      *
@@ -74,5 +75,4 @@ public interface ClusterNodeManager {
      */
     boolean collectNodeSettings(String cluster) throws AdminTaskException;
     
-    Result<List<ESClusterRoleHostVO>> listClusterRoleHostByRegionId(Long regionId);
 }
