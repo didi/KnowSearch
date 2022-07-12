@@ -6,11 +6,16 @@ import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.impl.BaseTe
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.pipeline.PipelineManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ESPipelineProcessor;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.IndexTemplatePhysicalConfig;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePhyPO;
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.NewTemplateSrvEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
@@ -26,6 +31,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.PIPELINE_RATE_LIMIT_MAX_VALUE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser.SYSTEM;
 import static com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESPipelineDAO.*;
 
 /**
@@ -425,6 +431,148 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
     public Integer getRateLimit(IndexTemplatePhy indexTemplatePhysicalMasterInfo) {
         ESPipelineProcessor esPipelineProcessor = esPipelineDAO.get(indexTemplatePhysicalMasterInfo.getCluster(), indexTemplatePhysicalMasterInfo.getName());
         return null != esPipelineProcessor ? esPipelineProcessor.getThrottle().getInteger(RATE_LIMIT) : 0;
+    }
+
+    @Override
+    public Result<Void> syncPipeline(Integer templatePhyId) {
+        IndexTemplatePhy indexTemplatePhy = indexTemplatePhyService.getTemplateById(templatePhyId.longValue());
+        if (null == indexTemplatePhy) {
+            return Result.buildFail("物理模板不存在");
+        }
+
+        IndexTemplate indexTemplate = indexTemplateService.getLogicTemplateById(indexTemplatePhy.getLogicId());
+        if (null == indexTemplate) {
+            return Result.buildFail("逻辑模板不存在");
+        }
+
+        if (!isTemplateSrvOpen(indexTemplate.getId())) {
+            return Result.buildFail("未开启pipeLine服务");
+        }
+
+        try {
+            ESPipelineProcessor esPipelineProcessor = esPipelineDAO.get(indexTemplatePhy.getCluster(), indexTemplatePhy.getName());
+            if (esPipelineProcessor == null) {
+                // pipeline processor不存在，创建
+                LOGGER.info("class=TemplatePipelineManagerImpl||method=syncPipeline||template={}||msg=pipeline not exist, recreate", indexTemplatePhy.getName());
+                return createPipeline(templatePhyId);
+            }
+            // pipeline processor不一致（有变化），以新元数据创建
+            if (notConsistent(indexTemplatePhy, indexTemplate, esPipelineProcessor)) {
+                LOGGER.info("class=TemplatePipelineManagerImpl||method=syncPipeline||template={}||msg=doCreatePipeline", indexTemplatePhy.getName());
+                return doCreatePipeline(indexTemplatePhy, indexTemplate, esPipelineProcessor.getThrottle().getInteger("rate_limit"));
+            }
+
+            return Result.buildSucc();
+        } catch (Exception e) {
+            LOGGER.warn("class=TemplatePipelineManagerImpl||method=syncPipeline||template={}||errMsg={}", indexTemplatePhy.getCluster(), e.getMessage(), e);
+            return Result.buildFail("sync fail");
+        }
+
+    }
+
+    @Override
+    public Result<Void> deletePipeline(Integer templatePhyId) {
+        IndexTemplatePhy indexTemplatePhy = indexTemplatePhyService.getTemplateById(templatePhyId.longValue());
+        if (null == indexTemplatePhy) {
+            return Result.buildFail("物理模板不存在");
+        }
+
+        if (!isTemplateSrvOpen(indexTemplatePhy.getLogicId())) {
+            return Result.buildFail("未开启pipeLine服务");
+        }
+
+        try {
+            return Result.build(ESOpTimeoutRetry.esRetryExecute("deletePipeline", RETRY_TIMES,
+                    () -> esPipelineDAO.delete(indexTemplatePhy.getCluster(), indexTemplatePhy.getName())));
+        } catch (Exception e) {
+            LOGGER.error("class=PipelineManagerImpl||method=deletePipeline||template={}||errMsg={}", indexTemplatePhy.getName(), e.getMessage(), e);
+            return Result.buildFail("delete fail");
+        }
+
+    }
+
+    @Override
+    public boolean editRateLimitByPercent(IndexTemplatePhy templatePhysical, Integer percent) throws ESOperateException {
+        if (!isTemplateSrvOpen(templatePhysical.getCluster())) {
+            return false;
+        }
+
+        if (percent == 0) {
+            return true;
+        }
+
+        IndexTemplateWithPhyTemplates templateLogicWithPhysical = indexTemplateService
+                .getLogicTemplateWithPhysicalsById(templatePhysical.getLogicId());
+
+        Integer manualRateLimit = getManualRateLimit(templatePhysical);
+        Integer rateLimitOld    = getDynamicQuotaRateLimit(templatePhysical);
+
+        int rateLimitNew = 1 + (int) (rateLimitOld * ((100.0 + percent) / 100.0));
+
+        rateLimitNew = (rateLimitNew < 1) ? 1 : rateLimitNew;
+        rateLimitNew = (rateLimitNew > manualRateLimit) ? manualRateLimit : rateLimitNew;
+
+        LOGGER.info("class=TemplatePipelineManagerImpl||method=editRateLimitByPercent||cluster={}||pipelineId={}||percent={}||rateLimit={}->{}",
+                templatePhysical.getCluster(), templatePhysical.getName(), percent, rateLimitOld, rateLimitNew);
+
+        int finalRateLimitNew = rateLimitNew;
+
+        if (rateLimitOld != rateLimitNew) {
+            // 保存到DB
+            saveRateLimitToDB(templatePhysical, finalRateLimitNew);
+
+            boolean esSuccess = ESOpTimeoutRetry.esRetryExecute("editFromTemplatePhysical", 3,
+                    () -> esPipelineDAO.save(templatePhysical.getCluster(), templatePhysical.getName(),
+                            templateLogicWithPhysical.getDateField(), templateLogicWithPhysical.getDateFieldFormat(),
+                            templateLogicWithPhysical.getDateFormat(),
+                            templateLogicWithPhysical.getHotTime() > 0 ? templateLogicWithPhysical.getHotTime()
+                                    : templateLogicWithPhysical.getExpireTime(),
+                            finalRateLimitNew, templatePhysical.getVersion(), templateLogicWithPhysical.getIdField(),
+                            templateLogicWithPhysical.getRoutingField()));
+            if (esSuccess) {
+                operateRecordService.save(new OperateRecord.Builder().operationTypeEnum(
+                                OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_INFO_MODIFY).userOperation(SYSTEM.getDesc())
+                        .triggerWayEnum(TriggerWayEnum.TIMING_TASK)
+                        .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
+                        .content(String.format("rateLimit:%s->%s", rateLimitOld, rateLimitNew))
+                        .bizId(templatePhysical.getId()).build());
+            }
+            return esSuccess;
+        }
+        return true;
+    }
+
+    @Override
+    public Result<Void> repairPipeline(Integer logicId) throws ESOperateException {
+        IndexTemplateWithPhyTemplates logicWithPhysical = indexTemplateService
+                .getLogicTemplateWithPhysicalsById(logicId);
+
+        if (logicWithPhysical == null) {
+            return Result.buildFail("索引模板不存在");
+        }
+
+        if (!isTemplateSrvOpen(logicWithPhysical.getPhysicals())) {
+            return Result.buildFail("物理集群没有开启" + templateSrv().getServiceName());
+        }
+
+        for (IndexTemplatePhy templatePhysical : logicWithPhysical.getPhysicals()) {
+            boolean result = createPipeline(templatePhysical, logicWithPhysical);
+            if (!result) {
+                return Result.buildFail(String.format("更新pipeline失败，name=%s, cluster=%s", templatePhysical.getName(),
+                        templatePhysical.getCluster()));
+            }
+        }
+
+        IndexTemplatePO editTemplate =indexTemplateService.getLogicTemplatePOById(logicId);
+
+
+        editTemplate.setIngestPipeline(logicWithPhysical.getName());
+
+
+        if (indexTemplateService.update(editTemplate) ) {
+            return Result.buildFail(String.format("更新模板pipeline字段失败，id=%d", editTemplate.getId()));
+        }
+        return Result.build(true);
     }
 
     /**************************************** private method ****************************************************/

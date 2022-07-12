@@ -55,8 +55,27 @@ public interface ClusterRegionManager {
      * @return                    Result<List<ClusterRegionVO>>
      */
     Result<List<ClusterRegionVO>> listNotEmptyClusterRegionByClusterName(String clusterName);
+
+    /**
+     * 删除物理集群region
+     * @param regionId
+     * @param operator
+     * @param projectId
+     * @return
+     */
     
     Result<Void> deletePhyClusterRegion(Long regionId, String operator, Integer projectId);
+
+    /**
+     * 解绑逻辑集群已经绑定的region
+     *
+     * @param regionId       regionId
+     * @param logicClusterId 逻辑集群id
+     * @param operator       operator
+     * @param projectId
+     * @return
+     */
+    Result<Void> unbindRegion(Long regionId, Long logicClusterId, String operator, Integer projectId);
 
   
 }

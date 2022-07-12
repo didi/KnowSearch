@@ -172,5 +172,7 @@ public interface TemplatePhyManager {
      * @return           List<IndexTemplatePhysicalVO>
      */
     Result<List<IndexTemplatePhysicalVO>> getTemplatePhies(Integer logicId);
+
+    Result<List<IndexTemplatePhysicalVO>> listByRegionId(Integer regionId);
     
 }

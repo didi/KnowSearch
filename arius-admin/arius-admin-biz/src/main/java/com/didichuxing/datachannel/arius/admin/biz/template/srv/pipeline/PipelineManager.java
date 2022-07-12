@@ -68,4 +68,35 @@ public interface PipelineManager {
 
     Integer getRateLimit(IndexTemplatePhy indexTemplatePhysicalMasterInfo);
 
+    /**
+     * 同步pipeline
+     * @param templatePhyId 物理模板id
+     * @return
+     */
+    Result<Void>syncPipeline(Integer templatePhyId);
+
+    /**
+     * 删除
+     * @param templatePhyId 物理模板id
+     * @return true/false
+     */
+    Result<Void> deletePipeline(Integer templatePhyId);
+
+    /**
+     * 调整限流值
+     *
+     * @param indexTemplatePhysicalInfo 名字
+     * @param percent 百分比 [-99, 1000]
+     * @return true/false
+     */
+    boolean editRateLimitByPercent(IndexTemplatePhy indexTemplatePhysicalInfo, Integer percent) throws ESOperateException;
+
+    /**
+     * 修复模板的pipeline
+     * @param logicId
+     * @return
+     */
+    Result<Void> repairPipeline(Integer logicId) throws ESOperateException;
+
+
 }

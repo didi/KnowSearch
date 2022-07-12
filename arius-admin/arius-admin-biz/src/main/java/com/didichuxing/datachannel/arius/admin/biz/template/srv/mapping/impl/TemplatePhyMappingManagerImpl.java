@@ -9,6 +9,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminESOpRetryConstants;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import com.didichuxing.datachannel.arius.admin.common.mapping.AriusTypeProperty;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusIndexMappingConfigUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.IndexNameFactory;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
@@ -162,6 +163,38 @@ public class TemplatePhyMappingManagerImpl implements TemplatePhyMappingManager 
         } catch (Exception t) {
             return Result.buildFail(t.getMessage());
         }
+    }
+
+    @Override
+    public Result<Void> addIndexMapping(String cluster, String expression, String dataFormat, int updateDays, MappingConfig mappingConfig) {
+        for (int i = 1; i <= updateDays; i++) {
+            String indexName = IndexNameFactory.getNoVersion(expression, dataFormat, 2 - i);
+
+            if (!esIndexDAO.updateIndexMapping(cluster, indexName, mappingConfig)) {
+                return Result.buildFail("update index mapping fail");
+            }
+        }
+
+        return Result.buildSucc();
+
+    }
+
+    @Override
+    public Result<Void> checkMappingForNew(String name, AriusTypeProperty ariusTypeProperty) {
+        try {
+            MappingConfig mappingConfig = new MappingConfig(ariusTypeProperty.toMappingJSON());
+            Map<String, TypeConfig> typeConfigMap = mappingConfig.getMapping();
+            if (typeConfigMap != null && typeConfigMap.size() > 1) {
+                return Result.build(ResultType.FAIL.getCode(), "mapping具有多个type, 只能配置一个type");
+            }
+        }catch (JSONException e) {
+            return Result.build(ResultType.FAIL.getCode(), JSON_PARSE_ERROR_TIPS);
+        }catch (Exception e) {
+            return Result.build(ResultType.FAIL.getCode(), e.getMessage());
+        }
+
+        return checkMapping(null, name, ariusTypeProperty.toMappingJSON().toJSONString(), false);
+
     }
 
     /**************************************** private method ****************************************************/

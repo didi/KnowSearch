@@ -588,6 +588,20 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
             ConvertUtil.list2List(indexTemplatePhyService.getTemplateByLogicId(logicId), IndexTemplatePhysicalVO.class));
     }
 
+    /**
+     * @param regionId
+     * @return
+     */
+    @Override
+    public Result<List<IndexTemplatePhysicalVO>> listByRegionId(Integer regionId) {
+        Result<List<IndexTemplatePhy>> ret = physicalService.listByRegionId(regionId);
+        if (ret.failed()) {
+            return Result.buildFrom(ret);
+        }
+        return Result.buildSucc(ConvertUtil.list2List(ret.getData(), IndexTemplatePhysicalVO.class));
+    }
+
+
     /**************************************** private method ****************************************************/
     private void initParamWhenAdd(IndexTemplatePhyDTO param) {
         IndexTemplate logic = indexTemplateService.getLogicTemplateById(param.getLogicId());

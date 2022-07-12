@@ -247,8 +247,35 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
         
         return voidResult;
     }
-    
-    
+
+    @Override
+    public Result<Void> unbindRegion(Long regionId, Long logicClusterId, String operator, Integer projectId) {
+        //校验操作合法性
+        final Result<Void> result = ProjectUtils.checkProjectCorrectly(i -> i, projectId, projectId);
+        if (result.failed()){
+            return result;
+        }
+        ClusterRegion region = clusterRegionService.getRegionById(regionId);
+        Result<Void> voidResult = clusterRegionService.unbindRegion(regionId, logicClusterId, operator);
+        if (voidResult.success()){
+            // 操作记录
+            operateRecordService.save(new OperateRecord.Builder()
+                    .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_REGION_CHANGE)
+                    .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                    .content(String.format("物理集群：%s,region解绑:%s;解绑逻辑群id:%s", region.getPhyClusterName(),
+                            region.getName(),logicClusterId))
+                    .project(projectService.getProjectBriefByProjectId(projectId))
+                    .userOperation(operator)
+                    .bizId(clusterPhyService.getClusterByName(region.getPhyClusterName()))
+                    .build());
+        }
+
+
+        return voidResult;
+    }
+
+
+
 
     /***************************************** private method ****************************************************/
     /**
