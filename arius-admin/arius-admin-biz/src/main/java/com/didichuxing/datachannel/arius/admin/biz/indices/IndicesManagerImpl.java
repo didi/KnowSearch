@@ -2,6 +2,16 @@ package com.didichuxing.datachannel.arius.admin.biz.indices;
 
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.PRIMARY;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.function.BiFunction;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
@@ -36,13 +46,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.Tri
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.mapping.AriusIndexTemplateSetting;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusIndexMappingConfigUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusOptional;
-import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.IndexSettingsUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.SizeUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.*;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
@@ -63,14 +67,6 @@ import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.function.BiFunction;
-import java.util.stream.Collectors;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  * @author lyn
@@ -81,6 +77,7 @@ public class IndicesManagerImpl implements IndicesManager {
     public static final String START = "*";
     private static final ILog     LOGGER = LogFactory.getLog(IndicesManagerImpl.class);
     public static final int            RETRY_COUNT = 3;
+    private static final String PROPERTIES = "\"properties\"";
     @Autowired
     private             ProjectService projectService;
 
@@ -368,13 +365,18 @@ public class IndicesManagerImpl implements IndicesManager {
 
     @Override
     public Result<IndexMappingVO> getMapping(String cluster, String indexName, Integer projectId) {
-        Result<Void> ret = basicCheckParam(cluster, indexName, projectId);
+        Result<String> getClusterRet = getClusterPhyByClusterNameAndProjectId(cluster, projectId);
+        if (getClusterRet.failed()) {
+            return Result.buildFrom(getClusterRet);
+        }
+        String phyCluster = getClusterRet.getData();
+        Result<Void> ret = basicCheckParam(phyCluster, indexName, projectId);
         if (ret.failed()) {
             return Result.buildFrom(ret);
         }
 
         IndexMappingVO indexMappingVO = new IndexMappingVO();
-        String mappingConfig = esIndexService.syncGetIndexMapping(cluster, indexName);
+        String mappingConfig = esIndexService.syncGetIndexMapping(phyCluster, indexName);
         indexMappingVO.setMappings(mappingConfig);
         indexMappingVO.setIndexName(indexName);
         return Result.buildSucc(indexMappingVO);
@@ -397,7 +399,7 @@ public class IndicesManagerImpl implements IndicesManager {
             return Result.buildFail("请传入索引Mapping");
         }
         Result<MappingConfig> mappingRet;
-        if (!StringUtils.contains(mapping, "\"properties\"")) {
+        if (!StringUtils.contains(mapping, PROPERTIES)) {
             //这里为了兼容多 type索引，前端进针对用户输入的内容做封装，所以后端解析封装
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("properties", mapping);
@@ -414,17 +416,22 @@ public class IndicesManagerImpl implements IndicesManager {
 
     @Override
     public Result<IndexSettingVO> getSetting(String cluster, String indexName, Integer projectId) {
-        Result<Void> ret = basicCheckParam(cluster, indexName, projectId);
+        Result<String> getClusterRet = getClusterPhyByClusterNameAndProjectId(cluster, projectId);
+        if (getClusterRet.failed()) {
+            return Result.buildFrom(getClusterRet);
+        }
+        String phyCluster = getClusterRet.getData();
+        Result<Void> ret = basicCheckParam(phyCluster, indexName, projectId);
         if (ret.failed()) {
             return Result.buildFrom(ret);
         }
 
         IndexSettingVO indexSettingVO = new IndexSettingVO();
-        MultiIndexsConfig multiIndexsConfig = esIndexService.syncGetIndexConfigs(cluster, indexName);
+        MultiIndexsConfig multiIndexsConfig = esIndexService.syncGetIndexConfigs(phyCluster, indexName);
         if (null == multiIndexsConfig) {
             LOGGER.warn(
                 "class=IndicesManagerImpl||method=getSetting||cluster={}||index={}||errMsg=get empty Index configs ",
-                cluster, indexName);
+                    phyCluster, indexName);
             return Result.buildSucc(indexSettingVO);
         }
 
@@ -432,7 +439,7 @@ public class IndicesManagerImpl implements IndicesManager {
         if (null == indexConfig) {
             LOGGER.warn(
                 "class=IndicesManagerImpl||method=getSetting||cluster={}||index={}||errMsg=get empty Index configs ",
-                cluster, indexName);
+                    phyCluster, indexName);
             return Result.buildSucc(indexSettingVO);
         }
         indexSettingVO.setProperties(JsonUtils.reFlat(indexConfig.getSettings()));
