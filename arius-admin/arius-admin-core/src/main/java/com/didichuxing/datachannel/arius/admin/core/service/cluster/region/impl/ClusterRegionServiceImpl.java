@@ -164,7 +164,7 @@ public class ClusterRegionServiceImpl implements ClusterRegionService {
                 // 获取被绑定的全部逻辑集群的名称
                 logicClusterNames.add(clusterLogic.getName());
             }
-            return Result.buildFail(String.format("region [%d] 已经被绑定到逻辑集群 %s", regionId,
+            return Result.buildFail(String.format("region [%d] 已经被绑定到逻辑集群 [%s]", regionId,
                     ListUtils.strList2String(logicClusterNames)));
         }
 
