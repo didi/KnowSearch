@@ -1042,11 +1042,6 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
         return indexTemplateDAO.getNameByTemplateLogicId(logicTemplateId);
     }
 
-    @Override
-    public List<Integer> listAllTemplateIds() {
-        return indexTemplateDAO.listAllIds();
-    }
-
     /**************************************** private method ****************************************************/
     /**
      * 转换逻辑模板，获取并组合对应的物理模板信息

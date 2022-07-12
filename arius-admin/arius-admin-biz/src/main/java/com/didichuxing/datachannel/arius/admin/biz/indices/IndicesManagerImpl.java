@@ -681,43 +681,6 @@ public class IndicesManagerImpl implements IndicesManager {
                 expression);
     }
 
-    @Override
-    public Long getTemplateIndicesDiskSum(Integer templateId) {
-        Long templateIndicesDiskSum = 0L;
-
-        // 根据逻辑模版id获取对应的物理模版详情   （一个逻辑模版可能涉及多个物理模版）
-        IndexTemplateWithPhyTemplates templateLogicWithPhysical = indexTemplateService
-                .getLogicTemplateWithPhysicalsById(templateId);
-        if(templateLogicWithPhysical == null){
-            return templateIndicesDiskSum;
-        }
-
-        // 当前逻辑模版分区（索引）列表
-        List<CatIndexResult> catIndexResults = Lists.newArrayList();
-
-        // 获取逻辑索引模板对应物理模版中的master模版
-        List<IndexTemplatePhy> physicalMasters = templateLogicWithPhysical.fetchMasterPhysicalTemplates();
-        for (IndexTemplatePhy physicalMaster : physicalMasters) {
-            try {
-                catIndexResults.addAll(listIndexCatInfoByTemplatePhyId(physicalMaster.getId()));
-            } catch (Exception e) {
-                LOGGER.warn("class=IndicesManagerImpl||method=getTemplateIndicesDiskSum||templateId={}||errMsg={}", templateId, e.getMessage(), e);
-            }
-        }
-
-        if (CollectionUtils.isNotEmpty(catIndexResults)) {
-            // 统计逻辑模版所有索引的占用磁盘大小
-            for (CatIndexResult catIndexResult : catIndexResults) {
-                String storeSize = catIndexResult.getStoreSize();
-                // storeSize属性为string类型，把单位统一转换为byte
-                Long size = SizeUtil.getUnitSize(storeSize);
-                templateIndicesDiskSum += size;
-            }
-        }
-
-        return templateIndicesDiskSum;
-    }
-
     /***************************************************private**********************************************************/
     private Result<Void> basicCheckParam(String cluster, String index, Integer projectId) {
         if (!projectService.checkProjectExist(projectId)) {

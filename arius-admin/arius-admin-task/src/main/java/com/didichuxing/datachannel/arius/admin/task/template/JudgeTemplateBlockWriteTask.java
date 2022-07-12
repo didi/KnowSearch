@@ -79,7 +79,7 @@ public class JudgeTemplateBlockWriteTask extends BaseConcurrentTemplateTask impl
             throw  new AdminOperateException(String.format("模板[%s]不存在", logicId));
         }
 
-        double limitDiskSize  = indexTemplateWithPhyTemplates.getDiskSize() * 1024 * 1024 * 1024;
+        long limitDiskSize  = (long)(indexTemplateWithPhyTemplates.getDiskSize() * 1024 * 1024 * 1024);
 
         IndexTemplatePhy masterPhyTemplate = indexTemplateWithPhyTemplates.getMasterPhyTemplate();
         if (masterPhyTemplate == null) {

@@ -406,10 +406,4 @@ public interface IndexTemplateService {
 
     String getNameByTemplateLogicId(Integer logicTemplateId);
 
-    /**
-     * 获取全局所有模版id
-     *
-     * @return
-     */
-    List<Integer> listAllTemplateIds();
 }

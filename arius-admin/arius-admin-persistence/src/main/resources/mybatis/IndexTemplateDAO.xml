@@ -243,10 +243,4 @@
           and is_active = 1
     </select>
 
-    <select id="listAllIds" resultType="java.lang.Integer">
-        select id
-        from index_template_info
-        where is_active = 1
-    </select>
-
 </mapper>

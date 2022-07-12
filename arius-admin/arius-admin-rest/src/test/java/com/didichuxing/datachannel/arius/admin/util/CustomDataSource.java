@@ -30,7 +30,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.Cl
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.project.ESUserPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.project.ProjectClusterLogicAuthPO;
@@ -700,48 +699,27 @@ public class CustomDataSource {
             "attributes");
     }
 
-    public static List<Integer> getTemplateIds() {
-        List<Integer> list = new ArrayList<>();
-        for (int i = 1; i < SIZE; i++) {
-            list.add(i);
-        }
-        return list;
-    }
-
-    public static IndexTemplateWithPhyTemplates getTemplateWithPhyTemplates(){
-        IndexTemplateWithPhyTemplates templateLogicWithPhysical = new IndexTemplateWithPhyTemplates();
-        IndexTemplatePhy indexTemplatePhy = new IndexTemplatePhy();
-        indexTemplatePhy.setId(1L);
-        indexTemplatePhy.setRole(1);
+    public static IndexTemplateWithPhyTemplates getIndexTemplateWithPhyTemplates(){
+        IndexTemplateWithPhyTemplates indexTemplateWithPhyTemplates = new IndexTemplateWithPhyTemplates();
+        indexTemplateWithPhyTemplates.setDiskSize(1.0);
         List<IndexTemplatePhy> physicals = new ArrayList<>();
-        physicals.add(indexTemplatePhy);
-        templateLogicWithPhysical.setPhysicals(physicals);
-        return templateLogicWithPhysical;
-    }
-
-    public static IndexTemplatePhyWithLogic getIndexTemplatePhyWithLogic(){
-        IndexTemplatePhyWithLogic indexTemplatePhyWithLogic = new IndexTemplatePhyWithLogic();
-        indexTemplatePhyWithLogic.setVersion(1);
-        indexTemplatePhyWithLogic.setExpression("test*");
-        indexTemplatePhyWithLogic.setCluster("test");
-        return indexTemplatePhyWithLogic;
+        IndexTemplatePhy physical = new IndexTemplatePhy();
+        physical.setRole(1);
+        physical.setId(1L);
+        physicals.add(physical);
+        indexTemplateWithPhyTemplates.setPhysicals(physicals);
+        return indexTemplateWithPhyTemplates;
     }
 
     public static List<CatIndexResult> getCatIndexResult(){
         List<CatIndexResult> catIndexResults = new ArrayList<>();
         CatIndexResult catIndexResult1 = new CatIndexResult();
-        catIndexResult1.setStoreSize("1b");
+        catIndexResult1.setStoreSize("1gb");
         catIndexResults.add(catIndexResult1);
         CatIndexResult catIndexResult2 = new CatIndexResult();
-        catIndexResult2.setStoreSize("2b");
+        catIndexResult2.setStoreSize("2gb");
         catIndexResults.add(catIndexResult2);
         return catIndexResults;
-    }
-
-    public static IndexTemplate getIndexTemplate(){
-        IndexTemplate indexTemplate = new IndexTemplate();
-        indexTemplate.setDiskSize(30.0);
-        return indexTemplate;
     }
 
     public static Result<Void> getResult(){
