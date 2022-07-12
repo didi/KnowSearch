@@ -28,4 +28,6 @@ public class TemplateOperateRecord {
     protected JSONObject target;
     protected   List<DiffJson> diffResult = Lists.newArrayList();
     
+    protected Boolean change;
+    
 }

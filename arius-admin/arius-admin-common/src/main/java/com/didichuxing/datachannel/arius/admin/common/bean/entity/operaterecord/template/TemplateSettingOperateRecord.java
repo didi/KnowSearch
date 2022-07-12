@@ -10,6 +10,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.DiffUtil.DiffJson;
 import java.util.List;
 import java.util.Optional;
 import lombok.Data;
+import org.apache.commons.collections4.CollectionUtils;
 
 /**
  * @author liuchengxiang
@@ -34,6 +35,7 @@ public class TemplateSettingOperateRecord extends TemplateOperateRecord {
         );
         
         diffResult.addAll(diffs);
+        change= CollectionUtils.isNotEmpty(diffs);
         
     }
     
@@ -44,6 +46,7 @@ public class TemplateSettingOperateRecord extends TemplateOperateRecord {
         
         diffResult.addAll(diffs);
         operateType = TemplateOperateRecordEnum.SETTING.getCode();
+        change= CollectionUtils.isNotEmpty(diffs);
     }
     
     @Override

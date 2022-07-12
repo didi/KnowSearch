@@ -8,6 +8,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.DiffUtil.DiffJson;
 import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
 import java.util.List;
 import lombok.Data;
+import org.apache.commons.collections4.CollectionUtils;
 
 /**
  * @author liuchengxiang
@@ -26,6 +27,7 @@ public class TemplateMappingOperateRecord extends TemplateOperateRecord {
         final List<DiffJson> diffs = DiffUtil.diffJsonByString(oldMappings, newMappings);
         diffResult.addAll(diffs);
         operateType = TemplateOperateRecordEnum.MAPPING.getCode();
+        change= CollectionUtils.isNotEmpty(diffs);
     }
     
     public TemplateMappingOperateRecord(MappingConfig before, MappingConfig after) {
@@ -36,6 +38,7 @@ public class TemplateMappingOperateRecord extends TemplateOperateRecord {
         
         diffResult.addAll(diffs);
         operateType = TemplateOperateRecordEnum.MAPPING.getCode();
+        change = CollectionUtils.isNotEmpty(diffs);
     }
     
     @Override
