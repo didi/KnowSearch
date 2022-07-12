@@ -8,6 +8,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterSe
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+
 import java.util.List;
 import java.util.Set;
 
@@ -168,11 +169,4 @@ public interface ClusterPhyService {
      */
     Result<List<ClusterTemplateSrv>> getPhyClusterTemplateSrv(ClusterPhy phyCluster);
     
-    /**
-     * 得到id通过名字
-     *
-     * @param phyCluster phy集群
-     * @return {@link Integer}
-     */
-    Integer getIdByName(String phyCluster);
 }

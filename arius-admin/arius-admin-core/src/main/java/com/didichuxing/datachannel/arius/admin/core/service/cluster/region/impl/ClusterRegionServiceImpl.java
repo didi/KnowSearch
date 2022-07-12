@@ -34,18 +34,14 @@ import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author ohushenglin_v
@@ -104,18 +100,6 @@ public class ClusterRegionServiceImpl implements ClusterRegionService {
             .collect(Collectors.toList());
     }
 
-    @Override
-    public List<ClusterRegion> listRegionsByLogicAndPhyCluster(Long logicClusterId, String phyClusterName) {
-        if (logicClusterId == null || StringUtils.isBlank(phyClusterName)) {
-            return new ArrayList<>();
-        }
-
-        ClusterRegionPO condt = new ClusterRegionPO();
-        condt.setLogicClusterIds(logicClusterId.toString());
-        condt.setPhyClusterName(phyClusterName);
-
-        return ConvertUtil.list2List(clusterRegionDAO.listBoundRegionsByCondition(condt), ClusterRegion.class);
-    }
 
     @Override
     public List<ClusterRegion> listPhyClusterRegions(String phyClusterName) {
