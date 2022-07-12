@@ -5,7 +5,6 @@ import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandle
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.TemplateTransferContent;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord.template.TemplateOperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
@@ -13,7 +12,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.deta
 import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TemplateOperateRecordEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
@@ -184,15 +182,11 @@ public class TemplateTransferHandler extends BaseWorkOrderHandler {
             content.getTgtResponsible(), workOrder.getSubmitor());
 
         if (result.success()) {
-              operateRecordService.save(new OperateRecord.Builder()
-                              .operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE)
-                              .userOperation(approver)
-                              .content(JSON.toJSONString(
-                    new TemplateOperateRecord(TemplateOperateRecordEnum.TRANSFER.getCode(),
-                            "模板从 project:" + projectService.getProjectBriefByProjectId(content.getSourceProjectId()).getProjectName() + "转移到 project:" +
-                            projectService.getProjectBriefByProjectId(content.getTgtProjectId()).getProjectName())))
-                              .project(projectService.getProjectBriefByProjectId(workOrder.getSubmitorProjectId()))
-                      .build());
+            operateRecordService.save(new OperateRecord.Builder().operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE)
+                    .userOperation(approver).content(String.format("模板从 项目:[%s】->项目:【%s】",
+                            projectService.getProjectBriefByProjectId(content.getSourceProjectId()).getProjectName(),
+                            projectService.getProjectBriefByProjectId(content.getTgtProjectId()).getProjectName()))
+                    .project(projectService.getProjectBriefByProjectId(workOrder.getSubmitorProjectId())).build());
            
         }
 

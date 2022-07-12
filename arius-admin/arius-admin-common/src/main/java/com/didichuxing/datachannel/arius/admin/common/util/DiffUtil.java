@@ -5,15 +5,22 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONPath;
 import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.difflib.text.DiffRow;
 import com.github.difflib.text.DiffRowGenerator;
+import com.github.fge.jsonpatch.diff.JsonDiff;
 import com.google.common.collect.Lists;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -27,6 +34,8 @@ import org.apache.commons.lang3.StringUtils;
  * @date 2022/07/09
  */
 public final class DiffUtil {
+  private static ObjectMapper mapper = new ObjectMapper();
+  
 
   public static List<Diff> diffJson(String expectedJsonStr, String actualJsonStr) throws Exception {
     return diffJson(expectedJsonStr, actualJsonStr, null, null, null);
@@ -157,7 +166,7 @@ public final class DiffUtil {
     if (result == null) {
       return;
     }
-    Diff diff = new Diff.DiffBuilder().original(expected).actual(actual).field(field)
+    Diff diff = new Diff.DiffBuilder().source(expected).target(actual).field(field)
         .type(type.name().toLowerCase(
             Locale.ROOT)).build();
     result.add(diff);
@@ -213,18 +222,40 @@ public final class DiffUtil {
     String actualJson = JSON.toJSONString(actualMap);
     return diffJson(expectJson, actualJson);
   }
-
-  public static List<DiffRow> diffRowsByString(String original, String revised,
-                                               String separatorChars) {
+  
+  public static List<DiffRow> diffRowsByString(String original, String revised, String separatorChars) {
     List<String> originalList = Lists.newArrayList(StringUtils.split(original, separatorChars));
     List<String> revisedList = Lists.newArrayList(StringUtils.split(revised, separatorChars));
     //行比较器，原文件删除的内容用"~"包裹，对比文件新增的内容用"**"包裹
-    DiffRowGenerator generator = DiffRowGenerator.create().showInlineDiffs(true)
-        .inlineDiffByWord(true)
-        .reportLinesUnchanged(true).replaceOriginalLinefeedInChangesWithSpaces(true)
-        .ignoreWhiteSpaces(true)
-        .mergeOriginalRevised(true).build();
+    DiffRowGenerator generator = DiffRowGenerator.create().showInlineDiffs(true).inlineDiffByWord(true)
+            .reportLinesUnchanged(true).replaceOriginalLinefeedInChangesWithSpaces(true).ignoreWhiteSpaces(true)
+            .mergeOriginalRevised(true).build();
+    
     return generator.generateDiffRows(originalList, revisedList);
+  }
+  
+  public static List<DiffJson> diffJsonByString(String original, String revised) {
+    JsonNode source = readJson(original);
+    JsonNode target = readJson(revised);
+    JsonNode jsonNode = JsonDiff.asJson(source, target);
+    return StreamSupport.stream(jsonNode.spliterator(), false)
+            .map(node -> new DiffJson.DiffJsonBuilder().path(node.get("path").asText()).op(node.get("op").asText())
+                    .value(Objects.nonNull(node.get("value")) ? getNode(node.get("value")) : null).build())
+            .collect(Collectors.toList());
+  }
+  
+  private static JsonNode readJson(String content) {
+    try {
+      return mapper.readTree(content);
+    } catch (IOException ignore) {
+      return mapper.createObjectNode();
+    }
+  }
+  
+  private static Object getNode(JsonNode jsonNode) {
+    return jsonNode.isBoolean()
+            ? jsonNode.booleanValue()
+            : jsonNode.isNumber() ? jsonNode.numberValue() : jsonNode.asText();
   }
 
  
@@ -251,11 +282,11 @@ public final class DiffUtil {
     /**
      * 原始
      */
-    private Object original;
+    private Object source;
     /**
      * 实际
      */
-    private Object actual;
+    private Object target;
   }
 
   @Data

@@ -346,7 +346,10 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     @Override
     public Result<List<ClusterLogicVO>> getProjectLogicClusterInfoByType(Integer projectId, Integer type) {
         ESLogicClusterDTO logicClusterDTO = new ESLogicClusterDTO();
-        logicClusterDTO.setProjectId(projectId);
+        if (!AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
+            logicClusterDTO.setProjectId(projectId);
+        }
+       
         logicClusterDTO.setType(type);
         return Result.buildSucc(
                 ConvertUtil.list2List(clusterLogicService.listClusterLogics(logicClusterDTO), ClusterLogicVO.class));

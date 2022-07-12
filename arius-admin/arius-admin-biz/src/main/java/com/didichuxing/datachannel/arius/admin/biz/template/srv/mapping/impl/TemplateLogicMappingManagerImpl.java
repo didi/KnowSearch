@@ -2,7 +2,6 @@ package com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping.impl;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.DEFAULT_INDEX_MAPPING_TYPE;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.impl.BaseTemplateSrvImpl;
@@ -17,7 +16,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleT
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateSchemaOptimizeDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord.template.TemplateSchemaOperateRecord;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord.template.TemplateMappingOperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateType;
@@ -25,7 +24,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateConfigPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateTypePO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateSchemaVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateMappingVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
@@ -159,6 +158,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrvImpl impleme
             if(null != mergeMappingConfig){
                 templateLogicWithMapping
                         .setTypeProperties(genAriusTypePropertyList(templateLogicWithMapping, mergeMappingConfig.getMapping()));
+                
                 List<Field> fields = null;
                 try {
                     fields = convert2Fields(mergeMappingConfig);
@@ -215,7 +215,8 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrvImpl impleme
     }
 
     @Override
-    public Result<Void> updateFields(Integer logicId, List<Field> fields, Set<String> removeFields) {
+    public Result<Void> updateFields(Integer logicId, List<Field> fields, Set<String> removeFields, Integer projectId,
+                                     String operator) {
         IndexTemplateWithPhyTemplates templateLogicWithPhysical = indexTemplateService
                 .getLogicTemplateWithPhysicalsById(logicId);
 
@@ -237,7 +238,9 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrvImpl impleme
             if (masterTemplatePhysical == null) {
                 return Result.buildFail("can not find template physical, logicId:" + logicId);
             }
-
+            final Result<MappingConfig> beforeResult = templatePhyMappingManager.getMapping(
+                    masterTemplatePhysical.getCluster(), masterTemplatePhysical.getName());
+    
             Result<MappingConfig> getDiffResult = getDiffMapping(masterTemplatePhysical.getCluster(), masterTemplatePhysical.getName(),
                     fields);
             if (getDiffResult.failed()) {
@@ -251,7 +254,17 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrvImpl impleme
             if (editResult.failed()) {
                 return Result.buildFrom(editResult);
             }
+            final Result<MappingConfig> afterResult = templatePhyMappingManager.getMapping(
+                    masterTemplatePhysical.getCluster(), masterTemplatePhysical.getName());
+            operateRecordService.save(new OperateRecord.Builder().project(
+                            Optional.ofNullable(projectId).map(projectService::getProjectBriefByProjectId).orElse(null))
+                    .userOperation(operator)
+                    .operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE_EDIT_MAPPING)
+                     .content(new TemplateMappingOperateRecord(beforeResult.getData(), afterResult.getData()).toString()).triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+            
+                    .build());
         }
+        
 
         return Result.buildSucc();
     }
@@ -391,7 +404,6 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrvImpl impleme
         TemplateConfigPO config = templateConfigDAO.getByLogicId(logicId);
 
         List<IndexTemplatePhy> templatePhysicals = templateLogicWithPhysical.fetchMasterPhysicalTemplates();
-        Result<ConsoleTemplateSchemaVO> oldSchemaVO = getSchema(logicId);
         boolean isSingleIndex = isSingleIndex(logicId);
 
         for (IndexTemplatePhy templatePhysical : templatePhysicals) {
@@ -428,25 +440,24 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrvImpl impleme
             } else {
                 templateMappingConfig.enableSource();
             }
-
+            final Result<MappingConfig> beforeResult = templatePhyMappingManager.getMapping(
+                    templatePhysical.getCluster(), templatePhysical.getName());
             Result<Void> updateMappingResult = templatePhyMappingManager.updateMapping(templatePhysical.getCluster(),
                     templatePhysical.getName(), templateMappingConfig.toJson().toJSONString());
 
             if (updateMappingResult.failed()) {
                 return Result.buildFrom(updateMappingResult);
             }
+            final Result<MappingConfig> afterResult = templatePhyMappingManager.getMapping(
+                    templatePhysical.getCluster(), templatePhysical.getName());
+            operateRecordService.save(new OperateRecord.Builder().operationTypeEnum(
+                            OperateTypeEnum.TEMPLATE_SERVICE_EDIT_MAPPING)
+                    .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).userOperation(operator)
+                    .project(projectService.getProjectBriefByProjectId(templateLogicWithPhysical.getProjectId()))
+                    .content(new TemplateMappingOperateRecord(beforeResult.getData(), afterResult.getData()).toString())
+                    .bizId(logicId).build());
         }
-
-        // 记录操作
-        Result<ConsoleTemplateSchemaVO> newSchemaVO = getSchema(logicId);
-        operateRecordService.save(new OperateRecord.Builder()
-                        .operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_EDIT_MAPPING)
-                        .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                        .userOperation(operator)
-                        .project(projectService.getProjectBriefByProjectId(templateLogicWithPhysical.getProjectId()))
-                        .content(JSON.toJSONString(new TemplateSchemaOperateRecord(oldSchemaVO.getData(), newSchemaVO.getData())))
-                        .bizId(logicId)
-                .build());
+        
 
         return Result.buildSucc();
     }
@@ -461,7 +472,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrvImpl impleme
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result<Void> modifySchema(ConsoleTemplateSchemaDTO schemaDTO, String operator, Integer projectId) throws AdminOperateException {
+    public Result<Void> editMapping(ConsoleTemplateSchemaDTO schemaDTO, String operator, Integer projectId) throws AdminOperateException {
         if (AriusObjUtils.isNull(operator)) {
             return Result.buildParamIllegal("操作人为空");
         }
@@ -478,7 +489,6 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrvImpl impleme
                 !clusterIsHighVersion(schemaDTO.getLogicId())) {
             return Result.buildParamIllegal("该功能只支持高版本(6.5.1以上)es， 请使用JSON格式");
         }
-          Result<ConsoleTemplateSchemaVO> oldSchemaVO = getSchema(schemaDTO.getLogicId());
 
         Result<Void> saveSpecialFieldResult = saveSpecialField(schemaDTO, operator,projectId);
         if (saveSpecialFieldResult.failed()) {
@@ -499,19 +509,12 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrvImpl impleme
             return result;
         }
         
-        Result<Void> result = updateFields(schemaDTO.getLogicId(), schemaDTO.getFields(), schemaDTO.getRemoveFieldNames());
+        Result<Void> result = updateFields(schemaDTO.getLogicId(), schemaDTO.getFields(), schemaDTO.getRemoveFieldNames()
+        ,projectId,operator
+        
+        );
         if (result.success()) {
             //JSonu
-            // 记录操作记录
-             Result<ConsoleTemplateSchemaVO> newSchemaVO = getSchema(schemaDTO.getLogicId());
-            operateRecordService.save(new OperateRecord.Builder().project(
-                            Optional.ofNullable(projectId).map(projectService::getProjectBriefByProjectId).orElse(null))
-                    .userOperation(operator)
-                    .operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_EDIT_MAPPING)
-                     .content(JSON.toJSONString(new TemplateSchemaOperateRecord(oldSchemaVO.getData(), newSchemaVO.getData()))).triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-            
-                    .build());
-
             // 重建明天索引
             templatePreCreateManager.reBuildTomorrowIndex(schemaDTO.getLogicId(), 3);
         }
@@ -520,7 +523,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrvImpl impleme
     }
 
     @Override
-    public Result<ConsoleTemplateSchemaVO> getSchema(Integer logicId) {
+    public Result<TemplateMappingVO> getSchema(Integer logicId) {
         Result<IndexTemplateWithMapping> result = getTemplateWithMapping(logicId);
         if (result.failed()) {
             return Result.buildFrom(result);
@@ -533,7 +536,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrvImpl impleme
 
         fillSpecialField(templateLogicWithMapping);
 
-        ConsoleTemplateSchemaVO schemaVO = ConvertUtil.obj2Obj(templateLogicWithMapping, ConsoleTemplateSchemaVO.class);
+        TemplateMappingVO schemaVO = ConvertUtil.obj2Obj(templateLogicWithMapping, TemplateMappingVO.class);
         return Result.buildSucc(schemaVO);
     }
 
@@ -687,6 +690,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrvImpl impleme
         }
         return Result.buildSucc();
     }
+    
 
     /**
      * 根据现有配置 和 fields对比，得到修改的mapping

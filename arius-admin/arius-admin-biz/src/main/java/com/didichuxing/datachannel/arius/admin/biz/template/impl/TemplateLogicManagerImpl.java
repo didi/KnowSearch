@@ -37,7 +37,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.Template
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord.template.TemplateOperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ProjectTemplateAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
@@ -590,17 +589,15 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             Result<Void> updateStatusResult = indexTemplateService.updateTemplateConfig(indexTemplateConfigDTO, operator);
             if (updateStatusResult.success()) {
                 // rollover状态修改记录(兼容开启或者关闭)
-                 operateRecordService.save(new OperateRecord.Builder()
-                         
-                                 .bizId(templateLogicId)
-                                 .userOperation(operator)
-                         .project(Optional.of(projectId).map(projectService::getProjectBriefByProjectId).orElse(null))
-                                 .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                                 .content(JSON.toJSONString(
-                        new TemplateOperateRecord(TemplateOperateRecordEnum.ROLLOVER.getCode(), "rollover状态修改为:" + (newDisable ? "关闭" : "开启"))))
-                                 .operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE)
-                         
-                         .build());
+                operateRecordService.save(new OperateRecord.Builder()
+            
+                        .bizId(templateLogicId).userOperation(operator)
+                        .project(Optional.of(projectId).map(projectService::getProjectBriefByProjectId).orElse(null))
+                        .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).content(
+                                String.format("%s:rollover状态修改为:【%s】", TemplateOperateRecordEnum.ROLLOVER.getDesc(),
+                                        (newDisable ? "关闭" : "开启"))).operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE)
+            
+                        .build());
             }
         }
         return Result.buildSucc();
@@ -931,35 +928,41 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
      */
     @Override
     public Result<ConsoleTemplateDetailVO> getDetailVoByLogicId(Integer logicId) {
-  IndexTemplateWithCluster indexTemplateLogicWithCluster = indexTemplateService
-                .getLogicTemplateWithCluster(logicId);
-
-        if (null == indexTemplateLogicWithCluster || CollectionUtils.isEmpty(indexTemplateLogicWithCluster.getLogicClusters())) {
+        if (Objects.isNull(logicId)){
+            return Result.buildSucc();
+        }
+        IndexTemplateWithCluster indexTemplateLogicWithCluster = indexTemplateService.getLogicTemplateWithCluster(
+                logicId);
+    
+        if (null == indexTemplateLogicWithCluster || CollectionUtils.isEmpty(
+                indexTemplateLogicWithCluster.getLogicClusters())) {
             return Result.buildFail("模板对应资源不存在!");
         }
-
+    
         ConsoleTemplateDetailVO consoleTemplateDetail = ConvertUtil.obj2Obj(indexTemplateLogicWithCluster,
                 ConsoleTemplateDetailVO.class);
-
+    
         consoleTemplateDetail.setCyclicalRoll(indexTemplateLogicWithCluster.getExpression().endsWith("*"));
-        consoleTemplateDetail
-                .setCluster(templateLogicManager.jointCluster(indexTemplateLogicWithCluster.getLogicClusters()));
-
+        consoleTemplateDetail.setCluster(
+                templateLogicManager.jointCluster(indexTemplateLogicWithCluster.getLogicClusters()));
+    
         // 仅对有一个逻辑集群的情况设置集群类型与等级
         if (indexTemplateLogicWithCluster.getLogicClusters().size() == 1) {
             consoleTemplateDetail.setClusterType(indexTemplateLogicWithCluster.getLogicClusters().get(0).getType());
             consoleTemplateDetail.setClusterLevel(indexTemplateLogicWithCluster.getLogicClusters().get(0).getLevel());
         }
-        consoleTemplateDetail.setAppName(projectService.getProjectBriefByProjectId(indexTemplateLogicWithCluster.getProjectId()).getProjectName());
+        consoleTemplateDetail.setAppName(
+                projectService.getProjectBriefByProjectId(indexTemplateLogicWithCluster.getProjectId())
+                        .getProjectName());
         consoleTemplateDetail.setIndices(getLogicTemplateIndices(logicId));
         consoleTemplateDetail.setEditable(templateLabelService.isImportantIndex(logicId));
         // 获取indexRollover功能开启状态
-        consoleTemplateDetail.setDisableIndexRollover(Optional.ofNullable(indexTemplateService.getTemplateConfig(logicId))
-                .map(IndexTemplateConfig::getDisableIndexRollover)
-                .orElse(null)
-
+        consoleTemplateDetail.setDisableIndexRollover(
+                Optional.ofNullable(indexTemplateService.getTemplateConfig(logicId))
+                        .map(IndexTemplateConfig::getDisableIndexRollover).orElse(null)
+    
         );
-           return Result.buildSucc(consoleTemplateDetail);
+        return Result.buildSucc(consoleTemplateDetail);
     }
     
     /**

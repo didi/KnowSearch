@@ -1,48 +1,56 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord.template;
 
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONAware;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhySetting;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexSettingVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TemplateOperateRecordEnum;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
-
-import java.util.Objects;
+import com.didichuxing.datachannel.arius.admin.common.util.DiffUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.DiffUtil.DiffJson;
+import java.util.List;
 import java.util.Optional;
+import lombok.Data;
+import org.apache.commons.collections4.CollectionUtils;
 
 /**
  * @author liuchengxiang
  * @date 2022/2/17
  */
 @Data
-@NoArgsConstructor
 public class TemplateSettingOperateRecord extends TemplateOperateRecord {
 
+    
     public TemplateSettingOperateRecord(IndexTemplatePhySetting oldConfig, IndexTemplatePhySetting newConfig) {
         this.operateType = TemplateOperateRecordEnum.SETTING.getCode();
-
-        StringBuilder settingChange = new StringBuilder();
-        Optional<JSONObject> oldSetting = Optional.ofNullable(oldConfig.getSettings())
-            .map(json -> json.getJSONObject("index"));
-        Optional<JSONObject> newSetting = Optional.ofNullable(newConfig.getSettings())
-            .map(json -> json.getJSONObject("index"));
-        Optional<Integer> newSettingShardNum = newSetting.map(json -> json.getInteger("number_of_replicas"));
-        Integer oldSettingShardNum = oldSetting.map(json -> json.getInteger("number_of_replicas")).orElse(null);
-        newSettingShardNum.ifPresent(newShardNum -> {
-            if (!Objects.equals(newShardNum, oldSettingShardNum)) {
-                settingChange.append(newShardNum > 0 ? "关闭取消副本" : "开启取消副本").append("，");
-            }
-        });
-        Optional<String> newSettingTranslog = newSetting.map(json -> json.getJSONObject("translog"))
-            .map(json -> json.getString("durability"));
-        String oldSettingTranslog = oldSetting.map(json -> json.getJSONObject("translog"))
-            .map(json -> json.getString("durability")).orElse("");
-        newSettingTranslog.ifPresent(newTranslog -> {
-            if (!StringUtils.equals(oldSettingTranslog, newTranslog)) {
-                settingChange.append(newTranslog.equals("async") ? "开启异步translog" : "关闭异步translog");
-            }
-        });
-        this.operateDesc = settingChange.toString();
+        source = oldConfig.getSettings();
+        target = newConfig.getSettings();
+        final List<DiffJson> diffs = DiffUtil.diffJsonByString(
+                Optional.ofNullable(oldConfig).map(IndexTemplatePhySetting::getSettings).map(JSONAware::toJSONString)
+                        
+                        .orElse(""),
+                Optional.ofNullable(newConfig).map(IndexTemplatePhySetting::getSettings).map(JSONAware::toJSONString)
+                        
+                        .orElse("")
+        
+        );
+        
+        diffResult.addAll(diffs);
+        change= CollectionUtils.isNotEmpty(diffs);
+        
     }
-
+    
+    public TemplateSettingOperateRecord(IndexSettingVO oldSetting, IndexSettingVO newSettingVo) {
+        source = oldSetting.getProperties();
+        target = newSettingVo.getProperties();
+        final List<DiffJson> diffs = DiffUtil.diffJsonByString(source.toJSONString(), target.toJSONString());
+        
+        diffResult.addAll(diffs);
+        operateType = TemplateOperateRecordEnum.SETTING.getCode();
+        change= CollectionUtils.isNotEmpty(diffs);
+    }
+    
+    @Override
+    public String toString() {
+        return JSON.toJSONString(this);
+    }
 }

@@ -50,14 +50,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class TemplateController extends BaseTemplateController {
 
     private static final ILog        LOGGER = LogFactory.getLog(TemplateController.class);
-
+    
     @Autowired
     private TemplateLogicManager     templateLogicManager;
 
     @Autowired
     private ClusterLogicManager      clusterLogicManager;
 
-
+ 
 
     @GetMapping("/{projectId}")
     @ResponseBody
@@ -72,10 +72,10 @@ public class TemplateController extends BaseTemplateController {
     @ResponseBody
     @ApiOperation(value = "获取模板详细信息接口【三方接口】",tags = "【三方接口】" )
     @ApiImplicitParam(type = "Integer", name = "logicId", value = "逻辑模板ID", required = true)
-    public Result<ConsoleTemplateDetailVO> detail(HttpServletRequest request, @PathVariable Integer logicId) {
-
+    public Result<ConsoleTemplateDetailVO> detail(HttpServletRequest request, @PathVariable("logicId") Integer logicId) {
+        
         return templateLogicManager.getDetailVoByLogicId(logicId);
-
+     
     }
     @PutMapping("")
     @ResponseBody
@@ -91,7 +91,7 @@ public class TemplateController extends BaseTemplateController {
     @ApiOperation(value = "获取索引清理信息接口【三方接口】",tags = "【三方接口】" )
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "索引ID", required = true) })
     public Result<ConsoleTemplateClearVO> getLogicTemplateClearInfo(@RequestParam("logicId") Integer logicId) throws AmsRemoteException {
-
+       
         return templateLogicManager.getLogicTemplateClearInfo(logicId);
     }
 
@@ -116,7 +116,7 @@ public class TemplateController extends BaseTemplateController {
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "path", dataType = "Integer", name = "logicId", value = "索引ID",
             required = true) })
     public Result<ConsoleTemplateDeleteVO> getLogicTemplateDeleteInfo(@PathVariable("logicId") Integer logicId) throws AmsRemoteException {
-
+       
         return templateLogicManager.getLogicTemplateDeleteInfo(logicId);
     }
 
@@ -150,7 +150,7 @@ public class TemplateController extends BaseTemplateController {
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "索引ID", required = true) })
     public Result<List<TemplateCyclicalRollInfoVO>> getCyclicalRollInfo(HttpServletRequest request,
                                                                         @RequestParam("logicId") Integer logicId) {
-
+    
         return templateLogicManager.getCyclicalRollInfo(logicId);
     }
 
@@ -162,9 +162,9 @@ public class TemplateController extends BaseTemplateController {
     @ApiOperation(value = "获取模板当前限流值接口【三方接口】",tags = "【三方接口】" )
     @ApiImplicitParams({@ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "索引ID", required = true)})
     public Result<ConsoleTemplateRateLimitVO> getTemplateRateLimit(@RequestParam("logicId") Integer logicId)  {    // 一个逻辑模板可能有master slave两种，限流查看时，默认查看master即可
-
+        
         return templateLogicManager.getTemplateRateLimit(logicId);
-
+        
     }
 
     /**
@@ -177,7 +177,7 @@ public class TemplateController extends BaseTemplateController {
     @ResponseBody
     @ApiOperation(value = "更新模板当前限流值接口【三方接口】",tags = "【三方接口】" )
     public Result updateTemplateRateLimit(HttpServletRequest request,@RequestBody ConsoleTemplateRateLimitDTO consoleTemplateRateLimitDTO) {
-
+       
         return templateLogicManager.updateTemplateWriteRateLimit(consoleTemplateRateLimitDTO,
                     HttpRequestUtil.getOperator(request), HttpRequestUtil.getProjectId(request));
     }
