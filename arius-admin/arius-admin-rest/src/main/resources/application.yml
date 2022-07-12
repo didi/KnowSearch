@@ -75,6 +75,10 @@ integrate.test.es.port: 8888
 integrate.test.appid: 1
 integrate.test.operator: admin
 
+
+#统计项目对应各方法代码行相关配置
+stat.method.line.standardLineOfMethod: 60
+
 #日志相关配置
 logging.pattern.file: "[%level][%d{yyyy-MM-dd'T'HH:mm:ss.SSS}][%t] %msg%xEx%n"
 logging.config: classpath:log4j2-dev.xml
