@@ -63,8 +63,7 @@ public interface ClusterRegionManager {
      * @param projectId
      * @return
      */
-    
-    Result<Void> deletePhyClusterRegion(Long regionId, String operator, Integer projectId);
+    Result<Void> deletePhyClusterRegion(Long regionId, String operator, Integer projectId) throws AdminOperateException ;
 
     /**
      * 解绑逻辑集群已经绑定的region
@@ -77,5 +76,5 @@ public interface ClusterRegionManager {
      */
     Result<Void> unbindRegion(Long regionId, Long logicClusterId, String operator, Integer projectId);
 
-  
+
 }

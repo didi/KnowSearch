@@ -5,6 +5,7 @@ import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterRegionManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionWithNodeInfoVO;
+import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -40,7 +41,7 @@ public class ESPhyClusterRegionController {
     @DeleteMapping("/{regionId}")
     @ResponseBody
     @ApiOperation(value = "删除物理集群region接口", notes = "")
-    public Result<Void> removeRegion(HttpServletRequest request, @PathVariable("regionId") Long regionId) {
+    public Result<Void> removeRegion(HttpServletRequest request, @PathVariable("regionId") Long regionId) throws AdminOperateException {
         return clusterRegionManager.deletePhyClusterRegion(regionId, HttpRequestUtil.getOperator(request),
                 HttpRequestUtil.getProjectId(request));
     }
