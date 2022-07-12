@@ -1,9 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.cold.impl;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_COMMON_GROUP;
-import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_TEMPLATE_COLD_GROUP;
-import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.INDEX_TEMPLATE_COLD_DAY_DEFAULT;
-
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
@@ -23,14 +19,17 @@ import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateExcepti
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.google.common.collect.Lists;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.*;
 
 /**
  * @author chengxiang, zqr
@@ -239,6 +238,40 @@ public class ColdManagerImpl extends BaseTemplateSrvImpl implements ColdManager 
         return Result.buildSucc();
     }
 
+    /**
+     * 批量修改hotDays
+     *
+     * @param days           变量
+     * @param operator       操作人
+     * @param templateIdList
+     * @param projectId
+     * @return result
+     */
+    @Override
+    public Result<Integer> batchChangeHotDay(Integer days, String operator, List<Integer> templateIdList,
+                                             Integer projectId) {
+        if (days > MAX_HOT_DAY || days < MIN_HOT_DAY) {
+            return Result.buildParamIllegal("冷热分离的时间参数非法, 介于[1, 3]");
+        }
+
+        int count = indexTemplateService.batchChangeHotDay(days,templateIdList);
+
+
+
+        LOGGER.info("class=TemplateColdManagerImpl||method=batchChangeHotDay||days={}||count={}||operator={}", days, count, operator);
+        for (Integer id : templateIdList) {
+            operateRecordService.save(
+                    new OperateRecord.Builder().userOperation(operator).operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE)
+                            .bizId(id)
+                            .project(projectService.getProjectBriefByProjectId(projectId))
+
+                            .content("deltaHotDays:" + days + ";editCount:" + count).build());
+        }
+
+
+
+        return Result.buildSucc(count);
+    }
 
 
     /**************************************************** private method ****************************************************/
