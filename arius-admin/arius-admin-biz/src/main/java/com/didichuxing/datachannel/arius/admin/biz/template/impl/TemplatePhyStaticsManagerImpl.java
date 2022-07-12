@@ -3,6 +3,7 @@ package com.didichuxing.datachannel.arius.admin.biz.template.impl;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyStaticsManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESIndexStats;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ProjectIdTemplateAccessCountVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateStatsInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateStatsService;
@@ -51,7 +52,13 @@ public class TemplatePhyStaticsManagerImpl implements TemplatePhyStaticsManager 
         return templateStatsService.getIndexStatis(logicTemplateId, startDate, endDate);
     }
 
+    @Override
+    public Result<List<ProjectIdTemplateAccessCountVO>> getAccessAppInfos(int logicTemplateId, Long startDate, Long endDate) {
+        return Result.buildSucc(ConvertUtil.list2List(
+                templateStatsService.getAccessAppInfos(logicTemplateId, startDate, endDate).getData(),
+                ProjectIdTemplateAccessCountVO.class));
+    }
 
 
-  
+
 }
