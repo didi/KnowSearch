@@ -242,10 +242,9 @@ public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrvImpl implem
         operateRecordService.save(
                 new OperateRecord.Builder().project(projectService.getProjectBriefByProjectId(projectId))
                         .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).userOperation(operator)
-                        .operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_EDIT_SETTING)
+                        .operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE_EDIT_SETTING)
                         .content(
-                                JSON.toJSONString(
-                                        new TemplateSettingOperateRecord(beforeSetting.getData(), afterSetting.getData())))
+                                new TemplateSettingOperateRecord(beforeSetting.getData(), afterSetting.getData()).toString())
                         .bizId(logicId)
                         .build());
 

@@ -2,7 +2,6 @@ package com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping.impl;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.DEFAULT_INDEX_MAPPING_TYPE;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.impl.BaseTemplateSrvImpl;
@@ -260,8 +259,8 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrvImpl impleme
             operateRecordService.save(new OperateRecord.Builder().project(
                             Optional.ofNullable(projectId).map(projectService::getProjectBriefByProjectId).orElse(null))
                     .userOperation(operator)
-                    .operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_EDIT_MAPPING)
-                     .content(JSON.toJSONString(new TemplateMappingOperateRecord(beforeResult.getData(), afterResult.getData()))).triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                    .operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE_EDIT_MAPPING)
+                     .content(new TemplateMappingOperateRecord(beforeResult.getData(), afterResult.getData()).toString()).triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
             
                     .build());
         }
@@ -452,11 +451,10 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrvImpl impleme
             final Result<MappingConfig> afterResult = templatePhyMappingManager.getMapping(
                     templatePhysical.getCluster(), templatePhysical.getName());
             operateRecordService.save(new OperateRecord.Builder().operationTypeEnum(
-                            OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_EDIT_MAPPING)
+                            OperateTypeEnum.TEMPLATE_SERVICE_EDIT_MAPPING)
                     .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).userOperation(operator)
                     .project(projectService.getProjectBriefByProjectId(templateLogicWithPhysical.getProjectId()))
-                    .content(JSON.toJSONString(
-                            new TemplateMappingOperateRecord(beforeResult.getData(), afterResult.getData())))
+                    .content(new TemplateMappingOperateRecord(beforeResult.getData(), afterResult.getData()).toString())
                     .bizId(logicId).build());
         }
         

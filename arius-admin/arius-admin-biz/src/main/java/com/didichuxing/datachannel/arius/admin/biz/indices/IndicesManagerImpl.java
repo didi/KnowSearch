@@ -34,7 +34,6 @@ import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.index.IndexBlockEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.mapping.AriusIndexTemplateSetting;
@@ -69,7 +68,6 @@ import com.google.common.collect.Maps;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
@@ -176,14 +174,19 @@ public class IndicesManagerImpl implements IndicesManager {
             if (indexNameList.size() == esIndexService.syncBatchDeleteIndices(cluster, indexNameList, RETRY_COUNT)) {
                 Result<Void> batchSetIndexFlagInvalidResult = updateIndexFlagInvalid(cluster, indexNameList);
                 if (batchSetIndexFlagInvalidResult.success()) {
-                    operateRecordService.save(new OperateRecord.Builder()
+                    for (String indexName : indexNameList) {
+                         operateRecordService.save(new OperateRecord.Builder()
                                     .operationTypeEnum(OperateTypeEnum.INDEX_MANAGEMENT_DELETE)
                                     .userOperation(operator)
-                                    .content(String.format("批量删除%s集群中的索引：%s", cluster, ListUtils.strList2String(indexNameList)))
-                                    .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                                    .content(String.format("删除【%s】集群中的索引：【%s】", cluster,
+                                            indexName))
+                                  
                                     .project(projectService.getProjectBriefByProjectId(projectId))
+                                         .bizId(indexName)
                             
-                            .build());
+                            .buildDefaultManualTrigger());
+                    }
+                   
                 }
             }
             return Result.buildSucc();
@@ -233,12 +236,16 @@ public class IndicesManagerImpl implements IndicesManager {
                 if (!setCatIndexResult.success()) {
                     return Result.buildFail("批量更新索引状态失败");
                 }
-                operateRecordService.save(
+                for (String indexName : indexNameList) {
+                  operateRecordService.save(
                         new OperateRecord.Builder().project(projectService.getProjectBriefByProjectId(projectId))
-                                .content(String.format("批量开启%s集群中的索引：%s", cluster,
-                                        ListUtils.strList2String(indexNameList))).userOperation(operator)
-                                .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                                .operationTypeEnum(OperateTypeEnum.INDEX_MANAGEMENT_OP_INDEX).build());
+                                .content(String.format("开启【%s】集群中的索引：【%s】", cluster,
+                                        indexName)).userOperation(operator)
+                               
+                                .bizId(indexName)
+                                .operationTypeEnum(OperateTypeEnum.INDEX_MANAGEMENT_OP_INDEX).buildDefaultManualTrigger());
+                }
+                
               
 
             } catch (ESOperateException e) {
@@ -266,17 +273,18 @@ public class IndicesManagerImpl implements IndicesManager {
                 if (!setCatIndexResult.success()) {
                     return Result.buildFail("批量更新索引状态失败");
                 }
-                 operateRecordService.save(
-                         new OperateRecord.Builder()
-                                 .content(String.format("批量关闭%s集群中的索引：%s", cluster, ListUtils.strList2String(indexNameList)))
-                                 .project(projectService.getProjectBriefByProjectId(projectId))
-                                 .operationTypeEnum(OperateTypeEnum.INDEX_MANAGEMENT_OP_INDEX)
-                                 .userOperation(operator)
-                                 .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                                 .build()
-                         
-                         
-                 );
+                for (String indexName : indexNameList) {
+                    operateRecordService.save(new OperateRecord.Builder().content(
+                                    String.format("关闭集群【%s】集群中的索引：【%s】", cluster, indexName))
+                            .project(projectService.getProjectBriefByProjectId(projectId))
+                            .operationTypeEnum(OperateTypeEnum.INDEX_MANAGEMENT_OP_INDEX).userOperation(operator)
+                          .bizId(indexName)
+            
+                            .buildDefaultManualTrigger()
+    
+                    );
+                }
+                
                 
 
             } catch (ESOperateException e) {
@@ -353,10 +361,11 @@ public class IndicesManagerImpl implements IndicesManager {
                             indicesBlockSetting.getValue());
                         for (IndicesBlockSettingDTO param : params) {
                             operateRecordService.save(new Builder()
-                                    .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).content(operateContent)
+                                   .content(operateContent)
                                     .userOperation(operator).bizId(param.getIndex())
                                     .project(projectService.getProjectBriefByProjectId(projectId))
-                                    .operationTypeEnum(OperateTypeEnum.INDEX_MANAGEMENT_READ_WRITE_CHANGE).build());
+                                    .operationTypeEnum(OperateTypeEnum.INDEX_MANAGEMENT_READ_WRITE_CHANGE)
+                                    .buildDefaultManualTrigger());
                         }
                         
                     }
@@ -420,12 +429,13 @@ public class IndicesManagerImpl implements IndicesManager {
             final Result<IndexMappingVO> afterMapping = getMapping(phyCluster, indexName, projectId);
             
             operateRecordService.save(new OperateRecord.Builder().project(
-                            Optional.ofNullable(projectId).map(projectService::getProjectBriefByProjectId).orElse(null))
+                            projectService.getProjectBriefByProjectId(projectId))
                     .userOperation(operate).operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_EDIT_MAPPING)
                     .content(new TemplateMappingOperateRecord(beforeMapping.getData(), afterMapping.getData()).toString())
-                    .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                  
+                            .bizId(indexName)
                 
-                    .build());
+                    .buildDefaultManualTrigger());
         }
        
 
@@ -488,12 +498,13 @@ public class IndicesManagerImpl implements IndicesManager {
         if (syncPutIndexSettings){
             final Result<IndexSettingVO> afterSetting = getSetting(phyCluster, indexName, projectId);
             operateRecordService.save(new OperateRecord.Builder().project(
-                            Optional.ofNullable(projectId).map(projectService::getProjectBriefByProjectId).orElse(null))
+                            projectService.getProjectBriefByProjectId(projectId))
                     .userOperation(operator).operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_EDIT_SETTING)
                     .content(new TemplateSettingOperateRecord(beforeSetting.getData(), afterSetting.getData()).toString())
-                    .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                    
+                            .bizId(indexName)
                 
-                    .build());
+                    .buildDefaultManualTrigger());
         }
         return Result.build(syncPutIndexSettings);
     }
