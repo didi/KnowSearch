@@ -34,8 +34,8 @@ import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.Ope
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.template.NewTemplateSrvEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDCDRStepEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
@@ -169,8 +169,8 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
      * @return
      */
     @Override
-    public NewTemplateSrvEnum templateSrv() {
-        return NewTemplateSrvEnum.TEMPLATE_DCDR;
+    public TemplateServiceEnum templateSrv() {
+        return TemplateServiceEnum.TEMPLATE_DCDR;
     }
     
     private AriusTaskThreadPool ariusTaskThreadPool;

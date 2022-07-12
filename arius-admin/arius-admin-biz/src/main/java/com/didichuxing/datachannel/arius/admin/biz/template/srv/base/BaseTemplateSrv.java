@@ -2,7 +2,6 @@ package com.didichuxing.datachannel.arius.admin.biz.template.srv.base;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
-import com.didichuxing.datachannel.arius.admin.common.constant.template.NewTemplateSrvEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import java.util.List;
@@ -22,9 +21,10 @@ public interface BaseTemplateSrv {
 
     /**
      * 获取当前模板服务的类型
+     *
      * @return 指定的模板服务类型
      */
-    NewTemplateSrvEnum templateSrv();
+    TemplateServiceEnum templateSrv();
 
     /**
      * 获取当前模板服务的名称

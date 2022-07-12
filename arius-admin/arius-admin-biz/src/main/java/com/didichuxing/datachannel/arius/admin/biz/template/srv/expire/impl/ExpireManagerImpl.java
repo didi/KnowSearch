@@ -17,8 +17,8 @@ import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.template.NewTemplateSrvEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplatePhysicalStatusEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexCatService;
@@ -57,8 +57,8 @@ public class ExpireManagerImpl extends BaseTemplateSrvImpl implements ExpireMana
     
 
     @Override
-    public NewTemplateSrvEnum templateSrv() {
-        return NewTemplateSrvEnum.TEMPLATE_DEL_EXPIRE;
+    public TemplateServiceEnum templateSrv() {
+        return TemplateServiceEnum.TEMPLATE_DEL_EXPIRE;
     }
 
     @Override

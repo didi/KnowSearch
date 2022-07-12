@@ -43,7 +43,7 @@ public interface IndexTemplateDAO {
     long getTotalHitByCondition(IndexTemplatePO param);
 
 
-    int batchChangeHotDay(Integer days);
+    int batchChangeHotDay(@Param("days")Integer days,@Param("templateIdList") List<Integer> templateIdList);
 
     int updateBlockReadState(@Param("logicId") Integer logicId, @Param("blockRead") Boolean blockRead);
 
@@ -54,4 +54,6 @@ public interface IndexTemplateDAO {
     Integer getProjectIdByTemplateLogicId(@Param("logicId")Integer templateLogicId);
 
     String getNameByTemplateLogicId(@Param("logicId")Integer logicTemplateId);
+    
+
 }
