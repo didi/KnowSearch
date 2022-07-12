@@ -1,15 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.HIST;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.INDICES;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.KEY;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.SHARDS;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.TASKS;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.TOTAL;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.VALUE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.GET_CLUSTER_STATS;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.GET_PENDING_TASKS;
-
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.common.constant.AriusStatsEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.IndexNameUtils;
@@ -19,15 +9,17 @@ import com.didiglobal.logi.elasticsearch.client.gateway.direct.DirectResponse;
 import com.didiglobal.logi.elasticsearch.client.response.query.query.ESQueryResponse;
 import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESAggr;
 import com.google.common.collect.Maps;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import javax.annotation.PostConstruct;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.rest.RestStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
+
+import javax.annotation.PostConstruct;
+import java.util.*;
+
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.*;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.GET_CLUSTER_STATS;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.GET_PENDING_TASKS;
 
 @Component
 public class AriusStatsClusterInfoESDAO extends BaseAriusStatsESDAO {
@@ -168,6 +160,7 @@ public class AriusStatsClusterInfoESDAO extends BaseAriusStatsESDAO {
 
 
         Map<String, ESAggr> esAggrMap = response.getAggs().getEsAggrMap();
+        List<Long> keys = new ArrayList<>();
         if (null != esAggrMap && null != esAggrMap.get(HIST)) {
             esAggrMap.get(HIST).getBucketList().forEach(r -> {
                 //获取时间戳
@@ -175,15 +168,14 @@ public class AriusStatsClusterInfoESDAO extends BaseAriusStatsESDAO {
                 if (null != r.getUnusedMap() && null != r.getUnusedMap().get(KEY)) {
                     timeSlip = Long.valueOf(r.getUnusedMap().get(KEY).toString());
                 }
-
+                keys.add(timeSlip);
+                timeSlip2ValueMap.put(timeSlip, 0d);
                 //获取聚合值
                 if (null != r.getAggrMap() && null != r.getAggrMap().get(clusterMetricsType)
                         && null != r.getAggrMap().get(clusterMetricsType).getUnusedMap().get(VALUE)) {
                     double aggCal = Double.parseDouble(r.getAggrMap().get(clusterMetricsType).getUnusedMap().get(VALUE).toString());
                     if (aggCal > 0) {
                         timeSlip2ValueMap.put(timeSlip, aggCal);
-                    } else {
-                        timeSlip2ValueMap.put(timeSlip, 0d);
                     }
                 }
             });
