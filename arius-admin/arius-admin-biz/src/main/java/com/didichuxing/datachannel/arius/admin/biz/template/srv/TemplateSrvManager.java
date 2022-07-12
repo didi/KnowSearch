@@ -6,9 +6,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.Temp
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.srv.TemplateSrv;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.srv.UnavailableTemplateSrv;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterTemplateSrvVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv.TemplateWithSrvVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
+
 import java.util.List;
 
 /**
@@ -87,47 +87,7 @@ public interface TemplateSrvManager {
      * @return
      */
     List<String> getPhyClusterByOpenTemplateSrv(List<ClusterPhy> clusterPhies, int srvId);
-    
-    /**
-     * 获取逻辑集群索引服务
-     *
-     * @param clusterLogicId
-     * @return
-     */
-    Result<List<ESClusterTemplateSrvVO>> getClusterLogicTemplateSrv(Long clusterLogicId);
-    
-        /**
-     * 为逻辑集群增加一个索引服务
-     *
-     * @param clusterLogicId 逻辑集群Id
-     * @param templateSrvId  索引服务Id
-     * @param operator       操作者
-     * @param projectId
-     * @return
-     */
-    Result<Boolean> addTemplateSrvForClusterLogic(Long clusterLogicId, String templateSrvId, String operator,
-                                                  Integer projectId);
 
-    /**
-     * 获取逻辑集群可选择的索引服务
-     * @param clusterLogicId 逻辑集群Id
-     * @return
-     */
-    Result<List<ESClusterTemplateSrvVO>> getClusterLogicSelectableTemplateSrv(Long clusterLogicId);
-    
-        /**
-     * 逻辑集群删除一个索引服务
-     *
-     * @param clusterLogicId
-     * @param templateSrvId
-     * @param operator
-     * @param projectId
-     * @return
-     */
-    Result<Boolean> delTemplateSrvForClusterLogic(Long clusterLogicId, String templateSrvId, String operator,
-                                                  Integer projectId);
-    
-    
         /**
      * 判断物理集群是否打开了某个索引服务
      * @param phyCluster        物理集群名称

@@ -3,26 +3,25 @@ package com.didichuxing.datachannel.arius.admin.biz.template.srv.cold.impl;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.impl.BaseTemplateSrvImpl;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.cold.ColdManager;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegionFSInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.NewTemplateSrvEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.google.common.collect.Lists;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author chengxiang, zqr
@@ -200,33 +199,6 @@ public class ColdManagerImpl extends BaseTemplateSrvImpl implements ColdManager 
     }
 
 
-    /**
-     * 批量修改hotDays
-     *
-     * @param days     变量
-     * @param operator 操作人
-     * @return result
-     */
-    @Override
-    public Result<Integer> batchChangeHotDay(Integer days, String operator) {
-        if (days > MAX_HOT_DAY || days < MIN_HOT_DAY) {
-            return Result.buildParamIllegal("days参数非法, [-2, 2]");
-        }
-
-        int count = indexTemplateService.batchChangeHotDay(days);
-        
-        
-
-        LOGGER.info("class=TemplateColdManagerImpl||method=batchChangeHotDay||days={}||count={}||operator={}", days, count, operator);
-        operateRecordService.save(
-                new OperateRecord.Builder().userOperation(operator).operationTypeEnum(OperateTypeEnum.SETTING_MODIFY)
-                        .bizId(-1)
-                    
-                        .content("deltaHotDays:" + days + ";editCount:" + count).build());
-      
-
-        return Result.buildSucc(count);
-    }
 
     /**************************************************** private method ****************************************************/
   

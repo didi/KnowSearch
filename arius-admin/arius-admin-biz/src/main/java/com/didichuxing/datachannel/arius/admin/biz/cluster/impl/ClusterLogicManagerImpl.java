@@ -1,13 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.biz.cluster.impl;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum.CLUSTER_LOGIC;
-import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum.GREEN;
-import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum.RED;
-import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum.UNKNOWN;
-import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum.YELLOW;
-import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.DATA_NODE;
-import static com.didichuxing.datachannel.arius.admin.common.util.SizeUtil.getUnitSize;
-
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterLogicManager;
@@ -37,14 +29,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESMachineNormsPO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicTemplateIndexCountVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicTemplateIndexDetailDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterStatusVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PluginVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.ecm.ESClusterNodeSepcVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
@@ -60,11 +45,7 @@ import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateExcepti
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
 import com.didichuxing.datachannel.arius.admin.common.tuple.Tuples;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.ClusterUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.*;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESMachineNormsService;
@@ -82,23 +63,24 @@ import com.didichuxing.datachannel.arius.admin.persistence.component.ESGatewayCl
 import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-import com.didiglobal.logi.security.common.enums.ResultCode;
 import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum.CLUSTER_LOGIC;
+import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum.*;
+import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.DATA_NODE;
+import static com.didichuxing.datachannel.arius.admin.common.util.SizeUtil.getUnitSize;
 
 @Component
 public class ClusterLogicManagerImpl implements ClusterLogicManager {
@@ -294,22 +276,6 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         return Result.buildSucc(list);
     }
 
-    /**
-     * 获取APP拥有的集群列表
-     * @param projectId projectId
-     * @return 集群列表
-     */
-    @Override
-    public Result<List<ClusterLogicVO>> getProjectLogicClusters(Integer projectId) {
-
-       if (!projectService.checkProjectExist(projectId)){
-           return Result.build(ResultCode.PROJECT_NOT_EXISTS.getCode(),ResultCode.PROJECT_NOT_EXISTS.getMessage());
-       }
-
-        return Result.buildSucc(
-                buildClusterLogics(clusterLogicService.getHasAuthClusterLogicsByProjectId(projectId)));
-    }
-
     @Override
     public Result<List<Tuple<Long/*逻辑集群Id*/, String/*逻辑集群名称*/>>> listProjectClusterLogicIdsAndNames(Integer projectId) {
         List<Tuple<Long/*逻辑集群Id*/, String/*逻辑集群名称*/>> res = Lists.newArrayList();
@@ -325,22 +291,6 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
             res.add(logicClusterId2logicClusterNameTuple);
         }
         return Result.buildSucc(res);
-    }
-
-    /**
-     *
-     * @param clusterId 逻辑集群id
-     * @param projectId 项目id
-     * @return 逻辑集群信息
-     */
-    @Override
-    public Result<ClusterLogicVO> getProjectLogicClusters(Long clusterId, Integer projectId) {
-        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(clusterId);
-        if (clusterLogic == null) {
-            return Result.buildNotExist("集群不存在");
-        }
-
-        return Result.buildSucc(buildClusterLogic(clusterLogic));
     }
 
     @Override
@@ -411,36 +361,6 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     @Override
     public Result<Void> addLogicClusterAndClusterRegions(ESLogicClusterWithRegionDTO param, String operator) throws AdminOperateException {
         return clusterRegionManager.batchBindRegionToClusterLogic(param, operator, Boolean.TRUE);
-    }
-
-    @Override
-    public ClusterLogicVO getConsoleClusterVOByIdAndProjectId(Long clusterLogicId, Integer projectId) {
-        if (AriusObjUtils.isNull(clusterLogicId)) {
-            return null;
-        }
-        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(clusterLogicId);
-
-        return ConvertUtil.obj2Obj(clusterLogic, ClusterLogicVO.class);
-    }
-
-    @Override
-    public Result<Long> addLogicCluster(ESLogicClusterDTO param, String operator, Integer projectId) {
-        Result<Long> result = clusterLogicService.createClusterLogic(param);
-
-        if (result.success()) {
-			SpringTool.publish(new ClusterLogicEvent(result.getData(), projectId));
-            //添加逻辑集群日志
-            operateRecordService.save(
-                    new OperateRecord.Builder()
-                            .project(projectService.getProjectBriefByProjectId(projectId))
-                            .operationTypeEnum(OperateTypeEnum.MY_CLUSTER_APPLY)
-                            .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                            .userOperation(operator)
-                            .content(param.getName())
-                            .bizId(result.getData().intValue())
-                            .build());
-        }
-        return result;
     }
 
     @Override
@@ -604,15 +524,6 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
             return Result.buildSucc(getUnitSize( nodeSpec.split("-")[2])*count);
         }
         return Result.buildSucc(UNKNOWN_SIZE);
-    }
-
-    @Override
-    public Result<List<String>> getProjectLogicClusterNameByType(Integer projectId, Integer type) {
-        ESLogicClusterDTO logicClusterDTO = new ESLogicClusterDTO();
-        logicClusterDTO.setProjectId(projectId);
-        logicClusterDTO.setType(type);
-        return Result.buildSucc(clusterLogicService.listClusterLogics(logicClusterDTO)
-                .stream().map(ClusterLogic::getName).collect(Collectors.toList()));
     }
 
     @Override

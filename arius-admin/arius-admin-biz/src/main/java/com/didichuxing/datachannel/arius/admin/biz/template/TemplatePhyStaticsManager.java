@@ -2,8 +2,8 @@ package com.didichuxing.datachannel.arius.admin.biz.template;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESIndexStats;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ProjectIdTemplateAccessCountVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateStatsInfoVO;
+
 import java.util.List;
 import java.util.Map;
 
@@ -27,14 +27,6 @@ public interface TemplatePhyStaticsManager {
      */
     Result<TemplateStatsInfoVO> getTemplateBaseStatisticalInfoByLogicTemplateId(Long logicTemplateId);
 
-    /**
-     * 根据模板Id获取[startDate, endDate]的projectid访问统计信息
-     * @param logicTemplateId 逻辑索引模板ID
-     * @param startDate 开始时刻
-     * @param endDate 结束时刻
-     * @return list
-     */
-    Result<List<ProjectIdTemplateAccessCountVO>> getAccessAppInfos(int logicTemplateId, Long startDate, Long endDate);
 
     /**
      * 根据模板id获取模板的基本统计信息

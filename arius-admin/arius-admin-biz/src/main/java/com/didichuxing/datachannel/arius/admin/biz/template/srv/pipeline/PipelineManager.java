@@ -19,19 +19,7 @@ public interface PipelineManager {
      */
     Result<Void> createPipeline(Integer templatePhyId);
 
-    /**
-     * 同步pipeline
-     * @param templatePhyId 物理模板id
-     * @return
-     */
-    Result<Void>syncPipeline(Integer templatePhyId);
 
-    /**
-     * 删除
-     * @param templatePhyId 物理模板id
-     * @return true/false
-     */
-    Result<Void> deletePipeline(Integer templatePhyId);
 
     /**
      * 修改逻辑字段
@@ -41,31 +29,8 @@ public interface PipelineManager {
      */
     Result<Void> editFromTemplateLogic(IndexTemplate oldTemplate, IndexTemplate newTemplate);
 
-    /**
-     * 修改物理字段
-     * @param oldTemplate 物理模板
-     * @param newTemplate 新物理模板
-     * @return true/false
-     */
-    Result<Void> editFromTemplatePhysical(IndexTemplatePhy oldTemplate, IndexTemplatePhy newTemplate);
 
-    /**
-     * 获取指定物理模板限流值
-     * @param templatePhyId
-     * @return
-     */
-    Integer getRateLimit(Integer templatePhyId);
-    
-    
-    
-    
     //////////////////////////SRV
-        /**
-     * 修复模板的pipeline
-     * @param logicId
-     * @return
-     */
-    Result<Void> repairPipeline(Integer logicId) throws ESOperateException;
 
     /**
      * 同步pipeline
@@ -100,14 +65,6 @@ public interface PipelineManager {
     boolean editFromTemplatePhysical(IndexTemplatePhy oldTemplate, IndexTemplatePhy newTemplate,
                                      IndexTemplateWithPhyTemplates logicWithPhysical) throws ESOperateException;
 
-    /**
-     * 调整限流值
-     *
-     * @param indexTemplatePhysicalInfo 名字
-     * @param percent 百分比 [-99, 1000]
-     * @return true/false
-     */
-    boolean editRateLimitByPercent(IndexTemplatePhy indexTemplatePhysicalInfo, Integer percent) throws ESOperateException;
 
     Integer getRateLimit(IndexTemplatePhy indexTemplatePhysicalMasterInfo);
 

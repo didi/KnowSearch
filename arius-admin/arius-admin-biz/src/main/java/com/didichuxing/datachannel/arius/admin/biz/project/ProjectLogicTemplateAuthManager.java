@@ -2,9 +2,8 @@ package com.didichuxing.datachannel.arius.admin.biz.project;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectTemplateAuthDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ProjectTemplateAuth;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.ProjectTemplateAuthVO;
+
 import java.util.List;
 
 /**
@@ -12,15 +11,7 @@ import java.util.List;
  */
 public interface ProjectLogicTemplateAuthManager {
 
-    /**
-     * 获取当前项目对模板列表的权限信息
-     * @param projectId                    项目
-     * @param indexTemplateList   逻辑模板信息列表
-     * @return
-     */
-    List<ProjectTemplateAuth> getTemplateAuthListByTemplateListAndProjectId(Integer projectId,
-                                                                            List<IndexTemplate> indexTemplateList);
-	
+
 	/**
 	 * 更新模板 更新模板权限
 	 *

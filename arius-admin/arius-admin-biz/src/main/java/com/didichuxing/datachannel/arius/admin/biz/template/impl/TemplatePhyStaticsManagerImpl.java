@@ -3,17 +3,17 @@ package com.didichuxing.datachannel.arius.admin.biz.template.impl;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyStaticsManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESIndexStats;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ProjectIdTemplateAccessCountVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateStatsInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateStatsService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateValueService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-import java.util.List;
-import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author d06679
@@ -45,12 +45,6 @@ public class TemplatePhyStaticsManagerImpl implements TemplatePhyStaticsManager 
                 TemplateStatsInfoVO.class));
     }
 
-    @Override
-    public Result<List<ProjectIdTemplateAccessCountVO>> getAccessAppInfos(int logicTemplateId, Long startDate, Long endDate) {
-        return Result.buildSucc(ConvertUtil.list2List(
-                templateStatsService.getAccessAppInfos(logicTemplateId, startDate, endDate).getData(),
-                ProjectIdTemplateAccessCountVO.class));
-    }
 
     @Override
     public Result<List<ESIndexStats>> getIndexStatics(Long logicTemplateId, Long startDate, Long endDate) {

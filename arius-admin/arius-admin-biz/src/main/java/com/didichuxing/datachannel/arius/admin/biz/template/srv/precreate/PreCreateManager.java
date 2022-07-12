@@ -17,12 +17,6 @@ public interface PreCreateManager {
      */
     Result<Void> preCreateIndex(Integer logicTemplateId);
 
-    /**
-     * 重建明天索引
-      * @param logicTemplateId 逻辑模板id
-     * @return Result 重建是否成功
-     */
-    Result<Void> reBuildTomorrowIndex(Integer logicTemplateId);
 
     /**
      * 异步创建今明天索引

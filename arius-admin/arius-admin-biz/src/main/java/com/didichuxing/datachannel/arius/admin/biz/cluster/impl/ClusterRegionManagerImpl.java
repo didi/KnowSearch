@@ -1,7 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.biz.cluster.impl;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType.FAIL;
-
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterRegionManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.TemplateSrvManager;
@@ -20,11 +18,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterRe
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.*;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
@@ -34,15 +28,18 @@ import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Sets;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
+
+import static com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType.FAIL;
 
 @Component
 public class ClusterRegionManagerImpl implements ClusterRegionManager {
@@ -185,33 +182,6 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
         return doBindRegionToClusterLogic(param, operator);
     }
 
-    @Override
-    public Result<Void> unbindRegion(Long regionId, Long logicClusterId, String operator, Integer projectId) {
-         //校验操作合法性
-            final Result<Void> result = ProjectUtils.checkProjectCorrectly(i -> i, projectId, projectId);
-            if (result.failed()){
-                return result;
-            }
-        ClusterRegion region = clusterRegionService.getRegionById(regionId);
-        Result<Void> voidResult = clusterRegionService.unbindRegion(regionId, logicClusterId, operator);
-        if (voidResult.success()){
-              // 操作记录
-            operateRecordService.save(new OperateRecord.Builder()
-                            .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_REGION_CHANGE)
-                            .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                            .content(String.format("物理集群：%s,region解绑:%s;解绑逻辑群id:%s", region.getPhyClusterName(),
-                                    region.getName(),logicClusterId))
-                            .project(projectService.getProjectBriefByProjectId(projectId))
-                            .userOperation(operator)
-                            .bizId(clusterPhyService.getClusterByName(region.getPhyClusterName()))
-                            .build());
-        }
-     
-
-        return voidResult;
-    }
-
-   
 
     @Override
     public Result<List<ClusterRegionWithNodeInfoVO>> listClusterRegionWithNodeInfoByClusterName(String clusterName) {

@@ -29,15 +29,4 @@ public interface ColdManager {
      * @return
      */
     Result<Boolean> move2ColdNode(String cluster);
-
-
-    
-
-    /**
-     * batchChangeHotDay
-     * @param days
-     * @param operator
-     * @return
-     */
-    Result<Integer> batchChangeHotDay(Integer days, String operator);
 }

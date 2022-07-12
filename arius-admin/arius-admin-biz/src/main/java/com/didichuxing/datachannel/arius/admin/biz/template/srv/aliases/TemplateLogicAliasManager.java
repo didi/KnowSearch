@@ -1,13 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.aliases;
 
-import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.alias.ConsoleAliasDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.alias.ConsoleLogicTemplateAliasesDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.alias.ConsoleLogicTemplateDeleteAliasesDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateAlias;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyAlias;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
+
 import java.util.List;
 
 public interface TemplateLogicAliasManager {
@@ -24,50 +22,6 @@ public interface TemplateLogicAliasManager {
      */
     List<IndexTemplateAlias> listAlias(List<IndexTemplateWithPhyTemplates> templateLogicList);
 
-    /**
-     * 获取别名
-     * @param logicId logicId
-     * @return list
-     */
-    List<IndexTemplateAlias> getAliasesById(Integer logicId);
-
-    /**
-     * getAliases
-     * @param logicId
-     * @return
-     */
-    Result<List<IndexTemplatePhyAlias>> getAliases(Integer logicId);
-
-    /**
-     * createAliases
-     * @param aliases
-     * @param operator
-     * @return
-     */
-    Result<Void> createAliases(ConsoleLogicTemplateAliasesDTO aliases, String operator);
-
-    /**
-     * modifyAliases
-     * @param aliases
-     * @param operator
-     * @return
-     */
-    Result<Void> modifyAliases(ConsoleLogicTemplateAliasesDTO aliases, String operator);
-
-    /**
-     * deleteTemplateAliases
-     * @param deleteAliasesDTO
-     * @param operator
-     * @return
-     */
-    Result<Void> deleteTemplateAliases(ConsoleLogicTemplateDeleteAliasesDTO deleteAliasesDTO, String operator);
-
-    /**
-     * getAllTemplateAliasesByProjectId
-     * @param projectId
-     * @return
-     */
-    Result<List<Tuple<String/*index*/, String/*aliases*/>>> getAllTemplateAliasesByProjectId(Integer projectId);
 
     /**
      * 根据逻辑模板ID获取对应别名详情列表
