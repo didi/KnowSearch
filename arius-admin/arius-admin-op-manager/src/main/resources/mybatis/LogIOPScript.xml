@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.didiglobal.logi.op.manager.infrastructure.db.mapper.ScriptDao">
+    <resultMap id="BaseResultMap"
+               type="com.didiglobal.logi.op.manager.infrastructure.db.ScriptPO">
+        <result column="id" jdbcType="INTEGER" property="id"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="template_id" jdbcType="VARCHAR" property="templateId"/>
+        <result column="content_url" jdbcType="VARCHAR" property="contentUrl"/>
+        <result column="describe" jdbcType="VARCHAR" property="describe"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+       id, `name`, template_id, content_url, `describe`, create_time, update_time
+    </sql>
+
+    <insert id="insert" parameterType="com.didiglobal.logi.op.manager.infrastructure.db.ScriptPO"
+            useGeneratedKeys="true"
+            keyColumn="id" keyProperty="id">
+        insert into logi_op_script (`name`, template_id, content_url, `describe`, create_time, update_time)
+        values (#{name}, #{templateId}, #{contentUrl}, #{describe}, #{createTime}, #{updateTime})
+    </insert>
+
+    <!--<update id="update"
+            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.config.AriusConfigInfoPO">
+        update arius_config_info
+        <trim prefix="set" prefixOverrides=",">
+            <if test="valueGroup != null">,`value_group` = #{valueGroup}</if>
+            <if test="valueName != null">,value_name = #{valueName}</if>
+            <if test="value != null">,`value` = #{value}</if>
+            <if test="dimension != null">,dimension = #{dimension}</if>
+            <if test="memo != null">,memo = #{memo}</if>
+        </trim>
+        where id = #{id}
+    </update>-->
+
+    <select id="queryScript"
+            parameterType="com.didiglobal.logi.op.manager.infrastructure.db.ScriptPO"
+            resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from logi_op_script where 1=1
+        <if test="name != null">and `name` LIKE CONCAT('%', #{name}, '%')</if>
+        <if test="describe != null">and `describe` LIKE CONCAT('%', #{describe}, '%')</if>
+        order by id desc
+    </select>
+
+
+    <!--<select id="getById" parameterType="integer" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from arius_config_info
+        where status != -1 and id = #{id}
+    </select>-->
+
+</mapper>
