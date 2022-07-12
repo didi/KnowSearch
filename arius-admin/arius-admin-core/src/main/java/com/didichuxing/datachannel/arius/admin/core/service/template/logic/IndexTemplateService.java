@@ -403,6 +403,7 @@ public interface IndexTemplateService {
     boolean update(IndexTemplatePO editTemplate);
     
     int batchChangeHotDay(Integer days);
-    
+
     String getNameByTemplateLogicId(Integer logicTemplateId);
+
 }
