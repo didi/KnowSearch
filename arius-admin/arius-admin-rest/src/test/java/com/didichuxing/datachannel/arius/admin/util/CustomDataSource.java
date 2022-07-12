@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.GatewayHeartbeat;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectTemplateAuthDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRegionDTO;
@@ -27,7 +28,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.Cluste
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.project.ESUserPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.project.ProjectClusterLogicAuthPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.project.ProjectConfigPO;
@@ -54,6 +57,8 @@ import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterRe
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
+import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
 import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import com.didiglobal.logi.security.common.vo.project.ProjectVO;
 import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
@@ -692,5 +697,34 @@ public class CustomDataSource {
     public static ESClusterRoleHostDTO getESClusterRoleHostDTO() {
         return new ESClusterRoleHostDTO(0L, 0L, "hostname", "ip", "cluster", "port", false, 0, 0, "nodeSet", 0,
             "attributes");
+    }
+
+    public static IndexTemplateWithPhyTemplates getIndexTemplateWithPhyTemplates(){
+        IndexTemplateWithPhyTemplates indexTemplateWithPhyTemplates = new IndexTemplateWithPhyTemplates();
+        indexTemplateWithPhyTemplates.setDiskSize(1.0);
+        List<IndexTemplatePhy> physicals = new ArrayList<>();
+        IndexTemplatePhy physical = new IndexTemplatePhy();
+        physical.setRole(1);
+        physical.setId(1L);
+        physicals.add(physical);
+        indexTemplateWithPhyTemplates.setPhysicals(physicals);
+        return indexTemplateWithPhyTemplates;
+    }
+
+    public static List<CatIndexResult> getCatIndexResult(){
+        List<CatIndexResult> catIndexResults = new ArrayList<>();
+        CatIndexResult catIndexResult1 = new CatIndexResult();
+        catIndexResult1.setStoreSize("1gb");
+        catIndexResults.add(catIndexResult1);
+        CatIndexResult catIndexResult2 = new CatIndexResult();
+        catIndexResult2.setStoreSize("2gb");
+        catIndexResults.add(catIndexResult2);
+        return catIndexResults;
+    }
+
+    public static Result<Void> getResult(){
+        Result<Void> result = new Result<>();
+        result.setCode(ResultType.SUCCESS.getCode());
+        return result;
     }
 }

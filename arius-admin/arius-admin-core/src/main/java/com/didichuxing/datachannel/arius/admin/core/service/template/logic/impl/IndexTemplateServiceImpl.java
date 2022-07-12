@@ -227,7 +227,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
         if (oldPO == null) {
             return Result.buildNotExist(TEMPLATE_NOT_EXIST);
         }
-        
+
         boolean succeed = (1 == indexTemplateDAO.delete(logicTemplateId));
         if (succeed) {
             Result<Void> deleteTemplateAuthResult = logicTemplateAuthService.deleteTemplateAuthByTemplateId(oldPO.getId());
@@ -243,7 +243,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
             if (result.failed()) {
                 throw new AdminOperateException("删除模板失败");
             } else {
-                
+
                 LOGGER.info("class=TemplateLogicServiceImpl||method=delTemplate||logicId={}||msg=delTemplateByLogicId succ", logicTemplateId);
             }
 
@@ -325,8 +325,8 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
             LOGGER.warn("class=TemplateLogicServiceImpl||method=editTemplate||msg={}", checkResult.getMessage());
             return checkResult;
         }
- 
-        
+
+
         return editTemplateWithoutCheck(param, operator);
     }
    
@@ -883,8 +883,8 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
             return Result.buildFail("logicId or blockRead is null");
         }
     
-   
-  
+
+
         return Result.build(1==indexTemplateDAO.updateBlockReadState(logicId, blockRead));
     }
 
@@ -900,7 +900,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
         if (null == logicId || null == blockWrite) {
             return Result.buildFail("logicId or blockWrite is null");
         }
-     
+
         return Result.build(indexTemplateDAO.updateBlockWriteState(logicId, blockWrite)==1);
     }
 
@@ -927,7 +927,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
             if (editPhyResult.failed()) {
                 return Result.buildFail("修改限流，修改物理模板失败");
             }
-    
+
             SpringTool.publish(new LogicTemplateModifyEvent(this, ConvertUtil.obj2Obj(oldPO, IndexTemplate.class), getLogicTemplateById(oldPO.getId())));
             return Result.buildSucc();
         }
@@ -1035,7 +1035,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
         
         return  indexTemplateDAO.batchChangeHotDay(days, templateIdList);
     }
-    
+
     /**
      * @param logicTemplateId
      * @return
@@ -1044,6 +1044,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
     public String getNameByTemplateLogicId(Integer logicTemplateId) {
         return indexTemplateDAO.getNameByTemplateLogicId(logicTemplateId);
     }
+
     /**************************************** private method ****************************************************/
     /**
      * 转换逻辑模板，获取并组合对应的物理模板信息
@@ -1142,7 +1143,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
 
         IndexTemplatePO oldPO = indexTemplateDAO.getById(param.getId());
         IndexTemplatePO editTemplate = ConvertUtil.obj2Obj(param, IndexTemplatePO.class);
-        
+
         boolean succeed = (1 == indexTemplateDAO.update(editTemplate));
 
         if (succeed) {

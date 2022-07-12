@@ -405,4 +405,5 @@ public interface IndexTemplateService {
     int batchChangeHotDay(Integer days, List<Integer> templateIdList);
     
     String getNameByTemplateLogicId(Integer logicTemplateId);
+
 }
