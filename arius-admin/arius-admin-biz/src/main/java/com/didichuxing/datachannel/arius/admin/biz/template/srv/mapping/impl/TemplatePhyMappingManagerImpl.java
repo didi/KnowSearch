@@ -24,17 +24,13 @@ import com.didiglobal.logi.elasticsearch.client.response.setting.template.Templa
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Maps;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import lombok.NoArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.*;
 
 /**
  * @author zhonghua
@@ -83,19 +79,6 @@ public class TemplatePhyMappingManagerImpl implements TemplatePhyMappingManager 
         return Result.buildFail("not find template mapping, cluster:" + cluster + ", template:" + name);
     }
 
-    @Override
-    public Result<Void> addIndexMapping(String cluster, String expression, String dataFormat, int updateDays,
-                                  MappingConfig mappingConfig) {
-        for (int i = 1; i <= updateDays; i++) {
-            String indexName = IndexNameFactory.getNoVersion(expression, dataFormat, 2 - i);
-
-            if (!esIndexDAO.updateIndexMapping(cluster, indexName, mappingConfig)) {
-                return Result.buildFail("update index mapping fail");
-            }
-        }
-
-        return Result.buildSucc();
-    }
 
     @Override
     public Result<Void> syncTemplateMapping2Index(String cluster, String index, MappingConfig mappingConfig){
@@ -103,30 +86,6 @@ public class TemplatePhyMappingManagerImpl implements TemplatePhyMappingManager 
             return Result.buildFail("update index mapping fail");
         }
         return Result.buildSucc();
-    }
-
-    /**
-     * 校验模板field
-     *
-     * @param name              模板名字
-     * @param ariusTypeProperty 属性列表
-     * @return Result
-     */
-    @Override
-    public Result<Void> checkMappingForNew(String name, AriusTypeProperty ariusTypeProperty) {
-        try {
-            MappingConfig mappingConfig = new MappingConfig(ariusTypeProperty.toMappingJSON());
-            Map<String, TypeConfig> typeConfigMap = mappingConfig.getMapping();
-            if (typeConfigMap != null && typeConfigMap.size() > 1) {
-                return Result.build(ResultType.FAIL.getCode(), "mapping具有多个type, 只能配置一个type");
-            }
-        }catch (JSONException e) {
-            return Result.build(ResultType.FAIL.getCode(), JSON_PARSE_ERROR_TIPS);
-        }catch (Exception e) {
-            return Result.build(ResultType.FAIL.getCode(), e.getMessage());
-        }
-
-        return checkMapping(null, name, ariusTypeProperty.toMappingJSON().toJSONString(), false);
     }
 
     @Override
@@ -204,6 +163,38 @@ public class TemplatePhyMappingManagerImpl implements TemplatePhyMappingManager 
         } catch (Exception t) {
             return Result.buildFail(t.getMessage());
         }
+    }
+
+    @Override
+    public Result<Void> addIndexMapping(String cluster, String expression, String dataFormat, int updateDays, MappingConfig mappingConfig) {
+        for (int i = 1; i <= updateDays; i++) {
+            String indexName = IndexNameFactory.getNoVersion(expression, dataFormat, 2 - i);
+
+            if (!esIndexDAO.updateIndexMapping(cluster, indexName, mappingConfig)) {
+                return Result.buildFail("update index mapping fail");
+            }
+        }
+
+        return Result.buildSucc();
+
+    }
+
+    @Override
+    public Result<Void> checkMappingForNew(String name, AriusTypeProperty ariusTypeProperty) {
+        try {
+            MappingConfig mappingConfig = new MappingConfig(ariusTypeProperty.toMappingJSON());
+            Map<String, TypeConfig> typeConfigMap = mappingConfig.getMapping();
+            if (typeConfigMap != null && typeConfigMap.size() > 1) {
+                return Result.build(ResultType.FAIL.getCode(), "mapping具有多个type, 只能配置一个type");
+            }
+        }catch (JSONException e) {
+            return Result.build(ResultType.FAIL.getCode(), JSON_PARSE_ERROR_TIPS);
+        }catch (Exception e) {
+            return Result.build(ResultType.FAIL.getCode(), e.getMessage());
+        }
+
+        return checkMapping(null, name, ariusTypeProperty.toMappingJSON().toJSONString(), false);
+
     }
 
     /**************************************** private method ****************************************************/

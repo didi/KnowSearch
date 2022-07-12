@@ -240,40 +240,6 @@ public class ColdManagerImpl extends BaseTemplateSrvImpl implements ColdManager 
     }
 
 
-    /**
-     * 批量修改hotDays
-     *
-     * @param days           变量
-     * @param operator       操作人
-     * @param templateIdList
-     * @param projectId
-     * @return result
-     */
-    @Override
-    public Result<Integer> batchChangeHotDay(Integer days, String operator, List<Integer> templateIdList,
-                                             Integer projectId) {
-        if (days > MAX_HOT_DAY || days < MIN_HOT_DAY) {
-            return Result.buildParamIllegal("冷热分离的时间参数非法, 介于[1, 3]");
-        }
-
-        int count = indexTemplateService.batchChangeHotDay(days,templateIdList);
-        
-        
-
-        LOGGER.info("class=TemplateColdManagerImpl||method=batchChangeHotDay||days={}||count={}||operator={}", days, count, operator);
-        for (Integer id : templateIdList) {
-            operateRecordService.save(
-                new OperateRecord.Builder().userOperation(operator).operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE)
-                        .bizId(id)
-                        .project(projectService.getProjectBriefByProjectId(projectId))
-                    
-                        .content("deltaHotDays:" + days + ";editCount:" + count).build());
-        }
-      
-      
-
-        return Result.buildSucc(count);
-    }
 
     /**************************************************** private method ****************************************************/
   

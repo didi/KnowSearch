@@ -1,7 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.impl;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.DEFAULT_CLUSTER_HEALTH;
-
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Plugin;
@@ -36,20 +34,17 @@ import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 import lombok.NoArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.DEFAULT_CLUSTER_HEALTH;
 
 /**
  * @author didi
@@ -399,16 +394,7 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
     
         return Result.buildSucc(templateServices);
     }
-    
-    /**
-     * @param phyCluster
-     * @return
-     */
-    @Override
-    public Integer getIdByName(String phyCluster) {
-        return clusterDAO.getIdByName(phyCluster);
-    }
-    
+
     /**
      * @param phyCluster
      * @return

@@ -1,9 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.biz.cluster;
 
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -22,6 +18,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTe
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * @description: 逻辑集群manager
@@ -45,12 +44,6 @@ public interface ClusterLogicManager {
      */
     ClusterLogicVO buildClusterLogic(ClusterLogic clusterLogic);
 
-    /**
-     * 获取APP拥有的集群列表
-     * @param projectId 项目id
-     * @return
-     */
-    Result<List<ClusterLogicVO>> getProjectLogicClusters(Integer projectId);
 
     /**
      * 获取project拥有的逻辑集群id和名称列表
@@ -66,14 +59,6 @@ public interface ClusterLogicManager {
      * @return
      */
     Result<List<ClusterLogicVO>> getLogicClustersByProjectId(Integer projectId);
-
-    /**
-     * 获取集群详情
-     * @param clusterId
-     * @param projectId 项目id
-     * @return
-     */
-    Result<ClusterLogicVO> getProjectLogicClusters(Long clusterId, Integer projectId);
 
     /**
      * 根据项目和集群类型获取逻辑集群(项目对其有管理权限)名称列表
@@ -139,23 +124,6 @@ public interface ClusterLogicManager {
     Result<Void> addLogicClusterAndClusterRegions(ESLogicClusterWithRegionDTO param, String operator) throws AdminOperateException;
 
     /**
-     *  根据逻辑集群Id和projectId创建逻辑集群信息
-     * @param clusterLogicId 集群id
-     * @param projectId projectId
-     * @return 集群详情
-     */
-    ClusterLogicVO getConsoleClusterVOByIdAndProjectId(Long clusterLogicId, Integer projectId);
-
-    /**
-     *  新建带有region信息的逻辑集群
-     * @param param 逻辑集群信息
-     * @param operator 操作人
-     * @param projectId projectId
-     * @return id
-     */
-    Result<Long> addLogicCluster(ESLogicClusterDTO param, String operator, Integer projectId);
-
-    /**
      * 逻辑集群下线
      * @param logicClusterId 逻辑集群id
      * @param operator 操作人
@@ -206,13 +174,6 @@ public interface ClusterLogicManager {
      */
     Result<Long> estimatedDiskSize(Long clusterLogicId, Integer count);
 
-    /**
-     * 根据项目和集群类型获取逻辑集群(项目对其有管理权限)名称列表
-     * @param projectId 项目id
-     * @param type
-     * @return
-     */
-    Result<List<String>> getProjectLogicClusterNameByType(Integer projectId, Integer type);
 
     /**
      * 根据projectId获取项目下的逻辑集群

@@ -1,7 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.task;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
-
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.task.OpTaskManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -21,19 +19,14 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
 
 /**
  * @author fengqiongfeng
@@ -57,35 +50,6 @@ public class OpTaskController {
             voList.add(new TaskTypeVO(elem.getType(), elem.getMessage()));
         }
         return Result.buildSucc(voList);
-    }
-
-    /**
-     * 提交一个任务
-     */
-    @PutMapping(path = "/{type}/submit")
-    @ResponseBody
-    @ApiOperation(value = "提交任务接口", notes = "")
-    @ApiImplicitParams({ @ApiImplicitParam(paramType = "path", dataType = "String", name = "type", value = "任务类型", required = true) })
-    public Result<WorkTaskVO> submit(HttpServletRequest request,
-                                     @PathVariable(value = "type") Integer type,
-                                     @RequestBody OpTaskDTO workTaskDTO) throws NotFindSubclassException {
-        String dataCenter = workTaskDTO.getDataCenter();
-        String user = HttpRequestUtil.getOperator(request);
-        final Integer projectId = HttpRequestUtil.getProjectId(request);
-    
-        workTaskDTO.setTaskType(type);
-        workTaskDTO.setCreator(user);
-        workTaskDTO.setCreateTime(new Date());
-        workTaskDTO.setUpdateTime(new Date());
-
-        LOGGER.info("class=OpTaskController||method=OpTaskController.process||workTaskDTO={}||envInfo={}||dataCenter={}",
-            JSON.toJSONString(workTaskDTO), EnvUtil.getStr(), dataCenter);
-
-        Result<OpTask> result = opTaskManager.addTask(workTaskDTO,projectId);
-        if (result.failed()) {
-            return Result.buildFail(result.getMessage());
-        }
-        return Result.buildSucc();
     }
 
     @ApiOperation(value = "任务详情", notes = "")

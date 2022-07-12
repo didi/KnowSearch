@@ -10,9 +10,10 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTe
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.IndexTemplatePhysicalVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 import java.util.Set;
-import org.springframework.transaction.annotation.Transactional;
 
 public interface TemplatePhyManager {
 
@@ -171,6 +172,7 @@ public interface TemplatePhyManager {
      * @return           List<IndexTemplatePhysicalVO>
      */
     Result<List<IndexTemplatePhysicalVO>> getTemplatePhies(Integer logicId);
-    
+
     Result<List<IndexTemplatePhysicalVO>> listByRegionId(Integer regionId);
+    
 }

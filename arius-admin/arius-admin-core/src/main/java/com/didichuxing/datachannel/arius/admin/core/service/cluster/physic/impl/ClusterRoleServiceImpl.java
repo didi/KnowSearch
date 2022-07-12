@@ -11,13 +11,14 @@ import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.ecm.ESClusterRoleDAO;
+import org.apache.commons.collections.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.apache.commons.collections.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 /**
  * ES集群对应角色集群 服务实现类
@@ -67,10 +68,6 @@ public class ClusterRoleServiceImpl implements ClusterRoleService {
         return ConvertUtil.obj2Obj(roleClusterPO, ClusterRoleInfo.class);
     }
 
-    @Override
-    public ClusterRoleInfo getById(Long id) {
-        return ConvertUtil.obj2Obj(roleClusterDAO.getById(id), ClusterRoleInfo.class);
-    }
 
     @Override
     public List<ClusterRoleInfo> getAllRoleClusterByClusterId(Integer clusterId) {
@@ -134,15 +131,6 @@ public class ClusterRoleServiceImpl implements ClusterRoleService {
          return result;
         }
         boolean success = (roleClusterDAO.delete(clusterId) > 0);
-        if (!success) {
-            return Result.buildFail();
-        }
-        return Result.buildSucc();
-    }
-
-    @Override
-    public Result deleteRoleClusterByClusterIdAndRole(Long clusterId, String role) {
-        boolean success = (roleClusterDAO.deleteRoleClusterByCluterIdAndRole(clusterId,role) > 0);
         if (!success) {
             return Result.buildFail();
         }

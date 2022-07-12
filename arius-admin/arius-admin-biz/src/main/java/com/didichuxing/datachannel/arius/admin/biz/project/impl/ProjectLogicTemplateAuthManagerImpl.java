@@ -6,10 +6,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectTemplateAuthDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ProjectTemplateAuth;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithClusterAndMasterTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.ProjectTemplateAuthVO;
-import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectTemplateAuthEnum;
@@ -20,14 +18,14 @@ import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecord
 import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectLogicTemplateAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didiglobal.logi.security.service.ProjectService;
-import com.google.common.collect.Lists;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  * Created by linyunan on 2021-06-15
@@ -44,54 +42,6 @@ public class ProjectLogicTemplateAuthManagerImpl implements ProjectLogicTemplate
     @Autowired
     private IndexTemplateService indexTemplateService;
 
-  
-
-    @Override
-    public List<ProjectTemplateAuth> getTemplateAuthListByTemplateListAndProjectId(Integer projectId,
-                                                                                   List<IndexTemplate> indexTemplateList) {
-        List<ProjectTemplateAuth> projectTemplateAuthList = Lists.newArrayList();
-        if (CollectionUtils.isEmpty(indexTemplateList)) {
-            return projectTemplateAuthList;
-        }
-
-        if (!projectService.checkProjectExist(projectId)) {
-            projectTemplateAuthList = indexTemplateList.stream()
-                .map(r -> projectLogicTemplateAuthService.buildTemplateAuth(r, ProjectTemplateAuthEnum.NO_PERMISSION))
-                .collect(Collectors.toList());
-            return projectTemplateAuthList;
-        }
-        //判断是否为超级应用
-        if (AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
-            projectTemplateAuthList = indexTemplateList.stream()
-                .map(r -> projectLogicTemplateAuthService.buildTemplateAuth(r, ProjectTemplateAuthEnum.OWN))
-                .collect(Collectors.toList());
-            return projectTemplateAuthList;
-        }
-
-        List<ProjectTemplateAuth> appActiveTemplateRWAuths = projectLogicTemplateAuthService.getProjectActiveTemplateRWAndRAuths(
-                projectId);
-        Map<Integer, ProjectTemplateAuth> templateId2AppTemplateAuthMap = ConvertUtil.list2Map(appActiveTemplateRWAuths,
-            ProjectTemplateAuth::getTemplateId);
-
-        for (IndexTemplate indexTemplate : indexTemplateList) {
-            Integer templateLogicId = indexTemplate.getId();
-            if (null != projectId && projectId.equals(indexTemplate.getProjectId())) {
-                projectTemplateAuthList.add(
-                    projectLogicTemplateAuthService.buildTemplateAuth(indexTemplate, ProjectTemplateAuthEnum.OWN));
-                continue;
-            }
-
-            if (null != templateLogicId && templateId2AppTemplateAuthMap.containsKey(templateLogicId)) {
-                projectTemplateAuthList.add(templateId2AppTemplateAuthMap.get(templateLogicId));
-                continue;
-            }
-
-            projectTemplateAuthList.add(projectLogicTemplateAuthService.buildTemplateAuth(indexTemplate,
-                ProjectTemplateAuthEnum.NO_PERMISSION));
-        }
-
-        return projectTemplateAuthList;
-    }
     /**
      * @param authDTO
      * @param operator

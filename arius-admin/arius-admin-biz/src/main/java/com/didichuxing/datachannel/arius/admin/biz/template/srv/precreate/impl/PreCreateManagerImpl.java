@@ -16,11 +16,12 @@ import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
 import com.didiglobal.logi.elasticsearch.client.response.setting.index.IndexConfig;
 import com.didiglobal.logi.elasticsearch.client.response.setting.template.TemplateConfig;
-import java.util.List;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * @author chengxiang, zqr
@@ -75,27 +76,6 @@ public class PreCreateManagerImpl extends BaseTemplateSrvImpl implements PreCrea
         }
 
         return succeedCount * 1.0 / templatePhyList.size() > SUCCESS_RATE ? Result.buildSucc() : Result.buildFail("预创建失败");
-    }
-
-    @Override
-    public Result<Void> reBuildTomorrowIndex(Integer logicTemplateId) {
-        List<IndexTemplatePhy> templatePhyList = indexTemplatePhyService.getTemplateByLogicId(logicTemplateId);
-        if (CollectionUtils.isEmpty(templatePhyList)) {
-            return Result.buildSucc();
-        }
-
-        Boolean succ = Boolean.TRUE;
-        for (IndexTemplatePhy templatePhy : templatePhyList) {
-            Long phyTemplateId = templatePhy.getId();
-            try {
-                if (syncDeleteTomorrowIndexByPhysicalId(phyTemplateId, RETRY_TIMES)) {
-                    succ = succ && syncCreateTomorrowIndexByPhysicalId(phyTemplateId, RETRY_TIMES);
-                }
-            } catch (Exception e) {
-                LOGGER.error("class=PreCreateManagerImpl||method=reBuildTomorrowIndex||errMsg={}||logicTemplate={}||physicalTemplate={}", e.getMessage(), logicTemplateId, phyTemplateId, e);
-            }
-        }
-        return succ ? Result.buildSucc() : Result.buildFail("重建明天索引失败");
     }
 
     @Override
