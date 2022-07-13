@@ -58,6 +58,9 @@ public class ESClusterRoleHostDTO extends BaseDTO {
     @ApiModelProperty("attributes, 逗号分隔 key1:value1,key2:value2")
     private String attributes;
 
+    @ApiModelProperty("机器规格")
+    private String machineSpec;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

@@ -1,27 +1,16 @@
 package com.didichuxing.datachannel.arius.admin.core.service.es.impl;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.INSERT_PRDER;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.ONE_BILLION;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.PRIORITY;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.SOURCE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.TASKS;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.TIME_IN_QUEUE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.*;
 import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.*;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_OPERATE_TIMEOUT;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.HashMap;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.*;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.NodeStateVO;
-import com.didiglobal.logi.elasticsearch.client.response.model.os.OsNode;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.rest.RestStatus;
@@ -32,6 +21,9 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.Triple;
+import com.didichuxing.datachannel.arius.admin.common.Tuple;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.NodeStateVO;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterNodeService;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpClient;
@@ -43,6 +35,7 @@ import com.didiglobal.logi.elasticsearch.client.response.cluster.nodes.ESCluster
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodesstats.ClusterNodeStats;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodesstats.ESClusterNodesStatsResponse;
 import com.didiglobal.logi.elasticsearch.client.response.model.fs.FSNode;
+import com.didiglobal.logi.elasticsearch.client.response.model.os.OsNode;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
@@ -331,6 +324,70 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
             });
         }
         return diskUsageMap;
+    }
+
+    @Override
+    public Map<String, Tuple<Long, Long>> syncGetNodesMemoryAndDisk(String cluster) {
+        Map<String, Tuple<Long, Long>> node2MemAndDiskMap = Maps.newHashMap();
+        List<ClusterNodeStats> nodeStatsList = esClusterNodeDAO.syncGetNodesStats(cluster);
+
+        if (CollectionUtils.isNotEmpty(nodeStatsList)) {
+            // 遍历节点，获得节点和对应的磁盘使用率
+            nodeStatsList.forEach(nodeStats -> {
+                String nodeName = nodeStats.getName();
+
+                FSNode fsNode = nodeStats.getFs();
+                long totalFsBytes = fsNode.getTotal().getTotalInBytes();
+                long totalOsMemBytes = nodeStats.getOs().getMem().getTotalInBytes();
+                if (totalFsBytes <= 0 || totalOsMemBytes <= 0) {
+                    return;
+                }
+                //Tuple<memoryBytes, diskBytes>
+                Tuple<Long, Long> tuple = new Tuple<>();
+                tuple.setV1(totalOsMemBytes);
+                tuple.setV2(totalFsBytes);
+
+                node2MemAndDiskMap.put(nodeName, tuple);
+            });
+        }
+        return node2MemAndDiskMap;
+    }
+
+    @Override
+    public Map<String, Integer> syncGetNodesCpuNum(String cluster) {
+        Map<String, Integer> node2CpuNumMap = Maps.newHashMap();
+        //这里直接使用 esClient.admin().cluster().nodes(new ESClusterNodesRequest().flag("os")).actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);无法正确获取到数据，所以使用
+        DirectResponse directResponse = esClusterNodeDAO.getDirectResponse(cluster, "GET", "/_nodes/os");
+
+        if (directResponse.getRestStatus() == RestStatus.OK
+            && StringUtils.isNotBlank(directResponse.getResponseContent())) {
+            JSONObject nodes = null;
+            try {
+                JSONObject jsonObject = JSONObject.parseObject(directResponse.getResponseContent());
+                nodes = jsonObject.getJSONObject("nodes");
+            } catch (Exception e) {
+                // pass 
+            }
+            Optional.ofNullable(nodes).ifPresent(nodesMap -> {
+                nodesMap.values().forEach(obj -> {
+                    Integer cpuNum = null;
+                    String nodeName = null;
+                    try {
+                        JSONObject nodeInfo = JSONObject.parseObject(JSONObject.toJSONString(obj));
+                        nodeName = nodeInfo.getString("name");
+                        cpuNum = nodeInfo.getJSONObject("os").getInteger("available_processors");
+                    } catch (Exception e) {
+                        // pass
+                    }
+                    if (StringUtils.isNotBlank(nodeName) && null != cpuNum && cpuNum > 0) {
+                        node2CpuNumMap.put(nodeName, cpuNum);
+                    }
+
+                });
+            });
+        }
+
+        return node2CpuNumMap;
     }
 
     /*********************************************private******************************************/

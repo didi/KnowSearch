@@ -141,4 +141,35 @@ public class SizeUtil {
 
         return String.format("%f%s", value, suffix);
     }
+
+    public static String getShortUnitSize(long bytes) {
+        final long c1 = 1024L;
+        final long c2 = c1 * 1024L;
+        final long c3 = c2 * 1024L;
+        final long c4 = c3 * 1024L;
+        final long c5 = c4 * 1024L;
+        long value = bytes;
+        String suffix = "b";
+        if (bytes >= c5) {
+            value /= c5;
+            suffix = "p";
+        } else if (bytes >= c4) {
+            value /= c4;
+            suffix = "t";
+        } else if (bytes >= c3) {
+            value /= c3;
+            suffix = "g";
+        } else if (bytes >= c2) {
+            value /= c2;
+            suffix = "m";
+        } else if (bytes >= c1) {
+            value /= c1;
+            suffix = "k";
+        }
+        return String.format("%d%s", value, suffix);
+    }
+
+    public static String getMachineSpec(int cpuNum, long memoryBytes, long diskBytes) {
+        return String.format("%sc-%s-%s", cpuNum, getShortUnitSize(memoryBytes), getShortUnitSize(diskBytes));
+    }
 }

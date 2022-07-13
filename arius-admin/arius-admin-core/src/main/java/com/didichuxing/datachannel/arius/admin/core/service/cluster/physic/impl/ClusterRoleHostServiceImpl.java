@@ -1,19 +1,26 @@
 package com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.impl;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.CLIENT_NODE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.DATA_NODE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.MASTER_NODE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.UNKNOWN;
-import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.valueOf;
+import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.*;
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeStatusEnum.OFFLINE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeStatusEnum.ONLINE;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_ROLE_CLIENT;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_ROLE_DATA;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_ROLE_MASTER;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.*;
+
+import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.ESClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterJoinDTO;
@@ -27,11 +34,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESCluste
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminTaskException;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.Getter;
-import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.*;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterNodeService;
@@ -43,23 +46,8 @@ import com.didiglobal.logi.elasticsearch.client.response.model.http.HttpInfo;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 /**
  * ES集群表对应各角色主机列表 服务实现类
@@ -174,6 +162,10 @@ public class ClusterRoleHostServiceImpl implements ClusterRoleHostService {
             if (nodePOFromDbMap.containsKey(nodePO.getKey())) {
                 nodePO.setId(nodePOFromDbMap.get(nodePO.getKey()).getId());
                 nodePO.setRegionId(nodePOFromDbMap.get(nodePO.getKey()).getRegionId());
+                String machineSpec = nodePOFromDbMap.get(nodePO.getKey()).getMachineSpec();
+                if (StringUtils.isNotBlank(machineSpec)) {
+                    nodePO.setMachineSpec(machineSpec);
+                }
                 LOGGER.info(
                     "class=RoleClusterHostServiceImpl||method=collectClusterNodeSettings||nodeName={}||id={}||msg=node has exist!",
                     nodePO.getNodeSet(), nodePO.getId());
@@ -498,12 +490,13 @@ public class ClusterRoleHostServiceImpl implements ClusterRoleHostService {
 
         // 从ES集群中获取初始的节点信息列表
         List<ClusterNodeInfo> clusterNodeInfos = buildAllClusterNodeInfoFromES(cluster);
+        Map<String,String> node2machineSpecMap  = buildESClusterNodeMachineSpecMap(cluster);
 
 
         // 根据集群节点角色信息构建入DB的host列表信息
         for (ClusterNodeInfo nodeInfoListFromArius : clusterNodeInfos) {
             // 构造节点记录数据
-            ESClusterRoleHostPO roleClusterHostPO = buildEsClusterHostPO(nodeInfoListFromArius, cluster);
+            ESClusterRoleHostPO roleClusterHostPO = buildEsClusterHostPO(nodeInfoListFromArius, node2machineSpecMap, cluster);
             // 节点所属的角色记录如果不存在，则去设置
             setRoleClusterId(roleClusterHostPO, cluster);
 
@@ -511,6 +504,26 @@ public class ClusterRoleHostServiceImpl implements ClusterRoleHostService {
         }
 
         return nodePOList;
+    }
+
+    private Map<String, String> buildESClusterNodeMachineSpecMap(String cluster) {
+        Map<String, String> node2machineSpecMap = Maps.newHashMap();
+        Map<String, Integer> node2CpuNum = esClusterNodeService.syncGetNodesCpuNum(cluster);
+        Map<String, Tuple<Long, Long>> node2MemAndDisk = esClusterNodeService.syncGetNodesMemoryAndDisk(cluster);
+        Set<String> nodes = Sets.intersection(node2CpuNum.keySet(), node2MemAndDisk.keySet());
+        if (CollectionUtils.isNotEmpty(nodes)) {
+            nodes.forEach(node -> {
+                Integer cpuNum = node2CpuNum.get(node);
+                Tuple<Long, Long> memAndDisk = node2MemAndDisk.get(node);
+                Long memoryBytes = memAndDisk.getV1();
+                Long diskBytes = memAndDisk.getV2();
+                if (null != cpuNum && null != memoryBytes && null != diskBytes) {
+                    node2machineSpecMap.put(node, SizeUtil.getMachineSpec(cpuNum, memoryBytes, diskBytes));
+                }
+            });
+        }
+
+        return node2machineSpecMap;
     }
 
     /**
@@ -615,7 +628,7 @@ public class ClusterRoleHostServiceImpl implements ClusterRoleHostService {
         return !roles.contains(ES_ROLE_DATA) && !roles.contains(ES_ROLE_MASTER);
     }
 
-    private ESClusterRoleHostPO buildEsClusterHostPO(ClusterNodeInfo clusterNodeInfo, String cluster) {
+    private ESClusterRoleHostPO buildEsClusterHostPO(ClusterNodeInfo clusterNodeInfo, Map<String,String> node2machineSpecMap,String cluster) {
         ESClusterRoleHostPO nodePO = new ESClusterRoleHostPO();
         nodePO.setCluster(cluster);
 
@@ -632,6 +645,7 @@ public class ClusterRoleHostServiceImpl implements ClusterRoleHostService {
         }else {
             nodePO.setPort("");
         }
+        nodePO.setMachineSpec(node2machineSpecMap.get(nodePO.getNodeSet()));
 
         nodePO.setStatus(ONLINE.getCode());
         nodePO.setRegionId(-1);
