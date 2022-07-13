@@ -120,7 +120,7 @@ public class ClusterRegionServiceImpl implements ClusterRegionService {
     }
 
     @Override
-    public Result<Long> createPhyClusterRegion(String clusterName, List<Integer> nodeIds, String regionName, String operator) {
+    public Result<Long> createPhyClusterRegion(String clusterName, String regionName, String operator) {
         ClusterRegionPO clusterRegionPO = new ClusterRegionPO();
         clusterRegionPO.setName(regionName);
         clusterRegionPO.setLogicClusterIds(AdminConstant.REGION_NOT_BOUND_LOGIC_CLUSTER_ID);

@@ -72,7 +72,7 @@ public interface ClusterRegionService {
      * @param operator      操作人
      * @return              regionId
      */
-    Result<Long> createPhyClusterRegion(String clusterName, List<Integer> nodeIds, String regionName, String operator);
+    Result<Long> createPhyClusterRegion(String clusterName, String regionName, String operator);
 
     /**
      * 删除物理集群region
