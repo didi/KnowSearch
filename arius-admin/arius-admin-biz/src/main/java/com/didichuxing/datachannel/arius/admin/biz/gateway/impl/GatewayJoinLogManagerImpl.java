@@ -23,20 +23,17 @@ public class GatewayJoinLogManagerImpl implements GatewayJoinLogManager {
     @Override
     public Result<List<GatewayJoinVO>> getGatewayErrorList(Long projectId, Long startDate, Long endDate) {
         return Result.buildSucc(ConvertUtil.list2List(
-                gatewayJoinLogService.getGatewayErrorList(projectId, startDate, endDate).getData(),
-                GatewayJoinVO.class));
+            gatewayJoinLogService.getGatewayErrorList(projectId, startDate, endDate).getData(), GatewayJoinVO.class));
     }
 
     @Override
     public Result<List<GatewayJoinVO>> getGatewaySlowList(Long projectId, Long startDate, Long endDate) {
         return Result.buildSucc(ConvertUtil.list2List(
-                gatewayJoinLogService.getGatewaySlowList(projectId, startDate, endDate).getData(),
-                GatewayJoinVO.class));
+            gatewayJoinLogService.getGatewaySlowList(projectId, startDate, endDate).getData(), GatewayJoinVO.class));
     }
 
     @Override
-    public Result<Long> getSearchCountByProjectId(String dataCenter, Long projectId, Long startDate,
-                                                  Long endDate) {
+    public Result<Long> getSearchCountByProjectId(String dataCenter, Long projectId, Long startDate, Long endDate) {
         return gatewayJoinLogService.getSearchCountByProjectId(projectId, startDate, endDate);
     }
 

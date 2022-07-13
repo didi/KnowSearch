@@ -20,11 +20,10 @@ public class SinkSdkIDCTemplateDeployInfoVO extends BaseVO {
      * 模板基础信息
      */
     @ApiModelProperty("基本信息")
-    private SinkSdkTemplateVO                     baseInfo;
+    private SinkSdkTemplateVO                              baseInfo;
 
     @ApiModelProperty("多机房模板主从元数据信息")
     private Map<String, SinkSdkIDCTemplateMasterSlaveMeta> templateMasterSlaveMetas;
-
 
     @Data
     public static class SinkSdkIDCTemplateMasterSlaveMeta extends BaseVO {

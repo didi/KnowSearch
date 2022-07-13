@@ -22,5 +22,5 @@ public class PhyClusterPluginOperationContent extends BaseContent {
     /**
      * 插件在文件仓库上的地址
      */
-    private String url;
+    private String  url;
 }

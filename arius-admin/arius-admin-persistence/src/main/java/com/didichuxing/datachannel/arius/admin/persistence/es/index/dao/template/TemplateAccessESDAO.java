@@ -31,7 +31,7 @@ public class TemplateAccessESDAO extends BaseESDAO {
     private String typeName = "type";
 
     @PostConstruct
-    public void init(){
+    public void init() {
         this.indexName = dataCentreUtil.getAriusTemplateAccess();
     }
 
@@ -53,14 +53,17 @@ public class TemplateAccessESDAO extends BaseESDAO {
      */
     public List<TemplateAccessCountPO> getAllTemplateAccessByDateRange(String startDate, String endDate) {
         int scrollSize = 1000;
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.SCROLL_GET_TEMPLATE_ACCESS_BY_RANGE, scrollSize, startDate, endDate);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.SCROLL_GET_TEMPLATE_ACCESS_BY_RANGE, scrollSize,
+            startDate, endDate);
 
         return getTemplateAccessByDsl(dsl, scrollSize);
     }
 
-    public List<TemplateAccessCountPO> getAllTemplateAccessByDateRange(String cluster, String startDate, String endDate) {
+    public List<TemplateAccessCountPO> getAllTemplateAccessByDateRange(String cluster, String startDate,
+                                                                       String endDate) {
         int scrollSize = 1000;
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.SCROLL_GET_TEMPLATE_ACCESS_BY_RANGE_AND_CLUSTER, scrollSize, cluster, startDate, endDate);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.SCROLL_GET_TEMPLATE_ACCESS_BY_RANGE_AND_CLUSTER,
+            scrollSize, cluster, startDate, endDate);
 
         return getTemplateAccessByDsl(dsl, scrollSize);
     }
@@ -69,13 +72,13 @@ public class TemplateAccessESDAO extends BaseESDAO {
      * 获取昨天总的访问次数
      * @return
      */
-    public Long getYesterDayAllTemplateAccess(String cluster){
+    public Long getYesterDayAllTemplateAccess(String cluster) {
         String startDate = getDateStr(getBeforeDays(new Date(), 1));
-        String endDate   = getDateStr(new Date());
+        String endDate = getDateStr(new Date());
 
-        List<TemplateAccessCountPO> list = StringUtils.isBlank(cluster) ?
-                getAllTemplateAccessByDateRange(startDate, endDate) :
-                getAllTemplateAccessByDateRange(cluster,startDate, endDate);
+        List<TemplateAccessCountPO> list = StringUtils.isBlank(cluster)
+            ? getAllTemplateAccessByDateRange(startDate, endDate)
+            : getAllTemplateAccessByDateRange(cluster, startDate, endDate);
 
         Long count = 0L;
         for (TemplateAccessCountPO po : list) {
@@ -93,9 +96,11 @@ public class TemplateAccessESDAO extends BaseESDAO {
      * @param endDate
      * @return
      */
-    public List<TemplateAccessCountPO> getAllTemplateAccessByTemplateDateRange(String templateName, String startDate, String endDate) {
+    public List<TemplateAccessCountPO> getAllTemplateAccessByTemplateDateRange(String templateName, String startDate,
+                                                                               String endDate) {
         int scrollSize = 1000;
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.SCROLL_GET_TEMPLATE_BY_TEMPLATE_RANGE, scrollSize, templateName, startDate, endDate);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.SCROLL_GET_TEMPLATE_BY_TEMPLATE_RANGE,
+            scrollSize, templateName, startDate, endDate);
 
         return getTemplateAccessByDsl(dsl, scrollSize);
     }
@@ -109,7 +114,7 @@ public class TemplateAccessESDAO extends BaseESDAO {
     public List<TemplateAccessCountPO> getAllTemplateAccessHistoryByTemplate(TemplateAccessHistory templateAccessHistory) {
         int scrollSize = 1000;
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.SCROLL_GET_TEMPLATE_HISTORY_BY_TEMPLATE,
-                scrollSize, templateAccessHistory.getClusterName(), templateAccessHistory.getTemplateName());
+            scrollSize, templateAccessHistory.getClusterName(), templateAccessHistory.getTemplateName());
 
         return getTemplateAccessByDsl(dsl, scrollSize);
     }
@@ -122,8 +127,8 @@ public class TemplateAccessESDAO extends BaseESDAO {
      */
     public List<TemplateAccessCountPO> getAllTemplateAccessHistoryByTemplateId(Integer templateId) {
         int scrollSize = 1000;
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.SCROLL_GET_TEMPLATE_HISTORY_BY_ID,
-                scrollSize, templateId);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.SCROLL_GET_TEMPLATE_HISTORY_BY_ID, scrollSize,
+            templateId);
 
         return getTemplateAccessByDsl(dsl, scrollSize);
     }
@@ -136,7 +141,7 @@ public class TemplateAccessESDAO extends BaseESDAO {
      */
     public List<TemplateAccessCountPO> getTemplateAccessLast7DayByTemplateId(Integer templateId) {
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_LAST_7_DAY_ACCESS_BY_TEMPLATE_ID,
-                templateId);
+            templateId);
 
         return gatewayClient.performRequest(indexName, typeName, dsl, TemplateAccessCountPO.class);
     }
@@ -147,9 +152,10 @@ public class TemplateAccessESDAO extends BaseESDAO {
      * @param logicTemplateId
      * @return
      */
-    public List<TemplateAccessCountPO> getTemplateAccessLastNDayByLogicTemplateId(Integer logicTemplateId, Integer days) {
+    public List<TemplateAccessCountPO> getTemplateAccessLastNDayByLogicTemplateId(Integer logicTemplateId,
+                                                                                  Integer days) {
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_LAST_N_DAY_ACCESS_BY_LOGIC_TEMPLATE_ID, days,
-                logicTemplateId);
+            logicTemplateId);
 
         return gatewayClient.performRequest(indexName, typeName, dsl, TemplateAccessCountPO.class);
     }
@@ -159,9 +165,9 @@ public class TemplateAccessESDAO extends BaseESDAO {
      * @param template
      * @return
      */
-    public Long getYesterDayTemplateAccessCount(String template){
+    public Long getYesterDayTemplateAccessCount(String template) {
         String startDate = getDateStr(getBeforeDays(new Date(), 1));
-        String endDate   = getDateStr(new Date());
+        String endDate = getDateStr(new Date());
 
         List<TemplateAccessCountPO> list = getAllTemplateAccessByTemplateDateRange(template, startDate, endDate);
         Long count = 0L;
@@ -183,11 +189,11 @@ public class TemplateAccessESDAO extends BaseESDAO {
         List<TemplateAccessCountPO> list = Lists.newLinkedList();
 
         gatewayClient.queryWithScroll(indexName, typeName, dsl, scrollSize, null, TemplateAccessCountPO.class,
-                resultList -> {
-                    if (resultList != null) {
-                        list.addAll(resultList);
-                    }
-                } );
+            resultList -> {
+                if (resultList != null) {
+                    list.addAll(resultList);
+                }
+            });
 
         return list;
     }

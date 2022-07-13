@@ -34,31 +34,31 @@ import lombok.Data;
 @Component
 public class RegionEditEventListener implements ApplicationListener<RegionEditEvent> {
 
-    private static final ILog      LOGGER                           = LogFactory.getLog(RegionEditEventListener.class);
+    private static final ILog       LOGGER                           = LogFactory.getLog(RegionEditEventListener.class);
 
     @Autowired
-    private ClusterRegionService   clusterRegionService;
+    private ClusterRegionService    clusterRegionService;
 
     @Autowired
-    private ClusterRoleHostService clusterRoleHostService;
+    private ClusterRoleHostService  clusterRoleHostService;
 
     @Autowired
     private IndexTemplatePhyService indexTemplatePhyService;
 
     @Autowired
-    private AriusConfigInfoService ariusConfigInfoService;
+    private AriusConfigInfoService  ariusConfigInfoService;
 
     @Autowired
-    private ESTemplateService      esTemplateService;
+    private ESTemplateService       esTemplateService;
 
     @Autowired
-    private ESIndexService         esIndexService;
+    private ESIndexService          esIndexService;
 
-    public static final String     TEMPLATE_INDEX_INCLUDE_NODE_NAME = "index.routing.allocation.include._name";
+    public static final String      TEMPLATE_INDEX_INCLUDE_NODE_NAME = "index.routing.allocation.include._name";
 
-    public static final String     NOT_BIND_LOGIC_CLUSTER_ID        = "-1";
+    public static final String      NOT_BIND_LOGIC_CLUSTER_ID        = "-1";
 
-    public static final int        RETRY_COUNT                      = 2;
+    public static final int         RETRY_COUNT                      = 2;
 
     @Override
     public void onApplicationEvent(RegionEditEvent regionEditEvent) {
@@ -122,9 +122,12 @@ public class RegionEditEventListener implements ApplicationListener<RegionEditEv
      */
     private void buildCluster2TemplateWithNodeNamesSetMap(Map<String, List<TemplateWithNodeNames>> cluster2TemplateWithNodeNames,
                                                           ClusterRegion clusterRegion, Set<String> nodeNames) {
-        Result<List<IndexTemplatePhy>> templatePhyListResult = indexTemplatePhyService.listByRegionId(Math.toIntExact(clusterRegion.getId()));
+        Result<List<IndexTemplatePhy>> templatePhyListResult = indexTemplatePhyService
+            .listByRegionId(Math.toIntExact(clusterRegion.getId()));
         if (templatePhyListResult.failed()) {
-            LOGGER.error("class=RegionEditEventListener||method=buildCluster2TemplateWithNodeNamesSetMap||region={}||err={}", clusterRegion.getId(), "update indices setting failed");
+            LOGGER.error(
+                "class=RegionEditEventListener||method=buildCluster2TemplateWithNodeNamesSetMap||region={}||err={}",
+                clusterRegion.getId(), "update indices setting failed");
             return;
         }
 

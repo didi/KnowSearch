@@ -19,11 +19,11 @@ public class ErrorDslInfo {
     /**
      * 异常名称
      */
-    private String name;
+    private String               name;
     /**
      * 异常次数
      */
-    private Long count;
+    private Long                 count;
     /**
      * 异常详情
      */

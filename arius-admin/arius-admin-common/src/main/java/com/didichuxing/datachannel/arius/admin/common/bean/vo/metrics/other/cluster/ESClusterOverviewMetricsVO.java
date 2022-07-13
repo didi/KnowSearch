@@ -105,7 +105,7 @@ public class ESClusterOverviewMetricsVO extends MetricsVO {
     private List<TaskCostMetricVO>                   taskCost;
 
     @ApiModelProperty("当前执行的task数量")
-    private List<TaskCountMetricVO>                   taskCount;
+    private List<TaskCountMetricVO>                  taskCount;
 
     /******************************************6.索引信息******************************************/
 

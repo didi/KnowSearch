@@ -4,9 +4,9 @@ import com.didichuxing.datachannel.arius.admin.common.constant.DataCenterEnum;
 
 public class EnvUtil {
 
-    private static EnvType type = EnvType.TEST;
+    private static EnvType        type = EnvType.TEST;
 
-    private static DataCenterEnum dc = DataCenterEnum.CN;
+    private static DataCenterEnum dc   = DataCenterEnum.CN;
 
     public static boolean isOnline() {
         return type == EnvType.ONLINECN;
@@ -36,7 +36,7 @@ public class EnvUtil {
         return dc == DataCenterEnum.CN;
     }
 
-    public static DataCenterEnum getDC(){
+    public static DataCenterEnum getDC() {
         return dc;
     }
 
@@ -63,11 +63,11 @@ public class EnvUtil {
                 type = EnvType.PRESSURE;
             } else if (profile.contains("pre")) {
                 type = EnvType.PRECN;
-            }else if (profile.contains("online")) {
+            } else if (profile.contains("online")) {
                 type = EnvType.ONLINECN;
             }
 
-            if(profile.contains("us01")){
+            if (profile.contains("us01")) {
                 dc = DataCenterEnum.US01;
             }
         }
@@ -88,12 +88,7 @@ public class EnvUtil {
     }
 
     public enum EnvType {
-        DEV("dev"),
-        TEST("test"),
-        STABLE("stable"),
-        PRECN("pre"),
-        PRESSURE("pressure"),
-        ONLINECN("online");
+                         DEV("dev"), TEST("test"), STABLE("stable"), PRECN("pre"), PRESSURE("pressure"), ONLINECN("online");
 
         private String str;
 

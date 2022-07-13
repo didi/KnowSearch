@@ -86,7 +86,8 @@ public class LogicClusterCreateHandler extends BaseWorkOrderHandler {
         ESLogicClusterDTO resourceLogicDTO = ConvertUtil.obj2Obj(content, ESLogicClusterDTO.class);
         resourceLogicDTO.setProjectId(workOrder.getSubmitorProjectId());
         resourceLogicDTO.setType(ClusterResourceTypeEnum.PRIVATE.getCode());
-        return clusterLogicService.validateClusterLogicParams(resourceLogicDTO, OperationEnum.ADD, resourceLogicDTO.getProjectId());
+        return clusterLogicService.validateClusterLogicParams(resourceLogicDTO, OperationEnum.ADD,
+            resourceLogicDTO.getProjectId());
     }
 
     @Override
@@ -123,12 +124,13 @@ public class LogicClusterCreateHandler extends BaseWorkOrderHandler {
 
         // 创建逻辑集群并且批量绑定指定的region,默认是能成功
         Result<Void> result = Result.buildSucc();
-        if(!CollectionUtils.isEmpty(esLogicClusterWithRegionDTO.getClusterRegionDTOS())) {
-            result = clusterLogicManager.addLogicClusterAndClusterRegions(esLogicClusterWithRegionDTO,approver);
+        if (!CollectionUtils.isEmpty(esLogicClusterWithRegionDTO.getClusterRegionDTOS())) {
+            result = clusterLogicManager.addLogicClusterAndClusterRegions(esLogicClusterWithRegionDTO, approver);
         }
 
         if (result.success()) {
-            List<String> administrators = getOPList().stream().map(UserBriefVO::getUserName).collect(Collectors.toList());
+            List<String> administrators = getOPList().stream().map(UserBriefVO::getUserName)
+                .collect(Collectors.toList());
             return Result.buildSuccWithMsg(
                 String.format("请联系管理员【%s】进行后续操作", administrators.get(new Random().nextInt(administrators.size()))));
         }

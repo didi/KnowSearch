@@ -24,10 +24,11 @@ import org.elasticsearch.client.ElasticsearchClient;
 
 /**
  */
-public class ESIndicesSimpleStatsAction extends Action<ESIndicesSimpleStatsRequest, ESIndicesSimpleStatsResponse, ESIndicesSimpleStatsRequestBuilder> {
+public class ESIndicesSimpleStatsAction extends
+                                        Action<ESIndicesSimpleStatsRequest, ESIndicesSimpleStatsResponse, ESIndicesSimpleStatsRequestBuilder> {
 
     public static final ESIndicesSimpleStatsAction INSTANCE = new ESIndicesSimpleStatsAction();
-    public static final String NAME = "indices:simplestats";
+    public static final String                     NAME     = "indices:simplestats";
 
     public ESIndicesSimpleStatsAction() {
         super(NAME);

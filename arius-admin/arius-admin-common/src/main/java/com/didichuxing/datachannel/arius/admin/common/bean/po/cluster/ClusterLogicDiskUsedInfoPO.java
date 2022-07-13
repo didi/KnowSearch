@@ -18,11 +18,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ClusterLogicDiskUsedInfoPO {
     @ApiModelProperty("磁盘使用率")
-    private Double                       diskUsagePercent;
+    private Double diskUsagePercent;
 
     @ApiModelProperty("磁盘总量")
-    private Long                         diskTotal;
+    private Long   diskTotal;
 
     @ApiModelProperty("磁盘使用量")
-    private Long                         diskUsage;
+    private Long   diskUsage;
 }

@@ -178,5 +178,5 @@ public class ESClusterStatsCells {
     /**
      * 任务数量
      */
-    private long taskCount;
+    private long   taskCount;
 }

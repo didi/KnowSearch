@@ -32,6 +32,6 @@ public class MetricsContent implements Serializable {
     /**
      * 时间段内的最大值或平均值
      */
-    private Double valueInTimePeriod;
+    private Double                   valueInTimePeriod;
 
 }

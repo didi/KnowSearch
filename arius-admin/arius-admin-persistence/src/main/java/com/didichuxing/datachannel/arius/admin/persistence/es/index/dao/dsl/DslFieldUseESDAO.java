@@ -25,14 +25,14 @@ public class DslFieldUseESDAO extends BaseESDAO {
     /**
      * type名称
      */
-    private String typeName = "type";
+    private String typeName   = "type";
     /**
      * 滚动查询大小
      */
-    private int scrollSize = 1000;
+    private int    scrollSize = 1000;
 
     @PostConstruct
-    public void init(){
+    public void init() {
         this.indexName = dataCentreUtil.getAriusDslFieldUse();
     }
 
@@ -51,11 +51,12 @@ public class DslFieldUseESDAO extends BaseESDAO {
         List<DslFieldUsePO> list = Lists.newLinkedList();
         String queryDsl = String.format("{\"size\":%d}", scrollSize);
 
-        gatewayClient.queryWithScroll(indexName, typeName, queryDsl, scrollSize, null, DslFieldUsePO.class, resultList -> {
-            if (resultList != null) {
-                list.addAll(resultList);
-            }
-        } );
+        gatewayClient.queryWithScroll(indexName, typeName, queryDsl, scrollSize, null, DslFieldUsePO.class,
+            resultList -> {
+                if (resultList != null) {
+                    list.addAll(resultList);
+                }
+            });
 
         return combineDslFieldUseList(list);
     }
@@ -115,8 +116,6 @@ public class DslFieldUseESDAO extends BaseESDAO {
 
         return hits.get(0);
     }
-
-
 
     /**
      * 合并字段使用情况

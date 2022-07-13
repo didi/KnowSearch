@@ -21,7 +21,7 @@ public class PreCreateIndexTask extends BaseConcurrentTemplateTask implements Jo
     private static final ILog LOGGER = LogFactory.getLog(PreCreateIndexTask.class);
 
     @Autowired
-    private PreCreateManager preCreateManager;
+    private PreCreateManager  preCreateManager;
 
     @Override
     public TaskResult execute(JobContext jobContext) throws Exception {

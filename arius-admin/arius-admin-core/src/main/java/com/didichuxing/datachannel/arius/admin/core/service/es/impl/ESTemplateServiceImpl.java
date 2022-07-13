@@ -34,7 +34,7 @@ public class ESTemplateServiceImpl implements ESTemplateService {
     private static final ILog LOGGER = LogFactory.getLog(ESTemplateServiceImpl.class);
 
     @Autowired
-    private ESTemplateDAO          esTemplateDAO;
+    private ESTemplateDAO     esTemplateDAO;
 
     /**
      * 删除模板
@@ -61,8 +61,7 @@ public class ESTemplateServiceImpl implements ESTemplateService {
     public boolean syncUpdateShard(String cluster, String name, Integer shard, Integer shardRouting,
                                    int retryCount) throws ESOperateException {
         return ESOpTimeoutRetry.esRetryExecute("updateTemplateRackAndShard", retryCount,
-                () -> esTemplateDAO.updateShard(cluster, name, shard,
-                shardRouting));
+            () -> esTemplateDAO.updateShard(cluster, name, shard, shardRouting));
     }
 
     /**
@@ -75,14 +74,15 @@ public class ESTemplateServiceImpl implements ESTemplateService {
      * @return result
      */
     @Override
-    public boolean syncCreate(String cluster, String name, String expression, Integer shard,
-                              Integer shardRouting, int retryCount) throws ESOperateException {
-        return ESOpTimeoutRetry.esRetryExecute("createTemplate", retryCount, () -> esTemplateDAO.create(cluster, name,
-            expression, shard, shardRouting));
+    public boolean syncCreate(String cluster, String name, String expression, Integer shard, Integer shardRouting,
+                              int retryCount) throws ESOperateException {
+        return ESOpTimeoutRetry.esRetryExecute("createTemplate", retryCount,
+            () -> esTemplateDAO.create(cluster, name, expression, shard, shardRouting));
     }
 
     @Override
-    public boolean syncCreate(Map<String, String> settings, String cluster, String name, String expression, MappingConfig mappings, int retryCount) throws ESOperateException {
+    public boolean syncCreate(Map<String, String> settings, String cluster, String name, String expression,
+                              MappingConfig mappings, int retryCount) throws ESOperateException {
         // 获取es中原来index template的配置
         TemplateConfig templateConfig = esTemplateDAO.getTemplate(cluster, name);
         if (templateConfig == null) {
@@ -102,8 +102,10 @@ public class ESTemplateServiceImpl implements ESTemplateService {
         }
         templateConfig.setSettings(SINGLE_TYPE, "true");
         TemplateConfig finalTemplateConfig = templateConfig;
-        return ESOpTimeoutRetry.esRetryExecute("createTemplate", retryCount, () -> esTemplateDAO.create(cluster, name, finalTemplateConfig));
+        return ESOpTimeoutRetry.esRetryExecute("createTemplate", retryCount,
+            () -> esTemplateDAO.create(cluster, name, finalTemplateConfig));
     }
+
     /**
      * 修改模板
      * @param cluster    集群
@@ -121,9 +123,10 @@ public class ESTemplateServiceImpl implements ESTemplateService {
     }
 
     @Override
-    public boolean syncUpdateShardNum(String cluster, String name, Integer shardNum, int retryCount) throws ESOperateException {
+    public boolean syncUpdateShardNum(String cluster, String name, Integer shardNum,
+                                      int retryCount) throws ESOperateException {
         return ESOpTimeoutRetry.esRetryExecute("updateShardNum", retryCount,
-                () -> esTemplateDAO.updateShardNum(cluster, name, shardNum));
+            () -> esTemplateDAO.updateShardNum(cluster, name, shardNum));
     }
 
     /**
@@ -251,11 +254,11 @@ public class ESTemplateServiceImpl implements ESTemplateService {
         if (syncDelete(cluster, srcName, retryCount)) {
             try {
                 return ESOpTimeoutRetry.esRetryExecute("createTemplate", retryCount,
-                        () -> esTemplateDAO.create(cluster, tgtName, templateConfig));
+                    () -> esTemplateDAO.create(cluster, tgtName, templateConfig));
             } catch (Exception e) {
                 LOGGER.error(
-                        "class=ESTemplateServiceImpl||method=syncUpdateName||clusterName={}||srcName={}||tgtName={}||errMsg=exception",
-                        cluster, srcName, tgtName);
+                    "class=ESTemplateServiceImpl||method=syncUpdateName||clusterName={}||srcName={}||tgtName={}||errMsg=exception",
+                    cluster, srcName, tgtName);
             }
         }
 
@@ -274,8 +277,8 @@ public class ESTemplateServiceImpl implements ESTemplateService {
                     () -> esTemplateDAO.delete(cluster, name));
             } catch (Exception e) {
                 LOGGER.error(
-                        "class=ESTemplateServiceImpl||method=syncCheckTemplateConfig||clusterName={}||name={}||errMsg=exception",
-                        cluster, name);
+                    "class=ESTemplateServiceImpl||method=syncCheckTemplateConfig||clusterName={}||name={}||errMsg=exception",
+                    cluster, name);
             }
         }
     }
@@ -290,7 +293,8 @@ public class ESTemplateServiceImpl implements ESTemplateService {
                 List<IndexTemplatePhyPO> indexBelongNodes = ConvertUtil
                     .str2ObjArrayByJson(directResponse.getResponseContent(), IndexTemplatePhyPO.class);
 
-                return indexBelongNodes.stream().map(IndexTemplatePhyPO::getName).filter(r -> !r.startsWith(".")).count();
+                return indexBelongNodes.stream().map(IndexTemplatePhyPO::getName).filter(r -> !r.startsWith("."))
+                    .count();
             }
         } catch (Exception e) {
             LOGGER.error("class=ESTemplateServiceImpl||method=syncGetTemplateNum||clusterName={}||errMsg=exception",

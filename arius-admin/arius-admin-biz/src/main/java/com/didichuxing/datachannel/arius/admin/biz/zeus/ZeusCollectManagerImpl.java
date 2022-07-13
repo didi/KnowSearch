@@ -26,10 +26,10 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.Cluste
 public class ZeusCollectManagerImpl implements ZeusCollectManager {
 
     @Autowired
-    private ClusterPhyManager                                           clusterPhyManager;
+    private ClusterPhyManager          clusterPhyManager;
 
     @Autowired
-    private ClusterPhyService                                           clusterPhyService;
+    private ClusterPhyService          clusterPhyService;
     /**
      * Map<clusterPhyName, clientCount>
      */
@@ -62,11 +62,11 @@ public class ZeusCollectManagerImpl implements ZeusCollectManager {
                 clusterDTO.setHttpWriteAddress("");
                 Result<Boolean> result = clusterPhyService.editCluster(clusterDTO, null);
                 if (result.success()) {
-                	//client标识位 + 1
+                    //client标识位 + 1
                     clusterPhyName2ClientCountMapAddOne(esZeusHostInfoDTO.getClusterPhyName());
 
-					//刷新最新物理集群配置
-					clusterPhy = clusterPhyService.getClusterByName(esZeusHostInfoDTO.getClusterPhyName());
+                    //刷新最新物理集群配置
+                    clusterPhy = clusterPhyService.getClusterByName(esZeusHostInfoDTO.getClusterPhyName());
                 }
             }
 
@@ -77,22 +77,23 @@ public class ZeusCollectManagerImpl implements ZeusCollectManager {
             }
         }
 
-        if (MASTER_NODE.getDesc().equals(esZeusHostInfoDTO.getRole()) &&
-				null == clusterPhyName2ClientCountMap.get(esZeusHostInfoDTO.getClusterPhyName())) {
+        if (MASTER_NODE.getDesc().equals(esZeusHostInfoDTO.getRole())
+            && null == clusterPhyName2ClientCountMap.get(esZeusHostInfoDTO.getClusterPhyName())) {
             buildESClusterDTOFromZeus(clusterDTO, clusterPhy, esZeusHostInfoDTO);
             clusterPhyManager.editCluster(clusterDTO, null);
         }
         return Result.buildSucc();
     }
 
-    private void buildESClusterDTOFromZeus(ClusterPhyDTO clusterDTO, ClusterPhy clusterPhy, ESZeusHostInfoDTO esZeusHostInfoDTO) {
-		String httpAddress = clusterPhy.getHttpAddress();
-		List<String> httpAddressList = ListUtils.string2StrList(httpAddress);
-		if (httpAddressList.contains(esZeusHostInfoDTO.getHttpAddress())) {
-			return;
-		}
+    private void buildESClusterDTOFromZeus(ClusterPhyDTO clusterDTO, ClusterPhy clusterPhy,
+                                           ESZeusHostInfoDTO esZeusHostInfoDTO) {
+        String httpAddress = clusterPhy.getHttpAddress();
+        List<String> httpAddressList = ListUtils.string2StrList(httpAddress);
+        if (httpAddressList.contains(esZeusHostInfoDTO.getHttpAddress())) {
+            return;
+        }
 
-		StringBuilder httpAddressStr = new StringBuilder();
+        StringBuilder httpAddressStr = new StringBuilder();
         if (isBlank(httpAddress) && !isBlank(esZeusHostInfoDTO.getHttpAddress())) {
             httpAddressStr.append(esZeusHostInfoDTO.getHttpAddress());
         } else if (!isBlank(httpAddress) && !isBlank(esZeusHostInfoDTO.getHttpAddress())) {

@@ -23,19 +23,21 @@ import com.didiglobal.logi.log.LogFactory;
 @Task(name = "DashboardAllClusterCollectorRandomTask", description = "采集DashBoard平台全集群汇总数据信息", cron = "0 0/5 * * * ? *", autoRegister = true)
 @Component
 public class DashboardAllClusterCollectorRandomTask implements Job {
-    private static final ILog        LOGGER     = LogFactory.getLog(DashboardAllClusterCollectorRandomTask.class);
+    private static final ILog                         LOGGER                       = LogFactory
+        .getLog(DashboardAllClusterCollectorRandomTask.class);
 
     @Autowired
-    private ClusterPhyService                                clusterPhyService;
+    private ClusterPhyService                         clusterPhyService;
 
     private final Map<String, BaseDashboardCollector> BASE_DASHBOARD_COLLECTOR_MAP = SpringTool
         .getBeansOfType(BaseDashboardCollector.class);
 
     @Override
     public TaskResult execute(JobContext jobContext) throws Exception {
-        LOGGER.info("class=DashboardAllClusterCollectorRandomTask||method=execute||msg=DashboardAllClusterCollectorRandomTask start.");
+        LOGGER.info(
+            "class=DashboardAllClusterCollectorRandomTask||method=execute||msg=DashboardAllClusterCollectorRandomTask start.");
         long currentTimeMillis = System.currentTimeMillis();
-        long currentTime       = CommonUtils.monitorTimestamp2min(currentTimeMillis);
+        long currentTime = CommonUtils.monitorTimestamp2min(currentTimeMillis);
         TaskResultBuilder taskResultBuilder = new TaskResultBuilder();
         List<String> clusterNameList = clusterPhyService.listClusterNames();
         if (CollectionUtils.isEmpty(clusterNameList)) {
@@ -45,7 +47,9 @@ public class DashboardAllClusterCollectorRandomTask implements Job {
 
         for (Map.Entry<String, BaseDashboardCollector> entry : BASE_DASHBOARD_COLLECTOR_MAP.entrySet()) {
             BaseDashboardCollector collector = entry.getValue();
-            if (null == collector) { continue;}
+            if (null == collector) {
+                continue;
+            }
             try {
                 collector.collectAllCluster(clusterNameList, currentTime);
                 // 采集缓冲, 每个collector停顿2s, 避免集群多个采集器爆炸式访问网关, 空闲出cpu
@@ -53,14 +57,15 @@ public class DashboardAllClusterCollectorRandomTask implements Job {
             } catch (Exception e) {
                 Thread.currentThread().interrupt();
                 String errLog = "class=DashboardAllClusterCollectorRandomTask||collectorName=" + collector.getName()
-                        + "||method=execute||errMsg=" + e.getMessage();
+                                + "||method=execute||errMsg=" + e.getMessage();
                 LOGGER.error(errLog, e);
                 taskResultBuilder.append(errLog);
             }
         }
 
-        LOGGER.info("class=DashboardAllClusterCollectorRandomTask||method=execute||msg=DashboardAllClusterCollectorRandomTask finish, cost:{}ms",
-                System.currentTimeMillis() - currentTimeMillis);
+        LOGGER.info(
+            "class=DashboardAllClusterCollectorRandomTask||method=execute||msg=DashboardAllClusterCollectorRandomTask finish, cost:{}ms",
+            System.currentTimeMillis() - currentTimeMillis);
         return taskResultBuilder.build();
     }
 

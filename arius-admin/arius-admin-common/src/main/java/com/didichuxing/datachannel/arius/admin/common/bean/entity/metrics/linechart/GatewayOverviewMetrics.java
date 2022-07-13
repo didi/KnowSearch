@@ -17,14 +17,18 @@ import java.util.Objects;
 @AllArgsConstructor
 public class GatewayOverviewMetrics implements Serializable {
 
-    private String type;
+    private String                   type;
 
     private List<MetricsContentCell> metrics;
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {return true;}
-        if (o == null || getClass() != o.getClass()) {return false;}
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         GatewayOverviewMetrics that = (GatewayOverviewMetrics) o;
         return type.equals(that.type);
     }

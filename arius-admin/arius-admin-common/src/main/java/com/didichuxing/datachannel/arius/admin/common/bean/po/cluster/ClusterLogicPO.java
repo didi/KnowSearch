@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ClusterLogicPO extends BasePO  {
+public class ClusterLogicPO extends BasePO {
 
     /**
      * 主键
@@ -45,15 +45,13 @@ public class ClusterLogicPO extends BasePO  {
     /**
      * dataNode的个数
      */
-    private Integer  dataNodeNu;
+    private Integer dataNodeNu;
 
     /**
      * 责任人
      */
     @Deprecated
     private String  responsible;
-
-
 
     /**
      * 备注

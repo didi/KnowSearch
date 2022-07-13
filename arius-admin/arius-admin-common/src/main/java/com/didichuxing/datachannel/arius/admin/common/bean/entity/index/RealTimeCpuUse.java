@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@ApiModel(description ="索引健康分实时cpu统计信息")
+@ApiModel(description = "索引健康分实时cpu统计信息")
 public class RealTimeCpuUse extends BaseDegree {
     /**
      * 近十分钟索引所在节点平均cpu使用率
@@ -17,14 +17,14 @@ public class RealTimeCpuUse extends BaseDegree {
     @ApiModelProperty(value = "近十分钟索引所在节点平均cpu使用率分")
     private Double avgCpuAvgUse;
 
-    public String getCpuUseScoreDesc(){
+    public String getCpuUseScoreDesc() {
         return super.getDesc();
     }
 
     /**
      * 实时cpu使用率得分
      */
-    public double getCpuUseScore(){
+    public double getCpuUseScore() {
         return super.getScore();
     }
 }

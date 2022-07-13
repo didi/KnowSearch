@@ -23,9 +23,9 @@ public interface ProjectLogicClusterAuthDAO {
 
     int deleteByLogicClusterId(Long logicClusterId);
 
-    List<ProjectClusterLogicAuthPO> listByProjectId(@Param("projectId")int projectId);
+    List<ProjectClusterLogicAuthPO> listByProjectId(@Param("projectId") int projectId);
 
-    List<ProjectClusterLogicAuthPO> listWithAccessByProjectId(@Param("projectId")int projectId);
+    List<ProjectClusterLogicAuthPO> listWithAccessByProjectId(@Param("projectId") int projectId);
 
     ProjectClusterLogicAuthPO getById(Long authId);
 

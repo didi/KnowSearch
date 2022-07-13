@@ -16,7 +16,7 @@ import java.util.List;
  */
 @Component
 public class ClusterThreadPoolDashBoardCollector extends BaseDashboardCollector {
-    private static final ILog             LOGGER     = LogFactory.getLog(ClusterThreadPoolDashBoardCollector.class);
+    private static final ILog LOGGER = LogFactory.getLog(ClusterThreadPoolDashBoardCollector.class);
 
     @Override
     public void collectSingleCluster(String cluster, long currentTime) {
@@ -42,7 +42,8 @@ public class ClusterThreadPoolDashBoardCollector extends BaseDashboardCollector 
         return "NodeThreadPoolDashBoardCollector";
     }
 
-    private void buildClusterThreadPoolQueueMetrics(String cluster, ClusterThreadPoolQueueMetrics clusterThreadPoolQueueMetrics) {
+    private void buildClusterThreadPoolQueueMetrics(String cluster,
+                                                    ClusterThreadPoolQueueMetrics clusterThreadPoolQueueMetrics) {
         try {
             ESClusterThreadStats esClusterThreadStats = esClusterService.syncGetThreadStatsByCluster(cluster);
             if (esClusterThreadStats != null) {

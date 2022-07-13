@@ -6,7 +6,8 @@ import java.util.Map;
 
 public class MonitorUtil {
 
-    private MonitorUtil(){}
+    private MonitorUtil() {
+    }
 
     public static final String COLLECTION_ROUTE_SPLIT            = ".";
 
@@ -25,10 +26,9 @@ public class MonitorUtil {
         if (route.contains(COLLECTION_ROUTE_COMPUTE_DIVISION)) {
             String[] routers = route.split(COLLECTION_ROUTE_COMPUTE_DIVISION);
             Double dividend = obj2Double(getValueByRoute(map, routers[0]));
-            Double divisor  = obj2Double(getValueByRoute(map, routers[1]));
+            Double divisor = obj2Double(getValueByRoute(map, routers[1]));
 
-            if (dividend == null || divisor == null || divisor == 0
-                    || dividend + divisor == 0) {
+            if (dividend == null || divisor == null || divisor == 0 || dividend + divisor == 0) {
                 return 0d;
             } else {
                 return dividend / (divisor * 1.0);
@@ -39,8 +39,7 @@ public class MonitorUtil {
             int offset = route.indexOf(COLLECTION_ROUTE_SPLIT);
             Object object = map.get(route.substring(0, offset));
             if (object instanceof Map) {
-                return getValueByRoute((Map) object,
-                        route.substring(offset + COLLECTION_ROUTE_SPLIT.length()));
+                return getValueByRoute((Map) object, route.substring(offset + COLLECTION_ROUTE_SPLIT.length()));
             } else {
                 return null;
             }
@@ -54,12 +53,14 @@ public class MonitorUtil {
         }
     }
 
-    public static Double obj2Double(Object obj){
-        if(null == obj){return 0d;}
+    public static Double obj2Double(Object obj) {
+        if (null == obj) {
+            return 0d;
+        }
 
-        if(obj instanceof Number){
+        if (obj instanceof Number) {
             return Double.valueOf(obj.toString());
-        }else {
+        } else {
             return 0d;
         }
     }

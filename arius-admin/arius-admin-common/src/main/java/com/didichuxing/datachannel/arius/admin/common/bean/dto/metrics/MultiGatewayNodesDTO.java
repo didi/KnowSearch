@@ -21,7 +21,7 @@ public class MultiGatewayNodesDTO extends GatewayMetricsDTO {
     private List<String> nodeIps;
 
     @ApiModelProperty("top数字")
-    private Integer topNu;
+    private Integer      topNu;
 
     @Override
     public String getGroup() {

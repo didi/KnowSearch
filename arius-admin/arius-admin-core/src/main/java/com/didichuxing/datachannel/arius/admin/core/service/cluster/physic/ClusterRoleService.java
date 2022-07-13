@@ -29,7 +29,6 @@ public interface ClusterRoleService {
      */
     ClusterRoleInfo createRoleClusterIfNotExist(String clusterName, String role);
 
-
     /**
      * 根据集群Id查询名下全部角色
      * @param clusterId

@@ -1,6 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.task.template;
 
-
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.expire.ExpireManager;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.task.BaseConcurrentClusterTask;
@@ -19,10 +18,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 @Task(name = "DeleteExpireIndexRandomTask", description = "删除过期索引任务", cron = "0 55 23 */1 * ?", autoRegister = true)
 public class DeleteExpireIndexRandomTask extends BaseConcurrentClusterTask implements Job {
 
-    private static final ILog     LOGGER = LogFactory.getLog(DeleteExpireIndexRandomTask.class);
+    private static final ILog LOGGER = LogFactory.getLog(DeleteExpireIndexRandomTask.class);
 
     @Autowired
-    private ExpireManager templateExpireManager;
+    private ExpireManager     templateExpireManager;
 
     @Override
     public TaskResult execute(JobContext jobContext) throws Exception {

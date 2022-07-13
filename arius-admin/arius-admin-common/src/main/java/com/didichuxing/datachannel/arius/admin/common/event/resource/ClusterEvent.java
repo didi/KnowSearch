@@ -7,7 +7,7 @@ import org.springframework.context.ApplicationEvent;
  */
 public abstract class ClusterEvent extends ApplicationEvent {
 
-	protected ClusterEvent(Object source) {
-		super(source);
-	}
+    protected ClusterEvent(Object source) {
+        super(source);
+    }
 }

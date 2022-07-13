@@ -22,7 +22,7 @@ public class ConsoleTemplateCapacityVO extends BaseVO {
     private Integer id;
 
     @ApiModelProperty("索引名字")
-    private String name;
+    private String  name;
 
     /**
      * 周期性滚动  1 滚动   0 不滚动
@@ -31,7 +31,7 @@ public class ConsoleTemplateCapacityVO extends BaseVO {
     private Boolean cyclicalRoll;
 
     @ApiModelProperty("时间字段")
-    private String dateField;
+    private String  dateField;
 
     /**
      * 数据保存时长 单位天
@@ -43,5 +43,5 @@ public class ConsoleTemplateCapacityVO extends BaseVO {
      * 规格 单位台
      */
     @ApiModelProperty("配额")
-    private Double quota;
+    private Double  quota;
 }

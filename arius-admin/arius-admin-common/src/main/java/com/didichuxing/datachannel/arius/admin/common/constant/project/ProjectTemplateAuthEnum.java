@@ -12,25 +12,25 @@ import java.util.stream.Collectors;
  */
 public enum ProjectTemplateAuthEnum {
 
-                                 /**
-                                  * Owner权限
-                                  */
-                                 OWN(1, "own", "管理"),
+                                     /**
+                                      * Owner权限
+                                      */
+                                     OWN(1, "own", "管理"),
 
-                                 /**
-                                  * 读写权限
-                                  */
-                                 RW(2, "rw", "读写"),
+                                     /**
+                                      * 读写权限
+                                      */
+                                     RW(2, "rw", "读写"),
 
-                                 /**
-                                  * 读权限
-                                  */
-                                 R(3, "r", "读"),
+                                     /**
+                                      * 读权限
+                                      */
+                                     R(3, "r", "读"),
 
-                                 /**
-                                  * 没有权限
-                                  */
-                                 NO_PERMISSION(-1, "", "unknown");
+                                     /**
+                                      * 没有权限
+                                      */
+                                     NO_PERMISSION(-1, "", "unknown");
 
     ProjectTemplateAuthEnum(int code, String name, String desc) {
         this.code = code;
@@ -63,7 +63,7 @@ public enum ProjectTemplateAuthEnum {
                 return state;
             }
         }
-        
+
         return ProjectTemplateAuthEnum.NO_PERMISSION;
     }
 
@@ -87,7 +87,7 @@ public enum ProjectTemplateAuthEnum {
         return ProjectTemplateAuthEnum.NO_PERMISSION;
     }
 
-    public static boolean isTemplateAuthExitByCode(Integer code){
+    public static boolean isTemplateAuthExitByCode(Integer code) {
         if (code == null) {
             return false;
         }
@@ -99,11 +99,9 @@ public enum ProjectTemplateAuthEnum {
 
         return false;
     }
-    
+
     public static List<Integer> listAppTemplateAuthCodes() {
-        return Arrays.stream(ProjectTemplateAuthEnum.values())
-                     .map(ProjectTemplateAuthEnum::getCode)
-                     .distinct()
-                     .collect(Collectors.toList());
+        return Arrays.stream(ProjectTemplateAuthEnum.values()).map(ProjectTemplateAuthEnum::getCode).distinct()
+            .collect(Collectors.toList());
     }
 }

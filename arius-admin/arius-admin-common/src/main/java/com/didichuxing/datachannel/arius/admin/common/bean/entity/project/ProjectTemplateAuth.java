@@ -18,7 +18,7 @@ public class ProjectTemplateAuth extends BaseEntity {
     /**
      * 主键
      */
-    private Long id;
+    private Long    id;
 
     /**
      * project ID
@@ -40,6 +40,6 @@ public class ProjectTemplateAuth extends BaseEntity {
      * 责任人列表
      */
     @Deprecated
-    private String responsible;
+    private String  responsible;
 
 }

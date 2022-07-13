@@ -23,6 +23,6 @@ public class IndexTemplateLogicWithClusterAndMasterTemplate extends IndexTemplat
     /**
      * 逻辑集群
      */
-    private ClusterLogic logicCluster;
+    private ClusterLogic     logicCluster;
 
 }

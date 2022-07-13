@@ -19,41 +19,42 @@ import com.didiglobal.logi.elasticsearch.client.gateway.direct.DirectRequest;
 import com.didiglobal.logi.elasticsearch.client.gateway.direct.DirectResponse;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+
 /**
  * 直接操作es集群的dao
  */
 public class BaseESDAO {
-    protected static final ILog      LOGGER = LogFactory.getLog(BaseESDAO.class);
+    protected static final ILog LOGGER = LogFactory.getLog(BaseESDAO.class);
 
     /**
      * 索引名数据中心加载工具类
      */
     @Autowired
-    protected DataCentreUtil  dataCentreUtil;
+    protected DataCentreUtil    dataCentreUtil;
     /**
      * 加载查询语句工具类
      */
     @Autowired
-    protected DslLoaderUtil   dslLoaderUtil;
+    protected DslLoaderUtil     dslLoaderUtil;
     /**
      * 查询es客户端
      */
     @Autowired
-    protected ESGatewayClient gatewayClient;
+    protected ESGatewayClient   gatewayClient;
     /**
      * 更新es客户端
      */
     @Autowired
-    protected ESUpdateClient  updateClient;
+    protected ESUpdateClient    updateClient;
 
     /**
      * Arius操作es集群的client
      */
     @Autowired
-    protected ESOpClient      esOpClient;
+    protected ESOpClient        esOpClient;
 
     public DirectResponse getDirectResponse(String clusterName, String methodType, String url) {
-        ESClient       esClient       = esOpClient.getESClient(clusterName);
+        ESClient esClient = esOpClient.getESClient(clusterName);
         DirectResponse directResponse = new DirectResponse();
         if (esClient == null) {
             LOGGER.error("class=BaseESDAO||method=getDirectResponse||clusterName={}||errMsg=esClient is null",
@@ -67,7 +68,7 @@ public class BaseESDAO {
             return esClient.direct(directRequest).actionGet(30, TimeUnit.SECONDS);
         } catch (Exception e) {
             LOGGER.error("class=BaseESDAO||method=getDirectResponse||clusterName={}||errMsg=esClient is null",
-                    clusterName, e.getMessage(), e);
+                clusterName, e.getMessage(), e);
             directResponse.setRestStatus(RestStatus.SERVICE_UNAVAILABLE);
             return directResponse;
         }

@@ -33,7 +33,7 @@ public interface ProjectLogicTemplateAuthService {
      * @return 设置结果
      */
     Result<Void> ensureSetLogicTemplateAuth(Integer projectId, Integer logicTemplateId, ProjectTemplateAuthEnum auth,
-                                      String responsible, String operator);
+                                            String responsible, String operator);
 
     /**
      * 获取project有权限的逻辑模板权限点
@@ -48,8 +48,11 @@ public interface ProjectLogicTemplateAuthService {
      * @return
      */
     List<ProjectTemplateAuth> getProjectActiveTemplateRWAndRAuths(Integer projectId);
+
     List<ProjectTemplateAuth> getProjectTemplateRWAndRAuthsWithoutCodecResponsible(Integer projectId);
+
     List<ProjectTemplateAuth> getProjectActiveTemplateRWAuths(Integer projectId);
+
     List<ProjectTemplateAuth> getProjectActiveTemplateRAuths(Integer projectId);
 
     /**
@@ -114,6 +117,6 @@ public interface ProjectLogicTemplateAuthService {
      * @return
      */
     ProjectTemplateAuth buildTemplateAuth(IndexTemplate logicTemplate, ProjectTemplateAuthEnum projectTemplateAuthEnum);
-    
+
     Integer getProjectIdById(Long authId);
 }

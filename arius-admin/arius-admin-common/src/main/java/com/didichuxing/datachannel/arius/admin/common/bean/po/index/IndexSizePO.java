@@ -39,7 +39,7 @@ public class IndexSizePO extends BaseESPO {
     /**
      * 主shard大小，单位字节
      */
-    private Long primaryStoreSize;
+    private Long   primaryStoreSize;
     /**
      * 单位化主shard磁盘大小
      */
@@ -47,7 +47,7 @@ public class IndexSizePO extends BaseESPO {
     /**
      * 文档个数
      */
-    private Long docsCount;
+    private Long   docsCount;
     /**
      * 流入流量
      */
@@ -55,7 +55,7 @@ public class IndexSizePO extends BaseESPO {
     /**
      * 流入流量 字节
      */
-    private Long sourceSize;
+    private Long   sourceSize;
     /**
      * 压缩比 primaryStoreSize/sourceSize
      */
@@ -67,24 +67,23 @@ public class IndexSizePO extends BaseESPO {
     /**
      * 索引大小，包括副本(如果有的话)，单位是字节
      */
-    private Long totalStoreSize;
+    private Long   totalStoreSize;
     /**
      * 单位化索引大小，包括副本(如果有的话)
      */
     private String unitTotalStoreSize;
 
     public boolean existCR() {
-        if(compressionRatio==null) {
+        if (compressionRatio == null) {
             return false;
         }
 
-        if(compressionRatio<=0) {
+        if (compressionRatio <= 0) {
             return false;
         }
 
         return true;
     }
-
 
     /**
      * 是否为有效的日期

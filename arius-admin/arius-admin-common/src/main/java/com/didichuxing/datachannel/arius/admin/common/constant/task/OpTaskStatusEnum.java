@@ -1,20 +1,20 @@
 package com.didichuxing.datachannel.arius.admin.common.constant.task;
 
 public enum OpTaskStatusEnum {
-                                /**执行成功*/
-                                SUCCESS("success", "执行成功"),
+                              /**执行成功*/
+                              SUCCESS("success", "执行成功"),
 
-                                FAILED("failed", "执行失败"),
+                              FAILED("failed", "执行失败"),
 
-                                RUNNING("running", "执行中"),
+                              RUNNING("running", "执行中"),
 
-                                WAITING("waiting", "等待"),
+                              WAITING("waiting", "等待"),
 
-                                PAUSE("pause", "暂停"),
+                              PAUSE("pause", "暂停"),
 
-                                CANCEL("cancel", "取消"),
+                              CANCEL("cancel", "取消"),
 
-                                UNKNOWN("unknown", "unknown");
+                              UNKNOWN("unknown", "unknown");
 
     OpTaskStatusEnum(String status, String value) {
         this.status = status;

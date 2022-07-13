@@ -12,7 +12,8 @@ import javax.servlet.http.HttpServletRequest;
  */
 public class UrlHelper {
 
-    private UrlHelper(){}
+    private UrlHelper() {
+    }
 
     private static final String UK = "unknown";
 

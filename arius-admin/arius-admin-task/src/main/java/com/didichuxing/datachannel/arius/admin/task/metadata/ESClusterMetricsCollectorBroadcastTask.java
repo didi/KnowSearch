@@ -12,11 +12,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 @Task(name = "ESClusterMetricsCollectorBroadcastTask", description = "集群指标采集调度任务", cron = "0 0/1 * * * ? *", autoRegister = true, consensual = ConsensualEnum.BROADCAST)
 public class ESClusterMetricsCollectorBroadcastTask implements Job {
-    private static final Logger LOGGER = LoggerFactory.getLogger( ESClusterMetricsCollectorBroadcastTask.class);
+    private static final Logger      LOGGER = LoggerFactory.getLogger(ESClusterMetricsCollectorBroadcastTask.class);
 
     @Autowired
     private ClusterMonitorJobHandler clusterMonitorJobHandler;
-    
+
     @Override
     public TaskResult execute(JobContext jobContext) throws Exception {
         LOGGER.info("class=ESClusterMetricsCollectorBroadcastTask||method=execute||msg=start");

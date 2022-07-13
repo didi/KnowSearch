@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@ApiModel(description ="索引健康分实时查询统计信息")
+@ApiModel(description = "索引健康分实时查询统计信息")
 public class RealTimeSearch extends BaseDegree {
     /**
      * 近十分钟平均查询率
@@ -23,14 +23,14 @@ public class RealTimeSearch extends BaseDegree {
     @ApiModelProperty(value = "昨天近十分钟平均查询率")
     private Double yesterdayAvgSearchRate;
 
-    public String getRealTimeSearchDesc(){
+    public String getRealTimeSearchDesc() {
         return super.getDesc();
     }
 
     /**
      * 实时查询得分
      */
-    public double getSearchScore(){
+    public double getSearchScore() {
         return super.getScore();
     }
 }

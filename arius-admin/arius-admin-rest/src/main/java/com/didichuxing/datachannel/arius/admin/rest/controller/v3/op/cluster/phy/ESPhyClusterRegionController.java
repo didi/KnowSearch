@@ -25,31 +25,34 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion
 @RequestMapping({ V3 + "/cluster/phy/region" })
 @Api(tags = "ES物理集群region接口(REST)")
 public class ESPhyClusterRegionController {
-    
+
     @Autowired
     private ClusterRegionManager clusterRegionManager;
     @Autowired
-    private ClusterNodeManager clusterNodeManager;
+    private ClusterNodeManager   clusterNodeManager;
+
     @GetMapping("{cluster}/{clusterLogicType}")
     @ResponseBody
     @ApiOperation(value = "获取物理集群region列表接口", notes = "支持各种纬度检索集群Region信息")
     public Result<List<ClusterRegionVO>> listPhyClusterRegionsByLogicClusterTypeAndCluster(@PathVariable("cluster") String cluster,
-                                                               @PathVariable("clusterLogicType") Integer clusterLogicType) {
+                                                                                           @PathVariable("clusterLogicType") Integer clusterLogicType) {
         return clusterRegionManager.listPhyClusterRegionsByLogicClusterTypeAndCluster(cluster, clusterLogicType);
     }
-    
+
     @DeleteMapping("/{regionId}")
     @ResponseBody
     @ApiOperation(value = "删除物理集群region接口", notes = "")
-    public Result<Void> removeRegion(HttpServletRequest request, @PathVariable("regionId") Long regionId) throws AdminOperateException {
+    public Result<Void> removeRegion(HttpServletRequest request,
+                                     @PathVariable("regionId") Long regionId) throws AdminOperateException {
         return clusterRegionManager.deletePhyClusterRegion(regionId, HttpRequestUtil.getOperator(request),
-                HttpRequestUtil.getProjectId(request));
+            HttpRequestUtil.getProjectId(request));
     }
 
     @GetMapping("/{clusterName}")
     @ResponseBody
     @ApiOperation(value = "根据物理集群名称获region信息，包含region中的数据节点信息")
-    public Result<List<ClusterRegionWithNodeInfoVO>> listClusterRegionWithNodeInfoByClusterName(HttpServletRequest request, @PathVariable String clusterName) {
+    public Result<List<ClusterRegionWithNodeInfoVO>> listClusterRegionWithNodeInfoByClusterName(HttpServletRequest request,
+                                                                                                @PathVariable String clusterName) {
         return clusterRegionManager.listClusterRegionWithNodeInfoByClusterName(clusterName);
     }
 

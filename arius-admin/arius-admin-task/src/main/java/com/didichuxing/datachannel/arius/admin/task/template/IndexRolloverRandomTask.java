@@ -1,6 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.task.template;
 
-
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.indexplan.IndexPlanManager;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.task.BaseConcurrentClusterTask;
@@ -36,7 +35,7 @@ public class IndexRolloverRandomTask extends BaseConcurrentClusterTask implement
     private static final ILog LOGGER = LogFactory.getLog(IndexRolloverRandomTask.class);
 
     @Autowired
-    private IndexPlanManager indexPlanManager;
+    private IndexPlanManager  indexPlanManager;
 
     @Override
     public TaskResult execute(JobContext jobContext) throws Exception {

@@ -49,18 +49,16 @@ import org.springframework.transaction.annotation.Transactional;
 public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrvImpl implements TemplateLogicSettingsManager {
 
     @Autowired
-    private TemplatePhySettingManager templatePhySettingManager;
+    private TemplatePhySettingManager   templatePhySettingManager;
 
     @Autowired
     private TemplateLogicMappingManager templateLogicMappingManager;
 
     @Autowired
-    private PreCreateManager  templatePreCreateManager;
+    private PreCreateManager            templatePreCreateManager;
     @Autowired
-    private ESTemplateService esTemplateService;
-    
-    
-    
+    private ESTemplateService           esTemplateService;
+
     /**
      * @return
      */
@@ -68,10 +66,11 @@ public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrvImpl implem
     public TemplateServiceEnum templateSrv() {
         return TemplateServiceEnum.TEMPLATE_SETTING;
     }
-    
+
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result<Void> modifySetting(ConsoleTemplateSettingDTO settingDTO, String operator, Integer projectId) throws AdminOperateException {
+    public Result<Void> modifySetting(ConsoleTemplateSettingDTO settingDTO, String operator,
+                                      Integer projectId) throws AdminOperateException {
 
         LOGGER.info("class=TemplateLogicServiceImpl||method=modifySetting||operator={}||setting={}", operator,
             JSON.toJSONString(settingDTO));
@@ -96,7 +95,7 @@ public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrvImpl implem
     public Result<Void> customizeSetting(TemplateSettingDTO settingDTO, String operator) throws AdminOperateException {
 
         LOGGER.info("class=TemplateLogicServiceImpl||method=modifySetting||operator={}||setting={}", operator,
-                JSON.toJSONString(settingDTO));
+            JSON.toJSONString(settingDTO));
 
         if (AriusObjUtils.isNull(operator)) {
             return Result.buildParamIllegal("操作人为空");
@@ -145,11 +144,11 @@ public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrvImpl implem
 
         // translog异步设置默认是request同步的
         templateSettingVO.setAsyncTranslog(flatIndexTemplateMap.containsKey(TRANSLOG_DURABILITY_KEY)
-                && flatIndexTemplateMap.get(TRANSLOG_DURABILITY_KEY).equals(ASYNC));
+                                           && flatIndexTemplateMap.get(TRANSLOG_DURABILITY_KEY).equals(ASYNC));
 
         // 获取当前模板的副本数目设置
         templateSettingVO.setCancelCopy(flatIndexTemplateMap.containsKey(NUMBER_OF_REPLICAS_KEY)
-                && Integer.parseInt(flatIndexTemplateMap.get(NUMBER_OF_REPLICAS_KEY)) == 0);
+                                        && Integer.parseInt(flatIndexTemplateMap.get(NUMBER_OF_REPLICAS_KEY)) == 0);
 
         // 获取当前模板设置的分词器，获取index.analysis下的自定义分词器设置
         templateSettingVO.setAnalysis(getAnalysisFromTemplateSettings(indexTemplatePhySetting));
@@ -200,9 +199,9 @@ public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrvImpl implem
     @Override
     public Result<Void> updateSettings(Integer logicId, IndexTemplatePhySetting settings, String operator,
                                        Integer projectId) {
-        
+
         IndexTemplateWithPhyTemplates templateLogicWithPhysical = indexTemplateService
-                .getLogicTemplateWithPhysicalsById(logicId);
+            .getLogicTemplateWithPhysicalsById(logicId);
 
         if (templateLogicWithPhysical == null) {
             return Result.buildNotExist("逻辑模板不存在, ID:" + logicId);
@@ -212,22 +211,20 @@ public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrvImpl implem
             return Result.buildNotExist("物理模板不存在，ID:" + logicId);
         }
         final Result<Void> result = ProjectUtils.checkProjectCorrectly(IndexTemplateWithPhyTemplates::getProjectId,
-                templateLogicWithPhysical, projectId);
+            templateLogicWithPhysical, projectId);
         if (result.failed()) {
             return result;
         }
-    
+
         List<IndexTemplatePhy> templatePhysicals = templateLogicWithPhysical.fetchMasterPhysicalTemplates();
 
-       
-    
         //获取变更前的setting
         final Result<IndexTemplatePhySetting> beforeSetting = getSettings(logicId);
-       
-        
+
         for (IndexTemplatePhy templatePhysical : templatePhysicals) {
             try {
-                templatePhySettingManager.mergeTemplateSettings(logicId, templatePhysical.getCluster(), templatePhysical.getName(),  settings);
+                templatePhySettingManager.mergeTemplateSettings(logicId, templatePhysical.getCluster(),
+                    templatePhysical.getName(), settings);
             } catch (AdminOperateException adminOperateException) {
                 return Result.buildFail(adminOperateException.getMessage());
             }
@@ -239,14 +236,11 @@ public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrvImpl implem
             LOGGER.error("class=TemplateLogicServiceImpl||method=updateSettings||logicId:{}", logicId, e);
         }
         final Result<IndexTemplatePhySetting> afterSetting = getSettings(logicId);
-        operateRecordService.save(
-                new OperateRecord.Builder().project(projectService.getProjectBriefByProjectId(projectId))
-                        .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).userOperation(operator)
-                        .operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE_EDIT_SETTING)
-                        .content(
-                                new TemplateSettingOperateRecord(beforeSetting.getData(), afterSetting.getData()).toString())
-                        .bizId(logicId)
-                        .build());
+        operateRecordService.save(new OperateRecord.Builder()
+            .project(projectService.getProjectBriefByProjectId(projectId)).triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+            .userOperation(operator).operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE_EDIT_SETTING)
+            .content(new TemplateSettingOperateRecord(beforeSetting.getData(), afterSetting.getData()).toString())
+            .bizId(logicId).build());
 
         return Result.buildSucc();
     }
@@ -272,8 +266,8 @@ public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrvImpl implem
         IndexTemplatePhy indexTemplatePhy = templateLogicWithPhysical.getMasterPhyTemplate();
         if (indexTemplatePhy != null) {
             try {
-                return Result.buildSucc( templatePhySettingManager
-                    .fetchTemplateSettings(indexTemplatePhy.getCluster(), indexTemplatePhy.getName()));
+                return Result.buildSucc(templatePhySettingManager.fetchTemplateSettings(indexTemplatePhy.getCluster(),
+                    indexTemplatePhy.getName()));
             } catch (ESOperateException e) {
                 return Result.buildFail(e.getMessage());
             }
@@ -289,10 +283,12 @@ public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrvImpl implem
      * @return
      */
     private JSONArray getDynamicTemplatesByLogicTemplate(Integer logicId) {
-        Result<IndexTemplateWithMapping> templateWithMapping = templateLogicMappingManager.getTemplateWithMapping(logicId);
+        Result<IndexTemplateWithMapping> templateWithMapping = templateLogicMappingManager
+            .getTemplateWithMapping(logicId);
         if (templateWithMapping.failed()) {
-            LOGGER.warn("class=TemplateLogicServiceImpl||method=getDynamicTemplatesByLogicTemplate||logicTemplateId={}||msg={}",
-                    logicId, templateWithMapping.getMessage());
+            LOGGER.warn(
+                "class=TemplateLogicServiceImpl||method=getDynamicTemplatesByLogicTemplate||logicTemplateId={}||msg={}",
+                logicId, templateWithMapping.getMessage());
             return null;
         }
 
@@ -309,8 +305,9 @@ public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrvImpl implem
     private JSONObject getAnalysisFromTemplateSettings(IndexTemplatePhySetting indexTemplatePhySetting) {
         JSONObject indexSettings = indexTemplatePhySetting.getSettings().getJSONObject("index");
         if (AriusObjUtils.isNull(indexSettings)) {
-            LOGGER.info("class=TemplateLogicServiceImpl||method=getAnalysisFromTemplateSettings||settings={}||msg= no index settings",
-                    indexTemplatePhySetting);
+            LOGGER.info(
+                "class=TemplateLogicServiceImpl||method=getAnalysisFromTemplateSettings||settings={}||msg= no index settings",
+                indexTemplatePhySetting);
             return null;
         }
 

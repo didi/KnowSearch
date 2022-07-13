@@ -36,7 +36,8 @@ public abstract class AbstractEcmBaseHandle {
 
     public abstract Result<EcmOperateAppBase> removeESCluster(EcmParamBase actionParamBase);
 
-    public abstract Result<EcmOperateAppBase> actionNotFinishedTask(EcmParamBase actionParamBase, EcmActionEnum ecmActionEnum, String hostname);
+    public abstract Result<EcmOperateAppBase> actionNotFinishedTask(EcmParamBase actionParamBase,
+                                                                    EcmActionEnum ecmActionEnum, String hostname);
 
     public abstract Result<String> infoESCluster(EcmParamBase actionParamBase);
 

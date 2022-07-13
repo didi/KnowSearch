@@ -30,15 +30,16 @@ public class ESIndexCatServiceImpl implements ESIndexCatService {
 
     private static final ILog LOGGER = LogFactory.getLog(ESIndexCatService.class);
     @Autowired
-    private IndexCatESDAO indexCatESDAO;
+    private IndexCatESDAO     indexCatESDAO;
 
     @Override
-    public Tuple<Long, List<IndexCatCell>> syncGetCatIndexInfo(String cluster, String index, String health,String status, Integer projectId,
-                                                               Long from, Long size, String sortTerm, Boolean orderByDesc) {
+    public Tuple<Long, List<IndexCatCell>> syncGetCatIndexInfo(String cluster, String index, String health,
+                                                               String status, Integer projectId, Long from, Long size,
+                                                               String sortTerm, Boolean orderByDesc) {
         Tuple<Long, List<IndexCatCellPO>> hitTotal2catIndexInfoTuplePO = indexCatESDAO.getCatIndexInfo(cluster, index,
-            health, status,projectId, from, size, sortTerm, orderByDesc);
+            health, status, projectId, from, size, sortTerm, orderByDesc);
         if (null == hitTotal2catIndexInfoTuplePO) {
-           return null;
+            return null;
         }
 
         Tuple<Long, List<IndexCatCell>> hitTotal2catIndexInfoTuple = new Tuple<>();
@@ -54,15 +55,14 @@ public class ESIndexCatServiceImpl implements ESIndexCatService {
         }
 
         BatchProcessor.BatchProcessResult<String, Boolean> result = new BatchProcessor<String, Boolean>()
-                .batchList(indexNameList)
-                .batchSize(10)
-                .processor(items -> indexCatESDAO.batchUpdateCatIndexDeleteFlag(cluster, items, retryCount))
-                .succChecker(succ -> succ)
-                .process();
-        
+            .batchList(indexNameList).batchSize(10)
+            .processor(items -> indexCatESDAO.batchUpdateCatIndexDeleteFlag(cluster, items, retryCount))
+            .succChecker(succ -> succ).process();
+
         if (!result.isSucc()) {
-            LOGGER.warn("class=ESIndexCatServiceImpl||method=syncUpdateCatIndexDeleteFlag||cluster={}||indexNameList={}||result={}", cluster, indexNameList,
-                    result);
+            LOGGER.warn(
+                "class=ESIndexCatServiceImpl||method=syncUpdateCatIndexDeleteFlag||cluster={}||indexNameList={}||result={}",
+                cluster, indexNameList, result);
         }
 
         return indexNameList.size() - result.getFailAndErrorCount();
@@ -75,15 +75,14 @@ public class ESIndexCatServiceImpl implements ESIndexCatService {
         }
 
         BatchProcessor.BatchProcessResult<String, Boolean> result = new BatchProcessor<String, Boolean>()
-                .batchList(indexNameList)
-                .batchSize(10)
-                .processor(items -> indexCatESDAO.batchUpdateCatIndexStatus(cluster, items, status, retryCount))
-                .succChecker(succ -> succ)
-                .process();
+            .batchList(indexNameList).batchSize(10)
+            .processor(items -> indexCatESDAO.batchUpdateCatIndexStatus(cluster, items, status, retryCount))
+            .succChecker(succ -> succ).process();
 
         if (!result.isSucc()) {
-            LOGGER.warn("class=ESIndexCatServiceImpl||method=syncUpdateCatIndexStatus||cluster={}||indexNameList={}||result={}", cluster, indexNameList,
-                    result);
+            LOGGER.warn(
+                "class=ESIndexCatServiceImpl||method=syncUpdateCatIndexStatus||cluster={}||indexNameList={}||result={}",
+                cluster, indexNameList, result);
         }
 
         return indexNameList.size() - result.getFailAndErrorCount();
@@ -106,11 +105,11 @@ public class ESIndexCatServiceImpl implements ESIndexCatService {
     private List<IndexCatCell> buildIndexCatCell(List<IndexCatCellPO> indexCatCellPOList) {
         List<IndexCatCell> indexCatCellList = Lists.newArrayList();
         for (IndexCatCellPO indexCatCellPO : indexCatCellPOList) {
-            IndexCatCell indexCatCell = ConvertUtil.obj2Obj(indexCatCellPO,IndexCatCell.class);
+            IndexCatCell indexCatCell = ConvertUtil.obj2Obj(indexCatCellPO, IndexCatCell.class);
             indexCatCell.setKey(indexCatCellPO.getKey());
             indexCatCell.setClusterPhy(indexCatCellPO.getCluster());
             indexCatCell.setIndex(indexCatCellPO.getIndex());
-            indexCatCell.setStoreSize(SizeUtil.getUnitSizeAndFormat(indexCatCellPO.getStoreSize() ,2));
+            indexCatCell.setStoreSize(SizeUtil.getUnitSizeAndFormat(indexCatCellPO.getStoreSize(), 2));
             indexCatCell.setPriStoreSize(SizeUtil.getUnitSizeAndFormat(indexCatCellPO.getPriStoreSize(), 2));
             indexCatCell.setDocsCount(String.valueOf(indexCatCellPO.getDocsCount()));
             indexCatCell.setDocsDeleted(String.valueOf(indexCatCellPO.getDocsDeleted()));

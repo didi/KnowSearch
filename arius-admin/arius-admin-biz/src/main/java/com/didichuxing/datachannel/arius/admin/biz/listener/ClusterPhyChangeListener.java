@@ -17,13 +17,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class ClusterPhyChangeListener implements ApplicationListener<ClusterPhyEvent> {
 
-    private static final ILog      LOGGER = LogFactory.getLog(ClusterPhyChangeListener.class);
+    private static final ILog     LOGGER = LogFactory.getLog(ClusterPhyChangeListener.class);
 
     @Autowired
-    private ClusterContextManager  clusterContextManager;
+    private ClusterContextManager clusterContextManager;
 
     @Autowired
-    private ClusterPhyManager      clusterPhyManager;
+    private ClusterPhyManager     clusterPhyManager;
 
     @Override
     public void onApplicationEvent(ClusterPhyEvent event) {

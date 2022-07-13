@@ -17,15 +17,15 @@ public class ProjectQueryPO {
     /**
      * 模板名称
      */
-    private String  indiceSample;
+    private String       indiceSample;
     /**
      * dsl查询模版
      */
-    private String  dslTemplate;
+    private String       dslTemplate;
     /**
      * dsl查询时间 yyyy-MM-dd HH:mm:ss
      */
-    private String  timeStamp;
+    private String       timeStamp;
     /**
      * 模版MD5
      */
@@ -33,5 +33,5 @@ public class ProjectQueryPO {
     /**
      * 查询耗时
      */
-    private Integer totalCost;
+    private Integer      totalCost;
 }

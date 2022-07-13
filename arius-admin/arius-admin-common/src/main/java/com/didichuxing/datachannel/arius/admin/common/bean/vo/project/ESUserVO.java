@@ -22,8 +22,6 @@ public class ESUserVO extends BaseVO {
     @ApiModelProperty("es user")
     private Integer id;
 
-
-
     @ApiModelProperty("root用户")
     private Integer isRoot;
 
@@ -41,7 +39,7 @@ public class ESUserVO extends BaseVO {
 
     @ApiModelProperty("查询模式（0:集群模式；1:索引模式, 3:原生模式）")
     private Integer searchType;
-     @ApiModelProperty("项目默认使用的es user")
-     private Boolean defaultDisplay;
+    @ApiModelProperty("项目默认使用的es user")
+    private Boolean defaultDisplay;
 
 }

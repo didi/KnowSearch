@@ -11,23 +11,23 @@ public class MetricsRegister {
     /**
      * 缓存普通的采集自es 发送给odin的数据
      */
-    private Map<String, ESDataTempBean>         dataBeanRegister;
+    private Map<String, ESDataTempBean>        dataBeanRegister;
     /**
      * 缓存采集自一个node上的索引的指标数据
      */
-    private Map<String, ESNodeToIndexTempBean>  nodeIndexRegister;
+    private Map<String, ESNodeToIndexTempBean> nodeIndexRegister;
     /**
      * 缓存需要复合计算的值
      */
-    private Map<String, Double>                 computeValueRegister;
+    private Map<String, Double>                computeValueRegister;
 
-    private Map<String, Tuple<Long, Double>>    clusterNodeCpu;
+    private Map<String, Tuple<Long, Double>>   clusterNodeCpu;
 
-    public MetricsRegister(){
-        dataBeanRegister        = Maps.newConcurrentMap();
-        nodeIndexRegister       = Maps.newConcurrentMap();
-        computeValueRegister    = Maps.newConcurrentMap();
-        clusterNodeCpu          = Maps.newConcurrentMap();
+    public MetricsRegister() {
+        dataBeanRegister = Maps.newConcurrentMap();
+        nodeIndexRegister = Maps.newConcurrentMap();
+        computeValueRegister = Maps.newConcurrentMap();
+        clusterNodeCpu = Maps.newConcurrentMap();
     }
 
     public void putBeforeNodeToIndexData(String key, ESNodeToIndexTempBean data) {
@@ -58,11 +58,11 @@ public class MetricsRegister {
         computeValueRegister.clear();
     }
 
-    public void putNodeCpu(String ip, Tuple<Long, Double> cpu){
+    public void putNodeCpu(String ip, Tuple<Long, Double> cpu) {
         clusterNodeCpu.put(ip, cpu);
     }
 
-    public Tuple<Long, Double> getNodeCpu(String ip){
+    public Tuple<Long, Double> getNodeCpu(String ip) {
         return clusterNodeCpu.get(ip);
     }
 }

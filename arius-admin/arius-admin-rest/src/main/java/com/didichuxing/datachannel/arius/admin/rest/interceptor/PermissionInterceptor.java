@@ -34,7 +34,7 @@ public class PermissionInterceptor implements HandlerInterceptor {
     private static final ILog      LOGGER = LogFactory.getLog(PermissionInterceptor.class);
 
     @Autowired
-    private LoginManager   loginManager;
+    private LoginManager           loginManager;
 
     @Autowired
     private AriusConfigInfoService ariusConfigInfoService;
@@ -60,14 +60,15 @@ public class PermissionInterceptor implements HandlerInterceptor {
                 "class=PermissionInterceptor||method=preHandle||uri={}||msg=parse class request-mapping failed",
                 request.getRequestURI(), e);
         }
-        List<String> whiteMappingValues = Lists.newArrayList(HEALTH,  V2_THIRD_PART, V3_THIRD_PART,
-                 V3_WHITE_PART,V3_SECURITY);
-    
-        return loginManager.interceptorCheck(request, response, classRequestMappingValue,whiteMappingValues);
+        List<String> whiteMappingValues = Lists.newArrayList(HEALTH, V2_THIRD_PART, V3_THIRD_PART, V3_WHITE_PART,
+            V3_SECURITY);
+
+        return loginManager.interceptorCheck(request, response, classRequestMappingValue, whiteMappingValues);
     }
 
     @Override
-    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler,
+                                Exception ex) {
         GlobalParam.CURRENT_USER.remove();
         GlobalParam.CURRENT_PROJECT_ID.remove();
     }

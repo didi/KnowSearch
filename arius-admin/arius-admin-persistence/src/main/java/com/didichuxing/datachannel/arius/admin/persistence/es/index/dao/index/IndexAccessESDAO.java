@@ -27,7 +27,7 @@ public class IndexAccessESDAO extends BaseESDAO {
     private String typeName = "type";
 
     @PostConstruct
-    public void init(){
+    public void init() {
         this.indexName = dataCentreUtil.getAriusIndexNameAccess();
     }
 
@@ -37,7 +37,7 @@ public class IndexAccessESDAO extends BaseESDAO {
      * @return
      */
     public boolean batchInsert(List<IndexNameAccessCountPO> list) {
-        return updateClient.batchInsert( EnvUtil.getWriteIndexNameByEnv(this.indexName), typeName, list);
+        return updateClient.batchInsert(EnvUtil.getWriteIndexNameByEnv(this.indexName), typeName, list);
     }
 
     /**
@@ -48,8 +48,8 @@ public class IndexAccessESDAO extends BaseESDAO {
      */
     public List<IndexNameAccessCountPO> getIndexNameAccessByTemplate(TemplateAccessDetail accessDetail) {
         int scrollSize = 1000;
-        String dsl = dslLoaderUtil.getFormatDslByFileName( DslsConstant.SCROLL_GET_TEMPLATE_DETAIL_BY_TEMPLATE, scrollSize,
-                accessDetail.getClusterName(), accessDetail.getTemplateName(), accessDetail.getCountDate());
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.SCROLL_GET_TEMPLATE_DETAIL_BY_TEMPLATE,
+            scrollSize, accessDetail.getClusterName(), accessDetail.getTemplateName(), accessDetail.getCountDate());
 
         return getIndexNameAccessByDsl(dsl, scrollSize);
     }
@@ -64,7 +64,7 @@ public class IndexAccessESDAO extends BaseESDAO {
     public List<IndexNameAccessCountPO> getIndexNameAccessByTemplateId(UserAccessTemplateDetail userAccessTemplateDetail) {
         int scrollSize = 1000;
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.SCROLL_GET_TEMPLATE_DETAIL_BY_ID, scrollSize,
-                userAccessTemplateDetail.getTemplateId(), userAccessTemplateDetail.getCountDate());
+            userAccessTemplateDetail.getTemplateId(), userAccessTemplateDetail.getCountDate());
 
         return getIndexNameAccessByDsl(dsl, scrollSize);
     }
@@ -79,11 +79,12 @@ public class IndexAccessESDAO extends BaseESDAO {
     private List<IndexNameAccessCountPO> getIndexNameAccessByDsl(String dsl, int scrollSize) {
         List<IndexNameAccessCountPO> list = Lists.newLinkedList();
 
-        gatewayClient.queryWithScroll(indexName, typeName, dsl, scrollSize, null, IndexNameAccessCountPO.class, resultList -> {
-            if (resultList != null) {
-                list.addAll(resultList);
-            }
-        } );
+        gatewayClient.queryWithScroll(indexName, typeName, dsl, scrollSize, null, IndexNameAccessCountPO.class,
+            resultList -> {
+                if (resultList != null) {
+                    list.addAll(resultList);
+                }
+            });
 
         return list;
     }

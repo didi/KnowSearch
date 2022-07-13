@@ -14,14 +14,14 @@ import java.util.Map;
  */
 public enum SlowDslReasonType {
 
-    /**
-     * 用户查询引起
-     */
-    USER_DSL("user dsl"),
-    /**
-     * ES查询引起
-     */
-    ES("es");
+                               /**
+                                * 用户查询引起
+                                */
+                               USER_DSL("user dsl"),
+                               /**
+                                * ES查询引起
+                                */
+                               ES("es");
 
     private final String type;
 

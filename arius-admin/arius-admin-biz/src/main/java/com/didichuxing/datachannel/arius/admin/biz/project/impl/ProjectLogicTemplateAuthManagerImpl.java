@@ -38,9 +38,9 @@ public class ProjectLogicTemplateAuthManagerImpl implements ProjectLogicTemplate
     @Autowired
     private ProjectService                  projectService;
     @Autowired
-    private OperateRecordService operateRecordService;
+    private OperateRecordService            operateRecordService;
     @Autowired
-    private IndexTemplateService indexTemplateService;
+    private IndexTemplateService            indexTemplateService;
 
     /**
      * @param authDTO
@@ -50,28 +50,25 @@ public class ProjectLogicTemplateAuthManagerImpl implements ProjectLogicTemplate
      */
     @Override
     public Result<Void> addTemplateAuth(ProjectTemplateAuthDTO authDTO, String operator, Integer projectId) {
-        Result<Void> checkProjectCorrectly = ProjectUtils.checkProjectCorrectly(ProjectTemplateAuthDTO::getProjectId, authDTO,
-                projectId);
-        if (checkProjectCorrectly.failed()){
+        Result<Void> checkProjectCorrectly = ProjectUtils.checkProjectCorrectly(ProjectTemplateAuthDTO::getProjectId,
+            authDTO, projectId);
+        if (checkProjectCorrectly.failed()) {
             return checkProjectCorrectly;
         }
-        
+
         Result<Void> voidResult = projectLogicTemplateAuthService.addTemplateAuth(authDTO);
-        if (voidResult.success()){
-                 operateRecordService.save(new OperateRecord.Builder()
-                            .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                            .userOperation(operator)
-                            .operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_INFO_MODIFY)
-                            .bizId(authDTO.getId())
-                             .content(authDTO.toString())
-                            .project(projectService.getProjectBriefByProjectId(authDTO.getProjectId()))
-                    
-                    .build());
-      
+        if (voidResult.success()) {
+            operateRecordService.save(new OperateRecord.Builder().triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                .userOperation(operator).operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_INFO_MODIFY)
+                .bizId(authDTO.getId()).content(authDTO.toString())
+                .project(projectService.getProjectBriefByProjectId(authDTO.getProjectId()))
+
+                .build());
+
         }
         return voidResult;
     }
-    
+
     /**
      * @param delete
      * @return
@@ -80,7 +77,7 @@ public class ProjectLogicTemplateAuthManagerImpl implements ProjectLogicTemplate
     public Result<Void> deleteRedundancyTemplateAuths(boolean delete) {
         return Result.build(projectLogicTemplateAuthService.deleteRedundancyTemplateAuths(true));
     }
-    
+
     /**
      * 得到app模板身份验证
      *
@@ -90,13 +87,13 @@ public class ProjectLogicTemplateAuthManagerImpl implements ProjectLogicTemplate
     @Override
     public Result<List<ProjectTemplateAuthVO>> getProjectTemplateAuths(Integer projectId) {
         List<ProjectTemplateAuthVO> templateAuths = ConvertUtil.list2List(
-                projectLogicTemplateAuthService.getProjectActiveTemplateRWAndRAuths(projectId),
-                ProjectTemplateAuthVO.class);
-    
+            projectLogicTemplateAuthService.getProjectActiveTemplateRWAndRAuths(projectId),
+            ProjectTemplateAuthVO.class);
+
         fillTemplateAuthVO(templateAuths);
         return Result.buildSucc(templateAuths);
     }
-    
+
     /**
      * @param authId
      * @param operator
@@ -107,23 +104,22 @@ public class ProjectLogicTemplateAuthManagerImpl implements ProjectLogicTemplate
     public Result<Void> deleteTemplateAuth(Long authId, String operator, Integer projectId) {
         Integer belongToProject = projectLogicTemplateAuthService.getProjectIdById(authId);
         Result<Void> checkProjectCorrectly = ProjectUtils.checkProjectCorrectly(i -> i, belongToProject, projectId);
-        if (checkProjectCorrectly.failed()){
+        if (checkProjectCorrectly.failed()) {
             return checkProjectCorrectly;
         }
         Result<Void> result = projectLogicTemplateAuthService.deleteTemplateAuth(authId);
-        if (result.success()){
-               operateRecordService.save(new OperateRecord.Builder()
-                         .operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_OFFLINE)
-                         .bizId(authId)
-                               .content(String.format("删除模板，模板id：%s",authId))
-                         .project(projectService.getProjectBriefByProjectId(projectId))
-                         .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                 
-                 .build());
+        if (result.success()) {
+            operateRecordService
+                .save(new OperateRecord.Builder().operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_OFFLINE)
+                    .bizId(authId).content(String.format("删除模板，模板id：%s", authId))
+                    .project(projectService.getProjectBriefByProjectId(projectId))
+                    .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+
+                    .build());
         }
         return result;
     }
-    
+
     @Override
     public Result<Void> updateTemplateAuth(ProjectTemplateAuthDTO authDTO, String operator) {
         if (AriusObjUtils.isNull(authDTO)) {
@@ -159,10 +155,11 @@ public class ProjectLogicTemplateAuthManagerImpl implements ProjectLogicTemplate
         return projectLogicTemplateAuthService
             .updateTemplateAuth(ConvertUtil.obj2Obj(projectTemplateAuth, ProjectTemplateAuthDTO.class), operator);
     }
-        /**
-     * 给AppTemplateAuthVO设置所属逻辑集群ID、name，逻辑模板name
-     * @param templateAuths 模板权限列表
-     */
+
+    /**
+    * 给AppTemplateAuthVO设置所属逻辑集群ID、name，逻辑模板name
+    * @param templateAuths 模板权限列表
+    */
     private void fillTemplateAuthVO(List<ProjectTemplateAuthVO> templateAuths) {
         if (CollectionUtils.isEmpty(templateAuths)) {
             return;

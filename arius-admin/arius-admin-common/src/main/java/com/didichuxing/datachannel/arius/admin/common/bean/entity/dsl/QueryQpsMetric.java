@@ -18,7 +18,7 @@ public class QueryQpsMetric {
     /**
      * 最大qps
      */
-    private Long maxQps;
+    private Long   maxQps;
     /**
      * 最大qps发生时刻
      */
@@ -26,11 +26,11 @@ public class QueryQpsMetric {
     /**
      * 平均qps
      */
-    private Long avgQps;
+    private Long   avgQps;
     /**
      * 最小qps
      */
-    private Long minQps;
+    private Long   minQps;
     /**
      * 最小qps发生时刻
      */

@@ -35,23 +35,23 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class ESPackageServiceImpl implements ESPackageService {
-    private static final ILog    LOGGER = LogFactory.getLog(ESPackageServiceImpl.class);
+    private static final ILog  LOGGER                   = LogFactory.getLog(ESPackageServiceImpl.class);
 
     @Autowired
-    private ESPackageDAO         esPackageDAO;
+    private ESPackageDAO       esPackageDAO;
 
     @Autowired
-    private UserService userService;
+    private UserService        userService;
     @Autowired
-    private RoleTool roleTool;
+    private RoleTool           roleTool;
 
     @Autowired
-    private FileStorageService   fileStorageService;
+    private FileStorageService fileStorageService;
 
     @Autowired
-    private ClusterPhyService clusterPhyService;
+    private ClusterPhyService  clusterPhyService;
 
-    private static final Long MULTI_PART_FILE_SIZE_MAX = 1024 * 1024 * 500L;
+    private static final Long  MULTI_PART_FILE_SIZE_MAX = 1024 * 1024 * 500L;
 
     @Override
     public List<ESPackage> listESPackage() {
@@ -89,7 +89,7 @@ public class ESPackageServiceImpl implements ESPackageService {
             }
         }
         final Result<Void> result = ProjectUtils.checkProjectCorrectly(id -> id, projectId, projectId);
-        if (result.failed()){
+        if (result.failed()) {
             return Result.buildFail(result.getMessage());
         }
 
@@ -113,7 +113,8 @@ public class ESPackageServiceImpl implements ESPackageService {
 
         // 在文件系统中删除对应的集群版本文件
         ESPackagePO esPackagePO = esPackageDAO.getById(id);
-        Result<Void> response = fileStorageService.remove(getUniqueFileName(ConvertUtil.obj2Obj(esPackagePO, ESPackage.class)));
+        Result<Void> response = fileStorageService
+            .remove(getUniqueFileName(ConvertUtil.obj2Obj(esPackagePO, ESPackage.class)));
         if (response.failed()) {
             return Result.buildFail("删除文件失败");
         }
@@ -133,7 +134,8 @@ public class ESPackageServiceImpl implements ESPackageService {
         Result<String> response = Result.buildFail();
         try {
             if (esPackageDTO.getUploadFile() != null) {
-                response = fileStorageService.upload(getUniqueFileName(ConvertUtil.obj2Obj(esPackageDTO, ESPackage.class)), esPackageDTO.getMd5(),
+                response = fileStorageService.upload(
+                    getUniqueFileName(ConvertUtil.obj2Obj(esPackageDTO, ESPackage.class)), esPackageDTO.getMd5(),
                     esPackageDTO.getUploadFile());
                 if (response.success()) {
                     esPackageDTO.setUrl(response.getData());
@@ -142,7 +144,8 @@ public class ESPackageServiceImpl implements ESPackageService {
                 }
             }
         } catch (Exception e) {
-            LOGGER.info("class=ESPackageServiceImpl||method=addESPlugin||uploadResponse={}||pluginName={}||exception={}",
+            LOGGER.info(
+                "class=ESPackageServiceImpl||method=addESPlugin||uploadResponse={}||pluginName={}||exception={}",
                 response.getMessage(), esPackageDTO.getFileName(), e);
         }
 
@@ -162,7 +165,7 @@ public class ESPackageServiceImpl implements ESPackageService {
             return Result.buildFail("非运维人员不能更新ES安装包!");
         }
 
-        if(operation.equals(UNKNOWN)) {
+        if (operation.equals(UNKNOWN)) {
             return Result.buildFail("操作类型未知");
         }
 
@@ -175,23 +178,24 @@ public class ESPackageServiceImpl implements ESPackageService {
             packageByVersion = esPackageDAO.getByVersionAndType(esPackageDTO.getEsVersion(),
                 esPackageDTO.getManifest());
             if (esPackageDTO.getUploadFile().getSize() > MULTI_PART_FILE_SIZE_MAX) {
-                return Result.buildFail("es程序包[" + esPackageDTO.getFileName() + "]文件的大小超过限制，不能超过" + MULTI_PART_FILE_SIZE_MAX / 1024 / 1024 + "M");
+                return Result.buildFail("es程序包[" + esPackageDTO.getFileName() + "]文件的大小超过限制，不能超过"
+                                        + MULTI_PART_FILE_SIZE_MAX / 1024 / 1024 + "M");
             }
         } else if (operation.getCode() == EDIT.getCode()) {
             packageByVersion = esPackageDAO.getByVersionAndManifestNotSelf(esPackageDTO.getEsVersion(),
                 esPackageDTO.getManifest(), esPackageDTO.getId());
-        } else if(operation.getCode() == DELETE.getCode()) {
+        } else if (operation.getCode() == DELETE.getCode()) {
             if (null == esPackageDTO.getId()) {
                 return Result.buildFail("所要删除的集群版本字段为空");
             }
 
             ESPackagePO esPackagePO = esPackageDAO.getById(esPackageDTO.getId());
-            if(esPackagePO == null) {
+            if (esPackagePO == null) {
                 return Result.buildFail("对应id的集群版本不存在");
             }
 
             if (clusterPhyService.isClusterExistsByPackageId(esPackageDTO.getId())) {
-               return Result.buildFail("版本已绑定集群无法删除");
+                return Result.buildFail("版本已绑定集群无法删除");
             }
 
         }

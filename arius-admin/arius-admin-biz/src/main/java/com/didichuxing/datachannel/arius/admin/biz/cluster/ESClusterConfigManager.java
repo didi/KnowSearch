@@ -22,7 +22,7 @@ public interface ESClusterConfigManager {
      * @return {@code Result<Void>}
      */
     Result<Void> editConfigDesc(ESConfigDTO param, String operator, Integer projectId);
-    
+
     /**
      * 获取ES集群模板config
      *
@@ -30,9 +30,9 @@ public interface ESClusterConfigManager {
      * @return {@code Result<ESConfigVO>}
      */
     Result<ESConfigVO> getEsClusterTemplateConfig(String type);
-    
+
     Result<Set<String>> gainEsClusterRoles(Long clusterId);
-    
+
     /**
      * 获取ES集群config通过id
      *
@@ -40,7 +40,7 @@ public interface ESClusterConfigManager {
      * @return {@code Result<ESConfigVO>}
      */
     Result<ESConfigVO> getEsClusterConfigById(Long configId);
-    
+
     /**
      * 获得ES集群配置
      *

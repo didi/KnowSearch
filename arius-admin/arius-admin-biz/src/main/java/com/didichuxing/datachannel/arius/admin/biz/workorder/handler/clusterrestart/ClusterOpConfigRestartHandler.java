@@ -78,7 +78,8 @@ public class ClusterOpConfigRestartHandler extends BaseClusterOpRestartHandler {
             return Result.buildParamIllegal("原始配置为空");
         }
 
-        if (opTaskManager.existUnClosedTask(content.getPhyClusterId().intValue(), OpTaskTypeEnum.CLUSTER_RESTART.getType())) {
+        if (opTaskManager.existUnClosedTask(content.getPhyClusterId().intValue(),
+            OpTaskTypeEnum.CLUSTER_RESTART.getType())) {
             return Result.buildParamIllegal("该集群上存在未完成的集群重启任务");
         }
 
@@ -119,8 +120,8 @@ public class ClusterOpConfigRestartHandler extends BaseClusterOpRestartHandler {
         }
 
         Multimap<String, Long> role2ConfigIdsMultiMap = saveAndGetEsConfigIds(content, approver);
-        List<EcmParamBase> ecmParamBaseList = ecmHandleService.buildEcmParamBaseListWithConfigAction(
-            clusterPhy.getId(), roleNameList, role2ConfigIdsMultiMap, content.getActionType()).getData();
+        List<EcmParamBase> ecmParamBaseList = ecmHandleService.buildEcmParamBaseListWithConfigAction(clusterPhy.getId(),
+            roleNameList, role2ConfigIdsMultiMap, content.getActionType()).getData();
 
         ecmTaskDTO.setEcmParamBaseList(ecmParamBaseList);
 
@@ -160,7 +161,8 @@ public class ClusterOpConfigRestartHandler extends BaseClusterOpRestartHandler {
     }
 
     /**落配置信息入DB*/
-    private Multimap</*集群角色*/String, /*改动的配置id*/Long> saveAndGetEsConfigIds(ClusterConfigRestartContent content, String approver) {
+    private Multimap</*集群角色*/String, /*改动的配置id*/Long> saveAndGetEsConfigIds(ClusterConfigRestartContent content,
+                                                                            String approver) {
         Multimap<String, Long> role2ConfigIdsMultiMap = ArrayListMultimap.create();
         if (ADD.getCode() == content.getActionType()) {
             List<ESConfigDTO> newEsConfigs = ConvertUtil.list2List(content.getNewEsConfigs(), ESConfigDTO.class);

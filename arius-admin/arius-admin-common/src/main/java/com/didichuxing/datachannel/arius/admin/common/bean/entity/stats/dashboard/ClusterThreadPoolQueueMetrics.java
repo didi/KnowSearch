@@ -14,12 +14,12 @@ public class ClusterThreadPoolQueueMetrics {
     /**
      * 集群名称
      */
-    private String  cluster;
-    private Long    timestamp;
-    private Long    management;
-    private Long    refresh;
-    private Long    flush;
-    private Long    merge;
-    private Long    search;
-    private Long    write;
+    private String cluster;
+    private Long   timestamp;
+    private Long   management;
+    private Long   refresh;
+    private Long   flush;
+    private Long   merge;
+    private Long   search;
+    private Long   write;
 }

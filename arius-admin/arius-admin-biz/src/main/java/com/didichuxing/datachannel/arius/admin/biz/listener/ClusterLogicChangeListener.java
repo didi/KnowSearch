@@ -22,7 +22,7 @@ public class ClusterLogicChangeListener implements ApplicationListener<ClusterLo
     private ClusterContextManager clusterContextManager;
 
     @Autowired
-    private ClusterLogicManager clusterLogicManager;
+    private ClusterLogicManager   clusterLogicManager;
 
     @Override
     public void onApplicationEvent(ClusterLogicEvent event) {

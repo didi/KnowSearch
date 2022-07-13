@@ -55,18 +55,21 @@ public class ESPhyClusterNodeController {
     @PostMapping("/divide-region")
     @ResponseBody
     @ApiOperation(value = "节点划分且创建region")
-    public Result<List<Long>> createMultiNode2Region(HttpServletRequest request, @RequestBody List<ClusterRegionWithNodeInfoDTO> params) throws AdminOperateException {
-        
+    public Result<List<Long>> createMultiNode2Region(HttpServletRequest request,
+                                                     @RequestBody List<ClusterRegionWithNodeInfoDTO> params) throws AdminOperateException {
+
         return clusterNodeManager.createMultiNode2Region(params, HttpRequestUtil.getOperator(request),
-                HttpRequestUtil.getProjectId(request));
+            HttpRequestUtil.getProjectId(request));
     }
 
     @PutMapping("/divide-region")
     @ResponseBody
     @ApiOperation(value = "编辑多个region中的节点信息（扩缩容）")
-    public Result<Boolean> editMultiNode2Region(HttpServletRequest request, @RequestBody List<ClusterRegionWithNodeInfoDTO> params) throws AdminOperateException {
-       
-        return clusterNodeManager.editMultiNode2Region(params, HttpRequestUtil.getOperator(request),HttpRequestUtil.getProjectId(request));
+    public Result<Boolean> editMultiNode2Region(HttpServletRequest request,
+                                                @RequestBody List<ClusterRegionWithNodeInfoDTO> params) throws AdminOperateException {
+
+        return clusterNodeManager.editMultiNode2Region(params, HttpRequestUtil.getOperator(request),
+            HttpRequestUtil.getProjectId(request));
     }
 
     @GetMapping("/{clusterPhyName}/names")

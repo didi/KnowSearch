@@ -36,7 +36,7 @@ public class IndexCatCellPO extends BaseESPO {
 
     private Long    primariesSegmentCount;
     private Long    totalSegmentCount;
-    private Integer    templateId;
+    private Integer templateId;
 
     public boolean getDeleteFlag() {
         return deleteFlag;

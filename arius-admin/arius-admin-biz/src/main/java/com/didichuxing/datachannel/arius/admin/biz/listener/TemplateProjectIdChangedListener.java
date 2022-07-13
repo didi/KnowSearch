@@ -17,7 +17,7 @@ import com.didiglobal.logi.log.LogFactory;
 
 @Component
 public class TemplateProjectIdChangedListener implements ApplicationListener<LogicTemplateModifyEvent> {
-    private static final ILog           LOGGER = LogFactory.getLog(TemplateProjectIdChangedListener.class);
+    private static final ILog               LOGGER = LogFactory.getLog(TemplateProjectIdChangedListener.class);
 
     @Autowired
     private ProjectLogicTemplateAuthService projectLogicTemplateAuthService;
@@ -54,8 +54,9 @@ public class TemplateProjectIdChangedListener implements ApplicationListener<Log
 
         //如果模板的projectid发生变更了，代表模板的管理权限发生变更，但是原projectid还要拥有模板的读写权限
         //给原projectid赋予索引的读写权限
-        Result<Void> result = projectLogicTemplateAuthService.ensureSetLogicTemplateAuth(oldIndexTemplate.getProjectId(),
-            logicTemplateId, ProjectTemplateAuthEnum.RW, oldIndexTemplate.getResponsible(), AriusUser.SYSTEM.getDesc());
+        Result<Void> result = projectLogicTemplateAuthService.ensureSetLogicTemplateAuth(
+            oldIndexTemplate.getProjectId(), logicTemplateId, ProjectTemplateAuthEnum.RW,
+            oldIndexTemplate.getResponsible(), AriusUser.SYSTEM.getDesc());
 
         if (!EnvUtil.isOnline()) {
             LOGGER.info("class=LogicTemplateModifyEventListener||method=handleTemplateProjectId||result={}",

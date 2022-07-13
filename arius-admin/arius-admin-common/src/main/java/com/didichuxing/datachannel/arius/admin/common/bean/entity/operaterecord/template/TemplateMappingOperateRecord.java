@@ -16,9 +16,7 @@ import org.apache.commons.collections4.CollectionUtils;
  */
 @Data
 public class TemplateMappingOperateRecord extends TemplateOperateRecord {
-    
 
-    
     public TemplateMappingOperateRecord(IndexMappingVO oldIndexMappingVO, IndexMappingVO newIndexMappingVO) {
         final String oldMappings = oldIndexMappingVO.getMappings();
         final String newMappings = newIndexMappingVO.getMappings();
@@ -27,20 +25,20 @@ public class TemplateMappingOperateRecord extends TemplateOperateRecord {
         final List<DiffJson> diffs = DiffUtil.diffJsonByString(oldMappings, newMappings);
         diffResult.addAll(diffs);
         operateType = TemplateOperateRecordEnum.MAPPING.getCode();
-        change= CollectionUtils.isNotEmpty(diffs);
+        change = CollectionUtils.isNotEmpty(diffs);
     }
-    
+
     public TemplateMappingOperateRecord(MappingConfig before, MappingConfig after) {
         source = before.toJson();
         target = after.toJson();
         final List<DiffJson> diffs = DiffUtil.diffJsonByString(before.toJson().toJSONString(),
-                after.toJson().toJSONString());
-        
+            after.toJson().toJSONString());
+
         diffResult.addAll(diffs);
         operateType = TemplateOperateRecordEnum.MAPPING.getCode();
         change = CollectionUtils.isNotEmpty(diffs);
     }
-    
+
     @Override
     public String toString() {
         return JSON.toJSONString(this);

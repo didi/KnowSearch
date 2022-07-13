@@ -10,22 +10,16 @@ import java.util.List;
  * @date 2020/09/02
  */
 public class PhysicalTemplateSettingsModifyEvent extends PhysicalMetaDataModifyEvent {
-    private final Integer projectId;
-    private final String  cluster;
-    private final String templateName;
-    private final List<String> receivers;
+    private final Integer                 projectId;
+    private final String                  cluster;
+    private final String                  templateName;
+    private final List<String>            receivers;
     private final IndexTemplatePhySetting beforeUpdateSettings;
     private final IndexTemplatePhySetting afterUpdateSettings;
 
-
-    public PhysicalTemplateSettingsModifyEvent(
-            Object source,
-            Integer projectId,
-            String cluster,
-            String templateName,
-            List<String> receivers,
-            IndexTemplatePhySetting beforeUpdateSettings,
-            IndexTemplatePhySetting afterUpdateSettings) {
+    public PhysicalTemplateSettingsModifyEvent(Object source, Integer projectId, String cluster, String templateName,
+                                               List<String> receivers, IndexTemplatePhySetting beforeUpdateSettings,
+                                               IndexTemplatePhySetting afterUpdateSettings) {
         super(source);
         this.projectId = projectId;
         this.cluster = cluster;

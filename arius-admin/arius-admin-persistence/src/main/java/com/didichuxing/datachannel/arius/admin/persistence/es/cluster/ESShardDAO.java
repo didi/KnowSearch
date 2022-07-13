@@ -34,7 +34,7 @@ public class ESShardDAO extends BaseESDAO {
             DirectRequest directRequest = new DirectRequest(SHARD.getMethod(), SHARD.getUri());
             DirectResponse directResponse = client.direct(directRequest).actionGet(30, TimeUnit.SECONDS);
             if (directResponse.getRestStatus() == RestStatus.OK
-                    && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
+                && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
                 ecSegmentsOnIps = JSONArray.parseArray(directResponse.getResponseContent(), ShardDistributionVO.class);
             }
         } catch (Exception e) {
@@ -48,18 +48,20 @@ public class ESShardDAO extends BaseESDAO {
         ESClient client = esOpClient.getESClient(clusterName);
         String result = null;
         if (Objects.isNull(client)) {
-            LOGGER.error("class=ESClusterDAO||method=shardAssignment||clusterName={}||errMsg=esClient is null", clusterName);
+            LOGGER.error("class=ESClusterDAO||method=shardAssignment||clusterName={}||errMsg=esClient is null",
+                clusterName);
             return null;
         }
         try {
             DirectRequest directRequest = new DirectRequest(SHARD_ASSIGNMENT.getMethod(), SHARD_ASSIGNMENT.getUri());
             DirectResponse directResponse = client.direct(directRequest).actionGet(30, TimeUnit.SECONDS);
             if (directResponse.getRestStatus() == RestStatus.OK
-                    && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
+                && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
                 result = directResponse.getResponseContent();
             }
         } catch (Exception e) {
-            LOGGER.warn("class=ESClusterDAO||method=shardAssignment||cluster={}||mg=get es segments fail", clusterName, e);
+            LOGGER.warn("class=ESClusterDAO||method=shardAssignment||cluster={}||mg=get es segments fail", clusterName,
+                e);
             return null;
         }
         return result;

@@ -13,7 +13,7 @@ public class NodeAllocationInfo {
      * 节点上的分片数目
      */
     @JSONField(name = "shards")
-   private String shardsNumber;
+    private String shardsNumber;
 
     /**
      * 节点上索引index占用的空间大小

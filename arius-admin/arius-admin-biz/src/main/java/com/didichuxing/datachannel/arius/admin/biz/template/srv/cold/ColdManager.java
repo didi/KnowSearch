@@ -23,14 +23,15 @@ public interface ColdManager {
      * @return
      */
     int fetchClusterDefaultHotDay(String phyCluster);
-    
+
     ///////////////srv
-        /**
-     * move2ColdNode
-     * @param cluster
-     * @return
-     */
+    /**
+    * move2ColdNode
+    * @param cluster
+    * @return
+    */
     Result<Boolean> move2ColdNode(String cluster);
 
-    Result<Integer> batchChangeHotDay(Integer coldSaveDays, String operator, List<Integer> templateIdList, Integer projectId);
+    Result<Integer> batchChangeHotDay(Integer coldSaveDays, String operator, List<Integer> templateIdList,
+                                      Integer projectId);
 }

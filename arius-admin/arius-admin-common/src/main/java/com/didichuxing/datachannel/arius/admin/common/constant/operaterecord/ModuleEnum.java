@@ -18,14 +18,11 @@ public enum ModuleEnum {
                         /** 模板 */
                         TEMPLATE(1, "模板"),
 
-
                         WORK_ORDER(3, "工单"),
 
                         DSL_ANALYZER(4, "DSL审核"),
 
                         CLUSTER(5, "集群"),
-
-
 
                         SCHEDULE(8, "定时任务"),
 

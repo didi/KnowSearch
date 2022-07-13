@@ -21,7 +21,7 @@ public class ColdDataMoveRandomTask extends BaseConcurrentClusterTask implements
     private static final ILog LOGGER = LogFactory.getLog(ColdDataMoveRandomTask.class);
 
     @Autowired
-    private ColdManager templateColdManager;
+    private ColdManager       templateColdManager;
 
     @Override
     public TaskResult execute(JobContext jobContext) throws Exception {
@@ -70,7 +70,8 @@ public class ColdDataMoveRandomTask extends BaseConcurrentClusterTask implements
     public boolean executeByCluster(String cluster) {
         Result<Boolean> result = templateColdManager.move2ColdNode(cluster);
         if (result.failed()) {
-            LOGGER.warn("class=ColdDataMoveRandomTask||method=executeByCluster||cluster={}||failMsg={}", cluster, result.getMessage());
+            LOGGER.warn("class=ColdDataMoveRandomTask||method=executeByCluster||cluster={}||failMsg={}", cluster,
+                result.getMessage());
             return false;
         }
         return true;

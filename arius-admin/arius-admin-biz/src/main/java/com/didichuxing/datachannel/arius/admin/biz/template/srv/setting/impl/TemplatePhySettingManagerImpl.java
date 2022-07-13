@@ -29,10 +29,10 @@ import org.springframework.stereotype.Service;
 @Service
 public class TemplatePhySettingManagerImpl implements TemplatePhySettingManager {
 
-    private static final ILog LOGGER = LogFactory.getLog(IndexTemplateServiceImpl.class);
+    private static final ILog    LOGGER = LogFactory.getLog(IndexTemplateServiceImpl.class);
 
     @Autowired
-    private ESTemplateService esTemplateService;
+    private ESTemplateService    esTemplateService;
 
     @Autowired
     private OperateRecordService operateRecordService;
@@ -70,7 +70,7 @@ public class TemplatePhySettingManagerImpl implements TemplatePhySettingManager 
         TemplateConfig templateConfig = esTemplateService.syncGetTemplateConfig(cluster, template);
         if (templateConfig == null) {
             LOGGER.info("class=TemplatePhySettingsManagerImpl||method=updateSetting||"
-                         + "msg=templateNotExists||cluster={}||template={}",
+                        + "msg=templateNotExists||cluster={}||template={}",
                 cluster, template);
             throw new AdminOperateException("模版不存在，template:" + template);
         }
@@ -82,29 +82,27 @@ public class TemplatePhySettingManagerImpl implements TemplatePhySettingManager 
         if (!esTemplateService.syncCheckTemplateConfig(cluster, fetchPreCreateTemplateName(template), templateConfig,
             AdminESOpRetryConstants.DEFAULT_RETRY_COUNT)) {
             LOGGER.info("class=TemplatePhySettingsManagerImpl||method=updateSetting||"
-                         + "msg=checkTemplateConfigFail||cluster={}||templateName={}||templateConfig={}",
+                        + "msg=checkTemplateConfigFail||cluster={}||templateName={}||templateConfig={}",
                 cluster, fetchPreCreateTemplateName(template), templateConfig);
             throw new AdminOperateException("非法模板settings: " + settings);
         }
 
         boolean result = esTemplateService.syncUpsertSetting(cluster, template, settings,
             AdminESOpRetryConstants.DEFAULT_RETRY_COUNT);
-        if(result) {
+        if (result) {
             // 记录setting 更新记录
-             operateRecordService.save(new OperateRecord.Builder()
-                             .bizId(logicId)
-                             .operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE_EDIT_SETTING)
-                     
-                     
-                             .content(new TemplateSettingOperateRecord(oldTemplateSettings, newTemplateSettings).toString())
-                             .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                     .build());
+            operateRecordService.save(new OperateRecord.Builder().bizId(logicId)
+                .operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE_EDIT_SETTING)
+
+                .content(new TemplateSettingOperateRecord(oldTemplateSettings, newTemplateSettings).toString())
+                .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).build());
         }
         return result;
     }
 
     @Override
-    public boolean mergeTemplateSettings(Integer logicId, String cluster, String template, IndexTemplatePhySetting settings) throws AdminOperateException {
+    public boolean mergeTemplateSettings(Integer logicId, String cluster, String template,
+                                         IndexTemplatePhySetting settings) throws AdminOperateException {
         Map<String, String> flatSettings = settings.flatSettings();
         TemplateConfig templateConfig = esTemplateService.syncGetTemplateConfig(cluster, template);
         if (templateConfig == null) {
@@ -112,11 +110,13 @@ public class TemplatePhySettingManagerImpl implements TemplatePhySettingManager 
         }
 
         templateConfig.setSetttings(flatSettings);
-        if (!esTemplateService.syncCheckTemplateConfig(cluster, fetchPreCreateTemplateName(template), templateConfig, AdminESOpRetryConstants.DEFAULT_RETRY_COUNT)) {
+        if (!esTemplateService.syncCheckTemplateConfig(cluster, fetchPreCreateTemplateName(template), templateConfig,
+            AdminESOpRetryConstants.DEFAULT_RETRY_COUNT)) {
             throw new AdminOperateException("非法模板settings: " + settings);
         }
 
-        return esTemplateService.syncUpsertSetting(cluster, template, flatSettings, AdminESOpRetryConstants.DEFAULT_RETRY_COUNT);
+        return esTemplateService.syncUpsertSetting(cluster, template, flatSettings,
+            AdminESOpRetryConstants.DEFAULT_RETRY_COUNT);
     }
 
     /**************************************** private method ****************************************************/

@@ -31,7 +31,7 @@ public class PhyTemplateClusterMetricsHandler extends BaseClusterMetricsHandle {
     private ESIndicesStatsService esIndicesStatsService;
 
     @Autowired
-    private IndexTemplateService indexTemplateService;
+    private IndexTemplateService  indexTemplateService;
 
     @Override
     protected Result<Void> checkSpecialParam(MetricsClusterPhyDTO param) {
@@ -46,7 +46,8 @@ public class PhyTemplateClusterMetricsHandler extends BaseClusterMetricsHandle {
 
     @Override
     protected List<VariousLineChartMetrics> getAggClusterPhyMetrics(MetricsClusterPhyDTO param) {
-        List<VariousLineChartMetrics> aggClusterPhyTemplateMetrics = esIndicesStatsService.getAggClusterPhyTemplateMetrics((MetricsClusterPhyTemplateDTO) param);
+        List<VariousLineChartMetrics> aggClusterPhyTemplateMetrics = esIndicesStatsService
+            .getAggClusterPhyTemplateMetrics((MetricsClusterPhyTemplateDTO) param);
         // 逻辑模板id转化为逻辑模板名称
         convertTemplateIdToName(aggClusterPhyTemplateMetrics);
 
@@ -78,7 +79,8 @@ public class PhyTemplateClusterMetricsHandler extends BaseClusterMetricsHandle {
 
             // 将逻辑模板的id转化为对应的逻辑模板名称，使用*进行数据库兜底操作
             for (MetricsContent param : variousLineChartMetrics.getMetricsContents()) {
-                IndexTemplate logicTemplate = indexTemplateService.getLogicTemplateById(Integer.parseInt(param.getName()));
+                IndexTemplate logicTemplate = indexTemplateService
+                    .getLogicTemplateById(Integer.parseInt(param.getName()));
                 param.setName(logicTemplate == null ? "*" : logicTemplate.getName());
             }
         }

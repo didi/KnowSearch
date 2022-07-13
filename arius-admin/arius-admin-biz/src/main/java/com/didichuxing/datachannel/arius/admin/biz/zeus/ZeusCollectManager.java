@@ -7,10 +7,10 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESZeusHos
  * Created by linyunan on 2021-09-14
  */
 public interface ZeusCollectManager {
-	/**
-	 * @param esZeusHostInfoDTO      Zeus采集节点信息实体
-	 * @return
-	 */
-	@Deprecated
-	Result<Boolean> updateHttpAddressFromZeus(ESZeusHostInfoDTO esZeusHostInfoDTO);
+    /**
+     * @param esZeusHostInfoDTO      Zeus采集节点信息实体
+     * @return
+     */
+    @Deprecated
+    Result<Boolean> updateHttpAddressFromZeus(ESZeusHostInfoDTO esZeusHostInfoDTO);
 }

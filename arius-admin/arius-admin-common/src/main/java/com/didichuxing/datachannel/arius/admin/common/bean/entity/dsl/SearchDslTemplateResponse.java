@@ -30,6 +30,6 @@ public class SearchDslTemplateResponse {
     /**
      * 查询命中记录数
      */
-    private Long totalHits;
+    private Long                totalHits;
 
 }

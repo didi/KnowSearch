@@ -16,5 +16,5 @@ import lombok.NoArgsConstructor;
 public class MetricsClusterPhyNodeDTO extends MetricsClusterPhyDTO {
 
     @ApiModelProperty("集群节点ip")
-    private String  nodeName;
+    private String nodeName;
 }

@@ -33,14 +33,13 @@ import java.util.Map;
 public class ESIndicesSimpleStatsResponse extends ESActionResponse {
 
     @JSONField(name = "_shards")
-    private Shards shards;
+    private Shards                       shards;
 
     @JSONField(name = "_all")
-    private SimpleIndexNode all;
+    private SimpleIndexNode              all;
 
     @JSONField(name = "indices")
     private Map<String, SimpleIndexNode> indices = new HashMap<>();
-
 
     public Shards getShards() {
         return shards;
@@ -65,7 +64,7 @@ public class ESIndicesSimpleStatsResponse extends ESActionResponse {
 
         JSONObject ret = new JSONObject();
 
-        for(Map.Entry<String, SimpleIndexNode> entry : indices.entrySet()){
+        for (Map.Entry<String, SimpleIndexNode> entry : indices.entrySet()) {
             String index = entry.getKey();
             ret.put(index, JSON.toJSON(indices.get(index)));
         }
@@ -83,7 +82,6 @@ public class ESIndicesSimpleStatsResponse extends ESActionResponse {
         }
     }
 
-
     @JSONField(serialize = false)
     public Map<String, SimpleIndexNode> getIndicesMap() {
         return indices;
@@ -93,7 +91,6 @@ public class ESIndicesSimpleStatsResponse extends ESActionResponse {
     public void setIndicesMap(Map<String, SimpleIndexNode> indicesMap) {
         this.indices = indicesMap;
     }
-
 
     @Override
     public String toString() {

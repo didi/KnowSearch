@@ -19,17 +19,17 @@ import lombok.NoArgsConstructor;
 public class TemplateSettingVO extends BaseVO {
 
     @ApiModelProperty("索引ID")
-    private Integer logicId;
+    private Integer    logicId;
 
     @ApiModelProperty("是否开启副本")
-    private boolean cancelCopy;
+    private boolean    cancelCopy;
 
     @ApiModelProperty("是否开启异步translog")
-    private boolean asyncTranslog;
+    private boolean    asyncTranslog;
 
     @ApiModelProperty("分词器")
     private JSONObject analysis;
 
     @ApiModelProperty("dynamic_templates设置")
-    private JSONArray dynamicTemplates;
+    private JSONArray  dynamicTemplates;
 }

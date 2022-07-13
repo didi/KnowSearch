@@ -29,7 +29,8 @@ public interface IndicesManager {
      * @param projectId         项目
      * @return              List<IndexCatInfoVO>
      */
-    PaginationResult<IndexCatCellVO> pageGetIndex(IndexQueryDTO condition, Integer projectId) throws NotFindSubclassException;
+    PaginationResult<IndexCatCellVO> pageGetIndex(IndexQueryDTO condition,
+                                                  Integer projectId) throws NotFindSubclassException;
 
     /**
      * 创建索引
@@ -48,7 +49,7 @@ public interface IndicesManager {
      * @return           Boolean
      */
     Result<Boolean> deleteIndex(List<IndexCatCellDTO> params, Integer projectId, String operator);
-    
+
     /**
      * 批量更新索引状态
      *
@@ -79,6 +80,7 @@ public interface IndicesManager {
      * @return {@link Result}<{@link Boolean}>
      */
     Result<Boolean> closeIndex(List<IndexCatCellDTO> params, Integer projectId, String operator);
+
     /**
      * 配合删除真实集群索引使用
      * <p>
@@ -138,7 +140,8 @@ public interface IndicesManager {
      * @param operator
      * @return
      */
-    Result<Void> editSetting(IndexCatCellWithConfigDTO param, Integer projectId, String operator) throws ESOperateException;
+    Result<Void> editSetting(IndexCatCellWithConfigDTO param, Integer projectId,
+                             String operator) throws ESOperateException;
 
     /**
      * 获取索引shard分配信息

@@ -43,6 +43,6 @@ public class ClusterResourceInfoCollectorRandomTask extends BaseConcurrentCluste
 
     @Override
     protected boolean executeByCluster(String cluster) {
-        return  clusterPhyManager.updateClusterInfo(cluster, AriusUser.SYSTEM.getDesc());
+        return clusterPhyManager.updateClusterInfo(cluster, AriusUser.SYSTEM.getDesc());
     }
 }

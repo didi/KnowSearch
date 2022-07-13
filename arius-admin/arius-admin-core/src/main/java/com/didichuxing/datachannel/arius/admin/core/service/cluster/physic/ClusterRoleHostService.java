@@ -72,7 +72,6 @@ public interface ClusterRoleHostService {
      */
     boolean collectClusterNodeSettings(String cluster) throws AdminTaskException;
 
-
     /**
      * 全量录入根据配置的节点信息持久化到MySQL, 包括节点状态
      * @param param 参数
@@ -129,7 +128,8 @@ public interface ClusterRoleHostService {
      * @param roleClusterIds 多个角色集群id
      * @return  Map<角色集群id,List<节点对象>>
      */
-    Map<Long,List<ClusterRoleHost>> getByRoleClusterIds(List<Long> roleClusterIds);
+    Map<Long, List<ClusterRoleHost>> getByRoleClusterIds(List<Long> roleClusterIds);
+
     /**
      * 获取节点名
      * @param clusterId 集群id

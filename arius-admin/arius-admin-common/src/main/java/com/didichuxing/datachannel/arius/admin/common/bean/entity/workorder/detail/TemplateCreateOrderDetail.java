@@ -57,7 +57,7 @@ public class TemplateCreateOrderDetail extends AbstractOrderDetail {
     /**
      * 热数据保存天数, 单位天
      */
-    private Integer hotTime;
+    private Integer      hotTime;
 
     /**
      * 数据总量 单位G
@@ -123,7 +123,7 @@ public class TemplateCreateOrderDetail extends AbstractOrderDetail {
     /**
      * 禁用rollover标识
      */
-    private Boolean disableIndexRollover;
+    private Boolean      disableIndexRollover;
 
     /**
      * 服务等级

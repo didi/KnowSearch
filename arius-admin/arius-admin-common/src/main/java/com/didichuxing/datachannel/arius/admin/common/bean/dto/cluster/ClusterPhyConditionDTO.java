@@ -19,12 +19,12 @@ import lombok.NoArgsConstructor;
 public class ClusterPhyConditionDTO extends ClusterPhyDTO {
 
     @ApiModelProperty("排序字段 diskUsagePercent")
-    private String  sortTerm;
+    private String       sortTerm;
 
-    private String sortType;
+    private String       sortType;
 
     @ApiModelProperty(value = "是否降序排序（默认降序）", dataType = "Boolean", required = false)
-    private Boolean orderByDesc = true;
+    private Boolean      orderByDesc = true;
 
     @ApiModelProperty("逻辑集群")
     private String       logicClusterName;

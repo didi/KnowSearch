@@ -55,7 +55,8 @@ public interface ESClusterRoleHostDAO {
      * @param nodeSets
      * @return
      */
-    List<ESClusterRoleHostPO> listByClusterAndNodeSets(@Param("cluster") String cluster, @Param("nodeSets") List<String> nodeSets);
+    List<ESClusterRoleHostPO> listByClusterAndNodeSets(@Param("cluster") String cluster,
+                                                       @Param("nodeSets") List<String> nodeSets);
 
     /**
      * 根据条件查询符合条件的主机信息列表
@@ -78,7 +79,7 @@ public interface ESClusterRoleHostDAO {
      */
     int update(ESClusterRoleHostPO param);
 
-    int updateRegionId(@Param("ids")List<Integer> ids, @Param("regionId")Integer regionId);
+    int updateRegionId(@Param("ids") List<Integer> ids, @Param("regionId") Integer regionId);
 
     /**
      * 将所有在线的节点置为离线,在同步集群节点时调用;需要在事务内调用,保证失败后回滚
@@ -106,8 +107,7 @@ public interface ESClusterRoleHostDAO {
      * @param roleId
      * @return
      */
-    int restoreByHostNameAndRoleId(@Param("hostname") String hostname,
-                                  @Param("roleId") Long roleId);
+    int restoreByHostNameAndRoleId(@Param("hostname") String hostname, @Param("roleId") Long roleId);
 
     /**
      * 获取所有节点信息

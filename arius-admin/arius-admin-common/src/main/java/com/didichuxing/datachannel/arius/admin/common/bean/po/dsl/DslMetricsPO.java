@@ -22,83 +22,83 @@ public class DslMetricsPO extends BaseESPO {
     /**
      * 创建时间
      */
-    private String ariusCreateTime;
+    private String  ariusCreateTime;
     /**
      * 日期时间
      */
-    private String logTime;
+    private String  logTime;
     /**
      * sink写入时间
      */
-    private Long sinkTime;
+    private Long    sinkTime;
     /**
      * flink写入时间
      */
-    private String flinkTime;
+    private String  flinkTime;
     /**
      * 响应平均长度
      */
-    private Double responseLenAvg;
+    private Double  responseLenAvg;
     /**
      * 请求类型 http/tcp
      */
-    private String requestType;
+    private String  requestType;
     /**
      * 查询类型 dsl/sql
      */
-    private String searchType;
+    private String  searchType;
     /**
      * 查询次数
      */
-    private Long searchCount;
+    private Long    searchCount;
     /**
      * 查询es平均耗时
      */
-    private Double esCostAvg;
+    private Double  esCostAvg;
     /**
      * 查询语句平均长度
      */
-    private Double dslLenAvg;
+    private Double  dslLenAvg;
     /**
      * 查询平均命中记录数
      */
-    private Double totalHitsAvg;
+    private Double  totalHitsAvg;
     /**
      * 查询成功平均shard数
      */
-    private Double successfulShardsAvg;
+    private Double  successfulShardsAvg;
     /**
      * 查询平均总shard数
      */
-    private Double totalShardsAvg;
+    private Double  totalShardsAvg;
     /**
      * 查询索引示例
      */
-    private String indiceSample;
+    private String  indiceSample;
     /**
      * 查询模板
      */
-    private String dslTemplate;
+    private String  dslTemplate;
     /**
      * 记录生成时间戳
      */
-    private Long timeStamp;
+    private Long    timeStamp;
     /**
      * dsl语句类型 normal/agg等
      */
-    private String dslType;
+    private String  dslType;
     /**
      * 查询索引名称，去重后的
      */
-    private String indices;
+    private String  indices;
     /**
      * 查询模板
      */
-    private String dslTemplateMd5;
+    private String  dslTemplateMd5;
     /**
      * 查询平均总耗时
      */
-    private Double totalCostAvg;
+    private Double  totalCostAvg;
     /**
      * 查询平均失败shard数
      */
@@ -114,11 +114,11 @@ public class DslMetricsPO extends BaseESPO {
     /**
      * gateway处理平均耗时
      */
-    private Double beforeCostAvg;
+    private Double  beforeCostAvg;
     /**
      * dsl查询限流值
      */
-    private Double   queryLimit;
+    private Double  queryLimit;
 
     @Override
     public String toString() {

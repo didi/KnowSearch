@@ -1,27 +1,16 @@
 package com.didichuxing.datachannel.arius.admin.core.service.es.impl;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.INSERT_PRDER;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.ONE_BILLION;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.PRIORITY;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.SOURCE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.TASKS;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.TIME_IN_QUEUE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.*;
 import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.*;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_OPERATE_TIMEOUT;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.HashMap;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.*;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.NodeStateVO;
-import com.didiglobal.logi.elasticsearch.client.response.model.os.OsNode;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.rest.RestStatus;
@@ -32,6 +21,9 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.Triple;
+import com.didichuxing.datachannel.arius.admin.common.Tuple;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.NodeStateVO;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterNodeService;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpClient;
@@ -43,6 +35,7 @@ import com.didiglobal.logi.elasticsearch.client.response.cluster.nodes.ESCluster
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodesstats.ClusterNodeStats;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodesstats.ESClusterNodesStatsResponse;
 import com.didiglobal.logi.elasticsearch.client.response.model.fs.FSNode;
+import com.didiglobal.logi.elasticsearch.client.response.model.os.OsNode;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
@@ -57,23 +50,23 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
     private static final ILog LOGGER = LogFactory.getLog(ESClusterNodeServiceImpl.class);
 
     @Autowired
-    private ESOpClient esOpClient;
+    private ESOpClient        esOpClient;
 
     @Autowired
-    private ESClusterNodeDAO esClusterNodeDAO;
+    private ESClusterNodeDAO  esClusterNodeDAO;
 
     @Override
     public Map<String, ClusterNodeStats> syncGetNodeFsStatsMap(String clusterName) {
         ESClient esClient = esOpClient.getESClient(clusterName);
         if (esClient == null) {
             LOGGER.error(
-                    "class=ESClusterNodeServiceImpl||method=syncGetNodeFsStatsMap||clusterName={}||errMsg=esClient is null",
-                    clusterName);
+                "class=ESClusterNodeServiceImpl||method=syncGetNodeFsStatsMap||clusterName={}||errMsg=esClient is null",
+                clusterName);
             return Maps.newHashMap();
         }
 
         ESClusterNodesStatsResponse response = esClient.admin().cluster().prepareNodeStats().setFs(true).execute()
-                    .actionGet(30, TimeUnit.SECONDS);
+            .actionGet(30, TimeUnit.SECONDS);
 
         return response.getNodes();
     }
@@ -83,19 +76,13 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
         ESClient esClient = esOpClient.getESClient(clusterName);
         if (esClient == null) {
             LOGGER.error(
-                    "class=ESClusterNodeServiceImpl||method=syncGetNodeFsStatsMap||clusterName={}||errMsg=esClient is null",
-                    clusterName);
+                "class=ESClusterNodeServiceImpl||method=syncGetNodeFsStatsMap||clusterName={}||errMsg=esClient is null",
+                clusterName);
             return Maps.newHashMap();
         }
 
-        ESClusterNodesStatsResponse response = esClient.admin().cluster().prepareNodeStats()
-                .setFs(true)
-                .setOs(true)
-                .setJvm(true)
-                .setThreadPool(true)
-                .level("node")
-                .execute()
-                .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+        ESClusterNodesStatsResponse response = esClient.admin().cluster().prepareNodeStats().setFs(true).setOs(true)
+            .setJvm(true).setThreadPool(true).level("node").execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
 
         return response.getNodes();
     }
@@ -108,8 +95,7 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
 
     @Override
     public List<String> syncGetNodeIp(String clusterName) {
-        return syncGetNodeInfo(clusterName).values().stream().map(ClusterNodeInfo::getIp)
-                .collect(Collectors.toList());
+        return syncGetNodeInfo(clusterName).values().stream().map(ClusterNodeInfo::getIp).collect(Collectors.toList());
     }
 
     @Override
@@ -135,8 +121,8 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
         ESClient esClient = esOpClient.getESClient(clusterName);
         if (esClient == null) {
             LOGGER.error(
-                    "class=ESClusterNodeServiceImpl||method=syncGetNodeNames||clusterName={}||errMsg=esClient is null",
-                    clusterName);
+                "class=ESClusterNodeServiceImpl||method=syncGetNodeNames||clusterName={}||errMsg=esClient is null",
+                clusterName);
             return Lists.newArrayList();
         }
 
@@ -146,7 +132,7 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
         }
 
         return esClusterNodesResponse.getNodes().values().stream().map(ClusterNodeInfo::getName)
-                .collect(Collectors.toList());
+            .collect(Collectors.toList());
     }
 
     @Override
@@ -154,7 +140,7 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
         DirectResponse directResponse = esClusterNodeDAO.getDirectResponse(clusterName, "Get", GET_PENDING_TASKS);
         List<PendingTask> pendingTasks = Lists.newArrayList();
         if (directResponse.getRestStatus() == RestStatus.OK
-                && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
+            && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
 
             JSONObject jsonObject = JSON.parseObject(directResponse.getResponseContent());
             if (null != jsonObject && null != jsonObject.getJSONArray(TASKS)) {
@@ -184,8 +170,7 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
         }
 
         if (null != pendingTasksObj.getJSONObject(i).get(INSERT_PRDER)) {
-            pendingTask.setInsertOrder(
-                    Long.valueOf(pendingTasksObj.getJSONObject(i).get(INSERT_PRDER).toString()));
+            pendingTask.setInsertOrder(Long.valueOf(pendingTasksObj.getJSONObject(i).get(INSERT_PRDER).toString()));
         }
     }
 
@@ -224,7 +209,7 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
         List<IndexResponse> indexResponses;
 
         if (directResponse.getRestStatus() == RestStatus.OK
-                && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
+            && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
 
             indexResponses = ConvertUtil.str2ObjArrayByJson(directResponse.getResponseContent(), IndexResponse.class);
 
@@ -233,13 +218,13 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
                 String requestContent = getShardToNodeRequestContentByIndexName(r.getIndex(), "20s");
 
                 DirectResponse shardNodeResponse = esClusterNodeDAO.getDirectResponse(clusterName, "Get",
-                        requestContent);
+                    requestContent);
 
                 if (shardNodeResponse.getRestStatus() == RestStatus.OK
-                        && StringUtils.isNoneBlank(shardNodeResponse.getResponseContent())) {
+                    && StringUtils.isNoneBlank(shardNodeResponse.getResponseContent())) {
 
                     List<IndexShardInfo> indexShardInfos = ConvertUtil
-                            .str2ObjArrayByJson(shardNodeResponse.getResponseContent(), IndexShardInfo.class);
+                        .str2ObjArrayByJson(shardNodeResponse.getResponseContent(), IndexShardInfo.class);
 
                     BigIndexMetrics bigIndexMetrics = new BigIndexMetrics();
                     bigIndexMetrics.setIndexName(r.getIndex());
@@ -255,7 +240,7 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
 
     @Override
     public int syncGetIndicesCount(String cluster, String nodes) {
-        return esClusterNodeDAO.getIndicesCount(cluster,nodes);
+        return esClusterNodeDAO.getIndicesCount(cluster, nodes);
     }
 
     @Override
@@ -263,14 +248,14 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
         ESClient esClient = esOpClient.getESClient(cluster);
         if (esClient == null) {
             LOGGER.error(
-                    "class=ESClusterNodeServiceImpl||method=synGetClusterMem||clusterName={}||errMsg=esClient is null",
-                    cluster);
+                "class=ESClusterNodeServiceImpl||method=synGetClusterMem||clusterName={}||errMsg=esClient is null",
+                cluster);
             return null;
         }
 
         // 获取nodes中的os信息
         ESClusterNodesStatsResponse response = esClient.admin().cluster().prepareNodeStats().setOs(true).execute()
-                .actionGet(30, TimeUnit.SECONDS);
+            .actionGet(30, TimeUnit.SECONDS);
 
         // 构建集群的内存使用信息对象
         ClusterMemInfo clusterMemInfo = ClusterMemInfo.builder().memFree(0L).memUsed(0L).memTotal(0L).build();
@@ -280,15 +265,11 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
         }
 
         // 统计所有的节点的内存信息合成为集群的内存使用信息
-        clusterNodeStatsMap.values()
-                .stream()
-                .map(ClusterNodeStats::getOs)
-                .map(OsNode::getMem)
-                .forEach(osMem -> {
-                    clusterMemInfo.setMemFree(clusterMemInfo.getMemFree() + osMem.getFreeInBytes());
-                    clusterMemInfo.setMemTotal(clusterMemInfo.getMemTotal() + osMem.getTotalInBytes());
-                    clusterMemInfo.setMemUsed(clusterMemInfo.getMemUsed() + osMem.getUsedInBytes());
-                });
+        clusterNodeStatsMap.values().stream().map(ClusterNodeStats::getOs).map(OsNode::getMem).forEach(osMem -> {
+            clusterMemInfo.setMemFree(clusterMemInfo.getMemFree() + osMem.getFreeInBytes());
+            clusterMemInfo.setMemTotal(clusterMemInfo.getMemTotal() + osMem.getTotalInBytes());
+            clusterMemInfo.setMemUsed(clusterMemInfo.getMemUsed() + osMem.getUsedInBytes());
+        });
 
         // 计算集群总的内存使用和空闲的百分比信息，保留小数点后3位
         BigDecimal memFreeDec = new BigDecimal(clusterMemInfo.getMemFree());
@@ -303,7 +284,6 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
     public Map<String, Triple<Long, Long, Double>> syncGetNodesDiskUsage(String cluster) {
         Map<String, Triple<Long, Long, Double>> diskUsageMap = new HashMap<>();
         List<ClusterNodeStats> nodeStatsList = esClusterNodeDAO.syncGetNodesStats(cluster);
-
 
         if (CollectionUtils.isNotEmpty(nodeStatsList)) {
             // 遍历节点，获得节点和对应的磁盘使用率
@@ -333,13 +313,77 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
         return diskUsageMap;
     }
 
+    @Override
+    public Map<String, Tuple<Long, Long>> syncGetNodesMemoryAndDisk(String cluster) {
+        Map<String, Tuple<Long, Long>> node2MemAndDiskMap = Maps.newHashMap();
+        List<ClusterNodeStats> nodeStatsList = esClusterNodeDAO.syncGetNodesStats(cluster);
+
+        if (CollectionUtils.isNotEmpty(nodeStatsList)) {
+            // 遍历节点，获得节点和对应的磁盘使用率
+            nodeStatsList.forEach(nodeStats -> {
+                String nodeName = nodeStats.getName();
+
+                FSNode fsNode = nodeStats.getFs();
+                long totalFsBytes = fsNode.getTotal().getTotalInBytes();
+                long totalOsMemBytes = nodeStats.getOs().getMem().getTotalInBytes();
+                if (totalFsBytes <= 0 || totalOsMemBytes <= 0) {
+                    return;
+                }
+                //Tuple<memoryBytes, diskBytes>
+                Tuple<Long, Long> tuple = new Tuple<>();
+                tuple.setV1(totalOsMemBytes);
+                tuple.setV2(totalFsBytes);
+
+                node2MemAndDiskMap.put(nodeName, tuple);
+            });
+        }
+        return node2MemAndDiskMap;
+    }
+
+    @Override
+    public Map<String, Integer> syncGetNodesCpuNum(String cluster) {
+        Map<String, Integer> node2CpuNumMap = Maps.newHashMap();
+        //这里直接使用 esClient.admin().cluster().nodes(new ESClusterNodesRequest().flag("os")).actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);无法正确获取到数据，所以使用
+        DirectResponse directResponse = esClusterNodeDAO.getDirectResponse(cluster, "GET", "/_nodes/os");
+
+        if (directResponse.getRestStatus() == RestStatus.OK
+            && StringUtils.isNotBlank(directResponse.getResponseContent())) {
+            JSONObject nodes = null;
+            try {
+                JSONObject jsonObject = JSONObject.parseObject(directResponse.getResponseContent());
+                nodes = jsonObject.getJSONObject("nodes");
+            } catch (Exception e) {
+                // pass 
+            }
+            Optional.ofNullable(nodes).ifPresent(nodesMap -> {
+                nodesMap.values().forEach(obj -> {
+                    Integer cpuNum = null;
+                    String nodeName = null;
+                    try {
+                        JSONObject nodeInfo = JSONObject.parseObject(JSONObject.toJSONString(obj));
+                        nodeName = nodeInfo.getString("name");
+                        cpuNum = nodeInfo.getJSONObject("os").getInteger("available_processors");
+                    } catch (Exception e) {
+                        // pass
+                    }
+                    if (StringUtils.isNotBlank(nodeName) && null != cpuNum && cpuNum > 0) {
+                        node2CpuNumMap.put(nodeName, cpuNum);
+                    }
+
+                });
+            });
+        }
+
+        return node2CpuNumMap;
+    }
+
     /*********************************************private******************************************/
 
     @Override
     public List<NodeStateVO> nodeStateAnalysis(String cluster) {
         List<ClusterNodeStats> nodeStats = esClusterNodeDAO.getNodeState(cluster);
         List<NodeStateVO> vos = new ArrayList<>();
-        nodeStats.forEach(nodeStat->{
+        nodeStats.forEach(nodeStat -> {
             NodeStateVO vo = new NodeStateVO();
 
             vo.setNodeName(nodeStat.getName());
@@ -360,7 +404,6 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
             vo.setThreadPoolManagementActive(nodeStat.getThreadPool().getManagement().getActive());
             vo.setThreadPoolManagementReject(nodeStat.getThreadPool().getManagement().getRejected());
             vo.setThreadPoolManagementQueue(nodeStat.getThreadPool().getManagement().getQueue());
-
 
             vos.add(vo);
         });

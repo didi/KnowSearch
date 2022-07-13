@@ -27,10 +27,7 @@ import org.springframework.stereotype.Service;
 public class LogicClusterTransferHandler extends BaseWorkOrderHandler {
 
     @Autowired
-    private ProjectService projectService;
-  
-
-  
+    private ProjectService      projectService;
 
     @Autowired
     private ClusterLogicService clusterLogicService;
@@ -49,16 +46,13 @@ public class LogicClusterTransferHandler extends BaseWorkOrderHandler {
             return Result.buildParamIllegal("目标项目Id为空");
         }
 
-       
         if (!projectService.checkProjectExist(sourceProjectId)) {
             return Result.buildParamIllegal("原项目不存在");
         }
 
-       
         if (!projectService.checkProjectExist(targetProjectId)) {
             return Result.buildParamIllegal("目标项目不存在");
         }
-        
 
         Long clusterLogicId = clusterLogicTransferContent.getClusterLogicId();
         if (Boolean.FALSE.equals(clusterLogicService.isClusterLogicExists(clusterLogicId))) {
@@ -117,8 +111,8 @@ public class LogicClusterTransferHandler extends BaseWorkOrderHandler {
     @Override
     protected Result<Void> doProcessAgree(WorkOrder workOrder, String approver) {
         ClusterLogicTransferContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
-                                              ClusterLogicTransferContent.class);
-        
+            ClusterLogicTransferContent.class);
+
         Result<Void> result = clusterLogicService.transferClusterLogic(content.getClusterLogicId(),
             content.getTargetProjectId(), content.getTargetResponsible(), workOrder.getSubmitor());
 

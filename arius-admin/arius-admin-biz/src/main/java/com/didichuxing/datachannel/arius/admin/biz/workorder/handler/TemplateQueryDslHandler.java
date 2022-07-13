@@ -36,7 +36,7 @@ public class TemplateQueryDslHandler extends BaseWorkOrderHandler {
     private ProjectLogicTemplateAuthService projectLogicTemplateAuthService;
 
     @Autowired
-    private DslStatisticsService dslStatisticsService;
+    private DslStatisticsService            dslStatisticsService;
 
     /**
      * 工单是否自动审批

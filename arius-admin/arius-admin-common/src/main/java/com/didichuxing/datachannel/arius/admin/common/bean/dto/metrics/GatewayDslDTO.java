@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 public class GatewayDslDTO extends GatewayMetricsDTO {
 
     @ApiModelProperty("dslMd5")
-    private String dslMd5;
+    private String  dslMd5;
 
     @ApiModelProperty("top数字")
     private Integer topNu;

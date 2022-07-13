@@ -30,9 +30,9 @@ import org.springframework.stereotype.Service;
 public class LogicClusterAuthHandler extends BaseWorkOrderHandler {
 
     @Autowired
-    private ClusterLogicService clusterLogicService;
+    private ClusterLogicService            clusterLogicService;
     @Autowired
-    private ProjectService projectService;
+    private ProjectService                 projectService;
 
     @Autowired
     private ProjectClusterLogicAuthService projectClusterLogicAuthService;
@@ -89,18 +89,13 @@ public class LogicClusterAuthHandler extends BaseWorkOrderHandler {
             workOrder.getSubmitor(), workOrder.getSubmitor());
 
         if (result.success()) {
-            operateRecordService.save(new OperateRecord.Builder()
-                            .operationTypeEnum(OperateTypeEnum.MY_CLUSTER_APPLY)
-                            .bizId(content.getLogicClusterId())
-                            .project(projectService.getProjectBriefByProjectId(workOrder.getSubmitorProjectId()))
-                            .content(
-                        workOrder.getSubmitor() + "申请" + content.getLogicClusterName() + "的"
-                        + ProjectClusterLogicAuthEnum
-                                                                                   .valueOf(content.getAuthCode()))
-                            .userOperation(approver)
-                            .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                    .build());
-           
+            operateRecordService.save(new OperateRecord.Builder().operationTypeEnum(OperateTypeEnum.MY_CLUSTER_APPLY)
+                .bizId(content.getLogicClusterId())
+                .project(projectService.getProjectBriefByProjectId(workOrder.getSubmitorProjectId()))
+                .content(workOrder.getSubmitor() + "申请" + content.getLogicClusterName() + "的"
+                         + ProjectClusterLogicAuthEnum.valueOf(content.getAuthCode()))
+                .userOperation(approver).triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).build());
+
         }
 
         return result;

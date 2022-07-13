@@ -4,25 +4,25 @@ import java.util.Arrays;
 import java.util.Objects;
 
 public enum ProjectClusterLogicAuthEnum {
-                                     /**
-                                      * 超级权限
-                                      */
-                                     ALL(0, "manager", "超管"),
+                                         /**
+                                          * 超级权限
+                                          */
+                                         ALL(0, "manager", "超管"),
 
-                                     /**
-                                      * Owner权限
-                                      */
-                                     OWN(1, "own", "配置管理"),
+                                         /**
+                                          * Owner权限
+                                          */
+                                         OWN(1, "own", "配置管理"),
 
-                                     /**
-                                      * 访问权限
-                                      */
-                                     ACCESS(2, "r", "访问"),
+                                         /**
+                                          * 访问权限
+                                          */
+                                         ACCESS(2, "r", "访问"),
 
-                                     /**
-                                      * 没有权限
-                                      */
-                                     NO_PERMISSIONS(-1, "", "无权限");
+                                         /**
+                                          * 没有权限
+                                          */
+                                         NO_PERMISSIONS(-1, "", "无权限");
 
     private final Integer code;
     private final String  name;

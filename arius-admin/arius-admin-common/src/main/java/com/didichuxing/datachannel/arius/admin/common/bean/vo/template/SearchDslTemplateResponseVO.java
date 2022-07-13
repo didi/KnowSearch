@@ -32,6 +32,6 @@ public class SearchDslTemplateResponseVO {
      * 查询命中记录数
      */
     @ApiModelProperty("查询命中记录数")
-    private Long totalHits;
+    private Long                totalHits;
 
 }

@@ -21,7 +21,7 @@ public abstract class BaseExtendFactory {
 
     private static final ILog LOGGER = LogFactory.getLog(BaseExtendFactory.class);
 
-    public  <T> T getByClassNamePer(String classNamePre, Class<T> clazz) throws NotFindSubclassException {
+    public <T> T getByClassNamePer(String classNamePre, Class<T> clazz) throws NotFindSubclassException {
         T handler = null;
         handler = doGet(classNamePre, clazz);
 

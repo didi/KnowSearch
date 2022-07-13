@@ -27,9 +27,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class MetricsConfigServiceImpl implements UserMetricsConfigService {
 
-    private static final ILog LOGGER = LogFactory.getLog(MetricsConfigServiceImpl.class);
+    private static final ILog    LOGGER    = LogFactory.getLog(MetricsConfigServiceImpl.class);
 
-    private static final String USER_NAME = "user_name";
+    private static final String  USER_NAME = "user_name";
 
     @Autowired
     private UserMetricsConfigDAO userMetricsConfigDAO;
@@ -49,14 +49,12 @@ public class MetricsConfigServiceImpl implements UserMetricsConfigService {
         }
 
         List<MetricsConfigInfo> metricsConfigInfos = JSON.parseArray(userMetricsConfigPO.getMetricInfo(),
-                MetricsConfigInfo.class);
+            MetricsConfigInfo.class);
 
         // 获取对应属性下的配置列表
-        List<List<String>> metricsList = metricsConfigInfos
-                .stream()
-                .filter(metricsConfigInfoPO -> metricsTypeMatch(metricsConfigInfoPO, metricsTypeEnum))
-                .map(MetricsConfigInfo::getMetricsTypes)
-                .collect(Collectors.toList());
+        List<List<String>> metricsList = metricsConfigInfos.stream()
+            .filter(metricsConfigInfoPO -> metricsTypeMatch(metricsConfigInfoPO, metricsTypeEnum))
+            .map(MetricsConfigInfo::getMetricsTypes).collect(Collectors.toList());
 
         if (metricsList.isEmpty()) {
             LOGGER.info("对应属性的配置内容尚未入库");
@@ -80,7 +78,7 @@ public class MetricsConfigServiceImpl implements UserMetricsConfigService {
         }
 
         List<MetricsConfigInfo> metricsConfigInfos = JSON.parseArray(userMetricsConfigPO.getMetricInfo(),
-                MetricsConfigInfo.class);
+            MetricsConfigInfo.class);
 
         boolean ifPresent = false;
         for (MetricsConfigInfo metricsConfigInfoPO : metricsConfigInfos) {
@@ -96,8 +94,8 @@ public class MetricsConfigServiceImpl implements UserMetricsConfigService {
         }
 
         userMetricsConfigPO.setMetricInfo(JSON.toJSONString(metricsConfigInfos));
-        boolean succ = (1 == userMetricsConfigDAO.update(
-                userMetricsConfigPO, new QueryWrapper<UserMetricsConfigPO>().eq(USER_NAME, param.getUserName())));
+        boolean succ = (1 == userMetricsConfigDAO.update(userMetricsConfigPO,
+            new QueryWrapper<UserMetricsConfigPO>().eq(USER_NAME, param.getUserName())));
         return Result.build(succ, userMetricsConfigPO.getId());
     }
 
@@ -114,7 +112,7 @@ public class MetricsConfigServiceImpl implements UserMetricsConfigService {
         }
         for (MetricsTypeEnum typeEnum : MetricsTypeEnum.values()) {
             if (typeEnum.getFirstMetricsType().equals(param.getFirstMetricsType())
-                    && typeEnum.getSecondMetricsType().equals(param.getSecondMetricsType())) {
+                && typeEnum.getSecondMetricsType().equals(param.getSecondMetricsType())) {
                 return typeEnum;
             }
         }

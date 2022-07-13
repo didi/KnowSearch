@@ -31,12 +31,11 @@ public class TemplateDCDRController {
     @PostMapping("/{templateId}/{regionId}/{targetCluster}")
     @ResponseBody
     @ApiOperation(value = "DCDR链路创建接口", notes = "")
-    public Result<Void> createDCDR(HttpServletRequest request,
-                                   @PathVariable("templateId") Integer templateId,
+    public Result<Void> createDCDR(HttpServletRequest request, @PathVariable("templateId") Integer templateId,
                                    @PathVariable("targetCluster") String targetCluster,
                                    @PathVariable("regionId") Integer regionId) throws AdminOperateException {
         return templateDCDRManager.copyAndCreateDCDR(templateId, targetCluster, regionId,
-                HttpRequestUtil.getOperator(request),HttpRequestUtil.getProjectId(request));
+            HttpRequestUtil.getOperator(request), HttpRequestUtil.getProjectId(request));
     }
 
     @GetMapping("/{templateId}")
@@ -49,9 +48,11 @@ public class TemplateDCDRController {
     @DeleteMapping("/{templateId}")
     @ResponseBody
     @ApiOperation(value = "DCDR链路删除接口", notes = "")
-    public Result<Void> deleteDcdr(HttpServletRequest request, @PathVariable(value = "templateId") Integer templateId) throws AdminOperateException {
-        
-        return templateDCDRManager.deleteDCDR(templateId, HttpRequestUtil.getOperator(request),HttpRequestUtil.getProjectId(request));
+    public Result<Void> deleteDcdr(HttpServletRequest request,
+                                   @PathVariable(value = "templateId") Integer templateId) throws AdminOperateException {
+
+        return templateDCDRManager.deleteDCDR(templateId, HttpRequestUtil.getOperator(request),
+            HttpRequestUtil.getProjectId(request));
     }
 
 }

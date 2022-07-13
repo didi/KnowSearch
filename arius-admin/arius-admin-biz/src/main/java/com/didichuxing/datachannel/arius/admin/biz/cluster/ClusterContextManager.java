@@ -67,6 +67,7 @@ public interface ClusterContextManager {
      * @return
      */
     ClusterLogicContext getClusterLogicContextCache(Long clusterLogicId);
+
     /**
      * 构建逻辑集群上下文
      * @param clusterLogicId
