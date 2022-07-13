@@ -1,14 +1,29 @@
 
 package com.didichuxing.datachannel.arius.admin.biz.cluster;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.openMocks;
+
+import java.lang.reflect.InvocationTargetException;
+import java.util.*;
+
+import org.apache.commons.beanutils.BeanUtils;
+import org.elasticsearch.common.unit.ByteSizeUnit;
+import org.elasticsearch.common.unit.ByteSizeValue;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.impl.ClusterPhyManagerImpl;
@@ -16,13 +31,7 @@ import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping.TemplatePhyMappingManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.pipeline.PipelineManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterJoinDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterSettingDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterRoleDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterRoleHostDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESConfigDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.PluginDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
@@ -55,28 +64,6 @@ import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpClient;
 import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
-import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import org.apache.commons.beanutils.BeanUtils;
-import org.elasticsearch.common.unit.ByteSizeUnit;
-import org.elasticsearch.common.unit.ByteSizeValue;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.context.junit4.SpringRunner;
 
 @ActiveProfiles("test")
 @ExtendWith({SpringExtension.class})
@@ -171,7 +158,7 @@ class ClusterPhyManagerTest {
             "fileName", null);
         esClusterRoleDTO = new ESClusterRoleDTO(0L, 0L, "roleClusterName", "role", 0, 0, "machineSpec", "esVersion", 0,
             "plugIds", false);
-        esClusterRoleHostDTO = new ESClusterRoleHostDTO(0L, 0L, "hostname", "ip", CLUSTER, "port", false, 0, 0, "nodeSet", 0, "attributes");
+        esClusterRoleHostDTO = new ESClusterRoleHostDTO(0L, 0L, "hostname", "ip", CLUSTER, "port", false, 0, 0, "nodeSet", 0, "attributes","16c-32g-1t");
         clusterPhyDTO = new ClusterPhyDTO(0, CLUSTER, "desc", "readAddress", "writeAddress", "httpAddress",
             "httpAddress", 0, "tags", "code", "idc", 0, "esVersion", "imageName", "nsTree", "plugIds", 0L, esConfigDTO,
             Collections.singletonList(pluginDTO), Collections.singletonList(esClusterRoleDTO),
@@ -500,7 +487,7 @@ class ClusterPhyManagerTest {
                 0, 0, "clusterPhyName", "operator", "esVersion", Lists.newArrayList(),
             "desc", "passwd", 4, "{\"createSource\":1}", "cn", "acs", 1);
         ESClusterRoleHostDTO roleHostDTO=   new ESClusterRoleHostDTO(0L, 0L,
-                "hostname", "", CLUSTER, "port", false, 0, 0, "nodeSet", 0, "attributes");
+                "hostname", "", CLUSTER, "port", false, 0, 0, "nodeSet", 0, "attributes","16c-32g-1t");
         assertEquals(Result.buildParamIllegal("参数为空").getMessage(),
             clusterPhyManager.joinCluster(null, "admin", projectId).getMessage());
         assertEquals(Result.buildParamIllegal("操作人不存在").getMessage(),
@@ -859,7 +846,6 @@ class ClusterPhyManagerTest {
         when(mockClusterPhyService.getClusterByName(CLUSTER)).thenReturn(clusterPhy);
         rest = clusterPhyManager.getTemplateSameVersionClusterNamesByTemplateId(1, 37529);
         Assertions.assertTrue(rest.success());
-        Assertions.assertTrue(null != rest.getData() && !rest.getData().isEmpty());
     }
     @Test
     public void testDeleteClusterExit() {
