@@ -14,13 +14,13 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class IndexResponse implements Serializable {
 
-	/**
-	 * 索引名称
-	 */
+    /**
+     * 索引名称
+     */
     private String index;
 
-	/**
-	 * 文档数
-	 */
-	private long   dc;
+    /**
+     * 文档数
+     */
+    private long   dc;
 }

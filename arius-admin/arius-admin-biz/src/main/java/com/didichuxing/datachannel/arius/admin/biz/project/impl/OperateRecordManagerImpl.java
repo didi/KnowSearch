@@ -25,11 +25,12 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class OperateRecordManagerImpl implements OperateRecordManager {
-    private static final ILog LOGGER = LogFactory.getLog(ClusterPhyManagerImpl.class);
+    private static final ILog    LOGGER = LogFactory.getLog(ClusterPhyManagerImpl.class);
     @Autowired
-    private                HandleFactory handleFactory;
+    private HandleFactory        handleFactory;
     @Autowired
     private OperateRecordService operateRecordService;
+
     /**
      * oplogvo
      *
@@ -38,19 +39,21 @@ public class OperateRecordManagerImpl implements OperateRecordManager {
      * @return {@code PagingResult<OplogVO>}
      */
     @Override
-    public PaginationResult<OperateRecordVO> pageOplogPage(OperateRecordDTO queryDTO, Integer projectId) throws NotFindSubclassException {
-        final BaseHandle baseHandle = handleFactory.getByHandlerNamePer(
-                PageSearchHandleTypeEnum.OPERATE_RECORD.getPageSearchType());
-         if (baseHandle instanceof OperateRecordPageSearchHandle) {
+    public PaginationResult<OperateRecordVO> pageOplogPage(OperateRecordDTO queryDTO,
+                                                           Integer projectId) throws NotFindSubclassException {
+        final BaseHandle baseHandle = handleFactory
+            .getByHandlerNamePer(PageSearchHandleTypeEnum.OPERATE_RECORD.getPageSearchType());
+        if (baseHandle instanceof OperateRecordPageSearchHandle) {
             OperateRecordPageSearchHandle pageSearchHandle = (OperateRecordPageSearchHandle) baseHandle;
             return pageSearchHandle.doPage(queryDTO, projectId);
         }
 
-        LOGGER.warn("class=OperateRecordManagerImpl||method=pageOplogPage||msg=failed to get the OperateRecordPageSearchHandle");
+        LOGGER.warn(
+            "class=OperateRecordManagerImpl||method=pageOplogPage||msg=failed to get the OperateRecordPageSearchHandle");
 
         return PaginationResult.buildFail("操作日志获取失败");
     }
-    
+
     /**
      * 获取oplog
      *
@@ -59,7 +62,7 @@ public class OperateRecordManagerImpl implements OperateRecordManager {
      */
     @Override
     public Result<OperateRecordVO> getOplogDetailByOplogId(Integer id) {
-        
+
         return Result.buildSucc(operateRecordService.getById(id));
     }
 }

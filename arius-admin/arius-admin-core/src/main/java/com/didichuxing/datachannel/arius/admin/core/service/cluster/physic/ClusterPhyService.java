@@ -86,6 +86,7 @@ public interface ClusterPhyService {
      * @return 集群列表,如果没有返回空列表
      */
     List<ClusterPhy> listClustersByNames(List<String> names);
+
     /**
      * 集群是否存在
      *
@@ -152,7 +153,7 @@ public interface ClusterPhyService {
      * @return true or false
      */
     boolean isClusterExistsByPackageId(Long packageId);
-    
+
     /**
      * 得到phy srv集群模板
      *
@@ -160,7 +161,7 @@ public interface ClusterPhyService {
      * @return {@link Result}<{@link List}<{@link ClusterTemplateSrv}>>
      */
     Result<List<ClusterTemplateSrv>> getPhyClusterTemplateSrv(String phyCluster);
-    
+
     /**
      * 得到phy srv集群模板
      *
@@ -168,5 +169,5 @@ public interface ClusterPhyService {
      * @return {@link Result}<{@link List}<{@link ClusterTemplateSrv}>>
      */
     Result<List<ClusterTemplateSrv>> getPhyClusterTemplateSrv(ClusterPhy phyCluster);
-    
+
 }

@@ -15,7 +15,8 @@ import com.google.common.collect.Sets;
  */
 public class AriusUserUtil {
 
-    private AriusUserUtil(){}
+    private AriusUserUtil() {
+    }
 
     public static String userIds2Str(Collection<Long> userIds) {
 
@@ -35,7 +36,6 @@ public class AriusUserUtil {
         }
         return userIds;
     }
-
 
     public static boolean userIdsIsSame(Set<Long> newUserIds, Set<Long> oldUserIds) {
 

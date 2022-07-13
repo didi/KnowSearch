@@ -25,10 +25,10 @@ public class UserMetricsConfigPO extends BasePO {
     /**
      * 用户名
      */
-    private String userName;
+    private String  userName;
 
     /**
      * 指标看板的配置
      */
-    private String metricInfo;
+    private String  metricInfo;
 }

@@ -17,6 +17,6 @@ public class ESClusterStateResponse {
 
     private List<ClusterNodeInfo> nodes;
 
-    private List<IndexRouting> indices;
+    private List<IndexRouting>    indices;
 
 }

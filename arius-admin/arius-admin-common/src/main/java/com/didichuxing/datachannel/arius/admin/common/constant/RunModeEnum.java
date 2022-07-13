@@ -1,9 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.common.constant;
 
 public enum RunModeEnum {
-    READ_WRITE_SHARE(0),
-    READ_WRITE_SPLIT(1),
-    UNKNOWN(-1);
+                         READ_WRITE_SHARE(0), READ_WRITE_SPLIT(1), UNKNOWN(-1);
+
     int runMode;
 
     RunModeEnum(int runMode) {

@@ -29,7 +29,7 @@ public class ESClusterConfigManagerImpl implements ESClusterConfigManager {
     private OperateRecordService   operateRecordService;
     @Autowired
     private ClusterRoleService     clusterRoleService;
-    
+
     /**
      * 编辑configdesc
      *
@@ -47,14 +47,14 @@ public class ESClusterConfigManagerImpl implements ESClusterConfigManager {
         final ESConfig oldEsConfig = esClusterConfigService.getEsClusterConfigById(param.getId());
         final Result<Void> result = esClusterConfigService.editConfigDesc(param);
         if (result.success()) {
-            operateRecordService.save(new OperateRecord.Builder().content(
-                            String.format("描述变更：【%s】->【%s】", oldEsConfig.getDesc(), param.getDesc())).userOperation(operator)
-                    .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_CONF_FILE_CHANGE)
-                    .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).bizId(Math.toIntExact(param.getId())).build());
+            operateRecordService.save(new OperateRecord.Builder()
+                .content(String.format("描述变更：【%s】->【%s】", oldEsConfig.getDesc(), param.getDesc()))
+                .userOperation(operator).operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_CONF_FILE_CHANGE)
+                .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).bizId(Math.toIntExact(param.getId())).build());
         }
         return result;
     }
-    
+
     /**
      * 获取ES集群模板config
      *
@@ -63,11 +63,11 @@ public class ESClusterConfigManagerImpl implements ESClusterConfigManager {
      */
     @Override
     public Result<ESConfigVO> getEsClusterTemplateConfig(String type) {
-        return Result.buildSucc(
-                ConvertUtil.obj2Obj(esClusterConfigService.getEsClusterTemplateConfig(type), ESConfigVO.class));
-        
+        return Result
+            .buildSucc(ConvertUtil.obj2Obj(esClusterConfigService.getEsClusterTemplateConfig(type), ESConfigVO.class));
+
     }
-    
+
     /**
      * @param clusterId
      * @return
@@ -76,19 +76,19 @@ public class ESClusterConfigManagerImpl implements ESClusterConfigManager {
     public Result<Set<String>> gainEsClusterRoles(Long clusterId) {
         List<ClusterRoleInfo> clusterRoleInfos = clusterRoleService.getAllRoleClusterByClusterId(clusterId.intValue());
         return Result.buildSucc(clusterRoleInfos.stream().filter(Objects::nonNull).map(ClusterRoleInfo::getRole)
-                .collect(Collectors.toSet()));
+            .collect(Collectors.toSet()));
     }
-    
+
     /**
      * @param configId
      * @return
      */
     @Override
     public Result<ESConfigVO> getEsClusterConfigById(Long configId) {
-        return Result.buildSucc(
-                ConvertUtil.obj2Obj(esClusterConfigService.getEsClusterConfigById(configId), ESConfigVO.class));
+        return Result
+            .buildSucc(ConvertUtil.obj2Obj(esClusterConfigService.getEsClusterConfigById(configId), ESConfigVO.class));
     }
-    
+
     /**
      * 获得ES集群配置
      *

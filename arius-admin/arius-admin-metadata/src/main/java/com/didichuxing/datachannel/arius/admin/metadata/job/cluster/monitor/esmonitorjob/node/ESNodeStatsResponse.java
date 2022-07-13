@@ -11,12 +11,12 @@ import java.util.Map;
 public class ESNodeStatsResponse extends ESActionResponse {
 
     @JSONField(name = "cluster_name")
-    private String clusterName;
+    private String                        clusterName;
 
     @JSONField(name = "nodes")
     private Map<String, ClusterNodeStats> nodes;
 
-    private int failedNodes;
+    private int                           failedNodes;
 
     public int getFailedNodes() {
         return failedNodes;

@@ -49,5 +49,5 @@ public interface GatewayService {
      * @param postFix        sql语句操作后缀
      * @return 数据查询结果
      */
-    Result<String> sqlOperate(String sql, String phyClusterName, ESUser  esUser, String postFix);
+    Result<String> sqlOperate(String sql, String phyClusterName, ESUser esUser, String postFix);
 }

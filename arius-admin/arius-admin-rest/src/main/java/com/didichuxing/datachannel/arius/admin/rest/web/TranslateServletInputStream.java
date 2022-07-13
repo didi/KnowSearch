@@ -16,7 +16,7 @@ public class TranslateServletInputStream extends ServletInputStream {
 
     private boolean              finished = false;
 
-    public TranslateServletInputStream(byte[] buffer){
+    public TranslateServletInputStream(byte[] buffer) {
         this.inputStream = new ByteArrayInputStream(buffer);
     }
 

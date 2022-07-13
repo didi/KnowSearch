@@ -22,87 +22,87 @@ public class GatewayJoin {
     /**
      * 请求path
      */
-    private String uri;
+    private String            uri;
     /**
      * 请求id
      */
-    private String  requestId;
+    private String            requestId;
     /**
      * projectid
      */
-    private Integer projectId;
+    private Integer           projectId;
     /**
      * 索引名称
      */
-    private String  indices;
+    private String            indices;
     /**
      * type名称
      */
-    private String typeName;
+    private String            typeName;
     /**
      * 查询命中索引信息json
      */
-    private String index;
+    private String            index;
     /**
      * 查询语句
      */
-    private String dsl;
+    private String            dsl;
     /**
      * 查询模板
      */
-    private String dslTemplate;
+    private String            dslTemplate;
     /**
      * 查询模板MD5
      */
-    private String dslTemplateMd5;
+    private String            dslTemplateMd5;
     /**
      * 是否超时，"true"/"false"
      */
-    private String isTimedOut;
+    private String            isTimedOut;
     /**
      * 查询语句类型
      */
-    private String dslType;
+    private String            dslType;
     /**
      * 查询方式,dsl/sql
      */
-    private String searchType;
+    private String            searchType;
     /**
      * 查询es耗时
      */
-    private Long esCost;
+    private Long              esCost;
     /**
      * 查询总耗时
      */
-    private Long totalCost;
+    private Long              totalCost;
     /**
      * 查询shard个数
      */
-    private Long totalShards;
+    private Long              totalShards;
     /**
      * 查询总命中数
      */
-    private Long totalHits;
+    private Long              totalHits;
     /**
      * 查询响应长度
      */
-    private Long responseLen;
+    private Long              responseLen;
     /**
      * 错误名称
      */
-    private String exceptionName;
+    private String            exceptionName;
     /**
      * 创建时间
      */
-    private String ariusCreateTime;
+    private String            ariusCreateTime;
     /**
      * timeStamp
      */
-    private long timeStamp;
+    private long              timeStamp;
     /**
      * indiceSample
      */
-    private String indiceSample;
+    private String            indiceSample;
     /**
      * 查询字段
      */
@@ -122,9 +122,9 @@ public class GatewayJoin {
     /**
      * 多type索引查询映射后的索引名称
      */
-    private String destIndexName;
+    private String            destIndexName;
     /**
      * 请求源ip
      */
-    private String remoteAddr;
+    private String            remoteAddr;
 }

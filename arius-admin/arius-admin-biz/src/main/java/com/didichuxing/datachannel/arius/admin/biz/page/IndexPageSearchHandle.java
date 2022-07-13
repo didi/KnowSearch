@@ -23,15 +23,14 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class IndexPageSearchHandle extends AbstractPageSearchHandle<IndexQueryDTO, IndexCatCellVO> {
-    private static final String DEFAULT_SORT_TERM = "timestamp";
+    private static final String           DEFAULT_SORT_TERM  = "timestamp";
 
     @Autowired
-    private ESIndexCatService   esIndexCatService;
+    private ESIndexCatService             esIndexCatService;
 
     @Autowired
-    private ESIndexService      esIndexService;
+    private ESIndexService                esIndexService;
     private static final FutureUtil<Void> INDEX_BUILD_FUTURE = FutureUtil.init("INDEX_BUILD_FUTURE", 10, 10, 100);
-
 
     @Override
     protected Result<Boolean> checkCondition(IndexQueryDTO condition, Integer projectId) {
@@ -78,7 +77,7 @@ public class IndexPageSearchHandle extends AbstractPageSearchHandle<IndexQueryDT
                 queryProjectId = projectId;
             }
             Tuple<Long, List<IndexCatCell>> totalHitAndIndexCatCellListTuple = esIndexCatService.syncGetCatIndexInfo(
-                queryCluster, condition.getIndex(), condition.getHealth(),condition.getStatus(), queryProjectId,
+                queryCluster, condition.getIndex(), condition.getHealth(), condition.getStatus(), queryProjectId,
                 (condition.getPage() - 1) * condition.getSize(), condition.getSize(), condition.getSortTerm(),
                 condition.getOrderByDesc());
             if (null == totalHitAndIndexCatCellListTuple) {
@@ -89,15 +88,17 @@ public class IndexPageSearchHandle extends AbstractPageSearchHandle<IndexQueryDT
             }
 
             //设置索引阻塞信息
-            List<IndexCatCell> finalIndexCatCellList = batchFetchIndexAliasesAndBlockInfo(totalHitAndIndexCatCellListTuple.getV2());
-            List<IndexCatCellVO> indexCatCellVOList = ConvertUtil.list2List(finalIndexCatCellList, IndexCatCellVO.class);
+            List<IndexCatCell> finalIndexCatCellList = batchFetchIndexAliasesAndBlockInfo(
+                totalHitAndIndexCatCellListTuple.getV2());
+            List<IndexCatCellVO> indexCatCellVOList = ConvertUtil.list2List(finalIndexCatCellList,
+                IndexCatCellVO.class);
 
             return PaginationResult.buildSucc(indexCatCellVOList, totalHitAndIndexCatCellListTuple.getV1(),
-                    condition.getPage(), condition.getSize());
+                condition.getPage(), condition.getSize());
         } catch (Exception e) {
             LOGGER.error(
-                    "class=IndicesPageSearchHandle||method=getIndexCatCellsFromES||clusters={}||index={}||errMsg={}",
-                    condition.getCluster(), condition.getIndex(), e.getMessage(), e);
+                "class=IndicesPageSearchHandle||method=getIndexCatCellsFromES||clusters={}||index={}||errMsg={}",
+                condition.getCluster(), condition.getIndex(), e.getMessage(), e);
             return PaginationResult.buildFail("获取分页索引列表失败");
         }
     }
@@ -110,7 +111,7 @@ public class IndexPageSearchHandle extends AbstractPageSearchHandle<IndexQueryDT
     private List<IndexCatCell> batchFetchIndexAliasesAndBlockInfo(List<IndexCatCell> catCellList) {
         List<IndexCatCell> finalIndexCatCellList = Lists.newCopyOnWriteArrayList(catCellList);
         Map<String, List<IndexCatCell>> cluster2IndexCatCellListMap = ConvertUtil.list2MapOfList(finalIndexCatCellList,
-                IndexCatCell::getClusterPhy, indexCatCell -> indexCatCell);
+            IndexCatCell::getClusterPhy, indexCatCell -> indexCatCell);
         if (MapUtils.isEmpty(cluster2IndexCatCellListMap)) {
             return finalIndexCatCellList;
         }

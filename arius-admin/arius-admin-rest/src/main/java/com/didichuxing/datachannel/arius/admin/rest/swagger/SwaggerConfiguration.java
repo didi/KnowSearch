@@ -35,13 +35,14 @@ public class SwaggerConfiguration {
 
     private static final ILog   LOGGER = LogFactory.getLog(SwaggerConfiguration.class);
 
-    private static List<String> envs = Lists.newArrayList();
-    private final static   String HEADER="header";
+    private static List<String> envs   = Lists.newArrayList();
+    private final static String HEADER = "header";
 
     @Value("${swagger.enable:false}")
-    private boolean enable;
+    private boolean             enable;
     @Value(value = "${admin.port.web}")
-    private int               port;
+    private int                 port;
+
     @Bean
     public Docket createRestApi() {
         String envStr = String.join(",", Lists.newArrayList(envs));
@@ -51,32 +52,30 @@ public class SwaggerConfiguration {
 
         LOGGER.info("class=SwaggerConfiguration||method=createRestApi||swagger started||env={}", envStr);
 
-
         List<ResponseMessage> responseMessageList = new ArrayList<>();
-        responseMessageList.add(new ResponseMessageBuilder().code(200).message("OK；服务正常返回或者异常都返回200，通过返回结构中的code来区分异常；code为0表示操作成功，其他为异常").build());
+        responseMessageList.add(new ResponseMessageBuilder().code(200)
+            .message("OK；服务正常返回或者异常都返回200，通过返回结构中的code来区分异常；code为0表示操作成功，其他为异常").build());
         responseMessageList.add(new ResponseMessageBuilder().code(404).message("资源找不到；请确认URL是否正确").build());
 
         return new Docket(DocumentationType.SWAGGER_2).apiInfo(apiInfo()).select()
             .apis(RequestHandlerSelectors.basePackage("com.didichuxing.datachannel.arius.admin"))
-            .paths(PathSelectors.any()).build()
-                .globalOperationParameters(parameters())
-                .useDefaultResponseMessages(true)
+            .paths(PathSelectors.any()).build().globalOperationParameters(parameters()).useDefaultResponseMessages(true)
             .globalResponseMessage(RequestMethod.GET, responseMessageList)
             .globalResponseMessage(RequestMethod.POST, responseMessageList)
             .globalResponseMessage(RequestMethod.PUT, responseMessageList)
             .globalResponseMessage(RequestMethod.DELETE, responseMessageList);
     }
-    
+
     private List<Parameter> parameters() {
-        
+
         final Parameter user = new ParameterBuilder().name(HttpRequestUtil.USER).description("操作人")
-                .modelRef(new ModelRef("string")).parameterType(HEADER).required(false).defaultValue("").build();
+            .modelRef(new ModelRef("string")).parameterType(HEADER).required(false).defaultValue("").build();
         final Parameter userId = new ParameterBuilder().name(HttpRequestUtil.USER_ID).description("操作人id")
-                .modelRef(new ModelRef("integer")).parameterType(HEADER).required(false).build();
+            .modelRef(new ModelRef("integer")).parameterType(HEADER).required(false).build();
         final Parameter projectId = new ParameterBuilder().name(HttpRequestUtil.PROJECT_ID)
-                .description("项目id:在项目创建后，各个接口都需要带此header").modelRef(new ModelRef("integer")).parameterType(HEADER)
-                .required(false).build();
-        
+            .description("项目id:在项目创建后，各个接口都需要带此header").modelRef(new ModelRef("integer")).parameterType(HEADER)
+            .required(false).build();
+
         return Lists.newArrayList(user, userId, projectId);
     }
 
@@ -86,8 +85,8 @@ public class SwaggerConfiguration {
      * @return
      */
     private ApiInfo apiInfo() {
-        return new ApiInfoBuilder().title("AriusAdmin接口文档").description(String.format("当前环境:%s", envs ))
-            .version("1.0_" + String.join(",", envs )).build();
+        return new ApiInfoBuilder().title("AriusAdmin接口文档").description(String.format("当前环境:%s", envs))
+            .version("1.0_" + String.join(",", envs)).build();
     }
 
     public static void initEnv(String[] args) {
@@ -102,7 +101,7 @@ public class SwaggerConfiguration {
                     envs.add(argArr[1]);
                 }
             }
-            LOGGER.info("class=SwaggerConfiguration||method=initEnv||swagger||env={}", envs );
+            LOGGER.info("class=SwaggerConfiguration||method=initEnv||swagger||env={}", envs);
         } catch (Exception e) {
             LOGGER.warn("class=SwaggerConfiguration||method=initEnv||initEnv error||args={}", args, e);
         }

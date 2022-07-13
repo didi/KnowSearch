@@ -14,11 +14,11 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProjectClusterLogicAuthPO extends BasePO  {
+public class ProjectClusterLogicAuthPO extends BasePO {
     /**
      * 主键
      */
-    private Long id;
+    private Long    id;
 
     /**
      * project id
@@ -28,7 +28,7 @@ public class ProjectClusterLogicAuthPO extends BasePO  {
     /**
      * 逻辑集群ID
      */
-    private Long logicClusterId;
+    private Long    logicClusterId;
 
     /**
      * 权限类型

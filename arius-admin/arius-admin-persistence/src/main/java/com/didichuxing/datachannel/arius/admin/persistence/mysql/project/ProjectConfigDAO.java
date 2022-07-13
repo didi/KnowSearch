@@ -21,7 +21,8 @@ public interface ProjectConfigDAO {
     int update(ProjectConfigPO param);
 
     List<ProjectConfigPO> listAll();
-    
+
     boolean checkProjectConfigByProjectId(@Param("projectId") int projectId);
+
     int deleteByProjectId(@Param("projectId") int projectId);
 }

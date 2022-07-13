@@ -15,13 +15,13 @@ import java.util.List;
 public class TemplateHealthDegreeRecordVO {
 
     @ApiModelProperty("统计时间")
-    private Long timestamp;
+    private Long          timestamp;
 
     @ApiModelProperty("逻辑模板Id")
-    private Integer logicTemplateId;
+    private Integer       logicTemplateId;
 
     @ApiModelProperty("健康分")
-    private Integer healthDegree;
+    private Integer       healthDegree;
 
     @ApiModelProperty("标签")
     List<TemplateLabelVO> labelPOS;

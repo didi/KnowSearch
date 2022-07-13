@@ -21,14 +21,14 @@ import org.springframework.stereotype.Service;
 public class ESClusterPhyStatsService {
 
     @Autowired
-    private AriusStatsClusterInfoESDAO ariusStatsClusterInfoEsDao;
+    private AriusStatsClusterInfoESDAO    ariusStatsClusterInfoEsDao;
 
     @Autowired
-    private AriusStatsNodeInfoESDAO    ariusStatsNodeInfoESDAO;
+    private AriusStatsNodeInfoESDAO       ariusStatsNodeInfoESDAO;
     @Autowired
-    private GatewayNodeMetricsDAO gatewayNodeMetricsDAO;
+    private GatewayNodeMetricsDAO         gatewayNodeMetricsDAO;
 
-    private static final FutureUtil<Void> futureUtil = FutureUtil.init("ESClusterPhyStaticsService", 10,10,200);
+    private static final FutureUtil<Void> futureUtil = FutureUtil.init("ESClusterPhyStaticsService", 10, 10, 200);
 
     /**
      * 获取集群维度分位统计信息
@@ -41,29 +41,30 @@ public class ESClusterPhyStatsService {
      */
     public List<BasePercentileMetrics> getAggPercentilesMetrics(String clusterName, String clusterMetricsType,
                                                                 String aggType, Long startTime, Long endTime) {
-        AtomicReference<Map<Long, Double>>   avgAtomic      = new AtomicReference<>();
-        AtomicReference<Map<Long, Double>>   st99Atomic     = new AtomicReference<>();
-        AtomicReference<Map<Long, Double>>   st95Atomic     = new AtomicReference<>();
-        AtomicReference<Map<Long, Double>>   st75Atomic     = new AtomicReference<>();
-        AtomicReference<Map<Long, Double>>   st55Atomic     = new AtomicReference<>();
+        AtomicReference<Map<Long, Double>> avgAtomic = new AtomicReference<>();
+        AtomicReference<Map<Long, Double>> st99Atomic = new AtomicReference<>();
+        AtomicReference<Map<Long, Double>> st95Atomic = new AtomicReference<>();
+        AtomicReference<Map<Long, Double>> st75Atomic = new AtomicReference<>();
+        AtomicReference<Map<Long, Double>> st55Atomic = new AtomicReference<>();
 
-        futureUtil.runnableTask(() -> avgAtomic.set(ariusStatsClusterInfoEsDao.getAggSinglePercentilesMetrics(clusterName,
+        futureUtil
+            .runnableTask(() -> avgAtomic.set(ariusStatsClusterInfoEsDao.getAggSinglePercentilesMetrics(clusterName,
                 clusterMetricsType, aggType, PercentilesEnum.AVG.getType(), startTime, endTime)))
 
-                .runnableTask(() -> st99Atomic.set(ariusStatsClusterInfoEsDao.getAggSinglePercentilesMetrics(clusterName,
-                        clusterMetricsType, aggType, PercentilesEnum.ST99.getType(), startTime, endTime)))
+            .runnableTask(() -> st99Atomic.set(ariusStatsClusterInfoEsDao.getAggSinglePercentilesMetrics(clusterName,
+                clusterMetricsType, aggType, PercentilesEnum.ST99.getType(), startTime, endTime)))
 
-                .runnableTask(() -> st95Atomic.set(ariusStatsClusterInfoEsDao.getAggSinglePercentilesMetrics(clusterName,
-                        clusterMetricsType, aggType, PercentilesEnum.ST95.getType(), startTime, endTime)))
+            .runnableTask(() -> st95Atomic.set(ariusStatsClusterInfoEsDao.getAggSinglePercentilesMetrics(clusterName,
+                clusterMetricsType, aggType, PercentilesEnum.ST95.getType(), startTime, endTime)))
 
-                .runnableTask(() -> st75Atomic.set(ariusStatsClusterInfoEsDao.getAggSinglePercentilesMetrics(clusterName,
-                        clusterMetricsType, aggType, PercentilesEnum.ST75.getType(), startTime, endTime)))
+            .runnableTask(() -> st75Atomic.set(ariusStatsClusterInfoEsDao.getAggSinglePercentilesMetrics(clusterName,
+                clusterMetricsType, aggType, PercentilesEnum.ST75.getType(), startTime, endTime)))
 
-                .runnableTask(() -> st55Atomic.set(ariusStatsClusterInfoEsDao.getAggSinglePercentilesMetrics(clusterName,
-                        clusterMetricsType, aggType, PercentilesEnum.ST55.getType(), startTime, endTime)))
-                .waitExecute();
+            .runnableTask(() -> st55Atomic.set(ariusStatsClusterInfoEsDao.getAggSinglePercentilesMetrics(clusterName,
+                clusterMetricsType, aggType, PercentilesEnum.ST55.getType(), startTime, endTime)))
+            .waitExecute();
 
-        Map<Long, Double> timeSlip2AvgValueMap  = avgAtomic.get();
+        Map<Long, Double> timeSlip2AvgValueMap = avgAtomic.get();
         Map<Long, Double> timeSlip2St99ValueMap = st99Atomic.get();
         Map<Long, Double> timeSlip2St95ValueMap = st95Atomic.get();
         Map<Long, Double> timeSlip2St75ValueMap = st75Atomic.get();
@@ -122,8 +123,7 @@ public class ESClusterPhyStatsService {
     public double getClusterSearchLatency(String cluster) {
         return ariusStatsNodeInfoESDAO.getClusterSearchLatency(cluster);
     }
-    
-    
+
     /**
      * 获取集群shard总数
      *
@@ -133,7 +133,7 @@ public class ESClusterPhyStatsService {
     public Long getClustersShardTotal(String cluster) {
         return ariusStatsClusterInfoEsDao.getClustersShardTotal(cluster);
     }
-    
+
     /**
      * 获取pending task数量
      *
@@ -143,7 +143,7 @@ public class ESClusterPhyStatsService {
     public Long getPendingTaskTotal(String cluster) {
         return ariusStatsClusterInfoEsDao.getPendingTaskTotal(cluster);
     }
-    
+
     /**
      * 获取网关成功率和失败率
      *
@@ -153,8 +153,7 @@ public class ESClusterPhyStatsService {
     public Tuple<Double/*成功率*/, Double/*失败率*/> getGatewaySuccessRateAndFailureRate(String cluster) {
         return gatewayNodeMetricsDAO.getGatewaySuccessRateAndFailureRate(cluster);
     }
-    
-    
+
     /**
      * 写入请求数
      *
@@ -174,7 +173,7 @@ public class ESClusterPhyStatsService {
     public Long getCurrentQueryTotal(String cluster) {
         return ariusStatsNodeInfoESDAO.getCurrentQueryTotal(cluster);
     }
-    
+
     /**
      * 集群http连接数
      *

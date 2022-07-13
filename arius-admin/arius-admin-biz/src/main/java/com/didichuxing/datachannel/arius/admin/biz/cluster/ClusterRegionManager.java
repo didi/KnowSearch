@@ -24,7 +24,8 @@ public interface ClusterRegionManager {
      * @param phyCluster 物理集群名称
      * @return 筛选后的region列表
      */
-    Result<List<ClusterRegionVO>> listPhyClusterRegionsByLogicClusterTypeAndCluster(String phyCluster, Integer clusterLogicType);
+    Result<List<ClusterRegionVO>> listPhyClusterRegionsByLogicClusterTypeAndCluster(String phyCluster,
+                                                                                    Integer clusterLogicType);
 
     /**
      * 构建regionVO
@@ -63,7 +64,7 @@ public interface ClusterRegionManager {
      * @param projectId
      * @return
      */
-    Result<Void> deletePhyClusterRegion(Long regionId, String operator, Integer projectId) throws AdminOperateException ;
+    Result<Void> deletePhyClusterRegion(Long regionId, String operator, Integer projectId) throws AdminOperateException;
 
     /**
      * 解绑逻辑集群已经绑定的region
@@ -75,6 +76,5 @@ public interface ClusterRegionManager {
      * @return
      */
     Result<Void> unbindRegion(Long regionId, Long logicClusterId, String operator, Integer projectId);
-
 
 }

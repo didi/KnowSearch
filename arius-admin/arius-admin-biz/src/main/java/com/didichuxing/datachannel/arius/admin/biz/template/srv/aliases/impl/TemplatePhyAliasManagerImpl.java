@@ -47,7 +47,6 @@ public class TemplatePhyAliasManagerImpl implements TemplatePhyAliasManager {
         return templateAliases.parseTemplateAliases();
     }
 
-
     /**
      * 获取所有模板别名列表
      * @param clusters 集群名
@@ -60,7 +59,7 @@ public class TemplatePhyAliasManagerImpl implements TemplatePhyAliasManager {
 
         Map<String, List<IndexTemplatePhyAlias>> templatePhyAliasMap = Maps.newHashMap();
 
-        templateConfigMap.forEach((x,y) -> {
+        templateConfigMap.forEach((x, y) -> {
             IndexTemplatePhyAliases templateAliases = new IndexTemplatePhyAliases(y.getAliases());
             templatePhyAliasMap.put(x, templateAliases.parseTemplateAliases());
         });
@@ -279,17 +278,16 @@ public class TemplatePhyAliasManagerImpl implements TemplatePhyAliasManager {
         return templateConfig;
     }
 
-
-    private Map<String,TemplateConfig> fetchAllTemplateConfig(List<String> clusters) throws ESOperateException {
+    private Map<String, TemplateConfig> fetchAllTemplateConfig(List<String> clusters) throws ESOperateException {
         if (CollectionUtils.isEmpty(clusters)) {
             throw new ESOperateException("非法请求");
         }
 
-        Map<String,TemplateConfig> templateConfigMap = esTemplateService.syncGetAllTemplates(clusters);
+        Map<String, TemplateConfig> templateConfigMap = esTemplateService.syncGetAllTemplates(clusters);
         if (templateConfigMap == null) {
             Logger.info("class=TemplatePhyAliasesManagerImpl||method=deleteTemplateAlias||"
                         + "msg=templateNotFound||cluster={}",
-                    clusters);
+                clusters);
             throw new ESOperateException("模板配置不存在");
         }
 

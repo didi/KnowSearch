@@ -35,12 +35,10 @@ public class TemplateTransferHandler extends BaseWorkOrderHandler {
     @Autowired
     private IndexTemplateService indexTemplateService;
 
- 
-
     @Autowired
-    private ProjectService projectService;
+    private ProjectService       projectService;
     @Autowired
-    private UserService    userService;
+    private UserService          userService;
 
     /**
      * 工单是否自动审批
@@ -95,10 +93,6 @@ public class TemplateTransferHandler extends BaseWorkOrderHandler {
         if (AriusObjUtils.isNull(content.getTgtProjectId())) {
             return Result.buildParamIllegal("应用id为空");
         }
-
-
-        
-
 
         if (AriusObjUtils.isNull(indexTemplateService.getLogicTemplateById(content.getId()))) {
             return Result.buildNotExist("索引不存在");
@@ -177,17 +171,17 @@ public class TemplateTransferHandler extends BaseWorkOrderHandler {
         TemplateTransferContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
             TemplateTransferContent.class);
 
-        Result<Void> result = indexTemplateService.turnOverLogicTemplate(content.getId(),
-                content.getSourceProjectId(),content.getTgtProjectId(),
-            content.getTgtResponsible(), workOrder.getSubmitor());
+        Result<Void> result = indexTemplateService.turnOverLogicTemplate(content.getId(), content.getSourceProjectId(),
+            content.getTgtProjectId(), content.getTgtResponsible(), workOrder.getSubmitor());
 
         if (result.success()) {
-            operateRecordService.save(new OperateRecord.Builder().operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE)
-                    .userOperation(approver).content(String.format("模板从 项目:[%s】->项目:【%s】",
-                            projectService.getProjectBriefByProjectId(content.getSourceProjectId()).getProjectName(),
-                            projectService.getProjectBriefByProjectId(content.getTgtProjectId()).getProjectName()))
+            operateRecordService.save(
+                new OperateRecord.Builder().operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE).userOperation(approver)
+                    .content(String.format("模板从 项目:[%s】->项目:【%s】",
+                        projectService.getProjectBriefByProjectId(content.getSourceProjectId()).getProjectName(),
+                        projectService.getProjectBriefByProjectId(content.getTgtProjectId()).getProjectName()))
                     .project(projectService.getProjectBriefByProjectId(workOrder.getSubmitorProjectId())).build());
-           
+
         }
 
         return Result.buildFrom(result);

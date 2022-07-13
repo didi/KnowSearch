@@ -6,8 +6,8 @@ import org.elasticsearch.client.ElasticsearchClient;
 
 import static com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.index.ESIndexStatsRequest.*;
 
-
-public class ESIndexStatsRequestBuilder extends ESBroadcastTimeoutRequestBuilder<ESIndexStatsRequest, ESIndexStatsResponse, ESIndexStatsRequestBuilder> {
+public class ESIndexStatsRequestBuilder extends
+                                        ESBroadcastTimeoutRequestBuilder<ESIndexStatsRequest, ESIndexStatsResponse, ESIndexStatsRequestBuilder> {
 
     public ESIndexStatsRequestBuilder(ElasticsearchClient client, ESIndexStatsAction action) {
         super(client, action, new ESIndexStatsRequest());
@@ -37,7 +37,6 @@ public class ESIndexStatsRequestBuilder extends ESBroadcastTimeoutRequestBuilder
         request.types(types);
         return this;
     }
-
 
     public ESIndexStatsRequestBuilder setDocs(boolean docs) {
         request.flag(DOCS, docs);
@@ -103,7 +102,6 @@ public class ESIndexStatsRequestBuilder extends ESBroadcastTimeoutRequestBuilder
         request.flag(COMPLETION, completion);
         return this;
     }
-
 
     public ESIndexStatsRequestBuilder setTranslog(boolean translog) {
         request.flag(TRANSLOG, translog);

@@ -24,7 +24,7 @@ public class TemplateValueESDAO extends BaseESDAO {
     private String typeName = "type";
 
     @PostConstruct
-    public void init(){
+    public void init() {
         this.indexName = dataCentreUtil.getAriusTemplateValue();
     }
 
@@ -34,7 +34,7 @@ public class TemplateValueESDAO extends BaseESDAO {
      * @return
      */
     public boolean batchInsert(List<TemplateValuePO> list) {
-        return updateClient.batchInsert( EnvUtil.getWriteIndexNameByEnv(this.indexName), typeName, list);
+        return updateClient.batchInsert(EnvUtil.getWriteIndexNameByEnv(this.indexName), typeName, list);
     }
 
     /**
@@ -44,7 +44,8 @@ public class TemplateValueESDAO extends BaseESDAO {
      * @return
      */
     public TemplateValuePO getByLogicTemplateId(Integer logicTemplateId) {
-        return gatewayClient.doGet(EnvUtil.getWriteIndexNameByEnv(this.indexName), typeName, String.valueOf(logicTemplateId), TemplateValuePO.class);
+        return gatewayClient.doGet(EnvUtil.getWriteIndexNameByEnv(this.indexName), typeName,
+            String.valueOf(logicTemplateId), TemplateValuePO.class);
     }
 
     /**
@@ -54,22 +55,22 @@ public class TemplateValueESDAO extends BaseESDAO {
      */
     public List<TemplateValuePO> listAll() {
         int scrollSize = 500;
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.SCROLL_VALUE_LIST_ALL,
-                scrollSize);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.SCROLL_VALUE_LIST_ALL, scrollSize);
 
         List<TemplateValuePO> list = Lists.newLinkedList();
 
-        gatewayClient.queryWithScroll(EnvUtil.getWriteIndexNameByEnv(this.indexName), typeName, dsl, scrollSize,
-                null, TemplateValuePO.class, resultList -> {
-                    if (resultList != null) {
-                        list.addAll(resultList);
+        gatewayClient.queryWithScroll(EnvUtil.getWriteIndexNameByEnv(this.indexName), typeName, dsl, scrollSize, null,
+            TemplateValuePO.class, resultList -> {
+                if (resultList != null) {
+                    list.addAll(resultList);
 
-                        if (!EnvUtil.isOnline()) {
-                            LOGGER.info("class=IndexTemplateValueEsDao||method=getLabelByDsl||TemplateValuePOList={}||dsl={}",
-                                    JSON.toJSONString(resultList), dsl);
-                        }
+                    if (!EnvUtil.isOnline()) {
+                        LOGGER.info(
+                            "class=IndexTemplateValueEsDao||method=getLabelByDsl||TemplateValuePOList={}||dsl={}",
+                            JSON.toJSONString(resultList), dsl);
                     }
-                });
+                }
+            });
 
         return list;
     }

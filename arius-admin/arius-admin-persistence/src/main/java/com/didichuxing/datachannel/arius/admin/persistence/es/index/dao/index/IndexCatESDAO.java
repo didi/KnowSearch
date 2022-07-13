@@ -25,16 +25,16 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class IndexCatESDAO extends BaseESDAO {
     @Value("${es.update.cluster.name}")
-    private String              metadataClusterName;
+    private String metadataClusterName;
 
     /**
      * 索引名称
      */
-    private String              indexName;
+    private String indexName;
     /**
      * type名称
      */
-    private String              typeName                   = "type";
+    private String typeName = "type";
 
     @PostConstruct
     public void init() {
@@ -72,14 +72,14 @@ public class IndexCatESDAO extends BaseESDAO {
      * @param orderByDesc  是否降序
      * @return             Tuple<Long, List<IndexCatCellPO>> 命中数 具体数据
      */
-    public Tuple<Long, List<IndexCatCellPO>> getCatIndexInfo(String cluster, String index, String health,String status, Integer projectId,
-                                                             Long from,
-                                                             Long size, String sortTerm, Boolean orderByDesc) {
+    public Tuple<Long, List<IndexCatCellPO>> getCatIndexInfo(String cluster, String index, String health, String status,
+                                                             Integer projectId, Long from, Long size, String sortTerm,
+                                                             Boolean orderByDesc) {
         Tuple<Long, List<IndexCatCellPO>> totalHitAndIndexCatCellListTuple;
-        String queryTermDsl =  buildQueryTermDsl(cluster, index, health,status, projectId);
-        String sortType     =  buildSortType(orderByDesc);
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_CAT_INDEX_INFO_BY_CONDITION,
-            queryTermDsl, sortTerm, sortType, from, size);
+        String queryTermDsl = buildQueryTermDsl(cluster, index, health, status, projectId);
+        String sortType = buildSortType(orderByDesc);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_CAT_INDEX_INFO_BY_CONDITION, queryTermDsl,
+            sortTerm, sortType, from, size);
         int retryTime = 3;
         do {
             totalHitAndIndexCatCellListTuple = gatewayClient.performRequestListAndGetTotalCount(metadataClusterName,
@@ -100,7 +100,7 @@ public class IndexCatESDAO extends BaseESDAO {
     public Boolean batchUpdateCatIndexDeleteFlag(String cluster, List<String> indexNameList, int retryCount) {
         try {
             return ESOpTimeoutRetry.esRetryExecute("batchUpdateCatIndexDeleteFlag", retryCount,
-                    () -> updateCatIndexDeleteFlag(cluster, indexNameList));
+                () -> updateCatIndexDeleteFlag(cluster, indexNameList));
         } catch (ESOperateException e) {
             LOGGER.warn("class=IndexCatESDAO||method=batchUpdateCatIndexDeleteFlag||errMsg={}", e.getMessage(), e);
         }
@@ -116,10 +116,11 @@ public class IndexCatESDAO extends BaseESDAO {
      * @param retryCount        重试次数
      * @return
      */
-    public Boolean batchUpdateCatIndexStatus(String cluster, List<String> indexNameList, String status, int retryCount) {
+    public Boolean batchUpdateCatIndexStatus(String cluster, List<String> indexNameList, String status,
+                                             int retryCount) {
         try {
             return ESOpTimeoutRetry.esRetryExecute("batchUpdateCatIndexStatus", retryCount,
-                    () -> updateCatIndexStatus(cluster, indexNameList, status));
+                () -> updateCatIndexStatus(cluster, indexNameList, status));
         } catch (ESOperateException e) {
             LOGGER.warn("class=IndexCatESDAO||method=batchUpdateCatIndexStatus||errMsg={}", e.getMessage(), e);
         }
@@ -141,11 +142,11 @@ public class IndexCatESDAO extends BaseESDAO {
      * @param health
      * @return
      */
-    private String buildQueryTermDsl(String cluster, String index, String health,String status, Integer projectId) {
-        return "[" + buildTermCell(cluster, index, health,status, projectId) +"]";
+    private String buildQueryTermDsl(String cluster, String index, String health, String status, Integer projectId) {
+        return "[" + buildTermCell(cluster, index, health, status, projectId) + "]";
     }
 
-    private String buildTermCell(String cluster, String index, String health,String status, Integer projectId) {
+    private String buildTermCell(String cluster, String index, String health, String status, Integer projectId) {
         List<String> termCellList = Lists.newArrayList();
         //projectId == null 时，属于超级项目访问；
         if (null == projectId) {

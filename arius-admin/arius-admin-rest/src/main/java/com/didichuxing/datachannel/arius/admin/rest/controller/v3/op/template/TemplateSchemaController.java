@@ -37,7 +37,7 @@ public class TemplateSchemaController extends BaseTemplateController {
 
     @PutMapping("/schema/convert")
     @ResponseBody
-    @ApiOperation(value = "模板field转mapping接口【三方接口】",tags = "【三方接口】" )
+    @ApiOperation(value = "模板field转mapping接口【三方接口】", tags = "【三方接口】")
     public Result<ConsoleTemplateFieldConvertVO> convertSchema(@RequestBody List<Field> fields) {
         AriusTypeProperty typeProperty = templateLogicMappingManager.fields2Mapping(fields);
 
@@ -57,7 +57,7 @@ public class TemplateSchemaController extends BaseTemplateController {
 
     @GetMapping("/schema")
     @ResponseBody
-    @ApiOperation(value = "获取索引Schema信息接口【三方接口】",tags = "【三方接口】" )
+    @ApiOperation(value = "获取索引Schema信息接口【三方接口】", tags = "【三方接口】")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "索引ID", required = true) })
     public Result<TemplateMappingVO> getSchema(@RequestParam("logicId") Integer logicId) {
         return templateLogicMappingManager.getSchema(logicId);
@@ -65,10 +65,10 @@ public class TemplateSchemaController extends BaseTemplateController {
 
     @PutMapping("/schema")
     @ResponseBody
-    @ApiOperation(value = "更新索引Schema信息接口【三方接口】",tags = "【三方接口】" )
+    @ApiOperation(value = "更新索引Schema信息接口【三方接口】", tags = "【三方接口】")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "header", dataType = "String", name = "X-ARIUS-APP-ID", value = "应用ID", required = true) })
     public Result<Void> modifySchema(HttpServletRequest request,
-                               @RequestBody ConsoleTemplateSchemaDTO schemaDTO) throws AdminOperateException {
+                                     @RequestBody ConsoleTemplateSchemaDTO schemaDTO) throws AdminOperateException {
 
         Result<Void> checkAuthResult = checkProjectAuth(schemaDTO.getLogicId());
         if (checkAuthResult.failed()) {
@@ -76,7 +76,7 @@ public class TemplateSchemaController extends BaseTemplateController {
         }
 
         return templateLogicMappingManager.editMapping(schemaDTO, HttpRequestUtil.getOperator(request),
-                HttpRequestUtil.getProjectId(request));
+            HttpRequestUtil.getProjectId(request));
     }
 
 }

@@ -17,7 +17,8 @@ public class AriusScheduleThreadPool {
 
     @PostConstruct
     public void init() {
-        scheduleThreadPool = new ScheduledThreadPoolExecutor(scheduleThreadNum, new DesmondThreadFactory("scheduleThreadPool"));
+        scheduleThreadPool = new ScheduledThreadPoolExecutor(scheduleThreadNum,
+            new DesmondThreadFactory("scheduleThreadPool"));
     }
 
     public void submitScheduleAtFixedRateTask(Runnable runnable, long initialDelay, long period) {
@@ -45,7 +46,7 @@ public class AriusScheduleThreadPool {
             }
 
             if (t.getPriority() != Thread.NORM_PRIORITY) {
-                t.setPriority( Thread.NORM_PRIORITY );
+                t.setPriority(Thread.NORM_PRIORITY);
             }
             return t;
         }

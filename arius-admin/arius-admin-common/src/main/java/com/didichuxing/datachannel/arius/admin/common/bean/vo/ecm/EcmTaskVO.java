@@ -1,6 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.vo.ecm;
 
-
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.BaseVO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -17,37 +16,36 @@ public class EcmTaskVO extends BaseVO {
     private static final long serialVersionUID = 1L;
 
     @ApiModelProperty("ID")
-    private Long id;
+    private Long              id;
 
     @ApiModelProperty("标题")
-    private String title;
+    private String            title;
 
     @ApiModelProperty("工单ID")
-    private Long workOrderId;
+    private Long              workOrderId;
 
     @ApiModelProperty("es版本")
-    private String  esVersion;
+    private String            esVersion;
 
     @ApiModelProperty("镜像名")
-    private String imageName;
+    private String            imageName;
 
     @ApiModelProperty("物理集群ID")
-    private Long physicClusterId;
+    private Long              physicClusterId;
 
     @ApiModelProperty("集群节点角色 执行顺序")
-    private String clusterNodeRole;
+    private String            clusterNodeRole;
 
     @ApiModelProperty("状态")
-    private String status;
+    private String            status;
 
     @ApiModelProperty("类型  docker容器云 3 /host 物理机 4")
-    private Integer type;
+    private Integer           type;
 
     @ApiModelProperty("类型 1 集群新增  2 集群扩容 3 集群缩容 4 集群重启 5 集群升级")
-    private Integer orderType;
+    private Integer           orderType;
 
     @ApiModelProperty("创建人")
-    private String creator;
-
+    private String            creator;
 
 }

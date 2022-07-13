@@ -126,14 +126,14 @@ public class ClusterPhyDTO extends PageDTO {
     private Double                     diskUsagePercent;
 
     @ApiModelProperty("IaaS平台类型")
-    private String                    platformType;
+    private String                     platformType;
 
     /**
      * @see ClusterResourceTypeEnum
      */
     @ApiModelProperty("集群资源类型(-1 未知 1 共享 2 独立 3 独享)")
     private Integer                    resourceType;
-    
+
     @ApiModelProperty("gateway地址")
-    private String                    gatewayUrl;
+    private String                     gatewayUrl;
 }

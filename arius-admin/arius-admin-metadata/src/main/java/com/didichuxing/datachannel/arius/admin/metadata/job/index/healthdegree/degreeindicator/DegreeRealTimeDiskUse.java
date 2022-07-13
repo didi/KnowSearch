@@ -6,6 +6,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.RealTime
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESIndexToNodeStats;
 import com.didichuxing.datachannel.arius.admin.metadata.job.index.healthdegree.AbstractDegreeIndicator;
 import org.apache.commons.lang3.StringUtils;
+
 @Deprecated
 public class DegreeRealTimeDiskUse extends AbstractDegreeIndicator {
     @Override
@@ -14,12 +15,13 @@ public class DegreeRealTimeDiskUse extends AbstractDegreeIndicator {
         double totalDiskUse = 0.0;
 
         for (ESIndexToNodeStats esESIndexToNodeStats : degreeParam.getEsIndexToNodeStats()) {
-            if(StringUtils.isNotBlank(esESIndexToNodeStats.getMetrics().get("fs-total-disk_free_percent"))){
-                totalDiskUse += (1 - Double.parseDouble(esESIndexToNodeStats.getMetrics().get("fs-total-disk_free_percent")));
+            if (StringUtils.isNotBlank(esESIndexToNodeStats.getMetrics().get("fs-total-disk_free_percent"))) {
+                totalDiskUse += (1 - Double
+                    .parseDouble(esESIndexToNodeStats.getMetrics().get("fs-total-disk_free_percent")));
             }
         }
 
-        RealTimeDiskUse realTimeDiskUsePO = (RealTimeDiskUse)t;
+        RealTimeDiskUse realTimeDiskUsePO = (RealTimeDiskUse) t;
 
         if (degreeParam.getEsIndexToNodeStats().size() == 0) {
             realTimeDiskUsePO.setScore(100.0);
@@ -32,7 +34,7 @@ public class DegreeRealTimeDiskUse extends AbstractDegreeIndicator {
             realTimeDiskUsePO.setScore(calc1(avgDiskUse));
         }
 
-        return (T)realTimeDiskUsePO;
+        return (T) realTimeDiskUsePO;
     }
 
     @Override

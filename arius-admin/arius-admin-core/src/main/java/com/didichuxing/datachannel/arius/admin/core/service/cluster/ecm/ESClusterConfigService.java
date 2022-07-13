@@ -65,8 +65,6 @@ public interface ESClusterConfigService {
      */
     Result<Long> esClusterConfigAction(ESConfigDTO param, EsConfigActionEnum actionEnum, String operator);
 
-
-
     /**
      * 删除ES集群配置
      * @param configId

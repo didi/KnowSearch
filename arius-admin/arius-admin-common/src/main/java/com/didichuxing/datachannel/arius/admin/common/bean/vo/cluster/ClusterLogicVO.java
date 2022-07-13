@@ -36,10 +36,10 @@ public class ClusterLogicVO extends BaseVO implements Comparable<ClusterLogicVO>
     private Integer                      type;
 
     @ApiModelProperty("所属应用ID")
-    private Integer projectId;
+    private Integer                      projectId;
 
     @ApiModelProperty("所属应用名")
-    private String projectName;
+    private String                       projectName;
 
     @ApiModelProperty("是否关联物理集群")
     private Boolean                      phyClusterAssociated;
@@ -95,12 +95,12 @@ public class ClusterLogicVO extends BaseVO implements Comparable<ClusterLogicVO>
     private List<ESClusterTemplateSrvVO> esClusterTemplateSrvVOS;
 
     @ApiModelProperty("集群角色信息")
-    private List<ESClusterRoleVO> esClusterRoleVOS;
+    private List<ESClusterRoleVO>        esClusterRoleVOS;
 
     @ApiModelProperty("集群健康状态")
     private Integer                      health;
-    
-     @ApiModelProperty("磁盘使用率")
+
+    @ApiModelProperty("磁盘使用率")
     private Double                       diskUsagePercent;
 
     @ApiModelProperty("磁盘总量")
@@ -108,8 +108,6 @@ public class ClusterLogicVO extends BaseVO implements Comparable<ClusterLogicVO>
 
     @ApiModelProperty("磁盘使用量")
     private Long                         diskUsage;
-    
-    
 
     @Override
     public int compareTo(ClusterLogicVO o) {

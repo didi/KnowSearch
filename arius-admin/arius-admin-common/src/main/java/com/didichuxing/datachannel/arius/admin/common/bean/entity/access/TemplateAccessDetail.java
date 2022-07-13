@@ -30,6 +30,7 @@ public class TemplateAccessDetail {
      * 统计日期
      */
     private String countDate;
+
     /**
      * 是否有效
      *
@@ -37,8 +38,7 @@ public class TemplateAccessDetail {
      */
     @JSONField(serialize = false)
     public boolean isValid() {
-        return  !(StringUtils.isBlank(templateName)
-                || StringUtils.isBlank(countDate)
-                || StringUtils.isBlank(clusterName));
+        return !(StringUtils.isBlank(templateName) || StringUtils.isBlank(countDate)
+                 || StringUtils.isBlank(clusterName));
     }
 }

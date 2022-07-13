@@ -20,32 +20,25 @@ public interface IndexTemplatePhyDAO {
 
     List<IndexTemplatePhyPO> listByLogicId(Integer logicId);
 
-    List<IndexTemplatePhyPO> getByLogicIdAndStatus(@Param("logicId") Integer logicId,
-                                                   @Param("status") Integer status);
+    List<IndexTemplatePhyPO> getByLogicIdAndStatus(@Param("logicId") Integer logicId, @Param("status") Integer status);
 
     int update(IndexTemplatePhyPO param);
 
-    int updateStatus(@Param("physicalId") Long physicalId,
-                     @Param("status") Integer status);
+    int updateStatus(@Param("physicalId") Long physicalId, @Param("status") Integer status);
 
-    List<IndexTemplatePhyPO> getByClusterAndStatus(@Param("cluster") String cluster,
-                                                   @Param("status") Integer status);
+    List<IndexTemplatePhyPO> getByClusterAndStatus(@Param("cluster") String cluster, @Param("status") Integer status);
 
-    List<IndexTemplatePhyPO> getByClusterAndNameAndStatus(@Param("cluster") String cluster,
-                                                          @Param("name") String name,
+    List<IndexTemplatePhyPO> getByClusterAndNameAndStatus(@Param("cluster") String cluster, @Param("name") String name,
                                                           @Param("status") Integer status);
 
-    List<IndexTemplatePhyPO> listByClusterAndStatus(@Param("cluster") String cluster,
-                                                    @Param("status") Integer status);
+    List<IndexTemplatePhyPO> listByClusterAndStatus(@Param("cluster") String cluster, @Param("status") Integer status);
 
     List<IndexTemplatePhyPO> listByMatchClusterAndStatus(@Param("cluster") String cluster,
                                                          @Param("status") Integer status);
 
-    IndexTemplatePhyPO getByClusterAndName(@Param("cluster") String cluster,
-                                           @Param("name") String name);
+    IndexTemplatePhyPO getByClusterAndName(@Param("cluster") String cluster, @Param("name") String name);
 
-    int deleteDirtyByClusterAndName(@Param("cluster") String cluster,
-                                    @Param("name") String name);
+    int deleteDirtyByClusterAndName(@Param("cluster") String cluster, @Param("name") String name);
 
     List<IndexTemplatePhyPO> listByLogicIds(List<Integer> logicIds);
 

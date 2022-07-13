@@ -26,19 +26,19 @@ import java.util.Map;
 @NoArgsConstructor
 public class DslMetricsESDAO extends BaseESDAO {
 
-    private static final String VALUE = "value";
+    private static final String VALUE    = "value";
 
     /**
      * 查询模板聚合数据的索引名称
      */
-    private String            indexName;
+    private String              indexName;
     /**
      * type名称，主键id是topic_partition_offset
      */
-    private String            typeName  = "type";
+    private String              typeName = "type";
 
     @PostConstruct
-    public void init(){
+    public void init() {
         this.indexName = dataCentreUtil.getAriusDslMetrices();
     }
 
@@ -51,7 +51,8 @@ public class DslMetricsESDAO extends BaseESDAO {
      * @return
      */
     public Long queryTotalHitsByProjectIdDate(Integer projectId, String startDate, String endDate) {
-        String dsl = dslLoaderUtil.getFormatDslByFileName( DslsConstant.GET_TOTAL_HITS_BY_PROJECT_ID, projectId, startDate, endDate);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_TOTAL_HITS_BY_PROJECT_ID, projectId,
+            startDate, endDate);
 
         return gatewayClient.performRequestAndGetTotalCount(indexName, typeName, dsl);
     }
@@ -110,48 +111,66 @@ public class DslMetricsESDAO extends BaseESDAO {
      * @return
      */
     public DslMetricsPO getMaxProjectIdTemplateQpsInfoByProjectIdTemplateMd5(DslBase dslBase) {
-        if(null == dslBase){return null;}
+        if (null == dslBase) {
+            return null;
+        }
 
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_MAX_QPS_BY_KEY, dslBase.getProjectId(), dslBase.getDslTemplateMd5());
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_MAX_QPS_BY_KEY, dslBase.getProjectId(),
+            dslBase.getDslTemplateMd5());
         String realIndexName = IndexNameUtils.genCurrentDailyIndexName(indexName);
         return gatewayClient.performRequestAndTakeFirst(realIndexName, typeName, dsl, DslMetricsPO.class);
     }
 
-    public List<DslMetricsPO> getDslDetailMetricByProjectIdAndDslTemplateMd5(int projectId, String dslTemplteMd5, long startDate, long endDate){
+    public List<DslMetricsPO> getDslDetailMetricByProjectIdAndDslTemplateMd5(int projectId, String dslTemplteMd5,
+                                                                             long startDate, long endDate) {
         String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startDate, endDate);
 
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_DSL_DETAIL_METRICS_BY_PROJECT_ID_AND_MD5_AND_RANGE, projectId, dslTemplteMd5, startDate, endDate, startDate, endDate);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(
+            DslsConstant.GET_DSL_DETAIL_METRICS_BY_PROJECT_ID_AND_MD5_AND_RANGE, projectId, dslTemplteMd5, startDate,
+            endDate, startDate, endDate);
 
         return gatewayClient.performRequest(realIndexName, typeName, dsl, s -> {
             List<DslMetricsPO> dslMetricsPos = new ArrayList<>();
-            if (s == null){return dslMetricsPos;}
+            if (s == null) {
+                return dslMetricsPos;
+            }
 
             List<ESBucket> esBuckets = s.getAggs().getEsAggrMap().get("groupByTimeStamp").getBucketList();
 
-            if(CollectionUtils.isNotEmpty(esBuckets)){
+            if (CollectionUtils.isNotEmpty(esBuckets)) {
                 esBuckets.forEach(esBucket -> {
                     try {
                         Map<String, Object> unUsedMap = esBucket.getUnusedMap();
-                        Map<String, ESAggr> aggrMap   = esBucket.getAggrMap();
-                        if(null != unUsedMap && null != aggrMap) {
+                        Map<String, ESAggr> aggrMap = esBucket.getAggrMap();
+                        if (null != unUsedMap && null != aggrMap) {
                             DslMetricsPO dslMetricsPo = new DslMetricsPO();
 
                             dslMetricsPo.setDslTemplateMd5(dslTemplteMd5);
                             dslMetricsPo.setProjectId(projectId);
-                            dslMetricsPo.setDslLenAvg(Double.valueOf(aggrMap.get("dslLenAvg").getUnusedMap().get(VALUE).toString()));
-                            dslMetricsPo.setEsCostAvg(Double.valueOf(aggrMap.get("esCostAvg").getUnusedMap().get(VALUE).toString()));
-                            dslMetricsPo.setFailedShardsAvg(Double.valueOf(aggrMap.get("failedShardsAvg").getUnusedMap().get(VALUE).toString()));
-                            dslMetricsPo.setResponseLenAvg(Double.valueOf(aggrMap.get("responseLenAvg").getUnusedMap().get(VALUE).toString()));
-                            dslMetricsPo.setSearchCount(Double.valueOf(aggrMap.get("searchCount").getUnusedMap().get(VALUE).toString()).longValue());
-                            dslMetricsPo.setTotalCostAvg(Double.valueOf(aggrMap.get("totalCostAvg").getUnusedMap().get(VALUE).toString()));
-                            dslMetricsPo.setTotalHitsAvg(Double.valueOf(aggrMap.get("totalHitsAvg").getUnusedMap().get(VALUE).toString()));
-                            dslMetricsPo.setTotalShardsAvg(Double.valueOf(aggrMap.get("totalShardsAvg").getUnusedMap().get(VALUE).toString()));
+                            dslMetricsPo.setDslLenAvg(
+                                Double.valueOf(aggrMap.get("dslLenAvg").getUnusedMap().get(VALUE).toString()));
+                            dslMetricsPo.setEsCostAvg(
+                                Double.valueOf(aggrMap.get("esCostAvg").getUnusedMap().get(VALUE).toString()));
+                            dslMetricsPo.setFailedShardsAvg(
+                                Double.valueOf(aggrMap.get("failedShardsAvg").getUnusedMap().get(VALUE).toString()));
+                            dslMetricsPo.setResponseLenAvg(
+                                Double.valueOf(aggrMap.get("responseLenAvg").getUnusedMap().get(VALUE).toString()));
+                            dslMetricsPo.setSearchCount(Double
+                                .valueOf(aggrMap.get("searchCount").getUnusedMap().get(VALUE).toString()).longValue());
+                            dslMetricsPo.setTotalCostAvg(
+                                Double.valueOf(aggrMap.get("totalCostAvg").getUnusedMap().get(VALUE).toString()));
+                            dslMetricsPo.setTotalHitsAvg(
+                                Double.valueOf(aggrMap.get("totalHitsAvg").getUnusedMap().get(VALUE).toString()));
+                            dslMetricsPo.setTotalShardsAvg(
+                                Double.valueOf(aggrMap.get("totalShardsAvg").getUnusedMap().get(VALUE).toString()));
                             dslMetricsPo.setTimeStamp(Long.valueOf(unUsedMap.get("key").toString()));
 
                             dslMetricsPos.add(dslMetricsPo);
                         }
-                    }catch (Exception e){
-                        LOGGER.error("class=AriusStatsInfoEsDao||method=getDslDetailMetricByProjectIdAndDslTemplateMd5||exceptionMsg:{}", e);
+                    } catch (Exception e) {
+                        LOGGER.error(
+                            "class=AriusStatsInfoEsDao||method=getDslDetailMetricByProjectIdAndDslTemplateMd5||exceptionMsg:{}",
+                            e);
                     }
                 });
             }
@@ -192,9 +211,9 @@ public class DslMetricsESDAO extends BaseESDAO {
      * @return
      */
     public DslMetricsPO getNeariestDslMetricsByProjectIdTemplateMd5(Integer projectId, String dslTemplateMd5) {
-        String queryDsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_DSL_METRICS_BY_KEY, projectId, dslTemplateMd5);
+        String queryDsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_DSL_METRICS_BY_KEY, projectId,
+            dslTemplateMd5);
 
-        return gatewayClient.performRequestAndTakeFirst(indexName, typeName, queryDsl,
-                DslMetricsPO.class);
+        return gatewayClient.performRequestAndTakeFirst(indexName, typeName, queryDsl, DslMetricsPO.class);
     }
 }

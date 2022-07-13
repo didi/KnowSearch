@@ -38,28 +38,26 @@ import java.util.stream.Collectors;
  */
 @Component
 public class ClusterLogicPageSearchHandle extends AbstractPageSearchHandle<ClusterLogicConditionDTO, ClusterLogicVO> {
-    private static final ILog LOGGER = LogFactory.getLog(ClusterLogicPageSearchHandle.class);
-
-
-
-    @Autowired
-    private ClusterLogicService clusterLogicService;
+    private static final ILog             LOGGER                  = LogFactory
+        .getLog(ClusterLogicPageSearchHandle.class);
 
     @Autowired
-    private ClusterLogicManager clusterLogicManager;
+    private ClusterLogicService           clusterLogicService;
 
     @Autowired
-    private ClusterContextManager clusterContextManager;
+    private ClusterLogicManager           clusterLogicManager;
 
     @Autowired
-    private ClusterRegionService clusterRegionService;
+    private ClusterContextManager         clusterContextManager;
 
     @Autowired
-    private ESClusterNodeService eSClusterNodeService;
+    private ClusterRegionService          clusterRegionService;
 
+    @Autowired
+    private ESClusterNodeService          eSClusterNodeService;
 
-
-    private static final FutureUtil<Void> futureUtilForClusterNum = FutureUtil.init("futureUtilForClusterNum", 10, 10, 100);
+    private static final FutureUtil<Void> futureUtilForClusterNum = FutureUtil.init("futureUtilForClusterNum", 10, 10,
+        100);
 
     /**
      * 1. 设置项目名称
@@ -80,7 +78,8 @@ public class ClusterLogicPageSearchHandle extends AbstractPageSearchHandle<Clust
         long diskTotal = 0L;
         long diskUsage = 0L;
         if (clusterRegion != null) {
-            Map<String, Triple<Long, Long, Double>> map = eSClusterNodeService.syncGetNodesDiskUsage(clusterRegion.getPhyClusterName());
+            Map<String, Triple<Long, Long, Double>> map = eSClusterNodeService
+                .syncGetNodesDiskUsage(clusterRegion.getPhyClusterName());
             Set<Map.Entry<String, Triple<Long, Long, Double>>> entries = map.entrySet();
             for (Map.Entry<String, Triple<Long, Long, Double>> entry : entries) {
                 diskTotal += entry.getValue().v1();
@@ -89,7 +88,8 @@ public class ClusterLogicPageSearchHandle extends AbstractPageSearchHandle<Clust
         }
         clusterLogicVO.setDiskTotal(diskTotal);
         clusterLogicVO.setDiskUsage(diskUsage);
-        clusterLogicVO.setDiskUsagePercent(new BigDecimal((double)diskUsage/diskTotal).setScale(4, BigDecimal.ROUND_HALF_UP).doubleValue());
+        clusterLogicVO.setDiskUsagePercent(
+            new BigDecimal((double) diskUsage / diskTotal).setScale(4, BigDecimal.ROUND_HALF_UP).doubleValue());
     }
 
     @Override
@@ -101,17 +101,18 @@ public class ClusterLogicPageSearchHandle extends AbstractPageSearchHandle<Clust
         }
 
         if (null != clusterLogicConditionDTO.getType()
-                && !ClusterResourceTypeEnum.isExist(clusterLogicConditionDTO.getType())) {
+            && !ClusterResourceTypeEnum.isExist(clusterLogicConditionDTO.getType())) {
             return Result.buildParamIllegal("逻辑集群类型不存在");
         }
 
-            if (null != clusterLogicConditionDTO.getProjectId()
-                    && !projectService.checkProjectExist(clusterLogicConditionDTO.getProjectId())) {
+        if (null != clusterLogicConditionDTO.getProjectId()
+            && !projectService.checkProjectExist(clusterLogicConditionDTO.getProjectId())) {
             return Result.buildParamIllegal("逻辑集群所属项目不存在");
         }
 
         String clusterLogicName = clusterLogicConditionDTO.getName();
-        if (!AriusObjUtils.isBlack(clusterLogicName) && (clusterLogicName.startsWith("*") || clusterLogicName.startsWith("?"))) {
+        if (!AriusObjUtils.isBlack(clusterLogicName)
+            && (clusterLogicName.startsWith("*") || clusterLogicName.startsWith("?"))) {
             return Result.buildParamIllegal("逻辑集群名称不允许带类似*, ?等通配符查询");
         }
 

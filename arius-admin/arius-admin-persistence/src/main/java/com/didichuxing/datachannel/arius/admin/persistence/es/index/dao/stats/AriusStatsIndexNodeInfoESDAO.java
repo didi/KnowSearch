@@ -20,10 +20,10 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.Cl
 public class AriusStatsIndexNodeInfoESDAO extends BaseAriusStatsESDAO {
 
     @PostConstruct
-    public void init(){
-        super.indexName   = dataCentreUtil.getAriusStatsIndexNodeInfo();
+    public void init() {
+        super.indexName = dataCentreUtil.getAriusStatsIndexNodeInfo();
 
-        BaseAriusStatsESDAO.register( AriusStatsEnum.INDEX_NODE_INFO,this);
+        BaseAriusStatsESDAO.register(AriusStatsEnum.INDEX_NODE_INFO, this);
     }
 
     /**
@@ -34,15 +34,16 @@ public class AriusStatsIndexNodeInfoESDAO extends BaseAriusStatsESDAO {
      */
     public List<ESIndexToNodeStats> getIndexToNodeStats(String template, String cluster, Long startDate, Long endDate) {
         String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startDate, endDate);
-        String dsl           = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_INDEX_NODE_STATS_BY_TIME_RANGE, SCROLL_SIZE, startDate, endDate, template, cluster);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_INDEX_NODE_STATS_BY_TIME_RANGE, SCROLL_SIZE,
+            startDate, endDate, template, cluster);
 
         List<ESIndexToNodeStats> esIndexToNodeStats = Lists.newLinkedList();
-        gatewayClient.queryWithScroll(realIndexName,
-                TYPE, dsl, SCROLL_SIZE, null, ESIndexToNodeStats.class, resultList -> {
-                    if (resultList != null) {
-                        esIndexToNodeStats.addAll(resultList);
-                    }
-                });
+        gatewayClient.queryWithScroll(realIndexName, TYPE, dsl, SCROLL_SIZE, null, ESIndexToNodeStats.class,
+            resultList -> {
+                if (resultList != null) {
+                    esIndexToNodeStats.addAll(resultList);
+                }
+            });
 
         return esIndexToNodeStats;
     }
@@ -56,15 +57,17 @@ public class AriusStatsIndexNodeInfoESDAO extends BaseAriusStatsESDAO {
      */
     public List<ESIndexToNodeStats> getIndexToNodeStats(Long templateId, Long startDate, Long endDate) {
         String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startDate, endDate);
-        String dsl           = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_INDEX_NODE_STATS_BY_TIME_RANGE_AND_TEMPALTEID, SCROLL_SIZE, startDate, endDate, templateId);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(
+            DslsConstant.GET_INDEX_NODE_STATS_BY_TIME_RANGE_AND_TEMPALTEID, SCROLL_SIZE, startDate, endDate,
+            templateId);
 
         List<ESIndexToNodeStats> esIndexToNodeStats = Lists.newLinkedList();
-        gatewayClient.queryWithScroll(realIndexName,
-                TYPE, dsl, SCROLL_SIZE, null, ESIndexToNodeStats.class, resultList -> {
-                    if (resultList != null) {
-                        esIndexToNodeStats.addAll(resultList);
-                    }
-                });
+        gatewayClient.queryWithScroll(realIndexName, TYPE, dsl, SCROLL_SIZE, null, ESIndexToNodeStats.class,
+            resultList -> {
+                if (resultList != null) {
+                    esIndexToNodeStats.addAll(resultList);
+                }
+            });
 
         return esIndexToNodeStats;
     }
@@ -76,14 +79,15 @@ public class AriusStatsIndexNodeInfoESDAO extends BaseAriusStatsESDAO {
      * @param endDate   毫秒
      * @return
      */
-    public List<Tuple<String/*node:port*/, Double/*cpu avg*/>> getTemplateNodeCpu(Long templateId, Long startDate, Long endDate) {
+    public List<Tuple<String/*node:port*/, Double/*cpu avg*/>> getTemplateNodeCpu(Long templateId, Long startDate,
+                                                                                  Long endDate) {
         List<ESIndexToNodeStats> esIndexStats = getIndexToNodeStats(templateId, startDate, endDate);
 
         Map<String, List<Double>> templateCpuMap = Maps.newHashMap();
 
         for (ESIndexToNodeStats indexNode : esIndexStats) {
             String node = indexNode.getNode() + ":" + indexNode.getPort();
-            Double cpu  = Double.valueOf(indexNode.getMetrics().get(CPU_USAGE_PERCENT.getType()));
+            Double cpu = Double.valueOf(indexNode.getMetrics().get(CPU_USAGE_PERCENT.getType()));
 
             List<Double> cpuList = templateCpuMap.get(node);
             if (CollectionUtils.isEmpty(cpuList)) {
@@ -96,14 +100,14 @@ public class AriusStatsIndexNodeInfoESDAO extends BaseAriusStatsESDAO {
         }
 
         List<Tuple<String, Double>> ret = Lists.newArrayList();
-        for(Map.Entry<String, List<Double>> entry : templateCpuMap.entrySet()){
+        for (Map.Entry<String, List<Double>> entry : templateCpuMap.entrySet()) {
             String node = entry.getKey();
             List<Double> doubleList = templateCpuMap.get(node);
             if (CollectionUtils.isNotEmpty(doubleList)) {
-                final Double[] totalCpu = {0.0d};
+                final Double[] totalCpu = { 0.0d };
                 doubleList.forEach(d -> totalCpu[0] += d);
 
-                ret.add(new Tuple<>(node, totalCpu[0]/doubleList.size()));
+                ret.add(new Tuple<>(node, totalCpu[0] / doubleList.size()));
             }
         }
 

@@ -20,8 +20,9 @@ public interface ESIndexCatService {
      * @param orderByDesc 降序标识
      * @return Tuple<Long, List < IndexCatCell>>   key1 -> 命中总数, key2 索引列表
      */
-    Tuple<Long, List<IndexCatCell>> syncGetCatIndexInfo(String cluster, String index, String health,String status, Integer projectId,
-                                                        Long from, Long size, String sortTerm, Boolean orderByDesc);
+    Tuple<Long, List<IndexCatCell>> syncGetCatIndexInfo(String cluster, String index, String health, String status,
+                                                        Integer projectId, Long from, Long size, String sortTerm,
+                                                        Boolean orderByDesc);
 
     /**
      * 更新索引删除标识

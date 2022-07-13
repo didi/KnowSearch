@@ -20,13 +20,13 @@ import java.util.List;
 @AllArgsConstructor
 public class ShardAssignmentDescriptionVO {
     @ApiModelProperty("是否为主")
-    private boolean primary;
+    private boolean                    primary;
     @ApiModelProperty("索引")
-    private String index;
+    private String                     index;
     @ApiModelProperty("分片")
-    private Integer shard;
+    private Integer                    shard;
     @ApiModelProperty("当前状态")
-    private String currentState;
+    private String                     currentState;
 
     @ApiModelProperty("节点信息")
     private List<ShardAssignmenNodeVO> decisions;

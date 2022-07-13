@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ClusterLogic extends BaseEntity implements  Comparable<ClusterLogic> {
+public class ClusterLogic extends BaseEntity implements Comparable<ClusterLogic> {
 
     /**
      * 主键
@@ -45,7 +45,7 @@ public class ClusterLogic extends BaseEntity implements  Comparable<ClusterLogic
     /**
      * dataNode的个数
      */
-    private Integer  dataNodeNu;
+    private Integer dataNodeNu;
 
     /**
      * 责任人

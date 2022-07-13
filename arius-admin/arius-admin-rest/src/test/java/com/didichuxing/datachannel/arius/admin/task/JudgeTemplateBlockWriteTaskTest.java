@@ -26,34 +26,38 @@ import static org.mockito.MockitoAnnotations.initMocks;
  * @Version: 1.0
  */
 
-
 public class JudgeTemplateBlockWriteTaskTest {
 
     @Mock
-    private IndicesManager indicesManager;
+    private IndicesManager       indicesManager;
 
     @Mock
     private IndexTemplateService indexTemplateService;
 
     @Test
-    public void executeTest(){
+    public void executeTest() {
         initMocks(this);
         Result<Void> result = new Result<>();
         result.setCode(1);
 
-        when(indexTemplateService.getLogicTemplateWithPhysicalsById(1)).thenReturn(CustomDataSource.getIndexTemplateWithPhyTemplates());
-        IndexTemplateWithPhyTemplates indexTemplateWithPhyTemplates = indexTemplateService.getLogicTemplateWithPhysicalsById(1);
-        long limitDiskSize  = (long)(indexTemplateWithPhyTemplates.getDiskSize() * 1024 * 1024 * 1024);
+        when(indexTemplateService.getLogicTemplateWithPhysicalsById(1))
+            .thenReturn(CustomDataSource.getIndexTemplateWithPhyTemplates());
+        IndexTemplateWithPhyTemplates indexTemplateWithPhyTemplates = indexTemplateService
+            .getLogicTemplateWithPhysicalsById(1);
+        long limitDiskSize = (long) (indexTemplateWithPhyTemplates.getDiskSize() * 1024 * 1024 * 1024);
         IndexTemplatePhy masterPhyTemplate = indexTemplateWithPhyTemplates.getMasterPhyTemplate();
-        when(indicesManager.listIndexCatInfoByTemplatePhyId(masterPhyTemplate.getId())).thenReturn(CustomDataSource.getCatIndexResult());
+        when(indicesManager.listIndexCatInfoByTemplatePhyId(masterPhyTemplate.getId()))
+            .thenReturn(CustomDataSource.getCatIndexResult());
 
-        List<CatIndexResult> catIndexResults = indicesManager.listIndexCatInfoByTemplatePhyId(masterPhyTemplate.getId());
+        List<CatIndexResult> catIndexResults = indicesManager
+            .listIndexCatInfoByTemplatePhyId(masterPhyTemplate.getId());
         long templateIndicesDiskSum = 0;
         if (CollectionUtils.isNotEmpty(catIndexResults)) {
-            templateIndicesDiskSum = catIndexResults.stream().mapToLong(r -> SizeUtil.getUnitSize(r.getStoreSize())).sum();
+            templateIndicesDiskSum = catIndexResults.stream().mapToLong(r -> SizeUtil.getUnitSize(r.getStoreSize()))
+                .sum();
         }
 
-        if (templateIndicesDiskSum >= templateIndicesDiskSum){
+        if (templateIndicesDiskSum >= templateIndicesDiskSum) {
             when(indexTemplateService.updateBlockWriteState(1, true, "admin")).thenReturn(CustomDataSource.getResult());
             result = indexTemplateService.updateBlockWriteState(1, true, "admin");
         }

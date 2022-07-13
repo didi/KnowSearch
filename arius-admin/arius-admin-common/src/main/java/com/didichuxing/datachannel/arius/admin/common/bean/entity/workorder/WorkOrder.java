@@ -17,7 +17,7 @@ public class WorkOrder extends BaseEntity {
     /**
      * id
      */
-    private Long  id;
+    private Long    id;
 
     /**
      * 工单类型
@@ -44,7 +44,6 @@ public class WorkOrder extends BaseEntity {
      */
     private Integer submitorProjectId;
 
-
     /**
      * 数据中心
      */
@@ -53,10 +52,10 @@ public class WorkOrder extends BaseEntity {
     /**
      * 审批信息
      */
-    private String opinion;
+    private String  opinion;
 
     /**
      * 申请原因
      */
-    private String description;
+    private String  description;
 }

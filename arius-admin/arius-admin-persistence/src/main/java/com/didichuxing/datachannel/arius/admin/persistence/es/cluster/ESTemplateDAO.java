@@ -70,7 +70,7 @@ public class ESTemplateDAO extends BaseESDAO {
 
         // 获取es中原来index template的配置
         ESIndicesGetTemplateResponse getTemplateResponse = client.admin().indices().prepareGetTemplate(name).execute()
-                .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+            .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
         TemplateConfig templateConfig = getTemplateResponse.getMultiTemplatesConfig().getSingleConfig();
 
         // 修改分片数目
@@ -82,7 +82,7 @@ public class ESTemplateDAO extends BaseESDAO {
         templateConfig.setVersion(client.getEsVersion());
 
         ESIndicesPutTemplateResponse response = client.admin().indices().preparePutTemplate(name)
-                .setTemplateConfig(templateConfig).execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+            .setTemplateConfig(templateConfig).execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
 
         return response.getAcknowledged();
     }
@@ -137,8 +137,7 @@ public class ESTemplateDAO extends BaseESDAO {
      * @param shardRouting shardRouting
      * @return result
      */
-    public boolean create(String cluster, String name, String expression, Integer shard,
-                          Integer shardRouting) {
+    public boolean create(String cluster, String name, String expression, Integer shard, Integer shardRouting) {
         ESClient client = esOpClient.getESClient(cluster);
 
         // 获取es中原来index template的配置
@@ -148,7 +147,8 @@ public class ESTemplateDAO extends BaseESDAO {
                 .execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
             templateConfig = getTemplateResponse.getMultiTemplatesConfig().getSingleConfig();
         } catch (Exception e) {
-            LOGGER.warn("class=ESTemplateDAO||method=create||msg=get src template fail||cluster={}||name={}", cluster, name);
+            LOGGER.warn("class=ESTemplateDAO||method=create||msg=get src template fail||cluster={}||name={}", cluster,
+                name);
         }
 
         if (templateConfig == null) {
@@ -172,7 +172,6 @@ public class ESTemplateDAO extends BaseESDAO {
             templateConfig.setOrder(TEMPLATE_DEFAULT_ORDER);
         }
 
-
         templateConfig.setSettings(SINGLE_TYPE, "true");
 
         // 设置ES版本
@@ -192,7 +191,7 @@ public class ESTemplateDAO extends BaseESDAO {
 
         // 向ES中创建模板流程
         ESIndicesPutTemplateResponse response = client.admin().indices().preparePutTemplate(name)
-                .setTemplateConfig(templateConfig).execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+            .setTemplateConfig(templateConfig).execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
 
         return response.getAcknowledged();
     }
@@ -218,8 +217,10 @@ public class ESTemplateDAO extends BaseESDAO {
         try {
             response = esClient.admin().indices().putTemplate(request).actionGet(120, TimeUnit.SECONDS);
         } catch (Exception e) {
-            LOGGER.warn("class=ESTemplateDAO||method=updateTemplate||update template fail||clusterName={}||templateName={}||esVersion={}||templateConfig={}||msg={}", clusterName, templateName,
-                    esClient.getEsVersion(), templateConfig.toJson(ESVersion.valueBy(esClient.getEsVersion())), e.getMessage(), e);
+            LOGGER.warn(
+                "class=ESTemplateDAO||method=updateTemplate||update template fail||clusterName={}||templateName={}||esVersion={}||templateConfig={}||msg={}",
+                clusterName, templateName, esClient.getEsVersion(),
+                templateConfig.toJson(ESVersion.valueBy(esClient.getEsVersion())), e.getMessage(), e);
             throw e;
         }
 
@@ -285,12 +286,12 @@ public class ESTemplateDAO extends BaseESDAO {
      */
     public MultiTemplatesConfig getTemplates(String clusterName, String templateName) {
 
-        LOGGER.warn("class=ESTemplateDAO||method=getTemplates||clusterName={}||templateName={}",
-                clusterName, templateName);
+        LOGGER.warn("class=ESTemplateDAO||method=getTemplates||clusterName={}||templateName={}", clusterName,
+            templateName);
 
         ESClient esClient = esOpClient.getESClient(clusterName);
 
-        if(null == esClient){
+        if (null == esClient) {
             return null;
         }
 
@@ -301,8 +302,9 @@ public class ESTemplateDAO extends BaseESDAO {
         try {
             response = esClient.admin().indices().getTemplate(request).actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
         } catch (Exception e) {
-            LOGGER.warn("class=ESTemplateDAO||method=getTemplates||get templates fail||clusterName={}||templateName={}||msg={}",
-                    clusterName, templateName, e.getMessage(), e);
+            LOGGER.warn(
+                "class=ESTemplateDAO||method=getTemplates||get templates fail||clusterName={}||templateName={}||msg={}",
+                clusterName, templateName, e.getMessage(), e);
         }
 
         if (response == null) {
@@ -310,7 +312,8 @@ public class ESTemplateDAO extends BaseESDAO {
         }
 
         if (!EnvUtil.isOnline()) {
-            LOGGER.warn("class=ESTemplateDAO||method=getTemplates||clusterName={}||templateName={}", clusterName, templateName);
+            LOGGER.warn("class=ESTemplateDAO||method=getTemplates||clusterName={}||templateName={}", clusterName,
+                templateName);
         }
 
         return response.getMultiTemplatesConfig();

@@ -21,7 +21,9 @@ public class ESAggMetricsVO implements Serializable, Comparable<ESAggMetricsVO> 
 
     @Override
     public int compareTo(ESAggMetricsVO o) {
-        if(null == o){return 0;}
+        if (null == o) {
+            return 0;
+        }
 
         return this.getTimeStamp().intValue() - o.getTimeStamp().intValue();
     }

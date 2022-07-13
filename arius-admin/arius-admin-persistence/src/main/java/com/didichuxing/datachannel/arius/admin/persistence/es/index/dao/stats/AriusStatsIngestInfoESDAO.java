@@ -17,10 +17,10 @@ import java.util.Map;
 public class AriusStatsIngestInfoESDAO extends BaseAriusStatsESDAO {
 
     @PostConstruct
-    public void init(){
-        super.indexName   = dataCentreUtil.getAriusStatsIngestInfo();
+    public void init() {
+        super.indexName = dataCentreUtil.getAriusStatsIngestInfo();
 
-        register( AriusStatsEnum.INGEST_INFO,this);
+        register(AriusStatsEnum.INGEST_INFO, this);
     }
 
     /**
@@ -68,13 +68,15 @@ public class AriusStatsIngestInfoESDAO extends BaseAriusStatsESDAO {
             }
           }
      */
-    public Map<Long/*templateId*/, Double> getTemplateIngestFailMetricInfo(Integer logicId, Long currentStartDate, Long currentEndDate) {
+    public Map<Long/*templateId*/, Double> getTemplateIngestFailMetricInfo(Integer logicId, Long currentStartDate,
+                                                                           Long currentEndDate) {
         Map<Long/*templateId*/, Double> currentFailCountMap = Maps.newHashMap();
 
         String indexNames = IndexNameUtils.genDailyIndexName(indexName, currentStartDate, currentEndDate);
 
         // 获得ingest写入错误数
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_INGEST_FAILED_COUNT_BY_LOGIC_ID_AND_TIME_RANGE, currentStartDate, currentEndDate, logicId);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(
+            DslsConstant.GET_INGEST_FAILED_COUNT_BY_LOGIC_ID_AND_TIME_RANGE, currentStartDate, currentEndDate, logicId);
         ESQueryResponse esQueryResponse = gatewayClient.performRequest(indexNames, TYPE, dsl);
         if (esQueryResponse != null && esQueryResponse.getAggs() != null) {
             Map<String, ESAggr> esAggrMap = esQueryResponse.getAggs().getEsAggrMap();
@@ -95,7 +97,8 @@ public class AriusStatsIngestInfoESDAO extends BaseAriusStatsESDAO {
                 Long templateId = Long.valueOf(esBucket.getUnusedMap().get("key").toString());
                 String avgCountStr = "0.0";
                 ESAggr avgCountAggr = esBucket.getAggrMap().get("avg_count_templateId");
-                if (avgCountAggr != null && avgCountAggr.getUnusedMap() != null && avgCountAggr.getUnusedMap().get("value") != null) {
+                if (avgCountAggr != null && avgCountAggr.getUnusedMap() != null
+                    && avgCountAggr.getUnusedMap().get("value") != null) {
                     avgCountStr = avgCountAggr.getUnusedMap().get("value").toString();
                 }
                 currentFailCountMap.put(templateId, Double.valueOf(avgCountStr));

@@ -94,7 +94,8 @@ public interface TemplateLogicMappingManager {
      * @param projectId
      * @return result
      */
-    Result<Void> editMapping(ConsoleTemplateSchemaDTO schemaDTO, String operator, Integer projectId) throws AdminOperateException;
+    Result<Void> editMapping(ConsoleTemplateSchemaDTO schemaDTO, String operator,
+                             Integer projectId) throws AdminOperateException;
 
     /**
      * 获取模板schema

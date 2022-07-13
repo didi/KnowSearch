@@ -19,36 +19,35 @@ import org.apache.commons.collections4.CollectionUtils;
 @Data
 public class TemplateSettingOperateRecord extends TemplateOperateRecord {
 
-    
     public TemplateSettingOperateRecord(IndexTemplatePhySetting oldConfig, IndexTemplatePhySetting newConfig) {
         this.operateType = TemplateOperateRecordEnum.SETTING.getCode();
         source = oldConfig.getSettings();
         target = newConfig.getSettings();
         final List<DiffJson> diffs = DiffUtil.diffJsonByString(
-                Optional.ofNullable(oldConfig).map(IndexTemplatePhySetting::getSettings).map(JSONAware::toJSONString)
-                        
-                        .orElse(""),
-                Optional.ofNullable(newConfig).map(IndexTemplatePhySetting::getSettings).map(JSONAware::toJSONString)
-                        
-                        .orElse("")
-        
+            Optional.ofNullable(oldConfig).map(IndexTemplatePhySetting::getSettings).map(JSONAware::toJSONString)
+
+                .orElse(""),
+            Optional.ofNullable(newConfig).map(IndexTemplatePhySetting::getSettings).map(JSONAware::toJSONString)
+
+                .orElse("")
+
         );
-        
+
         diffResult.addAll(diffs);
-        change= CollectionUtils.isNotEmpty(diffs);
-        
+        change = CollectionUtils.isNotEmpty(diffs);
+
     }
-    
+
     public TemplateSettingOperateRecord(IndexSettingVO oldSetting, IndexSettingVO newSettingVo) {
         source = oldSetting.getProperties();
         target = newSettingVo.getProperties();
         final List<DiffJson> diffs = DiffUtil.diffJsonByString(source.toJSONString(), target.toJSONString());
-        
+
         diffResult.addAll(diffs);
         operateType = TemplateOperateRecordEnum.SETTING.getCode();
-        change= CollectionUtils.isNotEmpty(diffs);
+        change = CollectionUtils.isNotEmpty(diffs);
     }
-    
+
     @Override
     public String toString() {
         return JSON.toJSONString(this);

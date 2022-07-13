@@ -40,20 +40,20 @@ import java.util.stream.Collectors;
 public class ClusterPhyQuickCommandManagerImpl implements ClusterPhyQuickCommandManager {
 
     @Autowired
-    protected ClusterPhyService clusterPhyService;
+    protected ClusterPhyService    clusterPhyService;
 
     @Autowired
-    protected ESClusterService esClusterService;
+    protected ESClusterService     esClusterService;
     @Autowired
     protected ESClusterNodeService esClusterNodeService;
 
     @Autowired
-    protected ESIndexService esIndexService;
+    protected ESIndexService       esIndexService;
     @Autowired
-    protected ESShardService esShardService;
+    protected ESShardService       esShardService;
 
     @Autowired
-    private HandleFactory handleFactory;
+    private HandleFactory          handleFactory;
 
     @Override
     public Result<List<NodeStateVO>> nodeStateAnalysis(String cluster) {
@@ -72,7 +72,7 @@ public class ClusterPhyQuickCommandManagerImpl implements ClusterPhyQuickCommand
         }
         // 把 List<CatIndexResult> 转为 List<IndicesDistributionVO>
         List<CatIndexResult> catIndexResultList = esIndexService.indicesDistribution(cluster);
-        return Result.buildSucc( ConvertUtil.list2List(catIndexResultList,IndicesDistributionVO.class));
+        return Result.buildSucc(ConvertUtil.list2List(catIndexResultList, IndicesDistributionVO.class));
     }
 
     @Override
@@ -159,8 +159,10 @@ public class ClusterPhyQuickCommandManagerImpl implements ClusterPhyQuickCommand
     }
 
     @Override
-    public PaginationResult<IndicesDistributionVO> indicesDistributionPage(IndexQueryDTO condition, Integer projectId) throws NotFindSubclassException {
-        BaseHandle baseHandle     = handleFactory.getByHandlerNamePer(PageSearchHandleTypeEnum.QUICK_COMMAND_INDEX.getPageSearchType());
+    public PaginationResult<IndicesDistributionVO> indicesDistributionPage(IndexQueryDTO condition,
+                                                                           Integer projectId) throws NotFindSubclassException {
+        BaseHandle baseHandle = handleFactory
+            .getByHandlerNamePer(PageSearchHandleTypeEnum.QUICK_COMMAND_INDEX.getPageSearchType());
         if (baseHandle instanceof QuickCommandIndicesDistributionPageSearchHandle) {
             QuickCommandIndicesDistributionPageSearchHandle handle = (QuickCommandIndicesDistributionPageSearchHandle) baseHandle;
             return handle.doPage(condition, projectId);

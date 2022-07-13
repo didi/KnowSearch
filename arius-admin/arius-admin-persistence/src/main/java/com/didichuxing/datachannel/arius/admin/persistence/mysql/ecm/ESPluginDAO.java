@@ -1,6 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.persistence.mysql.ecm;
 
-
 import com.didichuxing.datachannel.arius.admin.common.bean.po.esplugin.PluginPO;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -24,8 +23,7 @@ public interface ESPluginDAO {
 
     PluginPO getById(Long id);
 
-    List<PluginPO> getByNameAndVersion(@Param("name") String name,
-                                       @Param("version") String version);
+    List<PluginPO> getByNameAndVersion(@Param("name") String name, @Param("version") String version);
 
     int delete(Long id);
 

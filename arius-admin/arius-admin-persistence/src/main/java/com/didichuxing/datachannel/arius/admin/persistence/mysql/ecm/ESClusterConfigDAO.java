@@ -13,9 +13,9 @@ import org.springframework.stereotype.Repository;
 public interface ESClusterConfigDAO {
     List<ESConfigPO> listByClusterId(Long clusterId);
 
-    ESConfigPO getByClusterIdAndTypeAndEngin(@Param("clusterId") Long clusterId,
-                                             @Param("type") String type,
+    ESConfigPO getByClusterIdAndTypeAndEngin(@Param("clusterId") Long clusterId, @Param("type") String type,
                                              @Param("engin") String engin);
+
     int insert(ESConfigPO param);
 
     int update(ESConfigPO param);
@@ -26,8 +26,7 @@ public interface ESClusterConfigDAO {
 
     int delete(Long id);
 
-    ESConfigPO getByClusterIdAndTypeAndEnginAndVersion(@Param("clusterId") Long clusterId,
-                                                       @Param("type") String type,
+    ESConfigPO getByClusterIdAndTypeAndEnginAndVersion(@Param("clusterId") Long clusterId, @Param("type") String type,
                                                        @Param("engin") String enginName,
                                                        @Param("version") Integer version);
 
@@ -35,9 +34,8 @@ public interface ESClusterConfigDAO {
 
     int insertSelective(ESConfigPO param);
 
-    int deleteByClusterIdAndTypeAndEngin(@Param("clusterId") Long clusterId,
-                                         @Param("type") String type,
+    int deleteByClusterIdAndTypeAndEngin(@Param("clusterId") Long clusterId, @Param("type") String type,
                                          @Param("engin") String enginName);
-    
-    Integer getClusterIdByConfigId(@Param("id")Long configId);
+
+    Integer getClusterIdByConfigId(@Param("id") Long configId);
 }

@@ -15,7 +15,8 @@ import com.didiglobal.logi.log.LogFactory;
  */
 public class Getter {
 
-    private Getter(){}
+    private Getter() {
+    }
 
     private static final ILog LOGGER = LogFactory.getLog(Getter.class);
 

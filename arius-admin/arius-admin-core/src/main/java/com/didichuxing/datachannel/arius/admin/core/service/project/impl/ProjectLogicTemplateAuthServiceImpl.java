@@ -51,7 +51,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class ProjectLogicTemplateAuthServiceImpl implements ProjectLogicTemplateAuthService {
 
-    private static final ILog          LOGGER = LogFactory.getLog(ProjectLogicTemplateAuthServiceImpl.class);
+    private static final ILog              LOGGER = LogFactory.getLog(ProjectLogicTemplateAuthServiceImpl.class);
 
     @Autowired
     private ProjectTemplateAuthDAO         templateAuthDAO;
@@ -60,15 +60,13 @@ public class ProjectLogicTemplateAuthServiceImpl implements ProjectLogicTemplate
     private ProjectService                 projectService;
 
     @Autowired
-    private IndexTemplateService indexTemplateService;
-
-    
+    private IndexTemplateService           indexTemplateService;
 
     @Autowired
     private ProjectClusterLogicAuthService logicClusterAuthService;
 
     @Autowired
-    private OperateRecordService operateRecordService;
+    private OperateRecordService           operateRecordService;
 
     @Override
     public boolean deleteRedundancyTemplateAuths(boolean shouldDeleteFlags) {
@@ -81,7 +79,8 @@ public class ProjectLogicTemplateAuthServiceImpl implements ProjectLogicTemplate
         Map<Long, ProjectTemplateAuthPO> needDeleteTemplateAuths = Maps.newHashMap();
 
         for (Integer projectId : projectId2TemplateAuthsMappings.keySet()) {
-            List<ProjectTemplateAuthPO> appTemplateAuths = Lists.newArrayList(projectId2TemplateAuthsMappings.get(projectId));
+            List<ProjectTemplateAuthPO> appTemplateAuths = Lists
+                .newArrayList(projectId2TemplateAuthsMappings.get(projectId));
 
             Multimap<Integer, ProjectTemplateAuthPO> currentProjectLogicId2TemplateAuthsMappings = ConvertUtil
                 .list2MulMap(appTemplateAuths, ProjectTemplateAuthPO::getTemplateId);
@@ -94,16 +93,21 @@ public class ProjectLogicTemplateAuthServiceImpl implements ProjectLogicTemplate
                     needDeleteTemplateAuths
                         .putAll(ConvertUtil.list2Map(currentLogicTemplateAuths, ProjectTemplateAuthPO::getId));
 
-                    LOGGER.info("class=AppLogicTemplateAuthServiceImpl||method=checkMeta||msg=templateDeleted||projectId=={}||logicId={}", projectId, logicTemplateId);
+                    LOGGER.info(
+                        "class=AppLogicTemplateAuthServiceImpl||method=checkMeta||msg=templateDeleted||projectId=={}||logicId={}",
+                        projectId, logicTemplateId);
 
-                } else if (projectId.equals(logicTemplateId2LogicTemplateMappings.get(logicTemplateId).getProjectId())) {
+                } else if (projectId
+                    .equals(logicTemplateId2LogicTemplateMappings.get(logicTemplateId).getProjectId())) {
                     needDeleteTemplateAuths
                         .putAll(ConvertUtil.list2Map(currentLogicTemplateAuths, ProjectTemplateAuthPO::getId));
 
-                    LOGGER.info("class=AppLogicTemplateAuthServiceImpl||method=checkMeta||msg=appOwnTemplate||projectId=={}||logicId={}", projectId, logicTemplateId);
+                    LOGGER.info(
+                        "class=AppLogicTemplateAuthServiceImpl||method=checkMeta||msg=appOwnTemplate||projectId=={}||logicId={}",
+                        projectId, logicTemplateId);
                 } else {
 
-                    if(currentLogicTemplateAuths.size() == 1) {
+                    if (currentLogicTemplateAuths.size() == 1) {
                         continue;
                     }
 
@@ -113,8 +117,9 @@ public class ProjectLogicTemplateAuthServiceImpl implements ProjectLogicTemplate
                         ConvertUtil.list2Map(currentLogicTemplateAuths.subList(1, currentLogicTemplateAuths.size()),
                             ProjectTemplateAuthPO::getId));
 
-                    LOGGER.info("class=AppLogicTemplateAuthServiceImpl||method=checkMeta||msg=appHasMultiTemplateAuth||projectId=={}||logicId={}", projectId,
-                        logicTemplateId);
+                    LOGGER.info(
+                        "class=AppLogicTemplateAuthServiceImpl||method=checkMeta||msg=appHasMultiTemplateAuth||projectId=={}||logicId={}",
+                        projectId, logicTemplateId);
                 }
             }
         }
@@ -125,8 +130,8 @@ public class ProjectLogicTemplateAuthServiceImpl implements ProjectLogicTemplate
     }
 
     @Override
-    public Result<Void> ensureSetLogicTemplateAuth(Integer projectId, Integer logicTemplateId, ProjectTemplateAuthEnum auth,
-                                             String responsible, String operator) {
+    public Result<Void> ensureSetLogicTemplateAuth(Integer projectId, Integer logicTemplateId,
+                                                   ProjectTemplateAuthEnum auth, String responsible, String operator) {
         // 参数检查
         if (projectId == null) {
             return Result.buildParamIllegal("未指定projectId");
@@ -141,7 +146,8 @@ public class ProjectLogicTemplateAuthServiceImpl implements ProjectLogicTemplate
         }
 
         // 获取权限表中已经存在的权限¬记录
-        ProjectTemplateAuthPO oldAuthPO = templateAuthDAO.getByProjectIdAndTemplateId(projectId, String.valueOf(logicTemplateId));
+        ProjectTemplateAuthPO oldAuthPO = templateAuthDAO.getByProjectIdAndTemplateId(projectId,
+            String.valueOf(logicTemplateId));
 
         if (oldAuthPO == null) {
             // 之前无权限
@@ -151,7 +157,8 @@ public class ProjectLogicTemplateAuthServiceImpl implements ProjectLogicTemplate
             }
 
             // 新增
-            return addTemplateAuth(new ProjectTemplateAuthDTO(null, projectId, logicTemplateId, auth.getCode(), responsible));
+            return addTemplateAuth(
+                new ProjectTemplateAuthDTO(null, projectId, logicTemplateId, auth.getCode(), responsible));
         } else {
             // 有权限记录
             // 期望删除权限
@@ -193,9 +200,11 @@ public class ProjectLogicTemplateAuthServiceImpl implements ProjectLogicTemplate
     }
 
     @Override
-    public ProjectTemplateAuth getTemplateRWAuthByLogicTemplateIdAndProjectId(Integer logicTemplateId, Integer projectId) {
+    public ProjectTemplateAuth getTemplateRWAuthByLogicTemplateIdAndProjectId(Integer logicTemplateId,
+                                                                              Integer projectId) {
         return ConvertUtil.obj2Obj(
-                templateAuthDAO.getByProjectIdAndTemplateId(projectId, String.valueOf(logicTemplateId)), ProjectTemplateAuth.class);
+            templateAuthDAO.getByProjectIdAndTemplateId(projectId, String.valueOf(logicTemplateId)),
+            ProjectTemplateAuth.class);
     }
 
     /**
@@ -263,10 +272,8 @@ public class ProjectLogicTemplateAuthServiceImpl implements ProjectLogicTemplate
 
         if (succeed) {
             SpringTool.publish(
-                new ProjectTemplateAuthDeleteEvent(this, ConvertUtil.obj2Obj(oldAuthPO,
-                        ProjectTemplateAuth.class)));
-      
-          
+                new ProjectTemplateAuthDeleteEvent(this, ConvertUtil.obj2Obj(oldAuthPO, ProjectTemplateAuth.class)));
+
         }
 
         return Result.build(succeed);
@@ -281,20 +288,21 @@ public class ProjectLogicTemplateAuthServiceImpl implements ProjectLogicTemplate
                 return Result.buildSucc();
             }
 
-            List<Integer> oldTemplateIds = oldAppTemplateAuthPO.stream().map(ProjectTemplateAuthPO::getTemplateId).collect(Collectors.toList());
+            List<Integer> oldTemplateIds = oldAppTemplateAuthPO.stream().map(ProjectTemplateAuthPO::getTemplateId)
+                .collect(Collectors.toList());
             succeed = oldTemplateIds.size() == templateAuthDAO.batchDeleteByTemplateIds(oldTemplateIds);
             if (Boolean.FALSE.equals(succeed)) {
                 LOGGER.error(
-                        "class=AppLogicTemplateAuthServiceImpl||method=deleteTemplateAuthByTemplateId||delete infos failed");
+                    "class=AppLogicTemplateAuthServiceImpl||method=deleteTemplateAuthByTemplateId||delete infos failed");
             }
         } catch (Exception e) {
             LOGGER.error("class=AppLogicTemplateAuthServiceImpl||method=deleteTemplateAuthByTemplateId||errMsg={}",
-                    e.getMessage(), e);
+                e.getMessage(), e);
         }
 
         return Result.build(succeed);
     }
-    
+
     /**
      * @param authId
      * @return
@@ -303,7 +311,7 @@ public class ProjectLogicTemplateAuthServiceImpl implements ProjectLogicTemplate
     public Integer getProjectIdById(Long authId) {
         return templateAuthDAO.getProjectIdById(authId);
     }
-    
+
     /**
      * 获取所有APP的权限
      * @return map, key为projectId，value为app拥有的权限点集合
@@ -333,7 +341,8 @@ public class ProjectLogicTemplateAuthServiceImpl implements ProjectLogicTemplate
     }
 
     @Override
-    public ProjectTemplateAuth buildTemplateAuth(IndexTemplate logicTemplate, ProjectTemplateAuthEnum projectTemplateAuthEnum) {
+    public ProjectTemplateAuth buildTemplateAuth(IndexTemplate logicTemplate,
+                                                 ProjectTemplateAuthEnum projectTemplateAuthEnum) {
         ProjectTemplateAuth auth = new ProjectTemplateAuth();
         auth.setProjectId(logicTemplate.getProjectId());
         auth.setTemplateId(logicTemplate.getId());
@@ -360,16 +369,13 @@ public class ProjectLogicTemplateAuthServiceImpl implements ProjectLogicTemplate
             SpringTool.publish(
                 new ProjectTemplateAuthEditEvent(this, ConvertUtil.obj2Obj(oldAuthPO, ProjectTemplateAuth.class),
                     ConvertUtil.obj2Obj(templateAuthDAO.getById(authDTO.getId()), ProjectTemplateAuth.class)));
-            operateRecordService.save(new OperateRecord.Builder()
-                            .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                            .userOperation(operator)
-                            .operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_INFO_MODIFY)
-                            .bizId(oldAuthPO.getId())
-                            .content( JSON.toJSONString(newAuthPO))
-                            .project(projectService.getProjectBriefByProjectId(authDTO.getProjectId()))
-                    
-                    .build());
-          
+            operateRecordService.save(new OperateRecord.Builder().triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                .userOperation(operator).operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_INFO_MODIFY)
+                .bizId(oldAuthPO.getId()).content(JSON.toJSONString(newAuthPO))
+                .project(projectService.getProjectBriefByProjectId(authDTO.getProjectId()))
+
+                .build());
+
         }
 
         return Result.build(succeed);
@@ -382,13 +388,12 @@ public class ProjectLogicTemplateAuthServiceImpl implements ProjectLogicTemplate
      */
     private Result<Void> addTemplateAuthWithoutCheck(ProjectTemplateAuthDTO authDTO) {
         ProjectTemplateAuthPO authPO = ConvertUtil.obj2Obj(authDTO, ProjectTemplateAuthPO.class);
-        boolean succeed =  1 == templateAuthDAO.insert(authPO);
+        boolean succeed = 1 == templateAuthDAO.insert(authPO);
         if (succeed) {
             // 发送消息
-            SpringTool.publish(
-                    new ProjectTemplateAuthAddEvent(this, ConvertUtil.obj2Obj(authPO, ProjectTemplateAuth.class)));
+            SpringTool
+                .publish(new ProjectTemplateAuthAddEvent(this, ConvertUtil.obj2Obj(authPO, ProjectTemplateAuth.class)));
         }
-       
 
         return Result.build(succeed);
     }
@@ -420,7 +425,7 @@ public class ProjectLogicTemplateAuthServiceImpl implements ProjectLogicTemplate
             }
         } else if (OperationEnum.EDIT.equals(operation)) {
             Result<Void> result = handleEdit(authDTO);
-            if (result.failed()){
+            if (result.failed()) {
                 return result;
             }
         }
@@ -429,8 +434,6 @@ public class ProjectLogicTemplateAuthServiceImpl implements ProjectLogicTemplate
         if (ProjectTemplateAuthEnum.OWN == authEnum) {
             return Result.buildParamIllegal("不支持添加管理权限");
         }
-
-       
 
         return Result.buildSucc();
     }
@@ -447,7 +450,8 @@ public class ProjectLogicTemplateAuthServiceImpl implements ProjectLogicTemplate
         return Result.buildSucc();
     }
 
-    private Result<Void> handleAdd(ProjectTemplateAuthDTO authDTO, Integer projectId, Integer logicTemplateId, ProjectTemplateAuthEnum authEnum) {
+    private Result<Void> handleAdd(ProjectTemplateAuthDTO authDTO, Integer projectId, Integer logicTemplateId,
+                                   ProjectTemplateAuthEnum authEnum) {
         // 新增权限检查
         if (AriusObjUtils.isNull(projectId)) {
             return Result.buildParamIllegal("projectId为空");
@@ -470,8 +474,6 @@ public class ProjectLogicTemplateAuthServiceImpl implements ProjectLogicTemplate
             return Result.buildParamIllegal("权限类型为空");
         }
 
-        
-
         // 重复添加不做幂等，抛出错误
         if (null != templateAuthDAO.getByProjectIdAndTemplateId(projectId, String.valueOf(logicTemplateId))) {
             return Result.buildNotExist("权限已存在");
@@ -483,10 +485,10 @@ public class ProjectLogicTemplateAuthServiceImpl implements ProjectLogicTemplate
         }
 
         // 有集群权限才能新增索引权限
-        ClusterLogic clusterLogic = indexTemplateService
-            .getLogicTemplateWithClusterAndMasterTemplate(logicTemplateId).getLogicCluster();
+        ClusterLogic clusterLogic = indexTemplateService.getLogicTemplateWithClusterAndMasterTemplate(logicTemplateId)
+            .getLogicCluster();
         if (AriusObjUtils.isNull(clusterLogic) || logicClusterAuthService.getLogicClusterAuthEnum(projectId,
-                clusterLogic.getId()) == ProjectClusterLogicAuthEnum.NO_PERMISSIONS) {
+            clusterLogic.getId()) == ProjectClusterLogicAuthEnum.NO_PERMISSIONS) {
             return Result.buildOpForBidden("没有索引所在集群的权限");
         }
         return Result.buildSucc();
@@ -499,13 +501,11 @@ public class ProjectLogicTemplateAuthServiceImpl implements ProjectLogicTemplate
     private List<ProjectTemplateAuth> getAllAppsActiveTemplateOwnerAuths() {
         List<IndexTemplate> logicTemplates = indexTemplateService.listAllLogicTemplates();
         List<Integer> projectIds = projectService.getProjectBriefList().stream().map(ProjectBriefVO::getId)
-                .collect(Collectors.toList());
-    
-        return logicTemplates
-                .stream()
-                .filter(indexTemplateLogic -> projectIds.contains(indexTemplateLogic.getProjectId()))
-                .map(r -> buildTemplateAuth(r, ProjectTemplateAuthEnum.OWN))
-                .collect(Collectors.toList());
+            .collect(Collectors.toList());
+
+        return logicTemplates.stream()
+            .filter(indexTemplateLogic -> projectIds.contains(indexTemplateLogic.getProjectId()))
+            .map(r -> buildTemplateAuth(r, ProjectTemplateAuthEnum.OWN)).collect(Collectors.toList());
     }
 
     /**
@@ -518,7 +518,7 @@ public class ProjectLogicTemplateAuthServiceImpl implements ProjectLogicTemplate
 
         // 过滤出active的逻辑模板的权限点
         Set<Integer> logicTemplateIds = indexTemplateService.listAllLogicTemplates().stream().map(IndexTemplate::getId)
-                .collect(Collectors.toSet());
+            .collect(Collectors.toSet());
         return rwTemplateAuths.stream().filter(authTemplate -> logicTemplateIds.contains(authTemplate.getTemplateId()))
             .collect(Collectors.toList());
     }
@@ -531,14 +531,12 @@ public class ProjectLogicTemplateAuthServiceImpl implements ProjectLogicTemplate
 
     @Override
     public List<ProjectTemplateAuth> getProjectActiveTemplateRWAndRAuths(Integer projectId) {
-        return ConvertUtil
-            .list2List(templateAuthDAO.listWithRwAuthsByProjectId(projectId), ProjectTemplateAuth.class);
+        return ConvertUtil.list2List(templateAuthDAO.listWithRwAuthsByProjectId(projectId), ProjectTemplateAuth.class);
     }
 
     @Override
     public List<ProjectTemplateAuth> getProjectTemplateRWAndRAuthsWithoutCodecResponsible(Integer projectId) {
-        return ConvertUtil
-                .list2List(templateAuthDAO.listWithRwAuthsByProjectId(projectId), ProjectTemplateAuth.class);
+        return ConvertUtil.list2List(templateAuthDAO.listWithRwAuthsByProjectId(projectId), ProjectTemplateAuth.class);
     }
 
     @Override
@@ -546,8 +544,7 @@ public class ProjectLogicTemplateAuthServiceImpl implements ProjectLogicTemplate
         ProjectTemplateAuthPO projectTemplateAuthPO = new ProjectTemplateAuthPO();
         projectTemplateAuthPO.setProjectId(projectId);
         projectTemplateAuthPO.setType(ProjectTemplateAuthEnum.RW.getCode());
-        return ConvertUtil
-                .list2List(templateAuthDAO.listByCondition(projectTemplateAuthPO), ProjectTemplateAuth.class);
+        return ConvertUtil.list2List(templateAuthDAO.listByCondition(projectTemplateAuthPO), ProjectTemplateAuth.class);
     }
 
     @Override
@@ -555,8 +552,7 @@ public class ProjectLogicTemplateAuthServiceImpl implements ProjectLogicTemplate
         ProjectTemplateAuthPO projectTemplateAuthPO = new ProjectTemplateAuthPO();
         projectTemplateAuthPO.setProjectId(projectId);
         projectTemplateAuthPO.setType(ProjectTemplateAuthEnum.R.getCode());
-        return ConvertUtil
-                .list2List(templateAuthDAO.listByCondition(projectTemplateAuthPO), ProjectTemplateAuth.class);
+        return ConvertUtil.list2List(templateAuthDAO.listByCondition(projectTemplateAuthPO), ProjectTemplateAuth.class);
     }
 
     /**
@@ -569,10 +565,13 @@ public class ProjectLogicTemplateAuthServiceImpl implements ProjectLogicTemplate
             for (ProjectTemplateAuthPO templateAuth : templateAuths) {
                 if (deleteFlags) {
                     if (1 == templateAuthDAO.delete(templateAuth.getId())) {
-                        LOGGER.info("class=AppLogicTemplateAuthServiceImpl||method=checkMeta||msg=deleteTemplateAuthSucceed||authId={}", templateAuth.getId());
+                        LOGGER.info(
+                            "class=AppLogicTemplateAuthServiceImpl||method=checkMeta||msg=deleteTemplateAuthSucceed||authId={}",
+                            templateAuth.getId());
                     }
                 } else {
-                    LOGGER.info("class=AppLogicTemplateAuthServiceImpl||method=checkMeta||msg=deleteCheck||authId={}", templateAuth.getId());
+                    LOGGER.info("class=AppLogicTemplateAuthServiceImpl||method=checkMeta||msg=deleteCheck||authId={}",
+                        templateAuth.getId());
                 }
             }
         }
@@ -585,7 +584,7 @@ public class ProjectLogicTemplateAuthServiceImpl implements ProjectLogicTemplate
      * @return
      */
     private List<ProjectTemplateAuth> mergeAppTemplateAuths(List<ProjectTemplateAuth> projectTemplateRWAuths,
-                                                        List<ProjectTemplateAuth> projectTemplateOwnerAuths) {
+                                                            List<ProjectTemplateAuth> projectTemplateOwnerAuths) {
         List<ProjectTemplateAuth> mergeAppTemplateAuthList = Lists.newArrayList();
         List<Integer> appOwnTemplateId = projectTemplateOwnerAuths.stream().map(ProjectTemplateAuth::getTemplateId)
             .collect(Collectors.toList());

@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@ApiModel(description ="索引健康分实时查询耗时统计信息")
+@ApiModel(description = "索引健康分实时查询耗时统计信息")
 public class RealTimeSearchCost extends BaseDegree {
     /**
      * 近十分钟平均查询时长
@@ -20,11 +20,11 @@ public class RealTimeSearchCost extends BaseDegree {
     /**
      * 查询耗时得分
      */
-    public double getSearchCostTimeScore(){
+    public double getSearchCostTimeScore() {
         return super.getScore();
     }
 
-    public String getSearchCostTimeDesc(){
+    public String getSearchCostTimeDesc() {
         return super.getDesc();
     }
 }

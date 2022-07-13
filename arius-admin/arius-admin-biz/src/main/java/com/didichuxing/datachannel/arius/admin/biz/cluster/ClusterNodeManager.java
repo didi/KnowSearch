@@ -40,7 +40,8 @@ public interface ClusterNodeManager {
      * @param projectId
      * @return Result<Boolean>
      */
-    Result<Boolean> editMultiNode2Region(List<ClusterRegionWithNodeInfoDTO> params, String operator, Integer projectId) throws AdminOperateException;
+    Result<Boolean> editMultiNode2Region(List<ClusterRegionWithNodeInfoDTO> params, String operator,
+                                         Integer projectId) throws AdminOperateException;
 
     /**
      * 获取物理集群节点列表
@@ -66,6 +67,7 @@ public interface ClusterNodeManager {
     Result listClusterLogicNodeByName(String clusterLogicName);
 
     Result<List<ESClusterRoleHostVO>> listClusterRoleHostByRegionId(Long regionId);
+
     /**
      * 采集集群节点数据
      *
@@ -74,5 +76,5 @@ public interface ClusterNodeManager {
      * @throws AdminTaskException 管理任务异常
      */
     boolean collectNodeSettings(String cluster) throws AdminTaskException;
-    
+
 }

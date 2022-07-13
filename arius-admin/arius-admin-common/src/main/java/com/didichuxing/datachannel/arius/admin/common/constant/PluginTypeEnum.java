@@ -22,7 +22,7 @@ public enum PluginTypeEnum {
                              */
                             UNKNOWN(-1, "未知类型");
 
-    int code;
+    int    code;
     String desc;
 
     PluginTypeEnum(int code, String desc) {

@@ -78,5 +78,4 @@ public interface TemplatePhyMappingManager {
      */
     Result<Void> checkMappingForNew(String template, AriusTypeProperty ariusTypeProperty);
 
-
 }

@@ -1,6 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.po.ecm;
 
-
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.BasePO;
@@ -18,27 +17,27 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ESClusterRoleHostPO extends BasePO {
 
-    private Long id;
+    private Long    id;
 
     /**
      * elastic_cluster外键ID
      */
-    private Long roleClusterId;
+    private Long    roleClusterId;
 
     /**
      * 主机名或IP
      */
-    private String hostname;
+    private String  hostname;
 
     /**
      * IP
      */
-    private String ip;
+    private String  ip;
 
     /**
      * 集群名称
      */
-    private String cluster;
+    private String  cluster;
 
     /**
      * es进程端口
@@ -70,7 +69,7 @@ public class ESClusterRoleHostPO extends BasePO {
     /**
      * 机器规格 例如32C-64G-SSD-6T
      */
-    private String machineSpec;
+    private String  machineSpec;
 
     /**
      * regionId
@@ -80,7 +79,7 @@ public class ESClusterRoleHostPO extends BasePO {
     /**
      * attributes, 逗号分隔  key1:value1,key2:value2
      */
-    private String attributes;
+    private String  attributes;
 
     @Override
     public boolean equals(Object o) {

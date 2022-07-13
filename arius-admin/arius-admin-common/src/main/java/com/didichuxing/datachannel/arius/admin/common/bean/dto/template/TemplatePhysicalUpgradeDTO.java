@@ -31,6 +31,6 @@ public class TemplatePhysicalUpgradeDTO extends BaseDTO {
     private Integer version;
 
     @ApiModelProperty("逻辑模板id")
-    private Long logicId;
+    private Long    logicId;
 
 }

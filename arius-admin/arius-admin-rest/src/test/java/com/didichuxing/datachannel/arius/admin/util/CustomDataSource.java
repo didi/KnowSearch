@@ -58,21 +58,16 @@ import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
 
 public class CustomDataSource {
 
-    public static final String PHY_CLUSTER_NAME = "admin_test_1";
-    public static final String PHY_CLUSTER_NAME_LOGI="logi-em-matedata-cluster";
+    public static final String PHY_CLUSTER_NAME      = "admin_test_1";
+    public static final String PHY_CLUSTER_NAME_LOGI = "logi-em-matedata-cluster";
 
-    public static final String OPERATOR = "admin";
+    public static final String OPERATOR              = "admin";
 
-    public static final int SIZE = 10;
+    public static final int    SIZE                  = 10;
 
     public static <T> Stream<T> fromJSON(String json, Class<T> cls) {
         return Stream.of(JSON.parseObject(json, cls));
     }
-
-    
-  
-
-  
 
     public static AriusConfigInfoDTO ariusConfigInfoDTOFactory() {
         AriusConfigInfoDTO configInfoDTO = new AriusConfigInfoDTO();
@@ -93,8 +88,7 @@ public class CustomDataSource {
         return operateRecordDTO;
     }
 
- 
-    public static GatewayHeartbeat gatewayHeartbeatFactory()  {
+    public static GatewayHeartbeat gatewayHeartbeatFactory() {
         GatewayHeartbeat gatewayHeartbeat = new GatewayHeartbeat();
         gatewayHeartbeat.setClusterName(PHY_CLUSTER_NAME);
         gatewayHeartbeat.setHostName("www.wpk.com");
@@ -143,7 +137,7 @@ public class CustomDataSource {
         esPackageDTO.setFileName("wpk");
         esPackageDTO.setManifest(3);
         esPackageDTO.setMd5("");
-        esPackageDTO.setUploadFile(new MockMultipartFile("wpk",new byte[3]));
+        esPackageDTO.setUploadFile(new MockMultipartFile("wpk", new byte[3]));
         return esPackageDTO;
     }
 
@@ -164,7 +158,7 @@ public class CustomDataSource {
         pluginDTO.setFileName("test");
         pluginDTO.setUrl("");
         pluginDTO.setMd5("");
-        pluginDTO.setUploadFile(new MockMultipartFile("test", new byte[]{0, 1, 2}));
+        pluginDTO.setUploadFile(new MockMultipartFile("test", new byte[] { 0, 1, 2 }));
         return pluginDTO;
     }
 
@@ -221,7 +215,8 @@ public class CustomDataSource {
         dto.setDisableIndexRollover(true);
         return dto;
     }
-    public static  ESUserPO esUserPO(){
+
+    public static ESUserPO esUserPO() {
         ESUserPO esUserPO = new ESUserPO();
         esUserPO.setIsRoot(0);
         esUserPO.setVerifyCode("verifyCode");
@@ -235,16 +230,16 @@ public class CustomDataSource {
         esUserPO.setResponsible("admin");
         return esUserPO;
     }
-    
+
     public static ProjectBriefVO projectBriefVO() {
         final ProjectBriefVO projectBriefVO = new ProjectBriefVO();
         projectBriefVO.setId(1);
         projectBriefVO.setProjectCode("123456");
         projectBriefVO.setProjectName("test");
         return projectBriefVO;
-        
+
     }
-    
+
     public static ProjectVO projectVO() {
         final ProjectVO projectVO = new ProjectVO();
         projectVO.setId(1);
@@ -260,7 +255,8 @@ public class CustomDataSource {
         projectVO.setDescription("test");
         return projectVO;
     }
-    public static ProjectConfigPO projectConfigPO(){
+
+    public static ProjectConfigPO projectConfigPO() {
         ProjectConfigPO projectConfigPO = new ProjectConfigPO();
         projectConfigPO.setProjectId(1);
         projectConfigPO.setSlowQueryTimes(1000);
@@ -354,7 +350,6 @@ public class CustomDataSource {
         return esLogicClusterDTO;
     }
 
-
     public static ClusterRegionDTO clusterRegionDTOFactory() {
         ClusterRegionDTO clusterRegionDTO = new ClusterRegionDTO();
         //clusterRegionDTO.setLogicClusterId(AdminConstant.REGION_NOT_BOUND_LOGIC_CLUSTER_ID);
@@ -403,7 +398,7 @@ public class CustomDataSource {
 
     public static List<TemplateAliasPO> getTemplateAliasPOList() {
         List<TemplateAliasPO> list = new ArrayList<>();
-        for(int i = 0; i <= SIZE; i++) {
+        for (int i = 0; i <= SIZE; i++) {
             TemplateAliasPO templateAliasPO = CustomDataSource.templateAliasSource();
             templateAliasPO.setName(templateAliasPO.getName() + i);
             list.add(templateAliasPO);
@@ -431,7 +426,7 @@ public class CustomDataSource {
 
     public static List<ProjectTemplateAuth> getAppTemplateAuthList() {
         List<ProjectTemplateAuth> list = new ArrayList<>();
-        for(int i = 1; i <= SIZE; i++) {
+        for (int i = 1; i <= SIZE; i++) {
             ProjectTemplateAuth po = CustomDataSource.appTemplateAuthSource();
             po.setTemplateId(i);
             po.setId((long) i);
@@ -439,7 +434,8 @@ public class CustomDataSource {
         }
         return list;
     }
-    public static ProjectTemplateAuthPO projectTemplateAuthPO(){
+
+    public static ProjectTemplateAuthPO projectTemplateAuthPO() {
         ProjectTemplateAuthPO projectTemplateAuthPO = new ProjectTemplateAuthPO();
         projectTemplateAuthPO.setId(1L);
         projectTemplateAuthPO.setProjectId(1);
@@ -448,7 +444,7 @@ public class CustomDataSource {
         projectTemplateAuthPO.setResponsible("");
         return projectTemplateAuthPO;
     }
-    
+
     public static ProjectClusterLogicAuthPO projectClusterLogicAuthPO() {
         ProjectClusterLogicAuthPO projectClusterLogicAuthPO = new ProjectClusterLogicAuthPO();
         projectClusterLogicAuthPO.setId(1L);
@@ -456,13 +452,12 @@ public class CustomDataSource {
         projectClusterLogicAuthPO.setLogicClusterId(1L);
         projectClusterLogicAuthPO.setType(1);
         return projectClusterLogicAuthPO;
-        
-    }
 
+    }
 
     public static List<IndexTemplatePO> getTemplateLogicPOList() {
         List<IndexTemplatePO> list = new ArrayList<>();
-        for(int i = 1; i <= SIZE; i++) {
+        for (int i = 1; i <= SIZE; i++) {
             IndexTemplatePO po = CustomDataSource.templateLogicSource();
             po.setId(i);
             po.setName(po.getName() + "i");
@@ -473,7 +468,7 @@ public class CustomDataSource {
 
     public static List<IndexTemplatePhyPO> getTemplatePhysicalPOList() {
         List<IndexTemplatePhyPO> list = new ArrayList<>();
-        for(int i = 1; i <= SIZE; i++) {
+        for (int i = 1; i <= SIZE; i++) {
             IndexTemplatePhyPO po = CustomDataSource.templatePhysicalSource();
             list.add(po);
         }
@@ -482,18 +477,16 @@ public class CustomDataSource {
 
     public static List<TemplateTypePO> getTemplateTypePOList() {
         List<TemplateTypePO> list = new ArrayList<>();
-        for(int i = 1; i <= SIZE; i++) {
+        for (int i = 1; i <= SIZE; i++) {
             TemplateTypePO po = CustomDataSource.templateTypeSource();
             list.add(po);
         }
         return list;
     }
-    
 
-    
     public static List<ProjectClusterLogicAuth> getAppClusterLogicAuthList() {
         List<ProjectClusterLogicAuth> list = new ArrayList<>();
-        for(int i = 1; i <= SIZE; i++) {
+        for (int i = 1; i <= SIZE; i++) {
             ProjectClusterLogicAuth po = CustomDataSource.appClusterLogicAuthSource();
             po.setId((long) i);
             po.setLogicClusterId((long) i);
@@ -511,7 +504,7 @@ public class CustomDataSource {
 
     public static List<IndexTemplatePhy> getIndexTemplatePhyList() {
         List<IndexTemplatePhy> list = new ArrayList<>();
-        for(int i = 1; i <= SIZE; i++ ) {
+        for (int i = 1; i <= SIZE; i++) {
             IndexTemplatePhy po = CustomDataSource.getIndexTemplatePhy();
             po.setId((long) i);
             po.setLogicId(i);
@@ -530,7 +523,7 @@ public class CustomDataSource {
 
     public static List<ClusterLogic> getClusterLogicList() {
         List<ClusterLogic> list = new ArrayList<>();
-        for(int i = 1; i <= SIZE; i++ ) {
+        for (int i = 1; i <= SIZE; i++) {
             ClusterLogic po = CustomDataSource.getClusterLogic();
             po.setId((long) i);
             po.setName("test" + i);
@@ -542,23 +535,25 @@ public class CustomDataSource {
     public static UserMetricsConfigPO getMetricsConfigPO() {
         UserMetricsConfigPO userMetricsConfigPO = new UserMetricsConfigPO();
         userMetricsConfigPO.setId(1);
-        userMetricsConfigPO.setMetricInfo("[{\"domainAccount\":\"admin\",\"firstMetricsType\":\"cluster\",\"metricsTypes\":[\"cpuUsage\",\"cpuLoad1M\",\"cpuLoad5M\",\"cpuLoad15M\",\"diskUsage\",\"diskInfo\",\"nodesForDiskUsageGte75Percent\",\"recvTransSize\",\"sendTransSize\",\"readTps\",\"writeTps\",\"searchLatency\",\"indexingLatency\",\"shardNu\",\"movingShards\",\"bigShards\",\"bigIndices\",\"invalidNodes\",\"pendingTasks\"],\"secondMetricsType\":\"overview\"},{\"domainAccount\":\"admin\",\"firstMetricsType\":\"cluster\",\"metricsTypes\":[\"os-cpu-percent\",\"os-cpu-load_average-1m\",\"os-cpu-load_average-5m\",\"os-cpu-load_average-15m\",\"fs-total-disk_free_percent\",\"transport-tx_count_rate\",\"transport-rx_count_rate\",\"transport-tx_size_in_bytes_rate\",\"transport-rx_size_in_bytes_rate\",\"indices-indexing-index_total_rate\",\"indices-indexing-index_time_in_millis\",\"thread_pool-bulk-rejected\",\"thread_pool-bulk-queue\",\"indices-search-query_total_rate\",\"indices-search-fetch_total_rate\",\"indices-search-query_time_in_millis\",\"indices-search-fetch_time_in_millis\",\"thread_pool-search-queue\",\"thread_pool-search-rejected\",\"indices-search-scroll_current\",\"indices-search-scroll_time_in_millis\",\"indices-merges-total_time_in_millis\",\"indices-refresh-total_time_in_millis\",\"indices-flush-total_time_in_millis\",\"indices-query_cache-hit_count\",\"indices-query_cache-miss_count\",\"indices-request_cache-hit_count\",\"indices-request_cache-miss_count\",\"http-current_open\",\"indices-segments-count\",\"indices-segments-memory_in_bytes\",\"indices-segments-term_vectors_memory_in_bytes\",\"indices-segments-points_memory_in_bytes\",\"indices-segments-doc_values_memory_in_bytes\",\"indices-segments-index_writer_memory_in_bytes\",\"indices-docs-count\",\"indices-store-size_in_bytes\",\"indices-translog-uncommitted_size_in_bytes\",\"indices-query_cache-memory_size_in_bytes\",\"indices-request_cache-memory_size_in_bytes\",\"jvm-gc-young-collection_count_rate\",\"jvm-gc-old-collection_count_rate\",\"jvm-gc-young-collection_time_in_millis\",\"jvm-gc-old-collection_time_in_millis\",\"jvm-mem-heap_used_in_bytes\",\"jvm-mem-non_heap_used_in_bytes\",\"jvm-mem-heap_used_percent\"],\"secondMetricsType\":\"node\"},{\"domainAccount\":\"admin\",\"firstMetricsType\":\"user_show\",\"metricsTypes\":[\"docsCount\",\"docsDeleted\",\"priStoreSize\",\"storeSize\"],\"secondMetricsType\":\"indexSearch\"},{\"domainAccount\":\"admin\",\"firstMetricsType\":\"user_show\",\"metricsTypes\":[\"searchCount\",\"totalCostAvg\"],\"secondMetricsType\":\"dslTemplate\"},{\"domainAccount\":\"admin\",\"firstMetricsType\":\"cluster\",\"metricsTypes\":[\"shardNu\",\"store-size_in_bytes\",\"docs-count\",\"search-query_total_rate\",\"search-fetch_total_rate\",\"merges-total_rate\",\"refresh-total_rate\",\"flush-total_rate\",\"indexing-index_total_rate\",\"indexing-index_time_in_millis\",\"search-query_time_in_millis\",\"search-fetch_time_in_millis\",\"search-scroll_total_rate\",\"search-scroll_time_in_millis\",\"merges-total_time_in_millis\",\"refresh-total_time_in_millis\",\"flush-total_time_in_millis\",\"query_cache-memory_size_in_bytes\",\"segments-memory_in_bytes\",\"segments-term_vectors_memory_in_bytes\",\"segments-points_memory_in_bytes\",\"segments-doc_values_memory_in_bytes\",\"segments-index_writer_memory_in_bytes\",\"translog-size_in_bytes\"],\"secondMetricsType\":\"index\"}]");
+        userMetricsConfigPO.setMetricInfo(
+            "[{\"domainAccount\":\"admin\",\"firstMetricsType\":\"cluster\",\"metricsTypes\":[\"cpuUsage\",\"cpuLoad1M\",\"cpuLoad5M\",\"cpuLoad15M\",\"diskUsage\",\"diskInfo\",\"nodesForDiskUsageGte75Percent\",\"recvTransSize\",\"sendTransSize\",\"readTps\",\"writeTps\",\"searchLatency\",\"indexingLatency\",\"shardNu\",\"movingShards\",\"bigShards\",\"bigIndices\",\"invalidNodes\",\"pendingTasks\"],\"secondMetricsType\":\"overview\"},{\"domainAccount\":\"admin\",\"firstMetricsType\":\"cluster\",\"metricsTypes\":[\"os-cpu-percent\",\"os-cpu-load_average-1m\",\"os-cpu-load_average-5m\",\"os-cpu-load_average-15m\",\"fs-total-disk_free_percent\",\"transport-tx_count_rate\",\"transport-rx_count_rate\",\"transport-tx_size_in_bytes_rate\",\"transport-rx_size_in_bytes_rate\",\"indices-indexing-index_total_rate\",\"indices-indexing-index_time_in_millis\",\"thread_pool-bulk-rejected\",\"thread_pool-bulk-queue\",\"indices-search-query_total_rate\",\"indices-search-fetch_total_rate\",\"indices-search-query_time_in_millis\",\"indices-search-fetch_time_in_millis\",\"thread_pool-search-queue\",\"thread_pool-search-rejected\",\"indices-search-scroll_current\",\"indices-search-scroll_time_in_millis\",\"indices-merges-total_time_in_millis\",\"indices-refresh-total_time_in_millis\",\"indices-flush-total_time_in_millis\",\"indices-query_cache-hit_count\",\"indices-query_cache-miss_count\",\"indices-request_cache-hit_count\",\"indices-request_cache-miss_count\",\"http-current_open\",\"indices-segments-count\",\"indices-segments-memory_in_bytes\",\"indices-segments-term_vectors_memory_in_bytes\",\"indices-segments-points_memory_in_bytes\",\"indices-segments-doc_values_memory_in_bytes\",\"indices-segments-index_writer_memory_in_bytes\",\"indices-docs-count\",\"indices-store-size_in_bytes\",\"indices-translog-uncommitted_size_in_bytes\",\"indices-query_cache-memory_size_in_bytes\",\"indices-request_cache-memory_size_in_bytes\",\"jvm-gc-young-collection_count_rate\",\"jvm-gc-old-collection_count_rate\",\"jvm-gc-young-collection_time_in_millis\",\"jvm-gc-old-collection_time_in_millis\",\"jvm-mem-heap_used_in_bytes\",\"jvm-mem-non_heap_used_in_bytes\",\"jvm-mem-heap_used_percent\"],\"secondMetricsType\":\"node\"},{\"domainAccount\":\"admin\",\"firstMetricsType\":\"user_show\",\"metricsTypes\":[\"docsCount\",\"docsDeleted\",\"priStoreSize\",\"storeSize\"],\"secondMetricsType\":\"indexSearch\"},{\"domainAccount\":\"admin\",\"firstMetricsType\":\"user_show\",\"metricsTypes\":[\"searchCount\",\"totalCostAvg\"],\"secondMetricsType\":\"dslTemplate\"},{\"domainAccount\":\"admin\",\"firstMetricsType\":\"cluster\",\"metricsTypes\":[\"shardNu\",\"store-size_in_bytes\",\"docs-count\",\"search-query_total_rate\",\"search-fetch_total_rate\",\"merges-total_rate\",\"refresh-total_rate\",\"flush-total_rate\",\"indexing-index_total_rate\",\"indexing-index_time_in_millis\",\"search-query_time_in_millis\",\"search-fetch_time_in_millis\",\"search-scroll_total_rate\",\"search-scroll_time_in_millis\",\"merges-total_time_in_millis\",\"refresh-total_time_in_millis\",\"flush-total_time_in_millis\",\"query_cache-memory_size_in_bytes\",\"segments-memory_in_bytes\",\"segments-term_vectors_memory_in_bytes\",\"segments-points_memory_in_bytes\",\"segments-doc_values_memory_in_bytes\",\"segments-index_writer_memory_in_bytes\",\"translog-size_in_bytes\"],\"secondMetricsType\":\"index\"}]");
         return userMetricsConfigPO;
     }
-    public static String metricInfo(){
+
+    public static String metricInfo() {
         return "[{\"firstMetricsType\":\"cluster\",\"userName\":\"admin\",\"metricsTypes\":[\"cpuUsage\",\"cpuLoad1M\",\"cpuLoad5M\",\"cpuLoad15M\",\"diskUsage\",\"diskInfo\",\"nodesForDiskUsageGte75Percent\",\"recvTransSize\",\"sendTransSize\",\"readTps\",\"writeTps\",\"searchLatency\",\"indexingLatency\",\"shardNu\",\"movingShards\",\"bigShards\",\"bigIndices\",\"invalidNodes\",\"pendingTasks\"],\"secondMetricsType\":\"overview\"},{\"firstMetricsType\":\"cluster\",\"userName\":\"admin\",\"metricsTypes\":[\"os-cpu-percent\",\"os-cpu-load_average-1m\",\"os-cpu-load_average-5m\",\"os-cpu-load_average-15m\",\"fs-total-disk_free_percent\",\"transport-tx_count_rate\",\"transport-rx_count_rate\",\"transport-tx_size_in_bytes_rate\",\"transport-rx_size_in_bytes_rate\",\"indices-indexing-index_total_rate\",\"indices-indexing-index_time_in_millis\",\"thread_pool-bulk-rejected\",\"thread_pool-bulk-queue\",\"indices-search-query_total_rate\",\"indices-search-fetch_total_rate\",\"indices-search-query_time_in_millis\",\"indices-search-fetch_time_in_millis\",\"thread_pool-search-queue\",\"thread_pool-search-rejected\",\"indices-search-scroll_current\",\"indices-search-scroll_time_in_millis\",\"indices-merges-total_time_in_millis\",\"indices-refresh-total_time_in_millis\",\"indices-flush-total_time_in_millis\",\"indices-query_cache-hit_count\",\"indices-query_cache-miss_count\",\"indices-request_cache-hit_count\",\"indices-request_cache-miss_count\",\"http-current_open\",\"indices-segments-count\",\"indices-segments-memory_in_bytes\",\"indices-segments-term_vectors_memory_in_bytes\",\"indices-segments-points_memory_in_bytes\",\"indices-segments-doc_values_memory_in_bytes\",\"indices-segments-index_writer_memory_in_bytes\",\"indices-docs-count\",\"indices-store-size_in_bytes\",\"indices-translog-uncommitted_size_in_bytes\",\"indices-query_cache-memory_size_in_bytes\",\"indices-request_cache-memory_size_in_bytes\",\"jvm-gc-young-collection_count_rate\",\"jvm-gc-old-collection_count_rate\",\"jvm-gc-young-collection_time_in_millis\",\"jvm-gc-old-collection_time_in_millis\",\"jvm-mem-heap_used_in_bytes\",\"jvm-mem-non_heap_used_in_bytes\",\"jvm-mem-heap_used_percent\"],\"secondMetricsType\":\"node\"},{\"firstMetricsType\":\"user_show\",\"userName\":\"admin\",\"metricsTypes\":[\"docsCount\",\"docsDeleted\",\"priStoreSize\",\"storeSize\"],\"secondMetricsType\":\"indexSearch\"},{\"firstMetricsType\":\"user_show\",\"userName\":\"admin\",\"metricsTypes\":[\"searchCount\",\"totalCostAvg\"],\"secondMetricsType\":\"dslTemplate\"},{\"firstMetricsType\":\"cluster\",\"userName\":\"admin\",\"metricsTypes\":[\"shardNu\",\"store-size_in_bytes\",\"docs-count\",\"search-query_total_rate\",\"search-fetch_total_rate\",\"merges-total_rate\",\"refresh-total_rate\",\"flush-total_rate\",\"indexing-index_total_rate\",\"indexing-index_time_in_millis\",\"search-query_time_in_millis\",\"search-fetch_time_in_millis\",\"search-scroll_total_rate\",\"search-scroll_time_in_millis\",\"merges-total_time_in_millis\",\"refresh-total_time_in_millis\",\"flush-total_time_in_millis\",\"query_cache-memory_size_in_bytes\",\"segments-memory_in_bytes\",\"segments-term_vectors_memory_in_bytes\",\"segments-points_memory_in_bytes\",\"segments-doc_values_memory_in_bytes\",\"segments-index_writer_memory_in_bytes\",\"translog-size_in_bytes\"],\"secondMetricsType\":\"index\"}]";
     }
-    
+
     public static void main(String[] args) {
         final UserMetricsConfigPO metricsConfigPO = CustomDataSource.getMetricsConfigPO();
         final String metricInfo = metricsConfigPO.getMetricInfo();
         final JSONArray parse = JSONArray.parseArray(metricInfo);
-        for (Object o :  parse) {
-         String userName=   ((JSONObject)o).getString("domainAccount");
-           ((JSONObject)o).remove("domainAccount");
-            ((JSONObject)o).put("userName",userName);
+        for (Object o : parse) {
+            String userName = ((JSONObject) o).getString("domainAccount");
+            ((JSONObject) o).remove("domainAccount");
+            ((JSONObject) o).put("userName", userName);
         }
-        
+
         System.out.println(parse.get(0));
     }
 
@@ -571,7 +566,7 @@ public class CustomDataSource {
 
     public static List<GatewayClusterNodePO> getGatewayNodePOList() {
         List<GatewayClusterNodePO> list = new ArrayList<>();
-        for(int i = 1; i <= SIZE; i++ ) {
+        for (int i = 1; i <= SIZE; i++) {
             GatewayClusterNodePO po = CustomDataSource.getGatewayNodePO();
             po.setId(i);
             list.add(po);
@@ -602,7 +597,7 @@ public class CustomDataSource {
 
     public static List<PluginPO> getESPluginPOList() {
         List<PluginPO> list = new ArrayList<>();
-        for(int i = 1; i <= SIZE; i++ ) {
+        for (int i = 1; i <= SIZE; i++) {
             PluginPO po = CustomDataSource.getESPluginPO();
             po.setId((long) i);
             list.add(po);
@@ -616,18 +611,15 @@ public class CustomDataSource {
         return operateRecordPO;
     }
 
-
     public static List<OperateRecordInfoPO> getOperateRecordPOList() {
         List<OperateRecordInfoPO> list = new ArrayList<>();
-        for(int i = 1; i <= SIZE; i++ ) {
+        for (int i = 1; i <= SIZE; i++) {
             OperateRecordInfoPO po = CustomDataSource.getOperateRecordPO();
             po.setId(i);
             list.add(po);
         }
         return list;
     }
-
-    
 
     public static AriusConfigInfoPO getAriusConfigInfoPO() {
         AriusConfigInfoPO ariusConfigInfoPO = new AriusConfigInfoPO();
@@ -639,7 +631,7 @@ public class CustomDataSource {
 
     public static List<AriusConfigInfoPO> getAriusConfigInfoPOList() {
         List<AriusConfigInfoPO> list = new ArrayList<>();
-        for(int i = 1; i <= SIZE; i++ ) {
+        for (int i = 1; i <= SIZE; i++) {
             AriusConfigInfoPO po = CustomDataSource.getAriusConfigInfoPO();
             po.setId(i);
             po.setValueGroup("test" + i);
@@ -653,36 +645,36 @@ public class CustomDataSource {
         return new ClusterRoleHost(0L, 0L, "hostname", "ip", "cluster", "port", 0, 0, "rack", "nodeSet", "machineSpec",
             0, "attributes");
     }
+
     public static ClusterRoleHost getClusterRoleHostByRealIp() {
         return new ClusterRoleHost(0L, 0L, "hostname", "ip", "cluster", "port", 0, 0, "rack", "nodeSet", "machineSpec",
-                0, "attributes");
+            0, "attributes");
     }
 
     public static ClusterRegion getClusterRegion() {
-        return new ClusterRegion(0L, "name", "logicClusterIds", PHY_CLUSTER_NAME,"config");
+        return new ClusterRegion(0L, "name", "logicClusterIds", PHY_CLUSTER_NAME, "config");
     }
 
     public static ESClusterRoleHostVO getESClusterRoleHostVO() {
-        return new ESClusterRoleHostVO(0L, 0L, "hostname", "ip", PHY_CLUSTER_NAME, "clusterLogicNames", "port", 1, 0, "rack",
-            "machineSpec", "nodeSet", 0, "logicDepart", "attributes","regionName", 0.0,2L,1L);
+        return new ESClusterRoleHostVO(0L, 0L, "hostname", "ip", PHY_CLUSTER_NAME, "clusterLogicNames", "port", 1, 0,
+            "rack", "machineSpec", "nodeSet", 0, "logicDepart", "attributes", "regionName", 0.0, 2L, 1L);
     }
 
     public static ClusterRoleInfo getClusterRoleInfo() {
-        return  new ClusterRoleInfo(0L, 0L, "roleClusterName", "role", 0, 0, "machineSpec", "esVersion", 0,
-                "plugIds", false,
-                Collections.singletonList(getClusterRoleHost()));
+        return new ClusterRoleInfo(0L, 0L, "roleClusterName", "role", 0, 0, "machineSpec", "esVersion", 0, "plugIds",
+            false, Collections.singletonList(getClusterRoleHost()));
     }
+
     public static ClusterPhy getClusterPhy() {
 
-        return new ClusterPhy(0, "cluster", "desc", "readAddress", "writeAddress", "httpAddress",
-                "httpWriteAddress", 0, "tags", "dataCenter", "idc", 0, "esVersion", 0L, "plugIds", 0L, "imageName",
-                "nsTree", 0, "machineSpec", "templateSrvs", "password", "creator",
-                Collections.singletonList(getClusterRoleInfo()),
-                Collections.singletonList(getClusterRoleHost()),
-                0, "writeAction", 0, 0L, 0L, 0L, 0.0, "platformType", 0, "gatewayUrl");
+        return new ClusterPhy(0, "cluster", "desc", "readAddress", "writeAddress", "httpAddress", "httpWriteAddress", 0,
+            "tags", "dataCenter", "idc", 0, "esVersion", 0L, "plugIds", 0L, "imageName", "nsTree", 0, "machineSpec",
+            "templateSrvs", "password", "creator", Collections.singletonList(getClusterRoleInfo()),
+            Collections.singletonList(getClusterRoleHost()), 0, "writeAction", 0, 0L, 0L, 0L, 0.0, "platformType", 0,
+            "gatewayUrl");
     }
 
-    public static IndexTemplateWithPhyTemplates getIndexTemplateWithPhyTemplates(){
+    public static IndexTemplateWithPhyTemplates getIndexTemplateWithPhyTemplates() {
         IndexTemplateWithPhyTemplates indexTemplateWithPhyTemplates = new IndexTemplateWithPhyTemplates();
         indexTemplateWithPhyTemplates.setDiskSize(1.0);
         List<IndexTemplatePhy> physicals = new ArrayList<>();
@@ -694,7 +686,7 @@ public class CustomDataSource {
         return indexTemplateWithPhyTemplates;
     }
 
-    public static List<CatIndexResult> getCatIndexResult(){
+    public static List<CatIndexResult> getCatIndexResult() {
         List<CatIndexResult> catIndexResults = new ArrayList<>();
         CatIndexResult catIndexResult1 = new CatIndexResult();
         catIndexResult1.setStoreSize("1gb");
@@ -705,7 +697,7 @@ public class CustomDataSource {
         return catIndexResults;
     }
 
-    public static Result<Void> getResult(){
+    public static Result<Void> getResult() {
         Result<Void> result = new Result<>();
         result.setCode(ResultType.SUCCESS.getCode());
         return result;

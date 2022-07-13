@@ -18,8 +18,7 @@ public class PhysicalTemplateModifyEvent extends PhysicalTemplateEvent {
      *
      * @param source the object on which the event initially occurred (never {@code null})
      */
-    public PhysicalTemplateModifyEvent(Object source, IndexTemplatePhy oldTemplate,
-                                       IndexTemplatePhy newTemplate,
+    public PhysicalTemplateModifyEvent(Object source, IndexTemplatePhy oldTemplate, IndexTemplatePhy newTemplate,
                                        IndexTemplateWithPhyTemplates logicWithPhysical) {
         super(source, logicWithPhysical);
         this.oldTemplate = oldTemplate;

@@ -28,10 +28,10 @@ public abstract class BaseConcurrentTask<T> {
     protected AriusTaskThreadPool ariusTaskThreadPool;
 
     @Autowired
-    private OperateRecordService operateRecordService;
+    private OperateRecordService  operateRecordService;
 
     @PostConstruct
-    public void init(){
+    public void init() {
         ariusTaskThreadPool = new AriusTaskThreadPool();
         ariusTaskThreadPool.init(poolSize(), getTaskName(), QUEUE_SIZE);
     }
@@ -48,26 +48,28 @@ public abstract class BaseConcurrentTask<T> {
             LOGGER.warn(
                 "class=BaseConcurrentTask||method=execute||msg=currentQueueWorkerSize:{} is more than thread pool queue size:{}",
                 getTaskName(), currentQueueWorkerSize, QUEUE_SIZE);
-            return false; 
+            return false;
         }
         if (CollectionUtils.isEmpty(batches)) {
             LOGGER.warn("class=BaseConcurrentTask||method=execute||batches is empty||task={}", getTaskName());
             return true;
         }
 
-        LOGGER.info("class=BaseConcurrentTask||method=execute||ConcurrentClusterTask||msg=task start||task={}||batchSize={}", getTaskName(), batches.size());
+        LOGGER.info(
+            "class=BaseConcurrentTask||method=execute||ConcurrentClusterTask||msg=task start||task={}||batchSize={}",
+            getTaskName(), batches.size());
 
         CountDownLatch countDownLatch = new CountDownLatch(batches.size());
-        AtomicBoolean succ = new AtomicBoolean( true );
+        AtomicBoolean succ = new AtomicBoolean(true);
 
         for (TaskBatch<T> taskBatch : batches) {
             ariusTaskThreadPool.run(() -> {
                 try {
-                    if(!executeByBatch(taskBatch)) {
-                        succ.set( false );
+                    if (!executeByBatch(taskBatch)) {
+                        succ.set(false);
                     }
                 } catch (Exception e) {
-                    succ.set( false );
+                    succ.set(false);
                     // 需要Odin监控错误日志
                     LOGGER.error("class=BaseConcurrentTask||method=execute||errMsg={}||task={}", e.getMessage(),
                         getTaskName(), e);
@@ -80,20 +82,26 @@ public abstract class BaseConcurrentTask<T> {
                 Thread.sleep(TimeUnit.SECONDS.toMillis(TaskConcurrentConstants.SLEEP_SECONDS_PER_BATCH));
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-                LOGGER.warn("class=BaseConcurrentTask||method=execute||ConcurrentClusterTask Interrupted||task={}", getTaskName(), e);
+                LOGGER.warn("class=BaseConcurrentTask||method=execute||ConcurrentClusterTask Interrupted||task={}",
+                    getTaskName(), e);
             }
         }
 
         try {
             //等待所有任务完成
             if (countDownLatch.await(60L, TimeUnit.MINUTES)) {
-                LOGGER.info("class=BaseConcurrentTask||method=execute||ConcurrentClusterTask||msg=all task finish||task={}", getTaskName());
+                LOGGER.info(
+                    "class=BaseConcurrentTask||method=execute||ConcurrentClusterTask||msg=all task finish||task={}",
+                    getTaskName());
             } else {
-                LOGGER.warn("class=BaseConcurrentTask||method=execute||ConcurrentClusterTask||msg=has task time out||task={}", getTaskName());
+                LOGGER.warn(
+                    "class=BaseConcurrentTask||method=execute||ConcurrentClusterTask||msg=has task time out||task={}",
+                    getTaskName());
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            LOGGER.warn("class=BaseConcurrentTask||method=execute||ConcurrentClusterTask Interrupted||task={}", getTaskName(), e);
+            LOGGER.warn("class=BaseConcurrentTask||method=execute||ConcurrentClusterTask Interrupted||task={}",
+                getTaskName(), e);
         }
         try {
             //记录任务的完成任务时间
@@ -105,10 +113,9 @@ public abstract class BaseConcurrentTask<T> {
             //                .triggerWayEnum(TriggerWayEnum.TIMING_TASK)
             //                .userOperation(SYSTEM.getDesc())
             //        .build());
-        
+
         } catch (Exception e) {
-            LOGGER.error("class=BaseConcurrentTask||method=execute||errMsg={}",
-                    e.getMessage(), e);
+            LOGGER.error("class=BaseConcurrentTask||method=execute||errMsg={}", e.getMessage(), e);
         }
 
         return succ.get();
@@ -166,8 +173,9 @@ public abstract class BaseConcurrentTask<T> {
 
         int batchSize = allItems.size() / workerCount + 1;
 
-        LOGGER.info("class=BaseConcurrentTask||method=splitBatch||ConcurrentClusterTask||msg=splitBatch||task={}||workerCount={}||batchSize={}", getTaskName(),
-            workerCount, batchSize);
+        LOGGER.info(
+            "class=BaseConcurrentTask||method=splitBatch||ConcurrentClusterTask||msg=splitBatch||task={}||workerCount={}||batchSize={}",
+            getTaskName(), workerCount, batchSize);
 
         List<TaskBatch<T>> taskBatches = Lists.newArrayList();
         TaskBatch<T> batch = new TaskBatch<>();

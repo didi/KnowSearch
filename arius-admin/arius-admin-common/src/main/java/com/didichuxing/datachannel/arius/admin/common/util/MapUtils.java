@@ -11,7 +11,7 @@ public class MapUtils {
     private static final ILog LOGGER = LogFactory.getLog(MapUtils.class);
 
     public static String findChanged(Map<String, String> src, Map<String, String> dest) {
-        if(src == null || dest == null) {
+        if (src == null || dest == null) {
             return "";
         }
 
@@ -22,8 +22,8 @@ public class MapUtils {
                 String srcValue = src.get(key);
                 if (null != destValue) {
                     if (!destValue.equals(srcValue)) {
-                        content.append("字段").append(key).append("的原值").append("【").append(srcValue).append("】").append("修改为")
-                                .append("【").append(destValue).append("】").append("\r\n");
+                        content.append("字段").append(key).append("的原值").append("【").append(srcValue).append("】")
+                            .append("修改为").append("【").append(destValue).append("】").append("\r\n");
                     }
                 }
             }
@@ -35,7 +35,7 @@ public class MapUtils {
 
     public static Map<String, String> findChangedWithDestV(Map<String, String> src, Map<String, String> dest) {
         Map<String, String> result = new HashMap<>();
-        if(src == null || dest == null) {
+        if (src == null || dest == null) {
             return result;
         }
         try {

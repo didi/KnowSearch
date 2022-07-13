@@ -6,7 +6,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESCluste
 
 public class MetricsMonitorLogicClusterEvent extends MetaDataMetricsEvent {
     private List<ESClusterStats> esClusterStatsList;
-    private String hostName;
+    private String               hostName;
 
     /**
      * Create a new ApplicationEvent.

@@ -27,5 +27,4 @@ public enum TemplateLabelLevelEnum {
         return level;
     }
 
-
 }

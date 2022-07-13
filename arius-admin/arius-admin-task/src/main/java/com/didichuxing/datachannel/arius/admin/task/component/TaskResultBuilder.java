@@ -1,4 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.task.component;
+
 import com.didiglobal.logi.job.common.TaskResult;
 
 public class TaskResultBuilder {

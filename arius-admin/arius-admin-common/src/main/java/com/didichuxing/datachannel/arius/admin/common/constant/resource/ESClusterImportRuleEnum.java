@@ -5,11 +5,11 @@ package com.didichuxing.datachannel.arius.admin.common.constant.resource;
  * @author chengxiang
  */
 public enum ESClusterImportRuleEnum {
-                                   AUTO_IMPORT(0, "自动接入"),
+                                     AUTO_IMPORT(0, "自动接入"),
 
-                                   FULL_IMPORT(1, "全量接入"),
+                                     FULL_IMPORT(1, "全量接入"),
 
-                                   UNKNOWN(-1, "unknown");
+                                     UNKNOWN(-1, "unknown");
 
     ESClusterImportRuleEnum(int code, String desc) {
         this.code = code;
@@ -44,7 +44,7 @@ public enum ESClusterImportRuleEnum {
         if (code == null) {
             return false;
         }
-        for(ESClusterImportRuleEnum importRuleEnum : ESClusterImportRuleEnum.values()) {
+        for (ESClusterImportRuleEnum importRuleEnum : ESClusterImportRuleEnum.values()) {
             if (importRuleEnum.getCode() == code) {
                 return true;
             }

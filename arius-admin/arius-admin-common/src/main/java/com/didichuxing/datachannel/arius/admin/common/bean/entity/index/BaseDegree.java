@@ -15,38 +15,38 @@ public class BaseDegree {
     private IndicatorsType indicatorsType;
 
     @ApiModelProperty(value = "得分")
-    private  double score;
+    private double         score;
 
     /**
      * 乘以权重的最终得分，weightScore=score*weightRate
      */
     @ApiModelProperty(value = "乘以权重的最终得分，weightScore=score*weightRate")
-    private double weightScore;
+    private double         weightScore;
 
     /**
      * 权重
      */
     @ApiModelProperty(value = "权重")
-    private int weight;
+    private int            weight;
 
     /**
      * 权重比例
      */
     @ApiModelProperty(value = "权重比例")
-    private double  weightRate;
+    private double         weightRate;
 
     /**
      * 计算处理过程
      */
     @ApiModelProperty(value = "计算处理过程")
-    private String process;
+    private String         process;
 
     /**
      * 惩罚机制计算
      */
     @ApiModelProperty(value = "惩罚机制计算")
-    private String punishment;
+    private String         punishment;
 
     @ApiModelProperty(value = "得分描述")
-    private  String desc;
+    private String         desc;
 }

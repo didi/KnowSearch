@@ -33,6 +33,7 @@ public interface ESIndexService {
      * @throws ESOperateException
      */
     boolean syncCreateIndex(String cluster, String indexName, int retryCount) throws ESOperateException;
+
     /**
      * 同步创建索引
      * @param cluster 集群名称
@@ -42,7 +43,8 @@ public interface ESIndexService {
      * @return
      * @throws ESOperateException
      */
-    boolean syncCreateIndex(String cluster, String indexName, IndexConfig indexConfig, int retryCount) throws ESOperateException;
+    boolean syncCreateIndex(String cluster, String indexName, IndexConfig indexConfig,
+                            int retryCount) throws ESOperateException;
 
     /**
      * 同步删除索引
@@ -111,7 +113,8 @@ public interface ESIndexService {
      * @param retryCount
      * @return
      */
-    boolean syncPutIndexSetting(String cluster, List<String> indices, Map<String, String> settingMap, Integer retryCount) throws  ESOperateException;
+    boolean syncPutIndexSetting(String cluster, List<String> indices, Map<String, String> settingMap,
+                                Integer retryCount) throws ESOperateException;
 
     /**
      * 批量修改多个索引的相同的多个setting
@@ -120,7 +123,8 @@ public interface ESIndexService {
      * @param settings key：setting名称 value：setting数值
      * @param retryCount 重试次数
      */
-    boolean syncPutIndexSettings(String cluster, List<String> indices, Map</*setting名称*/String, /*setting数值*/String> settings,
+    boolean syncPutIndexSettings(String cluster, List<String> indices,
+                                 Map</*setting名称*/String, /*setting数值*/String> settings,
                                  int retryCount) throws ESOperateException;
 
     /**
@@ -154,7 +158,8 @@ public interface ESIndexService {
      * @param indices 索引列表
      * @return {@link Map}<{@link String}, {@link List}<{@link String}>>
      */
-    Map<String,List<String>> syncGetIndexAliasesByIndices(String cluster, String... indices);
+    Map<String, List<String>> syncGetIndexAliasesByIndices(String cluster, String... indices);
+
     /**
      * 批量删除索引
      * @param cluster 集群
@@ -201,7 +206,7 @@ public interface ESIndexService {
      * @throws ESOperateException
      */
     boolean syncBatchUpdateRegion(String cluster, List<String> indices, Integer tgtRegionId,
-                                int retryCount) throws ESOperateException;
+                                  int retryCount) throws ESOperateException;
 
     /**
      * 修改索引只读配置
@@ -282,6 +287,7 @@ public interface ESIndexService {
      * @return {@link Map}<{@link String}, {@link Tuple}<{@link Long}, {@link Long}>>
      */
     Map<String, Tuple<Long, Long>> syncGetIndicesSegmentCount(String clusterPhyName);
+
     /**
      * 获取索引主shard个数
      * @param cluster

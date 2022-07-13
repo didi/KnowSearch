@@ -58,8 +58,6 @@ public class AriusConfigConstant {
      */
     public static final String REQUEST_INTERCEPTOR_SWITCH_OPEN                         = "request.interceptor.switch.open";
 
-
-
     /**
      * meta监控配置组
      */
@@ -75,15 +73,10 @@ public class AriusConfigConstant {
      */
     public static final String INDEX_STAT_COLLECT_CONCURRENT                           = "index_stat.collect.concurrent";
 
-
-
     /**
      * dashboard阈值配置组
      */
     public static final String ARIUS_DASHBOARD_THRESHOLD_GROUP                         = "arius.dashboard.threshold.group";
-
-
-
 
     /**
      * 模板冷热配置组
@@ -94,8 +87,6 @@ public class AriusConfigConstant {
      * 索引模板默认冷存天数
      */
     public static final String INDEX_TEMPLATE_COLD_DAY_DEFAULT                         = "index_template.cold.day.default";
-
-
 
     /**
      * default value

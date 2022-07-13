@@ -29,39 +29,40 @@ public class ESConfigOperateRecode {
     /**
      * {@linkplain EsConfigActionEnum#getDesc()}
      */
-    private             String operationType;
+    private String             operationType;
     /**
      * {@linkplain  ESConfig#getConfigData()} ()}
      */
-    private             String source;
+    private String             source;
     /**
      * {@linkplain  ESConfig#getConfigData()} ()}
      */
-    private             String target;
-    
+    private String             target;
+
     /**
      * {@linkplain  ESConfig#getTypeName()}
      */
-    private String        typeName;
+    private String             typeName;
     /**
      * {@linkplain  ESConfig#getEnginName()} ()}
      */
-    private String        enginName;
+    private String             enginName;
     /**
      * {@linkplain  ESConfig#getVersionConfig()} ()}
      */
-    private Integer       versionConfig;
+    private Integer            versionConfig;
     /**
      * 对比结果列表
      */
-    private List<DiffRow> diffResultList;
-    
+    private List<DiffRow>      diffResultList;
+
     @Override
     public String toString() {
         return JSON.toJSONString(this);
     }
-    
-    public static final BiFunction<ESConfig, Function<Long, ESConfig>, TupleTwo</*source*/ESConfig,/*target*/ESConfig>> sourceAndTargetConfigFunc = (esConfig, getEsConfigByIdFunc) -> {
+
+    public static final BiFunction<ESConfig, Function<Long, ESConfig>, TupleTwo</*source*/ESConfig, /*target*/ESConfig>> sourceAndTargetConfigFunc = (esConfig,
+                                                                                                                                                      getEsConfigByIdFunc) -> {
         final Long id = esConfig.getId();
         //新增
         if (Objects.isNull(id)) {
@@ -69,36 +70,36 @@ public class ESConfigOperateRecode {
         }
         final ESConfig oldEsConfig = getEsConfigByIdFunc.apply(id);
         return Tuples.of(esConfig, oldEsConfig);
-        
+
     };
-    
-    public static ESConfigOperateRecode sourceTargetDiff(
-            TupleTwo</*source*/ESConfig,/*target*/ESConfig> sourceTargetTuple, Integer actionType) {
+
+    public static ESConfigOperateRecode sourceTargetDiff(TupleTwo</*source*/ESConfig, /*target*/ESConfig> sourceTargetTuple,
+                                                         Integer actionType) {
         final EsConfigActionEnum esConfigActionEnum = valueOf(actionType);
         String source = Optional.ofNullable(sourceTargetTuple.v1).map(ESConfig::getConfigData).orElse(STR_EMPTY);
         String target = Optional.ofNullable(sourceTargetTuple.v2).map(ESConfig::getConfigData).orElse(STR_EMPTY);
         final List<DiffRow> diffResultList = DiffUtil.diffRowsByString(source, target, DELIMITER);
         final String typeName = Optional.ofNullable(sourceTargetTuple.v1).map(ESConfig::getTypeName).orElse(STR_EMPTY);
         final String enginName = Optional.ofNullable(sourceTargetTuple.v1).map(ESConfig::getEnginName)
-                .orElse(STR_EMPTY);
+            .orElse(STR_EMPTY);
         final Integer versionConfig = Optional.ofNullable(sourceTargetTuple.v1).map(ESConfig::getVersionConfig)
-                .orElse(0);
-        
+            .orElse(0);
+
         return new ESConfigOperateRecode(esConfigActionEnum.getDesc(), source, target, typeName, enginName,
-                versionConfig, diffResultList);
-        
+            versionConfig, diffResultList);
+
     }
-    
+
     public static OperateRecord buildESConfigOperateRecode(String operationUser,
                                                            Function<Integer, ProjectBriefVO> getProjectByIdFunc,
                                                            Integer projectId,
                                                            ESConfigOperateRecode esConfigOperateRecode, Object bizId
-    
+
     ) {
-        
+
         return new Builder().userOperation(operationUser).project(getProjectByIdFunc.apply(projectId))
-                .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_CONF_FILE_CHANGE)
-                
-                .content(esConfigOperateRecode.toString()).bizId(bizId).buildDefaultManualTrigger();
+            .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_CONF_FILE_CHANGE)
+
+            .content(esConfigOperateRecode.toString()).bizId(bizId).buildDefaultManualTrigger();
     }
 }

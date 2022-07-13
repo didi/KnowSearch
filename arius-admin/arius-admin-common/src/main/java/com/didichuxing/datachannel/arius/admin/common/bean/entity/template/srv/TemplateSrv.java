@@ -26,13 +26,13 @@ public class TemplateSrv extends BaseEntity {
     /**
      * 模板服务名称
      */
-    protected String srvName;
+    protected String  srvName;
 
     /**
      * todo: 这个暂时没用到，后续干掉
      * 模板服务所需的最低es版本号
      */
-    protected String esVersion;
+    protected String  esVersion;
 
     public static List<TemplateSrv> codeStr2SrvList(String codeStr) {
         if (StringUtils.isBlank(codeStr)) {
@@ -40,7 +40,7 @@ public class TemplateSrv extends BaseEntity {
         }
 
         List<TemplateSrv> srvList = new ArrayList<>();
-        for(String srvId : StringUtils.split(codeStr,",")) {
+        for (String srvId : StringUtils.split(codeStr, ",")) {
             TemplateSrv templateSrv = getSrv(Integer.parseInt(srvId));
             if (null != templateSrv) {
                 srvList.add(templateSrv);

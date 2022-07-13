@@ -6,7 +6,7 @@ import org.elasticsearch.client.ElasticsearchClient;
 public class ESIndexStatsAction extends Action<ESIndexStatsRequest, ESIndexStatsResponse, ESIndexStatsRequestBuilder> {
 
     public static final ESIndexStatsAction INSTANCE = new ESIndexStatsAction();
-    public static final String NAME = "indices:stats/tolerance";
+    public static final String             NAME     = "indices:stats/tolerance";
 
     private ESIndexStatsAction() {
         super(NAME);

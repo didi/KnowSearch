@@ -17,7 +17,8 @@ public class Tuple<T, V> {
     private T v1;
     private V v2;
 
-    public Tuple(){}
+    public Tuple() {
+    }
 
     public Tuple(T v1, V v2) {
         this.v1 = v1;
@@ -44,12 +45,18 @@ public class Tuple<T, V> {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {return true;}
-        if (o == null || getClass() != o.getClass()) {return false;}
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         Tuple<?, ?> tuple = (Tuple<?, ?>) o;
 
-        if (v1 != null ? !v1.equals(tuple.v1) : tuple.v1 != null) {return false;}
+        if (v1 != null ? !v1.equals(tuple.v1) : tuple.v1 != null) {
+            return false;
+        }
         return v2 != null ? v2.equals(tuple.v2) : tuple.v2 == null;
     }
 

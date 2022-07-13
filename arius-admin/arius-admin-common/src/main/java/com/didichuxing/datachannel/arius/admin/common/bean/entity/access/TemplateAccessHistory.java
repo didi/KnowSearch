@@ -27,6 +27,7 @@ public class TemplateAccessHistory {
      * 索引模板名称
      */
     private String templateName;
+
     /**
      * 是否有效
      *
@@ -34,7 +35,7 @@ public class TemplateAccessHistory {
      */
     @JSONField(serialize = false)
     public boolean isValid() {
-        return  !(StringUtils.isBlank(templateName) || StringUtils.isBlank(clusterName));
+        return !(StringUtils.isBlank(templateName) || StringUtils.isBlank(clusterName));
     }
 
 }

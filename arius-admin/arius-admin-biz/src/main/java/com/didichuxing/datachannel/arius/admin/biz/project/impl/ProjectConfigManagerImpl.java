@@ -16,24 +16,19 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class ProjectConfigManagerImpl implements ProjectConfigManager {
-	@Autowired
-	private ProjectConfigService projectConfigService;
+    @Autowired
+    private ProjectConfigService projectConfigService;
 
+    /**
+     * 获取esUserName配置信息
+     *
+     * @param projectId@return 配置信息
+     */
+    @Override
+    public Result<ProjectConfigVO> get(int projectId) {
+        final ProjectConfigVO projectConfigVo = ConvertUtil.obj2Obj(projectConfigService.getProjectConfig(projectId),
+            ProjectConfigVO.class);
+        return Result.buildSucc(projectConfigVo);
+    }
 
-	
-	/**
-	 * 获取esUserName配置信息
-	 *
-	 * @param projectId@return 配置信息
-	 */
-	@Override
-	public Result<ProjectConfigVO> get(int projectId) {
-		final ProjectConfigVO projectConfigVo = ConvertUtil.obj2Obj(projectConfigService.getProjectConfig(projectId),
-				ProjectConfigVO.class);
-		return Result.buildSucc(projectConfigVo);
-	}
-	
-
-
-	
 }

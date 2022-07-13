@@ -18,9 +18,10 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConst
  */
 public class HttpHostUtil {
 
-    private HttpHostUtil(){}
+    private HttpHostUtil() {
+    }
 
-    public static final String HOST_NAME   = HostUtil.getHostName();
+    public static final String HOST_NAME = HostUtil.getHostName();
 
     /**
      * 根据ip地址和端口获取HttpHost
@@ -49,7 +50,7 @@ public class HttpHostUtil {
         ArrayList<HttpHost> hosts = Lists.newArrayList();
 
         if (StringUtils.isBlank(address)) {
-            return new HttpHost[]{};
+            return new HttpHost[] {};
         }
 
         String[] httpAddressArray = StringUtils.splitByWholeSeparatorPreserveAllTokens(address, COMMA);
@@ -89,21 +90,29 @@ public class HttpHostUtil {
     }
 
     //从类似10.179.100.148:9300的地址中获取端口
-    public static String getPortFromTransportAddress(String transportAddress){
-        if(StringUtils.isBlank(transportAddress)){return "";}
+    public static String getPortFromTransportAddress(String transportAddress) {
+        if (StringUtils.isBlank(transportAddress)) {
+            return "";
+        }
 
         String[] strTemp = transportAddress.split(":");
-        if (null == strTemp || 2 != strTemp.length){return "";}
+        if (null == strTemp || 2 != strTemp.length) {
+            return "";
+        }
 
         return strTemp[1];
     }
 
     //从类似10.179.100.148:9300的地址中获取ip
-    public static String getIpFromTransportAddress(String transportAddress){
-        if(StringUtils.isBlank(transportAddress)){return "";}
+    public static String getIpFromTransportAddress(String transportAddress) {
+        if (StringUtils.isBlank(transportAddress)) {
+            return "";
+        }
 
         String[] strTemp = transportAddress.split(":");
-        if (null == strTemp || 2 != strTemp.length){return "";}
+        if (null == strTemp || 2 != strTemp.length) {
+            return "";
+        }
 
         return strTemp[0];
     }

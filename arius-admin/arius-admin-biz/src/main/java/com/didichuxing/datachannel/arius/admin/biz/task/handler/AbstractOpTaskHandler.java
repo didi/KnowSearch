@@ -26,32 +26,32 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 public abstract class AbstractOpTaskHandler implements OpTaskHandler {
 
-    protected final ILog             LOGGER                   = LogFactory.getLog(this.getClass());
+    protected final ILog             LOGGER = LogFactory.getLog(this.getClass());
 
     @Autowired
-    protected EcmTaskManager ecmTaskManager;
+    protected EcmTaskManager         ecmTaskManager;
 
     @Autowired
-    protected OpTaskManager opTaskManager;
+    protected OpTaskManager          opTaskManager;
 
     @Autowired
-    protected ESClusterService esClusterService;
+    protected ESClusterService       esClusterService;
 
     @Autowired
     protected ESClusterConfigService esClusterConfigService;
 
     @Autowired
-    protected WorkOrderManager workOrderManager;
+    protected WorkOrderManager       workOrderManager;
 
     @Autowired
-    protected ESPluginService esPluginService;
+    protected ESPluginService        esPluginService;
 
     @Autowired
-    protected ClusterPhyService clusterPhyService;
+    protected ClusterPhyService      clusterPhyService;
     @Autowired
-    protected ProjectService       projectService;
+    protected ProjectService         projectService;
     @Autowired
-    protected OperateRecordService operateRecordService;
+    protected OperateRecordService   operateRecordService;
 
     @Override
     public Result<OpTask> addTask(OpTask opTask) throws NotFindSubclassException {

@@ -6,7 +6,6 @@ import org.springframework.stereotype.Repository;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.po.gateway.GatewayClusterPO;
 
-
 /**
  * @author d06679
  */

@@ -19,83 +19,83 @@ public class DslTemplate {
     /**
      * 查询模板创建时间
      */
-    private String ariusCreateTime;
+    private String  ariusCreateTime;
     /**
      * 查询模板修改时间
      */
-    private String ariusModifyTime;
+    private String  ariusModifyTime;
     /**
      * 平均响应长度
      */
-    private Double responseLenAvg;
+    private Double  responseLenAvg;
     /**
      * 请求类型
      */
-    private String requestType;
+    private String  requestType;
     /**
      * 查询类型
      */
-    private String searchType;
+    private String  searchType;
     /**
      * 查询次数(分钟级别)
      */
-    private Long searchCount;
+    private Long    searchCount;
     /**
      * es查询耗时
      */
-    private Double esCostAvg;
+    private Double  esCostAvg;
     /**
      * 平均查询语句长度
      */
-    private Double dslLenAvg;
+    private Double  dslLenAvg;
     /**
      * 平均命中记录数
      */
-    private Double totalHitsAvg;
+    private Double  totalHitsAvg;
     /**
      * 平均查询shard成功个数
      */
-    private Double successfulShardsAvg;
+    private Double  successfulShardsAvg;
     /**
      * 平均shard成功个数
      */
-    private Double totalShardsAvg;
+    private Double  totalShardsAvg;
     /**
      * 查询请求时刻
      */
-    private String logTime;
+    private String  logTime;
     /**
      * 查询索引示例
      */
-    private String indiceSample;
+    private String  indiceSample;
     /**
      * 查询模板
      */
-    private String dslTemplet;
+    private String  dslTemplet;
     /**
      * 查询请求时刻
      */
-    private Long timeStamp;
+    private Long    timeStamp;
     /**
      * 查询语句类型
      */
-    private String dslType;
+    private String  dslType;
     /**
      * 查询索引名称
      */
-    private String indices;
+    private String  indices;
     /**
      * 查询模板MD5
      */
-    private String dslTemplateMd5;
+    private String  dslTemplateMd5;
     /**
      * 平均查询总耗时
      */
-    private Double totalCostAvg;
+    private Double  totalCostAvg;
     /**
      * 查询shard失败个数
      */
-    private Double failedShardsAvg;
+    private Double  failedShardsAvg;
     /**
      * dsink写入时间
      */
@@ -111,15 +111,15 @@ public class DslTemplate {
     /**
      * 平均gateway处理耗时
      */
-    private Double beforeCostAvg;
+    private Double  beforeCostAvg;
     /**
      * flin
      */
-    private String flinkTime;
+    private String  flinkTime;
     /**
      * 查询限流
      */
-    private Double queryLimit;
+    private Double  queryLimit;
     /**
      * 是否来自用户控制台
      */
@@ -135,17 +135,17 @@ public class DslTemplate {
     /**
      * 黑白名单 null/white表示白名单，black表示黑名单
      */
-    private String checkMode;
+    private String  checkMode;
     /**
      * 慢查dsl阈值，单位为ms
      */
-    private Long slowDslThreshold;
+    private Long    slowDslThreshold;
     /**
      * 查询模板版本号
      */
-    private String version;
+    private String  version;
     /**
      * 查询模板危害标签
      */
-    private String dslTag;
+    private String  dslTag;
 }

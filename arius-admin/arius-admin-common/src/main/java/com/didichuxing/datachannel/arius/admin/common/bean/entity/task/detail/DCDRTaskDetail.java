@@ -14,11 +14,11 @@ import java.util.Date;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class DCDRTaskDetail extends AbstractTaskDetail{
+public class DCDRTaskDetail extends AbstractTaskDetail {
     /**
      * 开始时间
      */
-    private Date createTime;
+    private Date    createTime;
 
     /**
      * 逻辑索引模版Id
@@ -28,40 +28,39 @@ public class DCDRTaskDetail extends AbstractTaskDetail{
     /**
      * 逻辑索引模版名称
      */
-    private String logicTemplateName;
-
+    private String  logicTemplateName;
 
     /**
      * 所属逻辑集群名称
      */
-    private String logicClusterName;
+    private String  logicClusterName;
 
     /**
      * 主物理索引模版
      */
-    private String masterPhysicalTemplateName;
+    private String  masterPhysicalTemplateName;
 
     /**
      * 所属主物理集群名称
      */
-    private String masterPhysicalClusterName;
+    private String  masterPhysicalClusterName;
 
     /**
      * 副物理索引模版
      */
-    private String slavePhysicalTemplateName;
+    private String  slavePhysicalTemplateName;
 
     /**
      * 所属副物理集群名称
      */
-    private String slavePhysicalClusterName;
+    private String  slavePhysicalClusterName;
 
     /**
      * 任务状态
      * success:成功 failed:失败
      * running:执行中
      */
-    private String status;
+    private String  status;
 
     /**
      * 任务执行进度
@@ -81,6 +80,6 @@ public class DCDRTaskDetail extends AbstractTaskDetail{
     /**
      * 备注
      */
-    private String comment;
+    private String  comment;
 
 }

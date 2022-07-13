@@ -41,7 +41,7 @@ import org.springframework.stereotype.Service;
  */
 @Service("clusterConfigRestartTaskHandler")
 public class ClusterConfigRestartTaskHandler extends AbstractClusterTaskHandler {
-   
+
     @Override
     Result<Void> validateHostParam(String param) throws NotFindSubclassException {
         ClusterConfigRestartContent content = ConvertUtil.str2ObjByJson(param, ClusterConfigRestartContent.class);
@@ -79,12 +79,13 @@ public class ClusterConfigRestartTaskHandler extends AbstractClusterTaskHandler 
 
         return Result.buildSucc();
     }
+
     @Override
     Result<OpTask> buildOpTask(OpTask opTask) {
         ClusterBaseContent content = ConvertUtil.str2ObjByJson(opTask.getExpandData(), ClusterBaseContent.class);
         EcmTaskDTO ecmTaskDTO = new EcmTaskDTO();
         ecmTaskDTO
-                .setTitle(content.getPhyClusterName() + OpTaskTypeEnum.valueOfType(opTask.getTaskType()).getMessage());
+            .setTitle(content.getPhyClusterName() + OpTaskTypeEnum.valueOfType(opTask.getTaskType()).getMessage());
         ecmTaskDTO.setCreator(opTask.getCreator());
         ecmTaskDTO.setType(content.getType());
         ecmTaskDTO.setPhysicClusterId(ClusterConstant.INVALID_VALUE);
@@ -106,8 +107,7 @@ public class ClusterConfigRestartTaskHandler extends AbstractClusterTaskHandler 
 
     @Override
     Result<Void> buildHostEcmTaskDTO(EcmTaskDTO ecmTaskDTO, String param, String creator) {
-        ClusterConfigRestartContent content = ConvertUtil.str2ObjByJson(param,
-            ClusterConfigRestartContent.class);
+        ClusterConfigRestartContent content = ConvertUtil.str2ObjByJson(param, ClusterConfigRestartContent.class);
 
         ecmTaskDTO.setPhysicClusterId(content.getPhyClusterId());
         ecmTaskDTO.setOrderType(OpTaskTypeEnum.CLUSTER_RESTART.getType());
@@ -121,17 +121,16 @@ public class ClusterConfigRestartTaskHandler extends AbstractClusterTaskHandler 
             roleNameList.add(roleName);
         }
 
-        Multimap<String, Long> role2ConfigIdsMultiMap = saveEsConfigs(content, creator,ecmTaskDTO.getPhysicClusterId());
+        Multimap<String, Long> role2ConfigIdsMultiMap = saveEsConfigs(content, creator,
+            ecmTaskDTO.getPhysicClusterId());
         Result<List<EcmParamBase>> buildEcmParamBasesResult = ecmHandleService.buildEcmParamBaseListWithConfigAction(
             clusterPhy.getId(), roleNameList, role2ConfigIdsMultiMap, content.getActionType());
-            
+
         if (buildEcmParamBasesResult.failed()) {
             return Result.buildFail(buildEcmParamBasesResult.getMessage());
         }
         ecmTaskDTO.setEcmParamBaseList(buildEcmParamBasesResult.getData());
-      
-        
-        
+
         return Result.buildSucc();
     }
 
@@ -145,13 +144,13 @@ public class ClusterConfigRestartTaskHandler extends AbstractClusterTaskHandler 
      */
     private Multimap<String, Long> saveEsConfigs(ClusterConfigRestartContent content, String approver,
                                                  Long physicClusterId) {
-    
+
         final List<ESConfigOperateRecode> operateRecodeList = content.getNewEsConfigs().stream()
-                .filter(Objects::nonNull)
-                .map(esConfig -> ESConfigOperateRecode.sourceAndTargetConfigFunc.apply(esConfig,
-                        esClusterConfigService::getEsClusterConfigById))
-                .map(tupleTwo -> ESConfigOperateRecode.sourceTargetDiff(tupleTwo, content.getActionType()))
-                .collect(Collectors.toList());
+            .filter(Objects::nonNull)
+            .map(esConfig -> ESConfigOperateRecode.sourceAndTargetConfigFunc.apply(esConfig,
+                esClusterConfigService::getEsClusterConfigById))
+            .map(tupleTwo -> ESConfigOperateRecode.sourceTargetDiff(tupleTwo, content.getActionType()))
+            .collect(Collectors.toList());
         Multimap<String, Long> role2ConfigIdsMultiMap = ArrayListMultimap.create();
         if (ADD.getCode() == content.getActionType()) {
             List<ESConfigDTO> newEsConfigs = ConvertUtil.list2List(content.getNewEsConfigs(), ESConfigDTO.class);
@@ -187,14 +186,12 @@ public class ClusterConfigRestartTaskHandler extends AbstractClusterTaskHandler 
         //配置变更 保存到操作记录
         for (ESConfigOperateRecode esConfigOperateRecode : operateRecodeList) {
             final OperateRecord operateRecord = ESConfigOperateRecode.buildESConfigOperateRecode(approver,
-                    projectService::getProjectBriefByProjectId, AuthConstant.SUPER_PROJECT_ID, esConfigOperateRecode,
-                    physicClusterId);
+                projectService::getProjectBriefByProjectId, AuthConstant.SUPER_PROJECT_ID, esConfigOperateRecode,
+                physicClusterId);
             operateRecordService.save(operateRecord);
         }
 
         return role2ConfigIdsMultiMap;
     }
-    
-   
-  
+
 }

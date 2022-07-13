@@ -1,6 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.dto.template;
 
-
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -17,5 +16,5 @@ public class ConsoleTemplateRateLimitDTO {
     @ApiModelProperty("索引模板调整后限流值")
     private Integer adjustRateLimit;
     @ApiModelProperty("限流变更人")
-    private String submitor;
+    private String  submitor;
 }

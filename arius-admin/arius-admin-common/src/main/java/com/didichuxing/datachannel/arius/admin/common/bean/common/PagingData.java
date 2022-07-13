@@ -9,11 +9,11 @@ import java.util.List;
 public class PagingData<T> implements Serializable {
 
     private static final long serialVersionUID = -4498978062649547459L;
-    private List<T> bizData;
+    private List<T>           bizData;
 
-    private Pagination pagination;
+    private Pagination        pagination;
 
-    public PagingData (List<T> bizData, long total, long pageNo, long pageSize) {
+    public PagingData(List<T> bizData, long total, long pageNo, long pageSize) {
         this.bizData = bizData;
         this.pagination = new Pagination(total, pageNo, pageSize);
     }
@@ -22,9 +22,9 @@ public class PagingData<T> implements Serializable {
     public static class Pagination implements Serializable {
 
         private static final long serialVersionUID = 1037592182089929607L;
-        private long total;
-        private long pageNo;
-        private long pageSize;
+        private long              total;
+        private long              pageNo;
+        private long              pageSize;
 
         public Pagination(long total, long pageNo, long pageSize) {
             this.total = total;

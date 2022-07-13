@@ -5,7 +5,8 @@ import org.elasticsearch.client.ElasticsearchClient;
 
 import static com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.node.ESNodeStatsRequest.*;
 
-public class ESNodeStatsRequestBuilder extends ActionRequestBuilder<ESNodeStatsRequest, ESNodeStatsResponse, ESNodeStatsRequestBuilder> {
+public class ESNodeStatsRequestBuilder extends
+                                       ActionRequestBuilder<ESNodeStatsRequest, ESNodeStatsResponse, ESNodeStatsRequestBuilder> {
 
     public ESNodeStatsRequestBuilder(ElasticsearchClient client, ESNodeStatsAction action) {
         super(client, action, new ESNodeStatsRequest());

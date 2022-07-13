@@ -51,7 +51,6 @@ public interface ClusterRegionService {
      */
     List<Integer> listPhysicClusterId(Long logicClusterId);
 
-
     /**
      * 获取指定物理集群下的region
      * @param clusterName 物理集群名

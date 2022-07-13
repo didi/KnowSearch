@@ -48,14 +48,9 @@ public class IndexRealTimeInfo {
 
     @Override
     public String toString() {
-        return "IndexInfo" +
-                ": template="   + template  +
-                ": cluster="    + cluster   +
-                ": start="      + start.toString() +
-                ": end="        + end.toString()   +
-                ": avgSearchQueryTotalRate="   + avgSearchQueryTotalRate   +
-                ", avgIndexingIndexTotalRate=" + avgIndexingIndexTotalRate +
-                ", avgIndicesSearchQueryTime=" + avgIndicesSearchQueryTime
-                ;
+        return "IndexInfo" + ": template=" + template + ": cluster=" + cluster + ": start=" + start.toString()
+               + ": end=" + end.toString() + ": avgSearchQueryTotalRate=" + avgSearchQueryTotalRate
+               + ", avgIndexingIndexTotalRate=" + avgIndexingIndexTotalRate + ", avgIndicesSearchQueryTime="
+               + avgIndicesSearchQueryTime;
     }
 }

@@ -27,7 +27,7 @@ public class RoleTool {
     private RoleService roleService;
     @Autowired
     private UserService userService;
-    
+
     /**
      * 校验用户是否为管理员
      *
@@ -37,9 +37,9 @@ public class RoleTool {
     public boolean isAdmin(String userName) {
         final RoleVO roleVO = roleService.getRoleDetailByRoleId(AuthConstant.ADMIN_ROLE_ID);
         return Optional.ofNullable(roleVO).map(RoleVO::getAuthedUsers).orElse(Collections.emptyList()).stream()
-                .anyMatch(user -> StringUtils.equals(user, userName));
+            .anyMatch(user -> StringUtils.equals(user, userName));
     }
-    
+
     /**
      * 管理员用户列表
      *
@@ -48,17 +48,15 @@ public class RoleTool {
     public List<UserBriefVO> getAdminList() {
         final RoleVO roleVO = roleService.getRoleDetailByRoleId(AuthConstant.ADMIN_ROLE_ID);
         return Optional.ofNullable(roleVO).map(RoleVO::getAuthedUsers)
-                
-                .orElse(Collections.emptyList())
-                .stream()
-                .map(userService::getUserBriefByUserName)
-                .collect(Collectors.toList());
+
+            .orElse(Collections.emptyList()).stream().map(userService::getUserBriefByUserName)
+            .collect(Collectors.toList());
     }
-    
+
     public boolean isAdmin(Integer userId) {
-         final RoleVO roleVO = roleService.getRoleDetailByRoleId(AuthConstant.ADMIN_ROLE_ID);
+        final RoleVO roleVO = roleService.getRoleDetailByRoleId(AuthConstant.ADMIN_ROLE_ID);
         final UserVO userVO = userService.getUserDetailByUserId(userId);
         return Optional.ofNullable(roleVO).map(RoleVO::getAuthedUsers).orElse(Collections.emptyList()).stream()
-                .anyMatch(user -> StringUtils.equals(user, userVO.getUserName()));
+            .anyMatch(user -> StringUtils.equals(user, userVO.getUserName()));
     }
 }

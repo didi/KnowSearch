@@ -22,8 +22,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
  *
  * Created by d06679 on 2019/3/13.
  */
-@RestControllerAdvice(basePackages = {"com.didichuxing.datachannel.arius.admin.rest.controller"},basePackageClasses =
-        { LoginManager.class })
+@RestControllerAdvice(basePackages = { "com.didichuxing.datachannel.arius.admin.rest.controller" }, basePackageClasses = { LoginManager.class })
 public class ExceptionHandleController implements ThrowsAdvice {
 
     private static final ILog LOGGER = LogFactory.getLog(ExceptionHandleController.class);
@@ -36,7 +35,8 @@ public class ExceptionHandleController implements ThrowsAdvice {
 
     @ExceptionHandler(ESOperateException.class)
     public Result<Object> handleESOperateException(ESOperateException e) {
-        LOGGER.warn("class=ExceptionHandleController||method=handleESOperateException||msg=arius es rest process error.", e);
+        LOGGER.warn(
+            "class=ExceptionHandleController||method=handleESOperateException||msg=arius es rest process error.", e);
         Result<Object> result = Result.build(ES_OPERATE_ERROR);
         StringBuilder stringBuilder = new StringBuilder(e.getMessage());
         Throwable throwable = e.getCause();
@@ -61,7 +61,8 @@ public class ExceptionHandleController implements ThrowsAdvice {
 
     @ExceptionHandler(IllegalArgumentException.class)
     public Result<Object> handleIllegalArgumentException(IllegalArgumentException e) {
-        LOGGER.warn("class=ExceptionHandleController||method=handleIllegalArgumentException||msg=Illegal Argument error ", e);
+        LOGGER.warn(
+            "class=ExceptionHandleController||method=handleIllegalArgumentException||msg=Illegal Argument error ", e);
         Result<Object> result = Result.build(ResultType.ILLEGAL_PARAMS);
         result.setMessage(e.getMessage());
         return result;
@@ -69,38 +70,40 @@ public class ExceptionHandleController implements ThrowsAdvice {
 
     @ExceptionHandler(Exception.class)
     public Result<Object> handleException(Exception e) {
-        LOGGER.warn("class=ExceptionHandleController||method=handleException||arius admin process error||errMsg={}", e.getMessage(), e);
-        LOGGER.warn("class=ExceptionHandleController||method=handleException||arius admin process error||errStack={}", e.getStackTrace());
+        LOGGER.warn("class=ExceptionHandleController||method=handleException||arius admin process error||errMsg={}",
+            e.getMessage(), e);
+        LOGGER.warn("class=ExceptionHandleController||method=handleException||arius admin process error||errStack={}",
+            e.getStackTrace());
         Result<Object> result = Result.build(ResultType.FAIL);
         if (StringUtils.isNotBlank(e.getMessage())) {
             result.setMessage(e.getMessage());
         }
         return result;
     }
-    
+
     @ExceptionHandler(LogiSecurityException.class)
     public Result<Object> handleLogiSecurityException(LogiSecurityException e) {
         LOGGER.warn(
-                "class=ExceptionHandleController||method=handleLogiSecurityException||arius admin process error||errMsg={}",
-                e.getMessage(), e);
+            "class=ExceptionHandleController||method=handleLogiSecurityException||arius admin process error||errMsg={}",
+            e.getMessage(), e);
         LOGGER.warn(
-                "class=ExceptionHandleController||method=handleLogiSecurityException||arius admin process error||errStack={}",
-                e.getStackTrace());
+            "class=ExceptionHandleController||method=handleLogiSecurityException||arius admin process error||errStack={}",
+            e.getStackTrace());
         Result<Object> result = Result.build(ResultType.FAIL);
         if (StringUtils.isNotBlank(e.getMessage())) {
             result.setMessage(e.getMessage());
         }
         return result;
     }
-    
+
     @ExceptionHandler(OperateForbiddenException.class)
     public Result<Object> handleOperateForbiddenException(OperateForbiddenException e) {
         LOGGER.warn(
-                "class=ExceptionHandleController||method=handleOperateForbiddenException||arius admin process error||errMsg={}",
-                e.getMessage(), e);
+            "class=ExceptionHandleController||method=handleOperateForbiddenException||arius admin process error||errMsg={}",
+            e.getMessage(), e);
         LOGGER.warn(
-                "class=ExceptionHandleController||method=handleOperateForbiddenException||arius admin process error||errStack={}",
-                e.getStackTrace());
+            "class=ExceptionHandleController||method=handleOperateForbiddenException||arius admin process error||errStack={}",
+            e.getStackTrace());
         Result<Object> result = Result.build(ResultType.FAIL);
         if (StringUtils.isNotBlank(e.getMessage())) {
             result.setMessage(e.getMessage());
@@ -109,7 +112,8 @@ public class ExceptionHandleController implements ThrowsAdvice {
     }
 
     private Result<Object> handlerExceptionWithResult(Exception e, ResultType resultType) {
-        LOGGER.warn("class=ExceptionHandleController||method=handlerExceptionWithResult||arius admin rest process error.", e);
+        LOGGER.warn(
+            "class=ExceptionHandleController||method=handlerExceptionWithResult||arius admin rest process error.", e);
         Result<Object> result = Result.build(resultType);
         if (StringUtils.isNotBlank(e.getMessage())) {
             result.setMessage(e.getMessage());

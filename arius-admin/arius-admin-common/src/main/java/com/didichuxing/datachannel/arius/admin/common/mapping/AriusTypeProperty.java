@@ -34,7 +34,7 @@ public class AriusTypeProperty {
      * type_name
      */
     @ApiModelProperty("名称")
-    private String             typeName = "type";
+    private String             typeName              = "type";
 
     /**
      * id字段
@@ -77,9 +77,9 @@ public class AriusTypeProperty {
      * [{"key1":{}},{"key2":{}}]
      */
     @ApiModelProperty("dynamic_templates（jsonArray格式）")
-    private JSONArray dynamicTemplates;
+    private JSONArray          dynamicTemplates;
 
-    public static final String PROPERTIES_STR = "properties";
+    public static final String PROPERTIES_STR        = "properties";
     public static final String DYNAMIC_TEMPLATES_STR = "dynamic_templates";
 
     public JSONObject toMappingJSON() {

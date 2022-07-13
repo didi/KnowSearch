@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
 
 @RestController
-@RequestMapping(V3+ "/logic/cluster/templateSrv")
+@RequestMapping(V3 + "/logic/cluster/templateSrv")
 @Api(tags = "ES逻辑集群索引服务接口(REST)")
 @Deprecated
 public class ClusterLogicTemplateSrvController {

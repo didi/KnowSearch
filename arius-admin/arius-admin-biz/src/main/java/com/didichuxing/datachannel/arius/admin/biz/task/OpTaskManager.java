@@ -70,7 +70,7 @@ public interface OpTaskManager {
      * @return Result
      */
     Result<Void> processTask(OpTaskProcessDTO processDTO) throws NotFindSubclassException;
-    
+
     /**获取最新任务
      * 通过businessKey获取最新的任务
      *
@@ -80,8 +80,6 @@ public interface OpTaskManager {
      */
     Result<OpTask> getLatestTask(String businessKey, Integer taskType);
 
-
-    
     /**
      * 通过taskType获取待处理任务
      *

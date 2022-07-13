@@ -44,13 +44,13 @@ public class AriusConfigInfoServiceImpl implements AriusConfigInfoService {
 
     private static final ILog                LOGGER      = LogFactory.getLog(AriusConfigInfoServiceImpl.class);
 
-    private static final String NOT_EXIST = "配置不存在";
+    private static final String              NOT_EXIST   = "配置不存在";
 
     @Autowired
     private AriusConfigInfoDAO               configInfoDAO;
 
     @Autowired
-    private OperateRecordService operateRecordService;
+    private OperateRecordService             operateRecordService;
 
     private Cache<String, AriusConfigInfoPO> configCache = CacheBuilder.newBuilder()
         .expireAfterWrite(1, TimeUnit.MINUTES).maximumSize(100).build();
@@ -82,17 +82,12 @@ public class AriusConfigInfoServiceImpl implements AriusConfigInfoService {
         AriusConfigInfoPO param = ConvertUtil.obj2Obj(configInfoDTO, AriusConfigInfoPO.class);
         boolean succ = (1 == configInfoDAO.insert(param));
         if (succ) {
-            operateRecordService.save(new OperateRecord
-                            .Builder()
-                            .operationTypeEnum(OperateTypeEnum.SETTING_ADD)
-                            .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                            .content(String.format("新增平台配置, 配置组:%s, 配置名称%s", configInfoDTO.getValueGroup(),
-                            configInfoDTO.getValueName()))
-                            .userOperation(operator)
-                            .bizId(configInfoDTO.getId())
-                    .build());
+            operateRecordService.save(new OperateRecord.Builder().operationTypeEnum(OperateTypeEnum.SETTING_ADD)
+                .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).content(String.format("新增平台配置, 配置组:%s, 配置名称%s",
+                    configInfoDTO.getValueGroup(), configInfoDTO.getValueName()))
+                .userOperation(operator).bizId(configInfoDTO.getId()).build());
         }
-        return Result.build(succ,param.getId());
+        return Result.build(succ, param.getId());
     }
 
     /**
@@ -111,8 +106,9 @@ public class AriusConfigInfoServiceImpl implements AriusConfigInfoService {
 
         boolean succ = (1 == configInfoDAO.updateByIdAndStatus(configId, AriusConfigStatusEnum.DELETED.getCode()));
         if (succ) {
-             operateRecordService.save(new OperateRecord(OperateTypeEnum.SETTING_DELETE, TriggerWayEnum.MANUAL_TRIGGER,
-                   String.format("删除平台配置, 配置组:%s, 配置名称%s", configInfoPO.getValueGroup(), configInfoPO.getValueName()), operator,configId));
+            operateRecordService.save(new OperateRecord(OperateTypeEnum.SETTING_DELETE, TriggerWayEnum.MANUAL_TRIGGER,
+                String.format("删除平台配置, 配置组:%s, 配置名称%s", configInfoPO.getValueGroup(), configInfoPO.getValueName()),
+                operator, configId));
         }
 
         return Result.build(succ);
@@ -140,9 +136,9 @@ public class AriusConfigInfoServiceImpl implements AriusConfigInfoService {
 
         if (succ) {
             operateRecordService.save(new OperateRecord(OperateTypeEnum.SETTING_MODIFY, TriggerWayEnum.MANUAL_TRIGGER,
-                    String.format("编辑平台配置，配置组：%s，配置名称%s，配置值：", configInfoPO.getValueGroup(),
-                            configInfoPO.getValueName()), operator, configInfoPO.getId()));
-           
+                String.format("编辑平台配置，配置组：%s，配置名称%s，配置值：", configInfoPO.getValueGroup(), configInfoPO.getValueName()),
+                operator, configInfoPO.getId()));
+
         }
 
         return Result.build(succ);
@@ -170,10 +166,11 @@ public class AriusConfigInfoServiceImpl implements AriusConfigInfoService {
 
         boolean succ = (1 == configInfoDAO.updateByIdAndStatus(configId, status));
         if (succ) {
-            operateRecordService.save(new OperateRecord(OperateTypeEnum.SETTING_MODIFY, TriggerWayEnum.MANUAL_TRIGGER,
-                    String.format("平台配置%s, 配置组:%s, 配置名称%s", statusEnum.getDesc(), configInfoPO.getValueGroup(),
-                            configInfoPO.getValueName()), operator, configInfoPO.getId()));
-        
+            operateRecordService.save(new OperateRecord(
+                OperateTypeEnum.SETTING_MODIFY, TriggerWayEnum.MANUAL_TRIGGER, String.format("平台配置%s, 配置组:%s, 配置名称%s",
+                    statusEnum.getDesc(), configInfoPO.getValueGroup(), configInfoPO.getValueName()),
+                operator, configInfoPO.getId()));
+
         }
 
         return Result.build(succ);

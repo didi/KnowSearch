@@ -21,38 +21,36 @@ import org.springframework.stereotype.Component;
 @Component
 public class ProjectClusterLogicAuthManagerImpl implements ProjectClusterLogicAuthManager {
     @Autowired
-    private ProjectService projectService;
+    private ProjectService                 projectService;
 
     @Autowired
     private ProjectClusterLogicAuthService projectClusterLogicAuthService;
 
     @Override
-    public List<ProjectClusterLogicAuth> getByClusterLogicListAndProjectId(Integer projectId, List<ClusterLogic> clusterLogicList) {
+    public List<ProjectClusterLogicAuth> getByClusterLogicListAndProjectId(Integer projectId,
+                                                                           List<ClusterLogic> clusterLogicList) {
         List<ProjectClusterLogicAuth> projectClusterLogicAuthList = Lists.newArrayList();
         if (CollectionUtils.isEmpty(clusterLogicList)) {
             return projectClusterLogicAuthList;
         }
 
         if (!projectService.checkProjectExist(projectId)) {
-            projectClusterLogicAuthList = clusterLogicList
-                    .stream()
-                    .map(r -> projectClusterLogicAuthService.buildClusterLogicAuth(projectId, r.getId(), ProjectClusterLogicAuthEnum.NO_PERMISSIONS))
-                    .collect(Collectors.toList());
+            projectClusterLogicAuthList = clusterLogicList.stream().map(r -> projectClusterLogicAuthService
+                .buildClusterLogicAuth(projectId, r.getId(), ProjectClusterLogicAuthEnum.NO_PERMISSIONS))
+                .collect(Collectors.toList());
             return projectClusterLogicAuthList;
         }
 
         if (AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
-            projectClusterLogicAuthList = clusterLogicList
-                    .stream()
-                    .map(r -> projectClusterLogicAuthService.buildClusterLogicAuth(projectId, r.getId(), ProjectClusterLogicAuthEnum.OWN))
-                    .collect(Collectors.toList());
+            projectClusterLogicAuthList = clusterLogicList.stream().map(r -> projectClusterLogicAuthService
+                .buildClusterLogicAuth(projectId, r.getId(), ProjectClusterLogicAuthEnum.OWN))
+                .collect(Collectors.toList());
             return projectClusterLogicAuthList;
         }
 
-        projectClusterLogicAuthList = clusterLogicList
-                            .stream()
-                            .map(clusterLogic -> projectClusterLogicAuthService.getLogicClusterAuth(projectId, clusterLogic.getId()))
-                            .collect(Collectors.toList());
+        projectClusterLogicAuthList = clusterLogicList.stream()
+            .map(clusterLogic -> projectClusterLogicAuthService.getLogicClusterAuth(projectId, clusterLogic.getId()))
+            .collect(Collectors.toList());
 
         //处理无权限
         for (ProjectClusterLogicAuth projectClusterLogicAuth : projectClusterLogicAuthList) {

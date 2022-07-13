@@ -24,5 +24,5 @@ public class ClusterLogicTemplateIndexDetailDTO {
     private List<IndexTemplateLogicAggregate> templateLogicAggregates;
 
     @ApiModelProperty("索引列表")
-    private List<IndexCatCellDTO> catIndexResults;
+    private List<IndexCatCellDTO>             catIndexResults;
 }

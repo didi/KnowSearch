@@ -41,8 +41,8 @@ public class TemplateWithSrvVO extends BaseVO {
 
     @ApiModelProperty("热数据保存时长 单位天")
     private Integer                        hotTime;
-    
+
     @ApiModelProperty("项目名称 ")
-    private String projectName;
+    private String                         projectName;
 
 }

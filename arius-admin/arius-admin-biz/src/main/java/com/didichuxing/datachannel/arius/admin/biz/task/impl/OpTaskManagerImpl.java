@@ -36,18 +36,18 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class OpTaskManagerImpl implements OpTaskManager {
-    private static final ILog LOGGER = LogFactory.getLog(OpTaskManagerImpl.class);
+    private static final ILog    LOGGER = LogFactory.getLog(OpTaskManagerImpl.class);
 
     @Autowired
-    private OpTaskDAO opTaskDao;
+    private OpTaskDAO            opTaskDao;
 
     @Autowired
     private HandleFactory        handleFactory;
 
     @Autowired
-    private UserService  userService;
+    private UserService          userService;
     @Autowired
-    private ProjectService projectService;
+    private ProjectService       projectService;
     @Autowired
     private OperateRecordService operateRecordService;
 
@@ -75,28 +75,28 @@ public class OpTaskManagerImpl implements OpTaskManager {
             switch (typeEnum) {
                 case CLUSTER_NEW:
                     operationType = OperateTypeEnum.PHYSICAL_CLUSTER_NEW;
-                    content=opTaskDTO.getTitle();
+                    content = opTaskDTO.getTitle();
                     break;
                 case CLUSTER_OFFLINE:
                     operationType = OperateTypeEnum.PHYSICAL_CLUSTER_OFFLINE;
-                    content=opTaskDTO.getTitle();
+                    content = opTaskDTO.getTitle();
                     break;
                 case TEMPLATE_DCDR:
                     operationType = OperateTypeEnum.TEMPLATE_SERVICE_DCDR_SETTING;
-                    content=opTaskDTO.getTitle();
+                    content = opTaskDTO.getTitle();
                     break;
                 case CLUSTER_SHRINK:
                 case CLUSTER_EXPAND:
-                     operationType = OperateTypeEnum.PHYSICAL_CLUSTER_CAPACITY;
-                     content=opTaskDTO.getTitle();
+                    operationType = OperateTypeEnum.PHYSICAL_CLUSTER_CAPACITY;
+                    content = opTaskDTO.getTitle();
                     break;
                 case CLUSTER_RESTART:
                     operationType = OperateTypeEnum.PHYSICAL_CLUSTER_RESTART;
-                    content=opTaskDTO.getTitle();
+                    content = opTaskDTO.getTitle();
                     break;
                 case CLUSTER_UPGRADE:
                     operationType = OperateTypeEnum.PHYSICAL_CLUSTER_UPGRADE;
-                    content=opTaskDTO.getTitle();
+                    content = opTaskDTO.getTitle();
                     break;
                 default:
                     operationType = null;
@@ -104,15 +104,13 @@ public class OpTaskManagerImpl implements OpTaskManager {
             }
             if (StringUtils.isNotBlank(opTaskDTO.getCreator()) && Objects.nonNull(operationType)) {
                 final OperateRecord operateRecord = new Builder().userOperation(opTaskDTO.getCreator())
-                        .project(projectService.getProjectBriefByProjectId(projectId)).operationTypeEnum(operationType)
-                        .content(content)
-                        .bizId(opTaskResult.getData().getId())
-                        .buildDefaultManualTrigger();
+                    .project(projectService.getProjectBriefByProjectId(projectId)).operationTypeEnum(operationType)
+                    .content(content).bizId(opTaskResult.getData().getId()).buildDefaultManualTrigger();
                 operateRecordService.save(operateRecord);
             }
-        
+
         }
-        
+
         return opTaskResult;
     }
 
@@ -189,8 +187,6 @@ public class OpTaskManagerImpl implements OpTaskManager {
         }
         return Result.buildSucc(ConvertUtil.obj2Obj(opTaskPO, OpTask.class));
     }
-
-    
 
     @Override
     public List<OpTask> getPendingTaskByType(Integer taskType) {

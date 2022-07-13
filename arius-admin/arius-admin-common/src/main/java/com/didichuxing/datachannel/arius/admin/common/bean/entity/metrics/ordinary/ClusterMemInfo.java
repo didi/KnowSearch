@@ -14,13 +14,13 @@ import java.io.Serializable;
 @Builder
 public class ClusterMemInfo implements Serializable {
     @ApiModelProperty("已用内存大小")
-    private Long memUsed;
+    private Long   memUsed;
 
     @ApiModelProperty("剩余空闲内存大小")
-    private Long memFree;
+    private Long   memFree;
 
     @ApiModelProperty("总内存大小")
-    private Long memTotal;
+    private Long   memTotal;
 
     @ApiModelProperty("已用内存百分比")
     private Double memUsedPercent;

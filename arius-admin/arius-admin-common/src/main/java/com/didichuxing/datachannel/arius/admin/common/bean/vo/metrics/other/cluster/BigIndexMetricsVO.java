@@ -18,9 +18,9 @@ import lombok.NoArgsConstructor;
 @ApiModel("大索引, 大于10亿文档数的索引")
 public class BigIndexMetricsVO implements Serializable {
 
-	@ApiModelProperty("索引名称")
-	private String indexName;
+    @ApiModelProperty("索引名称")
+    private String                  indexName;
 
-	@ApiModelProperty("归属节点信息")
-	private List<IndexBelongNodeVO> belongNodeInfo;
+    @ApiModelProperty("归属节点信息")
+    private List<IndexBelongNodeVO> belongNodeInfo;
 }

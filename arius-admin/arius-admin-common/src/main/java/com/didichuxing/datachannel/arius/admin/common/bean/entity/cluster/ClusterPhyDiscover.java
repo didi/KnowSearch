@@ -50,10 +50,10 @@ public class ClusterPhyDiscover implements Serializable {
     /**
      * 创建时间
      */
-    private Date creationTime;
+    private Date   creationTime;
 
     /**
      * 最后更新时间
      */
-    private Date lastModifyTime;
+    private Date   lastModifyTime;
 }
