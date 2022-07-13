@@ -18,42 +18,42 @@ public class ClusterNewDockerContent extends ClusterBaseContent {
     /**
      * 数据中心
      */
-    private String              dataCenter;
+    private String                    dataCenter;
     /**
      * 机器节点
      */
-    private String              nsTree;
+    private String                    nsTree;
 
     /**
      * 机房
      */
-    private String              idc;
+    private String                    idc;
 
     /**
      * es版本
      */
-    private String              esVersion;
+    private String                    esVersion;
 
     /**
      * 插件包ID列表
      */
-    private String              plugs;
+    private String                    plugs;
 
     /**
      * 集群创建人
      */
-    private String              creator;
+    private String                    creator;
 
     /**
      * 描述
      */
-    private String              desc;
+    private String                    desc;
 
     /**
      * 服务等级
      * @see ResourceLogicLevelEnum
      */
-    private Integer             level;
+    private Integer                   level;
 
     /**
      * 集群角色列表

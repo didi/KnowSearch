@@ -6,7 +6,7 @@ import org.elasticsearch.client.ElasticsearchClient;
 public class ESNodeStatsAction extends Action<ESNodeStatsRequest, ESNodeStatsResponse, ESNodeStatsRequestBuilder> {
 
     public static final ESNodeStatsAction INSTANCE = new ESNodeStatsAction();
-    public static final String NAME = "cluster:nodes/tolerance/stats";
+    public static final String            NAME     = "cluster:nodes/tolerance/stats";
 
     private ESNodeStatsAction() {
         super(NAME);

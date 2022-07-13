@@ -22,7 +22,7 @@ public class MetricsConfigInfo extends BaseEntity {
     /**
      * 用户名
      */
-    private String userName;
+    private String       userName;
 
     /**
      * 一级目录下的指标配置类型,如集群看板，网关看板

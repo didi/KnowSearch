@@ -44,7 +44,6 @@ public interface ClusterLogicManager {
      */
     ClusterLogicVO buildClusterLogic(ClusterLogic clusterLogic);
 
-
     /**
      * 获取project拥有的逻辑集群id和名称列表
      * @param projectId 应用id
@@ -67,7 +66,6 @@ public interface ClusterLogicManager {
      * @return
      */
     Result<List<ClusterLogicVO>> getProjectLogicClusterInfoByType(Integer projectId, Integer type);
-
 
     /**
      * 获取逻辑集群所有逻辑模板列表
@@ -121,7 +119,8 @@ public interface ClusterLogicManager {
      * @param operator 操作人
      * @return 成功或失败
      */
-    Result<Void> addLogicClusterAndClusterRegions(ESLogicClusterWithRegionDTO param, String operator) throws AdminOperateException;
+    Result<Void> addLogicClusterAndClusterRegions(ESLogicClusterWithRegionDTO param,
+                                                  String operator) throws AdminOperateException;
 
     /**
      * 逻辑集群下线
@@ -131,7 +130,8 @@ public interface ClusterLogicManager {
      * @return 成功或者失败
      * @throws AdminOperateException
      */
-    Result<Void> deleteLogicCluster(Long logicClusterId, String operator, Integer projectId) throws AdminOperateException;
+    Result<Void> deleteLogicCluster(Long logicClusterId, String operator,
+                                    Integer projectId) throws AdminOperateException;
 
     /**
      *  修改逻辑集群信息
@@ -148,7 +148,8 @@ public interface ClusterLogicManager {
      * @param projectId 项目id
      * @return
      */
-    PaginationResult<ClusterLogicVO> pageGetClusterLogics(ClusterLogicConditionDTO condition, Integer projectId) throws NotFindSubclassException;
+    PaginationResult<ClusterLogicVO> pageGetClusterLogics(ClusterLogicConditionDTO condition,
+                                                          Integer projectId) throws NotFindSubclassException;
 
     /**
      * 更新逻辑集群状态
@@ -173,7 +174,6 @@ public interface ClusterLogicManager {
      * @return
      */
     Result<Long> estimatedDiskSize(Long clusterLogicId, Integer count);
-
 
     /**
      * 根据projectId获取项目下的逻辑集群

@@ -11,7 +11,7 @@ public class TemplateValueRecord {
     /**
      * 统计时间
      */
-    private Long timestamp;
+    private Long    timestamp;
     /**
      * 索引模板id
      */
@@ -23,13 +23,13 @@ public class TemplateValueRecord {
     /**
      * 访问量
      */
-    private Long accessCount;
+    private Long    accessCount;
     /**
      * 大小G
      */
-    private Double sizeG;
+    private Double  sizeG;
     /**
      * 逻辑集群
      */
-    private String logicCluster;
+    private String  logicCluster;
 }

@@ -21,9 +21,9 @@ public class ESClusterTaskDetail implements Serializable {
 
     private String action;
 
-    private long startTime;
+    private long   startTime;
 
-    private long runningTime;
+    private long   runningTime;
 
     private String runningTimeString;
 

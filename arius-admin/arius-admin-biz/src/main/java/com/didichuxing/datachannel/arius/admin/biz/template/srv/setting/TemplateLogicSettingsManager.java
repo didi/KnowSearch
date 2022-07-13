@@ -24,7 +24,8 @@ public interface TemplateLogicSettingsManager {
      * @return Result
      * @throws AdminOperateException
      */
-    Result<Void> modifySetting(ConsoleTemplateSettingDTO settingDTO, String operator, Integer projectId) throws AdminOperateException;
+    Result<Void> modifySetting(ConsoleTemplateSettingDTO settingDTO, String operator,
+                               Integer projectId) throws AdminOperateException;
 
     /**
      * 修改模板Setting(仅开放对于副本设置和异步translog落盘方式的设置)

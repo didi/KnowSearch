@@ -19,7 +19,7 @@ public interface LogicClusterDAO {
 
     List<ClusterLogicPO> listByCondition(ClusterLogicPO param);
 
-    List<ClusterLogicPO> listByNameAndProjectId(@Param("name")String name,@Param("projectId")Integer projectId);
+    List<ClusterLogicPO> listByNameAndProjectId(@Param("name") String name, @Param("projectId") Integer projectId);
 
     int insert(ClusterLogicPO param);
 
@@ -41,10 +41,9 @@ public interface LogicClusterDAO {
 
     List<ClusterLogicPO> listByResponsible(String responsible);
 
-
-
     List<ClusterLogicPO> pagingByCondition(ClusterLogicConditionDTO param);
 
     Long getTotalHitByCondition(ClusterLogicPO param);
+
     Integer getProjectIdById(@Param("resourceId") Long id);
 }

@@ -49,7 +49,8 @@ public class ClusterOpNormalRestartHandler extends BaseClusterOpRestartHandler {
             return Result.buildParamIllegal("物理集群不存在");
         }
 
-        if (opTaskManager.existUnClosedTask(content.getPhyClusterId().intValue(), OpTaskTypeEnum.CLUSTER_RESTART.getType())) {
+        if (opTaskManager.existUnClosedTask(content.getPhyClusterId().intValue(),
+            OpTaskTypeEnum.CLUSTER_RESTART.getType())) {
             return Result.buildParamIllegal("该集群上存在未完成的集群重启任务");
         }
 

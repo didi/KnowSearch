@@ -28,39 +28,39 @@ public class StatLineOfMethodTest {
     /**
      * 将该类运行时抛出的异常记录到日志中
      */
-    private static final Logger LOGGER               = LoggerFactory.getLogger(StatLineOfMethodTest.class);
+    private static final Logger LOGGER            = LoggerFactory.getLogger(StatLineOfMethodTest.class);
     /**
      * 统计项目中有多少超过规定代码行数的方法
      */
-    private int           exceedMethod         = 0;
+    private int                 exceedMethod      = 0;
     /**
      * 统计项目中有多少方法
      */
-    private int           methodNumber         = 0;
+    private int                 methodNumber      = 0;
     /**
      * 记录项目中的类
      */
-    private List<Class> classes              = new ArrayList<>();
+    private List<Class>         classes           = new ArrayList<>();
     /**
      * 记录项目中类的各个方法的信息
      */
-    private List<InfoOfMethod> infoOfMethods = new ArrayList<>();
+    private List<InfoOfMethod>  infoOfMethods     = new ArrayList<>();
     /**
      * 规定的代码行数
      */
-    private int standardLineOfMethod ;
+    private int                 standardLineOfMethod;
     /**
      * 输出统计代码行的文件路径
      */
-    public static final String  STORE_FILE           = "src/test/java/com/didichuxing/datachannel/arius/admin/statMethodLine.txt";
+    public static final String  STORE_FILE        = "src/test/java/com/didichuxing/datachannel/arius/admin/statMethodLine.txt";
     /**
      * 项目的根路径
      */
-    public static final String  FILE_OF_ADMIN        = getFileOfAdmin();
+    public static final String  FILE_OF_ADMIN     = getFileOfAdmin();
     /**
      * 包的前缀
      */
-    public static final String  PREFIX_OF_PACKAGE    = "com/didichuxing";
+    public static final String  PREFIX_OF_PACKAGE = "com/didichuxing";
 
     /**
      * 获得项目的根路径
@@ -93,7 +93,7 @@ public class StatLineOfMethodTest {
             bufferedWriter.write(String.format("%-8s", "方法行数"));
             bufferedWriter.newLine();
             bufferedWriter.flush();
-        }catch (Exception exception) {
+        } catch (Exception exception) {
             LOGGER.error("class=StatLineOfMethodTest||method=setup||msg=open and write file fail");
         } finally {
             bufferedWriter.close();
@@ -133,11 +133,11 @@ public class StatLineOfMethodTest {
      * 从配置文件中取出规定的不能超过的标准行数赋值给standardLineOfMethod变量
      */
     private void initProperties() throws IOException {
-        String[] ymlPaths = {"arius-admin-rest", "target", "classes", "application.yml"};
+        String[] ymlPaths = { "arius-admin-rest", "target", "classes", "application.yml" };
         String path = System.getProperty("user.dir");
         path = path.substring(0, path.lastIndexOf(File.separator) + 1) + StringUtils.join(ymlPaths, File.separator);
         String standardLine = YamlUtil.getValue(path, "stat.method.line.standardLineOfMethod");
-        if (StringUtils.isEmpty(standardLine)){
+        if (StringUtils.isEmpty(standardLine)) {
             throw new RuntimeException("统计代码行需要规定的代码行数，请配置文件application.yml中设置：stat.method.line.standardLineOfMethod");
         } else {
             standardLineOfMethod = Integer.parseInt(YamlUtil.getValue(path, "stat.method.line.standardLineOfMethod"));
@@ -170,14 +170,15 @@ public class StatLineOfMethodTest {
                         int beginLineOfMethod = ctMethod.getMethodInfo().getLineNumber(0);
                         int endLineOfMethod = ctMethod.getMethodInfo().getLineNumber(10000);
                         int linenumber = endLineOfMethod - beginLineOfMethod;
-                        if (linenumber >= standardLineOfMethod ) {
-                            exceedMethod = exceedMethod+1 ;
-                            InfoOfMethod infoOfMethod = new InfoOfMethod(linenumber,method.getName(),c.getSimpleName());
+                        if (linenumber >= standardLineOfMethod) {
+                            exceedMethod = exceedMethod + 1;
+                            InfoOfMethod infoOfMethod = new InfoOfMethod(linenumber, method.getName(),
+                                c.getSimpleName());
                             infoOfMethods.add(infoOfMethod);
                         }
                     } catch (Exception exception) {
                         LOGGER.warn(
-                                "class=StatLineOfMethodTest||method=statNumForMethodTest||msg=current capture method exception");
+                            "class=StatLineOfMethodTest||method=statNumForMethodTest||msg=current capture method exception");
                     }
                 }
             }
@@ -192,7 +193,7 @@ public class StatLineOfMethodTest {
      */
     public void recordExceedMethodToFile() throws IOException {
         Collections.sort(infoOfMethods);
-        for (InfoOfMethod infoOfMethod : infoOfMethods){
+        for (InfoOfMethod infoOfMethod : infoOfMethods) {
             BufferedWriter bufferedWriter = null;
             FileWriter fileWriter = null;
             try {
@@ -203,8 +204,9 @@ public class StatLineOfMethodTest {
                 bufferedWriter.write(String.format("%8d", infoOfMethod.methodLine));
                 bufferedWriter.newLine();
                 bufferedWriter.flush();
-            }catch (Exception exception) {
-                LOGGER.error("class=StatLineOfMethodTest||method=recordExceedMethodToFile||msg=open and write file fail");
+            } catch (Exception exception) {
+                LOGGER
+                    .error("class=StatLineOfMethodTest||method=recordExceedMethodToFile||msg=open and write file fail");
             } finally {
                 fileWriter.close();
                 bufferedWriter.close();
@@ -247,17 +249,19 @@ public class StatLineOfMethodTest {
      * 创建记录方法相关信息的类
      */
     public class InfoOfMethod implements Comparable<InfoOfMethod> {
-        int methodLine;
+        int    methodLine;
         String methodName;
         String className;
-        public InfoOfMethod(int lineOfMethod,String nameOfMethod,String nameOfClass){
+
+        public InfoOfMethod(int lineOfMethod, String nameOfMethod, String nameOfClass) {
             this.methodLine = lineOfMethod;
             this.className = nameOfClass;
             this.methodName = nameOfMethod;
         }
+
         @Override
-        public int compareTo(InfoOfMethod infoOfMethod) {  //重写compareTo方法
-            return infoOfMethod.methodLine-this.methodLine;  //  根据methodLine进行降序排序
+        public int compareTo(InfoOfMethod infoOfMethod) { //重写compareTo方法
+            return infoOfMethod.methodLine - this.methodLine; //  根据methodLine进行降序排序
         }
     }
 }

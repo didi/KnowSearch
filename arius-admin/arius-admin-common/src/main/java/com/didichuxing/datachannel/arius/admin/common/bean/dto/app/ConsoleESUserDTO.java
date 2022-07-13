@@ -20,7 +20,6 @@ public class ConsoleESUserDTO extends BaseDTO {
 
     @ApiModelProperty("es user")
     private Integer id;
-    
 
     @ApiModelProperty("备注")
     private String  memo;

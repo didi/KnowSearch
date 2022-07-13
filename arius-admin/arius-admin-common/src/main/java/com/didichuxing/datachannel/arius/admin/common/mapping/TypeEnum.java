@@ -7,50 +7,46 @@ package com.didichuxing.datachannel.arius.admin.common.mapping;
  * @date 2017/7/14
  */
 public enum TypeEnum {
-    // 数字类型
-    INT("integer", "integer"),
-    LONG("long", "long"),
-    DOUBLE("double", "double"),
-    SHORT("short", "short"),
-    BYTE("byte", "byte"),
-    FLOAT("float", "float"),
-    HALF_FLOAT("half_float", "half_float"),
-    SCALED_FLOAT("scaled_float", "scaled_float"),
-    NUMERIC("numeric", "numeric"),
+                      // 数字类型
+                      INT("integer",
+                          "integer"), LONG("long",
+                                           "long"), DOUBLE("double",
+                                                           "double"), SHORT("short",
+                                                                            "short"), BYTE("byte",
+                                                                                           "byte"), FLOAT("float",
+                                                                                                          "float"), HALF_FLOAT("half_float",
+                                                                                                                               "half_float"), SCALED_FLOAT("scaled_float",
+                                                                                                                                                           "scaled_float"), NUMERIC("numeric",
+                                                                                                                                                                                    "numeric"),
 
-    // 布尔类型
-    BOOLEAN("boolean", "boolean"),
+                      // 布尔类型
+                      BOOLEAN("boolean", "boolean"),
 
-    KEYWORD("keyword", "keyword"),
+                      KEYWORD("keyword", "keyword"),
 
-    STRING("string", "string"),
+                      STRING("string", "string"),
 
-    // 日期类型
-    DATE("date", "date"),
-    DATE_NANOS("date_nanos", "date_nanos"),
+                      // 日期类型
+                      DATE("date", "date"), DATE_NANOS("date_nanos", "date_nanos"),
 
-    ARRAY("array", "array"),
+                      ARRAY("array", "array"),
 
-    // Object类型
-    OBJECT("object", "object"),
-    FLATTENED("flattened", "flattened"),
-    NESTED("nested", "nested"),
+                      // Object类型
+                      OBJECT("object", "object"), FLATTENED("flattened", "flattened"), NESTED("nested", "nested"),
 
-    BINARY("binary", "binary"),
+                      BINARY("binary", "binary"),
 
-    // 空间数据类型
-    GEO_POINT("geo-point", "geo-point"),
-    GEO_SHAPE("geo-shape", "geo-shape"),
-    SHARPE("sharpe", "sharpe"),
+                      // 空间数据类型
+                      GEO_POINT("geo-point", "geo-point"), GEO_SHAPE("geo-shape", "geo-shape"), SHARPE("sharpe",
+                                                                                                       "sharpe"),
 
-    // 结构化数据类型
-    IP("ip", "ip"),
-    RANGE("range", "range"),
+                      // 结构化数据类型
+                      IP("ip", "ip"), RANGE("range", "range"),
 
-    // Text检索类型
-    TEXT("text", "text"),
+                      // Text检索类型
+                      TEXT("text", "text"),
 
-    UNKNOWN("unknown", "unknown");
+                      UNKNOWN("unknown", "unknown");
 
     TypeEnum(String code, String desc) {
         this.code = code;

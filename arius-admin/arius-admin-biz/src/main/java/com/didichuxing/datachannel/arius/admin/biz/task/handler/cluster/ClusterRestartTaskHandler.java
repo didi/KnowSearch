@@ -28,8 +28,7 @@ import org.springframework.stereotype.Service;
 public class ClusterRestartTaskHandler extends AbstractClusterTaskHandler {
     @Override
     Result<Void> initHostParam(OpTask opTask) {
-        ClusterRestartContent content = ConvertUtil.str2ObjByJson(opTask.getExpandData(),
-            ClusterRestartContent.class);
+        ClusterRestartContent content = ConvertUtil.str2ObjByJson(opTask.getExpandData(), ClusterRestartContent.class);
         content.setType(ES_HOST.getCode());
         opTask.setExpandData(JSON.toJSONString(content));
 
@@ -77,11 +76,11 @@ public class ClusterRestartTaskHandler extends AbstractClusterTaskHandler {
             roleNameList.add(roleName);
         }
         final Result<List<EcmParamBase>> listResult = ecmHandleService.buildEcmParamBaseList(clusterPhy.getId(),
-                roleNameList);
-        if (listResult.failed()){
+            roleNameList);
+        if (listResult.failed()) {
             return Result.buildFrom(listResult);
         }
-    
+
         ecmTaskDTO.setEcmParamBaseList(listResult.getData());
 
         return Result.buildSucc();

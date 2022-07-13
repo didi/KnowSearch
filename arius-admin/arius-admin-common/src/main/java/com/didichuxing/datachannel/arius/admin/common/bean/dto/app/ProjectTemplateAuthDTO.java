@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
  * @date 2019/4/16
  */
 @Data
-@ApiModel(description ="应用权限信息")
+@ApiModel(description = "应用权限信息")
 @AllArgsConstructor
 @NoArgsConstructor
 public class ProjectTemplateAuthDTO extends BaseDTO {

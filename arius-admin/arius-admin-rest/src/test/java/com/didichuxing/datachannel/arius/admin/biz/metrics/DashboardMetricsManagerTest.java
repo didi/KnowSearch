@@ -43,19 +43,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 @ActiveProfiles("test")
-@ExtendWith({SpringExtension.class, MockitoExtension.class})
+@ExtendWith({ SpringExtension.class, MockitoExtension.class })
 @MockitoSettings(strictness = Strictness.LENIENT)
 @RunWith(SpringRunner.class)
-@ContextConfiguration(classes = {SpringTool.class})
+@ContextConfiguration(classes = { SpringTool.class })
 @SpringBootTest(webEnvironment = WebEnvironment.NONE)
 class DashboardMetricsManagerTest {
 
     @Mock
-    private ProjectService projectService;
+    private ProjectService              projectService;
     @Mock
-    private DashBoardMetricsService dashBoardMetricsService;
+    private DashBoardMetricsService     dashBoardMetricsService;
     @Mock
-    private AriusConfigInfoService ariusConfigInfoService;
+    private AriusConfigInfoService      ariusConfigInfoService;
 
     @InjectMocks
     private DashboardMetricsManagerImpl dashboardMetricsManager;
@@ -64,22 +64,21 @@ class DashboardMetricsManagerTest {
     void getTopClusterMetricsInfoTest() {
         // Setup
         final MetricsDashboardTopNDTO param = new MetricsDashboardTopNDTO(0L, 0L, "aggType", Arrays.asList("value"), 0);
-        final Result<List<VariousLineChartMetricsVO>> expectedResult = Result.buildFail(
-                Arrays.asList(new VariousLineChartMetricsVO("type", Arrays.asList(
-                        new MetricsContentVO("cluster", "name", Arrays.asList(new MetricsContentCellVO(0.0, 0L)))))));
+        final Result<List<VariousLineChartMetricsVO>> expectedResult = Result
+            .buildFail(Arrays.asList(new VariousLineChartMetricsVO("type", Arrays
+                .asList(new MetricsContentVO("cluster", "name", Arrays.asList(new MetricsContentCellVO(0.0, 0L)))))));
         when(projectService.checkProjectExist(0)).thenReturn(false);
 
         // Configure DashBoardMetricsService.getToNMetrics(...).
         final List<VariousLineChartMetrics> variousLineChartMetrics = Arrays.asList(new VariousLineChartMetrics("type",
-                Arrays.asList(
-                        new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0))));
-        when(dashBoardMetricsService.getToNMetrics(
-                new MetricsDashboardTopNDTO(0L, 0L, "aggType", Arrays.asList("value"), 0), "oneLevelType"))
+            Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0))));
+        when(dashBoardMetricsService
+            .getToNMetrics(new MetricsDashboardTopNDTO(0L, 0L, "aggType", Arrays.asList("value"), 0), "oneLevelType"))
                 .thenReturn(variousLineChartMetrics);
 
         // Run the test
         final Result<List<VariousLineChartMetricsVO>> result = dashboardMetricsManager.getTopClusterMetricsInfo(param,
-                0);
+            0);
 
         // Verify the results
         assertThat(result).isEqualTo(expectedResult);
@@ -90,13 +89,13 @@ class DashboardMetricsManagerTest {
         // Setup
         final MetricsDashboardTopNDTO param = new MetricsDashboardTopNDTO(0L, 0L, "aggType", Arrays.asList("value"), 0);
         when(projectService.checkProjectExist(0)).thenReturn(false);
-        when(dashBoardMetricsService.getToNMetrics(
-                new MetricsDashboardTopNDTO(0L, 0L, "aggType", Arrays.asList("value"), 0), "oneLevelType"))
+        when(dashBoardMetricsService
+            .getToNMetrics(new MetricsDashboardTopNDTO(0L, 0L, "aggType", Arrays.asList("value"), 0), "oneLevelType"))
                 .thenReturn(Collections.emptyList());
 
         // Run the test
         final Result<List<VariousLineChartMetricsVO>> result = dashboardMetricsManager.getTopClusterMetricsInfo(param,
-                0);
+            0);
 
         // Verify the results
         assertThat(result).isEqualTo(Result.buildFail(Collections.emptyList()));
@@ -106,17 +105,16 @@ class DashboardMetricsManagerTest {
     void getTopNodeMetricsInfoTest() {
         // Setup
         final MetricsDashboardTopNDTO param = new MetricsDashboardTopNDTO(0L, 0L, "aggType", Arrays.asList("value"), 0);
-        final Result<List<VariousLineChartMetricsVO>> expectedResult = Result.buildFail(
-                Arrays.asList(new VariousLineChartMetricsVO("type", Arrays.asList(
-                        new MetricsContentVO("cluster", "name", Arrays.asList(new MetricsContentCellVO(0.0, 0L)))))));
+        final Result<List<VariousLineChartMetricsVO>> expectedResult = Result
+            .buildFail(Arrays.asList(new VariousLineChartMetricsVO("type", Arrays
+                .asList(new MetricsContentVO("cluster", "name", Arrays.asList(new MetricsContentCellVO(0.0, 0L)))))));
         when(projectService.checkProjectExist(0)).thenReturn(false);
 
         // Configure DashBoardMetricsService.getToNMetrics(...).
         final List<VariousLineChartMetrics> variousLineChartMetrics = Arrays.asList(new VariousLineChartMetrics("type",
-                Arrays.asList(
-                        new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0))));
-        when(dashBoardMetricsService.getToNMetrics(
-                new MetricsDashboardTopNDTO(0L, 0L, "aggType", Arrays.asList("value"), 0), "oneLevelType"))
+            Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0))));
+        when(dashBoardMetricsService
+            .getToNMetrics(new MetricsDashboardTopNDTO(0L, 0L, "aggType", Arrays.asList("value"), 0), "oneLevelType"))
                 .thenReturn(variousLineChartMetrics);
 
         // Run the test
@@ -131,8 +129,8 @@ class DashboardMetricsManagerTest {
         // Setup
         final MetricsDashboardTopNDTO param = new MetricsDashboardTopNDTO(0L, 0L, "aggType", Arrays.asList("value"), 0);
         when(projectService.checkProjectExist(0)).thenReturn(false);
-        when(dashBoardMetricsService.getToNMetrics(
-                new MetricsDashboardTopNDTO(0L, 0L, "aggType", Arrays.asList("value"), 0), "oneLevelType"))
+        when(dashBoardMetricsService
+            .getToNMetrics(new MetricsDashboardTopNDTO(0L, 0L, "aggType", Arrays.asList("value"), 0), "oneLevelType"))
                 .thenReturn(Collections.emptyList());
 
         // Run the test
@@ -146,22 +144,21 @@ class DashboardMetricsManagerTest {
     void getTopTemplateMetricsInfoTest() {
         // Setup
         final MetricsDashboardTopNDTO param = new MetricsDashboardTopNDTO(0L, 0L, "aggType", Arrays.asList("value"), 0);
-        final Result<List<VariousLineChartMetricsVO>> expectedResult = Result.buildFail(
-                Arrays.asList(new VariousLineChartMetricsVO("type", Arrays.asList(
-                        new MetricsContentVO("cluster", "name", Arrays.asList(new MetricsContentCellVO(0.0, 0L)))))));
+        final Result<List<VariousLineChartMetricsVO>> expectedResult = Result
+            .buildFail(Arrays.asList(new VariousLineChartMetricsVO("type", Arrays
+                .asList(new MetricsContentVO("cluster", "name", Arrays.asList(new MetricsContentCellVO(0.0, 0L)))))));
         when(projectService.checkProjectExist(0)).thenReturn(false);
 
         // Configure DashBoardMetricsService.getToNMetrics(...).
         final List<VariousLineChartMetrics> variousLineChartMetrics = Arrays.asList(new VariousLineChartMetrics("type",
-                Arrays.asList(
-                        new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0))));
-        when(dashBoardMetricsService.getToNMetrics(
-                new MetricsDashboardTopNDTO(0L, 0L, "aggType", Arrays.asList("value"), 0), "oneLevelType"))
+            Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0))));
+        when(dashBoardMetricsService
+            .getToNMetrics(new MetricsDashboardTopNDTO(0L, 0L, "aggType", Arrays.asList("value"), 0), "oneLevelType"))
                 .thenReturn(variousLineChartMetrics);
 
         // Run the test
         final Result<List<VariousLineChartMetricsVO>> result = dashboardMetricsManager.getTopTemplateMetricsInfo(param,
-                0);
+            0);
 
         // Verify the results
         assertThat(result).isEqualTo(expectedResult);
@@ -172,13 +169,13 @@ class DashboardMetricsManagerTest {
         // Setup
         final MetricsDashboardTopNDTO param = new MetricsDashboardTopNDTO(0L, 0L, "aggType", Arrays.asList("value"), 0);
         when(projectService.checkProjectExist(0)).thenReturn(false);
-        when(dashBoardMetricsService.getToNMetrics(
-                new MetricsDashboardTopNDTO(0L, 0L, "aggType", Arrays.asList("value"), 0), "oneLevelType"))
+        when(dashBoardMetricsService
+            .getToNMetrics(new MetricsDashboardTopNDTO(0L, 0L, "aggType", Arrays.asList("value"), 0), "oneLevelType"))
                 .thenReturn(Collections.emptyList());
 
         // Run the test
         final Result<List<VariousLineChartMetricsVO>> result = dashboardMetricsManager.getTopTemplateMetricsInfo(param,
-                0);
+            0);
 
         // Verify the results
         assertThat(result).isEqualTo(Result.buildFail(Collections.emptyList()));
@@ -188,17 +185,16 @@ class DashboardMetricsManagerTest {
     void getTopIndexMetricsInfoTest() {
         // Setup
         final MetricsDashboardTopNDTO param = new MetricsDashboardTopNDTO(0L, 0L, "aggType", Arrays.asList("value"), 0);
-        final Result<List<VariousLineChartMetricsVO>> expectedResult = Result.buildFail(
-                Arrays.asList(new VariousLineChartMetricsVO("type", Arrays.asList(
-                        new MetricsContentVO("cluster", "name", Arrays.asList(new MetricsContentCellVO(0.0, 0L)))))));
+        final Result<List<VariousLineChartMetricsVO>> expectedResult = Result
+            .buildFail(Arrays.asList(new VariousLineChartMetricsVO("type", Arrays
+                .asList(new MetricsContentVO("cluster", "name", Arrays.asList(new MetricsContentCellVO(0.0, 0L)))))));
         when(projectService.checkProjectExist(0)).thenReturn(false);
 
         // Configure DashBoardMetricsService.getToNMetrics(...).
         final List<VariousLineChartMetrics> variousLineChartMetrics = Arrays.asList(new VariousLineChartMetrics("type",
-                Arrays.asList(
-                        new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0))));
-        when(dashBoardMetricsService.getToNMetrics(
-                new MetricsDashboardTopNDTO(0L, 0L, "aggType", Arrays.asList("value"), 0), "oneLevelType"))
+            Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0))));
+        when(dashBoardMetricsService
+            .getToNMetrics(new MetricsDashboardTopNDTO(0L, 0L, "aggType", Arrays.asList("value"), 0), "oneLevelType"))
                 .thenReturn(variousLineChartMetrics);
 
         // Run the test
@@ -213,8 +209,8 @@ class DashboardMetricsManagerTest {
         // Setup
         final MetricsDashboardTopNDTO param = new MetricsDashboardTopNDTO(0L, 0L, "aggType", Arrays.asList("value"), 0);
         when(projectService.checkProjectExist(0)).thenReturn(false);
-        when(dashBoardMetricsService.getToNMetrics(
-                new MetricsDashboardTopNDTO(0L, 0L, "aggType", Arrays.asList("value"), 0), "oneLevelType"))
+        when(dashBoardMetricsService
+            .getToNMetrics(new MetricsDashboardTopNDTO(0L, 0L, "aggType", Arrays.asList("value"), 0), "oneLevelType"))
                 .thenReturn(Collections.emptyList());
 
         // Run the test
@@ -228,22 +224,21 @@ class DashboardMetricsManagerTest {
     void getTopClusterThreadPoolQueueMetricsInfoTest() {
         // Setup
         final MetricsDashboardTopNDTO param = new MetricsDashboardTopNDTO(0L, 0L, "aggType", Arrays.asList("value"), 0);
-        final Result<List<VariousLineChartMetricsVO>> expectedResult = Result.buildFail(
-                Arrays.asList(new VariousLineChartMetricsVO("type", Arrays.asList(
-                        new MetricsContentVO("cluster", "name", Arrays.asList(new MetricsContentCellVO(0.0, 0L)))))));
+        final Result<List<VariousLineChartMetricsVO>> expectedResult = Result
+            .buildFail(Arrays.asList(new VariousLineChartMetricsVO("type", Arrays
+                .asList(new MetricsContentVO("cluster", "name", Arrays.asList(new MetricsContentCellVO(0.0, 0L)))))));
         when(projectService.checkProjectExist(0)).thenReturn(false);
 
         // Configure DashBoardMetricsService.getToNMetrics(...).
         final List<VariousLineChartMetrics> variousLineChartMetrics = Arrays.asList(new VariousLineChartMetrics("type",
-                Arrays.asList(
-                        new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0))));
-        when(dashBoardMetricsService.getToNMetrics(
-                new MetricsDashboardTopNDTO(0L, 0L, "aggType", Arrays.asList("value"), 0), "oneLevelType"))
+            Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0))));
+        when(dashBoardMetricsService
+            .getToNMetrics(new MetricsDashboardTopNDTO(0L, 0L, "aggType", Arrays.asList("value"), 0), "oneLevelType"))
                 .thenReturn(variousLineChartMetrics);
 
         // Run the test
-        final Result<List<VariousLineChartMetricsVO>> result = dashboardMetricsManager.getTopClusterThreadPoolQueueMetricsInfo(
-                param, 0);
+        final Result<List<VariousLineChartMetricsVO>> result = dashboardMetricsManager
+            .getTopClusterThreadPoolQueueMetricsInfo(param, 0);
 
         // Verify the results
         assertThat(result).isEqualTo(expectedResult);
@@ -254,13 +249,13 @@ class DashboardMetricsManagerTest {
         // Setup
         final MetricsDashboardTopNDTO param = new MetricsDashboardTopNDTO(0L, 0L, "aggType", Arrays.asList("value"), 0);
         when(projectService.checkProjectExist(0)).thenReturn(false);
-        when(dashBoardMetricsService.getToNMetrics(
-                new MetricsDashboardTopNDTO(0L, 0L, "aggType", Arrays.asList("value"), 0), "oneLevelType"))
+        when(dashBoardMetricsService
+            .getToNMetrics(new MetricsDashboardTopNDTO(0L, 0L, "aggType", Arrays.asList("value"), 0), "oneLevelType"))
                 .thenReturn(Collections.emptyList());
 
         // Run the test
-        final Result<List<VariousLineChartMetricsVO>> result = dashboardMetricsManager.getTopClusterThreadPoolQueueMetricsInfo(
-                param, 0);
+        final Result<List<VariousLineChartMetricsVO>> result = dashboardMetricsManager
+            .getTopClusterThreadPoolQueueMetricsInfo(param, 0);
 
         // Verify the results
         assertThat(result).isEqualTo(Result.buildFail(Collections.emptyList()));
@@ -270,22 +265,21 @@ class DashboardMetricsManagerTest {
     void getListClusterMetricsInfoTest() {
         // Setup
         final MetricsDashboardListDTO param = new MetricsDashboardListDTO("aggType", false, Arrays.asList("value"));
-        final Result<List<MetricListVO>> expectedResult = Result.buildFail(
-                Arrays.asList(new MetricListVO(0L, "type",
-                        Arrays.asList(new MetricListContentVO("clusterPhyName", "name", 0.0)))));
+        final Result<List<MetricListVO>> expectedResult = Result.buildFail(Arrays.asList(
+            new MetricListVO(0L, "type", Arrays.asList(new MetricListContentVO("clusterPhyName", "name", 0.0)))));
         when(projectService.checkProjectExist(0)).thenReturn(false);
 
         // Configure DashBoardMetricsService.getListFaultMetrics(...).
         final MetricList metricList = new MetricList(0L, "type",
-                Arrays.asList(new MetricListContent("clusterPhyName", "name", 0.0)));
+            Arrays.asList(new MetricListContent("clusterPhyName", "name", 0.0)));
         when(dashBoardMetricsService.getListFaultMetrics("oneLevelType", "metricsType", "aggType", false))
-                .thenReturn(metricList);
+            .thenReturn(metricList);
 
         // Configure DashBoardMetricsService.getListValueMetrics(...).
         final MetricList metricList1 = new MetricList(0L, "type",
-                Arrays.asList(new MetricListContent("clusterPhyName", "name", 0.0)));
+            Arrays.asList(new MetricListContent("clusterPhyName", "name", 0.0)));
         when(dashBoardMetricsService.getListValueMetrics("oneLevelType", "metricsType", "aggType", false))
-                .thenReturn(metricList1);
+            .thenReturn(metricList1);
 
         when(ariusConfigInfoService.stringSetting("dashboard.threshold", "type", "defaultValue")).thenReturn("result");
 
@@ -300,22 +294,21 @@ class DashboardMetricsManagerTest {
     void getListNodeMetricsInfoTest() {
         // Setup
         final MetricsDashboardListDTO param = new MetricsDashboardListDTO("aggType", false, Arrays.asList("value"));
-        final Result<List<MetricListVO>> expectedResult = Result.buildFail(
-                Arrays.asList(new MetricListVO(0L, "type",
-                        Arrays.asList(new MetricListContentVO("clusterPhyName", "name", 0.0)))));
+        final Result<List<MetricListVO>> expectedResult = Result.buildFail(Arrays.asList(
+            new MetricListVO(0L, "type", Arrays.asList(new MetricListContentVO("clusterPhyName", "name", 0.0)))));
         when(projectService.checkProjectExist(0)).thenReturn(false);
 
         // Configure DashBoardMetricsService.getListFaultMetrics(...).
         final MetricList metricList = new MetricList(0L, "type",
-                Arrays.asList(new MetricListContent("clusterPhyName", "name", 0.0)));
+            Arrays.asList(new MetricListContent("clusterPhyName", "name", 0.0)));
         when(dashBoardMetricsService.getListFaultMetrics("oneLevelType", "metricsType", "aggType", false))
-                .thenReturn(metricList);
+            .thenReturn(metricList);
 
         // Configure DashBoardMetricsService.getListValueMetrics(...).
         final MetricList metricList1 = new MetricList(0L, "type",
-                Arrays.asList(new MetricListContent("clusterPhyName", "name", 0.0)));
+            Arrays.asList(new MetricListContent("clusterPhyName", "name", 0.0)));
         when(dashBoardMetricsService.getListValueMetrics("oneLevelType", "metricsType", "aggType", false))
-                .thenReturn(metricList1);
+            .thenReturn(metricList1);
 
         when(ariusConfigInfoService.stringSetting("dashboard.threshold", "type", "defaultValue")).thenReturn("result");
 
@@ -330,22 +323,21 @@ class DashboardMetricsManagerTest {
     void getListTemplateMetricsInfoTest() {
         // Setup
         final MetricsDashboardListDTO param = new MetricsDashboardListDTO("aggType", false, Arrays.asList("value"));
-        final Result<List<MetricListVO>> expectedResult = Result.buildFail(
-                Arrays.asList(new MetricListVO(0L, "type",
-                        Arrays.asList(new MetricListContentVO("clusterPhyName", "name", 0.0)))));
+        final Result<List<MetricListVO>> expectedResult = Result.buildFail(Arrays.asList(
+            new MetricListVO(0L, "type", Arrays.asList(new MetricListContentVO("clusterPhyName", "name", 0.0)))));
         when(projectService.checkProjectExist(0)).thenReturn(false);
 
         // Configure DashBoardMetricsService.getListFaultMetrics(...).
         final MetricList metricList = new MetricList(0L, "type",
-                Arrays.asList(new MetricListContent("clusterPhyName", "name", 0.0)));
+            Arrays.asList(new MetricListContent("clusterPhyName", "name", 0.0)));
         when(dashBoardMetricsService.getListFaultMetrics("oneLevelType", "metricsType", "aggType", false))
-                .thenReturn(metricList);
+            .thenReturn(metricList);
 
         // Configure DashBoardMetricsService.getListValueMetrics(...).
         final MetricList metricList1 = new MetricList(0L, "type",
-                Arrays.asList(new MetricListContent("clusterPhyName", "name", 0.0)));
+            Arrays.asList(new MetricListContent("clusterPhyName", "name", 0.0)));
         when(dashBoardMetricsService.getListValueMetrics("oneLevelType", "metricsType", "aggType", false))
-                .thenReturn(metricList1);
+            .thenReturn(metricList1);
 
         when(ariusConfigInfoService.stringSetting("dashboard.threshold", "type", "defaultValue")).thenReturn("result");
 
@@ -360,22 +352,21 @@ class DashboardMetricsManagerTest {
     void getListIndexMetricsInfoTest() {
         // Setup
         final MetricsDashboardListDTO param = new MetricsDashboardListDTO("aggType", false, Arrays.asList("value"));
-        final Result<List<MetricListVO>> expectedResult = Result.buildFail(
-                Arrays.asList(new MetricListVO(0L, "type",
-                        Arrays.asList(new MetricListContentVO("clusterPhyName", "name", 0.0)))));
+        final Result<List<MetricListVO>> expectedResult = Result.buildFail(Arrays.asList(
+            new MetricListVO(0L, "type", Arrays.asList(new MetricListContentVO("clusterPhyName", "name", 0.0)))));
         when(projectService.checkProjectExist(0)).thenReturn(false);
 
         // Configure DashBoardMetricsService.getListFaultMetrics(...).
         final MetricList metricList = new MetricList(0L, "type",
-                Arrays.asList(new MetricListContent("clusterPhyName", "name", 0.0)));
+            Arrays.asList(new MetricListContent("clusterPhyName", "name", 0.0)));
         when(dashBoardMetricsService.getListFaultMetrics("oneLevelType", "metricsType", "aggType", false))
-                .thenReturn(metricList);
+            .thenReturn(metricList);
 
         // Configure DashBoardMetricsService.getListValueMetrics(...).
         final MetricList metricList1 = new MetricList(0L, "type",
-                Arrays.asList(new MetricListContent("clusterPhyName", "name", 0.0)));
+            Arrays.asList(new MetricListContent("clusterPhyName", "name", 0.0)));
         when(dashBoardMetricsService.getListValueMetrics("oneLevelType", "metricsType", "aggType", false))
-                .thenReturn(metricList1);
+            .thenReturn(metricList1);
 
         when(ariusConfigInfoService.stringSetting("dashboard.threshold", "type", "defaultValue")).thenReturn("result");
 
@@ -389,14 +380,13 @@ class DashboardMetricsManagerTest {
     @Test
     void getClusterHealthInfoTest() {
         // Setup
-        final Result<ClusterPhyHealthMetricsVO> expectedResult = Result.buildFail(
-                new ClusterPhyHealthMetricsVO(0L, 0, 0, 0, 0, 0, Arrays.asList("value"), Arrays.asList("value"),
-                        Arrays.asList("value"), 0.0, 0.0, 0.0, 0.0));
+        final Result<ClusterPhyHealthMetricsVO> expectedResult = Result.buildFail(new ClusterPhyHealthMetricsVO(0L, 0,
+            0, 0, 0, 0, Arrays.asList("value"), Arrays.asList("value"), Arrays.asList("value"), 0.0, 0.0, 0.0, 0.0));
         when(projectService.checkProjectExist(0)).thenReturn(false);
 
         // Configure DashBoardMetricsService.getClusterHealthInfo(...).
         final ClusterPhyHealthMetrics clusterPhyHealthMetrics = new ClusterPhyHealthMetrics(0L, 0, 0, 0, 0, 0,
-                "yellowClusterListStr", "redClusterListStr", "unknownClusterListStr", 0.0, 0.0, 0.0, 0.0);
+            "yellowClusterListStr", "redClusterListStr", "unknownClusterListStr", 0.0, 0.0, 0.0, 0.0);
         when(dashBoardMetricsService.getClusterHealthInfo()).thenReturn(clusterPhyHealthMetrics);
 
         // Run the test

@@ -43,16 +43,16 @@ import org.springframework.stereotype.Service;
 @Service("newIndexPlanManagerImpl")
 public class IndexPlanManagerImpl extends BaseTemplateSrvImpl implements IndexPlanManager {
 
-    private final static Integer SINGLE_SHARD_MAX_SIZE       = 50;
-    private final static Integer SINGLE_SHARD_RECOMMEND_SIZE = 30;
-    
+    private final static Integer  SINGLE_SHARD_MAX_SIZE       = 50;
+    private final static Integer  SINGLE_SHARD_RECOMMEND_SIZE = 30;
+
     /**
      * (key, value) = (模板id, 该模版对应索引近七天某一天占用磁盘容量最大值)
      */
-    private final Map<Long, Long> indexMaxStoreMap = Maps.newConcurrentMap();
+    private final Map<Long, Long> indexMaxStoreMap            = Maps.newConcurrentMap();
 
     @Autowired
-    private ESIndexService esIndexService;
+    private ESIndexService        esIndexService;
 
     @Override
     public TemplateServiceEnum templateSrv() {
@@ -61,14 +61,17 @@ public class IndexPlanManagerImpl extends BaseTemplateSrvImpl implements IndexPl
 
     @Override
     public Result<Void> indexRollover(Integer logicTemplateId) {
-        LOGGER.info("class=IndexPlanManagerImpl||method=indexRollover||logicTemplateId={}||msg=start indexRollover", logicTemplateId);
+        LOGGER.info("class=IndexPlanManagerImpl||method=indexRollover||logicTemplateId={}||msg=start indexRollover",
+            logicTemplateId);
         if (!isTemplateSrvOpen(logicTemplateId)) {
             return Result.buildFail("指定索引模板未开启rollover能力");
         }
 
         List<IndexTemplatePhy> templatePhyList = indexTemplatePhyService.getTemplateByLogicId(logicTemplateId);
         if (CollectionUtils.isEmpty(templatePhyList)) {
-            LOGGER.info("class=IndexPlanManagerImpl||method=indexRollover||logicTemplateId={}||msg=IndexRolloverTask no physical template", logicTemplateId);
+            LOGGER.info(
+                "class=IndexPlanManagerImpl||method=indexRollover||logicTemplateId={}||msg=IndexRolloverTask no physical template",
+                logicTemplateId);
             return Result.buildSucc();
         }
 
@@ -83,7 +86,7 @@ public class IndexPlanManagerImpl extends BaseTemplateSrvImpl implements IndexPl
 
             // 获取索引的主shard个数，这里不能直接从数据库获取，因为可能会被改变，所以从ES中获取
             Integer primaryShardCnt = esIndexService.syncGetIndexPrimaryShardNumber(phyClusterName, indexName);
-            if(primaryShardCnt == null || indexNodes == null) {
+            if (primaryShardCnt == null || indexNodes == null) {
                 continue;
             }
 
@@ -91,15 +94,16 @@ public class IndexPlanManagerImpl extends BaseTemplateSrvImpl implements IndexPl
             long curSizeInBytes = indexNodes.getPrimaries().getStore().getSizeInBytes();
             double curSizeInGb = curSizeInBytes * BYTE_TO_G;
 
-            if(curSizeInGb >= primaryShardCnt * SINGLE_SHARD_MAX_SIZE) {
+            if (curSizeInGb >= primaryShardCnt * SINGLE_SHARD_MAX_SIZE) {
                 // 如果大于（主shard个数 * 推荐的单个shard大小50G），直接升版本
                 updateTemplateVersion(templatePhy);
-            } else if(curSizeInGb >= primaryShardCnt * SINGLE_SHARD_RECOMMEND_SIZE && TemplateUtils.isSaveByDay(template.getDateFormat())){
+            } else if (curSizeInGb >= primaryShardCnt * SINGLE_SHARD_RECOMMEND_SIZE
+                       && TemplateUtils.isSaveByDay(template.getDateFormat())) {
                 // 如果大于（主shard个数 * 推荐的单个shard大小30G），并且索引模版是按天创建索引
                 // 获取该索引模版对应索引近7天占用磁盘的最大值
                 Long sizeInBytesMax = getMaxStoreInRecentSevenDayByTemplatePhyId(templatePhy.getId());
                 // 比较两者大小，大于则升版本
-                if(curSizeInBytes > sizeInBytesMax) {
+                if (curSizeInBytes > sizeInBytesMax) {
                     updateTemplateVersion(templatePhy);
                 }
             }
@@ -109,21 +113,27 @@ public class IndexPlanManagerImpl extends BaseTemplateSrvImpl implements IndexPl
 
     @Override
     public Result<Void> adjustShardNum(Integer logicTemplateId) {
-        LOGGER.info("class=IndexPlanManagerImpl||method=adjustShardCount||logicTemplateId={}||msg=start adjustShardCount", logicTemplateId);
-        if(!isTemplateSrvOpen(logicTemplateId)) {
+        LOGGER.info(
+            "class=IndexPlanManagerImpl||method=adjustShardCount||logicTemplateId={}||msg=start adjustShardCount",
+            logicTemplateId);
+        if (!isTemplateSrvOpen(logicTemplateId)) {
             return Result.buildFail(logicTemplateId + "没有开启" + templateSrvName());
         }
 
         List<IndexTemplatePhy> templatePhyList = indexTemplatePhyService.getTemplateByLogicId(logicTemplateId);
         if (CollectionUtils.isEmpty(templatePhyList)) {
-            LOGGER.info("class=IndexPlanManagerImpl||method=adjustShardCount||logicTemplateId={}||msg=IndexRolloverTask no physical template", logicTemplateId);
+            LOGGER.info(
+                "class=IndexPlanManagerImpl||method=adjustShardCount||logicTemplateId={}||msg=IndexRolloverTask no physical template",
+                logicTemplateId);
             return Result.buildSucc();
         }
 
         try {
             governPerTemplate(templatePhyList);
         } catch (Exception e) {
-            LOGGER.error("class=IndexPlanManagerImpl||method=adjustShardCount||logicTemplateId={}||msg=adjustShardCount error", logicTemplateId, e);
+            LOGGER.error(
+                "class=IndexPlanManagerImpl||method=adjustShardCount||logicTemplateId={}||msg=adjustShardCount error",
+                logicTemplateId, e);
         }
         return Result.buildSucc();
     }
@@ -151,12 +161,13 @@ public class IndexPlanManagerImpl extends BaseTemplateSrvImpl implements IndexPl
     //////////private method/////////////////////////////////////////////////////////////
 
     private String getIndexNameByDateFormat(IndexTemplate logiTemplate, IndexTemplatePhy phyTemplate) {
-        if(TemplateUtils.isSaveByDay(logiTemplate.getDateFormat())) {
+        if (TemplateUtils.isSaveByDay(logiTemplate.getDateFormat())) {
             // 按天分区则获取模版对应当天索引拼接版本信息
             return IndexNameUtils.genDailyIndexNameWithVersion(phyTemplate.getName(), 0, phyTemplate.getVersion());
-        } else if(TemplateUtils.isSaveByMonth(logiTemplate.getDateFormat())) {
+        } else if (TemplateUtils.isSaveByMonth(logiTemplate.getDateFormat())) {
             // 按月分区则获取模版对应当月索引拼接版本信息
-            return IndexNameUtils.genCurrentMonthlyIndexNameWithVersion(phyTemplate.getName(), phyTemplate.getVersion());
+            return IndexNameUtils.genCurrentMonthlyIndexNameWithVersion(phyTemplate.getName(),
+                phyTemplate.getVersion());
         } else {
             // 不分区则模版名拼接版本信息
             return IndexNameUtils.genIndexNameWithVersion(phyTemplate.getName(), phyTemplate.getVersion());
@@ -171,9 +182,9 @@ public class IndexPlanManagerImpl extends BaseTemplateSrvImpl implements IndexPl
     private IndexNodes getIndexNodes(String indexName, String clusterPhyName) {
         // 获取该索引模版对应索引当天占用磁盘的大小
         Map<String, IndexNodes> indexNodeMap = esIndexService.syncGetIndexNodes(clusterPhyName, indexName);
-        if(indexNodeMap == null || indexNodeMap.size() == 0) {
-            LOGGER.warn("class=IndexPlanManagerImpl||method=getIndexNodes||index={}||errMsg={}",
-                    indexName, "获取不到该索引的IndexNodes（元数据）信息，索引也许不存在");
+        if (indexNodeMap == null || indexNodeMap.size() == 0) {
+            LOGGER.warn("class=IndexPlanManagerImpl||method=getIndexNodes||index={}||errMsg={}", indexName,
+                "获取不到该索引的IndexNodes（元数据）信息，索引也许不存在");
             return null;
         }
         return indexNodeMap.get(indexName);
@@ -188,20 +199,20 @@ public class IndexPlanManagerImpl extends BaseTemplateSrvImpl implements IndexPl
 
         try {
             Result<Void> result = templatePhyManager.rolloverUpgradeTemplate(param, AriusUser.CAPACITY_PLAN.getDesc());
-            if(result.failed()) {
+            if (result.failed()) {
                 throw new ESOperateException(result.getMessage());
             }
             LOGGER.info("class=IndexPlanManagerImpl||method=updateTemplateVersion||template={}||upgradeResult={}",
-                    templatePhy.getId(), result);
+                templatePhy.getId(), result);
         } catch (ESOperateException e) {
             LOGGER.warn("class=IndexPlanManagerImpl||method=updateTemplateVersion||template={}||errMsg={}",
-                    templatePhy.getId(), e);
+                templatePhy.getId(), e);
         }
     }
 
     private Long getMaxStoreInRecentSevenDayByTemplatePhyId(Long templatePhyId) {
         IndexTemplatePhy templatePhy = indexTemplatePhyService.getTemplateById(templatePhyId);
-        if(templatePhy == null) {
+        if (templatePhy == null) {
             // 该模版不存在
             return 0L;
         }
@@ -218,7 +229,8 @@ public class IndexPlanManagerImpl extends BaseTemplateSrvImpl implements IndexPl
         // 获取上一天起一周内的索引名称，今天是10-22，则获取10-15~10-21时间
         long lastWeekDayTimestamp = AriusDateUtils.getBeforeDays(new Date(), 6).getTime();
         long yesterdayTimestamp = AriusDateUtils.getBeforeDays(new Date(), 1).getTime();
-        String indexNames = IndexNameUtils.genDailyIndexName(templatePhy.getName(), lastWeekDayTimestamp, yesterdayTimestamp);
+        String indexNames = IndexNameUtils.genDailyIndexName(templatePhy.getName(), lastWeekDayTimestamp,
+            yesterdayTimestamp);
         String[] indexNameSplits = indexNames.split(",");
 
         List<String> indexNameList = Lists.newArrayList();
@@ -230,8 +242,8 @@ public class IndexPlanManagerImpl extends BaseTemplateSrvImpl implements IndexPl
         }
 
         // 获取索引的stats信息
-        Map<String, IndexNodes> indexNodeMap =
-                esIndexService.syncGetIndexNodes(templatePhy.getCluster(), StringUtils.join(indexNameList, ","));
+        Map<String, IndexNodes> indexNodeMap = esIndexService.syncGetIndexNodes(templatePhy.getCluster(),
+            StringUtils.join(indexNameList, ","));
 
         if (indexNodeMap == null || indexNodeMap.isEmpty()) {
             return 0;
@@ -260,16 +272,17 @@ public class IndexPlanManagerImpl extends BaseTemplateSrvImpl implements IndexPl
             List<IndexTemplatePhy> list = Lists.newArrayList(templatePhyList);
             Result<String> result = adjustShardCount(list.get(0));
             if (result.failed()) {
-                LOGGER.warn("class=IndexPlanManagerImpl||method=governPerTemplate||template={}||msg=adjust shard count fail={}",
-                        list.get(0).getName(), result.getMessage());
+                LOGGER.warn(
+                    "class=IndexPlanManagerImpl||method=governPerTemplate||template={}||msg=adjust shard count fail={}",
+                    list.get(0).getName(), result.getMessage());
             }
             return;
         }
 
         // 先改主再改从
         List<IndexTemplatePhy> masterTemplatePhyList = templatePhyList.stream()
-                // 只保留主角色的物理模版
-                .filter(x -> x.getRole().equals(TemplateDeployRoleEnum.MASTER.getCode())).collect(Collectors.toList());
+            // 只保留主角色的物理模版
+            .filter(x -> x.getRole().equals(TemplateDeployRoleEnum.MASTER.getCode())).collect(Collectors.toList());
 
         if (masterTemplatePhyList.isEmpty()) {
             return;
@@ -279,22 +292,24 @@ public class IndexPlanManagerImpl extends BaseTemplateSrvImpl implements IndexPl
             // 修改主
             Result<String> masterResult = adjustShardCount(masterTemplatePhy);
             if (masterResult.failed()) {
-                LOGGER.warn("class=IndexPlanManagerImpl||method=governPerTemplate||masterTemplate={}||msg=adjust shard count fail={}",
-                        masterTemplatePhy.getName(), masterResult.getMessage());
+                LOGGER.warn(
+                    "class=IndexPlanManagerImpl||method=governPerTemplate||masterTemplate={}||msg=adjust shard count fail={}",
+                    masterTemplatePhy.getName(), masterResult.getMessage());
                 return;
             }
 
             // 获取从物理模版
             List<IndexTemplatePhy> slaveTemplatePhyList = templatePhyList.stream()
-                    // 只保留从角色的物理模版
-                    .filter(x -> x.getRole().equals(TemplateDeployRoleEnum.SLAVE.getCode())).collect(Collectors.toList());
+                // 只保留从角色的物理模版
+                .filter(x -> x.getRole().equals(TemplateDeployRoleEnum.SLAVE.getCode())).collect(Collectors.toList());
 
             for (IndexTemplatePhy slaveTemplatePhy : slaveTemplatePhyList) {
                 // 修改从
                 Result<String> slaveResult = adjustShardCount(slaveTemplatePhy);
                 if (slaveResult.failed()) {
-                    LOGGER.warn("class=IndexPlanManagerImpl||method=governPerTemplate||slaveTemplate={}||msg=adjust shard count fail={}",
-                            masterTemplatePhy.getName(), masterResult.getMessage());
+                    LOGGER.warn(
+                        "class=IndexPlanManagerImpl||method=governPerTemplate||slaveTemplate={}||msg=adjust shard count fail={}",
+                        masterTemplatePhy.getName(), masterResult.getMessage());
                 }
             }
         }
@@ -323,7 +338,7 @@ public class IndexPlanManagerImpl extends BaseTemplateSrvImpl implements IndexPl
             Result<Void> result = editTemplateWithoutCheck(templatePhy, shardCount, AriusUser.CAPACITY_PLAN.getDesc());
             if (result.success()) {
                 LOGGER.info("class=IndexPlanManagerImpl||method=adjustShardCount||template={}||shardCount={}->{}",
-                        templatePhy.getName(), templatePhy.getShard(), shardCount);
+                    templatePhy.getName(), templatePhy.getShard(), shardCount);
             }
         }
 
@@ -337,7 +352,8 @@ public class IndexPlanManagerImpl extends BaseTemplateSrvImpl implements IndexPl
         return (int) (sizeInBytesMax * BYTE_TO_G / G_PER_SHARD) + 1;
     }
 
-    private Result<Void> editTemplateWithoutCheck(IndexTemplatePhy templatePhy, Integer shardNum, String operator) throws ESOperateException {
+    private Result<Void> editTemplateWithoutCheck(IndexTemplatePhy templatePhy, Integer shardNum,
+                                                  String operator) throws ESOperateException {
         // 计算 ShardRouting，并通过 ShardRouting 再计算 shard
         IndexTemplatePhyDTO param = new IndexTemplatePhyDTO();
         param.setShard(templatePhy.getShard());
@@ -347,9 +363,9 @@ public class IndexPlanManagerImpl extends BaseTemplateSrvImpl implements IndexPl
         templatePhy.setShardRouting(param.getShardRouting());
 
         // 获取明天的索引名
-        String indexName =
-                IndexNameUtils.genDailyIndexNameWithVersion(templatePhy.getName(), -1, templatePhy.getVersion());
-        if(esIndexService.syncIsIndexExist(templatePhy.getCluster(), indexName)) {
+        String indexName = IndexNameUtils.genDailyIndexNameWithVersion(templatePhy.getName(), -1,
+            templatePhy.getVersion());
+        if (esIndexService.syncIsIndexExist(templatePhy.getCluster(), indexName)) {
             // 如果明天的索引已经存在，则删除
             List<String> indexNameList = new ArrayList<>();
             indexNameList.add(indexName);
@@ -366,12 +382,12 @@ public class IndexPlanManagerImpl extends BaseTemplateSrvImpl implements IndexPl
         }
         return (shard / shardRouting + 1) * shardRouting;
     }
-    
-    
+
     /////////////////////////SRV
-     @Override
+    @Override
     public boolean indexRollover(String phyClusterName) {
-        LOGGER.info("class=CapacityPlanManagerImpl||method=indexRollover||cluster={}||msg=start indexRollover", phyClusterName);
+        LOGGER.info("class=CapacityPlanManagerImpl||method=indexRollover||cluster={}||msg=start indexRollover",
+            phyClusterName);
         // 判断指定物理集群是否开启了当前索引服务
         if (!isTemplateSrvOpen(phyClusterName)) {
             return false;
@@ -380,17 +396,19 @@ public class IndexPlanManagerImpl extends BaseTemplateSrvImpl implements IndexPl
         // 获取所有的索引物理模版
         List<IndexTemplatePhy> templatePhyList = indexTemplatePhyService.getNormalTemplateByCluster(phyClusterName);
         if (CollectionUtils.isEmpty(templatePhyList)) {
-            LOGGER.info("class=CapacityPlanManagerImpl||method=indexRollover||cluster={}||msg=IndexRolloverTask no template", phyClusterName);
+            LOGGER.info(
+                "class=CapacityPlanManagerImpl||method=indexRollover||cluster={}||msg=IndexRolloverTask no template",
+                phyClusterName);
             return true;
         }
 
-        for(IndexTemplatePhy phyTemplate : templatePhyList) {
+        for (IndexTemplatePhy phyTemplate : templatePhyList) {
             // 判断该索引模版是否开启当前索引服务
             IndexTemplateConfig config = indexTemplateService.getTemplateConfig(phyTemplate.getLogicId());
             if (config == null || config.getDisableIndexRollover()) {
                 LOGGER.info(
-                        "class=CapacityPlanManagerImpl||method=indexRollover||cluster={}||template={}||msg=skip indexRollover",
-                        phyClusterName, phyTemplate.getName());
+                    "class=CapacityPlanManagerImpl||method=indexRollover||cluster={}||template={}||msg=skip indexRollover",
+                    phyClusterName, phyTemplate.getName());
                 continue;
             }
 
@@ -404,7 +422,7 @@ public class IndexPlanManagerImpl extends BaseTemplateSrvImpl implements IndexPl
             IndexNodes indexNodes = getIndexNodes(indexName, phyClusterName);
             // 获取索引的主shard个数，这里不能直接从数据库获取，因为可能会被改变，所以从ES中获取
             Integer primaryShardCnt = esIndexService.syncGetIndexPrimaryShardNumber(phyClusterName, indexName);
-            if(primaryShardCnt == null || indexNodes == null) {
+            if (primaryShardCnt == null || indexNodes == null) {
                 continue;
             }
 
@@ -412,15 +430,15 @@ public class IndexPlanManagerImpl extends BaseTemplateSrvImpl implements IndexPl
             long curSizeInBytes = indexNodes.getPrimaries().getStore().getSizeInBytes();
             double curSizeInGb = curSizeInBytes * BYTE_TO_G;
 
-            if(curSizeInGb >= primaryShardCnt * 50) {
+            if (curSizeInGb >= primaryShardCnt * 50) {
                 // 如果大于（主shard个数 * 推荐的单个shard大小50G），直接升版本
                 updateTemplateVersion(phyTemplate);
-            } else if(curSizeInGb >= primaryShardCnt * 30 && TemplateUtils.isSaveByDay(logiTemplate.getDateFormat())){
+            } else if (curSizeInGb >= primaryShardCnt * 30 && TemplateUtils.isSaveByDay(logiTemplate.getDateFormat())) {
                 // 如果大于（主shard个数 * 推荐的单个shard大小30G），并且索引模版是按天创建索引
                 // 获取该索引模版对应索引近7天占用磁盘的最大值
                 Long sizeInBytesMax = getMaxStoreInRecentSevenDayByTemplatePhyId((phyTemplate.getId()));
                 // 比较两者大小，大于则升版本
-                if(curSizeInBytes > sizeInBytesMax) {
+                if (curSizeInBytes > sizeInBytesMax) {
                     updateTemplateVersion(phyTemplate);
                 }
             }
@@ -430,8 +448,10 @@ public class IndexPlanManagerImpl extends BaseTemplateSrvImpl implements IndexPl
 
     @Override
     public Result<Void> adjustShardCountByPhyClusterName(String phyClusterName) {
-        LOGGER.info("class=CapacityPlanManagerImpl||method=adjustShardCountByPhyClusterName||cluster={}||msg=start adjustShardCount", phyClusterName);
-        if(!isTemplateSrvOpen(phyClusterName)) {
+        LOGGER.info(
+            "class=CapacityPlanManagerImpl||method=adjustShardCountByPhyClusterName||cluster={}||msg=start adjustShardCount",
+            phyClusterName);
+        if (!isTemplateSrvOpen(phyClusterName)) {
             return Result.buildFail(phyClusterName + "没有开启" + templateServiceName());
         }
 
@@ -441,19 +461,19 @@ public class IndexPlanManagerImpl extends BaseTemplateSrvImpl implements IndexPl
             return Result.buildSucc();
         }
 
-        Multimap<Integer/*逻辑模版id*/, IndexTemplatePhy/*物理模版*/> multimap =
-                ConvertUtil.list2MulMap(templatePhyList, IndexTemplatePhy::getLogicId);
+        Multimap<Integer/*逻辑模版id*/, IndexTemplatePhy/*物理模版*/> multimap = ConvertUtil.list2MulMap(templatePhyList,
+            IndexTemplatePhy::getLogicId);
 
         for (Integer templateLogicId : multimap.keySet()) {
             try {
                 governPerTemplate(multimap.get(templateLogicId));
             } catch (Exception e) {
-                LOGGER.warn("class=CapacityPlanManagerImpl||method=adjustShardCountByPhyClusterName||templateLogicId={}||errMsg={}", templateLogicId, e.getMessage(), e);
+                LOGGER.warn(
+                    "class=CapacityPlanManagerImpl||method=adjustShardCountByPhyClusterName||templateLogicId={}||errMsg={}",
+                    templateLogicId, e.getMessage(), e);
             }
         }
         return Result.buildSucc();
     }
-    
-
 
 }

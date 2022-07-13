@@ -14,7 +14,7 @@ public class TaskTypeVO extends BaseVO {
     private Integer type;
 
     @ApiModelProperty(value = "描述信息")
-    private String message;
+    private String  message;
 
     public TaskTypeVO(Integer type, String message) {
         this.type = type;

@@ -19,10 +19,10 @@ import lombok.NoArgsConstructor;
 public class ThirdpartTemplateLogicVO extends BaseVO {
 
     @ApiModelProperty("模板ID")
-    private Integer    id;
+    private Integer id;
 
     @ApiModelProperty("模板名字")
-    private String     name;
+    private String  name;
 
     @ApiModelProperty("所属应用ID")
     private Integer projectId;
@@ -32,67 +32,67 @@ public class ThirdpartTemplateLogicVO extends BaseVO {
      * @see DataTypeEnum
      */
     @ApiModelProperty("数据类型（0:系统 1:日志；2:上报；3:rds；6:离线）")
-    private Integer    dataType;
+    private Integer dataType;
 
     /**
      * 索引滚动格式
      */
     @ApiModelProperty("分区周期")
-    private String     dateFormat;
+    private String  dateFormat;
 
     @ApiModelProperty("数据中心")
-    private String     dataCenter;
+    private String  dataCenter;
 
     /**
      * 数据保存时长 单位天
      */
     @ApiModelProperty("保存天数")
-    private Integer    expireTime;
+    private Integer expireTime;
 
     /**
      * 热数据保存时长 单位天
      */
     @ApiModelProperty("热数据保存天数")
-    private Integer    hotTime;
+    private Integer hotTime;
 
     @ApiModelProperty("成本部门ID：后续进行下线，无需使用")
-    private String     libraDepartmentId;
+    private String  libraDepartmentId;
 
     @ApiModelProperty("成本部门名称：后续进行下线，无需使用")
     @Deprecated
-    private String     libraDepartment;
+    private String  libraDepartment;
 
     @ApiModelProperty("责任人：后续进行下线，无需再使用")
-    private String     responsible;
+    private String  responsible;
 
     @ApiModelProperty("时间字段")
-    private String     dateField;
+    private String  dateField;
 
     /**
      * id地钻
      */
     @ApiModelProperty("主键字段：后续要下线无需使用")
     @Deprecated
-    private String     idField;
+    private String  idField;
 
     @ApiModelProperty("routing字段：后续下线，无需使用")
     @Deprecated
-    private String     routingField;
+    private String  routingField;
 
     @ApiModelProperty("表达式")
-    private String     expression;
+    private String  expression;
 
     @ApiModelProperty("描述")
-    private String     desc;
+    private String  desc;
 
     /**
      * 规格 单位台
      */
     @ApiModelProperty("配额")
-    private Double     quota;
+    private Double  quota;
 
     /**
      * 创建时间
      */
-    private Date       createTime;
+    private Date    createTime;
 }

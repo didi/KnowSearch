@@ -17,7 +17,7 @@ public interface ExpireManager {
      */
     Result<Void> deleteExpireIndex(Integer logicTemplateId);
     /////////////srv
-    
+
     /**
      * 删除过期索引
      *
@@ -26,8 +26,6 @@ public interface ExpireManager {
      * @throws
      */
     boolean deleteExpireIndex(String cluster);
-
-
 
     /**
      * 删除模板过期索引

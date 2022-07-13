@@ -18,6 +18,7 @@ public interface ClusterRegionDAO {
     List<ClusterRegionPO> getByPhyClusterName(String phyClusterName);
 
     List<ClusterRegionPO> listByPhyClusterNames(List<String> phyClusterNames);
+
     int insert(ClusterRegionPO param);
 
     int update(ClusterRegionPO param);

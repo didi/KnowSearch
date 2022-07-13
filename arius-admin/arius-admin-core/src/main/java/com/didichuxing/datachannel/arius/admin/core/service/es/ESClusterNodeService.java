@@ -30,6 +30,7 @@ public interface ESClusterNodeService {
      * 获取ES集群节点ip列表
      */
     List<String> syncGetNodeHosts(String clusterName);
+
     List<String> syncGetNodeIp(String clusterName);
 
     /**
@@ -65,8 +66,7 @@ public interface ESClusterNodeService {
      * @param cluster 物理集群名称
      * @return 集群的内存使用信息统计
      */
-     ClusterMemInfo synGetClusterMem(String cluster);
-
+    ClusterMemInfo synGetClusterMem(String cluster);
 
     /**
      * 同步节点磁盘使用情况
@@ -76,8 +76,6 @@ public interface ESClusterNodeService {
      * @return {@link Map}<{@link String}, {@link Triple}<{@link Long}, {@link Long}, {@link Double}>>
      */
     Map<String, Triple<Long, Long, Double>> syncGetNodesDiskUsage(String cluster);
-
-
 
     /**
      * node_state分析
@@ -92,7 +90,7 @@ public interface ESClusterNodeService {
      * @param cluster 集群
      * @return {@link Map}<{@link String}, {@link Tuple}<{@link Long}, {@link Long}>>
      */
-    Map<String, Tuple<Long,Long>> syncGetNodesMemoryAndDisk(String cluster);
+    Map<String, Tuple<Long, Long>> syncGetNodesMemoryAndDisk(String cluster);
 
     /**
      * 同步获取节点的cpu数量

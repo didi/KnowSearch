@@ -12,7 +12,7 @@ import com.didiglobal.logi.job.core.job.JobContext;
 
 @Task(name = "IndicesCatInfoCollectorRandomTask", description = "采集索引Cat/Index基本信息", cron = "0 0/3 * * * ? *", autoRegister = true)
 public class IndicesCatInfoCollectorRandomTask implements Job {
-    private static final Logger LOGGER = LoggerFactory.getLogger(IndicesCatInfoCollectorRandomTask.class);
+    private static final Logger   LOGGER = LoggerFactory.getLogger(IndicesCatInfoCollectorRandomTask.class);
 
     @Autowired
     private IndexCatInfoCollector indexCatInfoCollector;

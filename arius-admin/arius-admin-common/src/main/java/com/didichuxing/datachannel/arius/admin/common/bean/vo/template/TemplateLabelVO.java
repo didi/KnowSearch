@@ -18,11 +18,11 @@ public class TemplateLabelVO {
     private Integer indexTemplateId;
 
     @ApiModelProperty(value = "标签id，有一定的规则")
-    private String labelId;
+    private String  labelId;
 
     @ApiModelProperty(value = "标签名称")
-    private String labelName;
+    private String  labelName;
 
     @ApiModelProperty(value = "标记时间")
-    private Date markTime;
+    private Date    markTime;
 }

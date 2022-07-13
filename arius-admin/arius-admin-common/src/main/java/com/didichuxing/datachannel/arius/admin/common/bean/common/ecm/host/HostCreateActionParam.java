@@ -59,14 +59,12 @@ public class HostCreateActionParam extends HostParamBase {
      */
     private Integer  level;
 
-
-    private String                    platformType;
+    private String   platformType;
 
     /**
      * @see ClusterResourceTypeEnum
      */
-    private Integer                    resourceType;
-
+    private Integer  resourceType;
 
     public Result<Void> validateFiledIllegal() {
         if (StringUtils.isBlank(this.phyClusterName)) {

@@ -9,7 +9,8 @@ import java.util.*;
 public class ReadExprValueUtil {
     protected static final ILog LOGGER = LogFactory.getLog(ReadExprValueUtil.class);
 
-    private ReadExprValueUtil(){}
+    private ReadExprValueUtil() {
+    }
 
     /**
      * 返回 表达式的值(double)
@@ -59,7 +60,7 @@ public class ReadExprValueUtil {
      * @return
      */
     private static boolean isNum(char ch) {
-        return  (ch <= '9' && ch >= '0');
+        return (ch <= '9' && ch >= '0');
     }
 
     /**
@@ -188,7 +189,7 @@ public class ReadExprValueUtil {
                 temp = "";
             } else if (ch == '(') {
                 list.add("" + ch);
-            // 科学计数法E
+                // 科学计数法E
             } else if (ch == 'E') {
                 list.add("(");
                 list.add(temp);
@@ -206,7 +207,7 @@ public class ReadExprValueUtil {
 
                 i++;
                 String numStr = "";
-                for (;i < str.length(); i++) {
+                for (; i < str.length(); i++) {
                     char a = str.charAt(i);
                     if (isOperator(a)) {
                         i--;
@@ -249,7 +250,7 @@ public class ReadExprValueUtil {
                 return false;
             }
             if (isNum(ch) && !isOperator(chb) && chb != '.' && chb != ')' && chb != 'E' && !isNum(chb)) {
-                LOGGER.error("class=ReadExprValueUtil||method=isExpression||errMsg=数字后不是运算符--->{}",ch + chb);
+                LOGGER.error("class=ReadExprValueUtil||method=isExpression||errMsg=数字后不是运算符--->{}", ch + chb);
                 return false;
             }
             if (ch == '(') {

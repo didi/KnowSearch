@@ -21,27 +21,27 @@ public class WorkOrderPO extends BasePO {
     /**
      * ID
      */
-    private Long              id;
+    private Long    id;
 
     /**
      * @see WorkOrderTypeEnum
      */
-    private String            type;
+    private String  type;
 
     /**
      * 标题
      */
-    private String            title;
+    private String  title;
 
     /**
      * 扩展字段
      */
-    private String            extensions;
+    private String  extensions;
 
     /**
      * 申请人
      */
-    private String            applicant;
+    private String  applicant;
 
     /**
      * 申请人projectid
@@ -51,27 +51,27 @@ public class WorkOrderPO extends BasePO {
     /**
      * 备注信息
      */
-    private String            description;
+    private String  description;
 
     /**
      * 审批人
      */
-    private String            approver;
+    private String  approver;
 
     /**
      * 结束时间
      */
-    private Date              finishTime;
+    private Date    finishTime;
 
     /**
      * 审批信息
      */
-    private String            opinion;
+    private String  opinion;
 
     /**
      * 工单状态, 0:待审批, 1:通过, 2:拒绝, 3:取消
      */
-    private Integer           status;
+    private Integer status;
 
     /**
      * 审批人projectId

@@ -20,26 +20,22 @@ import org.springframework.stereotype.Component;
 @Component
 public class CommonManagerImpl implements CommonManager {
 
-    private static final ILog LOGGER = LogFactory.getLog(CommonManagerImpl.class);
-
-
+    private static final ILog      LOGGER = LogFactory.getLog(CommonManagerImpl.class);
 
     @Autowired
-    private ClusterPhyService esClusterPhyService;
-
-  
+    private ClusterPhyService      esClusterPhyService;
 
     @Autowired
     private TemplateSrvManager     templateSrvManager;
     @Autowired
     private AriusConfigInfoService ariusConfigInfoService;
 
-
     @Override
     public Result<List<ThirdPartClusterVO>> listDataCluster() {
         List<ThirdPartClusterVO> clusterVOS = ConvertUtil.list2List(esClusterPhyService.listAllClusters(),
-                ThirdPartClusterVO.class);
-        List<String> hasSecurityClusters = templateSrvManager.getPhyClusterByOpenTemplateSrv(TemplateServiceEnum.TEMPLATE_SECURITY.getCode());
+            ThirdPartClusterVO.class);
+        List<String> hasSecurityClusters = templateSrvManager
+            .getPhyClusterByOpenTemplateSrv(TemplateServiceEnum.TEMPLATE_SECURITY.getCode());
 
         clusterVOS.forEach(vo -> {
             if (hasSecurityClusters.contains(vo.getCluster())) {
@@ -53,18 +49,13 @@ public class CommonManagerImpl implements CommonManager {
     @Override
     public Result<ThirdPartClusterVO> getDataCluster(String cluster) {
         return Result
-                .buildSucc(ConvertUtil.obj2Obj(esClusterPhyService.getClusterByName(cluster), ThirdPartClusterVO.class));
+            .buildSucc(ConvertUtil.obj2Obj(esClusterPhyService.getClusterByName(cluster), ThirdPartClusterVO.class));
     }
 
     @Override
     public Result<List<ThirdpartConfigVO>> queryConfig(AriusConfigInfoDTO param) {
         return Result
-                .buildSucc(ConvertUtil.list2List(ariusConfigInfoService.queryByCondition(param), ThirdpartConfigVO.class));
+            .buildSucc(ConvertUtil.list2List(ariusConfigInfoService.queryByCondition(param), ThirdpartConfigVO.class));
     }
-
-  
-
-
-  
 
 }

@@ -31,17 +31,17 @@ import org.springframework.stereotype.Service;
 @Service
 public class DslStatisticsService {
 
-    protected static final ILog LOGGER = LogFactory.getLog(DslStatisticsService.class);
+    protected static final ILog  LOGGER = LogFactory.getLog(DslStatisticsService.class);
 
     @Autowired
-    private DslTemplateESDAO dslTemplateEsDao;
+    private DslTemplateESDAO     dslTemplateEsDao;
 
     @Autowired
     private OperateRecordService operateRecordService;
     @Autowired
-    private ProjectService projectService;
+    private ProjectService       projectService;
 
-    public Result<String> auditDsl(AuditDsl auditDsl){
+    public Result<String> auditDsl(AuditDsl auditDsl) {
         // 入参判断
         if (null == auditDsl || !auditDsl.isVaild()) {
             return Result.build(ResultType.ILLEGAL_PARAMS);
@@ -60,14 +60,13 @@ public class DslStatisticsService {
         // 添加操作记录
         if (operatorResult) {
             ProjectBriefVO projectBriefVO = Optional.ofNullable(auditDsl.getProjectId())
-                    .map(projectService::getProjectBriefByProjectId)
-                    .orElse(null);
+                .map(projectService::getProjectBriefByProjectId).orElse(null);
             for (DslTemplatePO dslTemplatePo : dslTemplatePOList) {
                 OperateRecord operateRecord = buildDslSettingOperatorRecord(
-                        String.format("%d_%s", projectId, dslTemplatePo.getDslTemplateMd5()),
-                        OperateTypeEnum.QUERY_TEMPLATE_DSL_CURRENT_LIMIT_ADJUSTMENT, auditDsl.getUserName(),
-                        String.format("checkMode->%s", dslTemplatePo.getCheckMode()),projectBriefVO);
-                
+                    String.format("%d_%s", projectId, dslTemplatePo.getDslTemplateMd5()),
+                    OperateTypeEnum.QUERY_TEMPLATE_DSL_CURRENT_LIMIT_ADJUSTMENT, auditDsl.getUserName(),
+                    String.format("checkMode->%s", dslTemplatePo.getCheckMode()), projectBriefVO);
+
                 operateRecordService.save(operateRecord);
             }
         }
@@ -91,15 +90,16 @@ public class DslStatisticsService {
 
         DslTemplatePO defaultDsl = new DslTemplatePO();
         defaultDsl.setQueryLimit(0D);
-       
+
         // 添加操作记录
         for (DslQueryLimit dslQueryLimit : dslQueryLimitList) {
             OperateRecord operateRecord = buildDslSettingOperatorRecord(dslQueryLimit.getProjectIdDslTemplateMd5(),
-                    OperateTypeEnum.QUERY_TEMPLATE_DSL_CURRENT_LIMIT_ADJUSTMENT, operator,
-                    String.format("queryLimit %f->%f",
-                            originalMap.getOrDefault(dslQueryLimit.getProjectIdDslTemplateMd5(), defaultDsl)
-                                    .getQueryLimit(), dslQueryLimit.getQueryLimit()), null);
-         
+                OperateTypeEnum.QUERY_TEMPLATE_DSL_CURRENT_LIMIT_ADJUSTMENT, operator,
+                String.format("queryLimit %f->%f",
+                    originalMap.getOrDefault(dslQueryLimit.getProjectIdDslTemplateMd5(), defaultDsl).getQueryLimit(),
+                    dslQueryLimit.getQueryLimit()),
+                null);
+
             operateRecordService.save(operateRecord);
         }
 
@@ -125,8 +125,9 @@ public class DslStatisticsService {
             return Result.buildSucc(response);
 
         } catch (Exception e) {
-            LOGGER.error("class=DslAnalyzerController||method=scrollSearchDslTemplate||errMsg=request {}, search es error||stack={}",
-                    request, e);
+            LOGGER.error(
+                "class=DslAnalyzerController||method=scrollSearchDslTemplate||errMsg=request {}, search es error||stack={}",
+                request, e);
             return Result.buildFail();
         }
     }
@@ -142,7 +143,7 @@ public class DslStatisticsService {
      */
     private boolean auditDsl(Integer projectId, List<DslInfo> dslInfos, List<DslTemplatePO> dslTemplatePOList) {
 
-        String dsl ;
+        String dsl;
         ExtractResult extractResult;
         String dslTemplateMd5;
         DslTemplatePO dslTemplatePO;
@@ -181,10 +182,11 @@ public class DslStatisticsService {
         }
 
         // 数据量不等，则失败
-        return  dslInfos.size() == dslTemplatePOList.size();
+        return dslInfos.size() == dslTemplatePOList.size();
     }
 
-    private DslTemplatePO createDslTemplate(Integer projectId, String dsl, ExtractResult extractResult, String dslTemplateMd5, String timeValue) {
+    private DslTemplatePO createDslTemplate(Integer projectId, String dsl, ExtractResult extractResult,
+                                            String dslTemplateMd5, String timeValue) {
         DslTemplatePO dslTemplatePO;
         dslTemplatePO = new DslTemplatePO();
         dslTemplatePO.setVersion("V2");
@@ -201,12 +203,14 @@ public class DslStatisticsService {
         // 如果查询语句中有聚合查询，或者没有过滤条件，则加入到黑名单
         if ("aggs".equals(extractResult.getDslType()) || StringUtils.isBlank(extractResult.getWhereFields())) {
             dslTemplatePO.setCheckMode("black");
-            LOGGER.error("class=DslAnalyzerController||method=auditDsl||errMsg={} {} has aggs or no where", projectId, dsl);
+            LOGGER.error("class=DslAnalyzerController||method=auditDsl||errMsg={} {} has aggs or no where", projectId,
+                dsl);
             // 通过sql查询语句中有订单号order_id 但没有routing值，则加入到黑名单
-        } else if ("sql".equals(extractResult.getSearchType()) &&
-                extractResult.getWhereFields().contains("order_id") && !extractResult.getDslTemplate().contains("ROUTINGS")) {
+        } else if ("sql".equals(extractResult.getSearchType()) && extractResult.getWhereFields().contains("order_id")
+                   && !extractResult.getDslTemplate().contains("ROUTINGS")) {
             dslTemplatePO.setCheckMode("black");
-            LOGGER.error("class=DslAnalyzerController||method=auditDsl||errMsg={} {} search with order_id no routing", projectId, dsl);
+            LOGGER.error("class=DslAnalyzerController||method=auditDsl||errMsg={} {} search with order_id no routing",
+                projectId, dsl);
         } else {
             dslTemplatePO.setCheckMode("white");
         }
@@ -217,14 +221,8 @@ public class DslStatisticsService {
 
     protected OperateRecord buildDslSettingOperatorRecord(String bizId, OperateTypeEnum operateType, String operator,
                                                           String content, ProjectBriefVO projectBriefVO) {
-     
 
-        return new OperateRecord.Builder()
-                .content(content)
-                .operationTypeEnum(operateType)
-                .project(projectBriefVO)
-                .userOperation(operator)
-                .bizId(bizId)
-                .build();
+        return new OperateRecord.Builder().content(content).operationTypeEnum(operateType).project(projectBriefVO)
+            .userOperation(operator).bizId(bizId).build();
     }
 }

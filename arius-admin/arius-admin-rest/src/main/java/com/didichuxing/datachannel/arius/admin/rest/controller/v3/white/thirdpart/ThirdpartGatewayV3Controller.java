@@ -48,14 +48,14 @@ public class ThirdpartGatewayV3Controller {
 
     @PutMapping("/heartbeat")
     @ResponseBody
-    @ApiOperation(value = "gateway心跳接口" )
+    @ApiOperation(value = "gateway心跳接口")
     public Result<Void> heartbeat(@RequestBody GatewayHeartbeat heartbeat) {
         return gatewayManager.heartbeat(heartbeat);
     }
 
     @GetMapping("/alivecount")
     @ResponseBody
-    @ApiOperation(value = "gateway存活接口" )
+    @ApiOperation(value = "gateway存活接口")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "String", name = "clusterName", value = "集群名称", required = true) })
     public Result<Integer> heartbeat(@RequestParam(value = "clusterName") String clusterName) {
         return gatewayManager.heartbeat(clusterName);
@@ -63,7 +63,7 @@ public class ThirdpartGatewayV3Controller {
 
     @GetMapping("/alive-node-name")
     @ResponseBody
-    @ApiOperation(value = "获取gateway存活节点名称列表接口" )
+    @ApiOperation(value = "获取gateway存活节点名称列表接口")
     public Result<List<String>> getGatewayAliveNodeNames(HttpServletRequest request) {
         return gatewayManager.getGatewayAliveNodeNames("Normal");
     }
@@ -98,22 +98,21 @@ public class ThirdpartGatewayV3Controller {
 
     @PostMapping(path = "dsl/scroll-dsl-template")
     @ApiOperation(value = "滚动获取查询模板数据", notes = "滚动获取查询模板数据", httpMethod = "POST")
-    public Result<ScrollDslTemplateResponse> scrollSearchDslTemplate(@ApiParam(name="request", value="滚动查询参数", required = true)
-                                                                     @RequestBody ScrollDslTemplateRequest request) {
+    public Result<ScrollDslTemplateResponse> scrollSearchDslTemplate(@ApiParam(name = "request", value = "滚动查询参数", required = true) @RequestBody ScrollDslTemplateRequest request) {
         return gatewayManager.scrollSearchDslTemplate(request);
     }
 
     @PostMapping(path = "/alias")
     @ResponseBody
     @ApiOperation(value = "设置一个模板的别名", notes = "设置一个模板的别名")
-    public Result<Boolean> addAlias(@RequestBody IndexTemplateAliasDTO indexTemplateAliasDTO){
+    public Result<Boolean> addAlias(@RequestBody IndexTemplateAliasDTO indexTemplateAliasDTO) {
         return gatewayManager.addAlias(indexTemplateAliasDTO);
     }
 
     @DeleteMapping(path = "/alias")
     @ResponseBody
     @ApiOperation(value = "删除一个模板的别名", notes = "删除一个模板的别名")
-    public Result<Boolean> delAlias(@RequestBody IndexTemplateAliasDTO indexTemplateAliasDTO){
+    public Result<Boolean> delAlias(@RequestBody IndexTemplateAliasDTO indexTemplateAliasDTO) {
         return gatewayManager.delAlias(indexTemplateAliasDTO);
     }
 }

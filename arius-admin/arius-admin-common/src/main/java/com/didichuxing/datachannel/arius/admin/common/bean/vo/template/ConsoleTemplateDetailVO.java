@@ -36,7 +36,7 @@ public class ConsoleTemplateDetailVO extends BaseTemplateVO {
      * @see ResourceLogicLevelEnum
      */
     @ApiModelProperty("集群服务等级")
-    private Integer       clusterLevel;
+    private Integer      clusterLevel;
 
     @ApiModelProperty("索引分区列表，按着先后顺序排列")
     private List<String> indices;
@@ -51,8 +51,8 @@ public class ConsoleTemplateDetailVO extends BaseTemplateVO {
     private Boolean      editable;
 
     @ApiModelProperty("服务等级")
-    private Integer level;
+    private Integer      level;
 
     @ApiModelProperty("是否开启indexRollover能力")
-    private Boolean disableIndexRollover;
+    private Boolean      disableIndexRollover;
 }

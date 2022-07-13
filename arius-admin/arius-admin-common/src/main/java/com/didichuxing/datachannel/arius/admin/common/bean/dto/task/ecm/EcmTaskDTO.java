@@ -16,39 +16,39 @@ import java.util.List;
 @ApiModel(description = "ECM任务信息")
 public class EcmTaskDTO extends BaseDTO {
 
-    private static final long serialVersionUID = 1L;
+    private static final long  serialVersionUID = 1L;
 
     @ApiModelProperty("ID主键自增")
-    private Long id;
+    private Long               id;
 
     @ApiModelProperty("标题")
-    private String title;
+    private String             title;
 
     @ApiModelProperty("工单ID")
-    private Long workOrderId;
+    private Long               workOrderId;
 
     @ApiModelProperty("物理集群ID")
-    private Long physicClusterId;
+    private Long               physicClusterId;
 
     @ApiModelProperty("集群节点角色")
-    private String clusterNodeRole;
+    private String             clusterNodeRole;
 
     @ApiModelProperty("状态")
-    private String status;
+    private String             status;
 
     @ApiModelProperty("工单数据")
     private List<EcmParamBase> ecmParamBaseList;
 
     @ApiModelProperty("docker容器云/host 物理机")
-    private Integer type;
+    private Integer            type;
 
     /**
      * @see EcmTaskTypeEnum
      */
     @ApiModelProperty("任务类型")
-    private Integer orderType;
+    private Integer            orderType;
 
     @ApiModelProperty("插件创建人")
-    private String creator;
+    private String             creator;
 
 }

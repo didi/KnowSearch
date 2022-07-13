@@ -36,7 +36,7 @@ public class ConsoleTemplateVO extends BaseTemplateVO implements Comparable<Cons
     private Long         checkPointDiff;
 
     @ApiModelProperty("项目名称")
-    private String projectName;
+    private String       projectName;
 
     @ApiModelProperty("是否开启indexRollover能力")
     private Boolean      disableIndexRollover;

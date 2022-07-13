@@ -33,7 +33,7 @@ public class DslTemplateUpdateNearestQueryLimitJob extends AbstractMetaDataJob {
      * 默认的查询限流值
      */
     @Value("${default.query.limit}")
-    private Integer defaultQueryLimit;
+    private Integer          defaultQueryLimit;
 
     @Override
     public Object handleJobTask(String params) {
@@ -56,8 +56,9 @@ public class DslTemplateUpdateNearestQueryLimitJob extends AbstractMetaDataJob {
         List<DslTemplatePO> dslTemplatePOList = dslTemplateESDAO.getNearestDslTemplate();
 
         if (CollectionUtils.isEmpty(dslTemplatePOList)) {
-            LOGGER.info("class=DslTemplateUpdateNearestQueryLimitJob||method=handleJobTask||msg=nearest dsl template is empty, cost {}",
-                    dslTemplatePOList.size(), stopWatch.stop().toString());
+            LOGGER.info(
+                "class=DslTemplateUpdateNearestQueryLimitJob||method=handleJobTask||msg=nearest dsl template is empty, cost {}",
+                dslTemplatePOList.size(), stopWatch.stop().toString());
             return JOB_SUCCESS;
         }
 
@@ -67,18 +68,17 @@ public class DslTemplateUpdateNearestQueryLimitJob extends AbstractMetaDataJob {
         Iterator<DslTemplatePO> iterator = dslTemplatePOList.iterator();
         while (iterator.hasNext()) {
             DslTemplatePO dslTemplatePO = iterator.next();
-            if (null == dslTemplatePO
-                    || null == dslTemplatePO.getTotalCostAvg()
-                    || null == dslTemplatePO.getTotalShardsAvg()
-                    || null == dslTemplatePO.getTotalHitsAvg()
-                    || null == dslTemplatePO.getResponseLenAvg()
-            ) {
+            if (null == dslTemplatePO || null == dslTemplatePO.getTotalCostAvg()
+                || null == dslTemplatePO.getTotalShardsAvg() || null == dslTemplatePO.getTotalHitsAvg()
+                || null == dslTemplatePO.getResponseLenAvg()) {
                 continue;
             }
             //计算其限流值
-            double queryLimitValue = calQueryLimit(dslTemplatePO.getTotalCostAvg(), dslTemplatePO.getTotalShardsAvg(), dslTemplatePO.getTotalHitsAvg(), dslTemplatePO.getResponseLenAvg());
+            double queryLimitValue = calQueryLimit(dslTemplatePO.getTotalCostAvg(), dslTemplatePO.getTotalShardsAvg(),
+                dslTemplatePO.getTotalHitsAvg(), dslTemplatePO.getResponseLenAvg());
 
-            if (dslTemplatePO.getQueryLimit() != null && 0 == Double.compare(dslTemplatePO.getQueryLimit(), queryLimitValue)) {
+            if (dslTemplatePO.getQueryLimit() != null
+                && 0 == Double.compare(dslTemplatePO.getQueryLimit(), queryLimitValue)) {
                 // 如果查询限流值没发生变化，就不需要更新es
                 iterator.remove();
             } else {
@@ -91,8 +91,9 @@ public class DslTemplateUpdateNearestQueryLimitJob extends AbstractMetaDataJob {
 
         boolean operatorResult = dslTemplateESDAO.updateTemplates(dslTemplatePOList);
 
-        LOGGER.info("class=DslTemplateUpdateNearestQueryLimitJob||method=handleJobTask||msg=set arius create time {}, result {}, update nearest dsl template {}, result {}, cost {}",
-                dslTemplates.size(), updateResult, dslTemplatePOList.size(), operatorResult, stopWatch.stop().toString());
+        LOGGER.info(
+            "class=DslTemplateUpdateNearestQueryLimitJob||method=handleJobTask||msg=set arius create time {}, result {}, update nearest dsl template {}, result {}, cost {}",
+            dslTemplates.size(), updateResult, dslTemplatePOList.size(), operatorResult, stopWatch.stop().toString());
         return JOB_SUCCESS;
     }
 
@@ -105,8 +106,8 @@ public class DslTemplateUpdateNearestQueryLimitJob extends AbstractMetaDataJob {
      * @param responseLenAvg 查询响应长度
      * @return
      */
-    private double calQueryLimit(double totalCostAvg, double totalShardsAvg,
-                                 double totalHitsAvg, double responseLenAvg) {
+    private double calQueryLimit(double totalCostAvg, double totalShardsAvg, double totalHitsAvg,
+                                 double responseLenAvg) {
         //计算查询耗时比重
         double queryWeight = getQueryWeight(totalCostAvg);
 

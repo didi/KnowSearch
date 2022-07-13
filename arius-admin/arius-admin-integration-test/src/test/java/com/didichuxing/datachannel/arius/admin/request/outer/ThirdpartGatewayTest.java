@@ -38,14 +38,14 @@ public class ThirdpartGatewayTest extends BaseContextTest {
     public void testHeartbeatByClusterName() throws IOException {
         Result<Integer> result = ThirdpartGatewayControllerMethod.heartbeat("normal");
 
-        Assert.assertTrue(result.getData()>=0);
+        Assert.assertTrue(result.getData() >= 0);
         Assert.assertTrue(result.success());
     }
 
     @Test
     public void testGetGatewayAliveNodeNames() throws IOException {
         Result<List<String>> result = ThirdpartGatewayControllerMethod.getGatewayAliveNodeNames();
-        Assert.assertTrue(result.getData()!=null);
+        Assert.assertTrue(result.getData() != null);
         Assert.assertTrue(result.success());
     }
 
@@ -55,19 +55,20 @@ public class ThirdpartGatewayTest extends BaseContextTest {
         Result<List<GatewayESUserVO>> result = ThirdpartGatewayControllerMethod.listApp();
         Assert.assertTrue(result.success());
         String templateJsonFile = "src/main/resources/template.thirdpart.gateway/gatewayappvo.json";
-        for (GatewayESUserVO gatewayAppVO:result.getData()){
+        for (GatewayESUserVO gatewayAppVO : result.getData()) {
             String responseJsonString = CompareUtil.serialize(gatewayAppVO);
-            Assert.assertTrue(CompareUtil.compareJson(templateJsonFile,responseJsonString));
+            Assert.assertTrue(CompareUtil.compareJson(templateJsonFile, responseJsonString));
         }
     }
 
     @Test
     public void testGetTemplateMap() throws IOException {
-        Result<Map<String, GatewayTemplatePhysicalVO>> result = ThirdpartGatewayControllerMethod.getTemplateMap("lcx-0401");
+        Result<Map<String, GatewayTemplatePhysicalVO>> result = ThirdpartGatewayControllerMethod
+            .getTemplateMap("lcx-0401");
         Assert.assertTrue(result.success());
         String templateJsonFile = "src/main/resources/template.thirdpart.gateway/gatewaytemplatephysicalvo.json";
         String responseJsonString = JSONObject.toJSONString(result.getData());
-        Assert.assertTrue(CompareUtil.compareJson(templateJsonFile,responseJsonString));
+        Assert.assertTrue(CompareUtil.compareJson(templateJsonFile, responseJsonString));
     }
 
     @Test
@@ -75,8 +76,9 @@ public class ThirdpartGatewayTest extends BaseContextTest {
         Result<Map<String, GatewayTemplateDeployInfoVO>> result = ThirdpartGatewayControllerMethod.listDeployInfo("cn");
         Assert.assertTrue(result.success());
         String templateJsonFile = "src/main/resources/template.thirdpart.gateway/gatewaytemplatedeployinfovo.json";
-        String responseJsonString = JSONObject.toJSONString(result.getData(), SerializerFeature.PrettyFormat, SerializerFeature.WriteMapNullValue);
-        Assert.assertTrue(CompareUtil.compareJson(templateJsonFile,responseJsonString));
+        String responseJsonString = JSONObject.toJSONString(result.getData(), SerializerFeature.PrettyFormat,
+            SerializerFeature.WriteMapNullValue);
+        Assert.assertTrue(CompareUtil.compareJson(templateJsonFile, responseJsonString));
     }
 
     @Test
@@ -85,12 +87,13 @@ public class ThirdpartGatewayTest extends BaseContextTest {
         scrollDslTemplateRequest.setDslTemplateVersion("7.6.1");
         scrollDslTemplateRequest.setScrollSize(23L);
         scrollDslTemplateRequest.setLastModifyTime(System.currentTimeMillis());
-        Result<ScrollDslTemplateResponse> result = ThirdpartGatewayControllerMethod.scrollSearchDslTemplate(scrollDslTemplateRequest);
+        Result<ScrollDslTemplateResponse> result = ThirdpartGatewayControllerMethod
+            .scrollSearchDslTemplate(scrollDslTemplateRequest);
         Assert.assertTrue(result.success());
 
         String templateJsonFile = "src/main/resources/template.thirdpart.gateway/scrollDslTemplateResponse.json";
         String responseJsonString = CompareUtil.serialize(result.getData());
-        Assert.assertTrue(CompareUtil.compareJson(templateJsonFile,responseJsonString));
+        Assert.assertTrue(CompareUtil.compareJson(templateJsonFile, responseJsonString));
     }
 
 }

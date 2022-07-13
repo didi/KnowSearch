@@ -46,9 +46,8 @@ public class ESPackageManager {
      * @return 安装包
      */
     public Result<ESPackageVO> getESPackageById(Long id) {
-        return AriusOptional
-                .ofObjNullable(buildESPackageVO(packageService.getESPackagePOById(id)))
-                .orGetResult(() -> Result.buildFail("ES安装包不存在"));
+        return AriusOptional.ofObjNullable(buildESPackageVO(packageService.getESPackagePOById(id)))
+            .orGetResult(() -> Result.buildFail("ES安装包不存在"));
     }
 
     /**
@@ -61,7 +60,7 @@ public class ESPackageManager {
      */
     public Result<Long> addESPackage(ESPackageDTO esPackageDTO, String operator, Integer projectId) {
         final Result<Void> result = ProjectUtils.checkProjectCorrectly(id -> id, projectId, projectId);
-        if (result.failed()){
+        if (result.failed()) {
             return Result.buildFail(result.getMessage());
         }
         return packageService.addESPackage(esPackageDTO, operator);
@@ -77,7 +76,7 @@ public class ESPackageManager {
      */
     public Result<ESPackageVO> updateESPackage(ESPackageDTO esPackageDTO, String operator, Integer projectId) {
 
-        Result<ESPackage> esPackageResult = packageService.updateESPackage(esPackageDTO, operator,projectId);
+        Result<ESPackage> esPackageResult = packageService.updateESPackage(esPackageDTO, operator, projectId);
         if (esPackageResult.failed()) {
             return Result.buildFail(esPackageResult.getMessage());
         }
@@ -94,7 +93,8 @@ public class ESPackageManager {
         ESPackageVO esPackageVO = ConvertUtil.obj2Obj(esPackage, ESPackageVO.class);
 
         // 根据es程序包的版本号判断是否为滴滴内部版本，当版本号为四位时，表示为滴滴内部版本，否则为外部开源的版本
-        esPackageVO.setPackageType(AriusESPackageEnum.valueOfLength(ESVersionUtil.getVersionLength(esPackage.getEsVersion())).getCode());
+        esPackageVO.setPackageType(
+            AriusESPackageEnum.valueOfLength(ESVersionUtil.getVersionLength(esPackage.getEsVersion())).getCode());
 
         return esPackageVO;
     }
@@ -109,7 +109,7 @@ public class ESPackageManager {
      */
     public Result<Long> deleteESPackage(Long id, String operator, Integer projectId) throws NotFindSubclassException {
         final Result<Void> result = ProjectUtils.checkProjectCorrectly(i -> i, projectId, projectId);
-        if (result.failed()){
+        if (result.failed()) {
             return Result.buildFail(result.getMessage());
         }
         return packageService.deleteESPackage(id, operator);

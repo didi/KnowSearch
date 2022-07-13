@@ -22,7 +22,6 @@ public class ConsoleESUserVO extends BaseVO {
     @ApiModelProperty("es user")
     private Integer id;
 
-
     @ApiModelProperty("备注")
     private String  memo;
 

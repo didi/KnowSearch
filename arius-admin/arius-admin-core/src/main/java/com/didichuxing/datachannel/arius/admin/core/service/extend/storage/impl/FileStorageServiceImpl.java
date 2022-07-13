@@ -28,21 +28,23 @@ public class FileStorageServiceImpl implements FileStorageService {
     private static final ILog LOGGER = LogFactory.getLog(FileStorageServiceImpl.class);
 
     @Autowired
-    private HandleFactory handleFactory;
+    private HandleFactory     handleFactory;
 
     @Value("${extend.fileStorage}")
-    private String fileStorageType;
+    private String            fileStorageType;
 
     @PostConstruct
     public void fileStorageTypeCheck() {
         FileStorageTypeEnum fileStorageTypeEnum = FileStorageTypeEnum.valueOfType(fileStorageType);
         if (fileStorageTypeEnum.getCode().equals(FileStorageTypeEnum.UNKNOWN.getCode())) {
-            LOGGER.error("class=FileStorageServiceImpl||method=fileStorageTypeCheck||fileStorageType={}", fileStorageTypeEnum);
+            LOGGER.error("class=FileStorageServiceImpl||method=fileStorageTypeCheck||fileStorageType={}",
+                fileStorageTypeEnum);
         }
     }
 
     @Override
-    public Result<String> upload(String fileName, String fileMd5, MultipartFile uploadFile) throws NotFindSubclassException {
+    public Result<String> upload(String fileName, String fileMd5,
+                                 MultipartFile uploadFile) throws NotFindSubclassException {
         Result<FileStorageHandle> result = getFileStorageHandleByType(fileStorageType);
         if (result.failed()) {
             LOGGER.info("class=FileStorageServiceImpl||method=upload||fileStorageType={}", fileStorageType);

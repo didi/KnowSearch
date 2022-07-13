@@ -27,9 +27,9 @@ public enum SecurityRoleAuthEnum {
 
     private final ProjectTemplateAuthEnum projectTemplateAuthEnum;
 
-    private final String              authName;
+    private final String                  authName;
 
-    private final Set<String>         privilegeSet;
+    private final Set<String>             privilegeSet;
 
     SecurityRoleAuthEnum(ProjectTemplateAuthEnum projectTemplateAuthEnum, String authName, Set<String> privilegeSet) {
         this.projectTemplateAuthEnum = projectTemplateAuthEnum;

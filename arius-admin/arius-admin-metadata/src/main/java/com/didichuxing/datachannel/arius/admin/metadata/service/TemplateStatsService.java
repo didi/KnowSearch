@@ -53,46 +53,46 @@ import com.google.common.collect.Maps;
 @Service
 public class TemplateStatsService {
 
-    protected static final ILog LOGGER = LogFactory.getLog(TemplateStatsService.class);
+    protected static final ILog          LOGGER         = LogFactory.getLog(TemplateStatsService.class);
 
     @Autowired
-    private AriusStatsIndexInfoESDAO        ariusStatsIndexInfoESDAO;
+    private AriusStatsIndexInfoESDAO     ariusStatsIndexInfoESDAO;
 
     @Autowired
-    private AriusStatsIndexNodeInfoESDAO    ariusStatsIndexNodeInfoESDAO;
+    private AriusStatsIndexNodeInfoESDAO ariusStatsIndexNodeInfoESDAO;
 
     @Autowired
-    private AriusStatsIngestInfoESDAO       ariusStatsIngestInfoESDAO;
+    private AriusStatsIngestInfoESDAO    ariusStatsIngestInfoESDAO;
 
     @Autowired
-    private GatewayJoinESDAO                gatewayJoinESDAO;
+    private GatewayJoinESDAO             gatewayJoinESDAO;
 
     @Autowired
-    private TemplateAccessESDAO             templateAccessESDAO;
+    private TemplateAccessESDAO          templateAccessESDAO;
 
     @Autowired
-    private ProjectTemplateAccessESDAO projectTemplateAccessESDAO;
+    private ProjectTemplateAccessESDAO   projectTemplateAccessESDAO;
 
     @Autowired
-    private DslFieldUseESDAO                dslFieldUseESDAO;
+    private DslFieldUseESDAO             dslFieldUseESDAO;
 
     @Autowired
-    private TemplateValueService            templateValueService;
+    private TemplateValueService         templateValueService;
 
     @Autowired
-    private IndexTemplateService indexTemplateService;
+    private IndexTemplateService         indexTemplateService;
 
     @Autowired
-    private ESTemplateService               esTemplateService;
+    private ESTemplateService            esTemplateService;
 
-    private static final Long               ONE_DAY    = 24 * 60 * 60 * 1000L;
-    private static final Long               MINS_OF_15 = 15 * 60 * 1000L;
-    private static final Long               ONE_GB     = 1024 * 1024 * 1024L;
+    private static final Long            ONE_DAY        = 24 * 60 * 60 * 1000L;
+    private static final Long            MINS_OF_15     = 15 * 60 * 1000L;
+    private static final Long            ONE_GB         = 1024 * 1024 * 1024L;
 
-    private static final String             INDEX_STR       = "index";
-    private static final String             DOC_VALUES_STR  = "doc_values";
-    private static final String             FALSE_STR       = "false";
-    private static final String             NO_STR          = "no";
+    private static final String          INDEX_STR      = "index";
+    private static final String          DOC_VALUES_STR = "doc_values";
+    private static final String          FALSE_STR      = "false";
+    private static final String          NO_STR         = "no";
 
     /**
      * 根据模板名称和集群获取，模板所在节点【startTime， endTime】内的平均cpu
@@ -113,19 +113,20 @@ public class TemplateStatsService {
      * @param days 结束日期
      * @return projectid列表
      */
-    
+
     public Result<Map<Integer, Long>> getTemplateAccessProjectIds(Integer logicTemplateId, int days) {
-        List<ProjectTemplateAccessCountPO> accessCountPos = projectTemplateAccessESDAO.getAccessProjectIdsInfoByTemplateId(logicTemplateId, days);
-        if(CollectionUtils.isEmpty(accessCountPos)){
+        List<ProjectTemplateAccessCountPO> accessCountPos = projectTemplateAccessESDAO
+            .getAccessProjectIdsInfoByTemplateId(logicTemplateId, days);
+        if (CollectionUtils.isEmpty(accessCountPos)) {
             return Result.buildSucc();
         }
 
         Map<Integer, Long> ret = new HashMap<>();
-        for(ProjectTemplateAccessCountPO accessCountPo : accessCountPos){
+        for (ProjectTemplateAccessCountPO accessCountPo : accessCountPos) {
             Integer projectId = accessCountPo.getProjectId();
-            Long    count = accessCountPo.getCount();
+            Long count = accessCountPo.getCount();
 
-            if(null != ret.get(projectId)){
+            if (null != ret.get(projectId)) {
                 count += ret.get(projectId);
             }
             ret.put(projectId, count);
@@ -151,7 +152,7 @@ public class TemplateStatsService {
      * @param endDate       毫秒
      * @return
      */
-    
+
     public Result<List<TemplateMetric>> getTemplateMetrics(String cluster, List<String> templateList, long startDate,
                                                            long endDate) {
         Long start = System.currentTimeMillis();
@@ -168,36 +169,36 @@ public class TemplateStatsService {
 
                 FutureUtil.DEAULT_FUTURE.runnableTask(() -> {
                     double totalSizeInBytes = ariusStatsIndexInfoESDAO.getTemplateTotalSizeByTimeRange(template,
-                            cluster, endDate - min30, endDate);
+                        cluster, endDate - min30, endDate);
                     templateMetric.setSumIndexSizeG(totalSizeInBytes / ONE_GB);
                 }).runnableTask(() -> {
                     long totalDocNu = ariusStatsIndexInfoESDAO.getTemplateTotalDocNuByTimeRange(template, cluster,
-                            endDate - min30, endDate);
+                        endDate - min30, endDate);
                     templateMetric.setSumDocCount(totalDocNu);
                 }).runnableTask(() -> {
                     double maxIndexSize = ariusStatsIndexInfoESDAO.getTemplateMaxIndexSize(template, cluster,
-                            endDate - min30, endDate);
+                        endDate - min30, endDate);
                     templateMetric.setMaxIndexSizeG(maxIndexSize / ONE_GB);
                 }).runnableTask(() -> {
                     long maxIndexDoc = ariusStatsIndexInfoESDAO.getTemplateMaxIndexDoc(template, cluster,
-                            endDate - min30, endDate);
+                        endDate - min30, endDate);
                     templateMetric.setMaxIndexDocCount(maxIndexDoc);
                 }).runnableTask(() -> {
                     Map<String, String> maxInfo = ariusStatsIndexInfoESDAO.getTemplateMaxInfo(template, cluster,
-                            startDate, endDate);
+                        startDate, endDate);
                     setMaxField(templateMetric, maxInfo);
                 }).waitExecute();
             } catch (Exception e) {
                 LOGGER.error("class=TemplateStatisController||method=getCapacityMetric||template={}||cluster={}",
-                        template, cluster);
+                    template, cluster);
             }
 
             templateMetrics.add(templateMetric);
 
             if (!EnvUtil.isOnline()) {
                 LOGGER.info(
-                        "class=TemplateStatisController||method=getCapacityMetric||template={}||cluster={}||templateMetric={}||cost={}",
-                        template, cluster, JSON.toJSONString(templateMetric), System.currentTimeMillis() - start);
+                    "class=TemplateStatisController||method=getCapacityMetric||template={}||cluster={}||templateMetric={}||cost={}",
+                    template, cluster, JSON.toJSONString(templateMetric), System.currentTimeMillis() - start);
             }
         });
 
@@ -230,10 +231,12 @@ public class TemplateStatsService {
      * @param currentEndDate   结束时间
      * @return
      */
-    
+
     public Result<LogicTemplateTpsMetric> getTemplateTpsMetric(Integer logicId, Long currentStartDate,
                                                                Long currentEndDate) {
-        if (logicId == null){ return Result.build(ResultType.ILLEGAL_PARAMS);}
+        if (logicId == null) {
+            return Result.build(ResultType.ILLEGAL_PARAMS);
+        }
 
         // 如果时间值为空，不传则为最近15分钟
         if (currentStartDate == null || currentEndDate == null) {
@@ -245,22 +248,22 @@ public class TemplateStatsService {
         Map<Long/*templateId*/, Double> currentFailCountMap = null;
         try {
             Long startDate = System.currentTimeMillis();
-            Long endDate   = startDate - 7 * ONE_DAY;
+            Long endDate = startDate - 7 * ONE_DAY;
             tpsMetricPO = ariusStatsIndexInfoESDAO.getTemplateTpsMetricInfo(logicId, startDate, endDate,
-                    currentStartDate, currentEndDate);
+                currentStartDate, currentEndDate);
 
             currentFailCountMap = ariusStatsIngestInfoESDAO.getTemplateIngestFailMetricInfo(logicId,
-                    System.currentTimeMillis() - MINS_OF_15, System.currentTimeMillis());
+                System.currentTimeMillis() - MINS_OF_15, System.currentTimeMillis());
 
             if (!Objects.isNull(tpsMetricPO)) {
                 tpsMetricPO.setCurrentFailCountMap(currentFailCountMap);
             }
 
-            return Result.buildSucc( ConvertUtil.obj2Obj(tpsMetricPO, LogicTemplateTpsMetric.class));
+            return Result.buildSucc(ConvertUtil.obj2Obj(tpsMetricPO, LogicTemplateTpsMetric.class));
         } catch (Exception e) {
             LOGGER.error(
-                    "class=TemplateStatisController||method=getTemplateTpsMetricInfo||errMsg=fail to get {} TpsMetricInfo",
-                    logicId, e);
+                "class=TemplateStatisController||method=getTemplateTpsMetricInfo||errMsg=fail to get {} TpsMetricInfo",
+                logicId, e);
             return Result.buildFail();
         }
     }
@@ -273,13 +276,14 @@ public class TemplateStatsService {
      * @param endDate    结束时间
      * @return result
      */
-    
+
     public Result<List<IndexNameQueryAvgRate>> getIndexAccessCount(String indexNames, Long startDate, Long endDate) {
         if (StringUtils.isBlank(indexNames) || startDate == null || endDate == null || endDate < startDate) {
             return Result.build(ResultType.ILLEGAL_PARAMS);
         }
 
-        return Result.buildSucc(ConvertUtil.list2List(ariusStatsIndexInfoESDAO.getIndexNameQueryAvgRate(indexNames, startDate, endDate),
+        return Result.buildSucc(
+            ConvertUtil.list2List(ariusStatsIndexInfoESDAO.getIndexNameQueryAvgRate(indexNames, startDate, endDate),
                 IndexNameQueryAvgRate.class));
     }
 
@@ -287,11 +291,10 @@ public class TemplateStatsService {
      * 获取价值分
      * @return result
      */
-    
+
     public Result<List<IndexTemplateValue>> listTemplateValue() {
         return Result.buildSucc(ConvertUtil.list2List(templateValueService.listAll(), IndexTemplateValue.class));
     }
-
 
     /**
      * 获取模板的价值分
@@ -299,9 +302,10 @@ public class TemplateStatsService {
      * @param logicTemplateId
      * @return result
      */
-    
+
     public Result<IndexTemplateValue> getTemplateValue(Integer logicTemplateId) {
-        return Result.buildSucc(ConvertUtil.obj2Obj(templateValueService.getTemplateValueByLogicTemplateId(logicTemplateId), IndexTemplateValue.class));
+        return Result.buildSucc(ConvertUtil.obj2Obj(
+            templateValueService.getTemplateValueByLogicTemplateId(logicTemplateId), IndexTemplateValue.class));
     }
 
     /**
@@ -326,7 +330,7 @@ public class TemplateStatsService {
 
         Map<String, Map<String, TypeDefine>> typeMap = mappingConfig.getTypeDefines();
 
-        for(Map.Entry<String, Map<String, TypeDefine>> entry : typeMap.entrySet()){
+        for (Map.Entry<String, Map<String, TypeDefine>> entry : typeMap.entrySet()) {
             String type = entry.getKey();
             for (String field : typeMap.get(type).keySet()) {
                 TypeDefine typeDefine = typeMap.get(type).get(field);
@@ -335,32 +339,37 @@ public class TemplateStatsService {
                 boolean docValue = false;
 
                 // sort/group
-                if(sort.containsKey(field) || group.containsKey(field)){docValue = true;}
-
-                // where
-                if(where.containsKey(field)){index = true;}
-
-                // 特殊类型不需要优化
-                if(TypeDefineOperator.isNotOptimze(typeDefine.getDefine())){continue;}
-
-                boolean optmize = false;
-                JSONObject tgtTypeJson = new JSONObject( Maps.newHashMap(typeDefine.getDefine()));
-                // 看是否能够优化关闭index
-                if (!index &&
-                    (!(FALSE_STR.equalsIgnoreCase(tgtTypeJson.getString(INDEX_STR))
-                            || NO_STR.equalsIgnoreCase(tgtTypeJson.getString(INDEX_STR))))) {
-                        tgtTypeJson.put(INDEX_STR, false);
-                        optmize = true;
+                if (sort.containsKey(field) || group.containsKey(field)) {
+                    docValue = true;
                 }
 
-                if (!docValue &&
-                    (!(FALSE_STR.equalsIgnoreCase(tgtTypeJson.getString(DOC_VALUES_STR))))) {
-                        tgtTypeJson.put(DOC_VALUES_STR, false);
-                        optmize = true;
+                // where
+                if (where.containsKey(field)) {
+                    index = true;
+                }
+
+                // 特殊类型不需要优化
+                if (TypeDefineOperator.isNotOptimze(typeDefine.getDefine())) {
+                    continue;
+                }
+
+                boolean optmize = false;
+                JSONObject tgtTypeJson = new JSONObject(Maps.newHashMap(typeDefine.getDefine()));
+                // 看是否能够优化关闭index
+                if (!index && (!(FALSE_STR.equalsIgnoreCase(tgtTypeJson.getString(INDEX_STR))
+                                 || NO_STR.equalsIgnoreCase(tgtTypeJson.getString(INDEX_STR))))) {
+                    tgtTypeJson.put(INDEX_STR, false);
+                    optmize = true;
+                }
+
+                if (!docValue && (!(FALSE_STR.equalsIgnoreCase(tgtTypeJson.getString(DOC_VALUES_STR))))) {
+                    tgtTypeJson.put(DOC_VALUES_STR, false);
+                    optmize = true;
                 }
 
                 if (optmize) {
-                    mappingOptimize.addOptimize(new MappingOptimizeItem(type, field, typeDefine.getDefine(), tgtTypeJson));
+                    mappingOptimize
+                        .addOptimize(new MappingOptimizeItem(type, field, typeDefine.getDefine(), tgtTypeJson));
                 }
             }
         }
@@ -376,7 +385,7 @@ public class TemplateStatsService {
      * @param endDate
      * @return
      */
-    
+
     public Result<IndexTemplateWithStats> getTemplateBaseStatsInfo(Long logicTemplateId, Long startDate, Long endDate) {
         if (logicTemplateId == null) {
             return Result.build(ResultType.ILLEGAL_PARAMS);
@@ -387,21 +396,21 @@ public class TemplateStatsService {
             return Result.buildFail();
         }
 
-        IndexTemplateWithStats indexTemplateLogicWithStats = (IndexTemplateWithStats)indexTemplate;
+        IndexTemplateWithStats indexTemplateLogicWithStats = (IndexTemplateWithStats) indexTemplate;
         FutureUtil.DEAULT_FUTURE.runnableTask(() -> {
             double totalSizeInBytes = ariusStatsIndexInfoESDAO.getLogicTemplateTotalSize(logicTemplateId);
             indexTemplateLogicWithStats.setStore(formatDouble(totalSizeInBytes / ONE_GB, 2));
         }).runnableTask(() -> {
             Integer templaterValueDegree = templateValueService
-                    .getTemplateValueByLogicTemplateId(logicTemplateId.intValue()).getValue();
+                .getTemplateValueByLogicTemplateId(logicTemplateId.intValue()).getValue();
             indexTemplateLogicWithStats.setIndexValueDegree(formatDouble(templaterValueDegree, 2));
         }).runnableTask(() -> {
             Double templateQpsAvgInfo = ariusStatsIndexInfoESDAO.getTemplateQpsAvgInfo(logicTemplateId, startDate,
-                    endDate);
+                endDate);
             indexTemplateLogicWithStats.setAvgQps(formatDouble(templateQpsAvgInfo, 2));
         }).runnableTask(() -> {
             Double templateTpsAvgInfo = ariusStatsIndexInfoESDAO.getTemplateTpsAvgInfo(logicTemplateId, startDate,
-                    endDate);
+                endDate);
             indexTemplateLogicWithStats.setAvgTps(formatDouble(templateTpsAvgInfo, 2));
         }).waitExecute();
 
@@ -416,13 +425,13 @@ public class TemplateStatsService {
      * @param endDate
      * @return
      */
-    
+
     public Result<List<AppQuery>> getQueryTopNumInfo(Integer projectId, Long startDate, Long endDate) {
         if (null == projectId || null == startDate || null == endDate) {
             return Result.build(ResultType.ILLEGAL_PARAMS);
         }
         List<ProjectQueryPO> queryInfoList = gatewayJoinESDAO.getQueryTopNumInfoByProjectId(projectId, startDate,
-                endDate, 10);
+            endDate, 10);
         if (CollectionUtils.isEmpty(queryInfoList)) {
             return Result.build(ResultType.NOT_EXIST);
         }
@@ -431,17 +440,18 @@ public class TemplateStatsService {
     }
 
     public Result<Map<Integer, Long>> getAccessStatsInfoByTemplateIdAndDays(int logicTemplateId, int days) {
-        List<ProjectTemplateAccessCountPO> accessCountPos = projectTemplateAccessESDAO.getAccessProjectIdsInfoByTemplateId(logicTemplateId, days);
-        if(CollectionUtils.isEmpty(accessCountPos)){
+        List<ProjectTemplateAccessCountPO> accessCountPos = projectTemplateAccessESDAO
+            .getAccessProjectIdsInfoByTemplateId(logicTemplateId, days);
+        if (CollectionUtils.isEmpty(accessCountPos)) {
             Result.build(ResultType.SUCCESS);
         }
 
         Map<Integer, Long> ret = Maps.newHashMap();
-        for(ProjectTemplateAccessCountPO accessCountPo : accessCountPos){
+        for (ProjectTemplateAccessCountPO accessCountPo : accessCountPos) {
             Integer projectId = accessCountPo.getProjectId();
-            Long    count = accessCountPo.getCount();
+            Long count = accessCountPo.getCount();
 
-            if(null != ret.get(projectId)){
+            if (null != ret.get(projectId)) {
                 count += ret.get(projectId);
             }
             ret.put(projectId, count);
@@ -469,11 +479,11 @@ public class TemplateStatsService {
             templateStatsInfoPO.setStore(formatDouble(totalSizeInBytes / ONE_GB, 2));
         }).runnableTask(() -> {
             double maxTps = ariusStatsIndexInfoESDAO.getTemplateMaxTpsByTimeRange(logicTemplateId, current - ONE_DAY,
-                    current);
+                current);
             templateStatsInfoPO.setWriteTps(formatDouble(maxTps, 2));
         }).runnableTask(() -> {
             long docNu = ariusStatsIndexInfoESDAO.getTemplateTotalDocNuByTimeRange(logicTemplateId, current - ONE_DAY,
-                    current);
+                current);
             templateStatsInfoPO.setDocNu(docNu);
         }).runnableTask(() -> {
             String indexName = indexTemplate.getName();
@@ -482,27 +492,29 @@ public class TemplateStatsService {
             templateStatsInfoPO.setTemplateName(indexName);
         }).runnableTask(() -> {
             List<TemplateAccessCountPO> templateAccessCountPos = templateAccessESDAO
-                    .getTemplateAccessLastNDayByLogicTemplateId(logicTemplateId.intValue(), 7);
+                .getTemplateAccessLastNDayByLogicTemplateId(logicTemplateId.intValue(), 7);
             if (CollectionUtils.isNotEmpty(templateAccessCountPos)) {
                 Long count = 0L;
                 for (TemplateAccessCountPO po : templateAccessCountPos) {
                     count += po.getCount();
                 }
 
-                templateStatsInfoPO.setAccessCountPreDay((double)count / templateAccessCountPos.size());
+                templateStatsInfoPO.setAccessCountPreDay((double) count / templateAccessCountPos.size());
             }
         }).waitExecute();
 
         return Result.buildSucc(ConvertUtil.obj2Obj(templateStatsInfoPO, TemplateStatsInfo.class));
     }
 
-    public Result<List<ProjectTemplateAccessCount>> getAccessAppInfos(int logicTemplateId, Long startDate, Long endDate) {
+    public Result<List<ProjectTemplateAccessCount>> getAccessAppInfos(int logicTemplateId, Long startDate,
+                                                                      Long endDate) {
         return Result.buildSucc(ConvertUtil.list2List(
-                projectTemplateAccessESDAO.getAccessProjectIdsInfoByTemplateId(logicTemplateId, startDate, endDate),
-                ProjectTemplateAccessCount.class));
+            projectTemplateAccessESDAO.getAccessProjectIdsInfoByTemplateId(logicTemplateId, startDate, endDate),
+            ProjectTemplateAccessCount.class));
     }
 
     public Result<List<ESIndexStats>> getIndexStatis(Long logicTemplateId, Long startDate, Long endDate) {
-        return Result.buildSucc(ariusStatsIndexInfoESDAO.getTemplateRealStatis(logicTemplateId, startDate - 1 * 60 * 1000L, endDate));
+        return Result.buildSucc(
+            ariusStatsIndexInfoESDAO.getTemplateRealStatis(logicTemplateId, startDate - 1 * 60 * 1000L, endDate));
     }
 }

@@ -27,7 +27,7 @@ public abstract class BaseDashboardCollector {
     protected ClusterLogicService          clusterLogicService;
 
     @Autowired
-    protected IndexTemplateService indexTemplateService;
+    protected IndexTemplateService         indexTemplateService;
 
     @Autowired
     protected ESClusterService             esClusterService;
@@ -64,7 +64,7 @@ public abstract class BaseDashboardCollector {
      */
     public abstract String getName();
 
-    protected DashBoardStats buildInitDashBoardStats(Long timestamp){
+    protected DashBoardStats buildInitDashBoardStats(Long timestamp) {
         DashBoardStats dashBoardStats = new DashBoardStats();
         dashBoardStats.setPhysicCluster(PHY_CLUSTER);
         dashBoardStats.setTimestamp(timestamp);

@@ -29,10 +29,10 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion
  * @date 2022/05/25
  */
 @RestController
-@RequestMapping({  V3 + "/cluster/logic" })
+@RequestMapping({ V3 + "/cluster/logic" })
 @Api(tags = "ES我的集群接口(REST)")
 public class ESLogicClusterOpV3Controller {
-    
+
     @Autowired
     private ClusterLogicManager clusterLogicManager;
 
@@ -47,9 +47,10 @@ public class ESLogicClusterOpV3Controller {
     @ResponseBody
     @ApiOperation(value = "根据项目获取逻辑集群下的物理集群名称")
     public Result<List<String>> listClusterLogicNameByProjectId(HttpServletRequest request) {
-        return Result.buildSucc(clusterLogicManager.listClusterLogicNameByProjectId(HttpRequestUtil.getProjectId(request)));
+        return Result
+            .buildSucc(clusterLogicManager.listClusterLogicNameByProjectId(HttpRequestUtil.getProjectId(request)));
     }
-    
+
     @GetMapping()
     @ResponseBody
     @ApiOperation(value = "根据projectId获取有权限的逻辑集群信息")
@@ -61,7 +62,7 @@ public class ESLogicClusterOpV3Controller {
     @ResponseBody
     @ApiOperation(value = "根据项目和集群类型获取逻辑集群(项目对其有管理权限)列表")
     public Result<List<ClusterLogicVO>> getAppLogicClusterInfoByType(HttpServletRequest request,
-                                                                       @PathVariable Integer type) {
+                                                                     @PathVariable Integer type) {
         return clusterLogicManager.getProjectLogicClusterInfoByType(HttpRequestUtil.getProjectId(request), type);
     }
 
@@ -69,69 +70,71 @@ public class ESLogicClusterOpV3Controller {
     @ResponseBody
     @ApiOperation(value = "条件获取逻辑集群列表")
     public PaginationResult<ClusterLogicVO> pageGetClusterLogics(HttpServletRequest request,
-                                                                     @RequestBody ClusterLogicConditionDTO condition) throws NotFindSubclassException {
+                                                                 @RequestBody ClusterLogicConditionDTO condition) throws NotFindSubclassException {
         return clusterLogicManager.pageGetClusterLogics(condition, HttpRequestUtil.getProjectId(request));
     }
-    
+
     @GetMapping("/detail/{clusterLogicId}")
     @ResponseBody
     @ApiOperation(value = "获取逻辑集群概览信息接口")
     @ApiImplicitParam(type = "Long", name = "clusterLogicId", value = "逻辑集群ID", required = true)
     public Result<ClusterLogicVO> detail(HttpServletRequest request, @PathVariable Long clusterLogicId) {
-        return Result.buildSucc(
-                clusterLogicManager.getClusterLogic(clusterLogicId, HttpRequestUtil.getProjectId(request)));
+        return Result
+            .buildSucc(clusterLogicManager.getClusterLogic(clusterLogicId, HttpRequestUtil.getProjectId(request)));
     }
-    
+
     @GetMapping("/{clusterLogicId}/check-region-not-empty")
     @ResponseBody
     @ApiOperation(value = "检查逻辑集群所拥有的region是否不为空")
     public Result<Boolean> checkLogicClusterRegionIsNotEmpty(@PathVariable("clusterLogicId") Long clusterLogicId) {
         return clusterLogicManager.isLogicClusterRegionIsNotEmpty(clusterLogicId);
     }
-    
+
     @PutMapping()
     @ResponseBody
     @ApiOperation(value = "编辑逻辑集群接口")
     public Result<Void> modifyLogicCluster(HttpServletRequest request, @RequestBody ESLogicClusterDTO param) {
         return clusterLogicManager.editLogicCluster(param, HttpRequestUtil.getOperator(request),
-                HttpRequestUtil.getProjectId(request));
+            HttpRequestUtil.getProjectId(request));
     }
-    
+
     @DeleteMapping("{clusterLogicId}")
     @ResponseBody
     @ApiOperation(value = "下线集群")
-    
-    public Result<Void> delete(HttpServletRequest request, @PathVariable Long clusterLogicId) throws AdminOperateException {
+
+    public Result<Void> delete(HttpServletRequest request,
+                               @PathVariable Long clusterLogicId) throws AdminOperateException {
         return clusterLogicManager.deleteLogicCluster(clusterLogicId, HttpRequestUtil.getOperator(request),
-                HttpRequestUtil.getProjectId(request));
+            HttpRequestUtil.getProjectId(request));
     }
-    
+
     @GetMapping("/index-template-count/{clusterLogicId}")
     @ResponseBody
     @ApiOperation(value = "提示用户索引和模板的数量")
-    public Result<ClusterLogicTemplateIndexCountVO> indexTemplateCount(HttpServletRequest request, @PathVariable Long clusterLogicId) {
+    public Result<ClusterLogicTemplateIndexCountVO> indexTemplateCount(HttpServletRequest request,
+                                                                       @PathVariable Long clusterLogicId) {
         return clusterLogicManager.indexTemplateCount(clusterLogicId, HttpRequestUtil.getOperator(request),
-                HttpRequestUtil.getProjectId(request));
+            HttpRequestUtil.getProjectId(request));
     }
 
     @GetMapping("/estimated-disk-size/{clusterLogicId}/{count}")
     @ResponseBody
     @ApiOperation(value = "获取预估磁盘大小")
-    public Result<Long>  estimatedDiskSize(@PathVariable Long clusterLogicId,@PathVariable Integer count) {
-        return clusterLogicManager.estimatedDiskSize(clusterLogicId,count);
+    public Result<Long> estimatedDiskSize(@PathVariable Long clusterLogicId, @PathVariable Integer count) {
+        return clusterLogicManager.estimatedDiskSize(clusterLogicId, count);
     }
 
     //超级应展示全部物理集群、普通应用展示普通应用有权限的逻辑集群
     @GetMapping("/cluster-phy-relation")
     @ResponseBody
     @ApiOperation(value = "根据项目id获取逻辑集群与物理集群映射")
-    public Result<List<Tuple<String, ClusterPhyVO>>>  getClusterRelationByProjectId(HttpServletRequest request) {
+    public Result<List<Tuple<String, ClusterPhyVO>>> getClusterRelationByProjectId(HttpServletRequest request) {
         return clusterLogicManager.getClusterRelationByProjectId(HttpRequestUtil.getProjectId(request));
     }
 
     @GetMapping("/plugins")
     @ResponseBody
-    @ApiOperation(value = "获取逻辑集群插件列表(用户侧获取)" )
+    @ApiOperation(value = "获取逻辑集群插件列表(用户侧获取)")
     public Result<List<PluginVO>> pluginList(Long clusterId) {
         return clusterLogicManager.getClusterLogicPlugins(clusterId);
     }

@@ -34,78 +34,80 @@ import org.springframework.stereotype.Service;
 @Service
 public class LogicClusterDeleteHandler extends BaseWorkOrderHandler {
 
-    protected static final ILog        LOGGER = LogFactory.getLog(LogicClusterDeleteHandler.class);
+    protected static final ILog            LOGGER = LogFactory.getLog(LogicClusterDeleteHandler.class);
 
     @Autowired
-    private ClusterLogicService        clusterLogicService;
+    private ClusterLogicService            clusterLogicService;
 
     @Autowired
-    private ClusterLogicManager        clusterLogicManager;
+    private ClusterLogicManager            clusterLogicManager;
 
     @Autowired
-    private ClusterContextManager      clusterContextManager;
+    private ClusterContextManager          clusterContextManager;
 
     @Autowired
     private ProjectClusterLogicAuthService projectClusterLogicAuthService;
 
-	@Override
-	protected Result<Void> validateConsoleParam(WorkOrder workOrder) {
-		LogicClusterDeleteContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
-				LogicClusterDeleteContent.class);
+    @Override
+    protected Result<Void> validateConsoleParam(WorkOrder workOrder) {
+        LogicClusterDeleteContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
+            LogicClusterDeleteContent.class);
 
-		if (Boolean.FALSE.equals(clusterLogicService.isClusterLogicExists(content.getId()))) {
-			return Result.buildFail(String.format("逻辑集群[%s]不存在", content.getName()));
-		}
+        if (Boolean.FALSE.equals(clusterLogicService.isClusterLogicExists(content.getId()))) {
+            return Result.buildFail(String.format("逻辑集群[%s]不存在", content.getName()));
+        }
 
-		if (Boolean.TRUE.equals(clusterLogicService.hasLogicClusterWithTemplates(content.getId()))) {
-			return Result.buildFail(String.format("逻辑集群[%s]存在模板", content.getName()));
-		}
+        if (Boolean.TRUE.equals(clusterLogicService.hasLogicClusterWithTemplates(content.getId()))) {
+            return Result.buildFail(String.format("逻辑集群[%s]存在模板", content.getName()));
+        }
 
-		ClusterLogicContext clusterLogicContext = clusterContextManager.getClusterLogicContext(content.getId());
-		if (CollectionUtils.isNotEmpty(clusterLogicContext.getAssociatedClusterPhyNames())) {
-			return Result.buildFail(String.format("逻辑集群[%s]和物理集群[%s]关联", content.getName(),
-					ListUtils.strList2String(clusterLogicContext.getAssociatedClusterPhyNames())));
-		}
+        ClusterLogicContext clusterLogicContext = clusterContextManager.getClusterLogicContext(content.getId());
+        if (CollectionUtils.isNotEmpty(clusterLogicContext.getAssociatedClusterPhyNames())) {
+            return Result.buildFail(String.format("逻辑集群[%s]和物理集群[%s]关联", content.getName(),
+                ListUtils.strList2String(clusterLogicContext.getAssociatedClusterPhyNames())));
+        }
 
-		ESLogicClusterDTO resourceLogicDTO = ConvertUtil.obj2Obj(content, ESLogicClusterDTO.class);
-		resourceLogicDTO.setProjectId(workOrder.getSubmitorProjectId());
-		resourceLogicDTO.setDataCenter(EnvUtil.getDC().getCode());
-		return clusterLogicService.validateClusterLogicParams(resourceLogicDTO, OperationEnum.CHECK, resourceLogicDTO.getProjectId());
-	}
+        ESLogicClusterDTO resourceLogicDTO = ConvertUtil.obj2Obj(content, ESLogicClusterDTO.class);
+        resourceLogicDTO.setProjectId(workOrder.getSubmitorProjectId());
+        resourceLogicDTO.setDataCenter(EnvUtil.getDC().getCode());
+        return clusterLogicService.validateClusterLogicParams(resourceLogicDTO, OperationEnum.CHECK,
+            resourceLogicDTO.getProjectId());
+    }
 
-	@Override
-	protected String getTitle(WorkOrder workOrder) {
-		LogicClusterDeleteContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
-				LogicClusterDeleteContent.class);
+    @Override
+    protected String getTitle(WorkOrder workOrder) {
+        LogicClusterDeleteContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
+            LogicClusterDeleteContent.class);
 
-		WorkOrderTypeEnum workOrderTypeEnum = WorkOrderTypeEnum.valueOfName(workOrder.getType());
-		if (workOrderTypeEnum == null) {
-			return "";
-		}
-		return content.getName() + workOrderTypeEnum.getMessage();
-	}
+        WorkOrderTypeEnum workOrderTypeEnum = WorkOrderTypeEnum.valueOfName(workOrder.getType());
+        if (workOrderTypeEnum == null) {
+            return "";
+        }
+        return content.getName() + workOrderTypeEnum.getMessage();
+    }
 
-	@Override
-	protected Result<Void> validateConsoleAuth(WorkOrder workOrder) {
-		if (!isOP(workOrder.getSubmitor())) {
-			return Result.buildOpForBidden("非运维人员不能操作集群扩缩容！");
-		}
+    @Override
+    protected Result<Void> validateConsoleAuth(WorkOrder workOrder) {
+        if (!isOP(workOrder.getSubmitor())) {
+            return Result.buildOpForBidden("非运维人员不能操作集群扩缩容！");
+        }
 
-		return Result.buildSucc();
-	}
-
-	@Override
-	protected Result<Void> validateParam(WorkOrder workOrder)  {
         return Result.buildSucc();
-	}
+    }
+
+    @Override
+    protected Result<Void> validateParam(WorkOrder workOrder) {
+        return Result.buildSucc();
+    }
 
     @Override
     protected Result<Void> doProcessAgree(WorkOrder workOrder, String approver) {
         LogicClusterDeleteContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
             LogicClusterDeleteContent.class);
         try {
-            Result<Void> deleteLogicClusterResult = clusterLogicManager.deleteLogicCluster(content.getId(), workOrder.getSubmitor(), workOrder.getSubmitorProjectId());
-            if (deleteLogicClusterResult.success()){
+            Result<Void> deleteLogicClusterResult = clusterLogicManager.deleteLogicCluster(content.getId(),
+                workOrder.getSubmitor(), workOrder.getSubmitorProjectId());
+            if (deleteLogicClusterResult.success()) {
                 projectClusterLogicAuthService.deleteLogicClusterAuthByLogicClusterId(content.getId());
             }
         } catch (AdminOperateException e) {
@@ -115,26 +117,26 @@ public class LogicClusterDeleteHandler extends BaseWorkOrderHandler {
         return Result.buildSucc();
     }
 
-	@Override
-	public boolean canAutoReview(WorkOrder workOrder) {
-		return false;
-	}
+    @Override
+    public boolean canAutoReview(WorkOrder workOrder) {
+        return false;
+    }
 
-	@Override
-	public AbstractOrderDetail getOrderDetail(String extensions) {
-		return ConvertUtil.obj2Obj(extensions, LogicClusterDeleteOrderDetail.class);
-	}
+    @Override
+    public AbstractOrderDetail getOrderDetail(String extensions) {
+        return ConvertUtil.obj2Obj(extensions, LogicClusterDeleteOrderDetail.class);
+    }
 
-	@Override
-	public List<UserBriefVO> getApproverList(AbstractOrderDetail detail) {
-		return getOPList();
-	}
+    @Override
+    public List<UserBriefVO> getApproverList(AbstractOrderDetail detail) {
+        return getOPList();
+    }
 
-	@Override
-	public Result<Void> checkAuthority(WorkOrderPO orderPO, String userName) {
-		if (isOP(userName)) {
-			return Result.buildSucc();
-		}
-		return Result.buildFail(ResultType.OPERATE_FORBIDDEN_ERROR.getMessage());
-	}
+    @Override
+    public Result<Void> checkAuthority(WorkOrderPO orderPO, String userName) {
+        if (isOP(userName)) {
+            return Result.buildSucc();
+        }
+        return Result.buildFail(ResultType.OPERATE_FORBIDDEN_ERROR.getMessage());
+    }
 }

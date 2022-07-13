@@ -1,6 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,14 +13,14 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ShardInfo {
 
-    private String state;
+    private String  state;
 
     private Boolean primary;
 
-    private String node;
+    private String  node;
 
     private Integer shard;
 
-    private String index;
+    private String  index;
 
 }

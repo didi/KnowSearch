@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
 public class PermissionExtendManagerImpl implements PermissionExtendManager {
     @Autowired
     private PermissionService permissionService;
-   
+
     /**
      * 建立资源owner角色权限树
      *
@@ -26,9 +26,9 @@ public class PermissionExtendManagerImpl implements PermissionExtendManager {
      */
     @Override
     public Result<PermissionTreeVO> buildPermissionTreeByResourceOwn() {
-        final PermissionTreeVO permissionTreeVO = permissionService.buildPermissionTreeByRoleId(AuthConstant.RESOURCE_OWN_ROLE_ID);
+        final PermissionTreeVO permissionTreeVO = permissionService
+            .buildPermissionTreeByRoleId(AuthConstant.RESOURCE_OWN_ROLE_ID);
         return Result.buildSucc(permissionTreeVO);
     }
-    
- 
+
 }

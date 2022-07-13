@@ -30,8 +30,9 @@ public class LoginV3Controller {
 
     @PostMapping("/login")
     @ApiOperation(value = "登录检查", notes = "检查SSO返回的Code")
-    public Result<UserBriefVO> login(HttpServletRequest request, HttpServletResponse response, @RequestBody AccountLoginDTO loginDTO) {
-       
+    public Result<UserBriefVO> login(HttpServletRequest request, HttpServletResponse response,
+                                     @RequestBody AccountLoginDTO loginDTO) {
+
         return loginManager.verifyLogin(loginDTO, request, response);
     }
 

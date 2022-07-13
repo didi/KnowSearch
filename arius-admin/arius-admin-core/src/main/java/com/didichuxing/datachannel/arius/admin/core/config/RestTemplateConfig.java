@@ -101,8 +101,10 @@ public class RestTemplateConfig {
         }
 
         private void traceRequest(HttpRequest request, String subFlag, byte[] body) throws IOException {
-            REQ_LOGGER.info("class=LogHttpRequestInterceptor||method=traceRequest||remoteRequest||url={}||method={}||headers={}||body={}||subFlag={}",
-                    request.getURI(), request.getMethod(), JSON.toJSONString(request.getHeaders()), new String(body, StandardCharsets.UTF_8), subFlag);
+            REQ_LOGGER.info(
+                "class=LogHttpRequestInterceptor||method=traceRequest||remoteRequest||url={}||method={}||headers={}||body={}||subFlag={}",
+                request.getURI(), request.getMethod(), JSON.toJSONString(request.getHeaders()),
+                new String(body, StandardCharsets.UTF_8), subFlag);
         }
 
         private void traceResponse(HttpRequest request, ClientHttpResponse response, IOException exception,
@@ -112,7 +114,7 @@ public class RestTemplateConfig {
             if (response == null) {
                 RESP_LOGGER.warn(
                     "class=LogHttpRequestInterceptor||method=traceResponse||remoteResponse||code=-1||url={}||text={}||headers={}||body={}||timeCost={}||subFlag={}",
-                        url, null, null, null, (System.nanoTime() - nanoTime) / 1000 / 1000, subFlag);
+                    url, null, null, null, (System.nanoTime() - nanoTime) / 1000 / 1000, subFlag);
                 return;
             }
 

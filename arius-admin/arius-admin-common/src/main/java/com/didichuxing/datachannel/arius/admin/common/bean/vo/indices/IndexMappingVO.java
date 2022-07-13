@@ -22,11 +22,11 @@ import lombok.NoArgsConstructor;
 public class IndexMappingVO extends BaseVO {
 
     @ApiModelProperty("索引名称")
-    private String            indexName;
+    private String      indexName;
 
     @ApiModelProperty("索引mapping列表信息")
-    private List<Field>       fields;
+    private List<Field> fields;
 
     @ApiModelProperty("索引mapping信息")
-    private String mappings;
+    private String      mappings;
 }

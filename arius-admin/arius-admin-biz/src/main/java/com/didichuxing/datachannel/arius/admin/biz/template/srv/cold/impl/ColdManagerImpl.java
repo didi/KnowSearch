@@ -42,13 +42,12 @@ public class ColdManagerImpl extends BaseTemplateSrvImpl implements ColdManager 
     private ESIndexService       esIndexService;
 
     @Autowired
-    private ClusterRegionService   clusterRegionService;
+    private ClusterRegionService clusterRegionService;
 
-    
-    public static final int MAX_HOT_DAY = 2;
-    public static final int MIN_HOT_DAY = -2;
-    
-    private final static Integer RETRY_TIME = 3;
+    public static final int      MAX_HOT_DAY = 2;
+    public static final int      MIN_HOT_DAY = -2;
+
+    private final static Integer RETRY_TIME  = 3;
 
     @Override
     public TemplateServiceEnum templateSrv() {
@@ -61,7 +60,8 @@ public class ColdManagerImpl extends BaseTemplateSrvImpl implements ColdManager 
             return Result.buildFail("没有开启冷热分离模板服务");
         }
 
-        IndexTemplateWithPhyTemplates logicTemplateWithPhysicals = indexTemplateService.getLogicTemplateWithPhysicalsById(logicTemplateId);
+        IndexTemplateWithPhyTemplates logicTemplateWithPhysicals = indexTemplateService
+            .getLogicTemplateWithPhysicalsById(logicTemplateId);
         if (null == logicTemplateWithPhysicals) {
             return Result.buildFail("模板不存在");
         }
@@ -71,7 +71,8 @@ public class ColdManagerImpl extends BaseTemplateSrvImpl implements ColdManager 
             return Result.buildFail("主模板不存在");
         }
 
-        List<ClusterRegion> coldRegionList = clusterRegionService.listColdRegionByCluster(masterPhyTemplate.getCluster());
+        List<ClusterRegion> coldRegionList = clusterRegionService
+            .listColdRegionByCluster(masterPhyTemplate.getCluster());
         if (CollectionUtils.isEmpty(coldRegionList)) {
             LOGGER.warn("class=ColdManagerImpl||method=move2ColdNode||logicTemplate={}||no cold rack", logicTemplateId);
             return Result.buildFail("没有冷节点");
@@ -81,11 +82,13 @@ public class ColdManagerImpl extends BaseTemplateSrvImpl implements ColdManager 
         try {
             Result<Void> moveResult = movePerTemplate(masterPhyTemplate, minUsageColdRegion.getId().intValue());
             if (moveResult.failed()) {
-                LOGGER.warn("class=ColdManagerImpl||method=move2ColdNode||template={}||msg=move2ColdNode fail", masterPhyTemplate.getName());
+                LOGGER.warn("class=ColdManagerImpl||method=move2ColdNode||template={}||msg=move2ColdNode fail",
+                    masterPhyTemplate.getName());
                 return moveResult;
             }
         } catch (Exception e) {
-            LOGGER.warn("class=ColdManagerImpl||method=move2ColdNode||template={}||errMsg={}", masterPhyTemplate.getName(), e.getMessage(), e);
+            LOGGER.warn("class=ColdManagerImpl||method=move2ColdNode||template={}||errMsg={}",
+                masterPhyTemplate.getName(), e.getMessage(), e);
             return Result.buildFail();
         }
 
@@ -94,7 +97,7 @@ public class ColdManagerImpl extends BaseTemplateSrvImpl implements ColdManager 
 
     @Override
     public int fetchClusterDefaultHotDay(String phyCluster) {
-               int hotDay = -1;
+        int hotDay = -1;
         Set<String> enableClusterSet = ariusConfigInfoService.stringSettingSplit2Set(ARIUS_COMMON_GROUP,
             "platform.govern.cold.data.move2ColdNode.enable.clusters", "", ",");
         if (enableClusterSet.contains(phyCluster)) {
@@ -104,21 +107,22 @@ public class ColdManagerImpl extends BaseTemplateSrvImpl implements ColdManager 
             }
         }
 
-        LOGGER.info("class=TemplateColdManagerImpl||method=fetchClusterDefaultHotDay||msg=no changed||cluster={}||enableClusters={}||version={}",
+        LOGGER.info(
+            "class=TemplateColdManagerImpl||method=fetchClusterDefaultHotDay||msg=no changed||cluster={}||enableClusters={}||version={}",
             phyCluster, JSON.toJSONString(enableClusterSet), hotDay);
 
         return hotDay;
     }
 
     ////////////////////////////private method/////////////////////////////////////
-        /**
-     * 获取配置默认hotDay值
-     *
-     * @return
-     */
+    /**
+    * 获取配置默认hotDay值
+    *
+    * @return
+    */
     private int getDefaultHotDay() {
         String defaultDay = ariusConfigInfoService.stringSetting(ARIUS_TEMPLATE_COLD_GROUP,
-                INDEX_TEMPLATE_COLD_DAY_DEFAULT, "");
+            INDEX_TEMPLATE_COLD_DAY_DEFAULT, "");
         LOGGER.info("class=TemplateColdManagerImpl||method=getDefaultHotDay||msg=defaultDay: {}", defaultDay);
         if (StringUtils.isNotBlank(defaultDay)) {
             try {
@@ -138,18 +142,21 @@ public class ColdManagerImpl extends BaseTemplateSrvImpl implements ColdManager 
      * @return
      * @throws ESOperateException
      */
-    private Result<Void> movePerTemplate(IndexTemplatePhy templatePhysical, Integer coldRegionId) throws ESOperateException {
+    private Result<Void> movePerTemplate(IndexTemplatePhy templatePhysical,
+                                         Integer coldRegionId) throws ESOperateException {
         Tuple<Set<String>, Set<String>> coldAndHotIndices = getColdAndHotIndex(templatePhysical.getId());
         Set<String> coldIndex = coldAndHotIndices.getV1();
         Set<String> hotIndices = coldAndHotIndices.getV2();
 
         Boolean moveSuccFlag = Boolean.TRUE;
         if (!CollectionUtils.isEmpty(coldIndex)) {
-            moveSuccFlag= esIndexService.syncBatchUpdateRegion(templatePhysical.getCluster(), Lists.newArrayList(coldIndex), coldRegionId, RETRY_TIME);
+            moveSuccFlag = esIndexService.syncBatchUpdateRegion(templatePhysical.getCluster(),
+                Lists.newArrayList(coldIndex), coldRegionId, RETRY_TIME);
         }
 
         if (!moveSuccFlag && !CollectionUtils.isEmpty(hotIndices)) {
-            moveSuccFlag = esIndexService.syncBatchUpdateRegion(templatePhysical.getCluster(), Lists.newArrayList(hotIndices), templatePhysical.getRegionId(), RETRY_TIME);
+            moveSuccFlag = esIndexService.syncBatchUpdateRegion(templatePhysical.getCluster(),
+                Lists.newArrayList(hotIndices), templatePhysical.getRegionId(), RETRY_TIME);
         }
 
         return Result.build(moveSuccFlag);
@@ -161,7 +168,8 @@ public class ColdManagerImpl extends BaseTemplateSrvImpl implements ColdManager 
      * @return
      */
     private Tuple</*冷节点索引列表*/Set<String>, /*热节点索引列表*/Set<String>> getColdAndHotIndex(Long physicalId) {
-        IndexTemplatePhyWithLogic templatePhysicalWithLogic = indexTemplatePhyService.getTemplateWithLogicById(physicalId);
+        IndexTemplatePhyWithLogic templatePhysicalWithLogic = indexTemplatePhyService
+            .getTemplateWithLogicById(physicalId);
         if (templatePhysicalWithLogic == null) {
             return new Tuple<>();
         }
@@ -169,12 +177,14 @@ public class ColdManagerImpl extends BaseTemplateSrvImpl implements ColdManager 
         int hotTime = templatePhysicalWithLogic.getLogicTemplate().getHotTime();
 
         if (hotTime <= 0) {
-            LOGGER.info("class=ColdManagerImpl||method=getColdAndHotIndex||template={}||msg=hotTime illegal", templatePhysicalWithLogic.getName());
+            LOGGER.info("class=ColdManagerImpl||method=getColdAndHotIndex||template={}||msg=hotTime illegal",
+                templatePhysicalWithLogic.getName());
             return new Tuple<>();
         }
 
         if (hotTime >= templatePhysicalWithLogic.getLogicTemplate().getExpireTime()) {
-            LOGGER.info("class=ColdManagerImpl||method=getColdAndHotIndex||||template={}||msg=all index is hot", templatePhysicalWithLogic.getName());
+            LOGGER.info("class=ColdManagerImpl||method=getColdAndHotIndex||||template={}||msg=all index is hot",
+                templatePhysicalWithLogic.getName());
             return new Tuple<>();
         }
 
@@ -208,10 +218,8 @@ public class ColdManagerImpl extends BaseTemplateSrvImpl implements ColdManager 
 
         return minUsageColdRegion;
     }
-    
-    /////////////////srv
-   
 
+    /////////////////srv
 
     /**
      * 根据接入集群可以连接的地址校验是否可以开启冷热分离服务
@@ -222,7 +230,6 @@ public class ColdManagerImpl extends BaseTemplateSrvImpl implements ColdManager 
     public Result<Boolean> checkOpenTemplateSrvWhenClusterJoin(String httpAddresses, String password) {
         return Result.buildSucc();
     }
-
 
     /**
      * 确保搬迁配置是打开的
@@ -254,33 +261,21 @@ public class ColdManagerImpl extends BaseTemplateSrvImpl implements ColdManager 
             return Result.buildParamIllegal("冷热分离的时间参数非法, 介于[1, 3]");
         }
 
-        int count = indexTemplateService.batchChangeHotDay(days,templateIdList);
+        int count = indexTemplateService.batchChangeHotDay(days, templateIdList);
 
-
-
-        LOGGER.info("class=TemplateColdManagerImpl||method=batchChangeHotDay||days={}||count={}||operator={}", days, count, operator);
+        LOGGER.info("class=TemplateColdManagerImpl||method=batchChangeHotDay||days={}||count={}||operator={}", days,
+            count, operator);
         for (Integer id : templateIdList) {
             operateRecordService.save(
-                    new OperateRecord.Builder().userOperation(operator).operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE)
-                            .bizId(id)
-                            .project(projectService.getProjectBriefByProjectId(projectId))
+                new OperateRecord.Builder().userOperation(operator).operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE)
+                    .bizId(id).project(projectService.getProjectBriefByProjectId(projectId))
 
-                            .content("deltaHotDays:" + days + ";editCount:" + count).build());
+                    .content("deltaHotDays:" + days + ";editCount:" + count).build());
         }
-
-
 
         return Result.buildSucc(count);
     }
 
-
     /**************************************************** private method ****************************************************/
-  
-
- 
-
- 
-
-
 
 }

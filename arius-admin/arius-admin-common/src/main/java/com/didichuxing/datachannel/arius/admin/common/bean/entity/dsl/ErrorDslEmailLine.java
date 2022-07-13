@@ -27,7 +27,7 @@ public class ErrorDslEmailLine {
     /**
      * 次数
      */
-    private Long count;
+    private Long   count;
     /**
      * 索引名称
      */

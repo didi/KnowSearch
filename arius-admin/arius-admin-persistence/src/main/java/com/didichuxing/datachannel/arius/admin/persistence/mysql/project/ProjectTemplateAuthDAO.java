@@ -24,7 +24,7 @@ public interface ProjectTemplateAuthDAO {
 
     int batchDeleteByTemplateIds(List<Integer> templateIds);
 
-    List<ProjectTemplateAuthPO> listWithRwAuthsByProjectId(@Param("projectId")int projectId);
+    List<ProjectTemplateAuthPO> listWithRwAuthsByProjectId(@Param("projectId") int projectId);
 
     List<ProjectTemplateAuthPO> getByTemplateId(Integer templateId);
 
@@ -42,6 +42,6 @@ public interface ProjectTemplateAuthDAO {
     List<ProjectTemplateAuthPO> listWithRwAuths();
 
     List<ProjectTemplateAuthPO> listWithOwnerAuths();
-    
+
     Integer getProjectIdById(Long authId);
 }

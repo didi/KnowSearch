@@ -24,7 +24,6 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class DslTemplatePageSearchHandle extends AbstractPageSearchHandle<DslTemplateConditionDTO, DslTemplateVO> {
-  
 
     @Autowired
     private DslTemplateService dslTemplateService;
@@ -50,7 +49,7 @@ public class DslTemplatePageSearchHandle extends AbstractPageSearchHandle<DslTem
 
         Tuple<Long, List<DslTemplatePO>> tuple = dslTemplateService.getDslTemplatePage(projectId, condition);
         if (tuple == null) {
-            return PaginationResult.buildSucc( new ArrayList<>(), 0L, condition.getPage(), condition.getSize());
+            return PaginationResult.buildSucc(new ArrayList<>(), 0L, condition.getPage(), condition.getSize());
         }
         List<DslTemplateVO> dslTemplateVOList = ConvertUtil.list2List(tuple.v2(), DslTemplateVO.class);
         return PaginationResult.buildSucc(dslTemplateVOList, tuple.v1(), condition.getPage(), condition.getSize());

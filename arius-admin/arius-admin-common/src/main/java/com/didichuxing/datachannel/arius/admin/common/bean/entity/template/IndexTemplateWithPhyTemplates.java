@@ -78,8 +78,8 @@ public class IndexTemplateWithPhyTemplates extends IndexTemplate {
         List<IndexTemplatePhy> templatePhysicals = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(physicals)) {
             for (IndexTemplatePhy physical : physicals) {
-                if (TemplateDeployRoleEnum.SLAVE.getCode().equals(physical.getRole()) &&
-                        physical.getGroupId().equals(groupId)) {
+                if (TemplateDeployRoleEnum.SLAVE.getCode().equals(physical.getRole())
+                    && physical.getGroupId().equals(groupId)) {
                     templatePhysicals.add(physical);
                 }
             }

@@ -36,15 +36,13 @@ import org.springframework.stereotype.Service;
 @Deprecated
 public class ClusterOpOfflineHandler extends BaseWorkOrderHandler {
 
-   
-
     @Autowired
     private ClusterPhyService esClusterPhyService;
 
     @Autowired
-    private OpTaskManager opTaskManager;
+    private OpTaskManager     opTaskManager;
     @Autowired
-    private RoleTool roleTool;
+    private RoleTool          roleTool;
 
     /**
      * 工单是否自动审批
@@ -99,7 +97,8 @@ public class ClusterOpOfflineHandler extends BaseWorkOrderHandler {
             return Result.buildParamIllegal("物理集群不存在");
         }
 
-        if (opTaskManager.existUnClosedTask(content.getPhyClusterId().intValue(), OpTaskTypeEnum.CLUSTER_OFFLINE.getType())) {
+        if (opTaskManager.existUnClosedTask(content.getPhyClusterId().intValue(),
+            OpTaskTypeEnum.CLUSTER_OFFLINE.getType())) {
             return Result.buildParamIllegal("该集群上存在未完成的任务");
         }
 

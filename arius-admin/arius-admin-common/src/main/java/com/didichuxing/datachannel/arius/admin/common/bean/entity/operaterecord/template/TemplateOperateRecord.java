@@ -12,22 +12,22 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class TemplateOperateRecord {
-    
+
     /**
      * 模板操作类型，如mapping, setting, etc
      */
-    protected Integer    operateType;
+    protected Integer        operateType;
     /**
      * 旧的schema 设置
      */
-    protected   JSONObject source;
-    
+    protected JSONObject     source;
+
     /**
      * 新的schema 设置
      */
-    protected JSONObject target;
-    protected   List<DiffJson> diffResult = Lists.newArrayList();
-    
-    protected Boolean change;
-    
+    protected JSONObject     target;
+    protected List<DiffJson> diffResult = Lists.newArrayList();
+
+    protected Boolean        change;
+
 }

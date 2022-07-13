@@ -12,8 +12,6 @@ public class TemplateValueService {
     @Autowired
     private TemplateValueESDAO templateValueESDAO;
 
-
-
     /**
      * 获取模板的健康分
      *
@@ -28,5 +26,4 @@ public class TemplateValueService {
         return templateValueESDAO.listAll();
     }
 
-   
 }

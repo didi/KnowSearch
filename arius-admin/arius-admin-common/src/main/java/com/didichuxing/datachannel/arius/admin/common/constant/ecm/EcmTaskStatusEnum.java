@@ -14,22 +14,22 @@ import java.util.Set;
  * @date 2020/10/10
  */
 public enum EcmTaskStatusEnum {
-    /**success*/
-    SUCCESS("success"),
+                               /**success*/
+                               SUCCESS("success"),
 
-    FAILED("failed"),
+                               FAILED("failed"),
 
-    RUNNING("running"),
+                               RUNNING("running"),
 
-    WAITING("waiting"),
+                               WAITING("waiting"),
 
-    PAUSE("pause"),
+                               PAUSE("pause"),
 
-    IGNORE("ignore"),
+                               IGNORE("ignore"),
 
-    CANCEL("cancel"),
+                               CANCEL("cancel"),
 
-    UNKNOWN("unknown");
+                               UNKNOWN("unknown");
 
     private String value;
 
@@ -59,7 +59,7 @@ public enum EcmTaskStatusEnum {
      * @return
      */
     public static EcmTaskStatusEnum calTaskStatus(Set<EcmTaskStatusEnum> subStatusSet) {
-        if (subStatusSet == null ) {
+        if (subStatusSet == null) {
             return EcmTaskStatusEnum.UNKNOWN;
         }
 
@@ -67,14 +67,14 @@ public enum EcmTaskStatusEnum {
             return EcmTaskStatusEnum.SUCCESS;
         }
 
-        if (subStatusSet.contains( EcmTaskStatusEnum.WAITING) && subStatusSet.size() == 1) {
+        if (subStatusSet.contains(EcmTaskStatusEnum.WAITING) && subStatusSet.size() == 1) {
             return EcmTaskStatusEnum.PAUSE;
         }
-        if (subStatusSet.contains( EcmTaskStatusEnum.CANCEL) && subStatusSet.size() == 1) {
+        if (subStatusSet.contains(EcmTaskStatusEnum.CANCEL) && subStatusSet.size() == 1) {
             return EcmTaskStatusEnum.CANCEL;
         }
 
-        if (subStatusSet.contains( EcmTaskStatusEnum.FAILED)) {
+        if (subStatusSet.contains(EcmTaskStatusEnum.FAILED)) {
             return EcmTaskStatusEnum.FAILED;
         }
 
@@ -82,21 +82,22 @@ public enum EcmTaskStatusEnum {
             return EcmTaskStatusEnum.RUNNING;
         }
 
-        if ((subStatusSet.contains( EcmTaskStatusEnum.SUCCESS) && subStatusSet.size() == 1) ||
-                (subStatusSet.contains( EcmTaskStatusEnum.IGNORE) && subStatusSet.size() == 1) ||
-                (subStatusSet.contains( EcmTaskStatusEnum.SUCCESS) && subStatusSet.contains( EcmTaskStatusEnum.IGNORE) && subStatusSet.size() == 2)) {
+        if ((subStatusSet.contains(EcmTaskStatusEnum.SUCCESS) && subStatusSet.size() == 1)
+            || (subStatusSet.contains(EcmTaskStatusEnum.IGNORE) && subStatusSet.size() == 1)
+            || (subStatusSet.contains(EcmTaskStatusEnum.SUCCESS) && subStatusSet.contains(EcmTaskStatusEnum.IGNORE)
+                && subStatusSet.size() == 2)) {
             //1 只有SUCCESS；2 只有IGNORE；3 只有SUCCESS和IGNORE  --> SUCCESS
             return EcmTaskStatusEnum.SUCCESS;
         }
 
-        if (subStatusSet.contains( EcmTaskStatusEnum.PAUSE) ||
-                (subStatusSet.contains( EcmTaskStatusEnum.WAITING)
-                        && subStatusSet.contains( EcmTaskStatusEnum.SUCCESS) && subStatusSet.size() == 2)) {
+        if (subStatusSet.contains(EcmTaskStatusEnum.PAUSE)
+            || (subStatusSet.contains(EcmTaskStatusEnum.WAITING) && subStatusSet.contains(EcmTaskStatusEnum.SUCCESS)
+                && subStatusSet.size() == 2)) {
             //1 只有PAUSE；2 走到暂停点，只有WAITING 和 SUCCESS
             return EcmTaskStatusEnum.PAUSE;
         }
 
-        if (subStatusSet.contains( EcmTaskStatusEnum.UNKNOWN)) {
+        if (subStatusSet.contains(EcmTaskStatusEnum.UNKNOWN)) {
             return EcmTaskStatusEnum.UNKNOWN;
         }
 

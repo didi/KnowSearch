@@ -24,20 +24,21 @@ public abstract class BaseIndicesController {
      * @return                  Result<Boolean>
      */
     protected Result<Boolean> checkClusterValid(List<String> clusterPhyNames) {
-        if (CollectionUtils.isEmpty(clusterPhyNames)) { return Result.buildSucc();}
+        if (CollectionUtils.isEmpty(clusterPhyNames)) {
+            return Result.buildSucc();
+        }
 
         // 暂时代码写死，防止页面上通过配置修改
         List<String> filterClustersFromDidi = Lists.newArrayList("didi-cluster-test");
 
-        Set<String> filterClustersFromAriusConfig = ariusConfigInfoService.stringSettingSplit2Set(
-                "arius.cluster.blacklist", "cluster.phy.name", "", ",");
+        Set<String> filterClustersFromAriusConfig = ariusConfigInfoService
+            .stringSettingSplit2Set("arius.cluster.blacklist", "cluster.phy.name", "", ",");
 
         filterClustersFromAriusConfig.addAll(filterClustersFromDidi);
 
         for (String clusterPhyName : clusterPhyNames) {
             if (filterClustersFromAriusConfig.contains(clusterPhyName)) {
-                return Result.buildFail(String.format("该物理集群[%s]已添加黑名单, 禁止对集群进行任何新增、编辑、删除等操作",
-                        clusterPhyName));
+                return Result.buildFail(String.format("该物理集群[%s]已添加黑名单, 禁止对集群进行任何新增、编辑、删除等操作", clusterPhyName));
             }
         }
 

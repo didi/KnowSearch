@@ -13,7 +13,7 @@ import com.didiglobal.logi.log.LogFactory;
 @Task(name = "DcdrInfoCollectorRandomTask", description = "采集dcdr相关数据", cron = "0 0/5 * * * ? *", autoRegister = true)
 public class DcdrInfoCollectorRandomTask extends BaseConcurrentTemplateTask implements Job {
 
-    private static final ILog    LOGGER = LogFactory.getLog(DcdrInfoCollectorRandomTask.class);
+    private static final ILog LOGGER = LogFactory.getLog(DcdrInfoCollectorRandomTask.class);
 
     @Override
     public TaskResult execute(JobContext jobContext) throws Exception {

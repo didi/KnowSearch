@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@ApiModel(description ="索引健康分实时写入统计信息")
+@ApiModel(description = "索引健康分实时写入统计信息")
 public class RealTimeWrite extends BaseDegree {
     /**
      * 10分钟内平均写入率
@@ -23,14 +23,14 @@ public class RealTimeWrite extends BaseDegree {
     @ApiModelProperty(value = "前一天近10分钟内平均写入率")
     private Double yesterdayAvgIndexingRate;
 
-    public String getRealTimeWriteDesc(){
+    public String getRealTimeWriteDesc() {
         return super.getDesc();
     }
 
     /**
      * 实时写入得分
      */
-    public double getRealTimeWriteScore(){
+    public double getRealTimeWriteScore() {
         return super.getScore();
     }
 }

@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 public class TemplateValueRecordVO {
 
     @ApiModelProperty(value = "统计时间")
-    private Long timestamp;
+    private Long    timestamp;
 
     @ApiModelProperty(value = "索引模板id")
     private Integer logicTemplateId;
@@ -22,11 +22,11 @@ public class TemplateValueRecordVO {
     private Integer value;
 
     @ApiModelProperty(value = "访问量")
-    private Long accessCount;
+    private Long    accessCount;
 
     @ApiModelProperty(value = "大小G")
-    private Double sizeG;
+    private Double  sizeG;
 
     @ApiModelProperty(value = "逻辑集群")
-    private String logicCluster;
+    private String  logicCluster;
 }

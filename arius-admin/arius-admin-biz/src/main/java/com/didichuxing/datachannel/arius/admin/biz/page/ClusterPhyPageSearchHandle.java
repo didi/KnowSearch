@@ -34,20 +34,20 @@ import org.springframework.stereotype.Component;
  * @date 2022-05-27
  */
 @Component
-public class ClusterPhyPageSearchHandle extends AbstractPageSearchHandle<ClusterPhyConditionDTO,ClusterPhyVO> {
+public class ClusterPhyPageSearchHandle extends AbstractPageSearchHandle<ClusterPhyConditionDTO, ClusterPhyVO> {
 
-    private static final ILog        LOGGER = LogFactory.getLog(ClusterPhyPageSearchHandle.class);
-    private static final CharSequence[] CHAR_SEQUENCES = {"*", "?"};
+    private static final ILog           LOGGER         = LogFactory.getLog(ClusterPhyPageSearchHandle.class);
+    private static final CharSequence[] CHAR_SEQUENCES = { "*", "?" };
 
+    @Autowired
+    private ClusterPhyService           clusterPhyService;
+    @Autowired
+    private ClusterLogicService         clusterLogicService;
+    @Autowired
+    private ClusterPhyManager           clusterPhyManager;
+    @Autowired
+    private ClusterRegionService        clusterRegionService;
 
-    @Autowired
-    private ClusterPhyService        clusterPhyService;
-    @Autowired
-    private ClusterLogicService clusterLogicService;
-    @Autowired
-    private ClusterPhyManager        clusterPhyManager;
-    @Autowired
-    private  ClusterRegionService clusterRegionService;
     @Override
     protected Result<Boolean> checkCondition(ClusterPhyConditionDTO condition, Integer projectId) {
 
@@ -67,7 +67,7 @@ public class ClusterPhyPageSearchHandle extends AbstractPageSearchHandle<Cluster
 
         return Result.buildSucc(true);
     }
-    
+
     @Override
     protected void initCondition(ClusterPhyConditionDTO condition, Integer projectId) {
         List<String> clusterNames = null;
@@ -111,8 +111,8 @@ public class ClusterPhyPageSearchHandle extends AbstractPageSearchHandle<Cluster
 
         long totalHit = clusterPhyService.fuzzyClusterPhyHitByCondition(condition);
         List<ClusterPhyVO> clusterPhyList = clusterPhyVOList.stream()
-                .filter(clusterPhyVO ->! ClusterHealthEnum.GREEN.getCode().equals(clusterPhyVO.getHealth()))
-                .collect(Collectors.toList());
+            .filter(clusterPhyVO -> !ClusterHealthEnum.GREEN.getCode().equals(clusterPhyVO.getHealth()))
+            .collect(Collectors.toList());
         //非正常集群需要重新发事件
         for (ClusterPhyVO clusterPhyVO : clusterPhyList) {
             SpringTool.publish(new ClusterPhyEvent(clusterPhyVO.getCluster(), AriusUser.SYSTEM.getDesc()));

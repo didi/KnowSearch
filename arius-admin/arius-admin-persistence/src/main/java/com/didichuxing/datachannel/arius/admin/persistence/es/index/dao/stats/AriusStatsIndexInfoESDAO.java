@@ -37,13 +37,14 @@ public class AriusStatsIndexInfoESDAO extends BaseAriusStatsESDAO {
      * 突增定义倍数 上个时间间隔请求数的两倍，
      * 例子: 上一个时间间隔是 1000r/s  当前时间间隔是 2500 r/s 超过2000 则定义为突增
      */
-    private static final String     SIZE_NUM             = "sizeSum";
-    private static final String     VALUE                = "value";
-    private static final String     VALUES               = "values";
-    private static final String     MAX_TPS              = "max_tps";
-    private static final String     GROUP_BY_TEMPLATE_ID = "groupByTemplateId";
-    private static final FutureUtil<Void> futureUtil     = FutureUtil.init("AriusStatsIndexInfoESDAO", 10,10, 100);
-    private static final long             ONE_MIN           = 60 * 1000;
+    private static final String           SIZE_NUM             = "sizeSum";
+    private static final String           VALUE                = "value";
+    private static final String           VALUES               = "values";
+    private static final String           MAX_TPS              = "max_tps";
+    private static final String           GROUP_BY_TEMPLATE_ID = "groupByTemplateId";
+    private static final FutureUtil<Void> futureUtil           = FutureUtil.init("AriusStatsIndexInfoESDAO", 10, 10,
+        100);
+    private static final long             ONE_MIN              = 60 * 1000;
 
     @PostConstruct
     public void init() {
@@ -62,8 +63,7 @@ public class AriusStatsIndexInfoESDAO extends BaseAriusStatsESDAO {
             "now-2m", "now-1m", QUERY_RATE.getType());
         String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
 
-        return gatewayClient.performRequest(realIndex, TYPE, dsl, s -> getSumFromESQueryResponse(s, "sum"),
-            3);
+        return gatewayClient.performRequest(realIndex, TYPE, dsl, s -> getSumFromESQueryResponse(s, "sum"), 3);
     }
 
     /**
@@ -73,11 +73,10 @@ public class AriusStatsIndexInfoESDAO extends BaseAriusStatsESDAO {
      */
     public double getClusterTps(String cluster) {
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_CLUSTER_REAL_TIME_TPS_QPS_INFO, cluster,
-            "now-2m", "now-1m",  INDEXING_RATE.getType());
+            "now-2m", "now-1m", INDEXING_RATE.getType());
         String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
 
-        return gatewayClient.performRequest(realIndex, TYPE, dsl, s -> getSumFromESQueryResponse(s, "sum"),
-            3);
+        return gatewayClient.performRequest(realIndex, TYPE, dsl, s -> getSumFromESQueryResponse(s, "sum"), 3);
     }
 
     /**
@@ -552,12 +551,12 @@ public class AriusStatsIndexInfoESDAO extends BaseAriusStatsESDAO {
                                 aggrMap.get("store-size_in_bytes-total").getUnusedMap().get(VALUE).toString());
                             esIndexStats.putMetrics("indexing-index_total_rate",
                                 aggrMap.get("indexing-index_total_rate").getUnusedMap().get(VALUE).toString());
-                            esIndexStats.putMetrics("indexing-index_time_in_millis_rate", aggrMap
-                                .get("indexing-index_time_in_millis_rate").getUnusedMap().get(VALUE).toString());
+                            esIndexStats.putMetrics("indexing-index_time_in_millis_rate",
+                                aggrMap.get("indexing-index_time_in_millis_rate").getUnusedMap().get(VALUE).toString());
                             esIndexStats.putMetrics("indexing-index_failed_rate",
                                 aggrMap.get("indexing-index_failed_rate").getUnusedMap().get(VALUE).toString());
-                            esIndexStats.putMetrics("search-scroll_time_in_millis_rate", aggrMap
-                                .get("search-scroll_time_in_millis_rate").getUnusedMap().get(VALUE).toString());
+                            esIndexStats.putMetrics("search-scroll_time_in_millis_rate",
+                                aggrMap.get("search-scroll_time_in_millis_rate").getUnusedMap().get(VALUE).toString());
                             esIndexStats.putMetrics("search-query_time_in_millis_rate",
                                 aggrMap.get("search-query_time_in_millis_rate").getUnusedMap().get(VALUE).toString());
                             esIndexStats.putMetrics("search-query_total_rate",
@@ -598,8 +597,8 @@ public class AriusStatsIndexInfoESDAO extends BaseAriusStatsESDAO {
 
         final Double[] totalIndexing = { 0.0d };
 
-        esIndexStats
-            .forEach(esIndexStats1 -> totalIndexing[0] += Double.parseDouble(esIndexStats1.getMetrics().get( INDEXING_RATE.getType())));
+        esIndexStats.forEach(esIndexStats1 -> totalIndexing[0] += Double
+            .parseDouble(esIndexStats1.getMetrics().get(INDEXING_RATE.getType())));
 
         // TPS_METRICS已经是毫秒级别的统计数据，monitor每分钟统计一次
         return totalIndexing[0] * 1000 * 60 / (endDate - startDate);
@@ -662,9 +661,11 @@ public class AriusStatsIndexInfoESDAO extends BaseAriusStatsESDAO {
      * @return
      */
     public List<TopMetrics> buildTopNIndexMetricsInfo(String clusterPhyName, List<String> metricsTypes, Integer topNu,
-                                                      String aggType, int indicesBucketsMaxNum, Long startTime, Long endTime) {
+                                                      String aggType, int indicesBucketsMaxNum, Long startTime,
+                                                      Long endTime) {
         List<VariousLineChartMetrics> variousLineChartMetrics;
-        Long timePoint = getHasDataTime(clusterPhyName, startTime, endTime, DslsConstant.GET_HAS_INDEX_METRICS_DATA_TIME);
+        Long timePoint = getHasDataTime(clusterPhyName, startTime, endTime,
+            DslsConstant.GET_HAS_INDEX_METRICS_DATA_TIME);
         //没有数据则提前终止
         if (null == timePoint) {
             return new ArrayList<>();
@@ -676,15 +677,15 @@ public class AriusStatsIndexInfoESDAO extends BaseAriusStatsESDAO {
 
         String interval = MetricsUtils.getInterval(endTime - startTime);
 
-        String dsl = dslLoaderUtil.getFormatDslByFileName(
-                DslsConstant.GET_MULTIPLE_INDEX_FIRST_INTERVAL_AGG_METRICS, clusterPhyName, startTimeForOneInterval,
-                endTimeForOneInterval, indicesBucketsMaxNum, interval, buildAggsDSL(metricsTypes, aggType));
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_MULTIPLE_INDEX_FIRST_INTERVAL_AGG_METRICS,
+            clusterPhyName, startTimeForOneInterval, endTimeForOneInterval, indicesBucketsMaxNum, interval,
+            buildAggsDSL(metricsTypes, aggType));
 
         String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTimeForOneInterval,
-                endTimeForOneInterval);
+            endTimeForOneInterval);
 
-        variousLineChartMetrics = gatewayClient.performRequestWithRouting(metadataClusterName, null,
-                realIndexName, TYPE, dsl, s -> fetchMultipleAggMetrics(s, null, metricsTypes, topNu), 3);
+        variousLineChartMetrics = gatewayClient.performRequestWithRouting(metadataClusterName, null, realIndexName,
+            TYPE, dsl, s -> fetchMultipleAggMetrics(s, null, metricsTypes, topNu), 3);
 
         return variousLineChartMetrics.stream().map(this::buildTopMetrics).collect(Collectors.toList());
     }
@@ -700,24 +701,27 @@ public class AriusStatsIndexInfoESDAO extends BaseAriusStatsESDAO {
      * @return
      */
     public List<VariousLineChartMetrics> getTopNTemplateAggMetrics(String clusterPhyName, List<String> metricsTypes,
-                                                                  Integer topNu, String aggType, Long startTime,
-                                                                  Long endTime) {
+                                                                   Integer topNu, String aggType, Long startTime,
+                                                                   Long endTime) {
         List<VariousLineChartMetrics> buildMetrics = Lists.newCopyOnWriteArrayList();
-        List<TopMetrics> topNTemplateMetricsList = buildTopNTemplateMetricsInfo(clusterPhyName, metricsTypes, topNu, aggType,
-                indicesBucketsMaxNum, startTime, endTime);
+        List<TopMetrics> topNTemplateMetricsList = buildTopNTemplateMetricsInfo(clusterPhyName, metricsTypes, topNu,
+            aggType, indicesBucketsMaxNum, startTime, endTime);
 
         for (TopMetrics topMetrics : topNTemplateMetricsList) {
             futureUtil.runnableTask(() -> buildTopNSingleMetricsForTemplate(buildMetrics, clusterPhyName, aggType,
-                    indicesBucketsMaxNum, startTime, endTime, topMetrics));
+                indicesBucketsMaxNum, startTime, endTime, topMetrics));
         }
         futureUtil.waitExecute();
 
         return buildMetrics;
     }
 
-    private List<TopMetrics> buildTopNTemplateMetricsInfo(String clusterPhyName, List<String> metricsTypes, Integer topNu, String aggType, int indicesBucketsMaxNum, Long startTime, Long endTime) {
+    private List<TopMetrics> buildTopNTemplateMetricsInfo(String clusterPhyName, List<String> metricsTypes,
+                                                          Integer topNu, String aggType, int indicesBucketsMaxNum,
+                                                          Long startTime, Long endTime) {
         List<VariousLineChartMetrics> variousLineChartMetrics;
-        Long timePoint = getHasDataTime(clusterPhyName, startTime, endTime, DslsConstant.GET_HAS_INDEX_METRICS_DATA_TIME);
+        Long timePoint = getHasDataTime(clusterPhyName, startTime, endTime,
+            DslsConstant.GET_HAS_INDEX_METRICS_DATA_TIME);
         //没有数据则提前终止
         if (null == timePoint) {
             return new ArrayList<>();
@@ -730,15 +734,15 @@ public class AriusStatsIndexInfoESDAO extends BaseAriusStatsESDAO {
         String interval = MetricsUtils.getInterval(endTime - startTime);
 
         String dsl = dslLoaderUtil.getFormatDslByFileName(
-                DslsConstant.GET_MULTIPLE_TEMPLATE_FIRST_INTERVAL_AGG_METRICS_WITH_STEP,
-                clusterPhyName, startTimeForOneInterval, endTimeForOneInterval,
-                indicesBucketsMaxNum, interval, buildAggsDSL(metricsTypes, aggType));
+            DslsConstant.GET_MULTIPLE_TEMPLATE_FIRST_INTERVAL_AGG_METRICS_WITH_STEP, clusterPhyName,
+            startTimeForOneInterval, endTimeForOneInterval, indicesBucketsMaxNum, interval,
+            buildAggsDSL(metricsTypes, aggType));
 
         String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTimeForOneInterval,
-                endTimeForOneInterval);
+            endTimeForOneInterval);
 
-        variousLineChartMetrics = gatewayClient.performRequestWithRouting(metadataClusterName, null,
-                realIndexName, TYPE, dsl, s -> fetchMultipleAggMetrics(s, null, metricsTypes, topNu), 3);
+        variousLineChartMetrics = gatewayClient.performRequestWithRouting(metadataClusterName, null, realIndexName,
+            TYPE, dsl, s -> fetchMultipleAggMetrics(s, null, metricsTypes, topNu), 3);
 
         return variousLineChartMetrics.stream().map(this::buildTopMetrics).collect(Collectors.toList());
     }
@@ -785,14 +789,14 @@ public class AriusStatsIndexInfoESDAO extends BaseAriusStatsESDAO {
         String interval = MetricsUtils.getInterval(endTime - startTime);
         List<String> metricsTypes = Lists.newArrayList(topMetrics.getType());
 
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_TOPN_INDEX_AGG_METRICS,
-                 clusterPhyName, topNameStr, startTime, endTime, indicesBucketsMaxNum, interval,
-                startTime, endTime, buildAggsDSL(metricsTypes, aggType));
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_TOPN_INDEX_AGG_METRICS, clusterPhyName,
+            topNameStr, startTime, endTime, indicesBucketsMaxNum, interval, startTime, endTime,
+            buildAggsDSL(metricsTypes, aggType));
 
         String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTime, endTime);
-        List<VariousLineChartMetrics> variousLineChartMetrics = gatewayClient.performRequestWithRouting(metadataClusterName,
-                null, realIndexName, TYPE, dsl,
-                s -> fetchMultipleAggMetrics(s, null, metricsTypes, null), 3);
+        List<VariousLineChartMetrics> variousLineChartMetrics = gatewayClient.performRequestWithRouting(
+            metadataClusterName, null, realIndexName, TYPE, dsl,
+            s -> fetchMultipleAggMetrics(s, null, metricsTypes, null), 3);
         buildMetrics.addAll(variousLineChartMetrics);
     }
 
@@ -808,22 +812,22 @@ public class AriusStatsIndexInfoESDAO extends BaseAriusStatsESDAO {
      * @return  List<VariousLineChartMetrics>
      */
     public List<VariousLineChartMetrics> getAggSingleTemplateMetrics(String clusterPhyName, List<String> metrics,
-                                                                  Integer logicTemplateId, String aggType, Long startTime,
-                                                                  Long endTime) {
+                                                                     Integer logicTemplateId, String aggType,
+                                                                     Long startTime, Long endTime) {
         String interval = MetricsUtils.getInterval(endTime - startTime);
 
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_AGG_SINGLE_TEMPLATE_METRICS,
-                 clusterPhyName, logicTemplateId, startTime, endTime, interval, buildAggsDSL(metrics, aggType));
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_AGG_SINGLE_TEMPLATE_METRICS, clusterPhyName,
+            logicTemplateId, startTime, endTime, interval, buildAggsDSL(metrics, aggType));
 
         String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTime, endTime);
 
-        return gatewayClient.performRequestWithRouting(metadataClusterName, String.valueOf(logicTemplateId), realIndexName, TYPE, dsl,
-                s -> fetchSingleAggMetrics(s, metrics, logicTemplateId.toString()), 3);
+        return gatewayClient.performRequestWithRouting(metadataClusterName, String.valueOf(logicTemplateId),
+            realIndexName, TYPE, dsl, s -> fetchSingleAggMetrics(s, metrics, logicTemplateId.toString()), 3);
     }
 
     private void buildTopNSingleMetricsForTemplate(List<VariousLineChartMetrics> buildMetrics, String clusterPhyName,
-                                                String aggType, int indicesBucketsMaxNum, Long startTime, Long endTime,
-                                                TopMetrics topMetrics) {
+                                                   String aggType, int indicesBucketsMaxNum, Long startTime,
+                                                   Long endTime, TopMetrics topMetrics) {
         String topNameStr = null;
         if (CollectionUtils.isNotEmpty(topMetrics.getTopNames())) {
             topNameStr = buildTopNameStr(topMetrics.getTopNames());
@@ -836,13 +840,14 @@ public class AriusStatsIndexInfoESDAO extends BaseAriusStatsESDAO {
         String interval = MetricsUtils.getInterval(endTime - startTime);
         List<String> metricsKeys = Lists.newArrayList(topMetrics.getType());
 
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_TOPN_TEMPLATE_AGG_METRICS, clusterPhyName, topNameStr,
-                  startTime, endTime, indicesBucketsMaxNum, interval, startTime, endTime, buildAggsDSL(metricsKeys, aggType));
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_TOPN_TEMPLATE_AGG_METRICS, clusterPhyName,
+            topNameStr, startTime, endTime, indicesBucketsMaxNum, interval, startTime, endTime,
+            buildAggsDSL(metricsKeys, aggType));
 
         String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTime, endTime);
-        List<VariousLineChartMetrics> variousLineChartMetrics = gatewayClient.performRequestWithRouting(metadataClusterName,
-                null, realIndexName, TYPE, dsl,
-                s -> fetchMultipleAggMetrics(s, null, metricsKeys, null), 3);
+        List<VariousLineChartMetrics> variousLineChartMetrics = gatewayClient.performRequestWithRouting(
+            metadataClusterName, null, realIndexName, TYPE, dsl,
+            s -> fetchMultipleAggMetrics(s, null, metricsKeys, null), 3);
         buildMetrics.addAll(variousLineChartMetrics);
     }
 
@@ -862,8 +867,8 @@ public class AriusStatsIndexInfoESDAO extends BaseAriusStatsESDAO {
                                                                   Long startTime, Long endTime) {
         String interval = MetricsUtils.getInterval(endTime - startTime);
 
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_AGG_SINGLE_INDEX_METRICS,
-             clusterPhyName, searchIndexName, startTime, endTime, interval, buildAggsDSL(metrics, aggType));
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_AGG_SINGLE_INDEX_METRICS, clusterPhyName,
+            searchIndexName, startTime, endTime, interval, buildAggsDSL(metrics, aggType));
 
         String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTime, endTime);
 
@@ -879,7 +884,7 @@ public class AriusStatsIndexInfoESDAO extends BaseAriusStatsESDAO {
      * @return {@code Map<String, Double>}
      */
     public Map<String, Double> getIndex2CurrentSearchQueryMap(String cluster, List<String> indexList) {
-        return  commonGetMetricValue(cluster, indexList, SEARCH_QUERY_TOTAL_DIFF);
+        return commonGetMetricValue(cluster, indexList, SEARCH_QUERY_TOTAL_DIFF);
     }
 
     /**
@@ -890,7 +895,7 @@ public class AriusStatsIndexInfoESDAO extends BaseAriusStatsESDAO {
      * @return {@code Map<String, Double>}
      */
     public Map<String, Double> getIndex2CurrentIndexingIndexMap(String cluster, List<String> indexList) {
-       return  commonGetMetricValue(cluster, indexList, INDEX_INDEX_TOTAL_DIFF);
+        return commonGetMetricValue(cluster, indexList, INDEX_INDEX_TOTAL_DIFF);
     }
 
     /********************************************* private methods *********************************************/
@@ -905,16 +910,20 @@ public class AriusStatsIndexInfoESDAO extends BaseAriusStatsESDAO {
     private Map<String, Double> commonGetMetricValue(String cluster, List<String> indexList, String metricType) {
         String termsDsl = DslTermUtil.buildTermsDslByIndexList(indexList);
         String commonRequestDsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_SINGLE_METRICS, cluster,
-                termsDsl, BaseAriusStatsESDAO.NOW_2M, BaseAriusStatsESDAO.NOW_1M, metricType);
+            termsDsl, BaseAriusStatsESDAO.NOW_2M, BaseAriusStatsESDAO.NOW_1M, metricType);
 
-        return gatewayClient.performRequest(cluster,
-                IndexNameUtils.genCurrentDailyIndexName(indexName), TYPE, commonRequestDsl, s -> fetchMap(s, metricType, indexList),3);
+        return gatewayClient.performRequest(cluster, IndexNameUtils.genCurrentDailyIndexName(indexName), TYPE,
+            commonRequestDsl, s -> fetchMap(s, metricType, indexList), 3);
     }
 
     private Map<String, Double> fetchMap(ESQueryResponse s, String metricType, List<String> indexList) {
         Map<String, Double> index2MetricValueMap = Maps.newHashMap();
-        if (null == s)                 { return index2MetricValueMap;}
-        if (null == s.getSourceList()) { return index2MetricValueMap;}
+        if (null == s) {
+            return index2MetricValueMap;
+        }
+        if (null == s.getSourceList()) {
+            return index2MetricValueMap;
+        }
         ESHits hits = s.getHits();
         if (null != hits && CollectionUtils.isNotEmpty(hits.getHits())) {
             for (ESHit esHit : hits.getHits()) {
@@ -922,40 +931,42 @@ public class AriusStatsIndexInfoESDAO extends BaseAriusStatsESDAO {
                 Object metricsObj = metricsJb.get("metrics");
 
                 JSONObject subMetrics = (JSONObject) metricsObj;
-                if (null == subMetrics) { continue;}
+                if (null == subMetrics) {
+                    continue;
+                }
 
                 double value = null == subMetrics.getDouble(metricType) ? 0d : subMetrics.getDouble(metricType);
                 String index = metricsJb.getString(INDEX);
-                if (null != index) { index2MetricValueMap.put(index, value);}
+                if (null != index) {
+                    index2MetricValueMap.put(index, value);
+                }
             }
 
             // 添加未匹配到的索引指标信息
-            List<String> addIndexNameList = indexList.stream()
-                    .filter(r -> !index2MetricValueMap.containsKey(r))
-                    .distinct()
-                    .collect(Collectors.toList());
-            for (String addIndexName : addIndexNameList) { index2MetricValueMap.put(addIndexName, 0d);}
+            List<String> addIndexNameList = indexList.stream().filter(r -> !index2MetricValueMap.containsKey(r))
+                .distinct().collect(Collectors.toList());
+            for (String addIndexName : addIndexNameList) {
+                index2MetricValueMap.put(addIndexName, 0d);
+            }
         }
         return index2MetricValueMap;
     }
 
     private void handleMaxScrollTimeESAggr(String maxPercentRate, Map<String, String> ret, ESAggr maxScrollTimeESAggr) {
-        if (null != maxScrollTimeESAggr.getUnusedMap()
-                && null != maxScrollTimeESAggr.getUnusedMap().get(VALUES)) {
+        if (null != maxScrollTimeESAggr.getUnusedMap() && null != maxScrollTimeESAggr.getUnusedMap().get(VALUES)) {
             JSONObject values = (JSONObject) maxScrollTimeESAggr.getUnusedMap().get(VALUES);
             if (Objects.nonNull(values) && values.containsKey(maxPercentRate)
-                    && Objects.nonNull(values.get(maxPercentRate))) {
+                && Objects.nonNull(values.get(maxPercentRate))) {
                 ret.put("max_scroll_time", values.get(maxPercentRate).toString());
             }
         }
     }
 
     private void handleMaxQueryTimeESAggr(String maxPercentRate, Map<String, String> ret, ESAggr maxQueryTimeESAggr) {
-        if (null != maxQueryTimeESAggr.getUnusedMap()
-                && null != maxQueryTimeESAggr.getUnusedMap().get(VALUES)) {
+        if (null != maxQueryTimeESAggr.getUnusedMap() && null != maxQueryTimeESAggr.getUnusedMap().get(VALUES)) {
             JSONObject values = (JSONObject) maxQueryTimeESAggr.getUnusedMap().get(VALUES);
             if (Objects.nonNull(values) && values.containsKey(maxPercentRate)
-                    && Objects.nonNull(values.get(maxPercentRate))) {
+                && Objects.nonNull(values.get(maxPercentRate))) {
                 ret.put("max_query_time", values.get(maxPercentRate).toString());
             }
         }
@@ -965,13 +976,14 @@ public class AriusStatsIndexInfoESDAO extends BaseAriusStatsESDAO {
         if (null != maxTpsESAggr.getUnusedMap() && null != maxTpsESAggr.getUnusedMap().get(VALUES)) {
             JSONObject values = (JSONObject) maxTpsESAggr.getUnusedMap().get(VALUES);
             if (Objects.nonNull(values) && values.containsKey(maxPercentRate)
-                    && Objects.nonNull(values.get(maxPercentRate))) {
+                && Objects.nonNull(values.get(maxPercentRate))) {
                 ret.put(MAX_TPS, values.get(maxPercentRate).toString());
             }
         }
     }
 
-    private void handleBucketList(List<IndexNameQueryAvgRatePO> indexNameQueryAvgRatePoList, ESAggr groupByIndexESAggr) {
+    private void handleBucketList(List<IndexNameQueryAvgRatePO> indexNameQueryAvgRatePoList,
+                                  ESAggr groupByIndexESAggr) {
         for (ESBucket esBucket : groupByIndexESAggr.getBucketList()) {
             String indexName = esBucket.getUnusedMap().get("key").toString();
             ESAggr dateBucketESAggr = esBucket.getAggrMap().get("date_bucket");
@@ -981,13 +993,12 @@ public class AriusStatsIndexInfoESDAO extends BaseAriusStatsESDAO {
                     String date = subBucket.getUnusedMap().get("key_as_string").toString();
 
                     ESAggr queryRateAvgESAggr = subBucket.getAggrMap().get("query_rate_avg");
-                    if (queryRateAvgESAggr != null
-                            && queryRateAvgESAggr.getUnusedMap().get(VALUE) != null) {
+                    if (queryRateAvgESAggr != null && queryRateAvgESAggr.getUnusedMap().get(VALUE) != null) {
                         IndexNameQueryAvgRatePO indexNameQueryAvgRatePo = new IndexNameQueryAvgRatePO();
                         indexNameQueryAvgRatePo.setDate(date);
                         indexNameQueryAvgRatePo.setIndexName(indexName);
-                        indexNameQueryAvgRatePo.setQueryTotalRate(
-                                Double.valueOf(queryRateAvgESAggr.getUnusedMap().get(VALUE).toString()));
+                        indexNameQueryAvgRatePo
+                            .setQueryTotalRate(Double.valueOf(queryRateAvgESAggr.getUnusedMap().get(VALUE).toString()));
 
                         indexNameQueryAvgRatePoList.add(indexNameQueryAvgRatePo);
                     }
@@ -1003,7 +1014,7 @@ public class AriusStatsIndexInfoESDAO extends BaseAriusStatsESDAO {
             if (esAggrMap != null && esAggrMap.containsKey(GROUP_BY_TEMPLATE_ID)) {
                 ESAggr groupByTemplateIdESAggr = esAggrMap.get(GROUP_BY_TEMPLATE_ID);
                 if (groupByTemplateIdESAggr != null
-                        && CollectionUtils.isNotEmpty(groupByTemplateIdESAggr.getBucketList())) {
+                    && CollectionUtils.isNotEmpty(groupByTemplateIdESAggr.getBucketList())) {
 
                     handleBucketList(currentTpsMap, groupByTemplateIdESAggr);
                 }
@@ -1023,11 +1034,12 @@ public class AriusStatsIndexInfoESDAO extends BaseAriusStatsESDAO {
         }
     }
 
-    private void setMaxTpsTimestamp(TemplateTpsMetricPO tpsMetricPO, Map<String, ESAggr> esAggrMap, String maxTpsValue) {
+    private void setMaxTpsTimestamp(TemplateTpsMetricPO tpsMetricPO, Map<String, ESAggr> esAggrMap,
+                                    String maxTpsValue) {
         if (maxTpsValue != null && esAggrMap != null && esAggrMap.containsKey(GROUP_BY_TEMPLATE_ID)) {
             ESAggr groupByTemplateIdESAggr = esAggrMap.get(GROUP_BY_TEMPLATE_ID);
             if (groupByTemplateIdESAggr != null
-                    && CollectionUtils.isNotEmpty(groupByTemplateIdESAggr.getBucketList())) {
+                && CollectionUtils.isNotEmpty(groupByTemplateIdESAggr.getBucketList())) {
                 handleBucketList(tpsMetricPO, maxTpsValue, groupByTemplateIdESAggr);
             }
         }
@@ -1055,7 +1067,7 @@ public class AriusStatsIndexInfoESDAO extends BaseAriusStatsESDAO {
         if (esAggrMap != null && esAggrMap.containsKey("max_tps_templateId")) {
             ESAggr maxTpsESAggr = esAggrMap.get("max_tps_templateId");
             if (maxTpsESAggr != null && maxTpsESAggr.getUnusedMap() != null
-                    && maxTpsESAggr.getUnusedMap().get(VALUE) != null) {
+                && maxTpsESAggr.getUnusedMap().get(VALUE) != null) {
                 maxTpsValue = maxTpsESAggr.getUnusedMap().get(VALUE).toString();
                 tpsMetricPO.setMaxTps(Double.valueOf(maxTpsValue));
                 Object obj = maxTpsESAggr.getUnusedMap().get("keys");
@@ -1080,24 +1092,30 @@ public class AriusStatsIndexInfoESDAO extends BaseAriusStatsESDAO {
      * @param endTime
      * @return
      */
-    public List<VariousLineChartMetrics> getTopNIndicesAggMetricsWithStep(String clusterPhyName, List<String> metricsTypes, Integer topNu, String topMethod, Integer topTimeStep, String aggType, Long startTime, Long endTime) {
+    public List<VariousLineChartMetrics> getTopNIndicesAggMetricsWithStep(String clusterPhyName,
+                                                                          List<String> metricsTypes, Integer topNu,
+                                                                          String topMethod, Integer topTimeStep,
+                                                                          String aggType, Long startTime,
+                                                                          Long endTime) {
         List<VariousLineChartMetrics> buildMetrics = Lists.newCopyOnWriteArrayList();
-        List<TopMetrics> topNIndexMetricsList = buildTopNIndexMetricsInfoWithStep(clusterPhyName, metricsTypes, topNu,topMethod,topTimeStep,
-                indicesBucketsMaxNum, startTime, endTime);
+        List<TopMetrics> topNIndexMetricsList = buildTopNIndexMetricsInfoWithStep(clusterPhyName, metricsTypes, topNu,
+            topMethod, topTimeStep, indicesBucketsMaxNum, startTime, endTime);
 
         for (TopMetrics topMetrics : topNIndexMetricsList) {
             futureUtil.runnableTask(() -> buildTopNSingleMetricsForIndex(buildMetrics, clusterPhyName, aggType,
-                    indicesBucketsMaxNum, startTime, endTime, topMetrics));
+                indicesBucketsMaxNum, startTime, endTime, topMetrics));
         }
         futureUtil.waitExecute();
 
         return buildMetrics;
     }
 
-    private List<TopMetrics> buildTopNIndexMetricsInfoWithStep(String clusterPhyName, List<String> metricsTypes, Integer topNu, String topMethod, Integer topTimeStep,
+    private List<TopMetrics> buildTopNIndexMetricsInfoWithStep(String clusterPhyName, List<String> metricsTypes,
+                                                               Integer topNu, String topMethod, Integer topTimeStep,
                                                                int indicesBucketsMaxNum, Long startTime, Long endTime) {
         List<VariousLineChartMetrics> variousLineChartMetrics;
-        Long timePoint = getHasDataTime(clusterPhyName, startTime, endTime, DslsConstant.GET_HAS_INDEX_METRICS_DATA_TIME);
+        Long timePoint = getHasDataTime(clusterPhyName, startTime, endTime,
+            DslsConstant.GET_HAS_INDEX_METRICS_DATA_TIME);
         //没有数据则提前终止
         if (null == timePoint) {
             return new ArrayList<>();
@@ -1107,40 +1125,47 @@ public class AriusStatsIndexInfoESDAO extends BaseAriusStatsESDAO {
         long endTimeForOneInterval = timePoint;
 
         String dsl = dslLoaderUtil.getFormatDslByFileName(
-                DslsConstant.GET_MULTIPLE_INDEX_FIRST_INTERVAL_AGG_METRICS_WITH_STEP, clusterPhyName, startTimeForOneInterval,
-                endTimeForOneInterval, indicesBucketsMaxNum, STEP_INTERVAL, buildAggsDSL(metricsTypes, topMethod),buildAggsDSLWithStep(metricsTypes, topMethod));
+            DslsConstant.GET_MULTIPLE_INDEX_FIRST_INTERVAL_AGG_METRICS_WITH_STEP, clusterPhyName,
+            startTimeForOneInterval, endTimeForOneInterval, indicesBucketsMaxNum, STEP_INTERVAL,
+            buildAggsDSL(metricsTypes, topMethod), buildAggsDSLWithStep(metricsTypes, topMethod));
 
         String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTimeForOneInterval,
-                endTimeForOneInterval);
+            endTimeForOneInterval);
 
-        variousLineChartMetrics = gatewayClient.performRequestWithRouting(metadataClusterName, null,
-                realIndexName, TYPE, dsl, s -> fetchMultipleAggMetricsWithStep(s, metricsTypes, topNu, topMethod,null), 3);
+        variousLineChartMetrics = gatewayClient.performRequestWithRouting(metadataClusterName, null, realIndexName,
+            TYPE, dsl, s -> fetchMultipleAggMetricsWithStep(s, metricsTypes, topNu, topMethod, null), 3);
 
         return variousLineChartMetrics.stream().map(this::buildTopMetrics).collect(Collectors.toList());
     }
 
-    public List<VariousLineChartMetrics> getTopNTemplateAggMetricsWithStep(String clusterPhyName, List<String> metricsTypes, Integer topNu,String topMethod, Integer topTimeStep,
-                                                                           String aggType, Long startTime, Long endTime) {
+    public List<VariousLineChartMetrics> getTopNTemplateAggMetricsWithStep(String clusterPhyName,
+                                                                           List<String> metricsTypes, Integer topNu,
+                                                                           String topMethod, Integer topTimeStep,
+                                                                           String aggType, Long startTime,
+                                                                           Long endTime) {
         List<VariousLineChartMetrics> buildMetrics = Lists.newCopyOnWriteArrayList();
-        List<TopMetrics> topNTemplateMetricsList = buildTopNTemplateMetricsInfoWithStep(clusterPhyName, metricsTypes, topNu, topMethod,topTimeStep,  aggType,
-                indicesBucketsMaxNum, startTime, endTime);
+        List<TopMetrics> topNTemplateMetricsList = buildTopNTemplateMetricsInfoWithStep(clusterPhyName, metricsTypes,
+            topNu, topMethod, topTimeStep, aggType, indicesBucketsMaxNum, startTime, endTime);
 
         for (TopMetrics topMetrics : topNTemplateMetricsList) {
             futureUtil.runnableTask(() -> buildTopNSingleMetricsForTemplate(buildMetrics, clusterPhyName, aggType,
-                    indicesBucketsMaxNum, startTime, endTime, topMetrics));
+                indicesBucketsMaxNum, startTime, endTime, topMetrics));
         }
         futureUtil.waitExecute();
 
         return buildMetrics;
     }
 
-    private List<TopMetrics> buildTopNTemplateMetricsInfoWithStep(String clusterPhyName, List<String> metricsTypes, Integer topNu, String topMethod, Integer topTimeStep,
-                                                                  String aggType, int indicesBucketsMaxNum, Long startTime, Long endTime) {
+    private List<TopMetrics> buildTopNTemplateMetricsInfoWithStep(String clusterPhyName, List<String> metricsTypes,
+                                                                  Integer topNu, String topMethod, Integer topTimeStep,
+                                                                  String aggType, int indicesBucketsMaxNum,
+                                                                  Long startTime, Long endTime) {
         List<VariousLineChartMetrics> variousLineChartMetrics = new ArrayList<>();
-        Long timePoint = getHasDataTime(clusterPhyName, startTime, endTime, DslsConstant.GET_HAS_INDEX_METRICS_DATA_TIME);
+        Long timePoint = getHasDataTime(clusterPhyName, startTime, endTime,
+            DslsConstant.GET_HAS_INDEX_METRICS_DATA_TIME);
         //没有数据则提前终止
         if (null == timePoint) {
-            return  new ArrayList<>();
+            return new ArrayList<>();
         }
 
         long startTimeForOneInterval = timePoint - topTimeStep;
@@ -1149,15 +1174,15 @@ public class AriusStatsIndexInfoESDAO extends BaseAriusStatsESDAO {
         String interval = "1m";
 
         String dsl = dslLoaderUtil.getFormatDslByFileName(
-                DslsConstant.GET_MULTIPLE_TEMPLATE_FIRST_INTERVAL_AGG_METRICS_WITH_STEP,
-                clusterPhyName, startTimeForOneInterval, endTimeForOneInterval,
-                indicesBucketsMaxNum, interval, buildAggsDSL(metricsTypes, topMethod), buildAggsDSLWithStep(metricsTypes, topMethod));
+            DslsConstant.GET_MULTIPLE_TEMPLATE_FIRST_INTERVAL_AGG_METRICS_WITH_STEP, clusterPhyName,
+            startTimeForOneInterval, endTimeForOneInterval, indicesBucketsMaxNum, interval,
+            buildAggsDSL(metricsTypes, topMethod), buildAggsDSLWithStep(metricsTypes, topMethod));
 
         String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTimeForOneInterval,
-                endTimeForOneInterval);
+            endTimeForOneInterval);
 
-        variousLineChartMetrics = gatewayClient.performRequestWithRouting(metadataClusterName, null,
-                realIndexName, TYPE, dsl, s -> fetchMultipleAggMetricsWithStep(s, metricsTypes, topNu, topMethod, null), 3);
+        variousLineChartMetrics = gatewayClient.performRequestWithRouting(metadataClusterName, null, realIndexName,
+            TYPE, dsl, s -> fetchMultipleAggMetricsWithStep(s, metricsTypes, topNu, topMethod, null), 3);
 
         return variousLineChartMetrics.stream().map(this::buildTopMetrics).collect(Collectors.toList());
     }

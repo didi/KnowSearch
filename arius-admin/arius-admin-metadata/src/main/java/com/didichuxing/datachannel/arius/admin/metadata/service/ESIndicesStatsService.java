@@ -24,26 +24,27 @@ public class ESIndicesStatsService {
     private AriusStatsIndexInfoESDAO ariusStatsIndexInfoESDAO;
 
     public List<VariousLineChartMetrics> getAggClusterPhyIndicesMetrics(MetricsClusterPhyIndicesDTO param) {
-        Integer topNu                =   param.getTopNu();
-        String topMethod         =   param.getTopMethod();
-        Integer topTimeStep       =   param.getTopTimeStep();
-        String searchIndexName       =   param.getIndexName();
-        String clusterPhyName        =   param.getClusterPhyName();
-        String aggType               =   param.getAggType();
-        Long endTime                 =   param.getEndTime();
-        Long startTime               =   param.getStartTime();
-        List<String> metricsTypes    =   param.getMetricsTypes();
+        Integer topNu = param.getTopNu();
+        String topMethod = param.getTopMethod();
+        Integer topTimeStep = param.getTopTimeStep();
+        String searchIndexName = param.getIndexName();
+        String clusterPhyName = param.getClusterPhyName();
+        String aggType = param.getAggType();
+        Long endTime = param.getEndTime();
+        Long startTime = param.getStartTime();
+        List<String> metricsTypes = param.getMetricsTypes();
 
         if (!AriusObjUtils.isBlack(param.getIndexName())) {
-            return ariusStatsIndexInfoESDAO.getAggSingleIndexMetrics(clusterPhyName, metricsTypes, searchIndexName, aggType,
-                startTime, endTime);
+            return ariusStatsIndexInfoESDAO.getAggSingleIndexMetrics(clusterPhyName, metricsTypes, searchIndexName,
+                aggType, startTime, endTime);
         }
 
-        return ariusStatsIndexInfoESDAO.getTopNIndicesAggMetricsWithStep(clusterPhyName, metricsTypes, topNu,topMethod,topTimeStep, aggType, startTime, endTime);
+        return ariusStatsIndexInfoESDAO.getTopNIndicesAggMetricsWithStep(clusterPhyName, metricsTypes, topNu, topMethod,
+            topTimeStep, aggType, startTime, endTime);
     }
 
     @Value("${es.metrics.indices.buckets.max.num}")
-    protected int                                                         indicesBucketsMaxNum;
+    protected int indicesBucketsMaxNum;
 
     /**
      * 获取并且聚合对应的物理集群的模板指标类型
@@ -52,8 +53,8 @@ public class ESIndicesStatsService {
      */
     public List<VariousLineChartMetrics> getAggClusterPhyTemplateMetrics(MetricsClusterPhyTemplateDTO param) {
         Integer topNu = param.getTopNu();
-        String topMethod         =   param.getTopMethod();
-        Integer topTimeStep       =   param.getTopTimeStep();
+        String topMethod = param.getTopMethod();
+        Integer topTimeStep = param.getTopTimeStep();
         Integer logicTemplateId = param.getLogicTemplateId();
         String clusterPhyName = param.getClusterPhyName();
         String aggType = param.getAggType();
@@ -62,11 +63,11 @@ public class ESIndicesStatsService {
         List<String> metricsTypes = param.getMetricsTypes();
 
         if (!AriusObjUtils.isNull(param.getLogicTemplateId())) {
-            return ariusStatsIndexInfoESDAO.getAggSingleTemplateMetrics(clusterPhyName, metricsTypes, logicTemplateId, aggType,
-                    startTime, endTime);
+            return ariusStatsIndexInfoESDAO.getAggSingleTemplateMetrics(clusterPhyName, metricsTypes, logicTemplateId,
+                aggType, startTime, endTime);
         }
-        return ariusStatsIndexInfoESDAO.getTopNTemplateAggMetricsWithStep(clusterPhyName, metricsTypes, topNu,topMethod,topTimeStep, aggType,
-                startTime, endTime);
+        return ariusStatsIndexInfoESDAO.getTopNTemplateAggMetricsWithStep(clusterPhyName, metricsTypes, topNu,
+            topMethod, topTimeStep, aggType, startTime, endTime);
     }
 
     /**
@@ -77,8 +78,10 @@ public class ESIndicesStatsService {
      * @param indexList   索引列表
      * @return {@code Map<String, Double>}
      */
-    public Map<String, Double> getIndex2CurrentSearchQueryMap(String cluster, List<String> indexList){
-        if (AriusObjUtils.isBlack(cluster) || CollectionUtils.isEmpty(indexList)) { return Maps.newHashMap();}
+    public Map<String, Double> getIndex2CurrentSearchQueryMap(String cluster, List<String> indexList) {
+        if (AriusObjUtils.isBlack(cluster) || CollectionUtils.isEmpty(indexList)) {
+            return Maps.newHashMap();
+        }
         return ariusStatsIndexInfoESDAO.getIndex2CurrentSearchQueryMap(cluster, indexList);
     }
 
@@ -91,9 +94,10 @@ public class ESIndicesStatsService {
      * @return {@code Map<String, Double>}
      */
     public Map<String, Double> getIndex2CurrentIndexingIndexMap(String cluster, List<String> indexList) {
-        if (AriusObjUtils.isBlack(cluster) || CollectionUtils.isEmpty(indexList)) { return Maps.newHashMap();}
+        if (AriusObjUtils.isBlack(cluster) || CollectionUtils.isEmpty(indexList)) {
+            return Maps.newHashMap();
+        }
         return ariusStatsIndexInfoESDAO.getIndex2CurrentIndexingIndexMap(cluster, indexList);
     }
-
 
 }

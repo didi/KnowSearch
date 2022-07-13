@@ -97,42 +97,41 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @NoArgsConstructor
 public class EcmTaskManagerImpl implements EcmTaskManager {
-    private static final Logger    LOGGER                                = LoggerFactory
-        .getLogger(EcmTaskManagerImpl.class);
-    public static final long DEFAULT_WORK_ORDER_ID = -1L;
+    private static final Logger     LOGGER                = LoggerFactory.getLogger(EcmTaskManagerImpl.class);
+    public static final long        DEFAULT_WORK_ORDER_ID = -1L;
 
     @Value("${es.client.cluster.port}")
-    private String                 esClusterClientPort;
+    private String                  esClusterClientPort;
 
     @Autowired
-    private EcmTaskDAO             ecmTaskDao;
+    private EcmTaskDAO              ecmTaskDao;
 
     @Autowired
-    private EcmHandleService       ecmHandleService;
+    private EcmHandleService        ecmHandleService;
 
     @Autowired
-    private ClusterPhyService      clusterPhyService;
+    private ClusterPhyService       clusterPhyService;
 
     @Autowired
-    private ClusterPhyManager      clusterPhyManager;
+    private ClusterPhyManager       clusterPhyManager;
 
     @Autowired
-    private ClusterRoleService clusterRoleService;
+    private ClusterRoleService      clusterRoleService;
 
     @Autowired
-    private ClusterRoleHostService clusterRoleHostService;
+    private ClusterRoleHostService  clusterRoleHostService;
 
     @Autowired
-    private EcmTaskDetailManager   ecmTaskDetailManager;
+    private EcmTaskDetailManager    ecmTaskDetailManager;
 
     @Autowired
-    private ESClusterService       esClusterService;
+    private ESClusterService        esClusterService;
 
     @Autowired
     private AriusScheduleThreadPool ariusScheduleThreadPool;
 
     @Autowired
-    private WorkOrderManager workOrderManager;
+    private WorkOrderManager        workOrderManager;
 
     @Override
     public boolean existUnClosedEcmTask(Long phyClusterId) {
@@ -142,11 +141,11 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
 
     @Override
     public Result<Long> saveEcmTask(EcmTaskDTO ecmTaskDTO) {
-        if (CollectionUtils.isEmpty(ecmTaskDTO.getEcmParamBaseList())){
+        if (CollectionUtils.isEmpty(ecmTaskDTO.getEcmParamBaseList())) {
             return Result.buildFail("工单数据为空");
         }
         //过滤掉nodeNumber 为0的数据
-        List<EcmParamBase> filteredEcmParamBaseList=ecmTaskDTO.getEcmParamBaseList().stream()
+        List<EcmParamBase> filteredEcmParamBaseList = ecmTaskDTO.getEcmParamBaseList().stream()
             .filter(elem -> elem.getNodeNumber() != null && elem.getNodeNumber() > 0).collect(Collectors.toList());
 
         EcmTaskPO ecmTaskPO = ConvertUtil.obj2Obj(ecmTaskDTO, EcmTaskPO.class);
@@ -214,7 +213,8 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
         // 获取任务的创建时间和更新时间
         ecmTaskBasic.setCreateTime(ecmTaskPO.getCreateTime());
         List<EcmTaskDetail> ecmTaskDetails = ecmTaskDetailManager.getEcmTaskDetailInOrder(taskId);
-        Optional<Date> optionalDate = ecmTaskDetails.stream().map(EcmTaskDetail::getUpdateTime).distinct().max(Date::compareTo);
+        Optional<Date> optionalDate = ecmTaskDetails.stream().map(EcmTaskDetail::getUpdateTime).distinct()
+            .max(Date::compareTo);
         optionalDate.ifPresent(ecmTaskBasic::setUpdateTime);
 
         return Result.buildSucc(ecmTaskBasic);
@@ -246,7 +246,7 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
         ecmTask.setPhysicClusterId(saveResult.getData());
         ecmTask.setHandleData(ConvertUtil.obj2Json(ecmParamBaseList));
         updateEcmTask(ecmTask);
-        
+
         //4. 启动任务, 运行新建master节点的ECM任务
         Result<EcmOperateAppBase> actionRet = actionEcmTaskForMasterNode(ecmParamBaseList, taskId, operator);
         if (actionRet.failed()) {
@@ -383,7 +383,7 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
         }
 
         List<EcmParamBase> ecmParamBaseList = OpOrderTaskConverter
-                .convert2EcmParamBaseList(ConvertUtil.obj2Obj(ecmTask, EcmTask.class));
+            .convert2EcmParamBaseList(ConvertUtil.obj2Obj(ecmTask, EcmTask.class));
         for (EcmParamBase ecmParamBase : ecmParamBaseList) {
             if (!AriusObjUtils.isNull(ecmParamBase) && AriusObjUtils.isNull(ecmParamBase.getTaskId())) {
                 // 将没有进行创建zeus任务的以cancel状态插入到task_detail表中
@@ -412,10 +412,10 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
         }
 
         List<EcmParamBase> ecmParamBaseList = OpOrderTaskConverter
-                .convert2EcmParamBaseList(ConvertUtil.obj2Obj(ecmTask, EcmTask.class));
+            .convert2EcmParamBaseList(ConvertUtil.obj2Obj(ecmTask, EcmTask.class));
         for (EcmParamBase ecmParamBase : ecmParamBaseList) {
             if (!AriusObjUtils.isNull(ecmParamBase)
-                    && isTaskActed(EcmTaskStatusEnum.RUNNING, ecmParamBase, ecmTask.getOrderType(), operator)) {
+                && isTaskActed(EcmTaskStatusEnum.RUNNING, ecmParamBase, ecmTask.getOrderType(), operator)) {
                 ecmHandleService.actionUnfinishedESCluster(EcmActionEnum.PAUSE, ecmParamBase, null, operator);
             }
         }
@@ -446,14 +446,15 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
     }
 
     @Override
-    public Result<Void> actionClusterHostEcmTask(Long taskId, EcmActionEnum ecmActionEnum, String hostname, String operator) {
+    public Result<Void> actionClusterHostEcmTask(Long taskId, EcmActionEnum ecmActionEnum, String hostname,
+                                                 String operator) {
         EcmTaskPO ecmTask = ecmTaskDao.getById(taskId);
         if (AriusObjUtils.isNull(ecmTask)) {
             return Result.buildParamIllegal("集群任务不存在");
         }
 
         List<EcmParamBase> ecmParamBaseList = OpOrderTaskConverter
-                .convert2EcmParamBaseList(ConvertUtil.obj2Obj(ecmTask, EcmTask.class));
+            .convert2EcmParamBaseList(ConvertUtil.obj2Obj(ecmTask, EcmTask.class));
         for (EcmParamBase ecmParamBase : ecmParamBaseList) {
             if (!AriusObjUtils.isNull(ecmParamBase)) {
                 ecmHandleService.actionUnfinishedESCluster(ecmActionEnum, ecmParamBase, hostname, operator);
@@ -472,7 +473,8 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
         if (AriusObjUtils.isNull(clusterPhy)) {
             return Result.buildFail("物理名称对应的物理信息不存在");
         }
-        return Result.buildSucc(ConvertUtil.obj2Obj(ecmTaskDao.getUsefulEcmTaskByClusterId(clusterPhy.getId()), EcmTask.class));
+        return Result
+            .buildSucc(ConvertUtil.obj2Obj(ecmTaskDao.getUsefulEcmTaskByClusterId(clusterPhy.getId()), EcmTask.class));
     }
 
     @Override
@@ -517,10 +519,10 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
 
         EcmTaskStatusEnum mergedStatusEnum = EcmTaskStatusEnum.calTaskStatus(subOrderTaskStatus);
 
-        if(postProcess(ecmTask, mergedStatusEnum).failed()) {
+        if (postProcess(ecmTask, mergedStatusEnum).failed()) {
             mergedStatusEnum = EcmTaskStatusEnum.FAILED;
         }
-        
+
         ecmTask.setStatus(mergedStatusEnum.getValue());
         updateEcmTask(ecmTask);
         return mergedStatusEnum;
@@ -534,7 +536,8 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
      * @param operator            操作人
      * @return
      */
-    private Result<EcmOperateAppBase> actionEcmTaskForMasterNode(List<EcmParamBase> ecmParamBaseList, Long taskId, String operator) {
+    private Result<EcmOperateAppBase> actionEcmTaskForMasterNode(List<EcmParamBase> ecmParamBaseList, Long taskId,
+                                                                 String operator) {
         EcmTask ecmTask = getEcmTask(taskId);
         if (null == ecmTask) {
             return Result.buildFail("ECM任务为空");
@@ -544,7 +547,8 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
 
         EcmParamBase ecmParamBase = role2EcmParamBaseMap.get(MASTER_NODE.getDesc());
 
-        Result<EcmOperateAppBase> runEcmTaskForMasterNodeRet = runEcmTask(ecmParamBase, ecmTask.getOrderType(), operator);
+        Result<EcmOperateAppBase> runEcmTaskForMasterNodeRet = runEcmTask(ecmParamBase, ecmTask.getOrderType(),
+            operator);
         if (runEcmTaskForMasterNodeRet.success()) {
             //回写taskId至DB
             ecmParamBase.setTaskId(runEcmTaskForMasterNodeRet.getData().getTaskId());
@@ -556,10 +560,10 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
             updateRoleClusterNumber(ecmTask, ecmParamBase);
             return Result.buildSucc(runEcmTaskForMasterNodeRet.getData());
         }
-        
+
         return Result.buildFail();
     }
-    
+
     private Result<EcmOperateAppBase> runEcmTask(EcmParamBase ecmParamBase, Integer orderType, String operator) {
         Result<EcmOperateAppBase> result;
         if (Objects.equals(OpTaskTypeEnum.CLUSTER_NEW.getType(), orderType)) {
@@ -614,17 +618,20 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
             updateTaskDetailByTaskStatus(ecmParam, remoteStatuses);
 
         } catch (Exception e) {
-            LOGGER.error("class=EcmTaskManagerImpl||method=doRefreshEcmTask||ecmTaskId={}||msg={}", ecmTask.getId(), e.getStackTrace());
+            LOGGER.error("class=EcmTaskManagerImpl||method=doRefreshEcmTask||ecmTaskId={}||msg={}", ecmTask.getId(),
+                e.getStackTrace());
             return EcmTaskStatusEnum.FAILED;
         }
 
         //5.计算最终状态
-        Set<EcmTaskStatusEnum> ecmHostStatus = remoteStatuses.stream().map(r -> convertStatus(r.getStatusEnum())).collect(Collectors.toSet());
+        Set<EcmTaskStatusEnum> ecmHostStatus = remoteStatuses.stream().map(r -> convertStatus(r.getStatusEnum()))
+            .collect(Collectors.toSet());
         return EcmTaskStatusEnum.calTaskStatus(ecmHostStatus);
     }
 
     /**检查执行的任务是否处于指定的状态*/
-    private boolean isTaskActed(EcmTaskStatusEnum ecmTaskStatusEnum, EcmParamBase ecmParamBase, Integer orderType, String operator) {
+    private boolean isTaskActed(EcmTaskStatusEnum ecmTaskStatusEnum, EcmParamBase ecmParamBase, Integer orderType,
+                                String operator) {
         Result<List<EcmTaskStatus>> result = ecmHandleService.getESClusterStatus(ecmParamBase, orderType, operator);
         if (result.failed()) {
             // 获取任务状态失败, 则直接返回false
@@ -705,16 +712,22 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
      * @param ecmTask ecm任务
      * @param mergedStatusEnum 总的任务执行情况
      */
-    private void saveOrEditHostInfoFromEcmTask(EcmTask ecmTask, EcmTaskStatusEnum mergedStatusEnum) throws AdminTaskException {
+    private void saveOrEditHostInfoFromEcmTask(EcmTask ecmTask,
+                                               EcmTaskStatusEnum mergedStatusEnum) throws AdminTaskException {
         if (!EcmTaskStatusEnum.SUCCESS.equals(mergedStatusEnum)) {
             return;
         }
 
         switch (OpTaskTypeEnum.valueOfType(ecmTask.getOrderType())) {
             case CLUSTER_EXPAND:
-            case CLUSTER_NEW: addHostInfoFromTaskOrder(ecmTask); break;
-            case CLUSTER_SHRINK: deleteRoleClusterAndHost(mergedStatusEnum,ecmTask); break;
-            default: break;
+            case CLUSTER_NEW:
+                addHostInfoFromTaskOrder(ecmTask);
+                break;
+            case CLUSTER_SHRINK:
+                deleteRoleClusterAndHost(mergedStatusEnum, ecmTask);
+                break;
+            default:
+                break;
         }
     }
 
@@ -724,11 +737,12 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
         if (getOrderDetailResult.failed()) {
             return;
         }
-        BaseClusterHostOrderDetail baseClusterHostOrderDetail = (JSONObject.parseObject(getOrderDetailResult.getData().getDetail(),
-                BaseClusterHostOrderDetail.class));
+        BaseClusterHostOrderDetail baseClusterHostOrderDetail = (JSONObject
+            .parseObject(getOrderDetailResult.getData().getDetail(), BaseClusterHostOrderDetail.class));
 
         // 保存全量节点信息到DB
-        clusterRoleHostService.createClusterNodeSettings(baseClusterHostOrderDetail.getRoleClusterHosts(), baseClusterHostOrderDetail.getPhyClusterName());
+        clusterRoleHostService.createClusterNodeSettings(baseClusterHostOrderDetail.getRoleClusterHosts(),
+            baseClusterHostOrderDetail.getPhyClusterName());
 
         // 更新es_cluster_role_info中的podNumber
         for (EcmParamBase ecmParamBase : OpOrderTaskConverter.convert2EcmParamBaseList(ecmTask)) {
@@ -737,7 +751,8 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
                 continue;
             }
 
-            ClusterRoleInfo clusterRoleInfo = clusterRoleService.getByClusterNameAndRole(baseClusterHostOrderDetail.getPhyClusterName(), hostParamBase.getRoleName());
+            ClusterRoleInfo clusterRoleInfo = clusterRoleService
+                .getByClusterNameAndRole(baseClusterHostOrderDetail.getPhyClusterName(), hostParamBase.getRoleName());
             if (clusterRoleInfo == null) {
                 continue;
             }
@@ -746,13 +761,15 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
         }
     }
 
-    private Result<Void> updateClusterAddressWhenIsValid(EcmTask ecmTask, EcmTaskStatusEnum mergedStatusEnum, List<EcmParamBase> ecmParamBases) {
+    private Result<Void> updateClusterAddressWhenIsValid(EcmTask ecmTask, EcmTaskStatusEnum mergedStatusEnum,
+                                                         List<EcmParamBase> ecmParamBases) {
         if (!hasCallBackAddress(mergedStatusEnum, ecmTask)) {
             return Result.buildSucc();
         }
         try {
             boolean succ = ESOpTimeoutRetry.esRetryExecuteWithGivenTime("集群读写地址有效性检测",
-                    ClusterConstant.DEFAULT_RETRY_TIMES, () -> hasValidEsClusterReadAndWriteAddress(ecmTask, ecmParamBases), ClusterConstant::defaultRetryTime);
+                ClusterConstant.DEFAULT_RETRY_TIMES, () -> hasValidEsClusterReadAndWriteAddress(ecmTask, ecmParamBases),
+                ClusterConstant::defaultRetryTime);
             if (succ) {
                 updateClusterReadAndWriteAddress(ecmTask, ecmParamBases);
                 // 物理集群读写地址更新完毕之后进行es-client的刷新
@@ -784,8 +801,8 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
             clusterAddress = buildClusterReadAndWriteAddressForHost(ecmTask, ecmParamBases);
         }
 
-        return esClusterService.syncGetClientAlivePercent(getClusterPhyNameFromEcmParamBases(ecmParamBases),
-            null,ListUtils.strList2String(clusterAddress)) > 0;
+        return esClusterService.syncGetClientAlivePercent(getClusterPhyNameFromEcmParamBases(ecmParamBases), null,
+            ListUtils.strList2String(clusterAddress)) > 0;
     }
 
     private String getClusterPhyNameFromEcmParamBases(List<EcmParamBase> ecmParamBases) {
@@ -820,13 +837,12 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
         }
 
         if (ecmTask.getOrderType().equals(OpTaskTypeEnum.CLUSTER_SHRINK.getType())
-                || ecmTask.getOrderType().equals(OpTaskTypeEnum.CLUSTER_EXPAND.getType())) {
-            return buildClusterReadAndWriteAddressForHostWhenScale(ecmTask.getOrderType(),
-                    ecmTask.getPhysicClusterId(),
-                    ecmParamBases);
+            || ecmTask.getOrderType().equals(OpTaskTypeEnum.CLUSTER_EXPAND.getType())) {
+            return buildClusterReadAndWriteAddressForHostWhenScale(ecmTask.getOrderType(), ecmTask.getPhysicClusterId(),
+                ecmParamBases);
         }
 
-        if(ecmTask.getOrderType().equals(OpTaskTypeEnum.CLUSTER_RESTART.getType())) {
+        if (ecmTask.getOrderType().equals(OpTaskTypeEnum.CLUSTER_RESTART.getType())) {
             return buildClusterReadAndWriteAddressForHostWhenRestart(ecmTask.getPhysicClusterId());
         }
 
@@ -835,7 +851,7 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
 
     private List<String> buildClusterReadAndWriteAddressForHostWhenRestart(Long physicClusterId) {
         ClusterPhy clusterPhy = clusterPhyService.getClusterById(Math.toIntExact(physicClusterId));
-        if(AriusObjUtils.isNull(clusterPhy) || AriusObjUtils.isNull(clusterPhy.getHttpAddress())) {
+        if (AriusObjUtils.isNull(clusterPhy) || AriusObjUtils.isNull(clusterPhy.getHttpAddress())) {
             return Lists.newArrayList();
         }
 
@@ -847,13 +863,13 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
         List<String> clusterPhyAddress = Lists.newArrayList();
         List<HostParamBase> hostParamBases = ConvertUtil.list2List(ecmParamBases, HostParamBase.class);
         List<HostParamBase> builds = hostParamBases.stream()
-                .filter(hostParam -> filterValidHttpAddressEcmParamBase(CLIENT_NODE.getDesc(), hostParam))
-                .collect(Collectors.toList());
+            .filter(hostParam -> filterValidHttpAddressEcmParamBase(CLIENT_NODE.getDesc(), hostParam))
+            .collect(Collectors.toList());
         //没有client角色, 用master角色节点作为http读写地址
         if (CollectionUtils.isEmpty(builds)) {
             builds = hostParamBases.stream()
-                    .filter(hostParam -> filterValidHttpAddressEcmParamBase(MASTER_NODE.getDesc(), hostParam))
-                    .collect(Collectors.toList());
+                .filter(hostParam -> filterValidHttpAddressEcmParamBase(MASTER_NODE.getDesc(), hostParam))
+                .collect(Collectors.toList());
         }
 
         for (HostParamBase hostParamBase : builds) {
@@ -864,7 +880,8 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
         return clusterPhyAddress;
     }
 
-    private List<String> buildClusterReadAndWriteAddressForHostWhenScale(Integer orderType, Long physicClusterId, List<EcmParamBase> ecmParamBases) {
+    private List<String> buildClusterReadAndWriteAddressForHostWhenScale(Integer orderType, Long physicClusterId,
+                                                                         List<EcmParamBase> ecmParamBases) {
         // 获取集群原有的clientnode和masternode的地址和端口号
         List<String> clientHttpAddresses = getAddressesByByRoleAndClusterId(physicClusterId, CLIENT_NODE.getDesc());
         List<String> masterHttpAddresses = getAddressesByByRoleAndClusterId(physicClusterId, MASTER_NODE.getDesc());
@@ -877,11 +894,8 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
             }
 
             // 获取扩缩容中当前角色的地址端口列表
-            List<String> shouldOperateAddresses = hostParamBase
-                    .getHostList()
-                    .stream()
-                    .map(hostname -> hostname + ":" + hostParamBase.getPort())
-                    .collect(Collectors.toList());
+            List<String> shouldOperateAddresses = hostParamBase.getHostList().stream()
+                .map(hostname -> hostname + ":" + hostParamBase.getPort()).collect(Collectors.toList());
 
             // 根据扩缩容和角色的类型对masternode和clientnode做对应删除增加操作
             if (hostParamBase.getRoleName().equals(CLIENT_NODE.getDesc())) {
@@ -916,10 +930,9 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
     private List<String> getAddressesByByRoleAndClusterId(Long clusterId, String role) {
         List<ClusterRoleHost> clusterRoleHosts = clusterRoleHostService.getByRoleAndClusterId(clusterId, role);
         if (!CollectionUtils.isEmpty(clusterRoleHosts)) {
-            return clusterRoleHosts
-                    .stream()
-                    .map(roleClusterHost -> roleClusterHost.getHostname() + ":" + roleClusterHost.getPort())
-                    .collect(Collectors.toList());
+            return clusterRoleHosts.stream()
+                .map(roleClusterHost -> roleClusterHost.getHostname() + ":" + roleClusterHost.getPort())
+                .collect(Collectors.toList());
         }
         return Lists.newArrayList();
     }
@@ -957,7 +970,8 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
                 continue;
             }
 
-            ClusterRoleInfo clusterRoleInfo = clusterRoleService.getByClusterNameAndRole(hostParamBase.getPhyClusterName(), hostParamBase.getRoleName());
+            ClusterRoleInfo clusterRoleInfo = clusterRoleService
+                .getByClusterNameAndRole(hostParamBase.getPhyClusterName(), hostParamBase.getRoleName());
             if (null == clusterRoleInfo) {
                 continue;
             }
@@ -982,10 +996,9 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
         updateClusterRoleInfo.setPodNumber(clusterRoleHostService.getPodNumberByRoleId(clusterRoleInfo.getId()));
         Result<Void> result = clusterRoleService.updatePodByClusterIdAndRole(updateClusterRoleInfo);
         if (result.failed()) {
-            LOGGER.error(
-                    "class=EcmTaskManagerImpl||method=deleteRoleCluster||clusterId={}||role={}"
-                            + "msg=failed to update roleCluster",
-                    ecmTask.getPhysicClusterId(), clusterRoleInfo.getRole());
+            LOGGER.error("class=EcmTaskManagerImpl||method=deleteRoleCluster||clusterId={}||role={}"
+                         + "msg=failed to update roleCluster",
+                ecmTask.getPhysicClusterId(), clusterRoleInfo.getRole());
         }
     }
 
@@ -998,7 +1011,7 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
         if (!SUCCESS.getValue().equals(mergedStatusEnum.getValue())) {
             return;
         }
-        
+
         if (!Objects.equals(OpTaskTypeEnum.CLUSTER_UPGRADE.getType(), ecmTask.getOrderType())) {
             return;
         }
@@ -1152,7 +1165,8 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
         return Boolean.TRUE;
     }
 
-    private void saveTaskDetailInfoWithoutZeusTaskId(EcmParamBase ecmParamBase, Long taskId, EcmTaskStatusEnum taskStatusEnum) {
+    private void saveTaskDetailInfoWithoutZeusTaskId(EcmParamBase ecmParamBase, Long taskId,
+                                                     EcmTaskStatusEnum taskStatusEnum) {
         HostParamBase hostParamBase = (HostParamBase) ecmParamBase;
         for (String hostname : hostParamBase.getHostList()) {
             EcmTaskDetail ecmTaskDetail = new EcmTaskDetail();

@@ -28,7 +28,6 @@ public interface TemplatePhyStaticsManager {
      */
     Result<TemplateStatsInfoVO> getTemplateBaseStatisticalInfoByLogicTemplateId(Long logicTemplateId);
 
-
     /**
      * 根据模板id获取模板的基本统计信息
      * @param logicTemplateId 模板id
@@ -46,6 +45,5 @@ public interface TemplatePhyStaticsManager {
      * @return
      */
     Result<List<ProjectIdTemplateAccessCountVO>> getAccessAppInfos(int logicTemplateId, Long startDate, Long endDate);
-
 
 }

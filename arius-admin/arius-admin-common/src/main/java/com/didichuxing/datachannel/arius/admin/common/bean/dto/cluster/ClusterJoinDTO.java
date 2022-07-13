@@ -24,7 +24,7 @@ public class ClusterJoinDTO extends BaseDTO {
     private Integer                    type;
 
     @ApiModelProperty("所属项目id")
-    private Integer projectId;
+    private Integer                    projectId;
 
     @ApiModelProperty("集群名字")
     private String                     cluster;
@@ -46,16 +46,16 @@ public class ClusterJoinDTO extends BaseDTO {
     private String                     password;
 
     @ApiModelProperty("录入规则 0 自动获取 1 全量录入")
-    private Integer importRule;
+    private Integer                    importRule;
 
     @ApiModelProperty("集群展示用属性标签，如「集群所属资源类型」等等")
-    private String tags;
+    private String                     tags;
 
     @ApiModelProperty("数据中心")
     private String                     dataCenter;
 
     @ApiModelProperty("IaaS平台类型")
-    private String                    platformType;
+    private String                     platformType;
 
     @ApiModelProperty("集群资源类型(-1 未知 1 共享 2 独立 3 独享)")
     private Integer                    resourceType;

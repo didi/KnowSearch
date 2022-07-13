@@ -28,5 +28,5 @@ public class TemplatePhysicalCopyDTO extends BaseDTO {
     private Integer shard;
 
     @ApiModelProperty("regionId")
-    private Integer  regionId;
+    private Integer regionId;
 }

@@ -15,22 +15,22 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ESPackage extends BaseEntity {
 
-    private Long id;
+    private Long    id;
 
     /**
      * 镜像地址或包地址
      */
-    private String url;
+    private String  url;
 
     /**
      * 版本标识
      */
-    private String esVersion;
+    private String  esVersion;
 
     /**
      * 包创建人
      */
-    private String creator;
+    private String  creator;
 
     /**
      * 是否为发布版本
@@ -44,7 +44,7 @@ public class ESPackage extends BaseEntity {
     /**
      * 备注
      */
-    private String desc;
+    private String  desc;
 
     /**
      * 标记删除

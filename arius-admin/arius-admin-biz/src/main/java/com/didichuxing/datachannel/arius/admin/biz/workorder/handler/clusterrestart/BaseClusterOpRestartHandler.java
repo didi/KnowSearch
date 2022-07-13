@@ -28,10 +28,10 @@ public abstract class BaseClusterOpRestartHandler extends BaseWorkOrderHandler {
     protected ClusterPhyService esClusterPhyService;
 
     @Autowired
-    protected EcmHandleService ecmHandleService;
+    protected EcmHandleService  ecmHandleService;
 
     @Autowired
-    protected OpTaskManager opTaskManager;
+    protected OpTaskManager     opTaskManager;
 
     @Override
     protected Result validateConsoleAuth(WorkOrder workOrder) {

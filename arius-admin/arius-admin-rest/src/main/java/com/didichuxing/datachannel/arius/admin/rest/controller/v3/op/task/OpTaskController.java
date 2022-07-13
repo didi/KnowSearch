@@ -39,7 +39,7 @@ public class OpTaskController {
     private static final ILog LOGGER = LogFactory.getLog(OpTaskController.class);
 
     @Autowired
-    private OpTaskManager opTaskManager;
+    private OpTaskManager     opTaskManager;
 
     @ApiOperation(value = "任务类型", notes = "")
     @GetMapping(value = "/type-enums")
@@ -60,16 +60,14 @@ public class OpTaskController {
         if (result.failed()) {
             return Result.buildFrom(result);
         }
-        return Result.buildSucc(ConvertUtil.obj2Obj(result.getData(),WorkTaskVO.class));
+        return Result.buildSucc(ConvertUtil.obj2Obj(result.getData(), WorkTaskVO.class));
     }
 
     @ApiOperation(value = "任务列表", notes = "")
     @GetMapping(value = "tasks")
     @ResponseBody
     public Result<List<WorkTaskVO>> getTaskList() {
-        return Result.buildSucc(ConvertUtil.list2List(
-                opTaskManager.list().getData(),WorkTaskVO.class)
-        );
+        return Result.buildSucc(ConvertUtil.list2List(opTaskManager.list().getData(), WorkTaskVO.class));
     }
 
     @PostMapping(path = "/{type}")
@@ -77,7 +75,7 @@ public class OpTaskController {
     @ApiOperation(value = "提交任务接口", notes = "")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "path", dataType = "String", name = "type", value = "任务类型", required = true) })
     public Result<WorkTaskVO> addTask(HttpServletRequest request, @PathVariable(value = "type") String code,
-                                     @RequestBody OpTaskDTO opTaskDTO) throws NotFindSubclassException {
+                                      @RequestBody OpTaskDTO opTaskDTO) throws NotFindSubclassException {
         String dataCenter = opTaskDTO.getDataCenter();
         String user = HttpRequestUtil.getOperator(request);
 
@@ -91,7 +89,7 @@ public class OpTaskController {
         if (result.failed()) {
             return Result.buildFail(result.getMessage());
         }
-        return Result.buildSucc(ConvertUtil.obj2Obj(result.getData(),WorkTaskVO.class));
+        return Result.buildSucc(ConvertUtil.obj2Obj(result.getData(), WorkTaskVO.class));
     }
 
 }

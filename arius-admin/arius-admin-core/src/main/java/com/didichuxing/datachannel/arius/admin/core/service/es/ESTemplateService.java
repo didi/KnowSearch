@@ -60,7 +60,8 @@ public interface ESTemplateService {
      * @return
      * @throws ESOperateException
      */
-    boolean syncCreate(Map<String, String> settings, String cluster, String name, String expression, MappingConfig mappings, int retryCount) throws ESOperateException;
+    boolean syncCreate(Map<String, String> settings, String cluster, String name, String expression,
+                       MappingConfig mappings, int retryCount) throws ESOperateException;
 
     /**
      * 修改模板
@@ -83,8 +84,7 @@ public interface ESTemplateService {
      * @return
      * @throws ESOperateException
      */
-    boolean syncUpdateShardNum(String cluster, String name, Integer shardNum,
-                               int retryCount) throws ESOperateException;
+    boolean syncUpdateShardNum(String cluster, String name, Integer shardNum, int retryCount) throws ESOperateException;
 
     /**
      * 修改模板setting

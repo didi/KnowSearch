@@ -5,12 +5,7 @@ import java.util.List;
 import com.google.common.collect.Lists;
 
 public enum OneLevelTypeEnum {
-                UNKNOWN(""),
-                CLUSTER("cluster"),
-                NODE("node"),
-                TEMPLATE("template"),
-                INDEX("index"),
-                CLUSTER_THREAD_POOL_QUEUE("clusterThreadPoolQueue");
+                              UNKNOWN(""), CLUSTER("cluster"), NODE("node"), TEMPLATE("template"), INDEX("index"), CLUSTER_THREAD_POOL_QUEUE("clusterThreadPoolQueue");
 
     OneLevelTypeEnum(String type) {
         this.type = type;
@@ -36,7 +31,7 @@ public enum OneLevelTypeEnum {
         return null;
     }
 
-    public static List<String> listNoClusterOneLevelType(){
+    public static List<String> listNoClusterOneLevelType() {
         return Lists.newArrayList(NODE.getType(), TEMPLATE.getType(), INDEX.getType());
     }
 }

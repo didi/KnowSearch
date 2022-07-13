@@ -1,6 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.persistence.mysql.ecm;
 
-
 import com.didichuxing.datachannel.arius.admin.common.bean.po.espackage.ESPackagePO;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -47,8 +46,7 @@ public interface ESPackageDAO {
      * @param manifest 类型
      * @return es安装包po
      */
-    ESPackagePO getByVersionAndType(@Param("esVersion") String esVersion,
-                                    @Param("manifest") Integer manifest);
+    ESPackagePO getByVersionAndType(@Param("esVersion") String esVersion, @Param("manifest") Integer manifest);
 
     /**
      * 通过es版本、类型以及id获取安装包
@@ -58,8 +56,7 @@ public interface ESPackageDAO {
      * @return es安装包po
      */
     ESPackagePO getByVersionAndManifestNotSelf(@Param("esVersion") String esVersion,
-                                               @Param("manifest") Integer manifest,
-                                               @Param("id") Long id);
+                                               @Param("manifest") Integer manifest, @Param("id") Long id);
 
     /**
      * 通过id删除es安装包

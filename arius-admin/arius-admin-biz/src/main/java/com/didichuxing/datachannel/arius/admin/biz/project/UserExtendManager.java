@@ -27,7 +27,7 @@ public interface UserExtendManager {
      * @return {@code Result<Void>}
      */
     Result<Void> addUser(UserDTO param, String operator);
-	
+
     /**
      * 用户注册信息校验
      * @param type
@@ -87,7 +87,7 @@ public interface UserExtendManager {
      * @param userIdList 用户idList
      * @return 用户简要信息List
      */
-   Result< List<UserBriefVO>> getUserBriefListByUserIdList(List<Integer> userIdList);
+    Result<List<UserBriefVO>> getUserBriefListByUserIdList(List<Integer> userIdList);
 
     /**
      * 根据部门id获取用户list（获取该部门下所有的用户，包括各种子部门）
@@ -101,7 +101,7 @@ public interface UserExtendManager {
      * @param userId 用户id
      * @return 分配角色或者分配用户/列表信息
      */
-    Result<List<AssignInfoVO>> getAssignDataByUserId(Integer userId) ;
+    Result<List<AssignInfoVO>> getAssignDataByUserId(Integer userId);
 
     /**
      * 根据角色id获取用户list
@@ -138,8 +138,6 @@ public interface UserExtendManager {
      */
     Result<List<UserBriefVO>> getAllUserBriefList();
 
-    
-
     /**
      * 编辑一个用户
      * @param userDTO
@@ -147,6 +145,6 @@ public interface UserExtendManager {
      * @return
      */
     Result<Void> editUser(UserDTO userDTO, String operator);
-    
+
     Result<List<UserVO>> getUserDetailByUserIds(List<Integer> ids);
 }

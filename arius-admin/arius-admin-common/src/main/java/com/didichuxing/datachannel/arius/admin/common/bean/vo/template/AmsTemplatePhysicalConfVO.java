@@ -16,21 +16,21 @@ import java.util.Map;
 public class AmsTemplatePhysicalConfVO extends BaseVO {
 
     @ApiModelProperty("逻辑模板ID")
-    private Integer logicId;
+    private Integer                                         logicId;
 
     @ApiModelProperty("模板名字")
-    private String  name;
+    private String                                          name;
 
     /**
      * 用于索引多type改造   是否启用索引名称映射 0 禁用 1 启用
      */
     @ApiModelProperty("是否启用")
-    private Boolean mappingIndexNameEnable;
+    private Boolean                                         mappingIndexNameEnable;
 
     /**
      * 多type索引type名称到单type索引模板名称的映射
      */
     @ApiModelProperty("映射关系")
-    private Map<String/*typeName*/,String/*templateName*/> typeIndexMapping;
+    private Map<String/*typeName*/, String/*templateName*/> typeIndexMapping;
 
 }

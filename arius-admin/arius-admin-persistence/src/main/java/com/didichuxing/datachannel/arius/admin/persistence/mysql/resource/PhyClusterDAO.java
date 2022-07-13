@@ -111,6 +111,6 @@ public interface PhyClusterDAO {
      * @return  long count
      */
     long getTotalHitByPackageId(@Param("packageId") Long packageId);
-    
-    Integer getIdByName(@Param("phyCluster")String phyCluster);
+
+    Integer getIdByName(@Param("phyCluster") String phyCluster);
 }

@@ -50,19 +50,19 @@ public class TemplateSrvController {
     @PutMapping("/{srvCode}/{templateIdList}")
     @ResponseBody
     @ApiOperation(value = "开启模板服务")
-    public Result<Void> openTemplateSrv(HttpServletRequest request,@PathVariable("srvCode") Integer srvCode,
+    public Result<Void> openTemplateSrv(HttpServletRequest request, @PathVariable("srvCode") Integer srvCode,
                                         @PathVariable("templateIdList") List<Integer> templateIdList,
                                         @RequestBody(required = false) ColdSrvOpenDTO data) {
-        return templateSrvManager.openSrv(srvCode, templateIdList,HttpRequestUtil.getOperator(request),
-                HttpRequestUtil.getProjectId(request),data);
+        return templateSrvManager.openSrv(srvCode, templateIdList, HttpRequestUtil.getOperator(request),
+            HttpRequestUtil.getProjectId(request), data);
     }
 
     @DeleteMapping("/{srvCode}/{templateIdList}")
     @ResponseBody
     @ApiOperation(value = "关闭模板服务")
-    public Result<Void> closeTemplateSrv(HttpServletRequest request,@PathVariable("srvCode") Integer srvCode,
+    public Result<Void> closeTemplateSrv(HttpServletRequest request, @PathVariable("srvCode") Integer srvCode,
                                          @PathVariable("templateIdList") List<Integer> templateIdList) {
-        return templateSrvManager.closeSrv(srvCode, templateIdList,HttpRequestUtil.getOperator(request),
-                HttpRequestUtil.getProjectId(request));
+        return templateSrvManager.closeSrv(srvCode, templateIdList, HttpRequestUtil.getOperator(request),
+            HttpRequestUtil.getProjectId(request));
     }
 }

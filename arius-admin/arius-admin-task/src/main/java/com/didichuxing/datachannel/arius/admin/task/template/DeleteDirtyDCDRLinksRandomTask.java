@@ -34,7 +34,7 @@ public class DeleteDirtyDCDRLinksRandomTask implements Job {
     private static final Logger LOGGER = LoggerFactory.getLogger(DeleteDirtyDCDRLinksRandomTask.class);
 
     @Autowired
-    private OpTaskManager opTaskManager;
+    private OpTaskManager       opTaskManager;
 
     @Autowired
     private TemplateDCDRManager templateDcdrManager;
@@ -44,37 +44,46 @@ public class DeleteDirtyDCDRLinksRandomTask implements Job {
         LOGGER.info("class=DeleteDirtyDCDRLinksRandomTask||method=execute||msg=start");
 
         //获取失败的dcdr主从切换任务
-        List<OpTask> successDcdrSwitchTaskList = opTaskManager.getSuccessTaskByType(OpTaskTypeEnum.TEMPLATE_DCDR.getType());
-        if (CollectionUtils.isEmpty(successDcdrSwitchTaskList)) { return TaskResult.SUCCESS; }
+        List<OpTask> successDcdrSwitchTaskList = opTaskManager
+            .getSuccessTaskByType(OpTaskTypeEnum.TEMPLATE_DCDR.getType());
+        if (CollectionUtils.isEmpty(successDcdrSwitchTaskList)) {
+            return TaskResult.SUCCESS;
+        }
 
         for (OpTask successDcdrSwitchTask : successDcdrSwitchTaskList) {
             DCDRTasksDetail dcdrTasksDetail = JSON.parseObject(successDcdrSwitchTask.getExpandData(),
                 DCDRTasksDetail.class);
 
-            if (null == dcdrTasksDetail) {continue;}
+            if (null == dcdrTasksDetail) {
+                continue;
+            }
 
             List<DCDRSingleTemplateMasterSlaveSwitchDetail> switchDetailList = dcdrTasksDetail
                 .getDcdrSingleTemplateMasterSlaveSwitchDetailList();
-            if (CollectionUtils.isEmpty(switchDetailList)) { continue; }
+            if (CollectionUtils.isEmpty(switchDetailList)) {
+                continue;
+            }
 
             for (DCDRSingleTemplateMasterSlaveSwitchDetail switchDetail : switchDetailList) {
                 //强切任务失败，删除脏链路
                 if (DCDRSwithTypeEnum.FORCE.getCode().equals(switchDetail.getSwitchType())
-                        && !switchDetail.getDeleteDcdrChannelFlag()) {
+                    && !switchDetail.getDeleteDcdrChannelFlag()) {
                     try {
                         Result<Void> deleteDcdrResult = templateDcdrManager.deleteDCDR(
-                                switchDetail.getTemplateId().intValue(), AriusUser.SYSTEM.getDesc(), AuthConstant.SUPER_PROJECT_ID);
+                            switchDetail.getTemplateId().intValue(), AriusUser.SYSTEM.getDesc(),
+                            AuthConstant.SUPER_PROJECT_ID);
 
                         if (deleteDcdrResult.failed()) {
                             LOGGER.error("class=DeleteDirtyDCDRLinksRandomTask||templateId={}||method=execute||msg={}",
-                                    switchDetail.getTemplateId(), deleteDcdrResult.getMessage());
+                                switchDetail.getTemplateId(), deleteDcdrResult.getMessage());
                             switchDetail.setDeleteDcdrChannelFlag(false);
-                        }else {
+                        } else {
                             switchDetail.setDeleteDcdrChannelFlag(true);
                         }
                     } catch (ESOperateException e) {
-                        LOGGER.error("class=DeleteDirtyDCDRLinksRandomTask||templateId={}||method=execute||msg=failed to delete dcdr channel",
-                                switchDetail.getTemplateId(), e);
+                        LOGGER.error(
+                            "class=DeleteDirtyDCDRLinksRandomTask||templateId={}||method=execute||msg=failed to delete dcdr channel",
+                            switchDetail.getTemplateId(), e);
                         switchDetail.setDeleteDcdrChannelFlag(false);
                     }
                 }

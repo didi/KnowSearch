@@ -21,7 +21,7 @@ public class ScrollDslTemplateRequest {
     /**
      * 滚动查询大小
      */
-    private Long scrollSize;
+    private Long   scrollSize;
     /**
      * 查询模板版本号
      */
@@ -29,7 +29,7 @@ public class ScrollDslTemplateRequest {
     /**
      * 上次修改时间
      */
-    private Long lastModifyTime;
+    private Long   lastModifyTime;
     /**
      * 滚动游标
      */

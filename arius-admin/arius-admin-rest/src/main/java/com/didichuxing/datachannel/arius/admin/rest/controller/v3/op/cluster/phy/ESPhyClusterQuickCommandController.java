@@ -30,10 +30,10 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion
 @RequestMapping({ V3 + "/cluster/phy" })
 @Api(tags = "ES物理集群集群快捷命令接口(REST)")
 public class ESPhyClusterQuickCommandController {
-    
+
     @Autowired
     private ClusterPhyQuickCommandManager clusterPhyQuickCommandManager;
-    
+
     @PutMapping("/{cluster}/node-state-analysis")
     @ResponseBody
     @ApiOperation(value = "node_state分析")

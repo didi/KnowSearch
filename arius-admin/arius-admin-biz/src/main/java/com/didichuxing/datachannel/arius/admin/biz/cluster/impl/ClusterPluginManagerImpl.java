@@ -12,32 +12,32 @@ import org.springframework.stereotype.Component;
 @Component
 public class ClusterPluginManagerImpl implements ClusterPluginManager {
     @Autowired
-    private ESPluginService       esPluginService;
+    private ESPluginService esPluginService;
 
-	@Override
-	public Result<Long> addPlugins(PluginDTO plugin, Integer projectId) throws NotFindSubclassException {
-		final Result<Void> result = ProjectUtils.checkProjectCorrectly(i -> i, projectId,projectId);
-        if (result.failed()){
+    @Override
+    public Result<Long> addPlugins(PluginDTO plugin, Integer projectId) throws NotFindSubclassException {
+        final Result<Void> result = ProjectUtils.checkProjectCorrectly(i -> i, projectId, projectId);
+        if (result.failed()) {
             return Result.buildFail(result.getMessage());
         }
-		return esPluginService.addESPlugin(plugin);
-	}
+        return esPluginService.addESPlugin(plugin);
+    }
 
-	@Override
-	public Result<Long> deletePluginById(Long id, String operator, Integer projectId) throws NotFindSubclassException {
-		final Result<Void> result = ProjectUtils.checkProjectCorrectly(i -> i, projectId,projectId);
-        if (result.failed()){
+    @Override
+    public Result<Long> deletePluginById(Long id, String operator, Integer projectId) throws NotFindSubclassException {
+        final Result<Void> result = ProjectUtils.checkProjectCorrectly(i -> i, projectId, projectId);
+        if (result.failed()) {
             return Result.buildFail(result.getMessage());
         }
-		return esPluginService.deletePluginById(id, operator);
-	}
+        return esPluginService.deletePluginById(id, operator);
+    }
 
-	@Override
-	public Result<Void> editPluginDesc(PluginDTO pluginDTO, String operator, Integer projectId) {
-		 final Result<Void> result = ProjectUtils.checkProjectCorrectly(i -> i, projectId,projectId);
-        if (result.failed()){
+    @Override
+    public Result<Void> editPluginDesc(PluginDTO pluginDTO, String operator, Integer projectId) {
+        final Result<Void> result = ProjectUtils.checkProjectCorrectly(i -> i, projectId, projectId);
+        if (result.failed()) {
             return Result.buildFail(result.getMessage());
         }
-		return esPluginService.updateESPluginDesc(pluginDTO, operator);
-	}
+        return esPluginService.updateESPluginDesc(pluginDTO, operator);
+    }
 }

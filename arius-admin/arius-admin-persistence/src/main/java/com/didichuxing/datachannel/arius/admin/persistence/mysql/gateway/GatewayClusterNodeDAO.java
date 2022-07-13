@@ -27,8 +27,7 @@ public interface GatewayClusterNodeDAO {
      * @param time 时间
      * @return int
      */
-    int aliveCountByClusterNameAndTime(@Param("clusterName") String clusterName,
-                                       @Param("time") Date time);
+    int aliveCountByClusterNameAndTime(@Param("clusterName") String clusterName, @Param("time") Date time);
 
     /**
      * 根据集群名和时间获取列表

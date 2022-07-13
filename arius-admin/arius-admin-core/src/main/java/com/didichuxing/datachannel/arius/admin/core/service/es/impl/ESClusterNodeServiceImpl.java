@@ -50,23 +50,23 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
     private static final ILog LOGGER = LogFactory.getLog(ESClusterNodeServiceImpl.class);
 
     @Autowired
-    private ESOpClient esOpClient;
+    private ESOpClient        esOpClient;
 
     @Autowired
-    private ESClusterNodeDAO esClusterNodeDAO;
+    private ESClusterNodeDAO  esClusterNodeDAO;
 
     @Override
     public Map<String, ClusterNodeStats> syncGetNodeFsStatsMap(String clusterName) {
         ESClient esClient = esOpClient.getESClient(clusterName);
         if (esClient == null) {
             LOGGER.error(
-                    "class=ESClusterNodeServiceImpl||method=syncGetNodeFsStatsMap||clusterName={}||errMsg=esClient is null",
-                    clusterName);
+                "class=ESClusterNodeServiceImpl||method=syncGetNodeFsStatsMap||clusterName={}||errMsg=esClient is null",
+                clusterName);
             return Maps.newHashMap();
         }
 
         ESClusterNodesStatsResponse response = esClient.admin().cluster().prepareNodeStats().setFs(true).execute()
-                    .actionGet(30, TimeUnit.SECONDS);
+            .actionGet(30, TimeUnit.SECONDS);
 
         return response.getNodes();
     }
@@ -76,19 +76,13 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
         ESClient esClient = esOpClient.getESClient(clusterName);
         if (esClient == null) {
             LOGGER.error(
-                    "class=ESClusterNodeServiceImpl||method=syncGetNodeFsStatsMap||clusterName={}||errMsg=esClient is null",
-                    clusterName);
+                "class=ESClusterNodeServiceImpl||method=syncGetNodeFsStatsMap||clusterName={}||errMsg=esClient is null",
+                clusterName);
             return Maps.newHashMap();
         }
 
-        ESClusterNodesStatsResponse response = esClient.admin().cluster().prepareNodeStats()
-                .setFs(true)
-                .setOs(true)
-                .setJvm(true)
-                .setThreadPool(true)
-                .level("node")
-                .execute()
-                .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+        ESClusterNodesStatsResponse response = esClient.admin().cluster().prepareNodeStats().setFs(true).setOs(true)
+            .setJvm(true).setThreadPool(true).level("node").execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
 
         return response.getNodes();
     }
@@ -101,8 +95,7 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
 
     @Override
     public List<String> syncGetNodeIp(String clusterName) {
-        return syncGetNodeInfo(clusterName).values().stream().map(ClusterNodeInfo::getIp)
-                .collect(Collectors.toList());
+        return syncGetNodeInfo(clusterName).values().stream().map(ClusterNodeInfo::getIp).collect(Collectors.toList());
     }
 
     @Override
@@ -128,8 +121,8 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
         ESClient esClient = esOpClient.getESClient(clusterName);
         if (esClient == null) {
             LOGGER.error(
-                    "class=ESClusterNodeServiceImpl||method=syncGetNodeNames||clusterName={}||errMsg=esClient is null",
-                    clusterName);
+                "class=ESClusterNodeServiceImpl||method=syncGetNodeNames||clusterName={}||errMsg=esClient is null",
+                clusterName);
             return Lists.newArrayList();
         }
 
@@ -139,7 +132,7 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
         }
 
         return esClusterNodesResponse.getNodes().values().stream().map(ClusterNodeInfo::getName)
-                .collect(Collectors.toList());
+            .collect(Collectors.toList());
     }
 
     @Override
@@ -147,7 +140,7 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
         DirectResponse directResponse = esClusterNodeDAO.getDirectResponse(clusterName, "Get", GET_PENDING_TASKS);
         List<PendingTask> pendingTasks = Lists.newArrayList();
         if (directResponse.getRestStatus() == RestStatus.OK
-                && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
+            && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
 
             JSONObject jsonObject = JSON.parseObject(directResponse.getResponseContent());
             if (null != jsonObject && null != jsonObject.getJSONArray(TASKS)) {
@@ -177,8 +170,7 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
         }
 
         if (null != pendingTasksObj.getJSONObject(i).get(INSERT_PRDER)) {
-            pendingTask.setInsertOrder(
-                    Long.valueOf(pendingTasksObj.getJSONObject(i).get(INSERT_PRDER).toString()));
+            pendingTask.setInsertOrder(Long.valueOf(pendingTasksObj.getJSONObject(i).get(INSERT_PRDER).toString()));
         }
     }
 
@@ -217,7 +209,7 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
         List<IndexResponse> indexResponses;
 
         if (directResponse.getRestStatus() == RestStatus.OK
-                && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
+            && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
 
             indexResponses = ConvertUtil.str2ObjArrayByJson(directResponse.getResponseContent(), IndexResponse.class);
 
@@ -226,13 +218,13 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
                 String requestContent = getShardToNodeRequestContentByIndexName(r.getIndex(), "20s");
 
                 DirectResponse shardNodeResponse = esClusterNodeDAO.getDirectResponse(clusterName, "Get",
-                        requestContent);
+                    requestContent);
 
                 if (shardNodeResponse.getRestStatus() == RestStatus.OK
-                        && StringUtils.isNoneBlank(shardNodeResponse.getResponseContent())) {
+                    && StringUtils.isNoneBlank(shardNodeResponse.getResponseContent())) {
 
                     List<IndexShardInfo> indexShardInfos = ConvertUtil
-                            .str2ObjArrayByJson(shardNodeResponse.getResponseContent(), IndexShardInfo.class);
+                        .str2ObjArrayByJson(shardNodeResponse.getResponseContent(), IndexShardInfo.class);
 
                     BigIndexMetrics bigIndexMetrics = new BigIndexMetrics();
                     bigIndexMetrics.setIndexName(r.getIndex());
@@ -248,7 +240,7 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
 
     @Override
     public int syncGetIndicesCount(String cluster, String nodes) {
-        return esClusterNodeDAO.getIndicesCount(cluster,nodes);
+        return esClusterNodeDAO.getIndicesCount(cluster, nodes);
     }
 
     @Override
@@ -256,14 +248,14 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
         ESClient esClient = esOpClient.getESClient(cluster);
         if (esClient == null) {
             LOGGER.error(
-                    "class=ESClusterNodeServiceImpl||method=synGetClusterMem||clusterName={}||errMsg=esClient is null",
-                    cluster);
+                "class=ESClusterNodeServiceImpl||method=synGetClusterMem||clusterName={}||errMsg=esClient is null",
+                cluster);
             return null;
         }
 
         // 获取nodes中的os信息
         ESClusterNodesStatsResponse response = esClient.admin().cluster().prepareNodeStats().setOs(true).execute()
-                .actionGet(30, TimeUnit.SECONDS);
+            .actionGet(30, TimeUnit.SECONDS);
 
         // 构建集群的内存使用信息对象
         ClusterMemInfo clusterMemInfo = ClusterMemInfo.builder().memFree(0L).memUsed(0L).memTotal(0L).build();
@@ -273,15 +265,11 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
         }
 
         // 统计所有的节点的内存信息合成为集群的内存使用信息
-        clusterNodeStatsMap.values()
-                .stream()
-                .map(ClusterNodeStats::getOs)
-                .map(OsNode::getMem)
-                .forEach(osMem -> {
-                    clusterMemInfo.setMemFree(clusterMemInfo.getMemFree() + osMem.getFreeInBytes());
-                    clusterMemInfo.setMemTotal(clusterMemInfo.getMemTotal() + osMem.getTotalInBytes());
-                    clusterMemInfo.setMemUsed(clusterMemInfo.getMemUsed() + osMem.getUsedInBytes());
-                });
+        clusterNodeStatsMap.values().stream().map(ClusterNodeStats::getOs).map(OsNode::getMem).forEach(osMem -> {
+            clusterMemInfo.setMemFree(clusterMemInfo.getMemFree() + osMem.getFreeInBytes());
+            clusterMemInfo.setMemTotal(clusterMemInfo.getMemTotal() + osMem.getTotalInBytes());
+            clusterMemInfo.setMemUsed(clusterMemInfo.getMemUsed() + osMem.getUsedInBytes());
+        });
 
         // 计算集群总的内存使用和空闲的百分比信息，保留小数点后3位
         BigDecimal memFreeDec = new BigDecimal(clusterMemInfo.getMemFree());
@@ -296,7 +284,6 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
     public Map<String, Triple<Long, Long, Double>> syncGetNodesDiskUsage(String cluster) {
         Map<String, Triple<Long, Long, Double>> diskUsageMap = new HashMap<>();
         List<ClusterNodeStats> nodeStatsList = esClusterNodeDAO.syncGetNodesStats(cluster);
-
 
         if (CollectionUtils.isNotEmpty(nodeStatsList)) {
             // 遍历节点，获得节点和对应的磁盘使用率
@@ -396,7 +383,7 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
     public List<NodeStateVO> nodeStateAnalysis(String cluster) {
         List<ClusterNodeStats> nodeStats = esClusterNodeDAO.getNodeState(cluster);
         List<NodeStateVO> vos = new ArrayList<>();
-        nodeStats.forEach(nodeStat->{
+        nodeStats.forEach(nodeStat -> {
             NodeStateVO vo = new NodeStateVO();
 
             vo.setNodeName(nodeStat.getName());
@@ -417,7 +404,6 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
             vo.setThreadPoolManagementActive(nodeStat.getThreadPool().getManagement().getActive());
             vo.setThreadPoolManagementReject(nodeStat.getThreadPool().getManagement().getRejected());
             vo.setThreadPoolManagementQueue(nodeStat.getThreadPool().getManagement().getQueue());
-
 
             vos.add(vo);
         });

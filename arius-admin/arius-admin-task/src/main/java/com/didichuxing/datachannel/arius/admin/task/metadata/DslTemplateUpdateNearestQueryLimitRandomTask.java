@@ -17,7 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 @Task(name = "DslTemplateUpdateNearestQueryLimitRandomTask", description = "更新最近的DSL模版限流值任务", cron = "0 */5 * * * ?", autoRegister = true)
 public class DslTemplateUpdateNearestQueryLimitRandomTask implements Job {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DslTemplateUpdateNearestQueryLimitRandomTask.class);
+    private static final Logger                   LOGGER = LoggerFactory
+        .getLogger(DslTemplateUpdateNearestQueryLimitRandomTask.class);
 
     @Autowired
     private DslTemplateUpdateNearestQueryLimitJob dslTemplateUpdateNearestQueryLimitJob;

@@ -15,14 +15,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 @Task(name = "ClusterNodeSettingCollectorRandomTask", description = "同步节点配置任务", cron = "0 0/3 * * * ?", autoRegister = true)
 public class ClusterNodeSettingCollectorRandomTask extends BaseConcurrentClusterTask implements Job {
 
-    private static final ILog LOGGER = LogFactory.getLog(ClusterNodeSettingCollectorRandomTask.class);
+    private static final ILog      LOGGER = LogFactory.getLog(ClusterNodeSettingCollectorRandomTask.class);
 
     @Autowired
     private ClusterRoleHostService clusterRoleHostService;
 
     @Override
     public TaskResult execute(JobContext jobContext) throws Exception {
-        LOGGER.info("class=ClusterNodeSettingCollectorRandomTask||method=execute||msg=ClusterNodeSettingCollectorRandomTask start.");
+        LOGGER.info(
+            "class=ClusterNodeSettingCollectorRandomTask||method=execute||msg=ClusterNodeSettingCollectorRandomTask start.");
         if (execute()) {
             return TaskResult.SUCCESS;
         }

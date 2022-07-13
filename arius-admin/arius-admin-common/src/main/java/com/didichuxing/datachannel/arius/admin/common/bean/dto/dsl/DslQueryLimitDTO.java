@@ -26,7 +26,6 @@ public class DslQueryLimitDTO extends DslBaseDTO {
         this.queryLimit = queryLimit;
     }
 
-
     public Double getQueryLimit() {
         return queryLimit;
     }

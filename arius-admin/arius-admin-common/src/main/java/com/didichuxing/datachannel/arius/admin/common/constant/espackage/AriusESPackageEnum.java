@@ -20,9 +20,9 @@ public enum AriusESPackageEnum {
         this.desc = desc;
     }
 
-    private int     code;
-    private int     versionLength;
-    private String  desc;
+    private int    code;
+    private int    versionLength;
+    private String desc;
 
     public int getCode() {
         return code;
@@ -32,7 +32,9 @@ public enum AriusESPackageEnum {
         return desc;
     }
 
-    public int getVersionLength() { return versionLength; }
+    public int getVersionLength() {
+        return versionLength;
+    }
 
     public static AriusESPackageEnum valueOfCode(Integer code) {
         if (code == null) {
@@ -49,12 +51,12 @@ public enum AriusESPackageEnum {
     }
 
     public static AriusESPackageEnum valueOfLength(Integer versionLength) {
-        if(versionLength == null) {
+        if (versionLength == null) {
             return UNKNOWN;
         }
 
-        for(AriusESPackageEnum param : AriusESPackageEnum.values()) {
-            if(param.getVersionLength() == versionLength) {
+        for (AriusESPackageEnum param : AriusESPackageEnum.values()) {
+            if (param.getVersionLength() == versionLength) {
                 return param;
             }
         }

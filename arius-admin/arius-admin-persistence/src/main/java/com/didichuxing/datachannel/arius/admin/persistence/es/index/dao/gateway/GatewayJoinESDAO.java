@@ -49,18 +49,18 @@ import org.springframework.stereotype.Component;
 @NoArgsConstructor
 public class GatewayJoinESDAO extends BaseESDAO {
 
-    private static final String DOC_COUNT = "doc_count";
-    private static final String INDICES = "indices";
+    private static final String DOC_COUNT                     = "doc_count";
+    private static final String INDICES                       = "indices";
     private static final String DOUBLE_STRING_WITH_UNDER_LINE = "%s_%s";
 
     /**
      * gateway join索引
      */
-    private String indexName;
+    private String              indexName;
     /**
      * type名称
      */
-    private String typeName   = "type";
+    private String              typeName                      = "type";
 
     @PostConstruct
     public void init() {
@@ -96,7 +96,7 @@ public class GatewayJoinESDAO extends BaseESDAO {
             }
         } catch (Exception e) {
             LOGGER.error("class=GatewayJoinEsDao||method=getTemplateMD5ByrealIndexName||errMsg={} fail to get dsls",
-                    templateName, e);
+                templateName, e);
         }
 
         return dslMap;
@@ -112,23 +112,22 @@ public class GatewayJoinESDAO extends BaseESDAO {
     public List<Double> getRtCostByProjectId(Integer projectId, Long startTime, Long endTime) {
         List<Double> rtCostList = Lists.newArrayList();
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_QUERY_RT_BY_PROJECT_ID, projectId, startTime,
-                endTime);
-        return gatewayClient.performRequest(getIndexByTimeRange(startTime, endTime),
-                typeName, dsl, response -> {
-                    Map<String, ESAggr> esAggrMap = response.getAggs().getEsAggrMap();
-                    if (null != esAggrMap && esAggrMap.containsKey("queryByTimeStamp")) {
-                        ESAggr queryByTimeStamp = esAggrMap.get("queryByTimeStamp");
-                        if (null != queryByTimeStamp && CollectionUtils.isNotEmpty(queryByTimeStamp.getBucketList())) {
-                            handleBucketListInGetRtCostByProjectId(rtCostList, queryByTimeStamp);
-                        }
-                    }
-                    if (CollectionUtils.isEmpty(rtCostList) || rtCostList.size() < 10) {
-                        return rtCostList;
-                    }
-                    rtCostList.sort( Comparator.reverseOrder());
-                    return rtCostList.subList(0, 10);
+            endTime);
+        return gatewayClient.performRequest(getIndexByTimeRange(startTime, endTime), typeName, dsl, response -> {
+            Map<String, ESAggr> esAggrMap = response.getAggs().getEsAggrMap();
+            if (null != esAggrMap && esAggrMap.containsKey("queryByTimeStamp")) {
+                ESAggr queryByTimeStamp = esAggrMap.get("queryByTimeStamp");
+                if (null != queryByTimeStamp && CollectionUtils.isNotEmpty(queryByTimeStamp.getBucketList())) {
+                    handleBucketListInGetRtCostByProjectId(rtCostList, queryByTimeStamp);
+                }
+            }
+            if (CollectionUtils.isEmpty(rtCostList) || rtCostList.size() < 10) {
+                return rtCostList;
+            }
+            rtCostList.sort(Comparator.reverseOrder());
+            return rtCostList.subList(0, 10);
 
-                }, 3);
+        }, 3);
     }
 
     /**
@@ -139,29 +138,28 @@ public class GatewayJoinESDAO extends BaseESDAO {
      * @param topNum
      * @return
      */
-    public List<ProjectQueryPO> getQueryTopNumInfoByProjectId(Integer projectId, Long startTime, Long endTime, int topNum) {
+    public List<ProjectQueryPO> getQueryTopNumInfoByProjectId(Integer projectId, Long startTime, Long endTime,
+                                                              int topNum) {
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_TOP_NUM_QUERY_INFO_BY_PROJECT_ID, projectId,
-                startTime, endTime, topNum);
-        return gatewayClient.performRequest(getIndexByTimeRange(startTime, endTime),
-                typeName, dsl, response -> {
-                    List<ESHit> hits = response.getHits().getHits();
-                    List<ProjectQueryPO> quetyInfoList = Lists.newArrayList();
-                    if (CollectionUtils.isNotEmpty(hits)) {
-                        for (ESHit hit : hits) {
-                            try {
-                                ProjectQueryPO projectQuery = ConvertUtil.obj2ObjByJSON(hit.getSource(),
-                                        ProjectQueryPO.class);
-                                if (null != projectQuery) {
-                                    quetyInfoList.add(projectQuery);
-                                }
-                            } catch (Exception e) {
-                                LOGGER.error("class=GatewayJoinEsDao||method=getQueryTopNumInfoByProjectId||errMsg={}", e);
-                            }
+            startTime, endTime, topNum);
+        return gatewayClient.performRequest(getIndexByTimeRange(startTime, endTime), typeName, dsl, response -> {
+            List<ESHit> hits = response.getHits().getHits();
+            List<ProjectQueryPO> quetyInfoList = Lists.newArrayList();
+            if (CollectionUtils.isNotEmpty(hits)) {
+                for (ESHit hit : hits) {
+                    try {
+                        ProjectQueryPO projectQuery = ConvertUtil.obj2ObjByJSON(hit.getSource(), ProjectQueryPO.class);
+                        if (null != projectQuery) {
+                            quetyInfoList.add(projectQuery);
                         }
-                        return quetyInfoList;
+                    } catch (Exception e) {
+                        LOGGER.error("class=GatewayJoinEsDao||method=getQueryTopNumInfoByProjectId||errMsg={}", e);
                     }
-                    return quetyInfoList;
-                }, 3);
+                }
+                return quetyInfoList;
+            }
+            return quetyInfoList;
+        }, 3);
     }
 
     /**
@@ -172,7 +170,7 @@ public class GatewayJoinESDAO extends BaseESDAO {
      */
     public Map<String/*dslMd5*/, GatewayJoinPO> getSearchRequestByRealIndexName(String templateName) {
         Map<String/*dslMd5*/, GatewayJoinPO> dslMap = Maps.newHashMap();
-        String dsl = dslLoaderUtil.getFormatDslByFileName( DslsConstant.GET_SEARCH_REQUEST_BY_INDEX_NAME, templateName);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_SEARCH_REQUEST_BY_INDEX_NAME, templateName);
 
         ESAggrMap esAggrMap = gatewayClient.performAggRequest(getTemplateExpression(), null, dsl);
         if (esAggrMap == null) {
@@ -191,13 +189,14 @@ public class GatewayJoinESDAO extends BaseESDAO {
             }
         } catch (Exception e) {
             LOGGER.error("class=GatewayJoinEsDao||method=getSearchRequestByrealIndexName||errMsg={} fail to get dsls",
-                    templateName, e);
+                templateName, e);
         }
 
         return dslMap;
     }
 
-    private void handleESBucketListInGetSearchRequestByRealIndexName(Map<String, GatewayJoinPO> dslMap, List<ESBucket> esBucketList) {
+    private void handleESBucketListInGetSearchRequestByRealIndexName(Map<String, GatewayJoinPO> dslMap,
+                                                                     List<ESBucket> esBucketList) {
         ESAggr subEsAggr;
         String md5;
         for (ESBucket esBucket : esBucketList) {
@@ -235,27 +234,27 @@ public class GatewayJoinESDAO extends BaseESDAO {
     }
 
     public List<GatewayJoinPO> getGatewaySlowList(Long projectId, Long startDate, Long endDate) {
-        String realrealIndexName = IndexNameUtils.genDailyIndexName( getTemplateName(), startDate, endDate);
+        String realrealIndexName = IndexNameUtils.genDailyIndexName(getTemplateName(), startDate, endDate);
         String dsl = null;
         if (null == projectId) {
             dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_SLOW_LIST_BY_RANGE, startDate, endDate);
         } else {
-            dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_SLOW_LIST_BY_PROJECT_ID_AND_RANGE, startDate,
-                    endDate, projectId);
+            dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_SLOW_LIST_BY_PROJECT_ID_AND_RANGE,
+                startDate, endDate, projectId);
         }
 
         return gatewayClient.performRequest(realrealIndexName, typeName, dsl, GatewayJoinPO.class);
     }
 
     public List<GatewayJoinPO> getGatewayErrorList(Long projectId, Long startDate, Long endDate) {
-        String realrealIndexName = IndexNameUtils.genDailyIndexName( getTemplateName(), startDate, endDate);
+        String realrealIndexName = IndexNameUtils.genDailyIndexName(getTemplateName(), startDate, endDate);
         String dsl = null;
         if (null == projectId) {
             dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_ERROR_LIST_BY_RANGE, startDate,
-                    endDate);
+                endDate);
         } else {
             dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_ERROR_LIST_BY_PROJECT_ID_AND_RANGE,
-                    startDate, endDate, projectId);
+                startDate, endDate, projectId);
         }
 
         return gatewayClient.performRequest(realrealIndexName, typeName, dsl, GatewayJoinPO.class);
@@ -270,9 +269,9 @@ public class GatewayJoinESDAO extends BaseESDAO {
      * @return
      */
     public Long getSearchCountByProjectId(Long projectId, Long startDate, Long endDate) {
-        String realrealIndexName = IndexNameUtils.genDailyIndexName( getTemplateName(), startDate, endDate);
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_SEARCH_COUNT_BY_PROJECT_ID_TIME_RANGE, projectId,
-                startDate, endDate);
+        String realrealIndexName = IndexNameUtils.genDailyIndexName(getTemplateName(), startDate, endDate);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_SEARCH_COUNT_BY_PROJECT_ID_TIME_RANGE,
+            projectId, startDate, endDate);
 
         return gatewayClient.performRequestAndGetTotalCount(realrealIndexName, typeName, dsl);
     }
@@ -286,9 +285,9 @@ public class GatewayJoinESDAO extends BaseESDAO {
      * @return
      */
     public Long getErrorCntByTemplateName(String templateName, Long startDate, Long endDate) {
-        String realrealIndexName = IndexNameUtils.genDailyIndexName( getTemplateName(), startDate, endDate);
+        String realrealIndexName = IndexNameUtils.genDailyIndexName(getTemplateName(), startDate, endDate);
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_ERROR_CNT_BY_TEMPLATE_NAME, templateName,
-                startDate, endDate);
+            startDate, endDate);
 
         return gatewayClient.performRequestAndGetTotalCount(realrealIndexName, typeName, dsl);
     }
@@ -302,9 +301,9 @@ public class GatewayJoinESDAO extends BaseESDAO {
      * @return
      */
     public Long getSlowCntByTemplateName(String templateName, Long totalCost, Long startDate, Long endDate) {
-        String realIndexName = IndexNameUtils.genDailyIndexName( getTemplateName(), startDate, endDate);
+        String realIndexName = IndexNameUtils.genDailyIndexName(getTemplateName(), startDate, endDate);
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_SLOW_CNT_BY_TEMPLATE_NAME, templateName,
-                totalCost, startDate, endDate);
+            totalCost, startDate, endDate);
         return gatewayClient.performRequestAndGetTotalCount(realIndexName, typeName, dsl);
     }
 
@@ -323,7 +322,8 @@ public class GatewayJoinESDAO extends BaseESDAO {
             if (i > 0) {
                 stringBuilder.append(",");
             }
-            stringBuilder.append(String.format(DOUBLE_STRING_WITH_UNDER_LINE, indexName, DateTimeUtil.getFormatDayByOffset(i)));
+            stringBuilder
+                .append(String.format(DOUBLE_STRING_WITH_UNDER_LINE, indexName, DateTimeUtil.getFormatDayByOffset(i)));
         }
 
         Map<String, Long> realIndexNameCountMap = Maps.newHashMap();
@@ -343,7 +343,7 @@ public class GatewayJoinESDAO extends BaseESDAO {
 
                 key = esBucket.getUnusedMap().get(ESConstant.AGG_KEY).toString();
                 realIndexNameCountMap.put(key,
-                        Long.valueOf(esBucket.getUnusedMap().get(ESConstant.AGG_DOC_COUNT).toString()));
+                    Long.valueOf(esBucket.getUnusedMap().get(ESConstant.AGG_DOC_COUNT).toString()));
             }
         }
 
@@ -358,14 +358,16 @@ public class GatewayJoinESDAO extends BaseESDAO {
      * @return
      */
     public Map<String, Long> getRequestTypeByProjectId(Integer projectId, String indexExp, Integer dayCount) {
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_REQUEST_TYPE_BY_PROJECT_ID, projectId, indexExp);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_REQUEST_TYPE_BY_PROJECT_ID, projectId,
+            indexExp);
 
         StringBuilder stringBuilder = new StringBuilder(64);
         for (int i = 0; i < dayCount; ++i) {
             if (i > 0) {
                 stringBuilder.append(",");
             }
-            stringBuilder.append(String.format(DOUBLE_STRING_WITH_UNDER_LINE, indexName, DateTimeUtil.getFormatDayByOffset(i)));
+            stringBuilder
+                .append(String.format(DOUBLE_STRING_WITH_UNDER_LINE, indexName, DateTimeUtil.getFormatDayByOffset(i)));
         }
 
         Map<String, Long> requestTypeMap = Maps.newHashMap();
@@ -419,11 +421,10 @@ public class GatewayJoinESDAO extends BaseESDAO {
     public Tuple<Long, GatewayJoinPO> getPoByIndicesAndMd5(String indexDate, String indices, String md5) {
 
         String realIndexName = getIndex(indexDate);
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_JOIN_BY_INDICES_MD5, indices,
-                md5);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_JOIN_BY_INDICES_MD5, indices, md5);
 
-        Tuple<Long, GatewayJoinPO> tuple = gatewayClient.performRequestAndGetTotalCount(realIndexName, null,
-                dsl, GatewayJoinPO.class);
+        Tuple<Long, GatewayJoinPO> tuple = gatewayClient.performRequestAndGetTotalCount(realIndexName, null, dsl,
+            GatewayJoinPO.class);
 
         if (tuple != null && tuple.v1() > 0) {
             return tuple;
@@ -462,7 +463,8 @@ public class GatewayJoinESDAO extends BaseESDAO {
         return accessIndicesDslMd5Maps;
     }
 
-    private void handleBucketListInAggIndicesDslMd5ByRange(Map<String, Set<String>> accessIndicesDslMd5Maps, ESAggr esAggr) {
+    private void handleBucketListInAggIndicesDslMd5ByRange(Map<String, Set<String>> accessIndicesDslMd5Maps,
+                                                           ESAggr esAggr) {
         List<ESBucket> subEsBucketList;
         String indices;
         ESAggr subEsAggr;
@@ -487,7 +489,8 @@ public class GatewayJoinESDAO extends BaseESDAO {
         }
     }
 
-    private void handleSubEsBucketList(Map<String, Set<String>> accessIndicesDslMd5Maps, List<ESBucket> subEsBucketList, String indices) {
+    private void handleSubEsBucketList(Map<String, Set<String>> accessIndicesDslMd5Maps, List<ESBucket> subEsBucketList,
+                                       String indices) {
         String md5;
         if (CollectionUtils.isEmpty(subEsBucketList)) {
             return;
@@ -578,10 +581,9 @@ public class GatewayJoinESDAO extends BaseESDAO {
      */
     public GatewayJoinPO getFirstByProjectIdAndTemplateMd5(Long projectId, String dslTemplateMd5) {
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_ONE_GATEWAY_JOIN_BY_KEY, projectId,
-                dslTemplateMd5);
+            dslTemplateMd5);
 
-        return gatewayClient.performRequestAndTakeFirst(getTemplateExpression(), null,
-                dsl, GatewayJoinPO.class);
+        return gatewayClient.performRequestAndTakeFirst(getTemplateExpression(), null, dsl, GatewayJoinPO.class);
     }
 
     /**
@@ -679,8 +681,7 @@ public class GatewayJoinESDAO extends BaseESDAO {
                     continue;
                 }
 
-                tuple = new Tuple<>( docCount,
-                        Long.valueOf( esBucket.getUnusedMap().get( ESConstant.AGG_KEY ).toString() ) );
+                tuple = new Tuple<>(docCount, Long.valueOf(esBucket.getUnusedMap().get(ESConstant.AGG_KEY).toString()));
 
                 qpsList.add(tuple);
             }
@@ -771,7 +772,7 @@ public class GatewayJoinESDAO extends BaseESDAO {
                     continue;
                 }
                 slowDslMap.put(esBucket.getUnusedMap().get(ESConstant.AGG_KEY).toString(),
-                        Long.valueOf(esBucket.getUnusedMap().get(ESConstant.AGG_DOC_COUNT).toString()));
+                    Long.valueOf(esBucket.getUnusedMap().get(ESConstant.AGG_DOC_COUNT).toString()));
             }
         }
 
@@ -786,16 +787,16 @@ public class GatewayJoinESDAO extends BaseESDAO {
      * @param dslTemplateMd5
      * @return
      */
-    public Tuple<Long, GatewayJoinPO> querySlowDslCountAndDetailByByProjectIdAndDslTemplate(String date, Integer projectId,
+    public Tuple<Long, GatewayJoinPO> querySlowDslCountAndDetailByByProjectIdAndDslTemplate(String date,
+                                                                                            Integer projectId,
                                                                                             String dslTemplateMd5,
                                                                                             Long slowDslThreshold) {
         String realIndexName = getIndex(date);
 
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_SLOW_DSL_BY_KEY, projectId, slowDslThreshold,
-                dslTemplateMd5);
+            dslTemplateMd5);
 
-        return gatewayClient.performRequestAndGetTotalCount(realIndexName, typeName, dsl,
-                GatewayJoinPO.class);
+        return gatewayClient.performRequestAndGetTotalCount(realIndexName, typeName, dsl, GatewayJoinPO.class);
     }
 
     /**
@@ -806,11 +807,12 @@ public class GatewayJoinESDAO extends BaseESDAO {
      * @return
      */
     @Nullable
-    public Tuple<Long, Long> queryMaxSearchQpsByProjectIdAndDslTemplate(String date, Integer projectId, String dslTemplateMd5) {
+    public Tuple<Long, Long> queryMaxSearchQpsByProjectIdAndDslTemplate(String date, Integer projectId,
+                                                                        String dslTemplateMd5) {
         String realIndexName = getIndex(date);
 
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_JOIN_MAX_QPS_BY_KEY, projectId,
-                dslTemplateMd5);
+            dslTemplateMd5);
 
         ESAggrMap esAggrMap = gatewayClient.performAggRequest(realIndexName, typeName, dsl);
         if (esAggrMap == null) {
@@ -829,8 +831,8 @@ public class GatewayJoinESDAO extends BaseESDAO {
                     continue;
                 }
 
-                return new Tuple<>( (Long) esBucket.getUnusedMap().get( ESConstant.AGG_KEY ),
-                        Long.valueOf( esBucket.getUnusedMap().get( ESConstant.AGG_DOC_COUNT ).toString() ) );
+                return new Tuple<>((Long) esBucket.getUnusedMap().get(ESConstant.AGG_KEY),
+                    Long.valueOf(esBucket.getUnusedMap().get(ESConstant.AGG_DOC_COUNT).toString()));
             }
         }
 
@@ -844,7 +846,8 @@ public class GatewayJoinESDAO extends BaseESDAO {
      * @param date
      * @return
      */
-    public Tuple<Long, List<Tuple<String, Long>>> getErrorSearchCountAndErrorDetailByProjectIdDate(Integer projectId, String date) {
+    public Tuple<Long, List<Tuple<String, Long>>> getErrorSearchCountAndErrorDetailByProjectIdDate(Integer projectId,
+                                                                                                   String date) {
         String realIndexName = getIndex(date);
 
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.AGG_EXCEPTION_NAME_BY_PROJECT_ID, projectId);
@@ -856,7 +859,7 @@ public class GatewayJoinESDAO extends BaseESDAO {
         List<Tuple<String, Long>> tupleList = Lists.newLinkedList();
 
         long errSearchCnt = Long
-                .parseLong(esQueryResponse.getHits().getUnusedMap().getOrDefault(ESConstant.HITS_TOTAL, "0").toString());
+            .parseLong(esQueryResponse.getHits().getUnusedMap().getOrDefault(ESConstant.HITS_TOTAL, "0").toString());
 
         if (esQueryResponse.getAggs() == null) {
             return new Tuple<>(errSearchCnt, tupleList);
@@ -875,7 +878,7 @@ public class GatewayJoinESDAO extends BaseESDAO {
                 }
 
                 tupleList.add(new Tuple<>(esBucket.getUnusedMap().get(ESConstant.AGG_KEY).toString(),
-                        Long.valueOf(esBucket.getUnusedMap().get(ESConstant.AGG_DOC_COUNT).toString())));
+                    Long.valueOf(esBucket.getUnusedMap().get(ESConstant.AGG_DOC_COUNT).toString())));
             }
         }
 
@@ -890,10 +893,12 @@ public class GatewayJoinESDAO extends BaseESDAO {
      * @param exceptionName
      * @return
      */
-    public Map<String, Long> queryErrorDslByProjectIdExceptionAndDate(String date, Integer projectId, String exceptionName) {
+    public Map<String, Long> queryErrorDslByProjectIdExceptionAndDate(String date, Integer projectId,
+                                                                      String exceptionName) {
         String realIndexName = getIndex(date);
 
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.AGG_MD5_BY_EXCEPTION_NAME, projectId, exceptionName);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.AGG_MD5_BY_EXCEPTION_NAME, projectId,
+            exceptionName);
 
         Map<String, Long> errorDslMap = Maps.newHashMap();
 
@@ -915,7 +920,7 @@ public class GatewayJoinESDAO extends BaseESDAO {
                 }
 
                 errorDslMap.put(esBucket.getUnusedMap().get(ESConstant.AGG_KEY).toString(),
-                        Long.valueOf(esBucket.getUnusedMap().get(ESConstant.AGG_DOC_COUNT).toString()));
+                    Long.valueOf(esBucket.getUnusedMap().get(ESConstant.AGG_DOC_COUNT).toString()));
             }
         }
 
@@ -931,12 +936,12 @@ public class GatewayJoinESDAO extends BaseESDAO {
      * @param exceptionName
      * @return
      */
-    public GatewayJoinPO queryErrorDslDetailByProjectIdTemplateAndDate(String date, Integer projectId, String dslTemplateMd5,
-                                                                       String exceptionName) {
+    public GatewayJoinPO queryErrorDslDetailByProjectIdTemplateAndDate(String date, Integer projectId,
+                                                                       String dslTemplateMd5, String exceptionName) {
         String realIndexName = getIndex(date);
 
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_EXCEPTION_BY_MD5, projectId, dslTemplateMd5,
-                exceptionName);
+            exceptionName);
 
         return gatewayClient.performRequestAndTakeFirst(realIndexName, typeName, dsl, GatewayJoinPO.class);
     }
@@ -951,7 +956,8 @@ public class GatewayJoinESDAO extends BaseESDAO {
     public String getAccessGatewayInfoByProjectIdDate(Integer projectId, String date) {
         String realIndexName = getIndex(date);
 
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_ACCESS_GATEWAY_INFO_BY_PROJECT_ID, projectId);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_ACCESS_GATEWAY_INFO_BY_PROJECT_ID,
+            projectId);
 
         ESAggrMap esAggrMap = gatewayClient.performAggRequest(realIndexName, typeName, dsl);
         if (esAggrMap == null) {
@@ -982,8 +988,8 @@ public class GatewayJoinESDAO extends BaseESDAO {
      */
     public Set<String> getDslByIndexAndTemplateMD5(String realIndexName, String templateMD5, int count) {
 
-        String queryDsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_DSL_BY_MD5_INDICES, count, realIndexName,
-                templateMD5);
+        String queryDsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_DSL_BY_MD5_INDICES, count,
+            realIndexName, templateMD5);
 
         Set<String> dslSet = new HashSet<>();
 
@@ -991,7 +997,7 @@ public class GatewayJoinESDAO extends BaseESDAO {
 
         if (list != null) {
             for (JSONObject jsonObject : list) {
-                dslSet.add(jsonObject.getString( "dsl" ));
+                dslSet.add(jsonObject.getString("dsl"));
             }
         }
 
@@ -1001,7 +1007,8 @@ public class GatewayJoinESDAO extends BaseESDAO {
     /**
      * 获得start和end这个时间段内，有查询请求的projectId和对应的templateMD5
      */
-    public Map<Integer/*projectId*/, Set<String/*templateMD5*/>> getIds(long start, long end, ExceptionDslRequest request) {
+    public Map<Integer/*projectId*/, Set<String/*templateMD5*/>> getIds(long start, long end,
+                                                                        ExceptionDslRequest request) {
         String subDsl = "";
         if (request.getFilterDsl() != null) {
             subDsl = "," + request.getFilterDsl().toJSONString();
@@ -1012,7 +1019,8 @@ public class GatewayJoinESDAO extends BaseESDAO {
             minCheckQps = 1L;
         }
 
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.AGG_PROJECT_ID_MD5, start, end, subDsl, minCheckQps);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.AGG_PROJECT_ID_MD5, start, end, subDsl,
+            minCheckQps);
 
         ESAggrMap esAggrMap = gatewayClient.performAggRequest(getIndexByTimeRange(start, end), null, dsl);
         if (esAggrMap == null) {
@@ -1037,8 +1045,8 @@ public class GatewayJoinESDAO extends BaseESDAO {
             subDsl = "," + request.getFilterDsl().toJSONString();
         }
 
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.AGG_MD5_BY_TIMESTAMP, start, end, projectId, subDsl,
-                request.getInterval(), request.getMinQps());
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.AGG_MD5_BY_TIMESTAMP, start, end, projectId,
+            subDsl, request.getInterval(), request.getMinQps());
 
         ESAggrMap esAggrMap = gatewayClient.performAggRequest(getIndexByTimeRange(start, end), null, dsl);
         if (esAggrMap == null) {
@@ -1060,13 +1068,11 @@ public class GatewayJoinESDAO extends BaseESDAO {
         return ret;
     }
 
-    public String matchIndices(Integer projectId, String templateMd5, long start, long end,
-                               Set<String> needIndexes) {
+    public String matchIndices(Integer projectId, String templateMd5, long start, long end, Set<String> needIndexes) {
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.MATCH_GATEWAY_INDICES, start, end, projectId,
-                templateMd5);
+            templateMd5);
 
-        ESAggrMap esAggrMap = gatewayClient.performAggRequest(getIndexByTimeRange(start, end),
-                null, dsl);
+        ESAggrMap esAggrMap = gatewayClient.performAggRequest(getIndexByTimeRange(start, end), null, dsl);
 
         if (esAggrMap == null) {
             return null;
@@ -1144,9 +1150,6 @@ public class GatewayJoinESDAO extends BaseESDAO {
         return ret;
     }
 
-   
-  
- 
     /**
      * 获取索引名称
      *
@@ -1162,13 +1165,14 @@ public class GatewayJoinESDAO extends BaseESDAO {
     }
 
     private String buildGatewayJoinSlowQueryCriteriaDsl(Integer projectId, GatewayJoinQueryDTO queryDTO) {
-        return "[" + buildGatewayJoinSlowQueryCriteriaCell(projectId, queryDTO) +"]";
+        return "[" + buildGatewayJoinSlowQueryCriteriaCell(projectId, queryDTO) + "]";
     }
 
     private String buildGatewayJoinSlowQueryCriteriaCell(Integer projectId, GatewayJoinQueryDTO queryDTO) {
         List<String> cellList = Lists.newArrayList();
         // 最近时间范围条件
-        cellList.add(DSLSearchUtils.getTermCellForRangeSearch(queryDTO.getStartTime(), queryDTO.getEndTime(), "timeStamp"));
+        cellList
+            .add(DSLSearchUtils.getTermCellForRangeSearch(queryDTO.getStartTime(), queryDTO.getEndTime(), "timeStamp"));
         // projectId 条件
         cellList.add(DSLSearchUtils.getTermCellForExactSearch(projectId, "appid"));
         // queryIndex 条件
@@ -1181,13 +1185,14 @@ public class GatewayJoinESDAO extends BaseESDAO {
     }
 
     private String buildGatewayJoinErrorQueryCriteriaDsl(Integer projectId, GatewayJoinQueryDTO queryDTO) {
-        return "[" + buildGatewayJoinErrorQueryCriteriaCell(projectId, queryDTO) +"]";
+        return "[" + buildGatewayJoinErrorQueryCriteriaCell(projectId, queryDTO) + "]";
     }
 
     private String buildGatewayJoinErrorQueryCriteriaCell(Integer projectId, GatewayJoinQueryDTO queryDTO) {
         List<String> cellList = Lists.newArrayList();
         // 最近时间范围条件
-        cellList.add(DSLSearchUtils.getTermCellForRangeSearch(queryDTO.getStartTime(), queryDTO.getEndTime(), "timeStamp"));
+        cellList
+            .add(DSLSearchUtils.getTermCellForRangeSearch(queryDTO.getStartTime(), queryDTO.getEndTime(), "timeStamp"));
         // projectId 条件
         cellList.add(DSLSearchUtils.getTermCellForExactSearch(projectId, "appid"));
         // queryIndex 条件
@@ -1207,7 +1212,7 @@ public class GatewayJoinESDAO extends BaseESDAO {
         String queryCriteriaDsl = buildGatewayJoinSlowQueryCriteriaDsl(projectId, queryDTO);
         String realName = IndexNameUtils.genDailyIndexName(indexName, queryDTO.getStartTime(), queryDTO.getEndTime());
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_SLOW_LIST_BY_CONDITION,
-                queryCriteriaDsl);
+            queryCriteriaDsl);
         return gatewayClient.performRequest(realName, typeName, dsl, GatewayJoinPO.class);
     }
 
@@ -1221,7 +1226,7 @@ public class GatewayJoinESDAO extends BaseESDAO {
         String queryCriteriaDsl = buildGatewayJoinErrorQueryCriteriaDsl(projectId, queryDTO);
         String realName = IndexNameUtils.genDailyIndexName(indexName, queryDTO.getStartTime(), queryDTO.getEndTime());
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_ERROR_LIST_BY_CONDITION,
-                queryCriteriaDsl);
+            queryCriteriaDsl);
         return gatewayClient.performRequest(realName, typeName, dsl, GatewayJoinPO.class);
     }
 
@@ -1259,7 +1264,8 @@ public class GatewayJoinESDAO extends BaseESDAO {
         return String.format("%s*", getTemplateName());
     }
 
-    private void handleBucketListInGetTemplateMD5ByRealIndexName(Map<String, Set<String>> dslMap, List<ESBucket> esBucketList) {
+    private void handleBucketListInGetTemplateMD5ByRealIndexName(Map<String, Set<String>> dslMap,
+                                                                 List<ESBucket> esBucketList) {
         String md5;
         ESAggr subEsAggr;
 
@@ -1279,7 +1285,8 @@ public class GatewayJoinESDAO extends BaseESDAO {
         }
     }
 
-    private void handleHitsByHandleBucketListInGetTemplateMD5ByRealIndexName(Map<String, Set<String>> dslMap, String md5, Object obj) {
+    private void handleHitsByHandleBucketListInGetTemplateMD5ByRealIndexName(Map<String, Set<String>> dslMap,
+                                                                             String md5, Object obj) {
         String dslSample;
 
         if (obj instanceof JSONObject) {
@@ -1289,14 +1296,15 @@ public class GatewayJoinESDAO extends BaseESDAO {
                 JSONObject hitJsonObj = jsonArray.getJSONObject(0);
                 JSONObject sourceJsonObj = hitJsonObj.getJSONObject("_source");
                 if (sourceJsonObj != null) {
-                    dslSample = sourceJsonObj.getString( "dsl" );
+                    dslSample = sourceJsonObj.getString("dsl");
                     dslMap.computeIfAbsent(md5, k -> Sets.newHashSet()).add(dslSample);
                 }
             }
         }
     }
 
-    private void handleBucketList(Set<String> needIndexes, AtomicReference<String> matchIndex, List<ESBucket> esBucketList) {
+    private void handleBucketList(Set<String> needIndexes, AtomicReference<String> matchIndex,
+                                  List<ESBucket> esBucketList) {
         String indices;
         if (esBucketList != null) {
             for (ESBucket esBucket : esBucketList) {
@@ -1349,12 +1357,10 @@ public class GatewayJoinESDAO extends BaseESDAO {
     private void handleBucketListInGetRtCostByProjectId(List<Double> rtCostList, ESAggr queryByTimeStamp) {
         queryByTimeStamp.getBucketList().stream().forEach(esBucket -> {
             try {
-                List<ESBucket> queryByProjectIdBucket = esBucket.getAggrMap().get("queryByAppid")
-                        .getBucketList();
+                List<ESBucket> queryByProjectIdBucket = esBucket.getAggrMap().get("queryByAppid").getBucketList();
                 if (CollectionUtils.isNotEmpty(queryByProjectIdBucket)) {
                     for (ESBucket bucket : queryByProjectIdBucket) {
-                        JSONObject valueObj = (JSONObject) bucket.getAggrMap().get("1").getUnusedMap()
-                                .get("values");
+                        JSONObject valueObj = (JSONObject) bucket.getAggrMap().get("1").getUnusedMap().get("values");
                         Double value = valueObj.getDouble("99.0");
                         if (null == value) {
                             continue;
@@ -1393,7 +1399,8 @@ public class GatewayJoinESDAO extends BaseESDAO {
         }
     }
 
-    private void handleSubEsBucketList(Map<Integer, Set<String>> ret, List<ESBucket> subEsBucketList, Integer projectId) {
+    private void handleSubEsBucketList(Map<Integer, Set<String>> ret, List<ESBucket> subEsBucketList,
+                                       Integer projectId) {
         String md5;
         if (CollectionUtils.isEmpty(subEsBucketList)) {
             return;

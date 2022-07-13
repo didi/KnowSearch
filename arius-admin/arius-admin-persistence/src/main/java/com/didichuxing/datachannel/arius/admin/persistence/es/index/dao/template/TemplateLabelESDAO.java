@@ -33,7 +33,7 @@ public class TemplateLabelESDAO extends BaseESDAO {
     private String typeName = "type";
 
     @PostConstruct
-    public void init(){
+    public void init() {
         this.indexName = dataCentreUtil.getAriusTemplateLabel();
     }
 
@@ -43,7 +43,7 @@ public class TemplateLabelESDAO extends BaseESDAO {
      * @return
      */
     public boolean batchInsert(List<TemplateLabelPO> list) {
-        return updateClient.batchInsert( EnvUtil.getWriteIndexNameByEnv(this.indexName), typeName, list);
+        return updateClient.batchInsert(EnvUtil.getWriteIndexNameByEnv(this.indexName), typeName, list);
     }
 
     /**
@@ -55,7 +55,6 @@ public class TemplateLabelESDAO extends BaseESDAO {
         return updateClient.batchDelete(EnvUtil.getWriteIndexNameByEnv(this.indexName), typeName, list);
     }
 
-
     /**
      * 根据索引模板ID获取标签
      *
@@ -65,8 +64,8 @@ public class TemplateLabelESDAO extends BaseESDAO {
     public List<TemplateLabelPO> getLabelByLogicTemplateId(Integer logicTemplateId) {
 
         int scrollSize = 500;
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.V2_SCROLL_LABEL_BY_TEMPLATE_ID,
-                500, logicTemplateId);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.V2_SCROLL_LABEL_BY_TEMPLATE_ID, 500,
+            logicTemplateId);
 
         return getLabelByDsl(dsl, scrollSize);
     }
@@ -79,13 +78,11 @@ public class TemplateLabelESDAO extends BaseESDAO {
      */
     public List<TemplateLabelPO> getLabelByLabelId(String labelId) {
         int scrollSize = 500;
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.V2_SCROLL_LABEL_BY_LABEL_ID,
-                scrollSize, labelId);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.V2_SCROLL_LABEL_BY_LABEL_ID, scrollSize,
+            labelId);
 
         return getLabelByDsl(dsl, scrollSize);
     }
-
-
 
     /**************************************** private methods ****************************************/
     /**
@@ -98,17 +95,18 @@ public class TemplateLabelESDAO extends BaseESDAO {
     private List<TemplateLabelPO> getLabelByDsl(String dsl, int scrollSize) {
         List<TemplateLabelPO> list = Lists.newLinkedList();
 
-        gatewayClient.queryWithScroll(EnvUtil.getWriteIndexNameByEnv(this.indexName), typeName, dsl, scrollSize,
-                null, TemplateLabelPO.class, resultList -> {
-                    if (resultList != null) {
-                        list.addAll(resultList);
+        gatewayClient.queryWithScroll(EnvUtil.getWriteIndexNameByEnv(this.indexName), typeName, dsl, scrollSize, null,
+            TemplateLabelPO.class, resultList -> {
+                if (resultList != null) {
+                    list.addAll(resultList);
 
-                        if (!EnvUtil.isOnline()) {
-                            LOGGER.info("class=IndexTemplateLabelEsDao||method=getLabelByDsl||indexTemplateLabelPOList={}||dsl={}",
-                                    JSON.toJSONString(resultList), dsl);
-                        }
+                    if (!EnvUtil.isOnline()) {
+                        LOGGER.info(
+                            "class=IndexTemplateLabelEsDao||method=getLabelByDsl||indexTemplateLabelPOList={}||dsl={}",
+                            JSON.toJSONString(resultList), dsl);
                     }
-                });
+                }
+            });
 
         return list;
     }

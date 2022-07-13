@@ -18,7 +18,7 @@ public class BigIndexMetrics implements Serializable {
     /**
      * 索引名称
      */
-    private String                indexName;
+    private String               indexName;
 
     /**
      * 归属节点node名称

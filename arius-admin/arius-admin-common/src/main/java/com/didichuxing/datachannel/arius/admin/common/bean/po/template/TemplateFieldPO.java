@@ -22,30 +22,30 @@ import java.util.*;
 @AllArgsConstructor
 public class TemplateFieldPO extends BaseESPO {
 
-    private Integer id;
+    private Integer             id;
 
-    private String name;
+    private String              name;
 
-    private String clusterName;
+    private String              clusterName;
 
     private Map<String, String> templateFieldMap;
 
-    private Integer fieldCount;
+    private Integer             fieldCount;
 
     @JSONField(serialize = false)
-    private Set<String> keySet;
+    private Set<String>         keySet;
     /**
      * 更新状态，1为启用mapping优化 @UpdateMappingState
      */
-    private Integer state;
+    private Integer             state;
     /**
      * 是否索引存储分离，1为分离，0不分离
      */
-    private Integer sourceSeparated;
+    private Integer             sourceSeparated;
     /**
      * 可忽略mapping优化字段集合
      */
-    private Set<String> ignoreFields;
+    private Set<String>         ignoreFields;
 
     public TemplateFieldPO(int id, String name, String clusterName) {
         this.id = id;
@@ -60,7 +60,8 @@ public class TemplateFieldPO extends BaseESPO {
         this.templateFieldMap = templateFieldMap;
     }
 
-    public TemplateFieldPO(Integer id, String name, String clusterName, Map<String, String> templateFieldMap, Integer state) {
+    public TemplateFieldPO(Integer id, String name, String clusterName, Map<String, String> templateFieldMap,
+                           Integer state) {
         this.id = id;
         this.name = name;
         this.clusterName = clusterName;

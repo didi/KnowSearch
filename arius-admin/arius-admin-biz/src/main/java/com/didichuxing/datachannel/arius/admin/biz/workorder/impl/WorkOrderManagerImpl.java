@@ -57,34 +57,32 @@ import org.springframework.stereotype.Service;
 @Service
 public class WorkOrderManagerImpl implements WorkOrderManager {
 
-    private static final Logger  LOGGER           = LoggerFactory.getLogger(WorkOrderManagerImpl.class);
+    private static final Logger LOGGER               = LoggerFactory.getLogger(WorkOrderManagerImpl.class);
 
-    private static final int PROJECT_ID_TO_CREATE = -99;
-
-    @Autowired
-    private HandleFactory        handleFactory;
+    private static final int    PROJECT_ID_TO_CREATE = -99;
 
     @Autowired
-    private ProjectService projectService;
-    @Autowired
-    private UserService userService;
+    private HandleFactory       handleFactory;
 
     @Autowired
-    private WorkOrderDAO orderDao;
+    private ProjectService      projectService;
     @Autowired
-    private DeptService deptService;
+    private UserService         userService;
+
     @Autowired
-    private RoleTool roleTool;
-
-
+    private WorkOrderDAO        orderDao;
+    @Autowired
+    private DeptService         deptService;
+    @Autowired
+    private RoleTool            roleTool;
 
     @Override
     public Result<List<OrderTypeVO>> getOrderTypes() {
         List<OrderTypeVO> orderTypeVOList = new ArrayList<>();
         orderTypeVOList.add(new OrderTypeVO(WorkOrderTypeEnum.LOGIC_CLUSTER_CREATE.getName(),
-                WorkOrderTypeEnum.LOGIC_CLUSTER_CREATE.getMessage()));
+            WorkOrderTypeEnum.LOGIC_CLUSTER_CREATE.getMessage()));
         orderTypeVOList.add(new OrderTypeVO(WorkOrderTypeEnum.LOGIC_CLUSTER_INDECREASE.getName(),
-                WorkOrderTypeEnum.LOGIC_CLUSTER_INDECREASE.getMessage()));
+            WorkOrderTypeEnum.LOGIC_CLUSTER_INDECREASE.getMessage()));
         return Result.buildSucc(orderTypeVOList);
     }
 
@@ -92,7 +90,8 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
     public Result<AriusWorkOrderInfoSubmittedVO> submit(WorkOrderDTO workOrderDTO) throws AdminOperateException {
 
         String workOrderJsonString = JSON.toJSONString(workOrderDTO);
-        LOGGER.info("class=WorkOrderManagerImpl||method=WorkOrderController.process||workOrderDTO={}||envInfo={}||dataCenter={}",
+        LOGGER.info(
+            "class=WorkOrderManagerImpl||method=WorkOrderController.process||workOrderDTO={}||envInfo={}||dataCenter={}",
             workOrderJsonString, EnvUtil.getStr(), workOrderDTO.getDataCenter());
 
         initWorkOrderDTO(workOrderDTO);
@@ -223,8 +222,8 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
     public Result<List<WorkOrderVO>> getOrderApplyList(String applicant, Integer status, Integer projectId) {
         List<WorkOrderVO> orderDOList = Lists.newArrayList();
         try {
-            orderDOList = ConvertUtil.list2List(orderDao.listByApplicantAndStatusAndProjectId(applicant, status,projectId),
-                WorkOrderVO.class);
+            orderDOList = ConvertUtil.list2List(
+                orderDao.listByApplicantAndStatusAndProjectId(applicant, status, projectId), WorkOrderVO.class);
         } catch (Exception e) {
             LOGGER.error(
                 "class=WorkOrderManagerImpl||method=getOrderApplyList||applicant={}||status={}||msg=get apply order failed!",
@@ -232,7 +231,7 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
         }
         return Result.buildSucc(orderDOList);
     }
-    
+
     /**
      * @param applicant
      * @param status
@@ -251,7 +250,7 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
         }
         return Result.buildSucc(orderDOList);
     }
-    
+
     @Override
     public List<WorkOrderPO> getApprovalList(String approver) {
         try {
@@ -293,7 +292,7 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
                 "class=WorkOrderManagerImpl||method=getWaitApprovalList||userName={}||msg=get wait order list failed!",
                 userName, e);
         }
-        
+
         if (roleTool.isAdmin(userName)) {
             return orderList;
         } else {
@@ -322,7 +321,7 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
         Map<Integer, Dept> map = deptService.getAllDeptMap();
         if (Objects.nonNull(userBriefVO) && map.containsKey(userBriefVO.getDeptId())) {
             detailBaseDTO.setAppDeptName(map.get(userBriefVO.getDeptId()).getDeptName());
-        
+
         }
 
         WorkOrderTypeEnum typeEnum = WorkOrderTypeEnum.valueOfName(orderPO.getType());
@@ -384,12 +383,12 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
         if (AriusObjUtils.isNull(userService.getUserBriefByUserName(workOrderDTO.getSubmitor()))) {
             return Result.buildParamIllegal("提交人非法");
         }
-    
+
         if (AriusObjUtils.isNull(workOrderDTO.getSubmitorProjectId())) {
             return Result.buildParamIllegal("提交projectID为空");
         }
-        if (PROJECT_ID_TO_CREATE != workOrderDTO.getSubmitorProjectId() && !projectService.checkProjectExist(
-                workOrderDTO.getSubmitorProjectId())) {
+        if (PROJECT_ID_TO_CREATE != workOrderDTO.getSubmitorProjectId()
+            && !projectService.checkProjectExist(workOrderDTO.getSubmitorProjectId())) {
             return Result.buildNotExist("提交projectId不存在");
         }
 
@@ -422,7 +421,8 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
         return Result.buildSucc();
     }
 
-    private Result<Void> doProcessByWorkOrderHandle(WorkOrderPO orderPO, WorkOrderProcessDTO processDTO) throws NotFindSubclassException {
+    private Result<Void> doProcessByWorkOrderHandle(WorkOrderPO orderPO,
+                                                    WorkOrderProcessDTO processDTO) throws NotFindSubclassException {
         WorkOrderHandler handler = (WorkOrderHandler) handleFactory.getByHandlerNamePer(orderPO.getType());
 
         Result<Void> checkAuthResult = handler.checkAuthority(orderPO, processDTO.getAssignee());

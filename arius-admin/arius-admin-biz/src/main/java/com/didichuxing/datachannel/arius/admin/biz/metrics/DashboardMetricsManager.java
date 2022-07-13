@@ -37,7 +37,8 @@ public interface DashboardMetricsManager {
 
     Result<List<VariousLineChartMetricsVO>> getTopIndexMetricsInfo(MetricsDashboardTopNDTO param, Integer projectId);
 
-    Result<List<VariousLineChartMetricsVO>> getTopClusterThreadPoolQueueMetricsInfo(MetricsDashboardTopNDTO param, Integer projectId);
+    Result<List<VariousLineChartMetricsVO>> getTopClusterThreadPoolQueueMetricsInfo(MetricsDashboardTopNDTO param,
+                                                                                    Integer projectId);
 
     /**
      * 获取dashboard大盘list列表指标信息

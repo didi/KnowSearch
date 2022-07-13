@@ -56,7 +56,8 @@ public class SpringTool implements ApplicationContextAware, DisposableBean {
      */
     public static void clearHolder() {
         if (logger.isDebugEnabled()) {
-            logger.debug("class=SpringTool||method=learHolder||msg=清除SpringContextHolder中的ApplicationContext:{}", applicationContext);
+            logger.debug("class=SpringTool||method=learHolder||msg=清除SpringContextHolder中的ApplicationContext:{}",
+                applicationContext);
         }
         applicationContext = null;
     }
@@ -78,14 +79,15 @@ public class SpringTool implements ApplicationContextAware, DisposableBean {
     }
 
     public static String getUserName() throws OperateForbiddenException {
-        ServletRequestAttributes servletRequestAttributes = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes());
-        if(null == servletRequestAttributes) {
-            throw new OperateForbiddenException(String.format("请携带操作人信息,HTTP_HEADER_KEY:%s",HttpRequestUtil.USER));
+        ServletRequestAttributes servletRequestAttributes = ((ServletRequestAttributes) RequestContextHolder
+            .getRequestAttributes());
+        if (null == servletRequestAttributes) {
+            throw new OperateForbiddenException(String.format("请携带操作人信息,HTTP_HEADER_KEY:%s", HttpRequestUtil.USER));
         }
         HttpServletRequest request = servletRequestAttributes.getRequest();
         Object value = request.getHeader(HttpRequestUtil.USER);
         if (value == null) {
-            throw new OperateForbiddenException(String.format("请携带操作人信息,HTTP_HEADER_KEY:%s",HttpRequestUtil.USER));
+            throw new OperateForbiddenException(String.format("请携带操作人信息,HTTP_HEADER_KEY:%s", HttpRequestUtil.USER));
         }
         return String.valueOf(value);
     }

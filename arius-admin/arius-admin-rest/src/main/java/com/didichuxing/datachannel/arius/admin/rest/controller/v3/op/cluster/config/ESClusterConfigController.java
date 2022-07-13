@@ -31,18 +31,16 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping({ V3 + "/cluster/phy/config-file" })
 @Api(tags = "ES集群Config接口(REST)")
 public class ESClusterConfigController {
-    
+
     @Autowired
     private ESClusterConfigManager esClusterConfigManager;
-
-  
 
     @GetMapping("")
     @ResponseBody
     @ApiOperation(value = "获取ES集群配置列表")
     @ApiImplicitParam(paramType = "query", dataType = "String", name = "clusterId", value = "物理集群ID", required = true)
     public Result<List<ESConfigVO>> gainEsClusterConfigs(@RequestParam("clusterId") Long clusterId) {
-        
+
         return esClusterConfigManager.gainEsClusterConfigs(clusterId);
     }
 
@@ -57,18 +55,16 @@ public class ESClusterConfigController {
     @ResponseBody
     @ApiOperation(value = "获取可操作配置文件的ES集群角色")
     public Result<Set<String>> gainEsClusterRoles(@PathVariable Long clusterId) {
-      
-      return   esClusterConfigManager.gainEsClusterRoles(clusterId);
-      
-      
+
+        return esClusterConfigManager.gainEsClusterRoles(clusterId);
+
     }
 
     @GetMapping("/template/{type}")
     @ResponseBody
     @ApiOperation(value = "获取ES集群模板配置")
     public Result<ESConfigVO> gainEsClusterTemplateConfig(@PathVariable String type) {
-        
-        
+
         return esClusterConfigManager.getEsClusterTemplateConfig(type);
     }
 
@@ -77,7 +73,7 @@ public class ESClusterConfigController {
     @ApiOperation(value = "更新ES集群配置描述")
     public Result<Void> editEsClusterConfigDesc(HttpServletRequest request, @RequestBody ESConfigDTO param) {
         return esClusterConfigManager.editConfigDesc(param, HttpRequestUtil.getOperator(request),
-                HttpRequestUtil.getProjectId(request));
-      
+            HttpRequestUtil.getProjectId(request));
+
     }
 }

@@ -16,10 +16,10 @@ public class ClusterTemplateSrv {
     /**
      * 索引服务名称
      */
-    private String serviceName;
+    private String  serviceName;
 
     /**
      * 索引服务所需的最低es版本号
      */
-    private String esVersion;
+    private String  esVersion;
 }

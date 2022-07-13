@@ -20,20 +20,20 @@ import java.util.List;
 public class TemplateWithManageVO extends BaseVO {
 
     @ApiModelProperty("模板ID")
-    private Integer id;
+    private Integer      id;
 
     @ApiModelProperty("模板名称")
-    private String name;
+    private String       name;
 
     @ApiModelProperty("业务等级")
-    private Integer level;
+    private Integer      level;
 
     @ApiModelProperty("模板类型")
-    private Integer dataType;
+    private Integer      dataType;
 
     @ApiModelProperty("所属集群")
     private List<String> cluster;
 
     @ApiModelProperty("模板描述")
-    private String desc;
+    private String       desc;
 }

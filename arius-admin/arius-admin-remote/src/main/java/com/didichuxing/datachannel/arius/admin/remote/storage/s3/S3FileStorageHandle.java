@@ -31,18 +31,18 @@ public class S3FileStorageHandle implements FileStorageHandle {
     private static final Logger LOGGER = LoggerFactory.getLogger(S3FileStorageHandle.class);
 
     @Value("${s3.endpoint:}")
-    private String endpoint;
+    private String              endpoint;
 
     @Value("${s3.access-key:}")
-    private String accessKey;
+    private String              accessKey;
 
     @Value("${s3.secret-key:}")
-    private String secretKey;
+    private String              secretKey;
 
     @Value("${s3.bucket:}")
-    private String bucket;
+    private String              bucket;
 
-    private MinioClient minioClient;
+    private MinioClient         minioClient;
 
     @PostConstruct
     public void init() {
@@ -53,8 +53,7 @@ public class S3FileStorageHandle implements FileStorageHandle {
             }
             minioClient = MinioClient.builder().endpoint(endpoint).credentials(accessKey, secretKey).build();
         } catch (Exception e) {
-            LOGGER.error("class=S3FileStorageHandle||method=init||fields={}||errMsg={}", this,
-                    e.getMessage());
+            LOGGER.error("class=S3FileStorageHandle||method=init||fields={}||errMsg={}", this, e.getMessage());
         }
     }
 
@@ -66,25 +65,26 @@ public class S3FileStorageHandle implements FileStorageHandle {
                 return Result.build(Boolean.FALSE, "");
             }
 
-            if(this.getFileNames().contains(fileName)) {
+            if (this.getFileNames().contains(fileName)) {
                 return Result.buildFail("fileName has existed,please modify!");
             }
 
             inputStream = uploadFile.getInputStream();
             minioClient.putObject(PutObjectArgs.builder().bucket(this.bucket).object(fileName)
-                    .stream(inputStream, inputStream.available(), -1).build());
+                .stream(inputStream, inputStream.available(), -1).build());
             String url = minioClient.getObjectUrl(bucket, fileName);
             return Result.build(Boolean.TRUE, url);
         } catch (Exception e) {
             LOGGER.error("class=S3FileStorageHandle||method=upload||fileName={}||errMsg={}||msg=upload failed",
-                    fileName, e.getMessage());
+                fileName, e.getMessage());
         } finally {
             if (inputStream != null) {
                 try {
                     inputStream.close();
                 } catch (IOException e) {
-                    LOGGER.error("class=S3FileStorageHandle||method=upload||fileName={}||errMsg={}||msg=inputStream close failed",
-                            fileName, e.getMessage());
+                    LOGGER.error(
+                        "class=S3FileStorageHandle||method=upload||fileName={}||errMsg={}||msg=inputStream close failed",
+                        fileName, e.getMessage());
                 }
             }
         }
@@ -98,7 +98,7 @@ public class S3FileStorageHandle implements FileStorageHandle {
             return Result.buildSucc();
         } catch (Exception e) {
             LOGGER.error("class=S3FileStorageHandle||method=remove||fileName={}||errMsg={}||msg=upload failed",
-                    fileName, e.getMessage());
+                fileName, e.getMessage());
         }
         return Result.buildFail();
     }
@@ -106,13 +106,15 @@ public class S3FileStorageHandle implements FileStorageHandle {
     @Override
     public Result<MultipartFile> download(String fileName) {
         try {
-            final ObjectStat stat = minioClient.statObject(StatObjectArgs.builder().bucket(this.bucket).object(fileName).build());
+            final ObjectStat stat = minioClient
+                .statObject(StatObjectArgs.builder().bucket(this.bucket).object(fileName).build());
 
-            InputStream is = minioClient.getObject(GetObjectArgs.builder().bucket(this.bucket).object(fileName).build());
+            InputStream is = minioClient
+                .getObject(GetObjectArgs.builder().bucket(this.bucket).object(fileName).build());
             return Result.buildSucc(new MockMultipartFile(fileName, fileName, stat.contentType(), is));
         } catch (Exception e) {
             LOGGER.error("class=S3FileStorageHandle||method=download||fileName={}||errMsg={}||msg=download failed",
-                    fileName, e.getMessage());
+                fileName, e.getMessage());
         }
         return Result.build(ResultType.STORAGE_DOWNLOAD_FILE_FAILED);
     }
@@ -133,13 +135,13 @@ public class S3FileStorageHandle implements FileStorageHandle {
             }
 
             LOGGER.info(
-                    "class=S3FileStorageHandle||method=createBucketIfNotExist||bucket={}||msg=check and create bucket success",
-                    this.bucket);
+                "class=S3FileStorageHandle||method=createBucketIfNotExist||bucket={}||msg=check and create bucket success",
+                this.bucket);
             return true;
         } catch (Exception e) {
             LOGGER.error(
-                    "class=S3FileStorageHandle||method=createBucketIfNotExist||bucket={}||errMsg={}||msg=create bucket failed",
-                    this.bucket, e.getMessage());
+                "class=S3FileStorageHandle||method=createBucketIfNotExist||bucket={}||errMsg={}||msg=create bucket failed",
+                this.bucket, e.getMessage());
         }
         return false;
     }
@@ -147,28 +149,25 @@ public class S3FileStorageHandle implements FileStorageHandle {
     @Override
     public String toString() {
         return "S3Service{" + "endpoint='" + endpoint + '\'' + ", accessKey='" + accessKey + '\'' + ", secretKey='"
-                + secretKey + '\'' + ", bucket='" + bucket + '\'' + '}';
+               + secretKey + '\'' + ", bucket='" + bucket + '\'' + '}';
     }
-
 
     /**
      * 获取指定存储桶下的文件名称列表
      * @return fileNamesOfBucket List<String>
      */
     private List<String> getFileNames() {
-        Iterable<io.minio.Result<Item>> results = minioClient.listObjects(ListObjectsArgs.builder().bucket(this.bucket).build());
+        Iterable<io.minio.Result<Item>> results = minioClient
+            .listObjects(ListObjectsArgs.builder().bucket(this.bucket).build());
         List<String> fileNamesOfBucket = Lists.newArrayList();
-        results.forEach(
-                itemResult ->  {
-                    try {
-                        fileNamesOfBucket.add(itemResult.get().objectName());
-                    } catch (Exception e) {
-                        LOGGER.warn(
-                                "class=S3FileStorageHandle||method=getFileNames||bucket={}||warnMsg={}",
-                                this.bucket, e.getMessage());
-                    }
-                }
-        );
+        results.forEach(itemResult -> {
+            try {
+                fileNamesOfBucket.add(itemResult.get().objectName());
+            } catch (Exception e) {
+                LOGGER.warn("class=S3FileStorageHandle||method=getFileNames||bucket={}||warnMsg={}", this.bucket,
+                    e.getMessage());
+            }
+        });
         return fileNamesOfBucket;
     }
 }

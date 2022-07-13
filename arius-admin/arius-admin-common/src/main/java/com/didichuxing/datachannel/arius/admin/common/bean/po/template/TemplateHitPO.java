@@ -22,39 +22,39 @@ import java.util.Map;
 @NoArgsConstructor
 public class TemplateHitPO extends BaseESPO {
 
-    private static final ILog LOGGER = LogFactory.getLog(TemplateHitPO.class);
+    private static final ILog LOGGER      = LogFactory.getLog(TemplateHitPO.class);
 
     /**
      * 模版主键id
      */
-    private Integer id;
+    private Integer           id;
     /**
      * 索引模板名称
      */
-    private String name;
+    private String            name;
     /**
      * 集群名称
      */
-    private String clusterName;
+    private String            clusterName;
     /**
      * 日期
      */
-    private String date;
+    private String            date;
 
     /**
      * 实际使用周期
      */
-    private long useTime;
+    private long              useTime;
 
-    private long day1Count =0;
+    private long              day1Count   = 0;
 
-    private long day3Count =0;
+    private long              day3Count   = 0;
 
-    private long day7Count =0;
+    private long              day7Count   = 0;
 
-    private long day30Count =0;
+    private long              day30Count  = 0;
 
-    private long dayAllCount=0;
+    private long              dayAllCount = 0;
 
     /**
      * 索引名称命中次数统计
@@ -62,17 +62,17 @@ public class TemplateHitPO extends BaseESPO {
     private Map<String, Long> hitIndexMap = Maps.newHashMap();
 
     public TemplateHitPO(Integer id, String name, String clusterName, String date) {
-        this.id             = id;
-        this.name           = name;
-        this.clusterName    = clusterName;
-        this.date           = date;
+        this.id = id;
+        this.name = name;
+        this.clusterName = clusterName;
+        this.date = date;
     }
 
     public TemplateHitPO(TemplateHitPO templateHitPO) {
-        this.id             = templateHitPO.id;
-        this.name           = templateHitPO.name;
-        this.clusterName    = templateHitPO.clusterName;
-        this.date           = templateHitPO.date;
+        this.id = templateHitPO.id;
+        this.name = templateHitPO.name;
+        this.clusterName = templateHitPO.clusterName;
+        this.date = templateHitPO.date;
     }
 
     public void addCount(String indexName, long count) {
@@ -112,10 +112,11 @@ public class TemplateHitPO extends BaseESPO {
 
     // 统计当天，3天，7天，30天，全部的查询次数
     private static final Long ONE_DAY = 24 * 60 * 60 * 1000L;
+
     public void setSumHits(String express, String timeFormat) {
         try {
             if (!express.endsWith("*") || timeFormat == null || timeFormat.trim().length() == 0) {
-                return ;
+                return;
             }
             timeFormat = timeFormat.replace("YYYY", "yyyy");
 
@@ -136,48 +137,51 @@ public class TemplateHitPO extends BaseESPO {
             handleHitIndexMap(express, sdf, dateTime, extraSdf, length);
 
         } catch (Exception t) {
-            LOGGER.error("class=TemplateHitPO||method=setSumHits||errMsg=get used day num error, express:{}, format:{}, hitPO:{}", express, timeFormat, JSON.toJSONString(this), t);
+            LOGGER.error(
+                "class=TemplateHitPO||method=setSumHits||errMsg=get used day num error, express:{}, format:{}, hitPO:{}",
+                express, timeFormat, JSON.toJSONString(this), t);
         }
     }
 
-    private void handleHitIndexMap(String express, SimpleDateFormat sdf, Long dateTime, SimpleDateFormat extraSdf, int length) throws ParseException {
+    private void handleHitIndexMap(String express, SimpleDateFormat sdf, Long dateTime, SimpleDateFormat extraSdf,
+                                   int length) throws ParseException {
         for (Map.Entry<String, Long> entry : hitIndexMap.entrySet()) {
             String index = entry.getKey();
             String dataStr = index.substring(length);
             Long count = entry.getValue();
-            if(count==null) {
+            if (count == null) {
                 continue;
             }
 
             Long time = getTime(sdf, extraSdf, dataStr);
 
-            if(time==null) {
-                LOGGER.error("class=TemplateHitPO||method=handleHitIndexMap||errMsg=parser time error, indexName:" + index + ", express:" + express);
+            if (time == null) {
+                LOGGER.error("class=TemplateHitPO||method=handleHitIndexMap||errMsg=parser time error, indexName:"
+                             + index + ", express:" + express);
                 continue;
             }
 
             Long gap = dateTime - time;
-            int day = (int) (gap/ ONE_DAY);
-            dayAllCount+=count;
+            int day = (int) (gap / ONE_DAY);
+            dayAllCount += count;
 
-            if(day<30) {
-                day30Count +=count;
+            if (day < 30) {
+                day30Count += count;
             }
 
-            if(day<7) {
-                day7Count +=count;
+            if (day < 7) {
+                day7Count += count;
             }
 
-            if(day<3) {
-                day3Count +=count;
+            if (day < 3) {
+                day3Count += count;
             }
 
-            if(day<1) {
-                day1Count +=count;
+            if (day < 1) {
+                day1Count += count;
             }
         }
     }
-
 
     // 返回-1表示不处理
     @JSONField(serialize = false)
@@ -207,13 +211,13 @@ public class TemplateHitPO extends BaseESPO {
                 String index = entry.getKey();
                 String dataStr = index.substring(length);
                 Long count = entry.getValue();
-                if(count!=null && count<maxQpsPerDay) {
+                if (count != null && count < maxQpsPerDay) {
                     continue;
                 }
 
                 Long time = getTime(sdf, extraSdf, dataStr);
 
-                if(time==null) {
+                if (time == null) {
                     throw new BaseException("parse time error", ResultType.FAIL);
                 }
 
@@ -224,7 +228,9 @@ public class TemplateHitPO extends BaseESPO {
             }
             return maxGap;
         } catch (Exception t) {
-            LOGGER.error("class=TemplateHitPO||method=getUsedDayNum||errMsg=get used day num error express:{}, format:{}, hitPO:{}", express, timeFormat, JSON.toJSONString(this), t);
+            LOGGER.error(
+                "class=TemplateHitPO||method=getUsedDayNum||errMsg=get used day num error express:{}, format:{}, hitPO:{}",
+                express, timeFormat, JSON.toJSONString(this), t);
             return -1;
         }
     }

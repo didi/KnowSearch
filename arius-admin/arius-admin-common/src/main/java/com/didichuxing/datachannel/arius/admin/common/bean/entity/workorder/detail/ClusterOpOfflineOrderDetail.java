@@ -15,7 +15,7 @@ public class ClusterOpOfflineOrderDetail extends AbstractOrderDetail {
     /**
      * 物理集群id
      */
-    private Long phyClusterId;
+    private Long   phyClusterId;
     /**
      * 物理集群名称
      */

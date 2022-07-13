@@ -25,98 +25,98 @@ import lombok.NoArgsConstructor;
 public class ClusterPhyVO extends BaseVO implements Comparable<ClusterPhyVO> {
 
     @ApiModelProperty("集群ID")
-    private Integer                      id;
+    private Integer                                      id;
 
     @ApiModelProperty("集群名字")
-    private String                       cluster;
+    private String                                       cluster;
 
     @ApiModelProperty("描述")
-    private String                       desc;
+    private String                                       desc;
 
     @ApiModelProperty("tcp地址-读")
-    private String                       readAddress;
+    private String                                       readAddress;
 
     @ApiModelProperty("tcp地址-写")
-    private String                       writeAddress;
+    private String                                       writeAddress;
 
     @ApiModelProperty("http地址-读")
-    private String                       httpAddress;
+    private String                                       httpAddress;
 
     @ApiModelProperty("http地址-写")
-    private String                       httpWriteAddress;
+    private String                                       httpWriteAddress;
 
     /** @see ESClusterTypeEnum */
     @ApiModelProperty("集群类型(3 docker, 4 host)")
-    private Integer                      type;
+    private Integer                                      type;
 
     @ApiModelProperty("集群展示用属性标签，如「集群所属资源类型」等等")
-    private String tags;
+    private String                                       tags;
 
     @ApiModelProperty("数据中心")
-    private String                       dataCenter;
+    private String                                       dataCenter;
 
     @ApiModelProperty("单节点实例数 host物理集群必填")
-    private Integer                      pidCount;
+    private Integer                                      pidCount;
 
     @ApiModelProperty("机器规格  host物理集群必填")
-    private String                       machineSpec;
+    private String                                       machineSpec;
 
     @ApiModelProperty("服务等级")
-    private Integer                      level;
+    private Integer                                      level;
 
     @ApiModelProperty("es版本")
-    private String                       esVersion;
+    private String                                       esVersion;
 
     @ApiModelProperty("镜像地址")
-    private String                       imageName;
+    private String                                       imageName;
 
     @ApiModelProperty("集群所开放的索引服务")
-    private List<ESClusterTemplateSrvVO> esClusterTemplateSrvVOS;
+    private List<ESClusterTemplateSrvVO>                 esClusterTemplateSrvVOS;
 
     @ApiModelProperty("集群角色信息")
-    private List<ESClusterRoleVO> esClusterRoleVOS;
+    private List<ESClusterRoleVO>                        esClusterRoleVOS;
 
     @ApiModelProperty("磁盘使用率")
-    private Double                       diskUsagePercent;
+    private Double                                       diskUsagePercent;
 
     @ApiModelProperty("磁盘总量")
-    private Long                         diskTotal;
+    private Long                                         diskTotal;
 
     @ApiModelProperty("磁盘使用量")
-    private Long                         diskUsage;
+    private Long                                         diskUsage;
 
     @ApiModelProperty("集群密码")
-    private String                       password;
+    private String                                       password;
 
     @ApiModelProperty("机房")
-    private String                       idc;
+    private String                                       idc;
 
     @ApiModelProperty("client运行模式（0：读写共享 1：读写分离）")
-    private Integer                     runMode;
+    private Integer                                      runMode;
 
     @ApiModelProperty("指定用写client的action")
-    private String                      writeAction;
+    private String                                       writeAction;
 
     @ApiModelProperty("集群状态")
-    private Integer                     health;
+    private Integer                                      health;
 
     @ApiModelProperty("活跃的分片数目")
-    private Long                        activeShardNum;
+    private Long                                         activeShardNum;
 
     @ApiModelProperty("IaaS平台类型")
-    private String                    platformType;
+    private String                                       platformType;
 
     /**
      * @see ClusterResourceTypeEnum
      */
     @ApiModelProperty("集群资源类型(-1 未知 1 共享 2 独立 3 独享)")
-    private Integer                    resourceType;
+    private Integer                                      resourceType;
 
     @ApiModelProperty("gateway地址")
-    private String                    gatewayUrl;
+    private String                                       gatewayUrl;
 
     @ApiModelProperty("逻辑集群与对应region的列表")
-    private List<Tuple<ClusterLogicVO, ClusterRegionVO>>    logicClusterAndRegionList;
+    private List<Tuple<ClusterLogicVO, ClusterRegionVO>> logicClusterAndRegionList;
 
     /**
      * 添加逻辑集群
@@ -133,6 +133,7 @@ public class ClusterPhyVO extends BaseVO implements Comparable<ClusterPhyVO> {
             logicClusterAndRegionList.add(tuple);
         }
     }
+
     @Override
     public int compareTo(ClusterPhyVO o) {
         if (null == o) {

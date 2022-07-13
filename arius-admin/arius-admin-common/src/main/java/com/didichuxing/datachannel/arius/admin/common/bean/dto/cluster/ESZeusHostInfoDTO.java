@@ -11,8 +11,8 @@ import lombok.Data;
 @ApiModel(description = "用户zeus回写ES集群读写地址")
 public class ESZeusHostInfoDTO {
 
-	@ApiModelProperty("集群名称")
-	private String clusterPhyName;
+    @ApiModelProperty("集群名称")
+    private String clusterPhyName;
 
     @ApiModelProperty("角色")
     private String role;

@@ -17,8 +17,8 @@ public interface OperateRecordDAO {
      * @param param OperateRecordInfoPO
      * @return List<OperateRecordPO>
      */
-    List<OperateRecordInfoPO> listByCondition( OperateRecordDTO param);
-    
+    List<OperateRecordInfoPO> listByCondition(OperateRecordDTO param);
+
     /**
      * 总数计算
      *
@@ -34,8 +34,6 @@ public interface OperateRecordDAO {
      */
     int insert(OperateRecordInfoPO po);
 
-
-
     /**
      * 通过moduleId和topN获取数据
      * @param moduleId 操作id
@@ -49,8 +47,8 @@ public interface OperateRecordDAO {
      * @param moduleId  操作id
      * @param id        id
      */
-    void deleteByModuleIdAndLessThanId(@Param("moduleId")int moduleId, @Param("id") int id);
-    
+    void deleteByModuleIdAndLessThanId(@Param("moduleId") int moduleId, @Param("id") int id);
+
     /**
      * 获取通过id
      *

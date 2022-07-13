@@ -17,7 +17,9 @@ import org.apache.commons.lang3.time.DateUtils;
 public class AriusDateUtils {
 
     private static final String FORMAT = "yyyy-MM-dd HH:mm:ss";
-    private AriusDateUtils(){}
+
+    private AriusDateUtils() {
+    }
 
     public static Long date2Long(Date time, String formatStr) {
 

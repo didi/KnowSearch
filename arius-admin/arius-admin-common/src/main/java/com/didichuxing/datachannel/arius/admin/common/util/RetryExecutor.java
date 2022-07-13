@@ -11,7 +11,7 @@ public class RetryExecutor {
     /**
      * 最多的重试次数
      */
-    private static final int        RETRY_MAX  = 10;
+    private static final int  RETRY_MAX  = 10;
     /**
      * 操作名字
      */
@@ -53,7 +53,9 @@ public class RetryExecutor {
          * @param retryTimes 重试次数
          * @return
          */
-        default int retrySleepTime(int retryTimes) {return 0;}
+        default int retrySleepTime(int retryTimes) {
+            return 0;
+        }
     }
 
     public static RetryExecutor builder() {
@@ -85,7 +87,7 @@ public class RetryExecutor {
         do {
             try {
                 int retrySleepTime = handler.retrySleepTime(tryCount);
-                if(retrySleepTime > 0){
+                if (retrySleepTime > 0) {
                     Thread.sleep(retrySleepTime);
                 }
 
@@ -100,8 +102,9 @@ public class RetryExecutor {
                     throw e;
                 }
 
-                LOGGER.warn("class=RetryExecutor||method=execute||errMsg={}||handlerName={}||tryCount={}||maxTryCount={}",
-                        e.getMessage(), name, tryCount,retryCount);
+                LOGGER.warn(
+                    "class=RetryExecutor||method=execute||errMsg={}||handlerName={}||tryCount={}||maxTryCount={}",
+                    e.getMessage(), name, tryCount, retryCount);
             }
         } while (tryCount++ < retryCount);
 
