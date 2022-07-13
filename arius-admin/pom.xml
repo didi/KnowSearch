@@ -894,7 +894,7 @@
                             <goal>format</goal>
                         </goals>
                         <configuration>
-                            <configFile>${project.basedir}/src/main/resources/code-format/didi-java-code-formatter.xml</configFile>
+                            <configFile>${user.dir}/didi-java-code-formatter.xml</configFile>
                         </configuration>
                     </execution>
                 </executions>
