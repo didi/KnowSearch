@@ -118,16 +118,19 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
         List<Long> regionIdLis = Lists.newArrayList();
         for (ClusterRegionWithNodeInfoDTO param : params) {
             Result<Boolean> checkRet = baseCheckParamValid(param);
-            if (checkRet.failed()) { return Result.buildFrom(checkRet);}
+            if (checkRet.failed()) { throw new AdminOperateException(String.format("region名称[%s], errMsg:%s",
+                    param.getName(), checkRet.getMessage()));}
 
             if (clusterRegionService.isExistByRegionName(param.getName())) {
-                return Result.buildFail(String.format("region名称[%s]已经存在", param.getName()));
+                throw  new AdminOperateException(String.format("region名称[%s]已经存在", param.getName()));
             }
 
-            if (CollectionUtils.isEmpty(param.getBindingNodeIds())) { return Result.buildFail("region节点集合为空");}
+            if (CollectionUtils.isEmpty(param.getBindingNodeIds())) {
+                throw  new AdminOperateException(String.format("region名称[%s], errMsg=%s", param.getName(), "划分至该region的节点为空"));
+            }
 
-            Result<Long> addRegionRet = clusterRegionService.createPhyClusterRegion(param.getPhyClusterName(), param.getBindingNodeIds(),
-                    param.getName(), operator);
+            Result<Long> addRegionRet = clusterRegionService.createPhyClusterRegion(param.getPhyClusterName(), param.getName(), operator);
+
             if (addRegionRet.success()) {
                 param.setId(addRegionRet.getData());
                 // 调用扩缩容region接口来添加region
@@ -143,7 +146,7 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
                                     .build());
                     regionIdLis.add(addRegionRet.getData());
                 }else {
-                    throw new AdminOperateException(addRegionRet.getMessage(), FAIL);
+                    throw new AdminOperateException(addRegionRet.getMessage());
                 }
             }
         }
