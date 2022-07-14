@@ -115,13 +115,13 @@ public interface ClusterLogicManager {
     /**
      * 新建逻辑集群, 关联 logicCluster 关联 region
      *
+     * @param aTrue
      * @param param    集群信息
      * @param operator 操作人
-     * @param aTrue
      * @return 成功或失败
      */
     Result<Void> addLogicClusterAndClusterRegions(ESLogicClusterWithRegionDTO param,
-                                                  String operator, Boolean isWorkOrder) throws AdminOperateException;
+                                                  String operator) throws AdminOperateException;
 
     /**
      * 逻辑集群下线

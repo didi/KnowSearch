@@ -372,8 +372,8 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
 
     @Override
     public Result<Void> addLogicClusterAndClusterRegions(ESLogicClusterWithRegionDTO param,
-                                                         String operator, Boolean isWorkOrder) throws AdminOperateException {
-        return clusterRegionManager.batchBindRegionToClusterLogic(param, operator, isWorkOrder);
+                                                         String operator) throws AdminOperateException {
+        return clusterRegionManager.batchBindRegionToClusterLogic(param, operator, Boolean.TRUE);
     }
 
     @Override

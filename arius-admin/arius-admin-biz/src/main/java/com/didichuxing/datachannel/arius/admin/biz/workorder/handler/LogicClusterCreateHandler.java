@@ -127,8 +127,7 @@ public class LogicClusterCreateHandler extends BaseWorkOrderHandler {
         Result<Void> result = Result.buildSucc();
         if (!CollectionUtils.isEmpty(esLogicClusterWithRegionDTO.getClusterRegionDTOS())) {
             //这里申请逻辑集群
-            result = clusterLogicManager.addLogicClusterAndClusterRegions(esLogicClusterWithRegionDTO, approver,
-                    Boolean.TRUE);
+            result = clusterLogicManager.addLogicClusterAndClusterRegions(esLogicClusterWithRegionDTO, approver);
         }
         if (result.success()) {
             //操作记录
