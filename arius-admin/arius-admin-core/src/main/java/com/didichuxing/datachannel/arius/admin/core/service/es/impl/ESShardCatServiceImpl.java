@@ -6,10 +6,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcomma
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESShardCatService;
 import com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESShardDAO;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 /**
  * 详细介绍类情况.
@@ -48,6 +47,7 @@ public class ESShardCatServiceImpl implements ESShardCatService {
     }
 
     private List<ShardDistributionVO> buildShardCatCell(List<ShardCatCellPO> v2) {
+        
         return ConvertUtil.list2List(v2,ShardDistributionVO.class);
     }
 }

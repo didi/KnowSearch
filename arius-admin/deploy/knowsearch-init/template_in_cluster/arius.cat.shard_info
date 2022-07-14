@@ -37,13 +37,13 @@
                 "type": "keyword"
             },
             "shard": {
-                "type": "keyword"
+                "type": "long"
             },
             "state": {
                 "type": "keyword"
             },
             "store": {
-                "type":"keyword"
+                "type":"long"
             },
             "timestamp":{
                 "format":"epoch_millis",
