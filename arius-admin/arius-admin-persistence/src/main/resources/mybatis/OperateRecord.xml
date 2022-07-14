@@ -4,7 +4,7 @@
 	<resultMap id="BaseResultMap"
 	           type="com.didichuxing.datachannel.arius.admin.common.bean.po.operaterecord.OperateRecordInfoPO">
 		<!--@mbg.generated-->
-		<!--@Table es_manager_test2.operate_record_info-->
+		<!--@Table operate_record_info-->
 		<id column="id" jdbcType="BIGINT" property="id"/>
 		<result column="project_name" jdbcType="INTEGER" property="projectName"/>
 		<result column="module_id" jdbcType="INTEGER" property="moduleId"/>
@@ -20,7 +20,7 @@
 	
 	<sql id="Base_Column_List">
 		<!--@mbg.generated-->
-		<!--@Table es_manager_test2.operate_record_info-->    id,
+		<!--@Table operate_record_info-->    id,
 		                                project_name,
 		                                module_id,
 		                                operate_id,
@@ -36,7 +36,7 @@
 	<insert id="insert"
 	        parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.operaterecord.OperateRecordInfoPO"
 	        useGeneratedKeys="true" keyColumn="id" keyProperty="id">
-		<!--@mbg.generated-->    insert into es_manager_test2.operate_record_info (project_name, module_id, operate_id, trigger_way_id,
+		<!--@mbg.generated-->    insert into operate_record_info (project_name, module_id, operate_id, trigger_way_id,
 		                                                     user_operation, operate_time, create_time, update_time,
 		                                                     content, biz_id)
 		                         values (#{projectName}, #{moduleId}, #{operateId}, #{triggerWayId}, #{userOperation},
@@ -47,7 +47,7 @@
 	        parameterType="com.didichuxing.datachannel.arius.admin.common.bean.dto.oprecord.OperateRecordDTO">
 		select
 		<include refid="Base_Column_List"/>
-		from es_manager_test2.operate_record_info
+		from operate_record_info
 		<where >
 			<if test="id != null">
 				and id = #{id}
@@ -94,7 +94,7 @@
 	<select id="selectDescTopNByModuleId" resultMap="BaseResultMap"
 	        parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.operaterecord.OperateRecordInfoPO">
 		select id, module_id
-		from es_manager_test2.operate_record_info
+		from operate_record_info
 		where module_id = #{moduleId}
 		order by id DESC
 		LIMIT #{topN}, 1
@@ -103,7 +103,7 @@
 	<select id="countByCondition" resultType="java.lang.Long"
 	        parameterType="com.didichuxing.datachannel.arius.admin.common.bean.dto.oprecord.OperateRecordDTO">
 		select count(id)
-		from es_manager_test2.operate_record_info
+		from operate_record_info
 		<where >
 			<if test="id != null">
 				and id = #{id}
@@ -146,13 +146,13 @@
 	        resultType="com.didichuxing.datachannel.arius.admin.common.bean.po.operaterecord.OperateRecordInfoPO">
 		select
 		<include refid="Base_Column_List"/>
-		from es_manager_test2.operate_record_info
+		from operate_record_info
 		where id = #{id}
 	</select>
 	
 	<update id="deleteByModuleIdAndLessThanId">
 		delete
-		from es_manager_test2.operate_record_info
+		from operate_record_info
 		where module_id = #{moduleId}
 			and id &lt; #{id}
 	</update>
