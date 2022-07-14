@@ -1,17 +1,24 @@
 package com.didichuxing.datachannel.arius.admin.common.constant;
 
 public enum PageSearchHandleTypeEnum {
-                                      UNKNOWN("unknown"), TEMPLATE_LOGIC("templateLogicPageSearch"), CLUSTER_LOGIC("clusterLogicPageSearch"), DSL_TEMPLATE("dslTemplatePageSearch"), CLUSTER_PHY("clusterPhyPageSearch"), INDEX("indexPageSearch"), TEMPLATE_SRV("templateSrvPageSearch"),
+        UNKNOWN("unknown"),
+        TEMPLATE_LOGIC("templateLogicPageSearch"),
+        CLUSTER_LOGIC("clusterLogicPageSearch"),
+        DSL_TEMPLATE("dslTemplatePageSearch"),
+        CLUSTER_PHY("clusterPhyPageSearch"),
+        INDEX("indexPageSearch"),
+        TEMPLATE_SRV("templateSrvPageSearch"),
 
-                                      QUICK_COMMAND_INDEX("quickCommandIndicesDistributionPageSearch"), OPERATE_RECORD("operateRecordPageSearch");
+        QUICK_COMMAND_INDEX("quickCommandIndicesDistributionPageSearch"),
+        QUICK_COMMAND_SHARD("quickCommandShardsDistributionPageSearch"),
+        OPERATE_RECORD("operateRecordPageSearch");
+       private String pageSearchType;
 
-    private String pageSearchType;
+        public String getPageSearchType(){
+            return pageSearchType;
+        }
 
-    public String getPageSearchType() {
-        return pageSearchType;
+        PageSearchHandleTypeEnum(String pageSearchType) {
+            this.pageSearchType   = pageSearchType;
+        }
     }
-
-    PageSearchHandleTypeEnum(String pageSearchType) {
-        this.pageSearchType = pageSearchType;
-    }
-}

@@ -160,14 +160,13 @@ public class MonitorJobHandler extends AbstractMetaDataJob {
         }
 
         List<ClusterPhy> clusterPhyList = dataSourceFilter(phyClusterService.listAllClusters());
-        List<AriusMetaJobClusterDistributePO> allTaskPOList = ariusMetaJobClusterDistributeDAO
-            .getAllTaskByDataCentre(dataCentre);
+        List<AriusMetaJobClusterDistributePO> allTaskPOList = ariusMetaJobClusterDistributeDAO.getAllTask();
 
         int jobTotalNu = allWorders.size();
 
         //计算本机需要采集的具体es集群
         if (needReAcquireCluster(jobTotalNu, clusterPhyList, allTaskPOList)) {
-            allTaskPOList = ariusMetaJobClusterDistributeDAO.getAllTaskByDataCentre(dataCentre);
+            allTaskPOList = ariusMetaJobClusterDistributeDAO.getAllTask();
             List<AriusMetaJobClusterDistributePO> lockedTasks = acquireOwnCluster(jobTotalNu, allTaskPOList);
 
             localTask.clear();

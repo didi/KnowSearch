@@ -386,7 +386,7 @@ class DashboardMetricsManagerTest {
 
         // Configure DashBoardMetricsService.getClusterHealthInfo(...).
         final ClusterPhyHealthMetrics clusterPhyHealthMetrics = new ClusterPhyHealthMetrics(0L, 0, 0, 0, 0, 0,
-            "yellowClusterListStr", "redClusterListStr", "unknownClusterListStr", 0.0, 0.0, 0.0, 0.0);
+            "greenClusterListStr","yellowClusterListStr", "redClusterListStr", "unknownClusterListStr", 0.0, 0.0, 0.0, 0.0);
         when(dashBoardMetricsService.getClusterHealthInfo()).thenReturn(clusterPhyHealthMetrics);
 
         // Run the test
