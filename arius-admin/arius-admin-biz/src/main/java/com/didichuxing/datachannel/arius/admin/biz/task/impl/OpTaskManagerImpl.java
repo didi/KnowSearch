@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.biz.task.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.task.OpTaskHandler;
 import com.didichuxing.datachannel.arius.admin.biz.task.OpTaskManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
@@ -71,32 +72,26 @@ public class OpTaskManagerImpl implements OpTaskManager {
         final Result<OpTask> opTaskResult = handler.addTask(ConvertUtil.obj2Obj(opTaskDTO, OpTask.class));
         if (opTaskResult.success()) {
             OperateTypeEnum operationType;
-            String content;
+            String content= JSON.parseObject(opTaskDTO.getExpandData()).getString("title");
             switch (typeEnum) {
                 case CLUSTER_NEW:
                     operationType = OperateTypeEnum.PHYSICAL_CLUSTER_NEW;
-                    content = opTaskDTO.getTitle();
                     break;
                 case CLUSTER_OFFLINE:
                     operationType = OperateTypeEnum.PHYSICAL_CLUSTER_OFFLINE;
-                    content = opTaskDTO.getTitle();
                     break;
                 case TEMPLATE_DCDR:
                     operationType = OperateTypeEnum.TEMPLATE_SERVICE_DCDR_SETTING;
-                    content = opTaskDTO.getTitle();
                     break;
                 case CLUSTER_SHRINK:
                 case CLUSTER_EXPAND:
                     operationType = OperateTypeEnum.PHYSICAL_CLUSTER_CAPACITY;
-                    content = opTaskDTO.getTitle();
                     break;
                 case CLUSTER_RESTART:
                     operationType = OperateTypeEnum.PHYSICAL_CLUSTER_RESTART;
-                    content = opTaskDTO.getTitle();
                     break;
                 case CLUSTER_UPGRADE:
                     operationType = OperateTypeEnum.PHYSICAL_CLUSTER_UPGRADE;
-                    content = opTaskDTO.getTitle();
                     break;
                 default:
                     operationType = null;
