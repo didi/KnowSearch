@@ -33,6 +33,9 @@ public class ClusterPhyHealthMetricsVO {
 
     @ApiModelProperty("未知状态集群数")
     private Integer unknownNum;
+    
+    @ApiModelProperty("green状态集群名称列表")
+    private List<String> greenClusterList;
 
     @ApiModelProperty("yellow状态集群名称列表")
     private List<String> yellowClusterList;

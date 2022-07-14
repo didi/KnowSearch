@@ -42,6 +42,11 @@ public class ClusterPhyHealthMetrics {
      * 未知状态集群数
      */
     private Integer unknownNum;
+    
+     /**
+     * green状态集群名称列表
+     */
+    private String  greenClusterListStr;
 
     /**
      * yellow状态集群名称列表

@@ -126,10 +126,12 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
         String unknownClusterListStr = clusterHealthInfo.getUnknownClusterListStr();
         String redClusterListStr     = clusterHealthInfo.getRedClusterListStr();
         String yellowClusterListStr  = clusterHealthInfo.getYellowClusterListStr();
+        String greenClusterListStr  = clusterHealthInfo.getYellowClusterListStr();
 
         clusterPhyHealthMetricsVO.setUnknownClusterList(ListUtils.string2StrList(unknownClusterListStr));
         clusterPhyHealthMetricsVO.setRedClusterList(ListUtils.string2StrList(redClusterListStr));
         clusterPhyHealthMetricsVO.setYellowClusterList(ListUtils.string2StrList(yellowClusterListStr));
+        //clusterPhyHealthMetricsVO.setGreenClusterList();
         return Result.buildSucc(clusterPhyHealthMetricsVO);
     }
 
