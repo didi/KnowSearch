@@ -76,9 +76,10 @@ public class ESShardDAO extends BaseESDAO {
             JSONObject shardInfo = jsonArray.getJSONObject(i);
             ShardCatCellPO shardCatCellPO = new ShardCatCellPO();
             shardCatCellPO.setClusterPhy(clusterName);
-            shardCatCellPO.setShard(Long.parseLong(shardInfo.getString("shard")));
-            shardCatCellPO.setStore(SizeUtil.getUnitSize(shardInfo.getString("store")));
-            shardCatCellPO.setDocs(Integer.parseInt(shardInfo.getString("docs")));
+            shardCatCellPO.setShard(shardInfo.getString("shard")==null?0L:Long.parseLong(shardInfo.getString("shard")));
+            shardCatCellPO.setStore(shardInfo.getString("store")==null?0L:SizeUtil.getUnitSize(shardInfo.getString(
+                    "store")));
+            shardCatCellPO.setDocs(shardInfo.getString("docs")==null?0:Integer.parseInt(shardInfo.getString("docs")));
             shardCatCellPO.setIndex(shardInfo.getString("index"));
             shardCatCellPO.setIp(shardInfo.getString("ip"));
             shardCatCellPO.setNode(shardInfo.getString("node"));
