@@ -843,7 +843,7 @@ class ClusterPhyManagerTest {
     public void testDeleteClusterExit() {
         int projectId = 1;
         Assertions.assertEquals(Result.buildFail("无权限删除集群").getMessage(),
-            clusterPhyManager.deleteClusterExit(CLUSTER, 1, "operator").getMessage());
+            clusterPhyManager.deleteClusterExit(CLUSTER, 2, "operator").getMessage());
         when(mockClusterPhyService.getClusterByName(CLUSTER)).thenReturn(clusterPhy);
         when(mockClusterPhyService.getClusterById(0)).thenReturn(clusterPhy);
         when(mockClusterRoleHostService.getNodesByCluster(CLUSTER)).thenReturn(Collections.emptyList());
