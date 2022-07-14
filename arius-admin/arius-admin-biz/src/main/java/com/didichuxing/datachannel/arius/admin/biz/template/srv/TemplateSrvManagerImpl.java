@@ -1,10 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum.TEMPLATE_SRV;
+
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
 import com.didichuxing.datachannel.arius.admin.biz.page.TemplateSrvPageSearchHandle;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.BaseTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.cold.ColdManager;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
@@ -18,8 +19,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.srv.T
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.srv.UnavailableTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv.TemplateWithSrvVO;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.NewTemplateSrvEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
@@ -41,12 +40,6 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.DependsOn;
-import org.springframework.stereotype.Service;
-
-import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -54,8 +47,11 @@ import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum.TEMPLATE_SRV;
+import javax.annotation.PostConstruct;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.DependsOn;
+import org.springframework.stereotype.Service;
 
 /**
  * @author chengxiang
@@ -304,16 +300,8 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
             return Result.buildNotExist(PHYSICAL_CLUSTER_NOT_EXISTS);
         }
         cluster.setTemplateSrvs("");
-        Result<Boolean> result = clusterPhyService.editCluster(ConvertUtil.obj2Obj(cluster, ClusterPhyDTO.class),
-            operator);
-        if (result.success()) {
-            operateRecordService.save(new OperateRecord.Builder().bizId(clusterPhy).userOperation(operator)
-                .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                .operationTypeEnum(OperateTypeEnum.INDEX_MANAGEMENT_DELETE).content(clusterPhy + "物理集群绑定逻辑集群，删除索引服务：")
-                .build());
-        }
-
-        return result;
+        //此处属于工单的特定使用是不需要进行冗余的操作记录的
+        return clusterPhyService.editCluster(ConvertUtil.obj2Obj(cluster, ClusterPhyDTO.class), operator);
     }
 
     private boolean isRDOrOP(String operator) {

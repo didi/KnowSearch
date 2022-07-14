@@ -12,6 +12,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.Work
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.LogicClusterIndecreaseOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectClusterLogicAuthEnum;
@@ -25,8 +26,8 @@ import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectClust
 import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
 import com.didiglobal.logi.security.service.ProjectService;
 import java.util.List;
-import java.util.Random;
-import java.util.stream.Collectors;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -164,7 +165,17 @@ public class LogicClusterIndecreaseHandler extends BaseWorkOrderHandler {
     protected Result<Void> doProcessAgree(WorkOrder workOrder, String approver) throws AdminOperateException {
         LogicClusterIndecreaseContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
             LogicClusterIndecreaseContent.class);
-
+        //执行前的节点结果
+        final Result<List<ESClusterRoleHostVO>> resultBefore = clusterNodeManager.listClusterLogicNode(
+                content.getLogicClusterId().intValue());
+        Long beforeSize = 0L;
+        if (resultBefore.success() && CollectionUtils.isNotEmpty(resultBefore.getData())) {
+            beforeSize = resultBefore.getData().stream().map(ESClusterRoleHostVO::getRegionName).distinct()
+                    .map(StringUtils::isNotBlank).count();
+        
+        }
+       
+        
         List<ClusterRegionWithNodeInfoDTO> clusterRegionWithNodeInfoDTOList = content.getRegionWithNodeInfo();
 
         Result<Boolean> regionEditResult = clusterNodeManager.editMultiNode2Region(clusterRegionWithNodeInfoDTOList,
@@ -172,15 +183,27 @@ public class LogicClusterIndecreaseHandler extends BaseWorkOrderHandler {
         if (regionEditResult.failed()) {
             return Result.buildFrom(regionEditResult);
         }
+       //执行后的节点结果
+         final Result<List<ESClusterRoleHostVO>> resultAfter = clusterNodeManager.listClusterLogicNode(
+                content.getLogicClusterId().intValue());
+        Long afterSize=0L;
+        if (resultAfter.success() && CollectionUtils.isNotEmpty(resultAfter.getData())){
+            afterSize=
+                    resultAfter.getData().stream().map(ESClusterRoleHostVO::getRegionName).distinct().map(StringUtils::isNotBlank)
+                    .count();
+            
+        }
+        
         operateRecordService.save(new OperateRecord.Builder().bizId(content.getLogicClusterId())
             .operationTypeEnum(OperateTypeEnum.MY_CLUSTER_CAPACITY).triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-            .content(String.format("%s申请逻辑集群：%s的扩容操作，内容如下：%s", workOrder.getSubmitor(), content.getLogicClusterName(),
-                content))
-            .userOperation(approver)
+            .content(String.format("%s：【%d】->【%d】",afterSize>beforeSize?"扩容":"缩容",beforeSize,afterSize))
+            .userOperation(workOrder.getSubmitor())
             .project(projectService.getProjectBriefByProjectId(workOrder.getSubmitorProjectId())).build());
-
-        List<String> administrators = getOPList().stream().map(UserBriefVO::getUserName).collect(Collectors.toList());
-        return Result.buildSuccWithMsg(
-            String.format("请联系管理员【%s】进行后续操作", administrators.get(new Random().nextInt(administrators.size()))));
+        //todo 后续工程清理
+        //List<String> administrators = getOPList().stream().map(UserBriefVO::getUserName).collect(Collectors.toList());
+        //return Result.buildSuccWithMsg(
+        //    String.format("请联系管理员【%s】进行后续操作", administrators.get(new Random().nextInt(administrators.size()))));
+        //当管理员扩容分配完成，就已经自动绑定了region，完成了扩缩容，不需要再进行下一步冗余操作
+        return Result.buildFrom(regionEditResult);
     }
 }
