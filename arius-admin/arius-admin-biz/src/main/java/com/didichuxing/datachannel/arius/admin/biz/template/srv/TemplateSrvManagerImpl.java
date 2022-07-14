@@ -78,7 +78,7 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
     /**
      * 本地cache 加快无效索引服务过滤
      */
-    private static final Cache<Integer, List<String>/*ESClusterVersionEnum*/> LOGIC_TEMPLATE_ID_2_ASSOCIATED_CLUSTER_VERSION_ENUM_CACHE = CacheBuilder
+    private static final Cache<Integer, String/*ESClusterVersionEnum*/> LOGIC_TEMPLATE_ID_2_ASSOCIATED_CLUSTER_VERSION_ENUM_CACHE = CacheBuilder
         .newBuilder().expireAfterWrite(10, TimeUnit.MINUTES).maximumSize(10000).build();
 
     @Autowired
@@ -151,9 +151,8 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
         List<UnavailableTemplateSrv> unavailableSrvList = Lists.newCopyOnWriteArrayList();
         List<NewTemplateSrvEnum> allSrvList = NewTemplateSrvEnum.getAll();
 
-        List<String> versionAndExpression = getLogicTemplateAssociatedEsVersionByLogicTemplateId(logicTemplateId);
-        String esVersionFromESCluster = versionAndExpression.get(0);
-        boolean isPartition = versionAndExpression.get(1).endsWith("*");
+        String esVersionFromESCluster = getLogicTemplateAssociatedEsVersionByLogicTemplateId(logicTemplateId);
+        boolean isPartition = indexTemplateService.getLogicTemplateById(logicTemplateId).getExpression().endsWith("*");
 
         for (NewTemplateSrvEnum srvEnum : allSrvList) {
             if (ESVersionUtil.isHigher(srvEnum.getEsClusterVersion().getVersion(), esVersionFromESCluster)) {
@@ -225,7 +224,7 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
         }
     }
 
-    private List<String> getLogicTemplateAssociatedEsVersionByLogicTemplateId(Integer logicTemplateId) {
+    private String getLogicTemplateAssociatedEsVersionByLogicTemplateId(Integer logicTemplateId) {
         try {
             return LOGIC_TEMPLATE_ID_2_ASSOCIATED_CLUSTER_VERSION_ENUM_CACHE.get(logicTemplateId, () -> {
                 IndexTemplateLogicWithClusterAndMasterTemplate template = indexTemplateService
@@ -235,7 +234,7 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
                         "class=TemplateSrvPageSearchHandle||method=getLogicTemplateAssociatedEsVersionByLogicTemplateId"
                                 + "||templateId={}||errMsg=masterPhyTemplate is null",
                         logicTemplateId);
-                    return null;
+                    return "";
                 }
 
                 String masterCluster = template.getMasterTemplate().getCluster();
@@ -245,20 +244,17 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
                         "class=TemplateSrvPageSearchHandle||method=getLogicTemplateAssociatedEsVersionByLogicTemplateId"
                                 + "||templateId={}||errMsg=clusterPhy of template is null",
                         logicTemplateId);
-                    return null;
+                    return "";
                 }
 
-                List<String> versionAndExpression = new ArrayList<>();
-                versionAndExpression.add(clusterPhy.getEsVersion());
-                versionAndExpression.add(template.getExpression());
-                return versionAndExpression;
+                return clusterPhy.getEsVersion();
             });
         } catch (ExecutionException e) {
             LOGGER
                 .error("class=TemplateSrvPageSearchHandle||method=getLogicTemplateAssociatedEsVersionByLogicTemplateId"
                        + "||templateId={}||errMsg={}",
                     logicTemplateId, e.getMessage(), e);
-            return null;
+            return "";
         }
     }
 
