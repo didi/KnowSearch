@@ -78,7 +78,7 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
     /**
      * 本地cache 加快无效索引服务过滤
      */
-    private static final Cache<Integer, String/*ESClusterVersionEnum*/> LOGIC_TEMPLATE_ID_2_ASSOCIATED_CLUSTER_VERSION_ENUM_CACHE = CacheBuilder
+    private static final Cache<Integer, List<String>/*ESClusterVersionEnum*/> LOGIC_TEMPLATE_ID_2_ASSOCIATED_CLUSTER_VERSION_ENUM_CACHE = CacheBuilder
         .newBuilder().expireAfterWrite(10, TimeUnit.MINUTES).maximumSize(10000).build();
 
     @Autowired
@@ -150,13 +150,25 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
     public List<UnavailableTemplateSrv> getUnavailableSrv(Integer logicTemplateId) {
         List<UnavailableTemplateSrv> unavailableSrvList = Lists.newCopyOnWriteArrayList();
         List<NewTemplateSrvEnum> allSrvList = NewTemplateSrvEnum.getAll();
+
+        List<String> versionAndExpression = getLogicTemplateAssociatedEsVersionByLogicTemplateId(logicTemplateId);
+        String esVersionFromESCluster = versionAndExpression.get(0);
+        boolean isPartition = versionAndExpression.get(1).endsWith("*");
+
         for (NewTemplateSrvEnum srvEnum : allSrvList) {
-            String esVersionFromESCluster = getLogicTemplateAssociatedEsVersionByLogicTemplateId(logicTemplateId);
             if (ESVersionUtil.isHigher(srvEnum.getEsClusterVersion().getVersion(), esVersionFromESCluster)) {
                 unavailableSrvList.add(new UnavailableTemplateSrv(srvEnum.getCode(), srvEnum.getServiceName(),
                     srvEnum.getEsClusterVersion().getVersion(),
                     String.format("不支持该模板服务, 模板[%s]归属集群目前版本[%s], 模板服务需要的最低版本为[%s]", logicTemplateId,
                         esVersionFromESCluster, srvEnum.getEsClusterVersion().getVersion())));
+            }
+
+            if(srvEnum.getCode() == 1 || srvEnum.getCode() == 4){
+                if (!isPartition){
+                    unavailableSrvList.add(new UnavailableTemplateSrv(srvEnum.getCode(), srvEnum.getServiceName(),
+                            srvEnum.getEsClusterVersion().getVersion(),
+                            String.format("非分区模版不支持预创建和过期删除")));
+                }
             }
         }
         return unavailableSrvList;
@@ -214,7 +226,7 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
         }
     }
 
-    private String getLogicTemplateAssociatedEsVersionByLogicTemplateId(Integer logicTemplateId) {
+    private List<String> getLogicTemplateAssociatedEsVersionByLogicTemplateId(Integer logicTemplateId) {
         try {
             return LOGIC_TEMPLATE_ID_2_ASSOCIATED_CLUSTER_VERSION_ENUM_CACHE.get(logicTemplateId, () -> {
                 IndexTemplateLogicWithClusterAndMasterTemplate template = indexTemplateService
@@ -224,7 +236,7 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
                         "class=TemplateSrvPageSearchHandle||method=getLogicTemplateAssociatedEsVersionByLogicTemplateId"
                                 + "||templateId={}||errMsg=masterPhyTemplate is null",
                         logicTemplateId);
-                    return "";
+                    return null;
                 }
 
                 String masterCluster = template.getMasterTemplate().getCluster();
@@ -234,17 +246,20 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
                         "class=TemplateSrvPageSearchHandle||method=getLogicTemplateAssociatedEsVersionByLogicTemplateId"
                                 + "||templateId={}||errMsg=clusterPhy of template is null",
                         logicTemplateId);
-                    return "";
+                    return null;
                 }
 
-                return clusterPhy.getEsVersion();
+                List<String> versionAndExpression = new ArrayList<>();
+                versionAndExpression.add(clusterPhy.getEsVersion());
+                versionAndExpression.add(template.getExpression());
+                return versionAndExpression;
             });
         } catch (ExecutionException e) {
             LOGGER
                 .error("class=TemplateSrvPageSearchHandle||method=getLogicTemplateAssociatedEsVersionByLogicTemplateId"
                        + "||templateId={}||errMsg={}",
                     logicTemplateId, e.getMessage(), e);
-            return "";
+            return null;
         }
     }
 
