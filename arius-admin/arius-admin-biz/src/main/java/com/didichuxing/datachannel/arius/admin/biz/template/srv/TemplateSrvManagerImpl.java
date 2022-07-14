@@ -152,6 +152,7 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
         List<NewTemplateSrvEnum> allSrvList = NewTemplateSrvEnum.getAll();
 
         String esVersionFromESCluster = getLogicTemplateAssociatedEsVersionByLogicTemplateId(logicTemplateId);
+        // isPartition为true代表能分区，false不能分区
         boolean isPartition = indexTemplateService.getLogicTemplateById(logicTemplateId).getExpression().endsWith("*");
 
         for (NewTemplateSrvEnum srvEnum : allSrvList) {
@@ -162,11 +163,10 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
                         esVersionFromESCluster, srvEnum.getEsClusterVersion().getVersion())));
             }
 
-            if(NewTemplateSrvEnum.TEMPLATE_PRE_CREATE.getCode().equals(srvEnum.getCode()) || NewTemplateSrvEnum.TEMPLATE_DEL_EXPIRE.getCode().equals(srvEnum.getCode())){
-                if (!isPartition){
-                    unavailableSrvList.add(new UnavailableTemplateSrv(srvEnum.getCode(), srvEnum.getServiceName(),
-                            srvEnum.getEsClusterVersion().getVersion(), "非分区模版不支持预创建和过期删除"));
-                }
+            if(!isPartition && (NewTemplateSrvEnum.TEMPLATE_PRE_CREATE.getCode().equals(srvEnum.getCode()) ||
+                    NewTemplateSrvEnum.TEMPLATE_DEL_EXPIRE.getCode().equals(srvEnum.getCode()))){
+                unavailableSrvList.add(new UnavailableTemplateSrv(srvEnum.getCode(), srvEnum.getServiceName(),
+                        srvEnum.getEsClusterVersion().getVersion(), "非分区模版不支持预创建和过期删除"));
             }
         }
         return unavailableSrvList;
