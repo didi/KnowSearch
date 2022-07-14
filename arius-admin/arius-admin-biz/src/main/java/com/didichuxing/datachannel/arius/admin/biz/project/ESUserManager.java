@@ -17,9 +17,7 @@ import javax.servlet.http.HttpServletRequest;
  * @date 2022/05/25
  */
 public interface ESUserManager {
-    
 
-    
     /**
      * 通过项目id获取es user 列表
      *
@@ -28,11 +26,7 @@ public interface ESUserManager {
      * @return {@code List<ESUser>}
      */
     Result<List<ESUserVO>> listESUsersByProjectId(String projectIdStr, HttpServletRequest request);
-    
 
-    
-
-    
     /**
      * 新建APP
      *
@@ -43,9 +37,6 @@ public interface ESUserManager {
      */
     Result<Integer> registerESUser(ESUserDTO appDTO, Integer projectId, String operator);
 
-    
-
-    
     /**
      * 编辑es user
      *
@@ -54,7 +45,7 @@ public interface ESUserManager {
      * @return {@code Result<Void>}
      */
     Result<Void> editESUser(ESUserDTO esUserDTO, String operator);
-    
+
     /**
      * 删除项目下的指定es user
      *
@@ -64,7 +55,7 @@ public interface ESUserManager {
      * @return {@code Result<Void>}
      */
     Result<Void> deleteESUserByProject(int esUser, int projectId, String operator);
-    
+
     /**
      * 删除项目下所有的es user
      *
@@ -73,8 +64,7 @@ public interface ESUserManager {
      * @return {@code Result<Void>}
      */
     Result<Void> deleteAllESUserByProject(int projectId, String operator);
-    
-    
+
     /**
      * 校验验证码
      * @param esUserName es user
@@ -82,9 +72,7 @@ public interface ESUserManager {
      * @return result
      */
     Result<Void> verifyAppCode(Integer esUserName, String verifyCode);
-    
 
-    
     /**
      * 获取
      *
@@ -93,7 +81,6 @@ public interface ESUserManager {
      */
     Result<ConsoleESUserVO> get(Integer esUser);
 
-    
     /**
      * 获取没有
      *
@@ -102,5 +89,5 @@ public interface ESUserManager {
      * @return {@code Result<List<ConsoleESUserWithVerifyCodeVO>>}
      */
     Result<List<ConsoleESUserWithVerifyCodeVO>> getNoCodeESUser(Integer projectId, String operator);
-    
+
 }

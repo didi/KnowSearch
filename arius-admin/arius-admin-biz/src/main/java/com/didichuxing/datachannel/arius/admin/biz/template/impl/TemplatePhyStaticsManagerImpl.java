@@ -10,10 +10,11 @@ import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateStatsSer
 import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateValueService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-import java.util.List;
-import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author d06679
@@ -22,13 +23,10 @@ import org.springframework.stereotype.Service;
 @Service
 public class TemplatePhyStaticsManagerImpl implements TemplatePhyStaticsManager {
 
-    private static final ILog         LOGGER = LogFactory.getLog( TemplatePhyStaticsManagerImpl.class);
-
- 
+    private static final ILog    LOGGER = LogFactory.getLog(TemplatePhyStaticsManagerImpl.class);
 
     @Autowired
     private TemplateStatsService templateStatsService;
-
 
     @Autowired
     private TemplateValueService templateValueService;
@@ -41,15 +39,8 @@ public class TemplatePhyStaticsManagerImpl implements TemplatePhyStaticsManager 
     @Override
     public Result<TemplateStatsInfoVO> getTemplateBaseStatisticalInfoByLogicTemplateId(Long logicTemplateId) {
         return Result.buildSucc(ConvertUtil.obj2Obj(
-                templateStatsService.getTemplateBaseStatisticalInfoByLogicTemplateId(logicTemplateId).getData(),
-                TemplateStatsInfoVO.class));
-    }
-
-    @Override
-    public Result<List<ProjectIdTemplateAccessCountVO>> getAccessAppInfos(int logicTemplateId, Long startDate, Long endDate) {
-        return Result.buildSucc(ConvertUtil.list2List(
-                templateStatsService.getAccessAppInfos(logicTemplateId, startDate, endDate).getData(),
-                ProjectIdTemplateAccessCountVO.class));
+            templateStatsService.getTemplateBaseStatisticalInfoByLogicTemplateId(logicTemplateId).getData(),
+            TemplateStatsInfoVO.class));
     }
 
     @Override
@@ -57,7 +48,12 @@ public class TemplatePhyStaticsManagerImpl implements TemplatePhyStaticsManager 
         return templateStatsService.getIndexStatis(logicTemplateId, startDate, endDate);
     }
 
+    @Override
+    public Result<List<ProjectIdTemplateAccessCountVO>> getAccessAppInfos(int logicTemplateId, Long startDate,
+                                                                          Long endDate) {
+        return Result.buildSucc(
+            ConvertUtil.list2List(templateStatsService.getAccessAppInfos(logicTemplateId, startDate, endDate).getData(),
+                ProjectIdTemplateAccessCountVO.class));
+    }
 
-
-  
 }

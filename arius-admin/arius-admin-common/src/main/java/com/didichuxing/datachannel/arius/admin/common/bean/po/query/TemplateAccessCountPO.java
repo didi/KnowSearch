@@ -38,22 +38,22 @@ public class TemplateAccessCountPO extends BaseESPO {
      * 索引模板名称
      */
     @ApiModelProperty(value = "索引模板名称")
-    private String templateName;
+    private String  templateName;
     /**
      * 集群名称
      */
     @ApiModelProperty(value = "集群名称")
-    private String clusterName;
+    private String  clusterName;
     /**
      * 访问次数
      */
     @ApiModelProperty(value = "访问次数")
-    private Long count;
+    private Long    count;
     /**
      * 统计日期
      */
     @ApiModelProperty(value = "统计日期")
-    private String date;
+    private String  date;
 
     /**
      * 累加访问次数

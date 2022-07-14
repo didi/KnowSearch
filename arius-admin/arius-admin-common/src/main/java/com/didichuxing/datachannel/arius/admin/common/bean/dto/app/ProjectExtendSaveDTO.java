@@ -18,8 +18,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @ApiModel(description = "项目保存dto")
 public class ProjectExtendSaveDTO {
-	@ApiModelProperty(value = "项目", dataType = "ProjectSaveDTO", required = false)
-	private ProjectSaveDTO   project;
-	@ApiModelProperty(value = "项目配置", dataType = "ProjectSaveDTO", required = false)
-	private ProjectConfigDTO config;
+    @ApiModelProperty(value = "项目", dataType = "ProjectSaveDTO", required = false)
+    private ProjectSaveDTO   project;
+    @ApiModelProperty(value = "项目配置", dataType = "ProjectSaveDTO", required = false)
+    private ProjectConfigDTO config;
 }

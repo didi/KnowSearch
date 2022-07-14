@@ -24,8 +24,7 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
  * @author d06679
  */
 @Configuration
-@MapperScan(value = "com.didichuxing.datachannel.arius.admin.persistence.mysql",
-        sqlSessionFactoryRef = "adminSqlSessionFactory")
+@MapperScan(value = "com.didichuxing.datachannel.arius.admin.persistence.mysql", sqlSessionFactoryRef = "adminSqlSessionFactory")
 public class DruidDbConfig {
 
     @Bean("adminDataSource")
@@ -36,10 +35,10 @@ public class DruidDbConfig {
     }
 
     @Bean
-    public GlobalConfig globalConfigByArius(){
-        GlobalConfig globalConfig=new GlobalConfig();
+    public GlobalConfig globalConfigByArius() {
+        GlobalConfig globalConfig = new GlobalConfig();
         globalConfig.setBanner(false);
-        GlobalConfig.DbConfig dbConfig=new GlobalConfig.DbConfig();
+        GlobalConfig.DbConfig dbConfig = new GlobalConfig.DbConfig();
         dbConfig.setIdType(IdType.AUTO);
         globalConfig.setDbConfig(dbConfig);
         return globalConfig;
@@ -64,13 +63,11 @@ public class DruidDbConfig {
      */
     @Bean("adminSqlSessionFactory")
     @Primary
-    public SqlSessionFactory sqlSessionFactory(
-            @Qualifier("adminDataSource") DataSource dataSource) throws Exception {
+    public SqlSessionFactory sqlSessionFactory(@Qualifier("adminDataSource") DataSource dataSource) throws Exception {
         //将SqlSessionFactoryBean 替换为 MybatisSqlSessionFactoryBean， 否则mybatis-plus 提示 Invalid bound statement (not found)
         MybatisSqlSessionFactoryBean bean = new MybatisSqlSessionFactoryBean();
         bean.setDataSource(dataSource);
-        bean.setMapperLocations(new PathMatchingResourcePatternResolver()
-                .getResources("classpath:mybatis/*.xml"));
+        bean.setMapperLocations(new PathMatchingResourcePatternResolver().getResources("classpath:mybatis/*.xml"));
         bean.setGlobalConfig(globalConfigByArius());
         MybatisConfiguration mc = new MybatisConfiguration();
         //查看打印sql日志
@@ -83,8 +80,8 @@ public class DruidDbConfig {
         // 设置mybatis的xml所在位置
         return bean.getObject();
     }
-    
-    @Bean({"adminSqlSessionTemplate"})
+
+    @Bean({ "adminSqlSessionTemplate" })
     @Primary
     public SqlSessionTemplate primarySqlSessionTemplate(@Qualifier("adminSqlSessionFactory") SqlSessionFactory sessionFactory) {
         return new SqlSessionTemplate(sessionFactory);

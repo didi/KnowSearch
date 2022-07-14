@@ -18,7 +18,7 @@ public class DeleteExpireIndexTask extends BaseConcurrentTemplateTask implements
     private static final ILog LOGGER = LogFactory.getLog(IndexRolloverTask.class);
 
     @Autowired
-    private ExpireManager expireManager;
+    private ExpireManager     expireManager;
 
     @Override
     public TaskResult execute(JobContext jobContext) throws Exception {

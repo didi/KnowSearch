@@ -1,30 +1,29 @@
 package com.didichuxing.datachannel.arius.admin.biz.workorder.handler;
 
 import com.alibaba.fastjson.JSON;
+import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandler;
+import com.didichuxing.datachannel.arius.admin.biz.workorder.content.TemplateQueryDslContent;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
-import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.AuditDsl;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.DslInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ProjectTemplateAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.TemplateQueryDslOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
+import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
+import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectLogicTemplateAuthService;
-import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandler;
-import com.didichuxing.datachannel.arius.admin.biz.workorder.content.TemplateQueryDslContent;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.AuditDsl;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.DslInfo;
 import com.didichuxing.datachannel.arius.admin.metadata.service.DslStatisticsService;
 import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * @author d06679
@@ -37,7 +36,7 @@ public class TemplateQueryDslHandler extends BaseWorkOrderHandler {
     private ProjectLogicTemplateAuthService projectLogicTemplateAuthService;
 
     @Autowired
-    private DslStatisticsService dslStatisticsService;
+    private DslStatisticsService            dslStatisticsService;
 
     /**
      * 工单是否自动审批
@@ -168,8 +167,7 @@ public class TemplateQueryDslHandler extends BaseWorkOrderHandler {
 
         // 修改模板quota及保存时长信息
         AuditDsl auditDsl = new AuditDsl(workOrder.getSubmitorProjectId(), workOrder.getSubmitor(), dslInfos);
-        Result<String> result = dslStatisticsService.auditDsl(auditDsl);
 
-        return Result.buildFrom(result);
+        return Result.buildFrom(dslStatisticsService.auditDsl(auditDsl));
     }
 }

@@ -29,7 +29,7 @@ public class YamlUtil {
         if (ymlPath == null) {
             return null;
         }
-        if(YML_NAME_TO_PROPERTIES.containsKey(ymlPath)) {
+        if (YML_NAME_TO_PROPERTIES.containsKey(ymlPath)) {
             return YML_NAME_TO_PROPERTIES.get(ymlPath);
         }
         Map<String, String> properties = new HashMap<>();
@@ -50,7 +50,7 @@ public class YamlUtil {
                 if (val instanceof Map) {
                     forEachYaml(properties, key, (Map<String, Object>) val, 1, keys);
                 } else {
-                    properties.put(key, val != null ? val.toString(): null);
+                    properties.put(key, val != null ? val.toString() : null);
                 }
             }
             YML_NAME_TO_PROPERTIES.put(ymlPath, properties);
@@ -66,21 +66,23 @@ public class YamlUtil {
      * 根据 key 获取值
      */
     public static String getValue(String ymlPath, String key) throws IOException {
-        if(YML_NAME_TO_PROPERTIES.containsKey(ymlPath)) {
+        if (YML_NAME_TO_PROPERTIES.containsKey(ymlPath)) {
             return YML_NAME_TO_PROPERTIES.get(ymlPath).get(key);
         }
         Map<String, String> properties = getYmlByFileName(ymlPath);
 
-        if (properties == null) {return null;}
+        if (properties == null) {
+            return null;
+        }
 
         return properties.get(key);
     }
 
-
     /**
      * 遍历 yml 文件，获取 map 集合
      */
-    private static void forEachYaml(Map<String, String> properties, String key_str, Map<String, Object> obj, int i, String... keys) {
+    private static void forEachYaml(Map<String, String> properties, String key_str, Map<String, Object> obj, int i,
+                                    String... keys) {
         for (Map.Entry<String, Object> entry : obj.entrySet()) {
             String key = entry.getKey();
             Object val = entry.getValue();
@@ -97,7 +99,7 @@ public class YamlUtil {
                 forEachYaml(properties, str_new, (Map<String, Object>) val, ++i, keys);
                 i--;
             } else {
-                properties.put(str_new, val != null ? val.toString(): null);
+                properties.put(str_new, val != null ? val.toString() : null);
             }
         }
     }

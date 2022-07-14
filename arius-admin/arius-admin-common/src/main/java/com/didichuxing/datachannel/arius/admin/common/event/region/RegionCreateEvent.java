@@ -12,14 +12,11 @@ public class RegionCreateEvent extends ApplicationEvent {
 
     private ClusterRegion clusterRegion;
 
-    private Integer share;
+    private Integer       share;
 
-    private String operator;
+    private String        operator;
 
-    public RegionCreateEvent(Object source,
-                             ClusterRegion clusterRegion,
-                             Integer share,
-                             String operator) {
+    public RegionCreateEvent(Object source, ClusterRegion clusterRegion, Integer share, String operator) {
         super(source);
         this.clusterRegion = clusterRegion;
         this.operator = operator;

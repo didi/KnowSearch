@@ -8,25 +8,25 @@ import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
  */
 public enum ClusterHealthEnum {
 
-    /**
-     * green
-     */
-    GREEN(0, "green"),
+                               /**
+                                * green
+                                */
+                               GREEN(0, "green"),
 
-    /**
-     * yellow
-     */
-    YELLOW(1, "yellow"),
+                               /**
+                                * yellow
+                                */
+                               YELLOW(1, "yellow"),
 
-    /**
-     * red
-     */
-    RED(2, "red"),
+                               /**
+                                * red
+                                */
+                               RED(2, "red"),
 
-    /**
-     * 未知
-     */
-    UNKNOWN(-1, "unknown");
+                               /**
+                                * 未知
+                                */
+                               UNKNOWN(-1, "unknown");
 
     ClusterHealthEnum(Integer code, String desc) {
         this.code = code;
@@ -68,7 +68,7 @@ public enum ClusterHealthEnum {
     }
 
     private Integer code;
-    private String desc;
+    private String  desc;
 
     public static boolean isExitByCode(Integer code) {
         if (null == code) {

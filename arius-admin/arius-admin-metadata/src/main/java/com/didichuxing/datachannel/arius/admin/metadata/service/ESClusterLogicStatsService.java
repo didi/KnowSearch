@@ -25,22 +25,25 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Service
 public class ESClusterLogicStatsService {
-    protected static final Logger logger = LoggerFactory.getLogger(ESClusterLogicStatsService.class);
-    private static final String STR_GREEN = "green";
-    private final Cache<String, ESClusterHealthResponse> phyClusterHealthCache = CacheBuilder.newBuilder().expireAfterWrite(2, TimeUnit.MINUTES).maximumSize(10000).build();
-    private final Cache<String, Map<String, IndexStatusResult>> templateIndicesHealthMapCache = CacheBuilder.newBuilder().expireAfterWrite(2, TimeUnit.MINUTES).maximumSize(10000).build();
+    protected static final Logger                               logger                        = LoggerFactory
+        .getLogger(ESClusterLogicStatsService.class);
+    private static final String                                 STR_GREEN                     = "green";
+    private final Cache<String, ESClusterHealthResponse>        phyClusterHealthCache         = CacheBuilder
+        .newBuilder().expireAfterWrite(2, TimeUnit.MINUTES).maximumSize(10000).build();
+    private final Cache<String, Map<String, IndexStatusResult>> templateIndicesHealthMapCache = CacheBuilder
+        .newBuilder().expireAfterWrite(2, TimeUnit.MINUTES).maximumSize(10000).build();
     @Autowired
-    private ESClusterService esClusterService;
+    private ESClusterService                                    esClusterService;
     @Autowired
-    private IndexTemplatePhyService indexTemplatePhyService;
+    private IndexTemplatePhyService                             indexTemplatePhyService;
     @Autowired
-    private AriusStatsNodeInfoESDAO ariusStatsNodeInfoEsDao;
+    private AriusStatsNodeInfoESDAO                             ariusStatsNodeInfoEsDao;
     @Autowired
-    private ClusterLogicService clusterLogicService;
+    private ClusterLogicService                                 clusterLogicService;
     @Autowired
-    private ClusterPhyService clusterPhyService;
+    private ClusterPhyService                                   clusterPhyService;
     @Autowired
-    private ClusterRegionService clusterRegionService;
+    private ClusterRegionService                                clusterRegionService;
 
     public ClusterLogicStatsPO getLogicClusterStats(Long logicClusterId, boolean isJob) {
         return new ClusterLogicStatsPO();

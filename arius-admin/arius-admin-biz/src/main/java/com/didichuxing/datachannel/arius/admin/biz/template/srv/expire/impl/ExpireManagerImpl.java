@@ -17,8 +17,8 @@ import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.template.NewTemplateSrvEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplatePhysicalStatusEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexCatService;
@@ -44,21 +44,19 @@ import org.springframework.stereotype.Service;
 @Service
 public class ExpireManagerImpl extends BaseTemplateSrvImpl implements ExpireManager {
 
-    private final Integer RETRY_TIMES = 3;
+    private final Integer         RETRY_TIMES = 3;
 
     @Autowired
-    private ESIndexService esIndexService;
-
+    private ESIndexService        esIndexService;
 
     @Autowired
     private IndexCatInfoCollector indexCatInfoCollector;
     @Autowired
     private ESIndexCatService     esIndexCatService;
-    
 
     @Override
-    public NewTemplateSrvEnum templateSrv() {
-        return NewTemplateSrvEnum.TEMPLATE_DEL_EXPIRE;
+    public TemplateServiceEnum templateSrv() {
+        return TemplateServiceEnum.TEMPLATE_DEL_EXPIRE;
     }
 
     @Override
@@ -67,64 +65,80 @@ public class ExpireManagerImpl extends BaseTemplateSrvImpl implements ExpireMana
             return Result.buildFail("模板未开启过期删除服务");
         }
 
-        Boolean succ = deleteNormalTemplateExpireIndex(logicTemplateId, RETRY_TIMES) && deleteDeletingTemplateExpireIndex(logicTemplateId);
+        Boolean succ = deleteNormalTemplateExpireIndex(logicTemplateId, RETRY_TIMES)
+                       && deleteDeletingTemplateExpireIndex(logicTemplateId);
         return succ ? Result.buildSucc() : Result.buildFail("删除过期索引失败");
     }
 
     /////////////////////////////private method/////////////////////////////////////////////
 
     private Boolean deleteNormalTemplateExpireIndex(Integer logicTemplateId, int retryCount) {
-        List<IndexTemplatePhy> templatePhyList = indexTemplatePhyService.getTemplateByLogicIdAndStatus(logicTemplateId, TemplatePhysicalStatusEnum.NORMAL.getCode());
+        List<IndexTemplatePhy> templatePhyList = indexTemplatePhyService.getTemplateByLogicIdAndStatus(logicTemplateId,
+            TemplatePhysicalStatusEnum.NORMAL.getCode());
         if (CollectionUtils.isEmpty(templatePhyList)) {
-            LOGGER.info("class=ExpireManagerImpl||method=deleteNormalTemplateExpireIndex||logicTemplateId={}||msg=no physical template", logicTemplateId);
+            LOGGER.info(
+                "class=ExpireManagerImpl||method=deleteNormalTemplateExpireIndex||logicTemplateId={}||msg=no physical template",
+                logicTemplateId);
             return Boolean.TRUE;
         }
 
         Multimap<String, String> cluster2ShouldDeleteIndex = ArrayListMultimap.create();
-        for (IndexTemplatePhy templatePhy: templatePhyList) {
+        for (IndexTemplatePhy templatePhy : templatePhyList) {
             try {
                 Long templatePhyId = templatePhy.getId();
                 Tuple<String, Set<String>> expireIndexTuple = getExpireIndex(templatePhyId);
                 if (null == expireIndexTuple) {
-                    LOGGER.info("class=ExpireManagerImpl||method=deleteNormalTemplateExpireIndex||templatePhyId={}||msg=no expire index", templatePhyId);
+                    LOGGER.info(
+                        "class=ExpireManagerImpl||method=deleteNormalTemplateExpireIndex||templatePhyId={}||msg=no expire index",
+                        templatePhyId);
                     continue;
                 }
 
                 cluster2ShouldDeleteIndex.putAll(expireIndexTuple.getV1(), expireIndexTuple.getV2());
             } catch (Exception e) {
-                LOGGER.warn("class=ExpireManagerImpl||method=deleteNormalTemplateExpireIndex||templatePhyId={}||errMsg={}", templatePhy.getId(), e.getMessage());
+                LOGGER.warn(
+                    "class=ExpireManagerImpl||method=deleteNormalTemplateExpireIndex||templatePhyId={}||errMsg={}",
+                    templatePhy.getId(), e.getMessage());
             }
         }
 
         if (cluster2ShouldDeleteIndex.isEmpty()) {
-            LOGGER.info("class=ExpireManagerImpl||method=deleteNormalTemplateExpireIndex||logicTemplateId={}||msg=no expire index", logicTemplateId);
+            LOGGER.info(
+                "class=ExpireManagerImpl||method=deleteNormalTemplateExpireIndex||logicTemplateId={}||msg=no expire index",
+                logicTemplateId);
             return Boolean.TRUE;
         }
 
         Boolean succ = Boolean.TRUE;
-        for (String cluster: cluster2ShouldDeleteIndex.keySet()) {
+        for (String cluster : cluster2ShouldDeleteIndex.keySet()) {
             List<String> shouldDeleteIndexList = new ArrayList<>(cluster2ShouldDeleteIndex.get(cluster));
             if (CollectionUtils.isEmpty(shouldDeleteIndexList)) {
-                LOGGER.info("class=ExpireManagerImpl||method=deleteNormalTemplateExpireIndex||cluster={}||msg=no expire index", cluster);
+                LOGGER.info(
+                    "class=ExpireManagerImpl||method=deleteNormalTemplateExpireIndex||cluster={}||msg=no expire index",
+                    cluster);
                 continue;
             }
 
-            succ = succ && esIndexService.syncBatchDeleteIndices(cluster, shouldDeleteIndexList, retryCount) == shouldDeleteIndexList.size();
+            succ = succ && esIndexService.syncBatchDeleteIndices(cluster, shouldDeleteIndexList,
+                retryCount) == shouldDeleteIndexList.size();
             succ = succ && updateIndexFlagInvalid(cluster, shouldDeleteIndexList).success();
         }
         return succ;
     }
 
     private Boolean deleteDeletingTemplateExpireIndex(Integer logicTemplateId) {
-        List<IndexTemplatePhy> templatePhyList = indexTemplatePhyService.getTemplateByLogicIdAndStatus(logicTemplateId, TemplatePhysicalStatusEnum.INDEX_DELETING.getCode());
+        List<IndexTemplatePhy> templatePhyList = indexTemplatePhyService.getTemplateByLogicIdAndStatus(logicTemplateId,
+            TemplatePhysicalStatusEnum.INDEX_DELETING.getCode());
         if (CollectionUtils.isEmpty(templatePhyList)) {
-            LOGGER.info("class=ExpireManagerImpl||method=deleteDeletingTemplateExpireIndex||logicTemplateId={}||msg=no deleting template", logicTemplateId);
+            LOGGER.info(
+                "class=ExpireManagerImpl||method=deleteDeletingTemplateExpireIndex||logicTemplateId={}||msg=no deleting template",
+                logicTemplateId);
             return true;
         }
 
         Boolean succ = Boolean.TRUE;
         IndexTemplate template = indexTemplateService.getLogicTemplateById(logicTemplateId);
-        for (IndexTemplatePhy templatePhy: templatePhyList) {
+        for (IndexTemplatePhy templatePhy : templatePhyList) {
             try {
                 if (null != template) {
                     succ = succ && deleteTemplatePhyExpireIndex(templatePhy.getId());
@@ -133,7 +147,8 @@ public class ExpireManagerImpl extends BaseTemplateSrvImpl implements ExpireMana
                 }
             } catch (Exception e) {
                 succ = Boolean.FALSE;
-                LOGGER.warn("class=ExpireManagerImpl||method=deleteDeletingTemplateExpireIndex||cluster={}||msg={}", templatePhy.getCluster(), e.getMessage(), e);
+                LOGGER.warn("class=ExpireManagerImpl||method=deleteDeletingTemplateExpireIndex||cluster={}||msg={}",
+                    templatePhy.getCluster(), e.getMessage(), e);
             }
         }
         return succ;
@@ -154,16 +169,23 @@ public class ExpireManagerImpl extends BaseTemplateSrvImpl implements ExpireMana
         int expireTime = logicTemplate.getExpireTime();
         if (expireTime > 0 && expireTime < PLATFORM_EXPIRE_TIME_MIN) {
             expireTime = PLATFORM_EXPIRE_TIME_MIN;
-            LOGGER.warn("class=ExpireManagerImpl||method=getExpireIndex||msg=getExpireIndexByTemplate expire time illegal||template={}", logicTemplate.getName());
+            LOGGER.warn(
+                "class=ExpireManagerImpl||method=getExpireIndex||msg=getExpireIndexByTemplate expire time illegal||template={}",
+                logicTemplate.getName());
         }
 
         if (expireTime <= 0) {
-            if (!TemplatePhysicalStatusEnum.NORMAL.equals(TemplatePhysicalStatusEnum.valueOf(templatePhysicalWithLogic.getStatus()))) {
+            if (!TemplatePhysicalStatusEnum.NORMAL
+                .equals(TemplatePhysicalStatusEnum.valueOf(templatePhysicalWithLogic.getStatus()))) {
                 // 对于已经删除的物理索引模板，我们需要重新设置其过期时间
                 expireTime = PLATFORM_DELETED_TEMPLATE_EXPIRED_TIME;
-                LOGGER.info("class=ExpireManagerImpl||method=getExpireIndex||msg=method=getExpireIndex||msg=reset template expire time||template={}", logicTemplate.getName());
+                LOGGER.info(
+                    "class=ExpireManagerImpl||method=getExpireIndex||msg=method=getExpireIndex||msg=reset template expire time||template={}",
+                    logicTemplate.getName());
             } else {
-                LOGGER.info("class=ExpireManagerImpl||method=getExpireIndex||msg=getExpireIndexByTemplate no expire||template={}", logicTemplate.getName());
+                LOGGER.info(
+                    "class=ExpireManagerImpl||method=getExpireIndex||msg=getExpireIndexByTemplate no expire||template={}",
+                    logicTemplate.getName());
                 return null;
             }
         }
@@ -191,9 +213,10 @@ public class ExpireManagerImpl extends BaseTemplateSrvImpl implements ExpireMana
             return Boolean.TRUE;
         }
 
-        Boolean succ = expireIndex.size() == esIndexService.syncBatchDeleteIndices(templatePhy.getCluster(), expireIndex, RETRY_TIMES);
+        Boolean succ = expireIndex.size() == esIndexService.syncBatchDeleteIndices(templatePhy.getCluster(),
+            expireIndex, RETRY_TIMES);
         if (succ) {
-           updateIndexFlagInvalid(templatePhy.getCluster(), Lists.newArrayList(expireIndex));
+            updateIndexFlagInvalid(templatePhy.getCluster(), Lists.newArrayList(expireIndex));
         }
         return succ;
     }
@@ -208,19 +231,16 @@ public class ExpireManagerImpl extends BaseTemplateSrvImpl implements ExpireMana
             return Boolean.FALSE;
         }
 
-        List<IndexTemplatePhyPO> physicalPOs =
-                indexTemplatePhyService.getByClusterAndNameAndStatus(physical.getCluster(), physical.getName(), TemplatePhysicalStatusEnum.NORMAL.getCode());
-                
-               
+        List<IndexTemplatePhyPO> physicalPOs = indexTemplatePhyService.getByClusterAndNameAndStatus(
+            physical.getCluster(), physical.getName(), TemplatePhysicalStatusEnum.NORMAL.getCode());
 
         //如果还有正常状态的物理模板存在，那就把非正常状态的物理模板给清理掉
-        if(CollectionUtils.isNotEmpty(physicalPOs)){
+        if (CollectionUtils.isNotEmpty(physicalPOs)) {
             deleteTemplateNuNormalStatusFromDB(physical);
             return Boolean.TRUE;
         }
         physicalPOs.addAll(indexTemplatePhyService.getByClusterAndStatus(physical.getCluster(),
-                TemplatePhysicalStatusEnum.INDEX_DELETING.getCode()));
-
+            TemplatePhysicalStatusEnum.INDEX_DELETING.getCode()));
 
         // 0：noConflict
         // 1：hasConflict
@@ -238,26 +258,36 @@ public class ExpireManagerImpl extends BaseTemplateSrvImpl implements ExpireMana
 
             String expressionPre = physical.getExpression().replace("*", "");
             if (po.getExpression().startsWith(expressionPre)) {
-                LOGGER.info("class=ExpireManagerImpl||method=deleteTemplateDeletedIndices||msg=processLogicDeleted hasConflict||deletedTemplate={}||conflictTemplate={}", physical.getName(), po.getName());
+                LOGGER.info(
+                    "class=ExpireManagerImpl||method=deleteTemplateDeletedIndices||msg=processLogicDeleted hasConflict||deletedTemplate={}||conflictTemplate={}",
+                    physical.getName(), po.getName());
                 deleteCode = 1;
                 break;
             }
         }
 
         if (deleteCode == 1) {
-            LOGGER.warn("class=ExpireManagerImpl||method=deleteTemplateDeletedIndices||msg=processLogicDeleted has conflict||deletedTemplate={}||expression={}", physical.getName(), physical.getExpression());
+            LOGGER.warn(
+                "class=ExpireManagerImpl||method=deleteTemplateDeletedIndices||msg=processLogicDeleted has conflict||deletedTemplate={}||expression={}",
+                physical.getName(), physical.getExpression());
             return false;
         }
 
         Boolean succ = Boolean.TRUE;
         if (deleteCode == 0) {
-            LOGGER.info("class=ExpireManagerImpl||method=deleteTemplateDeletedIndices||msg=processLogicDeleted no conflict and not reCreate||deletedTemplate={}||expression={}", physical.getName(), physical.getExpression());
-            Set<String> shouldDelSet = esIndexService.syncGetIndexNameByExpression(physical.getCluster(), physical.getExpression());
+            LOGGER.info(
+                "class=ExpireManagerImpl||method=deleteTemplateDeletedIndices||msg=processLogicDeleted no conflict and not reCreate||deletedTemplate={}||expression={}",
+                physical.getName(), physical.getExpression());
+            Set<String> shouldDelSet = esIndexService.syncGetIndexNameByExpression(physical.getCluster(),
+                physical.getExpression());
             if (CollectionUtils.isNotEmpty(shouldDelSet)) {
                 try {
-                    succ = esIndexService.syncDeleteIndexByExpression(physical.getCluster(), physical.getExpression(), RETRY_TIMES);
+                    succ = esIndexService.syncDeleteIndexByExpression(physical.getCluster(), physical.getExpression(),
+                        RETRY_TIMES);
                 } catch (Exception e) {
-                    LOGGER.error("class=ExpireManagerImpl||method=deleteTemplateDeletedIndices||msg=processLogicDeleted delete index error||deletedTemplate={}||expression={}", physical.getName(), physical.getExpression(), e);
+                    LOGGER.error(
+                        "class=ExpireManagerImpl||method=deleteTemplateDeletedIndices||msg=processLogicDeleted delete index error||deletedTemplate={}||expression={}",
+                        physical.getName(), physical.getExpression(), e);
                     succ = Boolean.FALSE;
                 }
                 if (succ) {
@@ -273,22 +303,22 @@ public class ExpireManagerImpl extends BaseTemplateSrvImpl implements ExpireMana
         }
         return succ;
     }
-    
+
     private Result<Boolean> updateIndexFlagInvalid(String cluster, List<String> indexNameList) {
         //不采集已删除索引
         indexCatInfoCollector.updateNotCollectorIndexNames(cluster, indexNameList);
         //更新存储cat/index信息的元信息索引中对应文档删除标识位为true
-        boolean succ =
-                indexNameList.size() == esIndexCatService.syncUpdateCatIndexDeleteFlag(cluster, indexNameList, 3);
+        boolean succ = indexNameList.size() == esIndexCatService.syncUpdateCatIndexDeleteFlag(cluster, indexNameList,
+            3);
         if (!succ) {
             LOGGER.error(
-                    "class=ExpireManagerImpl||method=batchSetIndexFlagInvalid||cluster={}||indexNameList={}||errMsg=failed to batchSetIndexFlagInvalid",
-                    cluster, ListUtils.strList2String(indexNameList));
+                "class=ExpireManagerImpl||method=batchSetIndexFlagInvalid||cluster={}||indexNameList={}||errMsg=failed to batchSetIndexFlagInvalid",
+                cluster, ListUtils.strList2String(indexNameList));
         }
         return Result.build(succ);
     }
 
-    private boolean deleteTemplateNuNormalStatusFromDB(IndexTemplatePhy physical){
+    private boolean deleteTemplateNuNormalStatusFromDB(IndexTemplatePhy physical) {
         return indexTemplatePhyService.deleteDirtyByClusterAndName(physical.getCluster(), physical.getName());
     }
 
@@ -305,7 +335,7 @@ public class ExpireManagerImpl extends BaseTemplateSrvImpl implements ExpireMana
         return indexTemplatePhyService.buildIndexTemplatePhysicalWithLogicByPhysicalId(physicalId);
     }
     ///////////////////////////////////////////srv
-    
+
     /**
      * 删除模板过期索引
      * 1、可以是当前集群存在的物理模板
@@ -322,14 +352,13 @@ public class ExpireManagerImpl extends BaseTemplateSrvImpl implements ExpireMana
             return true;
         }
 
-        Set<String> shouldDels =
-                Optional.ofNullable(getExpireIndex(physicalId)).map(Tuple::getV2).orElse(Sets.newHashSet());
+        Set<String> shouldDels = Optional.ofNullable(getExpireIndex(physicalId)).map(Tuple::getV2)
+            .orElse(Sets.newHashSet());
 
-        LOGGER
-            .error("class=ExpireManagerImpl||method=deleteExpireIndices||physicalId={}||logicId={}||status={}"
-                   + "||name={}||shouldDeleteIndices={}",
-                physicalId, templatePhysical.getLogicId(), templatePhysical.getStatus(), templatePhysical.getName(),
-                JSON.toJSONString(shouldDels));
+        LOGGER.error("class=ExpireManagerImpl||method=deleteExpireIndices||physicalId={}||logicId={}||status={}"
+                     + "||name={}||shouldDeleteIndices={}",
+            physicalId, templatePhysical.getLogicId(), templatePhysical.getStatus(), templatePhysical.getName(),
+            JSON.toJSONString(shouldDels));
 
         if (CollectionUtils.isEmpty(shouldDels)) {
             if (templatePhysical.getStatus().equals(TemplatePhysicalStatusEnum.INDEX_DELETING.getCode())) {
@@ -342,7 +371,7 @@ public class ExpireManagerImpl extends BaseTemplateSrvImpl implements ExpireMana
             shouldDels, retryCount);
 
         if (succ) {
-           updateIndexFlagInvalid(templatePhysical.getCluster(), Lists.newArrayList(shouldDels));
+            updateIndexFlagInvalid(templatePhysical.getCluster(), Lists.newArrayList(shouldDels));
         }
 
         return succ;
@@ -363,19 +392,18 @@ public class ExpireManagerImpl extends BaseTemplateSrvImpl implements ExpireMana
         }
 
         List<IndexTemplatePhyPO> physicalPOs =
-                
-                
-                indexTemplatePhyService
-                .getByClusterAndNameAndStatus(physical.getCluster(), physical.getName(), TemplatePhysicalStatusEnum.NORMAL.getCode());
+
+                indexTemplatePhyService.getByClusterAndNameAndStatus(physical.getCluster(), physical.getName(),
+                    TemplatePhysicalStatusEnum.NORMAL.getCode());
 
         //如果还有正常状态的物理模板存在，那就把非正常状态的物理模板给清理掉
-        if(CollectionUtils.isNotEmpty(physicalPOs)){
+        if (CollectionUtils.isNotEmpty(physicalPOs)) {
             deleteTemplateNuNormalStatusFromDB(physical);
             return true;
         }
 
         physicalPOs.addAll(indexTemplatePhyService.getByClusterAndStatus(physical.getCluster(),
-                TemplatePhysicalStatusEnum.INDEX_DELETING.getCode()));
+            TemplatePhysicalStatusEnum.INDEX_DELETING.getCode()));
 
         // 0：noConflict
         // 1：hasConflict
@@ -393,7 +421,8 @@ public class ExpireManagerImpl extends BaseTemplateSrvImpl implements ExpireMana
 
             String expressionPre = physical.getExpression().replace("*", "");
             if (po.getExpression().startsWith(expressionPre)) {
-                LOGGER.info("class=BaseTemplateSrv||method=deleteTemplateDeletedIndices||msg=processLogicDeleted hasConflict||deletedTemplate={}||conflictTemplate={}",
+                LOGGER.info(
+                    "class=BaseTemplateSrv||method=deleteTemplateDeletedIndices||msg=processLogicDeleted hasConflict||deletedTemplate={}||conflictTemplate={}",
                     physical.getName(), po.getName());
                 deleteCode = 1;
                 break;
@@ -401,18 +430,22 @@ public class ExpireManagerImpl extends BaseTemplateSrvImpl implements ExpireMana
         }
 
         if (deleteCode == 1) {
-            LOGGER.warn("class=BaseTemplateSrv||method=deleteTemplateDeletedIndices||msg=processLogicDeleted has conflict||deletedTemplate={}||expression={}", physical.getName(),
-                physical.getExpression());
+            LOGGER.warn(
+                "class=BaseTemplateSrv||method=deleteTemplateDeletedIndices||msg=processLogicDeleted has conflict||deletedTemplate={}||expression={}",
+                physical.getName(), physical.getExpression());
             return false;
         }
 
         boolean succ = true;
         if (deleteCode == 0) {
-            LOGGER.info("class=BaseTemplateSrv||method=deleteTemplateDeletedIndices||msg=processLogicDeleted no conflict and not reCreate||deletedTemplate={}||expression={}",
+            LOGGER.info(
+                "class=BaseTemplateSrv||method=deleteTemplateDeletedIndices||msg=processLogicDeleted no conflict and not reCreate||deletedTemplate={}||expression={}",
                 physical.getName(), physical.getExpression());
-            Set<String> shouldDelSet = esIndexService.syncGetIndexNameByExpression(physical.getCluster(), physical.getExpression());
+            Set<String> shouldDelSet = esIndexService.syncGetIndexNameByExpression(physical.getCluster(),
+                physical.getExpression());
             if (CollectionUtils.isNotEmpty(shouldDelSet)) {
-                succ = esIndexService.syncDeleteIndexByExpression(physical.getCluster(), physical.getExpression(), retryCount);
+                succ = esIndexService.syncDeleteIndexByExpression(physical.getCluster(), physical.getExpression(),
+                    retryCount);
                 if (succ) {
                     //批量设置存储索引cat/index信息的元数据索引中的文档标志位（deleteFlag）为true
                     updateIndexFlagInvalid(physical.getCluster(), Lists.newArrayList(shouldDelSet));
@@ -427,7 +460,7 @@ public class ExpireManagerImpl extends BaseTemplateSrvImpl implements ExpireMana
 
         return succ;
     }
-    
+
     /**
      * @param cluster 集群
      * @return
@@ -442,7 +475,8 @@ public class ExpireManagerImpl extends BaseTemplateSrvImpl implements ExpireMana
         return deleteNormalTemplateExpireIndexByCluster(cluster, retryCount)
                && deleteDeletingTemplateExpireIndexByCluster(cluster, retryCount);
     }
-     /**************************************** private method ****************************************************/
+
+    /**************************************** private method ****************************************************/
 
     private boolean deleteNormalTemplateExpireIndexByCluster(String cluster, int retryCount) {
         List<IndexTemplatePhy> templatePhysicals = indexTemplatePhyService.getTemplateByClusterAndStatus(cluster,
@@ -476,21 +510,21 @@ public class ExpireManagerImpl extends BaseTemplateSrvImpl implements ExpireMana
         if (succ) {
             List<String> shouldDelList = Lists.newArrayList(shouldDels);
             Result<Boolean> batchSetIndexFlagInvalidResult = updateIndexFlagInvalid(cluster, shouldDelList);
-            if (batchSetIndexFlagInvalidResult.success()){
+            if (batchSetIndexFlagInvalidResult.success()) {
                 operateRecordService.save(new OperateRecord.Builder()
 
-                                .content(String.format("根据模板过期时间删除过期索引：集群%s;索引:%s", cluster, ListUtils.strList2String(shouldDelList)))
-                                .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
-                                .operationTypeEnum(OperateTypeEnum.INDEX_MANAGEMENT_DELETE)
-                                .triggerWayEnum(TriggerWayEnum.TIMING_TASK)
-                                .userOperation(AriusUser.SYSTEM.getDesc())
-                        .build());
+                    .content(
+                        String.format("根据模板过期时间删除过期索引：集群%s;索引:%s", cluster, ListUtils.strList2String(shouldDelList)))
+                    .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
+                    .operationTypeEnum(OperateTypeEnum.INDEX_MANAGEMENT_DELETE)
+                    .triggerWayEnum(TriggerWayEnum.TIMING_TASK).userOperation(AriusUser.SYSTEM.getDesc()).build());
 
             }
         }
 
         return succ;
     }
+
     public Set<String> getExpireIndexByPhysicalId(Long physicalId) {
 
         IndexTemplatePhyWithLogic templatePhysicalWithLogic = getNormalAndDeletingTemplateWithLogicById(physicalId);
@@ -504,7 +538,9 @@ public class ExpireManagerImpl extends BaseTemplateSrvImpl implements ExpireMana
 
         if (expireTime > 0 && expireTime < PLATFORM_EXPIRE_TIME_MIN) {
             expireTime = PLATFORM_EXPIRE_TIME_MIN;
-            LOGGER.warn("class=BaseTemplateSrv||method= getExpireIndex||msg=getExpireIndexByTemplate expire time illegal||template={}", logicTemplate.getName());
+            LOGGER.warn(
+                "class=BaseTemplateSrv||method= getExpireIndex||msg=getExpireIndexByTemplate expire time illegal||template={}",
+                logicTemplate.getName());
         }
 
         if (expireTime <= 0) {
@@ -513,10 +549,13 @@ public class ExpireManagerImpl extends BaseTemplateSrvImpl implements ExpireMana
                 // 对于已经删除的物理索引模板，我们需要重新设置其过期时间
                 expireTime = PLATFORM_DELETED_TEMPLATE_EXPIRED_TIME;
 
-                LOGGER.info("class=BaseTemplateSrv||method= getExpireIndex||msg=method=getExpireIndex||msg=reset template expire time||template={}",
+                LOGGER.info(
+                    "class=BaseTemplateSrv||method= getExpireIndex||msg=method=getExpireIndex||msg=reset template expire time||template={}",
                     logicTemplate.getName());
             } else {
-                LOGGER.info("class=BaseTemplateSrv||method= getExpireIndex||msg=getExpireIndexByTemplate no expire||template={}", logicTemplate.getName());
+                LOGGER.info(
+                    "class=BaseTemplateSrv||method= getExpireIndex||msg=getExpireIndexByTemplate no expire||template={}",
+                    logicTemplate.getName());
                 return Sets.newHashSet();
             }
 
@@ -527,18 +566,19 @@ public class ExpireManagerImpl extends BaseTemplateSrvImpl implements ExpireMana
 
     private boolean deleteDeletingTemplateExpireIndexByCluster(String cluster, int retryCount) {
         List<IndexTemplatePhy> templatePhysicals = indexTemplatePhyService.getTemplateByClusterAndStatus(cluster,
-                TemplatePhysicalStatusEnum.INDEX_DELETING.getCode());
+            TemplatePhysicalStatusEnum.INDEX_DELETING.getCode());
         if (CollectionUtils.isEmpty(templatePhysicals)) {
             LOGGER.info(
-                    "class=ESClusterPhyServiceImpl||method=deleteDeletingTemplateExpireIndex||cluster={}||msg=cluster no deleting template",
-                    cluster);
+                "class=ESClusterPhyServiceImpl||method=deleteDeletingTemplateExpireIndex||cluster={}||msg=cluster no deleting template",
+                cluster);
             return true;
         }
-    
+
         boolean succ = true;
         for (IndexTemplatePhy physical : templatePhysicals) {
             try {
-                IndexTemplate templateLogic = indexTemplateService.getLogicTemplateWithPhysicalsById(physical.getLogicId());
+                IndexTemplate templateLogic = indexTemplateService
+                    .getLogicTemplateWithPhysicalsById(physical.getLogicId());
                 if (templateLogic != null) {
                     succ = deleteExpireIndices(physical.getId(), retryCount) && succ;
                 } else {
@@ -547,26 +587,26 @@ public class ExpireManagerImpl extends BaseTemplateSrvImpl implements ExpireMana
             } catch (Exception e) {
                 succ = false;
                 LOGGER.warn(
-                        "class=ESClusterPhyServiceImpl||method=deleteDeletingTemplateExpireIndex||template={}||msg={}",
-                        physical.getName(), e.getMessage(), e);
+                    "class=ESClusterPhyServiceImpl||method=deleteDeletingTemplateExpireIndex||template={}||msg={}",
+                    physical.getName(), e.getMessage(), e);
             }
-    
+
         }
-    
+
         if (succ) {
-            List<String> indexTemplatePhyNameList = templatePhysicals.stream().map(IndexTemplatePhy::getName).collect(Collectors.toList());
+            List<String> indexTemplatePhyNameList = templatePhysicals.stream().map(IndexTemplatePhy::getName)
+                .collect(Collectors.toList());
             operateRecordService.save(new OperateRecord.Builder()
-        
-                    .content(String.format("删除已删除模板关联的索引：集群%s; 模板%s", cluster,
-                            ListUtils.strList2String(indexTemplatePhyNameList)))
-                    .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
-                    .operationTypeEnum(OperateTypeEnum.INDEX_MANAGEMENT_DELETE)
-                    .triggerWayEnum(TriggerWayEnum.TIMING_TASK).userOperation(AriusUser.SYSTEM.getDesc()).build());
-        
+
+                .content(String.format("删除已删除模板关联的索引：集群%s; 模板%s", cluster,
+                    ListUtils.strList2String(indexTemplatePhyNameList)))
+                .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
+                .operationTypeEnum(OperateTypeEnum.INDEX_MANAGEMENT_DELETE).triggerWayEnum(TriggerWayEnum.TIMING_TASK)
+                .userOperation(AriusUser.SYSTEM.getDesc()).build());
+
         }
-    
+
         return succ;
     }
- 
 
 }

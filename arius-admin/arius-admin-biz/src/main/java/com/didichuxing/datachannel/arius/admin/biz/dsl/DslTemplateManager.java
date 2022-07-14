@@ -22,7 +22,8 @@ public interface DslTemplateManager {
      * @param queryLimit         限流值
      * @return Result<Boolean>
      */
-    Result<Boolean> updateDslTemplateQueryLimit(Integer projectId, String operator, List<String> dslTemplateMd5List, Double queryLimit);
+    Result<Boolean> updateDslTemplateQueryLimit(Integer projectId, String operator, List<String> dslTemplateMd5List,
+                                                Double queryLimit);
 
     /**
      * 更新查询模版的 启用|停用 状态
@@ -48,5 +49,6 @@ public interface DslTemplateManager {
      * @param queryDTO 查询条件
      * @return 分页数据
      */
-    PaginationResult<DslTemplateVO> getDslTemplatePage(Integer projectId, DslTemplateConditionDTO queryDTO) throws NotFindSubclassException;
+    PaginationResult<DslTemplateVO> getDslTemplatePage(Integer projectId,
+                                                       DslTemplateConditionDTO queryDTO) throws NotFindSubclassException;
 }

@@ -20,7 +20,7 @@ public class ErrorDsl {
     /**
      * 异常查询总次数
      */
-    private Long count;
+    private Long               count;
     /**
      * 异常查询
      */

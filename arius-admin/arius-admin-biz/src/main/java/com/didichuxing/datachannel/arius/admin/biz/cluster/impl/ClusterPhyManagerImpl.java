@@ -106,6 +106,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -113,6 +114,7 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.ElasticsearchTimeoutException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -126,85 +128,86 @@ import org.springframework.transaction.interceptor.TransactionAspectSupport;
 @Component
 public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
-    private static final ILog                                LOGGER                        = LogFactory
+    private static final ILog                                    LOGGER                                      = LogFactory
         .getLog(ClusterPhyManagerImpl.class);
 
-    private static final String                              NODE_NOT_EXISTS_TIPS          = "集群缺少类型为%s的节点";
+    private static final String                                  NODE_NOT_EXISTS_TIPS                        = "集群缺少类型为%s的节点";
 
-    private static final String                              IP_DUPLICATE_TIPS             = "集群ip:%s重复, 请重新输入";
+    private static final String                                  IP_DUPLICATE_TIPS                           = "集群ip:%s重复, 请重新输入";
     /**
      * Map< cluster , Triple< diskUsage , diskTotal , diskUsagePercent >>
      */
-    private static final Map<String, Triple<Long, Long, Double>> CLUSTER_NAME_TO_ES_CLUSTER_STATS_TRIPLE_MAP = Maps.newConcurrentMap();
-    public static final String SEPARATOR_CHARS = ",";
-    public static final String VERSION_PREFIX_PATTERN="^\\d*.\\d*";
+    private static final Map<String, Triple<Long, Long, Double>> CLUSTER_NAME_TO_ES_CLUSTER_STATS_TRIPLE_MAP = Maps
+        .newConcurrentMap();
+    public static final String                                   SEPARATOR_CHARS                             = ",";
+    public static final String                                   VERSION_PREFIX_PATTERN                      = "^\\d*.\\d*";
 
     @Autowired
-    private ESTemplateService                                esTemplateService;
+    private ESTemplateService                                    esTemplateService;
 
     @Autowired
-    private ClusterPhyService                                clusterPhyService;
+    private ClusterPhyService                                    clusterPhyService;
 
     @Autowired
-    private ClusterLogicService                              clusterLogicService;
+    private ClusterLogicService                                  clusterLogicService;
 
     @Autowired
-    private ClusterRoleService clusterRoleService;
+    private ClusterRoleService                                   clusterRoleService;
 
     @Autowired
-    private ClusterRoleHostService clusterRoleHostService;
+    private ClusterRoleHostService                               clusterRoleHostService;
 
     @Autowired
-    private IndexTemplatePhyService indexTemplatePhyService;
+    private IndexTemplatePhyService                              indexTemplatePhyService;
 
     @Autowired
-    private TemplatePhyMappingManager                        templatePhyMappingManager;
+    private TemplatePhyMappingManager                            templatePhyMappingManager;
 
     @Autowired
-    private PipelineManager templatePipelineManager;
+    private PipelineManager                                      templatePipelineManager;
 
     @Autowired
-    private IndexTemplateService indexTemplateService;
+    private IndexTemplateService                                 indexTemplateService;
 
     @Autowired
-    private TemplatePhyManager                               templatePhyManager;
+    private TemplatePhyManager                                   templatePhyManager;
 
     @Autowired
-    private ClusterRegionService clusterRegionService;
+    private ClusterRegionService                                 clusterRegionService;
 
     @Autowired
-    private ClusterContextManager                            clusterContextManager;
+    private ClusterContextManager                                clusterContextManager;
 
     @Autowired
-    private ProjectService projectService;
+    private ProjectService                                       projectService;
 
     @Autowired
-    private OperateRecordService operateRecordService;
+    private OperateRecordService                                 operateRecordService;
 
     @Autowired
-    private ESClusterNodeService                             esClusterNodeService;
+    private ESClusterNodeService                                 esClusterNodeService;
 
     @Autowired
-    private ESClusterService                                 esClusterService;
+    private ESClusterService                                     esClusterService;
 
     @Autowired
-    private HandleFactory                                    handleFactory;
+    private HandleFactory                                        handleFactory;
 
     @Autowired
-    private AriusScheduleThreadPool                          ariusScheduleThreadPool;
+    private AriusScheduleThreadPool                              ariusScheduleThreadPool;
 
     @Autowired
-    private ESOpClient                                       esOpClient;
+    private ESOpClient                                           esOpClient;
 
     @Autowired
-    private RoleTool roleTool;
+    private RoleTool                                             roleTool;
 
     @PostConstruct
-    private void init(){
-        ariusScheduleThreadPool.submitScheduleAtFixedDelayTask(this::refreshClusterDistInfo,60,180);
+    private void init() {
+        ariusScheduleThreadPool.submitScheduleAtFixedDelayTask(this::refreshClusterDistInfo, 60, 180);
     }
 
-    private static final FutureUtil<Void> FUTURE_UTIL = FutureUtil.init("ClusterPhyManagerImpl",20, 40,100);
+    private static final FutureUtil<Void> FUTURE_UTIL = FutureUtil.init("ClusterPhyManagerImpl", 20, 40, 100);
 
     @Override
     public boolean copyMapping(String cluster, int retryCount) {
@@ -285,7 +288,6 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         return buildClusterInfo(phyClusters);
     }
 
-
     @Override
     public List<ClusterPhyVO> buildClusterInfo(List<ClusterPhy> clusterPhyList) {
         if (CollectionUtils.isEmpty(clusterPhyList)) {
@@ -300,7 +302,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         long timeForBuildClusterDiskInfo = System.currentTimeMillis();
         for (ClusterPhyVO clusterPhyVO : clusterPhyVOList) {
             FUTURE_UTIL
-                    .runnableTask(() -> buildClusterRole(clusterPhyVO, roleListMap.get(clusterPhyVO.getId().longValue())));
+                .runnableTask(() -> buildClusterRole(clusterPhyVO, roleListMap.get(clusterPhyVO.getId().longValue())));
         }
         buildClusterPhyWithLogicAndRegion(clusterPhyVOList);
         FUTURE_UTIL.waitExecute();
@@ -382,7 +384,9 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         }
         List<String> clusters = Lists.newArrayList();
         ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(clusterLogicId);
-        if (clusterLogic == null) { return Result.buildFail("选定的逻辑集群不存在");}
+        if (clusterLogic == null) {
+            return Result.buildFail("选定的逻辑集群不存在");
+        }
 
         ClusterRegion logicClusterRegions = clusterRegionService.getRegionByLogicClusterId(clusterLogic.getId());
         if (null != logicClusterRegions) {
@@ -393,7 +397,9 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
     @Override
     public Result<List<String>> listCanBeAssociatedClustersPhys(Integer clusterLogicType) {
-        if (!ClusterResourceTypeEnum.isExist(clusterLogicType)) { return Result.buildParamIllegal("集群资源类型非法");}
+        if (!ClusterResourceTypeEnum.isExist(clusterLogicType)) {
+            return Result.buildParamIllegal("集群资源类型非法");
+        }
 
         List<String> clusters = Lists.newArrayList();
         ClusterPhyDTO clusterPhyDTO = new ClusterPhyDTO();
@@ -425,46 +431,78 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         return Result.buildSucc(clusters);
     }
 
+    private final Consumer<ESClusterRoleHostDTO> roleClusterHostsTrimHostnameAndPort = esClusterRoleHostDTO -> {
+        esClusterRoleHostDTO.setCluster(StringUtils.trim(esClusterRoleHostDTO.getCluster()));
+        esClusterRoleHostDTO.setHostname(StringUtils.trim(esClusterRoleHostDTO.getHostname()));
+        esClusterRoleHostDTO.setIp(StringUtils.trim(esClusterRoleHostDTO.getIp()));
+        esClusterRoleHostDTO.setPort(StringUtils.trim(esClusterRoleHostDTO.getPort()));
+
+    };
+
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result<ClusterPhyVO> joinCluster(ClusterJoinDTO param, String operator) {
-        try {
-            
-            Result<Void> checkResult = checkClusterJoin(param, operator);
-            if (checkResult.failed()) {
-                return Result.buildFail(checkResult.getMessage());
+    public Result<ClusterPhyVO> joinCluster(ClusterJoinDTO param, String operator, Integer projectId) {
+        if (param.getProjectId() == null) {
+            param.setProjectId(projectId);
+        }
+        //这里其实是需要一个内置trim 用来保证传输进行的roleClusterHosts是正确的
+        param.getRoleClusterHosts().forEach(roleClusterHostsTrimHostnameAndPort);
+        Result<Void> checkResult = checkClusterJoin(param, operator);
+        if (checkResult.failed()) {
+            return Result.buildFail(checkResult.getMessage());
+        }
+        String esClientHttpAddressesStr = clusterRoleHostService
+            .buildESClientHttpAddressesStr(param.getRoleClusterHosts());
+        for (ESClusterRoleHostDTO roleClusterHost : param.getRoleClusterHosts()) {
+            if (roleClusterHost.getRegionId() == null) {
+                roleClusterHost.setRegionId(-1);
             }
-            String esClientHttpAddressesStr = clusterRoleHostService
-                .buildESClientHttpAddressesStr(param.getRoleClusterHosts());
+        }
+        Result<Void> initResult = initClusterJoin(param, esClientHttpAddressesStr);
+        if (initResult.failed()) {
+            return Result.buildFail(initResult.getMessage());
+        }
 
-            Result<Void> initResult = initClusterJoin(param, operator, esClientHttpAddressesStr);
-            if (initResult.failed()) {
-                return Result.buildFail(initResult.getMessage());
-            }
+        try {
 
             // 1.保存物理集群信息(集群、角色、节点)
             Result<ClusterPhyVO> saveClusterResult = saveClusterPhy(param, operator);
+
             if (saveClusterResult.failed()) {
                 throw new AdminOperateException(saveClusterResult.getMessage());
             } else {
                 SpringTool.publish(new ClusterPhyEvent(param.getCluster(), operator));
-                postProcessingForClusterJoin(param, operator);
-            }
-            operateRecordService.save(new OperateRecord.Builder().project(
-                            projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
-                    .bizId(saveClusterResult.getData().getId()).content(saveClusterResult.getData().getCluster())
+                postProcessingForClusterJoin(param);
+                operateRecordService.save(new OperateRecord.Builder()
+                    .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
+                    .bizId(saveClusterResult.getData().getId())
+                    .content(String.format("集群接入：%s", saveClusterResult.getData().getCluster()))
                     .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_JOIN)
-                    .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).userOperation(operator)
-                    .build());
+                    .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).userOperation(operator).build());
+            }
 
             return saveClusterResult;
-        } catch (Exception e) {
-            LOGGER.error("class=ClusterPhyManagerImpl||method=clusterJoin||clusterPhy={}||errMsg={}",
-                param.getCluster(), e.getMessage());
+        } catch (AdminOperateException | ElasticsearchTimeoutException e) {
+            LOGGER.error("class=ClusterPhyManagerImpl||method=clusterJoin||clusterPhy={}||es operation errMsg={}",
+                param.getCluster(), e);
             // 这里必须显示事务回滚
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-            return Result.buildFail("操作失败, 请联系管理员");
+            return Result.buildFail("接入失败, 请重新尝试接入集群,多次重试不成功,请联系管理员");
+        } catch (NullPointerException e) {
+            LOGGER.error(
+                "class=ClusterPhyManagerImpl||method=clusterJoin||clusterPhy={}||join cluster operation null point exception errMsg={}",
+                param.getCluster(), e);
+            // 这里必须显示事务回滚
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return Result.buildFail("接入集群发生致命错误,请联系管理员");
+        } catch (Exception e) {
+            LOGGER.error("class=ClusterPhyManagerImpl||method=clusterJoin||clusterPhy={}||errMsg={}",
+                param.getCluster(), e);
+            // 这里必须显示事务回滚
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return Result.buildFail("操作失败,请联系管理员");
         }
+
     }
 
     @Override
@@ -474,10 +512,9 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         if (AriusObjUtils.isNull(clusterPhy)) {
             return Result.buildParamIllegal("物理集群不存在");
         }
-       
-    
+
         try {
-            doDeleteClusterJoin(clusterPhy, operator,projectId);
+            doDeleteClusterJoin(clusterPhy, operator, projectId);
         } catch (AdminOperateException e) {
             LOGGER.error("class=ClusterPhyManagerImpl||method=deleteClusterJoin||errMsg={}||e={}||clusterId={}",
                 e.getMessage(), e, clusterId);
@@ -485,15 +522,12 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return Result.buildFail(e.getMessage());
         }
-        operateRecordService.save(new OperateRecord.Builder()
-                        .content(String.format("删除接入集群：%d",clusterId))
-                        .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_JOIN)
-                        .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                        .project(projectService.getProjectBriefByProjectId(projectId))
-                        .userOperation(operator)
-                        .bizId(clusterId)
+        operateRecordService
+            .save(new OperateRecord.Builder().content(String.format("删除接入集群：%s", clusterPhy.getCluster()))
+                .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_JOIN).triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                .project(projectService.getProjectBriefByProjectId(projectId)).userOperation(operator).bizId(clusterId)
                 .build());
-        
+
         return Result.buildSucc();
     }
 
@@ -505,7 +539,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     @Override
     public Result<Map<ClusterDynamicConfigsTypeEnum, Map<String, Object>>> getPhyClusterDynamicConfigs(String cluster) {
         if (!isClusterExists(cluster)) {
-           return Result.buildFail(String.format("集群[%s]不存在", cluster));
+            return Result.buildFail(String.format("集群[%s]不存在", cluster));
         }
 
         ESClusterGetSettingsAllResponse clusterSetting = esClusterService.syncGetClusterSetting(cluster);
@@ -533,29 +567,29 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     @Override
     public Result<Boolean> updatePhyClusterDynamicConfig(ClusterSettingDTO param, String operator, Integer projectId) {
         final Result<Void> resultCheck = ProjectUtils.checkProjectCorrectly(i -> i, projectId, projectId);
-        if (resultCheck.failed()){
+        if (resultCheck.failed()) {
             return Result.buildFail(resultCheck.getMessage());
         }
-        final Result<Map<ClusterDynamicConfigsTypeEnum, Map<String, Object>>> beforeChangeConfigs =
-                getPhyClusterDynamicConfigs(
-                param.getClusterName());
+        final Result<Map<ClusterDynamicConfigsTypeEnum, Map<String, Object>>> beforeChangeConfigs = getPhyClusterDynamicConfigs(
+            param.getClusterName());
+        String changeKey = param.getKey();
+        Object beforeValue = beforeChangeConfigs.getData().values().stream()
+            .filter(
+                clusterDynamicConfigsTypeEnumMapValues -> clusterDynamicConfigsTypeEnumMapValues.containsKey(changeKey))
+            .map(clusterDynamicConfigsTypeEnumMapValues -> clusterDynamicConfigsTypeEnumMapValues.get(changeKey))
+            .findFirst().orElse("");
+        Object changeValue = param.getValue();
         final ClusterPhy clusterByName = clusterPhyService.getClusterByName(param.getClusterName());
         final Result<Boolean> result = clusterPhyService.updatePhyClusterDynamicConfig(param);
-        final Result<Map<ClusterDynamicConfigsTypeEnum, Map<String, Object>>> afterChangeConfigs =
-                getPhyClusterDynamicConfigs(
-                param.getClusterName());
-        if (result.success()){
-            
+        if (result.success()) {
+
             operateRecordService.save(new OperateRecord.Builder()
-                            .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
-                            .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                            .userOperation(operator)
-                            .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_DYNAMIC_CONF_CHANGE).content(
-                            ProjectUtils.getChangeByAfterAndBeforeJson(afterChangeConfigs,beforeChangeConfigs)
-        
-                    )
-                            .bizId(clusterByName.getId())
-                    .build());
+                .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
+                .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).userOperation(operator)
+                .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_DYNAMIC_CONF_CHANGE)
+                .content(String.format("%s:%s->%s", changeKey, beforeValue, changeValue)
+
+                ).bizId(clusterByName.getId()).build());
         }
         return result;
     }
@@ -584,7 +618,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
     @Override
     public Result<List<String>> listClusterPhyNameByResourceType(Integer clusterResourceType, Integer projectId) {
-        
+
         if (null != clusterResourceType && !ClusterResourceTypeEnum.isExist(clusterResourceType)) {
             return Result.buildParamIllegal("集群资源类型非法");
         }
@@ -617,41 +651,47 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     public Result<List<String>> getTemplateSameVersionClusterNamesByTemplateId(Integer projectId, Integer templateId) {
         List<String> clusterPhyNameList = listClusterPhyNameByProjectId(projectId);
         // No permission, cut branches and return
-        if (CollectionUtils.isEmpty(clusterPhyNameList)) { return Result.buildSucc();}
+        if (CollectionUtils.isEmpty(clusterPhyNameList)) {
+            return Result.buildSucc();
+        }
 
-        IndexTemplateWithPhyTemplates logicTemplateWithPhysicals = indexTemplateService.getLogicTemplateWithPhysicalsById(templateId);
-        if (null == logicTemplateWithPhysicals) { return  Result.buildFail(String.format("templateId[%s] is not exist", templateId));}
+        IndexTemplateWithPhyTemplates logicTemplateWithPhysicals = indexTemplateService
+            .getLogicTemplateWithPhysicalsById(templateId);
+        if (null == logicTemplateWithPhysicals) {
+            return Result.buildFail(String.format("templateId[%s] is not exist", templateId));
+        }
 
         IndexTemplatePhy masterPhyTemplate = logicTemplateWithPhysicals.getMasterPhyTemplate();
         if (null == masterPhyTemplate) {
-            return  Result.buildFail(String.format("the physicals of templateId[%s] is empty", templateId));
+            return Result.buildFail(String.format("the physicals of templateId[%s] is empty", templateId));
         }
 
         String cluster = masterPhyTemplate.getCluster();
         ClusterPhy clusterPhy = clusterPhyService.getClusterByName(cluster);
-        if (null == clusterPhy) { return  Result.buildFail(String.format("the cluster[%s] from templateId[%s] is empty", cluster, templateId));}
+        if (null == clusterPhy) {
+            return Result.buildFail(String.format("the cluster[%s] from templateId[%s] is empty", cluster, templateId));
+        }
 
         String esVersion = clusterPhy.getEsVersion();
 
         List<ClusterPhy> clusterPhies = clusterPhyService.listAllClusters();
-        
-        Predicate<ClusterPhy> matchingSameVersionESVersionPredicate=cp ->
-                StringUtils.equals(esVersion,cp.getEsVersion())||
-                StringUtils.equals(getESVersionPrefix(esVersion),getESVersionPrefix(cp.getEsVersion()));
-        List<String> sameVersionClusterNameList = clusterPhies.stream()
-                .filter(Objects::nonNull)
-                .filter(r->clusterPhyNameList.contains(r.getCluster()))
-                .filter(rCluster ->!StringUtils.equals(logicTemplateWithPhysicals.getMasterPhyTemplate().getCluster(),
-                        rCluster.getCluster()))
-                .filter(matchingSameVersionESVersionPredicate)
-                  .map(ClusterPhy::getCluster)
-                .distinct()
-                .collect(Collectors.toList());
+
+        Predicate<ClusterPhy> matchingSameVersionESVersionPredicate = cp -> StringUtils
+            .equals(esVersion, cp.getEsVersion())
+                                                                            || StringUtils.equals(
+                                                                                getESVersionPrefix(esVersion),
+                                                                                getESVersionPrefix(cp.getEsVersion()));
+        List<String> sameVersionClusterNameList = clusterPhies.stream().filter(Objects::nonNull)
+            .filter(r -> clusterPhyNameList.contains(r.getCluster()))
+            .filter(rCluster -> !StringUtils.equals(logicTemplateWithPhysicals.getMasterPhyTemplate().getCluster(),
+                rCluster.getCluster()))
+            .filter(matchingSameVersionESVersionPredicate).map(ClusterPhy::getCluster).distinct()
+            .collect(Collectors.toList());
 
         return Result.buildSucc(sameVersionClusterNameList);
     }
-    
-    private  String getESVersionPrefix(String esVersion) {
+
+    private String getESVersionPrefix(String esVersion) {
         Pattern pattern = compile(VERSION_PREFIX_PATTERN);
         final Matcher matcher = pattern.matcher(esVersion);
         if (matcher.find()) {
@@ -683,11 +723,11 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Result<Boolean> deleteCluster(Integer clusterPhyId, String operator, Integer projectId) {
-        if (!roleTool.isAdmin(operator)||!AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
+        if (!roleTool.isAdmin(operator) || !AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
             return Result.buildFail("当前登录人或项目没有权限进行该操作！");
         }
 
-        ClusterPhy clusterPhy  = clusterPhyService.getClusterById(clusterPhyId);
+        ClusterPhy clusterPhy = clusterPhyService.getClusterById(clusterPhyId);
         if (null == clusterPhy) {
             return Result.buildFail(String.format("物理集群Id[%s]不存在", clusterPhyId));
         }
@@ -701,10 +741,10 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         }
 
         List<String> templatePhyNameList = indexTemplatePhyService.getNormalTemplateByCluster(clusterPhy.getCluster())
-                .stream().map(IndexTemplatePhy::getName).collect(Collectors.toList());
+            .stream().map(IndexTemplatePhy::getName).collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(templatePhyNameList)) {
             return Result.buildFail(String.format("物理集群[%s]中已经存在模板[%s]", clusterPhy.getCluster(),
-                    ListUtils.strList2String(templatePhyNameList)));
+                ListUtils.strList2String(templatePhyNameList)));
         }
 
         Result<Boolean> deleteClusterResult = deleteClusterInner(clusterPhyId, projectId);
@@ -713,14 +753,10 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         }
 
         SpringTool.publish(new ClusterPhyEvent(clusterPhy.getCluster(), operator));
-        operateRecordService.save(new OperateRecord.Builder()
-                        .content(clusterPhy.getCluster())
-                        .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
-                        .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_OFFLINE)
-                        .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                        .userOperation(operator)
-                        .bizId(clusterPhyId)
-                .build());
+        operateRecordService.save(new OperateRecord.Builder().content(String.format("删除集群：%s", clusterPhy.getCluster()))
+            .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
+            .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_OFFLINE).triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+            .userOperation(operator).bizId(clusterPhyId).build());
         return Result.buildSucc(true);
     }
 
@@ -730,17 +766,13 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
         if (result.success()) {
             SpringTool.publish(new ClusterPhyEvent(param.getCluster(), operator));
-            operateRecordService.save(
-                    new OperateRecord.Builder()
-                            .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_NEW)
-                            .project(projectService.getProjectBriefByProjectId(projectId))
-                            .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                            .content(param.getCluster())
-                            .userOperation(operator)
-                            .build()
-                    
-                    
-                   );
+            operateRecordService
+                .save(new OperateRecord.Builder().operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_NEW)
+                    .project(projectService.getProjectBriefByProjectId(projectId))
+                    .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).content(String.format("新建集群：%s", param.getCluster()))
+                    .userOperation(operator).build()
+
+                );
         }
         return result;
     }
@@ -749,33 +781,35 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     public Result<Boolean> editCluster(ClusterPhyDTO param, String operator) {
         final ClusterPhy oldClusterPhy = clusterPhyService.getClusterById(param.getId());
         final Result<Boolean> result = clusterPhyService.editCluster(param, operator);
-        if (result.success()){
-    
+        if (result.success()) {
+
             if (!StringUtils.equals(oldClusterPhy.getDesc(), param.getDesc())) {
                 operateRecordService.save(new Builder().userOperation(operator)
-                        .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_UPGRADE)
-                        .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                        .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
-                        .bizId(param.getId()).content(String.format("%s,修改集群描述:%s-->%s", oldClusterPhy.getCluster(),
-                                oldClusterPhy.getCluster(), param.getCluster()))
-                
-                        .build());
+                    .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_INFO_MODIFY)
+                    .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                    .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
+                    .bizId(param.getId())
+                    .content(String.format("%s,修改集群描述:%s-->%s", oldClusterPhy.getCluster(), oldClusterPhy.getDesc(),
+                        param.getDesc()))
+
+                    .build());
             }
-           
-         
+
         }
         return result;
     }
 
     @Override
-    public PaginationResult<ClusterPhyVO> pageGetClusterPhys(ClusterPhyConditionDTO condition, Integer projectId) throws NotFindSubclassException {
+    public PaginationResult<ClusterPhyVO> pageGetClusterPhys(ClusterPhyConditionDTO condition,
+                                                             Integer projectId) throws NotFindSubclassException {
         BaseHandle baseHandle = handleFactory.getByHandlerNamePer(CLUSTER_PHY.getPageSearchType());
         if (baseHandle instanceof ClusterPhyPageSearchHandle) {
             ClusterPhyPageSearchHandle pageSearchHandle = (ClusterPhyPageSearchHandle) baseHandle;
             return pageSearchHandle.doPage(condition, projectId);
         }
 
-        LOGGER.warn("class=ClusterPhyManagerImpl||method=pageGetConsoleClusterVOS||msg=failed to get the ClusterPhyPageSearchHandle");
+        LOGGER.warn(
+            "class=ClusterPhyManagerImpl||method=pageGetConsoleClusterVOS||msg=failed to get the ClusterPhyPageSearchHandle");
 
         return PaginationResult.buildFail("分页获取物理集群信息失败");
     }
@@ -792,7 +826,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             cluster.setDiskUsagePercent(esClusterStaticInfoTriple.v3());
         } catch (Exception e) {
             LOGGER.warn("class=ClusterPhyManagerImpl||method=buildPhyClusterResourceUsage||logicClusterId={}",
-                    cluster.getId(), e);
+                cluster.getId(), e);
         }
     }
 
@@ -812,12 +846,13 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         try {
             List<ESClusterRoleVO> roleClusters = ConvertUtil.list2List(clusterRoleInfos, ESClusterRoleVO.class);
 
-            List<Long> roleClusterIds = roleClusters.stream().map(ESClusterRoleVO::getId).collect( Collectors.toList());
+            List<Long> roleClusterIds = roleClusters.stream().map(ESClusterRoleVO::getId).collect(Collectors.toList());
             Map<Long, List<ClusterRoleHost>> roleIdsMap = clusterRoleHostService.getByRoleClusterIds(roleClusterIds);
 
             for (ESClusterRoleVO esClusterRoleVO : roleClusters) {
                 List<ClusterRoleHost> clusterRoleHosts = roleIdsMap.get(esClusterRoleVO.getId());
-                List<ESClusterRoleHostVO> esClusterRoleHosts = ConvertUtil.list2List(clusterRoleHosts, ESClusterRoleHostVO.class);
+                List<ESClusterRoleHostVO> esClusterRoleHosts = ConvertUtil.list2List(clusterRoleHosts,
+                    ESClusterRoleHostVO.class);
                 esClusterRoleVO.setEsClusterRoleHostVO(esClusterRoleHosts);
             }
 
@@ -831,11 +866,13 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     public boolean updateClusterHealth(String clusterPhyName, String operator) {
         ClusterPhy clusterPhy = clusterPhyService.getClusterByName(clusterPhyName);
         if (null == clusterPhy) {
-            LOGGER.warn("class=ClusterPhyManagerImpl||method=updateClusterHealth||clusterPhyName={}||msg=clusterPhy is empty", clusterPhyName);
+            LOGGER.warn(
+                "class=ClusterPhyManagerImpl||method=updateClusterHealth||clusterPhyName={}||msg=clusterPhy is empty",
+                clusterPhyName);
             return false;
         }
 
-        ClusterPhyDTO esClusterDTO      = new ClusterPhyDTO();
+        ClusterPhyDTO esClusterDTO = new ClusterPhyDTO();
         ClusterHealthEnum clusterHealthEnum = esClusterService.syncGetClusterHealthEnum(clusterPhyName);
 
         esClusterDTO.setId(clusterPhy.getId());
@@ -854,13 +891,15 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     public boolean updateClusterInfo(String cluster, String operator) {
         ClusterPhy clusterPhy = clusterPhyService.getClusterByName(cluster);
         if (null == clusterPhy) {
-            LOGGER.warn("class=ClusterPhyManagerImpl||method=updateClusterInfo||clusterPhyName={}||msg=clusterPhy is empty", cluster);
+            LOGGER.warn(
+                "class=ClusterPhyManagerImpl||method=updateClusterInfo||clusterPhyName={}||msg=clusterPhy is empty",
+                cluster);
             return false;
         }
 
         ESClusterStatsResponse clusterStats = esClusterService.syncGetClusterStats(cluster);
-        long totalFsBytes      = clusterStats.getTotalFs().getBytes();
-        long usageFsBytes      = clusterStats.getTotalFs().getBytes() - clusterStats.getFreeFs().getBytes();
+        long totalFsBytes = clusterStats.getTotalFs().getBytes();
+        long usageFsBytes = clusterStats.getTotalFs().getBytes() - clusterStats.getFreeFs().getBytes();
 
         double diskFreePercent = clusterStats.getFreeFs().getGbFrac() / clusterStats.getTotalFs().getGbFrac();
         diskFreePercent = CommonUtils.formatDouble(1 - diskFreePercent, 5);
@@ -872,11 +911,11 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         esClusterDTO.setDiskUsagePercent(diskFreePercent);
         Result<Boolean> editClusterResult = clusterPhyService.editCluster(esClusterDTO, operator);
         if (editClusterResult.failed()) {
-            LOGGER.error("class=ClusterPhyManagerImpl||method=updateClusterInfo||clusterPhyName={}||errMsg={}",
-                    cluster, editClusterResult.getMessage());
+            LOGGER.error("class=ClusterPhyManagerImpl||method=updateClusterInfo||clusterPhyName={}||errMsg={}", cluster,
+                editClusterResult.getMessage());
             return false;
         }
-        
+
         return true;
     }
 
@@ -887,8 +926,8 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             return Result.buildFail();
         }
 
-        if (ClusterHealthEnum.GREEN.getCode().equals(clusterPhy.getHealth()) ||
-                ClusterHealthEnum.YELLOW.getCode().equals(clusterPhy.getHealth())) {
+        if (ClusterHealthEnum.GREEN.getCode().equals(clusterPhy.getHealth())
+            || ClusterHealthEnum.YELLOW.getCode().equals(clusterPhy.getHealth())) {
             return Result.buildSucc(true);
         }
 
@@ -903,7 +942,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
     @Override
     public Result<Boolean> deleteClusterExit(String clusterPhyName, Integer projectId, String operator) {
-        if  (!AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
+        if (!AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
             return Result.buildFail("无权限删除集群");
         }
 
@@ -916,36 +955,43 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     }
 
     @Override
-    public Result<List<String>> getPhyClusterNameWithSameEsVersion(Integer clusterLogicType,/*用户在新建逻辑集群阶段已选择的物理集群名称*/String hasSelectedClusterNameWhenBind) {
+    public Result<List<String>> getPhyClusterNameWithSameEsVersion(Integer clusterLogicType,
+                                                                   /*用户在新建逻辑集群阶段已选择的物理集群名称*/String hasSelectedClusterNameWhenBind) {
         //获取可以绑定的物理集群名称列表
-        Result<List<String>> canBeAssociatedClustersPhyNamesResult = validLogicAndReturnPhyNamesWhenBindPhy(null, clusterLogicType);
+        Result<List<String>> canBeAssociatedClustersPhyNamesResult = validLogicAndReturnPhyNamesWhenBindPhy(null,
+            clusterLogicType);
         if (canBeAssociatedClustersPhyNamesResult.failed()) {
             return Result.buildFrom(canBeAssociatedClustersPhyNamesResult);
         }
 
         //没有指定物理集群名称，则返回全量的匹配数据，不做版本的筛选
-        if(AriusObjUtils.isNull(hasSelectedClusterNameWhenBind)) {
+        if (AriusObjUtils.isNull(hasSelectedClusterNameWhenBind)) {
             return canBeAssociatedClustersPhyNamesResult;
         }
 
         //根据已绑定的物理集群的版本进行筛选
-        return Result.buildSucc(getPhyClusterNameWithSameEsVersion(hasSelectedClusterNameWhenBind, canBeAssociatedClustersPhyNamesResult.getData()));
+        return Result.buildSucc(getPhyClusterNameWithSameEsVersion(hasSelectedClusterNameWhenBind,
+            canBeAssociatedClustersPhyNamesResult.getData()));
     }
 
     @Override
     public Result<List<String>> getPhyClusterNameWithSameEsVersionAfterBuildLogic(Long clusterLogicId) {
         //获取可以绑定的物理集群名称列表
-        Result<List<String>> canBeAssociatedClustersPhyNamesResult = validLogicAndReturnPhyNamesWhenBindPhy(clusterLogicId, null);
+        Result<List<String>> canBeAssociatedClustersPhyNamesResult = validLogicAndReturnPhyNamesWhenBindPhy(
+            clusterLogicId, null);
         if (canBeAssociatedClustersPhyNamesResult.failed()) {
             return Result.buildFrom(canBeAssociatedClustersPhyNamesResult);
         }
 
         //获取逻辑集群已绑定的物理集群信息
         ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(clusterLogicId);
-        if (null == clusterRegion) { return canBeAssociatedClustersPhyNamesResult;}
+        if (null == clusterRegion) {
+            return canBeAssociatedClustersPhyNamesResult;
+        }
 
         //根据已绑定的物理集群的版本进行筛选
-        return Result.buildSucc(getPhyClusterNameWithSameEsVersion(clusterRegion.getPhyClusterName(), canBeAssociatedClustersPhyNamesResult.getData()));
+        return Result.buildSucc(getPhyClusterNameWithSameEsVersion(clusterRegion.getPhyClusterName(),
+            canBeAssociatedClustersPhyNamesResult.getData()));
     }
 
     @Override
@@ -955,28 +1001,26 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         clusterPhyDTO.setGatewayUrl(param.getGatewayUrl());
         ClusterPhy oldCluster = clusterPhyService.getClusterById(param.getId());
         Result<Boolean> result = clusterPhyService.editCluster(clusterPhyDTO, operator);
-        if (result.failed() ) {
+        if (result.failed()) {
             return Result.buildFail("编辑gateway失败！");
         }
         ClusterPhy clusterPhy = clusterPhyService.getClusterById(param.getId());
-        operateRecordService.save(new OperateRecord.Builder()
-                        .bizId(param.getId())
-                        .userOperation(operator)
-                        .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
-                        .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                        .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_GATEWAY_CHANGE)
-                        .content(String.format("%s,绑定gateway集群gateway_cluster:%s",oldCluster.getCluster(),param.getGatewayUrl()))
-                .build());
-        //todo 这里需要记录操作记录hsl
+        operateRecordService.save(new OperateRecord.Builder().bizId(param.getId()).userOperation(operator)
+            .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
+            .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+            .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_GATEWAY_CHANGE)
+            .content(String.format("%s,绑定gateway集群gateway_cluster:%s", oldCluster.getCluster(), param.getGatewayUrl()))
+            .build());
         return Result.buildSucc(ConvertUtil.obj2Obj(clusterPhy, ClusterPhyVO.class));
     }
+
     @Override
-    public List<ClusterRoleInfo> listClusterRolesByClusterId(Integer clusterId){
+    public List<ClusterRoleInfo> listClusterRolesByClusterId(Integer clusterId) {
         return clusterRoleService.getAllRoleClusterByClusterId(clusterId);
     }
 
     /**************************************** private method ***************************************************/
-    
+
     private Result<Boolean> deleteClusterInner(Integer clusterPhyId, Integer projectId) {
         ClusterPhy clusterPhy = clusterPhyService.getClusterById(clusterPhyId);
         if (null == clusterPhy) {
@@ -1070,8 +1114,9 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         }
 
         if (canBeAssociatedClustersPhyNames.failed()) {
-            LOGGER.warn("class=ClusterPhyManagerImpl||method=getPhyClusterNameWithSameEsVersionAfterBuildLogic||errMsg={}",
-                    canBeAssociatedClustersPhyNames.getMessage());
+            LOGGER.warn(
+                "class=ClusterPhyManagerImpl||method=getPhyClusterNameWithSameEsVersionAfterBuildLogic||errMsg={}",
+                canBeAssociatedClustersPhyNames.getMessage());
             Result.buildFail("无法获取对应的物理集群名称列表");
         }
 
@@ -1084,13 +1129,13 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
      * @param canBeAssociatedClustersPhyNames 可以匹配的物理集群名称列表（待筛选状态）
      * @return 物理集群名称列表
      */
-    private List<String> getPhyClusterNameWithSameEsVersion(String hasSelectedPhyClusterName, List<String> canBeAssociatedClustersPhyNames) {
+    private List<String> getPhyClusterNameWithSameEsVersion(String hasSelectedPhyClusterName,
+                                                            List<String> canBeAssociatedClustersPhyNames) {
         //获取用户已选择的物理集群的信息
         ClusterPhy hasSelectedCluster = clusterPhyService.getClusterByName(hasSelectedPhyClusterName);
         //如果指定的物理集群名称为null，则返回全量的物理集群名称列表
-        if (AriusObjUtils.isNull(hasSelectedPhyClusterName)
-                || AriusObjUtils.isNull(hasSelectedCluster)
-                || CollectionUtils.isEmpty(canBeAssociatedClustersPhyNames)) {
+        if (AriusObjUtils.isNull(hasSelectedPhyClusterName) || AriusObjUtils.isNull(hasSelectedCluster)
+            || CollectionUtils.isEmpty(canBeAssociatedClustersPhyNames)) {
             return null;
         }
 
@@ -1099,9 +1144,9 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         for (String canBeAssociatedClustersPhyName : canBeAssociatedClustersPhyNames) {
             ClusterPhy canBeAssociatedClustersPhy = clusterPhyService.getClusterByName(canBeAssociatedClustersPhyName);
             if (!AriusObjUtils.isNull(canBeAssociatedClustersPhy)
-                    && !AriusObjUtils.isNull(canBeAssociatedClustersPhy.getEsVersion())
-                    && !AriusObjUtils.isNull(canBeAssociatedClustersPhy.getCluster())
-                    && canBeAssociatedClustersPhy.getEsVersion().equals(hasSelectedCluster.getEsVersion())) {
+                && !AriusObjUtils.isNull(canBeAssociatedClustersPhy.getEsVersion())
+                && !AriusObjUtils.isNull(canBeAssociatedClustersPhy.getCluster())
+                && canBeAssociatedClustersPhy.getEsVersion().equals(hasSelectedCluster.getEsVersion())) {
                 canBeAssociatedPhyClusterNameWithSameEsVersion.add(canBeAssociatedClustersPhy.getCluster());
             }
         }
@@ -1137,9 +1182,11 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
     private Result<ClusterPhyVO> saveClusterPhy(ClusterJoinDTO param, String operator) {
         //保存集群信息
-        ClusterPhyDTO clusterDTO    =  buildPhyClusters(param, operator);
-        Result<Boolean> addClusterRet =  clusterPhyService.createCluster(clusterDTO, operator);
-        if (addClusterRet.failed()) { return Result.buildFrom(addClusterRet);}
+        ClusterPhyDTO clusterDTO = buildPhyClusters(param, operator);
+        Result<Boolean> addClusterRet = clusterPhyService.createCluster(clusterDTO, operator);
+        if (addClusterRet.failed()) {
+            return Result.buildFrom(addClusterRet);
+        }
         return Result.buildSucc(ConvertUtil.obj2Obj(clusterDTO, ClusterPhyVO.class));
     }
 
@@ -1168,6 +1215,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         clusterDTO.setHealth(DEFAULT_CLUSTER_HEALTH);
         return clusterDTO;
     }
+
     /**
      * 集群接入参数校验
      *
@@ -1211,10 +1259,8 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         }
 
         // 对于接入集群的节点端口进行校验
-        Set<String> wrongPortSet = roleClusterHosts.stream()
-                .map(ESClusterRoleHostDTO::getPort)
-                .filter(this::wrongPortDetect)
-                .collect(Collectors.toSet());
+        Set<String> wrongPortSet = roleClusterHosts.stream().map(ESClusterRoleHostDTO::getPort)
+            .filter(this::wrongPortDetect).collect(Collectors.toSet());
         if (!CollectionUtils.isEmpty(wrongPortSet)) {
             return Result.buildParamIllegal("接入集群中端口号存在异常" + wrongPortSet);
         }
@@ -1251,7 +1297,8 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             }
         } else {
 
-            List<String> ips = roleClusterHosts.stream().map(ESClusterRoleHostDTO::getIp).filter(StringUtils::isNotBlank).collect(Collectors.toList());
+            List<String> ips = roleClusterHosts.stream().map(ESClusterRoleHostDTO::getIp)
+                .filter(StringUtils::isNotBlank).collect(Collectors.toList());
             if (ips.size() < JOIN_MASTER_NODE_MIN_NUMBER) {
                 return Result.buildParamIllegal(String.format("集群%s的节点个数要求大于等于1，且不重复", param.getCluster()));
             }
@@ -1268,27 +1315,67 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
         String esClientHttpAddressesStr = clusterRoleHostService.buildESClientHttpAddressesStr(roleClusterHosts);
 
-        //密码验证
+        // 密码验证
         Result<Void> passwdResult = checkClusterWithoutPasswd(param, esClientHttpAddressesStr);
         if (passwdResult.failed()) {
             return passwdResult;
         }
-        //同集群验证
-        Result<Void> sameClusterResult = checkSameCluster(param.getPassword(), clusterRoleHostService.buildESAllRoleHttpAddressesList(roleClusterHosts));
+        // 同集群验证
+        Result<Void> sameClusterResult = checkSameCluster(param.getPassword(),
+            clusterRoleHostService.buildESAllRoleHttpAddressesList(roleClusterHosts));
         if (sameClusterResult.failed()) {
             return Result.buildParamIllegal("禁止同时接入超过两个不同集群节点");
         }
+
+        // 校验 是否接入同一集群
+        Result<Void> checkSameClientOrMasterClusterRet = checkSameESClientHttpAddresses(esClientHttpAddressesStr);
+        if (checkSameClientOrMasterClusterRet.failed()) {
+            return Result.buildFrom(checkSameClientOrMasterClusterRet);
+        }
+
         return Result.buildSucc();
     }
 
-    private Result<Void> initClusterJoin(ClusterJoinDTO param, String operator, String esClientHttpAddressesStr) {
+    /**
+     * 检查ESClientHttpAddresses是否已经存在
+     * @param esClientHttpAddressesStr
+     * @return
+     */
+    private Result<Void> checkSameESClientHttpAddresses(String esClientHttpAddressesStr) {
+        List<ClusterPhy> clusterPhies = clusterPhyService.listAllClusters();
+        if (CollectionUtils.isEmpty(clusterPhies)) {
+            return Result.buildSucc();
+        }
+
+        // 过滤出目前平台存在的ES集群链接ip:port
+        List<String> existClusterHttpAddress = Lists.newArrayList();
+        List<String> clusterHttpAddressList = clusterPhies.stream().map(ClusterPhy::getHttpAddress)
+            .collect(Collectors.toList());
+        for (String clusterHttpAddress : clusterHttpAddressList) {
+            for (String httpAddress : ListUtils.string2StrList(clusterHttpAddress)) {
+                if (!existClusterHttpAddress.contains(httpAddress.trim())) {
+                    existClusterHttpAddress.add(httpAddress.trim());
+                }
+            }
+        }
+
+        List<String> esClientHttpAddressesFromJoin = ListUtils.string2StrList(esClientHttpAddressesStr);
+        for (String esClientHttpAddressFromJoin : esClientHttpAddressesFromJoin) {
+            if (existClusterHttpAddress.contains(esClientHttpAddressFromJoin.trim())) {
+                return Result.buildFail(String.format("平台已经存在相同的集群，连接信息为[%s], 不允许重复接入", esClientHttpAddressFromJoin));
+            }
+        }
+
+        return Result.buildSucc();
+    }
+
+    private Result<Void> initClusterJoin(ClusterJoinDTO param, String esClientHttpAddressesStr) {
         //获取设置es版本
         Result<Void> esVersionSetResult = initESVersionForClusterJoin(param, esClientHttpAddressesStr);
         if (esVersionSetResult.failed()) {
             return esVersionSetResult;
         }
 
-        param.setResponsible(operator);
         return Result.buildSucc();
     }
 
@@ -1336,7 +1423,8 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         return Result.buildSucc();
     }
 
-    private void doDeleteClusterJoin(ClusterPhy clusterPhy, String operator, Integer projectId) throws AdminOperateException {
+    private void doDeleteClusterJoin(ClusterPhy clusterPhy, String operator,
+                                     Integer projectId) throws AdminOperateException {
         ClusterPhyContext clusterPhyContext = clusterContextManager.getClusterPhyContext(clusterPhy.getCluster());
         if (null == clusterPhyContext) {
             return;
@@ -1344,93 +1432,90 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
         List<Long> associatedRegionIds = clusterPhyContext.getAssociatedRegionIds();
         for (Long associatedRegionId : associatedRegionIds) {
-            Result<Void> unbindRegionResult = clusterRegionService.unbindRegion(associatedRegionId, null, operator,
-                    projectId);
+            Result<Void> unbindRegionResult = clusterRegionService.unbindRegion(associatedRegionId, null, operator);
             if (unbindRegionResult.failed()) {
                 throw new AdminOperateException(String.format("解绑region(%s)失败", associatedRegionId));
             } else {
                 //解绑region
-                operateRecordService.save(new OperateRecord.Builder().content(
-                                String.format("cluster:[%s]解绑region：%d", clusterPhy.getCluster(), associatedRegionId))
-                        .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_REGION_CHANGE)
-                        .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                        .project(projectService.getProjectBriefByProjectId(projectId)).userOperation(operator)
-                        .bizId(clusterPhy.getCluster()).build());
+                operateRecordService.save(new OperateRecord.Builder()
+                    .content(String.format("cluster:[%s]解绑region：%d", clusterPhy.getCluster(), associatedRegionId))
+                    .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_REGION_CHANGE)
+                    .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                    .project(projectService.getProjectBriefByProjectId(projectId)).userOperation(operator)
+                    .bizId(clusterPhy.getId()).build());
             }
 
             Result<Void> deletePhyClusterRegionResult = clusterRegionService.deletePhyClusterRegion(associatedRegionId,
-                operator, projectId);
+                operator);
             if (deletePhyClusterRegionResult.failed()) {
                 throw new AdminOperateException(String.format("删除region(%s)失败", associatedRegionId));
             } else {
-    
+
                 //删除region
-                operateRecordService.save(new OperateRecord.Builder().content(
-                                String.format("cluster:[%s]删除region：%d", clusterPhy.getCluster(), associatedRegionId))
-                        .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_REGION_CHANGE)
-                        .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                        .project(projectService.getProjectBriefByProjectId(projectId)).userOperation(operator)
-                        .bizId(clusterPhy.getCluster()).build());
+                operateRecordService.save(new OperateRecord.Builder()
+                    .content(String.format("cluster:[%s]删除region：%d", clusterPhy.getCluster(), associatedRegionId))
+                    .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_REGION_CHANGE)
+                    .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                    .project(projectService.getProjectBriefByProjectId(projectId)).userOperation(operator)
+                    .bizId(clusterPhy.getId()).build());
             }
         }
-       
-        
 
         List<Long> clusterLogicIds = clusterPhyContext.getAssociatedClusterLogicIds();
         for (Long clusterLogicId : clusterLogicIds) {
-            Result<Void> deleteLogicClusterResult = clusterLogicService.deleteClusterLogicById(clusterLogicId,
-                operator,projectId);
+            Result<Void> deleteLogicClusterResult = clusterLogicService.deleteClusterLogicById(clusterLogicId, operator,
+                projectId);
             if (deleteLogicClusterResult.failed()) {
                 throw new AdminOperateException(String.format("删除逻辑集群(%s)失败", clusterLogicId));
-            }else {
-               //删除逻辑集群
-                operateRecordService.save(new OperateRecord.Builder().content(
-                                String.format("cluster:[%s]删除逻辑集群：%d", clusterPhy.getCluster(), clusterLogicId))
-                        .operationTypeEnum(OperateTypeEnum.MY_CLUSTER_OFFLINE)
-                        .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                        .project(projectService.getProjectBriefByProjectId(projectId)).userOperation(operator)
-                        .bizId(clusterPhy.getCluster()).build());
+            } else {
+                //删除逻辑集群
+                operateRecordService.save(new OperateRecord.Builder()
+                    .content(String.format("cluster:[%s]删除逻辑集群：%d", clusterPhy.getCluster(), clusterLogicId))
+                    .operationTypeEnum(OperateTypeEnum.MY_CLUSTER_OFFLINE).triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                    .project(projectService.getProjectBriefByProjectId(projectId)).userOperation(operator)
+                    .bizId(clusterPhy.getCluster()).build());
             }
         }
 
         Result<Boolean> deleteClusterResult = clusterPhyService.deleteClusterById(clusterPhy.getId(), projectId);
         if (deleteClusterResult.failed()) {
             throw new AdminOperateException(String.format("删除物理集群(%s)失败", clusterPhy.getCluster()));
-        }else {
+        } else {
             //删除物理集群
-            operateRecordService.save(
-                    new OperateRecord.Builder().content(String.format("cluster:[%s]删除", clusterPhy.getCluster()))
-                            .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_OFFLINE)
-                            .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                            .project(projectService.getProjectBriefByProjectId(projectId)).userOperation(operator)
-                            .bizId(clusterPhy.getCluster()).build());
+            operateRecordService
+                .save(new OperateRecord.Builder().content(String.format("cluster:[%s]删除", clusterPhy.getCluster()))
+                    .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_OFFLINE)
+                    .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                    .project(projectService.getProjectBriefByProjectId(projectId)).userOperation(operator)
+                    .bizId(clusterPhy.getCluster()).build());
         }
 
-        Result<Void> deleteRoleClusterResult = clusterRoleService.deleteRoleClusterByClusterId(clusterPhy.getId(),projectId);
+        Result<Void> deleteRoleClusterResult = clusterRoleService.deleteRoleClusterByClusterId(clusterPhy.getId(),
+            projectId);
         if (deleteRoleClusterResult.failed()) {
             throw new AdminOperateException(String.format("删除物理集群角色(%s)失败", clusterPhy.getCluster()));
-        }else {
+        } else {
             //删除物理集群角色
-            operateRecordService.save(
-                    new OperateRecord.Builder().content(String.format("cluster:[%s]删除物理集群角色;[%d]",
-                                    clusterPhy.getCluster(),clusterPhy.getId()))
-                            .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_OFFLINE)
-                            .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                            .project(projectService.getProjectBriefByProjectId(projectId)).userOperation(operator)
-                            .bizId(clusterPhy.getCluster()).build());
+            operateRecordService.save(new OperateRecord.Builder()
+                .content(String.format("cluster:[%s]删除物理集群角色;[%d]", clusterPhy.getCluster(), clusterPhy.getId()))
+                .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_OFFLINE)
+                .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                .project(projectService.getProjectBriefByProjectId(projectId)).userOperation(operator)
+                .bizId(clusterPhy.getCluster()).build());
         }
 
-        Result<Void> deleteRoleClusterHostResult = clusterRoleHostService.deleteByCluster(clusterPhy.getCluster(),projectId);
+        Result<Void> deleteRoleClusterHostResult = clusterRoleHostService.deleteByCluster(clusterPhy.getCluster(),
+            projectId);
         if (deleteRoleClusterHostResult.failed()) {
             throw new AdminOperateException(String.format("删除物理集群节点(%s)失败", clusterPhy.getCluster()));
-        }else {
+        } else {
             //删除物理集群角色
             operateRecordService.save(
-                    new OperateRecord.Builder().content(String.format("cluster:[%s]删除物理集群节点", clusterPhy.getCluster()))
-                            .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_OFFLINE)
-                            .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                            .project(projectService.getProjectBriefByProjectId(projectId)).userOperation(operator)
-                            .bizId(clusterPhy.getCluster()).build());
+                new OperateRecord.Builder().content(String.format("cluster:[%s]删除物理集群节点", clusterPhy.getCluster()))
+                    .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_OFFLINE)
+                    .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                    .project(projectService.getProjectBriefByProjectId(projectId)).userOperation(operator)
+                    .bizId(clusterPhy.getCluster()).build());
         }
     }
 
@@ -1478,7 +1563,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         return triple;
     }
 
-    private void postProcessingForClusterJoin(ClusterJoinDTO param, String operator) throws AdminTaskException {
+    private void postProcessingForClusterJoin(ClusterJoinDTO param) throws AdminTaskException {
         esOpClient.connect(param.getCluster());
 
         if (ESClusterImportRuleEnum.AUTO_IMPORT == ESClusterImportRuleEnum.valueOf(param.getImportRule())) {
@@ -1489,17 +1574,8 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             //2.直接拉es 更新节点信息，去除因为定时任务触发导致的更新延时
             clusterRoleHostService.collectClusterNodeSettings(param.getCluster());
         }
-
         updateClusterHealth(param.getCluster(), AriusUser.SYSTEM.getDesc());
-        //集群接入
-        operateRecordService.save(
-                new OperateRecord.Builder()
-                        .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_JOIN)
-                        .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                        .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
-                        .userOperation(operator)
-                        .content( param.getCluster())
-                        .build());
+
     }
 
     private void refreshClusterDistInfo() {
@@ -1514,7 +1590,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     private void refreshClusterStats(String clusterName, Triple<Long, Long, Double> initTriple) {
         ESClusterStatsResponse clusterStats = esClusterService.syncGetClusterStats(clusterName);
         if (null != clusterStats && null != clusterStats.getFreeFs() && null != clusterStats.getTotalFs()
-                && clusterStats.getTotalFs().getBytes() > 0 && clusterStats.getFreeFs().getBytes() > 0) {
+            && clusterStats.getTotalFs().getBytes() > 0 && clusterStats.getFreeFs().getBytes() > 0) {
             initTriple.setV1(clusterStats.getTotalFs().getBytes());
             initTriple.setV2(clusterStats.getTotalFs().getBytes() - clusterStats.getFreeFs().getBytes());
             double diskFreePercent = clusterStats.getFreeFs().getGbFrac() / clusterStats.getTotalFs().getGbFrac();
@@ -1534,9 +1610,8 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             int portValue = Integer.parseInt(port);
             return portValue < AdminConstant.MIN_BIND_PORT_VALUE || portValue > AdminConstant.MAX_BIND_PORT_VALUE;
         } catch (NumberFormatException e) {
-            LOGGER.error(
-                    "class=ClusterPhyManagerImpl||method=wrongPortDetect||port={}||msg=Integer format error",
-                    port);
+            LOGGER.error("class=ClusterPhyManagerImpl||method=wrongPortDetect||port={}||msg=Integer format error",
+                port);
             return true;
         }
     }

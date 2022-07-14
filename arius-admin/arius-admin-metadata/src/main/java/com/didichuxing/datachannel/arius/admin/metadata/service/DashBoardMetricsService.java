@@ -36,12 +36,13 @@ public class DashBoardMetricsService {
      */
     public List<VariousLineChartMetrics> getToNMetrics(MetricsDashboardTopNDTO param, String oneLevelType) {
         List<String> metricsTypes = param.getMetricsTypes();
-        Long startTime            = param.getStartTime();
-        Long endTime              = param.getEndTime();
-        Integer topNu             = param.getTopNu();
-        String aggType            = param.getAggType();
+        Long startTime = param.getStartTime();
+        Long endTime = param.getEndTime();
+        Integer topNu = param.getTopNu();
+        String aggType = param.getAggType();
 
-        return ariusStatsDashBoardInfoESDAO.fetchTopMetric(oneLevelType, metricsTypes, topNu, aggType, startTime, endTime);
+        return ariusStatsDashBoardInfoESDAO.fetchTopMetric(oneLevelType, metricsTypes, topNu, aggType, startTime,
+            endTime);
     }
 
     /**
@@ -53,9 +54,11 @@ public class DashBoardMetricsService {
      *
      * @return MetricList
      */
-    public MetricList getListFaultMetrics(String oneLevelType, String metricsType, String aggType, Boolean orderByDesc) {
+    public MetricList getListFaultMetrics(String oneLevelType, String metricsType, String aggType,
+                                          Boolean orderByDesc) {
         String sortType = orderByDesc ? SortConstant.DESC : SortConstant.ASC;
-        return ariusStatsDashBoardInfoESDAO.fetchListFlagMetric(oneLevelType, metricsType, aggType, FAULT_FLAG, sortType);
+        return ariusStatsDashBoardInfoESDAO.fetchListFlagMetric(oneLevelType, metricsType, aggType, FAULT_FLAG,
+            sortType);
     }
 
     /**
@@ -67,7 +70,8 @@ public class DashBoardMetricsService {
      * @see DashBoardMetricListTypeEnum
      * @return
      */
-    public MetricList getListValueMetrics(String oneLevelType, String metricsType, String aggType, Boolean orderByDesc) {
+    public MetricList getListValueMetrics(String oneLevelType, String metricsType, String aggType,
+                                          Boolean orderByDesc) {
         String sortType = orderByDesc ? SortConstant.DESC : SortConstant.ASC;
         return ariusStatsDashBoardInfoESDAO.fetchListValueMetrics(oneLevelType, metricsType, aggType, sortType);
     }
@@ -81,6 +85,5 @@ public class DashBoardMetricsService {
     public ClusterPhyHealthMetrics getClusterHealthInfo() {
         return ariusStatsDashBoardInfoESDAO.fetchClusterHealthInfo();
     }
-
 
 }

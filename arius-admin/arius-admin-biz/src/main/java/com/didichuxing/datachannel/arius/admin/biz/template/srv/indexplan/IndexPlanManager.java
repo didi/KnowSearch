@@ -32,10 +32,9 @@ public interface IndexPlanManager {
      * @param param IndexTemplatePhyDTO
      */
     void initShardRoutingAndAdjustShard(IndexTemplatePhyDTO param);
-    
-    
+
     /////////////////////////SRV
-    
+
     /**
      * indexRollover能力
      * 根据该物理集群下，获取当天的索引主分片占用磁盘容量大小
@@ -53,6 +52,5 @@ public interface IndexPlanManager {
      * @return boolean 是否成功
      */
     Result<Void> adjustShardCountByPhyClusterName(String phyClusterName);
-
 
 }

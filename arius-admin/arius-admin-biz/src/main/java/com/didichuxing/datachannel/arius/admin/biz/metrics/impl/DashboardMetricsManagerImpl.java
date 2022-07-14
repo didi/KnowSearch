@@ -31,46 +31,51 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_DASHBOARD_THRESHOLD_GROUP;
+
 /**
  * Created by linyunan on 3/14/22
  */
 @Component
 public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
 
-    private static final FutureUtil<Void> futureUtil = FutureUtil.init("DashboardMetricsManagerImpl",  10,10,500);
+    private static final FutureUtil<Void> futureUtil = FutureUtil.init("DashboardMetricsManagerImpl", 10, 10, 500);
 
     @Autowired
-    private ProjectService projectService;
+    private ProjectService                projectService;
 
     @Autowired
-    private DashBoardMetricsService dashBoardMetricsService;
+    private DashBoardMetricsService       dashBoardMetricsService;
 
     @Autowired
-    private AriusConfigInfoService ariusConfigInfoService;
+    private AriusConfigInfoService        ariusConfigInfoService;
 
     @Override
-    public Result<List<VariousLineChartMetricsVO>> getTopClusterMetricsInfo(MetricsDashboardTopNDTO param, Integer projectId) {
+    public Result<List<VariousLineChartMetricsVO>> getTopClusterMetricsInfo(MetricsDashboardTopNDTO param,
+                                                                            Integer projectId) {
         param.init();
         String oneLevelType = OneLevelTypeEnum.CLUSTER.getType();
         return commonGetTopInfoByOneLevelType(param, projectId, oneLevelType);
     }
 
     @Override
-    public Result<List<VariousLineChartMetricsVO>> getTopNodeMetricsInfo(MetricsDashboardTopNDTO param, Integer projectId) {
+    public Result<List<VariousLineChartMetricsVO>> getTopNodeMetricsInfo(MetricsDashboardTopNDTO param,
+                                                                         Integer projectId) {
         param.init();
         String oneLevelType = OneLevelTypeEnum.NODE.getType();
         return commonGetTopInfoByOneLevelType(param, projectId, oneLevelType);
     }
 
     @Override
-    public Result<List<VariousLineChartMetricsVO>> getTopTemplateMetricsInfo(MetricsDashboardTopNDTO param, Integer projectId) {
+    public Result<List<VariousLineChartMetricsVO>> getTopTemplateMetricsInfo(MetricsDashboardTopNDTO param,
+                                                                             Integer projectId) {
         param.init();
         String oneLevelType = OneLevelTypeEnum.TEMPLATE.getType();
         return commonGetTopInfoByOneLevelType(param, projectId, oneLevelType);
     }
 
     @Override
-    public Result<List<VariousLineChartMetricsVO>> getTopIndexMetricsInfo(MetricsDashboardTopNDTO param, Integer projectId) {
+    public Result<List<VariousLineChartMetricsVO>> getTopIndexMetricsInfo(MetricsDashboardTopNDTO param,
+                                                                          Integer projectId) {
         param.init();
         String oneLevelType = OneLevelTypeEnum.INDEX.getType();
         return commonGetTopInfoByOneLevelType(param, projectId, oneLevelType);
@@ -111,17 +116,20 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
     @Override
     public Result<ClusterPhyHealthMetricsVO> getClusterHealthInfo(Integer projectId) {
         Result<Void> checkCommonParamResult = checkCommonParam(MetricsConstant.CLUSTER, new BaseDTO(), projectId);
-        if (checkCommonParamResult.failed()) { return Result.buildFrom(checkCommonParamResult);}
+        if (checkCommonParamResult.failed()) {
+            return Result.buildFrom(checkCommonParamResult);
+        }
 
         ClusterPhyHealthMetrics clusterHealthInfo = dashBoardMetricsService.getClusterHealthInfo();
         // 计算平台各种集群状态的百分比
         clusterHealthInfo.computePercent();
 
         // 格式化 ClusterPhyHealthMetrics 中的异常集群列表
-        ClusterPhyHealthMetricsVO clusterPhyHealthMetricsVO = ConvertUtil.obj2Obj(clusterHealthInfo, ClusterPhyHealthMetricsVO.class);
+        ClusterPhyHealthMetricsVO clusterPhyHealthMetricsVO = ConvertUtil.obj2Obj(clusterHealthInfo,
+            ClusterPhyHealthMetricsVO.class);
         String unknownClusterListStr = clusterHealthInfo.getUnknownClusterListStr();
-        String redClusterListStr     = clusterHealthInfo.getRedClusterListStr();
-        String yellowClusterListStr  = clusterHealthInfo.getYellowClusterListStr();
+        String redClusterListStr = clusterHealthInfo.getRedClusterListStr();
+        String yellowClusterListStr = clusterHealthInfo.getYellowClusterListStr();
 
         clusterPhyHealthMetricsVO.setUnknownClusterList(ListUtils.string2StrList(unknownClusterListStr));
         clusterPhyHealthMetricsVO.setRedClusterList(ListUtils.string2StrList(redClusterListStr));
@@ -137,13 +145,16 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
      * @param oneLevelType   OneLevelTypeEnum
      * @return
      */
-    private Result<List<VariousLineChartMetricsVO>> commonGetTopInfoByOneLevelType(MetricsDashboardTopNDTO param, Integer projectId, String oneLevelType) {
+    private Result<List<VariousLineChartMetricsVO>> commonGetTopInfoByOneLevelType(MetricsDashboardTopNDTO param,
+                                                                                   Integer projectId,
+                                                                                   String oneLevelType) {
         Result<Void> checkCommonParamResult = checkCommonParam(oneLevelType, param, projectId);
         if (checkCommonParamResult.failed()) {
             return Result.buildFrom(checkCommonParamResult);
         }
 
-        List<VariousLineChartMetrics> variousLineChartMetrics = dashBoardMetricsService.getToNMetrics(param, oneLevelType);
+        List<VariousLineChartMetrics> variousLineChartMetrics = dashBoardMetricsService.getToNMetrics(param,
+            oneLevelType);
         // 毛刺点优化
         MetricsValueConvertUtils.doOptimizeQueryBurrForNodeOrIndicesMetrics(variousLineChartMetrics);
 
@@ -157,50 +168,54 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
      * @param oneLevelType     OneLevelTypeEnum
      * @return
      */
-    private Result<List<MetricListVO>> commonGetListInfoByOneLevelType(MetricsDashboardListDTO param, Integer projectId, String oneLevelType) {
+    private Result<List<MetricListVO>> commonGetListInfoByOneLevelType(MetricsDashboardListDTO param, Integer projectId,
+                                                                       String oneLevelType) {
         Result<Void> checkCommonParamResult = checkCommonParam(oneLevelType, param, projectId);
         if (checkCommonParamResult.failed()) {
             return Result.buildFrom(checkCommonParamResult);
         }
-        List<String> faultTypeList   = DashBoardMetricListTypeEnum.getFaultTypeList();
-        List<String> valueTypeList   = DashBoardMetricListTypeEnum.getValueTypeList();
+        List<String> faultTypeList = DashBoardMetricListTypeEnum.getFaultTypeList();
+        List<String> valueTypeList = DashBoardMetricListTypeEnum.getValueTypeList();
         List<MetricList> listMetrics = Lists.newCopyOnWriteArrayList();
         for (String metricsType : param.getMetricsTypes()) {
             futureUtil.runnableTask(() -> {
                 if (faultTypeList.contains(metricsType)) {
-                    listMetrics.add(dashBoardMetricsService.getListFaultMetrics(oneLevelType, metricsType, param.getAggType(),
-                            param.getOrderByDesc()));
+                    listMetrics.add(dashBoardMetricsService.getListFaultMetrics(oneLevelType, metricsType,
+                        param.getAggType(), param.getOrderByDesc()));
                 } else if (valueTypeList.contains(metricsType)) {
                     listMetrics.add(dashBoardMetricsService.getListValueMetrics(oneLevelType, metricsType,
-                            param.getAggType(), param.getOrderByDesc()));
+                        param.getAggType(), param.getOrderByDesc()));
                 }
             });
         }
         futureUtil.waitExecute();
         try {
-            filterBySystemConfiguration(listMetrics,oneLevelType);
+            filterBySystemConfiguration(listMetrics, oneLevelType);
         } catch (AdminOperateException e) {
-            return  Result.buildFail(e.getMessage());
+            return Result.buildFail(e.getMessage());
         }
         return Result.buildSucc(ConvertUtil.list2List(listMetrics, MetricListVO.class));
     }
 
-
     /**
      * 根据系统配置筛选
      */
-    private void  filterBySystemConfiguration(List<MetricList> listMetrics, String oneLevelType) throws AdminOperateException{
+    private void filterBySystemConfiguration(List<MetricList> listMetrics,
+                                             String oneLevelType) throws AdminOperateException {
         Map<String, String> thresholdValues = DashBoardThresholdEnum.getDashBoardThresholdValue();
         //根据系统配置筛选,如果库里有对应的指标，就使用配置的指标
 
         for (MetricList metric : listMetrics) {
             //配置的指标项：oneLevelType +"_"+ metric.getType() eg:index_segmentMemSize
             String key = oneLevelType + "_" + metric.getType();
-            if (thresholdValues.get(metric.getType()) != null&&thresholdValues.containsKey(key)) {
-                String valueStr = ariusConfigInfoService.stringSetting(ARIUS_DASHBOARD_THRESHOLD_GROUP, metric.getType(), thresholdValues.get(key));
-                Double configValue =  conversionType(valueStr,v->Double.valueOf(v),String.format("平台配置:[%S]错误,需要类型:%S",key,Double.class.getSimpleName()));
+            if (thresholdValues.get(metric.getType()) != null && thresholdValues.containsKey(key)) {
+                String valueStr = ariusConfigInfoService.stringSetting(ARIUS_DASHBOARD_THRESHOLD_GROUP,
+                    metric.getType(), thresholdValues.get(key));
+                Double configValue = conversionType(valueStr, v -> Double.valueOf(v),
+                    String.format("平台配置:[%S]错误,需要类型:%S", key, Double.class.getSimpleName()));
                 metric.setMetricListContents(metric.getMetricListContents().stream()
-                        .filter(metricListContent -> metricListContent.getValue() > configValue).collect(Collectors.toList()));
+                    .filter(metricListContent -> metricListContent.getValue() > configValue)
+                    .collect(Collectors.toList()));
             }
         }
     }
@@ -214,16 +229,20 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
      * @return
      */
     private Result<Void> checkCommonParam(String oneLevelType, BaseDTO param, Integer projectId) {
-        if (null == param) { return Result.buildParamIllegal("指标项为空");}
+        if (null == param) {
+            return Result.buildParamIllegal("指标项为空");
+        }
 
-        if (null == projectId) { return Result.buildParamIllegal("projectId is empty");}
+        if (null == projectId) {
+            return Result.buildParamIllegal("projectId is empty");
+        }
 
         if (!projectService.checkProjectExist(projectId)) {
             return Result.buildParamIllegal(String.format("There is no projectId:%s", projectId));
         }
 
         if (param instanceof MetricsDashboardTopNDTO) {
-            MetricsDashboardTopNDTO metricsDashboardTopNDTO =  (MetricsDashboardTopNDTO) param;
+            MetricsDashboardTopNDTO metricsDashboardTopNDTO = (MetricsDashboardTopNDTO) param;
 
             if (CollectionUtils.isEmpty(metricsDashboardTopNDTO.getMetricsTypes())) {
                 return Result.buildParamIllegal("指标项为空");
@@ -251,7 +270,8 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
         return Result.buildSucc();
     }
 
-    private <R> R conversionType(String value, Function<String, R> convertFunc, String errMsg) throws AdminOperateException {
+    private <R> R conversionType(String value, Function<String, R> convertFunc,
+                                 String errMsg) throws AdminOperateException {
         try {
             return convertFunc.apply(value);
         } catch (Exception e) {

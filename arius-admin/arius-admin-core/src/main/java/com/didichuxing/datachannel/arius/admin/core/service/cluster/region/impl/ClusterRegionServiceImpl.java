@@ -1,9 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.core.service.cluster.region.impl;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.DELETE;
-
 import com.alibaba.fastjson.JSON;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
@@ -14,16 +11,12 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.Cluster
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterRegionPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
-import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.event.region.RegionUnbindEvent;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
@@ -41,18 +34,14 @@ import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author ohushenglin_v
@@ -85,7 +74,7 @@ public class ClusterRegionServiceImpl implements ClusterRegionService {
     @Autowired
     private ESClusterNodeService    esClusterNodeService;
     @Autowired
-    private ProjectService projectService;
+    private ProjectService          projectService;
 
     @Override
     public ClusterRegion getRegionById(Long regionId) {
@@ -112,19 +101,6 @@ public class ClusterRegionServiceImpl implements ClusterRegionService {
     }
 
     @Override
-    public List<ClusterRegion> listRegionsByLogicAndPhyCluster(Long logicClusterId, String phyClusterName) {
-        if (logicClusterId == null || StringUtils.isBlank(phyClusterName)) {
-            return new ArrayList<>();
-        }
-
-        ClusterRegionPO condt = new ClusterRegionPO();
-        condt.setLogicClusterIds(logicClusterId.toString());
-        condt.setPhyClusterName(phyClusterName);
-
-        return ConvertUtil.list2List(clusterRegionDAO.listBoundRegionsByCondition(condt), ClusterRegion.class);
-    }
-
-    @Override
     public List<ClusterRegion> listPhyClusterRegions(String phyClusterName) {
         return ConvertUtil.list2List(clusterRegionDAO.getByPhyClusterName(phyClusterName), ClusterRegion.class);
     }
@@ -143,7 +119,7 @@ public class ClusterRegionServiceImpl implements ClusterRegionService {
     }
 
     @Override
-    public Result<Long> createPhyClusterRegion(String clusterName, List<Integer> nodeIds, String regionName, String operator) {
+    public Result<Long> createPhyClusterRegion(String clusterName, String regionName, String operator) {
         ClusterRegionPO clusterRegionPO = new ClusterRegionPO();
         clusterRegionPO.setName(regionName);
         clusterRegionPO.setLogicClusterIds(AdminConstant.REGION_NOT_BOUND_LOGIC_CLUSTER_ID);
@@ -153,14 +129,14 @@ public class ClusterRegionServiceImpl implements ClusterRegionService {
     }
 
     @Override
-    public Result<Void> deletePhyClusterRegion(Long regionId, String operator, Integer projectId) {
-        if (regionId == null) { return Result.buildFail("regionId不能为null");}
+    public Result<Void> deletePhyClusterRegion(Long regionId, String operator) {
+        if (regionId == null) {
+            return Result.buildFail("regionId不能为null");
+        }
 
         ClusterRegion region = getRegionById(regionId);
-        if (region == null) { return Result.buildFail(String.format(REGION_NOT_EXIST, regionId));}
-        final Result<Void> result = ProjectUtils.checkProjectCorrectly(i -> i, projectId, projectId);
-        if (result.failed()){
-            return result;
+        if (region == null) {
+            return Result.buildFail(String.format(REGION_NOT_EXIST, regionId));
         }
         // 已经绑定过的region不能删除
         if (isRegionBound(region)) {
@@ -175,32 +151,11 @@ public class ClusterRegionServiceImpl implements ClusterRegionService {
                 // 获取被绑定的全部逻辑集群的名称
                 logicClusterNames.add(clusterLogic.getName());
             }
-            return Result.buildFail(String.format("region %d 已经被绑定到逻辑集群 %s", regionId, ListUtils.strList2String(logicClusterNames)));
+            return Result.buildFail(
+                String.format("region [%d] 已经被绑定到逻辑集群 [%s]", regionId, ListUtils.strList2String(logicClusterNames)));
         }
 
-        // 校验region是否还存在数据节点，如region中存在数据节点，需要先进行移除
-        Result<List<ClusterRoleHost>> ret = clusterRoleHostService.listByRegionId(region.getId().intValue());
-        if (ret.failed()) { return Result.buildFrom(ret);}
-        if (CollectionUtils.isNotEmpty(ret.getData())) {
-            List<ClusterRoleHost> clusterRoleHostList = ret.getData();
-            List<String> nodeNameList = clusterRoleHostList.stream().map(ClusterRoleHost::getNodeSet).distinct().collect(Collectors.toList());
-            return Result.buildFail(String.format("当前region中存在节点[%s]，需要先进行编辑移除", ListUtils.strList2String(nodeNameList)));
-        }
-
-        boolean succeed = clusterRegionDAO.delete(regionId) == 1;
-        if (succeed) {
-            //CLUSTER_REGION, DELETE, regionId, "", operator
-            operateRecordService.save(new OperateRecord.Builder()
-                            .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_REGION_CHANGE)
-                            .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                            .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
-                            .content(DELETE.getDesc())
-                            .userOperation(operator)
-                            .bizId(Math.toIntExact(regionId))
-                    .build());
-        }
-
-        return Result.build(succeed);
+        return Result.build(clusterRegionDAO.delete(regionId) == 1);
     }
 
     @Override
@@ -223,17 +178,16 @@ public class ClusterRegionServiceImpl implements ClusterRegionService {
             if (AriusObjUtils.isNull(clusterLogic)) {
                 return Result.buildFail(String.format("逻辑集群 %S 不存在", logicClusterId));
             }
-            
 
             // 判断在未绑定状态,获取region被绑定的逻辑集群的类型，只有被共享逻辑集群绑定的region才能被另一个共享逻辑集群重复绑定
             if (isRegionBound(region)) {
                 if (!isRegionBindByPublicLogicCluster(region)) {
-                    return Result.buildFail(String.format("region %d 已经被非共享逻辑集群绑定",regionId));
+                    return Result.buildFail(String.format("region %d 已经被非共享逻辑集群绑定", regionId));
                 }
 
                 if (!clusterLogic.getType().equals(ClusterResourceTypeEnum.PUBLIC.getCode())) {
-                    return Result.buildFail(String.format("region %d 已经被绑定,并且逻辑集群 %s 不是共享集群",
-                            regionId, clusterLogic.getName()));
+                    return Result
+                        .buildFail(String.format("region %d 已经被绑定,并且逻辑集群 %s 不是共享集群", regionId, clusterLogic.getName()));
                 }
             }
 
@@ -246,18 +200,9 @@ public class ClusterRegionServiceImpl implements ClusterRegionService {
             }
 
             // 绑定
-            updateRegion(regionId, constructNewLogicIds(logicClusterId,region.getLogicClusterIds()));
+            updateRegion(regionId, constructNewLogicIds(logicClusterId, region.getLogicClusterIds()));
             final ClusterRegionPO bindRegion = clusterRegionDAO.getById(regionId);
-            // 发送消息，添加容量规划area（幂等地），添加容量规划容量信息
-            operateRecordService.save(new OperateRecord.Builder()
-                            .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_REGION_CHANGE)
-                            .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                            .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
-                            .content(String.format("region绑定,%s",bindRegion.getName()))
-                            .bizId(Math.toIntExact(logicClusterId))
-                            .userOperation(operator)
-                    
-                    .build());
+
             return Result.buildSucc();
         } catch (Exception e) {
             LOGGER.error(
@@ -279,7 +224,7 @@ public class ClusterRegionServiceImpl implements ClusterRegionService {
     }
 
     @Override
-    public Result<Void> unbindRegion(Long regionId, Long logicClusterId, String operator, Integer projectId) {
+    public Result<Void> unbindRegion(Long regionId, Long logicClusterId, String operator) {
         try {
             if (regionId == null) {
                 return Result.buildFail("未指定regionId");
@@ -289,12 +234,7 @@ public class ClusterRegionServiceImpl implements ClusterRegionService {
             if (region == null) {
                 return Result.buildFail(String.format(REGION_NOT_EXIST, regionId));
             }
-            //校验操作合法性
-            final Result<Void> result = ProjectUtils.checkProjectCorrectly(i -> i, projectId, projectId);
-            if (result.failed()){
-                return result;
-            }
-    
+
             // 判断在绑定状态
             if (!isRegionBound(region)) {
                 return Result.buildFail(String.format("region %d 未被绑定", regionId));
@@ -302,7 +242,9 @@ public class ClusterRegionServiceImpl implements ClusterRegionService {
 
             // 判断region上没有模板
             Result<List<IndexTemplatePhy>> ret = indexTemplatePhyService.listByRegionId(regionId.intValue());
-            if (ret.failed()) { return Result.buildFail(ret.getMessage());}
+            if (ret.failed()) {
+                return Result.buildFail(ret.getMessage());
+            }
 
             List<IndexTemplatePhy> clusterTemplates = ret.getData();
             if (CollectionUtils.isNotEmpty(clusterTemplates)) {
@@ -310,21 +252,10 @@ public class ClusterRegionServiceImpl implements ClusterRegionService {
             }
 
             // 删除绑定
-            updateRegion(regionId, getNewBoundLogicIds(region,logicClusterId));
+            updateRegion(regionId, getNewBoundLogicIds(region, logicClusterId));
 
             // 发送消息，删除容量规划容量信息
             SpringTool.publish(new RegionUnbindEvent(this, region, operator));
-
-
-            // 操作记录
-            operateRecordService.save(new OperateRecord.Builder()
-                            .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_REGION_CHANGE)
-                            .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                            .content(String.format("region解绑:%s", region.getName()))
-                            .project(projectService.getProjectBriefByProjectId(projectId))
-                            .userOperation(operator)
-                            .bizId(Math.toIntExact(logicClusterId))
-                            .build());
 
             return Result.buildSucc();
         } catch (Exception e) {
@@ -346,9 +277,8 @@ public class ClusterRegionServiceImpl implements ClusterRegionService {
         List<Long> boundLogicClusterIds = ListUtils.string2LongList(region.getLogicClusterIds());
 
         // 当没有指定解绑的逻辑集群id或者region没有被逻辑集群绑定或者region仅被指定解绑的逻辑集群绑定，则回滚至默认值-1
-        if (AriusObjUtils.isNull(logicClusterId)
-                || CollectionUtils.isEmpty(boundLogicClusterIds)
-                || (boundLogicClusterIds.size() == 1 && boundLogicClusterIds.contains(logicClusterId))) {
+        if (AriusObjUtils.isNull(logicClusterId) || CollectionUtils.isEmpty(boundLogicClusterIds)
+            || (boundLogicClusterIds.size() == 1 && boundLogicClusterIds.contains(logicClusterId))) {
             return AdminConstant.REGION_NOT_BOUND_LOGIC_CLUSTER_ID;
         }
 
@@ -369,17 +299,18 @@ public class ClusterRegionServiceImpl implements ClusterRegionService {
             return new ArrayList<>();
         }
 
-        List<ClusterRegionPO> clusterRegionPOS = clusterRegionDAO.listAll()
-                .stream()
-                .filter(clusterRegionPO -> ListUtils.string2LongList(clusterRegionPO.getLogicClusterIds()).contains(logicClusterId))
-                .collect(Collectors.toList());
+        List<ClusterRegionPO> clusterRegionPOS = clusterRegionDAO.listAll().stream().filter(
+            clusterRegionPO -> ListUtils.string2LongList(clusterRegionPO.getLogicClusterIds()).contains(logicClusterId))
+            .collect(Collectors.toList());
 
         return ConvertUtil.list2List(clusterRegionPOS, ClusterRegion.class);
     }
 
     @Override
     public ClusterRegion getRegionByLogicClusterId(Long logicClusterId) {
-        if (logicClusterId == null) { return null;}
+        if (logicClusterId == null) {
+            return null;
+        }
 
         ClusterRegionPO clusterRegionPO = clusterRegionDAO.getByLogicClusterId(logicClusterId);
         return ConvertUtil.obj2Obj(clusterRegionPO, ClusterRegion.class);
@@ -426,7 +357,8 @@ public class ClusterRegionServiceImpl implements ClusterRegionService {
         Long logicClusterId = ListUtils.string2LongList(region.getLogicClusterIds()).get(0);
         ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(logicClusterId);
 
-        return !AriusObjUtils.isNull(clusterLogic) && clusterLogic.getType().equals(ClusterResourceTypeEnum.PUBLIC.getCode());
+        return !AriusObjUtils.isNull(clusterLogic)
+               && clusterLogic.getType().equals(ClusterResourceTypeEnum.PUBLIC.getCode());
     }
 
     @Override
@@ -527,7 +459,8 @@ public class ClusterRegionServiceImpl implements ClusterRegionService {
             return clusterRegionFSInfoMap;
         }
 
-        Multimap<Integer, ClusterRoleHost> regionId2NodeMap = ConvertUtil.list2MulMap(clusterRoleHostList, ClusterRoleHost::getRegionId);
+        Multimap<Integer, ClusterRoleHost> regionId2NodeMap = ConvertUtil.list2MulMap(clusterRoleHostList,
+            ClusterRoleHost::getRegionId);
         for (Integer regionId : regionId2NodeMap.keySet()) {
             List<ClusterRoleHost> nodeList = Lists.newArrayList(regionId2NodeMap.get(regionId));
             ClusterRegionFSInfo clusterRegionFSInfo = new ClusterRegionFSInfo();
@@ -543,7 +476,8 @@ public class ClusterRegionServiceImpl implements ClusterRegionService {
                 }
 
                 FSTotal fsTotal = nodeStats.getFs().getTotal();
-                clusterRegionFSInfo.setAvailableInBytes(fsTotal.getAvailableInBytes() + clusterRegionFSInfo.getAvailableInBytes());
+                clusterRegionFSInfo
+                    .setAvailableInBytes(fsTotal.getAvailableInBytes() + clusterRegionFSInfo.getAvailableInBytes());
                 clusterRegionFSInfo.setFreeInBytes(fsTotal.getFreeInBytes() + clusterRegionFSInfo.getFreeInBytes());
                 clusterRegionFSInfo.setTotalInBytes(fsTotal.getTotalInBytes() + clusterRegionFSInfo.getTotalInBytes());
             }
@@ -560,7 +494,9 @@ public class ClusterRegionServiceImpl implements ClusterRegionService {
      * @param logicClusterIds 逻辑集群ID列表，为null则不更新
      */
     private void updateRegion(Long regionId, String logicClusterIds) {
-        if (regionId == null) { return;}
+        if (regionId == null) {
+            return;
+        }
 
         ClusterRegionPO updateParam = new ClusterRegionPO();
         updateParam.setId(regionId);

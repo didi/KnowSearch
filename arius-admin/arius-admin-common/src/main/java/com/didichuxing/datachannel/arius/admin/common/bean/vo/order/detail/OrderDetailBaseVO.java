@@ -20,42 +20,42 @@ import lombok.NoArgsConstructor;
 @ApiModel(description = "工单详情类")
 public class OrderDetailBaseVO extends BaseVO {
     @ApiModelProperty(value = "工单ID")
-    private Long                  id;
+    private Long              id;
 
     @ApiModelProperty(value = "工单类型")
-    private String                type;
+    private String            type;
 
     @ApiModelProperty(value = "申请人")
-    private UserBriefVO applicant;
+    private UserBriefVO       applicant;
 
     @ApiModelProperty(value = "申请人部门")
-    private String                appDeptName;
+    private String            appDeptName;
 
     @ApiModelProperty(value = "申请人使用的ProjectId")
-    private Integer applicantProjectId;
+    private Integer           applicantProjectId;
 
     @ApiModelProperty(value = "申请人使用的项目名称")
-    private String                applicantAppName;
+    private String            applicantAppName;
 
     @ApiModelProperty(value = "审批人列表, 状态为未处理时返回的是审批人, 状态为处理完成时返回的是审批的人")
     private List<UserBriefVO> approverList;
 
     @ApiModelProperty(value = "审批时间")
-    private Date                  finishTime;
+    private Date              finishTime;
 
     @ApiModelProperty(value = "审批审批意见")
-    private String                opinion;
+    private String            opinion;
 
     @ApiModelProperty(value = "工单状态, 0:待审批, 1:通过, 2:拒绝, 3:取消")
-    private Integer               status;
+    private Integer           status;
 
     @ApiModelProperty(value = "备注")
-    private String                description;
+    private String            description;
 
     @ApiModelProperty(value = "工单title")
-    private String                title;
+    private String            title;
 
     @ApiModelProperty(value = "工单明细, json字符串")
-    private String                detail;
+    private String            detail;
 
 }

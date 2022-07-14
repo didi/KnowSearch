@@ -25,19 +25,20 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class TemplateDashBoardCollector extends BaseDashboardCollector {
-    private static final ILog             LOGGER     = LogFactory.getLog(TemplateDashBoardCollector.class);
+    private static final ILog LOGGER = LogFactory.getLog(TemplateDashBoardCollector.class);
 
     @Autowired
-    IndexTemplatePhyService indexTemplatePhyService;
+    IndexTemplatePhyService   indexTemplatePhyService;
 
     @Autowired
-    ESShardService esShardService;
+    ESShardService            esShardService;
 
     @Override
     public void collectSingleCluster(String cluster, long currentTime) {
         List<IndexTemplatePhyWithLogic> logicTemplates = indexTemplatePhyService.getTemplateByPhyCluster(cluster);
         if (logicTemplates.isEmpty()) {
-            LOGGER.error("class=TemplateDashBoardCollector||method=collectSingleCluster||errMsg=clusterTemplateList is null");
+            LOGGER.error(
+                "class=TemplateDashBoardCollector||method=collectSingleCluster||errMsg=clusterTemplateList is null");
             return;
         }
         List<Segment> segments = esShardService.syncGetSegments(cluster);
@@ -64,7 +65,9 @@ public class TemplateDashBoardCollector extends BaseDashboardCollector {
             dashBoardStatsList.add(dashBoardStats);
         }
 
-        if (CollectionUtils.isEmpty(dashBoardStatsList)) {return;}
+        if (CollectionUtils.isEmpty(dashBoardStatsList)) {
+            return;
+        }
 
         monitorMetricsSender.sendDashboardStats(dashBoardStatsList);
     }
@@ -78,15 +81,13 @@ public class TemplateDashBoardCollector extends BaseDashboardCollector {
         return "TemplateDashBoardCollector";
     }
 
-
     private void buildTemplateStats(TemplateMetrics templateMetrics, List<Segment> clusterSegments, String expression) {
         //这里传入的segments 是整个cluster 所有segments，先按照template expression 过滤出该模板所有的segments
-        List<Segment> matchExpSegments = clusterSegments
-                .stream()
-                .filter(s -> IndexNameUtils.indexExpMatch(s.getIndex(), expression))
-                .collect(Collectors.toList());
+        List<Segment> matchExpSegments = clusterSegments.stream()
+            .filter(s -> IndexNameUtils.indexExpMatch(s.getIndex(), expression)).collect(Collectors.toList());
 
         templateMetrics.setSegmentNum((long) matchExpSegments.size());
-        templateMetrics.setSegmentMemSize(matchExpSegments.stream().mapToDouble(Segment::getMemoSize).sum() * BYTE_TO_MB);
+        templateMetrics
+            .setSegmentMemSize(matchExpSegments.stream().mapToDouble(Segment::getMemoSize).sum() * BYTE_TO_MB);
     }
 }

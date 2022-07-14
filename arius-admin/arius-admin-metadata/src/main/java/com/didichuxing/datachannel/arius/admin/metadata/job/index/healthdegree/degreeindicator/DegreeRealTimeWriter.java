@@ -4,6 +4,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.IndicatorsType;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.BaseDegree;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.RealTimeWrite;
 import com.didichuxing.datachannel.arius.admin.metadata.job.index.healthdegree.AbstractDegreeIndicator;
+
 @Deprecated
 public class DegreeRealTimeWriter extends AbstractDegreeIndicator {
     @Override
@@ -12,16 +13,18 @@ public class DegreeRealTimeWriter extends AbstractDegreeIndicator {
     }
 
     @Override
-    public RealTimeWrite getRealTimePO(){
+    public RealTimeWrite getRealTimePO() {
         return new RealTimeWrite();
     }
 
     @Override
     public <T extends BaseDegree> T execInner(DegreeParam degreeParam, T t) {
-        double todayIndexRate  = Math.floor(degreeParam.getTodayReaTimelInfo().getAvgIndexingIndexTotalRate() * 10000) / 10000;
-        double yesdayIndexRate = Math.floor(degreeParam.getYesdayReaTimelInfo().getAvgIndexingIndexTotalRate() * 10000) / 10000;
+        double todayIndexRate = Math.floor(degreeParam.getTodayReaTimelInfo().getAvgIndexingIndexTotalRate() * 10000)
+                                / 10000;
+        double yesdayIndexRate = Math.floor(degreeParam.getYesdayReaTimelInfo().getAvgIndexingIndexTotalRate() * 10000)
+                                 / 10000;
 
-        RealTimeWrite realTimeWritePO = (RealTimeWrite)t;
+        RealTimeWrite realTimeWritePO = (RealTimeWrite) t;
 
         realTimeWritePO.setAvgIndexingRate(todayIndexRate);
         realTimeWritePO.setYesterdayAvgIndexingRate(yesdayIndexRate);
@@ -47,6 +50,6 @@ public class DegreeRealTimeWriter extends AbstractDegreeIndicator {
         processBuild.append(score).append("*").append(realTimeWritePO.getWeightRate()).append("%");
         realTimeWritePO.setProcess(processBuild.toString());
 
-        return (T)realTimeWritePO;
+        return (T) realTimeWritePO;
     }
 }

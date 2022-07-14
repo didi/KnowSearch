@@ -19,32 +19,31 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-
 /**
  * @author jinbinbin
  * @version $Id: AccessLogFilter.java, v 0.1 2018年03月05日 22:01 jinbinbin Exp $
  */
 public class WebRequestLogFilter implements Ordered, Filter {
 
-    private static final ILog LOGGER = LogFactory.getLog("accessLogger");
-    private static final ILog RESP_LOGGER = LogFactory.getLog("responseLogger");
+    private static final ILog        LOGGER                            = LogFactory.getLog("accessLogger");
+    private static final ILog        RESP_LOGGER                       = LogFactory.getLog("responseLogger");
 
-    public static final String RESPONSE_LOG_ENABLE = "responseLogEnable";
-    public static final String EXCLUDE_URLS = "excludeAllUrls";
-    public static final String EXCLUDE_REQUEST_BODY_URLS = "excludeReqBodyUrls";
-    public static final String EXCLUDE_RESPONSE_BODY_URLS = "excludeRespBodyUrls";
-    public static final String EXCLUDE_RESPONSE_BODY_URLS_PREFER = "excludeRespBodyUrlsPrefer";
+    public static final String       RESPONSE_LOG_ENABLE               = "responseLogEnable";
+    public static final String       EXCLUDE_URLS                      = "excludeAllUrls";
+    public static final String       EXCLUDE_REQUEST_BODY_URLS         = "excludeReqBodyUrls";
+    public static final String       EXCLUDE_RESPONSE_BODY_URLS        = "excludeRespBodyUrls";
+    public static final String       EXCLUDE_RESPONSE_BODY_URLS_PREFER = "excludeRespBodyUrlsPrefer";
 
-    private static final Set<String> ALL_EXCLUDE_URLS = new HashSet<>();
-    private static final Set<String> REQ_BODY_EXCLUDE_URLS = new HashSet<>();
-    private static final Set<String> RESP_BODY_EXCLUDE_URLS = new HashSet<>();
-    private static final Set<String> RESP_BODY_EXCLUDE_URLS_PREFER = new HashSet<>();
+    private static final Set<String> ALL_EXCLUDE_URLS                  = new HashSet<>();
+    private static final Set<String> REQ_BODY_EXCLUDE_URLS             = new HashSet<>();
+    private static final Set<String> RESP_BODY_EXCLUDE_URLS            = new HashSet<>();
+    private static final Set<String> RESP_BODY_EXCLUDE_URLS_PREFER     = new HashSet<>();
 
-    private Boolean respLogEnable = Boolean.TRUE;
+    private Boolean                  respLogEnable                     = Boolean.TRUE;
 
     @Override
     public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain) throws IOException,
-            ServletException {
+                                                                                      ServletException {
 
         long begin = System.currentTimeMillis();
 
@@ -106,7 +105,8 @@ public class WebRequestLogFilter implements Ordered, Filter {
         } else {
             responseBody = getResponseBody(wrapperResponse);
         }
-        RESP_LOGGER.info("class=WebRequestLogFilter||method=logResponse||response||responseBody={}||timeCost={}", responseBody, (System.currentTimeMillis() - begin));
+        RESP_LOGGER.info("class=WebRequestLogFilter||method=logResponse||response||responseBody={}||timeCost={}",
+            responseBody, (System.currentTimeMillis() - begin));
     }
 
     private void logRequest(TranslateHttpServletRequestWrapper request, String requestUrl) {
@@ -121,9 +121,10 @@ public class WebRequestLogFilter implements Ordered, Filter {
         } else {
             requestBody = getRequestBody(request);
         }
-        LOGGER.info("class=WebRequestLogFilter||method=logRequest||request||url={}||method={}||remoteAddr={}||headers={}||urlParams={}||body={}",
-                request.getRequestURI(), request.getMethod(), UrlHelper.getIpAddr(request), headers,
-                request.getQueryString(), requestBody, StandardCharsets.UTF_8);
+        LOGGER.info(
+            "class=WebRequestLogFilter||method=logRequest||request||url={}||method={}||remoteAddr={}||headers={}||urlParams={}||body={}",
+            request.getRequestURI(), request.getMethod(), UrlHelper.getIpAddr(request), headers,
+            request.getQueryString(), requestBody, StandardCharsets.UTF_8);
     }
 
     @Override
@@ -144,7 +145,7 @@ public class WebRequestLogFilter implements Ordered, Filter {
      */
     private String getResponseBody(ContentCachingResponseWrapper response) {
         ContentCachingResponseWrapper wrapper = WebUtils.getNativeResponse(response,
-                ContentCachingResponseWrapper.class);
+            ContentCachingResponseWrapper.class);
         if (wrapper != null) {
             byte[] buf = wrapper.getContentAsByteArray();
             if (buf.length > 0) {

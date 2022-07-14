@@ -17,13 +17,13 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ApiModel(description ="dsl慢查语句")
+@ApiModel(description = "dsl慢查语句")
 public class SlowDsl {
     /**
      * 慢查次数
      */
     @ApiModelProperty(value = "慢查次数")
-    private Long count;
+    private Long                count;
     /**
      * 慢查详情
      */

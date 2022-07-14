@@ -33,5 +33,5 @@ public class ErrorDslDetail {
     /**
      * 次数
      */
-    private Long count;
+    private Long   count;
 }

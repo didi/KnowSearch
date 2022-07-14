@@ -37,21 +37,18 @@ import org.springframework.stereotype.Service;
 @NoArgsConstructor
 public class GatewayServiceImpl implements GatewayService {
 
-    private static final ILog LOGGER = LogFactory.getLog(GatewayServiceImpl.class);
+    private static final ILog     LOGGER = LogFactory.getLog(GatewayServiceImpl.class);
 
     @Autowired
-    private GatewayClusterDAO gatewayClusterDAO;
+    private GatewayClusterDAO     gatewayClusterDAO;
 
     @Autowired
-    private ESGatewayClient esGatewayClient;
+    private ESGatewayClient       esGatewayClient;
 
     @Autowired
     private GatewayClusterNodeDAO gatewayClusterNodeDAO;
 
-   
-    
-
-    private Set<String>       clusterNames;
+    private Set<String>           clusterNames;
 
     @PostConstruct
     public void init() {
@@ -128,7 +125,6 @@ public class GatewayServiceImpl implements GatewayService {
             return Result.buildFrom(result);
         }
 
-
         String url = GatewaySqlConstant.DEFAULT_HTTP_PRE_FIX + esGatewayClient.getSingleGatewayAddress() + postFix;
 
         try {
@@ -141,24 +137,24 @@ public class GatewayServiceImpl implements GatewayService {
         return Result.buildFail();
     }
 
-    private Result<String> preSqlParamCheck(String sql,  String postFix) {
+    private Result<String> preSqlParamCheck(String sql, String postFix) {
         if (StringUtils.isBlank(sql)) {
             return Result.buildParamIllegal("查询的sql语句为空");
         }
         if (StringUtils.isBlank(postFix)) {
             return Result.buildParamIllegal("查询gateway的路径后缀为空");
         }
-        
+
         return Result.buildSucc();
     }
 
     private Map<String, String> buildGatewayHeader(String phyClusterName, ESUser esUser) {
         Map<String, String> headers = Maps.newHashMap();
-        
+
         Header header = BaseHttpUtil.buildHttpHeader(String.valueOf(esUser.getId()), esUser.getVerifyCode());
         headers.put("Content-Type", "application/json;charset=utf-8");
         headers.put(header.getName(), header.getValue());
-        if(!AriusObjUtils.isBlack(phyClusterName)) {
+        if (!AriusObjUtils.isBlack(phyClusterName)) {
             headers.put("CLUSTER-ID", phyClusterName);
         }
         return headers;

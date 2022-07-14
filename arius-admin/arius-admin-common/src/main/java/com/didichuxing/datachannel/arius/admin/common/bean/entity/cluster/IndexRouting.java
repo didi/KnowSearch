@@ -15,7 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 public class IndexRouting {
 
-    private String index;
+    private String          index;
 
     private List<ShardInfo> shards;
 }

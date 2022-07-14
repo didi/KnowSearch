@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ApiModel(description ="逻辑集群信息")
+@ApiModel(description = "逻辑集群信息")
 public class ESLogicClusterDTO extends PageDTO {
 
     @ApiModelProperty("逻辑集群ID")
@@ -30,7 +30,6 @@ public class ESLogicClusterDTO extends PageDTO {
     @ApiModelProperty("类型(1:公共：2:独立, 3:独占)")
     private Integer type;
 
-
     @ApiModelProperty("所属应用ID")
     private Integer projectId;
 
@@ -38,13 +37,11 @@ public class ESLogicClusterDTO extends PageDTO {
     private String  dataCenter;
 
     @ApiModelProperty("数据节点个数")
-    private Integer  dataNodeNum;
+    private Integer dataNodeNum;
 
     @ApiModelProperty("责任人：后续进行下线，无需再使用")
     @Deprecated
     private String  responsible;
-
-
 
     @ApiModelProperty("备注")
     private String  memo;

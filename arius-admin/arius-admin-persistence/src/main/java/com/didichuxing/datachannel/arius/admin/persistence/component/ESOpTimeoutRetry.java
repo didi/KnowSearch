@@ -23,7 +23,8 @@ public class ESOpTimeoutRetry {
     private static final int SEC_30 = 30 * 1000;
     private static final int MIN_5  = 5 * 60 * 1000;
 
-    private ESOpTimeoutRetry(){}
+    private ESOpTimeoutRetry() {
+    }
 
     public static boolean esRetryExecute(String methodName, int tryCount,
                                          RetryExecutor.Handler handler) throws ESOperateException {
@@ -41,10 +42,10 @@ public class ESOpTimeoutRetry {
                 }
 
                 @Override
-                public int retrySleepTime(int retryTims){
-                    int sleepTime       = retryTims * SEC_30;
-                    int randomSleepTime = (int)(Math.random() * 100);
-                    int totalSleepTime  = sleepTime + randomSleepTime;
+                public int retrySleepTime(int retryTims) {
+                    int sleepTime = retryTims * SEC_30;
+                    int randomSleepTime = (int) (Math.random() * 100);
+                    int totalSleepTime = sleepTime + randomSleepTime;
 
                     return totalSleepTime > MIN_5 ? MIN_5 : totalSleepTime;
                 }
@@ -63,8 +64,8 @@ public class ESOpTimeoutRetry {
      * @return 整个重试方法执行的结果
      * @throws ESOperateException 抛异常
      */
-    public static boolean esRetryExecuteWithGivenTime(String methodName, int tryCount,
-                                                      RetryExecutor.Handler handler, Function<Integer, Integer> retrySleepTime) throws ESOperateException {
+    public static boolean esRetryExecuteWithGivenTime(String methodName, int tryCount, RetryExecutor.Handler handler,
+                                                      Function<Integer, Integer> retrySleepTime) throws ESOperateException {
         try {
             return RetryExecutor.builder().name(methodName).retryCount(tryCount).handler(new RetryExecutor.Handler() {
                 @Override
@@ -75,7 +76,7 @@ public class ESOpTimeoutRetry {
                 @Override
                 public boolean needRetry(Exception e) {
                     return e instanceof ProcessClusterEventTimeoutException
-                            || e instanceof ElasticsearchTimeoutException;
+                           || e instanceof ElasticsearchTimeoutException;
                 }
 
                 @Override

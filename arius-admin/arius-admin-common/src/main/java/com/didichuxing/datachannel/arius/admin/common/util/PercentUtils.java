@@ -6,7 +6,8 @@ package com.didichuxing.datachannel.arius.admin.common.util;
  */
 public class PercentUtils {
 
-    private PercentUtils(){}
+    private PercentUtils() {
+    }
 
     public static int getWithLimit(Double value) {
         if (value == null) {

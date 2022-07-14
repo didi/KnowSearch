@@ -10,16 +10,16 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.Work
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.LogicClusterAuthOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
-import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectClusterLogicAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectClusterLogicAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectClusterLogicAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
+import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectClusterLogicAuthService;
 import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
 import com.didiglobal.logi.security.service.ProjectService;
 import java.util.List;
@@ -30,9 +30,9 @@ import org.springframework.stereotype.Service;
 public class LogicClusterAuthHandler extends BaseWorkOrderHandler {
 
     @Autowired
-    private ClusterLogicService clusterLogicService;
+    private ClusterLogicService            clusterLogicService;
     @Autowired
-    private ProjectService projectService;
+    private ProjectService                 projectService;
 
     @Autowired
     private ProjectClusterLogicAuthService projectClusterLogicAuthService;
@@ -88,27 +88,17 @@ public class LogicClusterAuthHandler extends BaseWorkOrderHandler {
             content.getLogicClusterId(), ProjectClusterLogicAuthEnum.valueOf(content.getAuthCode()),
             workOrder.getSubmitor(), workOrder.getSubmitor());
 
-        if (null != result && result.success()) {
-            operateRecordService.save(new OperateRecord.Builder()
-                            .operationTypeEnum(OperateTypeEnum.MY_CLUSTER_APPLY)
-                            .bizId(content.getLogicClusterId())
-                            .project(projectService.getProjectBriefByProjectId(workOrder.getSubmitorProjectId()))
-                            .content(
-                        workOrder.getSubmitor() + "申请" + content.getLogicClusterName() + "的"
-                        + ProjectClusterLogicAuthEnum
-                                                                                   .valueOf(content.getAuthCode()))
-                            .userOperation(approver)
-                            .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                    .build());
-            //operateRecordService
-            //    .save(CLUSTER, OperationEnum.ADD, content.getLogicClusterId(),
-            //            workOrder.getSubmitor() + "申请" + content.getLogicClusterName() + "的"
-            //            + ProjectClusterLogicAuthEnum
-            //                                                                       .valueOf(content.getAuthCode()),
-            //        approver);
+        if (result.success()) {
+            operateRecordService.save(new OperateRecord.Builder().operationTypeEnum(OperateTypeEnum.MY_CLUSTER_APPLY)
+                .bizId(content.getLogicClusterId())
+                .project(projectService.getProjectBriefByProjectId(workOrder.getSubmitorProjectId()))
+                .content(workOrder.getSubmitor() + "申请" + content.getLogicClusterName() + "的"
+                         + ProjectClusterLogicAuthEnum.valueOf(content.getAuthCode()))
+                .userOperation(approver).triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).build());
+
         }
 
-        return Result.buildFrom(result);
+        return result;
     }
 
     @Override

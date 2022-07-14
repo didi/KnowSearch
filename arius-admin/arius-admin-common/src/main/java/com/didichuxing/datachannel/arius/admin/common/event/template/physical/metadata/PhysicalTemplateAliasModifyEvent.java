@@ -14,22 +14,22 @@ public class PhysicalTemplateAliasModifyEvent extends PhysicalMetaDataModifyEven
     /**
      * project ID
      */
-    private final Integer projectId;
+    private final Integer               projectId;
 
     /**
      * 模板名称
      */
-    private final String templateName;
+    private final String                templateName;
 
     /**
      * 集群名称
      */
-    private final String cluster;
+    private final String                cluster;
 
     /**
      * 接受者列表
      */
-    private final List<String> receivers;
+    private final List<String>          receivers;
 
     /**
      * 更新之前索引模板别名信息
@@ -41,14 +41,9 @@ public class PhysicalTemplateAliasModifyEvent extends PhysicalMetaDataModifyEven
      */
     private final IndexTemplatePhyAlias afterUpdateAlias;
 
-    public PhysicalTemplateAliasModifyEvent(
-            Object source,
-            Integer projectId,
-            String cluster,
-            String templateName,
-            List<String> receivers,
-            IndexTemplatePhyAlias beforeUpdateAlias,
-            IndexTemplatePhyAlias afterUpdateAlias) {
+    public PhysicalTemplateAliasModifyEvent(Object source, Integer projectId, String cluster, String templateName,
+                                            List<String> receivers, IndexTemplatePhyAlias beforeUpdateAlias,
+                                            IndexTemplatePhyAlias afterUpdateAlias) {
         super(source);
         this.projectId = projectId;
         this.templateName = templateName;

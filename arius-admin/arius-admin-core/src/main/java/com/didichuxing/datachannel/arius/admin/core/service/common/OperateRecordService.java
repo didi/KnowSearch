@@ -16,23 +16,15 @@ import java.util.List;
  */
 public interface OperateRecordService {
 
-
-
     Result<Void> save(OperateRecord operateRecord);
 
-
-
-
-
-
-    
     /**
      * 动态分页查询
      *
      * @param pageDTO 页面dto
      * @return {@code Object}
      */
-    Tuple<Long,List<OperateRecordVO>> pagingGetOperateRecordByCondition(OperateRecordDTO pageDTO);
-    
+    Tuple<Long, List<OperateRecordVO>> pagingGetOperateRecordByCondition(OperateRecordDTO pageDTO);
+
     OperateRecordVO getById(Integer id);
 }

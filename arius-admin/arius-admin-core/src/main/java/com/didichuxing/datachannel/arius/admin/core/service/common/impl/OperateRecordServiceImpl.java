@@ -34,15 +34,15 @@ import org.springframework.stereotype.Service;
 @Service
 public class OperateRecordServiceImpl implements OperateRecordService {
 
-    private static final ILog LOGGER = LogFactory.getLog(OperateRecordServiceImpl.class);
+    private static final ILog LOGGER          = LogFactory.getLog(OperateRecordServiceImpl.class);
 
     @Autowired
-    private OperateRecordDAO operateRecordDAO;
+    private OperateRecordDAO  operateRecordDAO;
 
     /**
      * 操作日志，每个类别，保留的最近操作日志数
      */
-    private static final int SAVE_RECENT_NUM = 1000;
+    private static final int  SAVE_RECENT_NUM = 1000;
 
     /**
      * 0 0 1 * * ?
@@ -55,24 +55,21 @@ public class OperateRecordServiceImpl implements OperateRecordService {
         // 获取所有的分类
         OperationEnum[] operationEnums = OperationEnum.values();
         List<OperateRecordInfoPO> deleteList = new ArrayList<>();
-        for(OperationEnum operationEnum : operationEnums) {
+        for (OperationEnum operationEnum : operationEnums) {
             // 获取每一个分类倒数第 N 条数据
             int moduleId = operationEnum.getCode();
             OperateRecordInfoPO operateRecordPO = operateRecordDAO.selectDescTopNByModuleId(moduleId, SAVE_RECENT_NUM);
-            if(operateRecordPO == null) {
+            if (operateRecordPO == null) {
                 // 说明这个分类数据一共不超过 N 条
                 continue;
             }
             deleteList.add(operateRecordPO);
         }
-        for(OperateRecordInfoPO operateRecord : deleteList) {
+        for (OperateRecordInfoPO operateRecord : deleteList) {
             // 删除该类别中，比指定id小的数据
             operateRecordDAO.deleteByModuleIdAndLessThanId(operateRecord.getModuleId(), operateRecord.getId());
         }
     }
-
-
-
 
     /**
      * @param operateRecord
@@ -82,10 +79,9 @@ public class OperateRecordServiceImpl implements OperateRecordService {
     public Result<Void> save(OperateRecord operateRecord) {
         final OperateRecordInfoPO operateRecordInfoPO = ConvertUtil.obj2Obj(operateRecord, OperateRecordInfoPO.class);
         return Result.build(operateRecordDAO.insert(operateRecordInfoPO) == 1);
-        
+
     }
 
-    
     /**
      * 动态分页查询
      *
@@ -94,26 +90,26 @@ public class OperateRecordServiceImpl implements OperateRecordService {
      */
     @Override
     public Tuple<Long, List<OperateRecordVO>> pagingGetOperateRecordByCondition(OperateRecordDTO pageDTO) {
-        String sortTerm = OperateRecordSortEnum.getSortField( pageDTO.getSortTerm());
+        String sortTerm = OperateRecordSortEnum.getSortField(pageDTO.getSortTerm());
         String sortType = pageDTO.getOrderByDesc() ? SortConstant.DESC : SortConstant.ASC;
         pageDTO.setSortTerm(sortTerm);
         pageDTO.setSortType(sortType);
         final List<OperateRecordInfoPO> recordInfoPOList = operateRecordDAO.listByCondition(pageDTO);
-        
+
         final Map</*id*/Integer, OperateRecordInfoPO> operateRecordInfoMap = ConvertUtil.list2Map(recordInfoPOList,
-                OperateRecordInfoPO::getId);
-        final List<OperateRecordVO> operateRecordVOList = ConvertUtil.list2List(recordInfoPOList, OperateRecordVO.class);
+            OperateRecordInfoPO::getId);
+        final List<OperateRecordVO> operateRecordVOList = ConvertUtil.list2List(recordInfoPOList,
+            OperateRecordVO.class);
         //对vo中的数据进行转换
-        Consumer<OperateRecordVO> poIncludeEnumIdConvertEnumStrFunc = operateRecordVO -> this.poIncludeEnumIdConvertEnumStr(
-                operateRecordInfoMap.get(operateRecordVO.getId()), operateRecordVO);
+        Consumer<OperateRecordVO> poIncludeEnumIdConvertEnumStrFunc = operateRecordVO -> this
+            .poIncludeEnumIdConvertEnumStr(operateRecordInfoMap.get(operateRecordVO.getId()), operateRecordVO);
         operateRecordVOList.forEach(poIncludeEnumIdConvertEnumStrFunc);
-       
+
         final Long count = operateRecordDAO.countByCondition(pageDTO);
-        
-    
-        return new Tuple<>(count,operateRecordVOList);
+
+        return new Tuple<>(count, operateRecordVOList);
     }
-    
+
     /**
      * po包括枚举id转换枚举str
      *
@@ -122,19 +118,17 @@ public class OperateRecordServiceImpl implements OperateRecordService {
      */
     private void poIncludeEnumIdConvertEnumStr(OperateRecordInfoPO recordInfo, OperateRecordVO operateRecordVO) {
         //设置操作的模块
-        Optional.ofNullable(recordInfo)
-                .map(OperateRecordInfoPO::getModuleId).map(NewModuleEnum::getModuleEnum)
-                .map(NewModuleEnum::getModule).ifPresent(operateRecordVO::setModule);
+        Optional.ofNullable(recordInfo).map(OperateRecordInfoPO::getModuleId).map(NewModuleEnum::getModuleEnum)
+            .map(NewModuleEnum::getModule).ifPresent(operateRecordVO::setModule);
         //设置触发方式
-        Optional.ofNullable(recordInfo)
-                .map(OperateRecordInfoPO::getTriggerWayId).map(TriggerWayEnum::getTriggerWayEnum)
-                .map(TriggerWayEnum::getTriggerWay).ifPresent(operateRecordVO::setTriggerWay);
+        Optional.ofNullable(recordInfo).map(OperateRecordInfoPO::getTriggerWayId).map(TriggerWayEnum::getTriggerWayEnum)
+            .map(TriggerWayEnum::getTriggerWay).ifPresent(operateRecordVO::setTriggerWay);
         //设置操作类型
-        Optional.ofNullable(recordInfo)
-                .map(OperateRecordInfoPO::getOperateId).map(OperateTypeEnum::getOperationTypeEnum)
-                .map(OperateTypeEnum::getOperationType).ifPresent(operateRecordVO::setOperate);
+        Optional.ofNullable(recordInfo).map(OperateRecordInfoPO::getOperateId)
+            .map(OperateTypeEnum::getOperationTypeEnum).map(OperateTypeEnum::getOperationType)
+            .ifPresent(operateRecordVO::setOperate);
     }
-    
+
     /**
      * @param id
      * @return
@@ -143,10 +137,8 @@ public class OperateRecordServiceImpl implements OperateRecordService {
     public OperateRecordVO getById(Integer id) {
         final OperateRecordInfoPO recordInfo = operateRecordDAO.getById(id);
         final OperateRecordVO operateRecordVO = ConvertUtil.obj2Obj(recordInfo, OperateRecordVO.class);
-        poIncludeEnumIdConvertEnumStr(recordInfo,operateRecordVO);
+        poIncludeEnumIdConvertEnumStr(recordInfo, operateRecordVO);
         return operateRecordVO;
     }
-    
-
 
 }

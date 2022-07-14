@@ -11,20 +11,20 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel(description = "配置包查询DTO")
-public class ESZeusConfigDTO extends BaseDTO  {
+public class ESZeusConfigDTO extends BaseDTO {
 
     @ApiModelProperty("集群Id")
-    private Long  clusterId;
+    private Long   clusterId;
 
     @ApiModelProperty("集群名称")
     private String clusterName;
 
     @ApiModelProperty("组件名称")
-    private String  enginName;
+    private String enginName;
 
     @ApiModelProperty("配置文件名称")
-    private String  typeName;
+    private String typeName;
 
     @ApiModelProperty("配置文件内容")
-    private String  content;
+    private String content;
 }

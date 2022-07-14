@@ -11,7 +11,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.clusteroprestart.ClusterOpRestartOrderDetail;
-
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
@@ -49,7 +49,8 @@ public class ClusterOpNormalRestartHandler extends BaseClusterOpRestartHandler {
             return Result.buildParamIllegal("物理集群不存在");
         }
 
-        if (opTaskManager.existUnClosedTask(content.getPhyClusterId().intValue(), OpTaskTypeEnum.CLUSTER_RESTART.getType())) {
+        if (opTaskManager.existUnClosedTask(content.getPhyClusterId().intValue(),
+            OpTaskTypeEnum.CLUSTER_RESTART.getType())) {
             return Result.buildParamIllegal("该集群上存在未完成的集群重启任务");
         }
 
@@ -97,7 +98,7 @@ public class ClusterOpNormalRestartHandler extends BaseClusterOpRestartHandler {
         opTaskDTO.setTaskType(OpTaskTypeEnum.CLUSTER_RESTART.getType());
         opTaskDTO.setExpandData(JSON.toJSONString(ecmTaskDTO));
         opTaskDTO.setCreator(workOrder.getSubmitor());
-        Result<OpTask> result = opTaskManager.addTask(opTaskDTO);
+        Result<OpTask> result = opTaskManager.addTask(opTaskDTO, AuthConstant.SUPER_PROJECT_ID);
         if (null == result || result.failed()) {
             return Result.buildFail("生成集群新建操作任务失败!");
         }

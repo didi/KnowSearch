@@ -14,14 +14,12 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ESUserPO extends BasePO  {
+public class ESUserPO extends BasePO {
 
     /**
      * 主键
      */
     private Integer id;
-
-
 
     /**
      * 是否是超管
@@ -32,7 +30,6 @@ public class ESUserPO extends BasePO  {
      * 验证码
      */
     private String  verifyCode;
-
 
     /**
      * 备注
@@ -69,9 +66,6 @@ public class ESUserPO extends BasePO  {
      */
     private Boolean defaultDisplay;
 
-
-
-
     /******************** 即将废弃字段 ***********************/
 
     private String  ip;
@@ -79,6 +73,5 @@ public class ESUserPO extends BasePO  {
     private String  indexExp;
     @Deprecated
     private String  responsible;
-    
 
 }

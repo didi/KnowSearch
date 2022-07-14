@@ -2,14 +2,6 @@ package com.didichuxing.datachannel.arius.admin.biz.task.handler.cluster;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum.ES_HOST;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Service;
-
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.task.content.ClusterRestartContent;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -17,9 +9,14 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.EcmParamBa
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.ecm.EcmTaskDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
-
+import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import java.util.ArrayList;
+import java.util.List;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
 
 /**
  * 重新启动集群任务处理
@@ -31,8 +28,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 public class ClusterRestartTaskHandler extends AbstractClusterTaskHandler {
     @Override
     Result<Void> initHostParam(OpTask opTask) {
-        ClusterRestartContent content = ConvertUtil.str2ObjByJson(opTask.getExpandData(),
-            ClusterRestartContent.class);
+        ClusterRestartContent content = ConvertUtil.str2ObjByJson(opTask.getExpandData(), ClusterRestartContent.class);
         content.setType(ES_HOST.getCode());
         opTask.setExpandData(JSON.toJSONString(content));
 
@@ -79,10 +75,13 @@ public class ClusterRestartTaskHandler extends AbstractClusterTaskHandler {
             String roleName = roleClusterName.replaceFirst(clusterPhy.getCluster() + "-", "");
             roleNameList.add(roleName);
         }
-        List<EcmParamBase> ecmParamBaseList = ecmHandleService.buildEcmParamBaseList(clusterPhy.getId(), roleNameList)
-            .getData();
+        final Result<List<EcmParamBase>> listResult = ecmHandleService.buildEcmParamBaseList(clusterPhy.getId(),
+            roleNameList);
+        if (listResult.failed()) {
+            return Result.buildFrom(listResult);
+        }
 
-        ecmTaskDTO.setEcmParamBaseList(ecmParamBaseList);
+        ecmTaskDTO.setEcmParamBaseList(listResult.getData());
 
         return Result.buildSucc();
     }

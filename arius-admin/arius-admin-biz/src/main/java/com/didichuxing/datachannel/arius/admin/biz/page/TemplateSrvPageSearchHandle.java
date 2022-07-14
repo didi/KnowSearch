@@ -16,9 +16,11 @@ import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
+import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
@@ -31,8 +33,10 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<TemplateQueryDTO, TemplateWithSrvVO> {
-    private static final FutureUtil<Void> TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_CLUSTER_FUTURE_UTIL = FutureUtil.init("TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_CLUSTER_FUTURE_UTIL", 10, 10, 100);
-    private static final FutureUtil<Void> TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_UNAVAILABLE_SRV_FUTURE_UTIL = FutureUtil.init("TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_UNAVAILABLE_SRV_FUTURE_UTIL", 10, 10, 100);
+    private static final FutureUtil<Void> TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_CLUSTER_FUTURE_UTIL         = FutureUtil
+        .init("TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_CLUSTER_FUTURE_UTIL", 10, 10, 100);
+    private static final FutureUtil<Void> TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_UNAVAILABLE_SRV_FUTURE_UTIL = FutureUtil
+        .init("TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_UNAVAILABLE_SRV_FUTURE_UTIL", 10, 10, 100);
 
     @Autowired
     private IndexTemplateService          indexTemplateService;
@@ -76,6 +80,7 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<Templa
         List<TemplateWithSrvVO> templateWithSrvVOList = buildExtraAttribute(matchIndexTemplateList);
         return PaginationResult.buildSucc(templateWithSrvVOList, totalHit, condition.getPage(), condition.getSize());
     }
+
     /******************************************private***********************************************/
     /**
      * 根据模板Id、名称、归属projectId、归属物理集群等进行组合查询
@@ -85,33 +90,47 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<Templa
      */
     private List<IndexTemplate> getMatchConditionTemplateListByClusterName(TemplateQueryDTO condition) {
         List<IndexTemplate> meetConditionTemplateList = Lists.newArrayList();
-        List<IndexTemplatePhy> indexTemplatePhyList = indexTemplatePhyService.getNormalTemplateByCluster(condition.getCluster());
-        if (CollectionUtils.isEmpty(indexTemplatePhyList)) { return meetConditionTemplateList;}
+        List<IndexTemplatePhy> indexTemplatePhyList = indexTemplatePhyService
+            .getNormalTemplateByCluster(condition.getCluster());
+        if (CollectionUtils.isEmpty(indexTemplatePhyList)) {
+            return meetConditionTemplateList;
+        }
 
-        List<Integer> matchTemplateLogicIdList = indexTemplatePhyList.stream().map(IndexTemplatePhy::getLogicId).distinct().collect(Collectors.toList());
+        List<Integer> matchTemplateLogicIdList = indexTemplatePhyList.stream().map(IndexTemplatePhy::getLogicId)
+            .distinct().collect(Collectors.toList());
 
-        List<IndexTemplate> matchIndexTemplates = indexTemplateService.listLogicTemplatesByIds(matchTemplateLogicIdList);
+        List<IndexTemplate> matchIndexTemplates = indexTemplateService
+            .listLogicTemplatesByIds(matchTemplateLogicIdList);
         if (null != condition.getId()) {
-            matchIndexTemplates = matchIndexTemplates.stream().filter(r -> r.getId().equals(condition.getId())).collect(Collectors.toList());
+            matchIndexTemplates = matchIndexTemplates.stream().filter(r -> r.getId().equals(condition.getId()))
+                .collect(Collectors.toList());
         }
 
         if (!AriusObjUtils.isBlack(condition.getName())) {
-            matchIndexTemplates = matchIndexTemplates.stream().filter(r -> r.getName().contains(condition.getName())).collect(Collectors.toList());
+            matchIndexTemplates = matchIndexTemplates.stream().filter(r -> r.getName().contains(condition.getName()))
+                .collect(Collectors.toList());
         }
 
         if (null != condition.getProjectId()) {
-            matchIndexTemplates = matchIndexTemplates.stream().filter(r -> r.getProjectId().equals(condition.getProjectId())).collect(Collectors.toList());
+            matchIndexTemplates = matchIndexTemplates.stream()
+                .filter(r -> r.getProjectId().equals(condition.getProjectId())).collect(Collectors.toList());
         }
         return matchIndexTemplates;
     }
 
     private List<TemplateWithSrvVO> buildExtraAttribute(List<IndexTemplate> templateList) {
-        if (CollectionUtils.isEmpty(templateList)) { return Lists.newArrayList();}
+        if (CollectionUtils.isEmpty(templateList)) {
+            return Lists.newArrayList();
+        }
         List<TemplateWithSrvVO> templateWithSrvVOList = new ArrayList<>();
         // 构建基础信息
         for (IndexTemplate template : templateList) {
             TemplateWithSrvVO templateWithSrvVO = ConvertUtil.obj2Obj(template, TemplateWithSrvVO.class);
-            templateWithSrvVO.setOpenSrv(ConvertUtil.list2List(TemplateSrv.codeStr2SrvList(template.getOpenSrv()), TemplateSrvVO.class));
+            templateWithSrvVO.setOpenSrv(
+                ConvertUtil.list2List(TemplateSrv.codeStr2SrvList(template.getOpenSrv()), TemplateSrvVO.class));
+            Optional.ofNullable(template).map(IndexTemplate::getProjectId)
+                .map(projectService::getProjectBriefByProjectId).map(ProjectBriefVO::getProjectName)
+                .ifPresent(templateWithSrvVO::setProjectName);
             templateWithSrvVOList.add(templateWithSrvVO);
         }
 
@@ -129,9 +148,7 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<Templa
         for (TemplateWithSrvVO templateSrvVO : templateWithSrvVOList) {
             TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_CLUSTER_FUTURE_UTIL.runnableTask(() -> {
                 Set<String> clusterNameList = indexTemplatePhyService.getTemplateByLogicId(templateSrvVO.getId())
-                        .stream()
-                        .map(IndexTemplatePhy::getCluster)
-                        .collect(Collectors.toSet());
+                    .stream().map(IndexTemplatePhy::getCluster).collect(Collectors.toSet());
 
                 templateSrvVO.setCluster(Lists.newArrayList(clusterNameList));
             });
@@ -146,7 +163,8 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<Templa
     private void buildTemplateUnavailableSrv(List<TemplateWithSrvVO> templateWithSrvVOList) {
         for (TemplateWithSrvVO templateSrvVO : templateWithSrvVOList) {
             TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_UNAVAILABLE_SRV_FUTURE_UTIL.runnableTask(() -> {
-                templateSrvVO.setUnavailableSrv(ConvertUtil.list2List(templateSrvManager.getUnavailableSrv(templateSrvVO.getId()), UnavailableTemplateSrvVO.class));
+                templateSrvVO.setUnavailableSrv(ConvertUtil.list2List(
+                    templateSrvManager.getUnavailableSrv(templateSrvVO.getId()), UnavailableTemplateSrvVO.class));
             });
         }
         TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_UNAVAILABLE_SRV_FUTURE_UTIL.waitExecute();

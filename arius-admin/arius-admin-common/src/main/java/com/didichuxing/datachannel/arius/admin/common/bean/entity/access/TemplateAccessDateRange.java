@@ -29,6 +29,7 @@ public class TemplateAccessDateRange {
      * 统计结束时间
      */
     private String endDate;
+
     /**
      * 是否有效
      *

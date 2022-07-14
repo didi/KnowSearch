@@ -7,9 +7,10 @@ import org.elasticsearch.action.support.IndicesOptions;
 import org.elasticsearch.client.ElasticsearchClient;
 
 public abstract class ESBroadcastTimeoutRequestBuilder<Request extends ESBroadcastTimeoutRequest<Request>, Response extends ActionResponse, RequestBuilder extends ESBroadcastTimeoutRequestBuilder<Request, Response, RequestBuilder>>
-        extends ActionRequestBuilder<Request, Response, RequestBuilder> {
+                                                      extends ActionRequestBuilder<Request, Response, RequestBuilder> {
 
-    protected ESBroadcastTimeoutRequestBuilder(ElasticsearchClient client, Action<Request, Response, RequestBuilder> action, Request request) {
+    protected ESBroadcastTimeoutRequestBuilder(ElasticsearchClient client,
+                                               Action<Request, Response, RequestBuilder> action, Request request) {
         super(client, action, request);
     }
 
@@ -25,4 +26,3 @@ public abstract class ESBroadcastTimeoutRequestBuilder<Request extends ESBroadca
         return (RequestBuilder) this;
     }
 }
-

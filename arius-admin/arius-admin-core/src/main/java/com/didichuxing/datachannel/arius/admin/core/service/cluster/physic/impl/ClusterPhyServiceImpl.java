@@ -1,7 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.impl;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.DEFAULT_CLUSTER_HEALTH;
-
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Plugin;
@@ -36,20 +34,17 @@ import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 import lombok.NoArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.DEFAULT_CLUSTER_HEALTH;
 
 /**
  * @author didi
@@ -58,29 +53,30 @@ import org.springframework.transaction.annotation.Transactional;
 @NoArgsConstructor
 public class ClusterPhyServiceImpl implements ClusterPhyService {
 
-    private static final ILog        LOGGER = LogFactory.getLog(ClusterPhyServiceImpl.class);
+    private static final ILog      LOGGER                      = LogFactory.getLog(ClusterPhyServiceImpl.class);
 
-    private static final String CLUSTER_NOT_EXIST = "集群不存在";
-
-    @Autowired
-    private PhyClusterDAO clusterDAO;
+    private static final String    CLUSTER_NOT_EXIST           = "集群不存在";
 
     @Autowired
-    private ESClusterService         esClusterService;
+    private PhyClusterDAO          clusterDAO;
 
     @Autowired
-    private ESPluginService          esPluginService;
+    private ESClusterService       esClusterService;
 
     @Autowired
-    private ClusterRoleService clusterRoleService;
+    private ESPluginService        esPluginService;
+
+    @Autowired
+    private ClusterRoleService     clusterRoleService;
 
     @Autowired
     private ClusterRoleHostService clusterRoleHostService;
-    
-    private static final String DEFAULT_WRITE_ACTION        = "RestBulkAction,RestDeleteAction,RestIndexAction,RestUpdateAction";
-    private static final String PHYSICAL_CLUSTER_NOT_EXISTS = "物理集群不存在";
-    
-    private static final String COMMA_SYMBOL = ",";
+
+    private static final String    DEFAULT_WRITE_ACTION        = "RestBulkAction,RestDeleteAction,RestIndexAction,RestUpdateAction";
+    private static final String    PHYSICAL_CLUSTER_NOT_EXISTS = "物理集群不存在";
+
+    private static final String    COMMA_SYMBOL                = ",";
+
     /**
      * 条件查询
      * @param params 条件
@@ -114,10 +110,10 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
         }
         //校验操作项目的合法性
         final Result<Void> result = ProjectUtils.checkProjectCorrectly(i -> i, projectId, projectId);
-        if (result.failed()){
-          return   Result.buildFail(result.getMessage());
+        if (result.failed()) {
+            return Result.buildFail(result.getMessage());
         }
-    
+
         return Result.buildBoolen(clusterDAO.delete(clusterId) == 1);
     }
 
@@ -187,15 +183,15 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
         ClusterPhy clusterPhy = ConvertUtil.obj2Obj(clusterPO, ClusterPhy.class);
 
         // 添加角色、机器信息
-        List<ClusterRoleInfo> clusterRoleInfos = clusterRoleService.getAllRoleClusterByClusterId(
-                clusterPhy.getId());
+        List<ClusterRoleInfo> clusterRoleInfos = clusterRoleService.getAllRoleClusterByClusterId(clusterPhy.getId());
         if (CollectionUtils.isNotEmpty(clusterRoleInfos)) {
             // 角色信息
             clusterPhy.setClusterRoleInfos(clusterRoleInfos);
 
             // 机器信息
             List<ClusterRoleHost> clusterRoleHosts = new ArrayList<>();
-            Map<Long, List<ClusterRoleHost>> map = clusterRoleHostService.getByRoleClusterIds(clusterRoleInfos.stream().map(ClusterRoleInfo::getId).collect(Collectors.toList()));
+            Map<Long, List<ClusterRoleHost>> map = clusterRoleHostService.getByRoleClusterIds(
+                clusterRoleInfos.stream().map(ClusterRoleInfo::getId).collect(Collectors.toList()));
             for (ClusterRoleInfo clusterRoleInfo : clusterRoleInfos) {
                 List<ClusterRoleHost> esClusterRoleHosts = map.getOrDefault(clusterRoleInfo.getId(), new ArrayList<>());
                 clusterRoleHosts.addAll(esClusterRoleHosts);
@@ -223,7 +219,7 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
         try {
             clusterNameList.addAll(clusterDAO.listAllName());
         } catch (Exception e) {
-            LOGGER.error("class=ESClusterPhyServiceImpl||method=listAllClusterNameList||errMsg={}",e.getMessage(), e);
+            LOGGER.error("class=ESClusterPhyServiceImpl||method=listAllClusterNameList||errMsg={}", e.getMessage(), e);
         }
         return clusterNameList;
     }
@@ -258,7 +254,8 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
             return new ArrayList<>();
         }
 
-        List<Plugin> pluginList = ConvertUtil.list2List(esPluginService.listClusterAndDefaultESPlugin(clusterPhy.getId().toString()), Plugin.class);
+        List<Plugin> pluginList = ConvertUtil
+            .list2List(esPluginService.listClusterAndDefaultESPlugin(clusterPhy.getId().toString()), Plugin.class);
 
         // 将从插件列表获得的所有的插件(系统默认以及自定义)安装状态设置为FALSE
         Map<Long, Plugin> pluginMap = new HashMap<>(0);
@@ -333,7 +330,7 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
 
     @Override
     public Set<String> getRoutingAllocationAwarenessAttributes(String cluster) {
-        if(!isClusterExists(cluster)) {
+        if (!isClusterExists(cluster)) {
             return Sets.newHashSet();
         }
 
@@ -351,7 +348,8 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
         try {
             clusters = clusterDAO.pagingByCondition(param);
         } catch (Exception e) {
-            LOGGER.error("class=ClusterPhyServiceImpl||method=pagingGetClusterPhyByCondition||msg={}", e.getMessage(), e);
+            LOGGER.error("class=ClusterPhyServiceImpl||method=pagingGetClusterPhyByCondition||msg={}", e.getMessage(),
+                e);
         }
         return ConvertUtil.list2List(clusters, ClusterPhy.class);
     }
@@ -370,7 +368,7 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
     public boolean isClusterExistsByPackageId(Long packageId) {
         return clusterDAO.getTotalHitByPackageId(packageId) > 0;
     }
-    
+
     /**
      * @param phyCluster
      * @return
@@ -378,7 +376,7 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
     @Override
     public Result<List<ClusterTemplateSrv>> getPhyClusterTemplateSrv(String phyCluster) {
         ClusterPhy clusterPhy = getClusterByName(phyCluster);
-    
+
         if (null == clusterPhy) {
             return Result.buildNotExist(PHYSICAL_CLUSTER_NOT_EXISTS);
         }
@@ -387,26 +385,21 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
         if (StringUtils.isBlank(templateSrvs)) {
             return Result.buildSucc(new ArrayList<>(), "该物理集群无索引服务");
         }
-    
-        List<ClusterTemplateSrv> templateServices = Arrays.stream( StringUtils.split(templateSrvs, COMMA_SYMBOL))
-                .filter(StringUtils::isNumeric)
-                .map(Integer::parseInt)
-                .map(TemplateServiceEnum::getById)
-                .filter(Objects::nonNull)
-                .map(TemplateServiceEnum::convertFromEnum)
-                .distinct()
-                .collect(Collectors.toList());
-    
+
+        List<ClusterTemplateSrv> templateServices = Arrays.stream(StringUtils.split(templateSrvs, COMMA_SYMBOL))
+            .filter(StringUtils::isNumeric).map(Integer::parseInt).map(TemplateServiceEnum::getById)
+            .filter(Objects::nonNull).map(TemplateServiceEnum::convertFromEnum).distinct().collect(Collectors.toList());
+
         return Result.buildSucc(templateServices);
     }
-    
+
     /**
      * @param phyCluster
      * @return
      */
     @Override
     public Result<List<ClusterTemplateSrv>> getPhyClusterTemplateSrv(ClusterPhy phyCluster) {
-       if (null == phyCluster) {
+        if (null == phyCluster) {
             return Result.buildNotExist(PHYSICAL_CLUSTER_NOT_EXISTS);
         }
 
@@ -415,18 +408,13 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
             return Result.buildSucc(new ArrayList<>(), "该物理集群无索引服务");
         }
 
-         List<ClusterTemplateSrv> templateServices = Arrays.stream( StringUtils.split(templateSrvs, COMMA_SYMBOL))
-                .filter(StringUtils::isNumeric)
-                .map(Integer::parseInt)
-                .map(TemplateServiceEnum::getById)
-                .filter(Objects::nonNull)
-                .map(TemplateServiceEnum::convertFromEnum)
-                .distinct()
-                .collect(Collectors.toList());
-    
+        List<ClusterTemplateSrv> templateServices = Arrays.stream(StringUtils.split(templateSrvs, COMMA_SYMBOL))
+            .filter(StringUtils::isNumeric).map(Integer::parseInt).map(TemplateServiceEnum::getById)
+            .filter(Objects::nonNull).map(TemplateServiceEnum::convertFromEnum).distinct().collect(Collectors.toList());
+
         return Result.buildSucc(templateServices);
     }
-    
+
     /**************************************** private method ***************************************************/
     private List<String> genTcpAddr(String httpAddress, int tcpPort) {
         try {
@@ -444,12 +432,12 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
     }
 
     private Result<ClusterDynamicConfigsEnum> checkClusterDynamicType(ClusterSettingDTO param) {
-        if(!isClusterExists(param.getClusterName())) {
+        if (!isClusterExists(param.getClusterName())) {
             return Result.buildFail(CLUSTER_NOT_EXIST);
         }
 
         ClusterDynamicConfigsEnum clusterSettingEnum = ClusterDynamicConfigsEnum.valueCodeOfName(param.getKey());
-        if(clusterSettingEnum.equals(ClusterDynamicConfigsEnum.UNKNOWN)) {
+        if (clusterSettingEnum.equals(ClusterDynamicConfigsEnum.UNKNOWN)) {
             return Result.buildFail("传入的字段类型未知");
         }
 
@@ -458,13 +446,12 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
         }
 
         if (clusterSettingEnum == ClusterDynamicConfigsEnum.CLUSTER_ROUTING_ALLOCATION_AWARENESS_ATTRIBUTES
-                && !getRoutingAllocationAwarenessAttributes(param.getClusterName())
+            && !getRoutingAllocationAwarenessAttributes(param.getClusterName())
                 .containsAll((JSONArray) JSON.toJSON(param.getValue()))) {
             return Result.buildFail("传入的attributes字段参数有误");
         }
         return Result.buildSucc();
     }
-
 
     private Result<Boolean> checkClusterParam(ClusterPhyDTO param, OperationEnum operation) {
         if (AriusObjUtils.isNull(param)) {
@@ -565,23 +552,23 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
             param.setPassword("");
         }
 
-        if(param.getImageName() == null) {
+        if (param.getImageName() == null) {
             param.setImageName("");
         }
 
-        if(param.getLevel() == null) {
+        if (param.getLevel() == null) {
             param.setLevel(1);
         }
 
-        if(param.getCreator() == null) {
+        if (param.getCreator() == null) {
             param.setCreator("");
         }
 
-        if(param.getNsTree() == null) {
+        if (param.getNsTree() == null) {
             param.setNsTree("");
         }
 
-        if(param.getDesc() == null) {
+        if (param.getDesc() == null) {
             param.setDesc("");
         }
 
@@ -589,7 +576,7 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
             param.setWriteAction(DEFAULT_WRITE_ACTION);
         }
 
-        if (param.getTemplateSrvs() == null){
+        if (param.getTemplateSrvs() == null) {
             param.setTemplateSrvs(TemplateServiceEnum.getDefaultSrvs());
         }
 
@@ -597,7 +584,7 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
             param.setHealth(DEFAULT_CLUSTER_HEALTH);
         }
 
-        if(null == param.getActiveShardNum()) {
+        if (null == param.getActiveShardNum()) {
             param.setActiveShardNum(0L);
         }
 

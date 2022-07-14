@@ -15,7 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel(description = "集群带节点信息的Region实体")
-public class ClusterRegionWithNodeInfoDTO extends ClusterRegionDTO{
+public class ClusterRegionWithNodeInfoDTO extends ClusterRegionDTO {
     @ApiModelProperty("绑定节点id列表")
     private List<Integer> bindingNodeIds;
 

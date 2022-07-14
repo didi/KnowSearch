@@ -23,7 +23,7 @@ public class ProjectClusterLogicAuth extends BaseEntity {
     /**
      * 逻辑集群ID
      */
-    private Long logicClusterId;
+    private Long    logicClusterId;
 
     /**
      * 权限类型  管理、访问、无权限

@@ -16,18 +16,17 @@ public class BaseClusterHostOrderDetail extends AbstractOrderDetail implements S
     /**
      * 物理集群名称
      */
-    private String  phyClusterName;
+    private String                  phyClusterName;
 
     /**
      * type 3:docker 4:host
      */
-    private int type;
+    private int                     type;
 
     /**
      * 单机实例数
      */
     private Integer                 pidCount;
-
 
     /**
      * 集群角色 对应的变动的主机列表

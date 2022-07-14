@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.concurrent.*;
+
 /**
  * 异步操作线程池
  */
@@ -26,15 +27,13 @@ public class AriusOpThreadPool implements Executor {
 
     private ExecutorService     pool;
 
-    private ThreadFactory springThreadFactory = new CustomizableThreadFactory("AriusOpThreadPool");
+    private ThreadFactory       springThreadFactory = new CustomizableThreadFactory("AriusOpThreadPool");
 
     @PostConstruct
     public void init() {
         LOG.info("class=AriusOpThreadPool||method=init||AriusOpThreadPool init start..");
-        new ThreadPoolExecutor(poolSize, poolSize,
-                0L, TimeUnit.MILLISECONDS,
-                new LinkedBlockingQueue<Runnable>(),
-                springThreadFactory);
+        pool = new ThreadPoolExecutor(poolSize, poolSize, 0L, TimeUnit.MILLISECONDS,
+            new LinkedBlockingQueue<Runnable>(), springThreadFactory);
         Runtime.getRuntime().addShutdownHook(new Thread() {
 
             @Override
@@ -42,10 +41,11 @@ public class AriusOpThreadPool implements Executor {
                 pool.shutdown();
                 try {
                     if (!pool.awaitTermination(20, TimeUnit.SECONDS)) {
-                        LOG.warn("class=AriusOpThreadPool||method=init||errMsg=still some task running, force to shutdown!");
+                        LOG.warn(
+                            "class=AriusOpThreadPool||method=init||errMsg=still some task running, force to shutdown!");
                         List<Runnable> shutDownList = pool.shutdownNow();
-                        shutDownList
-                            .forEach(e -> LOG.info("class=AriusOpThreadPool||method=init||msg=Runnable forced shutdown"));
+                        shutDownList.forEach(
+                            e -> LOG.info("class=AriusOpThreadPool||method=init||msg=Runnable forced shutdown"));
                     }
                 } catch (InterruptedException e) {
                     pool.shutdownNow();

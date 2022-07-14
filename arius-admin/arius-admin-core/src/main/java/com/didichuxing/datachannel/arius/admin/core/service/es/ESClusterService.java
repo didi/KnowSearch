@@ -204,7 +204,6 @@ public interface ESClusterService {
     @Deprecated
     ESClusterHealthResponse syncGetClusterHealthAtIndicesLevel(String phyClusterName);
 
-
     /**
      * pending task分析
      * @param cluster

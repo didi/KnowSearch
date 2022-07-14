@@ -1,9 +1,28 @@
 package com.didichuxing.datachannel.arius.admin.biz.metrics.handle;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.PHY_CLUSTER;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyClusterMetricsEnum.*;
-
 import com.didichuxing.datachannel.arius.admin.biz.component.MetricsValueConvertUtils;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsClusterPhyDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.percentiles.BasePercentileMetrics;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStatsResponse;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.*;
+import com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyClusterMetricsEnum;
+import com.didichuxing.datachannel.arius.admin.common.util.*;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
+import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterNodeService;
+import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
+import com.didichuxing.datachannel.arius.admin.core.service.es.ESShardService;
+import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
+import com.didichuxing.datachannel.arius.admin.metadata.service.ESClusterPhyStatsService;
+import com.didiglobal.logi.elasticsearch.client.response.cluster.nodesstats.ClusterNodeStats;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
+import com.google.common.collect.Lists;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
@@ -12,28 +31,8 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.*;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.*;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.*;
-import com.didichuxing.datachannel.arius.admin.common.util.*;
-import com.didichuxing.datachannel.arius.admin.core.service.es.ESShardService;
-import com.didichuxing.datachannel.arius.admin.metadata.service.ESClusterPhyStatsService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsClusterPhyDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.percentiles.BasePercentileMetrics;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStatsResponse;
-import com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyClusterMetricsEnum;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
-import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterNodeService;
-import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
-import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
-import com.didiglobal.logi.elasticsearch.client.response.cluster.nodesstats.ClusterNodeStats;
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
-import com.google.common.collect.Lists;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.PHY_CLUSTER;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyClusterMetricsEnum.*;
 
 /**
  * Created by linyunan on 2021-08-02
@@ -41,29 +40,33 @@ import com.google.common.collect.Lists;
 @Component
 public class ClusterOverviewMetricsHandle {
 
-    private static final ILog          LOGGER     = LogFactory.getLog(ClusterOverviewMetricsHandle.class);
+    private static final ILog             LOGGER                        = LogFactory
+        .getLog(ClusterOverviewMetricsHandle.class);
 
     @Autowired
-    private ESClusterPhyStatsService esClusterPhyStatsService;
+    private ESClusterPhyStatsService      esClusterPhyStatsService;
 
     @Autowired
-    private ESClusterService           esClusterService;
+    private ESClusterService              esClusterService;
 
     @Autowired
-    private ESClusterNodeService       esClusterNodeService;
+    private ESClusterNodeService          esClusterNodeService;
 
     @Autowired
-    private ESShardService             esShardService;
+    private ESShardService                esShardService;
 
     @Autowired
-    private ClusterRoleHostService clusterRoleHostService;
+    private ClusterRoleHostService        clusterRoleHostService;
 
     @Autowired
-    private ESTemplateService          esTemplateService;
+    private ESTemplateService             esTemplateService;
 
-    private static final FutureUtil<Void>  getMultipleMetricFutureUtil   = FutureUtil.init("getMultipleMetricFutureUtil",10,10,100);
-    private static final FutureUtil<Void>  getClusterBasicInfoFutureUtil = FutureUtil.init("getClusterBasicInfoFutureUtil",10,10,50);
-    private static final FutureUtil<Void>  optimizeQueryBurrFutureUtil   = FutureUtil.init("optimizeQueryBurrFutureUtil",10,10,50);
+    private static final FutureUtil<Void> getMultipleMetricFutureUtil   = FutureUtil.init("getMultipleMetricFutureUtil",
+        10, 10, 100);
+    private static final FutureUtil<Void> getClusterBasicInfoFutureUtil = FutureUtil
+        .init("getClusterBasicInfoFutureUtil", 10, 10, 50);
+    private static final FutureUtil<Void> optimizeQueryBurrFutureUtil   = FutureUtil.init("optimizeQueryBurrFutureUtil",
+        10, 10, 50);
 
     /**
      *         metricsTypes 物理集群二级指标类型
@@ -77,8 +80,8 @@ public class ClusterOverviewMetricsHandle {
 
         //2. 从ES中获取指标, 同时获取多个
         for (String metricsType : metricsClusterPhyDTO.getMetricsTypes()) {
-            getMultipleMetricFutureUtil.runnableTask(() -> aggClusterPhyOverviewMetrics(esClusterOverviewMetricsVO, metricsType,
-                metricsClusterPhyDTO.getAggType(), metricsClusterPhyDTO.getStartTime(),
+            getMultipleMetricFutureUtil.runnableTask(() -> aggClusterPhyOverviewMetrics(esClusterOverviewMetricsVO,
+                metricsType, metricsClusterPhyDTO.getAggType(), metricsClusterPhyDTO.getStartTime(),
                 metricsClusterPhyDTO.getEndTime()));
         }
         getMultipleMetricFutureUtil.waitExecute();
@@ -100,20 +103,31 @@ public class ClusterOverviewMetricsHandle {
      */
     private void optimizeQueryBurrForClusterOverviewMetrics(ESClusterOverviewMetricsVO esClusterOverviewMetricsVO) {
         optimizeQueryBurrFutureUtil
-                .runnableTask(() -> MetricsValueConvertUtils.doOptimizeForPercentiles(esClusterOverviewMetricsVO.getCpuUsage()))
-                .runnableTask(() -> MetricsValueConvertUtils.doOptimizeForPercentiles(esClusterOverviewMetricsVO.getCpuLoad1M()))
-                .runnableTask(() -> MetricsValueConvertUtils.doOptimizeForPercentiles(esClusterOverviewMetricsVO.getCpuLoad5M()))
-                .runnableTask(() -> MetricsValueConvertUtils.doOptimizeForPercentiles(esClusterOverviewMetricsVO.getCpuLoad15M()))
-                .runnableTask(() -> MetricsValueConvertUtils.doOptimizeForPercentiles(esClusterOverviewMetricsVO.getDiskUsage()))
-                .runnableTask(() -> MetricsValueConvertUtils.doOptimizeForPercentiles(esClusterOverviewMetricsVO.getSearchLatency()))
-                .runnableTask(() -> MetricsValueConvertUtils.doOptimizeForPercentiles(esClusterOverviewMetricsVO.getIndexingLatency()))
-                .runnableTask(() -> MetricsValueConvertUtils.doOptimizeForRecvTransSize(esClusterOverviewMetricsVO.getRecvTransSize()))
-                .runnableTask(() -> MetricsValueConvertUtils.doOptimizeForSendTransSize(esClusterOverviewMetricsVO.getSendTransSize()))
-                .runnableTask(() -> MetricsValueConvertUtils.doOptimizeForDiskInfo(esClusterOverviewMetricsVO.getDiskInfo()))
-                .runnableTask(() -> MetricsValueConvertUtils.doOptimizeForShardNu(esClusterOverviewMetricsVO.getShardNu()))
-                .runnableTask(() -> MetricsValueConvertUtils.doOptimizeForReadTps(esClusterOverviewMetricsVO.getReadTps()))
-                .runnableTask(() -> MetricsValueConvertUtils.doOptimizeForWriteTps(esClusterOverviewMetricsVO.getWriteTps()))
-                .waitExecute();
+            .runnableTask(
+                () -> MetricsValueConvertUtils.doOptimizeForPercentiles(esClusterOverviewMetricsVO.getCpuUsage()))
+            .runnableTask(
+                () -> MetricsValueConvertUtils.doOptimizeForPercentiles(esClusterOverviewMetricsVO.getCpuLoad1M()))
+            .runnableTask(
+                () -> MetricsValueConvertUtils.doOptimizeForPercentiles(esClusterOverviewMetricsVO.getCpuLoad5M()))
+            .runnableTask(
+                () -> MetricsValueConvertUtils.doOptimizeForPercentiles(esClusterOverviewMetricsVO.getCpuLoad15M()))
+            .runnableTask(
+                () -> MetricsValueConvertUtils.doOptimizeForPercentiles(esClusterOverviewMetricsVO.getDiskUsage()))
+            .runnableTask(
+                () -> MetricsValueConvertUtils.doOptimizeForPercentiles(esClusterOverviewMetricsVO.getSearchLatency()))
+            .runnableTask(() -> MetricsValueConvertUtils
+                .doOptimizeForPercentiles(esClusterOverviewMetricsVO.getIndexingLatency()))
+            .runnableTask(() -> MetricsValueConvertUtils
+                .doOptimizeForRecvTransSize(esClusterOverviewMetricsVO.getRecvTransSize()))
+            .runnableTask(() -> MetricsValueConvertUtils
+                .doOptimizeForSendTransSize(esClusterOverviewMetricsVO.getSendTransSize()))
+            .runnableTask(
+                () -> MetricsValueConvertUtils.doOptimizeForDiskInfo(esClusterOverviewMetricsVO.getDiskInfo()))
+            .runnableTask(() -> MetricsValueConvertUtils.doOptimizeForShardNu(esClusterOverviewMetricsVO.getShardNu()))
+            .runnableTask(() -> MetricsValueConvertUtils.doOptimizeForReadTps(esClusterOverviewMetricsVO.getReadTps()))
+            .runnableTask(
+                () -> MetricsValueConvertUtils.doOptimizeForWriteTps(esClusterOverviewMetricsVO.getWriteTps()))
+            .waitExecute();
     }
 
     private ESClusterOverviewMetricsVO initESClusterPhyOverviewMetricsVO(MetricsClusterPhyDTO metricsClusterPhyDTO) {
@@ -126,7 +140,7 @@ public class ClusterOverviewMetricsHandle {
         esClusterOverviewMetricsVO.setCurrentTime(DateTimeUtil.formatTimestamp(System.currentTimeMillis()));
         return esClusterOverviewMetricsVO;
     }
-    
+
     private void aggClusterPhyOverviewMetrics(ESClusterOverviewMetricsVO metrics, String metricsType, String aggType,
                                               Long startTime, Long endTime) {
         try {
@@ -163,15 +177,15 @@ public class ClusterOverviewMetricsHandle {
                     return;
                 case CPU_LOAD_1M:
                     aggPercentilesMetrics(metrics, CPU_LOAD_1M.getType(), aggType, startTime, endTime,
-                            b -> metrics.setCpuLoad1M(ConvertUtil.list2List(b, CpuLoadFor1MinMetricsVO.class)));
+                        b -> metrics.setCpuLoad1M(ConvertUtil.list2List(b, CpuLoadFor1MinMetricsVO.class)));
                     return;
                 case CPU_LOAD_5M:
                     aggPercentilesMetrics(metrics, CPU_LOAD_5M.getType(), aggType, startTime, endTime,
-                            b -> metrics.setCpuLoad5M(ConvertUtil.list2List(b, CpuLoadFor5MinMetricsVO.class)));
+                        b -> metrics.setCpuLoad5M(ConvertUtil.list2List(b, CpuLoadFor5MinMetricsVO.class)));
                     return;
                 case CPU_LOAD_15M:
                     aggPercentilesMetrics(metrics, CPU_LOAD_15M.getType(), aggType, startTime, endTime,
-                            b -> metrics.setCpuLoad15M(ConvertUtil.list2List(b, CpuLoadFor15MinMetricsVO.class)));
+                        b -> metrics.setCpuLoad15M(ConvertUtil.list2List(b, CpuLoadFor15MinMetricsVO.class)));
                     return;
                 case DISK_USAGE:
                     aggPercentilesMetrics(metrics, DISK_USAGE.getType(), aggType, startTime, endTime,
@@ -179,16 +193,16 @@ public class ClusterOverviewMetricsHandle {
                     return;
                 case SEARCH_LATENCY:
                     aggPercentilesMetrics(metrics, SEARCH_LATENCY.getType(), aggType, startTime, endTime,
-                            b -> metrics.setSearchLatency(ConvertUtil.list2List(b, SearchLatencyMetricsVO.class)));
+                        b -> metrics.setSearchLatency(ConvertUtil.list2List(b, SearchLatencyMetricsVO.class)));
                     return;
                 case INDEXING_LATENCY:
                     aggPercentilesMetrics(metrics, INDEXING_LATENCY.getType(), aggType, startTime, endTime,
-                            b -> metrics.setIndexingLatency(ConvertUtil.list2List(b, IndexingLatencyMetricsVO.class)));
+                        b -> metrics.setIndexingLatency(ConvertUtil.list2List(b, IndexingLatencyMetricsVO.class)));
                     return;
 
                 case TASK_COST:
                     aggPercentilesMetrics(metrics, TASK_COST.getType(), aggType, startTime, endTime,
-                            b -> metrics.setTaskCost(ConvertUtil.list2List(b, TaskCostMetricVO.class)));
+                        b -> metrics.setTaskCost(ConvertUtil.list2List(b, TaskCostMetricVO.class)));
                     return;
 
                 /********************************普通指标(折线图)*******************************/
@@ -225,7 +239,7 @@ public class ClusterOverviewMetricsHandle {
     }
 
     private void getInvalidNodesMetrics(ESClusterOverviewMetricsVO metrics) {
-        List<String> nodeHostsFromES         = esClusterNodeService.syncGetNodeHosts(metrics.getClusterName());
+        List<String> nodeHostsFromES = esClusterNodeService.syncGetNodeHosts(metrics.getClusterName());
         List<ClusterRoleHost> nodesByCluster = clusterRoleHostService.getNodesByCluster(metrics.getClusterName());
         List<String> invalidNodeIps = Lists.newArrayList();
         nodesByCluster.forEach(nodeFromDb -> {
@@ -257,25 +271,22 @@ public class ClusterOverviewMetricsHandle {
         metrics.setPendingTasks(ConvertUtil.list2List(pendingTaskFromES, PendingTaskVO.class));
     }
 
-
     private void getElapsedTimeMetrics(ESClusterOverviewMetricsVO metrics) {
-        ESClusterPhyBasicMetricsVO   basic   =   metrics.getBasic();
+        ESClusterPhyBasicMetricsVO basic = metrics.getBasic();
         getClusterBasicInfoFutureUtil
-                .runnableTask(()-> buildBasicMetricsFromClusterStats(basic, metrics.getClusterName()))
-                .runnableTask(()-> buildBasicMetricsFromEsClusterTemplate(basic, metrics.getClusterName()))
-                .runnableTask(()-> buildBasicMetricsFromEsClusterNodeInfo(basic, metrics.getClusterName()))
-                .runnableTask(()-> buildBasicMetricsFromEsClusterMemInfo(basic,metrics.getClusterName()))
-                .waitExecute();
+            .runnableTask(() -> buildBasicMetricsFromClusterStats(basic, metrics.getClusterName()))
+            .runnableTask(() -> buildBasicMetricsFromEsClusterTemplate(basic, metrics.getClusterName()))
+            .runnableTask(() -> buildBasicMetricsFromEsClusterNodeInfo(basic, metrics.getClusterName()))
+            .runnableTask(() -> buildBasicMetricsFromEsClusterMemInfo(basic, metrics.getClusterName())).waitExecute();
     }
 
     private void getBasicMetrics(ESClusterOverviewMetricsVO metrics) {
-        ESClusterPhyBasicMetricsVO   basic   =   metrics.getBasic();
+        ESClusterPhyBasicMetricsVO basic = metrics.getBasic();
         getClusterBasicInfoFutureUtil
-                .runnableTask(()-> buildBasicMetricsFromClusterStats(basic, metrics.getClusterName()))
-                .runnableTask(()-> buildBasicMetricsFromEsClusterTemplate(basic, metrics.getClusterName()))
-                .runnableTask(()-> buildBasicMetricsFromEsClusterNodeInfo(basic, metrics.getClusterName()))
-                .runnableTask(()-> buildBasicMetricsFromEsClusterMemInfo(basic,metrics.getClusterName()))
-                .waitExecute();
+            .runnableTask(() -> buildBasicMetricsFromClusterStats(basic, metrics.getClusterName()))
+            .runnableTask(() -> buildBasicMetricsFromEsClusterTemplate(basic, metrics.getClusterName()))
+            .runnableTask(() -> buildBasicMetricsFromEsClusterNodeInfo(basic, metrics.getClusterName()))
+            .runnableTask(() -> buildBasicMetricsFromEsClusterMemInfo(basic, metrics.getClusterName())).waitExecute();
     }
 
     /**
@@ -286,7 +297,8 @@ public class ClusterOverviewMetricsHandle {
     private void buildBasicMetricsFromEsClusterMemInfo(ESClusterPhyBasicMetricsVO basicVO, String clusterName) {
         ClusterMemInfo clusterMemInfo = esClusterNodeService.synGetClusterMem(clusterName);
         if (AriusObjUtils.isNull(clusterMemInfo)) {
-            LOGGER.warn("class=ClusterPhyOverviewMetricsHandle||method=buildBasicMetricsFromEsClusterMemInfo||mem info is empty");
+            LOGGER.warn(
+                "class=ClusterPhyOverviewMetricsHandle||method=buildBasicMetricsFromEsClusterMemInfo||mem info is empty");
             return;
         }
 
@@ -305,7 +317,9 @@ public class ClusterOverviewMetricsHandle {
      */
     private void buildBasicMetricsFromClusterStats(ESClusterPhyBasicMetricsVO basicVO, String clusterName) {
         ESClusterStatsResponse clusterStats = esClusterService.syncGetClusterStats(clusterName);
-        if (null == clusterStats) { return;}
+        if (null == clusterStats) {
+            return;
+        }
 
         //设置状态
         basicVO.setStatus(clusterStats.getStatus());
@@ -353,8 +367,8 @@ public class ClusterOverviewMetricsHandle {
      */
     private void buildBasicMetricsFromEsClusterNodeInfo(ESClusterPhyBasicMetricsVO basicVO, String clusterName) {
         List<String> esHost = esClusterNodeService.syncGetNodeHosts(clusterName);
-        long invalidNodeCount       = 0;
-        long activeNodeCount        = 0;
+        long invalidNodeCount = 0;
+        long activeNodeCount = 0;
         List<ClusterRoleHost> nodesByCluster = clusterRoleHostService.getNodesByCluster(clusterName);
         Set<String> nodeIps = nodesByCluster.stream().map(ClusterRoleHost::getIp).collect(Collectors.toSet());
         for (String ip : nodeIps) {
@@ -369,7 +383,7 @@ public class ClusterOverviewMetricsHandle {
         basicVO.setTotalNodeNu(nodeIps.size());
 
         BigDecimal activeNodeNu = new BigDecimal(activeNodeCount);
-        BigDecimal totalNodeNu  = new BigDecimal(nodeIps.size());
+        BigDecimal totalNodeNu = new BigDecimal(nodeIps.size());
         basicVO.setActiveNodeNuPercent(activeNodeNu.divide(totalNodeNu, 3, 1).doubleValue() * 100);
         basicVO.setInvalidNodeNuPercent(100 - basicVO.getActiveNodeNuPercent());
     }
@@ -389,8 +403,8 @@ public class ClusterOverviewMetricsHandle {
     private void aggPercentilesMetrics(ESClusterOverviewMetricsVO metrics, String clusterMetricsType, String aggType,
                                        Long startTime, Long endTime, Consumer<List<BasePercentileMetrics>> function) {
 
-        List<BasePercentileMetrics> aggPercentilesMetrics = esClusterPhyStatsService.getAggPercentilesMetrics(
-            metrics.getClusterName(), clusterMetricsType, aggType, startTime, endTime);
+        List<BasePercentileMetrics> aggPercentilesMetrics = esClusterPhyStatsService
+            .getAggPercentilesMetrics(metrics.getClusterName(), clusterMetricsType, aggType, startTime, endTime);
 
         Collections.sort(aggPercentilesMetrics);
 
@@ -401,8 +415,7 @@ public class ClusterOverviewMetricsHandle {
         metrics.setNodesForDiskUsageGte75Percent(getNodeInfoForDiskUsageGte75Percent(metrics.getClusterName()));
     }
 
-    private void aggDiskInfoMetrics(ESClusterOverviewMetricsVO metrics, String aggType, Long startTime,
-                                    Long endTime) {
+    private void aggDiskInfoMetrics(ESClusterOverviewMetricsVO metrics, String aggType, Long startTime, Long endTime) {
         List<DiskInfoMetrics> diskInfoMetrics = esClusterPhyStatsService
             .getAggClusterPhyMetrics(metrics.getClusterName(), aggType, startTime, endTime, DiskInfoMetrics.class);
         List<DiskInfoMetricsVO> diskInfoMetricsVOS = ConvertUtil.list2List(diskInfoMetrics, DiskInfoMetricsVO.class);
@@ -410,8 +423,7 @@ public class ClusterOverviewMetricsHandle {
         metrics.setDiskInfo(diskInfoMetricsVOS);
     }
 
-    private void aggShardNuMetrics(ESClusterOverviewMetricsVO metrics, String aggType, Long startTime,
-                                   Long endTime) {
+    private void aggShardNuMetrics(ESClusterOverviewMetricsVO metrics, String aggType, Long startTime, Long endTime) {
         List<ShardInfoMetrics> shardInfoMetrics = esClusterPhyStatsService
             .getAggClusterPhyMetrics(metrics.getClusterName(), aggType, startTime, endTime, ShardInfoMetrics.class);
 
@@ -421,19 +433,16 @@ public class ClusterOverviewMetricsHandle {
         metrics.setShardNu(shardInfoMetricsVOS);
     }
 
-    private void aggTaskCount(ESClusterOverviewMetricsVO metrics, String aggType, Long startTime,
-                                   Long endTime) {
+    private void aggTaskCount(ESClusterOverviewMetricsVO metrics, String aggType, Long startTime, Long endTime) {
         List<TaskCountMetrics> taskCountMetrics = esClusterPhyStatsService
-                .getAggClusterPhyMetrics(metrics.getClusterName(), aggType, startTime, endTime, TaskCountMetrics.class);
+            .getAggClusterPhyMetrics(metrics.getClusterName(), aggType, startTime, endTime, TaskCountMetrics.class);
 
-        List<TaskCountMetricVO> taskCountMetricVOS = ConvertUtil.list2List(taskCountMetrics,
-                TaskCountMetricVO.class);
+        List<TaskCountMetricVO> taskCountMetricVOS = ConvertUtil.list2List(taskCountMetrics, TaskCountMetricVO.class);
         Collections.sort(taskCountMetricVOS);
         metrics.setTaskCount(taskCountMetricVOS);
     }
 
-    private void aggWriteTpsMetrics(ESClusterOverviewMetricsVO metrics, String aggType, Long startTime,
-                                    Long endTime) {
+    private void aggWriteTpsMetrics(ESClusterOverviewMetricsVO metrics, String aggType, Long startTime, Long endTime) {
         List<WriteTPSMetrics> writeTPSMetrics = esClusterPhyStatsService
             .getAggClusterPhyMetrics(metrics.getClusterName(), aggType, startTime, endTime, WriteTPSMetrics.class);
 
@@ -442,10 +451,9 @@ public class ClusterOverviewMetricsHandle {
         metrics.setWriteTps(writeTPSMetricsVOS);
     }
 
-    private void aggReadTpsMetrics(ESClusterOverviewMetricsVO metrics, String aggType, Long startTime,
-                                   Long endTime) {
-        List<ReadQPSMetrics> readQPSMetrics = esClusterPhyStatsService
-            .getAggClusterPhyMetrics(metrics.getClusterName(), aggType, startTime, endTime, ReadQPSMetrics.class);
+    private void aggReadTpsMetrics(ESClusterOverviewMetricsVO metrics, String aggType, Long startTime, Long endTime) {
+        List<ReadQPSMetrics> readQPSMetrics = esClusterPhyStatsService.getAggClusterPhyMetrics(metrics.getClusterName(),
+            aggType, startTime, endTime, ReadQPSMetrics.class);
 
         List<ReadQPSMetricsVO> readQPSMetricsVOS = ConvertUtil.list2List(readQPSMetrics, ReadQPSMetricsVO.class);
         Collections.sort(readQPSMetricsVOS);
@@ -454,7 +462,7 @@ public class ClusterOverviewMetricsHandle {
 
     private void aggSendTransMetrics(ESClusterOverviewMetricsVO metrics, String aggType, Long startTime, Long endTime) {
         List<SendTransMetrics> readQPSMetrics = esClusterPhyStatsService
-                .getAggClusterPhyMetrics(metrics.getClusterName(), aggType, startTime, endTime, SendTransMetrics.class);
+            .getAggClusterPhyMetrics(metrics.getClusterName(), aggType, startTime, endTime, SendTransMetrics.class);
 
         List<SendTransMetricsVO> sendTransMetricsVOS = ConvertUtil.list2List(readQPSMetrics, SendTransMetricsVO.class);
         Collections.sort(sendTransMetricsVOS);
@@ -463,7 +471,7 @@ public class ClusterOverviewMetricsHandle {
 
     private void aggRecvTransMetrics(ESClusterOverviewMetricsVO metrics, String aggType, Long startTime, Long endTime) {
         List<RecvTransMetrics> readQPSMetrics = esClusterPhyStatsService
-                .getAggClusterPhyMetrics(metrics.getClusterName(), aggType, startTime, endTime, RecvTransMetrics.class);
+            .getAggClusterPhyMetrics(metrics.getClusterName(), aggType, startTime, endTime, RecvTransMetrics.class);
 
         List<RecvTransMetricsVO> recvTransMetricsVOS = ConvertUtil.list2List(readQPSMetrics, RecvTransMetricsVO.class);
         Collections.sort(recvTransMetricsVOS);

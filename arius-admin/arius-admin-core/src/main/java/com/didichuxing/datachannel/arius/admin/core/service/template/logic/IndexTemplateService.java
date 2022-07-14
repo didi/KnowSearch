@@ -78,11 +78,10 @@ public interface IndexTemplateService {
      *
      * @param logicTemplateId 模板id
      * @param operator        操作人
-     * @param projectId
      * @return result
      * @throws AdminOperateException
      */
-    Result<Void> delTemplate(Integer logicTemplateId, String operator, Integer projectId) throws AdminOperateException;
+    Result<Void> delTemplate(Integer logicTemplateId, String operator) throws AdminOperateException;
 
     /**
      * 校验模板参数是否合法
@@ -90,7 +89,7 @@ public interface IndexTemplateService {
      * @param operation 操作
      * @return result
      */
-    Result<Void> validateTemplate(IndexTemplateDTO param, OperationEnum operation,Integer projectId);
+    Result<Void> validateTemplate(IndexTemplateDTO param, OperationEnum operation, Integer projectId);
 
     /**
      * 编辑逻辑模板
@@ -99,7 +98,7 @@ public interface IndexTemplateService {
      * @return result
      * @throws AdminOperateException 操作es失败
      */
-    Result<Void> editTemplate(IndexTemplateDTO param, String operator,Integer projectId) throws AdminOperateException;
+    Result<Void> editTemplate(IndexTemplateDTO param, String operator, Integer projectId) throws AdminOperateException;
 
     /**
      * 添加逻辑模板而不需要参数校验
@@ -159,6 +158,7 @@ public interface IndexTemplateService {
      * @return list
      */
     List<IndexTemplate> listAllLogicTemplates();
+
     List<IndexTemplate> listAllLogicTemplatesWithCache();
 
     /**
@@ -211,8 +211,8 @@ public interface IndexTemplateService {
      * @return Result
      * @throws AdminOperateException
      */
-    Result<Void> turnOverLogicTemplate(Integer logicId, Integer sourceProjectId,Integer tgtProjectId, String tgtResponsible,
-                                       String operator) throws AdminOperateException;
+    Result<Void> turnOverLogicTemplate(Integer logicId, Integer sourceProjectId, Integer tgtProjectId,
+                                       String tgtResponsible, String operator) throws AdminOperateException;
 
     /**
      * 获取每个模板的部署个数
@@ -226,8 +226,6 @@ public interface IndexTemplateService {
      * @return list
      */
     List<IndexTemplateType> listLogicTemplateTypes(Integer logicId);
-
-
 
     /**
      * 修改模板名称
@@ -352,7 +350,6 @@ public interface IndexTemplateService {
      */
     List<IndexTemplateWithPhyTemplates> listTemplateWithPhysicalByDataCenter(String dataCenter);
 
-
     /**
      * 修改禁读状态
      * @param logicId 逻辑模板
@@ -360,7 +357,7 @@ public interface IndexTemplateService {
      * @param operator  操作人
      * @return
      */
-    Result updateBlockReadState(Integer logicId, Boolean blockRead, String operator);
+    Result<Void> updateBlockReadState(Integer logicId, Boolean blockRead, String operator);
 
     /**
      * 修改禁写状态
@@ -369,9 +366,9 @@ public interface IndexTemplateService {
      * @param operator  操作人
      * @return
      */
-    Result updateBlockWriteState(Integer logicId, Boolean blockWrite, String operator);
+    Result<Void> updateBlockWriteState(Integer logicId, Boolean blockWrite, String operator);
 
-    Result updateTemplateWriteRateLimit(ConsoleTemplateRateLimitDTO consoleTemplateRateLimitDTO, String operator, Integer projectId) throws ESOperateException;
+    Result updateTemplateWriteRateLimit(ConsoleTemplateRateLimitDTO consoleTemplateRateLimitDTO) throws ESOperateException;
 
     Result<Void> preCheckTemplateName(String templateName);
 
@@ -382,15 +379,15 @@ public interface IndexTemplateService {
      */
     Result<List<IndexTemplate>> listByRegionId(Integer regionId);
 
-     List<IndexTemplateWithCluster> convert2WithCluster(List<IndexTemplateWithPhyTemplates> indexTemplateWithPhyTemplates);
+    List<IndexTemplateWithCluster> convert2WithCluster(List<IndexTemplateWithPhyTemplates> indexTemplateWithPhyTemplates);
 
     /**
      * 根据逻辑集群id 列表获取逻辑模板列表
      * @param resourceIds
      * @return
      */
-     List<IndexTemplate> listByResourceIds(List<Long> resourceIds);
-    
+    List<IndexTemplate> listByResourceIds(List<Long> resourceIds);
+
     /**
      * 获取项目id通过模板逻辑id
      *
@@ -398,10 +395,13 @@ public interface IndexTemplateService {
      * @return {@code Integer}
      */
     Integer getProjectIdByTemplateLogicId(Integer templateLogicId);
-    
+
     IndexTemplatePO getLogicTemplatePOById(Integer logicId);
-    
+
     boolean update(IndexTemplatePO editTemplate);
-    
-    int batchChangeHotDay(Integer days);
+
+    int batchChangeHotDay(Integer days, List<Integer> templateIdList);
+
+    String getNameByTemplateLogicId(Integer logicTemplateId);
+
 }

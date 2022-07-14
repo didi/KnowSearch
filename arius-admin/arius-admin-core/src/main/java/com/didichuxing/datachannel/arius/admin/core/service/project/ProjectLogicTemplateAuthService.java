@@ -2,10 +2,9 @@ package com.didichuxing.datachannel.arius.admin.core.service.project;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectTemplateAuthDTO;
-import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectTemplateAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ProjectTemplateAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
-
+import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectTemplateAuthEnum;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +33,7 @@ public interface ProjectLogicTemplateAuthService {
      * @return 设置结果
      */
     Result<Void> ensureSetLogicTemplateAuth(Integer projectId, Integer logicTemplateId, ProjectTemplateAuthEnum auth,
-                                      String responsible, String operator);
+                                            String responsible, String operator);
 
     /**
      * 获取project有权限的逻辑模板权限点
@@ -49,8 +48,11 @@ public interface ProjectLogicTemplateAuthService {
      * @return
      */
     List<ProjectTemplateAuth> getProjectActiveTemplateRWAndRAuths(Integer projectId);
+
     List<ProjectTemplateAuth> getProjectTemplateRWAndRAuthsWithoutCodecResponsible(Integer projectId);
+
     List<ProjectTemplateAuth> getProjectActiveTemplateRWAuths(Integer projectId);
+
     List<ProjectTemplateAuth> getProjectActiveTemplateRAuths(Integer projectId);
 
     /**
@@ -67,11 +69,11 @@ public interface ProjectLogicTemplateAuthService {
 
     /**
      * 增加逻辑模板权限
-     * @param authDTO  权限信息
-     * @param operator 操作人
+     *
+     * @param authDTO 权限信息
      * @return result
      */
-    Result<Void> addTemplateAuth(ProjectTemplateAuthDTO authDTO, String operator);
+    Result<Void> addTemplateAuth(ProjectTemplateAuthDTO authDTO);
 
     /**
      * 修改逻辑模板权限，仅可以修改权限类型和责任人
@@ -83,19 +85,19 @@ public interface ProjectLogicTemplateAuthService {
 
     /**
      * 删除逻辑模板权限
-     * @param authId   主键
-     * @param operator 操作人
+     *
+     * @param authId 主键
      * @return result
      */
-    Result<Void> deleteTemplateAuth(Long authId, String operator);
+    Result<Void> deleteTemplateAuth(Long authId);
 
     /**
      * 根据逻辑模板id删除权限信息
-     * @param templateId  模板Id
-     * @param operator    操作人
+     *
+     * @param templateId 模板Id
      * @return
      */
-    Result<Void> deleteTemplateAuthByTemplateId(Integer templateId, String operator);
+    Result<Void> deleteTemplateAuthByTemplateId(Integer templateId);
 
     /**
      * 获取所有project 的权限
@@ -115,4 +117,6 @@ public interface ProjectLogicTemplateAuthService {
      * @return
      */
     ProjectTemplateAuth buildTemplateAuth(IndexTemplate logicTemplate, ProjectTemplateAuthEnum projectTemplateAuthEnum);
+
+    Integer getProjectIdById(Long authId);
 }

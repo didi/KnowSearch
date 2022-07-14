@@ -88,10 +88,10 @@ public class EcmTaskBasic {
     /**
      * 开始时间
      */
-    private Date  createTime;
+    private Date    createTime;
 
     /**
      * 结束时间
      */
-    private Date  updateTime;
+    private Date    updateTime;
 }

@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 public class ESClusterNodeSepcVO extends BaseDTO {
 
     @ApiModelProperty("主键")
-    private int     id;
+    private int    id;
 
     @ApiModelProperty("角色")
     private String role;

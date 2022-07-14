@@ -142,4 +142,8 @@
                 #{versionConfig},
         </trim>
     </insert>
+    
+    <select id="getClusterIdByConfigId" resultType="java.lang.Integer">
+        select cluster_id from es_config where id=#{id}
+    </select>
 </mapper>

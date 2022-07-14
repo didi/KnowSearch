@@ -4,12 +4,12 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.resource.E
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum.ES_HOST;
 
 import com.alibaba.fastjson.JSON;
-import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandler;
-import com.didichuxing.datachannel.arius.admin.biz.workorder.utils.OpOrderTaskConverter;
 import com.didichuxing.datachannel.arius.admin.biz.task.OpTaskManager;
 import com.didichuxing.datachannel.arius.admin.biz.task.content.ClusterBaseContent;
 import com.didichuxing.datachannel.arius.admin.biz.task.content.ClusterIndecreaseDockerContent;
 import com.didichuxing.datachannel.arius.admin.biz.task.content.ClusterIndecreaseHostContent;
+import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandler;
+import com.didichuxing.datachannel.arius.admin.biz.workorder.utils.OpOrderTaskConverter;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.ESClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.EcmParamBase;
@@ -25,6 +25,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.deta
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.ClusterOpIndecreaseDockerOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.ClusterOpIndecreaseHostOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
@@ -62,31 +63,30 @@ import org.springframework.stereotype.Service;
 @Service("clusterOpIndecreaseHandler")
 @Deprecated
 public class ClusterOpIndecreaseHandler extends BaseWorkOrderHandler {
-    protected static final ILog  LOGGER = LogFactory.getLog(ClusterOpIndecreaseHandler.class);
+    protected static final ILog    LOGGER = LogFactory.getLog(ClusterOpIndecreaseHandler.class);
 
     @Autowired
-    private RoleTool roleTool;
+    private RoleTool               roleTool;
 
     @Autowired
-    private ClusterPhyService esClusterPhyService;
+    private ClusterPhyService      esClusterPhyService;
 
     @Autowired
-    private ESClusterService esClusterService;
+    private ESClusterService       esClusterService;
 
     @Autowired
-    private EcmHandleService ecmHandleService;
+    private EcmHandleService       ecmHandleService;
 
     @Autowired
     private ClusterRoleHostService clusterRoleHostService;
 
     @Autowired
-    private OpTaskManager opTaskManager;
+    private OpTaskManager          opTaskManager;
 
     @Override
     protected Result validateConsoleParam(WorkOrder workOrder) throws NotFindSubclassException {
 
-        ClusterBaseContent baseContent = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
-            ClusterBaseContent.class);
+        ClusterBaseContent baseContent = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(), ClusterBaseContent.class);
 
         if (ES_DOCKER.getCode() == baseContent.getType()) {
             ClusterIndecreaseDockerContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
@@ -122,18 +122,19 @@ public class ClusterOpIndecreaseHandler extends BaseWorkOrderHandler {
             }
 
             if (opTaskManager.existUnClosedTask(content.getPhyClusterId().intValue(),
-                    OpTaskTypeEnum.CLUSTER_EXPAND.getType())) {
+                OpTaskTypeEnum.CLUSTER_EXPAND.getType())) {
                 return Result.buildParamIllegal("该集群上存在未完成的集群扩缩容任务");
             }
 
             // 对于datanode的缩容，如果该节点上存在数据分片,做出警告
             if (content.getOperationType() == OpTaskTypeEnum.CLUSTER_SHRINK.getType()) {
-                Map<String, Integer> segmentsOfIpByCluster = esClusterService.synGetSegmentsOfIpByCluster(content.getPhyClusterName());
+                Map<String, Integer> segmentsOfIpByCluster = esClusterService
+                    .synGetSegmentsOfIpByCluster(content.getPhyClusterName());
 
                 for (ESClusterRoleHost esClusterRoleHost : content.getClusterRoleHosts()) {
                     if (esClusterRoleHost.getRole().equals(ESClusterNodeRoleEnum.DATA_NODE.getDesc())
-                            && segmentsOfIpByCluster.containsKey(esClusterRoleHost.getHostname())
-                            && !segmentsOfIpByCluster.get(esClusterRoleHost.getHostname()).equals(0)) {
+                        && segmentsOfIpByCluster.containsKey(esClusterRoleHost.getHostname())
+                        && !segmentsOfIpByCluster.get(esClusterRoleHost.getHostname()).equals(0)) {
                         return Result.buildFail("数据节点上存在分片，请迁移分片之后再进行该节点的缩容");
                     }
                 }
@@ -148,8 +149,7 @@ public class ClusterOpIndecreaseHandler extends BaseWorkOrderHandler {
 
     @Override
     protected String getTitle(WorkOrder workOrder) {
-        ClusterBaseContent baseContent = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
-            ClusterBaseContent.class);
+        ClusterBaseContent baseContent = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(), ClusterBaseContent.class);
         WorkOrderTypeEnum workOrderTypeEnum = WorkOrderTypeEnum.valueOfName(workOrder.getType());
         if (workOrderTypeEnum == null) {
             return "";
@@ -189,7 +189,7 @@ public class ClusterOpIndecreaseHandler extends BaseWorkOrderHandler {
             esEcmTaskDTO.setPhysicClusterId(content.getPhyClusterId());
             esEcmTaskDTO.setOrderType(content.getOperationType());
             List<EcmParamBase> ecmParamBaseList = OpOrderTaskConverter.convert2EcmParamBaseList(ES_DOCKER,
-                    OpTaskTypeEnum.valueOfType(content.getOperationType()), content);
+                OpTaskTypeEnum.valueOfType(content.getOperationType()), content);
             esEcmTaskDTO.setClusterNodeRole(ListUtils
                 .strList2String(ecmParamBaseList.stream().map(EcmParamBase::getRoleName).collect(Collectors.toList())));
             esEcmTaskDTO.setEcmParamBaseList(ecmParamBaseList);
@@ -213,7 +213,7 @@ public class ClusterOpIndecreaseHandler extends BaseWorkOrderHandler {
         opTaskDTO.setExpandData(JSON.toJSONString(esEcmTaskDTO));
         opTaskDTO.setTaskType(esEcmTaskDTO.getOrderType());
         opTaskDTO.setCreator(workOrder.getSubmitor());
-        Result<OpTask> result = opTaskManager.addTask(opTaskDTO);
+        Result<OpTask> result = opTaskManager.addTask(opTaskDTO, AuthConstant.SUPER_PROJECT_ID);
         if (null == result || result.failed()) {
             return Result.buildFail("生成集群新建操作任务失败!");
         }
@@ -228,8 +228,7 @@ public class ClusterOpIndecreaseHandler extends BaseWorkOrderHandler {
 
     @Override
     public AbstractOrderDetail getOrderDetail(String extensions) {
-        ClusterBaseContent baseContent = ConvertUtil.obj2ObjByJSON(JSON.parse(extensions),
-            ClusterBaseContent.class);
+        ClusterBaseContent baseContent = ConvertUtil.obj2ObjByJSON(JSON.parse(extensions), ClusterBaseContent.class);
 
         if (ES_DOCKER.getCode() == baseContent.getType()) {
             ClusterIndecreaseDockerContent content = JSON.parseObject(JSON.parse(extensions).toString(),
@@ -274,7 +273,8 @@ public class ClusterOpIndecreaseHandler extends BaseWorkOrderHandler {
     }
 
     private void initParam(WorkOrder workOrder) {
-        ClusterIndecreaseHostContent clusterOpIndecreaseHostContent = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(), ClusterIndecreaseHostContent.class);
+        ClusterIndecreaseHostContent clusterOpIndecreaseHostContent = ConvertUtil
+            .obj2ObjByJSON(workOrder.getContentObj(), ClusterIndecreaseHostContent.class);
         if (ES_HOST.getCode() == clusterOpIndecreaseHostContent.getType()) {
             // 如果当前角色对应pid_count为null，则设置为默认值1
             if (null == clusterOpIndecreaseHostContent.getPidCount()) {
@@ -282,9 +282,11 @@ public class ClusterOpIndecreaseHandler extends BaseWorkOrderHandler {
             }
 
             // 填充工单中的ip字段,port端口号填充
-            Map<String, String> portOfRoleMapFromHost = getPortOfRoleMapFromHost(clusterOpIndecreaseHostContent.getPhyClusterId());
+            Map<String, String> portOfRoleMapFromHost = getPortOfRoleMapFromHost(
+                clusterOpIndecreaseHostContent.getPhyClusterId());
             for (ESClusterRoleHost esClusterRoleHost : clusterOpIndecreaseHostContent.getClusterRoleHosts()) {
-                esClusterRoleHost.setIp(Getter.strWithDefault(esClusterRoleHost.getIp(), esClusterRoleHost.getHostname()));
+                esClusterRoleHost
+                    .setIp(Getter.strWithDefault(esClusterRoleHost.getIp(), esClusterRoleHost.getHostname()));
                 esClusterRoleHost.setPort(portOfRoleMapFromHost.get(esClusterRoleHost.getRole()));
             }
 
@@ -292,7 +294,9 @@ public class ClusterOpIndecreaseHandler extends BaseWorkOrderHandler {
         }
     }
 
-    private List<EcmParamBase> buildHostScaleParamBaseList(List<ESClusterRoleHost> roleClusterHosts, Integer pidCount, List<String> roleNameList, List<EcmParamBase> ecmParamBaseList) {
+    private List<EcmParamBase> buildHostScaleParamBaseList(List<ESClusterRoleHost> roleClusterHosts, Integer pidCount,
+                                                           List<String> roleNameList,
+                                                           List<EcmParamBase> ecmParamBaseList) {
         List<EcmParamBase> hostScaleParamBaseList = new ArrayList<>();
         for (String roleName : roleNameList) {
             List<String> hostnameList = new ArrayList<>();
@@ -329,10 +333,12 @@ public class ClusterOpIndecreaseHandler extends BaseWorkOrderHandler {
         Map<String, String> rolePortMap = new HashMap<>(ESClusterNodeRoleEnum.values().length);
         for (ESClusterNodeRoleEnum param : ESClusterNodeRoleEnum.values()) {
             if (param != ESClusterNodeRoleEnum.UNKNOWN) {
-                List<ClusterRoleHost> clusterRoleHosts = clusterRoleHostService.getByRoleAndClusterId(phyClusterId, param.getDesc());
+                List<ClusterRoleHost> clusterRoleHosts = clusterRoleHostService.getByRoleAndClusterId(phyClusterId,
+                    param.getDesc());
                 // 默认采用8060端口进行es集群的搭建
                 rolePortMap.put(param.getDesc(),
-                        CollectionUtils.isEmpty(clusterRoleHosts) ? ClusterConstant.DEFAULT_PORT : clusterRoleHosts.get(0).getPort());
+                    CollectionUtils.isEmpty(clusterRoleHosts) ? ClusterConstant.DEFAULT_PORT
+                        : clusterRoleHosts.get(0).getPort());
             }
         }
 

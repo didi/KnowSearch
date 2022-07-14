@@ -6,25 +6,25 @@ import java.util.stream.Collectors;
 
 public enum ClusterDynamicConfigsTypeEnum {
 
-    /**
-     * 未知项
-     */
-    UNKNOWN(-1,"unknown"),
+                                           /**
+                                            * 未知项
+                                            */
+                                           UNKNOWN(-1, "unknown"),
 
-    /**
-     * 物理集群下的breaker配置项
-     */
-    BREAKER(1,"breaker"),
+                                           /**
+                                            * 物理集群下的breaker配置项
+                                            */
+                                           BREAKER(1, "breaker"),
 
-    /**
-     * 物理集群下的routing配置项
-     */
-    ROUTING(2,"routing"),
+                                           /**
+                                            * 物理集群下的routing配置项
+                                            */
+                                           ROUTING(2, "routing"),
 
-    /**
-     * 物理集群下的zen配置项
-     */
-    ZEN(3,"zen");
+                                           /**
+                                            * 物理集群下的zen配置项
+                                            */
+                                           ZEN(3, "zen");
 
     ClusterDynamicConfigsTypeEnum(int code, String type) {
         this.code = code;
@@ -32,11 +32,13 @@ public enum ClusterDynamicConfigsTypeEnum {
     }
 
     public static List<ClusterDynamicConfigsTypeEnum> valuesWithoutUnknown() {
-        return Arrays.stream(values()).filter(clusterDynamicConfigsTypeEnum ->
-                clusterDynamicConfigsTypeEnum != ClusterDynamicConfigsTypeEnum.UNKNOWN).collect(Collectors.toList());
+        return Arrays.stream(values())
+            .filter(
+                clusterDynamicConfigsTypeEnum -> clusterDynamicConfigsTypeEnum != ClusterDynamicConfigsTypeEnum.UNKNOWN)
+            .collect(Collectors.toList());
     }
 
-    private int code;
+    private int    code;
     private String type;
 
     public String getType() {

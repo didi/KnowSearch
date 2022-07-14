@@ -34,16 +34,16 @@ import org.springframework.stereotype.Service;
 @Service
 @Deprecated
 public class ClusterDeleteHandler extends BaseWorkOrderHandler {
-    protected static final ILog    LOGGER = LogFactory.getLog(ClusterDeleteHandler.class);
+    protected static final ILog     LOGGER = LogFactory.getLog(ClusterDeleteHandler.class);
 
     @Autowired
-    private ClusterContextManager  clusterContextManager;
+    private ClusterContextManager   clusterContextManager;
 
     @Autowired
-    private ClusterPhyManager      clusterPhyManager;
+    private ClusterPhyManager       clusterPhyManager;
 
     @Autowired
-    private ClusterPhyService      clusterPhyService;
+    private ClusterPhyService       clusterPhyService;
 
     @Autowired
     private IndexTemplatePhyService indexTemplatePhyService;
@@ -55,14 +55,16 @@ public class ClusterDeleteHandler extends BaseWorkOrderHandler {
             return Result.buildFail(String.format("物理集群[%s]不存在", content.getPhyClusterName()));
         }
 
-        List<String> clusterLogicIdList = clusterContextManager.getClusterPhyAssociatedClusterLogicNames(content.getPhyClusterName());
+        List<String> clusterLogicIdList = clusterContextManager
+            .getClusterPhyAssociatedClusterLogicNames(content.getPhyClusterName());
         if (CollectionUtils.isNotEmpty(clusterLogicIdList)) {
             return Result.buildFail(String.format("物理集群[%s]和逻辑集群[%s]关联", content.getPhyClusterName(),
                 ListUtils.strList2String(clusterLogicIdList)));
         }
 
-        List<String> templatePhyNameList = indexTemplatePhyService.getNormalTemplateByCluster(content.getPhyClusterName())
-            .stream().map(IndexTemplatePhy::getName).collect(Collectors.toList());
+        List<String> templatePhyNameList = indexTemplatePhyService
+            .getNormalTemplateByCluster(content.getPhyClusterName()).stream().map(IndexTemplatePhy::getName)
+            .collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(templatePhyNameList)) {
             return Result.buildFail(String.format("物理集群[%s]中已经存在模板[%s]", content.getPhyClusterName(),
                 ListUtils.strList2String(templatePhyNameList)));
@@ -103,8 +105,8 @@ public class ClusterDeleteHandler extends BaseWorkOrderHandler {
             return Result.buildFail(String.format("物理集群[%s]不存在", content.getPhyClusterName()));
         }
 
-        Result<Boolean> deleteClusterResult = clusterPhyManager.deleteCluster(clusterPhy.getId(), workOrder.getSubmitor(),
-                AuthConstant.SUPER_PROJECT_ID);
+        Result<Boolean> deleteClusterResult = clusterPhyManager.deleteCluster(clusterPhy.getId(),
+            workOrder.getSubmitor(), AuthConstant.SUPER_PROJECT_ID);
         if (deleteClusterResult.failed()) {
             return Result.buildFail(deleteClusterResult.getMessage());
         }

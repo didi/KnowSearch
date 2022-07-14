@@ -49,8 +49,8 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class ESUserManagerImpl implements ESUserManager {
-    private static final ILog LOGGER = LogFactory.getLog(ESUserManagerImpl.class);
-    
+    private static final ILog    LOGGER = LogFactory.getLog(ESUserManagerImpl.class);
+
     @Autowired
     private ProjectService       projectService;
     @Autowired
@@ -59,9 +59,7 @@ public class ESUserManagerImpl implements ESUserManager {
     private OperateRecordService operateRecordService;
     @Autowired
     private RoleTool             roleTool;
-    
 
-    
     /**
      * @param projectIdStr
      * @param request
@@ -69,41 +67,33 @@ public class ESUserManagerImpl implements ESUserManager {
      */
     @Override
     public Result<List<ESUserVO>> listESUsersByProjectId(String projectIdStr, HttpServletRequest request) {
-    
+
         Integer projectId = null;
         if (StringUtils.isNumeric(projectIdStr)) {
             projectId = Integer.parseInt(projectIdStr);
         } else {
             projectId = HttpRequestUtil.getProjectId(request);
         }
-        
+
         final String operator = HttpRequestUtil.getOperator(request);
-        if (Objects.isNull(projectId)){
+        if (Objects.isNull(projectId)) {
             return Result.buildNotExist("未匹配到项目下的es user");
         }
         ProjectVO projectVO = projectService.getProjectDetailByProjectId(projectId);
-       
-        
+
         //确定当前操作者属于该项目成员或者是管理员
-        if (!(ProjectUtils.isUserNameBelongProjectMember(operator,
-                projectVO) ||
-              ProjectUtils.isUserNameBelongProjectResponsible(operator, projectVO) ||
-              roleTool.isAdmin(operator))
-        ) {
+        if (!(ProjectUtils.isUserNameBelongProjectMember(operator, projectVO)
+              || ProjectUtils.isUserNameBelongProjectResponsible(operator, projectVO) || roleTool.isAdmin(operator))) {
             return Result.buildParamIllegal(String.format("项目:[%s]不存在成员:[%s]", projectIdStr, request));
         }
         final List<ESUser> users = esUserService.listESUsers(Collections.singletonList(projectId));
         for (ESUser user : users) {
             user.setName(projectVO.getProjectName());
-        
+
         }
-        return Result.buildSucc(ConvertUtil.list2List(users,ESUserVO.class));
+        return Result.buildSucc(ConvertUtil.list2List(users, ESUserVO.class));
     }
-   
-    
-   
-    
-    
+
     /**
      * 新建APP
      *
@@ -121,35 +111,30 @@ public class ESUserManagerImpl implements ESUserManager {
             appDTO.setQueryThreshold(1000);
             appDTO.setIsRoot(0);
             appDTO.setMemo("新增");
-        
+
         }
-       
-         //暂定校验超级用户 user name
-        if (Objects.nonNull(appDTO)&&Objects.nonNull(appDTO.getResponsible())&&!roleTool.isAdmin(operator)) {
+
+        //暂定校验超级用户 user name
+        if (Objects.nonNull(appDTO) && Objects.nonNull(appDTO.getResponsible()) && !roleTool.isAdmin(operator)) {
             return Result.buildParamIllegal(String.format("当前操作[%s] 不能创建es user", appDTO.getResponsible()));
         }
-    
-        final TupleTwo</*创建的es user*/Result,/*创建的es user po*/ ESUserPO> resultESUserPOTuple =
-                esUserService.registerESUser(appDTO, operator);
-        
-         if (resultESUserPOTuple.v1().success()) {
+
+        final TupleTwo</*创建的es user*/Result, /*创建的es user po*/ ESUserPO> resultESUserPOTuple = esUserService
+            .registerESUser(appDTO, operator);
+
+        if (resultESUserPOTuple.v1().success()) {
             // 操作记录
-             operateRecordService.save(
-                     new OperateRecord.Builder().project(
-                                     projectService.getProjectBriefByProjectId(projectId))
-                             .content(String.format("新增访问模式:[%s]", ProjectSearchTypeEnum.valueOf(appDTO.getSearchType())))
-                             .operationTypeEnum(OperateTypeEnum.APPLICATION_ACCESS_MODE)
-                             .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).userOperation(operator).build());
-           
+            operateRecordService
+                .save(new OperateRecord.Builder().project(projectService.getProjectBriefByProjectId(projectId))
+                    .content(String.format("新增访问模式:[%s]", ProjectSearchTypeEnum.valueOf(appDTO.getSearchType())))
+                    .operationTypeEnum(OperateTypeEnum.APPLICATION_ACCESS_MODE)
+                    .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).userOperation(operator).build());
+
         }
 
         return resultESUserPOTuple.v1();
     }
- 
-    
 
-   
-    
     /**
      * @param esUserDTO   es user dto
      * @param operator 操作人或角色
@@ -157,8 +142,8 @@ public class ESUserManagerImpl implements ESUserManager {
      */
     @Override
     public Result<Void> editESUser(ESUserDTO esUserDTO, String operator) {
-        if (!projectService.checkProjectExist(esUserDTO.getProjectId())){
-             return Result.buildFail("应用不存在");
+        if (!projectService.checkProjectExist(esUserDTO.getProjectId())) {
+            return Result.buildFail("应用不存在");
         }
         Result<Void> checkResult = esUserService.validateESUser(esUserDTO, EDIT);
         if (checkResult.failed()) {
@@ -169,21 +154,21 @@ public class ESUserManagerImpl implements ESUserManager {
         final ESUser oldESUser = esUserService.getEsUserById(esUserDTO.getId());
         //校验当前esUserDTO中的projectId是否存在于esUser
         //更新之后的结果获取
-        final TupleTwo<Result<Void>/*更新的状态*/, ESUserPO/*更新之后的的ESUserPO*/> resultESUserTuple =
-                esUserService.editUser(esUserDTO);
-    
+        final TupleTwo<Result<Void>/*更新的状态*/, ESUserPO/*更新之后的的ESUserPO*/> resultESUserTuple = esUserService
+            .editUser(esUserDTO);
+
         if (resultESUserTuple.v1().success()) {
             // 操作记录
-            operateRecordService.save(new OperateRecord.Builder().project(
-                            projectService.getProjectBriefByProjectId(oldESUser.getProjectId())).content(
-                            String.format("修改访问模式:%s-->%s", ProjectSearchTypeEnum.valueOf(oldESUser.getSearchType()),
-                                    ProjectSearchTypeEnum.valueOf(esUserDTO.getSearchType())))
+            operateRecordService.save(
+                new OperateRecord.Builder().project(projectService.getProjectBriefByProjectId(oldESUser.getProjectId()))
+                    .content(String.format("修改访问模式:%s-->%s", ProjectSearchTypeEnum.valueOf(oldESUser.getSearchType()),
+                        ProjectSearchTypeEnum.valueOf(esUserDTO.getSearchType())))
                     .operationTypeEnum(OperateTypeEnum.APPLICATION_ACCESS_MODE)
                     .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).userOperation(operator).build());
         }
         return resultESUserTuple.v1();
     }
-    
+
     /**
      * 删除项目下指定的es user
      *
@@ -194,39 +179,38 @@ public class ESUserManagerImpl implements ESUserManager {
      */
     @Override
     public Result<Void> deleteESUserByProject(int esUser, int projectId, String operator) {
-        if (!roleTool.isAdmin(operator)){
+        if (!roleTool.isAdmin(operator)) {
             return Result.buildFail("当前操作者权限不足,需要管理员权限");
         }
         //校验当前项目下所有的es user
         final List<ESUser> esUsers = esUserService.listESUsers(Collections.singletonList(projectId));
-       
+
         //校验当前项目中存在该es user
         if (esUsers.stream().map(ESUser::getId).noneMatch(esUserName -> Objects.equals(esUserName, esUser))) {
             return Result.buildParamIllegal(String.format("当前项目[%s]不存在es user:[%s]", projectId,
-                    esUsers.stream().map(ESUser::getId).collect(
-                    Collectors.toList())));
+                esUsers.stream().map(ESUser::getId).collect(Collectors.toList())));
         }
         //判断删除之后的es user是否为项目使用的es user,如果是项目使用的默认es user，则需要解绑项目默认的es user 后才能进行es user的删除
-        if (esUsers.stream().anyMatch(oldESUser -> Objects.equals(oldESUser.getId(), esUser) && Boolean.TRUE.equals(
-                oldESUser.getDefaultDisplay()))) {
-        
+        if (esUsers.stream().anyMatch(oldESUser -> Objects.equals(oldESUser.getId(), esUser)
+                                                   && Boolean.TRUE.equals(oldESUser.getDefaultDisplay()))) {
+
             return Result.buildFail(String.format("项目[%s]中es user:[%s],属于项目默认的es user,请先进行解绑", projectId, esUser));
         }
         //进行es user的删除
         final TupleTwo<Result<Void>, ESUserPO> resultESUserPOTuple = esUserService.deleteESUserById(esUser);
-        if (resultESUserPOTuple.v1().success()){
+        if (resultESUserPOTuple.v1().success()) {
             // 操作记录
-            operateRecordService.save(
-                    new OperateRecord(projectService.getProjectBriefByProjectId(projectId).getProjectName(),
-                            OperateTypeEnum.APPLICATION_ACCESS_MODE, TriggerWayEnum.MANUAL_TRIGGER,
-                            String.format("删除访问模式:%s",
-                                    ProjectSearchTypeEnum.valueOf(resultESUserPOTuple.v2().getSearchType())), operator
-            
-                    ));
+            operateRecordService
+                .save(new OperateRecord(projectService.getProjectBriefByProjectId(projectId).getProjectName(),
+                    OperateTypeEnum.APPLICATION_ACCESS_MODE, TriggerWayEnum.MANUAL_TRIGGER,
+                    String.format("删除访问模式:%s", ProjectSearchTypeEnum.valueOf(resultESUserPOTuple.v2().getSearchType())),
+                    operator
+
+                ));
         }
         return resultESUserPOTuple.v1();
     }
-    
+
     /**
      * 删除项目下所有的es user
      *
@@ -236,25 +220,22 @@ public class ESUserManagerImpl implements ESUserManager {
      */
     @Override
     public Result<Void> deleteAllESUserByProject(int projectId, String operator) {
-        if (!roleTool.isAdmin(operator)){
+        if (!roleTool.isAdmin(operator)) {
             return Result.buildFail("当前操作者权限不足,需要管理员权限");
         }
-        
+
         final TupleTwo<Result<Void>, List<ESUserPO>> resultListTuple = esUserService.deleteByESUsers(projectId);
         if (resultListTuple.v1().success()) {
             // 操作记录
-            operateRecordService.save(
-                    new OperateRecord(projectService.getProjectBriefByProjectId(projectId).getProjectName(),
-                            OperateTypeEnum.APPLICATION_ACCESS_MODE, TriggerWayEnum.MANUAL_TRIGGER, "删除访问模式", operator
-            
-                    ));
+            operateRecordService
+                .save(new OperateRecord(projectService.getProjectBriefByProjectId(projectId).getProjectName(),
+                    OperateTypeEnum.APPLICATION_ACCESS_MODE, TriggerWayEnum.MANUAL_TRIGGER, "删除访问模式", operator
+
+                ));
         }
         return resultListTuple.v1();
     }
-    
 
-
-    
     /**
      * 校验验证码
      *
@@ -264,17 +245,14 @@ public class ESUserManagerImpl implements ESUserManager {
      */
     @Override
     public Result<Void> verifyAppCode(Integer esUserName, String verifyCode) {
-        return esUserService.verifyAppCode(esUserName,verifyCode);
+        return esUserService.verifyAppCode(esUserName, verifyCode);
     }
-    
-   
-    
+
     @Override
     public Result<ConsoleESUserVO> get(Integer esUser) {
         return Result.buildSucc(ConvertUtil.obj2Obj(esUserService.getEsUserById(esUser), ConsoleESUserVO.class));
     }
-    
-   
+
     /**
      * @param projectId
      * @param operator
@@ -282,19 +260,18 @@ public class ESUserManagerImpl implements ESUserManager {
      */
     @Override
     public Result<List<ConsoleESUserWithVerifyCodeVO>> getNoCodeESUser(Integer projectId, String operator) {
-       
+
         final ProjectVO projectVO = projectService.getProjectDetailByProjectId(projectId);
         if (!(ProjectUtils.isUserNameBelongProjectMember(operator, projectVO)
-            || ProjectUtils.isUserNameBelongProjectResponsible(operator, projectVO) || roleTool.isAdmin(operator))) {
+              || ProjectUtils.isUserNameBelongProjectResponsible(operator, projectVO) || roleTool.isAdmin(operator))) {
             return Result.buildFail("权限不足");
         }
         List<ESUser> users = esUserService.listESUsers(Collections.singletonList(projectId));
         for (ESUser user : users) {
             user.setName(projectVO.getProjectName());
-        
+
         }
-        return Result.buildSucc(
-                ConvertUtil.list2List(users, ConsoleESUserWithVerifyCodeVO.class));
-       
+        return Result.buildSucc(ConvertUtil.list2List(users, ConsoleESUserWithVerifyCodeVO.class));
+
     }
 }

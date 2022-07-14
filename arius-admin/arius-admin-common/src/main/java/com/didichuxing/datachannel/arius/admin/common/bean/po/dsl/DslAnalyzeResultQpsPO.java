@@ -30,25 +30,24 @@ public class DslAnalyzeResultQpsPO extends BaseESPO {
     /**
      * 查询模板的md5值
      */
-    private String dslTemplateMd5;
+    private String  dslTemplateMd5;
 
     /**
      * 查询次数
      */
-    private Long searchCount;
+    private Long    searchCount;
     /**
      * 日期
      */
-    private String date;
+    private String  date;
     /**
      * 时间
      */
-    private Long timeStamp;
+    private Long    timeStamp;
     /**
      * 数据类型
      */
-    private String ariusType;
-
+    private String  ariusType;
 
     @Override
     public String toString() {
@@ -81,7 +80,8 @@ public class DslAnalyzeResultQpsPO extends BaseESPO {
      * @return
      */
     public static DslAnalyzeResultQpsPO buildProjectIdTemplateQpsInfo(Tuple<Long, Long> maxQpsTimeTuple,
-                                                                      Integer projectId, String dslTemplateMd5, String date) {
+                                                                      Integer projectId, String dslTemplateMd5,
+                                                                      String date) {
         DslAnalyzeResultQpsPO dslAnalyzeResultQps = new DslAnalyzeResultQpsPO();
         dslAnalyzeResultQps.setProjectId(projectId);
         dslAnalyzeResultQps.setDslTemplateMd5(dslTemplateMd5);

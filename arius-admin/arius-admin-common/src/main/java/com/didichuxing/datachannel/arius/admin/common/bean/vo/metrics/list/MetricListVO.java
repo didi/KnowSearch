@@ -18,10 +18,10 @@ import lombok.NoArgsConstructor;
 @ApiModel("列表类型的指标类")
 public class MetricListVO implements Serializable {
     @ApiModelProperty("当前时间")
-    private Long   currentTime;
+    private Long                      currentTime;
 
     @ApiModelProperty("指标类型")
-    private String type;
+    private String                    type;
 
     @ApiModelProperty("具体指标信息")
     private List<MetricListContentVO> metricListContents;

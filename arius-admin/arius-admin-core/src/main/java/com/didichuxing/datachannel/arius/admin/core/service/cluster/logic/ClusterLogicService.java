@@ -45,7 +45,8 @@ public interface ClusterLogicService {
      * @return result
      * @throws AdminOperateException admin操作异常
      */
-    Result<Void> deleteClusterLogicById(Long logicClusterId, String operator, Integer projectId) throws AdminOperateException;
+    Result<Void> deleteClusterLogicById(Long logicClusterId, String operator,
+                                        Integer projectId) throws AdminOperateException;
 
     /**
      * 判断逻辑集群是否有模板
@@ -121,7 +122,6 @@ public interface ClusterLogicService {
      * @return {@link List}<{@link ClusterLogic}>
      */
     List<ClusterLogic> listClusterLogicByProjectIdAndName(Integer projectId, String clusterName);
-    
 
     List<Long> getHasAuthClusterLogicIdsByProjectId(Integer projectId);
 
@@ -177,7 +177,8 @@ public interface ClusterLogicService {
      * @param submitor             提交人
      * @return 成功/失败
      */
-    Result<Void> transferClusterLogic(Long clusterLogicId, Integer targetProjectId, String targetResponsible, String submitor);
+    Result<Void> transferClusterLogic(Long clusterLogicId, Integer targetProjectId, String targetResponsible,
+                                      String submitor);
 
     /**
      * 模糊分页查询物理集群列表信息，仅获取部分属性

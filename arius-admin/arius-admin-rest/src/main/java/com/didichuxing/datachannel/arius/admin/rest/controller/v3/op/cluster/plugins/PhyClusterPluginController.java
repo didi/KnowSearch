@@ -20,7 +20,6 @@ import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
-
 /**
  * @author linyunan
  * @date 2021-03-15
@@ -31,7 +30,7 @@ import io.swagger.annotations.ApiOperation;
 public class PhyClusterPluginController {
 
     @Autowired
-    private ClusterPhyManager clusterPhyManager;
+    private ClusterPhyManager    clusterPhyManager;
 
     @Autowired
     private ClusterPluginManager clusterPluginManager;
@@ -46,25 +45,27 @@ public class PhyClusterPluginController {
     @PostMapping("")
     @ResponseBody
     @ApiOperation(value = "上传插件")
-    public Result<Long> add(HttpServletRequest request,PluginDTO param) throws NotFindSubclassException {
-       
-        return clusterPluginManager.addPlugins(param,HttpRequestUtil.getProjectId(request));
+    public Result<Long> add(HttpServletRequest request, PluginDTO param) throws NotFindSubclassException {
+
+        return clusterPluginManager.addPlugins(param, HttpRequestUtil.getProjectId(request));
     }
 
     @DeleteMapping("/{pluginId}")
     @ResponseBody
     @ApiOperation(value = "删除ES本地插件信息")
-    public Result<Long> deleteEsClusterConfig(HttpServletRequest request, @PathVariable(value = "pluginId") Long pluginId) throws NotFindSubclassException {
-        
+    public Result<Long> deleteEsClusterConfig(HttpServletRequest request,
+                                              @PathVariable(value = "pluginId") Long pluginId) throws NotFindSubclassException {
+
         return clusterPluginManager.deletePluginById(pluginId, HttpRequestUtil.getOperator(request),
-                HttpRequestUtil.getProjectId(request));
+            HttpRequestUtil.getProjectId(request));
     }
 
     @PutMapping("")
     @ResponseBody
     @ApiOperation(value = "编辑本地插件描述")
     public Result<Void> edit(HttpServletRequest request, @RequestBody PluginDTO pluginDTO) {
-        
-        return clusterPluginManager.editPluginDesc(pluginDTO, HttpRequestUtil.getOperator(request),HttpRequestUtil.getProjectId(request));
+
+        return clusterPluginManager.editPluginDesc(pluginDTO, HttpRequestUtil.getOperator(request),
+            HttpRequestUtil.getProjectId(request));
     }
 }

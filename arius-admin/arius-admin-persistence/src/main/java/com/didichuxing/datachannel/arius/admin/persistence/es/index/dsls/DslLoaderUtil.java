@@ -34,7 +34,7 @@ import java.util.Map;
  */
 @Component
 public class DslLoaderUtil {
-    private static final ILog LOGGER  = LogFactory.getLog(DslLoaderUtil.class);
+    private static final ILog                                     LOGGER  = LogFactory.getLog(DslLoaderUtil.class);
     /**
      * 查询语句容器
      */
@@ -107,6 +107,7 @@ public class DslLoaderUtil {
 
         return dsl;
     }
+
     /**************************************** private method ****************************************************/
     /**
      * 去除json中的空格
@@ -126,7 +127,7 @@ public class DslLoaderUtil {
             try {
                 // 这里需要Feature.OrderedField.getMask()保持有序
                 parser = new DefaultJSONParser(dsl, ParserConfig.getGlobalInstance(),
-                        JSON.DEFAULT_PARSER_FEATURE | Feature.OrderedField.getMask());
+                    JSON.DEFAULT_PARSER_FEATURE | Feature.OrderedField.getMask());
                 obj = parser.parse();
             } catch (Exception t) {
                 LOGGER.error("class=DslLoaderUtil||method=trimJsonBank||errMsg=parse json {} error. ", dsl, t);
@@ -165,7 +166,7 @@ public class DslLoaderUtil {
      */
     private String readDslFileInJarFile(String fileName) {
         InputStream inputStream = this.getClass().getClassLoader()
-                .getResourceAsStream(String.format("dsl/%s", fileName));
+            .getResourceAsStream(String.format("dsl/%s", fileName));
         if (inputStream != null) {
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
             String line = null;
@@ -178,7 +179,7 @@ public class DslLoaderUtil {
 
             } catch (IOException e) {
                 LOGGER.error("class=DslLoaderUtil||method=readDslFileInJarFile||errMsg=read file {} error. ", fileName,
-                        e);
+                    e);
 
                 return "";
             } finally {
@@ -186,13 +187,13 @@ public class DslLoaderUtil {
                     inputStream.close();
                 } catch (IOException e) {
                     LOGGER.error(
-                            "class=DslLoaderUtil||method=readDslFileInJarFile||errMsg=fail to close file {} error. ",
-                            fileName, e);
+                        "class=DslLoaderUtil||method=readDslFileInJarFile||errMsg=fail to close file {} error. ",
+                        fileName, e);
                 }
             }
         } else {
             LOGGER.error("class=DslLoaderUtil||method=readDslFileInJarFile||errMsg=fail to read file {} content",
-                    fileName);
+                fileName);
             return "";
         }
     }

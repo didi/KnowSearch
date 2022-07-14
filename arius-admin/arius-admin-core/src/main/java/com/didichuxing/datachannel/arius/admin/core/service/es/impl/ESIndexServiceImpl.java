@@ -54,16 +54,13 @@ import com.google.common.collect.Sets;
 @Service
 public class ESIndexServiceImpl implements ESIndexService {
 
-    private static final ILog LOGGER = LogFactory.getLog(ESIndexServiceImpl.class);
+    private static final ILog      LOGGER = LogFactory.getLog(ESIndexServiceImpl.class);
 
     @Autowired
-    private ESIndexDAO        esIndexDAO;
+    private ESIndexDAO             esIndexDAO;
 
     @Autowired
     private ClusterRoleHostService clusterRoleHostService;
-
-
-
 
     @Override
     public boolean syncCreateIndex(String cluster, String indexName, int retryCount) throws ESOperateException {
@@ -127,7 +124,9 @@ public class ESIndexServiceImpl implements ESIndexService {
     @Override
     public Map<String, IndexConfig> syncBatchGetIndexConfig(String cluster, List<String> indexList) {
         MultiIndexsConfig multiIndexsConfig = esIndexDAO.batchGetIndexConfig(cluster, indexList);
-        if (null == multiIndexsConfig) { return Maps.newConcurrentMap();}
+        if (null == multiIndexsConfig) {
+            return Maps.newConcurrentMap();
+        }
         return multiIndexsConfig.getIndexConfigMap();
     }
 
@@ -176,15 +175,17 @@ public class ESIndexServiceImpl implements ESIndexService {
     }
 
     @Override
-    public boolean syncPutIndexSetting(String cluster, List<String> indices, Map<String, String> settingMap, Integer retryCount) throws  ESOperateException{
+    public boolean syncPutIndexSetting(String cluster, List<String> indices, Map<String, String> settingMap,
+                                       Integer retryCount) throws ESOperateException {
         return ESOpTimeoutRetry.esRetryExecute("putIndexSettingBatch", retryCount,
-                () -> esIndexDAO.putIndexSetting(cluster, indices, settingMap));
+            () -> esIndexDAO.putIndexSetting(cluster, indices, settingMap));
     }
 
     @Override
-    public boolean syncPutIndexSettings(String cluster, List<String> indices, Map<String, String> settings, int retryCount) throws ESOperateException {
+    public boolean syncPutIndexSettings(String cluster, List<String> indices, Map<String, String> settings,
+                                        int retryCount) throws ESOperateException {
         return ESOpTimeoutRetry.esRetryExecute("putIndexSettings", retryCount,
-                () -> esIndexDAO.putIndexSettings(cluster, indices, settings));
+            () -> esIndexDAO.putIndexSettings(cluster, indices, settings));
     }
 
     /**
@@ -244,13 +245,14 @@ public class ESIndexServiceImpl implements ESIndexService {
 
         return ret;
     }
+
     @Override
-    public Map<String,List<String>> syncGetIndexAliasesByIndices(String cluster, String... indices) {
+    public Map<String, List<String>> syncGetIndexAliasesByIndices(String cluster, String... indices) {
         Map<String/*index*/, AliasIndexNode> aliasIndexNodeMap = esIndexDAO.getAliasesByIndices(cluster, indices);
         if (aliasIndexNodeMap == null) {
             LOGGER.warn(
-                    "class=ESIndexServiceImpl||method=syncGetIndexNameByExpression||msg=no alias||cluster={}||expression={}",
-                    cluster, indices);
+                "class=ESIndexServiceImpl||method=syncGetIndexNameByExpression||msg=no alias||cluster={}||expression={}",
+                cluster, indices);
             return new HashMap<>();
         }
 
@@ -285,31 +287,33 @@ public class ESIndexServiceImpl implements ESIndexService {
             .succChecker(succ -> succ).process();
 
         if (!result.isSucc()) {
-            LOGGER.warn("class=ESIndexServiceImpl||method=syncBatchDeleteIndices||cluster={}||shouldDels={}||result={}", cluster, shouldDels,
-                result);
+            LOGGER.warn("class=ESIndexServiceImpl||method=syncBatchDeleteIndices||cluster={}||shouldDels={}||result={}",
+                cluster, shouldDels, result);
         }
 
         return shouldDels.size() - result.getFailAndErrorCount();
     }
 
     @Override
-    public boolean syncBatchCloseIndices(String cluster, List<String> shouldCloses, int retryCount) throws ESOperateException {
+    public boolean syncBatchCloseIndices(String cluster, List<String> shouldCloses,
+                                         int retryCount) throws ESOperateException {
         if (CollectionUtils.isEmpty(shouldCloses)) {
             return true;
         }
 
         return ESOpTimeoutRetry.esRetryExecute("closeIndex", retryCount,
-                () -> esIndexDAO.closeIndex(cluster, shouldCloses));
+            () -> esIndexDAO.closeIndex(cluster, shouldCloses));
     }
 
     @Override
-    public boolean syncBatchOpenIndices(String cluster, List<String> shouldOpens, int retryCount) throws ESOperateException {
+    public boolean syncBatchOpenIndices(String cluster, List<String> shouldOpens,
+                                        int retryCount) throws ESOperateException {
         if (CollectionUtils.isEmpty(shouldOpens)) {
             return true;
         }
 
         return ESOpTimeoutRetry.esRetryExecute("openIndex", retryCount,
-                () -> esIndexDAO.openIndex(cluster, shouldOpens));
+            () -> esIndexDAO.openIndex(cluster, shouldOpens));
     }
 
     /**
@@ -334,7 +338,8 @@ public class ESIndexServiceImpl implements ESIndexService {
         if (clusterRoleHostResult.failed()) {
             return false;
         }
-        clusterRoleHostResult.getData().stream().forEach(clusterRoleHost -> nodeNames.add(clusterRoleHost.getNodeSet()));
+        clusterRoleHostResult.getData().stream()
+            .forEach(clusterRoleHost -> nodeNames.add(clusterRoleHost.getNodeSet()));
 
         return ESOpTimeoutRetry.esRetryExecute("syncBatchUpdateRegion", retryCount,
             () -> esIndexDAO.batchUpdateIndexRegion(cluster, indices, nodeNames));
@@ -464,9 +469,10 @@ public class ESIndexServiceImpl implements ESIndexService {
                 LOGGER.warn("class=ESIndexServiceImpl||method=ensureDateSame||msg=sleep interrupted", e);
             }
             catIndexResultList.addAll(esIndexDAO.catIndices(clusterPhyName));
-            if (CollectionUtils.isNotEmpty(catIndexResultList)) { break;}
+            if (CollectionUtils.isNotEmpty(catIndexResultList)) {
+                break;
+            }
         }
-
 
         return catIndexResultList.stream().filter(this::filterOriginalIndices).collect(Collectors.toList());
     }
@@ -494,7 +500,7 @@ public class ESIndexServiceImpl implements ESIndexService {
         }
         return retMap;
     }
-    
+
     /**
      * 过滤原始索引
      */
@@ -591,7 +597,8 @@ public class ESIndexServiceImpl implements ESIndexService {
 
             if (null == commonStat.getSeqNo()) {
                 LOGGER.warn(
-                    "class=ESIndexServiceImpl||method=syncGetTotalCheckpoint||indexName={}||shard={}||msg=commonStat seqNo is empty", index, shard);
+                    "class=ESIndexServiceImpl||method=syncGetTotalCheckpoint||indexName={}||shard={}||msg=commonStat seqNo is empty",
+                    index, shard);
                 return;
             }
 
@@ -667,6 +674,7 @@ public class ESIndexServiceImpl implements ESIndexService {
         }
         return esIndexDAO.editAlias(cluster, putAliasNodeList);
     }
+
     @Override
     public Result<Void> rollover(String cluster, String alias, String conditions) {
         return esIndexDAO.rollover(cluster, alias, conditions);
@@ -723,7 +731,6 @@ public class ESIndexServiceImpl implements ESIndexService {
 
     /***************************************** private method ****************************************************/
 
-
     private Tuple<Boolean, Boolean> getWriteAndReadBlock(IndexConfig indexConfig) {
         Tuple<Boolean, Boolean> writeAndReadBlockFromMerge = new Tuple<>();
         //build from es setUp settings
@@ -763,7 +770,7 @@ public class ESIndexServiceImpl implements ESIndexService {
 
         return writeAndReadBlockFromMerge;
     }
-    
+
     private Result<Void> refreshIndex(String cluster, List<String> indexNames) {
         BatchProcessor.BatchProcessResult<String, Boolean> result = new BatchProcessor<String, Boolean>()
             .batchList(indexNames).batchSize(30).processor(items -> esIndexDAO.refreshIndex(cluster, items))
@@ -774,13 +781,15 @@ public class ESIndexServiceImpl implements ESIndexService {
     private boolean checkDateSame(String cluster1, String cluster2, List<String> indexNames) {
         Result<Void> refreshIndexResult1 = refreshIndex(cluster1, indexNames);
         if (refreshIndexResult1.failed()) {
-            LOGGER.warn("class=ESIndexServiceImpl||method=ensureDateSame||cluster={}||indexNames={}||msg=refresh fail", cluster1, indexNames);
+            LOGGER.warn("class=ESIndexServiceImpl||method=ensureDateSame||cluster={}||indexNames={}||msg=refresh fail",
+                cluster1, indexNames);
             return false;
         }
 
         Result<Void> refreshIndexResult2 = refreshIndex(cluster2, indexNames);
         if (refreshIndexResult2.failed()) {
-            LOGGER.warn("class=ESIndexServiceImpl||method=ensureDateSame||cluster={}||indexNames={}||msg=refresh fail", cluster2, indexNames);
+            LOGGER.warn("class=ESIndexServiceImpl||method=ensureDateSame||cluster={}||indexNames={}||msg=refresh fail",
+                cluster2, indexNames);
             return false;
         }
 
@@ -797,7 +806,8 @@ public class ESIndexServiceImpl implements ESIndexService {
             }
 
             if (stat1.getPrimaries().getDocs().getCount() != stat2.getPrimaries().getDocs().getCount()) {
-                LOGGER.warn("class=ESIndexServiceImpl||method=ensureDateSame||indexName={}||msg=doc count not match, primary={}, replica={}",
+                LOGGER.warn(
+                    "class=ESIndexServiceImpl||method=ensureDateSame||indexName={}||msg=doc count not match, primary={}, replica={}",
                     index, stat1.getPrimaries().getDocs().getCount(), stat2.getPrimaries().getDocs().getCount());
                 return false;
             }
@@ -812,7 +822,8 @@ public class ESIndexServiceImpl implements ESIndexService {
             }
 
             if (totalCheckpoint1.get() != totalCheckpoint2.get()) {
-                LOGGER.warn("class=ESIndexServiceImpl||method=ensureDateSame||indexName={}|||msg=checkpoint not match, primary={}, replica={}",
+                LOGGER.warn(
+                    "class=ESIndexServiceImpl||method=ensureDateSame||indexName={}|||msg=checkpoint not match, primary={}, replica={}",
                     index, totalCheckpoint1.get(), totalCheckpoint2.get());
                 return false;
             }
@@ -826,9 +837,8 @@ public class ESIndexServiceImpl implements ESIndexService {
             syncDeleteIndexByExpression(cluster, indices, retryCount);
             return true;
         } catch (ESOperateException e) {
-            LOGGER.error("class=ESIndexServiceImpl||method=batchDeleteIndicesInner||cluster"
-                    + "={}||indices={}", cluster,
-                indices,e);
+            LOGGER.error("class=ESIndexServiceImpl||method=batchDeleteIndicesInner||cluster" + "={}||indices={}",
+                cluster, indices, e);
         }
         return false;
     }

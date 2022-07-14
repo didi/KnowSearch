@@ -16,104 +16,108 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.template.T
  */
 public enum TemplateLabelEnum {
 
-    /**
-     *
-     */
-    DSL_NEED_REVIEW("01", "DSL查询需要审核", ADMIN, SYS, GREEN, TemplateLabelPeriodEnum.FOREVER),
+                               /**
+                                *
+                                */
+                               DSL_NEED_REVIEW("01", "DSL查询需要审核", ADMIN, SYS, GREEN, TemplateLabelPeriodEnum.FOREVER),
 
-    /**
-     *
-     */
-    IMPORTANT("02", "重要索引", ADMIN, SYS, GREEN, TemplateLabelPeriodEnum.FOREVER),
+                               /**
+                                *
+                                */
+                               IMPORTANT("02", "重要索引", ADMIN, SYS, GREEN, TemplateLabelPeriodEnum.FOREVER),
 
-    /**
-     *
-     */
-    FULL_LINK_SUPPORT("03", "全链路保证", ADMIN, USER, GREEN, TemplateLabelPeriodEnum.FOREVER),
+                               /**
+                                *
+                                */
+                               FULL_LINK_SUPPORT("03", "全链路保证", ADMIN, USER, GREEN, TemplateLabelPeriodEnum.FOREVER),
 
-    /**
-     *
-     */
-    SUSPEND_GOVERN("04", "暂停治理", ADMIN, USER, GREEN, TemplateLabelPeriodEnum.THREE_MONTH),
+                               /**
+                                *
+                                */
+                               SUSPEND_GOVERN("04", "暂停治理", ADMIN, USER, GREEN, TemplateLabelPeriodEnum.THREE_MONTH),
 
-    /**
-     *
-     */
-    QUOTA_USAGE_LOW("20", "Quota利用率过低", PLATFORM_GOVERN, USER, YELLOW, TemplateLabelPeriodEnum.FOREVER),
+                               /**
+                                *
+                                */
+                               QUOTA_USAGE_LOW("20", "Quota利用率过低", PLATFORM_GOVERN, USER, YELLOW,
+                                               TemplateLabelPeriodEnum.FOREVER),
 
-    /**
-     *
-     */
-    QUOTA_USAGE_HIGH("21", "Quota利用率过高", PLATFORM_GOVERN, USER, RED, TemplateLabelPeriodEnum.FOREVER),
+                               /**
+                                *
+                                */
+                               QUOTA_USAGE_HIGH("21", "Quota利用率过高", PLATFORM_GOVERN, USER, RED,
+                                                TemplateLabelPeriodEnum.FOREVER),
 
-    /**
-     *
-     */
-    EXPIRE_DAYS_LONG("22", "保存周期过长", PLATFORM_GOVERN, USER, YELLOW, TemplateLabelPeriodEnum.FOREVER),
+                               /**
+                                *
+                                */
+                               EXPIRE_DAYS_LONG("22", "保存周期过长", PLATFORM_GOVERN, USER, YELLOW,
+                                                TemplateLabelPeriodEnum.FOREVER),
 
-    /**
-     *
-     */
-    HAS_DELETED_DOC("40", "有删除操作", AMS, SYS, GREEN, TemplateLabelPeriodEnum.FOREVER),
+                               /**
+                                *
+                                */
+                               HAS_DELETED_DOC("40", "有删除操作", AMS, SYS, GREEN, TemplateLabelPeriodEnum.FOREVER),
 
-    /**
-     *
-     */
-    VALUE_LOW("41", "低价值", AMS, USER, YELLOW, TemplateLabelPeriodEnum.FOREVER),
+                               /**
+                                *
+                                */
+                               VALUE_LOW("41", "低价值", AMS, USER, YELLOW, TemplateLabelPeriodEnum.FOREVER),
 
-    /**
-     *
-     */
-    MAPPING_NEED_IMPROVE("42", "mapping待优化", AMS, USER, YELLOW, TemplateLabelPeriodEnum.FOREVER),
+                               /**
+                                *
+                                */
+                               MAPPING_NEED_IMPROVE("42", "mapping待优化", AMS, USER, YELLOW,
+                                                    TemplateLabelPeriodEnum.FOREVER),
 
-    /**
-     *
-     */
-    QUERY_ERROR("43", "异常查询", AMS, USER, YELLOW, TemplateLabelPeriodEnum.FOREVER),
+                               /**
+                                *
+                                */
+                               QUERY_ERROR("43", "异常查询", AMS, USER, YELLOW, TemplateLabelPeriodEnum.FOREVER),
 
-    /**
-     *
-     */
-    QUERY_SLOW("44", "慢查询", AMS, USER, YELLOW, TemplateLabelPeriodEnum.FOREVER),
+                               /**
+                                *
+                                */
+                               QUERY_SLOW("44", "慢查询", AMS, USER, YELLOW, TemplateLabelPeriodEnum.FOREVER),
 
-    /**
-     *
-     */
-    NO_DATA("45", "无数据", AMS, USER, RED, TemplateLabelPeriodEnum.FOREVER),
+                               /**
+                                *
+                                */
+                               NO_DATA("45", "无数据", AMS, USER, RED, TemplateLabelPeriodEnum.FOREVER),
 
-    /**
-     *
-     */
-    NO_WRITE("46", "无写入", AMS, USER, YELLOW, TemplateLabelPeriodEnum.FOREVER),
+                               /**
+                                *
+                                */
+                               NO_WRITE("46", "无写入", AMS, USER, YELLOW, TemplateLabelPeriodEnum.FOREVER),
 
-    /**
-     *
-     */
-    NO_QUERY("47", "无查询", AMS, USER, RED, TemplateLabelPeriodEnum.FOREVER),
+                               /**
+                                *
+                                */
+                               NO_QUERY("47", "无查询", AMS, USER, RED, TemplateLabelPeriodEnum.FOREVER),
 
-    /**
-     *
-     */
-    INVALID("48", "废弃索引", AMS, USER, RED, TemplateLabelPeriodEnum.FOREVER);
+                               /**
+                                *
+                                */
+                               INVALID("48", "废弃索引", AMS, USER, RED, TemplateLabelPeriodEnum.FOREVER);
 
+    public static final String         LABEL_ID   = "labelId";
 
-    public static final String LABEL_ID = "labelId";
+    public static final String         LABEL_NAME = "labelName";
 
-    public static final String LABEL_NAME = "labelName";
+    private String                     id;
 
-    private String id;
+    private String                     name;
 
-    private String name;
-
-    private TemplateLabelSourceEnum source;
+    private TemplateLabelSourceEnum    source;
 
     private TemplateLabelAttributeEnum attribute;
 
-    private TemplateLabelLevelEnum level;
+    private TemplateLabelLevelEnum     level;
 
-    private TemplateLabelPeriodEnum period;
+    private TemplateLabelPeriodEnum    period;
 
-    TemplateLabelEnum(String id, String name, TemplateLabelSourceEnum source, TemplateLabelAttributeEnum attribute, TemplateLabelLevelEnum level, TemplateLabelPeriodEnum period) {
+    TemplateLabelEnum(String id, String name, TemplateLabelSourceEnum source, TemplateLabelAttributeEnum attribute,
+                      TemplateLabelLevelEnum level, TemplateLabelPeriodEnum period) {
         this.id = id;
         this.name = name;
         this.source = source;

@@ -8,7 +8,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType
  */
 public class NotFindSubclassException extends AdminOperateException {
 
-	public NotFindSubclassException(String message) {
-		super(message, ResultType.NO_FIND_SUB_CLASS);
-	}
+    public NotFindSubclassException(String message) {
+        super(message, ResultType.NO_FIND_SUB_CLASS);
+    }
 }

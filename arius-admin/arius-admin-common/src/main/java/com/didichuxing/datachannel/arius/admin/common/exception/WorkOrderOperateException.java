@@ -6,7 +6,7 @@ package com.didichuxing.datachannel.arius.admin.common.exception;
  * @author d06679
  * @date 2019/2/21
  */
-public class WorkOrderOperateException extends RuntimeException {
+public class WorkOrderOperateException extends AdminOperateException {
 
     /**
      * Constructs a new exception with the specified detail message.  The

@@ -10,50 +10,50 @@ package com.didichuxing.datachannel.arius.admin.common.constant;
  */
 public enum AriusStatsEnum {
 
-    /**
-     * 索引维度
-     */
-    INDEX_INFO("index_info"),
+                            /**
+                             * 索引维度
+                             */
+                            INDEX_INFO("index_info"),
 
-    /**
-     * 节点到索引维度
-     */
-    NODE_INDEX_INFO("node_index_info"),
+                            /**
+                             * 节点到索引维度
+                             */
+                            NODE_INDEX_INFO("node_index_info"),
 
-    /**
-     * 索引到节点维度
-     */
-    INDEX_NODE_INFO("index_node_info"),
+                            /**
+                             * 索引到节点维度
+                             */
+                            INDEX_NODE_INFO("index_node_info"),
 
-    /**
-     * 节点维度
-     */
-    NODE_INFO("node_info"),
+                            /**
+                             * 节点维度
+                             */
+                            NODE_INFO("node_info"),
 
-    /**
-     * ingest写入维度
-     */
-    INGEST_INFO("ingest_info"),
+                            /**
+                             * ingest写入维度
+                             */
+                            INGEST_INFO("ingest_info"),
 
-    /**
-     * 集群维度
-     */
-    CLUSTER_INFO("cluster_info"),
+                            /**
+                             * 集群维度
+                             */
+                            CLUSTER_INFO("cluster_info"),
 
-    /**
-     * task维度
-     */
-    TASK_INFO("task_info"),
+                            /**
+                             * task维度
+                             */
+                            TASK_INFO("task_info"),
 
-    /**
-     * dcdr维度
-     */
-    DCDR_INFO("dcdr_info"),
+                            /**
+                             * dcdr维度
+                             */
+                            DCDR_INFO("dcdr_info"),
 
-    /**
-     * dashboard
-     */
-    DASHBOARD_INFO("dashboard_info");
+                            /**
+                             * dashboard
+                             */
+                            DASHBOARD_INFO("dashboard_info");
 
     private String type;
 

@@ -43,5 +43,6 @@ public interface TemplatePhySettingManager {
      * @return
      * @throws AdminOperateException
      */
-    boolean mergeTemplateSettings(Integer logicId, String cluster, String template, IndexTemplatePhySetting settings) throws AdminOperateException;
+    boolean mergeTemplateSettings(Integer logicId, String cluster, String template,
+                                  IndexTemplatePhySetting settings) throws AdminOperateException;
 }

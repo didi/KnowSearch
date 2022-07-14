@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping(V3 + "/indices/srv")
 @Api(tags = "索引服务")
-public class IndicesSrvController extends BaseIndicesController{
+public class IndicesSrvController extends BaseIndicesController {
 
     @Autowired
     private IndicesManager indicesManager;
@@ -38,9 +38,11 @@ public class IndicesSrvController extends BaseIndicesController{
     @ApiOperation(value = "rollover")
     public Result<Void> rollover(HttpServletRequest request, @RequestBody IndexRolloverDTO param) {
         List<IndexCatCellDTO> indices = param.getIndices();
-        Result<Boolean> checkClusterValidResult = checkClusterValid(indices.stream().map(IndexCatCellDTO::getCluster)
-                .distinct().collect(Collectors.toList()));
-        if (checkClusterValidResult.failed()) { return Result.buildFrom(checkClusterValidResult);}
+        Result<Boolean> checkClusterValidResult = checkClusterValid(
+            indices.stream().map(IndexCatCellDTO::getCluster).distinct().collect(Collectors.toList()));
+        if (checkClusterValidResult.failed()) {
+            return Result.buildFrom(checkClusterValidResult);
+        }
 
         return indicesManager.rollover(param);
     }
@@ -50,7 +52,9 @@ public class IndicesSrvController extends BaseIndicesController{
     @ApiOperation(value = "shrink")
     public Result<Void> shrink(HttpServletRequest request, @RequestBody IndexCatCellWithConfigDTO param) {
         Result<Boolean> checkClusterValidResult = checkClusterValid(Lists.newArrayList(param.getCluster()));
-        if (checkClusterValidResult.failed()) { return Result.buildFrom(checkClusterValidResult);}
+        if (checkClusterValidResult.failed()) {
+            return Result.buildFrom(checkClusterValidResult);
+        }
 
         return indicesManager.shrink(param);
     }
@@ -60,7 +64,9 @@ public class IndicesSrvController extends BaseIndicesController{
     @ApiOperation(value = "split")
     public Result<Void> split(HttpServletRequest request, @RequestBody IndexCatCellWithConfigDTO param) {
         Result<Boolean> checkClusterValidResult = checkClusterValid(Lists.newArrayList(param.getCluster()));
-        if (checkClusterValidResult.failed()) { return Result.buildFrom(checkClusterValidResult);}
+        if (checkClusterValidResult.failed()) {
+            return Result.buildFrom(checkClusterValidResult);
+        }
 
         return indicesManager.split(param);
     }
@@ -70,9 +76,11 @@ public class IndicesSrvController extends BaseIndicesController{
     @ApiOperation(value = "forceMerge")
     public Result<Void> forceMerge(HttpServletRequest request, @RequestBody IndexForceMergeDTO param) {
         List<IndexCatCellDTO> indices = param.getIndices();
-        Result<Boolean> checkClusterValidResult = checkClusterValid(indices.stream().map(IndexCatCellDTO::getCluster)
-                .distinct().collect(Collectors.toList()));
-        if (checkClusterValidResult.failed()) { return Result.buildFrom(checkClusterValidResult);}
+        Result<Boolean> checkClusterValidResult = checkClusterValid(
+            indices.stream().map(IndexCatCellDTO::getCluster).distinct().collect(Collectors.toList()));
+        if (checkClusterValidResult.failed()) {
+            return Result.buildFrom(checkClusterValidResult);
+        }
 
         return indicesManager.forceMerge(param);
     }

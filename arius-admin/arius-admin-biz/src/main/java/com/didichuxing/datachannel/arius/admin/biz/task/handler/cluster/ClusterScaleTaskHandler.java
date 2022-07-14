@@ -2,21 +2,10 @@ package com.didichuxing.datachannel.arius.admin.biz.task.handler.cluster;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum.ES_DOCKER;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.stereotype.Service;
-
 import com.alibaba.fastjson.JSON;
-import com.didichuxing.datachannel.arius.admin.biz.workorder.utils.OpOrderTaskConverter;
 import com.didichuxing.datachannel.arius.admin.biz.task.content.ClusterIndecreaseDockerContent;
 import com.didichuxing.datachannel.arius.admin.biz.task.content.ClusterIndecreaseHostContent;
+import com.didichuxing.datachannel.arius.admin.biz.workorder.utils.OpOrderTaskConverter;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.ESClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.EcmParamBase;
@@ -27,12 +16,22 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.Cluste
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
 import com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant;
-
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.Getter;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
+import com.google.common.collect.Lists;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
 
 /**
  * 集群扩缩容
@@ -45,8 +44,8 @@ public class ClusterScaleTaskHandler extends AbstractClusterTaskHandler {
 
     @Override
     Result<Void> initHostParam(OpTask opTask) {
-        ClusterIndecreaseHostContent clusterOpIndecreaseHostContent = ConvertUtil
-            .str2ObjByJson(opTask.getExpandData(), ClusterIndecreaseHostContent.class);
+        ClusterIndecreaseHostContent clusterOpIndecreaseHostContent = ConvertUtil.str2ObjByJson(opTask.getExpandData(),
+            ClusterIndecreaseHostContent.class);
         // 如果当前角色对应pid_count为null，则设置为默认值1
         if (null == clusterOpIndecreaseHostContent.getPidCount()) {
             clusterOpIndecreaseHostContent.setPidCount(ClusterConstant.DEFAULT_CLUSTER_PAID_COUNT);
@@ -77,19 +76,22 @@ public class ClusterScaleTaskHandler extends AbstractClusterTaskHandler {
             return Result.buildParamIllegal("物理集群不存在");
         }
 
-        if (opTaskManager.existUnClosedTask(content.getPhyClusterId().intValue(), OpTaskTypeEnum.CLUSTER_EXPAND.getType())
-            || opTaskManager.existUnClosedTask(content.getPhyClusterId().intValue(), OpTaskTypeEnum.CLUSTER_SHRINK.getType())) {
+        if (opTaskManager.existUnClosedTask(content.getPhyClusterId().intValue(),
+            OpTaskTypeEnum.CLUSTER_EXPAND.getType())
+            || opTaskManager.existUnClosedTask(content.getPhyClusterId().intValue(),
+                OpTaskTypeEnum.CLUSTER_SHRINK.getType())) {
             return Result.buildParamIllegal("该集群上存在未完成的集群扩缩容任务");
         }
 
         // 对于datanode的缩容，如果该节点上存在数据分片,做出警告
         if (content.getOperationType() == OpTaskTypeEnum.CLUSTER_SHRINK.getType()) {
-            Map<String, Integer> segmentsOfIpByCluster = esClusterService.synGetSegmentsOfIpByCluster(content.getPhyClusterName());
+            Map<String, Integer> segmentsOfIpByCluster = esClusterService
+                .synGetSegmentsOfIpByCluster(content.getPhyClusterName());
 
             for (ESClusterRoleHost esClusterRoleHost : content.getClusterRoleHosts()) {
                 if (esClusterRoleHost.getRole().equals(ESClusterNodeRoleEnum.DATA_NODE.getDesc())
-                        && segmentsOfIpByCluster.containsKey(esClusterRoleHost.getHostname())
-                        && !segmentsOfIpByCluster.get(esClusterRoleHost.getHostname()).equals(0)) {
+                    && segmentsOfIpByCluster.containsKey(esClusterRoleHost.getHostname())
+                    && !segmentsOfIpByCluster.get(esClusterRoleHost.getHostname()).equals(0)) {
                     return Result.buildFail("数据节点上存在分片，请迁移分片之后再进行该节点的缩容");
                 }
             }
@@ -99,13 +101,16 @@ public class ClusterScaleTaskHandler extends AbstractClusterTaskHandler {
 
     @Override
     Result<Void> buildHostEcmTaskDTO(EcmTaskDTO ecmTaskDTO, String param, String creator) {
-        ClusterIndecreaseHostContent content = ConvertUtil.str2ObjByJson(param,
-            ClusterIndecreaseHostContent.class);
+        ClusterIndecreaseHostContent content = ConvertUtil.str2ObjByJson(param, ClusterIndecreaseHostContent.class);
         ecmTaskDTO.setPhysicClusterId(content.getPhyClusterId());
         ecmTaskDTO.setOrderType(content.getOperationType());
 
-        List<EcmParamBase> hostScaleParamBaseList = getHostScaleParamBaseList(content.getPhyClusterId().intValue(),
-            content.getClusterRoleHosts(), content.getPidCount());
+        final Result<List<EcmParamBase>> hostScaleParamBaseListResult = getHostScaleParamBaseList(
+            content.getPhyClusterId().intValue(), content.getClusterRoleHosts(), content.getPidCount());
+        if (hostScaleParamBaseListResult.failed()) {
+            return Result.buildFrom(hostScaleParamBaseListResult);
+        }
+        List<EcmParamBase> hostScaleParamBaseList = hostScaleParamBaseListResult.getData();
 
         ecmTaskDTO.setClusterNodeRole(ListUtils.strList2String(
             hostScaleParamBaseList.stream().map(EcmParamBase::getRoleName).collect(Collectors.toList())));
@@ -115,42 +120,48 @@ public class ClusterScaleTaskHandler extends AbstractClusterTaskHandler {
 
     @Override
     Result<Void> buildDockerEcmTaskDTO(EcmTaskDTO ecmTaskDTO, String param, String creator) {
-        ClusterIndecreaseDockerContent content = ConvertUtil.obj2ObjByJSON(param,
-            ClusterIndecreaseDockerContent.class);
+        ClusterIndecreaseDockerContent content = ConvertUtil.obj2ObjByJSON(param, ClusterIndecreaseDockerContent.class);
         ecmTaskDTO.setPhysicClusterId(content.getPhyClusterId());
         ecmTaskDTO.setOrderType(content.getOperationType());
 
         List<EcmParamBase> ecmParamBaseList = OpOrderTaskConverter.convert2EcmParamBaseList(ES_DOCKER,
-                OpTaskTypeEnum.valueOfType(content.getOperationType()), content);
+            OpTaskTypeEnum.valueOfType(content.getOperationType()), content);
         ecmTaskDTO.setClusterNodeRole(ListUtils
             .strList2String(ecmParamBaseList.stream().map(EcmParamBase::getRoleName).collect(Collectors.toList())));
         ecmTaskDTO.setEcmParamBaseList(ecmParamBaseList);
         return Result.buildSucc();
     }
 
-
-    private List<EcmParamBase> getHostScaleParamBaseList(Integer phyClusterId,
-                                                           List<ESClusterRoleHost> roleClusterHosts, Integer pidCount) {
+    private Result<List<EcmParamBase>> getHostScaleParamBaseList(Integer phyClusterId,
+                                                                 List<ESClusterRoleHost> roleClusterHosts,
+                                                                 Integer pidCount) {
         List<String> roleNameList = new ArrayList<>();
         for (ESClusterRoleHost clusterRoleHost : roleClusterHosts) {
             if (!roleNameList.contains(clusterRoleHost.getRole())) {
                 roleNameList.add(clusterRoleHost.getRole());
             }
         }
+        final Result<List<EcmParamBase>> listResult = ecmHandleService.buildEcmParamBaseList(phyClusterId,
+            roleNameList);
+        if (listResult.failed()) {
+            return Result.buildFrom(listResult);
+        }
+        List<EcmParamBase> ecmParamBaseList = listResult.getData();
 
-        List<EcmParamBase> ecmParamBaseList = ecmHandleService.buildEcmParamBaseList(phyClusterId, roleNameList)
-                .getData();
-        return buildHostScaleParamBaseList(roleClusterHosts, pidCount, roleNameList, ecmParamBaseList);
+        return Result
+            .buildSucc(buildHostScaleParamBaseList(roleClusterHosts, pidCount, roleNameList, ecmParamBaseList));
     }
 
     private List<EcmParamBase> buildHostScaleParamBaseList(List<ESClusterRoleHost> roleClusterHosts, Integer pidCount,
-                                                             List<String> roleNameList,
-                                                             List<EcmParamBase> ecmParamBaseList) {
-        List<EcmParamBase> hostScaleParamBaseList = new ArrayList<>();
+                                                           List<String> roleNameList,
+                                                           List<EcmParamBase> ecmParamBaseList) {
+
+        List<EcmParamBase> hostScaleParamBaseList = Lists.newArrayList();
         for (String roleName : roleNameList) {
-            List<String> hostnameList = new ArrayList<>();
+            List<String> hostnameList = Lists.newArrayList();
             for (ESClusterRoleHost clusterRoleHost : roleClusterHosts) {
-                if (roleName.equals(clusterRoleHost.getRole())) {
+
+                if (StringUtils.equals(roleName, clusterRoleHost.getRole())) {
                     if (AriusObjUtils.isBlank(clusterRoleHost.getHostname())) {
                         continue;
                     }
@@ -158,11 +169,11 @@ public class ClusterScaleTaskHandler extends AbstractClusterTaskHandler {
                 }
             }
             for (EcmParamBase ecmParamBase : ecmParamBaseList) {
-                if (roleName.equals(ecmParamBase.getRoleName())) {
+                if (StringUtils.equals(roleName, ecmParamBase.getRoleName())) {
                     HostParamBase hostParamBase = (HostParamBase) ecmParamBase;
 
                     HostScaleActionParam hostScaleActionParam = ConvertUtil.obj2Obj(hostParamBase,
-                            HostScaleActionParam.class);
+                        HostScaleActionParam.class);
                     hostScaleActionParam.setPidCount(pidCount);
                     hostScaleActionParam.setHostList(hostnameList);
                     hostScaleActionParam.setNodeNumber(hostnameList.size());
@@ -186,11 +197,11 @@ public class ClusterScaleTaskHandler extends AbstractClusterTaskHandler {
         for (ESClusterNodeRoleEnum param : ESClusterNodeRoleEnum.values()) {
             if (param != ESClusterNodeRoleEnum.UNKNOWN) {
                 List<ClusterRoleHost> clusterRoleHosts = clusterRoleHostService.getByRoleAndClusterId(phyClusterId,
-                        param.getDesc());
+                    param.getDesc());
                 // 默认采用8060端口进行es集群的搭建
                 rolePortMap.put(param.getDesc(),
-                        CollectionUtils.isEmpty(clusterRoleHosts) ? ClusterConstant.DEFAULT_PORT
-                                : clusterRoleHosts.get(0).getPort());
+                    CollectionUtils.isEmpty(clusterRoleHosts) ? ClusterConstant.DEFAULT_PORT
+                        : clusterRoleHosts.get(0).getPort());
             }
         }
 

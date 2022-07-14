@@ -1,13 +1,13 @@
 package com.didichuxing.datachannel.arius.admin.core.service.cluster.region;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegionConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegionFSInfo;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author ohushenglin_v
@@ -52,14 +52,6 @@ public interface ClusterRegionService {
     List<Integer> listPhysicClusterId(Long logicClusterId);
 
     /**
-     * 获取指定物理集群绑定到指定逻辑集群的region
-     * @param logicClusterId 逻辑集群ID
-     * @param clusterName    物理集群名
-     * @return 物理集群clusterName下的被绑定到逻辑集群logicClusterId的region
-     */
-    List<ClusterRegion> listRegionsByLogicAndPhyCluster(Long logicClusterId, String clusterName);
-
-    /**
      * 获取指定物理集群下的region
      * @param clusterName 物理集群名
      * @return 物理集群clusterName下的region
@@ -79,17 +71,16 @@ public interface ClusterRegionService {
      * @param operator      操作人
      * @return              regionId
      */
-    Result<Long> createPhyClusterRegion(String clusterName, List<Integer> nodeIds, String regionName, String operator);
+    Result<Long> createPhyClusterRegion(String clusterName, String regionName, String operator);
 
     /**
      * 删除物理集群region
      *
-     * @param regionId  regionId
-     * @param operator  操作人
-     * @param projectId
+     * @param regionId regionId
+     * @param operator 操作人
      * @return
      */
-    Result<Void> deletePhyClusterRegion(Long regionId, String operator, Integer projectId);
+    Result<Void> deletePhyClusterRegion(Long regionId, String operator);
 
     /**
      * 批量删除物理集群中region
@@ -104,10 +95,9 @@ public interface ClusterRegionService {
      * @param regionId       regionId
      * @param logicClusterId 逻辑集群id
      * @param operator       operator
-     * @param projectId
      * @return
      */
-    Result<Void> unbindRegion(Long regionId, Long logicClusterId, String operator, Integer projectId);
+    Result<Void> unbindRegion(Long regionId, Long logicClusterId, String operator);
 
     /**
      * 绑定region到逻辑集群

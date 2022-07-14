@@ -37,12 +37,12 @@ public class ESClusterDynamicConfigController {
     public Result<Map<ClusterDynamicConfigsTypeEnum, Map<String, Object>>> getPhyClusterDynamicConfigs(@PathVariable String cluster) {
         return clusterPhyManager.getPhyClusterDynamicConfigs(cluster);
     }
-    
+
     @PutMapping("")
     @ApiOperation(value = "更新集群配置项的信息")
-    public Result<Boolean> updateDynamicConfig(HttpServletRequest request,@RequestBody ClusterSettingDTO param) {
+    public Result<Boolean> updateDynamicConfig(HttpServletRequest request, @RequestBody ClusterSettingDTO param) {
         return clusterPhyManager.updatePhyClusterDynamicConfig(param, HttpRequestUtil.getOperator(request),
-                HttpRequestUtil.getProjectId(request));
+            HttpRequestUtil.getProjectId(request));
     }
 
     @GetMapping("/attributes/{cluster}")

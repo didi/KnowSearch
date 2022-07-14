@@ -38,15 +38,15 @@ import org.springframework.stereotype.Service;
 public class LogicClusterIndecreaseHandler extends BaseWorkOrderHandler {
 
     @Autowired
-    private ClusterLogicService clusterLogicService;
+    private ClusterLogicService            clusterLogicService;
 
     @Autowired
     private ProjectClusterLogicAuthService projectClusterLogicAuthService;
 
     @Autowired
-    private ClusterNodeManager clusterNodeManager;
+    private ClusterNodeManager             clusterNodeManager;
     @Autowired
-    private ProjectService projectService;
+    private ProjectService                 projectService;
 
     /**
      * 工单是否自动审批
@@ -167,26 +167,20 @@ public class LogicClusterIndecreaseHandler extends BaseWorkOrderHandler {
 
         List<ClusterRegionWithNodeInfoDTO> clusterRegionWithNodeInfoDTOList = content.getRegionWithNodeInfo();
 
-        Result<Boolean> regionEditResult = clusterNodeManager.editMultiNode2Region(clusterRegionWithNodeInfoDTOList, approver,
-                workOrder.getSubmitorProjectId());
-        if (regionEditResult.failed()) { return Result.buildFrom(regionEditResult);}
-         operateRecordService.save(new OperateRecord.Builder()
-                 
-                         .bizId(content.getLogicClusterId())
-                         .operationTypeEnum(OperateTypeEnum.MY_CLUSTER_CAPACITY)
-                         .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                         .content(workOrder.getSubmitor() + "申请" + content.getLogicClusterName() + "的扩缩容操作，具体参数："
-                                                                                           + JSON.toJSONString(content))
-                         .userOperation(approver)
-                         .project(projectService.getProjectBriefByProjectId(workOrder.getSubmitorProjectId()))
-                 .build());
-        //operateRecordService.save(CLUSTER, OperationEnum.ADD, content.getLogicClusterId(),
-        //    workOrder.getSubmitor() + "申请" + content.getLogicClusterName() + "的扩缩容操作，具体参数："
-        //                                                                                   + JSON.toJSONString(content),
-        //    approver);
+        Result<Boolean> regionEditResult = clusterNodeManager.editMultiNode2Region(clusterRegionWithNodeInfoDTOList,
+            approver, workOrder.getSubmitorProjectId());
+        if (regionEditResult.failed()) {
+            return Result.buildFrom(regionEditResult);
+        }
+        operateRecordService.save(new OperateRecord.Builder().bizId(content.getLogicClusterId())
+            .operationTypeEnum(OperateTypeEnum.MY_CLUSTER_CAPACITY).triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+            .content(String.format("%s申请逻辑集群：%s的扩容操作，内容如下：%s", workOrder.getSubmitor(), content.getLogicClusterName(),
+                content))
+            .userOperation(approver)
+            .project(projectService.getProjectBriefByProjectId(workOrder.getSubmitorProjectId())).build());
 
-        List<String> administrators = getOPList().stream().map(UserBriefVO::getUserName).collect(
-                Collectors.toList());
-        return Result.buildSuccWithMsg(String.format("请联系管理员【%s】进行后续操作", administrators.get(new Random().nextInt(administrators.size()))));
+        List<String> administrators = getOPList().stream().map(UserBriefVO::getUserName).collect(Collectors.toList());
+        return Result.buildSuccWithMsg(
+            String.format("请联系管理员【%s】进行后续操作", administrators.get(new Random().nextInt(administrators.size()))));
     }
 }

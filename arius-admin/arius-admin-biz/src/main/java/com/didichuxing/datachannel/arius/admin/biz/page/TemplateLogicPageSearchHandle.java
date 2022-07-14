@@ -14,8 +14,10 @@ import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
+import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import com.google.common.collect.Lists;
 import java.util.List;
+import java.util.Optional;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -27,16 +29,16 @@ import org.springframework.stereotype.Component;
 public class TemplateLogicPageSearchHandle extends AbstractPageSearchHandle<TemplateConditionDTO, ConsoleTemplateVO> {
 
     @Autowired
-    private IndexTemplateService indexTemplateService;
+    private IndexTemplateService          indexTemplateService;
 
     @Autowired
-    private ClusterLogicService clusterLogicService;
+    private ClusterLogicService           clusterLogicService;
 
+    private static final FutureUtil<Void> BUILD_BELONG_CLUSTER_FUTURE_UTIL = FutureUtil
+        .init("BUILD_BELONG_CLUSTER_FUTURE_UTIL", 10, 10, 100);
 
-    private static final FutureUtil<Void> BUILD_BELONG_CLUSTER_FUTURE_UTIL = FutureUtil.init("BUILD_BELONG_CLUSTER_FUTURE_UTIL", 10, 10, 100);
-
-    private static final FutureUtil<Void> RESOURCE_BUILD_FUTURE_UTIL = FutureUtil.init("RESOURCE_BUILD_FUTURE_UTIL", 10, 10, 100);
-
+    private static final FutureUtil<Void> RESOURCE_BUILD_FUTURE_UTIL       = FutureUtil
+        .init("RESOURCE_BUILD_FUTURE_UTIL", 10, 10, 100);
 
     @Override
     protected Result<Boolean> checkCondition(TemplateConditionDTO templateConditionDTO, Integer projectId) {
@@ -60,10 +62,10 @@ public class TemplateLogicPageSearchHandle extends AbstractPageSearchHandle<Temp
 
     @Override
     protected void initCondition(TemplateConditionDTO condition, Integer projectId) {
-        if (!AuthConstant.SUPER_PROJECT_ID.equals(projectId)){
+        if (!AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
             condition.setProjectId(projectId);
         }
-        
+
     }
 
     @Override
@@ -77,23 +79,33 @@ public class TemplateLogicPageSearchHandle extends AbstractPageSearchHandle<Temp
 
     /******************************************private***********************************************/
     private List<ConsoleTemplateVO> buildOtherInfo(List<IndexTemplate> indexTemplateList) {
-        if (CollectionUtils.isEmpty(indexTemplateList)) { return Lists.newArrayList();}
+        if (CollectionUtils.isEmpty(indexTemplateList)) {
+            return Lists.newArrayList();
+        }
+        List<ConsoleTemplateVO> consoleTemplateVOList = ConvertUtil.list2List(indexTemplateList,
+            ConsoleTemplateVO.class);
+        consoleTemplateVOList.forEach(consoleTemplateVO -> {
 
-        List<ConsoleTemplateVO> consoleTemplateVOList = ConvertUtil.list2List(indexTemplateList, ConsoleTemplateVO.class);
+            Optional.ofNullable(consoleTemplateVO.getProjectId()).map(projectService::getProjectBriefByProjectId)
+                .map(ProjectBriefVO::getProjectName).ifPresent(consoleTemplateVO::setProjectName);
+
+        });
         //1. 设置逻辑集群
-        RESOURCE_BUILD_FUTURE_UTIL
-                .runnableTask(() -> setTemplateClusterName(consoleTemplateVOList))
-                .waitExecute();
+        RESOURCE_BUILD_FUTURE_UTIL.runnableTask(() -> setTemplateClusterName(consoleTemplateVOList)).waitExecute();
         return consoleTemplateVOList;
     }
 
     private void setTemplateClusterName(List<ConsoleTemplateVO> consoleTemplateVOList) {
-        if (CollectionUtils.isEmpty(consoleTemplateVOList)) { return;}
+        if (CollectionUtils.isEmpty(consoleTemplateVOList)) {
+            return;
+        }
 
         for (ConsoleTemplateVO consoleTemplateVO : consoleTemplateVOList) {
             BUILD_BELONG_CLUSTER_FUTURE_UTIL.runnableTask(() -> {
                 ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(consoleTemplateVO.getResourceId());
-                if (null != clusterLogic) { consoleTemplateVO.setCluster(clusterLogic.getName());}
+                if (null != clusterLogic) {
+                    consoleTemplateVO.setCluster(clusterLogic.getName());
+                }
             });
         }
         BUILD_BELONG_CLUSTER_FUTURE_UTIL.waitExecute();

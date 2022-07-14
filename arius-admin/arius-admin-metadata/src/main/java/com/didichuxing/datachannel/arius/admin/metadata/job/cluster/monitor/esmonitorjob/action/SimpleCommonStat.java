@@ -7,7 +7,6 @@ public class SimpleCommonStat {
     @JSONField(name = "routing")
     private Routing routing;
 
-
     public Routing getRouting() {
         return routing;
     }

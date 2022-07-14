@@ -50,18 +50,20 @@ public class NormalOrderController {
     @PutMapping("/{type}/submit")
     @ResponseBody
     @ApiOperation(value = "提交工单接口")
-    @ApiImplicitParams({@ApiImplicitParam(paramType = "path", dataType = "String", name = "type", value = "工单类型", required = true)})
+    @ApiImplicitParams({ @ApiImplicitParam(paramType = "path", dataType = "String", name = "type", value = "工单类型", required = true) })
     public Result<AriusWorkOrderInfoSubmittedVO> submit(@PathVariable(value = "type") String type,
                                                         @RequestBody WorkOrderDTO workOrderDTO) throws AdminOperateException {
-        return workOrderManager.submit( workOrderDTO );
+        return workOrderManager.submit(workOrderDTO);
     }
 
     @PutMapping("/{orderId}")
     @ResponseBody
     @ApiOperation(value = "审核")
-    public Result<Void> process(@PathVariable(value = "orderId") Long orderId, @RequestBody WorkOrderProcessDTO processDTO) throws NotFindSubclassException, OperateForbiddenException {
+    public Result<Void> process(@PathVariable(value = "orderId") Long orderId,
+                                @RequestBody WorkOrderProcessDTO processDTO) throws NotFindSubclassException,
+                                                                             OperateForbiddenException {
         //设置当前操作人
-        processDTO.setAssignee( SpringTool.getUserName() );
+        processDTO.setAssignee(SpringTool.getUserName());
         return workOrderManager.process(processDTO);
     }
 
@@ -84,7 +86,8 @@ public class NormalOrderController {
     @ApiOperation(value = "工单申请列表")
     public Result<List<WorkOrderVO>> getOrderApplyList(HttpServletRequest httpServletRequest,
                                                        @RequestParam(value = "status") Integer status) throws OperateForbiddenException {
-        return workOrderManager.getOrderApplyList(SpringTool.getUserName(), status, HttpRequestUtil.getProjectId(httpServletRequest));
+        return workOrderManager.getOrderApplyList(SpringTool.getUserName(), status,
+            HttpRequestUtil.getProjectId(httpServletRequest));
     }
 
     @GetMapping("/approvals")

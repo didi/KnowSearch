@@ -2,7 +2,6 @@ package com.didichuxing.datachannel.arius.admin.biz.template.srv.base;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
-import com.didichuxing.datachannel.arius.admin.common.constant.template.NewTemplateSrvEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import java.util.List;
@@ -22,9 +21,10 @@ public interface BaseTemplateSrv {
 
     /**
      * 获取当前模板服务的类型
+     *
      * @return 指定的模板服务类型
      */
-    NewTemplateSrvEnum templateSrv();
+    TemplateServiceEnum templateSrv();
 
     /**
      * 获取当前模板服务的名称
@@ -50,13 +50,15 @@ public interface BaseTemplateSrv {
      * @param projectId
      * @return
      */
-    Result<Void> closeSrv(List<Integer> templateIdList, String operator, Integer projectId) throws AdminOperateException ;
+    Result<Void> closeSrv(List<Integer> templateIdList, String operator,
+                          Integer projectId) throws AdminOperateException;
+
     ///////////////////////////////////srv
-        /**
-     * 判断指定物理集群是否开启了当前索引服务
-     * @param phyClusterName 物理集群名字
-     * @return 校验结果
-     */
+    /**
+    * 判断指定物理集群是否开启了当前索引服务
+    * @param phyClusterName 物理集群名字
+    * @return 校验结果
+    */
     boolean isTemplateSrvOpen(String phyClusterName);
 
     /**
@@ -72,7 +74,6 @@ public interface BaseTemplateSrv {
      * @return 模板服务描述
      */
     String templateServiceName();
-
 
     /**
      * 根据物理集群名称判断是否可以开启对应的模板服务

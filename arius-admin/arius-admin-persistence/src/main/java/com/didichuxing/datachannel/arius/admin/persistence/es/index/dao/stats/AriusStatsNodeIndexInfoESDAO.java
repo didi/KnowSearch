@@ -9,9 +9,9 @@ import javax.annotation.PostConstruct;
 public class AriusStatsNodeIndexInfoESDAO extends BaseAriusStatsESDAO {
 
     @PostConstruct
-    public void init(){
-        super.indexName   = dataCentreUtil.getAriusStatsNodeIndexInfo();
+    public void init() {
+        super.indexName = dataCentreUtil.getAriusStatsNodeIndexInfo();
 
-        register( AriusStatsEnum.NODE_INDEX_INFO,this);
+        register(AriusStatsEnum.NODE_INDEX_INFO, this);
     }
 }

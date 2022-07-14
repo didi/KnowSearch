@@ -18,23 +18,23 @@ import lombok.NoArgsConstructor;
 public class WorkOrderProcessDTO {
 
     @ApiModelProperty("工单id")
-    private Long              orderId;
+    private Long    orderId;
 
     @ApiModelProperty("审批结果，agree/disagree/submit")
-    private String              outcome;
+    private String  outcome;
 
     @ApiModelProperty("审批意见")
-    private String              comment;
+    private String  comment;
 
     @ApiModelProperty("审批人")
-    private String              assignee;
+    private String  assignee;
 
     @ApiModelProperty("审批人projectId")
     private Integer assigneeProjectId;
 
     @ApiModelProperty("是否自动审批")
-    private Boolean             checkAuthority;
+    private Boolean checkAuthority;
 
     @ApiModelProperty("业务参数")
-    private Object              contentObj;
+    private Object  contentObj;
 }

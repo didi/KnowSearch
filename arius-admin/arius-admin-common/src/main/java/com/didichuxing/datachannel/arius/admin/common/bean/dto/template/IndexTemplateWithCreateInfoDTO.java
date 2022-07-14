@@ -6,7 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-
 /**
  * @author chengxiang
  * @date 2022/5/26
@@ -21,9 +20,9 @@ public class IndexTemplateWithCreateInfoDTO extends IndexTemplateDTO {
     private Boolean cyclicalRoll;
 
     @ApiModelProperty("mapping")
-    private String mapping;
+    private String  mapping;
 
     @ApiModelProperty("setting信息")
-    private String setting;
+    private String  setting;
 
 }

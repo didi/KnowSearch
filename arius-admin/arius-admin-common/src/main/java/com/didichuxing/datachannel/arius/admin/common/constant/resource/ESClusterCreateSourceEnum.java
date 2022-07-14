@@ -5,20 +5,20 @@ package com.didichuxing.datachannel.arius.admin.common.constant.resource;
  * @author chengxiang
  */
 public enum ESClusterCreateSourceEnum {
-                               /**
-                                *
-                                */
-                               ES_IMPORT(0, "接入集群"),
+                                       /**
+                                        *
+                                        */
+                                       ES_IMPORT(0, "接入集群"),
 
-                               /**
-                                * vmware集群
-                                */
-                               ES_NEW(1, "新建集群"),
+                                       /**
+                                        * vmware集群
+                                        */
+                                       ES_NEW(1, "新建集群"),
 
-                               /**
-                                * 未知
-                                */
-                               UNKNOWN(-1, "unknown");
+                                       /**
+                                        * 未知
+                                        */
+                                       UNKNOWN(-1, "unknown");
 
     ESClusterCreateSourceEnum(int code, String desc) {
         this.code = code;

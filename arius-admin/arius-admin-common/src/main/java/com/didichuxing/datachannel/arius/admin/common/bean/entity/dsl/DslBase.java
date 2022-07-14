@@ -28,7 +28,7 @@ public class DslBase {
      * 查询模板的md5值
      */
     @ApiModelProperty(value = "查询模板MD5", example = "V2_EA317B2029682DB83A191CBD797A66FE")
-    private String dslTemplateMd5;
+    private String  dslTemplateMd5;
 
     /**
      * 获取索引主键

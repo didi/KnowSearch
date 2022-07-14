@@ -18,5 +18,5 @@ import java.util.List;
 public class MultiMetricsClusterPhyNodeDTO extends MetricsClusterPhyDTO {
 
     @ApiModelProperty("集群多个节点ip")
-    private List<String>  nodeNames;
+    private List<String> nodeNames;
 }

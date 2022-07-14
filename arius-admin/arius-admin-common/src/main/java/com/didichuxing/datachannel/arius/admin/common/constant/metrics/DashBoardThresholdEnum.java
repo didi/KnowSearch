@@ -11,17 +11,24 @@ import java.util.Map;
  */
 public enum DashBoardThresholdEnum {
 
-    BIG_COPY_INDEX_CLUSTER_BLACKLIST("bigCopyIndexClusterBlacklist", "大副本索引集群黑名单","[]"),
-    INDEX_TEMPLATE_SEGMENTS_MEMORY_SIZE("template_segmentMemSize", "索引模板Segements内存大小","1"),
-    INDEX_TEMPLATE_SEGMENTS_NUM("template_segmentNum", "索引模板Segments个数","1000"),
-    INDEX_MAPPING_NUM("index_mappingNum", "索引Mapping个数","100"),
-    NODE_SHARD_NUM("node_shardNum", "节点分片个数","500"),
-    INDEX_SEGMENT_MEMORY_SIZE("index_segmentMemSize", "索引Sements内存大小","1"),
-    INDEX_SEGMENT_NUM("index_segmentNum", "索引Segements个数","1000"),
-    INDEX_SMALL_SHARD_LIST("index_smallShard", "小Shard索引列表(shard个数大于1)","1");
+                                    BIG_COPY_INDEX_CLUSTER_BLACKLIST("bigCopyIndexClusterBlacklist", "大副本索引集群黑名单",
+                                                                     "[]"), INDEX_TEMPLATE_SEGMENTS_MEMORY_SIZE("template_segmentMemSize",
+                                                                                                                "索引模板Segements内存大小",
+                                                                                                                "1"), INDEX_TEMPLATE_SEGMENTS_NUM("template_segmentNum",
+                                                                                                                                                  "索引模板Segments个数",
+                                                                                                                                                  "1000"), INDEX_MAPPING_NUM("index_mappingNum",
+                                                                                                                                                                             "索引Mapping个数",
+                                                                                                                                                                             "100"), NODE_SHARD_NUM("node_shardNum",
+                                                                                                                                                                                                    "节点分片个数",
+                                                                                                                                                                                                    "500"), INDEX_SEGMENT_MEMORY_SIZE("index_segmentMemSize",
+                                                                                                                                                                                                                                      "索引Sements内存大小",
+                                                                                                                                                                                                                                      "1"), INDEX_SEGMENT_NUM("index_segmentNum",
+                                                                                                                                                                                                                                                              "索引Segements个数",
+                                                                                                                                                                                                                                                              "1000"), INDEX_SMALL_SHARD_LIST("index_smallShard",
+                                                                                                                                                                                                                                                                                              "小Shard索引列表(shard个数大于1)",
+                                                                                                                                                                                                                                                                                              "1");
 
-
-    DashBoardThresholdEnum(String name, String desc,String value) {
+    DashBoardThresholdEnum(String name, String desc, String value) {
         this.name = name;
         this.desc = desc;
         this.value = value;
@@ -35,7 +42,10 @@ public enum DashBoardThresholdEnum {
     public String getName() {
         return name;
     }
-    public String getValue() { return value; }
+
+    public String getValue() {
+        return value;
+    }
 
     public static Map getDashBoardThresholdValue() {
         Map<String, String> map = new HashMap();

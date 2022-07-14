@@ -88,5 +88,6 @@ public interface ClusterPhyQuickCommandManager {
      * @param projectId         项目
      * @return              List<IndexCatInfoVO>
      */
-    PaginationResult<IndicesDistributionVO> indicesDistributionPage(IndexQueryDTO condition, Integer projectId) throws NotFindSubclassException;
+    PaginationResult<IndicesDistributionVO> indicesDistributionPage(IndexQueryDTO condition,
+                                                                    Integer projectId) throws NotFindSubclassException;
 }

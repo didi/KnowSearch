@@ -3,19 +3,6 @@ package com.didichuxing.datachannel.arius.admin.biz.cluster.impl;
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.DATA_NODE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType.FAIL;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
-import org.apache.commons.collections4.CollectionUtils;
-import org.jetbrains.annotations.Nullable;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterNodeManager;
 import com.didichuxing.datachannel.arius.admin.common.Triple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
@@ -30,6 +17,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterR
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.event.region.RegionEditEvent;
+import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminTaskException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
@@ -45,6 +33,16 @@ import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import org.apache.commons.collections4.CollectionUtils;
+import org.jetbrains.annotations.Nullable;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author ohushenglin_v
@@ -54,7 +52,6 @@ import com.google.common.collect.Maps;
 public class ClusterNodeManagerImpl implements ClusterNodeManager {
 
     private static final ILog      LOGGER = LogFactory.getLog(ClusterNodeManager.class);
-
 
     @Autowired
     private ClusterRoleHostService clusterRoleHostService;
@@ -72,7 +69,7 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
     private OperateRecordService   operateRecordService;
 
     @Autowired
-    private ClusterLogicService clusterLogicService;
+    private ClusterLogicService    clusterLogicService;
 
     @Override
     public Result<List<ESClusterRoleHostWithRegionInfoVO>> listDivide2ClusterNodeInfo(Long clusterId) {
@@ -81,29 +78,32 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
             clusterRoleHostList = clusterRoleHostService.getByRoleAndClusterId(clusterId, DATA_NODE.getDesc());
         } catch (Exception e) {
             LOGGER.error("class=ClusterPhyManagerImpl||method=listDivide2ClusterNodeInfo||clusterId={}||errMsg={}",
-                    clusterId, e.getMessage(), e);
+                clusterId, e.getMessage(), e);
         }
-        List<ESClusterRoleHostWithRegionInfoVO> esClusterRoleHostWithRegionInfoVOS =
-                ConvertUtil.list2List(clusterRoleHostList, ESClusterRoleHostWithRegionInfoVO.class);
+        List<ESClusterRoleHostWithRegionInfoVO> esClusterRoleHostWithRegionInfoVOS = ConvertUtil
+            .list2List(clusterRoleHostList, ESClusterRoleHostWithRegionInfoVO.class);
 
         // 根据regionId获取region名称
         List<Integer> regionIdList = esClusterRoleHostWithRegionInfoVOS.stream()
-                .map(ESClusterRoleHostWithRegionInfoVO::getRegionId)
-                .distinct()
-                .collect(Collectors.toList());
+            .map(ESClusterRoleHostWithRegionInfoVO::getRegionId).distinct().collect(Collectors.toList());
 
-        if (CollectionUtils.isEmpty(regionIdList)) { return Result.buildSucc(esClusterRoleHostWithRegionInfoVOS);}
+        if (CollectionUtils.isEmpty(regionIdList)) {
+            return Result.buildSucc(esClusterRoleHostWithRegionInfoVOS);
+        }
 
         Map<Integer, String> regionId2RegionNameMap = Maps.newHashMap();
         for (Integer regionId : regionIdList) {
             ClusterRegion clusterRegion = clusterRegionService.getRegionById(regionId.longValue());
-            if (null == clusterRegion) { continue;}
+            if (null == clusterRegion) {
+                continue;
+            }
 
             regionId2RegionNameMap.put(regionId, clusterRegion.getName());
         }
 
         for (ESClusterRoleHostWithRegionInfoVO clusterRoleHostWithRegionInfoVO : esClusterRoleHostWithRegionInfoVOS) {
-            clusterRoleHostWithRegionInfoVO.setRegionName(regionId2RegionNameMap.get(clusterRoleHostWithRegionInfoVO.getRegionId()));
+            clusterRoleHostWithRegionInfoVO
+                .setRegionName(regionId2RegionNameMap.get(clusterRoleHostWithRegionInfoVO.getRegionId()));
         }
         return Result.buildSucc(esClusterRoleHostWithRegionInfoVOS);
     }
@@ -112,40 +112,44 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
     @Transactional(rollbackFor = Exception.class)
     public Result<List<Long>> createMultiNode2Region(List<ClusterRegionWithNodeInfoDTO> params, String operator,
                                                      Integer projectId) throws AdminOperateException {
-        final Result<Void> result = ProjectUtils.checkProjectCorrectly(i -> i, projectId,projectId);
-        if (result.failed()){
+        final Result<Void> result = ProjectUtils.checkProjectCorrectly(i -> i, projectId, projectId);
+        if (result.failed()) {
             return Result.buildFail(result.getMessage());
         }
 
         List<Long> regionIdLis = Lists.newArrayList();
         for (ClusterRegionWithNodeInfoDTO param : params) {
             Result<Boolean> checkRet = baseCheckParamValid(param);
-            if (checkRet.failed()) { return Result.buildFrom(checkRet);}
-
-            if (clusterRegionService.isExistByRegionName(param.getName())) {
-                return Result.buildFail(String.format("region名称[%s]已经存在", param.getName()));
+            if (checkRet.failed()) {
+                throw new AdminOperateException(
+                    String.format("region名称[%s], errMsg:%s", param.getName(), checkRet.getMessage()));
             }
 
-            if (CollectionUtils.isEmpty(param.getBindingNodeIds())) { return Result.buildFail("region节点集合为空");}
+            if (clusterRegionService.isExistByRegionName(param.getName())) {
+                throw new AdminOperateException(String.format("region名称[%s]已经存在", param.getName()));
+            }
 
-            Result<Long> addRegionRet = clusterRegionService.createPhyClusterRegion(param.getPhyClusterName(), param.getBindingNodeIds(),
-                    param.getName(), operator);
+            if (CollectionUtils.isEmpty(param.getBindingNodeIds())) {
+                throw new AdminOperateException(
+                    String.format("region名称[%s], errMsg=%s", param.getName(), "划分至该region的节点为空"));
+            }
+
+            Result<Long> addRegionRet = clusterRegionService.createPhyClusterRegion(param.getPhyClusterName(),
+                param.getName(), operator);
+
             if (addRegionRet.success()) {
                 param.setId(addRegionRet.getData());
                 // 调用扩缩容region接口来添加region
                 Result<Boolean> booleanResult = editNode2Region(param);
                 if (booleanResult.success()) {
                     // 2. 操作记录 :Region变更
-                    operateRecordService.save(
-                            new OperateRecord.Builder()
-                                    .userOperation(operator)
-                                    .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_REGION_CHANGE)
-                                    .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                                    .content(String.format("新增region[%s]", param.getName()))
-                                    .build());
+                    operateRecordService.save(new OperateRecord.Builder().userOperation(operator)
+                        .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_REGION_CHANGE)
+                        .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                        .content(String.format("新增region[%s]", param.getName())).build());
                     regionIdLis.add(addRegionRet.getData());
-                }else {
-                    throw new AdminOperateException(addRegionRet.getMessage(), FAIL);
+                } else {
+                    throw new AdminOperateException(addRegionRet.getMessage());
                 }
             }
         }
@@ -156,17 +160,20 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
     @Transactional(rollbackFor = Exception.class)
     public Result<Boolean> editMultiNode2Region(List<ClusterRegionWithNodeInfoDTO> params, String operator,
                                                 Integer projectId) throws AdminOperateException {
-         final Result<Void> result = ProjectUtils.checkProjectCorrectly(i -> i, projectId,projectId);
-        if (result.failed()){
+        final Result<Void> result = ProjectUtils.checkProjectCorrectly(i -> i, projectId, projectId);
+        if (result.failed()) {
             return Result.buildFail(result.getMessage());
         }
         for (ClusterRegionWithNodeInfoDTO param : params) {
             Result<Boolean> editNode2RegionRet = editNode2Region(param);
-            if (editNode2RegionRet.failed()) { throw new AdminOperateException(editNode2RegionRet.getMessage(), FAIL);}
+            if (editNode2RegionRet.failed()) {
+                throw new AdminOperateException(editNode2RegionRet.getMessage(), FAIL);
+            }
         }
 
         // 发布region变更的事件，对模板和索引生效
-        List<Long> regionIdList = params.stream().distinct().map(ClusterRegionWithNodeInfoDTO::getId).collect(Collectors.toList());
+        List<Long> regionIdList = params.stream().distinct().map(ClusterRegionWithNodeInfoDTO::getId)
+            .collect(Collectors.toList());
         SpringTool.publish(new RegionEditEvent(this, regionIdList));
 
         return Result.buildSucc(true);
@@ -182,7 +189,6 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
         return Result.buildSucc(buildClusterRoleHostStats(clusterPhy.getCluster(), clusterRoleHostList));
     }
 
-
     @Override
     public Result<List<ESClusterRoleHostVO>> listClusterLogicNode(Integer clusterId) {
         ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(Long.valueOf(clusterId));
@@ -190,15 +196,16 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
             return Result.buildFail(String.format("集群[%s]不存在", clusterId));
         }
         ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(clusterLogic.getId());
-        if (clusterRegion==null){
+        if (clusterRegion == null) {
             return Result.buildFail(String.format("集群[%s]未绑定region", clusterId));
         }
-        Result<List<ClusterRoleHost>> result = clusterRoleHostService.listByRegionId(Math.toIntExact(clusterRegion.getId()));
+        Result<List<ClusterRoleHost>> result = clusterRoleHostService
+            .listByRegionId(Math.toIntExact(clusterRegion.getId()));
         if (result.failed()) {
             return Result.buildFail(result.getMessage());
         }
         //节点名称列表
-        return Result.buildSucc(buildClusterRoleHostStats(clusterRegion.getPhyClusterName(),result.getData()));
+        return Result.buildSucc(buildClusterRoleHostStats(clusterRegion.getPhyClusterName(), result.getData()));
     }
 
     @Override
@@ -208,19 +215,39 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
             return Result.buildFail(String.format("集群[%s]不存在", clusterLogicName));
         }
         ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(clusterLogic.getId());
-        Result<List<ClusterRoleHost>> result = clusterRoleHostService.listByRegionId(Math.toIntExact(clusterRegion.getId()));
+        Result<List<ClusterRoleHost>> result = clusterRoleHostService
+            .listByRegionId(Math.toIntExact(clusterRegion.getId()));
 
         if (result.failed()) {
             return Result.buildFail(result.getMessage());
         }
 
         //节点名称列表
-        return Result.buildSucc(result.getData().stream().map(ClusterRoleHost::getNodeSet).collect(Collectors.toList()));
+        return Result
+            .buildSucc(result.getData().stream().map(ClusterRoleHost::getNodeSet).collect(Collectors.toList()));
     }
 
     @Override
     public boolean collectNodeSettings(String cluster) throws AdminTaskException {
         return clusterRoleHostService.collectClusterNodeSettings(cluster);
+    }
+
+    /**
+     * @param regionId
+     * @return
+     */
+    @Override
+    public Result<List<ESClusterRoleHostVO>> listClusterRoleHostByRegionId(Long regionId) {
+        ClusterRegion region = clusterRegionService.getRegionById(regionId);
+        if (region == null) {
+            return Result.buildFail("region不存在");
+        }
+        Result<List<ClusterRoleHost>> ret = clusterRoleHostService.listByRegionId(region.getId().intValue());
+        if (ret.failed()) {
+            return Result.buildFail("获取host失败");
+
+        }
+        return Result.buildSucc(ConvertUtil.list2List(ret.getData(), ESClusterRoleHostVO.class));
     }
 
     /**************************************** private method ***************************************************/
@@ -235,7 +262,8 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
                 .collect(
                     Collectors.toMap(region -> String.valueOf(region.getId()), ClusterRegion::getName, (r1, r2) -> r1));
 
-            Map<String, Triple<Long, Long, Double>> nodeDiskUsageMap = esClusterNodeService.syncGetNodesDiskUsage(cluster);
+            Map<String, Triple<Long, Long, Double>> nodeDiskUsageMap = esClusterNodeService
+                .syncGetNodesDiskUsage(cluster);
             roleHostList.forEach(vo -> {
                 Optional.ofNullable(regionMap.get(String.valueOf(vo.getRegionId()))).ifPresent(vo::setRegionName);
                 Optional.ofNullable(nodeDiskUsageMap.get(vo.getNodeSet())).ifPresent(triple -> {
@@ -254,7 +282,9 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
             return Result.buildFail("参数为空");
         }
 
-        if (AriusObjUtils.isBlank(param.getName())) { return Result.buildFail("region名称不允许为空或者空字符串");}
+        if (AriusObjUtils.isBlank(param.getName())) {
+            return Result.buildFail("region名称不允许为空或者空字符串");
+        }
 
         if (!clusterPhyService.isClusterExists(param.getPhyClusterName())) {
             return Result.buildFail(String.format("物理集群[%s]不存在", param.getPhyClusterName()));
@@ -267,12 +297,9 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
         if (checkRet.failed()) {
             return Result.buildFrom(checkRet);
         }
-        if (!clusterRegionService.isExistByRegionId(param.getId().intValue())) {
-            return Result.buildFail(String.format("regionId[%s]不存在", param.getId()));
-        }
 
         // 校验bindingNodeIds 和 unBindingNodeIds的重复性
-        List<Integer> bindingNodeIds   = param.getBindingNodeIds();
+        List<Integer> bindingNodeIds = param.getBindingNodeIds();
         List<Integer> unBindingNodeIds = param.getUnBindingNodeIds();
         if (CollectionUtils.isNotEmpty(bindingNodeIds)) {
             for (Integer bindingNodeId : bindingNodeIds) {
@@ -284,14 +311,19 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
 
         if (CollectionUtils.isNotEmpty(bindingNodeIds)) {
             // 绑定node 到指定 region
-            boolean editBingingNodeRegionIdFlag = clusterRoleHostService.editNodeRegionId(bindingNodeIds, param.getId().intValue());
-            if (!editBingingNodeRegionIdFlag) { return Result.buildFail(String.format("新增region节点[%s]失败", bindingNodeIds));}
+            boolean editBingingNodeRegionIdFlag = clusterRoleHostService.editNodeRegionId(bindingNodeIds,
+                param.getId().intValue());
+            if (!editBingingNodeRegionIdFlag) {
+                return Result.buildFail(String.format("新增region节点[%s]失败", bindingNodeIds));
+            }
         }
 
         if (CollectionUtils.isNotEmpty(unBindingNodeIds)) {
             // 解绑node 到指定 region
             boolean editUnBingingNodeRegionFlag = clusterRoleHostService.editNodeRegionId(unBindingNodeIds, -1);
-            if (!editUnBingingNodeRegionFlag) { return Result.buildFail(String.format("删除region节点[%s]失败", unBindingNodeIds));}
+            if (!editUnBingingNodeRegionFlag) {
+                return Result.buildFail(String.format("删除region节点[%s]失败", unBindingNodeIds));
+            }
         }
         return Result.build(true);
     }

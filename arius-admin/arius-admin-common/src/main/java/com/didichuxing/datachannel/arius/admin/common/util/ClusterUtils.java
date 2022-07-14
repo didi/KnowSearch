@@ -13,38 +13,39 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.Cl
  */
 public class ClusterUtils {
 
-	private ClusterUtils(){}
+    private ClusterUtils() {
+    }
 
-	public static String getDuplicateIp(List<String> ips) {
-		if(CollectionUtils.isEmpty(ips)){
-			return null;
-		}
+    public static String getDuplicateIp(List<String> ips) {
+        if (CollectionUtils.isEmpty(ips)) {
+            return null;
+        }
 
-		Set<String> tempSet = Sets.newHashSet();
-		for (String ip : ips) {
-			if (tempSet.contains(ip)) {
-				return ip;
-			}
+        Set<String> tempSet = Sets.newHashSet();
+        for (String ip : ips) {
+            if (tempSet.contains(ip)) {
+                return ip;
+            }
 
-			tempSet.add(ip);
-		}
+            tempSet.add(ip);
+        }
 
-		return null;
-	}
+        return null;
+    }
 
-	public static  Integer getClusterLogicHealthByClusterHealth(Set<Integer> clusterHealthSet) {
-		if (CollectionUtils.isEmpty(clusterHealthSet) || clusterHealthSet.contains(UNKNOWN.getCode())) {
-			return UNKNOWN.getCode();
-		}
+    public static Integer getClusterLogicHealthByClusterHealth(Set<Integer> clusterHealthSet) {
+        if (CollectionUtils.isEmpty(clusterHealthSet) || clusterHealthSet.contains(UNKNOWN.getCode())) {
+            return UNKNOWN.getCode();
+        }
 
-		if (clusterHealthSet.contains(RED.getCode())) {
-			return RED.getCode();
-		}
+        if (clusterHealthSet.contains(RED.getCode())) {
+            return RED.getCode();
+        }
 
-		if (clusterHealthSet.contains(YELLOW.getCode())) {
-			return YELLOW.getCode();
-		}
+        if (clusterHealthSet.contains(YELLOW.getCode())) {
+            return YELLOW.getCode();
+        }
 
-		return GREEN.getCode();
-	}
+        return GREEN.getCode();
+    }
 }

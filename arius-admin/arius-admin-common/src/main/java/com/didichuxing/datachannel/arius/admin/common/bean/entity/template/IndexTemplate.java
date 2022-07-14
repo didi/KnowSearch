@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class IndexTemplate extends BaseEntity implements  Comparable<IndexTemplate> {
+public class IndexTemplate extends BaseEntity implements Comparable<IndexTemplate> {
 
     private Integer id;
 
@@ -164,7 +164,7 @@ public class IndexTemplate extends BaseEntity implements  Comparable<IndexTempla
     /**
      * 可用磁盘容量
      */
-    private Double diskSize;
+    private Double  diskSize;
 
     @Override
     public int compareTo(IndexTemplate o) {

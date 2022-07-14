@@ -1,5 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.core.service.es.impl;
 
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_OPERATE_TIMEOUT;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.VERSION;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.VERSION_INNER_NUMBER;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.VERSION_NUMBER;
+
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.NodeAttrInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -32,6 +37,15 @@ import com.didiglobal.logi.log.LogFactory;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import java.net.InetAddress;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.compress.utils.Sets;
 import org.apache.commons.lang3.StringUtils;
@@ -41,12 +55,6 @@ import org.elasticsearch.rest.RestStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.net.InetAddress;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.*;
-
 /**
  * @author d06679
  * @date 2019/5/8
@@ -54,22 +62,21 @@ import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOpe
 @Service
 public class ESClusterServiceImpl implements ESClusterService {
 
-    private static final ILog LOGGER = LogFactory.getLog(ESClusterServiceImpl.class);
+    private static final ILog LOGGER                = LogFactory.getLog(ESClusterServiceImpl.class);
 
     @Autowired
     private ESClusterDAO      esClusterDAO;
 
-    private final String ACKNOWLEDGED = "acknowledged";
-    private final String SHARDS = "_shards";
-    private final String FAILED = "failed";
-    private final String DESCRIPTION = "description";
-    private final String START_TIME_IN_MILLIS = "start_time_in_millis";
-    private final String RUNNING_TIME_IN_NANOS = "running_time_in_nanos";
-    private final String ACTION = "action";
-    private final String NAME = "name";
-    private final String NODES = "nodes";
-    private final String TASKS = "tasks";
-
+    private final String      ACKNOWLEDGED          = "acknowledged";
+    private final String      SHARDS                = "_shards";
+    private final String      FAILED                = "failed";
+    private final String      DESCRIPTION           = "description";
+    private final String      START_TIME_IN_MILLIS  = "start_time_in_millis";
+    private final String      RUNNING_TIME_IN_NANOS = "running_time_in_nanos";
+    private final String      ACTION                = "action";
+    private final String      NAME                  = "name";
+    private final String      NODES                 = "nodes";
+    private final String      TASKS                 = "tasks";
 
     /**
      * 关闭集群re balance
@@ -125,14 +132,15 @@ public class ESClusterServiceImpl implements ESClusterService {
     @Override
     public boolean hasSettingExist(String cluster, String settingFlatName) {
         Map<String, Object> clusterSettingMap = esClusterDAO.getPersistentClusterSettings(cluster);
-        if (null == clusterSettingMap) { return false;}
+        if (null == clusterSettingMap) {
+            return false;
+        }
         return clusterSettingMap.containsKey(settingFlatName);
     }
 
-
     @Override
     public Map<String, List<String>> syncGetNode2PluginsMap(String cluster) {
-        return esClusterDAO.getNode2PluginsMap(cluster);
+        return esClusterDAO.getNode2PluginsMap(cluster, 3);
     }
 
     /**
@@ -146,8 +154,8 @@ public class ESClusterServiceImpl implements ESClusterService {
         Map<String, Set<String>> ret = new HashMap<>();
 
         try {
-            ESIndicesGetAliasResponse response = esClusterDAO.getClusterAlias(cluster);
-            if(response == null || response.getM() == null) {
+            ESIndicesGetAliasResponse response = esClusterDAO.getClusterAlias(cluster, 3);
+            if (response == null || response.getM() == null) {
                 return ret;
             }
             for (String index : response.getM().keySet()) {
@@ -160,7 +168,8 @@ public class ESClusterServiceImpl implements ESClusterService {
             }
             return ret;
         } catch (Exception t) {
-            LOGGER.error("class=ClusterClientPool||method=syncGetAliasMap||clusterName={}||errMsg=fail to get alias", cluster, t);
+            LOGGER.error("class=ClusterClientPool||method=syncGetAliasMap||clusterName={}||errMsg=fail to get alias",
+                cluster, t);
             return ret;
         }
     }
@@ -192,7 +201,7 @@ public class ESClusterServiceImpl implements ESClusterService {
      * @return
      */
     @Override
-    public boolean judgeClientAlive(String cluster,String password ,String address) {
+    public boolean judgeClientAlive(String cluster, String password, String address) {
 
         String[] hostAndPortStr = StringUtils.split(address, ":");
         if (null == hostAndPortStr || hostAndPortStr.length <= 1) {
@@ -205,11 +214,11 @@ public class ESClusterServiceImpl implements ESClusterService {
         String port = hostAndPortStr[1];
         List<InetSocketTransportAddress> transportAddresses = Lists.newArrayList();
         ESClient esClient = new ESClient();
-        try  {
+        try {
             transportAddresses.add(new InetSocketTransportAddress(InetAddress.getByName(host), Integer.parseInt(port)));
             esClient.addTransportAddresses(transportAddresses.toArray(new TransportAddress[0]));
             esClient.setClusterName(cluster);
-            if(StringUtils.isNotBlank(password)){
+            if (StringUtils.isNotBlank(password)) {
                 esClient.setPassword(password);
             }
             esClient.start();
@@ -223,14 +232,14 @@ public class ESClusterServiceImpl implements ESClusterService {
                 "class=ESClusterServiceImpl||method=judgeClientAlive||cluster={}||client={}||msg=judgeAlive is excepjudgeClientAlivetion!",
                 cluster, address, e);
             return false;
-        }finally {
+        } finally {
             esClient.close();
         }
     }
 
-	@Override
+    @Override
     public ESClusterHealthResponse syncGetClusterHealth(String clusterName) {
-        return esClusterDAO.getClusterHealth(clusterName);
+        return esClusterDAO.getClusterHealth(clusterName, 3);
     }
 
     @Override
@@ -240,7 +249,7 @@ public class ESClusterServiceImpl implements ESClusterService {
 
     @Override
     public ClusterHealthEnum syncGetClusterHealthEnum(String clusterName) {
-        ESClusterHealthResponse clusterHealthResponse = esClusterDAO.getClusterHealth(clusterName);
+        ESClusterHealthResponse clusterHealthResponse = esClusterDAO.getClusterHealth(clusterName, 3);
 
         ClusterHealthEnum clusterHealthEnum = ClusterHealthEnum.UNKNOWN;
         if (clusterHealthResponse != null) {
@@ -264,7 +273,8 @@ public class ESClusterServiceImpl implements ESClusterService {
         Map<String, Integer> segmentsOnIpMap = Maps.newHashMap();
         for (ECSegmentOnIp ecSegmentsOnIp : esClusterDAO.getSegmentsOfIpByCluster(clusterName)) {
             if (segmentsOnIpMap.containsKey(ecSegmentsOnIp.getIp())) {
-                Integer newSegments = segmentsOnIpMap.get(ecSegmentsOnIp.getIp()) + Integer.parseInt(ecSegmentsOnIp.getSegment());
+                Integer newSegments = segmentsOnIpMap.get(ecSegmentsOnIp.getIp())
+                                      + Integer.parseInt(ecSegmentsOnIp.getSegment());
                 segmentsOnIpMap.put(ecSegmentsOnIp.getIp(), newSegments);
             } else {
                 segmentsOnIpMap.put(ecSegmentsOnIp.getIp(), Integer.valueOf(ecSegmentsOnIp.getSegment()));
@@ -280,17 +290,17 @@ public class ESClusterServiceImpl implements ESClusterService {
 
     @Override
     public String synGetESVersionByCluster(String cluster) {
-        return esClusterDAO.getESVersionByCluster(cluster);
+        return esClusterDAO.getESVersionByCluster(cluster, 3);
     }
 
     @Override
     public Map<String, ClusterNodeInfo> syncGetAllSettingsByCluster(String cluster) {
-        return esClusterDAO.getAllSettingsByCluster(cluster);
+        return esClusterDAO.getAllSettingsByCluster(cluster, 3);
     }
 
     @Override
     public Map<String, ClusterNodeSettings> syncGetPartOfSettingsByCluster(String cluster) {
-        return esClusterDAO.getPartOfSettingsByCluster(cluster);
+        return esClusterDAO.getPartOfSettingsByCluster(cluster, 3);
     }
 
     @Override
@@ -308,9 +318,9 @@ public class ESClusterServiceImpl implements ESClusterService {
     }
 
     @Override
-    public Result<Void> checkSameCluster(String password, List<String> addresses){
+    public Result<Void> checkSameCluster(String password, List<String> addresses) {
         Set<String> clusters = new HashSet<>();
-        for(String address: addresses) {
+        for (String address : addresses) {
             ESClient client = new ESClient();
             try {
                 if (StringUtils.isNotBlank(password)) {
@@ -319,12 +329,14 @@ public class ESClusterServiceImpl implements ESClusterService {
                 client.addTransportAddresses(address);
                 client.start();
                 ESClusterNodesSettingResponse response = client.admin().cluster().prepareNodesSetting().execute()
-                        .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+                    .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
                 if (RestStatus.OK.getStatus() == response.getRestStatus().getStatus()) {
                     clusters.add(response.getClusterName());
                 }
             } catch (Exception e) {
-                LOGGER.error("class=ESClusterServiceImpl||method=getClusterRackByHttpAddress||msg=get rack error||httpAddress={}||msg=client start error", addresses);
+                LOGGER.error(
+                    "class=ESClusterServiceImpl||method=getClusterRackByHttpAddress||msg=get rack error||httpAddress={}||msg=client start error",
+                    addresses);
             } finally {
                 client.close();
             }
@@ -346,7 +358,7 @@ public class ESClusterServiceImpl implements ESClusterService {
             DirectRequest directRequest = new DirectRequest("GET", "");
             DirectResponse directResponse = client.direct(directRequest).actionGet(30, TimeUnit.SECONDS);
             if (directResponse.getRestStatus() == RestStatus.OK
-                    && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
+                && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
                 JSONObject version = JSONObject.parseObject(directResponse.getResponseContent()).getJSONObject(VERSION);
                 esVersion = version.getString(VERSION_NUMBER);
                 if (version.containsKey(VERSION_INNER_NUMBER)) {
@@ -356,7 +368,9 @@ public class ESClusterServiceImpl implements ESClusterService {
             }
             return esVersion;
         } catch (Exception e) {
-            LOGGER.warn("class=ESClusterServiceImpl||method=synGetESVersionByHttpAddress||address={}||mg=get es segments fail", addresses, e);
+            LOGGER.warn(
+                "class=ESClusterServiceImpl||method=synGetESVersionByHttpAddress||address={}||mg=get es segments fail",
+                addresses, e);
             return null;
         } finally {
             client.close();
@@ -377,7 +391,9 @@ public class ESClusterServiceImpl implements ESClusterService {
             client.direct(directRequest).actionGet(30, TimeUnit.SECONDS);
             return ClusterConnectionStatus.NORMAL;
         } catch (Exception e) {
-            LOGGER.warn("class=ESClusterServiceImpl||method=checkClusterWithoutPassword||address={}||mg=get es segments fail", addresses, e);
+            LOGGER.warn(
+                "class=ESClusterServiceImpl||method=checkClusterWithoutPassword||address={}||mg=get es segments fail",
+                addresses, e);
             if (e.getCause().getMessage().contains("Unauthorized")) {
                 return ClusterConnectionStatus.UNAUTHORIZED;
             } else {
@@ -393,12 +409,22 @@ public class ESClusterServiceImpl implements ESClusterService {
         List<ESClusterThreadPO> threadStats = esClusterDAO.syncGetThreadStatsByCluster(cluster);
         ESClusterThreadStats esClusterThreadStats = new ESClusterThreadStats(cluster, 0L, 0L, 0L, 0L, 0L, 0L);
         if (threadStats != null) {
-            esClusterThreadStats.setManagement(threadStats.stream().filter(thread -> "management".equals(thread.getThreadName())).mapToLong(ESClusterThreadPO::getQueueNum).sum());
-            esClusterThreadStats.setRefresh(threadStats.stream().filter(thread -> "refresh".equals(thread.getThreadName())).mapToLong(ESClusterThreadPO::getQueueNum).sum());
-            esClusterThreadStats.setFlush(threadStats.stream().filter(thread -> "flush".equals(thread.getThreadName())).mapToLong(ESClusterThreadPO::getQueueNum).sum());
-            esClusterThreadStats.setMerge(threadStats.stream().filter(thread -> "force_merge".equals(thread.getThreadName())).mapToLong(ESClusterThreadPO::getQueueNum).sum());
-            esClusterThreadStats.setSearch(threadStats.stream().filter(thread -> "search".equals(thread.getThreadName())).mapToLong(ESClusterThreadPO::getQueueNum).sum());
-            esClusterThreadStats.setWrite(threadStats.stream().filter(thread ->"write".equals(thread.getThreadName())).mapToLong(ESClusterThreadPO::getQueueNum).sum());
+            esClusterThreadStats
+                .setManagement(threadStats.stream().filter(thread -> "management".equals(thread.getThreadName()))
+                    .mapToLong(ESClusterThreadPO::getQueueNum).sum());
+            esClusterThreadStats
+                .setRefresh(threadStats.stream().filter(thread -> "refresh".equals(thread.getThreadName()))
+                    .mapToLong(ESClusterThreadPO::getQueueNum).sum());
+            esClusterThreadStats.setFlush(threadStats.stream().filter(thread -> "flush".equals(thread.getThreadName()))
+                .mapToLong(ESClusterThreadPO::getQueueNum).sum());
+            esClusterThreadStats
+                .setMerge(threadStats.stream().filter(thread -> "force_merge".equals(thread.getThreadName()))
+                    .mapToLong(ESClusterThreadPO::getQueueNum).sum());
+            esClusterThreadStats
+                .setSearch(threadStats.stream().filter(thread -> "search".equals(thread.getThreadName()))
+                    .mapToLong(ESClusterThreadPO::getQueueNum).sum());
+            esClusterThreadStats.setWrite(threadStats.stream().filter(thread -> "write".equals(thread.getThreadName()))
+                .mapToLong(ESClusterThreadPO::getQueueNum).sum());
         }
         return esClusterThreadStats;
     }
@@ -411,14 +437,17 @@ public class ESClusterServiceImpl implements ESClusterService {
     @Override
     public List<PendingTaskAnalysisVO> pendingTaskAnalysis(String cluster) {
         String response = esClusterDAO.pendingTask(cluster);
-        return  Optional.ofNullable(response).map(JSONObject::parseObject).map(jsonObject->jsonObject.getJSONArray(TASKS))
-                .map(tasks->JSONObject.parseArray(tasks.toJSONString(), PendingTaskAnalysisVO.class)).orElse(new ArrayList<>());
+        return Optional.ofNullable(response).map(JSONObject::parseObject)
+            .map(jsonObject -> jsonObject.getJSONArray(TASKS))
+            .map(tasks -> JSONObject.parseArray(tasks.toJSONString(), PendingTaskAnalysisVO.class))
+            .orElse(new ArrayList<>());
     }
 
     @Override
     public List<TaskMissionAnalysisVO> taskMissionAnalysis(String cluster) {
         String response = esClusterDAO.taskMission(cluster);
-        return Optional.ofNullable(response).map(JSONObject::parseObject).map(jsonObject -> buildTaskMission(jsonObject)).orElse(new ArrayList<>());
+        return Optional.ofNullable(response).map(JSONObject::parseObject)
+            .map(jsonObject -> buildTaskMission(jsonObject)).orElse(new ArrayList<>());
     }
 
     @Override
@@ -430,14 +459,16 @@ public class ESClusterServiceImpl implements ESClusterService {
     @Override
     public boolean abnormalShardAllocationRetry(String cluster) {
         String response = esClusterDAO.abnormalShardAllocationRetry(cluster);
-        return  Optional.ofNullable(response).map(JSONObject::parseObject).map(jsonObject ->jsonObject.getBoolean(ACKNOWLEDGED)).orElse(false);
+        return Optional.ofNullable(response).map(JSONObject::parseObject)
+            .map(jsonObject -> jsonObject.getBoolean(ACKNOWLEDGED)).orElse(false);
     }
 
     @Override
     public boolean clearFieldDataMemory(String cluster) {
         String response = esClusterDAO.clearFieldDataMemory(cluster);
-        return  Optional.ofNullable(response).map(JSONObject::parseObject).map(jsonObject -> jsonObject.getJSONObject(SHARDS))
-                .map(shards->shards.getInteger(FAILED)).map(failed->failed.equals(0)).orElse(false);
+        return Optional.ofNullable(response).map(JSONObject::parseObject)
+            .map(jsonObject -> jsonObject.getJSONObject(SHARDS)).map(shards -> shards.getInteger(FAILED))
+            .map(failed -> failed.equals(0)).orElse(false);
     }
 
     private List<TaskMissionAnalysisVO> buildTaskMission(JSONObject responseJson) {
@@ -449,15 +480,14 @@ public class ESClusterServiceImpl implements ESClusterService {
                     JSONObject nodeInfo = (JSONObject) val;
                     String nodeName = nodes.getJSONObject(key).getString(NAME);
                     TaskMissionAnalysisVO taskMissionAnalysisVO = new TaskMissionAnalysisVO();
-                    Optional.ofNullable(nodeInfo)
-                            .ifPresent(o -> {
-                                taskMissionAnalysisVO.setAction(o.getString(ACTION));
-                                taskMissionAnalysisVO.setNode(nodeName);
-                                taskMissionAnalysisVO.setDescription(o.getString(DESCRIPTION));
-                                taskMissionAnalysisVO.setStartTimeInMillis(o.getLong(START_TIME_IN_MILLIS));
-                                taskMissionAnalysisVO.setRunningTimeInNanos(o.getInteger(RUNNING_TIME_IN_NANOS));
-                                vos.add(taskMissionAnalysisVO);
-                            });
+                    Optional.ofNullable(nodeInfo).ifPresent(o -> {
+                        taskMissionAnalysisVO.setAction(o.getString(ACTION));
+                        taskMissionAnalysisVO.setNode(nodeName);
+                        taskMissionAnalysisVO.setDescription(o.getString(DESCRIPTION));
+                        taskMissionAnalysisVO.setStartTimeInMillis(o.getLong(START_TIME_IN_MILLIS));
+                        taskMissionAnalysisVO.setRunningTimeInNanos(o.getInteger(RUNNING_TIME_IN_NANOS));
+                        vos.add(taskMissionAnalysisVO);
+                    });
                 });
             });
         });

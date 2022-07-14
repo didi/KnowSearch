@@ -2,11 +2,14 @@ package com.didichuxing.datachannel.arius.admin.biz.task.impl;
 
 import com.didichuxing.datachannel.arius.admin.biz.task.OpTaskHandler;
 import com.didichuxing.datachannel.arius.admin.biz.task.OpTaskManager;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord.Builder;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskProcessDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.task.OpTaskPO;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskHandleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
@@ -14,12 +17,16 @@ import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassE
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
+import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.task.OpTaskDAO;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.logi.security.service.ProjectService;
 import com.didiglobal.logi.security.service.UserService;
 import com.google.common.collect.Lists;
 import java.util.List;
+import java.util.Objects;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -29,19 +36,23 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class OpTaskManagerImpl implements OpTaskManager {
-    private static final ILog LOGGER = LogFactory.getLog(OpTaskManagerImpl.class);
+    private static final ILog    LOGGER = LogFactory.getLog(OpTaskManagerImpl.class);
 
     @Autowired
-    private OpTaskDAO opTaskDao;
+    private OpTaskDAO            opTaskDao;
 
     @Autowired
     private HandleFactory        handleFactory;
 
     @Autowired
-    private UserService  userService;
+    private UserService          userService;
+    @Autowired
+    private ProjectService       projectService;
+    @Autowired
+    private OperateRecordService operateRecordService;
 
     @Override
-    public Result<OpTask> addTask(OpTaskDTO opTaskDTO) throws NotFindSubclassException {
+    public Result<OpTask> addTask(OpTaskDTO opTaskDTO, Integer projectId) throws NotFindSubclassException {
         if (AriusObjUtils.isNull(opTaskDTO.getCreator())) {
             return Result.buildParamIllegal("提交人为空");
         }
@@ -57,8 +68,50 @@ public class OpTaskManagerImpl implements OpTaskManager {
         OpTaskHandleEnum taskHandleEnum = OpTaskHandleEnum.valueOfType(opTaskDTO.getTaskType());
 
         OpTaskHandler handler = (OpTaskHandler) handleFactory.getByHandlerNamePer(taskHandleEnum.getMessage());
+        final Result<OpTask> opTaskResult = handler.addTask(ConvertUtil.obj2Obj(opTaskDTO, OpTask.class));
+        if (opTaskResult.success()) {
+            OperateTypeEnum operationType;
+            String content;
+            switch (typeEnum) {
+                case CLUSTER_NEW:
+                    operationType = OperateTypeEnum.PHYSICAL_CLUSTER_NEW;
+                    content = opTaskDTO.getTitle();
+                    break;
+                case CLUSTER_OFFLINE:
+                    operationType = OperateTypeEnum.PHYSICAL_CLUSTER_OFFLINE;
+                    content = opTaskDTO.getTitle();
+                    break;
+                case TEMPLATE_DCDR:
+                    operationType = OperateTypeEnum.TEMPLATE_SERVICE_DCDR_SETTING;
+                    content = opTaskDTO.getTitle();
+                    break;
+                case CLUSTER_SHRINK:
+                case CLUSTER_EXPAND:
+                    operationType = OperateTypeEnum.PHYSICAL_CLUSTER_CAPACITY;
+                    content = opTaskDTO.getTitle();
+                    break;
+                case CLUSTER_RESTART:
+                    operationType = OperateTypeEnum.PHYSICAL_CLUSTER_RESTART;
+                    content = opTaskDTO.getTitle();
+                    break;
+                case CLUSTER_UPGRADE:
+                    operationType = OperateTypeEnum.PHYSICAL_CLUSTER_UPGRADE;
+                    content = opTaskDTO.getTitle();
+                    break;
+                default:
+                    operationType = null;
+                    content = null;
+            }
+            if (StringUtils.isNotBlank(opTaskDTO.getCreator()) && Objects.nonNull(operationType)) {
+                final OperateRecord operateRecord = new Builder().userOperation(opTaskDTO.getCreator())
+                    .project(projectService.getProjectBriefByProjectId(projectId)).operationTypeEnum(operationType)
+                    .content(content).bizId(opTaskResult.getData().getId()).buildDefaultManualTrigger();
+                operateRecordService.save(operateRecord);
+            }
 
-        return handler.addTask(ConvertUtil.obj2Obj(opTaskDTO, OpTask.class));
+        }
+
+        return opTaskResult;
     }
 
     @Override
@@ -134,8 +187,6 @@ public class OpTaskManagerImpl implements OpTaskManager {
         }
         return Result.buildSucc(ConvertUtil.obj2Obj(opTaskPO, OpTask.class));
     }
-
-    
 
     @Override
     public List<OpTask> getPendingTaskByType(Integer taskType) {

@@ -2,13 +2,14 @@ package com.didichuxing.datachannel.arius.admin.biz.template.srv;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.ColdSrvOpenDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.TemplateQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.srv.TemplateSrv;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.srv.UnavailableTemplateSrv;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterTemplateSrvVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv.TemplateWithSrvVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
+
 import java.util.List;
 
 /**
@@ -24,7 +25,6 @@ public interface TemplateSrvManager {
      * @return
      */
     boolean isTemplateSrvOpen(Integer logicTemplateId, Integer templateSrvId);
-
 
     /**
      * 获取指定模板「开启的」服务
@@ -54,9 +54,11 @@ public interface TemplateSrvManager {
      * @param templateIdList 模板id列表
      * @param operator
      * @param projectId
+     * @param data
      * @return
      */
-    Result<Void> openSrv(Integer srvCode, List<Integer> templateIdList, String operator, Integer projectId);
+    Result<Void> openSrv(Integer srvCode, List<Integer> templateIdList, String operator, Integer projectId,
+                         ColdSrvOpenDTO data);
 
     /**
      * 关闭模板服务
@@ -68,18 +70,20 @@ public interface TemplateSrvManager {
      * @return
      */
     Result<Void> closeSrv(Integer srvCode, List<Integer> templateIdList, String operator, Integer projectId);
-    
+
     List<Integer> getPhyClusterTemplateSrvIds(String clusterPhyName);
-    
-    Result<Boolean> replaceTemplateServes(String phyClusterName, List<Integer> clusterTemplateSrvIdList, String operator);
-    
-        /**
-     * 清理所有索引服务
-     * @param clusterPhy 物理集群名称
-     * @param operator   操作人
-     * @return {@link Result}<{@link Boolean}>
-     */
+
+    Result<Boolean> replaceTemplateServes(String phyClusterName, List<Integer> clusterTemplateSrvIdList,
+                                          String operator);
+
+    /**
+    * 清理所有索引服务
+    * @param clusterPhy 物理集群名称
+    * @param operator   操作人
+    * @return {@link Result}<{@link Boolean}>
+    */
     Result<Boolean> delAllTemplateSrvByClusterPhy(String clusterPhy, String operator);
+
     /**
      * 查询开启了某个索引服务的物理集群列表
      * @param clusterPhies
@@ -87,55 +91,15 @@ public interface TemplateSrvManager {
      * @return
      */
     List<String> getPhyClusterByOpenTemplateSrv(List<ClusterPhy> clusterPhies, int srvId);
-    
-    /**
-     * 获取逻辑集群索引服务
-     *
-     * @param clusterLogicId
-     * @return
-     */
-    Result<List<ESClusterTemplateSrvVO>> getClusterLogicTemplateSrv(Long clusterLogicId);
-    
-        /**
-     * 为逻辑集群增加一个索引服务
-     *
-     * @param clusterLogicId 逻辑集群Id
-     * @param templateSrvId  索引服务Id
-     * @param operator       操作者
-     * @param projectId
-     * @return
-     */
-    Result<Boolean> addTemplateSrvForClusterLogic(Long clusterLogicId, String templateSrvId, String operator,
-                                                  Integer projectId);
 
     /**
-     * 获取逻辑集群可选择的索引服务
-     * @param clusterLogicId 逻辑集群Id
-     * @return
-     */
-    Result<List<ESClusterTemplateSrvVO>> getClusterLogicSelectableTemplateSrv(Long clusterLogicId);
-    
-        /**
-     * 逻辑集群删除一个索引服务
-     *
-     * @param clusterLogicId
-     * @param templateSrvId
-     * @param operator
-     * @param projectId
-     * @return
-     */
-    Result<Boolean> delTemplateSrvForClusterLogic(Long clusterLogicId, String templateSrvId, String operator,
-                                                  Integer projectId);
-    
-    
-        /**
-     * 判断物理集群是否打开了某个索引服务
-     * @param phyCluster        物理集群名称
-     * @param srvId
-     * @return
-     */
+    * 判断物理集群是否打开了某个索引服务
+    * @param phyCluster        物理集群名称
+    * @param srvId
+    * @return
+    */
     boolean isPhyClusterOpenTemplateSrv(String phyCluster, int srvId);
-    
+
     /**
      * 查询开启了某个索引服务的物理集群列表
      *

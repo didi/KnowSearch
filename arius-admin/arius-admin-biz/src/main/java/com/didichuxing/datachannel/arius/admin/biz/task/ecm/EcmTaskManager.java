@@ -85,7 +85,8 @@ public interface EcmTaskManager {
      * @param operator
      * @return
      */
-    Result<EcmOperateAppBase> actionClusterEcmTask(Long taskId, EcmActionEnum ecmActionEnum, String hostname, String operator) throws EcmRemoteException;
+    Result<EcmOperateAppBase> actionClusterEcmTask(Long taskId, EcmActionEnum ecmActionEnum, String hostname,
+                                                   String operator) throws EcmRemoteException;
 
     /**
      * 取消工单部署集群节点

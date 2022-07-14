@@ -3,11 +3,10 @@ package com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.BaseVO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
 
 /**
  * @author chengxiang
@@ -42,5 +41,8 @@ public class TemplateWithSrvVO extends BaseVO {
 
     @ApiModelProperty("热数据保存时长 单位天")
     private Integer                        hotTime;
+
+    @ApiModelProperty("项目名称 ")
+    private String                         projectName;
 
 }

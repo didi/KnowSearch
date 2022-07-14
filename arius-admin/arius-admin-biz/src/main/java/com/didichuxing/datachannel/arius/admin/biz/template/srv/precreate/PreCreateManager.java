@@ -18,27 +18,19 @@ public interface PreCreateManager {
     Result<Void> preCreateIndex(Integer logicTemplateId);
 
     /**
-     * 重建明天索引
-      * @param logicTemplateId 逻辑模板id
-     * @return Result 重建是否成功
-     */
-    Result<Void> reBuildTomorrowIndex(Integer logicTemplateId);
-
-    /**
      * 异步创建今明天索引
      * @param physicalId 物理模板id
      */
     void asyncCreateTodayAndTomorrowIndexByPhysicalId(Long physicalId);
-    
-    
+
     ////////////////////srv
-        /**
-     * 索引预先创建
-     * @param cluster 集群
-     * @param retryCount 重试次数
-     * @return true/false
-     * @throws AdminOperateException
-     */
+    /**
+    * 索引预先创建
+    * @param cluster 集群
+    * @param retryCount 重试次数
+    * @return true/false
+    * @throws AdminOperateException
+    */
     boolean preCreateIndex(String cluster, int retryCount);
 
     /**

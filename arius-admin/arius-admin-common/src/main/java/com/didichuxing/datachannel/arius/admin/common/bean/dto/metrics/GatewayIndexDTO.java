@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 public class GatewayIndexDTO extends GatewayMetricsDTO {
 
     @ApiModelProperty("索引名称")
-    private String indexName;
+    private String  indexName;
 
     @ApiModelProperty("top数字")
     private Integer topNu;

@@ -1,9 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.biz.workorder.handler;
 
 import com.alibaba.fastjson.JSON;
-import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandler;
 import com.didichuxing.datachannel.arius.admin.biz.task.OpTaskManager;
 import com.didichuxing.datachannel.arius.admin.biz.task.content.ClusterOfflineContent;
+import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandler;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.ecm.EcmTaskDTO;
@@ -13,6 +13,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.Work
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.ClusterOpOfflineOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
@@ -35,15 +36,13 @@ import org.springframework.stereotype.Service;
 @Deprecated
 public class ClusterOpOfflineHandler extends BaseWorkOrderHandler {
 
-   
-
     @Autowired
     private ClusterPhyService esClusterPhyService;
 
     @Autowired
-    private OpTaskManager opTaskManager;
+    private OpTaskManager     opTaskManager;
     @Autowired
-    private RoleTool roleTool;
+    private RoleTool          roleTool;
 
     /**
      * 工单是否自动审批
@@ -98,7 +97,8 @@ public class ClusterOpOfflineHandler extends BaseWorkOrderHandler {
             return Result.buildParamIllegal("物理集群不存在");
         }
 
-        if (opTaskManager.existUnClosedTask(content.getPhyClusterId().intValue(), OpTaskTypeEnum.CLUSTER_OFFLINE.getType())) {
+        if (opTaskManager.existUnClosedTask(content.getPhyClusterId().intValue(),
+            OpTaskTypeEnum.CLUSTER_OFFLINE.getType())) {
             return Result.buildParamIllegal("该集群上存在未完成的任务");
         }
 
@@ -165,7 +165,7 @@ public class ClusterOpOfflineHandler extends BaseWorkOrderHandler {
         opTaskDTO.setCreator(workOrder.getSubmitor());
         opTaskDTO.setExpandData(JSON.toJSONString(ecmTaskDTO));
         opTaskDTO.setTaskType(OpTaskTypeEnum.CLUSTER_OFFLINE.getType());
-        Result<OpTask> result = opTaskManager.addTask(opTaskDTO);
+        Result<OpTask> result = opTaskManager.addTask(opTaskDTO, AuthConstant.SUPER_PROJECT_ID);
         if (null == result || result.failed()) {
             return Result.buildFail("生成集群新建操作任务失败!");
         }

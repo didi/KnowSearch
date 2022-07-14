@@ -15,5 +15,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @JSONType(serialzeFeatures = { SerializerFeature.WriteClassName })
 public class HostScaleActionParam extends HostParamBase {
-    private String       action;
+    private String action;
 }

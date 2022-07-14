@@ -16,17 +16,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 /**
  * Created by d06679 on 2018/3/14.
  */
-@Task(name = "preCreateIndexTaskDriver",
-        description = "明天索引预先创建任务，预先创建平台中模板明天索引，避免凌晨大规模创建索引",
-        cron = "0 0 03-06 * * ?",
-        autoRegister = true,
-        consensual = ConsensualEnum.RANDOM)
+@Task(name = "preCreateIndexTaskDriver", description = "明天索引预先创建任务，预先创建平台中模板明天索引，避免凌晨大规模创建索引", cron = "0 0 03-06 * * ?", autoRegister = true, consensual = ConsensualEnum.RANDOM)
 public class PreCreateIndexRandomTask extends BaseConcurrentClusterTask implements Job {
 
-    private static final ILog  LOGGER = LogFactory.getLog(PreCreateIndexRandomTask.class);
+    private static final ILog LOGGER = LogFactory.getLog(PreCreateIndexRandomTask.class);
 
     @Autowired
-    private PreCreateManager templatePreCreateManager;
+    private PreCreateManager  templatePreCreateManager;
 
     @Override
     public TaskResult execute(JobContext jobContext) throws Exception {

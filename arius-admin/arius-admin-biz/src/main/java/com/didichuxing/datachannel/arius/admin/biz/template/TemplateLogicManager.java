@@ -1,24 +1,30 @@
 package com.didichuxing.datachannel.arius.admin.biz.template;
 
+import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateClearDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateRateLimitDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateWithCreateInfoDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateClearDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicAggregate;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateClearVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateDeleteVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateDetailVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateRateLimitVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateCyclicalRollInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectTemplateAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.AmsRemoteException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
+import java.util.List;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 /**
  * 逻辑模板管理Biz类
@@ -34,9 +40,6 @@ public interface TemplateLogicManager {
      */
     int DEFAULT_TEMPLATE_VALUE = 61;
 
-
-
-
     /**
      * 获取最近访问该模板的project
      *
@@ -44,8 +47,6 @@ public interface TemplateLogicManager {
      * @return result
      */
     List<ProjectBriefVO> getLogicTemplateProjectAccess(Integer logicId) throws AmsRemoteException;
-
-
 
     /**
      * 新建逻辑模板
@@ -55,7 +56,8 @@ public interface TemplateLogicManager {
      * @return result
      */
     @Transactional(rollbackFor = Exception.class)
-    Result<Void> create(IndexTemplateWithCreateInfoDTO param, String operator, Integer projectId) throws AdminOperateException;
+    Result<Void> create(IndexTemplateWithCreateInfoDTO param, String operator,
+                        Integer projectId) throws AdminOperateException;
 
     /**
      * 获取所有逻辑模板聚合
@@ -114,11 +116,7 @@ public interface TemplateLogicManager {
      */
     List<String> getTemplateLogicNames(Integer projectId);
 
-    @Deprecated
-    //todo: 下线并重命名方法
-    Result<Void> editTemplate(IndexTemplateDTO param, String operator, Integer projectId) throws AdminOperateException;
-
-    Result<Void> newEditTemplate(IndexTemplateDTO param, String operator, Integer projectId);
+    Result<Void> editTemplate(IndexTemplateDTO param, String operator, Integer projectId);
 
     Result<Void> delTemplate(Integer logicTemplateId, String operator, Integer projectId) throws AdminOperateException;
 
@@ -128,7 +126,8 @@ public interface TemplateLogicManager {
      * @param projectId      项目
      * @return
      */
-    PaginationResult<ConsoleTemplateVO> pageGetConsoleTemplateVOS(TemplateConditionDTO condition, Integer projectId) throws NotFindSubclassException;
+    PaginationResult<ConsoleTemplateVO> pageGetConsoleTemplateVOS(TemplateConditionDTO condition,
+                                                                  Integer projectId) throws NotFindSubclassException;
 
     /**
      * 校验创建模板名称是否合法
@@ -154,6 +153,7 @@ public interface TemplateLogicManager {
      * @return
      */
     Result<Void> switchRolloverStatus(Integer templateLogicId, Integer status, String operator, Integer projectId);
+
     /**
      * 获取创建dcdr链路模板
      * @return
@@ -194,7 +194,7 @@ public interface TemplateLogicManager {
     /**
      * 清除索引
      */
-    Result<Void> clearIndices(TemplateClearDTO clearDTO, Integer projectId);
+    Result<Void> clearIndices(TemplateClearDTO clearDTO, String operator, Integer projectId);
 
     /**
      * 执行调整shard 数量
@@ -205,7 +205,8 @@ public interface TemplateLogicManager {
      * @param operator
      * @return 调整结果
      */
-    Result<Void> adjustShard(Integer logicTemplateId, Integer shardNum, Integer projectId, String operator) throws AdminOperateException;
+    Result<Void> adjustShard(Integer logicTemplateId, Integer shardNum, Integer projectId,
+                             String operator) throws AdminOperateException;
 
     /**
      * 模板升级
@@ -218,4 +219,19 @@ public interface TemplateLogicManager {
     Result<Void> upgrade(Integer templateId, String operator, Integer projectId) throws AdminOperateException;
 
     Result<List<ConsoleTemplateVO>> listTemplateVOByLogicCluster(String clusterLogicName, Integer projectId);
+
+    Result<List<Tuple<String, String>>> listLogicTemplatesByProjectId(Integer projectId);
+
+    Result<List<TemplateCyclicalRollInfoVO>> getCyclicalRollInfo(Integer logicId);
+
+    Result<ConsoleTemplateRateLimitVO> getTemplateRateLimit(Integer logicId);
+
+    Result<ConsoleTemplateDetailVO> getDetailVoByLogicId(Integer logicId);
+
+    Result<ConsoleTemplateClearVO> getLogicTemplateClearInfo(Integer logicId) throws AmsRemoteException;
+
+    Result<ConsoleTemplateDeleteVO> getLogicTemplateDeleteInfo(Integer logicId) throws AmsRemoteException;
+
+    Result<Void> updateTemplateWriteRateLimit(ConsoleTemplateRateLimitDTO consoleTemplateRateLimitDTO, String operator,
+                                              Integer projectId);
 }

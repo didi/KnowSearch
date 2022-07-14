@@ -5,25 +5,25 @@ import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 
 public class DeriveComputer implements MetricsComputer {
-    private static final ILog LOGGER = LogFactory.getLog(DeriveComputer.class);
+    private static final ILog  LOGGER = LogFactory.getLog(DeriveComputer.class);
 
-    private MetricsRegister     metricsRegister;
+    private MetricsRegister    metricsRegister;
 
-    private MetricsComputeType  computeType;
+    private MetricsComputeType computeType;
 
     public DeriveComputer(MetricsComputeType computeType, MetricsRegister metricsRegister) {
-        this.computeType     = computeType;
+        this.computeType = computeType;
         this.metricsRegister = metricsRegister;
     }
 
     @Override
     public String compute(ESDataTempBean esDataTempBean) {
         try {
-            String keyPre      = esDataTempBean.getKeyPre();
+            String keyPre = esDataTempBean.getKeyPre();
             String dividendKey = keyPre + esDataTempBean.getDeriverParamByKey(ESDataTempBean.DIVIDEND);
-            String divisorKey  = keyPre + esDataTempBean.getDeriverParamByKey(ESDataTempBean.DIVISOR);
+            String divisorKey = keyPre + esDataTempBean.getDeriverParamByKey(ESDataTempBean.DIVISOR);
 
-            Double first  = metricsRegister.getBeforeComputeData(dividendKey);
+            Double first = metricsRegister.getBeforeComputeData(dividendKey);
             Double second = metricsRegister.getBeforeComputeData(divisorKey);
 
             if (first == null || second == null) {

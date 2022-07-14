@@ -19,7 +19,8 @@ import com.google.common.collect.*;
 
 public class ConvertUtil {
 
-    private ConvertUtil(){}
+    private ConvertUtil() {
+    }
 
     private static final ILog LOGGER = LogFactory.getLog(ConvertUtil.class);
 
@@ -263,7 +264,9 @@ public class ConvertUtil {
             if ((String.valueOf(map.get(keyArray[i]))).trim().length() > 0) {
                 sb.append(keyArray[i]).append(":").append(String.valueOf(map.get(keyArray[i])).trim());
             }
-            if (i != keyArray.length - 1) { sb.append(",");}
+            if (i != keyArray.length - 1) {
+                sb.append(",");
+            }
         }
 
         return sb.toString();
@@ -289,10 +292,10 @@ public class ConvertUtil {
         return result;
     }
 
-    public  static Map<String, Object> directFlatObject(JSONObject obj) {
+    public static Map<String, Object> directFlatObject(JSONObject obj) {
         Map<String, Object> ret = new HashMap<>();
 
-        if(obj==null) {
+        if (obj == null) {
             return ret;
         }
 

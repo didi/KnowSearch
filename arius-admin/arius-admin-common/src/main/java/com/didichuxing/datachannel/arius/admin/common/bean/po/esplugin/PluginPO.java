@@ -31,7 +31,7 @@ public class PluginPO extends BasePO {
     /**
      * 物理集群Id
      */
-    private String physicClusterId;
+    private String            physicClusterId;
 
     /**
      * 插件版本

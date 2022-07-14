@@ -1,13 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.biz.page;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -19,13 +11,22 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhy
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.SortConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.SortTermEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum;
+import com.didichuxing.datachannel.arius.admin.common.event.resource.ClusterPhyEvent;
+import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
+import java.util.List;
+import java.util.stream.Collectors;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  *
@@ -33,20 +34,20 @@ import com.google.common.collect.Lists;
  * @date 2022-05-27
  */
 @Component
-public class ClusterPhyPageSearchHandle extends AbstractPageSearchHandle<ClusterPhyConditionDTO,ClusterPhyVO> {
+public class ClusterPhyPageSearchHandle extends AbstractPageSearchHandle<ClusterPhyConditionDTO, ClusterPhyVO> {
 
-    private static final ILog        LOGGER = LogFactory.getLog(ClusterPhyPageSearchHandle.class);
-    private static final CharSequence[] CHAR_SEQUENCES = {"*", "?"};
+    private static final ILog           LOGGER         = LogFactory.getLog(ClusterPhyPageSearchHandle.class);
+    private static final CharSequence[] CHAR_SEQUENCES = { "*", "?" };
 
+    @Autowired
+    private ClusterPhyService           clusterPhyService;
+    @Autowired
+    private ClusterLogicService         clusterLogicService;
+    @Autowired
+    private ClusterPhyManager           clusterPhyManager;
+    @Autowired
+    private ClusterRegionService        clusterRegionService;
 
-    @Autowired
-    private ClusterPhyService        clusterPhyService;
-    @Autowired
-    private ClusterLogicService clusterLogicService;
-    @Autowired
-    private ClusterPhyManager        clusterPhyManager;
-    @Autowired
-    private  ClusterRegionService clusterRegionService;
     @Override
     protected Result<Boolean> checkCondition(ClusterPhyConditionDTO condition, Integer projectId) {
 
@@ -66,7 +67,7 @@ public class ClusterPhyPageSearchHandle extends AbstractPageSearchHandle<Cluster
 
         return Result.buildSucc(true);
     }
-    
+
     @Override
     protected void initCondition(ClusterPhyConditionDTO condition, Integer projectId) {
         List<String> clusterNames = null;
@@ -109,6 +110,13 @@ public class ClusterPhyPageSearchHandle extends AbstractPageSearchHandle<Cluster
         List<ClusterPhyVO> clusterPhyVOList = clusterPhyManager.buildClusterInfo(pagingGetClusterPhyList);
 
         long totalHit = clusterPhyService.fuzzyClusterPhyHitByCondition(condition);
+        List<ClusterPhyVO> clusterPhyList = clusterPhyVOList.stream()
+            .filter(clusterPhyVO -> !ClusterHealthEnum.GREEN.getCode().equals(clusterPhyVO.getHealth()))
+            .collect(Collectors.toList());
+        //非正常集群需要重新发事件
+        for (ClusterPhyVO clusterPhyVO : clusterPhyList) {
+            SpringTool.publish(new ClusterPhyEvent(clusterPhyVO.getCluster(), AriusUser.SYSTEM.getDesc()));
+        }
         return PaginationResult.buildSucc(clusterPhyVOList, totalHit, condition.getPage(), condition.getSize());
     }
 }

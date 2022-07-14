@@ -63,8 +63,7 @@ public abstract class BaseConcurrentClusterLogicTask extends BaseConcurrentTask<
             try {
                 LOGGER.info("executeByClusterLogic begin||cluster={}||task={}", item.getName(), getTaskName());
                 if (executeByClusterLogic(item.getId())) {
-                    LOGGER.info("executeByClusterLogic succ||cluster={}||task={}", item.getName(),
-                        getTaskName());
+                    LOGGER.info("executeByClusterLogic succ||cluster={}||task={}", item.getName(), getTaskName());
                 } else {
                     succ = false;
                     LOGGER.warn("executeByClusterLogic fail||cluster={}||task={}", item.getName(), getTaskName());

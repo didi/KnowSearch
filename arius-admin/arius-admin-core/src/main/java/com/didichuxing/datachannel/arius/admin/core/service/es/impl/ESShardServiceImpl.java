@@ -38,9 +38,9 @@ import com.google.common.collect.Lists;
 public class ESShardServiceImpl implements ESShardService {
 
     private static final ILog LOGGER = LogFactory.getLog(ESShardServiceImpl.class);
-    
+
     @Autowired
-    private ESShardDAO esShardDAO;
+    private ESShardDAO        esShardDAO;
 
     @Override
     public List<MovingShardMetrics> syncGetMovingShards(String clusterName) {
@@ -48,10 +48,10 @@ public class ESShardServiceImpl implements ESShardService {
 
         List<MovingShardMetrics> movingShardsMetrics = Lists.newArrayList();
         if (directResponse.getRestStatus() == RestStatus.OK
-                && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
+            && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
 
             movingShardsMetrics = ConvertUtil.str2ObjArrayByJson(directResponse.getResponseContent(),
-                    MovingShardMetrics.class);
+                MovingShardMetrics.class);
 
         }
         return movingShardsMetrics;
@@ -87,19 +87,18 @@ public class ESShardServiceImpl implements ESShardService {
 
     @Override
     public List<ShardDistributionVO> shardDistribution(String cluster) {
-        return  esShardDAO.catShard(cluster);
+        return esShardDAO.catShard(cluster);
     }
 
     @Override
     public ShardAssignmentDescriptionVO shardAssignmentDescription(String cluster) {
         String response = esShardDAO.shardAssignment(cluster);
-        if (null!=response){
+        if (null != response) {
             return buildShardAssignment(JSONObject.parseObject(response));
-        }else {
+        } else {
             return null;
         }
     }
-
 
     /*********************************************private******************************************/
     @NotNull
@@ -109,25 +108,33 @@ public class ESShardServiceImpl implements ESShardService {
     }
 
     private boolean filterBigShard(ShardMetrics shardMetrics) {
-        if (null == shardMetrics) { return false;}
+        if (null == shardMetrics) {
+            return false;
+        }
 
         String store = shardMetrics.getStore();
-        if (null == store) { return false;}
+        if (null == store) {
+            return false;
+        }
         String value = store.substring(0, store.length() - 2);
         if (store.endsWith("tb")) {
             value += "1024";
             return BIG_SHARD <= Double.valueOf(value);
-        }else if (store.endsWith("gb")){
+        } else if (store.endsWith("gb")) {
             return BIG_SHARD <= Double.valueOf(value);
-        }else {
+        } else {
             return false;
         }
     }
 
     private boolean filterSmallShard(ShardMetrics shardMetrics) {
-        if (null == shardMetrics) { return false;}
+        if (null == shardMetrics) {
+            return false;
+        }
         String store = shardMetrics.getStore();
-        if (null == store) { return false;}
+        if (null == store) {
+            return false;
+        }
         return !store.endsWith("tb") && !store.endsWith("gb");
     }
 

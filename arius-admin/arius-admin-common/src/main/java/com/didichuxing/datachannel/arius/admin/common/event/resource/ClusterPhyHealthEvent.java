@@ -4,7 +4,7 @@ import org.springframework.context.ApplicationEvent;
 
 public class ClusterPhyHealthEvent extends ApplicationEvent {
 
-    private String  clusterPhyName;
+    private String clusterPhyName;
 
     public ClusterPhyHealthEvent(Object source, String clusterPhyName) {
         super(source);

@@ -6,14 +6,14 @@ import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 
 public class SimpleComputer implements MetricsComputer {
-    private static final ILog LOGGER = LogFactory.getLog(SimpleComputer.class);
+    private static final ILog  LOGGER = LogFactory.getLog(SimpleComputer.class);
 
-    private MetricsRegister   metricsRegister;
+    private MetricsRegister    metricsRegister;
 
     private MetricsComputeType computeType;
 
     public SimpleComputer(MetricsComputeType computeType, MetricsRegister metricsRegister) {
-        this.computeType     = computeType;
+        this.computeType = computeType;
         this.metricsRegister = metricsRegister;
     }
 
@@ -24,7 +24,7 @@ public class SimpleComputer implements MetricsComputer {
             ESDataTempBean beforeData = metricsRegister.getBeforeEsData(key);
             metricsRegister.putBeforeEsData(key, esDataTempBean);
             if (beforeData == null) {
-                if(EnvUtil.isPre()){
+                if (EnvUtil.isPre()) {
                     LOGGER.info("class=SimpleComputer||method=compute||key={}||msg=beforeData is null!", key);
                 }
                 //防止启动AMS时误报
@@ -32,8 +32,9 @@ public class SimpleComputer implements MetricsComputer {
                 return null;
             } else {
                 if (esDataTempBean.getValue() == null) {
-                    if(EnvUtil.isPre()) {
-                        LOGGER.error("class=SimpleComputer||method=compute||msg=collect data value is null. {}", esDataTempBean);
+                    if (EnvUtil.isPre()) {
+                        LOGGER.error("class=SimpleComputer||method=compute||msg=collect data value is null. {}",
+                            esDataTempBean);
                     }
                     return null;
                 }

@@ -40,6 +40,4 @@ public interface OpTaskHandler extends BaseHandle {
      */
     Result<Void> process(OpTask opTask, Integer step, String status, String expandData);
 
-
-
 }

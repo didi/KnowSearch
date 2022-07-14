@@ -12,13 +12,18 @@ import com.didiglobal.logi.elasticsearch.client.response.setting.common.TypeDefi
  */
 
 public class MappingConfigUtil {
-    private MappingConfigUtil(){}
+    private MappingConfigUtil() {
+    }
 
     public static Integer countMappingFieldNum(MappingConfig mapping) {
-        if (null == mapping) { return 0;}
+        if (null == mapping) {
+            return 0;
+        }
 
         Map<String/*typeName*/, Map<String/*field*/, TypeDefine>> typeFieldTypeMap = mapping.getTypeDefines();
-        if (MapUtils.isEmpty(typeFieldTypeMap)) { return 0;}
+        if (MapUtils.isEmpty(typeFieldTypeMap)) {
+            return 0;
+        }
 
         int count = 0;
         for (Map.Entry<String/*typeName*/, Map<String/*field*/, TypeDefine>> entry : typeFieldTypeMap.entrySet()) {

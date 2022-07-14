@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel(description = "带有region信息的逻辑集群")
-public class ESLogicClusterWithRegionDTO extends ESLogicClusterDTO{
+public class ESLogicClusterWithRegionDTO extends ESLogicClusterDTO {
 
     @ApiModelProperty("集群Region")
     private List<ClusterRegionDTO> clusterRegionDTOS;

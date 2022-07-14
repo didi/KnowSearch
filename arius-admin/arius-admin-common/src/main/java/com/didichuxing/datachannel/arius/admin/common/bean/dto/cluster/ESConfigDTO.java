@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel(description = "配置包DTO")
-public class ESConfigDTO extends BaseDTO  {
+public class ESConfigDTO extends BaseDTO {
 
     @ApiModelProperty("主键")
     private Long    id;
@@ -36,8 +36,8 @@ public class ESConfigDTO extends BaseDTO  {
     private String  versionTag;
 
     @ApiModelProperty("配置版本")
-    private Integer  versionConfig;
+    private Integer versionConfig;
 
     @ApiModelProperty("是否在使用")
-    private Integer  selected;
+    private Integer selected;
 }

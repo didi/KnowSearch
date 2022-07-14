@@ -26,7 +26,7 @@ import java.util.List;
 public class LogicClusterPluginHandler extends BaseWorkOrderHandler {
 
     @Autowired
-    private ClusterLogicService clusterLogicService;
+    private ClusterLogicService            clusterLogicService;
 
     @Autowired
     private ProjectClusterLogicAuthService projectClusterLogicAuthService;
@@ -83,7 +83,7 @@ public class LogicClusterPluginHandler extends BaseWorkOrderHandler {
 
     @Override
     protected Result<Void> doProcessAgree(WorkOrder workOrder, String approver) throws AdminOperateException {
-      
+
         return Result.buildSucc();
     }
 
