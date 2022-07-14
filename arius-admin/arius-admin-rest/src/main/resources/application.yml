@@ -137,6 +137,7 @@ spring:
     max-thread-num: 100
     log-exipre: 3 # 日志保存天数，以天为单位
     app_name: arius_test03
+    enable: false
     claim-strategy: com.didiglobal.logi.job.core.consensual.RandomConsensual
   logi-security:
     app-name: know_search
