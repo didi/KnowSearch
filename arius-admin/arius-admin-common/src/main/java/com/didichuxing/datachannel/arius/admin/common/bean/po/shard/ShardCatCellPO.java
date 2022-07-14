@@ -30,11 +30,11 @@ public class ShardCatCellPO extends BaseESPO {
     @ApiModelProperty("索引")
     private String index;
     @ApiModelProperty("分片")
-    private String shard;
+    private long shard;
     @ApiModelProperty("state")
     private String state;
     @ApiModelProperty("store大小")
-    private String store;
+    private long store;
     @ApiModelProperty("物理集群名称")
     private String clusterPhy;
 
