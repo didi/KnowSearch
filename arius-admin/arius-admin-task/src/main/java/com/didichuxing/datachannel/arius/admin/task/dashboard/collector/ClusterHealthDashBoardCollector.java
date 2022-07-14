@@ -78,6 +78,7 @@ public class ClusterHealthDashBoardCollector extends BaseDashboardCollector {
         clusterPhyHealthMetrics.setYellowClusterListStr(ListUtils.strList2String(yellowClusterList));
         clusterPhyHealthMetrics.setRedClusterListStr(ListUtils.strList2String(redClusterList));
         clusterPhyHealthMetrics.setUnknownClusterListStr(ListUtils.strList2String(unknownClusterList));
+        clusterPhyHealthMetrics.setGreenClusterListStr(ListUtils.strList2String(greenClusterList));
 
         dashBoardStats.setClusterPhyHealth(clusterPhyHealthMetrics);
         monitorMetricsSender.sendDashboardStats(Lists.newArrayList(dashBoardStats));

@@ -1,12 +1,14 @@
-package com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand;
+package com.didichuxing.datachannel.arius.admin.common.bean.po.shard;
 
+import com.alibaba.fastjson.annotation.JSONField;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.BaseESPO;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * 详细介绍类情况.
+ * Shard分布.
  *
  * @ClassName ShardDistributionVO
  * @Author gyp
@@ -16,7 +18,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ShardDistributionVO {
+public class ShardCatCellPO extends BaseESPO {
     @ApiModelProperty("主副")
     private String prirep;
     @ApiModelProperty("节点名称")
@@ -33,4 +35,19 @@ public class ShardDistributionVO {
     private String state;
     @ApiModelProperty("store大小")
     private String store;
+    @ApiModelProperty("物理集群名称")
+    private String clusterPhy;
+
+    private long    timestamp;
+
+    @Override
+    @JSONField(serialize = false)
+    public String getKey() {
+        return index + "@" + shard;
+    }
+
+    @Override
+    public String getRoutingValue() {
+        return null;
+    }
 }
