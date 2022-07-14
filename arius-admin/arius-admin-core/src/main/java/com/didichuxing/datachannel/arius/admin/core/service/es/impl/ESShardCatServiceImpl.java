@@ -3,13 +3,13 @@ package com.didichuxing.datachannel.arius.admin.core.service.es.impl;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.shard.ShardCatCellPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.ShardDistributionVO;
-import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.SizeUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESShardCatService;
 import com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESShardDAO;
+import java.util.ArrayList;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 /**
  * 详细介绍类情况.
@@ -48,6 +48,19 @@ public class ESShardCatServiceImpl implements ESShardCatService {
     }
 
     private List<ShardDistributionVO> buildShardCatCell(List<ShardCatCellPO> v2) {
-        return ConvertUtil.list2List(v2,ShardDistributionVO.class);
+        List<ShardDistributionVO> shardDistributionVOList = new ArrayList<>();
+        v2.forEach(cell->{
+            ShardDistributionVO shardDistributionVO = new ShardDistributionVO();
+            shardDistributionVO.setDocs(cell.getDocs());
+            shardDistributionVO.setIndex(cell.getIndex());
+            shardDistributionVO.setIp(cell.getIp());
+            shardDistributionVO.setNode(cell.getNode());
+            shardDistributionVO.setPrirep(cell.getPrirep());
+            shardDistributionVO.setShard(String.valueOf(cell.getShard()));
+            shardDistributionVO.setState(cell.getState());
+            shardDistributionVO.setStore(SizeUtil.getUnitSize(cell.getStore()));
+            shardDistributionVOList.add(shardDistributionVO);
+        });
+        return shardDistributionVOList;
     }
 }
