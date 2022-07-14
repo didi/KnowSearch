@@ -356,13 +356,15 @@ public class IndicesManagerImpl implements IndicesManager {
                     if (succ) {
                         String writeOrRead=StringUtils.equals(indicesBlockSetting.getType(),"write")?"写":"读";
                         String value=indicesBlockSetting.getValue().equals(Boolean.TRUE)?"启用":"禁用";
-                        String operateContent = String.format("%s%s",value,writeOrRead);
+                     
                         
                         for (IndicesBlockSettingDTO param : params) {
+                            String operateContent = String.format("【%s】:%s%s", param.getIndex(), value, writeOrRead);
                             operateRecordService.save(new Builder().content(operateContent).userOperation(operator)
-                                .bizId(param.getIndex()).project(projectService.getProjectBriefByProjectId(projectId))
-                                .operationTypeEnum(OperateTypeEnum.INDEX_MANAGEMENT_READ_WRITE_CHANGE)
-                                .buildDefaultManualTrigger());
+                                    .bizId(param.getIndex())
+                                    .project(projectService.getProjectBriefByProjectId(projectId))
+                                    .operationTypeEnum(OperateTypeEnum.INDEX_MANAGEMENT_READ_WRITE_CHANGE)
+                                    .buildDefaultManualTrigger());
                         }
 
                     }
