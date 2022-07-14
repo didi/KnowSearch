@@ -470,12 +470,13 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         if (checkProjectCorrectly.failed()) {
             return checkProjectCorrectly;
         }
+        String beforeDeleteName = indexTemplateService.getNameByTemplateLogicId(logicTemplateId);
         Result<Void> result = indexTemplateService.delTemplate(logicTemplateId, operator);
         if (result.success()) {
-            String name = indexTemplateService.getNameByTemplateLogicId(logicTemplateId);
+            
             operateRecordService
                 .save(new OperateRecord.Builder().bizId(logicTemplateId).triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                    .content(String.format("模板%s下线,id：%d", name, logicTemplateId))
+                    .content(String.format("模板【%s】下线", beforeDeleteName))
                     .project(projectService.getProjectBriefByProjectId(projectId)).userOperation(operator)
                     .operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_OFFLINE).build());
         }
