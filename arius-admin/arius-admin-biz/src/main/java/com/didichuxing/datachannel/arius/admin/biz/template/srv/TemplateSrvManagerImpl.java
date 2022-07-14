@@ -19,7 +19,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.srv.T
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.srv.UnavailableTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv.TemplateWithSrvVO;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
-import com.didichuxing.datachannel.arius.admin.common.constant.template.NewTemplateSrvEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
@@ -145,13 +144,13 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
     @Override
     public List<UnavailableTemplateSrv> getUnavailableSrv(Integer logicTemplateId) {
         List<UnavailableTemplateSrv> unavailableSrvList = Lists.newCopyOnWriteArrayList();
-        List<NewTemplateSrvEnum> allSrvList = NewTemplateSrvEnum.getAll();
+        List<TemplateServiceEnum> allSrvList = TemplateServiceEnum.allTemplateSrv();
 
         String esVersionFromESCluster = getLogicTemplateAssociatedEsVersionByLogicTemplateId(logicTemplateId);
         // isPartition为true代表能分区，false不能分区
         boolean isPartition = indexTemplateService.getLogicTemplateById(logicTemplateId).getExpression().endsWith("*");
 
-        for (NewTemplateSrvEnum srvEnum : allSrvList) {
+        for (TemplateServiceEnum srvEnum : allSrvList) {
             if (ESVersionUtil.isHigher(srvEnum.getEsClusterVersion().getVersion(), esVersionFromESCluster)) {
                 unavailableSrvList.add(new UnavailableTemplateSrv(srvEnum.getCode(), srvEnum.getServiceName(),
                     srvEnum.getEsClusterVersion().getVersion(),
@@ -159,8 +158,8 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
                         esVersionFromESCluster, srvEnum.getEsClusterVersion().getVersion())));
             }
 
-            if(!isPartition && (NewTemplateSrvEnum.TEMPLATE_PRE_CREATE.getCode().equals(srvEnum.getCode()) ||
-                    NewTemplateSrvEnum.TEMPLATE_DEL_EXPIRE.getCode().equals(srvEnum.getCode()))){
+            if(!isPartition && (TemplateServiceEnum.TEMPLATE_PRE_CREATE.getCode().equals(srvEnum.getCode()) ||
+                    TemplateServiceEnum.TEMPLATE_DEL_EXPIRE.getCode().equals(srvEnum.getCode()))){
                 unavailableSrvList.add(new UnavailableTemplateSrv(srvEnum.getCode(), srvEnum.getServiceName(),
                         srvEnum.getEsClusterVersion().getVersion(), "非分区模版不支持预创建和过期删除"));
             }
