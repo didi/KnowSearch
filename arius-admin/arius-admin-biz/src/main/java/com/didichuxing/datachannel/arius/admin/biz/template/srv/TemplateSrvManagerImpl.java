@@ -162,7 +162,7 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
                         esVersionFromESCluster, srvEnum.getEsClusterVersion().getVersion())));
             }
 
-            if(srvEnum.getCode() == 1 || srvEnum.getCode() == 4){
+            if(NewTemplateSrvEnum.TEMPLATE_PRE_CREATE.getCode().equals(srvEnum.getCode()) || NewTemplateSrvEnum.TEMPLATE_DEL_EXPIRE.getCode().equals(srvEnum.getCode())){
                 if (!isPartition){
                     unavailableSrvList.add(new UnavailableTemplateSrv(srvEnum.getCode(), srvEnum.getServiceName(),
                             srvEnum.getEsClusterVersion().getVersion(), "非分区模版不支持预创建和过期删除"));
