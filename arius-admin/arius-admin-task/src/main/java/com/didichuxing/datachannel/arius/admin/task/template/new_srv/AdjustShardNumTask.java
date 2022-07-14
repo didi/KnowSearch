@@ -30,7 +30,7 @@ public class AdjustShardNumTask extends BaseConcurrentTemplateTask implements Jo
     private static final ILog LOGGER = LogFactory.getLog(AdjustShardNumTask.class);
 
     @Autowired
-    private IndexPlanManager indexPlanManager;
+    private IndexPlanManager  indexPlanManager;
 
     @Override
     public TaskResult execute(JobContext jobContext) throws Exception {

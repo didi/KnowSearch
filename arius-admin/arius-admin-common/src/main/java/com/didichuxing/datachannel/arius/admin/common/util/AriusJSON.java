@@ -10,7 +10,8 @@ import com.alibaba.fastjson.JSON;
  */
 public class AriusJSON {
 
-    private AriusJSON(){}
+    private AriusJSON() {
+    }
 
     public static String toString(Object obj) {
         if (obj == null) {

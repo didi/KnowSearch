@@ -24,11 +24,11 @@ public class MetricsUtils {
      */
     private static final double UPRUSH_THRESHOLD = 2.0;
 
-    private static final long ONE_HOUR   = 60 * 60 * 1000L;
-    private static final long ONE_DAY    = 24 * 60 * 60 * 1000L;
-    private static final long SEVEN_DAY  = 7 * 24 * 60 * 60 * 1000L;
-    private static final char COLON      = ':';
-    private static final char SPACE      = ' ';
+    private static final long   ONE_HOUR         = 60 * 60 * 1000L;
+    private static final long   ONE_DAY          = 24 * 60 * 60 * 1000L;
+    private static final long   SEVEN_DAY        = 7 * 24 * 60 * 60 * 1000L;
+    private static final char   COLON            = ':';
+    private static final char   SPACE            = ' ';
 
     /**
      *   指标看板返回值中的时间间隔:
@@ -97,7 +97,7 @@ public class MetricsUtils {
             if (minute > 20 && minute <= 40) {
                 start = 20;
                 end = 40;
-            } else if (minute > 40 && minute <= 60){
+            } else if (minute > 40 && minute <= 60) {
                 start = 40;
                 end = 60;
             }
@@ -106,7 +106,7 @@ public class MetricsUtils {
             cal.set(Calendar.MINUTE, end);
             long tuple2 = cal.getTimeInMillis();
             return new Tuple<>(tuple1, tuple2);
-        } else  {
+        } else {
             cal.set(Calendar.MINUTE, 0);
             long tuple1 = cal.getTimeInMillis();
             return new Tuple<>(tuple1, tuple1 + 60 * 60 * 1000);
@@ -123,7 +123,6 @@ public class MetricsUtils {
         }
         return Double.valueOf(value);
     }
-
 
     /**
      * 判断是否需要单位转化，一般以_count结尾的指标都是累加的结果，需要单位转化。
@@ -189,10 +188,7 @@ public class MetricsUtils {
     }
 
     public enum Interval {
-        ONE_MIN("1m"),
-        FIVE_MIN("5m"),
-        TWENTY_MIN("20m"),
-        ONE_HOUR("1h");
+                          ONE_MIN("1m"), FIVE_MIN("5m"), TWENTY_MIN("20m"), ONE_HOUR("1h");
 
         private String str;
 
@@ -222,7 +218,9 @@ public class MetricsUtils {
      * @return
      */
     public static Double computerUprushNum(Double currentTimeValue, Double lastTimeValue) {
-        if (null == lastTimeValue || null == currentTimeValue) { return 0d;}
+        if (null == lastTimeValue || null == currentTimeValue) {
+            return 0d;
+        }
 
         if (0 == lastTimeValue && 0 > currentTimeValue) {
             return currentTimeValue;

@@ -26,7 +26,8 @@ public class UserAccessTemplateDetail {
     /**
      * 统计日期
      */
-    private String countDate;
+    private String  countDate;
+
     /**
      * 是否有效
      *
@@ -34,6 +35,6 @@ public class UserAccessTemplateDetail {
      */
     @JSONField(serialize = false)
     public boolean isValid() {
-        return  !(templateId == null || StringUtils.isBlank(countDate));
+        return !(templateId == null || StringUtils.isBlank(countDate));
     }
 }

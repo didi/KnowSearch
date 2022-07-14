@@ -69,8 +69,7 @@ public enum ResultType {
 
                         FILE_UPLOAD_ERROR(10029, "upload file failed"),
 
-                        NOT_SUPPORT_ERROR(10030, "接口不再支持"),
-    ;
+                        NOT_SUPPORT_ERROR(10030, "接口不再支持"),;
 
     private Integer code;
     private String  message;

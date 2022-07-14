@@ -18,7 +18,6 @@ import java.util.Map;
 public class IndexTemplatePhySetting implements Serializable {
     private JSONObject settings;
 
-
     /**
      * 构造函数
      * @param settings JSON settings

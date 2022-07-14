@@ -17,7 +17,7 @@ import com.didiglobal.logi.job.core.job.JobContext;
 @Task(name = "SyncTemplateMetadataRandomTask", description = "集群模板元数据同步任务", cron = "0 20 2 * * ?", autoRegister = true)
 public class SyncTemplateMetadataRandomTask extends BaseConcurrentClusterTask implements Job {
 
-    private static final ILog        LOGGER = LogFactory.getLog(SyncTemplateMetadataRandomTask.class);
+    private static final ILog LOGGER = LogFactory.getLog(SyncTemplateMetadataRandomTask.class);
 
     @Override
     public TaskResult execute(JobContext jobContext) throws Exception {

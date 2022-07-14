@@ -40,21 +40,21 @@ import org.springframework.stereotype.Component;
 public class LogicClusterMonitorJobHandler extends AbstractMetaDataJob {
 
     @Value("${monitorJob.threadPool.maxsize:30}")
-    private int maxPoolSize;
+    private int                                  maxPoolSize;
     @Autowired
-    private ClusterLogicService clusterLogicService;
+    private ClusterLogicService                  clusterLogicService;
     @Autowired
     private AriusMetaJobClusterDistributeService ariusMetaJobClusterDistributeService;
     @Autowired
-    private MonitorMetricsSender monitorMetricsSender;
+    private MonitorMetricsSender                 monitorMetricsSender;
     @Autowired
-    private ESClusterLogicStatsService clusterLogicStaticsService;
+    private ESClusterLogicStatsService           clusterLogicStaticsService;
     @Autowired
-    private ClusterRegionService clusterRegionService;
+    private ClusterRegionService                 clusterRegionService;
 
-    private final String hostName = HttpHostUtil.HOST_NAME;
+    private final String                         hostName = HttpHostUtil.HOST_NAME;
 
-    private FutureUtil<Void> clusterLogicFutureUtil;
+    private FutureUtil<Void>                     clusterLogicFutureUtil;
 
     @Override
     public Object handleJobTask(String params) {
@@ -64,7 +64,8 @@ public class LogicClusterMonitorJobHandler extends AbstractMetaDataJob {
 
     @PostConstruct
     public void init() {
-        clusterLogicFutureUtil = FutureUtil.init("ClusterLogicMonitorJobHandler", 3 * maxPoolSize, 3 * maxPoolSize, 100);
+        clusterLogicFutureUtil = FutureUtil.init("ClusterLogicMonitorJobHandler", 3 * maxPoolSize, 3 * maxPoolSize,
+            100);
     }
 
     private void handleLogicClusterStats() {
@@ -72,7 +73,8 @@ public class LogicClusterMonitorJobHandler extends AbstractMetaDataJob {
         List<ClusterPhy> monitorCluster = ariusMetaJobClusterDistributeService.getSingleMachineMonitorCluster(hostName);
         // 2. do handle
         if (CollectionUtils.isNotEmpty(monitorCluster)) {
-            Set<String> monitorClusterSet = monitorCluster.stream().map(ClusterPhy::getCluster).collect(Collectors.toSet());
+            Set<String> monitorClusterSet = monitorCluster.stream().map(ClusterPhy::getCluster)
+                .collect(Collectors.toSet());
             doHandleLogicClusterStats(monitorClusterSet);
         }
     }
@@ -86,55 +88,63 @@ public class LogicClusterMonitorJobHandler extends AbstractMetaDataJob {
             return;
         }
         Set<Long> clusterIds = new HashSet<>();
-        regionList.stream().filter(region -> monitorClusterSet.contains(region.getPhyClusterName())).map(ClusterRegion::getLogicClusterIds).filter(StringUtils::isNotBlank).map(StringUtils::split).forEach(ids -> {
-            for (String str : ids) {
-                long id = Long.parseLong(str);
-                if (id > 0) {
-                    clusterIds.add(Long.valueOf(str));
+        regionList.stream().filter(region -> monitorClusterSet.contains(region.getPhyClusterName()))
+            .map(ClusterRegion::getLogicClusterIds).filter(StringUtils::isNotBlank).map(StringUtils::split)
+            .forEach(ids -> {
+                for (String str : ids) {
+                    long id = Long.parseLong(str);
+                    if (id > 0) {
+                        clusterIds.add(Long.valueOf(str));
+                    }
                 }
-            }
-        });
-        long collectTime = CommonUtils.monitorTimestamp2min(System.currentTimeMillis());
-        clusterLogicList.stream().filter(clusterLogic -> clusterIds.contains(clusterLogic.getId())).forEach(logicCluster -> {
-            clusterLogicFutureUtil.runnableTask(() -> {
-                ClusterLogicStatsPO clusterLogicStatsPO = null;
-                try {
-                    clusterLogicStatsPO = clusterLogicStaticsService.getLogicClusterStats(logicCluster.getId(), true);
-                } catch (Exception e) {
-                    LOGGER.error("class=ClusterLogicMonitorJobHandler||method=doHandleLogicClusterStats||logicClusterId={}||" + "msg=failed to get LogicClusterStats", logicCluster.getId());
-                }
-                if (null == clusterLogicStatsPO) {
-                    return;
-                }
-                ESClusterStatsCells esClusterStatsBean = new ESClusterStatsCells();
-                esClusterStatsBean.setStatus(clusterLogicStatsPO.getStatus());
-                esClusterStatsBean.setStatusType(clusterLogicStatsPO.getStatusType());
-                esClusterStatsBean.setClusterName(logicCluster.getName());
-                esClusterStatsBean.setLevel(logicCluster.getLevel());
-                esClusterStatsBean.setClusterNu(1);
-                esClusterStatsBean.setTotalDocNu((long) clusterLogicStatsPO.getDocNu());
-                esClusterStatsBean.setIndexStoreSize(clusterLogicStatsPO.getUsedDisk());
-                esClusterStatsBean.setStoreSize(clusterLogicStatsPO.getUsedDisk());
-                esClusterStatsBean.setFreeStoreSize(clusterLogicStatsPO.getFreeDisk());
-                esClusterStatsBean.setTotalStoreSize(clusterLogicStatsPO.getTotalDisk());
-                esClusterStatsBean.setNumberDataNodes(clusterLogicStatsPO.getNumberDataNodes());
-                esClusterStatsBean.setNumberPendingTasks(clusterLogicStatsPO.getNumberPendingTasks());
-                esClusterStatsBean.setUnAssignedShards(clusterLogicStatsPO.getUnAssignedShards());
-                esClusterStatsBean.setCpuUsage(clusterLogicStatsPO.getCpuUsedPercent());
-                esClusterStatsBean.setAlivePercent(clusterLogicStatsPO.getAlivePercent());
-                if (0 != esClusterStatsBean.getTotalStoreSize()) {
-                    esClusterStatsBean.setDiskUsage(esClusterStatsBean.getStoreSize() / esClusterStatsBean.getTotalStoreSize());
-                }
-                ESClusterStats esClusterStats = new ESClusterStats();
-                esClusterStats.setStatis(esClusterStatsBean);
-                esClusterStats.setCluster(logicCluster.getName());
-                // 设置集群arius id
-                esClusterStats.setPhysicCluster(LOGIC_CLUSTER);
-                esClusterStats.setTimestamp(collectTime);
-                esClusterStats.setDataCenter(logicCluster.getDataCenter());
-                esLogicClusterStatsList.add(esClusterStats);
             });
-        });
+        long collectTime = CommonUtils.monitorTimestamp2min(System.currentTimeMillis());
+        clusterLogicList.stream().filter(clusterLogic -> clusterIds.contains(clusterLogic.getId()))
+            .forEach(logicCluster -> {
+                clusterLogicFutureUtil.runnableTask(() -> {
+                    ClusterLogicStatsPO clusterLogicStatsPO = null;
+                    try {
+                        clusterLogicStatsPO = clusterLogicStaticsService.getLogicClusterStats(logicCluster.getId(),
+                            true);
+                    } catch (Exception e) {
+                        LOGGER.error(
+                            "class=ClusterLogicMonitorJobHandler||method=doHandleLogicClusterStats||logicClusterId={}||"
+                                     + "msg=failed to get LogicClusterStats",
+                            logicCluster.getId());
+                    }
+                    if (null == clusterLogicStatsPO) {
+                        return;
+                    }
+                    ESClusterStatsCells esClusterStatsBean = new ESClusterStatsCells();
+                    esClusterStatsBean.setStatus(clusterLogicStatsPO.getStatus());
+                    esClusterStatsBean.setStatusType(clusterLogicStatsPO.getStatusType());
+                    esClusterStatsBean.setClusterName(logicCluster.getName());
+                    esClusterStatsBean.setLevel(logicCluster.getLevel());
+                    esClusterStatsBean.setClusterNu(1);
+                    esClusterStatsBean.setTotalDocNu((long) clusterLogicStatsPO.getDocNu());
+                    esClusterStatsBean.setIndexStoreSize(clusterLogicStatsPO.getUsedDisk());
+                    esClusterStatsBean.setStoreSize(clusterLogicStatsPO.getUsedDisk());
+                    esClusterStatsBean.setFreeStoreSize(clusterLogicStatsPO.getFreeDisk());
+                    esClusterStatsBean.setTotalStoreSize(clusterLogicStatsPO.getTotalDisk());
+                    esClusterStatsBean.setNumberDataNodes(clusterLogicStatsPO.getNumberDataNodes());
+                    esClusterStatsBean.setNumberPendingTasks(clusterLogicStatsPO.getNumberPendingTasks());
+                    esClusterStatsBean.setUnAssignedShards(clusterLogicStatsPO.getUnAssignedShards());
+                    esClusterStatsBean.setCpuUsage(clusterLogicStatsPO.getCpuUsedPercent());
+                    esClusterStatsBean.setAlivePercent(clusterLogicStatsPO.getAlivePercent());
+                    if (0 != esClusterStatsBean.getTotalStoreSize()) {
+                        esClusterStatsBean
+                            .setDiskUsage(esClusterStatsBean.getStoreSize() / esClusterStatsBean.getTotalStoreSize());
+                    }
+                    ESClusterStats esClusterStats = new ESClusterStats();
+                    esClusterStats.setStatis(esClusterStatsBean);
+                    esClusterStats.setCluster(logicCluster.getName());
+                    // 设置集群arius id
+                    esClusterStats.setPhysicCluster(LOGIC_CLUSTER);
+                    esClusterStats.setTimestamp(collectTime);
+                    esClusterStats.setDataCenter(logicCluster.getDataCenter());
+                    esLogicClusterStatsList.add(esClusterStats);
+                });
+            });
         clusterLogicFutureUtil.waitExecute(50);
 
         // send cluster status to es and kafka

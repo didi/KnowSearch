@@ -7,7 +7,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.config.ThirdpartCo
 import java.util.List;
 
 public interface CommonManager {
-    
 
     /**
      * 获取物理集群列表接口
@@ -22,14 +21,11 @@ public interface CommonManager {
      */
     Result<ThirdPartClusterVO> getDataCluster(String cluster);
 
-     /**
-     * 获取配置列表接口
-     * @param param
-     * @return
-     */
+    /**
+    * 获取配置列表接口
+    * @param param
+    * @return
+    */
     Result<List<ThirdpartConfigVO>> queryConfig(AriusConfigInfoDTO param);
 
-
-
- 
 }

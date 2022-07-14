@@ -22,7 +22,7 @@ public class BaseTemplateVO extends BaseVO {
     private Integer id;
 
     @ApiModelProperty("索引名称")
-    private String name;
+    private String  name;
 
     /**
      * 用户数据类型
@@ -36,10 +36,10 @@ public class BaseTemplateVO extends BaseVO {
      * 索引滚动格式
      */
     @ApiModelProperty("时间后缀")
-    private String dateFormat;
+    private String  dateFormat;
 
     @ApiModelProperty("数据中心")
-    private String dataCenter;
+    private String  dataCenter;
 
     /**
      * 数据保存时长 单位天
@@ -54,49 +54,47 @@ public class BaseTemplateVO extends BaseVO {
     private Integer hotTime;
 
     @ApiModelProperty("成本部门ID")
-    private String libraDepartmentId;
+    private String  libraDepartmentId;
 
     @ApiModelProperty("成本部门名称")
-    private String libraDepartment;
+    private String  libraDepartment;
 
     @ApiModelProperty("索引应用ID")
     private Integer projectId;
 
     @ApiModelProperty("责任人：后续进行下线，无需再使用")
     @Deprecated
-    private String responsible;
+    private String  responsible;
 
     @ApiModelProperty("时间字段")
-    private String dateField;
+    private String  dateField;
 
     @ApiModelProperty("时间字段格式")
-    private String dateFieldFormat;
+    private String  dateFieldFormat;
 
     /**
      * id地钻
      */
     @ApiModelProperty("主键字段")
-    private String idField;
+    private String  idField;
 
     @ApiModelProperty("routing字段")
-    private String routingField;
+    private String  routingField;
 
     @ApiModelProperty("表达式")
-    private String expression;
+    private String  expression;
 
     @ApiModelProperty("描述")
-    private String desc;
+    private String  desc;
 
     /**
      * 规格 单位台
      */
     @ApiModelProperty("配额")
-    private Double quota;
+    private Double  quota;
 
-    @ApiModelProperty("写入限流值，" +
-            "writeRateLimit = 0 禁止写入；" +
-            "writeRateLimit = -1 不限流；" +
-            "writeRateLimit = 123 具体的写入tps限流值，即单台client每秒写入123条文档")
+    @ApiModelProperty("写入限流值，" + "writeRateLimit = 0 禁止写入；" + "writeRateLimit = -1 不限流；"
+                      + "writeRateLimit = 123 具体的写入tps限流值，即单台client每秒写入123条文档")
     private Integer writeRateLimit;
 
     /**

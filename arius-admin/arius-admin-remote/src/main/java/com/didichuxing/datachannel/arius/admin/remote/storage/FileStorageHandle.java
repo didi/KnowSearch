@@ -28,8 +28,8 @@ public interface FileStorageHandle extends BaseHandle {
 
     Result<Void> remove(String fileName);
 
-        /**
-         * 下载base地址
-         */
+    /**
+     * 下载base地址
+     */
     String getDownloadBaseUrl();
 }

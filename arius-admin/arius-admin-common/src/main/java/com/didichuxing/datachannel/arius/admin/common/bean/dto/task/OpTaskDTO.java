@@ -23,16 +23,16 @@ public class OpTaskDTO extends BaseDTO {
 
     private static final long serialVersionUID = 1L;
 
-    private Integer id;
+    private Integer           id;
 
     @ApiModelProperty("标题")
-    private String title;
+    private String            title;
 
     @ApiModelProperty("任务类型")
-    private Integer taskType;
+    private Integer           taskType;
 
     @ApiModelProperty("业务数据主键")
-    private String businessKey;
+    private String            businessKey;
 
     /**
      * 任务状态
@@ -41,24 +41,24 @@ public class OpTaskDTO extends BaseDTO {
      * cancel:取消 pause:暂停
      */
     @ApiModelProperty("任务状态")
-    private String status;
+    private String            status;
 
     @ApiModelProperty("创建人")
-    private String creator;
+    private String            creator;
 
     @ApiModelProperty("创建时间")
-    private Date createTime;
+    private Date              createTime;
 
     @ApiModelProperty("更新时间")
-    private Date updateTime;
+    private Date              updateTime;
 
     @ApiModelProperty("标记删除 ")
-    private Boolean deleteFlag;
+    private Boolean           deleteFlag;
 
     @ApiModelProperty("expandData")
-    private String expandData;
+    private String            expandData;
 
     @ApiModelProperty("数据中心")
-    private String  dataCenter;
+    private String            dataCenter;
 
 }

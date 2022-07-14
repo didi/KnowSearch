@@ -35,7 +35,7 @@ public class ShardNumAdjustRandomTask extends BaseConcurrentClusterTask implemen
     private static final ILog LOGGER = LogFactory.getLog(ShardNumAdjustRandomTask.class);
 
     @Autowired
-    private IndexPlanManager indexPlanManager;
+    private IndexPlanManager  indexPlanManager;
 
     @Override
     public TaskResult execute(JobContext jobContext) throws Exception {

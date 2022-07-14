@@ -17,9 +17,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class OperateRecordVO extends BaseVO {
 
-       /**
-     * 主键
-     */
+    /**
+    * 主键
+    */
     @ApiModelProperty("记录ID")
     private Integer id;
 
@@ -27,15 +27,13 @@ public class OperateRecordVO extends BaseVO {
      * @see com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.NewModuleEnum
      */
     @ApiModelProperty("模块")
-    private String module;
+    private String  module;
 
     /**
      * @see OperateTypeEnum
      */
     @ApiModelProperty("操作ID")
-    private String operate;
-
-
+    private String  operate;
 
     /**
      * 操作描述
@@ -55,17 +53,16 @@ public class OperateRecordVO extends BaseVO {
     @ApiModelProperty("操作时间")
     private Date    operateTime;
 
-    
     /**
      * 触发方式
      * @see com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum
      */
     @ApiModelProperty("操作方式")
-    private String triggerWay;
+    private String  triggerWay;
     /**
      * 应用id
      */
     @ApiModelProperty("项目")
-    private String projectName;
+    private String  projectName;
 
 }

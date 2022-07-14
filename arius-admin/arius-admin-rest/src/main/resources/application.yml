@@ -30,7 +30,7 @@ es.update.cluster.name: logi-elasticsearch-7.6.0
 
 #ES客户端相关配置
 es.client.cluster.port: 8061
-es.client.io.thread.count: 2
+es.client.io.thread.count: 8
 
 #可观测性相关配置
 monitorJob.threadPool.initsize: 20

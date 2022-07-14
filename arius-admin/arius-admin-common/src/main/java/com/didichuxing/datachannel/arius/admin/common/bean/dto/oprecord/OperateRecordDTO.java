@@ -40,8 +40,6 @@ public class OperateRecordDTO extends PageDTO {
     @ApiModelProperty(value = "操作ID")
     private Integer operateId;
 
-
-
     /**
      * 操作描述
      */
@@ -54,20 +52,18 @@ public class OperateRecordDTO extends PageDTO {
     @ApiModelProperty("操作人")
     private String  userOperation;
 
-
-
     /**
      * 操作起始时间 查询使用
      */
-    @ApiModelProperty(value = "开始时间",dataType ="Date" )
+    @ApiModelProperty(value = "开始时间", dataType = "Date")
     private Date    beginTime;
 
     /**
      * 操作截止时间 查询使用
      */
-    @ApiModelProperty(value = "结束时间",dataType ="Date" )
+    @ApiModelProperty(value = "结束时间", dataType = "Date")
     private Date    endTime;
-    
+
     /**
      * 触发方式
      * @see com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum
@@ -80,16 +76,15 @@ public class OperateRecordDTO extends PageDTO {
     @ApiModelProperty("项目")
     private String  projectName;
     @ApiModelProperty("bizId")
-    private String bizId;
+    private String  bizId;
     /**
      * @see OperateRecordSortEnum
      */
-    @ApiModelProperty(value = "排序字段",example = "id或者operateTime")
-    private String sortTerm;
-    
-    
+    @ApiModelProperty(value = "排序字段", example = "id或者operateTime")
+    private String  sortTerm;
+
     @ApiModelProperty(value = "是否降序排序（默认降序）", dataType = "Boolean", required = false)
     private Boolean orderByDesc = true;
     @ApiModelProperty(hidden = true)
-    private String sortType;
+    private String  sortType;
 }

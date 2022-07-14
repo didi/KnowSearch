@@ -21,16 +21,16 @@ import java.util.Date;
 public class ESPackageVO extends BaseVO {
 
     @ApiModelProperty("主键")
-    private Long id;
+    private Long    id;
 
     @ApiModelProperty("镜像地址或包地址")
-    private String url;
+    private String  url;
 
     @ApiModelProperty("版本标识")
-    private String esVersion;
+    private String  esVersion;
 
     @ApiModelProperty("包创建人")
-    private String creator;
+    private String  creator;
 
     @ApiModelProperty("是否为发布版本")
     private Boolean release;
@@ -39,13 +39,13 @@ public class ESPackageVO extends BaseVO {
     private Integer manifest;
 
     @ApiModelProperty("备注")
-    private String desc;
+    private String  desc;
 
     @ApiModelProperty("标记删除")
     private Boolean deleteFlag;
 
     @ApiModelProperty("创建时间")
-    private Date createTime;
+    private Date    createTime;
 
     @ApiModelProperty("类型(1 滴滴内部版本/2 开源版本)")
     private Integer packageType;

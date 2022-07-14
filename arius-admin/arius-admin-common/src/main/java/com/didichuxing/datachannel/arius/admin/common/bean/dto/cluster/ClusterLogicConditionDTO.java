@@ -22,15 +22,15 @@ public class ClusterLogicConditionDTO extends ESLogicClusterDTO {
      * @see ProjectClusterLogicAuthEnum
      */
     @ApiModelProperty("权限类型 1:配置管理, 2:访问, -1:无权限")
-    private Integer authType;
+    private Integer      authType;
 
     @ApiModelProperty("暂无")
-    private String  sortTerm;
+    private String       sortTerm;
 
-    private String sortType;
+    private String       sortType;
 
     @ApiModelProperty(value = "是否降序排序（默认降序）", dataType = "Boolean", required = false)
-    private Boolean orderByDesc = true;
+    private Boolean      orderByDesc = true;
 
     @ApiModelProperty("集群名称，用于后端根据项目筛选")
     private List<String> clusterNames;

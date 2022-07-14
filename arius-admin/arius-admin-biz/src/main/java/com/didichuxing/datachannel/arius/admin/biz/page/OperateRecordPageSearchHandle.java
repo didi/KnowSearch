@@ -26,16 +26,14 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class OperateRecordPageSearchHandle extends AbstractPageSearchHandle<OperateRecordDTO, OperateRecordVO> {
-    private static final ILog LOGGER = LogFactory.getLog(OperateRecordPageSearchHandle.class);
-   
+    private static final ILog    LOGGER = LogFactory.getLog(OperateRecordPageSearchHandle.class);
+
     @Autowired
     private OperateRecordService operateRecordService;
 
- 
-
     @Override
     protected Result<Boolean> checkCondition(OperateRecordDTO condition, Integer projectId) {
-        
+
         return Result.buildSucc();
     }
 
@@ -48,20 +46,19 @@ public class OperateRecordPageSearchHandle extends AbstractPageSearchHandle<Oper
             }
         }
         condition.setFrom((condition.getPage() - 1) * condition.getSize());
-        
+
         // Do nothing
     }
 
     @Override
     protected PaginationResult<OperateRecordVO> buildPageData(OperateRecordDTO pageDTO, Integer projectId) {
-    
-        final Tuple<Long, List<OperateRecordVO>> tuple = operateRecordService.pagingGetOperateRecordByCondition(
-                pageDTO);
+
+        final Tuple<Long, List<OperateRecordVO>> tuple = operateRecordService
+            .pagingGetOperateRecordByCondition(pageDTO);
         if (tuple == null) {
-            return PaginationResult.buildSucc( Collections.emptyList(), 0L, pageDTO.getPage(), pageDTO.getSize());
+            return PaginationResult.buildSucc(Collections.emptyList(), 0L, pageDTO.getPage(), pageDTO.getSize());
         }
         return PaginationResult.buildSucc(tuple.getV2(), tuple.v1(), pageDTO.getPage(), pageDTO.getSize());
     }
 
-   
 }

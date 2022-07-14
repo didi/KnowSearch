@@ -115,8 +115,7 @@ public class ClusterCreateTaskHandler extends AbstractClusterTaskHandler {
     @Override
     Result<Void> buildHostEcmTaskDTO(EcmTaskDTO ecmTaskDTO, String param, String creator) {
         // 获取并且设置新建集群工单内容中的集群创建人信息
-        ClusterNewHostContent clusterOpNewHostContent = ConvertUtil.str2ObjByJson(param,
-            ClusterNewHostContent.class);
+        ClusterNewHostContent clusterOpNewHostContent = ConvertUtil.str2ObjByJson(param, ClusterNewHostContent.class);
         if (StringUtils.isBlank(clusterOpNewHostContent.getCreator())) {
             clusterOpNewHostContent.setCreator(creator);
         }

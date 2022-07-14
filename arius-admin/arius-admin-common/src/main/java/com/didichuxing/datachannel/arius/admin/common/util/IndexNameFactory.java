@@ -19,7 +19,8 @@ import com.didiglobal.logi.log.LogFactory;
  */
 public class IndexNameFactory {
 
-    private IndexNameFactory(){}
+    private IndexNameFactory() {
+    }
 
     private static final ILog    LOGGER             = LogFactory.getLog(IndexNameFactory.class);
 
@@ -150,7 +151,8 @@ public class IndexNameFactory {
                 SimpleDateFormat format = new SimpleDateFormat(dateFormatyyyy);
                 return format.parse(indexNameNoVersion.substring(expression.length() - 1));
             } catch (Exception e) {
-                LOGGER.warn("class=IndexNameFactory||method=genIndexTimeByIndexName||expression={}||dateFormat{}||indexNameNoVersion={}",
+                LOGGER.warn(
+                    "class=IndexNameFactory||method=genIndexTimeByIndexName||expression={}||dateFormat{}||indexNameNoVersion={}",
                     expression, dateFormatyyyy, indexNameNoVersion);
             }
         } else {
@@ -177,7 +179,8 @@ public class IndexNameFactory {
                 }
 
             } catch (Exception e) {
-                LOGGER.warn("class=IndexNameFactory||method=genIndexTimeByIndexName||expression={}||dateFormat{}||indexNameNoVersion={}",
+                LOGGER.warn(
+                    "class=IndexNameFactory||method=genIndexTimeByIndexName||expression={}||dateFormat{}||indexNameNoVersion={}",
                     expression, dateFormatyyyy, indexNameNoVersion);
             }
         }

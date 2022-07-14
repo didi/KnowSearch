@@ -32,7 +32,7 @@ public class IndexRolloverTask extends BaseConcurrentTemplateTask implements Job
     private static final ILog LOGGER = LogFactory.getLog(IndexRolloverTask.class);
 
     @Autowired
-    private IndexPlanManager indexPlanManager;
+    private IndexPlanManager  indexPlanManager;
 
     @Override
     public TaskResult execute(JobContext jobContext) throws Exception {

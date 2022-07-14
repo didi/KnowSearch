@@ -16,7 +16,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel(description = "多节点task指标信息")
-public class MultiMetricsClusterPhyNodeTaskDTO extends MultiMetricsClusterPhyNodeDTO{
+public class MultiMetricsClusterPhyNodeTaskDTO extends MultiMetricsClusterPhyNodeDTO {
 
     @ApiModelProperty("集群节点ip")
     private List<String> aggTypes;

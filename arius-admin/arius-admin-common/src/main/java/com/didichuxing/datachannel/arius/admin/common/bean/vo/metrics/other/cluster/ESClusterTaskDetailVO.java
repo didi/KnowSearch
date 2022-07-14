@@ -28,10 +28,10 @@ public class ESClusterTaskDetailVO implements Serializable {
     private String action;
 
     @ApiModelProperty("开始时间")
-    private long startTime;
+    private long   startTime;
 
     @ApiModelProperty("运行时间ms")
-    private long runningTime;
+    private long   runningTime;
 
     @ApiModelProperty("运行时间string")
     private String runningTimeString;

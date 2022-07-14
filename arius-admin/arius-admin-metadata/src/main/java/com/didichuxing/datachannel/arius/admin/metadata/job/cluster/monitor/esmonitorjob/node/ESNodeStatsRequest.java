@@ -14,20 +14,20 @@ import java.util.Set;
 
 public class ESNodeStatsRequest extends BaseTimeoutRequest<ESNodeStatsRequest> {
 
-    public static final String INDICES = "indices";
-    public static final String OS = "os";
-    public static final String PROCESS = "process";
-    public static final String JVM = "jvm";
+    public static final String INDICES     = "indices";
+    public static final String OS          = "os";
+    public static final String PROCESS     = "process";
+    public static final String JVM         = "jvm";
     public static final String THREAD_POOL = "thread_pool";
-    public static final String FS = "fs";
-    public static final String TRANSPORT = "transport";
-    public static final String HTTP = "http";
-    public static final String BREAKERS = "breakers";
-    public static final String SCRIPT = "script";
+    public static final String FS          = "fs";
+    public static final String TRANSPORT   = "transport";
+    public static final String HTTP        = "http";
+    public static final String BREAKERS    = "breakers";
+    public static final String SCRIPT      = "script";
 
-    private Set<String> flags = new HashSet<>();
-    private String[] nodesIds = null;
-    private String level = null;
+    private Set<String>        flags       = new HashSet<>();
+    private String[]           nodesIds    = null;
+    private String             level       = null;
 
     public final ESNodeStatsRequest nodesIds(String... nodesIds) {
         this.nodesIds = nodesIds;
@@ -58,7 +58,6 @@ public class ESNodeStatsRequest extends BaseTimeoutRequest<ESNodeStatsRequest> {
         flags.clear();
         return this;
     }
-
 
     public ESNodeStatsRequest flag(String name, boolean isSet) {
         Optional.ofNullable(isSet ? flags.add(name) : flags.remove(name));

@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 public class ConsoleAliasDTO extends BaseDTO {
 
     @ApiModelProperty("模板别名名称")
-    private String alias;
+    private String     alias;
 
     @ApiModelProperty("别名过滤器")
     private JSONObject filter;

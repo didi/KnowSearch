@@ -35,7 +35,7 @@ public interface DslMetricsManager {
      * @param endDate
      * @return
      */
-    Result<SearchDslTemplateResponseVO> getDslTemplateByCondition(Integer projectId, String searchKeyword, String dslTag,
-                                                                  String sortInfo, Long from, Long size, Long startDate,
-                                                                  Long endDate);
+    Result<SearchDslTemplateResponseVO> getDslTemplateByCondition(Integer projectId, String searchKeyword,
+                                                                  String dslTag, String sortInfo, Long from, Long size,
+                                                                  Long startDate, Long endDate);
 }

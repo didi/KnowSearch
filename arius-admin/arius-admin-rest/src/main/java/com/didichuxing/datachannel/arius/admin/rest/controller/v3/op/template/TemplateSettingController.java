@@ -26,24 +26,23 @@ public class TemplateSettingController {
 
     @Autowired
     private TemplateLogicSettingsManager templateLogicSettingManager;
+
     @PutMapping("/{logicId}")
     @ResponseBody
-    @ApiOperation(value = "更新索引Setting接口" )
+    @ApiOperation(value = "更新索引Setting接口")
     public Result<Void> modifySetting(HttpServletRequest request, @PathVariable("logicId") Integer logicId,
                                       @RequestBody String settingDTO) {
         IndexTemplatePhySetting settings = new IndexTemplatePhySetting(JSONObject.parseObject(settingDTO));
         return templateLogicSettingManager.updateSettings(logicId, settings, HttpRequestUtil.getOperator(request),
-                HttpRequestUtil.getProjectId(request));
+            HttpRequestUtil.getProjectId(request));
     }
-    
+
     @GetMapping("")
     @ResponseBody
-    @ApiOperation(value = "获取索引Setting接口" )
+    @ApiOperation(value = "获取索引Setting接口")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "索引ID", required = true) })
-    public Result<IndexTemplatePhySetting> getTemplateSettings(@RequestParam("logicId") Integer logicId) throws
-                                                                                                          AdminOperateException {
+    public Result<IndexTemplatePhySetting> getTemplateSettings(@RequestParam("logicId") Integer logicId) throws AdminOperateException {
         return templateLogicSettingManager.getSettings(logicId);
     }
-    
-   
+
 }

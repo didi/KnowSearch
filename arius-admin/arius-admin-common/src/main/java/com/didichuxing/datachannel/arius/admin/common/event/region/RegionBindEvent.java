@@ -12,14 +12,11 @@ public class RegionBindEvent extends ApplicationEvent {
 
     private ClusterRegion clusterRegion;
 
-    private Integer share;
+    private Integer       share;
 
-    private String operator;
+    private String        operator;
 
-    public RegionBindEvent(Object source,
-                           ClusterRegion clusterRegion,
-                           Integer share,
-                           String operator) {
+    public RegionBindEvent(Object source, ClusterRegion clusterRegion, Integer share, String operator) {
         super(source);
         this.clusterRegion = clusterRegion;
         this.share = share;

@@ -56,12 +56,12 @@ public class ESConfig extends BaseEntity {
     /**
      * 配置版本
      */
-    private Integer  versionConfig;
+    private Integer versionConfig;
 
     /**
      *  是否在使用 0：不使用 1：部分生效中 2：已生效
      */
-    private Integer  selected;
+    private Integer selected;
 
     /**
      * 标记删除

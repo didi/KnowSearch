@@ -47,5 +47,5 @@ public class ConsoleESUserWithVerifyCodeVO extends BaseVO {
     private Integer queryThreshold;
 
     @ApiModelProperty("数据中心")
-    private String dataCenter;
+    private String  dataCenter;
 }

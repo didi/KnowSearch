@@ -29,41 +29,42 @@ import org.springframework.stereotype.Component;
 @Component
 public class ClusterIndexManagerImpl implements ClusterIndexManager {
     @Autowired
-    private ClusterLogicService clusterLogicService;
+    private ClusterLogicService     clusterLogicService;
 
     @Autowired
-    private ClusterRegionService clusterRegionService;
+    private ClusterRegionService    clusterRegionService;
 
     @Autowired
-    private ClusterRoleHostService clusterRoleHostService;
+    private ClusterRoleHostService  clusterRoleHostService;
 
     @Autowired
-    private TemplateLogicManager templateLogicManager;
+    private TemplateLogicManager    templateLogicManager;
 
     @Autowired
-    private IndexTemplateService indexTemplateService;
+    private IndexTemplateService    indexTemplateService;
 
     @Autowired
     private IndexTemplatePhyService indexTemplatePhyService;
 
     @Override
-    public Result<List<ESClusterRoleHostVO>> listClusterLogicIndices(Integer clusterId,Integer projectId) {
+    public Result<List<ESClusterRoleHostVO>> listClusterLogicIndices(Integer clusterId, Integer projectId) {
         ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(Long.valueOf(clusterId));
         if (AriusObjUtils.isNull(clusterLogic)) {
             return Result.buildFail(String.format("集群[%s]不存在", clusterId));
         }
         ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(clusterLogic.getId());
-        Result<List<ClusterRoleHost>> result = clusterRoleHostService.listByRegionId(Math.toIntExact(clusterRegion.getId()));
+        Result<List<ClusterRoleHost>> result = clusterRoleHostService
+            .listByRegionId(Math.toIntExact(clusterRegion.getId()));
         if (result.failed()) {
             return Result.buildFail(result.getMessage());
         }
 
-        Result<List<IndexTemplatePhy>> indexTemplatePhy = indexTemplatePhyService.listByRegionId(Math.toIntExact(clusterRegion.getId()));
+        Result<List<IndexTemplatePhy>> indexTemplatePhy = indexTemplatePhyService
+            .listByRegionId(Math.toIntExact(clusterRegion.getId()));
         if (indexTemplatePhy.failed()) {
             return Result.buildFail(indexTemplatePhy.getMessage());
         }
 
-
-        return  null;
+        return null;
     }
 }

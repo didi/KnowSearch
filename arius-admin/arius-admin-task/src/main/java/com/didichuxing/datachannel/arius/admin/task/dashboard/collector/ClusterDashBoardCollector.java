@@ -23,13 +23,17 @@ import com.google.common.collect.Maps;
  */
 @Component
 public class ClusterDashBoardCollector extends BaseDashboardCollector {
-    private static final ILog            LOGGER = LogFactory.getLog(ClusterDashBoardCollector.class);
+    private static final ILog                                                LOGGER                            = LogFactory
+        .getLog(ClusterDashBoardCollector.class);
     @Autowired
-    protected ESClusterPhyStatsService esClusterPhyStatsService;
+    protected ESClusterPhyStatsService                                       esClusterPhyStatsService;
 
-    private static final Map<String/*集群名称*/, ClusterMetrics /*上一次采集到的集群数据*/> cluster2LastTimeClusterMetricsMap = Maps.newConcurrentMap();
+    private static final Map<String/*集群名称*/, ClusterMetrics /*上一次采集到的集群数据*/> cluster2LastTimeClusterMetricsMap = Maps
+        .newConcurrentMap();
 
-    private static final long FIVE_MINUTE = 5*60*1000;
+    private static final long                                                FIVE_MINUTE                       = 5 * 60
+                                                                                                                 * 1000;
+
     @Override
     public void collectSingleCluster(String cluster, long startTime) {
         DashBoardStats dashBoardStats = buildInitDashBoardStats(startTime);
@@ -46,7 +50,8 @@ public class ClusterDashBoardCollector extends BaseDashboardCollector {
         // 5. 写入请求数
         clusterMetrics.setIndexReqNum(esClusterPhyStatsService.getCurrentIndexTotal(cluster));
         // 6. 网关成功率、失败率
-        Tuple<Double/*成功率*/, Double/*失败率*/> gatewaySuccessRateAndFailureRate = esClusterPhyStatsService.getGatewaySuccessRateAndFailureRate(cluster);
+        Tuple<Double/*成功率*/, Double/*失败率*/> gatewaySuccessRateAndFailureRate = esClusterPhyStatsService
+            .getGatewaySuccessRateAndFailureRate(cluster);
         clusterMetrics.setGatewaySucPer(gatewaySuccessRateAndFailureRate.getV1());
         clusterMetrics.setGatewayFailedPer(gatewaySuccessRateAndFailureRate.getV2());
         // 7. 集群Pending task数
@@ -60,9 +65,9 @@ public class ClusterDashBoardCollector extends BaseDashboardCollector {
 
         long currentTimeMillis = System.currentTimeMillis();
         long currentTime = CommonUtils.monitorTimestamp2min(currentTimeMillis);
-        long elapsedTime = currentTime -startTime;
+        long elapsedTime = currentTime - startTime;
         clusterMetrics.setElapsedTime(elapsedTime);
-        clusterMetrics.setElapsedTimeGte5Min(elapsedTime>FIVE_MINUTE);
+        clusterMetrics.setElapsedTimeGte5Min(elapsedTime > FIVE_MINUTE);
 
         dashBoardStats.setCluster(clusterMetrics);
         monitorMetricsSender.sendDashboardStats(Lists.newArrayList(dashBoardStats));
@@ -89,11 +94,14 @@ public class ClusterDashBoardCollector extends BaseDashboardCollector {
     private Long getDocUprushNum(String cluster) {
         ClusterMetrics clusterMetrics = cluster2LastTimeClusterMetricsMap.get(cluster);
         // web第一次启动无暂存采集数据
-        if (null == clusterMetrics) { return 0L;}
+        if (null == clusterMetrics) {
+            return 0L;
+        }
 
-        Long lastTimeDocNum     = clusterMetrics.getDocUprushNum();
-        Long currentTimeDocNum  = esClusterPhyStatsService.getCurrentIndexTotal(cluster);
-        return MetricsUtils.computerUprushNum(currentTimeDocNum.doubleValue(), lastTimeDocNum.doubleValue()).longValue();
+        Long lastTimeDocNum = clusterMetrics.getDocUprushNum();
+        Long currentTimeDocNum = esClusterPhyStatsService.getCurrentIndexTotal(cluster);
+        return MetricsUtils.computerUprushNum(currentTimeDocNum.doubleValue(), lastTimeDocNum.doubleValue())
+            .longValue();
     }
 
     /**
@@ -104,11 +112,14 @@ public class ClusterDashBoardCollector extends BaseDashboardCollector {
     private Long getReqUprushNum(String cluster) {
         ClusterMetrics clusterMetrics = cluster2LastTimeClusterMetricsMap.get(cluster);
         // web第一次启动无暂存采集数据
-        if (null == clusterMetrics) { return 0L;}
+        if (null == clusterMetrics) {
+            return 0L;
+        }
 
         Long lastTimeQueryTotal = clusterMetrics.getReqUprushNum();
-        Long currentQueryTotal  = esClusterPhyStatsService.getCurrentQueryTotal(cluster);
+        Long currentQueryTotal = esClusterPhyStatsService.getCurrentQueryTotal(cluster);
 
-        return MetricsUtils.computerUprushNum(currentQueryTotal.doubleValue(), lastTimeQueryTotal.doubleValue()).longValue();
+        return MetricsUtils.computerUprushNum(currentQueryTotal.doubleValue(), lastTimeQueryTotal.doubleValue())
+            .longValue();
     }
 }

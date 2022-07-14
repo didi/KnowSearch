@@ -8,14 +8,13 @@ import java.util.Map;
 
 public class SimpleIndexNode {
     @JSONField(name = "primaries")
-    private CommonStat primaries;
+    private CommonStat                          primaries;
 
     @JSONField(name = "total")
-    private CommonStat total;
+    private CommonStat                          total;
 
     @JSONField(name = "shards")
     private Map<String, List<SimpleCommonStat>> shards;
-
 
     public CommonStat getPrimaries() {
         return primaries;

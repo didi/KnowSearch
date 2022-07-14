@@ -38,55 +38,68 @@ import com.google.common.collect.Maps;
  */
 @Component
 public class IndexDashBoardCollector extends BaseDashboardCollector {
-    private static final ILog   LOGGER     = LogFactory.getLog(IndexDashBoardCollector.class);
-    private static final String NO_REPLICA = "0";
+    private static final ILog                                                       LOGGER                        = LogFactory
+        .getLog(IndexDashBoardCollector.class);
+    private static final String                                                     NO_REPLICA                    = "0";
 
     @Autowired
-    private ESShardService          esShardService;
+    private ESShardService                                                          esShardService;
 
     @Autowired
-    private ESIndexService          esIndexService;
+    private ESIndexService                                                          esIndexService;
 
     @Autowired
-    private ESIndicesStatsService esIndicesStatsService;
+    private ESIndicesStatsService                                                   esIndicesStatsService;
 
-    private static final Map<String/*cluster@index*/, IndexMetrics /*上一次采集到的索引数据*/> index2LastTimeIndexMetricsMap = Maps.newConcurrentMap();
+    private static final Map<String/*cluster@index*/, IndexMetrics /*上一次采集到的索引数据*/> index2LastTimeIndexMetricsMap = Maps
+        .newConcurrentMap();
 
-    private static final FutureUtil FUTURE_UTIL = FutureUtil.init("IndexDashBoardCollector", 10, 10, 100);
+    private static final FutureUtil                                                 FUTURE_UTIL                   = FutureUtil
+        .init("IndexDashBoardCollector", 10, 10, 100);
 
     @Override
     public void collectSingleCluster(String cluster, long currentTime) {
         List<CatIndexResult> catIndexResults = esIndexService.syncCatIndex(cluster, 2);
-        if (CollectionUtils.isEmpty(catIndexResults)) { return;}
-
+        if (CollectionUtils.isEmpty(catIndexResults)) {
+            return;
+        }
 
         List<DashBoardStats> dashBoardStatsList = Lists.newArrayList();
-        AtomicReference<List<Segment>>                                segmentsListRef         = new AtomicReference<>(Lists.newArrayList());
+        AtomicReference<List<Segment>> segmentsListRef = new AtomicReference<>(Lists.newArrayList());
         AtomicReference<Tuple<List<ShardMetrics>, List<ShardMetrics>>> bigAndSmallListTupleRef = new AtomicReference<>();
-        AtomicReference<Map<String, IndexConfig>>                      index2IndexConfigMapRef = new AtomicReference<>(Maps.newHashMap());
-        AtomicReference<Map<String, Double>>                      index2IndexingIndexIncrementMapRef = new AtomicReference<>(Maps.newHashMap());
-        AtomicReference<Map<String, Double>>                      index2SearchQueryIncrementMapRef = new AtomicReference<>(Maps.newHashMap());
+        AtomicReference<Map<String, IndexConfig>> index2IndexConfigMapRef = new AtomicReference<>(Maps.newHashMap());
+        AtomicReference<Map<String, Double>> index2IndexingIndexIncrementMapRef = new AtomicReference<>(
+            Maps.newHashMap());
+        AtomicReference<Map<String, Double>> index2SearchQueryIncrementMapRef = new AtomicReference<>(
+            Maps.newHashMap());
         // 获取集群mapping信息、读、写文档突增等信息
-        List<String> indexList = catIndexResults.stream().map(CatIndexResult::getIndex).distinct().collect(Collectors.toList());
+        List<String> indexList = catIndexResults.stream().map(CatIndexResult::getIndex).distinct()
+            .collect(Collectors.toList());
 
         FUTURE_UTIL.runnableTask(() -> segmentsListRef.set(esShardService.syncGetSegments(cluster)))
-                .runnableTask(() -> bigAndSmallListTupleRef.set(esShardService.syncGetBigAndSmallShards(cluster)))
-                .runnableTask(() -> index2IndexConfigMapRef.set(batchGetIndexConfigMap(cluster, indexList)))
-                .runnableTask(() -> index2IndexingIndexIncrementMapRef.set(batchGetIndexingIndexIncrementMap(cluster, indexList)))
-                .runnableTask(() -> index2SearchQueryIncrementMapRef.set(batchGetSearchQueryIncrementMap(cluster, indexList)))
-                .waitExecute();
+            .runnableTask(() -> bigAndSmallListTupleRef.set(esShardService.syncGetBigAndSmallShards(cluster)))
+            .runnableTask(() -> index2IndexConfigMapRef.set(batchGetIndexConfigMap(cluster, indexList)))
+            .runnableTask(
+                () -> index2IndexingIndexIncrementMapRef.set(batchGetIndexingIndexIncrementMap(cluster, indexList)))
+            .runnableTask(
+                () -> index2SearchQueryIncrementMapRef.set(batchGetSearchQueryIncrementMap(cluster, indexList)))
+            .waitExecute();
 
         // 获取集群大shard、小shard
-        List<ShardMetrics> bigShardListList   = null != bigAndSmallListTupleRef.get() ? bigAndSmallListTupleRef.get().getV1() : Lists.newArrayList();
-        List<ShardMetrics> smallShardListList = null != bigAndSmallListTupleRef.get() ? bigAndSmallListTupleRef.get().getV2() : Lists.newArrayList();
+        List<ShardMetrics> bigShardListList = null != bigAndSmallListTupleRef.get()
+            ? bigAndSmallListTupleRef.get().getV1()
+            : Lists.newArrayList();
+        List<ShardMetrics> smallShardListList = null != bigAndSmallListTupleRef.get()
+            ? bigAndSmallListTupleRef.get().getV2()
+            : Lists.newArrayList();
         Map<String, List<ShardMetrics>> index2BigShardListMap = ConvertUtil.list2MapOfList(bigShardListList,
-                ShardMetrics::getIndex, c -> c);
+            ShardMetrics::getIndex, c -> c);
         Map<String, List<ShardMetrics>> index2SmallShardListMap = ConvertUtil.list2MapOfList(smallShardListList,
-                ShardMetrics::getIndex, c -> c);
+            ShardMetrics::getIndex, c -> c);
 
         // 获取集群segments
         Map<String, List<Segment>> index2SegmentsListMap = ConvertUtil.list2MapOfList(segmentsListRef.get(),
-                Segment::getIndex, c -> c);
+            Segment::getIndex, c -> c);
 
         for (CatIndexResult index : catIndexResults) {
             DashBoardStats dashBoardStats = buildInitDashBoardStats(currentTime);
@@ -117,12 +130,15 @@ public class IndexDashBoardCollector extends BaseDashboardCollector {
             List<Segment> indexSegmentList = index2SegmentsListMap.getOrDefault(index.getIndex(), Lists.newArrayList());
             indexMetrics.setSegmentNum((long) indexSegmentList.size());
             // 8. 索引Segements内存大小（MB）
-            indexMetrics.setSegmentMemSize(indexSegmentList.stream().mapToDouble(Segment::getMemoSize).sum() * BYTE_TO_MB);
+            indexMetrics
+                .setSegmentMemSize(indexSegmentList.stream().mapToDouble(Segment::getMemoSize).sum() * BYTE_TO_MB);
             // 9. 写入文档数突增个数 （上个时间间隔的两倍）
-            double indexingIndexIncrementValue = index2IndexingIndexIncrementMapRef.get().getOrDefault(index.getIndex(),0d);
+            double indexingIndexIncrementValue = index2IndexingIndexIncrementMapRef.get().getOrDefault(index.getIndex(),
+                0d);
             indexMetrics.setDocUprushNum((long) indexingIndexIncrementValue);
             // 10. 查询请求数突增个数（上个时间间隔的两倍）
-            double SearchQueryIncrementValue = index2SearchQueryIncrementMapRef.get().getOrDefault(index.getIndex(),0d);
+            double SearchQueryIncrementValue = index2SearchQueryIncrementMapRef.get().getOrDefault(index.getIndex(),
+                0d);
             indexMetrics.setReqUprushNum((long) SearchQueryIncrementValue);
 
             dashBoardStats.setIndex(indexMetrics);
@@ -131,7 +147,9 @@ public class IndexDashBoardCollector extends BaseDashboardCollector {
             index2LastTimeIndexMetricsMap.put(uniqueIndexKey, indexMetrics);
         }
 
-        if (CollectionUtils.isEmpty(dashBoardStatsList)) { return;}
+        if (CollectionUtils.isEmpty(dashBoardStatsList)) {
+            return;
+        }
 
         monitorMetricsSender.sendDashboardStats(dashBoardStatsList);
     }
@@ -146,20 +164,24 @@ public class IndexDashBoardCollector extends BaseDashboardCollector {
         Map<String, Double> index2CurrentSearchQueryMap = Maps.newHashMap();
         List<List<String>> indexListList = Lists.partition(indexList, 20);
         for (List<String> subIndexList : indexListList) {
-            index2CurrentSearchQueryMap.putAll(esIndicesStatsService.getIndex2CurrentSearchQueryMap(cluster, subIndexList));
+            index2CurrentSearchQueryMap
+                .putAll(esIndicesStatsService.getIndex2CurrentSearchQueryMap(cluster, subIndexList));
         }
 
         // 计算索引列表SearchQuery突增量
         Map<String, Double> index2SearchQueryIncrementMap = Maps.newHashMap();
         for (String index : indexList) {
-            String       uniqueIndexKey = CommonUtils.getUniqueKey(cluster, index);
-            IndexMetrics indexMetrics   = index2LastTimeIndexMetricsMap.get(uniqueIndexKey);
-            if (null == indexMetrics) { index2SearchQueryIncrementMap.put(index, 0d); continue;}
+            String uniqueIndexKey = CommonUtils.getUniqueKey(cluster, index);
+            IndexMetrics indexMetrics = index2LastTimeIndexMetricsMap.get(uniqueIndexKey);
+            if (null == indexMetrics) {
+                index2SearchQueryIncrementMap.put(index, 0d);
+                continue;
+            }
 
             Double currentTimeSearchQuery = index2CurrentSearchQueryMap.get(index);
-            Double lastTimeSearchQuery    = indexMetrics.getReqUprushNum().doubleValue();
+            Double lastTimeSearchQuery = indexMetrics.getReqUprushNum().doubleValue();
             // 计算突增值
-            Double incrementValue         = MetricsUtils.computerUprushNum(currentTimeSearchQuery, lastTimeSearchQuery);
+            Double incrementValue = MetricsUtils.computerUprushNum(currentTimeSearchQuery, lastTimeSearchQuery);
             index2SearchQueryIncrementMap.put(index, incrementValue);
         }
 
@@ -176,20 +198,24 @@ public class IndexDashBoardCollector extends BaseDashboardCollector {
         Map<String, Double> index2CurrentIndexingIndexMap = Maps.newHashMap();
         List<List<String>> indexListList = Lists.partition(indexList, 20);
         for (List<String> subIndexList : indexListList) {
-            index2CurrentIndexingIndexMap.putAll(esIndicesStatsService.getIndex2CurrentIndexingIndexMap(cluster, subIndexList));
+            index2CurrentIndexingIndexMap
+                .putAll(esIndicesStatsService.getIndex2CurrentIndexingIndexMap(cluster, subIndexList));
         }
 
         // 计算索引列表IndexingIndex突增量
         Map<String, Double> index2IndexingIndexIncrementMap = Maps.newHashMap();
         for (String index : indexList) {
-            String       uniqueIndexKey = CommonUtils.getUniqueKey(cluster, index);
-            IndexMetrics indexMetrics   = index2LastTimeIndexMetricsMap.get(uniqueIndexKey);
-            if (null == indexMetrics) { index2IndexingIndexIncrementMap.put(index, 0d); continue;}
+            String uniqueIndexKey = CommonUtils.getUniqueKey(cluster, index);
+            IndexMetrics indexMetrics = index2LastTimeIndexMetricsMap.get(uniqueIndexKey);
+            if (null == indexMetrics) {
+                index2IndexingIndexIncrementMap.put(index, 0d);
+                continue;
+            }
 
             Double currentTimeSearchQuery = index2CurrentIndexingIndexMap.get(index);
-            Double lastTimeSearchQuery    = indexMetrics.getDocUprushNum().doubleValue();
+            Double lastTimeSearchQuery = indexMetrics.getDocUprushNum().doubleValue();
             // 计算突增值
-            Double incrementValue         = MetricsUtils.computerUprushNum(currentTimeSearchQuery, lastTimeSearchQuery);
+            Double incrementValue = MetricsUtils.computerUprushNum(currentTimeSearchQuery, lastTimeSearchQuery);
             index2IndexingIndexIncrementMap.put(index, incrementValue);
         }
 

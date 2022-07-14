@@ -18,10 +18,10 @@ import lombok.NoArgsConstructor;
 public class ESConfigVO extends BaseVO {
 
     @ApiModelProperty("主键")
-    private Long id;
+    private Long   id;
 
     @ApiModelProperty("集群id")
-    private Long clusterId;
+    private Long   clusterId;
 
     @ApiModelProperty("配置文件名称")
     private String typeName;

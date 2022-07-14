@@ -48,24 +48,24 @@ public class LogicClusterPlugOperationHandler extends BaseWorkOrderHandler {
     private ProjectClusterLogicAuthService projectClusterLogicAuthService;
 
     @Autowired
-    private ClusterRegionService       clusterRegionService;
+    private ClusterRegionService           clusterRegionService;
 
     @Autowired
-    private ClusterPhyService          esClusterPhyService;
+    private ClusterPhyService              esClusterPhyService;
 
     @Autowired
-    private ClusterLogicService        clusterLogicService;
+    private ClusterLogicService            clusterLogicService;
 
     @Autowired
-    private EcmTaskManager             ecmTaskManager;
+    private EcmTaskManager                 ecmTaskManager;
 
     @Autowired
-    private ClusterRoleService         clusterRoleService;
+    private ClusterRoleService             clusterRoleService;
 
     @Autowired
-    private EcmHandleService           ecmHandleService;
+    private EcmHandleService               ecmHandleService;
 
-    protected static final ILog        LOGGER = LogFactory.getLog(LogicClusterPlugOperationHandler.class);
+    protected static final ILog            LOGGER = LogFactory.getLog(LogicClusterPlugOperationHandler.class);
 
     @Override
     protected Result<Void> validateConsoleParam(WorkOrder workOrder) {
@@ -169,8 +169,7 @@ public class LogicClusterPlugOperationHandler extends BaseWorkOrderHandler {
         ClusterPhy clusterPhy = esClusterPhyService.getClusterById(clusterId);
         esEcmTaskDTO.setPhysicClusterId(clusterPhy.getId().longValue());
 
-        List<ClusterRoleInfo> clusterRoleInfoList = clusterRoleService.getAllRoleClusterByClusterId(
-                clusterPhy.getId());
+        List<ClusterRoleInfo> clusterRoleInfoList = clusterRoleService.getAllRoleClusterByClusterId(clusterPhy.getId());
         if (CollectionUtils.isEmpty(clusterRoleInfoList)) {
             return Result.buildFail("物理集群角色不存在");
         }

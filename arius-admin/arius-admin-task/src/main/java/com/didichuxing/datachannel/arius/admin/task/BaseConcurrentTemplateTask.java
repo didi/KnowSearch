@@ -20,10 +20,10 @@ import com.didiglobal.logi.log.LogFactory;
  */
 public abstract class BaseConcurrentTemplateTask extends BaseConcurrentTask<IndexTemplatePO> {
 
-    private static final ILog     LOGGER = LogFactory.getLog(BaseConcurrentClusterTask.class);
+    private static final ILog      LOGGER = LogFactory.getLog(BaseConcurrentClusterTask.class);
 
     @Autowired
-    private IndexTemplateDAO templateLogicDAO;
+    private IndexTemplateDAO       templateLogicDAO;
 
     @Autowired
     protected TemplateLogicManager templateLogicManager;
@@ -55,18 +55,26 @@ public abstract class BaseConcurrentTemplateTask extends BaseConcurrentTask<Inde
         for (IndexTemplatePO item : items) {
             IndexTemplatePO logicPO = item;
             try {
-                LOGGER.info("class=BaseConcurrentTemplateTask||method=executeByBatc||executeByLogicTemplate begin||template={}||task={}", logicPO.getName(), getTaskName());
+                LOGGER.info(
+                    "class=BaseConcurrentTemplateTask||method=executeByBatc||executeByLogicTemplate begin||template={}||task={}",
+                    logicPO.getName(), getTaskName());
                 if (executeByLogicTemplate(logicPO.getId())) {
-                    LOGGER.info("class=BaseConcurrentTemplateTask||method=executeByBatc||executeByLogicTemplate succ||template={}||task={}", logicPO.getName(), getTaskName());
+                    LOGGER.info(
+                        "class=BaseConcurrentTemplateTask||method=executeByBatc||executeByLogicTemplate succ||template={}||task={}",
+                        logicPO.getName(), getTaskName());
                 } else {
                     succeed = false;
-                    LOGGER.warn("class=BaseConcurrentTemplateTask||method=executeByBatc||executeByLogicTemplate fail||template={}||task={}", logicPO.getName(), getTaskName());
+                    LOGGER.warn(
+                        "class=BaseConcurrentTemplateTask||method=executeByBatc||executeByLogicTemplate fail||template={}||task={}",
+                        logicPO.getName(), getTaskName());
                 }
 
                 Thread.sleep(TimeUnit.SECONDS.toMillis(TaskConcurrentConstants.SLEEP_SECONDS_PER_EXECUTE));
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-                LOGGER.warn("class=BaseConcurrentTemplateTask||method=executeByBatc||BaseConcurrentTemplateTask Interrupted||task={}", getTaskName(), e);
+                LOGGER.warn(
+                    "class=BaseConcurrentTemplateTask||method=executeByBatc||BaseConcurrentTemplateTask Interrupted||task={}",
+                    getTaskName(), e);
             } catch (Exception e) {
                 succeed = false;
                 LOGGER.error("class=BaseConcurrentTemplateTask||method=executeByBatch||errMsg={}||template={}||task={}",

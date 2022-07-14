@@ -38,26 +38,26 @@ import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
 public class ClusterPhyServiceTest {
 
     @InjectMocks
-    private ClusterPhyServiceImpl ClusterPhyService;
+    private ClusterPhyServiceImpl  ClusterPhyService;
 
     @Mock
-    private PhyClusterDAO clusterDAO;
+    private PhyClusterDAO          clusterDAO;
 
     @Mock
-    private ESClusterService esClusterService;
+    private ESClusterService       esClusterService;
 
     @Mock
-    private ClusterRoleService clusterRoleService;
+    private ClusterRoleService     clusterRoleService;
 
     @Mock
     private ClusterRoleHostService clusterRoleHostService;
 
     @Mock
-    private ESPluginService esPluginService;
+    private ESPluginService        esPluginService;
 
     private final String           cluster      = "lyn-test-public12-08";
     private final String           existCluster = "hsl-test-exist-Cluster";
-    private final Integer          id      = 157;
+    private final Integer          id           = 157;
 
     @BeforeEach
     public void setUp() {
@@ -109,33 +109,33 @@ public class ClusterPhyServiceTest {
         ClusterPhyDTO esClusterDTO = CustomDataSource.esClusterDTOFactory();
         esClusterDTO.setCluster(existCluster);
         Assertions.assertEquals(Result.buildParamIllegal("集群信息为空").getMessage(),
-                ClusterPhyService.createCluster(null, CustomDataSource.OPERATOR).getMessage());
+            ClusterPhyService.createCluster(null, CustomDataSource.OPERATOR).getMessage());
         esClusterDTO.setEsVersion(null);
         Assertions.assertEquals(Result.buildParamIllegal("es版本为空").getMessage(),
-                ClusterPhyService.createCluster(esClusterDTO, CustomDataSource.OPERATOR).getMessage());
+            ClusterPhyService.createCluster(esClusterDTO, CustomDataSource.OPERATOR).getMessage());
         esClusterDTO.setIdc(null);
         Assertions.assertEquals(Result.buildParamIllegal("机房信息为空").getMessage(),
-                ClusterPhyService.createCluster(esClusterDTO, CustomDataSource.OPERATOR).getMessage());
+            ClusterPhyService.createCluster(esClusterDTO, CustomDataSource.OPERATOR).getMessage());
         esClusterDTO.setDataCenter(null);
         Assertions.assertEquals(Result.buildParamIllegal("数据中心为空").getMessage(),
-                ClusterPhyService.createCluster(esClusterDTO, CustomDataSource.OPERATOR).getMessage());
+            ClusterPhyService.createCluster(esClusterDTO, CustomDataSource.OPERATOR).getMessage());
         esClusterDTO.setType(null);
         Assertions.assertEquals(Result.buildParamIllegal("集群类型为空").getMessage(),
-                ClusterPhyService.createCluster(esClusterDTO, CustomDataSource.OPERATOR).getMessage());
+            ClusterPhyService.createCluster(esClusterDTO, CustomDataSource.OPERATOR).getMessage());
         esClusterDTO.setHttpAddress(null);
         Assertions.assertEquals(Result.buildParamIllegal("集群HTTP地址为空").getMessage(),
-                ClusterPhyService.createCluster(esClusterDTO, CustomDataSource.OPERATOR).getMessage());
+            ClusterPhyService.createCluster(esClusterDTO, CustomDataSource.OPERATOR).getMessage());
         esClusterDTO.setCluster(null);
         Assertions.assertEquals(Result.buildParamIllegal("集群名称为空").getMessage(),
-                ClusterPhyService.createCluster(esClusterDTO, CustomDataSource.OPERATOR).getMessage());
+            ClusterPhyService.createCluster(esClusterDTO, CustomDataSource.OPERATOR).getMessage());
         esClusterDTO = CustomDataSource.esClusterDTOFactory();
         esClusterDTO.setCluster(existCluster);
         esClusterDTO.setEsVersion("test.test.test");
         Assertions.assertEquals(Result.buildParamIllegal("es版本号非法").getMessage(),
-                ClusterPhyService.createCluster(esClusterDTO, CustomDataSource.OPERATOR).getMessage());
+            ClusterPhyService.createCluster(esClusterDTO, CustomDataSource.OPERATOR).getMessage());
         esClusterDTO.setDataCenter("wpkTest");
         Assertions.assertEquals(Result.buildParamIllegal("数据中心非法").getMessage(),
-                ClusterPhyService.createCluster(esClusterDTO, CustomDataSource.OPERATOR).getMessage());
+            ClusterPhyService.createCluster(esClusterDTO, CustomDataSource.OPERATOR).getMessage());
         esClusterDTO = CustomDataSource.esClusterDTOFactory();
         esClusterDTO.setCluster(existCluster);
         Assertions.assertTrue(ClusterPhyService.createCluster(esClusterDTO, CustomDataSource.OPERATOR).success());
@@ -147,10 +147,10 @@ public class ClusterPhyServiceTest {
         Assertions.assertTrue(ClusterPhyService.editCluster(esClusterDTO, CustomDataSource.OPERATOR).success());
         esClusterDTO.setId(null);
         Assertions.assertEquals(Result.buildParamIllegal("集群ID为空").getMessage(),
-                ClusterPhyService.editCluster(esClusterDTO, CustomDataSource.OPERATOR).getMessage());
+            ClusterPhyService.editCluster(esClusterDTO, CustomDataSource.OPERATOR).getMessage());
         esClusterDTO.setId(id + 1);
         Assertions.assertEquals(Result.buildNotExist("集群不存在").getMessage(),
-                ClusterPhyService.editCluster(esClusterDTO, CustomDataSource.OPERATOR).getMessage());
+            ClusterPhyService.editCluster(esClusterDTO, CustomDataSource.OPERATOR).getMessage());
     }
 
     @Test
@@ -158,32 +158,32 @@ public class ClusterPhyServiceTest {
         ClusterRoleInfo clusterRoleInfo = new ClusterRoleInfo();
         clusterRoleInfo.setRole("wpk");
         Mockito.when(clusterRoleService.getAllRoleClusterByClusterId(Mockito.any()))
-                .thenReturn(Collections.singletonList(clusterRoleInfo));
+            .thenReturn(Collections.singletonList(clusterRoleInfo));
         ClusterRoleHost clusterRoleHost = new ClusterRoleHost();
         Mockito.when(clusterRoleHostService.getByRoleClusterId(Mockito.anyLong()))
-                .thenReturn(Collections.singletonList(clusterRoleHost));
+            .thenReturn(Collections.singletonList(clusterRoleHost));
         ClusterPhy clusterPhy = ClusterPhyService.getClusterByName(cluster);
         Assertions.assertTrue(clusterPhy.getClusterRoleInfos().stream()
-                .anyMatch(esRoleCluster1 -> esRoleCluster1.getRole().equals(clusterRoleInfo.getRole())));
+            .anyMatch(esRoleCluster1 -> esRoleCluster1.getRole().equals(clusterRoleInfo.getRole())));
     }
 
     @Test
     public void listAllClustersTest() {
         Assertions.assertTrue(
-                ClusterPhyService.listAllClusters().stream().anyMatch(esClusterPhy -> esClusterPhy.getId().equals(id)));
+            ClusterPhyService.listAllClusters().stream().anyMatch(esClusterPhy -> esClusterPhy.getId().equals(id)));
     }
 
     @Test
     public void listClusterNamesTest() {
-        Assertions.assertTrue(ClusterPhyService.listClusterNames().stream()
-                .anyMatch(clusterName -> clusterName.equals(cluster)));
+        Assertions.assertTrue(
+            ClusterPhyService.listClusterNames().stream().anyMatch(clusterName -> clusterName.equals(cluster)));
         Mockito.when(clusterDAO.listAllName()).thenThrow(new RuntimeException());
         Assertions.assertTrue(CollectionUtils.isEmpty(ClusterPhyService.listClusterNames()));
     }
 
     @Test
     public void listClustersByNamesTest() {
-        Assertions.assertTrue(ClusterPhyService.listClustersByNames(Arrays.asList(cluster,existCluster)).stream()
+        Assertions.assertTrue(ClusterPhyService.listClustersByNames(Arrays.asList(cluster, existCluster)).stream()
             .anyMatch(esClusterPhy -> esClusterPhy.getCluster().equals(cluster)));
         Assertions.assertTrue(CollectionUtils.isEmpty(ClusterPhyService.listClustersByNames(Collections.emptyList())));
     }
@@ -200,15 +200,13 @@ public class ClusterPhyServiceTest {
         // 为mock的插件对象设置插件的文件名称
         pluginDTO.setFileName("test");
         pluginDTO.setId(1234L);
-        Mockito.when(esPluginService.listClusterAndDefaultESPlugin(id.toString()))
-                .thenReturn(null);
+        Mockito.when(esPluginService.listClusterAndDefaultESPlugin(id.toString())).thenReturn(null);
         Assertions.assertTrue(ClusterPhyService.listClusterPlugins(cluster).isEmpty());
         Assertions.assertTrue(ClusterPhyService.listClusterPlugins(existCluster).isEmpty());
         Mockito.when(esPluginService.listClusterAndDefaultESPlugin(id.toString()))
-                .thenReturn(Collections.singletonList(ConvertUtil.obj2Obj(pluginDTO, PluginPO.class)));
-        Assertions.assertTrue(ClusterPhyService.listClusterPlugins(cluster).stream()
-                .map(Plugin::getId)
-                .anyMatch(pId -> pluginDTO.getId().equals(pId)));
+            .thenReturn(Collections.singletonList(ConvertUtil.obj2Obj(pluginDTO, PluginPO.class)));
+        Assertions.assertTrue(ClusterPhyService.listClusterPlugins(cluster).stream().map(Plugin::getId)
+            .anyMatch(pId -> pluginDTO.getId().equals(pId)));
     }
 
     @Test
@@ -221,26 +219,28 @@ public class ClusterPhyServiceTest {
     public void ensureDcdrRemoteClusterTest() throws ESOperateException {
         Assertions.assertFalse(ClusterPhyService.ensureDCDRRemoteCluster(cluster, null));
         Mockito.when(esClusterService.hasSettingExist(Mockito.anyString(), Mockito.anyString())).thenReturn(true);
-        Assertions.assertTrue(
-                ClusterPhyService.ensureDCDRRemoteCluster(cluster, cluster));
+        Assertions.assertTrue(ClusterPhyService.ensureDCDRRemoteCluster(cluster, cluster));
         Mockito.when(esClusterService.hasSettingExist(Mockito.anyString(), Mockito.anyString())).thenReturn(false);
         Mockito.when(esClusterService.syncPutRemoteCluster(Mockito.anyString(), Mockito.anyString(), Mockito.isNull(),
-                Mockito.anyInt())).thenReturn(true);
-        Assertions.assertFalse(
-                ClusterPhyService.ensureDCDRRemoteCluster(cluster, existCluster));
-        Assertions.assertFalse(
-                ClusterPhyService.ensureDCDRRemoteCluster(existCluster, cluster));
+            Mockito.anyInt())).thenReturn(true);
+        Assertions.assertFalse(ClusterPhyService.ensureDCDRRemoteCluster(cluster, existCluster));
+        Assertions.assertFalse(ClusterPhyService.ensureDCDRRemoteCluster(existCluster, cluster));
         Mockito.when(esClusterService.hasSettingExist(Mockito.any(), Mockito.any())).thenReturn(false);
-        Mockito.when(esClusterService.syncPutRemoteCluster(Mockito.any(), Mockito.any(), Mockito.any(),
-                Mockito.anyInt())).thenReturn(true);
-        Assertions.assertTrue(
-                ClusterPhyService.ensureDCDRRemoteCluster(cluster, cluster));
+        Mockito
+            .when(esClusterService.syncPutRemoteCluster(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.anyInt()))
+            .thenReturn(true);
+        Assertions.assertTrue(ClusterPhyService.ensureDCDRRemoteCluster(cluster, cluster));
     }
 
     @Test
     public void getRoutingAllocationAwarenessAttributesTest() {
         Assertions.assertTrue(ClusterPhyService.getRoutingAllocationAwarenessAttributes(existCluster).isEmpty());
-        Mockito.when(esClusterService.syncGetAllNodesAttributes(Mockito.anyString())).thenReturn(new HashSet<String>(){{add("aaa");}});;
+        Mockito.when(esClusterService.syncGetAllNodesAttributes(Mockito.anyString())).thenReturn(new HashSet<String>() {
+            {
+                add("aaa");
+            }
+        });
+        ;
         Assertions.assertFalse(ClusterPhyService.getRoutingAllocationAwarenessAttributes(cluster).isEmpty());
     }
 
@@ -270,9 +270,8 @@ public class ClusterPhyServiceTest {
         //条件查询
         ClusterPhyConditionDTO clusterPhyConditionDTO = clusterPhyConditionDTOFactory();
         //按照集群名称进行查询
-        Assertions.assertTrue(ClusterPhyService.pagingGetClusterPhyByCondition(clusterPhyConditionDTO)
-                .stream()
-                .anyMatch(clusterPhy -> clusterPhy.getCluster().equals(cluster)));
+        Assertions.assertTrue(ClusterPhyService.pagingGetClusterPhyByCondition(clusterPhyConditionDTO).stream()
+            .anyMatch(clusterPhy -> clusterPhy.getCluster().equals(cluster)));
         Mockito.when(clusterDAO.pagingByCondition(Mockito.any())).thenThrow(new RuntimeException());
         Assertions.assertTrue(ClusterPhyService.pagingGetClusterPhyByCondition(clusterPhyConditionDTO).isEmpty());
     }
@@ -284,6 +283,7 @@ public class ClusterPhyServiceTest {
         //按照集群名称进行查询
         Assertions.assertTrue(ClusterPhyService.fuzzyClusterPhyHitByCondition(clusterPhyConditionDTO) >= 1);
     }
+
     @Test
     public void isClusterExistsByPackageIdTest() {
         //模糊查询

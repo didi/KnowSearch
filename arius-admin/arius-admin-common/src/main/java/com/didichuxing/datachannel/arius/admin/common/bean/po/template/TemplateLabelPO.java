@@ -26,15 +26,16 @@ public class TemplateLabelPO extends BaseESPO {
     /**
      * 标签id，有一定的规则
      */
-    private String labelId;
+    private String  labelId;
     /**
      * 标签名称
      */
-    private String labelName;
+    private String  labelName;
     /**
      * 标记时间
      */
-    private Date markTime;
+    private Date    markTime;
+
     /**
      * 获取主键key
      *

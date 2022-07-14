@@ -23,13 +23,10 @@ import java.util.Map;
 @Service
 public class TemplatePhyStaticsManagerImpl implements TemplatePhyStaticsManager {
 
-    private static final ILog         LOGGER = LogFactory.getLog( TemplatePhyStaticsManagerImpl.class);
-
- 
+    private static final ILog    LOGGER = LogFactory.getLog(TemplatePhyStaticsManagerImpl.class);
 
     @Autowired
     private TemplateStatsService templateStatsService;
-
 
     @Autowired
     private TemplateValueService templateValueService;
@@ -42,10 +39,9 @@ public class TemplatePhyStaticsManagerImpl implements TemplatePhyStaticsManager 
     @Override
     public Result<TemplateStatsInfoVO> getTemplateBaseStatisticalInfoByLogicTemplateId(Long logicTemplateId) {
         return Result.buildSucc(ConvertUtil.obj2Obj(
-                templateStatsService.getTemplateBaseStatisticalInfoByLogicTemplateId(logicTemplateId).getData(),
-                TemplateStatsInfoVO.class));
+            templateStatsService.getTemplateBaseStatisticalInfoByLogicTemplateId(logicTemplateId).getData(),
+            TemplateStatsInfoVO.class));
     }
-
 
     @Override
     public Result<List<ESIndexStats>> getIndexStatics(Long logicTemplateId, Long startDate, Long endDate) {
@@ -53,12 +49,11 @@ public class TemplatePhyStaticsManagerImpl implements TemplatePhyStaticsManager 
     }
 
     @Override
-    public Result<List<ProjectIdTemplateAccessCountVO>> getAccessAppInfos(int logicTemplateId, Long startDate, Long endDate) {
-        return Result.buildSucc(ConvertUtil.list2List(
-                templateStatsService.getAccessAppInfos(logicTemplateId, startDate, endDate).getData(),
+    public Result<List<ProjectIdTemplateAccessCountVO>> getAccessAppInfos(int logicTemplateId, Long startDate,
+                                                                          Long endDate) {
+        return Result.buildSucc(
+            ConvertUtil.list2List(templateStatsService.getAccessAppInfos(logicTemplateId, startDate, endDate).getData(),
                 ProjectIdTemplateAccessCountVO.class));
     }
-
-
 
 }

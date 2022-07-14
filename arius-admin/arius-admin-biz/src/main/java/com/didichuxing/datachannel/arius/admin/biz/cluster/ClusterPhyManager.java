@@ -96,7 +96,7 @@ public interface ClusterPhyManager {
      * @param projectId
      * @return ClusterPhyVO
      */
-	Result<ClusterPhyVO> joinCluster(ClusterJoinDTO param, String operator, Integer projectId);
+    Result<ClusterPhyVO> joinCluster(ClusterJoinDTO param, String operator, Integer projectId);
 
     /**
      * 删除接入集群 删除顺序: region ——> clusterLogic ——> clusterHost ——> clusterRole  ——> cluster
@@ -211,7 +211,8 @@ public interface ClusterPhyManager {
      * @param projectId
      * @return
      */
-    PaginationResult<ClusterPhyVO> pageGetClusterPhys(ClusterPhyConditionDTO condition, Integer projectId) throws NotFindSubclassException;
+    PaginationResult<ClusterPhyVO> pageGetClusterPhys(ClusterPhyConditionDTO condition,
+                                                      Integer projectId) throws NotFindSubclassException;
 
     /**
      * 构建物理集群角色信息
@@ -274,7 +275,8 @@ public interface ClusterPhyManager {
      *  @param clusterLogicType 逻辑集群类型
      *  @return 同版本的物理集群名称列表
      */
-    Result<List<String>> getPhyClusterNameWithSameEsVersion(Integer clusterLogicType, String hasSelectedClusterNameWhenBind);
+    Result<List<String>> getPhyClusterNameWithSameEsVersion(Integer clusterLogicType,
+                                                            String hasSelectedClusterNameWhenBind);
 
     /**
      * 根据已经创建的逻辑集群id筛选出物理集群版本一致的物理集群名称列表
@@ -308,6 +310,5 @@ public interface ClusterPhyManager {
      * @return {@link Result}<{@link List}<{@link String}>>
      */
     Result<List<String>> listClusterPhyNameByResourceType(Integer clusterResourceType, Integer projectId);
-    
 
 }

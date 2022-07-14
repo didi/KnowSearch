@@ -14,8 +14,9 @@ public interface OperateRecordManager {
      * @param projectId
      * @return {@code PagingResult<OplogVO>}
      */
-    PaginationResult<OperateRecordVO> pageOplogPage(OperateRecordDTO queryDTO,Integer projectId) throws NotFindSubclassException;
-    
+    PaginationResult<OperateRecordVO> pageOplogPage(OperateRecordDTO queryDTO,
+                                                    Integer projectId) throws NotFindSubclassException;
+
     /**
      * 获取oplog
      *

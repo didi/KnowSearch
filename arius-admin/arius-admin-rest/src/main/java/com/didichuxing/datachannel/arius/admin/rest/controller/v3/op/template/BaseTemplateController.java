@@ -19,7 +19,7 @@ public class BaseTemplateController {
     protected TemplateLabelService templateLabelService;
 
     @Autowired
-    protected ProjectService projectService;
+    protected ProjectService       projectService;
 
     /**
      * Check是否有逻辑索引操作权限
@@ -29,13 +29,9 @@ public class BaseTemplateController {
      */
     protected Result<Void> checkProjectAuth(Integer logicId) {
 
-      
-
         if (templateLabelService.isImportantIndex(logicId)) {
             return Result.buildOpForBidden("禁止操作重要索引，请联系Arius服务号处理");
         }
-       
-        
 
         return Result.buildSucc();
     }

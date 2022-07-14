@@ -18,8 +18,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @ApiModel(description = "项目简要信息（包含项目配置）")
 public class ProjectBriefExtendVO extends ProjectBriefVO {
-	@ApiModelProperty(value = "项目配置", dataType = "ProjectSaveDTO", required = false)
-	private ProjectConfigVO config;
-	@ApiModelProperty(value = "是否为超级项目", dataType = "boolean", required = false)
-	private Boolean         isAdmin;
+    @ApiModelProperty(value = "项目配置", dataType = "ProjectSaveDTO", required = false)
+    private ProjectConfigVO config;
+    @ApiModelProperty(value = "是否为超级项目", dataType = "boolean", required = false)
+    private Boolean         isAdmin;
 }

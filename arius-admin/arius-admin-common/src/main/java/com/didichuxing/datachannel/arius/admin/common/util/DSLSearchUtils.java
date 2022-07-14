@@ -25,7 +25,9 @@ public class DSLSearchUtils {
     /**
      * 工具类不支持使用构造方法
      */
-    private DSLSearchUtils() { throw new IllegalStateException("Utility class"); }
+    private DSLSearchUtils() {
+        throw new IllegalStateException("Utility class");
+    }
 
     /**
      * 构建范围查询子条件
@@ -35,18 +37,18 @@ public class DSLSearchUtils {
      * @return dsl
      */
     public static String getTermCellForRangeSearch(Object gteValue, Object lteValue, String termKey) {
-        if((gteValue == null && lteValue == null) || AriusObjUtils.isBlack(termKey)) {
+        if ((gteValue == null && lteValue == null) || AriusObjUtils.isBlack(termKey)) {
             return null;
         }
 
         StringBuilder rangeSb = new StringBuilder();
         rangeSb.append("{").append(QUERY_BOOL_MUST_RANGE).append("{").append(String.format(PLACE_HOLDER, termKey))
-                .append("{");
-        if(gteValue != null) {
+            .append("{");
+        if (gteValue != null) {
             rangeSb.append(QUERY_BOOL_MUST_RANGE_GTE).append(gteValue);
         }
-        if(lteValue != null) {
-            if(gteValue != null) {
+        if (lteValue != null) {
+            if (gteValue != null) {
                 rangeSb.append(",");
             }
             rangeSb.append(QUERY_BOOL_MUST_RANGE_LTE).append(lteValue);
@@ -104,8 +106,8 @@ public class DSLSearchUtils {
 
         StringBuilder termSb = new StringBuilder();
         termSb.append("{").append(QUERY_BOOL_MUST_TERM).append("{").append(String.format(PLACE_HOLDER, termKey))
-                .append("{").append(QUERY_BOOL_MUST_TERM_VALUE).append("\"").append(term).append("\"").append("}")
-                .append("}").append("}");
+            .append("{").append(QUERY_BOOL_MUST_TERM_VALUE).append("\"").append(term).append("\"").append("}")
+            .append("}").append("}");
         return termSb.toString();
     }
 
@@ -130,8 +132,7 @@ public class DSLSearchUtils {
 
         StringBuilder termSb = new StringBuilder();
         termSb.append("{").append(QUERY_BOOL_MUST_TERM).append("{").append(String.format(PLACE_HOLDER, termKey))
-                .append("{").append(QUERY_BOOL_MUST_TERM_VALUE).append(term).append("}")
-                .append("}").append("}");
+            .append("{").append(QUERY_BOOL_MUST_TERM_VALUE).append(term).append("}").append("}").append("}");
 
         return termSb.toString();
     }
@@ -194,8 +195,8 @@ public class DSLSearchUtils {
         StringBuilder termSb = new StringBuilder();
         if (StringUtils.isNotBlank(term)) {
             termSb.append("{").append(QUERY_BOOL_MUST_PREFIX).append("{").append(String.format(PLACE_HOLDER, termKey))
-                .append("{").append(QUERY_BOOL_MUST_TERM_VALUE).append("\"").append(term).append("\"")
-                .append("}").append("}").append("}");
+                .append("{").append(QUERY_BOOL_MUST_TERM_VALUE).append("\"").append(term).append("\"").append("}")
+                .append("}").append("}");
         }
 
         return termSb.toString();
@@ -221,8 +222,8 @@ public class DSLSearchUtils {
         StringBuilder termSb = new StringBuilder();
         if (StringUtils.isNotBlank(term)) {
             termSb.append("{").append(QUERY_BOOL_MUST_WILDCARD).append("{").append(String.format(PLACE_HOLDER, termKey))
-                    .append("{").append(QUERY_BOOL_MUST_TERM_VALUE).append("\"").append("*").append(term).append("*")
-                    .append("\"").append("}").append("}").append("}");
+                .append("{").append(QUERY_BOOL_MUST_TERM_VALUE).append("\"").append("*").append(term).append("*")
+                .append("\"").append("}").append("}").append("}");
         }
         return termSb.toString();
     }

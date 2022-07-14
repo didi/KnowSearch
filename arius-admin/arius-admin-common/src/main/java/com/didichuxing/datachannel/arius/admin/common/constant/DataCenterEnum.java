@@ -1,9 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.common.constant;
 
 public enum DataCenterEnum {
-    US01("us01", "美东机房"),
-    CN("cn", "国内"),
-    UNKNOWN("unknown", "未知");
+                            US01("us01", "美东机房"), CN("cn", "国内"), UNKNOWN("unknown", "未知");
 
     DataCenterEnum(String code, String desc) {
         this.code = code;
@@ -44,7 +42,7 @@ public enum DataCenterEnum {
         return DataCenterEnum.UNKNOWN != DataCenterEnum.valueOfCode(dataCenter);
     }
 
-    public boolean sameDC(DataCenterEnum dc){
+    public boolean sameDC(DataCenterEnum dc) {
         return this.code.equals(dc.getCode());
     }
 }

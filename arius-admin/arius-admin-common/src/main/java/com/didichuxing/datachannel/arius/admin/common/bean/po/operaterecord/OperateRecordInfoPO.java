@@ -31,7 +31,6 @@ public class OperateRecordInfoPO extends BasePO {
      */
     private Integer operateId;
 
-
     /**
      * 操作描述
      */
@@ -40,7 +39,7 @@ public class OperateRecordInfoPO extends BasePO {
     /**
      * 操作人
      */
-    private String userOperation;
+    private String  userOperation;
 
     /**
      * 操作时间
@@ -58,6 +57,6 @@ public class OperateRecordInfoPO extends BasePO {
     /**
      * 业务id
      */
-    private String bizId;
+    private String  bizId;
 
 }

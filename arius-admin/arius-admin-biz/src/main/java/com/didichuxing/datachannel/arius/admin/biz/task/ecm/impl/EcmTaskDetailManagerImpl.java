@@ -42,19 +42,19 @@ import com.google.common.collect.Maps;
  */
 @Service
 public class EcmTaskDetailManagerImpl implements EcmTaskDetailManager {
-    private static final Logger      LOGGER = LoggerFactory.getLogger( EcmTaskDetailManagerImpl.class);
+    private static final Logger    LOGGER = LoggerFactory.getLogger(EcmTaskDetailManagerImpl.class);
 
     @Autowired
-    private EcmTaskDetailDAO         ecmTaskDetailDAO;
+    private EcmTaskDetailDAO       ecmTaskDetailDAO;
 
     @Autowired
-    private ClusterRoleService clusterRoleService;
+    private ClusterRoleService     clusterRoleService;
 
     @Autowired
-    private EcmTaskManager ecmTaskManager;
+    private EcmTaskManager         ecmTaskManager;
 
     @Autowired
-    private EcmHandleService ecmHandleService;
+    private EcmHandleService       ecmHandleService;
 
     @Autowired
     private ClusterRoleHostService clusterRoleHostService;
@@ -178,7 +178,7 @@ public class EcmTaskDetailManagerImpl implements EcmTaskDetailManager {
         try {
             ecmTaskDetailDAO.deleteEcmTaskDetailsByTaskOrder(workOrderTaskId);
         } catch (Exception e) {
-            LOGGER.error("class=EcmTaskDetailManagerImpl||method=deleteEcmTaskDetailsByTaskOrder",e);
+            LOGGER.error("class=EcmTaskDetailManagerImpl||method=deleteEcmTaskDetailsByTaskOrder", e);
             return Result.buildFail("根据工单任务id删除对应任务详情信息失败");
         }
         return Result.buildSucc();
@@ -224,7 +224,7 @@ public class EcmTaskDetailManagerImpl implements EcmTaskDetailManager {
 
         //扩缩容获取变化的机器
         if (Objects.equals(OpTaskTypeEnum.CLUSTER_EXPAND.getType(), ecmTask.getOrderType())
-                || Objects.equals(OpTaskTypeEnum.CLUSTER_SHRINK.getType(), ecmTask.getOrderType())) {
+            || Objects.equals(OpTaskTypeEnum.CLUSTER_SHRINK.getType(), ecmTask.getOrderType())) {
 
             for (Map.Entry<String, List<String>> e : role2HostNamesMap.entrySet()) {
                 ecmParamBases.stream().filter(r -> !AriusObjUtils.isNull(r) && r.getRoleName().equals(e.getKey()))
@@ -271,11 +271,11 @@ public class EcmTaskDetailManagerImpl implements EcmTaskDetailManager {
         return role2HostNamesMap;
     }
 
-    private  void initEcmTaskDetailParam(EcmTaskDetailPO ecmTaskDetailPo) {
-        if(ecmTaskDetailPo.getGrp() == null) {
+    private void initEcmTaskDetailParam(EcmTaskDetailPO ecmTaskDetailPo) {
+        if (ecmTaskDetailPo.getGrp() == null) {
             ecmTaskDetailPo.setGrp(0);
         }
-        if(ecmTaskDetailPo.getIdx() == null) {
+        if (ecmTaskDetailPo.getIdx() == null) {
             ecmTaskDetailPo.setIdx(0);
         }
     }

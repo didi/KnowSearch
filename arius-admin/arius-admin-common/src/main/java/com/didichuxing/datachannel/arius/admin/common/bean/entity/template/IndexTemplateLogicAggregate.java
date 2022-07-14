@@ -25,15 +25,15 @@ public class IndexTemplateLogicAggregate implements Serializable {
     /**
      * APP对当前模板的权限
      */
-    private ProjectTemplateAuth projectTemplateAuth;
+    private ProjectTemplateAuth      projectTemplateAuth;
 
     /**
      * 模板健康分
      */
-    private IndexTemplateValue            indexTemplateValue;
+    private IndexTemplateValue       indexTemplateValue;
 
     /**
      * 是否具有DCDR
      */
-    private Boolean                       hasDCDR;
+    private Boolean                  hasDCDR;
 }

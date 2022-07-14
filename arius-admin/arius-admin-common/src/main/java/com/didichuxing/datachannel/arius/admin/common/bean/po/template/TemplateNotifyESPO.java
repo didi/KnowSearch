@@ -9,9 +9,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TemplateNotifyESPO extends BaseESPO {
-    int logicTemplateId;
+    int    logicTemplateId;
 
-    int projectId;
+    int    projectId;
 
     String templateName;
 

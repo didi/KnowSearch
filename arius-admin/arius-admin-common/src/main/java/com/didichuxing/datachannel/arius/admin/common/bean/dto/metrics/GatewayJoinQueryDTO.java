@@ -15,11 +15,11 @@ public class GatewayJoinQueryDTO {
     private String queryIndex;
 
     @ApiModelProperty(value = "DSL模版最近使用时间start（时间戳ms）", dataType = "Long", required = true)
-    private Long startTime;
+    private Long   startTime;
 
     @ApiModelProperty(value = "DSL模版最近使用时间end（时间戳ms）", dataType = "Long", required = true)
-    private Long endTime;
+    private Long   endTime;
 
     @ApiModelProperty(value = "查询总耗时（时间戳ms）", dataType = "Long", required = true)
-    private Long totalCost;
+    private Long   totalCost;
 }

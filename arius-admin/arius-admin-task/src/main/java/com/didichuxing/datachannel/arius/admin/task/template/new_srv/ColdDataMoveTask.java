@@ -20,7 +20,7 @@ public class ColdDataMoveTask extends BaseConcurrentTemplateTask implements Job 
     private static final ILog LOGGER = LogFactory.getLog(ColdDataMoveTask.class);
 
     @Autowired
-    private ColdManager coldManager;
+    private ColdManager       coldManager;
 
     @Override
     public TaskResult execute(JobContext jobContext) throws Exception {

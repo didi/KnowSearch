@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 public class ClusterRegionVO extends BaseVO {
 
     @ApiModelProperty("主键")
-    private Long id;
+    private Long   id;
 
     @ApiModelProperty("region 名称")
     private String name;

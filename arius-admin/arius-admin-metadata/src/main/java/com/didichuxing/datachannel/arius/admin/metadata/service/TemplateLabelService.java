@@ -45,17 +45,16 @@ import org.springframework.stereotype.Service;
 @Service
 public class TemplateLabelService {
 
-    private static final ILog LOGGER = LogFactory.getLog( TemplateLabelService.class);
+    private static final ILog    LOGGER                   = LogFactory.getLog(TemplateLabelService.class);
 
-    public static final String TEMPLATE_HAS_DELETED_DOC   = "21140";
- 
-    public static final String TEMPLATE_IMPORTANT_LABEL   = "11102";
-  
-    public static final String TEMPLATE_HAVE_DCDR         = "12149";
+    public static final String   TEMPLATE_HAS_DELETED_DOC = "21140";
 
+    public static final String   TEMPLATE_IMPORTANT_LABEL = "11102";
+
+    public static final String   TEMPLATE_HAVE_DCDR       = "12149";
 
     @Autowired
-    private TemplateLabelESDAO indexTemplateLabelDAO;
+    private TemplateLabelESDAO   indexTemplateLabelDAO;
 
     @Autowired
     private IndexTemplateService indexTemplateService;
@@ -69,10 +68,10 @@ public class TemplateLabelService {
      * @return
      */
     public boolean hasDeleteDoc(Integer logicId) {
-        Map<String, TemplateLabelPO> labelMap = ConvertUtil.list2Map( listIndexTemplateLabelPO(logicId), TemplateLabelPO::getLabelId);
+        Map<String, TemplateLabelPO> labelMap = ConvertUtil.list2Map(listIndexTemplateLabelPO(logicId),
+            TemplateLabelPO::getLabelId);
         return labelMap.containsKey(TEMPLATE_HAS_DELETED_DOC);
     }
-
 
     /**
      * 是否是重要索引
@@ -80,7 +79,8 @@ public class TemplateLabelService {
      * @return boolean
      */
     public boolean isImportantIndex(Integer logicId) {
-        Map<String, TemplateLabelPO> labelMap = ConvertUtil.list2Map( listIndexTemplateLabelPO(logicId), TemplateLabelPO::getLabelId);
+        Map<String, TemplateLabelPO> labelMap = ConvertUtil.list2Map(listIndexTemplateLabelPO(logicId),
+            TemplateLabelPO::getLabelId);
         return labelMap.containsKey(TEMPLATE_IMPORTANT_LABEL);
     }
 
@@ -109,8 +109,8 @@ public class TemplateLabelService {
             excludeLabelIds = "";
         }
 
-        Map<Integer/*indexTemplateId*/, Collection<TemplateLabelPO>> integerCollectionMap =
-                listAllIndexTemplateLabelByLabelIds(includeLabelIds, excludeLabelIds);
+        Map<Integer/*indexTemplateId*/, Collection<TemplateLabelPO>> integerCollectionMap = listAllIndexTemplateLabelByLabelIds(
+            includeLabelIds, excludeLabelIds);
 
         List<TemplateLabel> templateLabels = new ArrayList<>();
         for (Map.Entry<Integer, Collection<TemplateLabelPO>> entry : integerCollectionMap.entrySet()) {
@@ -124,12 +124,11 @@ public class TemplateLabelService {
         return Result.build(true, templateLabels);
     }
 
-
-    private Result<List<TemplateLabel>> listByLabelId(String labelId){
+    private Result<List<TemplateLabel>> listByLabelId(String labelId) {
         List<TemplateLabelPO> templateLabelPOS = listPOByLabelId(labelId);
 
         List<TemplateLabel> templateLabels = new ArrayList<>();
-        for(TemplateLabelPO templateLabelPO : templateLabelPOS){
+        for (TemplateLabelPO templateLabelPO : templateLabelPOS) {
             TemplateLabel templateLabel = new TemplateLabel();
             templateLabel.setIndexTemplateId(templateLabelPO.getIndexTemplateId());
             templateLabels.add(templateLabel);
@@ -137,9 +136,6 @@ public class TemplateLabelService {
 
         return Result.buildSucc(templateLabels);
     }
-
-
-
 
     public Result<List<TemplateLabel>> listHaveDcdrTemplates() {
         return listByLabelId(TEMPLATE_HAVE_DCDR);
@@ -180,7 +176,7 @@ public class TemplateLabelService {
      * @return result result
      */
     public Result<Boolean> updateTemplateLabel(Integer logicId, Set<String> shouldAdds, Set<String> shouldDels,
-                                      String operator) throws AmsRemoteException {
+                                               String operator) throws AmsRemoteException {
         List<Label> allLabels = listTemplateLabel(logicId);
 
         Set<String> oldLabelIdSet = allLabels.stream().map(Label::getLabelId).collect(Collectors.toSet());
@@ -241,7 +237,6 @@ public class TemplateLabelService {
         return indexTemplateLabelDAO.getLabelByLabelId(labelId);
     }
 
-
     /**
      * 根据条件查询
      *
@@ -249,7 +244,8 @@ public class TemplateLabelService {
      * @param excludeLabelIds 不能包含的标签
      * @return map
      */
-    public Map<Integer/*indexTemplateId*/, Collection<TemplateLabelPO>> listAllIndexTemplateLabelByLabelIds(String includeLabelIds, String excludeLabelIds) {
+    public Map<Integer/*indexTemplateId*/, Collection<TemplateLabelPO>> listAllIndexTemplateLabelByLabelIds(String includeLabelIds,
+                                                                                                            String excludeLabelIds) {
         Map<Integer/*indexTemplateId*/, Collection<TemplateLabelPO>> retMap = new ConcurrentHashMap<>();
 
         List<IndexTemplate> templateLogics = indexTemplateService.listAllLogicTemplates();
@@ -258,14 +254,16 @@ public class TemplateLabelService {
             Integer templateId = indexTemplate.getId();
             List<TemplateLabelPO> templateLabelPOS = listIndexTemplateLabelPO(templateId);
 
-            LOGGER.info("class=IndexTemplateLabelService||method=listAllIndexTemplateLabelByLabelIds||indexTemplates={}||templateLabelPOS={}",
-                    templateId, JSON.toJSONString( templateLabelPOS ));
+            LOGGER.info(
+                "class=IndexTemplateLabelService||method=listAllIndexTemplateLabelByLabelIds||indexTemplates={}||templateLabelPOS={}",
+                templateId, JSON.toJSONString(templateLabelPOS));
 
-            if (!CollectionUtils.isEmpty( templateLabelPOS )) {
-                List<String> labelIds = templateLabelPOS.stream().map( s -> String.valueOf(s.getLabelId())).collect(Collectors.toList());
+            if (!CollectionUtils.isEmpty(templateLabelPOS)) {
+                List<String> labelIds = templateLabelPOS.stream().map(s -> String.valueOf(s.getLabelId()))
+                    .collect(Collectors.toList());
 
                 if (isIndexTemplateLabelsMatch(labelIds, includeLabelIds, excludeLabelIds)) {
-                    retMap.put(templateId, templateLabelPOS );
+                    retMap.put(templateId, templateLabelPOS);
                 }
             }
         });
@@ -306,10 +304,14 @@ public class TemplateLabelService {
 
         for (TemplateLabelPO po : indexTemplateLabels) {
             if (deleteMap.containsKey(po.getLabelId())) {
-                LOGGER.info("class=IndexTemplateLabelService||method=updateIndexTemplateLabel||msg=label has EXIST. label: {}", po);
+                LOGGER.info(
+                    "class=IndexTemplateLabelService||method=updateIndexTemplateLabel||msg=label has EXIST. label: {}",
+                    po);
                 deleteMap.remove(po.getLabelId());
             } else {
-                LOGGER.info("class=IndexTemplateLabelService||method=updateIndexTemplateLabel||msg=label is NEW. label: {}", po);
+                LOGGER.info(
+                    "class=IndexTemplateLabelService||method=updateIndexTemplateLabel||msg=label is NEW. label: {}",
+                    po);
                 news.add(po);
             }
         }
@@ -326,7 +328,9 @@ public class TemplateLabelService {
             change = true;
             boolean result = batchDelete(deleteIds);
             if (!result) {
-                LOGGER.error("class=IndexTemplateLabelService||method=updateIndexTemplateLabel||errMsg=fail to delete label {}", deleteIds);
+                LOGGER.error(
+                    "class=IndexTemplateLabelService||method=updateIndexTemplateLabel||errMsg=fail to delete label {}",
+                    deleteIds);
                 return false;
             }
         }
@@ -337,17 +341,17 @@ public class TemplateLabelService {
             change = true;
             boolean result = batchInsert(news);
             if (!result) {
-                LOGGER.error("class=IndexTemplateLabelService||method=updateIndexTemplateLabel||errMsg=fail to add label {}", news);
+                LOGGER.error(
+                    "class=IndexTemplateLabelService||method=updateIndexTemplateLabel||errMsg=fail to add label {}",
+                    news);
                 return false;
             }
         }
 
         //记录操作记录
         if (change) {
-            OperateRecord operateRecord = buildLabelSettingOperatorRecord(
-                    indexTemplateId, INDEX_MANAGEMENT_LABEL_MODIFY, operator,
-                    getEditContent(deleteMap.values(), news),null
-            );
+            OperateRecord operateRecord = buildLabelSettingOperatorRecord(indexTemplateId,
+                INDEX_MANAGEMENT_LABEL_MODIFY, operator, getEditContent(deleteMap.values(), news), null);
             operateRecordService.save(operateRecord);
         }
 
@@ -386,7 +390,7 @@ public class TemplateLabelService {
     private boolean isIndexTemplateLabelsMatch(List<String> labelIds, String includeLabelIds, String excludeLabelIds) {
         if (StringUtils.isNotBlank(includeLabelIds)
             && !labelIds.containsAll(Arrays.asList(includeLabelIds.split(",")))) {
-                return false;
+            return false;
         }
 
         if (StringUtils.isNotBlank(excludeLabelIds)) {
@@ -425,8 +429,8 @@ public class TemplateLabelService {
      */
     private OperateRecord buildLabelSettingOperatorRecord(Object bizId, OperateTypeEnum operateType, String operator,
                                                           String content, ProjectBriefVO projectBriefVO) {
-    
+
         return new OperateRecord.Builder().content(content).operationTypeEnum(operateType).project(projectBriefVO)
-                .userOperation(operator).bizId(bizId).build();
+            .userOperation(operator).bizId(bizId).build();
     }
 }

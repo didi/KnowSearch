@@ -15,7 +15,7 @@ import io.swagger.annotations.ApiModelProperty;
 public class Result<T> extends BaseResult {
 
     @ApiModelProperty("内容")
-    protected T                 data;
+    protected T data;
 
     public T getData() {
         return data;
@@ -89,7 +89,7 @@ public class Result<T> extends BaseResult {
         return result;
     }
 
-    public static Result<Boolean> buildBoolen(boolean succ){
+    public static Result<Boolean> buildBoolen(boolean succ) {
         if (succ) {
             return buildSucc(succ);
         }

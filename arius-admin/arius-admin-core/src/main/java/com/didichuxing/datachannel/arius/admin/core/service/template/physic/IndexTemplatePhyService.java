@@ -175,6 +175,7 @@ public interface IndexTemplatePhyService {
      * @return list
      */
     List<IndexTemplatePhy> listTemplate();
+
     List<IndexTemplatePhy> listTemplateWithCache();
 
     /**
@@ -182,6 +183,7 @@ public interface IndexTemplatePhyService {
      * @return list
      */
     List<IndexTemplatePhyWithLogic> listTemplateWithLogic();
+
     List<IndexTemplatePhyWithLogic> listTemplateWithLogicWithCache();
 
     /**
@@ -275,14 +277,14 @@ public interface IndexTemplatePhyService {
      * @return    Result<List<IndexTemplatePhy>>
      */
     Result<List<IndexTemplatePhy>> listByRegionId(Integer regionId);
-    
+
     IndexTemplatePhyWithLogic buildIndexTemplatePhysicalWithLogicByPhysicalId(Long physicalId);
-    
+
     List<IndexTemplatePhyPO> getByClusterAndNameAndStatus(String cluster, String name, int code);
-    
+
     Collection<IndexTemplatePhyPO> getByClusterAndStatus(String cluster, int code);
-    
+
     boolean updateStatus(Long physicalId, int code);
-    
+
     boolean updateByIndexTemplatePhyPO(IndexTemplatePhyPO physicalPO);
 }

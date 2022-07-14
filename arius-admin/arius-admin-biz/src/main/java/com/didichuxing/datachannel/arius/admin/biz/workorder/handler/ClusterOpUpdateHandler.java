@@ -47,24 +47,23 @@ import org.springframework.stereotype.Service;
 public class ClusterOpUpdateHandler extends BaseWorkOrderHandler {
 
     @Autowired
-    private RoleTool roleTool;
+    private RoleTool          roleTool;
 
     @Autowired
     private ClusterPhyService esClusterPhyService;
 
     @Autowired
-    private ESPackageService     esPackageService;
+    private ESPackageService  esPackageService;
 
     @Autowired
-    private EcmHandleService ecmHandleService;
+    private EcmHandleService  ecmHandleService;
 
     @Autowired
-    private OpTaskManager opTaskManager;
+    private OpTaskManager     opTaskManager;
 
     @Override
     protected Result<Void> validateConsoleParam(WorkOrder workOrder) throws NotFindSubclassException {
-        ClusterUpdateContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
-            ClusterUpdateContent.class);
+        ClusterUpdateContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(), ClusterUpdateContent.class);
 
         if (AriusObjUtils.isNull(content.getPhyClusterId())) {
             return Result.buildParamIllegal("物理集群id为空");
@@ -89,8 +88,7 @@ public class ClusterOpUpdateHandler extends BaseWorkOrderHandler {
 
     @Override
     protected String getTitle(WorkOrder workOrder) {
-        ClusterUpdateContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
-            ClusterUpdateContent.class);
+        ClusterUpdateContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(), ClusterUpdateContent.class);
         WorkOrderTypeEnum workOrderTypeEnum = WorkOrderTypeEnum.valueOfName(workOrder.getType());
         if (workOrderTypeEnum == null) {
             return "";
@@ -114,8 +112,7 @@ public class ClusterOpUpdateHandler extends BaseWorkOrderHandler {
 
     @Override
     protected Result<Void> doProcessAgree(WorkOrder workOrder, String approver) throws NotFindSubclassException {
-        ClusterUpdateContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
-            ClusterUpdateContent.class);
+        ClusterUpdateContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(), ClusterUpdateContent.class);
 
         EcmTaskDTO ecmTaskDTO = new EcmTaskDTO();
         ecmTaskDTO.setPhysicClusterId(content.getPhyClusterId());

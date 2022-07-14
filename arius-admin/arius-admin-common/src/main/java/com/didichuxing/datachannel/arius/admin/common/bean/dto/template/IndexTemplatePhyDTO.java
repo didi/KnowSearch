@@ -21,46 +21,46 @@ import lombok.NoArgsConstructor;
 public class IndexTemplatePhyDTO extends BaseDTO {
 
     @ApiModelProperty("模板ID")
-    private Long                           id;
+    private Long                      id;
 
     @ApiModelProperty("逻辑模板id")
-    private Integer                        logicId;
+    private Integer                   logicId;
 
     @ApiModelProperty("模板名称")
-    private String                         name;
+    private String                    name;
 
     @ApiModelProperty("表达式")
-    private String                         expression;
+    private String                    expression;
 
     @ApiModelProperty("物理集群名字")
-    private String                         cluster;
+    private String                    cluster;
 
     @ApiModelProperty("资源是否是默认物理索引")
-    private Boolean                        defaultWriterFlags;
+    private Boolean                   defaultWriterFlags;
 
     @ApiModelProperty("组ID")
-    private String                         groupId;
+    private String                    groupId;
 
     @ApiModelProperty("rack")
-    private String                         rack;
+    private String                    rack;
 
     @ApiModelProperty("shard")
-    private Integer                        shard;
+    private Integer                   shard;
 
     @ApiModelProperty("shardRouting")
-    private Integer                        shardRouting;
+    private Integer                   shardRouting;
 
     @ApiModelProperty("版本")
-    private Integer                        version;
+    private Integer                   version;
 
     @ApiModelProperty("角色(1:主；2:从)")
-    private Integer                        role;
+    private Integer                   role;
 
     @ApiModelProperty("状态(1:常规；-1:索引删除中；-2:删除)")
-    private Integer                        status;
+    private Integer                   status;
 
     @ApiModelProperty("配置信息")
-    private String                         config;
+    private String                    config;
 
     /**
      * {
@@ -79,7 +79,7 @@ public class IndexTemplatePhyDTO extends BaseDTO {
      * }
      */
     @ApiModelProperty("mapping信息")
-    private String mappings;
+    private String                    mappings;
     /**
      *
      * {
@@ -97,10 +97,10 @@ public class IndexTemplatePhyDTO extends BaseDTO {
      * }
      */
     @ApiModelProperty("索引模板自定义settings")
-    private String settings;
-    
+    private String                    settings;
+
     @ApiModelProperty("逻辑集群ID")
-    private Long                           resourceId;
+    private Long                      resourceId;
 
     /**
      * 写入限流值，
@@ -109,7 +109,7 @@ public class IndexTemplatePhyDTO extends BaseDTO {
      * writeRateLimit = 123 具体的写入tps限流值，即单台client每秒写入123条文档
      */
     @ApiModelProperty("写入限流值")
-    private Integer                        writeRateLimit;
+    private Integer                   writeRateLimit;
 
     //todo: delete this annoying field
     @ApiModelProperty("物理模板列表")

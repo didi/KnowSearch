@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ApiModel(description ="提取查询模板")
+@ApiModel(description = "提取查询模板")
 @Deprecated
 public class ExtractDslContent {
 

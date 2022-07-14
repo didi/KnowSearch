@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 public class IndexCatCellDTO {
 
     @ApiModelProperty("主键")
-    private String key;
+    private String  key;
 
     @ApiModelProperty("集群名称")
     private String  cluster;

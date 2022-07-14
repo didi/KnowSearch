@@ -9,6 +9,6 @@ public abstract class MetaDataMetricsEvent extends ApplicationEvent {
      * @param source the object on which the event initially occurred (never {@code null})
      */
     public MetaDataMetricsEvent(Object source) {
-        super( source );
+        super(source);
     }
 }

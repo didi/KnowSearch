@@ -35,16 +35,16 @@ import javax.annotation.PostConstruct;
 @Component
 public class ESOpClient {
 
-    private static final ILog            LOGGER       = LogFactory.getLog(ESOpClient.class);
+    private static final ILog               LOGGER       = LogFactory.getLog(ESOpClient.class);
 
-    private final Map<String, ESClient>  esClientMap  = new ConcurrentHashMap<>();
+    private final Map<String, ESClient>     esClientMap  = new ConcurrentHashMap<>();
     private final Map<String, ClusterPhyPO> esClusterMap = new ConcurrentHashMap<>();
 
     @Autowired
-    private PhyClusterDAO clusterDAO;
+    private PhyClusterDAO                   clusterDAO;
 
     @Value("${es.client.io.thread.count:0}")
-    private Integer                      ioThreadCount;
+    private Integer                         ioThreadCount;
 
     /**
      * 启动就链接所有集群
@@ -67,19 +67,20 @@ public class ESOpClient {
                     connect(clusterPO);
                 } catch (Exception e) {
                     LOGGER.error("class=ESOpClient||method=refreshConnect||errMsg={}||cluster={}", e.getMessage(),
-                            clusterPO.getCluster(), e);
+                        clusterPO.getCluster(), e);
                 }
             } else {
                 ClusterPhyPO cachedCluster = esClusterMap.get(clusterPO.getCluster());
-                if ((cachedCluster != null && !cachedCluster.equals(clusterPO)) || !isActualRunning(clusterPO.getCluster())) {
-                    LOGGER.info("class=ESOpClient||method=refreshConnect||msg=clusterMetaUpdate||" +
-                                    "cluster={}||cachedClusterMeta={}||currentClusterMeta={}",
-                            clusterPO.getCluster(), JSON.toJSONString(cachedCluster), JSON.toJSONString(clusterPO));
+                if ((cachedCluster != null && !cachedCluster.equals(clusterPO))
+                    || !isActualRunning(clusterPO.getCluster())) {
+                    LOGGER.info("class=ESOpClient||method=refreshConnect||msg=clusterMetaUpdate||"
+                                + "cluster={}||cachedClusterMeta={}||currentClusterMeta={}",
+                        clusterPO.getCluster(), JSON.toJSONString(cachedCluster), JSON.toJSONString(clusterPO));
                     reConnect(clusterPO.getCluster());
                 } else if (cachedCluster == null) {
-                    LOGGER.error("class=ESOpClient||method=refreshConnect||msg=clusterCachedMiss||" +
-                                    "cluster={}||currentClusterMeta={}",
-                            clusterPO.getCluster(), JSON.toJSONString(clusterPO));
+                    LOGGER.error("class=ESOpClient||method=refreshConnect||msg=clusterCachedMiss||"
+                                 + "cluster={}||currentClusterMeta={}",
+                        clusterPO.getCluster(), JSON.toJSONString(clusterPO));
                 }
             }
             currentESClientClusters.remove(clusterPO.getCluster());
@@ -127,7 +128,8 @@ public class ESOpClient {
      */
     public ESClient getESClient(String cluster) {
         if (!esClientMap.containsKey(cluster)) {
-            LOGGER.warn("class=ESOpClient||method=getESClient||msg=cluster connect not exist, reconnect||cluster={}", cluster);
+            LOGGER.warn("class=ESOpClient||method=getESClient||msg=cluster connect not exist, reconnect||cluster={}",
+                cluster);
         }
 
         return esClientMap.get(cluster);
@@ -148,7 +150,8 @@ public class ESOpClient {
         LOGGER.info("class=ESOpClient||method=connect||msg=connect es start||cluster={}", clusterPO.getCluster());
 
         if (StringUtils.isBlank(clusterPO.getHttpAddress())) {
-            LOGGER.warn("class=ESOpClient||method=connect||msg=connect es fail, httpAddress is null||cluster={}", clusterPO.getCluster());
+            LOGGER.warn("class=ESOpClient||method=connect||msg=connect es fail, httpAddress is null||cluster={}",
+                clusterPO.getCluster());
             return;
         }
 
@@ -160,7 +163,7 @@ public class ESOpClient {
 
         try {
             if (ESClient.DEFAULT_ES_VERSION.equals(client.getEsVersion())
-                    && !ESClient.DEFAULT_ES_VERSION.equals(clusterPO.getEsVersion())) {
+                && !ESClient.DEFAULT_ES_VERSION.equals(clusterPO.getEsVersion())) {
                 client.setEsVersion(clusterPO.getEsVersion());
                 client.setClusterName(clusterPO.getCluster());
             }
@@ -172,21 +175,22 @@ public class ESOpClient {
             client.start();
 
             ESClusterHealthResponse response = client.admin().cluster().prepareHealth().execute().actionGet(10,
-                    TimeUnit.SECONDS);
+                TimeUnit.SECONDS);
 
             if (RestStatus.OK.getStatus() == response.getRestStatus().getStatus()) {
-                LOGGER.info("class=ESOpClient||method=connect||msg=connect es by http succ||cluster={}||hosts={}", clusterPO.getCluster(),
-                        clusterPO.getHttpAddress());
+                LOGGER.info("class=ESOpClient||method=connect||msg=connect es by http succ||cluster={}||hosts={}",
+                    clusterPO.getCluster(), clusterPO.getHttpAddress());
 
                 esClientMap.put(clusterPO.getCluster(), client);
                 esClusterMap.put(clusterPO.getCluster(), clusterPO);
-            }else {
+            } else {
                 client.close();
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             client.close();
-            LOGGER.error("class=ESOpClient||method=connect||msg=connect es by http error||cluster={}||hosts={}||msg=client start error", clusterPO.getCluster(),
-                    clusterPO.getHttpAddress());
+            LOGGER.error(
+                "class=ESOpClient||method=connect||msg=connect es by http error||cluster={}||hosts={}||msg=client start error",
+                clusterPO.getCluster(), clusterPO.getHttpAddress());
         }
     }
 

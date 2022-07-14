@@ -50,31 +50,31 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 @ActiveProfiles("test")
-@ExtendWith({SpringExtension.class, MockitoExtension.class})
+@ExtendWith({ SpringExtension.class, MockitoExtension.class })
 @MockitoSettings(strictness = Strictness.LENIENT)
 @RunWith(SpringRunner.class)
-@ContextConfiguration(classes = {SpringTool.class})
+@ContextConfiguration(classes = { SpringTool.class })
 @SpringBootTest(webEnvironment = WebEnvironment.NONE)
 class ClusterPhyMetricsManagerTest {
 
     @Mock
-    private ProjectService projectService;
+    private ProjectService               projectService;
     @Mock
-    private UserMetricsConfigService userMetricsConfigService;
+    private UserMetricsConfigService     userMetricsConfigService;
     @Mock
-    private NodeStatsService nodeStatsService;
+    private NodeStatsService             nodeStatsService;
     @Mock
-    private HandleFactory handleFactory;
+    private HandleFactory                handleFactory;
     @Mock
-    private ClusterLogicService clusterLogicService;
+    private ClusterLogicService          clusterLogicService;
     @Mock
-    private ClusterRegionService clusterRegionService;
+    private ClusterRegionService         clusterRegionService;
     @Mock
-    private ClusterRoleHostService clusterRoleHostService;
+    private ClusterRoleHostService       clusterRoleHostService;
     @Mock
-    private IndexTemplateService indexTemplateService;
+    private IndexTemplateService         indexTemplateService;
     @Mock
-    private ESIndexService esIndexService;
+    private ESIndexService               esIndexService;
 
     @InjectMocks
     private ClusterPhyMetricsManagerImpl clusterPhyMetricsManager;
@@ -89,31 +89,28 @@ class ClusterPhyMetricsManagerTest {
     void getClusterMetricsByMetricsTypeTest() throws NotFindSubclassException {
         // Setup
         final MetricsClusterPhyDTO param = new MetricsClusterPhyDTO("clusterPhyName", "clusterLogicName", 0L, 0L,
-                "aggType", Arrays.asList("value"), 0, 0, "topMethod", Arrays.asList("value"));
+            "aggType", Arrays.asList("value"), 0, 0, "topMethod", Arrays.asList("value"));
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
         final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0,
-                "responsible", "libraDepartmentId", "libraDepartment", "memo", 0.0, 0, "configJson", 0);
+            "responsible", "libraDepartmentId", "libraDepartment", "memo", 0.0, 0, "configJson", 0);
         when(clusterLogicService.getClusterLogicByName("clusterLogicName")).thenReturn(clusterLogic);
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
         final ClusterRegion clusterRegion = new ClusterRegion(0L, "name", "logicClusterIds", "clusterPhyName",
-                "config");
+            "config");
         when(clusterRegionService.getRegionByLogicClusterId(0L)).thenReturn(clusterRegion);
 
         // Configure ClusterRoleHostService.listByRegionId(...).
-        final Result<List<ClusterRoleHost>> result = Result.buildFail(
-                Arrays.asList(new ClusterRoleHost(0L, 0L, "hostname", "ip", "cluster", "port", 0, 0, "rack", "nodeSet",
-                        "machineSpec", 0, "attributes")));
+        final Result<List<ClusterRoleHost>> result = Result.buildFail(Arrays.asList(new ClusterRoleHost(0L, 0L,
+            "hostname", "ip", "cluster", "port", 0, 0, "rack", "nodeSet", "machineSpec", 0, "attributes")));
         when(clusterRoleHostService.listByRegionId(0)).thenReturn(result);
 
         // Configure IndexTemplateService.listByRegionId(...).
         final Result<List<IndexTemplate>> listResult = Result.buildFail(
-                Arrays.asList(
-                        new IndexTemplate(0, "name", 0, 0, "dateFormat", "dataCenter", 0, 0, 0, "libraDepartmentId",
-                                "libraDepartment", "responsible", "dateField", "dateFieldFormat", "idField",
-                                "routingField", "expression", 0L, "desc", 0.0, 0, "ingestPipeline", false, false, 0,
-                                false, 0L, "openSrv", 0, 0.0)));
+            Arrays.asList(new IndexTemplate(0, "name", 0, 0, "dateFormat", "dataCenter", 0, 0, 0, "libraDepartmentId",
+                "libraDepartment", "responsible", "dateField", "dateFieldFormat", "idField", "routingField",
+                "expression", 0L, "desc", 0.0, 0, "ingestPipeline", false, false, 0, false, 0L, "openSrv", 0, 0.0)));
         when(indexTemplateService.listByRegionId(0)).thenReturn(listResult);
 
         // Configure ESIndexService.syncCatIndexByExpression(...).
@@ -133,8 +130,8 @@ class ClusterPhyMetricsManagerTest {
         when(handleFactory.getByHandlerNamePer("type")).thenReturn(null);
 
         // Run the test
-        final Result resultClusterMetrics = clusterPhyMetricsManager.getClusterMetricsByMetricsType(param, 0, "userName",
-                ClusterPhyTypeMetricsEnum.UNKNOWN);
+        final Result resultClusterMetrics = clusterPhyMetricsManager.getClusterMetricsByMetricsType(param, 0,
+            "userName", ClusterPhyTypeMetricsEnum.UNKNOWN);
 
         // Verify the results
     }
@@ -143,18 +140,18 @@ class ClusterPhyMetricsManagerTest {
     void getClusterMetricsByMetricsTypeClusterRegionServiceReturnsNullTest() {
         // Setup
         final MetricsClusterPhyDTO param = new MetricsClusterPhyDTO("clusterPhyName", "clusterLogicName", 0L, 0L,
-                "aggType", Arrays.asList("value"), 0, 0, "topMethod", Arrays.asList("value"));
+            "aggType", Arrays.asList("value"), 0, 0, "topMethod", Arrays.asList("value"));
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
         final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0,
-                "responsible", "libraDepartmentId", "libraDepartment", "memo", 0.0, 0, "configJson", 0);
+            "responsible", "libraDepartmentId", "libraDepartment", "memo", 0.0, 0, "configJson", 0);
         when(clusterLogicService.getClusterLogicByName("clusterLogicName")).thenReturn(clusterLogic);
 
         when(clusterRegionService.getRegionByLogicClusterId(0L)).thenReturn(null);
 
         // Run the test
         final Result result = clusterPhyMetricsManager.getClusterMetricsByMetricsType(param, 0, "userName",
-                ClusterPhyTypeMetricsEnum.UNKNOWN);
+            ClusterPhyTypeMetricsEnum.UNKNOWN);
 
         // Verify the results
     }
@@ -163,27 +160,25 @@ class ClusterPhyMetricsManagerTest {
     void getClusterMetricsByMetricsTypeClusterRoleHostServiceReturnsNoItemTest() throws NotFindSubclassException {
         // Setup
         final MetricsClusterPhyDTO param = new MetricsClusterPhyDTO("clusterPhyName", "clusterLogicName", 0L, 0L,
-                "aggType", Arrays.asList("value"), 0, 0, "topMethod", Arrays.asList("value"));
+            "aggType", Arrays.asList("value"), 0, 0, "topMethod", Arrays.asList("value"));
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
         final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0,
-                "responsible", "libraDepartmentId", "libraDepartment", "memo", 0.0, 0, "configJson", 0);
+            "responsible", "libraDepartmentId", "libraDepartment", "memo", 0.0, 0, "configJson", 0);
         when(clusterLogicService.getClusterLogicByName("clusterLogicName")).thenReturn(clusterLogic);
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
         final ClusterRegion clusterRegion = new ClusterRegion(0L, "name", "logicClusterIds", "clusterPhyName",
-                "config");
+            "config");
         when(clusterRegionService.getRegionByLogicClusterId(0L)).thenReturn(clusterRegion);
 
         when(clusterRoleHostService.listByRegionId(0)).thenReturn(Result.buildSucc());
 
         // Configure IndexTemplateService.listByRegionId(...).
         final Result<List<IndexTemplate>> listResult = Result.buildFail(
-                Arrays.asList(
-                        new IndexTemplate(0, "name", 0, 0, "dateFormat", "dataCenter", 0, 0, 0, "libraDepartmentId",
-                                "libraDepartment", "responsible", "dateField", "dateFieldFormat", "idField",
-                                "routingField", "expression", 0L, "desc", 0.0, 0, "ingestPipeline", false, false, 0,
-                                false, 0L, "openSrv", 0, 0.0)));
+            Arrays.asList(new IndexTemplate(0, "name", 0, 0, "dateFormat", "dataCenter", 0, 0, 0, "libraDepartmentId",
+                "libraDepartment", "responsible", "dateField", "dateFieldFormat", "idField", "routingField",
+                "expression", 0L, "desc", 0.0, 0, "ingestPipeline", false, false, 0, false, 0L, "openSrv", 0, 0.0)));
         when(indexTemplateService.listByRegionId(0)).thenReturn(listResult);
 
         // Configure ESIndexService.syncCatIndexByExpression(...).
@@ -204,7 +199,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Run the test
         final Result result = clusterPhyMetricsManager.getClusterMetricsByMetricsType(param, 0, "userName",
-                ClusterPhyTypeMetricsEnum.UNKNOWN);
+            ClusterPhyTypeMetricsEnum.UNKNOWN);
 
         // Verify the results
     }
@@ -213,16 +208,16 @@ class ClusterPhyMetricsManagerTest {
     void getClusterMetricsByMetricsTypeClusterRoleHostServiceReturnsNoItemsTest() throws NotFindSubclassException {
         // Setup
         final MetricsClusterPhyDTO param = new MetricsClusterPhyDTO("clusterPhyName", "clusterLogicName", 0L, 0L,
-                "aggType", Arrays.asList("value"), 0, 0, "topMethod", Arrays.asList("value"));
+            "aggType", Arrays.asList("value"), 0, 0, "topMethod", Arrays.asList("value"));
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
         final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0,
-                "responsible", "libraDepartmentId", "libraDepartment", "memo", 0.0, 0, "configJson", 0);
+            "responsible", "libraDepartmentId", "libraDepartment", "memo", 0.0, 0, "configJson", 0);
         when(clusterLogicService.getClusterLogicByName("clusterLogicName")).thenReturn(clusterLogic);
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
         final ClusterRegion clusterRegion = new ClusterRegion(0L, "name", "logicClusterIds", "clusterPhyName",
-                "config");
+            "config");
         when(clusterRegionService.getRegionByLogicClusterId(0L)).thenReturn(clusterRegion);
 
         // Configure ClusterRoleHostService.listByRegionId(...).
@@ -231,11 +226,9 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure IndexTemplateService.listByRegionId(...).
         final Result<List<IndexTemplate>> listResult = Result.buildFail(
-                Arrays.asList(
-                        new IndexTemplate(0, "name", 0, 0, "dateFormat", "dataCenter", 0, 0, 0, "libraDepartmentId",
-                                "libraDepartment", "responsible", "dateField", "dateFieldFormat", "idField",
-                                "routingField", "expression", 0L, "desc", 0.0, 0, "ingestPipeline", false, false, 0,
-                                false, 0L, "openSrv", 0, 0.0)));
+            Arrays.asList(new IndexTemplate(0, "name", 0, 0, "dateFormat", "dataCenter", 0, 0, 0, "libraDepartmentId",
+                "libraDepartment", "responsible", "dateField", "dateFieldFormat", "idField", "routingField",
+                "expression", 0L, "desc", 0.0, 0, "ingestPipeline", false, false, 0, false, 0L, "openSrv", 0, 0.0)));
         when(indexTemplateService.listByRegionId(0)).thenReturn(listResult);
 
         // Configure ESIndexService.syncCatIndexByExpression(...).
@@ -255,8 +248,8 @@ class ClusterPhyMetricsManagerTest {
         when(handleFactory.getByHandlerNamePer("type")).thenReturn(null);
 
         // Run the test
-        final Result resultClusterMetrics = clusterPhyMetricsManager.getClusterMetricsByMetricsType(param, 0, "userName",
-                ClusterPhyTypeMetricsEnum.UNKNOWN);
+        final Result resultClusterMetrics = clusterPhyMetricsManager.getClusterMetricsByMetricsType(param, 0,
+            "userName", ClusterPhyTypeMetricsEnum.UNKNOWN);
 
         // Verify the results
     }
@@ -265,16 +258,16 @@ class ClusterPhyMetricsManagerTest {
     void getClusterMetricsByMetricsTypeClusterRoleHostServiceReturnsFailureTest() throws NotFindSubclassException {
         // Setup
         final MetricsClusterPhyDTO param = new MetricsClusterPhyDTO("clusterPhyName", "clusterLogicName", 0L, 0L,
-                "aggType", Arrays.asList("value"), 0, 0, "topMethod", Arrays.asList("value"));
+            "aggType", Arrays.asList("value"), 0, 0, "topMethod", Arrays.asList("value"));
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
         final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0,
-                "responsible", "libraDepartmentId", "libraDepartment", "memo", 0.0, 0, "configJson", 0);
+            "responsible", "libraDepartmentId", "libraDepartment", "memo", 0.0, 0, "configJson", 0);
         when(clusterLogicService.getClusterLogicByName("clusterLogicName")).thenReturn(clusterLogic);
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
         final ClusterRegion clusterRegion = new ClusterRegion(0L, "name", "logicClusterIds", "clusterPhyName",
-                "config");
+            "config");
         when(clusterRegionService.getRegionByLogicClusterId(0L)).thenReturn(clusterRegion);
 
         // Configure ClusterRoleHostService.listByRegionId(...).
@@ -283,11 +276,9 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure IndexTemplateService.listByRegionId(...).
         final Result<List<IndexTemplate>> listResult = Result.buildFail(
-                Arrays.asList(
-                        new IndexTemplate(0, "name", 0, 0, "dateFormat", "dataCenter", 0, 0, 0, "libraDepartmentId",
-                                "libraDepartment", "responsible", "dateField", "dateFieldFormat", "idField",
-                                "routingField", "expression", 0L, "desc", 0.0, 0, "ingestPipeline", false, false, 0,
-                                false, 0L, "openSrv", 0, 0.0)));
+            Arrays.asList(new IndexTemplate(0, "name", 0, 0, "dateFormat", "dataCenter", 0, 0, 0, "libraDepartmentId",
+                "libraDepartment", "responsible", "dateField", "dateFieldFormat", "idField", "routingField",
+                "expression", 0L, "desc", 0.0, 0, "ingestPipeline", false, false, 0, false, 0L, "openSrv", 0, 0.0)));
         when(indexTemplateService.listByRegionId(0)).thenReturn(listResult);
 
         // Configure ESIndexService.syncCatIndexByExpression(...).
@@ -307,8 +298,8 @@ class ClusterPhyMetricsManagerTest {
         when(handleFactory.getByHandlerNamePer("type")).thenReturn(null);
 
         // Run the test
-        final Result resultClusterMetrics = clusterPhyMetricsManager.getClusterMetricsByMetricsType(param, 0, "userName",
-                ClusterPhyTypeMetricsEnum.UNKNOWN);
+        final Result resultClusterMetrics = clusterPhyMetricsManager.getClusterMetricsByMetricsType(param, 0,
+            "userName", ClusterPhyTypeMetricsEnum.UNKNOWN);
 
         // Verify the results
     }
@@ -317,22 +308,21 @@ class ClusterPhyMetricsManagerTest {
     void getClusterMetricsByMetricsTypeIndexTemplateServiceReturnsNoItemTest() throws NotFindSubclassException {
         // Setup
         final MetricsClusterPhyDTO param = new MetricsClusterPhyDTO("clusterPhyName", "clusterLogicName", 0L, 0L,
-                "aggType", Arrays.asList("value"), 0, 0, "topMethod", Arrays.asList("value"));
+            "aggType", Arrays.asList("value"), 0, 0, "topMethod", Arrays.asList("value"));
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
         final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0,
-                "responsible", "libraDepartmentId", "libraDepartment", "memo", 0.0, 0, "configJson", 0);
+            "responsible", "libraDepartmentId", "libraDepartment", "memo", 0.0, 0, "configJson", 0);
         when(clusterLogicService.getClusterLogicByName("clusterLogicName")).thenReturn(clusterLogic);
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
         final ClusterRegion clusterRegion = new ClusterRegion(0L, "name", "logicClusterIds", "clusterPhyName",
-                "config");
+            "config");
         when(clusterRegionService.getRegionByLogicClusterId(0L)).thenReturn(clusterRegion);
 
         // Configure ClusterRoleHostService.listByRegionId(...).
-        final Result<List<ClusterRoleHost>> result = Result.buildFail(
-                Arrays.asList(new ClusterRoleHost(0L, 0L, "hostname", "ip", "cluster", "port", 0, 0, "rack", "nodeSet",
-                        "machineSpec", 0, "attributes")));
+        final Result<List<ClusterRoleHost>> result = Result.buildFail(Arrays.asList(new ClusterRoleHost(0L, 0L,
+            "hostname", "ip", "cluster", "port", 0, 0, "rack", "nodeSet", "machineSpec", 0, "attributes")));
         when(clusterRoleHostService.listByRegionId(0)).thenReturn(result);
 
         when(indexTemplateService.listByRegionId(0)).thenReturn(Result.buildSucc());
@@ -354,8 +344,8 @@ class ClusterPhyMetricsManagerTest {
         when(handleFactory.getByHandlerNamePer("type")).thenReturn(null);
 
         // Run the test
-        final Result resultClusterMetrics = clusterPhyMetricsManager.getClusterMetricsByMetricsType(param, 0, "userName",
-                ClusterPhyTypeMetricsEnum.UNKNOWN);
+        final Result resultClusterMetrics = clusterPhyMetricsManager.getClusterMetricsByMetricsType(param, 0,
+            "userName", ClusterPhyTypeMetricsEnum.UNKNOWN);
 
         // Verify the results
     }
@@ -364,22 +354,21 @@ class ClusterPhyMetricsManagerTest {
     void getClusterMetricsByMetricsTypeIndexTemplateServiceReturnsNoItemsTest() throws NotFindSubclassException {
         // Setup
         final MetricsClusterPhyDTO param = new MetricsClusterPhyDTO("clusterPhyName", "clusterLogicName", 0L, 0L,
-                "aggType", Arrays.asList("value"), 0, 0, "topMethod", Arrays.asList("value"));
+            "aggType", Arrays.asList("value"), 0, 0, "topMethod", Arrays.asList("value"));
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
         final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0,
-                "responsible", "libraDepartmentId", "libraDepartment", "memo", 0.0, 0, "configJson", 0);
+            "responsible", "libraDepartmentId", "libraDepartment", "memo", 0.0, 0, "configJson", 0);
         when(clusterLogicService.getClusterLogicByName("clusterLogicName")).thenReturn(clusterLogic);
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
         final ClusterRegion clusterRegion = new ClusterRegion(0L, "name", "logicClusterIds", "clusterPhyName",
-                "config");
+            "config");
         when(clusterRegionService.getRegionByLogicClusterId(0L)).thenReturn(clusterRegion);
 
         // Configure ClusterRoleHostService.listByRegionId(...).
-        final Result<List<ClusterRoleHost>> result = Result.buildFail(
-                Arrays.asList(new ClusterRoleHost(0L, 0L, "hostname", "ip", "cluster", "port", 0, 0, "rack", "nodeSet",
-                        "machineSpec", 0, "attributes")));
+        final Result<List<ClusterRoleHost>> result = Result.buildFail(Arrays.asList(new ClusterRoleHost(0L, 0L,
+            "hostname", "ip", "cluster", "port", 0, 0, "rack", "nodeSet", "machineSpec", 0, "attributes")));
         when(clusterRoleHostService.listByRegionId(0)).thenReturn(result);
 
         // Configure IndexTemplateService.listByRegionId(...).
@@ -403,8 +392,8 @@ class ClusterPhyMetricsManagerTest {
         when(handleFactory.getByHandlerNamePer("type")).thenReturn(null);
 
         // Run the test
-        final Result resultClusterMetrics = clusterPhyMetricsManager.getClusterMetricsByMetricsType(param, 0, "userName",
-                ClusterPhyTypeMetricsEnum.UNKNOWN);
+        final Result resultClusterMetrics = clusterPhyMetricsManager.getClusterMetricsByMetricsType(param, 0,
+            "userName", ClusterPhyTypeMetricsEnum.UNKNOWN);
 
         // Verify the results
     }
@@ -413,22 +402,21 @@ class ClusterPhyMetricsManagerTest {
     void getClusterMetricsByMetricsTypeIndexTemplateServiceReturnsFailureTest() throws NotFindSubclassException {
         // Setup
         final MetricsClusterPhyDTO param = new MetricsClusterPhyDTO("clusterPhyName", "clusterLogicName", 0L, 0L,
-                "aggType", Arrays.asList("value"), 0, 0, "topMethod", Arrays.asList("value"));
+            "aggType", Arrays.asList("value"), 0, 0, "topMethod", Arrays.asList("value"));
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
         final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0,
-                "responsible", "libraDepartmentId", "libraDepartment", "memo", 0.0, 0, "configJson", 0);
+            "responsible", "libraDepartmentId", "libraDepartment", "memo", 0.0, 0, "configJson", 0);
         when(clusterLogicService.getClusterLogicByName("clusterLogicName")).thenReturn(clusterLogic);
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
         final ClusterRegion clusterRegion = new ClusterRegion(0L, "name", "logicClusterIds", "clusterPhyName",
-                "config");
+            "config");
         when(clusterRegionService.getRegionByLogicClusterId(0L)).thenReturn(clusterRegion);
 
         // Configure ClusterRoleHostService.listByRegionId(...).
-        final Result<List<ClusterRoleHost>> result = Result.buildFail(
-                Arrays.asList(new ClusterRoleHost(0L, 0L, "hostname", "ip", "cluster", "port", 0, 0, "rack", "nodeSet",
-                        "machineSpec", 0, "attributes")));
+        final Result<List<ClusterRoleHost>> result = Result.buildFail(Arrays.asList(new ClusterRoleHost(0L, 0L,
+            "hostname", "ip", "cluster", "port", 0, 0, "rack", "nodeSet", "machineSpec", 0, "attributes")));
         when(clusterRoleHostService.listByRegionId(0)).thenReturn(result);
 
         // Configure IndexTemplateService.listByRegionId(...).
@@ -452,8 +440,8 @@ class ClusterPhyMetricsManagerTest {
         when(handleFactory.getByHandlerNamePer("type")).thenReturn(null);
 
         // Run the test
-        final Result resultClusterMetrics = clusterPhyMetricsManager.getClusterMetricsByMetricsType(param, 0, "userName",
-                ClusterPhyTypeMetricsEnum.UNKNOWN);
+        final Result resultClusterMetrics = clusterPhyMetricsManager.getClusterMetricsByMetricsType(param, 0,
+            "userName", ClusterPhyTypeMetricsEnum.UNKNOWN);
 
         // Verify the results
     }
@@ -462,40 +450,37 @@ class ClusterPhyMetricsManagerTest {
     void getClusterMetricsByMetricsTypeESIndexServiceReturnsNoItemsTest() throws NotFindSubclassException {
         // Setup
         final MetricsClusterPhyDTO param = new MetricsClusterPhyDTO("clusterPhyName", "clusterLogicName", 0L, 0L,
-                "aggType", Arrays.asList("value"), 0, 0, "topMethod", Arrays.asList("value"));
+            "aggType", Arrays.asList("value"), 0, 0, "topMethod", Arrays.asList("value"));
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
         final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0,
-                "responsible", "libraDepartmentId", "libraDepartment", "memo", 0.0, 0, "configJson", 0);
+            "responsible", "libraDepartmentId", "libraDepartment", "memo", 0.0, 0, "configJson", 0);
         when(clusterLogicService.getClusterLogicByName("clusterLogicName")).thenReturn(clusterLogic);
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
         final ClusterRegion clusterRegion = new ClusterRegion(0L, "name", "logicClusterIds", "clusterPhyName",
-                "config");
+            "config");
         when(clusterRegionService.getRegionByLogicClusterId(0L)).thenReturn(clusterRegion);
 
         // Configure ClusterRoleHostService.listByRegionId(...).
-        final Result<List<ClusterRoleHost>> result = Result.buildFail(
-                Arrays.asList(new ClusterRoleHost(0L, 0L, "hostname", "ip", "cluster", "port", 0, 0, "rack", "nodeSet",
-                        "machineSpec", 0, "attributes")));
+        final Result<List<ClusterRoleHost>> result = Result.buildFail(Arrays.asList(new ClusterRoleHost(0L, 0L,
+            "hostname", "ip", "cluster", "port", 0, 0, "rack", "nodeSet", "machineSpec", 0, "attributes")));
         when(clusterRoleHostService.listByRegionId(0)).thenReturn(result);
 
         // Configure IndexTemplateService.listByRegionId(...).
         final Result<List<IndexTemplate>> listResult = Result.buildFail(
-                Arrays.asList(
-                        new IndexTemplate(0, "name", 0, 0, "dateFormat", "dataCenter", 0, 0, 0, "libraDepartmentId",
-                                "libraDepartment", "responsible", "dateField", "dateFieldFormat", "idField",
-                                "routingField", "expression", 0L, "desc", 0.0, 0, "ingestPipeline", false, false, 0,
-                                false, 0L, "openSrv", 0, 0.0)));
+            Arrays.asList(new IndexTemplate(0, "name", 0, 0, "dateFormat", "dataCenter", 0, 0, 0, "libraDepartmentId",
+                "libraDepartment", "responsible", "dateField", "dateFieldFormat", "idField", "routingField",
+                "expression", 0L, "desc", 0.0, 0, "ingestPipeline", false, false, 0, false, 0L, "openSrv", 0, 0.0)));
         when(indexTemplateService.listByRegionId(0)).thenReturn(listResult);
 
         when(esIndexService.syncCatIndexByExpression("clusterPhyName", "expression"))
-                .thenReturn(Collections.emptyList());
+            .thenReturn(Collections.emptyList());
         when(handleFactory.getByHandlerNamePer("type")).thenReturn(null);
 
         // Run the test
-        final Result resultClusterMetrics = clusterPhyMetricsManager.getClusterMetricsByMetricsType(param, 0, "userName",
-                ClusterPhyTypeMetricsEnum.UNKNOWN);
+        final Result resultClusterMetrics = clusterPhyMetricsManager.getClusterMetricsByMetricsType(param, 0,
+            "userName", ClusterPhyTypeMetricsEnum.UNKNOWN);
 
         // Verify the results
     }
@@ -504,33 +489,30 @@ class ClusterPhyMetricsManagerTest {
     void getMultiClusterMetricsTest() throws NotFindSubclassException {
         // Setup
         final MultiMetricsClusterPhyNodeDTO param = new MultiMetricsClusterPhyNodeDTO(Arrays.asList("value"));
-        final Result<List<VariousLineChartMetricsVO>> expectedResult = Result.buildFail(
-                Arrays.asList(new VariousLineChartMetricsVO("type", Arrays.asList(
-                        new MetricsContentVO("cluster", "name", Arrays.asList(new MetricsContentCellVO(0.0, 0L)))))));
+        final Result<List<VariousLineChartMetricsVO>> expectedResult = Result
+            .buildFail(Arrays.asList(new VariousLineChartMetricsVO("type", Arrays
+                .asList(new MetricsContentVO("cluster", "name", Arrays.asList(new MetricsContentCellVO(0.0, 0L)))))));
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
         final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0,
-                "responsible", "libraDepartmentId", "libraDepartment", "memo", 0.0, 0, "configJson", 0);
+            "responsible", "libraDepartmentId", "libraDepartment", "memo", 0.0, 0, "configJson", 0);
         when(clusterLogicService.getClusterLogicByName("clusterLogicName")).thenReturn(clusterLogic);
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
         final ClusterRegion clusterRegion = new ClusterRegion(0L, "name", "logicClusterIds", "clusterPhyName",
-                "config");
+            "config");
         when(clusterRegionService.getRegionByLogicClusterId(0L)).thenReturn(clusterRegion);
 
         // Configure ClusterRoleHostService.listByRegionId(...).
-        final Result<List<ClusterRoleHost>> result = Result.buildFail(
-                Arrays.asList(new ClusterRoleHost(0L, 0L, "hostname", "ip", "cluster", "port", 0, 0, "rack", "nodeSet",
-                        "machineSpec", 0, "attributes")));
+        final Result<List<ClusterRoleHost>> result = Result.buildFail(Arrays.asList(new ClusterRoleHost(0L, 0L,
+            "hostname", "ip", "cluster", "port", 0, 0, "rack", "nodeSet", "machineSpec", 0, "attributes")));
         when(clusterRoleHostService.listByRegionId(0)).thenReturn(result);
 
         // Configure IndexTemplateService.listByRegionId(...).
         final Result<List<IndexTemplate>> listResult = Result.buildFail(
-                Arrays.asList(
-                        new IndexTemplate(0, "name", 0, 0, "dateFormat", "dataCenter", 0, 0, 0, "libraDepartmentId",
-                                "libraDepartment", "responsible", "dateField", "dateFieldFormat", "idField",
-                                "routingField", "expression", 0L, "desc", 0.0, 0, "ingestPipeline", false, false, 0,
-                                false, 0L, "openSrv", 0, 0.0)));
+            Arrays.asList(new IndexTemplate(0, "name", 0, 0, "dateFormat", "dataCenter", 0, 0, 0, "libraDepartmentId",
+                "libraDepartment", "responsible", "dateField", "dateFieldFormat", "idField", "routingField",
+                "expression", 0L, "desc", 0.0, 0, "ingestPipeline", false, false, 0, false, 0L, "openSrv", 0, 0.0)));
         when(indexTemplateService.listByRegionId(0)).thenReturn(listResult);
 
         // Configure ESIndexService.syncCatIndexByExpression(...).
@@ -550,9 +532,8 @@ class ClusterPhyMetricsManagerTest {
         when(handleFactory.getByHandlerNamePer("type")).thenReturn(null);
 
         // Run the test
-        final Result<List<VariousLineChartMetricsVO>> resultClusterMetrics = clusterPhyMetricsManager.getMultiClusterMetrics(param, 0,
-                "userName",
-                ClusterPhyTypeMetricsEnum.UNKNOWN);
+        final Result<List<VariousLineChartMetricsVO>> resultClusterMetrics = clusterPhyMetricsManager
+            .getMultiClusterMetrics(param, 0, "userName", ClusterPhyTypeMetricsEnum.UNKNOWN);
 
         // Verify the results
         assertThat(result).isEqualTo(expectedResult);
@@ -562,21 +543,20 @@ class ClusterPhyMetricsManagerTest {
     void getMultiClusterMetricsClusterRegionServiceReturnsNullTest() {
         // Setup
         final MultiMetricsClusterPhyNodeDTO param = new MultiMetricsClusterPhyNodeDTO(Arrays.asList("value"));
-        final Result<List<VariousLineChartMetricsVO>> expectedResult = Result.buildFail(
-                Arrays.asList(new VariousLineChartMetricsVO("type", Arrays.asList(
-                        new MetricsContentVO("cluster", "name", Arrays.asList(new MetricsContentCellVO(0.0, 0L)))))));
+        final Result<List<VariousLineChartMetricsVO>> expectedResult = Result
+            .buildFail(Arrays.asList(new VariousLineChartMetricsVO("type", Arrays
+                .asList(new MetricsContentVO("cluster", "name", Arrays.asList(new MetricsContentCellVO(0.0, 0L)))))));
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
         final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0,
-                "responsible", "libraDepartmentId", "libraDepartment", "memo", 0.0, 0, "configJson", 0);
+            "responsible", "libraDepartmentId", "libraDepartment", "memo", 0.0, 0, "configJson", 0);
         when(clusterLogicService.getClusterLogicByName("clusterLogicName")).thenReturn(clusterLogic);
 
         when(clusterRegionService.getRegionByLogicClusterId(0L)).thenReturn(null);
 
         // Run the test
         final Result<List<VariousLineChartMetricsVO>> result = clusterPhyMetricsManager.getMultiClusterMetrics(param, 0,
-                "userName",
-                ClusterPhyTypeMetricsEnum.UNKNOWN);
+            "userName", ClusterPhyTypeMetricsEnum.UNKNOWN);
 
         // Verify the results
         assertThat(result).isEqualTo(expectedResult);
@@ -586,29 +566,27 @@ class ClusterPhyMetricsManagerTest {
     void getMultiClusterMetricsClusterRoleHostServiceReturnsNoItemTest() throws NotFindSubclassException {
         // Setup
         final MultiMetricsClusterPhyNodeDTO param = new MultiMetricsClusterPhyNodeDTO(Arrays.asList("value"));
-        final Result<List<VariousLineChartMetricsVO>> expectedResult = Result.buildFail(
-                Arrays.asList(new VariousLineChartMetricsVO("type", Arrays.asList(
-                        new MetricsContentVO("cluster", "name", Arrays.asList(new MetricsContentCellVO(0.0, 0L)))))));
+        final Result<List<VariousLineChartMetricsVO>> expectedResult = Result
+            .buildFail(Arrays.asList(new VariousLineChartMetricsVO("type", Arrays
+                .asList(new MetricsContentVO("cluster", "name", Arrays.asList(new MetricsContentCellVO(0.0, 0L)))))));
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
         final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0,
-                "responsible", "libraDepartmentId", "libraDepartment", "memo", 0.0, 0, "configJson", 0);
+            "responsible", "libraDepartmentId", "libraDepartment", "memo", 0.0, 0, "configJson", 0);
         when(clusterLogicService.getClusterLogicByName("clusterLogicName")).thenReturn(clusterLogic);
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
         final ClusterRegion clusterRegion = new ClusterRegion(0L, "name", "logicClusterIds", "clusterPhyName",
-                "config");
+            "config");
         when(clusterRegionService.getRegionByLogicClusterId(0L)).thenReturn(clusterRegion);
 
         when(clusterRoleHostService.listByRegionId(0)).thenReturn(Result.buildSucc());
 
         // Configure IndexTemplateService.listByRegionId(...).
         final Result<List<IndexTemplate>> listResult = Result.buildFail(
-                Arrays.asList(
-                        new IndexTemplate(0, "name", 0, 0, "dateFormat", "dataCenter", 0, 0, 0, "libraDepartmentId",
-                                "libraDepartment", "responsible", "dateField", "dateFieldFormat", "idField",
-                                "routingField", "expression", 0L, "desc", 0.0, 0, "ingestPipeline", false, false, 0,
-                                false, 0L, "openSrv", 0, 0.0)));
+            Arrays.asList(new IndexTemplate(0, "name", 0, 0, "dateFormat", "dataCenter", 0, 0, 0, "libraDepartmentId",
+                "libraDepartment", "responsible", "dateField", "dateFieldFormat", "idField", "routingField",
+                "expression", 0L, "desc", 0.0, 0, "ingestPipeline", false, false, 0, false, 0L, "openSrv", 0, 0.0)));
         when(indexTemplateService.listByRegionId(0)).thenReturn(listResult);
 
         // Configure ESIndexService.syncCatIndexByExpression(...).
@@ -629,8 +607,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Run the test
         final Result<List<VariousLineChartMetricsVO>> result = clusterPhyMetricsManager.getMultiClusterMetrics(param, 0,
-                "userName",
-                ClusterPhyTypeMetricsEnum.UNKNOWN);
+            "userName", ClusterPhyTypeMetricsEnum.UNKNOWN);
 
         // Verify the results
         assertThat(result).isEqualTo(expectedResult);
@@ -640,18 +617,18 @@ class ClusterPhyMetricsManagerTest {
     void getMultiClusterMetricsClusterRoleHostServiceReturnsNoItemsTest() throws NotFindSubclassException {
         // Setup
         final MultiMetricsClusterPhyNodeDTO param = new MultiMetricsClusterPhyNodeDTO(Arrays.asList("value"));
-        final Result<List<VariousLineChartMetricsVO>> expectedResult = Result.buildFail(
-                Arrays.asList(new VariousLineChartMetricsVO("type", Arrays.asList(
-                        new MetricsContentVO("cluster", "name", Arrays.asList(new MetricsContentCellVO(0.0, 0L)))))));
+        final Result<List<VariousLineChartMetricsVO>> expectedResult = Result
+            .buildFail(Arrays.asList(new VariousLineChartMetricsVO("type", Arrays
+                .asList(new MetricsContentVO("cluster", "name", Arrays.asList(new MetricsContentCellVO(0.0, 0L)))))));
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
         final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0,
-                "responsible", "libraDepartmentId", "libraDepartment", "memo", 0.0, 0, "configJson", 0);
+            "responsible", "libraDepartmentId", "libraDepartment", "memo", 0.0, 0, "configJson", 0);
         when(clusterLogicService.getClusterLogicByName("clusterLogicName")).thenReturn(clusterLogic);
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
         final ClusterRegion clusterRegion = new ClusterRegion(0L, "name", "logicClusterIds", "clusterPhyName",
-                "config");
+            "config");
         when(clusterRegionService.getRegionByLogicClusterId(0L)).thenReturn(clusterRegion);
 
         // Configure ClusterRoleHostService.listByRegionId(...).
@@ -660,11 +637,9 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure IndexTemplateService.listByRegionId(...).
         final Result<List<IndexTemplate>> listResult = Result.buildFail(
-                Arrays.asList(
-                        new IndexTemplate(0, "name", 0, 0, "dateFormat", "dataCenter", 0, 0, 0, "libraDepartmentId",
-                                "libraDepartment", "responsible", "dateField", "dateFieldFormat", "idField",
-                                "routingField", "expression", 0L, "desc", 0.0, 0, "ingestPipeline", false, false, 0,
-                                false, 0L, "openSrv", 0, 0.0)));
+            Arrays.asList(new IndexTemplate(0, "name", 0, 0, "dateFormat", "dataCenter", 0, 0, 0, "libraDepartmentId",
+                "libraDepartment", "responsible", "dateField", "dateFieldFormat", "idField", "routingField",
+                "expression", 0L, "desc", 0.0, 0, "ingestPipeline", false, false, 0, false, 0L, "openSrv", 0, 0.0)));
         when(indexTemplateService.listByRegionId(0)).thenReturn(listResult);
 
         // Configure ESIndexService.syncCatIndexByExpression(...).
@@ -684,9 +659,8 @@ class ClusterPhyMetricsManagerTest {
         when(handleFactory.getByHandlerNamePer("type")).thenReturn(null);
 
         // Run the test
-        final Result<List<VariousLineChartMetricsVO>> resultClusterMetrics = clusterPhyMetricsManager.getMultiClusterMetrics(param, 0,
-                "userName",
-                ClusterPhyTypeMetricsEnum.UNKNOWN);
+        final Result<List<VariousLineChartMetricsVO>> resultClusterMetrics = clusterPhyMetricsManager
+            .getMultiClusterMetrics(param, 0, "userName", ClusterPhyTypeMetricsEnum.UNKNOWN);
 
         // Verify the results
         assertThat(result).isEqualTo(expectedResult);
@@ -696,18 +670,18 @@ class ClusterPhyMetricsManagerTest {
     void getMultiClusterMetricsClusterRoleHostServiceReturnsFailureTest() throws NotFindSubclassException {
         // Setup
         final MultiMetricsClusterPhyNodeDTO param = new MultiMetricsClusterPhyNodeDTO(Arrays.asList("value"));
-        final Result<List<VariousLineChartMetricsVO>> expectedResult = Result.buildFail(
-                Arrays.asList(new VariousLineChartMetricsVO("type", Arrays.asList(
-                        new MetricsContentVO("cluster", "name", Arrays.asList(new MetricsContentCellVO(0.0, 0L)))))));
+        final Result<List<VariousLineChartMetricsVO>> expectedResult = Result
+            .buildFail(Arrays.asList(new VariousLineChartMetricsVO("type", Arrays
+                .asList(new MetricsContentVO("cluster", "name", Arrays.asList(new MetricsContentCellVO(0.0, 0L)))))));
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
         final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0,
-                "responsible", "libraDepartmentId", "libraDepartment", "memo", 0.0, 0, "configJson", 0);
+            "responsible", "libraDepartmentId", "libraDepartment", "memo", 0.0, 0, "configJson", 0);
         when(clusterLogicService.getClusterLogicByName("clusterLogicName")).thenReturn(clusterLogic);
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
         final ClusterRegion clusterRegion = new ClusterRegion(0L, "name", "logicClusterIds", "clusterPhyName",
-                "config");
+            "config");
         when(clusterRegionService.getRegionByLogicClusterId(0L)).thenReturn(clusterRegion);
 
         // Configure ClusterRoleHostService.listByRegionId(...).
@@ -716,11 +690,9 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure IndexTemplateService.listByRegionId(...).
         final Result<List<IndexTemplate>> listResult = Result.buildFail(
-                Arrays.asList(
-                        new IndexTemplate(0, "name", 0, 0, "dateFormat", "dataCenter", 0, 0, 0, "libraDepartmentId",
-                                "libraDepartment", "responsible", "dateField", "dateFieldFormat", "idField",
-                                "routingField", "expression", 0L, "desc", 0.0, 0, "ingestPipeline", false, false, 0,
-                                false, 0L, "openSrv", 0, 0.0)));
+            Arrays.asList(new IndexTemplate(0, "name", 0, 0, "dateFormat", "dataCenter", 0, 0, 0, "libraDepartmentId",
+                "libraDepartment", "responsible", "dateField", "dateFieldFormat", "idField", "routingField",
+                "expression", 0L, "desc", 0.0, 0, "ingestPipeline", false, false, 0, false, 0L, "openSrv", 0, 0.0)));
         when(indexTemplateService.listByRegionId(0)).thenReturn(listResult);
 
         // Configure ESIndexService.syncCatIndexByExpression(...).
@@ -740,9 +712,8 @@ class ClusterPhyMetricsManagerTest {
         when(handleFactory.getByHandlerNamePer("type")).thenReturn(null);
 
         // Run the test
-        final Result<List<VariousLineChartMetricsVO>> resultClusterMetrics = clusterPhyMetricsManager.getMultiClusterMetrics(param, 0,
-                "userName",
-                ClusterPhyTypeMetricsEnum.UNKNOWN);
+        final Result<List<VariousLineChartMetricsVO>> resultClusterMetrics = clusterPhyMetricsManager
+            .getMultiClusterMetrics(param, 0, "userName", ClusterPhyTypeMetricsEnum.UNKNOWN);
 
         // Verify the results
         assertThat(result).isEqualTo(expectedResult);
@@ -752,24 +723,23 @@ class ClusterPhyMetricsManagerTest {
     void getMultiClusterMetricsIndexTemplateServiceReturnsNoItemTest() throws NotFindSubclassException {
         // Setup
         final MultiMetricsClusterPhyNodeDTO param = new MultiMetricsClusterPhyNodeDTO(Arrays.asList("value"));
-        final Result<List<VariousLineChartMetricsVO>> expectedResult = Result.buildFail(
-                Arrays.asList(new VariousLineChartMetricsVO("type", Arrays.asList(
-                        new MetricsContentVO("cluster", "name", Arrays.asList(new MetricsContentCellVO(0.0, 0L)))))));
+        final Result<List<VariousLineChartMetricsVO>> expectedResult = Result
+            .buildFail(Arrays.asList(new VariousLineChartMetricsVO("type", Arrays
+                .asList(new MetricsContentVO("cluster", "name", Arrays.asList(new MetricsContentCellVO(0.0, 0L)))))));
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
         final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0,
-                "responsible", "libraDepartmentId", "libraDepartment", "memo", 0.0, 0, "configJson", 0);
+            "responsible", "libraDepartmentId", "libraDepartment", "memo", 0.0, 0, "configJson", 0);
         when(clusterLogicService.getClusterLogicByName("clusterLogicName")).thenReturn(clusterLogic);
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
         final ClusterRegion clusterRegion = new ClusterRegion(0L, "name", "logicClusterIds", "clusterPhyName",
-                "config");
+            "config");
         when(clusterRegionService.getRegionByLogicClusterId(0L)).thenReturn(clusterRegion);
 
         // Configure ClusterRoleHostService.listByRegionId(...).
-        final Result<List<ClusterRoleHost>> result = Result.buildFail(
-                Arrays.asList(new ClusterRoleHost(0L, 0L, "hostname", "ip", "cluster", "port", 0, 0, "rack", "nodeSet",
-                        "machineSpec", 0, "attributes")));
+        final Result<List<ClusterRoleHost>> result = Result.buildFail(Arrays.asList(new ClusterRoleHost(0L, 0L,
+            "hostname", "ip", "cluster", "port", 0, 0, "rack", "nodeSet", "machineSpec", 0, "attributes")));
         when(clusterRoleHostService.listByRegionId(0)).thenReturn(result);
 
         when(indexTemplateService.listByRegionId(0)).thenReturn(Result.buildSucc());
@@ -791,9 +761,8 @@ class ClusterPhyMetricsManagerTest {
         when(handleFactory.getByHandlerNamePer("type")).thenReturn(null);
 
         // Run the test
-        final Result<List<VariousLineChartMetricsVO>> resultClusterMetrics = clusterPhyMetricsManager.getMultiClusterMetrics(param, 0,
-                "userName",
-                ClusterPhyTypeMetricsEnum.UNKNOWN);
+        final Result<List<VariousLineChartMetricsVO>> resultClusterMetrics = clusterPhyMetricsManager
+            .getMultiClusterMetrics(param, 0, "userName", ClusterPhyTypeMetricsEnum.UNKNOWN);
 
         // Verify the results
         assertThat(result).isEqualTo(expectedResult);
@@ -803,24 +772,23 @@ class ClusterPhyMetricsManagerTest {
     void getMultiClusterMetricsIndexTemplateServiceReturnsNoItemsTest() throws NotFindSubclassException {
         // Setup
         final MultiMetricsClusterPhyNodeDTO param = new MultiMetricsClusterPhyNodeDTO(Arrays.asList("value"));
-        final Result<List<VariousLineChartMetricsVO>> expectedResult = Result.buildFail(
-                Arrays.asList(new VariousLineChartMetricsVO("type", Arrays.asList(
-                        new MetricsContentVO("cluster", "name", Arrays.asList(new MetricsContentCellVO(0.0, 0L)))))));
+        final Result<List<VariousLineChartMetricsVO>> expectedResult = Result
+            .buildFail(Arrays.asList(new VariousLineChartMetricsVO("type", Arrays
+                .asList(new MetricsContentVO("cluster", "name", Arrays.asList(new MetricsContentCellVO(0.0, 0L)))))));
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
         final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0,
-                "responsible", "libraDepartmentId", "libraDepartment", "memo", 0.0, 0, "configJson", 0);
+            "responsible", "libraDepartmentId", "libraDepartment", "memo", 0.0, 0, "configJson", 0);
         when(clusterLogicService.getClusterLogicByName("clusterLogicName")).thenReturn(clusterLogic);
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
         final ClusterRegion clusterRegion = new ClusterRegion(0L, "name", "logicClusterIds", "clusterPhyName",
-                "config");
+            "config");
         when(clusterRegionService.getRegionByLogicClusterId(0L)).thenReturn(clusterRegion);
 
         // Configure ClusterRoleHostService.listByRegionId(...).
-        final Result<List<ClusterRoleHost>> result = Result.buildFail(
-                Arrays.asList(new ClusterRoleHost(0L, 0L, "hostname", "ip", "cluster", "port", 0, 0, "rack", "nodeSet",
-                        "machineSpec", 0, "attributes")));
+        final Result<List<ClusterRoleHost>> result = Result.buildFail(Arrays.asList(new ClusterRoleHost(0L, 0L,
+            "hostname", "ip", "cluster", "port", 0, 0, "rack", "nodeSet", "machineSpec", 0, "attributes")));
         when(clusterRoleHostService.listByRegionId(0)).thenReturn(result);
 
         // Configure IndexTemplateService.listByRegionId(...).
@@ -844,9 +812,8 @@ class ClusterPhyMetricsManagerTest {
         when(handleFactory.getByHandlerNamePer("type")).thenReturn(null);
 
         // Run the test
-        final Result<List<VariousLineChartMetricsVO>> resultClusterMetrics = clusterPhyMetricsManager.getMultiClusterMetrics(param, 0,
-                "userName",
-                ClusterPhyTypeMetricsEnum.UNKNOWN);
+        final Result<List<VariousLineChartMetricsVO>> resultClusterMetrics = clusterPhyMetricsManager
+            .getMultiClusterMetrics(param, 0, "userName", ClusterPhyTypeMetricsEnum.UNKNOWN);
 
         // Verify the results
         assertThat(result).isEqualTo(expectedResult);
@@ -856,24 +823,23 @@ class ClusterPhyMetricsManagerTest {
     void getMultiClusterMetricsIndexTemplateServiceReturnsFailureTest() throws NotFindSubclassException {
         // Setup
         final MultiMetricsClusterPhyNodeDTO param = new MultiMetricsClusterPhyNodeDTO(Arrays.asList("value"));
-        final Result<List<VariousLineChartMetricsVO>> expectedResult = Result.buildFail(
-                Arrays.asList(new VariousLineChartMetricsVO("type", Arrays.asList(
-                        new MetricsContentVO("cluster", "name", Arrays.asList(new MetricsContentCellVO(0.0, 0L)))))));
+        final Result<List<VariousLineChartMetricsVO>> expectedResult = Result
+            .buildFail(Arrays.asList(new VariousLineChartMetricsVO("type", Arrays
+                .asList(new MetricsContentVO("cluster", "name", Arrays.asList(new MetricsContentCellVO(0.0, 0L)))))));
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
         final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0,
-                "responsible", "libraDepartmentId", "libraDepartment", "memo", 0.0, 0, "configJson", 0);
+            "responsible", "libraDepartmentId", "libraDepartment", "memo", 0.0, 0, "configJson", 0);
         when(clusterLogicService.getClusterLogicByName("clusterLogicName")).thenReturn(clusterLogic);
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
         final ClusterRegion clusterRegion = new ClusterRegion(0L, "name", "logicClusterIds", "clusterPhyName",
-                "config");
+            "config");
         when(clusterRegionService.getRegionByLogicClusterId(0L)).thenReturn(clusterRegion);
 
         // Configure ClusterRoleHostService.listByRegionId(...).
-        final Result<List<ClusterRoleHost>> result = Result.buildFail(
-                Arrays.asList(new ClusterRoleHost(0L, 0L, "hostname", "ip", "cluster", "port", 0, 0, "rack", "nodeSet",
-                        "machineSpec", 0, "attributes")));
+        final Result<List<ClusterRoleHost>> result = Result.buildFail(Arrays.asList(new ClusterRoleHost(0L, 0L,
+            "hostname", "ip", "cluster", "port", 0, 0, "rack", "nodeSet", "machineSpec", 0, "attributes")));
         when(clusterRoleHostService.listByRegionId(0)).thenReturn(result);
 
         // Configure IndexTemplateService.listByRegionId(...).
@@ -897,9 +863,8 @@ class ClusterPhyMetricsManagerTest {
         when(handleFactory.getByHandlerNamePer("type")).thenReturn(null);
 
         // Run the test
-        final Result<List<VariousLineChartMetricsVO>> resultClusterMetrics = clusterPhyMetricsManager.getMultiClusterMetrics(param, 0,
-                "userName",
-                ClusterPhyTypeMetricsEnum.UNKNOWN);
+        final Result<List<VariousLineChartMetricsVO>> resultClusterMetrics = clusterPhyMetricsManager
+            .getMultiClusterMetrics(param, 0, "userName", ClusterPhyTypeMetricsEnum.UNKNOWN);
 
         // Verify the results
         assertThat(result).isEqualTo(expectedResult);
@@ -909,43 +874,39 @@ class ClusterPhyMetricsManagerTest {
     void getMultiClusterMetricsESIndexServiceReturnsNoItemsTest() throws NotFindSubclassException {
         // Setup
         final MultiMetricsClusterPhyNodeDTO param = new MultiMetricsClusterPhyNodeDTO(Arrays.asList("value"));
-        final Result<List<VariousLineChartMetricsVO>> expectedResult = Result.buildFail(
-                Arrays.asList(new VariousLineChartMetricsVO("type", Arrays.asList(
-                        new MetricsContentVO("cluster", "name", Arrays.asList(new MetricsContentCellVO(0.0, 0L)))))));
+        final Result<List<VariousLineChartMetricsVO>> expectedResult = Result
+            .buildFail(Arrays.asList(new VariousLineChartMetricsVO("type", Arrays
+                .asList(new MetricsContentVO("cluster", "name", Arrays.asList(new MetricsContentCellVO(0.0, 0L)))))));
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
         final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0,
-                "responsible", "libraDepartmentId", "libraDepartment", "memo", 0.0, 0, "configJson", 0);
+            "responsible", "libraDepartmentId", "libraDepartment", "memo", 0.0, 0, "configJson", 0);
         when(clusterLogicService.getClusterLogicByName("clusterLogicName")).thenReturn(clusterLogic);
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
         final ClusterRegion clusterRegion = new ClusterRegion(0L, "name", "logicClusterIds", "clusterPhyName",
-                "config");
+            "config");
         when(clusterRegionService.getRegionByLogicClusterId(0L)).thenReturn(clusterRegion);
 
         // Configure ClusterRoleHostService.listByRegionId(...).
-        final Result<List<ClusterRoleHost>> result = Result.buildFail(
-                Arrays.asList(new ClusterRoleHost(0L, 0L, "hostname", "ip", "cluster", "port", 0, 0, "rack", "nodeSet",
-                        "machineSpec", 0, "attributes")));
+        final Result<List<ClusterRoleHost>> result = Result.buildFail(Arrays.asList(new ClusterRoleHost(0L, 0L,
+            "hostname", "ip", "cluster", "port", 0, 0, "rack", "nodeSet", "machineSpec", 0, "attributes")));
         when(clusterRoleHostService.listByRegionId(0)).thenReturn(result);
 
         // Configure IndexTemplateService.listByRegionId(...).
         final Result<List<IndexTemplate>> listResult = Result.buildFail(
-                Arrays.asList(
-                        new IndexTemplate(0, "name", 0, 0, "dateFormat", "dataCenter", 0, 0, 0, "libraDepartmentId",
-                                "libraDepartment", "responsible", "dateField", "dateFieldFormat", "idField",
-                                "routingField", "expression", 0L, "desc", 0.0, 0, "ingestPipeline", false, false, 0,
-                                false, 0L, "openSrv", 0, 0.0)));
+            Arrays.asList(new IndexTemplate(0, "name", 0, 0, "dateFormat", "dataCenter", 0, 0, 0, "libraDepartmentId",
+                "libraDepartment", "responsible", "dateField", "dateFieldFormat", "idField", "routingField",
+                "expression", 0L, "desc", 0.0, 0, "ingestPipeline", false, false, 0, false, 0L, "openSrv", 0, 0.0)));
         when(indexTemplateService.listByRegionId(0)).thenReturn(listResult);
 
         when(esIndexService.syncCatIndexByExpression("clusterPhyName", "expression"))
-                .thenReturn(Collections.emptyList());
+            .thenReturn(Collections.emptyList());
         when(handleFactory.getByHandlerNamePer("type")).thenReturn(null);
 
         // Run the test
-        final Result<List<VariousLineChartMetricsVO>> resultClusterMetrics = clusterPhyMetricsManager.getMultiClusterMetrics(param, 0,
-                "userName",
-                ClusterPhyTypeMetricsEnum.UNKNOWN);
+        final Result<List<VariousLineChartMetricsVO>> resultClusterMetrics = clusterPhyMetricsManager
+            .getMultiClusterMetrics(param, 0, "userName", ClusterPhyTypeMetricsEnum.UNKNOWN);
 
         // Verify the results
         assertThat(result).isEqualTo(expectedResult);
@@ -955,10 +916,10 @@ class ClusterPhyMetricsManagerTest {
     void getUserNameConfigMetricsTest() {
         // Setup
         final MetricsConfigInfoDTO metricsConfigInfoDTO = new MetricsConfigInfoDTO("userName", "firstMetricsType",
-                "secondMetricsType", Arrays.asList("value"));
+            "secondMetricsType", Arrays.asList("value"));
         when(userMetricsConfigService.getMetricsByTypeAndUserName(
-                new MetricsConfigInfoDTO("userName", "firstMetricsType", "secondMetricsType",
-                        Arrays.asList("value")))).thenReturn(Arrays.asList("value"));
+            new MetricsConfigInfoDTO("userName", "firstMetricsType", "secondMetricsType", Arrays.asList("value"))))
+                .thenReturn(Arrays.asList("value"));
 
         // Run the test
         final List<String> result = clusterPhyMetricsManager.getUserNameConfigMetrics(metricsConfigInfoDTO, "userName");
@@ -971,10 +932,10 @@ class ClusterPhyMetricsManagerTest {
     void getUserNameConfigMetricsUserMetricsConfigServiceReturnsNoItemsTest() {
         // Setup
         final MetricsConfigInfoDTO metricsConfigInfoDTO = new MetricsConfigInfoDTO("userName", "firstMetricsType",
-                "secondMetricsType", Arrays.asList("value"));
+            "secondMetricsType", Arrays.asList("value"));
         when(userMetricsConfigService.getMetricsByTypeAndUserName(
-                new MetricsConfigInfoDTO("userName", "firstMetricsType", "secondMetricsType",
-                        Arrays.asList("value")))).thenReturn(Collections.emptyList());
+            new MetricsConfigInfoDTO("userName", "firstMetricsType", "secondMetricsType", Arrays.asList("value"))))
+                .thenReturn(Collections.emptyList());
 
         // Run the test
         final List<String> result = clusterPhyMetricsManager.getUserNameConfigMetrics(metricsConfigInfoDTO, "userName");
@@ -987,11 +948,11 @@ class ClusterPhyMetricsManagerTest {
     void updateUserNameConfigMetricsTest() {
         // Setup
         final MetricsConfigInfoDTO param = new MetricsConfigInfoDTO("userName", "firstMetricsType", "secondMetricsType",
-                Arrays.asList("value"));
+            Arrays.asList("value"));
         final Result<Integer> expectedResult = Result.buildFail(0);
         when(userMetricsConfigService.updateByMetricsByTypeAndUserName(
-                new MetricsConfigInfoDTO("userName", "firstMetricsType", "secondMetricsType",
-                        Arrays.asList("value")))).thenReturn(Result.buildFail(0));
+            new MetricsConfigInfoDTO("userName", "firstMetricsType", "secondMetricsType", Arrays.asList("value"))))
+                .thenReturn(Result.buildFail(0));
 
         // Run the test
         final Result<Integer> result = clusterPhyMetricsManager.updateUserNameConfigMetrics(param, "userName");
@@ -1004,10 +965,10 @@ class ClusterPhyMetricsManagerTest {
     void updateUserNameConfigMetricsUserMetricsConfigServiceReturnsNoItemTest() {
         // Setup
         final MetricsConfigInfoDTO param = new MetricsConfigInfoDTO("userName", "firstMetricsType", "secondMetricsType",
-                Arrays.asList("value"));
+            Arrays.asList("value"));
         when(userMetricsConfigService.updateByMetricsByTypeAndUserName(
-                new MetricsConfigInfoDTO("userName", "firstMetricsType", "secondMetricsType",
-                        Arrays.asList("value")))).thenReturn(Result.buildSucc());
+            new MetricsConfigInfoDTO("userName", "firstMetricsType", "secondMetricsType", Arrays.asList("value"))))
+                .thenReturn(Result.buildSucc());
 
         // Run the test
         final Result<Integer> result = clusterPhyMetricsManager.updateUserNameConfigMetrics(param, "userName");
@@ -1020,11 +981,11 @@ class ClusterPhyMetricsManagerTest {
     void updateUserNameConfigMetricsUserMetricsConfigServiceReturnsFailureTest() {
         // Setup
         final MetricsConfigInfoDTO param = new MetricsConfigInfoDTO("userName", "firstMetricsType", "secondMetricsType",
-                Arrays.asList("value"));
+            Arrays.asList("value"));
         final Result<Integer> expectedResult = Result.buildFail(0);
         when(userMetricsConfigService.updateByMetricsByTypeAndUserName(
-                new MetricsConfigInfoDTO("userName", "firstMetricsType", "secondMetricsType",
-                        Arrays.asList("value")))).thenReturn(Result.buildFail());
+            new MetricsConfigInfoDTO("userName", "firstMetricsType", "secondMetricsType", Arrays.asList("value"))))
+                .thenReturn(Result.buildFail());
 
         // Run the test
         final Result<Integer> result = clusterPhyMetricsManager.updateUserNameConfigMetrics(param, "userName");
@@ -1036,19 +997,18 @@ class ClusterPhyMetricsManagerTest {
     @Test
     void getClusterPhyTaskDetailTest() {
         // Setup
-        final Result<List<ESClusterTaskDetailVO>> expectedResult = Result.buildFail(
-                Arrays.asList(new ESClusterTaskDetailVO("taskId", "node", "action", 0L, 0L, "runningTimeString",
-                        "description")));
+        final Result<List<ESClusterTaskDetailVO>> expectedResult = Result.buildFail(Arrays
+            .asList(new ESClusterTaskDetailVO("taskId", "node", "action", 0L, 0L, "runningTimeString", "description")));
         when(projectService.checkProjectExist(0)).thenReturn(false);
 
         // Configure NodeStatisService.getClusterTaskDetail(...).
-        final List<ESClusterTaskDetail> esClusterTaskDetails = Arrays.asList(
-                new ESClusterTaskDetail("taskId", "node", "action", 0L, 0L, "runningTimeString", "description"));
+        final List<ESClusterTaskDetail> esClusterTaskDetails = Arrays
+            .asList(new ESClusterTaskDetail("taskId", "node", "action", 0L, 0L, "runningTimeString", "description"));
         when(nodeStatsService.getClusterTaskDetail("clusterPhyName", "node", 0L, 0L)).thenReturn(esClusterTaskDetails);
 
         // Run the test
-        final Result<List<ESClusterTaskDetailVO>> result = clusterPhyMetricsManager.getClusterPhyTaskDetail(
-                "clusterPhyName", "node", "startTime", "endTime", 0);
+        final Result<List<ESClusterTaskDetailVO>> result = clusterPhyMetricsManager
+            .getClusterPhyTaskDetail("clusterPhyName", "node", "startTime", "endTime", 0);
 
         // Verify the results
         assertThat(result).isEqualTo(expectedResult);
@@ -1059,11 +1019,11 @@ class ClusterPhyMetricsManagerTest {
         // Setup
         when(projectService.checkProjectExist(0)).thenReturn(false);
         when(nodeStatsService.getClusterTaskDetail("clusterPhyName", "node", 0L, 0L))
-                .thenReturn(Collections.emptyList());
+            .thenReturn(Collections.emptyList());
 
         // Run the test
-        final Result<List<ESClusterTaskDetailVO>> result = clusterPhyMetricsManager.getClusterPhyTaskDetail(
-                "clusterPhyName", "node", "startTime", "endTime", 0);
+        final Result<List<ESClusterTaskDetailVO>> result = clusterPhyMetricsManager
+            .getClusterPhyTaskDetail("clusterPhyName", "node", "startTime", "endTime", 0);
 
         // Verify the results
         assertThat(result).isEqualTo(Result.buildFail(Collections.emptyList()));

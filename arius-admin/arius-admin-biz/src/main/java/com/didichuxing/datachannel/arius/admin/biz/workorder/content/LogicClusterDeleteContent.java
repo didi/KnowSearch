@@ -10,10 +10,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class LogicClusterDeleteContent extends BaseContent {
 
-	/**
-	 * 主键
-	 */
-	private Long    id;
+    /**
+     * 主键
+     */
+    private Long    id;
 
     /**
      * 集群名称

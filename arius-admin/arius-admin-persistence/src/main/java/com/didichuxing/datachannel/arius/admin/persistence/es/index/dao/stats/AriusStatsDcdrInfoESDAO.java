@@ -9,9 +9,9 @@ import javax.annotation.PostConstruct;
 public class AriusStatsDcdrInfoESDAO extends BaseAriusStatsESDAO {
 
     @PostConstruct
-    public void init(){
-        super.indexName   = dataCentreUtil.getAriusStatsDcdrInfo();
+    public void init() {
+        super.indexName = dataCentreUtil.getAriusStatsDcdrInfo();
 
-        BaseAriusStatsESDAO.register(AriusStatsEnum.DCDR_INFO,this);
+        BaseAriusStatsESDAO.register(AriusStatsEnum.DCDR_INFO, this);
     }
 }

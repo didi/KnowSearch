@@ -16,9 +16,10 @@ import com.didiglobal.logi.log.LogFactory;
  */
 public class AriusIndexMappingConfigUtils {
 
-    private AriusIndexMappingConfigUtils(){}
+    private AriusIndexMappingConfigUtils() {
+    }
 
-    private static final ILog LOGGER = LogFactory.getLog(AriusIndexMappingConfigUtils.class);
+    private static final ILog   LOGGER       = LogFactory.getLog(AriusIndexMappingConfigUtils.class);
 
     private static final String MAPPING_STR  = "mapping";
     private static final String MAPPINGS_STR = "mappings";
@@ -33,8 +34,8 @@ public class AriusIndexMappingConfigUtils {
             return Result.buildSucc(new MappingConfig(getMappingObj(JSON.parseObject(mappingConfig))));
         } catch (Exception t) {
             LOGGER.warn(
-                    "class=AriusIndexMappingConfigUtils||method=parseMappingConfig||" +
-                            "mappingConfig={}||exception={}", mappingConfig, t);
+                "class=AriusIndexMappingConfigUtils||method=parseMappingConfig||" + "mappingConfig={}||exception={}",
+                mappingConfig, t);
             if (t instanceof JSONException) {
                 return Result.build(ResultType.FAIL.getCode(), "json解析失败");
             }

@@ -20,8 +20,7 @@ public enum OpTaskTypeEnum {
 
                             CLUSTER_UPGRADE(5, "集群升级", "cluster-upgrade"),
 
-                            CLUSTER_PLUG_OPERATION(6, "集群插件操作",
-                                                   "cluster-plug-operation"),
+                            CLUSTER_PLUG_OPERATION(6, "集群插件操作", "cluster-plug-operation"),
 
                             CLUSTER_OFFLINE(7, "集群下线操作", "cluster-offline"),
 
@@ -31,8 +30,7 @@ public enum OpTaskTypeEnum {
 
                             CLUSTER_CONFIG_EDIT(12, "集群配置编辑", "cluster-config-edit"),
 
-                            CLUSTER_CONFIG_DELETE(13, "集群配置删除",
-                                                  "cluster-config-delete"),
+                            CLUSTER_CONFIG_DELETE(13, "集群配置删除", "cluster-config-delete"),
 
                             UNKNOWN(-1, "unknown");
 

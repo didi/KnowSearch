@@ -15,17 +15,17 @@ public class TemplateTpsMetricPO {
      * 历史每小时tps峰值 单位 条/s
      * 是取各个物理模板最大值
      */
-    private Double maxTps;
+    private Double                          maxTps;
 
     /**
      * 最大值对应的小时时间
      */
-    private String maxTpsTimestamp;
+    private String                          maxTpsTimestamp;
 
     /**
      * 最大值对应的索引模板物理ID
      */
-    private Long maxTpsTemplateId;
+    private Long                            maxTpsTemplateId;
 
     /**
      * 每个物理模板，最近15分钟平均值 单位 条/s

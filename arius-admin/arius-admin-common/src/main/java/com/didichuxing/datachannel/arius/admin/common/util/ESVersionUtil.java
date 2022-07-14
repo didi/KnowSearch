@@ -8,21 +8,26 @@ import com.google.common.collect.Lists;
 
 public class ESVersionUtil {
 
-    private ESVersionUtil(){}
+    private ESVersionUtil() {
+    }
 
     /**
      * 判断是不是标准的es版本号，如：6.6.1.1000 或者 6.6.1
      * @param version
      * @return
      */
-    public static boolean isValid(String version){
-        if(StringUtils.isBlank(version)){return false;}
+    public static boolean isValid(String version) {
+        if (StringUtils.isBlank(version)) {
+            return false;
+        }
 
         String[] vers = version.split("\\.");
-        if(null == vers){return false;}
+        if (null == vers) {
+            return false;
+        }
 
-        for(String ver : vers){
-            if(!ver.chars().allMatch(Character::isDigit)){
+        for (String ver : vers) {
+            if (!ver.chars().allMatch(Character::isDigit)) {
                 return false;
             }
         }
@@ -75,9 +80,9 @@ public class ESVersionUtil {
                 vers1List.add("0");
             }
         }
-        int ver1Count = 0,ver2Count = 0;
+        int ver1Count = 0, ver2Count = 0;
         for (int i = 0; i < vers1List.size(); i++) {
-            int number =  i == (vers1List.size() - 1) ? 1 : (100000000/(int)Math.pow(100,i));
+            int number = i == (vers1List.size() - 1) ? 1 : (100000000 / (int) Math.pow(100, i));
             ver1Count = ver1Count + Integer.parseInt(vers1List.get(i)) * number;
             ver2Count = ver2Count + Integer.parseInt(vers2List.get(i)) * number;
         }

@@ -35,16 +35,15 @@ import java.util.stream.LongStream;
  * @Version: 1.0
  */
 
-@Task(name = "JudgeTemplateBlockWriteTask", description = "检查模版磁盘使用率是否达到上限",
-        cron = "0 */5 * * * ?", autoRegister = true)
+@Task(name = "JudgeTemplateBlockWriteTask", description = "检查模版磁盘使用率是否达到上限", cron = "0 */5 * * * ?", autoRegister = true)
 public class JudgeTemplateBlockWriteTask extends BaseConcurrentTemplateTask implements Job {
-    private static final Logger LOGGER = LoggerFactory.getLogger(JudgeTemplateBlockWriteTask.class);
+    private static final Logger  LOGGER = LoggerFactory.getLogger(JudgeTemplateBlockWriteTask.class);
 
     @Autowired
     private IndexTemplateService indexTemplateService;
 
     @Autowired
-    private IndicesManager indicesManager;
+    private IndicesManager       indicesManager;
 
     @Override
     public String getTaskName() {
@@ -75,28 +74,32 @@ public class JudgeTemplateBlockWriteTask extends BaseConcurrentTemplateTask impl
         IndexTemplateWithPhyTemplates indexTemplateWithPhyTemplates = indexTemplateService
             .getLogicTemplateWithPhysicalsById(logicId);
 
-        if (indexTemplateWithPhyTemplates == null ) {
-            throw  new AdminOperateException(String.format("模板[%s]不存在", logicId));
+        if (indexTemplateWithPhyTemplates == null) {
+            throw new AdminOperateException(String.format("模板[%s]不存在", logicId));
         }
 
-        long limitDiskSize  = (long)(indexTemplateWithPhyTemplates.getDiskSize() * 1024 * 1024 * 1024);
+        long limitDiskSize = (long) (indexTemplateWithPhyTemplates.getDiskSize() * 1024 * 1024 * 1024);
 
         IndexTemplatePhy masterPhyTemplate = indexTemplateWithPhyTemplates.getMasterPhyTemplate();
         if (masterPhyTemplate == null) {
-            throw  new AdminOperateException(String.format("模板[%s]对应的物理模板不存在", logicId));
+            throw new AdminOperateException(String.format("模板[%s]对应的物理模板不存在", logicId));
         }
 
-        List<CatIndexResult> catIndexResults = indicesManager.listIndexCatInfoByTemplatePhyId(masterPhyTemplate.getId());
+        List<CatIndexResult> catIndexResults = indicesManager
+            .listIndexCatInfoByTemplatePhyId(masterPhyTemplate.getId());
 
         long templateIndicesDiskSum = 0;
         if (CollectionUtils.isNotEmpty(catIndexResults)) {
             // 统计逻辑模版所有索引的占用磁盘大小
             // storeSize属性为string类型，把单位统一转换为byte
-            templateIndicesDiskSum = catIndexResults.stream().mapToLong(r -> SizeUtil.getUnitSize(r.getStoreSize())).sum();
+            templateIndicesDiskSum = catIndexResults.stream().mapToLong(r -> SizeUtil.getUnitSize(r.getStoreSize()))
+                .sum();
         }
 
         // 判断是否禁写
-        if (templateIndicesDiskSum < limitDiskSize) { return true;}
+        if (templateIndicesDiskSum < limitDiskSize) {
+            return true;
+        }
 
         Result<Void> ret = indexTemplateService.updateBlockWriteState(indexTemplateWithPhyTemplates.getId(), true,
             AriusUser.SYSTEM.getDesc());

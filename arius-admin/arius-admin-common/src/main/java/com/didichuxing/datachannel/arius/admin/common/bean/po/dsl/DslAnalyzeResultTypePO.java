@@ -19,19 +19,19 @@ public class DslAnalyzeResultTypePO extends BaseESPO {
     /**
      * projectId
      */
-    private Integer projectId;
+    private Integer        projectId;
     /**
      * 分析所在日期
      */
-    private String  date;
+    private String         date;
     /**
      * 访问gateway信息
      */
-    private String accessGatewayInfo;
+    private String         accessGatewayInfo;
     /**
      * 查询模板信息
      */
-    private DslTemplate dslTemplate;
+    private DslTemplate    dslTemplate;
     /**
      *  查询概述
      */
@@ -39,15 +39,15 @@ public class DslAnalyzeResultTypePO extends BaseESPO {
     /**
      * 慢查信息
      */
-    private SlowDsl slowDsl;
+    private SlowDsl        slowDsl;
     /**
      * 异常查询
      */
-    private ErrorDsl errorDsl;
+    private ErrorDsl       errorDsl;
     /**
      * 数据类型
      */
-    private String ariusType;
+    private String         ariusType;
 
     @Override
     public String toString() {

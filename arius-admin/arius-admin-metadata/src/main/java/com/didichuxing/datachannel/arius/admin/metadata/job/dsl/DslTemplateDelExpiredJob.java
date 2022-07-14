@@ -46,7 +46,7 @@ public class DslTemplateDelExpiredJob extends AbstractMetaDataJob {
         String cost = stopWatch.stop().toString();
 
         LOGGER.info("class=DslTemplateDelExpiredJob||method=handleJobTask||size={}||result={}||cost={}",
-                deleteDslTemplatePOList.size(), operatorDeleteResult, cost);
+            deleteDslTemplatePOList.size(), operatorDeleteResult, cost);
 
         return JOB_SUCCESS;
     }

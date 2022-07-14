@@ -47,39 +47,34 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.Cl
 @Component
 public class ClusterPhyMetricsManagerImpl implements ClusterPhyMetricsManager {
 
-    private static final ILog            LOGGER = LogFactory.getLog(ClusterPhyMetricsManagerImpl.class);
+    private static final ILog        LOGGER = LogFactory.getLog(ClusterPhyMetricsManagerImpl.class);
 
     @Autowired
-    private ProjectService projectService;
+    private ProjectService           projectService;
 
     @Autowired
     private UserMetricsConfigService userMetricsConfigService;
 
+    @Autowired
+    private NodeStatsService         nodeStatsService;
 
     @Autowired
-    private NodeStatsService nodeStatsService;
+    private HandleFactory            handleFactory;
 
     @Autowired
-    private HandleFactory                handleFactory;
+    private ClusterLogicService      clusterLogicService;
 
     @Autowired
-    private ClusterLogicService          clusterLogicService;
+    private ClusterRegionService     clusterRegionService;
 
     @Autowired
-    private ClusterRegionService         clusterRegionService;
+    private ClusterRoleHostService   clusterRoleHostService;
 
     @Autowired
-    private ClusterRoleHostService       clusterRoleHostService;
+    private IndexTemplateService     indexTemplateService;
 
     @Autowired
-    private IndexTemplateService indexTemplateService;
-
-    @Autowired
-    private ESIndexService esIndexService;
-
-
-
-
+    private ESIndexService           esIndexService;
 
     @Override
     public List<String> getMetricsCode2TypeMap(String type) {
@@ -98,7 +93,8 @@ public class ClusterPhyMetricsManagerImpl implements ClusterPhyMetricsManager {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T> Result<T> getClusterMetricsByMetricsType(MetricsClusterPhyDTO param, Integer projectId, String userName, ClusterPhyTypeMetricsEnum metricsTypeEnum) {
+    public <T> Result<T> getClusterMetricsByMetricsType(MetricsClusterPhyDTO param, Integer projectId, String userName,
+                                                        ClusterPhyTypeMetricsEnum metricsTypeEnum) {
         try {
             if (StringUtils.isNotBlank(param.getClusterLogicName())) {
                 ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByName(param.getClusterLogicName());
@@ -113,22 +109,23 @@ public class ClusterPhyMetricsManagerImpl implements ClusterPhyMetricsManager {
                 param.setClusterPhyName(clusterRegion.getPhyClusterName());
             }
             T result;
-            BaseClusterMetricsHandle metricsHandle = (BaseClusterMetricsHandle) handleFactory.getByHandlerNamePer(metricsTypeEnum.getType());
+            BaseClusterMetricsHandle metricsHandle = (BaseClusterMetricsHandle) handleFactory
+                .getByHandlerNamePer(metricsTypeEnum.getType());
             if (AriusObjUtils.isNull(metricsHandle)) {
-                LOGGER.warn("class=ClusterPhyMetricsManagerImpl||method=getClusterMetricsFromEs||errMsg=cannot get metricsHandle");
+                LOGGER.warn(
+                    "class=ClusterPhyMetricsManagerImpl||method=getClusterMetricsFromEs||errMsg=cannot get metricsHandle");
                 return Result.buildFail();
             }
 
             if (metricsTypeEnum.isCollectCurveMetricsList()) {
                 // 折线图数据
-                Result<List<VariousLineChartMetricsVO>> clusterPhyMetricsResult = metricsHandle.getClusterPhyRelatedCurveMetrics(param,
-                        projectId,
-                        userName);
+                Result<List<VariousLineChartMetricsVO>> clusterPhyMetricsResult = metricsHandle
+                    .getClusterPhyRelatedCurveMetrics(param, projectId, userName);
                 result = clusterPhyMetricsResult.success() ? (T) clusterPhyMetricsResult.getData() : null;
             } else {
                 // 折线图和列表图数据
                 Result<MetricsVO> metricsVoResult = metricsHandle.getOtherClusterPhyRelatedMetricsVO(param, projectId,
-                        userName);
+                    userName);
                 result = metricsVoResult.success() ? (T) metricsVoResult.getData() : null;
             }
 
@@ -140,7 +137,9 @@ public class ClusterPhyMetricsManagerImpl implements ClusterPhyMetricsManager {
     }
 
     @Override
-    public Result<List<VariousLineChartMetricsVO>> getMultiClusterMetrics(MultiMetricsClusterPhyNodeDTO param, Integer projectId, String userName, ClusterPhyTypeMetricsEnum metricsTypeEnum) {
+    public Result<List<VariousLineChartMetricsVO>> getMultiClusterMetrics(MultiMetricsClusterPhyNodeDTO param,
+                                                                          Integer projectId, String userName,
+                                                                          ClusterPhyTypeMetricsEnum metricsTypeEnum) {
         MetricsClusterPhyNodeDTO phyNodeDTO;
         if (metricsTypeEnum == ClusterPhyTypeMetricsEnum.NODE) {
             phyNodeDTO = ConvertUtil.obj2Obj(param, MetricsClusterPhyNodeDTO.class);
@@ -156,8 +155,7 @@ public class ClusterPhyMetricsManagerImpl implements ClusterPhyMetricsManager {
             try {
                 phyNodeDTO.setNodeName(nodeName);
                 Result<List<VariousLineChartMetricsVO>> nodeMetrics = getClusterMetricsByMetricsType(phyNodeDTO,
-                        projectId,
-                        userName, metricsTypeEnum);
+                    projectId, userName, metricsTypeEnum);
                 if (nodeMetrics.success()) {
                     result.addAll(nodeMetrics.getData());
                 }
@@ -167,7 +165,6 @@ public class ClusterPhyMetricsManagerImpl implements ClusterPhyMetricsManager {
         }
         return Result.buildSucc(MetricsUtils.joinDuplicateTypeVOs(result));
     }
-
 
     @Override
     public List<String> getUserNameConfigMetrics(MetricsConfigInfoDTO metricsConfigInfoDTO, String userName) {
@@ -179,21 +176,23 @@ public class ClusterPhyMetricsManagerImpl implements ClusterPhyMetricsManager {
     public Result<Integer> updateUserNameConfigMetrics(MetricsConfigInfoDTO param, String userName) {
         param.setUserName(userName);
         Result<Integer> result = userMetricsConfigService.updateByMetricsByTypeAndUserName(param);
-        if(result.failed()) {
-            LOGGER.warn("class=ClusterPhyMetricsManagerImpl||method=updateDomainAccountConfigMetrics||errMsg={}","用户指标配置信息更新出错");
+        if (result.failed()) {
+            LOGGER.warn("class=ClusterPhyMetricsManagerImpl||method=updateDomainAccountConfigMetrics||errMsg={}",
+                "用户指标配置信息更新出错");
         }
         return result;
     }
 
     @Override
-    public Result<List<ESClusterTaskDetailVO>> getClusterPhyTaskDetail(String clusterPhyName, String node, String startTime, String endTime, Integer projectId) {
+    public Result<List<ESClusterTaskDetailVO>> getClusterPhyTaskDetail(String clusterPhyName, String node,
+                                                                       String startTime, String endTime,
+                                                                       Integer projectId) {
         if (!projectService.checkProjectExist(projectId)) {
             return Result.buildParamIllegal(String.format("There is no project id:%s", projectId));
         }
-        return Result.buildSucc(ConvertUtil.list2List(nodeStatsService.getClusterTaskDetail(clusterPhyName, node, Long.parseLong(startTime), Long.parseLong(endTime)),
-                ESClusterTaskDetailVO.class));
+        return Result.buildSucc(ConvertUtil.list2List(nodeStatsService.getClusterTaskDetail(clusterPhyName, node,
+            Long.parseLong(startTime), Long.parseLong(endTime)), ESClusterTaskDetailVO.class));
     }
-
 
     /**
      * 获取逻辑集群下的节点，索引，模板信息
@@ -201,25 +200,32 @@ public class ClusterPhyMetricsManagerImpl implements ClusterPhyMetricsManager {
      * @param clusterRegion 逻辑集群关联的region
      * @return  节点，索引，模板信息 名称集合
      */
-    private List<String> buildItemsUnderClusterLogic(ClusterPhyTypeMetricsEnum metricsTypeEnum, ClusterRegion clusterRegion) {
+    private List<String> buildItemsUnderClusterLogic(ClusterPhyTypeMetricsEnum metricsTypeEnum,
+                                                     ClusterRegion clusterRegion) {
         List<String> nodeNamesUnderClusterLogic;
         //节点名称列表
-        switch (metricsTypeEnum){
+        switch (metricsTypeEnum) {
             case NODE:
-                Result<List<ClusterRoleHost>> result = clusterRoleHostService.listByRegionId(Math.toIntExact(clusterRegion.getId()));
-                nodeNamesUnderClusterLogic = result.getData().stream().map(ClusterRoleHost::getNodeSet).collect(Collectors.toList());
+                Result<List<ClusterRoleHost>> result = clusterRoleHostService
+                    .listByRegionId(Math.toIntExact(clusterRegion.getId()));
+                nodeNamesUnderClusterLogic = result.getData().stream().map(ClusterRoleHost::getNodeSet)
+                    .collect(Collectors.toList());
                 break;
             case TEMPLATES:
-                Result<List<IndexTemplate>>  indexTemplates =indexTemplateService.listByRegionId(Math.toIntExact(clusterRegion.getId()));
-                nodeNamesUnderClusterLogic =  indexTemplates.getData().stream().map(IndexTemplate::getName).collect(Collectors.toList());
+                Result<List<IndexTemplate>> indexTemplates = indexTemplateService
+                    .listByRegionId(Math.toIntExact(clusterRegion.getId()));
+                nodeNamesUnderClusterLogic = indexTemplates.getData().stream().map(IndexTemplate::getName)
+                    .collect(Collectors.toList());
                 break;
             case INDICES:
-                Result<List<IndexTemplate>> listResult = indexTemplateService.listByRegionId(Math.toIntExact(clusterRegion.getId()));
+                Result<List<IndexTemplate>> listResult = indexTemplateService
+                    .listByRegionId(Math.toIntExact(clusterRegion.getId()));
                 List<IndexTemplate> indexTemplatesList = listResult.getData();
                 List<CatIndexResult> catIndexResultList = new ArrayList<>();
-                indexTemplatesList.forEach(indexTemplate->catIndexResultList.addAll(esIndexService.syncCatIndexByExpression(clusterRegion.getPhyClusterName(),
-                        indexTemplate.getExpression())));
-                nodeNamesUnderClusterLogic =  catIndexResultList.stream().map(CatIndexResult::getIndex).collect(Collectors.toList());
+                indexTemplatesList.forEach(indexTemplate -> catIndexResultList.addAll(esIndexService
+                    .syncCatIndexByExpression(clusterRegion.getPhyClusterName(), indexTemplate.getExpression())));
+                nodeNamesUnderClusterLogic = catIndexResultList.stream().map(CatIndexResult::getIndex)
+                    .collect(Collectors.toList());
                 break;
             default:
                 nodeNamesUnderClusterLogic = new ArrayList<>();

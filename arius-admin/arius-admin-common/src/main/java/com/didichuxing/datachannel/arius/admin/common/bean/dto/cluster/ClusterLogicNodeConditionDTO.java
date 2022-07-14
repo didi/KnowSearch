@@ -25,7 +25,7 @@ public class ClusterLogicNodeConditionDTO extends PageDTO {
     @ApiModelProperty("暂无")
     private String  sortTerm;
 
-    private String sortType;
+    private String  sortType;
 
     @ApiModelProperty(value = "是否降序排序（默认降序）", dataType = "Boolean")
     private Boolean orderByDesc = true;

@@ -28,7 +28,7 @@ public class IndexSizeESDAO extends BaseESDAO {
     private String typeName = "type";
 
     @PostConstruct
-    public void init(){
+    public void init() {
         this.indexName = dataCentreUtil.getAriusIndexSize();
     }
 
@@ -51,13 +51,12 @@ public class IndexSizeESDAO extends BaseESDAO {
      */
     public IndexSizePO getNearestIndexSizeByTemplateName(String templateName) {
         List<IndexSizePO> hits = getIndexSizeByTemplateName(templateName, 1);
-        if(CollectionUtils.isEmpty(hits)) {
+        if (CollectionUtils.isEmpty(hits)) {
             return null;
         }
 
         return hits.get(0);
     }
-
 
     /**
      * 根据索引模板名称获取索引大小信息
@@ -72,18 +71,18 @@ public class IndexSizeESDAO extends BaseESDAO {
         return gatewayClient.performRequest(indexName, typeName, dsl, IndexSizePO.class);
     }
 
-
     public Map<String, IndexSizePO> getYesterDayIndexSize(int offset) {
 
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_YESTERDAY_INDEX_SIZE, DateTimeUtil.getFormatDayByOffset(offset));
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_YESTERDAY_INDEX_SIZE,
+            DateTimeUtil.getFormatDayByOffset(offset));
 
         List<IndexSizePO> indexSizePOS = gatewayClient.performRequest(indexName, typeName, dsl, IndexSizePO.class);
 
         Map<String, IndexSizePO> ret = new HashMap<>();
-        for(IndexSizePO IndexSizePO : indexSizePOS) {
+        for (IndexSizePO IndexSizePO : indexSizePOS) {
             ret.put(IndexSizePO.getTemplateName(), IndexSizePO);
         }
         return ret;
     }
-    
+
 }

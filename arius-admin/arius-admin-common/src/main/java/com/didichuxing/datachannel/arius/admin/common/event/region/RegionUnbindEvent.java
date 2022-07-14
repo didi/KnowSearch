@@ -12,11 +12,9 @@ public class RegionUnbindEvent extends ApplicationEvent {
 
     private ClusterRegion clusterRegion;
 
-    private String operator;
+    private String        operator;
 
-    public RegionUnbindEvent(Object source,
-                             ClusterRegion clusterRegion,
-                             String operator) {
+    public RegionUnbindEvent(Object source, ClusterRegion clusterRegion, String operator) {
         super(source);
         this.clusterRegion = clusterRegion;
         this.operator = operator;

@@ -26,8 +26,8 @@ public class DCDROpTaskHandler extends AbstractOpTaskHandler {
             return Result.buildParamIllegal("业务id为空");
         }
         if (existUnClosedTask(opTask.getBusinessKey(), opTask.getTaskType())) {
-            return Result.buildParamIllegal(String.format("模版列表[%s]存在未完成的dcdr模板主从切换任务，不允许再次创建",
-                    opTask.getBusinessKey()));
+            return Result
+                .buildParamIllegal(String.format("模版列表[%s]存在未完成的dcdr模板主从切换任务，不允许再次创建", opTask.getBusinessKey()));
         }
 
         opTask.setCreateTime(new Date());
@@ -36,8 +36,8 @@ public class DCDROpTaskHandler extends AbstractOpTaskHandler {
         boolean succ = 0 < opTask.getId();
         if (!succ) {
             LOGGER.error(
-                    "class=DCDRWorkTaskHandler||method=addTask||taskType={}||businessKey={}||errMsg=failed to insert",
-                    opTask.getTaskType(), opTask.getBusinessKey());
+                "class=DCDRWorkTaskHandler||method=addTask||taskType={}||businessKey={}||errMsg=failed to insert",
+                opTask.getTaskType(), opTask.getBusinessKey());
             return Result.buildFail();
         }
         return Result.buildSucc(opTask);
@@ -46,11 +46,12 @@ public class DCDROpTaskHandler extends AbstractOpTaskHandler {
     @Override
     public boolean existUnClosedTask(String key, Integer type) {
         List<OpTask> pengingTaskList = opTaskManager.getPendingTaskByType(type);
-        if (CollectionUtils.isEmpty(pengingTaskList)) { return false; }
+        if (CollectionUtils.isEmpty(pengingTaskList)) {
+            return false;
+        }
 
-        List<String> businessKeyList = pengingTaskList.stream()
-                .map(OpTask::getBusinessKey)
-                .collect(Collectors.toList());
+        List<String> businessKeyList = pengingTaskList.stream().map(OpTask::getBusinessKey)
+            .collect(Collectors.toList());
 
         List<String> templateIdListToCreate = ListUtils.string2StrList(key);
         for (String businessKey : businessKeyList) {
@@ -77,7 +78,7 @@ public class DCDROpTaskHandler extends AbstractOpTaskHandler {
         detail.setTaskProgress(step);
         updateOpTask.setExpandData(JSON.toJSONString(detail));
         if (OpTaskStatusEnum.FAILED.getStatus().equals(status)
-                || step.equals(OpTaskDCDRProgressEnum.STEP_9.getProgress())) {
+            || step.equals(OpTaskDCDRProgressEnum.STEP_9.getProgress())) {
             updateOpTask.setStatus(status);
         }
 
@@ -85,7 +86,5 @@ public class DCDROpTaskHandler extends AbstractOpTaskHandler {
 
         return Result.buildSucc();
     }
-
-
 
 }

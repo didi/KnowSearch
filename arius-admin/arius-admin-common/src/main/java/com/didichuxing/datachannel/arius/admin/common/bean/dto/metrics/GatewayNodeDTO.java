@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 public class GatewayNodeDTO extends GatewayMetricsDTO {
 
     @ApiModelProperty("节点Ip")
-    private String nodeIp;
+    private String  nodeIp;
 
     @ApiModelProperty("top数字")
     private Integer topNu;

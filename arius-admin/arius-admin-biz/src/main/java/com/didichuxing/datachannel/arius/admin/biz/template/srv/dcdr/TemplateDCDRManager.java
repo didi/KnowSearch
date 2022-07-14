@@ -28,8 +28,8 @@ public interface TemplateDCDRManager {
      * @return Result
      * @throws AdminOperateException 管理操作Exception
      */
-    Result<Void> copyAndCreateDCDR(Integer templateId, String targetCluster, Integer regionId,
-                                   String operator, Integer projectId) throws AdminOperateException;
+    Result<Void> copyAndCreateDCDR(Integer templateId, String targetCluster, Integer regionId, String operator,
+                                   Integer projectId) throws AdminOperateException;
 
     /**
      * createPhyDCDR
@@ -83,9 +83,9 @@ public interface TemplateDCDRManager {
      * @throws ESOperateException
      */
     Result<Void> cancelDCDRSwitchMasterSlaveByTaskIdAndTemplateIds(Integer taskId, List<Long> templateIds,
-                                                                   boolean fullDeleteFlag,
-                                                                   String operator, Integer projectId) throws ESOperateException;
-    
+                                                                   boolean fullDeleteFlag, String operator,
+                                                                   Integer projectId) throws ESOperateException;
+
     /**
      * 取消dcdr主从切换任务id 根据任务id取消DCDR主从切换
      *
@@ -95,17 +95,18 @@ public interface TemplateDCDRManager {
      * @return {@link Result}<{@link Void}>
      * @throws ESOperateException esoperateException
      */
-    Result<Void> cancelDCDRSwitchMasterSlaveByTaskId(Integer taskId, String operator, Integer projectId) throws ESOperateException;
+    Result<Void> cancelDCDRSwitchMasterSlaveByTaskId(Integer taskId, String operator,
+                                                     Integer projectId) throws ESOperateException;
 
-  /**
-   * 刷新dcdrChannel状态
-   *
-   * @param taskId     任务id
-   * @param templateId 模板id
-   * @param operator   操作人或角色
-   * @param projectId
-   * @return {@link Result}<{@link Void}>
-   */
+    /**
+     * 刷新dcdrChannel状态
+     *
+     * @param taskId     任务id
+     * @param templateId 模板id
+     * @param operator   操作人或角色
+     * @param projectId
+     * @return {@link Result}<{@link Void}>
+     */
     Result<Void> refreshDCDRChannelState(Integer taskId, Integer templateId, String operator, Integer projectId);
 
     /**
@@ -146,8 +147,6 @@ public interface TemplateDCDRManager {
      */
     Result<DCDRSingleTemplateMasterSlaveSwitchDetailVO> getDCDRSingleTemplateMasterSlaveSwitchDetailVO(Integer taskId,
                                                                                                        Long templateId);
-    
-   
 
     /**
      * 创建DCDR模板

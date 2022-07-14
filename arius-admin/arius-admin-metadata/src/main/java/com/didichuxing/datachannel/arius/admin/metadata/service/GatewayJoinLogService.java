@@ -17,20 +17,18 @@ public class GatewayJoinLogService {
     @Autowired
     private GatewayJoinESDAO gatewayJoinESDAO;
 
-    public Result<Long> getSearchCountByProjectId(Long projectId, Long startDate, Long endDate){
+    public Result<Long> getSearchCountByProjectId(Long projectId, Long startDate, Long endDate) {
         return Result.buildSucc(gatewayJoinESDAO.getSearchCountByProjectId(projectId, startDate, endDate));
     }
 
     public Result<List<GatewayJoin>> getGatewayErrorList(Long projectId, Long startDate, Long endDate) {
-        return Result.buildSucc(ConvertUtil.list2List(
-                gatewayJoinESDAO.getGatewayErrorList(projectId, startDate, endDate),
-                GatewayJoin.class));
+        return Result.buildSucc(ConvertUtil
+            .list2List(gatewayJoinESDAO.getGatewayErrorList(projectId, startDate, endDate), GatewayJoin.class));
     }
 
     public Result<List<GatewayJoin>> getGatewaySlowList(Long projectId, Long startDate, Long endDate) {
-        return Result.buildSucc(ConvertUtil.list2List(
-                gatewayJoinESDAO.getGatewaySlowList(projectId, startDate, endDate),
-                GatewayJoin.class));
+        return Result.buildSucc(ConvertUtil
+            .list2List(gatewayJoinESDAO.getGatewaySlowList(projectId, startDate, endDate), GatewayJoin.class));
     }
 
     public List<GatewayJoin> getGatewaySlowList(Integer projectId, GatewayJoinQueryDTO queryDTO) {
@@ -45,18 +43,18 @@ public class GatewayJoinLogService {
 
     private void initGatewaySlowQueryCondition(GatewayJoinQueryDTO queryDTO) {
         initQueryTimeRange(queryDTO);
-        if(queryDTO.getTotalCost() == null) {
+        if (queryDTO.getTotalCost() == null) {
             queryDTO.setTotalCost(1000L);
         }
     }
 
     private void initQueryTimeRange(GatewayJoinQueryDTO queryDTO) {
-        if(queryDTO.getStartTime() == null) {
+        if (queryDTO.getStartTime() == null) {
             long curTimestamp = System.currentTimeMillis();
             queryDTO.setStartTime(curTimestamp - AdminConstant.MILLIS_PER_DAY);
             queryDTO.setEndTime(curTimestamp);
         }
-        if(queryDTO.getEndTime() == null) {
+        if (queryDTO.getEndTime() == null) {
             queryDTO.setEndTime(System.currentTimeMillis());
         }
     }

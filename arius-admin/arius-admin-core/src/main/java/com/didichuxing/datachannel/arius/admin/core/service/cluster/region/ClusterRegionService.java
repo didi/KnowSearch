@@ -51,7 +51,6 @@ public interface ClusterRegionService {
      */
     List<Integer> listPhysicClusterId(Long logicClusterId);
 
-
     /**
      * 获取指定物理集群下的region
      * @param clusterName 物理集群名
@@ -72,7 +71,7 @@ public interface ClusterRegionService {
      * @param operator      操作人
      * @return              regionId
      */
-    Result<Long> createPhyClusterRegion(String clusterName, List<Integer> nodeIds, String regionName, String operator);
+    Result<Long> createPhyClusterRegion(String clusterName, String regionName, String operator);
 
     /**
      * 删除物理集群region

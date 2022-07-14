@@ -15,7 +15,7 @@ import java.util.List;
  * @date 2018/9/18
  */
 public interface WorkOrderHandler extends BaseHandle {
-    
+
     /**提交
      * 创建一个工单
      *
@@ -28,7 +28,7 @@ public interface WorkOrderHandler extends BaseHandle {
      @throws AdminOperateException 管理操作Exception
      */
     Result<WorkOrderPO> submit(WorkOrder workOrder) throws AdminOperateException;
-    
+
     /**过程一致
      * 处理工单
      * @param workOrder 工单内容
@@ -38,7 +38,7 @@ public interface WorkOrderHandler extends BaseHandle {
      @throws AdminOperateException 管理操作Exception
      */
     Result<Void> processAgree(WorkOrder workOrder, String approver, String opinion) throws AdminOperateException;
-    
+
     /**过程不同意
      * 处理审核不同意的工单
      * @param processDTO 工单内容
@@ -67,7 +67,7 @@ public interface WorkOrderHandler extends BaseHandle {
      * @return List<AriusUserInfo>
      */
     List<UserBriefVO> getApproverList(AbstractOrderDetail detail);
-    
+
     /**检查机关
      * 是否审批人员
      * @param orderPO 订单信息, userName 审批人名称

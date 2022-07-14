@@ -9,20 +9,20 @@ import java.util.stream.Collectors;
  * @date 2019/3/29
  */
 public enum DataTypeEnum {
-    /**
-     * 日志数据
-     */
-    SYSTEM(0, "系统数据", "system"),
+                          /**
+                           * 日志数据
+                           */
+                          SYSTEM(0, "系统数据", "system"),
 
-    LOG(1, "日志数据", "log"),
+                          LOG(1, "日志数据", "log"),
 
-    OLAP(2, "用户上报数据", "olap"),
+                          OLAP(2, "用户上报数据", "olap"),
 
-    BINLOG(3, "RDS数据", "binlog"),
+                          BINLOG(3, "RDS数据", "binlog"),
 
-    OFFLINE(4, "离线导入数据", "offline"),
+                          OFFLINE(4, "离线导入数据", "offline"),
 
-    UNKNOWN(-1, "未知", "");
+                          UNKNOWN(-1, "未知", "");
 
     DataTypeEnum(int code, String desc, String label) {
         this.code = code;
@@ -30,7 +30,7 @@ public enum DataTypeEnum {
         this.label = label;
     }
 
-    private int code;
+    private int    code;
 
     private String desc;
 
@@ -73,11 +73,10 @@ public enum DataTypeEnum {
 
         return false;
     }
-    
-    public static final Map<Integer,String> code2DescMap(){
-       return Arrays.stream(DataTypeEnum.values())
-                .filter(dataTypeEnum -> !UNKNOWN.equals(dataTypeEnum))
-                .collect(Collectors.toMap(DataTypeEnum::getCode,DataTypeEnum::getDesc));
+
+    public static final Map<Integer, String> code2DescMap() {
+        return Arrays.stream(DataTypeEnum.values()).filter(dataTypeEnum -> !UNKNOWN.equals(dataTypeEnum))
+            .collect(Collectors.toMap(DataTypeEnum::getCode, DataTypeEnum::getDesc));
     }
 
 }

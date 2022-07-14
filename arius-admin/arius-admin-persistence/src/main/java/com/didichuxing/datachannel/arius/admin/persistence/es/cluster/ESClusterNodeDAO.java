@@ -65,13 +65,12 @@ public class ESClusterNodeDAO extends BaseESDAO {
     public List<ClusterNodeStats> getNodeState(String cluster) {
         ESClient esClient = esOpClient.getESClient(cluster);
         if (esClient == null) {
-            LOGGER.error(
-                    "class=ESClusterNodeServiceImpl||method=getNodeState||clusterName={}||errMsg=esClient is null",
-                    cluster);
+            LOGGER.error("class=ESClusterNodeServiceImpl||method=getNodeState||clusterName={}||errMsg=esClient is null",
+                cluster);
             return Lists.newArrayList();
         }
-        ESClusterNodesStatsResponse response =  esClient.admin().cluster().nodeStats(new ESClusterNodesStatsRequest())
-                .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+        ESClusterNodesStatsResponse response = esClient.admin().cluster().nodeStats(new ESClusterNodesStatsRequest())
+            .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
         if (response.getNodes() != null) {
             return new ArrayList<>(response.getNodes().values());
 

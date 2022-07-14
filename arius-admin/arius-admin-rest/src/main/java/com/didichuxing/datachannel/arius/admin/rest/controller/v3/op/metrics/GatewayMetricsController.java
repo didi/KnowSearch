@@ -30,11 +30,11 @@ public class GatewayMetricsController {
     @Autowired
     private GatewayMetricsManager gatewayMetricsManager;
     @Autowired
-    private GatewayManager gatewayManager;
+    private GatewayManager        gatewayManager;
 
     @GetMapping("/alive-nodes")
     @ResponseBody
-    @ApiOperation(value = "获取gateway存活节点名称列表接口" )
+    @ApiOperation(value = "获取gateway存活节点名称列表接口")
     public Result<List<String>> getGatewayAliveNodeNames(HttpServletRequest request) {
         return gatewayManager.getGatewayAliveNodeNames("Normal");
     }
@@ -77,16 +77,17 @@ public class GatewayMetricsController {
     @PostMapping("/client-node")
     @ApiOperation(value = "获取gatewayNode相关的clientNode指标信息")
     public Result<List<VariousLineChartMetricsVO>> getClientNodeMetrics(@RequestBody ClientNodeDTO dto,
-                                                                         HttpServletRequest request) {
+                                                                        HttpServletRequest request) {
         validateParam(dto);
         return gatewayMetricsManager.getClientNodeMetrics(dto, HttpRequestUtil.getProjectId(request));
     }
 
     @GetMapping("/client-node-ip")
     @ApiOperation(value = "获取取gatewayNode相关的clientNode ip列表")
-    public Result<List<String>> getClientNodeIpList(String gatewayNode, Long startTime,
-                                                    Long endTime, HttpServletRequest request) {
-        return gatewayMetricsManager.getClientNodeIdList(gatewayNode, startTime, endTime, HttpRequestUtil.getProjectId(request));
+    public Result<List<String>> getClientNodeIpList(String gatewayNode, Long startTime, Long endTime,
+                                                    HttpServletRequest request) {
+        return gatewayMetricsManager.getClientNodeIdList(gatewayNode, startTime, endTime,
+            HttpRequestUtil.getProjectId(request));
     }
 
     @PostMapping("/index")
@@ -116,7 +117,8 @@ public class GatewayMetricsController {
         dto.validParam();
         //检查是否有不合法的指标传过来
         List<String> metricsByGroup = GatewayMetricsTypeEnum.getMetricsByGroup(dto.getGroup());
-        String invalidMetrics = dto.getMetricsTypes().stream().filter(x -> !metricsByGroup.contains(x)).collect(Collectors.joining(","));
+        String invalidMetrics = dto.getMetricsTypes().stream().filter(x -> !metricsByGroup.contains(x))
+            .collect(Collectors.joining(","));
         if (StringUtils.isNotBlank(invalidMetrics)) {
             throw new RuntimeException("非法指标:" + invalidMetrics);
         }

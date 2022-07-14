@@ -53,13 +53,10 @@ public class IndexTemplatePO extends BasePO {
      */
     private Integer hotTime;
 
-
-
-
     /**
      * 责任人，id列表，英文逗号分隔
      */
-      @Deprecated
+    @Deprecated
     private String  responsible;
 
     /**
@@ -143,11 +140,11 @@ public class IndexTemplatePO extends BasePO {
     /**
      * 已开启的模板服务
      */
-    private String openSrv;
+    private String  openSrv;
 
     /**
      * 可用磁盘容量
      */
-    private Double diskSize;
+    private Double  diskSize;
 
 }

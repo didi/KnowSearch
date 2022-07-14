@@ -13,9 +13,9 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AuditDsl {
-    private Integer projectId;
+    private Integer       projectId;
 
-    private String userName;
+    private String        userName;
 
     private List<DslInfo> dslInfos;
 

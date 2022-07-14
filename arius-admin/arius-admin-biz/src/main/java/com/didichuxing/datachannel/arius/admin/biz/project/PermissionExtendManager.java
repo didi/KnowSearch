@@ -16,5 +16,5 @@ public interface PermissionExtendManager {
      * @return {@code Result<PermissionTreeVO>}
      */
     Result<PermissionTreeVO> buildPermissionTreeByResourceOwn();
-   
+
 }

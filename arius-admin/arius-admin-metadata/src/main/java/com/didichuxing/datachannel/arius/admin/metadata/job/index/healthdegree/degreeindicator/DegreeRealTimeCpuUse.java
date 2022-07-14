@@ -6,6 +6,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.RealTime
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESIndexToNodeStats;
 import com.didichuxing.datachannel.arius.admin.metadata.job.index.healthdegree.AbstractDegreeIndicator;
 import org.apache.commons.lang3.StringUtils;
+
 @Deprecated
 public class DegreeRealTimeCpuUse extends AbstractDegreeIndicator {
     @Override
@@ -13,12 +14,12 @@ public class DegreeRealTimeCpuUse extends AbstractDegreeIndicator {
         double avgCpuUse;
         double totalCpuUse = 0.0;
         for (ESIndexToNodeStats esESIndexToNodeStats : degreeParam.getEsIndexToNodeStats()) {
-            if(StringUtils.isNotBlank(esESIndexToNodeStats.getMetrics().get("os-cpu-percent"))){
+            if (StringUtils.isNotBlank(esESIndexToNodeStats.getMetrics().get("os-cpu-percent"))) {
                 totalCpuUse += Double.parseDouble(esESIndexToNodeStats.getMetrics().get("os-cpu-percent"));
             }
         }
 
-        RealTimeCpuUse realTimeCpuUsePO = (RealTimeCpuUse)t;
+        RealTimeCpuUse realTimeCpuUsePO = (RealTimeCpuUse) t;
 
         if (degreeParam.getEsIndexToNodeStats().size() == 0) {
             realTimeCpuUsePO.setScore(100.0);
@@ -29,7 +30,7 @@ public class DegreeRealTimeCpuUse extends AbstractDegreeIndicator {
             realTimeCpuUsePO.setScore(calc1(avgCpuUse));
         }
 
-        return (T)realTimeCpuUsePO;
+        return (T) realTimeCpuUsePO;
     }
 
     @Override

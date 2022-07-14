@@ -21,6 +21,6 @@ public class ThirdPartTemplateLogicWithMasterTemplateResourceVO extends Thirdpar
     private IndexTemplatePhysicalVO masterTemplate;
 
     @ApiModelProperty("master所在的逻辑集群信息")
-    private ClusterLogicVO masterResource;
+    private ClusterLogicVO          masterResource;
 
 }

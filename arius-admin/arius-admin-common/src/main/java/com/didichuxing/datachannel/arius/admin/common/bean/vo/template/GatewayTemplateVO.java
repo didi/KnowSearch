@@ -22,61 +22,61 @@ public class GatewayTemplateVO extends BaseVO {
 
     /******************************* 逻辑信息 ********************************/
     @ApiModelProperty("逻辑ID")
-    private Integer     id;
+    private Integer      id;
 
     /**
      * 索引模板名称
      */
     @ApiModelProperty("索引模板名称")
-    private String      name;
+    private String       name;
 
     /**
      * 数据中心
      */
     @ApiModelProperty("数据中心")
-    private String      dataCenter;
+    private String       dataCenter;
 
     /**
      * 表达式
      */
     @ApiModelProperty("表达式")
-    private String      expression;
+    private String       expression;
 
     /**
      * 时间字段
      */
     @ApiModelProperty("时间字段")
-    private String      dateField;
+    private String       dateField;
 
     /**
      * 时间字段的格式
      */
     @ApiModelProperty("时间字段的格式")
-    private String dateFieldFormat;
+    private String       dateFieldFormat;
 
     /**
      * id字段
      */
     @ApiModelProperty("id字段")
-    private String      idField;
+    private String       idField;
 
     /**
      * routing字段
      */
     @ApiModelProperty("routing字段")
-    private String      routingField;
+    private String       routingField;
 
     /**
      * 索引滚动格式
      */
     @ApiModelProperty("索引滚动格式")
-    private String      dateFormat;
+    private String       dateFormat;
 
     /**
      * 数据保存时长 单位天
      */
     @ApiModelProperty("数据保存时长")
-    private Integer     expireTime;
+    private Integer      expireTime;
 
     /**
      * pipeline
@@ -90,13 +90,13 @@ public class GatewayTemplateVO extends BaseVO {
      * 部署
      */
     @ApiModelProperty("部署状态")
-    private Integer     deployStatus;
+    private Integer      deployStatus;
 
     /**
      * 版本号
      */
     @ApiModelProperty("版本号")
-    private Integer     version;
+    private Integer      version;
 
     /******************************* 别名 ********************************/
 
@@ -109,12 +109,11 @@ public class GatewayTemplateVO extends BaseVO {
     /**
      * 是否禁止读
      */
-    private Boolean blockRead;
+    private Boolean      blockRead;
 
     /**
      * 是否禁止写
      */
-    private Boolean blockWrite;
-
+    private Boolean      blockWrite;
 
 }

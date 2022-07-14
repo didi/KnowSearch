@@ -12,30 +12,26 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 public class AriusClient {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AriusClient.class);
-    private static final MediaType JSON_TYPE = MediaType.get("application/json; charset=utf-8");
-    private static String prefix;
-    private static String user = "admin";
-    private static String app = "";
-    private static final String GATEWAY_GET_APP_TICKET      = "xTc59aY72";
-    private static final String GATEWAY_GET_APP_TICKET_NAME = "X-ARIUS-GATEWAY-TICKET";
+    private static final Logger    LOGGER                      = LoggerFactory.getLogger(AriusClient.class);
+    private static final MediaType JSON_TYPE                   = MediaType.get("application/json; charset=utf-8");
+    private static String          prefix;
+    private static String          user                        = "admin";
+    private static String          app                         = "";
+    private static final String    GATEWAY_GET_APP_TICKET      = "xTc59aY72";
+    private static final String    GATEWAY_GET_APP_TICKET_NAME = "X-ARIUS-GATEWAY-TICKET";
 
-    public static String postForFileForm(String path, String fileFormKey, File fileFormValue, Map<String, Object> params) throws IOException {
+    public static String postForFileForm(String path, String fileFormKey, File fileFormValue,
+                                         Map<String, Object> params) throws IOException {
         RequestBody fileBody = RequestBody.create(MediaType.parse("multipart/form-data"), fileFormValue);
         MultipartBody.Builder builder = new MultipartBody.Builder();
         builder.addFormDataPart(fileFormKey, fileFormValue.getName(), fileBody);
         builder.setType(MultipartBody.FORM);
-        for(String key : params.keySet()) {
+        for (String key : params.keySet()) {
             builder.addFormDataPart(key, String.valueOf(params.get(key)));
         }
 
-        Request request = new Request.Builder()
-                .url(prefix + path)
-                .post(builder.build())
-                .addHeader("X-SSO-USER", user)
-                .addHeader("X-ARIUS-APP-ID", app)
-                .addHeader(GATEWAY_GET_APP_TICKET_NAME,GATEWAY_GET_APP_TICKET)
-                .build();
+        Request request = new Request.Builder().url(prefix + path).post(builder.build()).addHeader("X-SSO-USER", user)
+            .addHeader("X-ARIUS-APP-ID", app).addHeader(GATEWAY_GET_APP_TICKET_NAME, GATEWAY_GET_APP_TICKET).build();
 
         OkHttpClient client = new OkHttpClient.Builder().readTimeout(1200000, TimeUnit.MILLISECONDS).build();
 
@@ -56,15 +52,14 @@ public class AriusClient {
 
         RequestBody body = requestBody != null ? RequestBody.create(requestBody, JSON_TYPE) : null;
         Request.Builder builder = new Request.Builder();
-        builder.url(prefix + path)
-                .method(method, body);
+        builder.url(prefix + path).method(method, body);
         if (!StringUtils.isBlank(user)) {
             builder.addHeader("X-SSO-USER", user);
         }
         if (!StringUtils.isBlank(app)) {
             builder.addHeader("X-ARIUS-APP-ID", app);
         }
-        builder.addHeader(GATEWAY_GET_APP_TICKET_NAME,GATEWAY_GET_APP_TICKET);
+        builder.addHeader(GATEWAY_GET_APP_TICKET_NAME, GATEWAY_GET_APP_TICKET);
         return builder.build();
     }
 
@@ -75,7 +70,8 @@ public class AriusClient {
         try (Response response = client.newCall(request).execute()) {
             String responseBody = Objects.requireNonNull(response.body()).string();
             long end = System.currentTimeMillis();
-            LOGGER.info("class=AriusClient||method={}||path={}||requestBody={}||msg={}||used time {}ms", method, path, requestBody, responseBody, end - start);
+            LOGGER.info("class=AriusClient||method={}||path={}||requestBody={}||msg={}||used time {}ms", method, path,
+                requestBody, responseBody, end - start);
             return responseBody;
         }
     }
@@ -99,11 +95,11 @@ public class AriusClient {
 
     private static String buildPathWithParams(String path, Map<String, Object> params) {
         Iterator<Map.Entry<String, Object>> var3;
-        if(params != null) {
+        if (params != null) {
             StringBuilder builder = (new StringBuilder(path)).append('?');
             var3 = params.entrySet().iterator();
 
-            while(var3.hasNext()) {
+            while (var3.hasNext()) {
                 Map.Entry<String, Object> e = var3.next();
                 builder.append(e.getKey()).append('=').append(e.getValue()).append('&');
             }

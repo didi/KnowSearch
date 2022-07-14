@@ -66,11 +66,8 @@ public enum ESClusterNodeRoleEnum {
      * 获取去除node部分的role列表，例如data,master等
      */
     public static List<String> nodeRoleList() {
-        return Arrays.stream(values()).
-                filter(param -> param != UNKNOWN).
-                map(ESClusterNodeRoleEnum::getDesc).
-                map(roleNode -> roleNode.substring(0, roleNode.lastIndexOf("n")))
-                .collect(Collectors.toList());
+        return Arrays.stream(values()).filter(param -> param != UNKNOWN).map(ESClusterNodeRoleEnum::getDesc)
+            .map(roleNode -> roleNode.substring(0, roleNode.lastIndexOf("n"))).collect(Collectors.toList());
     }
 
 }

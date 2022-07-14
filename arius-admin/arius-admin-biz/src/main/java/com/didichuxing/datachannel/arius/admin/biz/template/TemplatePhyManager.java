@@ -63,9 +63,11 @@ public interface TemplatePhyManager {
      * @return result
      */
     @Transactional(rollbackFor = Exception.class)
-    Result<Void> upgradeTemplate(TemplatePhysicalUpgradeDTO param, String operator, Integer projectId) throws ESOperateException;
+    Result<Void> upgradeTemplate(TemplatePhysicalUpgradeDTO param, String operator,
+                                 Integer projectId) throws ESOperateException;
 
-    Result<Boolean> upgradeMultipleTemplate(List<TemplatePhysicalUpgradeDTO> params, String operator, Integer projectId) throws ESOperateException;
+    Result<Boolean> upgradeMultipleTemplate(List<TemplatePhysicalUpgradeDTO> params, String operator,
+                                            Integer projectId) throws ESOperateException;
 
     Result<Void> rolloverUpgradeTemplate(TemplatePhysicalUpgradeDTO param, String operator) throws ESOperateException;
 
@@ -88,8 +90,7 @@ public interface TemplatePhyManager {
      */
     Result<Void> editTemplate(IndexTemplatePhyDTO param, String operator) throws ESOperateException;
 
-    Result<Boolean> editMultipleTemplate(List<IndexTemplatePhyDTO> params,
-                                         String operator) throws ESOperateException;
+    Result<Boolean> editMultipleTemplate(List<IndexTemplatePhyDTO> params, String operator) throws ESOperateException;
 
     /**
      * 批量新增物理模板
@@ -139,7 +140,8 @@ public interface TemplatePhyManager {
      * @param days 热数据保存天数
      * @return 索引名称列表
      */
-    Tuple</*存放冷存索引列表*/Set<String>,/*存放热存索引列表*/Set<String>> getHotAndColdIndexByBeforeDay(IndexTemplatePhyWithLogic physicalWithLogic, int days);
+    Tuple</*存放冷存索引列表*/Set<String>, /*存放热存索引列表*/Set<String>> getHotAndColdIndexByBeforeDay(IndexTemplatePhyWithLogic physicalWithLogic,
+                                                                                          int days);
 
     /**
      * 获取指定天数外的索引列表
@@ -148,7 +150,6 @@ public interface TemplatePhyManager {
      * @return 索引名称列表
      */
     Set<String> getIndexByBeforeDay(IndexTemplatePhyWithLogic physicalWithLogic, int days);
-
 
     /**
      * 获取带有App权限信息的物理模板列表
@@ -174,5 +175,5 @@ public interface TemplatePhyManager {
     Result<List<IndexTemplatePhysicalVO>> getTemplatePhies(Integer logicId);
 
     Result<List<IndexTemplatePhysicalVO>> listByRegionId(Integer regionId);
-    
+
 }

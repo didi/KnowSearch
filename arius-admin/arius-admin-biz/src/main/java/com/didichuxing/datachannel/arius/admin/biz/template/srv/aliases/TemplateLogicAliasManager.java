@@ -24,7 +24,6 @@ public interface TemplateLogicAliasManager {
      */
     List<IndexTemplateAlias> listAlias(List<IndexTemplateWithPhyTemplates> templateLogicList);
 
-
     /**
      * 根据逻辑模板ID获取对应别名详情列表
      * @param logicId 逻辑ID
@@ -92,6 +91,5 @@ public interface TemplateLogicAliasManager {
      * @return
      */
     Result<List<Tuple<String/*index*/, String/*aliases*/>>> getAllTemplateAliasesByProjectId(Integer projectId);
-
 
 }

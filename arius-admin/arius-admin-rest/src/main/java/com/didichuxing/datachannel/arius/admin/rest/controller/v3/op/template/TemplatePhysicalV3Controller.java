@@ -71,7 +71,7 @@ public class TemplatePhysicalV3Controller {
     public Result<Boolean> multipleUpgrade(HttpServletRequest request,
                                            @RequestBody List<TemplatePhysicalUpgradeDTO> params) throws ESOperateException {
         return templatePhyManager.upgradeMultipleTemplate(params, HttpRequestUtil.getOperator(request),
-                HttpRequestUtil.getProjectId(request));
+            HttpRequestUtil.getProjectId(request));
     }
 
     /**

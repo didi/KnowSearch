@@ -19,11 +19,11 @@ public class SearchOverview {
     /**
      * 查询总次数
      */
-    private Long count;
+    private Long                count;
     /**
      * 查询qps信息
      */
-    private QueryQpsMetric qpsMetric;
+    private QueryQpsMetric      qpsMetric;
     /**
      * 查询耗时分位图
      */

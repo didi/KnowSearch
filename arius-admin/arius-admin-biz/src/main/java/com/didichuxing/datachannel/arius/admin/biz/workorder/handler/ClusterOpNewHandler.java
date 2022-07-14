@@ -56,20 +56,20 @@ import org.springframework.stereotype.Service;
 public class ClusterOpNewHandler extends BaseWorkOrderHandler {
 
     @Autowired
-    private OpTaskManager opTaskManager;
+    private OpTaskManager       opTaskManager;
 
     @Autowired
-    private ClusterPhyService esClusterPhyService;
+    private ClusterPhyService   esClusterPhyService;
 
     @Autowired
-    private ESPackageService esPackageService;
+    private ESPackageService    esPackageService;
 
     private static final String PARAM_ILLEGAL_TIPS = "集群缺少类型为%s的节点";
 
     @Override
     protected Result<Void> validateConsoleParam(WorkOrder workOrder) {
         Result<Void> initResult = initParam(workOrder);
-        if(initResult.failed()) {
+        if (initResult.failed()) {
             return Result.buildFrom(initResult);
         }
 
@@ -93,7 +93,8 @@ public class ClusterOpNewHandler extends BaseWorkOrderHandler {
             return Result.buildFrom(doValidRoleClusterPort);
         }
 
-        ClusterNewHostContent clusterOpNewHostContent = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(), ClusterNewHostContent.class);
+        ClusterNewHostContent clusterOpNewHostContent = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
+            ClusterNewHostContent.class);
         // es版本的
         if (null == esPackageService.getByVersionAndType(clusterOpNewHostContent.getEsVersion(), ES_HOST.getCode())) {
             return Result.buildFail(ES_HOST.getDesc() + "类型版本为" + clusterOpNewHostContent.getEsVersion() + "的程序包不存在");
@@ -147,7 +148,8 @@ public class ClusterOpNewHandler extends BaseWorkOrderHandler {
                 ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(), ClusterNewDockerContent.class));
         } else if (ES_HOST.getCode() == clusterBaseContent.getType()) {
             // 获取并且设置新建集群工单内容中的集群创建人信息
-            ClusterNewHostContent clusterOpNewHostContent = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(), ClusterNewHostContent.class);
+            ClusterNewHostContent clusterOpNewHostContent = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
+                ClusterNewHostContent.class);
             clusterOpNewHostContent.setCreator(workOrder.getSubmitor());
 
             ecmParamBaseList = OpOrderTaskConverter.convert2EcmParamBaseList(ESClusterTypeEnum.ES_HOST,
@@ -208,7 +210,7 @@ public class ClusterOpNewHandler extends BaseWorkOrderHandler {
         }
         return Result.buildFail(ResultType.OPERATE_FORBIDDEN_ERROR.getMessage());
     }
-    
+
     /*******************************************private************************************************/
 
     private Result<Void> validateClusterMasterNodeNumber(ClusterBaseContent content, WorkOrder workOrder) {
@@ -221,7 +223,8 @@ public class ClusterOpNewHandler extends BaseWorkOrderHandler {
     }
 
     private Result<Void> initParam(WorkOrder workOrder) {
-        ClusterNewHostContent clusterOpNewHostContent = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(), ClusterNewHostContent.class);
+        ClusterNewHostContent clusterOpNewHostContent = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
+            ClusterNewHostContent.class);
 
         // 校验pid_count（单节点实例数字段）,如果为null，则设置默认值1
         if (null == clusterOpNewHostContent.getPidCount()) {
@@ -232,12 +235,12 @@ public class ClusterOpNewHandler extends BaseWorkOrderHandler {
         List<ESClusterRoleHost> roleClusterHosts = clusterOpNewHostContent.getClusterRoleHosts();
 
         for (ESClusterRoleHost esClusterRoleHost : roleClusterHosts) {
-            if(null == esClusterRoleHost.getAddress()) {
+            if (null == esClusterRoleHost.getAddress()) {
                 return Result.buildFail("传入节点的address不应该为空");
             }
             // 将ip和port中hostname中拆分出来
             String[] ipAndPort = esClusterRoleHost.getAddress().split(":");
-            if(ipAndPort.length<2)  {
+            if (ipAndPort.length < 2) {
                 return Result.buildFail("传入节点的address应该满足【ip:port】格式");
             }
             esClusterRoleHost.setHostname(ipAndPort[0]);
@@ -250,7 +253,8 @@ public class ClusterOpNewHandler extends BaseWorkOrderHandler {
     }
 
     private Result<Void> validateClusterMasterNodeNumberESDocker(WorkOrder workOrder) {
-        ClusterBaseContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(), ClusterNewDockerContent.class);
+        ClusterBaseContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
+            ClusterNewDockerContent.class);
 
         List<ESClusterRoleDocker> roleClusterDockers = ((ClusterNewDockerContent) content).getRoleClusters();
         if (CollectionUtils.isEmpty(roleClusterDockers)) {
@@ -263,11 +267,8 @@ public class ClusterOpNewHandler extends BaseWorkOrderHandler {
             return Result.buildParamIllegal(String.format(PARAM_ILLEGAL_TIPS, MASTER_NODE.getDesc()));
         }
 
-        Integer masterNodesNumber = roleClusterDockers
-                                    .stream()
-                                    .filter(r -> MASTER_NODE.getDesc().equals(r.getRole()))
-                                    .map(ESClusterRoleDocker::getPodNumber)
-                                    .collect(Collectors.toList()).get(0);
+        Integer masterNodesNumber = roleClusterDockers.stream().filter(r -> MASTER_NODE.getDesc().equals(r.getRole()))
+            .map(ESClusterRoleDocker::getPodNumber).collect(Collectors.toList()).get(0);
 
         if (masterNodesNumber < CREATE_MASTER_NODE_MIN_NUMBER) {
             return Result.buildParamIllegal("masternode角色pod数量要求大于等于1");
@@ -283,8 +284,7 @@ public class ClusterOpNewHandler extends BaseWorkOrderHandler {
             return Result.buildParamIllegal("集群角色为空");
         }
 
-        Set<String> hostRoles = roleClusterHosts.stream().map(ESClusterRoleHost::getRole)
-            .collect(Collectors.toSet());
+        Set<String> hostRoles = roleClusterHosts.stream().map(ESClusterRoleHost::getRole).collect(Collectors.toSet());
         if (!hostRoles.contains(MASTER_NODE.getDesc())) {
             return Result.buildParamIllegal(String.format(PARAM_ILLEGAL_TIPS, MASTER_NODE.getDesc()));
         }
@@ -299,7 +299,8 @@ public class ClusterOpNewHandler extends BaseWorkOrderHandler {
     }
 
     private Result<Void> validRoleClusterPort(WorkOrder workOrder) {
-        ClusterNewHostContent clusterOpNewHostContent = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(), ClusterNewHostContent.class);
+        ClusterNewHostContent clusterOpNewHostContent = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
+            ClusterNewHostContent.class);
         List<ESClusterRoleHost> roleClusterHosts = clusterOpNewHostContent.getClusterRoleHosts();
 
         Map<Object, Object> roleClusterPortMap = Maps.newHashMap();
@@ -311,7 +312,7 @@ public class ClusterOpNewHandler extends BaseWorkOrderHandler {
             }
 
             if (roleClusterPortMap.containsKey(esClusterRoleHost.getRole())
-                    && !roleClusterPortMap.get(esClusterRoleHost.getRole()).equals(esClusterRoleHost.getPort())) {
+                && !roleClusterPortMap.get(esClusterRoleHost.getRole()).equals(esClusterRoleHost.getPort())) {
                 return Result.buildFail("同一个集群中同一角色的端口号应该相同");
             }
         }

@@ -81,10 +81,10 @@ public class ThirdPartClusterVO extends BaseVO {
     private Map<String, Integer> httpAddressMap;
 
     @ApiModelProperty("client运行模式（0：读写共享 1：读写分离）")
-    private Integer             runMode;
+    private Integer              runMode;
 
     @ApiModelProperty("指定用写client的action")
-    private String              writeAction;
+    private String               writeAction;
 
     public void setReadAddress(String readAddress) {
         this.readAddress = readAddress;
