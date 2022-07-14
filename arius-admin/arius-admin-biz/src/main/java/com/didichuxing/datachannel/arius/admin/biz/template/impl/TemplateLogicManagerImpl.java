@@ -840,6 +840,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             operateRecordService.save(new OperateRecord.Builder().bizId(templateId)
                 .operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE_UPGRADED_VERSION)
                 .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                            .project(projectService.getProjectBriefByProjectId(projectId))
                 .content(String.format("模板[%s]生版本%d->%d",
                     templatePhy.getName(), beforeVersion, afterVersion))
                 .userOperation(operator).build()
