@@ -166,8 +166,7 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
             if(srvEnum.getCode() == 1 || srvEnum.getCode() == 4){
                 if (!isPartition){
                     unavailableSrvList.add(new UnavailableTemplateSrv(srvEnum.getCode(), srvEnum.getServiceName(),
-                            srvEnum.getEsClusterVersion().getVersion(),
-                            String.format("非分区模版不支持预创建和过期删除")));
+                            srvEnum.getEsClusterVersion().getVersion(), "非分区模版不支持预创建和过期删除"));
                 }
             }
         }
