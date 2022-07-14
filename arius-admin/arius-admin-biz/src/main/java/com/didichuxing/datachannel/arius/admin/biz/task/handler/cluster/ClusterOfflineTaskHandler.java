@@ -1,16 +1,18 @@
 package com.didichuxing.datachannel.arius.admin.biz.task.handler.cluster;
 
-import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
-import org.springframework.stereotype.Service;
-
 import com.didichuxing.datachannel.arius.admin.biz.task.content.ClusterOfflineContent;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord.Builder;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.ecm.EcmTaskDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
-
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import org.springframework.stereotype.Service;
 
 /**
  * 物理集群下线
@@ -45,6 +47,13 @@ public class ClusterOfflineTaskHandler extends AbstractClusterTaskHandler {
         ClusterOfflineContent content = ConvertUtil.obj2ObjByJSON(param, ClusterOfflineContent.class);
         ecmTaskDTO.setPhysicClusterId(content.getPhyClusterId());
         ecmTaskDTO.setOrderType(OpTaskTypeEnum.CLUSTER_OFFLINE.getType());
+        //下线记录操作内容
+         final OperateRecord operateRecord = new Builder().userOperation(creator)
+                .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
+                .operationTypeEnum( OperateTypeEnum.PHYSICAL_CLUSTER_OFFLINE)
+                .content(String.format("下线物理集群：【%s】", content.getPhyClusterName()))
+                .bizId(content.getPhyClusterId()).buildDefaultManualTrigger();
+        operateRecordService.save(operateRecord);
         return Result.buildSucc();
     }
 }
