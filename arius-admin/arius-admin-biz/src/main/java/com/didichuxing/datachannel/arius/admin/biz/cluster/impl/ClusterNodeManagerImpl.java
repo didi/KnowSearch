@@ -15,7 +15,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.Cluster
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostWithRegionInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.event.region.RegionEditEvent;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminTaskException;
@@ -31,6 +30,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecord
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterNodeService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import java.util.List;
@@ -70,6 +70,8 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
 
     @Autowired
     private ClusterLogicService    clusterLogicService;
+    @Autowired
+    private ProjectService projectService;
 
     @Override
     public Result<List<ESClusterRoleHostWithRegionInfoVO>> listDivide2ClusterNodeInfo(Long clusterId) {
@@ -144,9 +146,9 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
                 if (booleanResult.success()) {
                     // 2. 操作记录 :Region变更
                     operateRecordService.save(new OperateRecord.Builder().userOperation(operator)
-                        .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_REGION_CHANGE)
-                        .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                        .content(String.format("新增region[%s]", param.getName())).build());
+                            .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_REGION_CHANGE)
+                            .project(projectService.getProjectBriefByProjectId(projectId))
+                            .content(String.format("新增region[%s]", param.getName())).buildDefaultManualTrigger());
                     regionIdLis.add(addRegionRet.getData());
                 } else {
                     throw new AdminOperateException(addRegionRet.getMessage());

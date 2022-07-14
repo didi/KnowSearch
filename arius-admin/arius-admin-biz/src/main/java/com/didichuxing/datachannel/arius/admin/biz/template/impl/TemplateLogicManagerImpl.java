@@ -60,6 +60,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.Tem
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectTemplateAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.DataTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
@@ -441,15 +442,15 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             }
             final Result<Void> voidResult = indexTemplateService.editTemplateInfoTODB(param);
             if (voidResult.success()) {
-
-                final IndexTemplateDTO destConsoleTemplateVO = ConvertUtil.obj2Obj(param, IndexTemplateDTO.class);
-                final Map<String, String> apiModelPropertyValueModify = Maps.newHashMap();
-
+                String dataTypeBefore= DataTypeEnum.valueOf(oldIndexTemplate.getDataType()).getDesc();
+                String dataTypeAfter= DataTypeEnum.valueOf(param.getDataType()).getDesc();
+                String descBefore=oldIndexTemplate.getDesc();
+                String descAfter=param.getDesc();
                 operateRecordService.save(
                     new OperateRecord.Builder().operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_INFO_MODIFY)
                         .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).userOperation(operator)
-                        .content(AriusObjUtils.findChangedWithClearByBeanVo(param, destConsoleTemplateVO,
-                            apiModelPropertyValueModify))
+                        .content(String.format("数据类型变更：【%s】->【%s】;描述变更:【%s】->【%s】",dataTypeBefore,dataTypeAfter,
+                                descBefore,descAfter))
                         .bizId(param.getId()).project(projectService.getProjectBriefByProjectId(projectId)).build());
             }
 
@@ -823,11 +824,12 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
 
         IndexTemplatePhyDTO updateParam = new IndexTemplatePhyDTO();
         for (IndexTemplatePhy templatePhy : templatePhyList) {
+            final Integer beforeVersion = templatePhy.getVersion();
+            final Integer afterVersion =beforeVersion + 1;
             updateParam.setId(templatePhy.getId());
             updateParam.setShard(updateParam.getShard());
             updateParam.setRack("");
-            updateParam.setVersion(templatePhy.getVersion() + 1);
-
+            updateParam.setVersion(beforeVersion + 1);
             Result<Void> editResult = templatePhyManager.editTemplateWithoutCheck(updateParam, operator, RETRY_TIMES);
             if (editResult.failed()) {
                 throw new AdminOperateException(editResult.getMessage(), FAIL);
@@ -835,10 +837,10 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
 
             preCreateManager.asyncCreateTodayAndTomorrowIndexByPhysicalId(templatePhy.getId());
             operateRecordService.save(new OperateRecord.Builder().bizId(templateId)
-                .operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_UPGRADED_VERSION)
+                .operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE_UPGRADED_VERSION)
                 .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                .content(String.format("同步修改es集群[%s]中模板[%s]shard数[%d],版本号[%d]", templatePhy.getCluster(),
-                    templatePhy.getName(), updateParam.getShard(), updateParam.getVersion()))
+                .content(String.format("模板[%s]生版本%d->%d",
+                    templatePhy.getName(), beforeVersion, afterVersion))
                 .userOperation(operator).build()
 
             );

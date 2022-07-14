@@ -12,6 +12,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.Work
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.LogicClusterIndecreaseOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectClusterLogicAuthEnum;
@@ -27,6 +28,8 @@ import com.didiglobal.logi.security.service.ProjectService;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -164,7 +167,17 @@ public class LogicClusterIndecreaseHandler extends BaseWorkOrderHandler {
     protected Result<Void> doProcessAgree(WorkOrder workOrder, String approver) throws AdminOperateException {
         LogicClusterIndecreaseContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
             LogicClusterIndecreaseContent.class);
-
+        //执行前的节点结果
+        final Result<List<ESClusterRoleHostVO>> resultBefore = clusterNodeManager.listClusterLogicNode(
+                content.getLogicClusterId().intValue());
+        Long beforeSize = 0L;
+        if (resultBefore.success() && CollectionUtils.isNotEmpty(resultBefore.getData())) {
+            beforeSize = resultBefore.getData().stream().map(ESClusterRoleHostVO::getRegionName).distinct()
+                    .map(StringUtils::isNotBlank).count();
+        
+        }
+       
+        
         List<ClusterRegionWithNodeInfoDTO> clusterRegionWithNodeInfoDTOList = content.getRegionWithNodeInfo();
 
         Result<Boolean> regionEditResult = clusterNodeManager.editMultiNode2Region(clusterRegionWithNodeInfoDTOList,
@@ -172,11 +185,21 @@ public class LogicClusterIndecreaseHandler extends BaseWorkOrderHandler {
         if (regionEditResult.failed()) {
             return Result.buildFrom(regionEditResult);
         }
+       //执行后的节点结果
+         final Result<List<ESClusterRoleHostVO>> resultAfter = clusterNodeManager.listClusterLogicNode(
+                content.getLogicClusterId().intValue());
+        Long afterSize=0L;
+        if (resultAfter.success() && CollectionUtils.isNotEmpty(resultAfter.getData())){
+            afterSize=
+                    resultAfter.getData().stream().map(ESClusterRoleHostVO::getRegionName).distinct().map(StringUtils::isNotBlank)
+                    .count();
+            
+        }
+        
         operateRecordService.save(new OperateRecord.Builder().bizId(content.getLogicClusterId())
             .operationTypeEnum(OperateTypeEnum.MY_CLUSTER_CAPACITY).triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-            .content(String.format("%s申请逻辑集群：%s的扩容操作，内容如下：%s", workOrder.getSubmitor(), content.getLogicClusterName(),
-                content))
-            .userOperation(approver)
+            .content(String.format("%s：【%d】->【%d】",afterSize>beforeSize?"扩容":"缩容",beforeSize,afterSize))
+            .userOperation(workOrder.getSubmitor())
             .project(projectService.getProjectBriefByProjectId(workOrder.getSubmitorProjectId())).build());
 
         List<String> administrators = getOPList().stream().map(UserBriefVO::getUserName).collect(Collectors.toList());

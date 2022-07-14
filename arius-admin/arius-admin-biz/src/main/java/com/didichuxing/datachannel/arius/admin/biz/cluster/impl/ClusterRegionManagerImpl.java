@@ -2,18 +2,6 @@ package com.didichuxing.datachannel.arius.admin.biz.cluster.impl;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType.FAIL;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import com.google.common.collect.Lists;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterNodeManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterRegionManager;
@@ -47,7 +35,17 @@ import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecord
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.service.ProjectService;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class ClusterRegionManagerImpl implements ClusterRegionManager {
@@ -314,8 +312,7 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
             operateRecordService.save(new OperateRecord.Builder()
                 .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_REGION_CHANGE)
                 .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                .content(String.format("物理集群：%s,region解绑:%s;解绑逻辑群id:%s", region.getPhyClusterName(), region.getName(),
-                    logicClusterId))
+                .content(String.format("region解绑:%s", region.getName()))
                 .project(projectService.getProjectBriefByProjectId(projectId)).userOperation(operator)
                 .bizId(clusterPhyService.getClusterByName(region.getPhyClusterName())).build());
         }

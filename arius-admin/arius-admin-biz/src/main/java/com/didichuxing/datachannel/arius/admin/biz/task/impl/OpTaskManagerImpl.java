@@ -1,8 +1,12 @@
 package com.didichuxing.datachannel.arius.admin.biz.task.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.biz.task.OpTaskHandler;
 import com.didichuxing.datachannel.arius.admin.biz.task.OpTaskManager;
+import com.didichuxing.datachannel.arius.admin.biz.task.content.ClusterBaseContent;
+import com.didichuxing.datachannel.arius.admin.biz.task.content.ClusterOfflineContent;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord.Builder;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -27,6 +31,7 @@ import com.didiglobal.logi.security.service.UserService;
 import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -72,27 +77,63 @@ public class OpTaskManagerImpl implements OpTaskManager {
         final Result<OpTask> opTaskResult = handler.addTask(ConvertUtil.obj2Obj(opTaskDTO, OpTask.class));
         if (opTaskResult.success()) {
             OperateTypeEnum operationType;
-            String content= JSON.parseObject(opTaskDTO.getExpandData()).getString("title");
+            String content= null;
             switch (typeEnum) {
                 case CLUSTER_NEW:
                     operationType = OperateTypeEnum.PHYSICAL_CLUSTER_NEW;
+                    content=String.format("新建物理集群：【%s】",ConvertUtil.obj2ObjByJSON(opTaskDTO.getExpandData(),
+            ClusterBaseContent.class).getPhyClusterName());
                     break;
                 case CLUSTER_OFFLINE:
                     operationType = OperateTypeEnum.PHYSICAL_CLUSTER_OFFLINE;
+                    content=String.format("物理集群下线：【%s】",ConvertUtil.obj2ObjByJSON(opTaskDTO.getExpandData(),
+            ClusterOfflineContent.class).getPhyClusterName());
                     break;
-                case TEMPLATE_DCDR:
-                    operationType = OperateTypeEnum.TEMPLATE_SERVICE_DCDR_SETTING;
-                    break;
+              
                 case CLUSTER_SHRINK:
+                    //最终实现中不能轻易获取这些结果，故在此处记录
+                     operationType = OperateTypeEnum.PHYSICAL_CLUSTER_CAPACITY;
+                    final JSONArray shrinkClusterRoleHosts = JSON.parseObject(opTaskDTO.getExpandData())
+                            .getJSONArray("clusterRoleHosts");
+                    final String shrinkClientNodes = shrinkClusterRoleHosts.stream().filter(Objects::nonNull)
+                            .filter(JSONObject.class::isInstance)
+                            .filter(json -> ((JSONObject) json).containsKey("role"))
+                            .filter(json -> StringUtils.equalsIgnoreCase(((JSONObject) json).getString("role"),
+                                    "clientnode")).map(json -> ((JSONObject) json).getString("hostname"))
+                            .collect(Collectors.joining(","));
+                     final String shrinkDataNodes = shrinkClusterRoleHosts.stream().filter(Objects::nonNull)
+                            .filter(JSONObject.class::isInstance)
+                            .filter(json -> ((JSONObject) json).containsKey("role"))
+                            .filter(json -> StringUtils.equalsIgnoreCase(((JSONObject) json).getString("role"),
+                                    "clientnode")).map(json -> ((JSONObject) json).getString("hostname"))
+                            .collect(Collectors.joining(","));
+                    content = String.format("物理集群【%s】缩容：clientNode节点列表【%s】；dataNodes节点列表：【%s】",
+                            ConvertUtil.obj2ObjByJSON(opTaskDTO.getExpandData(), ClusterOfflineContent.class)
+                                    .getPhyClusterName(),shrinkClientNodes,shrinkDataNodes);
+                    break;
                 case CLUSTER_EXPAND:
+                    //最终实现中不能轻易获取这些结果，故在此处记录
                     operationType = OperateTypeEnum.PHYSICAL_CLUSTER_CAPACITY;
+                    final JSONArray clusterRoleHosts = JSON.parseObject(opTaskDTO.getExpandData())
+                            .getJSONArray("clusterRoleHosts");
+                    final String clientNodes = clusterRoleHosts.stream().filter(Objects::nonNull)
+                            .filter(JSONObject.class::isInstance)
+                            .filter(json -> ((JSONObject) json).containsKey("role"))
+                            .filter(json -> StringUtils.equalsIgnoreCase(((JSONObject) json).getString("role"),
+                                    "clientnode")).map(json -> ((JSONObject) json).getString("hostname"))
+                            .collect(Collectors.joining(","));
+                     final String dataNodes = clusterRoleHosts.stream().filter(Objects::nonNull)
+                            .filter(JSONObject.class::isInstance)
+                            .filter(json -> ((JSONObject) json).containsKey("role"))
+                            .filter(json -> StringUtils.equalsIgnoreCase(((JSONObject) json).getString("role"),
+                                    "clientnode")).map(json -> ((JSONObject) json).getString("hostname"))
+                            .collect(Collectors.joining(","));
+                    content = String.format("物理集群【%s】扩容：clientNode节点列表【%s】；dataNodes节点列表：【%s】",
+                            ConvertUtil.obj2ObjByJSON(opTaskDTO.getExpandData(), ClusterOfflineContent.class)
+                                    .getPhyClusterName(),clientNodes,dataNodes);
                     break;
-                case CLUSTER_RESTART:
-                    operationType = OperateTypeEnum.PHYSICAL_CLUSTER_RESTART;
-                    break;
-                case CLUSTER_UPGRADE:
-                    operationType = OperateTypeEnum.PHYSICAL_CLUSTER_UPGRADE;
-                    break;
+            
+               
                 default:
                     operationType = null;
                     content = null;

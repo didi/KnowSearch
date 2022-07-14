@@ -85,6 +85,7 @@ public class OperateRecord {
                          String userOperation, Object bizId) {
         this.moduleId = operateTypeEnum.getModule().getCode();
         this.operateId = operateTypeEnum.getCode();
+        this.projectName="-";
         this.content = content;
         this.userOperation = userOperation;
         this.operateTime = Calendar.getInstance().getTime();
@@ -189,8 +190,8 @@ public class OperateRecord {
             return new OperateRecord(this);
         }
 
-        public OperateRecord buildDefaultTimingTask() {
-            this.triggerWayEnum = TriggerWayEnum.TIMING_TASK;
+        public OperateRecord buildDefaultSchedulingTasks() {
+            this.triggerWayEnum = TriggerWayEnum.SCHEDULING_TASKS;
             return new OperateRecord(this);
         }
 

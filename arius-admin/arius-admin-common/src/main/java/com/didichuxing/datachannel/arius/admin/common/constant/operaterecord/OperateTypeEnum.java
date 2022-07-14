@@ -130,7 +130,7 @@ public enum OperateTypeEnum {
     /**
      * 索引模板管理:升级版本
      */
-    INDEX_TEMPLATE_MANAGEMENT_UPGRADED_VERSION(NewModuleEnum.INDEX_MANAGEMENT, "升版本", 28),
+    TEMPLATE_SERVICE_UPGRADED_VERSION(NewModuleEnum.TEMPLATE_SERVICE, "升版本", 28),
     /**
      * 模板服务:DCDR设置
      */

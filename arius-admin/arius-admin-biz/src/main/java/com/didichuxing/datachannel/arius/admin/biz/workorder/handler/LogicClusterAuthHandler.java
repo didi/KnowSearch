@@ -92,8 +92,7 @@ public class LogicClusterAuthHandler extends BaseWorkOrderHandler {
             operateRecordService.save(new OperateRecord.Builder().operationTypeEnum(OperateTypeEnum.MY_CLUSTER_APPLY)
                 .bizId(content.getLogicClusterId())
                 .project(projectService.getProjectBriefByProjectId(workOrder.getSubmitorProjectId()))
-                .content(workOrder.getSubmitor() + "申请" + content.getLogicClusterName() + "的"
-                         + ProjectClusterLogicAuthEnum.valueOf(content.getAuthCode()))
+                .content( String.format("申请:【%s】" , content.getLogicClusterName()))
                 .userOperation(approver).triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).build());
 
         }
