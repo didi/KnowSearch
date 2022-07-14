@@ -429,8 +429,8 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrvImpl impleme
                 TypeProperties typeProperties = new TypeProperties(ariusTypeProperty.getProperties());
 
                 for (Map.Entry<String, TypeConfig> entry : typeConfigMap.entrySet()) {
-                    if (isSingleIndex && isExistMappingChanged(entry.getValue().getProperties().getJsonMap(),
-                        typeProperties.getJsonMap())) {
+                    if (isSingleIndex && (entry.getValue().getProperties() == null || (isExistMappingChanged(entry.getValue().getProperties().getJsonMap(),
+                        typeProperties.getJsonMap())))){
                         return Result.buildFail("非滚动模板禁止修改已有mapping项");
                     }
                     entry.getValue().setProperties(typeProperties);
