@@ -1,0 +1,57 @@
+{
+    "order":10,
+    "index_patterns":[
+        "arius.cat.shard_info*"
+    ],
+    "settings":{
+        "index":{
+            "mapping":{
+                "single_type":"true"
+            },
+            "number_of_shards":"4",
+            "number_of_routing_size":"1",
+            "refresh_interval": "1s"
+        }
+    },
+    "mappings":{
+        "_source":{
+            "enabled":true
+        },
+        "properties":{
+            "prirep": {
+                "type": "keyword"
+            },
+            "clusterPhy": {
+                "type": "keyword"
+            },
+            "node": {
+                "type": "keyword"
+            },
+            "docs": {
+                "type": "long"
+            },
+            "ip": {
+                "type": "keyword"
+            },
+            "index": {
+                "type": "keyword"
+            },
+            "shard": {
+                "type": "keyword"
+            },
+            "state": {
+                "type": "keyword"
+            },
+            "store": {
+                "type":"keyword"
+            },
+            "timestamp":{
+                "format":"epoch_millis",
+                "type":"date"
+            }
+        }
+    },
+    "aliases":{
+
+    }
+}
