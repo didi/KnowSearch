@@ -160,7 +160,7 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
      * 集群不存在
      */
     @Override
-    public Result<Boolean> editCluster(ClusterPhyDTO param) {
+    public Result<Boolean> editCluster(ClusterPhyDTO param, String operator) {
         Result<Boolean> checkResult = checkClusterParam(param, OperationEnum.EDIT);
         if (checkResult.failed()) {
             LOGGER.warn("class=ESClusterPhyServiceImpl||method=editCluster||msg={}", checkResult.getMessage());

@@ -291,7 +291,7 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
         }
         cluster.setTemplateSrvs("");
         //此处属于工单的特定使用是不需要进行冗余的操作记录的
-        return clusterPhyService.editCluster(ConvertUtil.obj2Obj(cluster, ClusterPhyDTO.class));
+        return clusterPhyService.editCluster(ConvertUtil.obj2Obj(cluster, ClusterPhyDTO.class), operator);
     }
 
     private boolean isRDOrOP(String operator) {

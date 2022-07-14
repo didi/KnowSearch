@@ -49,7 +49,7 @@ public interface ClusterPhyService {
      * @return 成功 true 失败 false
      *
      */
-    Result<Boolean> editCluster(ClusterPhyDTO param);
+    Result<Boolean> editCluster(ClusterPhyDTO param, String operator);
 
     /**
      * 根据集群名字查询集群
