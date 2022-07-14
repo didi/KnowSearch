@@ -26,8 +26,6 @@ import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectClust
 import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
 import com.didiglobal.logi.security.service.ProjectService;
 import java.util.List;
-import java.util.Random;
-import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -201,9 +199,11 @@ public class LogicClusterIndecreaseHandler extends BaseWorkOrderHandler {
             .content(String.format("%s：【%d】->【%d】",afterSize>beforeSize?"扩容":"缩容",beforeSize,afterSize))
             .userOperation(workOrder.getSubmitor())
             .project(projectService.getProjectBriefByProjectId(workOrder.getSubmitorProjectId())).build());
-
-        List<String> administrators = getOPList().stream().map(UserBriefVO::getUserName).collect(Collectors.toList());
-        return Result.buildSuccWithMsg(
-            String.format("请联系管理员【%s】进行后续操作", administrators.get(new Random().nextInt(administrators.size()))));
+        //todo 后续工程清理
+        //List<String> administrators = getOPList().stream().map(UserBriefVO::getUserName).collect(Collectors.toList());
+        //return Result.buildSuccWithMsg(
+        //    String.format("请联系管理员【%s】进行后续操作", administrators.get(new Random().nextInt(administrators.size()))));
+        //当管理员扩容分配完成，就已经自动绑定了region，完成了扩缩容，不需要再进行下一步冗余操作
+        return Result.buildFrom(regionEditResult);
     }
 }

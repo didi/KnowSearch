@@ -120,12 +120,19 @@ public class ClusterScaleTaskHandler extends AbstractClusterTaskHandler {
             hostScaleParamBaseList.stream().map(EcmParamBase::getRoleName).collect(Collectors.toList())));
         ecmTaskDTO.setEcmParamBaseList(hostScaleParamBaseList);
         String hostOption=content.getOperationType()==2?"扩容":"缩容";
+        final String clientNode = content.getOriginClusterRoleHosts().stream()
+                .filter(esClusterRoleHost -> StringUtils.equalsIgnoreCase(esClusterRoleHost.getRole(), "clientnode"))
+                .map(ESClusterRoleHost::getHostname).distinct().collect(Collectors.joining(","));
+    
+        final String datanode = content.getOriginClusterRoleHosts().stream()
+                .filter(esClusterRoleHost -> StringUtils.equalsIgnoreCase(esClusterRoleHost.getRole(), "datanode"))
+                .map(ESClusterRoleHost::getHostname).distinct().collect(Collectors.joining(","));
+        
         //扩缩容操作记录
          final OperateRecord operateRecord = new Builder().userOperation(creator)
                 .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
-                .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_NEW)
-                .content(String.format("集群%s：【%s】", hostOption,ListUtils.strList2String(
-            hostScaleParamBaseList.stream().map(EcmParamBase::getRoleName).collect(Collectors.toList()))))
+                .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_CAPACITY)
+                .content(String.format("集群%s:clientNode:【%s】;datanode:【%s】",hostOption,clientNode,datanode))
                 .bizId(content.getPhyClusterId()).buildDefaultManualTrigger();
         operateRecordService.save(operateRecord);
         return Result.buildSucc();

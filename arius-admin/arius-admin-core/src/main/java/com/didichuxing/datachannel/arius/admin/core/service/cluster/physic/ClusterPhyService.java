@@ -8,7 +8,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterSe
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
-
 import java.util.List;
 import java.util.Set;
 
@@ -50,7 +49,7 @@ public interface ClusterPhyService {
      * @return 成功 true 失败 false
      *
      */
-    Result<Boolean> editCluster(ClusterPhyDTO param, String operator);
+    Result<Boolean> editCluster(ClusterPhyDTO param);
 
     /**
      * 根据集群名字查询集群

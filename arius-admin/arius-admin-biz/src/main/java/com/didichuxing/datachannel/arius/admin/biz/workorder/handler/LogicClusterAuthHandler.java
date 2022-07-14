@@ -3,15 +3,12 @@ package com.didichuxing.datachannel.arius.admin.biz.workorder.handler;
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandler;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.LogicClusterAuthContent;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.LogicClusterAuthOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectClusterLogicAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
@@ -84,20 +81,10 @@ public class LogicClusterAuthHandler extends BaseWorkOrderHandler {
         LogicClusterAuthContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
             LogicClusterAuthContent.class);
 
-        Result<Void> result = projectClusterLogicAuthService.ensureSetLogicClusterAuth(workOrder.getSubmitorProjectId(),
+        
+        return  projectClusterLogicAuthService.ensureSetLogicClusterAuth(workOrder.getSubmitorProjectId(),
             content.getLogicClusterId(), ProjectClusterLogicAuthEnum.valueOf(content.getAuthCode()),
             workOrder.getSubmitor(), workOrder.getSubmitor());
-
-        if (result.success()) {
-            operateRecordService.save(new OperateRecord.Builder().operationTypeEnum(OperateTypeEnum.MY_CLUSTER_APPLY)
-                .bizId(content.getLogicClusterId())
-                .project(projectService.getProjectBriefByProjectId(workOrder.getSubmitorProjectId()))
-                .content( String.format("申请:【%s】" , content.getLogicClusterName()))
-                .userOperation(approver).triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).build());
-
-        }
-
-        return result;
     }
 
     @Override

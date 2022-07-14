@@ -148,7 +148,7 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Result<Void> batchBindRegionToClusterLogic(ESLogicClusterWithRegionDTO param, String operator,
-                                                      boolean isAddClusterLogicFlag) throws AdminOperateException {
+                                                      boolean isWorkOrder) throws AdminOperateException {
         //1. 前置校验
         if (AriusObjUtils.isNull(param)) {
             return Result.buildParamIllegal("参数为空");
@@ -173,7 +173,7 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
         }
 
         //4. 是否要创建逻辑集群
-        if (isAddClusterLogicFlag) {
+        if (isWorkOrder) {
             param.setDataCenter(EnvUtil.getDC().getCode());
             Result<Long> createLogicClusterResult = clusterLogicService.createClusterLogic(param);
             if (createLogicClusterResult.failed()) {

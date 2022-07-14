@@ -6,7 +6,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.Cluster
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionWithNodeInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
-
 import java.util.List;
 
 public interface ClusterRegionManager {
@@ -37,10 +36,10 @@ public interface ClusterRegionManager {
     /**
      * 逻辑集群批量绑定region
      *
-     * @param isAddClusterLogicFlag 是否要添加逻辑集群
+     * @param isWorkOrder 是否要添加逻辑集群
      */
     Result<Void> batchBindRegionToClusterLogic(ESLogicClusterWithRegionDTO param, String operator,
-                                               boolean isAddClusterLogicFlag) throws AdminOperateException;
+                                               boolean isWorkOrder) throws AdminOperateException;
 
     /**
      * 根据物理集群名称获region信息（包含空节点region），包含region中的数据节点信息
