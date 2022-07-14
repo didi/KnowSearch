@@ -161,7 +161,7 @@ public class ESShardDAO extends BaseESDAO {
 
         }
         if (StringUtils.isNotBlank(keyword)){
-            termCellList.add(DSLSearchUtils.getTermCellForWildcardSearch(keyword, "clusterPhy"));
+            termCellList.add(DSLSearchUtils.getTermCellForWildcardSearch(keyword, "index"));
         }
         return ListUtils.strList2String(termCellList);
     }

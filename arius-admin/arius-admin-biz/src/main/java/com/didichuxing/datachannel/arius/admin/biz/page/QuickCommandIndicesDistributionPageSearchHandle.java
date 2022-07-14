@@ -61,7 +61,7 @@ public class QuickCommandIndicesDistributionPageSearchHandle extends AbstractPag
             // 使用超级项目访问时，queryProjectId为null
             Integer queryProjectId = null;
             Tuple<Long, List<IndexCatCell>> totalHitAndIndexCatCellListTuple = esIndexCatService.syncGetCatIndexInfo(
-                    queryCluster, condition.getIndex(), condition.getHealth(),condition.getStatus(), queryProjectId,
+                    queryCluster, condition.getKeyword(), condition.getHealth(),condition.getStatus(), queryProjectId,
                     (condition.getPage() - 1) * condition.getSize(), condition.getSize(), condition.getSortTerm(),
                     condition.getOrderByDesc());
             if (null == totalHitAndIndexCatCellListTuple) {
