@@ -28,8 +28,8 @@ import org.springframework.stereotype.Repository;
 public class ESClusterNodeDAO extends BaseESDAO {
     private static final String GET_NODE_PLUGINS = "/_nodes/plugins";
     private static final String NODES            = "nodes";
-    private static final String NAME             = "name";
-    private static final String PLUGINS          = "plugins";
+    private static final String NAME    = "name";
+    private static final String MODULES = "modules";
     /**
      * 获取节点上的索引个数
      * @param cluster 集群
@@ -108,7 +108,7 @@ public class ESClusterNodeDAO extends BaseESDAO {
     }
     private  TupleTwo<String,List<String>> buildNodeNamePlugins(JSONObject jsonObject){
         final String nodeName = jsonObject.getString(NAME);
-        final List<String> pluginNames = jsonObject.getJSONArray(PLUGINS).stream().filter(Objects::nonNull)
+        final List<String> pluginNames = jsonObject.getJSONArray(MODULES).stream().filter(Objects::nonNull)
                 .map(plugin -> ((JSONObject) plugin).getString(NAME)).collect(Collectors.toList());
         return Tuples.of(nodeName,pluginNames);
     
