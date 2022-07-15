@@ -46,7 +46,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
-import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
+import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterNodeService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpTimeoutRetry;
@@ -55,7 +55,6 @@ import com.didiglobal.logi.elasticsearch.client.request.dcdr.DCDRTemplate;
 import com.didiglobal.logi.elasticsearch.client.response.indices.stats.IndexNodes;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
@@ -146,11 +145,10 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
 
     @Autowired
     private OpTaskManager         opTaskManager;
+    @Autowired
+    private ESClusterNodeService esClusterNodeService;
 
-    @Autowired
-    private OperateRecordService  operateRecordService;
-    @Autowired
-    private ProjectService        projectService;
+    
     private static final int      TRY_LOCK_TIMEOUT            = 5;
     private static final int      ONE_STEP                    = 1;
     private static final int      TRY_TIMES_THREE             = 3;
@@ -748,7 +746,8 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
      */
     @Override
     public boolean clusterSupport(String phyCluster) {
-        return isTemplateSrvOpen(phyCluster);
+        //直接获取插件信息
+        return esClusterNodeService.existDCDRAndPipelineModule(phyCluster).v1;
     }
 
     @Override
@@ -890,11 +889,11 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
                 return Result.buildNotExist("从集群不存在");
             }
 
-            if (!isTemplateSrvOpen(templatePhysical.getCluster())) {
+            if (!clusterSupport(templatePhysical.getCluster())) {
                 return Result.buildParamIllegal("模板所在集群不支持DCDR");
             }
 
-            if (!isTemplateSrvOpen(param.getReplicaClusters().get(i))) {
+            if (!clusterSupport(param.getReplicaClusters().get(i))) {
                 return Result.buildParamIllegal("所选的从集群不支持DCDR");
             }
 

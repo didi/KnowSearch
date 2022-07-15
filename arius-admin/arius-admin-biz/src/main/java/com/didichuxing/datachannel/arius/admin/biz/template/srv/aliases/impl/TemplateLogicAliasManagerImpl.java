@@ -9,7 +9,11 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.alias.ConsoleAliasDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.alias.ConsoleLogicTemplateAliasesDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ProjectTemplateAuth;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateAlias;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyAlias;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
@@ -28,8 +32,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.*;
 
 /**
  * @author zqr
@@ -134,8 +136,8 @@ public class TemplateLogicAliasManagerImpl extends BaseTemplateSrvImpl implement
         }
 
         IndexTemplatePhy indexTemplatePhy = result.getData();
-        if (!isTemplateSrvOpen(indexTemplatePhy.getCluster())) {
-            return Result.buildFail(indexTemplatePhy.getCluster() + "没有开启" + templateServiceName());
+        if (!isTemplateSrvOpen(indexTemplatePhy.getLogicId())) {
+            return Result.buildFail(indexTemplatePhy.getName() + "没有开启" + templateServiceName());
         }
 
         try {
@@ -158,8 +160,8 @@ public class TemplateLogicAliasManagerImpl extends BaseTemplateSrvImpl implement
         }
 
         IndexTemplatePhy indexTemplatePhy = result.getData();
-        if (!isTemplateSrvOpen(indexTemplatePhy.getCluster())) {
-            return Result.buildFail(indexTemplatePhy.getCluster() + "没有开启" + templateServiceName());
+        if (!isTemplateSrvOpen(indexTemplatePhy.getLogicId())) {
+            return Result.buildFail(indexTemplatePhy.getName() + "没有开启" + templateServiceName());
         }
 
         try {
@@ -190,8 +192,8 @@ public class TemplateLogicAliasManagerImpl extends BaseTemplateSrvImpl implement
 
         IndexTemplatePhy indexTemplatePhy = result.getData();
 
-        if (!isTemplateSrvOpen(indexTemplatePhy.getCluster())) {
-            return Result.buildFail(indexTemplatePhy.getCluster() + "没有开启" + templateServiceName());
+        if (!isTemplateSrvOpen(indexTemplatePhy.getLogicId())) {
+            return Result.buildFail(indexTemplatePhy.getName() + "没有开启" + templateServiceName());
         }
 
         try {
@@ -290,7 +292,7 @@ public class TemplateLogicAliasManagerImpl extends BaseTemplateSrvImpl implement
             if (null != logicWithPhysical && logicWithPhysical.hasPhysicals()) {
                 IndexTemplatePhy indexTemplatePhysicalInfo = logicWithPhysical.getPhysicals().get(0);
 
-                if (!isTemplateSrvOpen(indexTemplatePhysicalInfo.getCluster())) {
+                if (!isTemplateSrvOpen(indexTemplatePhysicalInfo.getLogicId())) {
                     return;
                 }
 

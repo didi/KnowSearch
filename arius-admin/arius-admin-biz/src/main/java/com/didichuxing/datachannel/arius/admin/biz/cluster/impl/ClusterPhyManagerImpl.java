@@ -375,8 +375,6 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         }
 
         ClusterPhyVO clusterPhyVO = ConvertUtil.obj2Obj(clusterPhy, ClusterPhyVO.class);
-        clusterPhyVO.setGatewayUrl(esGatewayClient.getSingleGatewayAddress());
-
         // 构建overView信息
         buildPhyCluster(clusterPhyVO);
         return clusterPhyVO;
@@ -1179,6 +1177,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
      */
     private void buildPhyCluster(ClusterPhyVO clusterPhyVO) {
         if (!AriusObjUtils.isNull(clusterPhyVO)) {
+            clusterPhyVO.setGatewayUrl(esGatewayClient.getSingleGatewayAddress());
             buildPhyClusterStatics(clusterPhyVO);
             buildClusterRole(clusterPhyVO);
             buildClusterPhyWithLogicAndRegion(Collections.singletonList(clusterPhyVO));
