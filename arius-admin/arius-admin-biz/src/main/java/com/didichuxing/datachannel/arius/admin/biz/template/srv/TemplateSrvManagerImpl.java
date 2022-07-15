@@ -358,7 +358,10 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
     }
 
     public boolean isPhyClusterOpenTemplateSrv(ClusterPhy phyCluster, int srvId) {
+        /**
         try {
+            //todo 要下线 集群侧不具备
+            
             Result<List<ClusterTemplateSrv>> result = clusterPhyService.getPhyClusterTemplateSrv(phyCluster);
             if (result.failed()) {
                 return false;
@@ -370,14 +373,15 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
                     return true;
                 }
             }
-
+        
             return false;
         } catch (Exception e) {
             LOGGER.warn("class=TemplateSrvManager||method=isPhyClusterOpenTemplateSrv||phyCluster={}||srvId={}",
                 phyCluster, srvId, e);
 
             return true;
-        }
+        }**/
+            return true;
     }
 
 

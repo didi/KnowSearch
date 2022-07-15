@@ -1,14 +1,12 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster;
 
-import java.util.List;
-
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.BaseEntity;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
-
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -127,6 +125,7 @@ public class ClusterPhy extends BaseEntity implements Comparable<ClusterPhy> {
      * 集群支持的索引服务
      * @see TemplateServiceEnum
      */
+    @Deprecated
     private String                templateSrvs;
 
     /**
