@@ -41,10 +41,9 @@ public class TemplateSrvController {
     @ApiOperation(value = "分页查询模板服务列表")
     public PaginationResult<TemplateWithSrvVO> pageGetTemplateWithSrv(HttpServletRequest request,
                                                                       @RequestBody TemplateQueryDTO condition) throws NotFindSubclassException {
-        if (condition.getProjectId() == null) {
-            condition.setProjectId(HttpRequestUtil.getProjectId(request));
-        }
-        return templateSrvManager.pageGetTemplateWithSrv(condition);
+        final Integer projectId = HttpRequestUtil.getProjectId(request);
+        
+        return templateSrvManager.pageGetTemplateWithSrv(condition,projectId);
     }
 
     @PutMapping("/{srvCode}/{templateIdList}")

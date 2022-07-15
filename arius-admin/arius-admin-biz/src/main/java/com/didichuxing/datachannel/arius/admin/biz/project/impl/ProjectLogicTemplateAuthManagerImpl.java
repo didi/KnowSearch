@@ -18,14 +18,13 @@ import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecord
 import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectLogicTemplateAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didiglobal.logi.security.service.ProjectService;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * Created by linyunan on 2021-06-15
@@ -58,12 +57,14 @@ public class ProjectLogicTemplateAuthManagerImpl implements ProjectLogicTemplate
 
         Result<Void> voidResult = projectLogicTemplateAuthService.addTemplateAuth(authDTO);
         if (voidResult.success()) {
-            operateRecordService.save(new OperateRecord.Builder().triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                .userOperation(operator).operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_INFO_MODIFY)
-                .bizId(authDTO.getId()).content(authDTO.toString())
-                .project(projectService.getProjectBriefByProjectId(authDTO.getProjectId()))
-
-                .build());
+            final ProjectTemplateAuthEnum projectTemplateAuthEnum = ProjectTemplateAuthEnum.valueOf(authDTO.getType());
+            operateRecordService.save(
+                    new OperateRecord.Builder().triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).userOperation(operator)
+                            .operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_INFO_MODIFY)
+                            .bizId(authDTO.getId()).content(String.format("权限变更：%s", projectTemplateAuthEnum.getDesc()))
+                            .project(projectService.getProjectBriefByProjectId(authDTO.getProjectId()))
+                    
+                            .build());
 
         }
         return voidResult;
@@ -151,9 +152,21 @@ public class ProjectLogicTemplateAuthManagerImpl implements ProjectLogicTemplate
         }
 
         projectTemplateAuth.setType(authDTO.getType());
-        projectTemplateAuth.setResponsible(authDTO.getResponsible());
-        return projectLogicTemplateAuthService
-            .updateTemplateAuth(ConvertUtil.obj2Obj(projectTemplateAuth, ProjectTemplateAuthDTO.class), operator);
+        final Result<Void> result = projectLogicTemplateAuthService.updateTemplateAuth(
+                ConvertUtil.obj2Obj(projectTemplateAuth, ProjectTemplateAuthDTO.class));
+        if (result.success()) {
+            final ProjectTemplateAuthEnum projectTemplateAuthEnum = ProjectTemplateAuthEnum.valueOf(authDTO.getType());
+            operateRecordService.save(
+                    new OperateRecord.Builder().triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).userOperation(operator)
+                            .operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_INFO_MODIFY)
+                            .bizId(authDTO.getId())
+                            .content(String.format("权限变更：【%s】", projectTemplateAuthEnum.getDesc()))
+                            .project(projectService.getProjectBriefByProjectId(authDTO.getProjectId()))
+                        
+                            .build());
+        }
+        return result;
+    
     }
 
     /**

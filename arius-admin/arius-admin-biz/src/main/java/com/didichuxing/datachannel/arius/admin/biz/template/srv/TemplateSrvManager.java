@@ -9,7 +9,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.srv.T
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.srv.UnavailableTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv.TemplateWithSrvVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
-
 import java.util.List;
 
 /**
@@ -42,10 +41,12 @@ public interface TemplateSrvManager {
 
     /**
      * 分页模糊查询模板服务
+     *
      * @param condition
+     * @param projectId
      * @return
      */
-    PaginationResult<TemplateWithSrvVO> pageGetTemplateWithSrv(TemplateQueryDTO condition) throws NotFindSubclassException;
+    PaginationResult<TemplateWithSrvVO> pageGetTemplateWithSrv(TemplateQueryDTO condition, Integer projectId) throws NotFindSubclassException;
 
     /**
      * 开启模板服务
@@ -77,11 +78,12 @@ public interface TemplateSrvManager {
                                           String operator);
 
     /**
-    * 清理所有索引服务
-    * @param clusterPhy 物理集群名称
-    * @param operator   操作人
-    * @return {@link Result}<{@link Boolean}>
-    */
+     * 清理所有索引服务
+     *
+     * @param clusterPhy 物理集群名称
+     * @param operator   操作人
+     * @return {@link Result}<{@link Boolean}>
+     */
     Result<Boolean> delAllTemplateSrvByClusterPhy(String clusterPhy, String operator);
 
     /**

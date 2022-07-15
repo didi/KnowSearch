@@ -4,11 +4,15 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.resource.E
 
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.task.content.ClusterRestartContent;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord.Builder;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.EcmParamBase;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.ecm.EcmTaskDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
@@ -82,6 +86,15 @@ public class ClusterRestartTaskHandler extends AbstractClusterTaskHandler {
         }
 
         ecmTaskDTO.setEcmParamBaseList(listResult.getData());
+        //集群重启进行操作记录
+        final OperateRecord operateRecord = new Builder().userOperation(creator)
+                //ecm的操作都是属于超级项目下的，所以这里直接采用内部机制
+                    .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
+                .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_RESTART)
+                    .content(String.format("重启:【%s】",content.getPhyClusterName()))
+                
+                .bizId(content.getPhyClusterId()).buildDefaultManualTrigger();
+                operateRecordService.save(operateRecord);
 
         return Result.buildSucc();
     }

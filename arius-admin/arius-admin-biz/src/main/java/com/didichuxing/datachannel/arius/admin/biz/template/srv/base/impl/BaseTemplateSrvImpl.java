@@ -183,7 +183,10 @@ public abstract class BaseTemplateSrvImpl implements BaseTemplateSrv {
                 operateRecordService.save(new OperateRecord.Builder()
                     .operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE).triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
                     .bizId(tupleTwo.v2.getId()).project(projectService.getProjectBriefByProjectId(projectId))
-                    .content(Boolean.TRUE.equals(status) ? "开启模板服务" : "关闭模板服务").userOperation(operator).build());
+                    .content(String.format("%s:【%s】", Boolean.TRUE.equals(status) ? "开启模板服务" : "关闭模板服务",templateSrvName())
+                           
+                           
+                           ).userOperation(operator).build());
             }
         }
 

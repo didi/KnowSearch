@@ -65,6 +65,7 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<Templa
 
     @Override
     protected PaginationResult<TemplateWithSrvVO> buildPageData(TemplateQueryDTO condition, Integer projectId) {
+    
         // 注意这里的condition是物理集群
         Integer totalHit;
         List<IndexTemplate> matchIndexTemplateList;

@@ -193,31 +193,43 @@ public interface IndicesManager {
 
     /**
      * rollover
+     *
      * @param param
+     * @param operator
+     * @param projectId
      * @return
      */
-    Result<Void> rollover(IndexRolloverDTO param);
+    Result<Void> rollover(IndexRolloverDTO param, String operator, Integer projectId);
 
     /**
      * shrink
+     *
      * @param param
+     * @param operator
+     * @param projectId
      * @return
      */
-    Result<Void> shrink(IndexCatCellWithConfigDTO param);
+    Result<Void> shrink(IndexCatCellWithConfigDTO param, String operator, Integer projectId);
 
     /**
      * split
+     *
      * @param param
+     * @param operator
+     * @param projectId
      * @return
      */
-    Result<Void> split(IndexCatCellWithConfigDTO param);
+    Result<Void> split(IndexCatCellWithConfigDTO param, String operator, Integer projectId);
 
     /**
      * forceMerge
+     *
      * @param param
+     * @param operator
+     * @param projectId
      * @return
      */
-    Result<Void> forceMerge(IndexForceMergeDTO param);
+    Result<Void> forceMerge(IndexForceMergeDTO param, String operator, Integer projectId);
 
     /**
      * 获取物理集群中的索引列表

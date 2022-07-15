@@ -61,10 +61,12 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.EcmHandl
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleService;
+import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpTimeoutRetry;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.task.EcmTaskDAO;
 import com.didichuxing.datachannel.arius.admin.remote.zeus.bean.constant.EcmActionEnum;
+import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -132,6 +134,10 @@ public class EcmTaskManagerImpl implements EcmTaskManager {
 
     @Autowired
     private WorkOrderManager        workOrderManager;
+    @Autowired
+    private ProjectService       projectService;
+    @Autowired
+    private OperateRecordService operateRecordService;
 
     @Override
     public boolean existUnClosedEcmTask(Long phyClusterId) {

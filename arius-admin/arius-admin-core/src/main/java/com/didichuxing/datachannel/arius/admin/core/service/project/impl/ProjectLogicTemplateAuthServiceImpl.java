@@ -1,7 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.core.service.project.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectTemplateAuthDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
@@ -9,9 +8,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.Projec
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.project.ProjectTemplateAuthPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectClusterLogicAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectTemplateAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.event.auth.ProjectTemplateAuthAddEvent;
@@ -169,7 +166,7 @@ public class ProjectLogicTemplateAuthServiceImpl implements ProjectLogicTemplate
             // 期望更新权限信息
             ProjectTemplateAuthDTO newAuthDTO = new ProjectTemplateAuthDTO(oldAuthPO.getId(), null, null,
                 auth == null ? null : auth.getCode(), StringUtils.isBlank(responsible) ? null : responsible);
-            return updateTemplateAuth(newAuthDTO, operator);
+            return updateTemplateAuth(newAuthDTO);
         }
     }
 
@@ -239,19 +236,19 @@ public class ProjectLogicTemplateAuthServiceImpl implements ProjectLogicTemplate
 
     /**
      * 修改权限 可以修改权限类型和责任人
-     * @param authDTO  参数
-     * @param operator 操作人
+     *
+     * @param authDTO 参数
      * @return result
      */
     @Override
-    public Result<Void> updateTemplateAuth(ProjectTemplateAuthDTO authDTO, String operator) {
+    public Result<Void> updateTemplateAuth(ProjectTemplateAuthDTO authDTO) {
         Result<Void> checkResult = validateTemplateAuth(authDTO, OperationEnum.EDIT);
         if (checkResult.failed()) {
             LOGGER.warn("class=AppAuthServiceImpl||method=updateTemplateAuth||msg={}||msg=check fail!",
                 checkResult.getMessage());
             return checkResult;
         }
-        return updateTemplateAuthWithoutCheck(authDTO, operator);
+        return updateTemplateAuthWithoutCheck(authDTO);
     }
 
     /**
@@ -358,7 +355,7 @@ public class ProjectLogicTemplateAuthServiceImpl implements ProjectLogicTemplate
      * @param operator 操作人
      * @return result
      */
-    private Result<Void> updateTemplateAuthWithoutCheck(ProjectTemplateAuthDTO authDTO, String operator) {
+    private Result<Void> updateTemplateAuthWithoutCheck(ProjectTemplateAuthDTO authDTO) {
 
         ProjectTemplateAuthPO oldAuthPO = templateAuthDAO.getById(authDTO.getId());
         ProjectTemplateAuthPO newAuthPO = ConvertUtil.obj2Obj(authDTO, ProjectTemplateAuthPO.class);
@@ -369,12 +366,6 @@ public class ProjectLogicTemplateAuthServiceImpl implements ProjectLogicTemplate
             SpringTool.publish(
                 new ProjectTemplateAuthEditEvent(this, ConvertUtil.obj2Obj(oldAuthPO, ProjectTemplateAuth.class),
                     ConvertUtil.obj2Obj(templateAuthDAO.getById(authDTO.getId()), ProjectTemplateAuth.class)));
-            operateRecordService.save(new OperateRecord.Builder().triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                .userOperation(operator).operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_INFO_MODIFY)
-                .bizId(oldAuthPO.getId()).content(JSON.toJSONString(newAuthPO))
-                .project(projectService.getProjectBriefByProjectId(authDTO.getProjectId()))
-
-                .build());
 
         }
 
