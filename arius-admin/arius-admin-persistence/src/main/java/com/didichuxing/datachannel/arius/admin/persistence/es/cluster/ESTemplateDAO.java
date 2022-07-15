@@ -299,7 +299,6 @@ public class ESTemplateDAO extends BaseESDAO {
 
         ESIndicesGetTemplateRequest request = new ESIndicesGetTemplateRequest();
         request.setTemplates(templateName);
-        request.setIncludeTypeName(true);
 
         ESIndicesGetTemplateResponse response = null;
         try {
