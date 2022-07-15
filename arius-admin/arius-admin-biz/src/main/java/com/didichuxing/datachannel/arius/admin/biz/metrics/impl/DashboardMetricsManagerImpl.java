@@ -215,8 +215,10 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
         for (MetricList metric : listMetrics) {
             DashBoardMetricListTypeEnum key = DashBoardMetricListTypeEnum.valueOfType(metric.getType());
             if (thresholdValues.get(key) != null && thresholdValues.containsKey(key)) {
-                Double configValue = thresholdValues.get(metric.getType());
+                Double configValue = thresholdValues.get(key);
                 metric.setMetricListContents(metric.getMetricListContents().stream()
+                        .filter(metricListContent->metricListContent!=null)
+                        .filter(metricListContent->metricListContent.getValue()!=null)
                         .filter(metricListContent -> metricListContent.getValue() > configValue)
                         .collect(Collectors.toList()));
             }
