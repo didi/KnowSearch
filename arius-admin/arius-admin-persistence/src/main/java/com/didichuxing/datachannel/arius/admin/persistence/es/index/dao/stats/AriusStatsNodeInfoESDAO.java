@@ -473,7 +473,7 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
     private Long commonGetCurrentAggMetrics(String cluster, String oneLevelMetrics, String metricsType1,
                                             String metricsType2) {
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_FIELD_SUM_AND_RANGE_FIELD_TOTAL, cluster,
-            TIMESTAMP, NOW_2M, NOW_1M, metricsType1, SUM, String.format("%s%s", oneLevelMetrics, metricsType2));
+            TIMESTAMP, NOW_2M, NOW_1M, metricsType1, SUM.getType(), String.format("%s%s", oneLevelMetrics, metricsType2));
         String realIndexName = getIndexNameByNowTimestamp(indexName);
         return gatewayClient.performRequest(cluster, realIndexName, TYPE, dsl,
             response -> Optional.ofNullable(response).map(ESQueryResponse::getAggs).map(ESAggrMap::getEsAggrMap)
