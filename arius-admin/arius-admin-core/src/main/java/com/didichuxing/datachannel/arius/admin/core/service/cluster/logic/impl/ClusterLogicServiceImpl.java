@@ -487,7 +487,7 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
 
     @Override
     public Long fuzzyClusterLogicHitByCondition(ClusterLogicConditionDTO param) {
-        return logicClusterDAO.getTotalHitByCondition(ConvertUtil.obj2Obj(param, ClusterLogicPO.class));
+        return logicClusterDAO.getTotalHitByCondition(param);
     }
 
     @Override
