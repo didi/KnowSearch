@@ -165,6 +165,7 @@ public abstract class BaseTemplateSrvImpl implements BaseTemplateSrv {
 
             IndexTemplateConfigDTO indexTemplateConfigDTO = new IndexTemplateConfigDTO();
             indexTemplateConfigDTO.setId((long)templateId);
+            indexTemplateConfigDTO.setLogicId(templateId);
             if (status) {
                 addSrvCode(indexTemplate, srvCode);
                 if (TemplateServiceEnum.INDEX_PLAN.getCode().toString().equals(srvCode)){
