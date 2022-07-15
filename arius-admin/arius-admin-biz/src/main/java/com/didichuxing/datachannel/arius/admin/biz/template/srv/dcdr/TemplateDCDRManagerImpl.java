@@ -365,6 +365,7 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
         try {
             //1. 批量校验模板DCDR是否可以切换, 仅有一个模板校验不通过结果为不通过。
             List<Long> templateIdList = dcdrMasterSlaveSwitchDTO.getTemplateIds();
+            String dcdrType = dcdrMasterSlaveSwitchDTO.getType() == 1 ? "平滑" : "强制";
             Result<Void> batchCheckValidForDCDRSwitchResult = batchCheckValidForDCDRSwitch(templateIdList, operator);
             if (batchCheckValidForDCDRSwitchResult.failed()) {
                 return Result.buildFrom(batchCheckValidForDCDRSwitchResult);
@@ -396,13 +397,17 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
             //2.5 记录操作
             for (DCDRSingleTemplateMasterSlaveSwitchDetail dcdrTask : dcdrTasksDetail
                 .getDcdrSingleTemplateMasterSlaveSwitchDetailList()) {
-                operateRecordService
-                    .save(new OperateRecord.Builder().operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE_DCDR_SETTING)
-                        .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).bizId(dcdrTask.getTemplateId())
-                        .userOperation(operator)
-                        .content("主从切换，主集群：" + dcdrTask.getMasterCluster() + "切换至从集群：" + dcdrTask.getSlaveCluster())
-
-                        .build());
+                operateRecordService.save(
+                        new OperateRecord.Builder()
+                                .operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE_DCDR_SETTING)
+                                .bizId(dcdrTask.getTemplateId())
+                                .userOperation(operator).content(String.format("【%s】%s",
+                                        indexTemplateService.getNameByTemplateLogicId(dcdrTask.getTemplateId().intValue()),
+                                        dcdrType))
+                                .project(projectService.getProjectBriefByProjectId(projectId))
+                        
+                                    .buildDefaultManualTrigger());
+                
             }
 
         } catch (Exception e) {

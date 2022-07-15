@@ -491,10 +491,9 @@ public class EcmHandleServiceImpl implements EcmHandleService {
                     .save(new OperateRecord.Builder().operationTypeEnum(operateTypeEnum)
                         .content(String.format("物理集群 %s 开始进行 %s 操作", clusterId, methodName))
                         .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
-                        .triggerWayEnum(TriggerWayEnum.TIMING_TASK).bizId(clusterId).userOperation(operator).build()));
+                        .triggerWayEnum(TriggerWayEnum.SCHEDULING_TASKS).bizId(clusterId).userOperation(operator).build()));
 
-            //operateRecordService.save(CLUSTER, EXE, String.valueOf(clusterId),
-            //    String.format("物理集群 %s 开始进行 %s 操作", clusterId, methodName), operator);
+          
         }
 
         return result;

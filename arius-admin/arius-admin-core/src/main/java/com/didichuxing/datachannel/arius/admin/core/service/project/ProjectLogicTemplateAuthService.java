@@ -77,11 +77,11 @@ public interface ProjectLogicTemplateAuthService {
 
     /**
      * 修改逻辑模板权限，仅可以修改权限类型和责任人
-     * @param authDTO  参数
-     * @param operator 操作人
+     *
+     * @param authDTO 参数
      * @return result
      */
-    Result<Void> updateTemplateAuth(ProjectTemplateAuthDTO authDTO, String operator);
+    Result<Void> updateTemplateAuth(ProjectTemplateAuthDTO authDTO);
 
     /**
      * 删除逻辑模板权限

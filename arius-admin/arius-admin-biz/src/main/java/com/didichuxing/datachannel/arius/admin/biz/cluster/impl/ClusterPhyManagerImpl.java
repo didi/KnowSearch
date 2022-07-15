@@ -1432,28 +1432,29 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
         List<Long> associatedRegionIds = clusterPhyContext.getAssociatedRegionIds();
         for (Long associatedRegionId : associatedRegionIds) {
+            final ClusterRegion region = clusterRegionService.getRegionById(associatedRegionId);
             Result<Void> unbindRegionResult = clusterRegionService.unbindRegion(associatedRegionId, null, operator);
             if (unbindRegionResult.failed()) {
                 throw new AdminOperateException(String.format("解绑region(%s)失败", associatedRegionId));
             } else {
+                
                 //解绑region
                 operateRecordService.save(new OperateRecord.Builder()
-                    .content(String.format("cluster:[%s]解绑region：%d", clusterPhy.getCluster(), associatedRegionId))
+                    .content(String.format("解绑region：%s", region.getName()))
                     .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_REGION_CHANGE)
                     .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
                     .project(projectService.getProjectBriefByProjectId(projectId)).userOperation(operator)
                     .bizId(clusterPhy.getId()).build());
             }
-
             Result<Void> deletePhyClusterRegionResult = clusterRegionService.deletePhyClusterRegion(associatedRegionId,
                 operator);
             if (deletePhyClusterRegionResult.failed()) {
                 throw new AdminOperateException(String.format("删除region(%s)失败", associatedRegionId));
             } else {
-
+                
                 //删除region
                 operateRecordService.save(new OperateRecord.Builder()
-                    .content(String.format("cluster:[%s]删除region：%d", clusterPhy.getCluster(), associatedRegionId))
+                    .content(String.format("删除region：%s",  region.getName()))
                     .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_REGION_CHANGE)
                     .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
                     .project(projectService.getProjectBriefByProjectId(projectId)).userOperation(operator)
@@ -1463,6 +1464,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
         List<Long> clusterLogicIds = clusterPhyContext.getAssociatedClusterLogicIds();
         for (Long clusterLogicId : clusterLogicIds) {
+            final ClusterLogic deleteById = clusterLogicService.getClusterLogicById(clusterLogicId);
             Result<Void> deleteLogicClusterResult = clusterLogicService.deleteClusterLogicById(clusterLogicId, operator,
                 projectId);
             if (deleteLogicClusterResult.failed()) {
@@ -1470,10 +1472,10 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             } else {
                 //删除逻辑集群
                 operateRecordService.save(new OperateRecord.Builder()
-                    .content(String.format("cluster:[%s]删除逻辑集群：%d", clusterPhy.getCluster(), clusterLogicId))
+                    .content(String.format("删除逻辑集群：%s", deleteById.getName()))
                     .operationTypeEnum(OperateTypeEnum.MY_CLUSTER_OFFLINE).triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
                     .project(projectService.getProjectBriefByProjectId(projectId)).userOperation(operator)
-                    .bizId(clusterPhy.getCluster()).build());
+                    .bizId(clusterPhy.getId()).build());
             }
         }
 
