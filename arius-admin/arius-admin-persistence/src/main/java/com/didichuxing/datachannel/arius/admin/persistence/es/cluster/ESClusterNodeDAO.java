@@ -2,8 +2,13 @@ package com.didichuxing.datachannel.arius.admin.persistence.es.cluster;
 
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_OPERATE_TIMEOUT;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
+import com.didichuxing.datachannel.arius.admin.common.tuple.Tuples;
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
 import com.didiglobal.logi.elasticsearch.client.ESClient;
+import com.didiglobal.logi.elasticsearch.client.gateway.direct.DirectResponse;
 import com.didiglobal.logi.elasticsearch.client.request.cluster.nodestats.ESClusterNodesStatsRequest;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodesstats.ClusterNodeStats;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodesstats.ESClusterNodesStatsResponse;
@@ -11,7 +16,9 @@ import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -19,7 +26,10 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public class ESClusterNodeDAO extends BaseESDAO {
-
+    private static final String GET_NODE_PLUGINS = "/_nodes/plugins";
+    private static final String NODES            = "nodes";
+    private static final String NAME             = "name";
+    private static final String PLUGINS          = "plugins";
     /**
      * 获取节点上的索引个数
      * @param cluster 集群
@@ -76,6 +86,32 @@ public class ESClusterNodeDAO extends BaseESDAO {
 
         }
         return Lists.newArrayList();
+    }
+    
+    public List<TupleTwo</*node name*/String,/*plugin names*/List<String>>> syncGetNodesPlugins(String clusterName){
+        final DirectResponse directResponse = getDirectResponse(clusterName, "GET", GET_NODE_PLUGINS);
+        if (directResponse == null) {
+            return Lists.newArrayList();
+        }
+        JSONObject jsonObject = JSON.parseObject(directResponse.getResponseContent());
+        if (jsonObject == null || !jsonObject.containsKey(NODES)) {
+            return Lists.newArrayList();
+        }
+       return jsonObject.getJSONObject(NODES)
+                .values()
+                .stream()
+                .filter(Objects::nonNull)
+                .map(JSONObject.class::cast)
+                .map(this::buildNodeNamePlugins)
+                .collect(Collectors.toList());
+                
+    }
+    private  TupleTwo<String,List<String>> buildNodeNamePlugins(JSONObject jsonObject){
+        final String nodeName = jsonObject.getString(NAME);
+        final List<String> pluginNames = jsonObject.getJSONArray(PLUGINS).stream().filter(Objects::nonNull)
+                .map(plugin -> ((JSONObject) plugin).getString(NAME)).collect(Collectors.toList());
+        return Tuples.of(nodeName,pluginNames);
+    
     }
 
 }

@@ -387,7 +387,7 @@ public class ExpireManagerImpl extends BaseTemplateSrvImpl implements ExpireMana
      */
     @Override
     public boolean deleteTemplateDeletedIndices(IndexTemplatePhy physical, int retryCount) throws ESOperateException {
-        if (!isTemplateSrvOpen(physical.getCluster())) {
+        if (!isTemplateSrvOpen(physical.getLogicId())) {
             return false;
         }
 
@@ -467,9 +467,10 @@ public class ExpireManagerImpl extends BaseTemplateSrvImpl implements ExpireMana
      */
     @Override
     public boolean deleteExpireIndex(String cluster) {
-        if (!isTemplateSrvOpen(cluster)) {
-            return false;
-        }
+        //集群侧不存在判断
+        //if (!isTemplateSrvOpen(cluster)) {
+        //    return false;
+        //}
 
         int retryCount = 5;
         return deleteNormalTemplateExpireIndexByCluster(cluster, retryCount)
@@ -490,6 +491,10 @@ public class ExpireManagerImpl extends BaseTemplateSrvImpl implements ExpireMana
 
         Set<String> shouldDels = Sets.newHashSet();
         for (IndexTemplatePhy templatePhysical : templatePhysicals) {
+            //集群移动到模版侧
+            if (Boolean.FALSE.equals(isTemplateSrvOpen(templatePhysical.getLogicId()))){
+                continue;
+            }
             try {
                 shouldDels.addAll(getExpireIndexByPhysicalId(templatePhysical.getId()));
             } catch (Exception e) {
@@ -576,9 +581,14 @@ public class ExpireManagerImpl extends BaseTemplateSrvImpl implements ExpireMana
 
         boolean succ = true;
         for (IndexTemplatePhy physical : templatePhysicals) {
+            //没有开启就跳过
+            if (Boolean.FALSE.equals(isTemplateSrvOpen(physical.getLogicId()))){
+                continue;
+            }
             try {
                 IndexTemplate templateLogic = indexTemplateService
                     .getLogicTemplateWithPhysicalsById(physical.getLogicId());
+                
                 if (templateLogic != null) {
                     succ = deleteExpireIndices(physical.getId(), retryCount) && succ;
                 } else {
