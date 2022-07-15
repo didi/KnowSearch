@@ -1,8 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.cluster;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterQuickCommandMethodsEnum.SHARD;
-import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterQuickCommandMethodsEnum.SHARD_ASSIGNMENT;
-
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
@@ -17,15 +14,19 @@ import com.didiglobal.logi.elasticsearch.client.ESClient;
 import com.didiglobal.logi.elasticsearch.client.gateway.direct.DirectRequest;
 import com.didiglobal.logi.elasticsearch.client.gateway.direct.DirectResponse;
 import com.google.common.collect.Lists;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.TimeUnit;
-import javax.annotation.PostConstruct;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.rest.RestStatus;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
+
+import javax.annotation.PostConstruct;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
+
+import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterQuickCommandMethodsEnum.SHARD;
+import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterQuickCommandMethodsEnum.SHARD_ASSIGNMENT;
 
 /**
  * Created by linyunan on 3/22/22
@@ -42,6 +43,14 @@ public class ESShardDAO extends BaseESDAO {
      * type名称
      */
     private String              typeName                   = "type";
+    private String              shard                      = "shard";
+    private String              store                      = "store";
+    private String              docs                       = "docs";
+    private String              index                      = "index";
+    private String              ip                         = "ip";
+    private String              node                       = "node";
+    private String              prirep                     = "prirep";
+    private String              state                      = "state";
 
     @PostConstruct
     public void init() {
@@ -68,22 +77,26 @@ public class ESShardDAO extends BaseESDAO {
         }
         return ecSegmentsOnIps;
     }
-    
-    private List<ShardCatCellPO> buildShardCatCellPOs(String responseContent,String clusterName) {
-         List<ShardCatCellPO> shardCatCellPOList = new ArrayList<>();
+
+    private List<ShardCatCellPO> buildShardCatCellPOs(String responseContent, String clusterName) {
+        List<ShardCatCellPO> shardCatCellPOList = new ArrayList<>();
         JSONArray jsonArray = JSONArray.parseArray(responseContent);
         for (int i = 0; i < jsonArray.size(); i++) {
             JSONObject shardInfo = jsonArray.getJSONObject(i);
+            String shardStr = shardInfo.getString(shard);
+            String storeStr = shardInfo.getString(store);
+            String docsStr = shardInfo.getString(docs);
+
             ShardCatCellPO shardCatCellPO = new ShardCatCellPO();
             shardCatCellPO.setClusterPhy(clusterName);
-            shardCatCellPO.setShard(Long.parseLong(shardInfo.getString("shard")));
-            shardCatCellPO.setStore(SizeUtil.getUnitSize(shardInfo.getString("store")));
-            shardCatCellPO.setDocs(Integer.parseInt(shardInfo.getString("docs")));
-            shardCatCellPO.setIndex(shardInfo.getString("index"));
-            shardCatCellPO.setIp(shardInfo.getString("ip"));
-            shardCatCellPO.setNode(shardInfo.getString("node"));
-            shardCatCellPO.setPrirep(shardInfo.getString("prirep"));
-            shardCatCellPO.setState(shardInfo.getString("state"));
+            shardCatCellPO.setShard(shardStr == null ? 0L : Long.parseLong(shardStr));
+            shardCatCellPO.setStore(storeStr == null ? 0L : SizeUtil.getUnitSize(storeStr));
+            shardCatCellPO.setDocs(docsStr == null ? 0 : Integer.parseInt(docsStr));
+            shardCatCellPO.setIndex(shardInfo.getString(index));
+            shardCatCellPO.setIp(shardInfo.getString(ip));
+            shardCatCellPO.setNode(shardInfo.getString(node));
+            shardCatCellPO.setPrirep(shardInfo.getString(prirep));
+            shardCatCellPO.setState(shardInfo.getString(state));
             shardCatCellPOList.add(shardCatCellPO);
         }
         return shardCatCellPOList;
