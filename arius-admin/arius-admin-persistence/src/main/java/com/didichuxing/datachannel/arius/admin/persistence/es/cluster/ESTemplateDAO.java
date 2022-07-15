@@ -1,9 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.cluster;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_OPERATE_TIMEOUT;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.INDEX_SHARD_NUM;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.SINGLE_TYPE;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.TEMPLATE_DEFAULT_ORDER;
 
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
@@ -17,10 +17,12 @@ import com.didiglobal.logi.elasticsearch.client.response.indices.puttemplate.ESI
 import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
 import com.didiglobal.logi.elasticsearch.client.response.setting.template.MultiTemplatesConfig;
 import com.didiglobal.logi.elasticsearch.client.response.setting.template.TemplateConfig;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
-
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.*;
 
 /**
  * @author d06679
@@ -234,7 +236,7 @@ public class ESTemplateDAO extends BaseESDAO {
      * @return result
      */
     public TemplateConfig getTemplate(String clusterName, String templateName) {
-        MultiTemplatesConfig templatesConfig = getTemplates(clusterName, templateName);
+        MultiTemplatesConfig templatesConfig = getTemplates(clusterName, templateName,3);
 
         if (templatesConfig == null) {
             return null;
@@ -252,7 +254,7 @@ public class ESTemplateDAO extends BaseESDAO {
         Map<String, TemplateConfig> map = new HashMap<>();
         for (String clusterName : clusters) {
 
-            MultiTemplatesConfig templatesConfig = getTemplates(clusterName, null);
+            MultiTemplatesConfig templatesConfig = getTemplates(clusterName, null,3);
 
             if (null == templatesConfig) {
                 return null;
@@ -269,7 +271,7 @@ public class ESTemplateDAO extends BaseESDAO {
      * @return result
      */
     public MappingConfig getTemplateMapping(String clusterName, String templateName) {
-        MultiTemplatesConfig templatesConfig = getTemplates(clusterName, templateName);
+        MultiTemplatesConfig templatesConfig = getTemplates(clusterName, templateName,3);
 
         if (templatesConfig == null || templatesConfig.getSingleConfig() == null) {
             return null;
@@ -284,7 +286,7 @@ public class ESTemplateDAO extends BaseESDAO {
      * @param templateName      模版名
      * @return result
      */
-    public MultiTemplatesConfig getTemplates(String clusterName, String templateName) {
+    public MultiTemplatesConfig getTemplates(String clusterName, String templateName,Integer tryTimes) {
 
         LOGGER.warn("class=ESTemplateDAO||method=getTemplates||clusterName={}||templateName={}", clusterName,
             templateName);
@@ -297,10 +299,14 @@ public class ESTemplateDAO extends BaseESDAO {
 
         ESIndicesGetTemplateRequest request = new ESIndicesGetTemplateRequest();
         request.setTemplates(templateName);
+        request.setIncludeTypeName(true);
 
         ESIndicesGetTemplateResponse response = null;
         try {
-            response = esClient.admin().indices().getTemplate(request).actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+            do {
+                response = esClient.admin().indices().getTemplate(request).actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+            }while (tryTimes-- > 0 && null == response);
+            
         } catch (Exception e) {
             LOGGER.warn(
                 "class=ESTemplateDAO||method=getTemplates||get templates fail||clusterName={}||templateName={}||msg={}",
