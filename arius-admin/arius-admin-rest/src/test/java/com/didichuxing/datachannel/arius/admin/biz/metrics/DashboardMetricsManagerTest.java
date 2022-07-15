@@ -9,10 +9,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linech
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.VariousLineChartMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.list.MetricList;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.list.MetricListContent;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.ClusterPhyHealthMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.list.MetricListContentVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.list.MetricListVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.dashboard.ClusterPhyHealthMetricsVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.top.MetricsContentCellVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.top.MetricsContentVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.top.VariousLineChartMetricsVO;
@@ -372,25 +370,6 @@ class DashboardMetricsManagerTest {
 
         // Run the test
         final Result<List<MetricListVO>> result = dashboardMetricsManager.getListIndexMetricsInfo(param, 0);
-
-        // Verify the results
-        assertThat(result).isEqualTo(expectedResult);
-    }
-
-    @Test
-    void getClusterHealthInfoTest() {
-        // Setup
-        final Result<ClusterPhyHealthMetricsVO> expectedResult = Result.buildFail(new ClusterPhyHealthMetricsVO(0L, 0,
-            0, 0, 0, 0, Arrays.asList("value"), Arrays.asList("value"), Arrays.asList("value"), Arrays.asList("value"), 0.0, 0.0, 0.0, 0.0));
-        when(projectService.checkProjectExist(0)).thenReturn(false);
-
-        // Configure DashBoardMetricsService.getClusterHealthInfo(...).
-        final ClusterPhyHealthMetrics clusterPhyHealthMetrics = new ClusterPhyHealthMetrics(0L, 0, 0, 0, 0, 0,
-            "greenClusterListStr","yellowClusterListStr", "redClusterListStr", "unknownClusterListStr", 0.0, 0.0, 0.0, 0.0);
-        when(dashBoardMetricsService.getClusterHealthInfo()).thenReturn(clusterPhyHealthMetrics);
-
-        // Run the test
-        final Result<ClusterPhyHealthMetricsVO> result = dashboardMetricsManager.getClusterHealthInfo(0);
 
         // Verify the results
         assertThat(result).isEqualTo(expectedResult);
