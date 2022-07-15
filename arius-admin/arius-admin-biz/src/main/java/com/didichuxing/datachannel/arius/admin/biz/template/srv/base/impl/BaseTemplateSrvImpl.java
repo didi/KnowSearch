@@ -16,6 +16,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.constant.ESClusterVersionEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
 import com.didichuxing.datachannel.arius.admin.common.tuple.Tuples;
@@ -166,10 +167,14 @@ public abstract class BaseTemplateSrvImpl implements BaseTemplateSrv {
             indexTemplateConfigDTO.setId((long)templateId);
             if (status) {
                 addSrvCode(indexTemplate, srvCode);
-                indexTemplateConfigDTO.setDisableIndexRollover(false);
+                if (TemplateServiceEnum.INDEX_PLAN.getCode().toString().equals(srvCode)){
+                    indexTemplateConfigDTO.setDisableIndexRollover(false);
+                }
             } else {
                 removeSrvCode(indexTemplate, srvCode);
-                indexTemplateConfigDTO.setDisableIndexRollover(true);
+                if (TemplateServiceEnum.INDEX_PLAN.getCode().toString().equals(srvCode)){
+                    indexTemplateConfigDTO.setDisableIndexRollover(true);
+                }
             }
 
             Result<Void> result = indexTemplateService.updateTemplateConfig(indexTemplateConfigDTO, operator);
