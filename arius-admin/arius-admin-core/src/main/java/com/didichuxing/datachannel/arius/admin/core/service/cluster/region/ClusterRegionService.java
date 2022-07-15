@@ -1,6 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.core.service.cluster.region;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRegionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegionConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegionFSInfo;
@@ -66,12 +67,11 @@ public interface ClusterRegionService {
 
     /**
      * 创建物理集群region
-     * @param clusterName   物理集群名称
-     * @param regionName    region名称
-     * @param operator      操作人
-     * @return              regionId
+     * @param clusterRegionDTO  region信息
+     * @param operator          操作人
+     * @return                  regionId
      */
-    Result<Long> createPhyClusterRegion(String clusterName, String regionName, String operator);
+    Result<Long> createPhyClusterRegion(ClusterRegionDTO clusterRegionDTO, String operator);
 
     /**
      * 删除物理集群region

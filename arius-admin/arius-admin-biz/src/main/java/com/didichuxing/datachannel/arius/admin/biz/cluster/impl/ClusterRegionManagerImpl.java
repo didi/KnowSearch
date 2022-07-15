@@ -289,9 +289,9 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
                 .save(new OperateRecord.Builder().operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_REGION_CHANGE)
                     .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
                     .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
-                    .content(String.format("region删除：%s,删除的regionId：%s",
-                        region.getName(), regionId))
-                    .userOperation(operator).bizId(clusterPhyService.getClusterByName(region.getPhyClusterName()))
+                    .content(String.format("集群: %s, region删除：%s,删除的regionId：%s", region.getPhyClusterName(), region.getName(), regionId))
+                    .userOperation(operator)
+                        .bizId(regionId)
                     .build());
         }
 

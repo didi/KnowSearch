@@ -7,6 +7,7 @@ import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterNodeManager;
 import com.didichuxing.datachannel.arius.admin.common.Triple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRegionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRegionWithNodeInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
@@ -136,8 +137,7 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
                     String.format("region名称[%s], errMsg=%s", param.getName(), "划分至该region的节点为空"));
             }
 
-            Result<Long> addRegionRet = clusterRegionService.createPhyClusterRegion(param.getPhyClusterName(),
-                param.getName(), operator);
+            Result<Long> addRegionRet = clusterRegionService.createPhyClusterRegion(param, operator);
 
             if (addRegionRet.success()) {
                 param.setId(addRegionRet.getData());
