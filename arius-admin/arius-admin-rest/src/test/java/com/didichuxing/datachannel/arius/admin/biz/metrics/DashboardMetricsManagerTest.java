@@ -381,7 +381,7 @@ class DashboardMetricsManagerTest {
     void getClusterHealthInfoTest() {
         // Setup
         final Result<ClusterPhyHealthMetricsVO> expectedResult = Result.buildFail(new ClusterPhyHealthMetricsVO(0L, 0,
-            0, 0, 0, 0, Arrays.asList("value"), Arrays.asList("value"), Arrays.asList("value"), 0.0, 0.0, 0.0, 0.0));
+            0, 0, 0, 0, Arrays.asList("value"), Arrays.asList("value"), Arrays.asList("value"), Arrays.asList("value"), 0.0, 0.0, 0.0, 0.0));
         when(projectService.checkProjectExist(0)).thenReturn(false);
 
         // Configure DashBoardMetricsService.getClusterHealthInfo(...).

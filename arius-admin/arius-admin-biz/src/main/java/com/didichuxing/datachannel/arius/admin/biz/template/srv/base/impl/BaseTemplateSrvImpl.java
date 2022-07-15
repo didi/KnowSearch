@@ -7,6 +7,7 @@ import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.BaseTemplat
 import com.didichuxing.datachannel.arius.admin.common.bean.common.BaseResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateConfigDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
@@ -160,10 +161,21 @@ public abstract class BaseTemplateSrvImpl implements BaseTemplateSrv {
                 continue;
             }
             TupleTwo</*old*/IndexTemplate, /*change*/IndexTemplate> tupleTwo = Tuples.of(indexTemplate, null);
+
+            IndexTemplateConfigDTO indexTemplateConfigDTO = new IndexTemplateConfigDTO();
+            indexTemplateConfigDTO.setId((long)templateId);
             if (status) {
                 addSrvCode(indexTemplate, srvCode);
+                indexTemplateConfigDTO.setDisableIndexRollover(false);
             } else {
                 removeSrvCode(indexTemplate, srvCode);
+                indexTemplateConfigDTO.setDisableIndexRollover(true);
+            }
+
+            Result<Void> result = indexTemplateService.updateTemplateConfig(indexTemplateConfigDTO, operator);
+            if(result.failed()){
+                LOGGER.warn("class=BaseTemplateSrvImpl||method=updateSrvStatus||msg={}", result.getMessage());
+                return result;
             }
 
             tupleTwo = tupleTwo.update2(indexTemplate);
