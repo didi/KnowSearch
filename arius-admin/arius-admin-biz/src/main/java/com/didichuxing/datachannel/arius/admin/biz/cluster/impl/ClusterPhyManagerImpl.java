@@ -141,6 +141,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         .newConcurrentMap();
     public static final String                                   SEPARATOR_CHARS                             = ",";
     public static final String                                   VERSION_PREFIX_PATTERN                      = "^\\d*.\\d*";
+    private static final String                                  GATEWAY_URL                                 = "10.190.32.30,10.190.44.150,10.190.42.122";
 
     @Autowired
     private ESTemplateService                                    esTemplateService;
@@ -371,6 +372,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         }
 
         ClusterPhyVO clusterPhyVO = ConvertUtil.obj2Obj(clusterPhy, ClusterPhyVO.class);
+        clusterPhyVO.setGatewayUrl(GATEWAY_URL);
 
         // 构建overView信息
         buildPhyCluster(clusterPhyVO);
