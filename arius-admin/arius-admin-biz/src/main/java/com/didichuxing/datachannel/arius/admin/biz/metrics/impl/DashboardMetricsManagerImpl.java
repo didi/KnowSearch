@@ -1,21 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.biz.metrics.impl;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_DASHBOARD_THRESHOLD_GROUP;
-import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.INDEX_MAPPING_NUM_THRESHOLD;
-import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.INDEX_SEGMENT_MEMORY_SIZE_THRESHOLD;
-import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.INDEX_SEGMENT_NUM_THRESHOLD;
-import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.INDEX_SHARD_SMALL_THRESHOLD;
-import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.INDEX_TEMPLATE_SEGMENT_COUNT_THRESHOLD;
-import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.INDEX_TEMPLATE_SEGMENT_MEMORY_SIZE_THRESHOLD;
-import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.NODE_SHARD_BIG_THRESHOLD;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricListTypeEnum.INDEX_MAPPING_NUM;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricListTypeEnum.INDEX_SEGMENT_MEM_SIZE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricListTypeEnum.INDEX_SEGMENT_NUM;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricListTypeEnum.INDEX_SMALL_SHARD;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricListTypeEnum.NODE_SHARD_NUM;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricListTypeEnum.TEMPLATE_SEGMENT_MEM_NUM;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricListTypeEnum.TEMPLATE_SEGMENT_NUM;
-
 import com.didichuxing.datachannel.arius.admin.biz.component.MetricsValueConvertUtils;
 import com.didichuxing.datachannel.arius.admin.biz.metrics.DashboardMetricsManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -40,15 +24,19 @@ import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigIn
 import com.didichuxing.datachannel.arius.admin.metadata.service.DashBoardMetricsService;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
+import org.apache.commons.collections4.CollectionUtils;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import org.apache.commons.collections4.CollectionUtils;
-import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.*;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricListTypeEnum.*;
 
 /**
  * Created by linyunan on 3/14/22
@@ -153,7 +141,7 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
         clusterPhyHealthMetricsVO.setUnknownClusterList(ListUtils.string2StrList(unknownClusterListStr));
         clusterPhyHealthMetricsVO.setRedClusterList(ListUtils.string2StrList(redClusterListStr));
         clusterPhyHealthMetricsVO.setYellowClusterList(ListUtils.string2StrList(yellowClusterListStr));
-        //clusterPhyHealthMetricsVO.setGreenClusterList();
+        clusterPhyHealthMetricsVO.setGreenClusterList(ListUtils.string2StrList(greenClusterListStr));
         return Result.buildSucc(clusterPhyHealthMetricsVO);
     }
     
