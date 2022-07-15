@@ -857,12 +857,12 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
 
     /**
      * 获取指定数据中的模板信息
-     * @param dataCenter 数据中心
+     *
      * @return list
      */
     @Override
-    public List<IndexTemplateWithPhyTemplates> listTemplateWithPhysicalByDataCenter(String dataCenter) {
-        return batchConvertLogicTemplateCombinePhysical(indexTemplateDAO.listByDataCenter(dataCenter));
+    public List<IndexTemplateWithPhyTemplates> listTemplateWithPhysical() {
+        return batchConvertLogicTemplateCombinePhysical(indexTemplateDAO.listAll());
     }
 
     /**
