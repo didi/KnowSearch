@@ -8,6 +8,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ESClusterV
 
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.common.constant.ESClusterVersionEnum;
+import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -173,4 +174,12 @@ public enum TemplateServiceEnum {
         clusterTemplateSrv.setEsVersion(serviceEnum.getEsClusterVersion().getVersion());
         return clusterTemplateSrv;
     }
+    
+    public static List<TemplateServiceEnum> usePartitionService(){
+        
+        
+        return Lists.newArrayList(TemplateServiceEnum.TEMPLATE_PRE_CREATE,TemplateServiceEnum.TEMPLATE_DEL_EXPIRE,
+                TemplateServiceEnum.TEMPLATE_COLD);
+    }
+    
 }

@@ -93,7 +93,7 @@ public class ThirdpartGatewayV3Controller {
     @ApiOperation(value = "获取模板信息", notes = "主主从结构组织")
     @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "String", name = "dataCenter", value = "数据中心", required = true) })
     public Result<Map<String, GatewayTemplateDeployInfoVO>> listDeployInfo(@RequestParam(value = "dataCenter") String dataCenter) {
-        return gatewayManager.listDeployInfo(dataCenter);
+        return gatewayManager.listDeployInfo();
     }
 
     @PostMapping(path = "dsl/scroll-dsl-template")

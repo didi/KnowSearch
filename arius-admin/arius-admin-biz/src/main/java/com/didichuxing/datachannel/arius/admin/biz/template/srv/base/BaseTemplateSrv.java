@@ -59,6 +59,7 @@ public interface BaseTemplateSrv {
     * @param phyClusterName 物理集群名字
     * @return 校验结果
     */
+    @Deprecated
     boolean isTemplateSrvOpen(String phyClusterName);
 
     /**

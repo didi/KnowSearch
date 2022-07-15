@@ -25,6 +25,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
+import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterNodeService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didiglobal.logi.log.ILog;
@@ -63,7 +64,9 @@ public abstract class BaseTemplateSrvImpl implements BaseTemplateSrv {
     @Autowired
     protected ProjectService          projectService;
     @Autowired
-    protected AriusConfigInfoService  ariusConfigInfoService;
+    protected AriusConfigInfoService ariusConfigInfoService;
+    @Autowired
+    private ESClusterNodeService esClusterNodeService;
 
     @Override
     public boolean isTemplateSrvOpen(Integer templateId) {
@@ -234,7 +237,7 @@ public abstract class BaseTemplateSrvImpl implements BaseTemplateSrv {
     @Override
     public boolean isTemplateSrvOpen(List<IndexTemplatePhy> indexTemplatePhies) {
         for (IndexTemplatePhy indexTemplatePhy : indexTemplatePhies) {
-            if (!isTemplateSrvOpen(indexTemplatePhy.getCluster())) {
+            if (!isTemplateSrvOpen(indexTemplatePhy.getLogicId())) {
                 return false;
             }
         }
