@@ -41,10 +41,12 @@ public interface TemplateSrvManager {
 
     /**
      * 分页模糊查询模板服务
+     *
      * @param condition
+     * @param projectId
      * @return
      */
-    PaginationResult<TemplateWithSrvVO> pageGetTemplateWithSrv(TemplateQueryDTO condition) throws NotFindSubclassException;
+    PaginationResult<TemplateWithSrvVO> pageGetTemplateWithSrv(TemplateQueryDTO condition, Integer projectId) throws NotFindSubclassException;
 
     /**
      * 开启模板服务

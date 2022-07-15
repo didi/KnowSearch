@@ -1,10 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.persistence.mysql.ecm;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESClusterRolePO;
+import java.util.List;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
-
-import java.util.List;
 
 /**
  * 集群角色DAO
@@ -90,5 +89,6 @@ public interface ESClusterRoleDAO {
      * @return
      */
     int deleteRoleClusterByCluterIdAndRole(@Param("clusterId") Long clusterId, @Param("role") String role);
-
+    
+    int countByClusterId(@Param("clusterId")Integer clusterId);
 }
