@@ -160,7 +160,8 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
             }
 
             if(!isPartition && (TemplateServiceEnum.TEMPLATE_PRE_CREATE.getCode().equals(srvEnum.getCode()) ||
-                    TemplateServiceEnum.TEMPLATE_DEL_EXPIRE.getCode().equals(srvEnum.getCode()))){
+                    TemplateServiceEnum.TEMPLATE_DEL_EXPIRE.getCode().equals(srvEnum.getCode()) ||
+                    TemplateServiceEnum.TEMPLATE_COLD.getCode().equals(srvEnum.getCode()))){
                 unavailableSrvList.add(new UnavailableTemplateSrv(srvEnum.getCode(), srvEnum.getServiceName(),
                         srvEnum.getEsClusterVersion().getVersion(), "非分区模版不支持预创建和过期删除"));
             }
