@@ -15,7 +15,7 @@ public class UnavailableTemplateSrv extends TemplateSrv {
     private String unavailableReason;
 
     public UnavailableTemplateSrv(Integer srvCode, String srvName, String esVersion, String unavailableReason) {
-        super(srvCode, srvName, esVersion);
+        super(srvCode, srvName);
         this.unavailableReason = unavailableReason;
     }
 

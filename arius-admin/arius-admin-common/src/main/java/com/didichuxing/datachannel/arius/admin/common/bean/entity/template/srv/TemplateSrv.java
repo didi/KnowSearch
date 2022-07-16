@@ -28,11 +28,7 @@ public class TemplateSrv extends BaseEntity {
      */
     protected String  srvName;
 
-    /**
-     * todo: 这个暂时没用到，后续干掉
-     * 模板服务所需的最低es版本号
-     */
-    protected String  esVersion;
+
 
     public static List<TemplateSrv> codeStr2SrvList(String codeStr) {
         if (StringUtils.isBlank(codeStr)) {
@@ -52,6 +48,6 @@ public class TemplateSrv extends BaseEntity {
 
     public static TemplateSrv getSrv(Integer templateSrvCode) {
         TemplateServiceEnum srvEnum = TemplateServiceEnum.getById(templateSrvCode);
-        return new TemplateSrv(srvEnum.getCode(), srvEnum.getServiceName(), srvEnum.getEsClusterVersion().getVersion());
+        return new TemplateSrv(srvEnum.getCode(), srvEnum.getServiceName());
     }
 }

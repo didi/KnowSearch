@@ -9,8 +9,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.GatewayHeartbe
 import com.didichuxing.datachannel.arius.admin.common.bean.common.IndexTemplatePhysicalConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.alias.IndexTemplateAliasDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.ScrollDslTemplateRequest;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.ScrollDslTemplateResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.gateway.GatewayClusterNode;
@@ -34,7 +32,6 @@ import com.didichuxing.datachannel.arius.admin.common.constant.template.Template
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.TemplateUtils;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.gateway.GatewayService;
 import com.didichuxing.datachannel.arius.admin.core.service.project.ESUserService;
@@ -277,9 +274,9 @@ public class GatewayManagerImpl implements GatewayManager {
     }
 
     @Override
-    public Result<Map<String, GatewayTemplateDeployInfoVO>> listDeployInfo(String dataCenter) {
+    public Result<Map<String, GatewayTemplateDeployInfoVO>> listDeployInfo() {
         List<IndexTemplateWithPhyTemplates> logicWithPhysicals = indexTemplateService
-            .listTemplateWithPhysicalByDataCenter(dataCenter);
+            .listTemplateWithPhysical();
 
         List<IndexTemplateAlias> logicWithAliases = templateLogicAliasManager.listAlias(logicWithPhysicals);
         Multimap<Integer, IndexTemplateAlias> logicId2IndexTemplateAliasMultiMap = ConvertUtil
@@ -300,8 +297,8 @@ public class GatewayManagerImpl implements GatewayManager {
                     }
                 } catch (Exception e) {
                     LOGGER.warn(
-                        "class=GatewayManagerImpl||method=listDeployInfo||dataCenter={}||templateName={}||errMsg={}",
-                        dataCenter, logicWithPhysical.getName(), e.getMessage(), e);
+                        "class=GatewayManagerImpl||method=listDeployInfo||||templateName={}||errMsg={}",
+                         logicWithPhysical.getName(), e.getMessage(), e);
                 }
             }
         }

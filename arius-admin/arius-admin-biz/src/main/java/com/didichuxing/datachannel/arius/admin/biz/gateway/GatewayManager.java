@@ -61,10 +61,10 @@ public interface GatewayManager {
 
     /**
      * 获取模板信息，包含主主从结构组织
-     * @param dataCenter 数据中心
-     * @return Result<Map<String, GatewayTemplateDeployInfoVO>>
+     *
+     * @return Result<Map < String, GatewayTemplateDeployInfoVO>>
      */
-    Result<Map<String, GatewayTemplateDeployInfoVO>> listDeployInfo(String dataCenter);
+    Result<Map<String, GatewayTemplateDeployInfoVO>> listDeployInfo();
 
     /**
      * 滚动获取查询模板数据

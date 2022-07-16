@@ -389,9 +389,9 @@ public class IndexPlanManagerImpl extends BaseTemplateSrvImpl implements IndexPl
         LOGGER.info("class=CapacityPlanManagerImpl||method=indexRollover||cluster={}||msg=start indexRollover",
             phyClusterName);
         // 判断指定物理集群是否开启了当前索引服务
-        if (!isTemplateSrvOpen(phyClusterName)) {
-            return false;
-        }
+        //if (!isTemplateSrvOpen(phyClusterName)) {
+        //    return false;
+        //}
 
         // 获取所有的索引物理模版
         List<IndexTemplatePhy> templatePhyList = indexTemplatePhyService.getNormalTemplateByCluster(phyClusterName);
@@ -405,13 +405,17 @@ public class IndexPlanManagerImpl extends BaseTemplateSrvImpl implements IndexPl
         for (IndexTemplatePhy phyTemplate : templatePhyList) {
             // 判断该索引模版是否开启当前索引服务
             IndexTemplateConfig config = indexTemplateService.getTemplateConfig(phyTemplate.getLogicId());
+            
             if (config == null || config.getDisableIndexRollover()) {
                 LOGGER.info(
                     "class=CapacityPlanManagerImpl||method=indexRollover||cluster={}||template={}||msg=skip indexRollover",
                     phyClusterName, phyTemplate.getName());
                 continue;
             }
-
+            //判断集群的模版是否开启了索引规划rollover
+            if (isTemplateSrvOpen(phyTemplate.getLogicId())){
+                return false;
+            }
             // 获取逻辑模版信息
             IndexTemplate logiTemplate = indexTemplateService.getLogicTemplateById(phyTemplate.getLogicId());
 
@@ -451,12 +455,13 @@ public class IndexPlanManagerImpl extends BaseTemplateSrvImpl implements IndexPl
         LOGGER.info(
             "class=CapacityPlanManagerImpl||method=adjustShardCountByPhyClusterName||cluster={}||msg=start adjustShardCount",
             phyClusterName);
-        if (!isTemplateSrvOpen(phyClusterName)) {
-            return Result.buildFail(phyClusterName + "没有开启" + templateServiceName());
-        }
+        //物理集群侧不在判读
+        //if (!isTemplateSrvOpen(phyClusterName)) {
+        //    return Result.buildFail(phyClusterName + "没有开启" + templateServiceName());
+        //}
 
         List<IndexTemplatePhy> templatePhyList = indexTemplatePhyService.listTemplate();
-
+       
         if (AriusObjUtils.isEmptyList(templatePhyList)) {
             return Result.buildSucc();
         }
@@ -466,6 +471,9 @@ public class IndexPlanManagerImpl extends BaseTemplateSrvImpl implements IndexPl
 
         for (Integer templateLogicId : multimap.keySet()) {
             try {
+                if (!isTemplateSrvOpen(templateLogicId)){
+                    continue;
+                }
                 governPerTemplate(multimap.get(templateLogicId));
             } catch (Exception e) {
                 LOGGER.warn(

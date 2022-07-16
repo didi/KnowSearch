@@ -349,7 +349,7 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
     @Override
     public void syncPipeline(IndexTemplatePhy indexTemplatePhysicalInfo,
                              IndexTemplateWithPhyTemplates logicWithPhysical) {
-        if (!isTemplateSrvOpen(indexTemplatePhysicalInfo.getCluster())) {
+        if (!isTemplateSrvOpen(indexTemplatePhysicalInfo.getLogicId())) {
             return;
         }
 
@@ -389,7 +389,7 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
     @Override
     public boolean createPipeline(IndexTemplatePhy indexTemplatePhysicalInfo,
                                   IndexTemplateWithPhyTemplates logicWithPhysical) throws ESOperateException {
-        if (!isTemplateSrvOpen(indexTemplatePhysicalInfo.getCluster())) {
+        if (!isTemplateSrvOpen(indexTemplatePhysicalInfo.getLogicId())) {
             return false;
         }
 
@@ -406,7 +406,7 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
      */
     @Override
     public boolean deletePipeline(IndexTemplatePhy indexTemplatePhysicalInfo) throws ESOperateException {
-        if (!isTemplateSrvOpen(indexTemplatePhysicalInfo.getCluster())) {
+        if (!isTemplateSrvOpen(indexTemplatePhysicalInfo.getLogicId())) {
             return false;
         }
 
@@ -521,7 +521,7 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
     @Override
     public boolean editRateLimitByPercent(IndexTemplatePhy templatePhysical,
                                           Integer percent) throws ESOperateException {
-        if (!isTemplateSrvOpen(templatePhysical.getCluster())) {
+        if (!isTemplateSrvOpen(templatePhysical.getLogicId())) {
             return false;
         }
 
@@ -580,8 +580,8 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
             return Result.buildFail("索引模板不存在");
         }
 
-        if (!isTemplateSrvOpen(logicWithPhysical.getPhysicals())) {
-            return Result.buildFail("物理集群没有开启" + templateSrv().getServiceName());
+        if (!isTemplateSrvOpen(logicId)) {
+            return Result.buildFail(String.format("%s没有开启%s", logicWithPhysical.getName(), templateSrv().getServiceName()));
         }
 
         for (IndexTemplatePhy templatePhysical : logicWithPhysical.getPhysicals()) {

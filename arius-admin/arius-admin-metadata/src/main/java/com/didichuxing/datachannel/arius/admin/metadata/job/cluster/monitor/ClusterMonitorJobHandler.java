@@ -151,33 +151,27 @@ public class ClusterMonitorJobHandler extends AbstractMetaDataJob {
             if (checkThreadPool()) {
                 futureMap.put(dataSource.getCluster(), threadPool.submit(() -> {
                     try {
-                        if (EnvUtil.getDC().getCode().equals(dataSource.getDataCenter())) {
-                            ESClusterHealthResponse clusterHealthResponse = esClusterService
-                                .syncGetClusterHealth(dataSource.getCluster());
-                            List<ESClusterStats> esClusterStatusList = buildEsClusterStatusWithPercentiles(clusterSize,
-                                dataSource, clusterPhyName2TemplateCountMap, projectIdCount, clusterHealthResponse);
+                        ESClusterHealthResponse clusterHealthResponse = esClusterService
+                            .syncGetClusterHealth(dataSource.getCluster());
+                        List<ESClusterStats> esClusterStatusList = buildEsClusterStatusWithPercentiles(clusterSize,
+                            dataSource, clusterPhyName2TemplateCountMap, projectIdCount, clusterHealthResponse);
 
-                            monitorMetricsSender.sendClusterStats(esClusterStatusList);
-                            buildAndSendTaskStats(timestamp, dataSource);
+                        monitorMetricsSender.sendClusterStats(esClusterStatusList);
+                        buildAndSendTaskStats(timestamp, dataSource);
 
-                            if (clusterHealthResponse == null) {
-                                clusterHealthResponse = new ESClusterHealthResponse();
-                                clusterHealthResponse.setClusterName(dataSource.getCluster());
-                                clusterHealthResponse.setStatus(ClusterHealthEnum.UNKNOWN.getDesc());
-                                clusterHealthResponse.setActiveShards(0);
-                            }
-                            clusterHealthResponseMap.put(dataSource, clusterHealthResponse);
-
-                            esClusterStatsList.addAll(esClusterStatusList);
-
-                            // 更新物理集群的健康度信息和活跃的分片数目信息
-                            handleSaveClusterHealthToDB(dataSource, clusterHealthResponse);
-                        } else {
-                            LOGGER.error(
-                                "class=ClusterMonitorJobHandler||method=handlePhysicalClusterStats||clusterPhyName={}||clusterPhyDataCenter={}"
-                                         + "||errMsg= dataSource mismatch",
-                                dataSource.getCluster(), dataSource.getDataCenter());
+                        if (clusterHealthResponse == null) {
+                            clusterHealthResponse = new ESClusterHealthResponse();
+                            clusterHealthResponse.setClusterName(dataSource.getCluster());
+                            clusterHealthResponse.setStatus(ClusterHealthEnum.UNKNOWN.getDesc());
+                            clusterHealthResponse.setActiveShards(0);
                         }
+                        clusterHealthResponseMap.put(dataSource, clusterHealthResponse);
+
+                        esClusterStatsList.addAll(esClusterStatusList);
+
+                        // 更新物理集群的健康度信息和活跃的分片数目信息
+                        handleSaveClusterHealthToDB(dataSource, clusterHealthResponse);
+
                     } catch (Exception e) {
                         LOGGER.error(
                             "class=ClusterMonitorJobHandler||method=handlePhysicalClusterStats||clusterPhyName={}||clusterPhyDataCenter={}"

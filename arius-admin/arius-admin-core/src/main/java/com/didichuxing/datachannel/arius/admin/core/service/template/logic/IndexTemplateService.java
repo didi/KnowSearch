@@ -345,10 +345,10 @@ public interface IndexTemplateService {
 
     /**
      * 获取指定数据中的模板信息
-     * @param dataCenter 数据中心
+     *
      * @return list
      */
-    List<IndexTemplateWithPhyTemplates> listTemplateWithPhysicalByDataCenter(String dataCenter);
+    List<IndexTemplateWithPhyTemplates> listTemplateWithPhysical();
 
     /**
      * 修改禁读状态

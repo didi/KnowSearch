@@ -23,9 +23,9 @@ import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
+import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
+import com.didichuxing.datachannel.arius.admin.common.tuple.Tuples;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.ESVersionUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
@@ -33,6 +33,7 @@ import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
+import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterNodeService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
@@ -74,7 +75,7 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
     /**
      * 本地cache 加快无效索引服务过滤
      */
-    private static final Cache<Integer, String/*ESClusterVersionEnum*/> LOGIC_TEMPLATE_ID_2_ASSOCIATED_CLUSTER_VERSION_ENUM_CACHE = CacheBuilder
+    private static final Cache<Integer, TupleTwo</*dcdr*/Boolean,/*pipeline*/Boolean>> LOGIC_TEMPLATE_ID_2_ASSOCIATED_CLUSTER_VERSION_ENUM_CACHE = CacheBuilder
         .newBuilder().expireAfterWrite(10, TimeUnit.MINUTES).maximumSize(10000).build();
 
     @Autowired
@@ -94,7 +95,9 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
     @Autowired
     private ClusterContextManager                                       clusterContextManager;
     @Autowired
-    private ColdManager                                                 coldManager;
+    private ColdManager          coldManager;
+    @Autowired
+    private ESClusterNodeService esClusterNodeService;
 
     @PostConstruct
     public void init() {
@@ -146,23 +149,47 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
     public List<UnavailableTemplateSrv> getUnavailableSrv(Integer logicTemplateId) {
         List<UnavailableTemplateSrv> unavailableSrvList = Lists.newCopyOnWriteArrayList();
         List<TemplateServiceEnum> allSrvList = TemplateServiceEnum.allTemplateSrv();
-
-        String esVersionFromESCluster = getLogicTemplateAssociatedEsVersionByLogicTemplateId(logicTemplateId);
+    
+        TupleTwo</*dcdr*/Boolean,/*pipeline*/Boolean> supportDCDRAndPipelineTuple =
+                getLogicTemplateAssociatedEsVersionByLogicTemplateId(
+                logicTemplateId);
+        final Boolean dcdrSupport = supportDCDRAndPipelineTuple.v1;
+        final Boolean pipelineSupport = supportDCDRAndPipelineTuple.v2;
+    
+        //校验是否具备分区能力：冷热划分的能力、过期删除
         // isPartition为true代表能分区，false不能分区
         boolean isPartition = indexTemplateService.getLogicTemplateById(logicTemplateId).getExpression().endsWith("*");
-
+        /**
+         * 预创建，过期删除（分区才可以操作），冷热分离（分区并且有冷region才能操作），dcdr和pipeline（es有对应module才能操作），rolloer没有限制但是产品侧有提示
+         */
         for (TemplateServiceEnum srvEnum : allSrvList) {
-            if (ESVersionUtil.isHigher(srvEnum.getEsClusterVersion().getVersion(), esVersionFromESCluster)) {
-                unavailableSrvList.add(new UnavailableTemplateSrv(srvEnum.getCode(), srvEnum.getServiceName(),
-                    srvEnum.getEsClusterVersion().getVersion(),
-                    String.format("不支持该模板服务, 模板[%s]归属集群目前版本[%s], 模板服务需要的最低版本为[%s]", logicTemplateId,
-                        esVersionFromESCluster, srvEnum.getEsClusterVersion().getVersion())));
-            }
-
-            if(!isPartition && (TemplateServiceEnum.TEMPLATE_PRE_CREATE.getCode().equals(srvEnum.getCode()) ||
-                    TemplateServiceEnum.TEMPLATE_DEL_EXPIRE.getCode().equals(srvEnum.getCode()))){
-                unavailableSrvList.add(new UnavailableTemplateSrv(srvEnum.getCode(), srvEnum.getServiceName(),
-                        srvEnum.getEsClusterVersion().getVersion(), "非分区模版不支持预创建和过期删除"));
+            //if (ESVersionUtil.isHigher(srvEnum.getEsClusterVersion().getVersion(), esVersionFromESCluster)) {
+            //    unavailableSrvList.add(new UnavailableTemplateSrv(srvEnum.getCode(), srvEnum.getServiceName(),
+            //        srvEnum.getEsClusterVersion().getVersion(),
+            //        String.format("不支持该模板服务, 模板[%s]归属集群目前版本[%s], 模板服务需要的最低版本为[%s]", logicTemplateId,
+            //            esVersionFromESCluster, srvEnum.getEsClusterVersion().getVersion())));
+            //}
+            //1.非分区模版不支持：预创建、过期删除、冷热划分的能力
+            if (Boolean.FALSE.equals(isPartition)&&TemplateServiceEnum.usePartitionService().contains(srvEnum)){
+                final UnavailableTemplateSrv unavailableTemplateSrv = new UnavailableTemplateSrv(srvEnum.getCode(),
+                        srvEnum.getServiceName(), srvEnum.getEsClusterVersion().getVersion(),
+                        String.format("非分区模版不支持%s能力", srvEnum.getServiceName()));
+                unavailableSrvList.add(unavailableTemplateSrv);
+            }else
+            //todo 2.必须存在冷region才支持 少了一步判断 等待cold支持
+            //3.dcdr dcdrSupport==true支持
+            if (Boolean.FALSE.equals(dcdrSupport)&&srvEnum.equals(TemplateServiceEnum.TEMPLATE_DCDR)){
+                final UnavailableTemplateSrv unavailableTemplateSrv = new UnavailableTemplateSrv(srvEnum.getCode(),
+                        srvEnum.getServiceName(), srvEnum.getEsClusterVersion().getVersion(),
+                        "无DCDR插件，不支持此能力");
+                unavailableSrvList.add(unavailableTemplateSrv);
+            }else
+            //4.pipeline pipelineSupport==true支持
+            if (Boolean.FALSE.equals(pipelineSupport)&&srvEnum.equals(TemplateServiceEnum.TEMPLATE_PIPELINE)){
+                final UnavailableTemplateSrv unavailableTemplateSrv = new UnavailableTemplateSrv(srvEnum.getCode(),
+                        srvEnum.getServiceName(), srvEnum.getEsClusterVersion().getVersion(),
+                        "集群中没有pipeline 插件，不支持此能力");
+                unavailableSrvList.add(unavailableTemplateSrv);
             }
         }
         return unavailableSrvList;
@@ -223,7 +250,7 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
         }
     }
 
-    private String getLogicTemplateAssociatedEsVersionByLogicTemplateId(Integer logicTemplateId) {
+    private TupleTwo</*dcdr*/Boolean,/*pipeline*/Boolean> getLogicTemplateAssociatedEsVersionByLogicTemplateId(Integer logicTemplateId) {
         try {
             return LOGIC_TEMPLATE_ID_2_ASSOCIATED_CLUSTER_VERSION_ENUM_CACHE.get(logicTemplateId, () -> {
                 IndexTemplateLogicWithClusterAndMasterTemplate template = indexTemplateService
@@ -233,7 +260,7 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
                         "class=TemplateSrvPageSearchHandle||method=getLogicTemplateAssociatedEsVersionByLogicTemplateId"
                                 + "||templateId={}||errMsg=masterPhyTemplate is null",
                         logicTemplateId);
-                    return "";
+                 return Tuples.of(Boolean.FALSE,Boolean.FALSE);
                 }
 
                 String masterCluster = template.getMasterTemplate().getCluster();
@@ -243,17 +270,17 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
                         "class=TemplateSrvPageSearchHandle||method=getLogicTemplateAssociatedEsVersionByLogicTemplateId"
                                 + "||templateId={}||errMsg=clusterPhy of template is null",
                         logicTemplateId);
-                    return "";
+                    return Tuples.of(Boolean.FALSE,Boolean.FALSE);
                 }
 
-                return clusterPhy.getEsVersion();
+                return esClusterNodeService.existDCDRAndPipelineModule(masterCluster);
             });
         } catch (ExecutionException e) {
             LOGGER
                 .error("class=TemplateSrvPageSearchHandle||method=getLogicTemplateAssociatedEsVersionByLogicTemplateId"
                        + "||templateId={}||errMsg={}",
                     logicTemplateId, e.getMessage(), e);
-            return "";
+            return Tuples.of(Boolean.FALSE,Boolean.FALSE);
         }
     }
 
@@ -331,7 +358,10 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
     }
 
     public boolean isPhyClusterOpenTemplateSrv(ClusterPhy phyCluster, int srvId) {
+        /**
         try {
+            //todo 要下线 集群侧不具备
+            
             Result<List<ClusterTemplateSrv>> result = clusterPhyService.getPhyClusterTemplateSrv(phyCluster);
             if (result.failed()) {
                 return false;
@@ -343,31 +373,18 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
                     return true;
                 }
             }
-
+        
             return false;
         } catch (Exception e) {
             LOGGER.warn("class=TemplateSrvManager||method=isPhyClusterOpenTemplateSrv||phyCluster={}||srvId={}",
                 phyCluster, srvId, e);
 
             return true;
-        }
+        }**/
+            return true;
     }
 
-    /**
-    * 根据物理集群名称和模板服务的映射id校验是否能够开启指定的模板服务
-    * @param phyCluster 物理集群名称
-    * @param templateSrvId 模板服务id
-    * @return 校验结果
-    */
-    private Result<Boolean> validCanOpenTemplateSrvId(String phyCluster, String templateSrvId) {
-        TemplateServiceEnum templateServiceEnum = TemplateServiceEnum.getById(Integer.parseInt(templateSrvId));
-        if (templateServiceEnum == null
-            || AriusObjUtils.isNull(BASE_TEMPLATE_SRV_MAP.get(Integer.parseInt(templateSrvId)))) {
-            return Result.buildFail("指定模板服务id有误");
-        }
 
-        return BASE_TEMPLATE_SRV_MAP.get(Integer.parseInt(templateSrvId)).checkOpenTemplateSrvByCluster(phyCluster);
-    }
 
     /**
      * 判断物理集群是否打开了某个索引服务
@@ -411,4 +428,5 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
         List<ClusterPhy> clusterPhies = clusterPhyService.listAllClusters();
         return getPhyClusterByOpenTemplateSrv(clusterPhies, srvId);
     }
+  
 }
