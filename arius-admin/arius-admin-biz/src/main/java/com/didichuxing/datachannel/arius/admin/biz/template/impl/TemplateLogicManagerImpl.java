@@ -959,14 +959,10 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         consoleTemplateDetail.setIndices(getLogicTemplateIndices(logicId));
         consoleTemplateDetail.setEditable(templateLabelService.isImportantIndex(logicId));
         // 获取indexRollover功能开启状态
-        String serCodeSrv = indexTemplateLogicWithCluster.getOpenSrv();
-        List<String> srvCodeList = ListUtils.string2StrList(serCodeSrv);
-        if(srvCodeList.isEmpty() || !srvCodeList.contains(TemplateServiceEnum.INDEX_PLAN.getCode().toString())){
-            consoleTemplateDetail.setDisableIndexRollover(true);
-        } else {
-            consoleTemplateDetail.setDisableIndexRollover(false);
-        }
-
+        consoleTemplateDetail
+            .setDisableIndexRollover(Optional.ofNullable(indexTemplateService.getTemplateConfig(logicId))
+                .map(IndexTemplateConfig::getDisableIndexRollover).orElse(null)
+            );
         return Result.buildSucc(consoleTemplateDetail);
     }
 

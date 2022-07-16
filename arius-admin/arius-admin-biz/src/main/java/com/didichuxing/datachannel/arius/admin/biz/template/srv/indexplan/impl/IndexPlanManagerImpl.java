@@ -11,6 +11,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.Template
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
+import com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
@@ -20,6 +21,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.IndexNameUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.TemplateUtils;
+import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didiglobal.logi.elasticsearch.client.response.indices.stats.IndexNodes;
 import com.google.common.collect.Lists;
@@ -50,6 +52,9 @@ public class IndexPlanManagerImpl extends BaseTemplateSrvImpl implements IndexPl
      * (key, value) = (模板id, 该模版对应索引近七天某一天占用磁盘容量最大值)
      */
     private final Map<Long, Long> indexMaxStoreMap            = Maps.newConcurrentMap();
+
+    @Autowired
+    private AriusConfigInfoService ariusConfigInfoService;
 
     @Autowired
     private ESIndexService        esIndexService;
@@ -434,7 +439,10 @@ public class IndexPlanManagerImpl extends BaseTemplateSrvImpl implements IndexPl
             long curSizeInBytes = indexNodes.getPrimaries().getStore().getSizeInBytes();
             double curSizeInGb = curSizeInBytes * BYTE_TO_G;
 
-            if (curSizeInGb >= primaryShardCnt * 50) {
+            double rolloverThreshold = ariusConfigInfoService.doubleSetting(AriusConfigConstant.ARIUS_COMMON_GROUP,
+                    AriusConfigConstant.INDEX_ROLLOVER_THRESHOLD, 1.0);
+
+            if (curSizeInGb >= primaryShardCnt * rolloverThreshold) {
                 // 如果大于（主shard个数 * 推荐的单个shard大小50G），直接升版本
                 updateTemplateVersion(phyTemplate);
             } else if (curSizeInGb >= primaryShardCnt * 30 && TemplateUtils.isSaveByDay(logiTemplate.getDateFormat())) {

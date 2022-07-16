@@ -166,9 +166,18 @@ public abstract class BaseTemplateSrvImpl implements BaseTemplateSrv {
             }
             TupleTwo</*old*/IndexTemplate, /*change*/IndexTemplate> tupleTwo = Tuples.of(indexTemplate, null);
             if (status) {
+                // 开启该项模版服务
                 addSrvCode(indexTemplate, srvCode);
+                // 如果是Rollover服务，则也要修改index_tmplate_config表中的disable_index_rollover字段
+                if (TemplateServiceEnum.INDEX_PLAN.getCode().toString().equals(srvCode)){
+                    updateTemplateConfigRollover(templateId, false, operator);
+                }
             } else {
+                // 关闭该项模版服务
                 removeSrvCode(indexTemplate, srvCode);
+                if (TemplateServiceEnum.INDEX_PLAN.getCode().toString().equals(srvCode)){
+                    updateTemplateConfigRollover(templateId, true, operator);
+                }
             }
             tupleTwo = tupleTwo.update2(indexTemplate);
             tupleTwos.add(tupleTwo);
@@ -222,6 +231,25 @@ public abstract class BaseTemplateSrvImpl implements BaseTemplateSrv {
             srvCodeList.remove(removeSrvCode);
             indexTemplate.setOpenSrv(ListUtils.strList2String(srvCodeList));
         }
+    }
+
+    /**
+     * 更新index_template_config表中的disable_index_rollover字段
+     * @param templateId
+     * @param state disable_index_rollover是true还是false
+     * @param operator
+     * @return
+     */
+    private Result<Void> updateTemplateConfigRollover(Integer templateId, Boolean state, String operator){
+        IndexTemplateConfigDTO indexTemplateConfigDTO = new IndexTemplateConfigDTO();
+        indexTemplateConfigDTO.setLogicId(templateId);
+        indexTemplateConfigDTO.setDisableIndexRollover(state);
+        Result<Void> result = indexTemplateService.updateTemplateConfig(indexTemplateConfigDTO, operator);
+        if(result.failed()){
+            LOGGER.warn("class=BaseTemplateSrvImpl||method=updateTemplateConfigRollover||msg={}", result.getMessage());
+            return result;
+        }
+        return Result.buildSucc();
     }
 
     ///////////////////////////////////srv
