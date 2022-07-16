@@ -24,4 +24,10 @@ public class SegmentPO extends BasePO {
 
     @JSONField(name = "size.memory")
     private Double memoSize;
+
+    /**
+     * 主副标识 p 或 r
+     */
+    @JSONField(name = "prirep")
+    private String primaryFlag;
 }
