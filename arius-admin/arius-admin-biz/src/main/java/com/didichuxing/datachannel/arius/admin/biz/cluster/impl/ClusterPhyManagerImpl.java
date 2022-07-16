@@ -90,6 +90,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
+import com.didichuxing.datachannel.arius.admin.persistence.component.ESGatewayClient;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpClient;
 import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
 import com.didiglobal.logi.log.ILog;
@@ -141,6 +142,9 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         .newConcurrentMap();
     public static final String                                   SEPARATOR_CHARS                             = ",";
     public static final String                                   VERSION_PREFIX_PATTERN                      = "^\\d*.\\d*";
+
+    @Autowired
+    private ESGatewayClient                                      esGatewayClient;
 
     @Autowired
     private ESTemplateService                                    esTemplateService;
@@ -371,7 +375,6 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         }
 
         ClusterPhyVO clusterPhyVO = ConvertUtil.obj2Obj(clusterPhy, ClusterPhyVO.class);
-
         // 构建overView信息
         buildPhyCluster(clusterPhyVO);
         return clusterPhyVO;
@@ -1174,6 +1177,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
      */
     private void buildPhyCluster(ClusterPhyVO clusterPhyVO) {
         if (!AriusObjUtils.isNull(clusterPhyVO)) {
+            clusterPhyVO.setGatewayUrl(esGatewayClient.getSingleGatewayAddress());
             buildPhyClusterStatics(clusterPhyVO);
             buildClusterRole(clusterPhyVO);
             buildClusterPhyWithLogicAndRegion(Collections.singletonList(clusterPhyVO));
