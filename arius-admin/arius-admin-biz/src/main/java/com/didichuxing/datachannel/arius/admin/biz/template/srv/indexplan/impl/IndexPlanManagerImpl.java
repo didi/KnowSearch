@@ -440,7 +440,7 @@ public class IndexPlanManagerImpl extends BaseTemplateSrvImpl implements IndexPl
             double curSizeInGb = curSizeInBytes * BYTE_TO_G;
 
             double rolloverThreshold = ariusConfigInfoService.doubleSetting(AriusConfigConstant.ARIUS_COMMON_GROUP,
-                    AriusConfigConstant.INDEX_ROLLOVER_THRESHOLD, 1.0);
+                    AriusConfigConstant.INDEX_ROLLOVER_THRESHOLD, 50.0);
 
             if (curSizeInGb >= primaryShardCnt * rolloverThreshold) {
                 // 如果大于（主shard个数 * 推荐的单个shard大小50G），直接升版本
