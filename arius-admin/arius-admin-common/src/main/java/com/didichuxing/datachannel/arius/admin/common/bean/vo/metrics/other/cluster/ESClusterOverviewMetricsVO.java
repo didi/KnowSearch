@@ -1,14 +1,14 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster;
 
-import java.util.List;
-
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.MetricsVO;
-
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 /**
  * Created by linyunan on 2021-07-30
@@ -80,7 +80,7 @@ public class ESClusterOverviewMetricsVO extends MetricsVO {
     private List<NodeInfoForDiskUsageGte75PercentVO> nodesForDiskUsageGte75Percent;
 
     @ApiModelProperty("无效节点的Ip列表")
-    private List<String>                             invalidNodes;
+    private List<ClusterRoleHost>                             invalidNodes;
 
     /****************************************7.进程任务信息******************************************/
 

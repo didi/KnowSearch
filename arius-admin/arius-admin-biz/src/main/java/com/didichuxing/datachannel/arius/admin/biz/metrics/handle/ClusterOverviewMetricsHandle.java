@@ -241,10 +241,10 @@ public class ClusterOverviewMetricsHandle {
     private void getInvalidNodesMetrics(ESClusterOverviewMetricsVO metrics) {
         List<String> nodeHostsFromES = esClusterNodeService.syncGetNodeHosts(metrics.getClusterName());
         List<ClusterRoleHost> nodesByCluster = clusterRoleHostService.getNodesByCluster(metrics.getClusterName());
-        List<String> invalidNodeIps = Lists.newArrayList();
+        List<ClusterRoleHost> invalidNodeIps = Lists.newArrayList();
         nodesByCluster.forEach(nodeFromDb -> {
             if (!nodeHostsFromES.contains(nodeFromDb.getIp())) {
-                invalidNodeIps.add(nodeFromDb.getIp());
+                invalidNodeIps.add(nodeFromDb);
             }
         });
 
