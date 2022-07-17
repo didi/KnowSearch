@@ -75,7 +75,7 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
     /**
      * 本地cache 加快无效索引服务过滤
      */
-    private static final Cache<Integer, TupleTwo</*dcdr*/Boolean,/*pipeline*/Boolean>> LOGIC_TEMPLATE_ID_2_ASSOCIATED_CLUSTER_VERSION_ENUM_CACHE = CacheBuilder
+    private static final Cache</*logic id*/Integer, TupleTwo</*dcdr support*/Boolean,/*pipeline support*/Boolean>> LOGIC_TEMPLATE_ID_2_ASSOCIATED_CLUSTER_VERSION_ENUM_CACHE = CacheBuilder
         .newBuilder().expireAfterWrite(10, TimeUnit.MINUTES).maximumSize(10000).build();
 
     @Autowired
@@ -151,7 +151,7 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
         List<TemplateServiceEnum> allSrvList = TemplateServiceEnum.allTemplateSrv();
     
         TupleTwo</*dcdr*/Boolean,/*pipeline*/Boolean> supportDCDRAndPipelineTuple =
-                getLogicTemplateAssociatedEsVersionByLogicTemplateId(
+                getLogicTemplateSupportDCDRAndPipelineByLogicId(
                 logicTemplateId);
         final Boolean dcdrSupport = supportDCDRAndPipelineTuple.v1;
         final Boolean pipelineSupport = supportDCDRAndPipelineTuple.v2;
@@ -250,7 +250,7 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
         }
     }
 
-    private TupleTwo</*dcdr*/Boolean,/*pipeline*/Boolean> getLogicTemplateAssociatedEsVersionByLogicTemplateId(Integer logicTemplateId) {
+    private TupleTwo</*dcdr*/Boolean,/*pipeline*/Boolean> getLogicTemplateSupportDCDRAndPipelineByLogicId(Integer logicTemplateId) {
         try {
             return LOGIC_TEMPLATE_ID_2_ASSOCIATED_CLUSTER_VERSION_ENUM_CACHE.get(logicTemplateId, () -> {
                 IndexTemplateLogicWithClusterAndMasterTemplate template = indexTemplateService
@@ -358,29 +358,7 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
     }
 
     public boolean isPhyClusterOpenTemplateSrv(ClusterPhy phyCluster, int srvId) {
-        /**
-        try {
-            //todo 要下线 集群侧不具备
-            
-            Result<List<ClusterTemplateSrv>> result = clusterPhyService.getPhyClusterTemplateSrv(phyCluster);
-            if (result.failed()) {
-                return false;
-            }
-
-            List<ClusterTemplateSrv> clusterTemplateSrvs = result.getData();
-            for (ClusterTemplateSrv templateSrv : clusterTemplateSrvs) {
-                if (srvId == templateSrv.getServiceId()) {
-                    return true;
-                }
-            }
-        
-            return false;
-        } catch (Exception e) {
-            LOGGER.warn("class=TemplateSrvManager||method=isPhyClusterOpenTemplateSrv||phyCluster={}||srvId={}",
-                phyCluster, srvId, e);
-
-            return true;
-        }**/
+       
             return true;
     }
 
@@ -425,8 +403,8 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
      */
     @Override
     public List<String> getPhyClusterByOpenTemplateSrv(int srvId) {
-        List<ClusterPhy> clusterPhies = clusterPhyService.listAllClusters();
-        return getPhyClusterByOpenTemplateSrv(clusterPhies, srvId);
+        
+        return clusterPhyService.listAllClusters().stream().map(ClusterPhy::getCluster).collect(Collectors.toList());
     }
   
 }
