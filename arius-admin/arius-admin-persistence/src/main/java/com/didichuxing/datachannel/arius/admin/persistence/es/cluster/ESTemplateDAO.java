@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.cluster;
 
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_OPERATE_MIN_TIMEOUT;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_OPERATE_TIMEOUT;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.INDEX_SHARD_NUM;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.SINGLE_TYPE;
@@ -71,8 +72,8 @@ public class ESTemplateDAO extends BaseESDAO {
         ESClient client = esOpClient.getESClient(cluster);
 
         // 获取es中原来index template的配置
-        ESIndicesGetTemplateResponse getTemplateResponse = client.admin().indices().prepareGetTemplate(name).execute()
-            .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+         ESIndicesGetTemplateResponse getTemplateResponse = getESIndicesGetTemplateResponse(cluster,
+                name, 3);
         TemplateConfig templateConfig = getTemplateResponse.getMultiTemplatesConfig().getSingleConfig();
 
         // 修改分片数目
@@ -296,22 +297,10 @@ public class ESTemplateDAO extends BaseESDAO {
         if (null == esClient) {
             return null;
         }
-
-        ESIndicesGetTemplateRequest request = new ESIndicesGetTemplateRequest();
-        request.setTemplates(templateName);
-
-        ESIndicesGetTemplateResponse response = null;
-        try {
-            do {
-                response = esClient.admin().indices().getTemplate(request).actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
-            }while (tryTimes-- > 0 && null == response);
-            
-        } catch (Exception e) {
-            LOGGER.warn(
-                "class=ESTemplateDAO||method=getTemplates||get templates fail||clusterName={}||templateName={}||msg={}",
-                clusterName, templateName, e.getMessage(), e);
-        }
-
+    
+        ESIndicesGetTemplateResponse response = getESIndicesGetTemplateResponse(clusterName,
+                templateName, tryTimes);
+    
         if (response == null) {
             return null;
         }
@@ -322,6 +311,37 @@ public class ESTemplateDAO extends BaseESDAO {
         }
 
         return response.getMultiTemplatesConfig();
+    }
+    
+    protected ESIndicesGetTemplateResponse getESIndicesGetTemplateResponse(String clusterName, String templateName,
+                                                                           Integer tryTimes) {
+        ESClient esClient = esOpClient.getESClient(clusterName);
+    
+        if (null == esClient) {
+            return null;
+        }
+        Long minTimeoutNum = 1L;
+        Long maxTimeoutNum = tryTimes.longValue();
+        ESIndicesGetTemplateRequest request = new ESIndicesGetTemplateRequest();
+        request.setTemplates(templateName);
+        ESIndicesGetTemplateResponse response = null;
+        do {
+            try {
+                response = esClient.admin().indices().getTemplate(request)
+                        .actionGet(/*降低因为抖动导致的等待时常,等待时常从低到高进行重试*/minTimeoutNum * ES_OPERATE_MIN_TIMEOUT,
+                                TimeUnit.SECONDS);
+                
+            } catch (Exception e) {
+                LOGGER.warn(
+                        "class=ESTemplateDAO||method=getTemplates||get templates fail||clusterName={}||templateName={}||msg={}",
+                        clusterName, templateName, e.getMessage(), e);
+            }
+            minTimeoutNum++;
+            if (minTimeoutNum > maxTimeoutNum) {
+                minTimeoutNum = maxTimeoutNum;
+            }
+        } while (tryTimes-- > 0 && null == response);
+        return response;
     }
 
     /**

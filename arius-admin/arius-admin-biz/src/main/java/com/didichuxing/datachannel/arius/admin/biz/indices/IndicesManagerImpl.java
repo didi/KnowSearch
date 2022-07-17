@@ -594,7 +594,7 @@ public class IndicesManagerImpl implements IndicesManager {
                 .content(String.format("index:【%s】删除别名：【%s】",  param.getIndex(), param.getAliases()))
                 .operationTypeEnum(OperateTypeEnum.INDEX_MANAGEMENT_ALIAS_MODIFY)
                 .project(projectService.getProjectBriefByProjectId(projectId)).userOperation(operator)
-                .bizId(param.getIndex()).build();
+                .bizId(param.getIndex()).buildDefaultManualTrigger();
             operateRecordService.save(operateRecord);
         }
         return result;

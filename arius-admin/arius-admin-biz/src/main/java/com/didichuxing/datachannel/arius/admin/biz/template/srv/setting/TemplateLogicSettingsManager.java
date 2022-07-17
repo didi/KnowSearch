@@ -1,7 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.setting;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateSettingDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateSettingDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhySetting;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateSettingVO;
@@ -15,17 +14,17 @@ import com.didichuxing.datachannel.arius.admin.common.mapping.AriusIndexTemplate
  */
 public interface TemplateLogicSettingsManager {
 
-    /**
-     * 修改模板Setting
-     *
-     * @param settingDTO Setting
-     * @param operator   操作者
-     * @param projectId
-     * @return Result
-     * @throws AdminOperateException
-     */
-    Result<Void> modifySetting(ConsoleTemplateSettingDTO settingDTO, String operator,
-                               Integer projectId) throws AdminOperateException;
+    ///**
+    // * 修改模板Setting
+    // *
+    // * @param settingDTO Setting
+    // * @param operator   操作者
+    // * @param projectId
+    // * @return Result
+    // * @throws AdminOperateException
+    // */
+    //Result<Void> modifySetting(ConsoleTemplateSettingDTO settingDTO, String operator,
+    //                           Integer projectId) throws AdminOperateException;
 
     /**
      * 修改模板Setting(仅开放对于副本设置和异步translog落盘方式的设置)

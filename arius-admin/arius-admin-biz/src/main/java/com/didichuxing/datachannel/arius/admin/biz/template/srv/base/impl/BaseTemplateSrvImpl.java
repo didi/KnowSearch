@@ -224,15 +224,7 @@ public abstract class BaseTemplateSrvImpl implements BaseTemplateSrv {
     }
 
     ///////////////////////////////////srv
-    @Override
-    public boolean isTemplateSrvOpen(String phyClusterName) {
-        boolean enable = templateSrvManager.isPhyClusterOpenTemplateSrv(phyClusterName, templateSrv().getCode());
-
-        LOGGER.info("class=BaseTemplateSrv||method=enableTemplateSrv||clusterName={}||enable={}||templateSrv={}",
-            phyClusterName, enable, templateServiceName());
-
-        return enable;
-    }
+  
 
     @Override
     public boolean isTemplateSrvOpen(List<IndexTemplatePhy> indexTemplatePhies) {
