@@ -2,6 +2,7 @@ package com.didichuxing.datachannel.arius.admin.biz.cluster.impl;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType.FAIL;
 
+import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterNodeManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterRegionManager;
@@ -41,8 +42,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -77,6 +80,7 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
     private OperateRecordService   operateRecordService;
     @Autowired
     private ProjectService         projectService;
+    private static final String COLD = "cold";
 
     /**
      * 构建regionVO
@@ -319,8 +323,37 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
 
         return voidResult;
     }
-
+    
+    /**
+     * @param phyCluster
+     * @param regionId
+     * @return
+     */
+    @Override
+    public Boolean existColdRegion(String phyCluster, Integer regionId) {
+        if (Objects.isNull(regionId) || regionId < 1){
+            return Boolean.FALSE;
+        }
+        List<ClusterRegion> clusterRegions = clusterRegionService.listPhyClusterRegions(phyCluster);
+        return clusterRegions.stream()
+                .filter(clusterRegion ->Objects.equals( clusterRegion.getId().intValue(),regionId))
+                .map(ClusterRegion::getConfig)
+                //集群侧中只要
+                .anyMatch(coldTruePre);
+    }
     /***************************************** private method ****************************************************/
+    private final static Predicate<String> coldTruePre = coldJson -> {
+        if (StringUtils.isBlank(coldJson)) {
+            return Boolean.FALSE;
+        }
+        try {
+            return JSON.parseObject(coldJson).getBoolean(COLD);
+        
+        } catch (Exception e) {
+            return Boolean.FALSE;
+        }
+    
+    };
     /**
      * 对于逻辑集群绑定的物理集群的版本进行一致性校验
      *
