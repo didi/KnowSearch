@@ -114,7 +114,7 @@ public class AriusConfigConstant {
      */
     public static final String INDEX_MAPPING_NUM_THRESHOLD                             = "index.mapping.num_threshold";
 
-
+    public static final String INDEX_ROLLOVER_THRESHOLD                                = "index.rollover.threshold";
 
 
 
