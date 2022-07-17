@@ -287,7 +287,7 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
                 supportSrv.setPipelineModuleExists(existDCDRAndPipelineModule.v2);
                 Boolean existColdRegion = clusterRegionManager.existColdRegion(masterCluster,template.getMasterTemplate().getRegionId());
                 supportSrv.setColdRegionExists(existColdRegion);
-                Boolean isPartition= template.getMasterTemplate().getExpression().endsWith("*");
+                Boolean isPartition= indexTemplateService.getLogicTemplateById(logicTemplateId).getExpression().endsWith("*");
                 supportSrv.setIsPartition(isPartition);
                 return supportSrv;
             });
