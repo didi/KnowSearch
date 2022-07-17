@@ -166,16 +166,18 @@
     </select>
 
     <select id="getTotalHitByCondition"
-            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterLogicPO"
+            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterLogicConditionDTO"
             resultType="long">
         select
         count(1)
         from project_arius_resource_logic
         where id > 0
+        <if test="id != null">and id = #{id}</if>
         <if test="name != null">and `name` LIKE CONCAT('%',#{name},'%')</if>
         <if test="projectId != null">and project_id = #{projectId}</if>
         <if test="health != null">and health = #{health}</if>
         <if test="type != null">and type = #{type}</if>
+        <if test="memo != null">and `memo` LIKE CONCAT('%',#{memo},'%')</if>
     </select>
 	
 	<select id="getProjectIdById" resultType="java.lang.Integer">

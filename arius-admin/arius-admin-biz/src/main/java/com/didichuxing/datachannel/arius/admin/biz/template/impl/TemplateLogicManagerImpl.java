@@ -977,7 +977,6 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         consoleTemplateDetail
             .setDisableIndexRollover(Optional.ofNullable(indexTemplateService.getTemplateConfig(logicId))
                 .map(IndexTemplateConfig::getDisableIndexRollover).orElse(null)
-
             );
         return Result.buildSucc(consoleTemplateDetail);
     }

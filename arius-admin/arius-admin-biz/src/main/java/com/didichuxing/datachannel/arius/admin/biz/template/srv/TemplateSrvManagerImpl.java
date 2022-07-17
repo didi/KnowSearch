@@ -374,7 +374,21 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
             return true;
     }
 
+    /**
+    * 根据物理集群名称和模板服务的映射id校验是否能够开启指定的模板服务
+    * @param phyCluster 物理集群名称
+    * @param templateSrvId 模板服务id
+    * @return 校验结果
+    */
+    private Result<Boolean> validCanOpenTemplateSrvId(String phyCluster, String templateSrvId) {
+        TemplateServiceEnum templateServiceEnum = TemplateServiceEnum.getById(Integer.parseInt(templateSrvId));
+        if (templateServiceEnum == null
+            || AriusObjUtils.isNull(BASE_TEMPLATE_SRV_MAP.get(Integer.parseInt(templateSrvId)))) {
+            return Result.buildFail("指定模板服务id有误");
+        }
 
+        return BASE_TEMPLATE_SRV_MAP.get(Integer.parseInt(templateSrvId)).checkOpenTemplateSrvByCluster(phyCluster);
+    }
 
     /**
      * 判断物理集群是否打开了某个索引服务

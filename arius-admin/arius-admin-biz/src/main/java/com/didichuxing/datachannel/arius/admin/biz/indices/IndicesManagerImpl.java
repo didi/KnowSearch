@@ -159,10 +159,10 @@ public class IndicesManagerImpl implements IndicesManager {
         }
         try {
             esIndexService.syncCreateIndex(phyCluster, indexCreateDTO.getIndex(), indexConfig, RETRY_COUNT);
-        } catch (Exception e) {
+        } catch (ESOperateException e) {
             LOGGER.error("class=IndicesManagerImpl||method=createIndex||msg=create index failed||index={}",
                 indexCreateDTO.getIndex(), e);
-            return Result.buildFail("索引创建失败，请联系管理员检查集群后重新创建！");
+            return Result.buildFail(String.format("索引创建失败, errMsg:%s", e.getCause()));
         }
         operateRecordService.save(new OperateRecord.Builder()
             .content(String.format("物理集群:[%s],创建索引：[%s]", indexCreateDTO.getCluster(), indexCreateDTO.getIndex()))

@@ -82,6 +82,15 @@ public class ESShardServiceImpl implements ESShardService {
         List<SegmentPO> segmentPOS = esShardDAO.commonGet(clusterName, segmentsPartInfoRequestContent, SegmentPO.class);
         return ConvertUtil.list2List(segmentPOS, Segment.class);
     }
+
+    @Override
+    public List<Segment> syncGetSegmentsCountInfo(String clusterName) {
+        String segmentsCountContent = getSegmentsCountContent();
+        List<SegmentPO> segmentPOS = esShardDAO.commonGet(clusterName, segmentsCountContent, SegmentPO.class);
+        return ConvertUtil.list2List(segmentPOS, Segment.class);
+    }
+
+
     @Override
     public ShardAssignmentDescriptionVO shardAssignmentDescription(String cluster) {
         String response = esShardDAO.shardAssignment(cluster);

@@ -478,30 +478,6 @@ public class ESIndexServiceImpl implements ESIndexService {
     }
 
     /**
-     * 获取集群中索引segment数量
-     *
-     * @param clusterPhyName 物理集群名称
-     * @return {@link Map}<{@link String}, {@link Tuple}<{@link Long}, {@link Long}>>
-     */
-    @Override
-    public Map<String, Tuple<Long, Long>> syncGetIndicesSegmentCount(String clusterPhyName) {
-        Map<String, IndexNodes> indexNodesMap = esIndexDAO.getIndexStats(clusterPhyName, null);
-        Map<String, Tuple<Long, Long>> retMap = new HashMap<>();
-        if (MapUtils.isNotEmpty(indexNodesMap)) {
-            indexNodesMap.forEach((key, val) -> {
-                Tuple<Long, Long> tuple = new Tuple<>();
-                Optional.ofNullable(val).map(IndexNodes::getTotal).map(CommonStat::getSegments).map(Segments::getCount)
-                    .ifPresent(tuple::setV1);
-                Optional.ofNullable(val).map(IndexNodes::getPrimaries).map(CommonStat::getSegments)
-                    .map(Segments::getCount).ifPresent(tuple::setV2);
-                retMap.put(key, tuple);
-            });
-
-        }
-        return retMap;
-    }
-
-    /**
      * 过滤原始索引
      */
     private boolean filterOriginalIndices(CatIndexResult catIndexResult) {
