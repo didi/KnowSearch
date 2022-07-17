@@ -10,7 +10,6 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.Cl
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.CLIENT_NODE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.DATA_NODE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.MASTER_NODE;
-import static java.util.regex.Pattern.compile;
 
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
@@ -73,6 +72,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ClusterUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.ESVersionUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
@@ -109,8 +109,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import org.apache.commons.collections4.CollectionUtils;
@@ -141,7 +139,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     private static final Map<String, Triple<Long, Long, Double>> CLUSTER_NAME_TO_ES_CLUSTER_STATS_TRIPLE_MAP = Maps
         .newConcurrentMap();
     public static final String                                   SEPARATOR_CHARS                             = ",";
-    public static final String                                   VERSION_PREFIX_PATTERN                      = "^\\d*.\\d*";
+    
 
     @Autowired
     private ESGatewayClient                                      esGatewayClient;
@@ -679,11 +677,8 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
         List<ClusterPhy> clusterPhies = clusterPhyService.listAllClusters();
 
-        Predicate<ClusterPhy> matchingSameVersionESVersionPredicate = cp -> StringUtils
-            .equals(esVersion, cp.getEsVersion())
-                                                                            || StringUtils.equals(
-                                                                                getESVersionPrefix(esVersion),
-                                                                                getESVersionPrefix(cp.getEsVersion()));
+        Predicate<ClusterPhy> matchingSameVersionESVersionPredicate =
+                cp -> ESVersionUtil.compareVersionConsistency(esVersion,cp.getEsVersion());
         List<String> sameVersionClusterNameList = clusterPhies.stream().filter(Objects::nonNull)
             .filter(r -> clusterPhyNameList.contains(r.getCluster()))
             .filter(rCluster -> !StringUtils.equals(logicTemplateWithPhysicals.getMasterPhyTemplate().getCluster(),
@@ -694,14 +689,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         return Result.buildSucc(sameVersionClusterNameList);
     }
 
-    private String getESVersionPrefix(String esVersion) {
-        Pattern pattern = compile(VERSION_PREFIX_PATTERN);
-        final Matcher matcher = pattern.matcher(esVersion);
-        if (matcher.find()) {
-            return matcher.group(0);
-        }
-        return null;
-    }
+ 
 
     @Override
     public List<String> listClusterPhyNodeName(String clusterPhyName) {
