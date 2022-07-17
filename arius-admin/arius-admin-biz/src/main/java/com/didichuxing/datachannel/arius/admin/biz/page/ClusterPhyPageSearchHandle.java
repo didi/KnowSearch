@@ -111,7 +111,7 @@ public class ClusterPhyPageSearchHandle extends AbstractPageSearchHandle<Cluster
 
         long totalHit = clusterPhyService.fuzzyClusterPhyHitByCondition(condition);
         List<ClusterPhyVO> clusterPhyList = clusterPhyVOList.stream()
-            .filter(clusterPhyVO -> !ClusterHealthEnum.GREEN.getCode().equals(clusterPhyVO.getHealth()))
+            .filter(clusterPhyVO -> ClusterHealthEnum.UNKNOWN.getCode().equals(clusterPhyVO.getHealth()))
             .collect(Collectors.toList());
         //非正常集群需要重新发事件
         for (ClusterPhyVO clusterPhyVO : clusterPhyList) {
