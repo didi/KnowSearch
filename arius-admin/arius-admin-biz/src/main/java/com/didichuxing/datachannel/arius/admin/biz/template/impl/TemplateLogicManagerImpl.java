@@ -807,7 +807,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             if (updateDBResult.failed()) {
                 throw new AdminOperateException(updateDBResult.getMessage(), FAIL);
             }
-
+            
             boolean succ = esTemplateService.syncUpdateShardNum(templatePhy.getCluster(), templatePhy.getName(),
                 shardNum, RETRY_TIMES);
             if (!succ) {

@@ -163,7 +163,7 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
         Boolean coldRegionSupport = supportSrv.getColdRegionExists();
         //校验是否具备分区能力：冷热划分的能力、过期删除
         // isPartition为true代表能分区，false不能分区
-        boolean isPartition = indexTemplateService.getLogicTemplateById(logicTemplateId).getExpression().endsWith("*");
+        boolean isPartition =supportSrv.getIsPartition();
         /**
          * 预创建，过期删除（分区才可以操作），冷热分离（分区并且有冷region才能操作），dcdr和pipeline（es有对应module才能操作），rolloer没有限制但是产品侧有提示
          */
@@ -262,6 +262,7 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
             return LOGIC_TEMPLATE_ID_2_ASSOCIATED_CLUSTER_VERSION_ENUM_CACHE.get(logicTemplateId, () -> {
                 IndexTemplateLogicWithClusterAndMasterTemplate template = indexTemplateService
                     .getLogicTemplateWithClusterAndMasterTemplate(logicTemplateId);
+               
                 SupportSrv supportSrv = new SupportSrv();
                 if (null == template || null == template.getMasterTemplate()) {
                     LOGGER.warn(
@@ -284,8 +285,10 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
                         masterCluster);
                 supportSrv.setDcdrModuleExists(existDCDRAndPipelineModule.v1);
                 supportSrv.setPipelineModuleExists(existDCDRAndPipelineModule.v2);
-                Boolean existColdRegion = clusterRegionManager.existColdRegion(masterCluster,template.getRegionId());
+                Boolean existColdRegion = clusterRegionManager.existColdRegion(masterCluster,template.getMasterTemplate().getRegionId());
                 supportSrv.setColdRegionExists(existColdRegion);
+                Boolean isPartition= template.getMasterTemplate().getExpression().endsWith("*");
+                supportSrv.setIsPartition(isPartition);
                 return supportSrv;
             });
         } catch (ExecutionException e) {
@@ -442,5 +445,6 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
         private Boolean coldRegionExists=false;
         private Boolean pipelineModuleExists=false;
         private Boolean enableWriteRateLimit=false;
+        private Boolean isPartition=false;
     }
 }
