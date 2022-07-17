@@ -1,13 +1,13 @@
 package com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob;
 
-import com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.metrics.CollectMetrics;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESDataTempBean;
-import com.google.common.collect.Lists;
+import static com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.metrics.MetricsComputeType.*;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import static com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.metrics.MetricsComputeType.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESDataTempBean;
+import com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.metrics.CollectMetrics;
+import com.google.common.collect.Lists;
 
 public class MonitorCollectMetrics {
 
@@ -246,16 +246,16 @@ public class MonitorCollectMetrics {
             .valueRoute("indices.merges.total_time_in_millis").computeType(MINUS).bIndexToNodeMetrics().build());
 
         nodeWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.indices.refresh.total")
-            .valueRoute("indices.refresh.total ").computeType(MINUS).build());
+            .valueRoute("indices.refresh.total").computeType(MINUS).build());
 
         nodeWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.indices.refresh.total_time_in_millis")
             .valueRoute("indices.refresh.total_time_in_millis").computeType(MINUS).build());
 
-        nodeWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.indices.flush.total ")
-            .valueRoute("indices.flush.total ").computeType(MINUS).sendToN9e().build());
+        nodeWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.indices.flush.total")
+            .valueRoute("indices.flush.total").computeType(MINUS).sendToN9e().build());
 
-        nodeWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.indices.flush.total_time_in_millis ")
-            .valueRoute("indices.flush.total_time_in_millis ").computeType(MINUS).build());
+        nodeWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.indices.flush.total_time_in_millis")
+            .valueRoute("indices.flush.total_time_in_millis").computeType(MINUS).build());
 
         nodeWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.indices.segments.count")
             .valueRoute("indices.segments.count").computeType(NONE).build());
@@ -470,16 +470,16 @@ public class MonitorCollectMetrics {
             .valueRoute("merges.total_time_in_millis").computeType(MINUS).build());
 
         nodeToIndexWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.index.refresh.total")
-            .valueRoute("refresh.total ").computeType(MINUS).build());
+            .valueRoute("refresh.total").computeType(MINUS).build());
 
         nodeToIndexWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.index.refresh.total_time_in_millis")
             .valueRoute("refresh.total_time_in_millis").computeType(MINUS).build());
 
-        nodeToIndexWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.index.flush.total ")
-            .valueRoute("flush.total ").computeType(MINUS).build());
+        nodeToIndexWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.index.flush.total")
+            .valueRoute("flush.total").computeType(MINUS).build());
 
-        nodeToIndexWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.index.flush.total_time_in_millis ")
-            .valueRoute("flush.total_time_in_millis ").computeType(MINUS).build());
+        nodeToIndexWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.index.flush.total_time_in_millis")
+            .valueRoute("flush.total_time_in_millis").computeType(MINUS).build());
 
         nodeToIndexWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.index.segments.count")
             .valueRoute("segments.count").computeType(NONE).build());
