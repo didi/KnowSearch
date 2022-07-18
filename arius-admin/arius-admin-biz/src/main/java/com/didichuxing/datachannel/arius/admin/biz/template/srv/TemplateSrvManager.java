@@ -112,5 +112,12 @@ public interface TemplateSrvManager {
      */
     List<String> getPhyClusterByOpenTemplateSrv(int srvId);
     
+    /**
+     * 查询开启了某个索引服务的索引模板列表
+     *
+     * @param srvId
+     * @return
+     */
+    List<String> getIndexTemplateContainsSrv(int srvId);
     
 }
