@@ -1,85 +1,92 @@
 {
-    "order":10,
-    "index_patterns":[
-        "arius.cat.index_info*"
+    "order" : 10,
+    "index_patterns" : [
+      "arius_cat_index_info*"
     ],
-    "settings":{
-        "index":{
-            "mapping":{
-                "single_type":"true"
-            },
-            "number_of_shards":"4",
-            "number_of_routing_size":"1",
-            "refresh_interval": "1s"
-        }
-    },
-    "mappings":{
-        "_source":{
-            "enabled":true
-        },
-        "properties":{
-            "cluster": {
-                "type": "keyword"
-            },
-            "clusterPhy": {
-                "type": "keyword"
-            },
-            "clusterLogic": {
-                "type": "keyword"
-            },
-            "resourceId": {
-                "type": "long"
-            },
-            "templateId": {
-                "type": "integer"
-            },
-            "totalSegmentCount": {
-                "type": "long"
-            },
-            "primariesSegmentCount": {
-                "type": "long"
-            },
-            "priStoreSize": {
-                "type": "long"
-            },
-            "pri": {
-                "type":"long"
-            },
-            "index":{
-                "type":"keyword"
-            },
-            "health":{
-                "type":"keyword"
-            },
-            "deleteFlag":{
-                "type":"boolean"
-            },
-            "docsDeleted":{
-                "type":"long"
-            },
-            "storeSize":{
-                "type":"long"
-            },
-            "rep":{
-                "type":"long"
-            },
-            "docsCount":{
-                "type":"long"
-            },
-            "key":{
-                "ignore_above":1024,
-                "type":"keyword"
-            },
-            "status":{
-                "type":"keyword"
-            },
-            "timestamp":{
-                "format":"epoch_millis",
-                "type":"date"
+    "settings" : {
+      "index" : {
+        "routing" : {
+          "allocation" : {
+            "include" : {
+              "_name" : "logi03-datanode03,logi01-datanode01,logi02-datanode02"
             }
-        }
+          }
+        },
+        "mapping" : {
+          "single_type" : "true"
+        },
+        "number_of_shards" : "1",
+        "number_of_routing_size" : "1"
+      }
     },
-    "aliases":{
-
-    }
-}
+    "mappings" : {
+      "properties" : {
+        "cluster" : {
+          "type" : "keyword"
+        },
+        "clusterPhy" : {
+          "type" : "keyword"
+        },
+        "clusterLogic" : {
+          "type" : "keyword"
+        },
+        "resourceId" : {
+          "type" : "long"
+        },
+        "pri" : {
+          "type" : "long"
+        },
+        "health" : {
+          "type" : "keyword"
+        },
+        "index" : {
+          "type" : "keyword"
+        },
+        "templateId" : {
+          "type" : "integer"
+        },
+        "deleteFlag" : {
+          "type" : "boolean"
+        },
+        "docsDeleted" : {
+          "type" : "long"
+        },
+        "appId" : {
+          "type" : "integer"
+        },
+        "priStoreSize" : {
+          "type" : "long"
+        },
+         "totalSegmentCount" : {
+          "type" : "long"
+        },
+        "primariesSegmentCount" : {
+          "type" : "long"
+        },
+        "storeSize" : {
+          "type" : "long"
+        },
+        "docsCount" : {
+          "type" : "long"
+        },
+        "rep" : {
+          "type" : "long"
+        },
+        "projectId" : {
+          "type" : "integer"
+        },
+        "key" : {
+          "ignore_above" : 1024,
+          "type" : "keyword"
+        },
+        "status" : {
+          "type" : "keyword"
+        },
+        "timestamp" : {
+          "format" : "epoch_millis",
+          "type" : "date"
+        }
+      }
+    },
+    "aliases" : { }
+  }
