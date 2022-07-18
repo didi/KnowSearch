@@ -251,8 +251,7 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
      */
     private Map<String,String> getDashBoardMetricThresholdNames(){
         Map<String,String> threshold = new HashMap<>();
-        threshold.put(INDEX_SMALL_SHARD.getType(), DashBoardMetricThresholdValueNameEnum.SEGMENT_NUM.getValue());
-        //threshold.put(INDEX_SEGMENT_NUM.getType(),DashBoardMetricThresholdValueNameEnum.SEGMENT_NUM.getValue());
+        threshold.put(INDEX_SMALL_SHARD.getType(), DashBoardMetricThresholdValueNameEnum.SHARD_SIZE.getValue());
         return threshold;
     }
     
