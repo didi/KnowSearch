@@ -76,6 +76,9 @@
                     "httpNum":{
                         "type":"long"
                     },
+                    "elapsedTime":{
+                        "type":"long"
+                    },
                     "timestamp":{
                         "format":"epoch_millis",
                         "type":"date"

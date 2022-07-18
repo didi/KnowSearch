@@ -1,21 +1,19 @@
 package com.didichuxing.datachannel.arius.admin.task.dashboard.collector;
 
-import java.util.List;
-import java.util.Map;
-
-import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
-import com.didichuxing.datachannel.arius.admin.metadata.service.ESClusterPhyStatsService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.ClusterMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.DashBoardStats;
+import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.MetricsUtils;
+import com.didichuxing.datachannel.arius.admin.metadata.service.ESClusterPhyStatsService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import java.util.List;
+import java.util.Map;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * Created by linyunan on 3/11/22
@@ -66,7 +64,9 @@ public class ClusterDashBoardCollector extends BaseDashboardCollector {
         long currentTimeMillis = System.currentTimeMillis();
         long currentTime = CommonUtils.monitorTimestamp2min(currentTimeMillis);
         long elapsedTime = currentTime - startTime;
+        //11.消耗时间 开始采集到结束采集的时间
         clusterMetrics.setElapsedTime(elapsedTime);
+        //12.消耗时间是否大于5分钟,开始采集到结束采集的时间
         clusterMetrics.setElapsedTimeGte5Min(elapsedTime > FIVE_MINUTE);
 
         dashBoardStats.setCluster(clusterMetrics);
