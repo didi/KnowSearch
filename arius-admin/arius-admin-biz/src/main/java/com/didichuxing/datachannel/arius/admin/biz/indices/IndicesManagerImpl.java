@@ -160,17 +160,19 @@ public class IndicesManagerImpl implements IndicesManager {
         if (StringUtils.isNotBlank(indexCreateDTO.getSetting())) {
             indexConfig.setSettings(AriusIndexTemplateSetting.flat(JSON.parseObject(indexCreateDTO.getSetting())));
         }
-
+        boolean succ = false;
         try {
             // 1. es创建真实索引
             boolean syncCreateIndexRet = esIndexService.syncCreateIndex(indexCreateDTO.getCluster(), indexCreateDTO.getIndex(),
                     indexConfig, RETRY_COUNT);
 
             // 2. 同步在元数据Cat_index系统索引中添加此索引元数据文档
-            indexCreateDTO.setProjectId(projectId);
-            boolean syncInsertCatIndexRet = esIndexCatService.syncInsertCatIndex(Lists.newArrayList(indexCreateDTO), RETRY_COUNT);
+            if (syncCreateIndexRet) {
+                indexCreateDTO.setProjectId(projectId);
+                succ = esIndexCatService.syncInsertCatIndex(Lists.newArrayList(indexCreateDTO), RETRY_COUNT);
+            }
 
-            if (syncCreateIndexRet && syncInsertCatIndexRet) {
+            if (succ) {
                 operateRecordService.save(new OperateRecord.Builder()
                         .content(String.format("物理集群:[%s],创建索引：[%s]", indexCreateDTO.getCluster(), indexCreateDTO.getIndex()))
                         .operationTypeEnum(OperateTypeEnum.INDEX_MANAGEMENT_CREATE).userOperation(operator)
@@ -181,27 +183,9 @@ public class IndicesManagerImpl implements IndicesManager {
                 indexCreateDTO.getIndex(), e);
             return Result.buildFail(String.format("索引创建失败, errMsg:%s", e.getCause()));
         }
+        if (succ) { return Result.buildSuccWithMsg("索引创建成功，请五分钟后再进行查询与操作");}
 
-        return Result.buildSuccWithMsg("索引创建成功，请五分钟后再进行查询与操作！");
-    }
-
-    private Result<Void> init(IndexCatCellWithConfigDTO indexCreateDTO, Integer projectId) {
-        if (AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
-            return Result.buildSucc();
-        } else {
-            ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByName(indexCreateDTO.getCluster());
-            if (null == clusterLogic) {
-                return Result.buildParamIllegal(String.format("逻辑集群[%s]不存在", indexCreateDTO.getCluster()));
-            }
-            ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(clusterLogic.getId());
-            if (null == clusterRegion) { return Result.buildParamIllegal("逻辑集群未绑定Region");}
-
-            // 这里用户侧，传逻辑集群名称 这里先补丁适配
-            indexCreateDTO.setClusterLogic(indexCreateDTO.getCluster());
-            indexCreateDTO.setResourceId(clusterLogic.getId());
-        }
-        indexCreateDTO.setProjectId(projectId);
-        return Result.buildSucc();
+        return Result.buildFail("创建索引失败, 请检查集群是否异常");
     }
 
     @Override
@@ -884,5 +868,25 @@ public class IndicesManagerImpl implements IndicesManager {
             phyClusterName = clusterRegion.getPhyClusterName();
         }
         return Result.buildSucc(phyClusterName);
+    }
+
+    private Result<Void> init(IndexCatCellWithConfigDTO indexCreateDTO, Integer projectId) {
+        if (AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
+            return Result.buildSucc();
+        } else {
+            ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByName(indexCreateDTO.getCluster());
+            if (null == clusterLogic) {
+                return Result.buildParamIllegal(String.format("逻辑集群[%s]不存在", indexCreateDTO.getCluster()));
+            }
+            ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(clusterLogic.getId());
+            if (null == clusterRegion) { return Result.buildParamIllegal("逻辑集群未绑定Region");}
+
+            // 这里用户侧，传逻辑集群名称 这里先补丁适配
+            indexCreateDTO.setClusterLogic(indexCreateDTO.getCluster());
+            indexCreateDTO.setResourceId(clusterLogic.getId());
+            indexCreateDTO.setCluster(clusterRegion.getPhyClusterName());
+        }
+        indexCreateDTO.setProjectId(projectId);
+        return Result.buildSucc();
     }
 }

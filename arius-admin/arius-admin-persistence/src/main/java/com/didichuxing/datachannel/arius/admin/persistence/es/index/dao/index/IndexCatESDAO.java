@@ -36,7 +36,7 @@ public class IndexCatESDAO extends BaseESDAO {
     /**
      * type名称
      */
-    private String typeName = "type";
+    private String typeName = "_doc";
 
     @PostConstruct
     public void init() {
