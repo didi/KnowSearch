@@ -1,19 +1,12 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.cluster;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.COMMA;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.*;
-
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-
-import javax.annotation.Nullable;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.rest.RestStatus;
-import org.springframework.http.HttpMethod;
-import org.springframework.stereotype.Repository;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_OPERATE_MIN_TIMEOUT;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_OPERATE_TIMEOUT;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.INDEX_BLOCKS_READ;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.INDEX_BLOCKS_WRITE;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.INDEX_SETTING_PRE;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.TEMPLATE_INDEX_INCLUDE_NODE_NAME;
 
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -39,6 +32,7 @@ import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.ESIn
 import com.didiglobal.logi.elasticsearch.client.response.indices.closeindex.ESIndicesCloseIndexResponse;
 import com.didiglobal.logi.elasticsearch.client.response.indices.deletebyquery.ESIndicesDeleteByQueryResponse;
 import com.didiglobal.logi.elasticsearch.client.response.indices.deleteindex.ESIndicesDeleteIndexResponse;
+import com.didiglobal.logi.elasticsearch.client.response.indices.exists.ESIndicesExistsResponse;
 import com.didiglobal.logi.elasticsearch.client.response.indices.getalias.AliasIndexNode;
 import com.didiglobal.logi.elasticsearch.client.response.indices.getalias.ESIndicesGetAliasResponse;
 import com.didiglobal.logi.elasticsearch.client.response.indices.getindex.ESIndicesGetIndexResponse;
@@ -56,6 +50,20 @@ import com.didiglobal.logi.elasticsearch.client.response.setting.index.IndexConf
 import com.didiglobal.logi.elasticsearch.client.response.setting.index.MultiIndexsConfig;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import javax.annotation.Nullable;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.rest.RestStatus;
+import org.springframework.http.HttpMethod;
+import org.springframework.stereotype.Repository;
 
 /**
  * @author d06679
@@ -150,15 +158,27 @@ public class ESIndexDAO extends BaseESDAO {
      * @param indexName  索引名称
      * @return
      */
-    public boolean existByClusterAndIndexName(String cluster, String indexName) {
+    public boolean existByClusterAndIndexName(String cluster, String indexName,Integer tryTimes) {
         Client client = fetchESClientByCluster(cluster);
+         if ( client==null) {
+           return Boolean.FALSE;
+        }
         ESIndicesExistsRequest esIndicesExistsRequest = new ESIndicesExistsRequest();
         esIndicesExistsRequest.setIndex(indexName);
-        if (client != null) {
-            return client.admin().indices().exists(esIndicesExistsRequest)
-                .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS).isExists();
-        }
-        return false;
+        ESIndicesExistsResponse response = null;
+        Long minTimeoutNum = 1L;
+        Long maxTimeoutNum = tryTimes.longValue();
+    
+        do {
+            response = client.admin().indices().exists(esIndicesExistsRequest)
+                    .actionGet(/*降低因为抖动导致的等待时常,等待时常从低到高进行重试*/minTimeoutNum * ES_OPERATE_MIN_TIMEOUT, TimeUnit.SECONDS);
+            minTimeoutNum++;
+            if (minTimeoutNum > maxTimeoutNum) {
+                minTimeoutNum = maxTimeoutNum;
+            }
+        } while (tryTimes-- > 0 && Boolean.FALSE.equals(
+                Optional.ofNullable(response).map(ESIndicesExistsResponse::isExists).orElse(Boolean.FALSE)));
+        return Optional.ofNullable(response).map(ESIndicesExistsResponse::isExists).orElse(Boolean.FALSE);
     }
 
     /**
@@ -747,16 +767,26 @@ public class ESIndexDAO extends BaseESDAO {
      * @param aliases
      * @return result
      */
-    public Result<Void> editAlias(String cluster, List<PutAliasNode> aliases) {
+    public Result<Void> editAlias(String cluster, List<PutAliasNode> aliases, Integer tryTimes) {
         ESClient client = fetchESClientByCluster(cluster);
         if (client == null) {
             LOGGER.warn("class=ESIndexDAO||method=editAlias||errMsg=es client not found");
             return Result.buildFail();
         }
+        Long minTimeoutNum = 1L;
+        Long maxTimeoutNum = tryTimes.longValue();
+        ESIndicesPutAliasResponse response =null;
+        do {
+            response = client.admin().indices().preparePutAlias().addPutAliasNodes(aliases).execute()
+                    .actionGet(/*降低因为抖动导致的等待时常,等待时常从低到高进行重试*/minTimeoutNum * ES_OPERATE_MIN_TIMEOUT, TimeUnit.SECONDS);
+            minTimeoutNum++;
+            if (minTimeoutNum > maxTimeoutNum) {
+                minTimeoutNum = maxTimeoutNum;
+            }
+        }while (tryTimes-- > 0 &&Boolean.FALSE.equals(Optional.ofNullable(response).map(ESIndicesPutAliasResponse::getAcknowledged).orElse(Boolean.FALSE)));
 
-        ESIndicesPutAliasResponse response = client.admin().indices().preparePutAlias().addPutAliasNodes(aliases)
-            .execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
-        return Result.build(response.getAcknowledged());
+        
+        return Result.build(Optional.ofNullable(response).map(ESIndicesPutAliasResponse::getAcknowledged).orElse(Boolean.FALSE));
     }
 
     public Result<Void> rollover(String cluster, String alias, String conditions) {

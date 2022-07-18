@@ -10,10 +10,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTe
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.IndexTemplatePhysicalVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 import java.util.Set;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface TemplatePhyManager {
 
@@ -78,7 +77,6 @@ public interface TemplatePhyManager {
      * @param operator 操作人
      * @return result
      */
-    @Transactional(rollbackFor = Exception.class)
     Result<Void> copyTemplate(TemplatePhysicalCopyDTO param, String operator) throws AdminOperateException;
 
     /**

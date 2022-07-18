@@ -4,10 +4,12 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.IndexCatCell;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.index.IndexCatCellPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.index.IndexStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
@@ -47,8 +49,14 @@ public class IndexCatESDAO extends BaseESDAO {
      * @param list
      * @return
      */
-    public boolean batchInsert(List<IndexCatCellPO> list) {
-        return updateClient.batchInsert(IndexNameUtils.genCurrentDailyIndexName(indexName), typeName, list);
+    public boolean batchInsert(List<IndexCatCellPO> list, int retryCount) {
+        try {
+            return ESOpTimeoutRetry.esRetryExecute("batchInsert", retryCount,
+                    () -> updateClient.batchInsert(IndexNameUtils.genCurrentDailyIndexName(indexName), typeName, list));
+        } catch (ESOperateException e) {
+            LOGGER.error("class=IndexCatESDAO||method=batchInsert||errMsg={}", e.getMessage(), e);
+        }
+        return false;
     }
 
     /**
@@ -126,6 +134,22 @@ public class IndexCatESDAO extends BaseESDAO {
         }
 
         return false;
+    }
+
+    /**
+     * 获取不包含模板id并且包含projectId的IndexCatCell信息，作用于平台索引管理新建索引侧
+     * @return          List<IndexCatCell>
+     */
+    public List<IndexCatCell> getHasProjectIdButNotTemplateIdCatIndexList() {
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_HAS_PROJECT_ID_BUT_NOT_TEMPLATE_ID_CAT_INDEX);
+        int retryTime = 3;
+        List<IndexCatCell> indexCatCell;
+        do {
+            indexCatCell = gatewayClient.performRequest(metadataClusterName,
+                    IndexNameUtils.genCurrentDailyIndexName(indexName), typeName, dsl, IndexCatCell.class);
+        } while (retryTime-- > 0 && CollectionUtils.isEmpty(indexCatCell));
+
+        return indexCatCell;
     }
 
     /**************************************************private******************************************************/
@@ -222,4 +246,6 @@ public class IndexCatESDAO extends BaseESDAO {
 
         return "asc";
     }
+
+
 }

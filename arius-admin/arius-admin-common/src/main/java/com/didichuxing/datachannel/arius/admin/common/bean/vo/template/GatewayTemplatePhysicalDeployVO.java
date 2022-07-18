@@ -1,10 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.vo.template;
 
-import java.util.Map;
-import java.util.Set;
-
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.Map;
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -62,10 +61,10 @@ public class GatewayTemplatePhysicalDeployVO {
     private String                                          topic;
 
     /**
-     * 能够查询的app列表
+     * 能够查询的应用列表
      */
-    @ApiModelProperty("能够查询的app列表")
-    private Set<Integer>                                    accessApps;
+    @ApiModelProperty("能够查询的应用列表")
+    private Set<Integer> accessProjects;
 
     /**
      * 用于索引多type改造   是否启用索引名称映射 0 禁用 1 启用
