@@ -54,13 +54,7 @@ public interface BaseTemplateSrv {
                           Integer projectId) throws AdminOperateException;
 
     ///////////////////////////////////srv
-    /**
-    * 判断指定物理集群是否开启了当前索引服务
-    * @param phyClusterName 物理集群名字
-    * @return 校验结果
-    */
-    @Deprecated
-    boolean isTemplateSrvOpen(String phyClusterName);
+
 
     /**
      * 判断物理模板已经开启了当前索引服务（判断指定物理模板所在物理集群是否开启了当前索引服务）
