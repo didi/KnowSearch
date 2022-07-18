@@ -2,7 +2,17 @@ package com.didichuxing.datachannel.arius.admin.core.service.es.impl;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.getShards2NodeInfoRequestContent;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.rest.RestStatus;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatCellDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.IndexCatCell;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.IndexShardInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.index.IndexCatCellPO;
@@ -15,12 +25,6 @@ import com.didiglobal.logi.elasticsearch.client.gateway.direct.DirectResponse;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
-import java.util.List;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.rest.RestStatus;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 /**
  * Created by linyunan on 2021-10-14
@@ -102,6 +106,36 @@ public class ESIndexCatServiceImpl implements ESIndexCatService {
         return Lists.newArrayList();
     }
 
+    @Override
+    public Boolean syncInsertCatIndex(List<IndexCatCellDTO> params, int retryCount) {
+        BatchProcessor.BatchProcessResult<IndexCatCellDTO, Boolean> result = new BatchProcessor<IndexCatCellDTO, Boolean>()
+                .batchList(params).batchSize(5000)
+                .processor(items -> indexCatESDAO.batchInsert(ConvertUtil.list2List(items, IndexCatCellPO.class), retryCount))
+                .succChecker(succ -> succ).process();
+
+        if (!result.isSucc()) {
+            List<String> clusterList = params.stream().map(IndexCatCellDTO::getCluster).distinct().collect(Collectors.toList());
+            List<String> indexList   = params.stream().map(IndexCatCellDTO::getIndex).distinct().collect(Collectors.toList());
+            LOGGER.error("class=ESIndexCatServiceImpl||method=syncInsertCatIndex||cluster={}||indexNameList={}||result={}",
+                    clusterList, indexList, result);
+        }
+
+        return result.isSucc();
+    }
+
+    @Override
+    public List<IndexCatCell> syncGetHasProjectIdButNotTemplateIdCatIndexList() {
+        try {
+            return indexCatESDAO.getHasProjectIdButNotTemplateIdCatIndexList();
+        } catch (Exception e) {
+            LOGGER.error("class=ESIndexCatServiceImpl||method=syncGetHasProjectIdButNotTemplateIdCatIndexList||" +
+                    "errMsg=failed to get syncGetHasProjectIdButNotTemplateIdCatIndexList", e);
+        }
+        return Lists.newArrayList();
+    }
+
+
+    /*************************************************private*******************************************************/
     private List<IndexCatCell> buildIndexCatCell(List<IndexCatCellPO> indexCatCellPOList) {
         List<IndexCatCell> indexCatCellList = Lists.newArrayList();
         for (IndexCatCellPO indexCatCellPO : indexCatCellPOList) {

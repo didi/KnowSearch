@@ -38,4 +38,6 @@ public class IndexCatCell {
     private Long         totalSegmentCount;
     private Integer      templateId;
     private List<String> aliases;
+
+    public String getKey() { return cluster + "@" + index;}
 }
