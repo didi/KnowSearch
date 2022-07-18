@@ -76,6 +76,12 @@
                     "httpNum":{
                         "type":"long"
                     },
+                    "clusterElapsedTime":{
+                        "type":"long"
+                    },
+                    "clusterElapsedTimeGte5Min":{
+                        "type":"boolean"
+                    }
                     "timestamp":{
                         "format":"epoch_millis",
                         "type":"date"
@@ -109,6 +115,9 @@
                         "type":"boolean"
                     },
                     "SearchRejectedNum":{
+                        "type":"long"
+                    },
+                    "nodeElapsedTime":{
                         "type":"long"
                     },
                     "timestamp":{
@@ -197,6 +206,9 @@
                     },
                     "bigShard":{
                         "type":"boolean"
+                    },
+                    "shardSize":{
+                        "type":"long"
                     },
                     "singReplicate":{
                         "type":"boolean"

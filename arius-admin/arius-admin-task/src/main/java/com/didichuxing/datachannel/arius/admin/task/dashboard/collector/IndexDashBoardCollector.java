@@ -2,35 +2,35 @@ package com.didichuxing.datachannel.arius.admin.task.dashboard.collector;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.BYTE_TO_MB;
 
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
-
-import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
-import com.didichuxing.datachannel.arius.admin.metadata.service.ESIndicesStatsService;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.ShardMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.shard.Segment;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.DashBoardStats;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.IndexMetrics;
 import com.didichuxing.datachannel.arius.admin.common.constant.index.IndexStatusEnum;
+import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.MappingConfigUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.MetricsUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.SizeUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESShardService;
+import com.didichuxing.datachannel.arius.admin.metadata.service.ESIndicesStatsService;
 import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
 import com.didiglobal.logi.elasticsearch.client.response.setting.index.IndexConfig;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * Created by linyunan on 3/11/22
@@ -119,6 +119,7 @@ public class IndexDashBoardCollector extends BaseDashboardCollector {
             indexMetrics.setBigShard(index2BigShardListMap.containsKey(index.getIndex()));
             // 5. 是否为小shard索引(小于1G)
             indexMetrics.setSmallShard(index2SmallShardListMap.containsKey(index.getIndex()));
+            indexMetrics.setShardSize(countShardSize(index2BigShardListMap,index2SmallShardListMap,index.getIndex()));
             // 6. 索引Mapping字段个数
             int mappingNum = 0;
             IndexConfig indexConfig = index2IndexConfigMapRef.get().get(index.getIndex());
@@ -153,7 +154,28 @@ public class IndexDashBoardCollector extends BaseDashboardCollector {
 
         monitorMetricsSender.sendDashboardStats(dashBoardStatsList);
     }
-
+    
+    /**
+     *  计算对于索引shard大小
+     * @param index2BigShardListMap 大shard集合
+     * @param index2SmallShardListMap 小shard集合
+     * @param index 索引
+     * @return 索引大小
+     */
+    private Long countShardSize(Map<String, List<ShardMetrics>> index2BigShardListMap, Map<String, List<ShardMetrics>> index2SmallShardListMap, String index) {
+        List<ShardMetrics> metrics= new ArrayList<>();
+        if (index2BigShardListMap.containsKey(index)){
+            metrics = index2BigShardListMap.get(index);
+        }else if (index2SmallShardListMap.containsKey(index)){
+            metrics = index2SmallShardListMap.get(index);
+        }
+        Long size = 0L;
+        for(ShardMetrics metric:metrics){
+            size+=SizeUtil.getUnitSize(metric.getStore());
+        }
+        return size;
+    }
+    
     /**
      * 分批采集 + 计算索引列表SearchQuery突增量
      * @param cluster        集群名称

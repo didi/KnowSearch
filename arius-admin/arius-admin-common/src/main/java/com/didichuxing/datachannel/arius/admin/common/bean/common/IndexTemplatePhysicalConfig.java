@@ -2,7 +2,6 @@ package com.didichuxing.datachannel.arius.admin.common.bean.common;
 
 import java.util.Map;
 import java.util.Set;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -34,7 +33,7 @@ public class IndexTemplatePhysicalConfig {
     /**
      * 可以访问的APP
      */
-    private Set<Integer>                                    accessApps;
+    private Set<Integer> accessProjects;
 
     /**
      * frozen配置

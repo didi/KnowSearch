@@ -17,7 +17,9 @@ import com.didichuxing.datachannel.arius.admin.core.service.template.logic.Index
 import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import com.google.common.collect.Lists;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Consumer;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -74,9 +76,19 @@ public class TemplateLogicPageSearchHandle extends AbstractPageSearchHandle<Temp
         Integer totalHit = indexTemplateService.fuzzyLogicTemplatesHitByCondition(condition).intValue();
 
         List<ConsoleTemplateVO> consoleTemplateVOList = buildOtherInfo(matchIndexTemplate);
+        consoleTemplateVOList.forEach(buildIsPartition);
         return PaginationResult.buildSucc(consoleTemplateVOList, totalHit, condition.getPage(), condition.getSize());
     }
-
+    
+    private final Consumer<ConsoleTemplateVO> buildIsPartition = consoleTemplateVO -> {
+        if (Objects.isNull(consoleTemplateVO.getExpression())) {
+            consoleTemplateVO.setIsPartition(Boolean.FALSE);
+        } else {
+            consoleTemplateVO.setIsPartition(consoleTemplateVO.getExpression().endsWith("*"));
+            
+        }
+        
+    };
     /******************************************private***********************************************/
     private List<ConsoleTemplateVO> buildOtherInfo(List<IndexTemplate> indexTemplateList) {
         if (CollectionUtils.isEmpty(indexTemplateList)) {

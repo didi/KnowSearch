@@ -205,6 +205,15 @@ public class ESUserServiceImpl implements ESUserService {
             if (Objects.nonNull(oldESUser) && !appDTO.getProjectId().equals(oldESUser.getProjectId())) {
                 return Result.buildParamIllegal(String.format("es user [%s] 已存在", appDTO.getId()));
             }
+            if (StringUtils.isBlank(appDTO.getVerifyCode())) {
+                return Result.buildParamIllegal("校验码不能为空");
+            }
+            final int countByProjectIdAndSearchType = esUserDAO.countByProjectIdAndSearchType(appDTO.getSearchType(),
+                    appDTO.getProjectId());
+    
+            if (countByProjectIdAndSearchType >= 1) {
+                return Result.buildParamIllegal("当前项目已经存在相同模式的es user");
+            }
         } else if (EDIT.equals(operation)) {
             if (AriusObjUtils.isNull(appDTO.getId()) || AriusObjUtils.isNull(oldESUser)) {
                 return Result.buildNotExist(ES_USER_NOT_EXIST);
@@ -224,14 +233,7 @@ public class ESUserServiceImpl implements ESUserService {
         if (searchTypeEnum.equals(ProjectSearchTypeEnum.UNKNOWN)) {
             return Result.buildParamIllegal("查询模式非法");
         }
-        final int countByProjectIdAndSearchType = esUserDAO.countByProjectIdAndSearchType(appDTO.getSearchType(),
-            appDTO.getProjectId());
-        if (StringUtils.isBlank(appDTO.getVerifyCode())) {
-            return Result.buildParamIllegal("校验码不能为空");
-        }
-        if (countByProjectIdAndSearchType > 1) {
-            return Result.buildParamIllegal("当前项目已经存在相同模式的es user");
-        }
+       
 
         return Result.buildSucc();
     }

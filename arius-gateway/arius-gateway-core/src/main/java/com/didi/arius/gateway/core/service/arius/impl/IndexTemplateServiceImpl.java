@@ -2,20 +2,6 @@ package com.didi.arius.gateway.core.service.arius.impl;
 
 import static com.didi.arius.gateway.common.utils.AppUtil.isAdminAppid;
 
-import java.util.*;
-
-import javax.annotation.PostConstruct;
-
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.MapUtils;
-import org.elasticsearch.gateway.GatewayException;
-import org.elasticsearch.rest.RestStatus;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -25,7 +11,13 @@ import com.didi.arius.gateway.common.exception.IndexNotFoundException;
 import com.didi.arius.gateway.common.exception.InvalidParameterException;
 import com.didi.arius.gateway.common.exception.TemplateBlockException;
 import com.didi.arius.gateway.common.exception.TooManyIndexException;
-import com.didi.arius.gateway.common.metadata.*;
+import com.didi.arius.gateway.common.metadata.AppDetail;
+import com.didi.arius.gateway.common.metadata.ESCluster;
+import com.didi.arius.gateway.common.metadata.IndexTemplate;
+import com.didi.arius.gateway.common.metadata.QueryContext;
+import com.didi.arius.gateway.common.metadata.TemplateAlias;
+import com.didi.arius.gateway.common.metadata.TemplateClusterInfo;
+import com.didi.arius.gateway.common.metadata.TemplateInfo;
 import com.didi.arius.gateway.common.utils.IndexTire;
 import com.didi.arius.gateway.common.utils.IndexTireBuilder;
 import com.didi.arius.gateway.common.utils.Regex;
@@ -38,10 +30,31 @@ import com.didi.arius.gateway.elasticsearch.client.ESClient;
 import com.didi.arius.gateway.elasticsearch.client.gateway.direct.DirectRequest;
 import com.didi.arius.gateway.elasticsearch.client.gateway.direct.DirectResponse;
 import com.didi.arius.gateway.remote.AriusAdminRemoteService;
-import com.didi.arius.gateway.remote.response.*;
+import com.didi.arius.gateway.remote.response.AliasesInfoResponse;
+import com.didi.arius.gateway.remote.response.IndexTemplateListResponse;
+import com.didi.arius.gateway.remote.response.IndexTemplateResponse;
+import com.didi.arius.gateway.remote.response.SlaveInfoResponse;
+import com.didi.arius.gateway.remote.response.TempaletAliasResponse;
+import com.didi.arius.gateway.remote.response.TemplateInfoListResponse;
+import com.didi.arius.gateway.remote.response.TemplateInfoResponse;
 import com.google.common.collect.Maps;
-
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import javax.annotation.PostConstruct;
 import lombok.NoArgsConstructor;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
+import org.elasticsearch.gateway.GatewayException;
+import org.elasticsearch.rest.RestStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
 @Service
 @NoArgsConstructor
@@ -333,7 +346,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
         if (indexTemplateResponse.getSlaveInfos() != null && !indexTemplateResponse.getSlaveInfos().isEmpty()) {
             for (SlaveInfoResponse slaveInfoResponse : indexTemplateResponse.getSlaveInfos()) {
                 TemplateClusterInfo slaveInfo = new TemplateClusterInfo();
-                slaveInfo.setAccessApps(slaveInfoResponse.getAccessApps() == null ? new HashSet<>() : new HashSet<>(slaveInfoResponse.getAccessApps()));
+                slaveInfo.setAccessApps(slaveInfoResponse.getAccessProjects() == null ? new HashSet<>() : new HashSet<>(slaveInfoResponse.getAccessProjects()));
                 slaveInfo.setCluster(slaveInfoResponse.getCluster());
                 slaveInfo.setTopic(slaveInfoResponse.getTopic());
                 slaveInfo.setMappingIndexNameEnable(!Objects.isNull(slaveInfoResponse.getMappingIndexNameEnable()) && slaveInfoResponse.getMappingIndexNameEnable());

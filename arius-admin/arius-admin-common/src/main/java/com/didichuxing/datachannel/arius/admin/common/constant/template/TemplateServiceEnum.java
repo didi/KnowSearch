@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author zqr
@@ -180,6 +181,21 @@ public enum TemplateServiceEnum {
         
         return Lists.newArrayList(TemplateServiceEnum.TEMPLATE_PRE_CREATE,TemplateServiceEnum.TEMPLATE_DEL_EXPIRE,
                 TemplateServiceEnum.TEMPLATE_COLD);
+    }
+    
+    /**
+     * str是否保存传入的枚举类
+     *
+     * @param openSrvStr  打开电脑,str
+     * @param serviceEnum
+     * @return boolean
+     */
+    public static boolean strContainsSrv(String openSrvStr, TemplateServiceEnum serviceEnum) {
+        if (StringUtils.isBlank(openSrvStr)) {
+            return Boolean.FALSE;
+        }
+        return Arrays.stream(StringUtils.split(openSrvStr, ",")).filter(StringUtils::isNumeric).map(Integer::parseInt)
+                .map(TemplateServiceEnum::getById).filter(Objects::nonNull).anyMatch(srv -> srv.equals(serviceEnum));
     }
     
 }

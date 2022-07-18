@@ -52,7 +52,6 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -166,15 +165,11 @@ public class IndexTemplatePhyServiceImpl implements IndexTemplatePhyService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Result<Long> insert(IndexTemplatePhyDTO param) throws AdminOperateException {
         IndexTemplatePhyPO newTemplate = ConvertUtil.obj2Obj(param, IndexTemplatePhyPO.class);
-        boolean succ;
-        try {
-            succ = (1 == indexTemplatePhyDAO.insert(newTemplate));
-        } catch (DuplicateKeyException e) {
-            LOGGER.warn("class=TemplatePhyServiceImpl||method=insert||errMsg={}", e.getMessage());
-            throw new AdminOperateException(String.format("保存物理模板【%s】失败：物理模板已存在！", newTemplate.getName()));
-        }
+        boolean succ = (1 == indexTemplatePhyDAO.insert(newTemplate));
+    
         return Result.build(succ, newTemplate.getId());
     }
 

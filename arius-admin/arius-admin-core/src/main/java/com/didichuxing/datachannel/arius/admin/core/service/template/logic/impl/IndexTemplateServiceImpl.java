@@ -76,6 +76,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -827,7 +828,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
      */
     @Override
     public List<IndexTemplateWithPhyTemplates> listAllLogicTemplateWithPhysicals() {
-        return batchConvertLogicTemplateCombinePhysical(indexTemplateDAO.listAll());
+        return batchConvertLogicTemplateCombinePhysicalWithCache(indexTemplateDAO.listAll());
     }
 
     @Override
@@ -1049,20 +1050,15 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
     }
 
     /**************************************** private method ****************************************************/
-    /**
-     * 转换逻辑模板，获取并组合对应的物理模板信息
-     * @param logicTemplates 逻辑模板列表
-     * @return
-     */
-    private List<IndexTemplateWithPhyTemplates> batchConvertLogicTemplateCombinePhysical(List<IndexTemplatePO> logicTemplates) {
-
+    private List<IndexTemplateWithPhyTemplates> batchConvertLogicTemplateCombinePhysicalWithFunction(List<IndexTemplatePO> logicTemplates,
+                                                                                         Supplier<List<IndexTemplatePhy>> supplier){
         if (CollectionUtils.isEmpty(logicTemplates)) {
             return Lists.newArrayList();
         }
 
         // 逻辑模板对应1到多个物理模板
         Multimap<Integer, IndexTemplatePhy> logicId2PhysicalTemplatesMapping = ConvertUtil
-            .list2MulMap(indexTemplatePhyService.listTemplateWithCache(), IndexTemplatePhy::getLogicId);
+            .list2MulMap(supplier.get(), IndexTemplatePhy::getLogicId);
 
         List<IndexTemplateWithPhyTemplates> indexTemplateCombinePhysicalTemplates = Lists
             .newArrayListWithCapacity(logicTemplates.size());
@@ -1077,6 +1073,24 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
         }
 
         return indexTemplateCombinePhysicalTemplates;
+        
+    }
+    
+    private List<IndexTemplateWithPhyTemplates> batchConvertLogicTemplateCombinePhysicalWithCache(
+            List<IndexTemplatePO> logicTemplates) {
+        return batchConvertLogicTemplateCombinePhysicalWithFunction(logicTemplates,
+                () -> indexTemplatePhyService.listTemplateWithCache());
+    }
+    /**
+     * 转换逻辑模板，获取并组合对应的物理模板信息
+     * @param logicTemplates 逻辑模板列表
+     * @return
+     */
+    private List<IndexTemplateWithPhyTemplates> batchConvertLogicTemplateCombinePhysical(List<IndexTemplatePO> logicTemplates) {
+
+       
+
+        return batchConvertLogicTemplateCombinePhysicalWithFunction(logicTemplates, ()->indexTemplatePhyService.listTemplate());
     }
 
     /**

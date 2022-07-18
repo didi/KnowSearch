@@ -7,7 +7,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.impl.BaseTemplateSrvImpl;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping.TemplateLogicMappingManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping.TemplatePhyMappingManager;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.precreate.PreCreateManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.MappingOptimize;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.MappingOptimizeItem;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
@@ -29,6 +28,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
+import com.didichuxing.datachannel.arius.admin.common.event.index.ReBuildTomorrowIndexEvent;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.mapping.AnalyzerEnum;
 import com.didichuxing.datachannel.arius.admin.common.mapping.AriusTypeProperty;
@@ -42,7 +42,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ESVersionUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
-import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
+import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.impl.IndexTemplateServiceImpl;
 import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateStatsService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateConfigDAO;
@@ -91,8 +91,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrvImpl impleme
     @Autowired
     private TemplateStatsService      templateStatsService;
 
-    @Autowired
-    private PreCreateManager          templatePreCreateManager;
+
 
     @Autowired
     private IndexTemplateConfigDAO    templateConfigDAO;
@@ -100,8 +99,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrvImpl impleme
     @Autowired
     private IndexTemplateTypeDAO      indexTemplateTypeDAO;
    
-    @Autowired
-    private ESTemplateService templateService;
+
 
     private static final String       TEXT_STR                          = "text";
     private static final String       TYPE_STR                          = "type";
@@ -432,7 +430,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrvImpl impleme
                 for (Map.Entry<String, TypeConfig> entry : typeConfigMap.entrySet()) {
                     if (isSingleIndex && (entry.getValue().getProperties() == null || (isExistMappingChanged(entry.getValue().getProperties().getJsonMap(),
                         typeProperties.getJsonMap())))){
-                        return Result.buildFail("非滚动模板禁止修改已有mapping项");
+                        return Result.buildFail("非分区模板禁止编辑mapping");
                     }
                     entry.getValue().setProperties(typeProperties);
                     entry.getValue().getNotUsedMap().put(AdminConstant.DEFAULT_DYNAMIC_TEMPLATES_KEY,
@@ -507,7 +505,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrvImpl impleme
                 if (isSingleIndex(schemaDTO.getLogicId())) {
                     syncTemplateMapping2Index(schemaDTO.getLogicId());
                 } else {
-                    templatePreCreateManager.reBuildTomorrowIndex(schemaDTO.getLogicId(), 3);
+                    SpringTool.publish(new ReBuildTomorrowIndexEvent(this,schemaDTO.getLogicId()));
                 }
             }
             return result;
@@ -519,8 +517,9 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrvImpl impleme
         );
         if (result.success()) {
             //JSonu
-            // 重建明天索引
-            templatePreCreateManager.reBuildTomorrowIndex(schemaDTO.getLogicId(), 3);
+            // 重建明天索引 通过发布事件提升模板编辑的速度
+            
+             SpringTool.publish(new ReBuildTomorrowIndexEvent(this,schemaDTO.getLogicId()));
         }
 
         return result;
