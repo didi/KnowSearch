@@ -3,7 +3,6 @@ package com.didichuxing.datachannel.arius.admin.task.dashboard.collector;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.ClusterMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.DashBoardStats;
-import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.MetricsUtils;
 import com.didichuxing.datachannel.arius.admin.metadata.service.ESClusterPhyStatsService;
 import com.didiglobal.logi.log.ILog;
@@ -62,12 +61,11 @@ public class ClusterDashBoardCollector extends BaseDashboardCollector {
         clusterMetrics.setDocUprushNum(getDocUprushNum(cluster));
 
         long currentTimeMillis = System.currentTimeMillis();
-        long currentTime = CommonUtils.monitorTimestamp2min(currentTimeMillis);
-        long elapsedTime = currentTime - startTime;
+        long elapsedTime = currentTimeMillis - startTime;
         //11.消耗时间 开始采集到结束采集的时间
-        clusterMetrics.setElapsedTime(elapsedTime);
+        clusterMetrics.setClusterElapsedTime(elapsedTime);
         //12.消耗时间是否大于5分钟,开始采集到结束采集的时间
-        clusterMetrics.setElapsedTimeGte5Min(elapsedTime > FIVE_MINUTE);
+        clusterMetrics.setClusterElapsedTimeGte5Min(elapsedTime > FIVE_MINUTE);
 
         dashBoardStats.setCluster(clusterMetrics);
         monitorMetricsSender.sendDashboardStats(Lists.newArrayList(dashBoardStats));

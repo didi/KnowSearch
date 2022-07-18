@@ -76,9 +76,12 @@
                     "httpNum":{
                         "type":"long"
                     },
-                    "elapsedTime":{
+                    "clusterElapsedTime":{
                         "type":"long"
                     },
+                    "clusterElapsedTimeGte5Min":{
+                        "type":"boolean"
+                    }
                     "timestamp":{
                         "format":"epoch_millis",
                         "type":"date"
@@ -112,6 +115,9 @@
                         "type":"boolean"
                     },
                     "SearchRejectedNum":{
+                        "type":"long"
+                    },
+                    "nodeElapsedTime":{
                         "type":"long"
                     },
                     "timestamp":{
