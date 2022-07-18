@@ -43,7 +43,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.Cluster
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicAggregate;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithClusterAndMasterTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithCluster;
@@ -489,8 +488,8 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         if (checkProjectCorrectly.failed()) {
             return checkProjectCorrectly;
         }
-        IndexTemplateLogicWithClusterAndMasterTemplate template = indexTemplateService.getLogicTemplateWithClusterAndMasterTemplate(
-                logicTemplateId);
+        String phyCluster=indexTemplatePhyService.getPhyClusterByLogicTemplateId(logicTemplateId);
+       
         Result<ConsoleTemplateClearVO> templateClearInfo = templateLogicManager.getLogicTemplateClearInfo(
                 logicTemplateId);
        
@@ -511,7 +510,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
                 List<IndexCatCellDTO> catCellList = templateClearInfo.getData().getIndices().stream().map(index -> {
                     IndexCatCellDTO indexCatCellDTO = new IndexCatCellDTO();
                     indexCatCellDTO.setIndex(index);
-                    indexCatCellDTO.setCluster(template.getMasterTemplate().getCluster());
+                    indexCatCellDTO.setCluster(phyCluster);
                     return indexCatCellDTO;
                 }).collect(Collectors.toList());
                 SpringTool.publish(new IndexDeleteEvent(this, catCellList, projectId, operator));

@@ -777,7 +777,16 @@ public class IndexTemplatePhyServiceImpl implements IndexTemplatePhyService {
     public boolean updateByIndexTemplatePhyPO(IndexTemplatePhyPO physicalPO) {
         return indexTemplatePhyDAO.update(physicalPO) == 1;
     }
-
+    
+    /**
+     * @param logicTemplateId
+     * @return
+     */
+    @Override
+    public String getPhyClusterByLogicTemplateId(Integer logicTemplateId) {
+        return  getTemplateById(logicTemplateId.longValue()).getCluster();
+    }
+    
     /**************************************************** private method ****************************************************/
     private List<IndexTemplatePhyWithLogic> batchBuildTemplatePhysicalWithLogic(List<IndexTemplatePhyPO> indexTemplatePhyPOS) {
         if (CollectionUtils.isEmpty(indexTemplatePhyPOS)) {
