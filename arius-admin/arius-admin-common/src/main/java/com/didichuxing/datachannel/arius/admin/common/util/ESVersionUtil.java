@@ -92,23 +92,29 @@ public class ESVersionUtil {
     }
     
     /**
-     * 比较版本一致性 小版本之间是属于相同的版本：7.6.0==7.6.1 大版本之前的版本是不同的：7.6.0！=7.5.0
+     * 比较大版本一致性 小版本之间是属于相同的版本：7.6.0==7.6.1 大版本之前的版本是不同的：7.6.0！=7.5.0
      *
-     * @param esVersion1 7.6.0
-     * @param esVersion2 7.6.1
+     * @param esVersion1 7.6.x
+     * @param esVersion2 7.6.x
      * @return boolean    true
      */
-    public static Boolean compareVersionConsistency(String esVersion1, String esVersion2) {
+    public static Boolean compareBigVersionConsistency(String esVersion1, String esVersion2) {
         if (StringUtils.isBlank(esVersion1) || StringUtils.isBlank(esVersion2)) {
             return Boolean.FALSE;
         }
         if (StringUtils.equals(esVersion1, esVersion2)) {
             return Boolean.TRUE;
         }
-        return StringUtils.equals(getESVersionPrefix(esVersion1), getESVersionPrefix(esVersion2));
+        return StringUtils.equals(getESBigVersion(esVersion1), getESBigVersion(esVersion2));
     }
     
-    private static String getESVersionPrefix(String esVersion) {
+    /**
+     * 获取es的大版本前缀
+     *
+     * @param esVersion
+     * @return {@link String}
+     */
+    private static String getESBigVersion(String esVersion) {
         Pattern pattern = compile(VERSION_PREFIX_PATTERN);
         final Matcher matcher = pattern.matcher(esVersion);
         if (matcher.find()) {

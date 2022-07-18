@@ -678,7 +678,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         List<ClusterPhy> clusterPhies = clusterPhyService.listAllClusters();
 
         Predicate<ClusterPhy> matchingSameVersionESVersionPredicate =
-                cp -> ESVersionUtil.compareVersionConsistency(esVersion,cp.getEsVersion());
+                cp -> ESVersionUtil.compareBigVersionConsistency(esVersion,cp.getEsVersion());
         List<String> sameVersionClusterNameList = clusterPhies.stream().filter(Objects::nonNull)
                 //正常的集群才能够进行dcdr
                 .filter(r-> !ClusterHealthEnum.UNKNOWN.getCode().equals(r.getHealth()))

@@ -221,7 +221,7 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
             return Result.buildFail(String.format("原集群[%s]不存在", masterPhyTemplate.getCluster()));
         }
         //大版本一致就可以，小之间是不应该产生影响的
-        if (Boolean.FALSE.equals(ESVersionUtil.compareVersionConsistency(sourceClusterPhy.getEsVersion(),targetClusterPhy.getEsVersion()))) {
+        if (Boolean.FALSE.equals(ESVersionUtil.compareBigVersionConsistency(sourceClusterPhy.getEsVersion(),targetClusterPhy.getEsVersion()))) {
             return Result.buildFail("主从集群版本必须一致");
         }
 
