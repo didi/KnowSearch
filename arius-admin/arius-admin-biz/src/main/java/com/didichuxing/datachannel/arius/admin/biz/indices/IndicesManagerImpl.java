@@ -503,19 +503,24 @@ public class IndicesManagerImpl implements IndicesManager {
             .map(IndexConfig::getSettings).orElse(Maps.newHashMap());
         final Map<String, String> finalSettingMap = IndexSettingsUtil.getChangedSettings(sourceSettings,
             JsonUtils.flat(settingObj));
-        final boolean syncPutIndexSettings = esIndexService.syncPutIndexSettings(phyCluster,
-            Lists.newArrayList(indexName), finalSettingMap, RETRY_COUNT);
-        if (syncPutIndexSettings) {
-            final Result<IndexSettingVO> afterSetting = getSetting(phyCluster, indexName, projectId);
-            operateRecordService.save(new OperateRecord.Builder()
-                .project(projectService.getProjectBriefByProjectId(projectId)).userOperation(operator)
-                .operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_EDIT_SETTING)
-                .content(new TemplateSettingOperateRecord(beforeSetting.getData(), afterSetting.getData()).toString())
+        boolean syncPutIndexSettings = true;
+        if (finalSettingMap.size() > 0) {
+            syncPutIndexSettings = esIndexService.syncPutIndexSettings(phyCluster,
+                    Lists.newArrayList(indexName), finalSettingMap, RETRY_COUNT);
+            if (syncPutIndexSettings) {
+                final Result<IndexSettingVO> afterSetting = getSetting(phyCluster, indexName, projectId);
+                operateRecordService.save(new OperateRecord.Builder()
+                        .project(projectService.getProjectBriefByProjectId(projectId)).userOperation(operator)
+                        .operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_EDIT_SETTING)
+                        .content(new TemplateSettingOperateRecord(beforeSetting.getData(), afterSetting.getData()).toString())
 
-                .bizId(indexName)
+                        .bizId(indexName)
 
-                .buildDefaultManualTrigger());
+                        .buildDefaultManualTrigger());
+            }
         }
+
+
         return Result.build(syncPutIndexSettings);
     }
 
