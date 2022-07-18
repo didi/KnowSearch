@@ -255,7 +255,6 @@ public class IndexCatInfoCollector extends AbstractMetaDataJob {
                 indexCatCellPO.setCluster(indexCatCell.getClusterLogic());
                 indexCatCellPO.setClusterPhy(indexCatCell.getClusterPhy());
                 indexCatCellPO.setClusterLogic(indexCatCell.getClusterLogic());
-                indexCatCellPO.setClusterLogic(indexCatCell.getClusterLogic());
                 indexCatCellPO.setResourceId(indexCatCell.getResourceId());
             }
 
