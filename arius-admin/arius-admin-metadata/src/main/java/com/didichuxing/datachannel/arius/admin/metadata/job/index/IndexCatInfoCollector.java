@@ -255,6 +255,7 @@ public class IndexCatInfoCollector extends AbstractMetaDataJob {
                 indexCatCellPO.setCluster(indexCatCell.getClusterLogic());
                 indexCatCellPO.setClusterPhy(indexCatCell.getClusterPhy());
                 indexCatCellPO.setClusterLogic(indexCatCell.getClusterLogic());
+                indexCatCellPO.setClusterLogic(indexCatCell.getClusterLogic());
                 indexCatCellPO.setResourceId(indexCatCell.getResourceId());
             }
 
@@ -329,6 +330,7 @@ public class IndexCatInfoCollector extends AbstractMetaDataJob {
         if (!AriusObjUtils.isBlack(catIndexResult.getHealth())) {
             indexCatCell.setHealth(catIndexResult.getHealth());
         }
+
         Optional.ofNullable(indices2SegmentCountMap).map(map -> map.get(catIndexResult.getIndex())).ifPresent(tuple -> {
             indexCatCell.setTotalSegmentCount(tuple.v1());
             indexCatCell.setPrimariesSegmentCount(tuple.v2());
@@ -336,6 +338,7 @@ public class IndexCatInfoCollector extends AbstractMetaDataJob {
 
         indexCatCell.setCluster(clusterName);
         indexCatCell.setClusterPhy(clusterName);
+        indexCatCell.setDeleteFlag(false);
         indexCatCell.setTimestamp(timeMillis);
     }
 
