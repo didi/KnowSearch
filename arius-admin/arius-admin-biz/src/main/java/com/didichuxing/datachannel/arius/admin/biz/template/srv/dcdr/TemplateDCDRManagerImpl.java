@@ -43,6 +43,7 @@ import com.didichuxing.datachannel.arius.admin.common.threadpool.AriusTaskThread
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.BatchProcessor;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.ESVersionUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
@@ -219,8 +220,8 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
         if (null == sourceClusterPhy) {
             return Result.buildFail(String.format("原集群[%s]不存在", masterPhyTemplate.getCluster()));
         }
-        if (null != sourceClusterPhy.getEsVersion()
-            && !sourceClusterPhy.getEsVersion().equals(targetClusterPhy.getEsVersion())) {
+        //大版本一致就可以，小之间是不应该产生影响的
+        if (Boolean.FALSE.equals(ESVersionUtil.compareBigVersionConsistency(sourceClusterPhy.getEsVersion(),targetClusterPhy.getEsVersion()))) {
             return Result.buildFail("主从集群版本必须一致");
         }
 

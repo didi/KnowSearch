@@ -106,6 +106,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 @Component
 public class TemplateLogicManagerImpl implements TemplateLogicManager {
@@ -197,40 +198,54 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result<Void> create(IndexTemplateWithCreateInfoDTO param, String operator,
-                               Integer projectId) throws AdminOperateException {
+    public Result<Void> create(IndexTemplateWithCreateInfoDTO param, String operator, Integer projectId)
+            throws AdminOperateException {
         IndexTemplateDTO indexTemplateDTO = buildTemplateDTO(param, projectId);
         Result<Void> validLogicTemplateResult = indexTemplateService.validateTemplate(indexTemplateDTO, ADD, projectId);
         if (validLogicTemplateResult.failed()) {
             return validLogicTemplateResult;
         }
-
-        Result<Void> validPhyTemplateResult = indexTemplatePhyService
-            .validateTemplates(indexTemplateDTO.getPhysicalInfos(), ADD);
+    
+        Result<Void> validPhyTemplateResult = indexTemplatePhyService.validateTemplates(
+                indexTemplateDTO.getPhysicalInfos(), ADD);
         if (validPhyTemplateResult.failed()) {
             return validPhyTemplateResult;
         }
-
-        Result<Void> save2DBResult = indexTemplateService.addTemplateWithoutCheck(indexTemplateDTO);
-        if (save2DBResult.failed()) {
-            throw new AdminOperateException(String.format("创建模板失败:%s", save2DBResult.getMessage()));
+    
+        try {
+            Result<Void> save2DBResult = indexTemplateService.addTemplateWithoutCheck(indexTemplateDTO);
+            if (save2DBResult.failed()) {
+                throw new AdminOperateException(String.format("创建模板失败:%s", save2DBResult.getMessage()));
+            }
+        
+            Result<Void> save2PhyTemplateResult = templatePhyManager.addTemplatesWithoutCheck(indexTemplateDTO.getId(),
+                    indexTemplateDTO.getPhysicalInfos());
+            if (save2PhyTemplateResult.failed()) {
+                throw new AdminOperateException(String.format("创建模板失败:%s", save2PhyTemplateResult.getMessage()));
+            }
+        
+            Result<Void> saveTemplateConfigResult = insertTemplateConfig(indexTemplateDTO);
+            if (saveTemplateConfigResult.failed()) {
+                throw new AdminOperateException(String.format("创建模板失败:%s", saveTemplateConfigResult.getMessage()));
+            }
+            operateRecordService.save(
+                    new OperateRecord.Builder().bizId(indexTemplateDTO.getId()).userOperation(operator)
+                            .content(String.format("模版创建：%s", param.getName()))
+                            .project(projectService.getProjectBriefByProjectId(projectId))
+                            .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                            .operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_CREATE).build());
+        } catch (AdminOperateException e) {
+            LOGGER.error("class=TemplateLogicManagerImpl||method=create", e);
+            // 这里必须显示事务回滚
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return Result.buildFail(e.getMessage());
+        } catch (Exception e) {
+            LOGGER.error("class=TemplateLogicManagerImpl||method=create", e);
+            // 这里必须显示事务回滚
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return Result.buildFail("模版创建失败，请重新尝试");
         }
-
-        Result<Void> save2PhyTemplateResult = templatePhyManager.addTemplatesWithoutCheck(indexTemplateDTO.getId(),
-            indexTemplateDTO.getPhysicalInfos());
-        if (save2PhyTemplateResult.failed()) {
-            throw new AdminOperateException(String.format("创建模板失败:%s", save2PhyTemplateResult.getMessage()));
-        }
-
-        Result<Void> saveTemplateConfigResult = insertTemplateConfig(indexTemplateDTO);
-        if (saveTemplateConfigResult.failed()) {
-            throw new AdminOperateException(String.format("创建模板失败:%s", saveTemplateConfigResult.getMessage()));
-        }
-        operateRecordService.save(new OperateRecord.Builder().bizId(indexTemplateDTO.getId()).userOperation(operator)
-            .content(String.format("模版创建：%s", param.getName()))
-            .project(projectService.getProjectBriefByProjectId(projectId)).triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-            .operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_CREATE).build());
-
+    
         return Result.buildSucc();
     }
 
@@ -792,7 +807,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             if (updateDBResult.failed()) {
                 throw new AdminOperateException(updateDBResult.getMessage(), FAIL);
             }
-
+            
             boolean succ = esTemplateService.syncUpdateShardNum(templatePhy.getCluster(), templatePhy.getName(),
                 shardNum, RETRY_TIMES);
             if (!succ) {

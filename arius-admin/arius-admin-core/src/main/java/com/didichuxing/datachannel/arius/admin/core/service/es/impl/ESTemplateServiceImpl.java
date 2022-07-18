@@ -221,7 +221,7 @@ public class ESTemplateServiceImpl implements ESTemplateService {
      */
     @Override
     public MultiTemplatesConfig syncGetTemplates(String clusterName, String templateName) {
-        return esTemplateDAO.getTemplates(clusterName, templateName);
+        return esTemplateDAO.getTemplates(clusterName, templateName,3);
     }
 
     /**

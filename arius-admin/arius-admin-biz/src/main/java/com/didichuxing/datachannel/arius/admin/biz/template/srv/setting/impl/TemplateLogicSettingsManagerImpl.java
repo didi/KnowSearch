@@ -15,7 +15,6 @@ import com.didichuxing.datachannel.arius.admin.biz.template.srv.setting.Template
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.setting.TemplatePhySettingManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateSettingDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateSettingDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord.template.TemplateSettingOperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
@@ -38,7 +37,6 @@ import java.util.Map;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * 索引setting服务实现
@@ -67,29 +65,29 @@ public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrvImpl implem
         return TemplateServiceEnum.TEMPLATE_SETTING;
     }
 
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public Result<Void> modifySetting(ConsoleTemplateSettingDTO settingDTO, String operator,
-                                      Integer projectId) throws AdminOperateException {
-
-        LOGGER.info("class=TemplateLogicServiceImpl||method=modifySetting||operator={}||setting={}", operator,
-            JSON.toJSONString(settingDTO));
-
-        if (AriusObjUtils.isNull(operator)) {
-            return Result.buildParamIllegal("操作人为空");
-        }
-
-        if (settingDTO.getSetting() == null || settingDTO.getSetting().getAnalysis() == null) {
-            return Result.buildParamIllegal("setting信息不能为空");
-        }
-
-        Result<Void> result = updateSettings(settingDTO.getLogicId(), operator, settingDTO.getSetting());
-        if (result.success()) {
-            templatePreCreateManager.reBuildTomorrowIndex(settingDTO.getLogicId(), 3);
-        }
-
-        return result;
-    }
+    //@Override
+    //@Transactional(rollbackFor = Exception.class)
+    //public Result<Void> modifySetting(ConsoleTemplateSettingDTO settingDTO, String operator,
+    //                                  Integer projectId) throws AdminOperateException {
+    //
+    //    LOGGER.info("class=TemplateLogicServiceImpl||method=modifySetting||operator={}||setting={}", operator,
+    //        JSON.toJSONString(settingDTO));
+    //
+    //    if (AriusObjUtils.isNull(operator)) {
+    //        return Result.buildParamIllegal("操作人为空");
+    //    }
+    //
+    //    if (settingDTO.getSetting() == null || settingDTO.getSetting().getAnalysis() == null) {
+    //        return Result.buildParamIllegal("setting信息不能为空");
+    //    }
+    //
+    //    Result<Void> result = updateSettings(settingDTO.getLogicId(), operator, settingDTO.getSetting());
+    //    if (result.success()) {
+    //        templatePreCreateManager.reBuildTomorrowIndex(settingDTO.getLogicId(), 3);
+    //    }
+    //
+    //    return result;
+    //}
 
     @Override
     public Result<Void> customizeSetting(TemplateSettingDTO settingDTO, String operator) throws AdminOperateException {

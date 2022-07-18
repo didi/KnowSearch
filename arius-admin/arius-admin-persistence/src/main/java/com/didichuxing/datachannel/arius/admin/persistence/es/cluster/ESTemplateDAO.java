@@ -1,9 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.cluster;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_OPERATE_MIN_TIMEOUT;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_OPERATE_TIMEOUT;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.INDEX_SHARD_NUM;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.SINGLE_TYPE;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.TEMPLATE_DEFAULT_ORDER;
 
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
@@ -17,10 +18,12 @@ import com.didiglobal.logi.elasticsearch.client.response.indices.puttemplate.ESI
 import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
 import com.didiglobal.logi.elasticsearch.client.response.setting.template.MultiTemplatesConfig;
 import com.didiglobal.logi.elasticsearch.client.response.setting.template.TemplateConfig;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
-
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.*;
 
 /**
  * @author d06679
@@ -69,8 +72,8 @@ public class ESTemplateDAO extends BaseESDAO {
         ESClient client = esOpClient.getESClient(cluster);
 
         // 获取es中原来index template的配置
-        ESIndicesGetTemplateResponse getTemplateResponse = client.admin().indices().prepareGetTemplate(name).execute()
-            .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+         ESIndicesGetTemplateResponse getTemplateResponse = getESIndicesGetTemplateResponse(cluster,
+                name, 3);
         TemplateConfig templateConfig = getTemplateResponse.getMultiTemplatesConfig().getSingleConfig();
 
         // 修改分片数目
@@ -234,7 +237,7 @@ public class ESTemplateDAO extends BaseESDAO {
      * @return result
      */
     public TemplateConfig getTemplate(String clusterName, String templateName) {
-        MultiTemplatesConfig templatesConfig = getTemplates(clusterName, templateName);
+        MultiTemplatesConfig templatesConfig = getTemplates(clusterName, templateName,3);
 
         if (templatesConfig == null) {
             return null;
@@ -252,7 +255,7 @@ public class ESTemplateDAO extends BaseESDAO {
         Map<String, TemplateConfig> map = new HashMap<>();
         for (String clusterName : clusters) {
 
-            MultiTemplatesConfig templatesConfig = getTemplates(clusterName, null);
+            MultiTemplatesConfig templatesConfig = getTemplates(clusterName, null,3);
 
             if (null == templatesConfig) {
                 return null;
@@ -269,7 +272,7 @@ public class ESTemplateDAO extends BaseESDAO {
      * @return result
      */
     public MappingConfig getTemplateMapping(String clusterName, String templateName) {
-        MultiTemplatesConfig templatesConfig = getTemplates(clusterName, templateName);
+        MultiTemplatesConfig templatesConfig = getTemplates(clusterName, templateName,3);
 
         if (templatesConfig == null || templatesConfig.getSingleConfig() == null) {
             return null;
@@ -284,7 +287,7 @@ public class ESTemplateDAO extends BaseESDAO {
      * @param templateName      模版名
      * @return result
      */
-    public MultiTemplatesConfig getTemplates(String clusterName, String templateName) {
+    public MultiTemplatesConfig getTemplates(String clusterName, String templateName,Integer tryTimes) {
 
         LOGGER.warn("class=ESTemplateDAO||method=getTemplates||clusterName={}||templateName={}", clusterName,
             templateName);
@@ -294,19 +297,10 @@ public class ESTemplateDAO extends BaseESDAO {
         if (null == esClient) {
             return null;
         }
-
-        ESIndicesGetTemplateRequest request = new ESIndicesGetTemplateRequest();
-        request.setTemplates(templateName);
-
-        ESIndicesGetTemplateResponse response = null;
-        try {
-            response = esClient.admin().indices().getTemplate(request).actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
-        } catch (Exception e) {
-            LOGGER.warn(
-                "class=ESTemplateDAO||method=getTemplates||get templates fail||clusterName={}||templateName={}||msg={}",
-                clusterName, templateName, e.getMessage(), e);
-        }
-
+    
+        ESIndicesGetTemplateResponse response = getESIndicesGetTemplateResponse(clusterName,
+                templateName, tryTimes);
+    
         if (response == null) {
             return null;
         }
@@ -317,6 +311,37 @@ public class ESTemplateDAO extends BaseESDAO {
         }
 
         return response.getMultiTemplatesConfig();
+    }
+    
+    protected ESIndicesGetTemplateResponse getESIndicesGetTemplateResponse(String clusterName, String templateName,
+                                                                           Integer tryTimes) {
+        ESClient esClient = esOpClient.getESClient(clusterName);
+    
+        if (null == esClient) {
+            return null;
+        }
+        Long minTimeoutNum = 1L;
+        Long maxTimeoutNum = tryTimes.longValue();
+        ESIndicesGetTemplateRequest request = new ESIndicesGetTemplateRequest();
+        request.setTemplates(templateName);
+        ESIndicesGetTemplateResponse response = null;
+        do {
+            try {
+                response = esClient.admin().indices().getTemplate(request)
+                        .actionGet(/*降低因为抖动导致的等待时常,等待时常从低到高进行重试*/minTimeoutNum * ES_OPERATE_MIN_TIMEOUT,
+                                TimeUnit.SECONDS);
+                
+            } catch (Exception e) {
+                LOGGER.warn(
+                        "class=ESTemplateDAO||method=getTemplates||get templates fail||clusterName={}||templateName={}||msg={}",
+                        clusterName, templateName, e.getMessage(), e);
+            }
+            minTimeoutNum++;
+            if (minTimeoutNum > maxTimeoutNum) {
+                minTimeoutNum = maxTimeoutNum;
+            }
+        } while (tryTimes-- > 0 && null == response);
+        return response;
     }
 
     /**
