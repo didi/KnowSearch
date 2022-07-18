@@ -42,6 +42,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ESVersionUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
+import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.impl.IndexTemplateServiceImpl;
 import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateStatsService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateConfigDAO;
@@ -52,7 +53,6 @@ import com.didiglobal.logi.elasticsearch.client.response.setting.common.TypeDefi
 import com.didiglobal.logi.elasticsearch.client.response.setting.common.TypeProperties;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
@@ -99,8 +99,9 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrvImpl impleme
 
     @Autowired
     private IndexTemplateTypeDAO      indexTemplateTypeDAO;
+   
     @Autowired
-    private ProjectService            projectService;
+    private ESTemplateService templateService;
 
     private static final String       TEXT_STR                          = "text";
     private static final String       TYPE_STR                          = "type";
@@ -429,8 +430,8 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrvImpl impleme
                 TypeProperties typeProperties = new TypeProperties(ariusTypeProperty.getProperties());
 
                 for (Map.Entry<String, TypeConfig> entry : typeConfigMap.entrySet()) {
-                    if (isSingleIndex && isExistMappingChanged(entry.getValue().getProperties().getJsonMap(),
-                        typeProperties.getJsonMap())) {
+                    if (isSingleIndex && (entry.getValue().getProperties() == null || (isExistMappingChanged(entry.getValue().getProperties().getJsonMap(),
+                        typeProperties.getJsonMap())))){
                         return Result.buildFail("非滚动模板禁止修改已有mapping项");
                     }
                     entry.getValue().setProperties(typeProperties);

@@ -10,7 +10,6 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.Cl
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.CLIENT_NODE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.DATA_NODE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.MASTER_NODE;
-import static java.util.regex.Pattern.compile;
 
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
@@ -73,6 +72,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ClusterUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.ESVersionUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
@@ -90,6 +90,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
+import com.didichuxing.datachannel.arius.admin.persistence.component.ESGatewayClient;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpClient;
 import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
 import com.didiglobal.logi.log.ILog;
@@ -108,8 +109,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import org.apache.commons.collections4.CollectionUtils;
@@ -140,7 +139,10 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     private static final Map<String, Triple<Long, Long, Double>> CLUSTER_NAME_TO_ES_CLUSTER_STATS_TRIPLE_MAP = Maps
         .newConcurrentMap();
     public static final String                                   SEPARATOR_CHARS                             = ",";
-    public static final String                                   VERSION_PREFIX_PATTERN                      = "^\\d*.\\d*";
+    
+
+    @Autowired
+    private ESGatewayClient                                      esGatewayClient;
 
     @Autowired
     private ESTemplateService                                    esTemplateService;
@@ -371,7 +373,6 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         }
 
         ClusterPhyVO clusterPhyVO = ConvertUtil.obj2Obj(clusterPhy, ClusterPhyVO.class);
-
         // 构建overView信息
         buildPhyCluster(clusterPhyVO);
         return clusterPhyVO;
@@ -676,12 +677,11 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
         List<ClusterPhy> clusterPhies = clusterPhyService.listAllClusters();
 
-        Predicate<ClusterPhy> matchingSameVersionESVersionPredicate = cp -> StringUtils
-            .equals(esVersion, cp.getEsVersion())
-                                                                            || StringUtils.equals(
-                                                                                getESVersionPrefix(esVersion),
-                                                                                getESVersionPrefix(cp.getEsVersion()));
+        Predicate<ClusterPhy> matchingSameVersionESVersionPredicate =
+                cp -> ESVersionUtil.compareBigVersionConsistency(esVersion,cp.getEsVersion());
         List<String> sameVersionClusterNameList = clusterPhies.stream().filter(Objects::nonNull)
+                //正常的集群才能够进行dcdr
+                .filter(r-> !ClusterHealthEnum.UNKNOWN.getCode().equals(r.getHealth()))
             .filter(r -> clusterPhyNameList.contains(r.getCluster()))
             .filter(rCluster -> !StringUtils.equals(logicTemplateWithPhysicals.getMasterPhyTemplate().getCluster(),
                 rCluster.getCluster()))
@@ -691,14 +691,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         return Result.buildSucc(sameVersionClusterNameList);
     }
 
-    private String getESVersionPrefix(String esVersion) {
-        Pattern pattern = compile(VERSION_PREFIX_PATTERN);
-        final Matcher matcher = pattern.matcher(esVersion);
-        if (matcher.find()) {
-            return matcher.group(0);
-        }
-        return null;
-    }
+ 
 
     @Override
     public List<String> listClusterPhyNodeName(String clusterPhyName) {
@@ -1174,6 +1167,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
      */
     private void buildPhyCluster(ClusterPhyVO clusterPhyVO) {
         if (!AriusObjUtils.isNull(clusterPhyVO)) {
+            clusterPhyVO.setGatewayUrl(esGatewayClient.getSingleGatewayAddress());
             buildPhyClusterStatics(clusterPhyVO);
             buildClusterRole(clusterPhyVO);
             buildClusterPhyWithLogicAndRegion(Collections.singletonList(clusterPhyVO));
@@ -1432,28 +1426,29 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
         List<Long> associatedRegionIds = clusterPhyContext.getAssociatedRegionIds();
         for (Long associatedRegionId : associatedRegionIds) {
+            final ClusterRegion region = clusterRegionService.getRegionById(associatedRegionId);
             Result<Void> unbindRegionResult = clusterRegionService.unbindRegion(associatedRegionId, null, operator);
             if (unbindRegionResult.failed()) {
                 throw new AdminOperateException(String.format("解绑region(%s)失败", associatedRegionId));
             } else {
+                
                 //解绑region
                 operateRecordService.save(new OperateRecord.Builder()
-                    .content(String.format("cluster:[%s]解绑region：%d", clusterPhy.getCluster(), associatedRegionId))
+                    .content(String.format("解绑region：%s", region.getName()))
                     .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_REGION_CHANGE)
                     .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
                     .project(projectService.getProjectBriefByProjectId(projectId)).userOperation(operator)
                     .bizId(clusterPhy.getId()).build());
             }
-
             Result<Void> deletePhyClusterRegionResult = clusterRegionService.deletePhyClusterRegion(associatedRegionId,
                 operator);
             if (deletePhyClusterRegionResult.failed()) {
                 throw new AdminOperateException(String.format("删除region(%s)失败", associatedRegionId));
             } else {
-
+                
                 //删除region
                 operateRecordService.save(new OperateRecord.Builder()
-                    .content(String.format("cluster:[%s]删除region：%d", clusterPhy.getCluster(), associatedRegionId))
+                    .content(String.format("删除region：%s",  region.getName()))
                     .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_REGION_CHANGE)
                     .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
                     .project(projectService.getProjectBriefByProjectId(projectId)).userOperation(operator)
@@ -1463,6 +1458,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
         List<Long> clusterLogicIds = clusterPhyContext.getAssociatedClusterLogicIds();
         for (Long clusterLogicId : clusterLogicIds) {
+            final ClusterLogic deleteById = clusterLogicService.getClusterLogicById(clusterLogicId);
             Result<Void> deleteLogicClusterResult = clusterLogicService.deleteClusterLogicById(clusterLogicId, operator,
                 projectId);
             if (deleteLogicClusterResult.failed()) {
@@ -1470,10 +1466,10 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             } else {
                 //删除逻辑集群
                 operateRecordService.save(new OperateRecord.Builder()
-                    .content(String.format("cluster:[%s]删除逻辑集群：%d", clusterPhy.getCluster(), clusterLogicId))
+                    .content(String.format("删除逻辑集群：%s", deleteById.getName()))
                     .operationTypeEnum(OperateTypeEnum.MY_CLUSTER_OFFLINE).triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
                     .project(projectService.getProjectBriefByProjectId(projectId)).userOperation(operator)
-                    .bizId(clusterPhy.getCluster()).build());
+                    .bizId(clusterPhy.getId()).build());
             }
         }
 

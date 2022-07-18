@@ -6,6 +6,8 @@ import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.task.content.ClusterIndecreaseDockerContent;
 import com.didichuxing.datachannel.arius.admin.biz.task.content.ClusterIndecreaseHostContent;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.utils.OpOrderTaskConverter;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord.Builder;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.ESClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.EcmParamBase;
@@ -15,7 +17,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.ecm.EcmTaskD
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
@@ -115,6 +119,22 @@ public class ClusterScaleTaskHandler extends AbstractClusterTaskHandler {
         ecmTaskDTO.setClusterNodeRole(ListUtils.strList2String(
             hostScaleParamBaseList.stream().map(EcmParamBase::getRoleName).collect(Collectors.toList())));
         ecmTaskDTO.setEcmParamBaseList(hostScaleParamBaseList);
+        String hostOption=content.getOperationType()==2?"扩容":"缩容";
+        final String clientNode = content.getOriginClusterRoleHosts().stream()
+                .filter(esClusterRoleHost -> StringUtils.equalsIgnoreCase(esClusterRoleHost.getRole(), "clientnode"))
+                .map(ESClusterRoleHost::getHostname).distinct().collect(Collectors.joining(","));
+    
+        final String datanode = content.getOriginClusterRoleHosts().stream()
+                .filter(esClusterRoleHost -> StringUtils.equalsIgnoreCase(esClusterRoleHost.getRole(), "datanode"))
+                .map(ESClusterRoleHost::getHostname).distinct().collect(Collectors.joining(","));
+        
+        //扩缩容操作记录
+         final OperateRecord operateRecord = new Builder().userOperation(creator)
+                .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
+                .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_CAPACITY)
+                .content(String.format("集群%s:clientNode:【%s】;datanode:【%s】",hostOption,clientNode,datanode))
+                .bizId(content.getPhyClusterId()).buildDefaultManualTrigger();
+        operateRecordService.save(operateRecord);
         return Result.buildSucc();
     }
 

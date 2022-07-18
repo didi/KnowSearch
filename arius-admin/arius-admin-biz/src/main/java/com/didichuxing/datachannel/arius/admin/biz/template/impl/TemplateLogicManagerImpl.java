@@ -60,6 +60,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.Tem
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectTemplateAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.DataTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
@@ -105,6 +106,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 @Component
 public class TemplateLogicManagerImpl implements TemplateLogicManager {
@@ -196,40 +198,54 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result<Void> create(IndexTemplateWithCreateInfoDTO param, String operator,
-                               Integer projectId) throws AdminOperateException {
+    public Result<Void> create(IndexTemplateWithCreateInfoDTO param, String operator, Integer projectId)
+            throws AdminOperateException {
         IndexTemplateDTO indexTemplateDTO = buildTemplateDTO(param, projectId);
         Result<Void> validLogicTemplateResult = indexTemplateService.validateTemplate(indexTemplateDTO, ADD, projectId);
         if (validLogicTemplateResult.failed()) {
             return validLogicTemplateResult;
         }
-
-        Result<Void> validPhyTemplateResult = indexTemplatePhyService
-            .validateTemplates(indexTemplateDTO.getPhysicalInfos(), ADD);
+    
+        Result<Void> validPhyTemplateResult = indexTemplatePhyService.validateTemplates(
+                indexTemplateDTO.getPhysicalInfos(), ADD);
         if (validPhyTemplateResult.failed()) {
             return validPhyTemplateResult;
         }
-
-        Result<Void> save2DBResult = indexTemplateService.addTemplateWithoutCheck(indexTemplateDTO);
-        if (save2DBResult.failed()) {
-            throw new AdminOperateException(String.format("创建模板失败:%s", save2DBResult.getMessage()));
+    
+        try {
+            Result<Void> save2DBResult = indexTemplateService.addTemplateWithoutCheck(indexTemplateDTO);
+            if (save2DBResult.failed()) {
+                throw new AdminOperateException(String.format("创建模板失败:%s", save2DBResult.getMessage()));
+            }
+        
+            Result<Void> save2PhyTemplateResult = templatePhyManager.addTemplatesWithoutCheck(indexTemplateDTO.getId(),
+                    indexTemplateDTO.getPhysicalInfos());
+            if (save2PhyTemplateResult.failed()) {
+                throw new AdminOperateException(String.format("创建模板失败:%s", save2PhyTemplateResult.getMessage()));
+            }
+        
+            Result<Void> saveTemplateConfigResult = insertTemplateConfig(indexTemplateDTO);
+            if (saveTemplateConfigResult.failed()) {
+                throw new AdminOperateException(String.format("创建模板失败:%s", saveTemplateConfigResult.getMessage()));
+            }
+            operateRecordService.save(
+                    new OperateRecord.Builder().bizId(indexTemplateDTO.getId()).userOperation(operator)
+                            .content(String.format("模版创建：%s", param.getName()))
+                            .project(projectService.getProjectBriefByProjectId(projectId))
+                            .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                            .operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_CREATE).build());
+        } catch (AdminOperateException e) {
+            LOGGER.error("class=TemplateLogicManagerImpl||method=create", e);
+            // 这里必须显示事务回滚
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return Result.buildFail(e.getMessage());
+        } catch (Exception e) {
+            LOGGER.error("class=TemplateLogicManagerImpl||method=create", e);
+            // 这里必须显示事务回滚
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return Result.buildFail("模版创建失败，请重新尝试");
         }
-
-        Result<Void> save2PhyTemplateResult = templatePhyManager.addTemplatesWithoutCheck(indexTemplateDTO.getId(),
-            indexTemplateDTO.getPhysicalInfos());
-        if (save2PhyTemplateResult.failed()) {
-            throw new AdminOperateException(String.format("创建模板失败:%s", save2PhyTemplateResult.getMessage()));
-        }
-
-        Result<Void> saveTemplateConfigResult = insertTemplateConfig(indexTemplateDTO);
-        if (saveTemplateConfigResult.failed()) {
-            throw new AdminOperateException(String.format("创建模板失败:%s", saveTemplateConfigResult.getMessage()));
-        }
-        operateRecordService.save(new OperateRecord.Builder().bizId(indexTemplateDTO.getId()).userOperation(operator)
-            .content(String.format("模版创建：%s", param.getName()))
-            .project(projectService.getProjectBriefByProjectId(projectId)).triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-            .operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_CREATE).build());
-
+    
         return Result.buildSucc();
     }
 
@@ -441,15 +457,15 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             }
             final Result<Void> voidResult = indexTemplateService.editTemplateInfoTODB(param);
             if (voidResult.success()) {
-
-                final IndexTemplateDTO destConsoleTemplateVO = ConvertUtil.obj2Obj(param, IndexTemplateDTO.class);
-                final Map<String, String> apiModelPropertyValueModify = Maps.newHashMap();
-
+                String dataTypeBefore= DataTypeEnum.valueOf(oldIndexTemplate.getDataType()).getDesc();
+                String dataTypeAfter= DataTypeEnum.valueOf(param.getDataType()).getDesc();
+                String descBefore=oldIndexTemplate.getDesc();
+                String descAfter=param.getDesc();
                 operateRecordService.save(
                     new OperateRecord.Builder().operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_INFO_MODIFY)
                         .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).userOperation(operator)
-                        .content(AriusObjUtils.findChangedWithClearByBeanVo(param, destConsoleTemplateVO,
-                            apiModelPropertyValueModify))
+                        .content(String.format("数据类型变更：【%s】->【%s】;描述变更:【%s】->【%s】",dataTypeBefore,dataTypeAfter,
+                                descBefore,descAfter))
                         .bizId(param.getId()).project(projectService.getProjectBriefByProjectId(projectId)).build());
             }
 
@@ -469,12 +485,13 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         if (checkProjectCorrectly.failed()) {
             return checkProjectCorrectly;
         }
+        String beforeDeleteName = indexTemplateService.getNameByTemplateLogicId(logicTemplateId);
         Result<Void> result = indexTemplateService.delTemplate(logicTemplateId, operator);
         if (result.success()) {
-            String name = indexTemplateService.getNameByTemplateLogicId(logicTemplateId);
+            
             operateRecordService
                 .save(new OperateRecord.Builder().bizId(logicTemplateId).triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                    .content(String.format("模板%s下线,id：%d", name, logicTemplateId))
+                    .content(String.format("模板【%s】下线", beforeDeleteName))
                     .project(projectService.getProjectBriefByProjectId(projectId)).userOperation(operator)
                     .operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_OFFLINE).build());
         }
@@ -790,7 +807,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             if (updateDBResult.failed()) {
                 throw new AdminOperateException(updateDBResult.getMessage(), FAIL);
             }
-
+            
             boolean succ = esTemplateService.syncUpdateShardNum(templatePhy.getCluster(), templatePhy.getName(),
                 shardNum, RETRY_TIMES);
             if (!succ) {
@@ -823,11 +840,12 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
 
         IndexTemplatePhyDTO updateParam = new IndexTemplatePhyDTO();
         for (IndexTemplatePhy templatePhy : templatePhyList) {
+            final Integer beforeVersion = templatePhy.getVersion();
+            final Integer afterVersion =beforeVersion + 1;
             updateParam.setId(templatePhy.getId());
             updateParam.setShard(updateParam.getShard());
             updateParam.setRack("");
-            updateParam.setVersion(templatePhy.getVersion() + 1);
-
+            updateParam.setVersion(beforeVersion + 1);
             Result<Void> editResult = templatePhyManager.editTemplateWithoutCheck(updateParam, operator, RETRY_TIMES);
             if (editResult.failed()) {
                 throw new AdminOperateException(editResult.getMessage(), FAIL);
@@ -835,10 +853,11 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
 
             preCreateManager.asyncCreateTodayAndTomorrowIndexByPhysicalId(templatePhy.getId());
             operateRecordService.save(new OperateRecord.Builder().bizId(templateId)
-                .operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_UPGRADED_VERSION)
+                .operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE_UPGRADED_VERSION)
                 .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                .content(String.format("同步修改es集群[%s]中模板[%s]shard数[%d],版本号[%d]", templatePhy.getCluster(),
-                    templatePhy.getName(), updateParam.getShard(), updateParam.getVersion()))
+                            .project(projectService.getProjectBriefByProjectId(projectId))
+                .content(String.format("模板[%s]升版本%d->%d",
+                    templatePhy.getName(), beforeVersion, afterVersion))
                 .userOperation(operator).build()
 
             );
@@ -958,7 +977,6 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         consoleTemplateDetail
             .setDisableIndexRollover(Optional.ofNullable(indexTemplateService.getTemplateConfig(logicId))
                 .map(IndexTemplateConfig::getDisableIndexRollover).orElse(null)
-
             );
         return Result.buildSucc(consoleTemplateDetail);
     }

@@ -23,4 +23,6 @@ public class Segment extends BaseEntity {
     private String segment;
 
     private Double memoSize;
+
+    private String primaryFlag;
 }

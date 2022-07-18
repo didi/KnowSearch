@@ -7,6 +7,7 @@ import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.BaseTemplat
 import com.didichuxing.datachannel.arius.admin.common.bean.common.BaseResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateConfigDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
@@ -15,6 +16,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.constant.ESClusterVersionEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
 import com.didichuxing.datachannel.arius.admin.common.tuple.Tuples;
@@ -25,6 +27,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
+import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterNodeService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didiglobal.logi.log.ILog;
@@ -63,7 +66,9 @@ public abstract class BaseTemplateSrvImpl implements BaseTemplateSrv {
     @Autowired
     protected ProjectService          projectService;
     @Autowired
-    protected AriusConfigInfoService  ariusConfigInfoService;
+    protected AriusConfigInfoService ariusConfigInfoService;
+    @Autowired
+    private ESClusterNodeService esClusterNodeService;
 
     @Override
     public boolean isTemplateSrvOpen(Integer templateId) {
@@ -161,11 +166,19 @@ public abstract class BaseTemplateSrvImpl implements BaseTemplateSrv {
             }
             TupleTwo</*old*/IndexTemplate, /*change*/IndexTemplate> tupleTwo = Tuples.of(indexTemplate, null);
             if (status) {
+                // 开启该项模版服务
                 addSrvCode(indexTemplate, srvCode);
+                // 如果是Rollover服务，则也要修改index_tmplate_config表中的disable_index_rollover字段
+                if (TemplateServiceEnum.INDEX_PLAN.getCode().toString().equals(srvCode)){
+                    updateTemplateConfigRollover(templateId, false, operator);
+                }
             } else {
+                // 关闭该项模版服务
                 removeSrvCode(indexTemplate, srvCode);
+                if (TemplateServiceEnum.INDEX_PLAN.getCode().toString().equals(srvCode)){
+                    updateTemplateConfigRollover(templateId, true, operator);
+                }
             }
-
             tupleTwo = tupleTwo.update2(indexTemplate);
             tupleTwos.add(tupleTwo);
         }
@@ -180,10 +193,14 @@ public abstract class BaseTemplateSrvImpl implements BaseTemplateSrv {
             final Result<Void> result = indexTemplateService
                 .editTemplateInfoTODB(ConvertUtil.obj2Obj(tupleTwo.v2, IndexTemplateDTO.class));
             if (result.success()) {
+                
                 operateRecordService.save(new OperateRecord.Builder()
                     .operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE).triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
                     .bizId(tupleTwo.v2.getId()).project(projectService.getProjectBriefByProjectId(projectId))
-                    .content(Boolean.TRUE.equals(status) ? "开启模板服务" : "关闭模板服务").userOperation(operator).build());
+                    .content(String.format("%s:【%s】", Boolean.TRUE.equals(status) ? "开启模板服务" : "关闭模板服务",templateSrvName())
+                           
+                           
+                           ).userOperation(operator).build());
             }
         }
 
@@ -217,21 +234,32 @@ public abstract class BaseTemplateSrvImpl implements BaseTemplateSrv {
         }
     }
 
-    ///////////////////////////////////srv
-    @Override
-    public boolean isTemplateSrvOpen(String phyClusterName) {
-        boolean enable = templateSrvManager.isPhyClusterOpenTemplateSrv(phyClusterName, templateSrv().getCode());
-
-        LOGGER.info("class=BaseTemplateSrv||method=enableTemplateSrv||clusterName={}||enable={}||templateSrv={}",
-            phyClusterName, enable, templateServiceName());
-
-        return enable;
+    /**
+     * 更新index_template_config表中的disable_index_rollover字段
+     * @param templateId
+     * @param state disable_index_rollover是true还是false
+     * @param operator
+     * @return
+     */
+    private Result<Void> updateTemplateConfigRollover(Integer templateId, Boolean state, String operator){
+        IndexTemplateConfigDTO indexTemplateConfigDTO = new IndexTemplateConfigDTO();
+        indexTemplateConfigDTO.setLogicId(templateId);
+        indexTemplateConfigDTO.setDisableIndexRollover(state);
+        Result<Void> result = indexTemplateService.updateTemplateConfig(indexTemplateConfigDTO, operator);
+        if(result.failed()){
+            LOGGER.warn("class=BaseTemplateSrvImpl||method=updateTemplateConfigRollover||msg={}", result.getMessage());
+            return result;
+        }
+        return Result.buildSucc();
     }
+
+    ///////////////////////////////////srv
+  
 
     @Override
     public boolean isTemplateSrvOpen(List<IndexTemplatePhy> indexTemplatePhies) {
         for (IndexTemplatePhy indexTemplatePhy : indexTemplatePhies) {
-            if (!isTemplateSrvOpen(indexTemplatePhy.getCluster())) {
+            if (!isTemplateSrvOpen(indexTemplatePhy.getLogicId())) {
                 return false;
             }
         }

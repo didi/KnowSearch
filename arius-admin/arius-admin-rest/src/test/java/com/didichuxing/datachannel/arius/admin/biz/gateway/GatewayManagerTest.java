@@ -40,7 +40,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -222,7 +221,7 @@ public class GatewayManagerTest {
         final List<IndexTemplateWithPhyTemplates> indexTemplateWithPhyTemplates = Arrays
             .asList(new IndexTemplateWithPhyTemplates(Arrays.asList(
                 new IndexTemplatePhy(0L, 0, "name", "expression", "cluster", "rack", 0, 0, 0, 0, 0, "config", 0))));
-        when(mockIndexTemplateService.listTemplateWithPhysicalByDataCenter("dataCenter"))
+        when(mockIndexTemplateService.listTemplateWithPhysical())
             .thenReturn(indexTemplateWithPhyTemplates);
 
         // Configure TemplateLogicAliasesManager.listAlias(...).
@@ -233,7 +232,7 @@ public class GatewayManagerTest {
 
         // Run the test
         final Result<Map<String, GatewayTemplateDeployInfoVO>> result = gatewayManagerImplUnderTest
-            .listDeployInfo("dataCenter");
+            .listDeployInfo();
 
         // Verify the results
         assertThat(result).isEqualTo(expectedResult);

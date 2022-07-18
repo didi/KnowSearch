@@ -20,9 +20,9 @@ public enum TriggerWayEnum {
                              */
                             SYSTEM_TRIGGER("系统触发", 1),
                             /**
-                             * 定时任务
+                             * 调度任务scheduling_tasks
                              */
-                            TIMING_TASK("定时任务", 2);
+                            SCHEDULING_TASKS("调度任务", 2);
 
     /**
      * 触发方式

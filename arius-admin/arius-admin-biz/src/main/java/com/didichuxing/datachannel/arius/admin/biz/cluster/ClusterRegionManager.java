@@ -6,7 +6,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.Cluster
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionWithNodeInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
-
 import java.util.List;
 
 public interface ClusterRegionManager {
@@ -76,5 +75,6 @@ public interface ClusterRegionManager {
      * @return
      */
     Result<Void> unbindRegion(Long regionId, Long logicClusterId, String operator, Integer projectId);
-
+    
+    Boolean existColdRegion(String phyCluster, Integer regionId);
 }
