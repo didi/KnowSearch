@@ -436,7 +436,21 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
         
         return clusterPhyService.listAllClusters().stream().map(ClusterPhy::getCluster).collect(Collectors.toList());
     }
-    
+  
+    /**
+     * 查询开启了某个索引服务的索引模板列表
+     *
+     * @param srvId srvid
+     * @return {@link List}<{@link String}>
+     */
+      @Override
+    public List<String> getIndexTemplateContainsSrv(int srvId) {
+       return indexTemplateService.listAllLogicTemplatesWithCache()
+                .stream()
+                .filter(indexTemplate -> TemplateServiceEnum.strContainsSrv( indexTemplate.getOpenSrv(),TemplateServiceEnum.TEMPLATE_PIPELINE))
+                .map(IndexTemplate::getName)
+                .collect(Collectors.toList());
+    }
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
