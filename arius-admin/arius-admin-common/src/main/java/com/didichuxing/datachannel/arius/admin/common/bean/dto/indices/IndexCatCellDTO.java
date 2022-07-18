@@ -41,22 +41,22 @@ public class IndexCatCellDTO {
     private String  index;
 
     @ApiModelProperty("分区shard个数")
-    private String  pri;
+    private Long  pri;
 
     @ApiModelProperty("分区副本个数")
-    private String  rep;
+    private Long  rep;
 
     @ApiModelProperty("分区文档个数")
-    private String  docsCount;
+    private Long  docsCount;
 
     @ApiModelProperty("分区文档删除个数")
-    private String  docsDeleted;
+    private Long  docsDeleted;
 
     @ApiModelProperty("分区主分片存储大小")
-    private String  storeSize;
+    private Long  storeSize;
 
     @ApiModelProperty("分区存储大小")
-    private String  priStoreSize;
+    private Long  priStoreSize;
 
     @ApiModelProperty("可读标志位")
     private Boolean readFlag;

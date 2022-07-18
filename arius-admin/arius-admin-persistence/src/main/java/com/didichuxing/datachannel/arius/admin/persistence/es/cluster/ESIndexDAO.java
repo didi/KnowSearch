@@ -122,16 +122,16 @@ public class ESIndexDAO extends BaseESDAO {
      * @return
      */
     public boolean createIndexWithConfig(String cluster, String indexName, IndexConfig indexConfig) {
-        if (exist(cluster, indexName)) {
+        /*if (exist(cluster, indexName)) {
             LOGGER.warn("class=ESIndexDAO||method=createIndexWithConfig||index already exist||cluster={}||indexName={}",
                 cluster, indexName);
             return true;
-        }
+        }*/
         ESClient client = fetchESClientByCluster(cluster);
         if (client != null) {
             indexConfig.setVersion(ESVersion.valueBy(client.getEsVersion()));
             ESIndicesPutIndexResponse response = client.admin().indices().preparePutIndex(indexName)
-                .setIndexConfig(indexConfig).execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.MINUTES);
+                .setIndexConfig(indexConfig).execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
             return response.getAcknowledged();
         } else {
             return false;

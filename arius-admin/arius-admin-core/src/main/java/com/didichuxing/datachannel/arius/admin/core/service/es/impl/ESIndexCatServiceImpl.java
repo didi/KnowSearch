@@ -108,19 +108,15 @@ public class ESIndexCatServiceImpl implements ESIndexCatService {
 
     @Override
     public Boolean syncInsertCatIndex(List<IndexCatCellDTO> params, int retryCount) {
-        BatchProcessor.BatchProcessResult<IndexCatCellDTO, Boolean> result = new BatchProcessor<IndexCatCellDTO, Boolean>()
-                .batchList(params).batchSize(5000)
-                .processor(items -> indexCatESDAO.batchInsert(ConvertUtil.list2List(items, IndexCatCellPO.class), retryCount))
-                .succChecker(succ -> succ).process();
-
-        if (!result.isSucc()) {
+        boolean succ = indexCatESDAO.batchInsert(ConvertUtil.list2List(params, IndexCatCellPO.class), retryCount);
+        if (succ) {
             List<String> clusterList = params.stream().map(IndexCatCellDTO::getCluster).distinct().collect(Collectors.toList());
             List<String> indexList   = params.stream().map(IndexCatCellDTO::getIndex).distinct().collect(Collectors.toList());
-            LOGGER.error("class=ESIndexCatServiceImpl||method=syncInsertCatIndex||cluster={}||indexNameList={}||result={}",
-                    clusterList, indexList, result);
+            LOGGER.error("class=ESIndexCatServiceImpl||method=syncInsertCatIndex||cluster={}||indexNameList={}||errMsg=failed to batchInsert",
+                    clusterList, indexList);
         }
 
-        return result.isSucc();
+        return succ;
     }
 
     @Override
