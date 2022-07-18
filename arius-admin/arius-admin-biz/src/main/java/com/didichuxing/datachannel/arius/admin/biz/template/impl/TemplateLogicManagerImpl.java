@@ -28,6 +28,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.TemplateLabel;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatCellDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateRateLimitDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateConfigDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
@@ -42,6 +43,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.Cluster
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicAggregate;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithClusterAndMasterTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithCluster;
@@ -63,6 +65,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType
 import com.didichuxing.datachannel.arius.admin.common.constant.template.DataTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
+import com.didichuxing.datachannel.arius.admin.common.event.index.IndexDeleteEvent;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.AmsRemoteException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
@@ -74,6 +77,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.TemplateUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
+import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
@@ -485,6 +489,11 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         if (checkProjectCorrectly.failed()) {
             return checkProjectCorrectly;
         }
+        IndexTemplateLogicWithClusterAndMasterTemplate template = indexTemplateService.getLogicTemplateWithClusterAndMasterTemplate(
+                logicTemplateId);
+        Result<ConsoleTemplateClearVO> templateClearInfo = templateLogicManager.getLogicTemplateClearInfo(
+                logicTemplateId);
+       
         String beforeDeleteName = indexTemplateService.getNameByTemplateLogicId(logicTemplateId);
         Result<Void> result = indexTemplateService.delTemplate(logicTemplateId, operator);
         if (result.success()) {
@@ -494,6 +503,19 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
                     .content(String.format("模板【%s】下线", beforeDeleteName))
                     .project(projectService.getProjectBriefByProjectId(projectId)).userOperation(operator)
                     .operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_OFFLINE).build());
+            //一并下线模板关联的索引
+            /**
+             * [{"cluster":"Zh_test3_cluster_7-6-0-1400","index":"zh_test3_template3_2022-07-18"}]
+             */
+            if (templateClearInfo.success() && CollectionUtils.isNotEmpty(templateClearInfo.getData().getIndices())) {
+                List<IndexCatCellDTO> catCellList = templateClearInfo.getData().getIndices().stream().map(index -> {
+                    IndexCatCellDTO indexCatCellDTO = new IndexCatCellDTO();
+                    indexCatCellDTO.setIndex(index);
+                    indexCatCellDTO.setCluster(template.getMasterTemplate().getCluster());
+                    return indexCatCellDTO;
+                }).collect(Collectors.toList());
+                SpringTool.publish(new IndexDeleteEvent(this, catCellList, projectId, operator));
+            }
         }
         return result;
     }
