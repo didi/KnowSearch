@@ -207,6 +207,9 @@
                     "bigShard":{
                         "type":"boolean"
                     },
+                    "shardSize":{
+                        "type":"long"
+                    },
                     "singReplicate":{
                         "type":"boolean"
                     },
