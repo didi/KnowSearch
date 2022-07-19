@@ -143,10 +143,10 @@ public class IndicesManagerImpl implements IndicesManager {
     public Result<Void> createIndex(IndexCatCellWithConfigDTO indexCreateDTO, Integer projectId, String operator) {
         // 初始化分配集群信息
         Result<String> getClusterRet = getClusterPhyByClusterNameAndProjectId(indexCreateDTO.getCluster(), projectId);
-
-        init(indexCreateDTO, projectId);
-
         if (getClusterRet.failed()) { return Result.buildFrom(getClusterRet);}
+
+        Result<Void> initRet = initIndexCreateDTO(indexCreateDTO, projectId);
+        if (initRet.failed()) { return initRet;}
 
         // 处理索引 mapping
         IndexConfig indexConfig = new IndexConfig();
@@ -870,10 +870,8 @@ public class IndicesManagerImpl implements IndicesManager {
         return Result.buildSucc(phyClusterName);
     }
 
-    private Result<Void> init(IndexCatCellWithConfigDTO indexCreateDTO, Integer projectId) {
-        if (AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
-            return Result.buildSucc();
-        } else {
+    private Result<Void> initIndexCreateDTO(IndexCatCellWithConfigDTO indexCreateDTO, Integer projectId) {
+        if (!AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
             ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByName(indexCreateDTO.getCluster());
             if (null == clusterLogic) {
                 return Result.buildParamIllegal(String.format("逻辑集群[%s]不存在", indexCreateDTO.getCluster()));
@@ -886,6 +884,7 @@ public class IndicesManagerImpl implements IndicesManager {
             indexCreateDTO.setResourceId(clusterLogic.getId());
             indexCreateDTO.setCluster(clusterRegion.getPhyClusterName());
         }
+
         indexCreateDTO.setPlatformCreateFlag(true);
         indexCreateDTO.setProjectId(projectId);
         return Result.buildSucc();
