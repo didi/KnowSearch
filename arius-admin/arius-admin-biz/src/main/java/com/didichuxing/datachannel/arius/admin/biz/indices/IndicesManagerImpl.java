@@ -2,6 +2,16 @@ package com.didichuxing.datachannel.arius.admin.biz.indices;
 
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.PRIMARY;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.function.BiFunction;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
@@ -65,14 +75,6 @@ import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.function.BiFunction;
-import java.util.stream.Collectors;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  * @author lyn
@@ -139,11 +141,11 @@ public class IndicesManagerImpl implements IndicesManager {
 
     @Override
     public Result<Void> createIndex(IndexCatCellWithConfigDTO indexCreateDTO, Integer projectId, String operator) {
-        Result<String> getClusterRet = getClusterPhyByClusterNameAndProjectId(indexCreateDTO.getCluster(), projectId);
-        if (getClusterRet.failed()) {
-            return Result.buildFrom(getClusterRet);
-        }
-        String phyCluster = getClusterRet.getData();
+        // 初始化分配集群信息
+        Result<Void> initRet = init(indexCreateDTO, projectId);
+        if (initRet.failed()) { return Result.buildFrom(initRet);}
+
+        // 处理索引 mapping
         IndexConfig indexConfig = new IndexConfig();
         if (StringUtils.isNotBlank(indexCreateDTO.getMapping())) {
             Result<MappingConfig> mappingResult = AriusIndexMappingConfigUtils
@@ -154,21 +156,36 @@ public class IndicesManagerImpl implements IndicesManager {
             indexConfig.setMappings(mappingResult.getData());
         }
 
+        // 处理索引 setting
         if (StringUtils.isNotBlank(indexCreateDTO.getSetting())) {
             indexConfig.setSettings(AriusIndexTemplateSetting.flat(JSON.parseObject(indexCreateDTO.getSetting())));
         }
+        boolean succ = false;
         try {
-            esIndexService.syncCreateIndex(phyCluster, indexCreateDTO.getIndex(), indexConfig, RETRY_COUNT);
+            // 1. es创建真实索引
+            boolean syncCreateIndexRet = esIndexService.syncCreateIndex(indexCreateDTO.getCluster(), indexCreateDTO.getIndex(),
+                    indexConfig, RETRY_COUNT);
+
+            // 2. 同步在元数据Cat_index系统索引中添加此索引元数据文档
+            if (syncCreateIndexRet) {
+                indexCreateDTO.setProjectId(projectId);
+                succ = esIndexCatService.syncInsertCatIndex(Lists.newArrayList(indexCreateDTO), RETRY_COUNT);
+            }
+
+            if (succ) {
+                operateRecordService.save(new OperateRecord.Builder()
+                        .content(String.format("物理集群:[%s],创建索引：[%s]", indexCreateDTO.getCluster(), indexCreateDTO.getIndex()))
+                        .operationTypeEnum(OperateTypeEnum.INDEX_MANAGEMENT_CREATE).userOperation(operator)
+                        .project(projectService.getProjectBriefByProjectId(projectId)).bizId(indexCreateDTO.getIndex()).buildDefaultManualTrigger());
+            }
         } catch (ESOperateException e) {
             LOGGER.error("class=IndicesManagerImpl||method=createIndex||msg=create index failed||index={}",
                 indexCreateDTO.getIndex(), e);
             return Result.buildFail(String.format("索引创建失败, errMsg:%s", e.getCause()));
         }
-        operateRecordService.save(new OperateRecord.Builder()
-            .content(String.format("物理集群:[%s],创建索引：[%s]", indexCreateDTO.getCluster(), indexCreateDTO.getIndex()))
-            .operationTypeEnum(OperateTypeEnum.INDEX_MANAGEMENT_CREATE).userOperation(operator)
-            .project(projectService.getProjectBriefByProjectId(projectId)).bizId(indexCreateDTO.getIndex()).buildDefaultManualTrigger());
-        return Result.buildSuccWithMsg("索引创建成功，请五分钟后再进行查询与操作！");
+        if (succ) { return Result.buildSuccWithMsg("索引创建成功，请五分钟后再进行查询与操作");}
+
+        return Result.buildFail("创建索引失败, 请检查集群是否异常");
     }
 
     @Override
@@ -503,19 +520,24 @@ public class IndicesManagerImpl implements IndicesManager {
             .map(IndexConfig::getSettings).orElse(Maps.newHashMap());
         final Map<String, String> finalSettingMap = IndexSettingsUtil.getChangedSettings(sourceSettings,
             JsonUtils.flat(settingObj));
-        final boolean syncPutIndexSettings = esIndexService.syncPutIndexSettings(phyCluster,
-            Lists.newArrayList(indexName), finalSettingMap, RETRY_COUNT);
-        if (syncPutIndexSettings) {
-            final Result<IndexSettingVO> afterSetting = getSetting(phyCluster, indexName, projectId);
-            operateRecordService.save(new OperateRecord.Builder()
-                .project(projectService.getProjectBriefByProjectId(projectId)).userOperation(operator)
-                .operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_EDIT_SETTING)
-                .content(new TemplateSettingOperateRecord(beforeSetting.getData(), afterSetting.getData()).toString())
+        boolean syncPutIndexSettings = true;
+        if (finalSettingMap.size() > 0) {
+            syncPutIndexSettings = esIndexService.syncPutIndexSettings(phyCluster,
+                    Lists.newArrayList(indexName), finalSettingMap, RETRY_COUNT);
+            if (syncPutIndexSettings) {
+                final Result<IndexSettingVO> afterSetting = getSetting(phyCluster, indexName, projectId);
+                operateRecordService.save(new OperateRecord.Builder()
+                        .project(projectService.getProjectBriefByProjectId(projectId)).userOperation(operator)
+                        .operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_EDIT_SETTING)
+                        .content(new TemplateSettingOperateRecord(beforeSetting.getData(), afterSetting.getData()).toString())
 
-                .bizId(indexName)
+                        .bizId(indexName)
 
-                .buildDefaultManualTrigger());
+                        .buildDefaultManualTrigger());
+            }
         }
+
+
         return Result.build(syncPutIndexSettings);
     }
 
@@ -846,5 +868,25 @@ public class IndicesManagerImpl implements IndicesManager {
             phyClusterName = clusterRegion.getPhyClusterName();
         }
         return Result.buildSucc(phyClusterName);
+    }
+
+    private Result<Void> init(IndexCatCellWithConfigDTO indexCreateDTO, Integer projectId) {
+        if (AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
+            return Result.buildSucc();
+        } else {
+            ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByName(indexCreateDTO.getCluster());
+            if (null == clusterLogic) {
+                return Result.buildParamIllegal(String.format("逻辑集群[%s]不存在", indexCreateDTO.getCluster()));
+            }
+            ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(clusterLogic.getId());
+            if (null == clusterRegion) { return Result.buildParamIllegal("逻辑集群未绑定Region");}
+
+            // 这里用户侧，传逻辑集群名称 这里先补丁适配
+            indexCreateDTO.setClusterLogic(indexCreateDTO.getCluster());
+            indexCreateDTO.setResourceId(clusterLogic.getId());
+            indexCreateDTO.setCluster(clusterRegion.getPhyClusterName());
+        }
+        indexCreateDTO.setProjectId(projectId);
+        return Result.buildSucc();
     }
 }

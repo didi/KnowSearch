@@ -1,24 +1,15 @@
 package com.didichuxing.datachannel.arius.admin.task.dashboard.collector;
 
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
-
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
-import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
-import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats.AriusStatsClusterTaskInfoESDAO;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.DashBoardStats;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.NodeMetrics;
 import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterNodeService;
+import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats.AriusStatsClusterTaskInfoESDAO;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodesstats.ClusterNodeStats;
 import com.didiglobal.logi.elasticsearch.client.response.model.fs.FSTotal;
 import com.didiglobal.logi.elasticsearch.client.response.model.jvm.JvmMem;
@@ -28,6 +19,13 @@ import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * Created by linyunan on 3/11/22
@@ -139,9 +137,8 @@ public class NodeDashBoardCollector extends BaseDashboardCollector {
             nodeMetrics.setTaskConsuming(clusterNodesTaskTotalCostAtomic.get().getOrDefault(nodeName, 0d).longValue());
 
             long currentTimeMillis = System.currentTimeMillis();
-            long currentTime = CommonUtils.monitorTimestamp2min(currentTimeMillis);
-            long elapsedTime = currentTime - startTime;
-            nodeMetrics.setElapsedTime(elapsedTime);
+            long elapsedTime = currentTimeMillis - startTime;
+            nodeMetrics.setNodeElapsedTime(elapsedTime);
 
             // 设置dashboard中节点维度指标数据
             dashBoardStats.setNode(nodeMetrics);

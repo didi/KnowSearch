@@ -126,11 +126,11 @@ public class ESIndexDAO extends BaseESDAO {
      * @return
      */
     public boolean createIndexWithConfig(String cluster, String indexName, IndexConfig indexConfig,Integer tryTimes) {
-        if (exist(cluster, indexName)) {
+        /*if (exist(cluster, indexName)) {
             LOGGER.warn("class=ESIndexDAO||method=createIndexWithConfig||index already exist||cluster={}||indexName={}",
                 cluster, indexName);
             return true;
-        }
+        }*/
         ESClient client = fetchESClientByCluster(cluster);
         if (client == null) {
             return Boolean.FALSE;

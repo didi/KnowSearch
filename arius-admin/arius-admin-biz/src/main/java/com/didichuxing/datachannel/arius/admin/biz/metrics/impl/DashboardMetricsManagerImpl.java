@@ -1,5 +1,21 @@
 package com.didichuxing.datachannel.arius.admin.biz.metrics.impl;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_DASHBOARD_THRESHOLD_GROUP;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.INDEX_MAPPING_NUM_THRESHOLD;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.INDEX_SEGMENT_MEMORY_SIZE_THRESHOLD;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.INDEX_SEGMENT_NUM_THRESHOLD;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.INDEX_SHARD_SMALL_THRESHOLD;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.INDEX_TEMPLATE_SEGMENT_COUNT_THRESHOLD;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.INDEX_TEMPLATE_SEGMENT_MEMORY_SIZE_THRESHOLD;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.NODE_SHARD_BIG_THRESHOLD;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricListTypeEnum.INDEX_MAPPING_NUM;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricListTypeEnum.INDEX_SEGMENT_MEM_SIZE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricListTypeEnum.INDEX_SEGMENT_NUM;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricListTypeEnum.INDEX_SMALL_SHARD;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricListTypeEnum.NODE_SHARD_NUM;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricListTypeEnum.TEMPLATE_SEGMENT_MEM_NUM;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricListTypeEnum.TEMPLATE_SEGMENT_NUM;
+
 import com.didichuxing.datachannel.arius.admin.biz.component.MetricsValueConvertUtils;
 import com.didichuxing.datachannel.arius.admin.biz.metrics.DashboardMetricsManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -13,6 +29,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.list.Metri
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.dashboard.ClusterPhyHealthMetricsVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.top.VariousLineChartMetricsVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricListTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricThresholdValueNameEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricTopTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.MetricsConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.OneLevelTypeEnum;
@@ -24,19 +41,15 @@ import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigIn
 import com.didichuxing.datachannel.arius.admin.metadata.service.DashBoardMetricsService;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
-import org.apache.commons.collections4.CollectionUtils;
-import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.*;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricListTypeEnum.*;
+import org.apache.commons.collections4.CollectionUtils;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * Created by linyunan on 3/14/22
@@ -182,10 +195,16 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
         }
         List<String> faultTypeList = DashBoardMetricListTypeEnum.getFaultTypeList();
         List<String> valueTypeList = DashBoardMetricListTypeEnum.getValueTypeList();
+        Map<String,String> thresholds= getDashBoardMetricThresholdNames();
         List<MetricList> listMetrics = Lists.newCopyOnWriteArrayList();
         for (String metricsType : param.getMetricsTypes()) {
             futureUtil.runnableTask(() -> {
-                if (faultTypeList.contains(metricsType)) {
+                if (thresholds.containsKey(metricsType)){
+                    listMetrics.add(
+                            dashBoardMetricsService.getListThresholdsMetrics(oneLevelType, metricsType,
+                                    thresholds.get(metricsType),param.getAggType(),
+                                    param.getOrderByDesc()));
+                }else if (faultTypeList.contains(metricsType)) {
                     listMetrics.add(
                             dashBoardMetricsService.getListFaultMetrics(oneLevelType, metricsType, param.getAggType(),
                                     param.getOrderByDesc()));
@@ -223,6 +242,17 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
                         .collect(Collectors.toList()));
             }
         }
+    }
+    
+    /**
+     * 获取阈值项与值的名称
+     * 如：smallShard->shardSize
+     * @return
+     */
+    private Map<String,String> getDashBoardMetricThresholdNames(){
+        Map<String,String> threshold = new HashMap<>();
+        threshold.put(INDEX_SMALL_SHARD.getType(), DashBoardMetricThresholdValueNameEnum.SHARD_SIZE.getValue());
+        return threshold;
     }
     
     /**

@@ -23,28 +23,20 @@ public class IndexCatCellPO extends BaseESPO {
     private String  health;
     private String  status;
     private String  index;
-    private long    pri;
-    private long    rep;
-    private long    docsCount;
-    private long    docsDeleted;
-    private long    storeSize;
-    private long    priStoreSize;
+    private Long    pri;
+    private Long    rep;
+    private Long    docsCount;
+    private Long    docsDeleted;
+    private Long    storeSize;
+    private Long    priStoreSize;
     private Boolean readFlag;
     private Boolean writeFlag;
-    private boolean deleteFlag;
-    private long    timestamp;
+    private Boolean deleteFlag;
+    private Long    timestamp;
 
     private Long    primariesSegmentCount;
     private Long    totalSegmentCount;
     private Integer templateId;
-
-    public boolean getDeleteFlag() {
-        return deleteFlag;
-    }
-
-    public void setDeleteFlag(boolean deleteFlag) {
-        this.deleteFlag = deleteFlag;
-    }
 
     @Override
     @JSONField(serialize = false)
