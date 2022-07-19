@@ -5,10 +5,11 @@ import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterRe
 import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectClusterLogicAuthEnum;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 /**
  * 集群基本类
@@ -83,7 +84,7 @@ public class ClusterLogicVO extends BaseVO implements Comparable<ClusterLogicVO>
     private String                       permissions;
 
     @ApiModelProperty("ES集群版本")
-    private List<String>                 esClusterVersions;
+    private String                       esClusterVersion;
 
     @ApiModelProperty("集群状态信息")
     private ConsoleClusterStatusVO       clusterStatus;

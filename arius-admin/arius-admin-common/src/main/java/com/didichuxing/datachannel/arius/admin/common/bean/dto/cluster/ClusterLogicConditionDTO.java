@@ -1,7 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster;
 
 import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectClusterLogicAuthEnum;
-
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -27,6 +26,7 @@ public class ClusterLogicConditionDTO extends ESLogicClusterDTO {
     @ApiModelProperty("暂无")
     private String       sortTerm;
 
+    @ApiModelProperty("排序字段，type，")
     private String       sortType;
 
     @ApiModelProperty(value = "是否降序排序（默认降序）", dataType = "Boolean", required = false)

@@ -5,18 +5,21 @@
                type="com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterLogicPO">
         <result column="id" jdbcType="BIGINT" property="id"/>
         <result column="name" jdbcType="VARCHAR" property="name"/>
-        <result column="type" jdbcType="TINYINT" property="type"/>
-        <result column="project_id" jdbcType="INTEGER" property="projectId"/>
-        <result column="data_center" jdbcType="VARCHAR" property="dataCenter"/>
-        <result column="responsible" jdbcType="VARCHAR" property="responsible"/>
-        <result column="memo" jdbcType="VARCHAR" property="memo"/>
-        <result column="quota" jdbcType="DECIMAL" property="quota"/>
-        <result column="level" jdbcType="TINYINT" property="level"/>
-        <result column="config_json" jdbcType="VARCHAR" property="configJson"/>
-        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
-        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
-        <result column="health" jdbcType="TINYINT" property="health"/>
-        <result column="data_node_spec" jdbcType="VARCHAR" property="dataNodeSpec"/>
+        <result column="type"                       jdbcType="TINYINT" property="type"/>
+        <result column="project_id"                 jdbcType="INTEGER" property="projectId"/>
+        <result column="data_center"                jdbcType="VARCHAR" property="dataCenter"/>
+        <result column="responsible"                jdbcType="VARCHAR" property="responsible"/>
+        <result column="memo"                       jdbcType="VARCHAR" property="memo"/>
+        <result column="quota"                      jdbcType="DECIMAL" property="quota"/>
+        <result column="level"                      jdbcType="TINYINT" property="level"/>
+        <result column="config_json"                jdbcType="VARCHAR" property="configJson"/>
+        <result column="create_time"                jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time"                jdbcType="TIMESTAMP" property="updateTime"/>
+        <result column="health"                     jdbcType="TINYINT" property="health"/>
+        <result column="data_node_spec"             jdbcType="VARCHAR" property="dataNodeSpec"/>
+        <result column="disk_total"                 jdbcType="BIGINT" property="diskTotal"/>
+        <result column="disk_usage"                 jdbcType="BIGINT" property="diskUsage"/>
+        <result column="disk_usage_percent"         jdbcType="DECIMAL" property="diskUsagePercent"/>
     </resultMap>
 
     <sql id="Base_Column_List">

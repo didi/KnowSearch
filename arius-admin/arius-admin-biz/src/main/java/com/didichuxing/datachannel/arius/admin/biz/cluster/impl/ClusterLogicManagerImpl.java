@@ -7,6 +7,7 @@ import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterRegionManager;
 import com.didichuxing.datachannel.arius.admin.biz.indices.IndicesManager;
 import com.didichuxing.datachannel.arius.admin.biz.page.ClusterLogicPageSearchHandle;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager;
+import com.didichuxing.datachannel.arius.admin.common.Triple;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
@@ -54,6 +55,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.Clust
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
+import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterNodeService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectClusterLogicAuthService;
@@ -74,6 +76,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -140,6 +143,9 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
 
     @Autowired
     private IndicesManager                 indicesManager;
+
+    @Autowired
+    private ESClusterNodeService           eSClusterNodeService;
 
     private static final FutureUtil<Void>  futureUtil   = FutureUtil.init("ClusterLogicManager", 10, 10, 100);
 
@@ -244,13 +250,13 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
      * @return 物理集群集合
      */
     @Override
-    public List<ClusterPhy> getLogicClusterAssignedPhysicalClusters(Long logicClusterId) {
+    public ClusterPhy getLogicClusterAssignedPhysicalClusters(Long logicClusterId) {
         ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(logicClusterId);
         if (clusterRegion == null) {
-            return Lists.newArrayList();
+            return null;
         }
 
-        return Lists.newArrayList(clusterPhyService.getClusterByName(clusterRegion.getPhyClusterName()));
+        return clusterPhyService.getClusterByName(clusterRegion.getPhyClusterName());
     }
 
     @Override
@@ -485,6 +491,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
             }
 
             updateLogicClusterDTO.setHealth(ClusterUtils.getClusterLogicHealthByClusterHealth(clusterHealthSet));
+            setDiskUsedInfo(updateLogicClusterDTO);
             clusterLogicService.editClusterLogicNotCheck(updateLogicClusterDTO, AriusUser.SYSTEM.getDesc());
         } catch (Exception e) {
             LOGGER.error("class=ClusterLogicManagerImpl||method=updateClusterLogicHealth||clusterLogicId={}||errMsg={}",
@@ -572,6 +579,29 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
 
     /**************************************************** private method ****************************************************/
 
+    /**
+     * 设置磁盘使用信息
+     * @param clusterDTO
+     */
+    private void setDiskUsedInfo(ESLogicClusterDTO clusterDTO) {
+        ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(clusterDTO.getId());
+        long diskTotal = 0L;
+        long diskUsage = 0L;
+        if (clusterRegion != null) {
+            Map<String, Triple<Long, Long, Double>> map = eSClusterNodeService
+                    .syncGetNodesDiskUsage(clusterRegion.getPhyClusterName());
+            Set<Map.Entry<String, Triple<Long, Long, Double>>> entries = map.entrySet();
+            for (Map.Entry<String, Triple<Long, Long, Double>> entry : entries) {
+                diskTotal += entry.getValue().v1();
+                diskUsage += entry.getValue().v2();
+            }
+        }
+        clusterDTO.setDiskTotal(diskTotal);
+        clusterDTO.setDiskUsage(diskUsage);
+        clusterDTO.setDiskUsagePercent(
+                new BigDecimal((double) diskUsage / diskTotal).setScale(4, BigDecimal.ROUND_HALF_UP).doubleValue());
+    }
+
     private ClusterPhyVO getPhyNameByLogic(Long clusterLogicId) {
         ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(clusterLogicId);
         ClusterPhy clusterPhy = clusterPhyService.getClusterByName(clusterRegion.getPhyClusterName());
@@ -607,14 +637,11 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     private void buildConsoleClusterVersions(ClusterLogicVO logicCluster) {
         try {
             if (logicCluster != null) {
-                List<ClusterPhy> physicalClusters = getLogicClusterAssignedPhysicalClusters(logicCluster.getId());
-                if (CollectionUtils.isEmpty(physicalClusters)) {
+                ClusterPhy physicalCluster = getLogicClusterAssignedPhysicalClusters(logicCluster.getId());
+                if (physicalCluster == null) {
                     return;
                 }
-
-                List<String> esClusterVersions = physicalClusters.stream().map(ClusterPhy::getEsVersion).distinct()
-                    .collect(Collectors.toList());
-                logicCluster.setEsClusterVersions(esClusterVersions);
+                logicCluster.setEsClusterVersion(physicalCluster.getEsVersion());
             }
         } catch (Exception e) {
             LOGGER.warn("class=LogicClusterManager||method=buildConsoleClusterVersions||logicClusterId={}",

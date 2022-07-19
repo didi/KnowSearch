@@ -77,4 +77,19 @@ public class ClusterLogicPO extends BasePO {
      * 健康状态 1 green 2 yellow 3 red -1 未知
      */
     private Integer health;
+
+    /**
+     * 磁盘使用率
+     */
+    private Double diskUsagePercent;
+
+    /**
+     * 磁盘总量
+     */
+    private Long diskTotal;
+
+    /**
+     * 磁盘使用量
+     */
+    private Long diskUsage;
 }
