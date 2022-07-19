@@ -1,16 +1,16 @@
 package com.didichuxing.datachannel.arius.admin.core.service.es;
 
-import java.util.List;
-import java.util.Map;
-
 import com.didichuxing.datachannel.arius.admin.common.Triple;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.BigIndexMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.ClusterMemInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.PendingTask;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.NodeStateVO;
+import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodes.ClusterNodeInfo;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodesstats.ClusterNodeStats;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by linyunan on 2021-08-09
@@ -99,4 +99,20 @@ public interface ESClusterNodeService {
      * @return {@link Map}<{@link String}, {@link Integer}>
      */
     Map<String, Integer> syncGetNodesCpuNum(String cluster);
+    
+    /**
+     * 同步获取节点插件元组列表
+     *
+     * @param phyCluster phy集群
+     * @return {@code List<TupleTwo<String, List<String>>>}
+     */
+    public List<TupleTwo</*node name*/String,/*plugin names*/List<String>>> syncGetNodePluginTupleList(String phyCluster);
+    
+    /**
+     * 确定dcdr 和pipeline存在于集群中
+     *
+     * @param phyClusterName phy集群名称
+     * @return {@code TupleTwo<Boolean, Boolean>}
+     */
+    public TupleTwo</*dcdrExist*/Boolean,/*pipelineExist*/ Boolean> existDCDRAndPipelineModule(String phyClusterName);
 }

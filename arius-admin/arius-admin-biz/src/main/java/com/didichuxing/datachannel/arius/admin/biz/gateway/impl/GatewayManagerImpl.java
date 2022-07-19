@@ -9,8 +9,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.GatewayHeartbe
 import com.didichuxing.datachannel.arius.admin.common.bean.common.IndexTemplatePhysicalConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.alias.IndexTemplateAliasDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.ScrollDslTemplateRequest;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.ScrollDslTemplateResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.gateway.GatewayClusterNode;
@@ -34,7 +32,6 @@ import com.didichuxing.datachannel.arius.admin.common.constant.template.Template
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.TemplateUtils;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.gateway.GatewayService;
 import com.didichuxing.datachannel.arius.admin.core.service.project.ESUserService;
@@ -277,31 +274,31 @@ public class GatewayManagerImpl implements GatewayManager {
     }
 
     @Override
-    public Result<Map<String, GatewayTemplateDeployInfoVO>> listDeployInfo(String dataCenter) {
+    public Result<Map<String, GatewayTemplateDeployInfoVO>> listDeployInfo() {
         List<IndexTemplateWithPhyTemplates> logicWithPhysicals = indexTemplateService
-            .listTemplateWithPhysicalByDataCenter(dataCenter);
+            .listTemplateWithPhysical();
 
         List<IndexTemplateAlias> logicWithAliases = templateLogicAliasManager.listAlias(logicWithPhysicals);
         Multimap<Integer, IndexTemplateAlias> logicId2IndexTemplateAliasMultiMap = ConvertUtil
             .list2MulMap(logicWithAliases, IndexTemplateAlias::getLogicId);
 
-        List<String> pipelineClusterSet = templateSrvManager
-            .getPhyClusterByOpenTemplateSrv(TemplateServiceEnum.TEMPLATE_PIPELINE.getCode());
+        List<String> pipelineIndexTemplateSet = templateSrvManager
+            .getIndexTemplateContainsSrv(TemplateServiceEnum.TEMPLATE_PIPELINE.getCode());
 
         Map<String, GatewayTemplateDeployInfoVO> result = Maps.newHashMap();
         for (IndexTemplateWithPhyTemplates logicWithPhysical : logicWithPhysicals) {
             if (logicWithPhysical.hasPhysicals()) {
                 try {
                     GatewayTemplateDeployInfoVO gatewayTemplateDeployInfoVO = buildGatewayTemplateDeployInfoVO(
-                        logicWithPhysical, logicId2IndexTemplateAliasMultiMap, pipelineClusterSet);
+                        logicWithPhysical, logicId2IndexTemplateAliasMultiMap, pipelineIndexTemplateSet);
 
                     if (null != gatewayTemplateDeployInfoVO) {
                         result.put(logicWithPhysical.getName(), gatewayTemplateDeployInfoVO);
                     }
                 } catch (Exception e) {
                     LOGGER.warn(
-                        "class=GatewayManagerImpl||method=listDeployInfo||dataCenter={}||templateName={}||errMsg={}",
-                        dataCenter, logicWithPhysical.getName(), e.getMessage(), e);
+                        "class=GatewayManagerImpl||method=listDeployInfo||||templateName={}||errMsg={}",
+                         logicWithPhysical.getName(), e.getMessage(), e);
                 }
             }
         }
@@ -361,7 +358,7 @@ public class GatewayManagerImpl implements GatewayManager {
             IndexTemplatePhysicalConfig config = JSON.parseObject(physical.getConfig(),
                 IndexTemplatePhysicalConfig.class);
             deployVO.setTopic(config.getKafkaTopic());
-            deployVO.setAccessApps(config.getAccessApps());
+            deployVO.setAccessProjects(config.getAccessProjects());
             deployVO.setMappingIndexNameEnable(config.getMappingIndexNameEnable());
             deployVO.setTypeIndexMapping(config.getTypeIndexMapping());
         }
@@ -470,7 +467,7 @@ public class GatewayManagerImpl implements GatewayManager {
 
     private GatewayTemplateDeployInfoVO buildGatewayTemplateDeployInfoVO(IndexTemplateWithPhyTemplates logicWithPhysical,
                                                                          Multimap<Integer, IndexTemplateAlias> logicId2IndexTemplateAliasMultiMap,
-                                                                         List<String> pipelineClusterSet) {
+                                                                         List<String> pipelineIndexTemplateSet) {
         if (null == logicWithPhysical || null == logicWithPhysical.getMasterPhyTemplate()) {
             return null;
         }
@@ -480,7 +477,7 @@ public class GatewayManagerImpl implements GatewayManager {
         baseInfo.setAliases(logicId2IndexTemplateAliasMultiMap.get(logicWithPhysical.getId()).stream()
             .map(IndexTemplateAlias::getName).collect(Collectors.toList()));
         baseInfo.setVersion(logicWithPhysical.getMasterPhyTemplate().getVersion());
-
+        
         GatewayTemplatePhysicalDeployVO masterInfo = genMasterInfo(logicWithPhysical);
         List<GatewayTemplatePhysicalDeployVO> slaveInfos = genSlaveInfos(logicWithPhysical);
 
@@ -488,8 +485,8 @@ public class GatewayManagerImpl implements GatewayManager {
         deployInfoVO.setBaseInfo(baseInfo);
         deployInfoVO.setMasterInfo(masterInfo);
         deployInfoVO.setSlaveInfos(slaveInfos);
-
-        if (!pipelineClusterSet.contains(logicWithPhysical.getMasterPhyTemplate().getCluster())) {
+        
+        if (!pipelineIndexTemplateSet.contains(logicWithPhysical.getMasterPhyTemplate().getName())) {
             deployInfoVO.getBaseInfo().setIngestPipeline("");
         }
 

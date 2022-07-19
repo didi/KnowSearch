@@ -31,15 +31,12 @@ public enum NewModuleEnum {
                             */
                            TENANT("租户", 3),
 
-                           /**
-                            * 索引模板管理：模板创建
-                            */
-                           INDEX_TEMPLATE_MANAGEMENT("索引模板管理", 4),
+
 
                            /**
                             * 模板服务:DCDR设置
                             */
-                           TEMPLATE_SERVICE("模板服务", 5),
+                           TEMPLATE_SERVICE("模板管理", 5),
 
                            /**
                             * 索引管理:创建

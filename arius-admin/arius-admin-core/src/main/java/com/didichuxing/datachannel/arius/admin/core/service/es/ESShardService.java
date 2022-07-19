@@ -34,11 +34,18 @@ public interface ESShardService {
     Tuple</*大shard列表*/List<ShardMetrics>, /*小shard列表*/List<ShardMetrics>> syncGetBigAndSmallShards(String clusterName);
 
     /**
-     * 获取集群segments信息
+     * 获取集群segments信息, 不包含全量segment属性
      * @param clusterName
      * @return
      */
     List<Segment> syncGetSegments(String clusterName);
+
+    /**
+     * 获取集群segments数量统计信息
+     * @param clusterName
+     * @return
+     */
+    List<Segment> syncGetSegmentsCountInfo(String clusterName);
 
 
     ShardAssignmentDescriptionVO shardAssignmentDescription(String cluster);

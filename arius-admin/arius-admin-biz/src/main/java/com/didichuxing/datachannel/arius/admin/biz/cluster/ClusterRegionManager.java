@@ -75,5 +75,6 @@ public interface ClusterRegionManager {
      * @return
      */
     Result<Void> unbindRegion(Long regionId, Long logicClusterId, String operator, Integer projectId);
-
+    
+    Boolean existColdRegion(String phyCluster, Integer regionId);
 }

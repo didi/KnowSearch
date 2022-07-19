@@ -1,29 +1,32 @@
 package com.didichuxing.datachannel.arius.admin.core.service.es.impl;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.*;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.*;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.INSERT_PRDER;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.ONE_BILLION;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.PRIORITY;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.SOURCE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.TASKS;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.TIME_IN_QUEUE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.GET_PENDING_TASKS;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.getBigIndicesRequestContent;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.getShardToNodeRequestContentByIndexName;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.getShards2NodeRequestContent;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_OPERATE_TIMEOUT;
-
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.rest.RestStatus;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.Triple;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.BigIndexMetrics;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.ClusterMemInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.IndexResponse;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.IndexShardInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.PendingTask;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.ShardMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.NodeStateVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.PluginConstant;
+import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
+import com.didichuxing.datachannel.arius.admin.common.tuple.Tuples;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterNodeService;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpClient;
@@ -41,6 +44,21 @@ import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.rest.RestStatus;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * Created by linyunan on 2021-08-09
@@ -376,7 +394,39 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
 
         return node2CpuNumMap;
     }
-
+    
+    /**
+     * 同步获取节点插件元组列表
+     *
+     * @param phyCluster phy集群
+     * @return {@code List<TupleTwo<String, List<String>>>}
+     */
+    @Override
+    public List<TupleTwo<String, List<String>>> syncGetNodePluginTupleList(String phyCluster) {
+        return esClusterNodeDAO.syncGetNodesPlugins(phyCluster);
+    }
+    
+    /**
+     * @param phyClusterName
+     * @return
+     */
+    @Override
+    public TupleTwo<Boolean, Boolean> existDCDRAndPipelineModule(String phyClusterName) {
+        //获取物理集群侧的插件列表
+        final List<TupleTwo<String, List<String>>> syncGetNodePluginTupleList = syncGetNodePluginTupleList(
+                phyClusterName);
+        if (CollectionUtils.isEmpty(syncGetNodePluginTupleList)) {
+            return Tuples.of(Boolean.FALSE, Boolean.FALSE);
+        }
+        //这里对于一个集群来说，不需要校验全部节点是否是存在dcdr和pipeline的;这里属于内置的module，默认拿一个验证即可
+        final TupleTwo<String, List<String>> nodeNamePlugins = syncGetNodePluginTupleList.get(0);
+        if (CollectionUtils.isEmpty(nodeNamePlugins.v2())) {
+            return Tuples.of(Boolean.FALSE, Boolean.FALSE);
+        }
+        return Tuples.of(nodeNamePlugins.v2().contains(PluginConstant.DIDI_CROSS_DATACENTER_REPLICATION),
+                nodeNamePlugins.v2().contains(PluginConstant.INGEST_INDEX_TEMPLATE));
+    }
+    
     /*********************************************private******************************************/
 
     @Override

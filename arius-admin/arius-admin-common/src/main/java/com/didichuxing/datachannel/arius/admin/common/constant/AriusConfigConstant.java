@@ -80,12 +80,12 @@ public class AriusConfigConstant {
 
 
     /**
-     * 小Shard列表阈值定义
+     * 小Shard列表阈值定义(小Shard索引列表，并且shard个数大于1)
      */
     public static final String INDEX_SHARD_SMALL_THRESHOLD                             = "index.shard.small_threshold";
 
     /**
-     * 大Shard列表阈值定义
+     * 大Shard列表阈值定义(节点分片个数大于>500)
      */
     public static final String NODE_SHARD_BIG_THRESHOLD                                = "node.shard.big_threshold";
 
@@ -100,12 +100,12 @@ public class AriusConfigConstant {
     public static final String INDEX_SEGMENT_MEMORY_SIZE_THRESHOLD                     = "index.segment.memory_size_threshold";
 
     /**
-     * 索引模板Segment个数阈值定义
+     * 索引模板Segment个数阈值定义(索引模板Segments个数超过1000)
      */
     public static final String INDEX_TEMPLATE_SEGMENT_COUNT_THRESHOLD                  = "index.template.segment_count_threshold";
 
     /**
-     * 索引Segment个数阈值定义
+     * 索引Segment个数阈值定义(索引Segments个数超过阀值100)
      */
     public static final String INDEX_SEGMENT_NUM_THRESHOLD                             = "index.segment.num_threshold";
 
@@ -114,7 +114,7 @@ public class AriusConfigConstant {
      */
     public static final String INDEX_MAPPING_NUM_THRESHOLD                             = "index.mapping.num_threshold";
 
-
+    public static final String INDEX_ROLLOVER_THRESHOLD                                = "index.rollover.threshold";
 
 
 

@@ -53,6 +53,8 @@ public class ESHttpRequestContent {
 
     public static final String GET_PATH_SEGMENTS_PART_INFO = GET_PATH_SEGMENTS + "?v&h=size,size.memory,index";
 
+    public static final String GET_PATH_SEGMENTS_COUNT_INFO = GET_PATH_SEGMENTS + "?v&h=index,prirep";
+
     /**
      * 获取大索引请求内容
      */
@@ -97,7 +99,7 @@ public class ESHttpRequestContent {
         return GET_TEMPLATE_NAME;
     }
 
-    public static String getSegmentsPartInfoRequestContent() {
-        return GET_PATH_SEGMENTS_PART_INFO;
-    }
+    public static String getSegmentsPartInfoRequestContent() { return GET_PATH_SEGMENTS_PART_INFO;}
+
+    public static String getSegmentsCountContent() { return GET_PATH_SEGMENTS_COUNT_INFO;}
 }

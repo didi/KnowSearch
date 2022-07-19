@@ -40,6 +40,10 @@ public class IndexMetrics {
      * 是否存在小shard
      */
     private Boolean smallShard;
+        /**
+     * shard大小
+     */
+    private Long    shardSize;
     /**
      * shard大小
      */

@@ -69,5 +69,5 @@ public class NodeMetrics {
     /**
      * 消耗时间 （开始采集到结束采集的时间）
      */
-    private Long    elapsedTime;
+    private Long    nodeElapsedTime;
 }

@@ -87,19 +87,21 @@ public interface TemplateSrvManager {
     Result<Boolean> delAllTemplateSrvByClusterPhy(String clusterPhy, String operator);
 
     /**
-     * 查询开启了某个索引服务的物理集群列表
+     * 查询开启了某个索引服务的物理集群列表 索引服务不在绑定集群测
      * @param clusterPhies
      * @param srvId
      * @return
      */
+    @Deprecated
     List<String> getPhyClusterByOpenTemplateSrv(List<ClusterPhy> clusterPhies, int srvId);
 
     /**
-    * 判断物理集群是否打开了某个索引服务
+    * 判断物理集群是否打开了某个索引服务 索引服务不在绑定集群测
     * @param phyCluster        物理集群名称
     * @param srvId
     * @return
     */
+    @Deprecated
     boolean isPhyClusterOpenTemplateSrv(String phyCluster, int srvId);
 
     /**
@@ -109,4 +111,13 @@ public interface TemplateSrvManager {
      * @return
      */
     List<String> getPhyClusterByOpenTemplateSrv(int srvId);
+    
+    /**
+     * 查询开启了某个索引服务的索引模板列表
+     *
+     * @param srvId
+     * @return
+     */
+    List<String> getIndexTemplateContainsSrv(int srvId);
+    
 }

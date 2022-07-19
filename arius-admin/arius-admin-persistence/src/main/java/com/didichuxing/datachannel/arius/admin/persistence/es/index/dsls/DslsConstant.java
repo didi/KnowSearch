@@ -675,6 +675,7 @@ public class DslsConstant {
      * 条件查询索引cat/index信息
      */
     public static final String GET_CAT_INDEX_INFO_BY_CONDITION                               = "IndexCatESDAO/getCatIndexInfoByCondition";
+    public static final String GET_HAS_PROJECT_ID_BUT_NOT_TEMPLATE_ID_CAT_INDEX  = "IndexCatESDAO/getHasProjectIdButNotTemplateIdCatIndexList";
 
     /************************************************************      ShardCatESDAO     **************************************************************/
     /**
@@ -836,7 +837,14 @@ public class DslsConstant {
     /**
      * 获取List类型 Dashboard维度统计信息(带标识的类型)
      */
-    public static final String FETCH_LIST_FLAG_METRIC                                        = "AriusStatsDashBoardInfoESDAO/fetchListFlagMetric";
+    public static final String FETCH_LIST_FLAG_METRIC                                        =
+            "AriusStatsDashBoardInfoESDAO/fetchListFlagMetric";
+    
+        /**
+     * 获取List类型 Dashboard维度统计信息(阈值处理)
+     */
+    public static final String FETCH_LIST_THRESHOLDS_METRIC                                        =
+            "AriusStatsDashBoardInfoESDAO/fetchListThresholdsMetric";
 
     /**
      * 获取List类型 Dashboard维度统计信息(带数据值的类型)

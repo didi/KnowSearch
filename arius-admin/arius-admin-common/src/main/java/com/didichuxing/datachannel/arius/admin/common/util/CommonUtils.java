@@ -101,8 +101,8 @@ public class CommonUtils {
         BigDecimal v1Decimal = new BigDecimal(v1);
         BigDecimal v2Decimal = new BigDecimal(v2);
         BigDecimal bigDecimal = new BigDecimal(multiply);
-
-        BigDecimal greenDivide = v1Decimal.divide(v2Decimal, scale, 1);
+  
+        BigDecimal greenDivide = v2==0?new BigDecimal(0):v1Decimal.divide(v2Decimal, scale, 1);
         return greenDivide.multiply(bigDecimal).doubleValue();
     }
 

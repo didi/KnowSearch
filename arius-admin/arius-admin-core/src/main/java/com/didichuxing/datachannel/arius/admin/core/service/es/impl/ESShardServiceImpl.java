@@ -1,5 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.core.service.es.impl;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.BIG_SHARD;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.GET_MOVING_SHARD;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.getSegmentsCountContent;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.getSegmentsPartInfoRequestContent;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.getShardsAllInfoRequestContent;
+
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
@@ -16,18 +22,14 @@ import com.didiglobal.logi.elasticsearch.client.gateway.direct.DirectResponse;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.rest.RestStatus;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.BIG_SHARD;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.*;
 
 /**
  * Created by linyunan on 3/22/22
@@ -36,6 +38,17 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ES
 public class ESShardServiceImpl implements ESShardService {
 
     private static final ILog LOGGER = LogFactory.getLog(ESShardServiceImpl.class);
+    
+    private String              shard                        = "shard";
+    private String              index                        = "index";
+    private String              primary                      = "primary";
+    private String              current_state                = "current_state";
+    private String              node_allocation_decisions    = "node_allocation_decisions";
+    private String              node_name                    = "node_name";
+    private String              decider                      = "decider";
+    private String              deciders                     = "deciders";
+    private String              explanation                  = "explanation";
+    
     
     @Autowired
     private ESShardDAO esShardDAO;
@@ -82,6 +95,15 @@ public class ESShardServiceImpl implements ESShardService {
         List<SegmentPO> segmentPOS = esShardDAO.commonGet(clusterName, segmentsPartInfoRequestContent, SegmentPO.class);
         return ConvertUtil.list2List(segmentPOS, Segment.class);
     }
+
+    @Override
+    public List<Segment> syncGetSegmentsCountInfo(String clusterName) {
+        String segmentsCountContent = getSegmentsCountContent();
+        List<SegmentPO> segmentPOS = esShardDAO.commonGet(clusterName, segmentsCountContent, SegmentPO.class);
+        return ConvertUtil.list2List(segmentPOS, Segment.class);
+    }
+
+
     @Override
     public ShardAssignmentDescriptionVO shardAssignmentDescription(String cluster) {
         String response = esShardDAO.shardAssignment(cluster);
@@ -127,20 +149,20 @@ public class ESShardServiceImpl implements ESShardService {
 
     private ShardAssignmentDescriptionVO buildShardAssignment(JSONObject responseJson) {
         ShardAssignmentDescriptionVO descriptionVO = new ShardAssignmentDescriptionVO();
-        descriptionVO.setShard((Integer) responseJson.get("shard"));
-        descriptionVO.setIndex((String) responseJson.get("responseJson"));
-        descriptionVO.setPrimary((Boolean) responseJson.get("primary"));
-        descriptionVO.setCurrentState((String) responseJson.get("current_state"));
-        JSONArray decisionsArray = responseJson.getJSONArray("node_allocation_decisions");
+        descriptionVO.setShard((Integer) responseJson.get(shard));
+        descriptionVO.setIndex((String) responseJson.get(index));
+        descriptionVO.setPrimary((Boolean) responseJson.get(primary));
+        descriptionVO.setCurrentState((String) responseJson.get(current_state));
+        JSONArray decisionsArray = responseJson.getJSONArray(node_allocation_decisions);
         List<ShardAssignmenNodeVO> decisions = new ArrayList<>();
         for (int i = 0; i < decisionsArray.size(); i++) {
             ShardAssignmenNodeVO decisionMap = new ShardAssignmenNodeVO();
             JSONObject decisionObject = decisionsArray.getJSONObject(i);
-            decisionMap.setNodeName((String) decisionObject.get("node_name"));
-            JSONArray deciders = decisionObject.getJSONArray("deciders");
-            JSONObject decider = (JSONObject) deciders.get(0);
-            decisionMap.setNodeDecide((String) decider.get("decider"));
-            decisionMap.setExplanation((String) decider.get("explanation"));
+            decisionMap.setNodeName((String) decisionObject.get(node_name));
+            JSONArray decidersJson = decisionObject.getJSONArray(deciders);
+            JSONObject deciderJson = (JSONObject) decidersJson.get(0);
+            decisionMap.setNodeDecide((String) deciderJson.get(decider));
+            decisionMap.setExplanation((String) deciderJson.get(explanation));
             decisions.add(decisionMap);
         }
         descriptionVO.setDecisions(decisions);

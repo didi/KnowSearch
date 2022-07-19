@@ -16,12 +16,11 @@ import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
 import com.didiglobal.logi.elasticsearch.client.response.setting.index.IndexConfig;
 import com.didiglobal.logi.elasticsearch.client.response.setting.template.TemplateConfig;
+import java.util.List;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 /**
  * @author chengxiang, zqr
@@ -196,9 +195,7 @@ public class PreCreateManagerImpl extends BaseTemplateSrvImpl implements PreCrea
     /////////////////////////////srv
     @Override
     public boolean preCreateIndex(String phyCluster, int retryCount) {
-        if (!isTemplateSrvOpen(phyCluster)) {
-            return false;
-        }
+        
 
         List<IndexTemplatePhy> physicals = indexTemplatePhyService.getNormalTemplateByCluster(phyCluster);
         if (CollectionUtils.isEmpty(physicals)) {
@@ -207,9 +204,13 @@ public class PreCreateManagerImpl extends BaseTemplateSrvImpl implements PreCrea
                 phyCluster);
             return true;
         }
-
+       
         int succeedCount = 0;
         for (IndexTemplatePhy physical : physicals) {
+            if (Boolean.FALSE.equals(isTemplateSrvOpen(physical.getLogicId()))) {
+                continue;
+            }
+            
             IndexTemplateConfig config = indexTemplateService.getTemplateConfig(physical.getLogicId());
             if (config == null || !config.getPreCreateFlags()) {
                 LOGGER.warn(

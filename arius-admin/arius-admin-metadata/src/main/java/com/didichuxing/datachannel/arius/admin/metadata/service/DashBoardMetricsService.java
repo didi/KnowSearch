@@ -2,20 +2,18 @@ package com.didichuxing.datachannel.arius.admin.metadata.service;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.MetricsConstant.FAULT_FLAG;
 
-import java.util.List;
-
-import com.didichuxing.datachannel.arius.admin.common.constant.SortConstant;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsDashboardTopNDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.VariousLineChartMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.list.MetricList;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.ClusterPhyHealthMetrics;
+import com.didichuxing.datachannel.arius.admin.common.constant.SortConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricListTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricOtherTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricTopTypeEnum;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats.AriusStatsDashBoardInfoESDAO;
+import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * Created by linyunan on 3/14/22
@@ -85,5 +83,14 @@ public class DashBoardMetricsService {
     public ClusterPhyHealthMetrics getClusterHealthInfo() {
         return ariusStatsDashBoardInfoESDAO.fetchClusterHealthInfo();
     }
-
+    
+    public MetricList getListThresholdsMetrics(String oneLevelType, String metricsType, String valueName,
+                                               String aggType,
+                                               Boolean orderByDesc) {
+        String sortType = orderByDesc ? SortConstant.DESC : SortConstant.ASC;
+        
+        return ariusStatsDashBoardInfoESDAO.fetchListThresholdsMetric(oneLevelType, metricsType,valueName, aggType,
+                FAULT_FLAG,
+            sortType);
+    }
 }

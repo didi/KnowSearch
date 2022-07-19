@@ -1,0 +1,20 @@
+{
+  "query": {
+    "bool": {
+      "must_not": [
+        {
+          "exists": {
+            "field": "templateId"
+          }
+        }
+      ],
+      "must": [
+        {
+          "exists": {
+            "field": "projectId"
+          }
+        }
+      ]
+    }
+  }
+}

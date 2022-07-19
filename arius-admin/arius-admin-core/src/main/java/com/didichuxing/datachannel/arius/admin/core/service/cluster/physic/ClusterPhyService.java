@@ -167,6 +167,7 @@ public interface ClusterPhyService {
      * @param phyCluster phy集群
      * @return {@link Result}<{@link List}<{@link ClusterTemplateSrv}>>
      */
+    @Deprecated
     Result<List<ClusterTemplateSrv>> getPhyClusterTemplateSrv(ClusterPhy phyCluster);
 
 }
