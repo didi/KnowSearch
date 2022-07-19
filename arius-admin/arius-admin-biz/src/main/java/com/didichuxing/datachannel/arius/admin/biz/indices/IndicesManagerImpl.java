@@ -882,7 +882,7 @@ public class IndicesManagerImpl implements IndicesManager {
             if (null == clusterRegion) { return Result.buildParamIllegal("逻辑集群未绑定Region");}
 
             // 这里用户侧，传逻辑集群名称 这里先补丁适配
-            indexCreateDTO.setClusterLogic(indexCreateDTO.getCluster());
+            indexCreateDTO.setClusterLogic(clusterLogic.getName());
             indexCreateDTO.setResourceId(clusterLogic.getId());
             indexCreateDTO.setCluster(clusterRegion.getPhyClusterName());
         }

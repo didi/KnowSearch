@@ -111,7 +111,7 @@ public class IndexPageSearchHandle extends AbstractPageSearchHandle<IndexQueryDT
     private List<IndexCatCell> batchFetchIndexAliasesAndBlockInfo(List<IndexCatCell> catCellList) {
         List<IndexCatCell> finalIndexCatCellList = Lists.newCopyOnWriteArrayList(catCellList);
         Map<String, List<IndexCatCell>> cluster2IndexCatCellListMap = ConvertUtil.list2MapOfList(finalIndexCatCellList,
-            IndexCatCell::getClusterPhy, indexCatCell -> indexCatCell);
+            IndexCatCell::getCluster, indexCatCell -> indexCatCell);
         if (MapUtils.isEmpty(cluster2IndexCatCellListMap)) {
             return finalIndexCatCellList;
         }
