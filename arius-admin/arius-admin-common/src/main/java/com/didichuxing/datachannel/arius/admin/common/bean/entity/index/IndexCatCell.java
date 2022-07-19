@@ -21,10 +21,10 @@ public class IndexCatCell {
     private String       health;
     private String       status;
     private String       index;
-    private String       pri;
-    private String       rep;
-    private String       docsCount;
-    private String       docsDeleted;
+    private Long         pri;
+    private Long         rep;
+    private Long         docsCount;
+    private Long         docsDeleted;
     private String       storeSize;
     private String       priStoreSize;
     private Boolean      readFlag;

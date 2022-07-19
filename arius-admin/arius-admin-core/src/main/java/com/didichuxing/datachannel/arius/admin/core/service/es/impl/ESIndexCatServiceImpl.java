@@ -5,6 +5,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ES
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.rest.RestStatus;
@@ -108,15 +109,20 @@ public class ESIndexCatServiceImpl implements ESIndexCatService {
 
     @Override
     public Boolean syncInsertCatIndex(List<IndexCatCellDTO> params, int retryCount) {
-        boolean succ = indexCatESDAO.batchInsert(ConvertUtil.list2List(params, IndexCatCellPO.class), retryCount);
-        if (succ) {
+        BatchProcessor.BatchProcessResult<IndexCatCellDTO, Boolean> result = new BatchProcessor<IndexCatCellDTO, Boolean>()
+                .batchList(params).batchSize(5000)
+                .processor(items -> indexCatESDAO.batchInsert(ConvertUtil.list2List(params, IndexCatCellPO.class), retryCount))
+                .succChecker(succ -> succ).process();
+
+        if (!result.isSucc()) {
             List<String> clusterList = params.stream().map(IndexCatCellDTO::getCluster).distinct().collect(Collectors.toList());
             List<String> indexList   = params.stream().map(IndexCatCellDTO::getIndex).distinct().collect(Collectors.toList());
-            LOGGER.error("class=ESIndexCatServiceImpl||method=syncInsertCatIndex||cluster={}||indexNameList={}||errMsg=failed to batchInsert",
-                    clusterList, indexList);
+            LOGGER.error("class=ESIndexCatServiceImpl||method=syncInsertCatIndex||cluster={}||indexNameList={}||errMsg=failed to batchInsert, batch total count = {}, batch failed count={}",
+                    ListUtils.strList2String(clusterList), ListUtils.strList2String(indexList),
+                    params.size(), result.getFailAndErrorCount());
         }
 
-        return succ;
+        return result.isSucc();
     }
 
     @Override

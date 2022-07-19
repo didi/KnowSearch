@@ -2,14 +2,13 @@ package com.didichuxing.datachannel.arius.admin.metadata.job.index;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.JOB_SUCCESS;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -127,6 +126,7 @@ public class IndexCatInfoCollector extends AbstractMetaDataJob {
 
                         // 3.1 获取匹配平台模板的cat_index信息
                         List<CatIndexResult> catIndexMatchAriusTemplateList = catIndexResults.stream()
+                                .filter(Objects::nonNull)
                                 .filter(r -> templateName2IndexTemplatePhyWithLogicMap.containsKey(
                                         TemplateUtils.getMatchTemplateNameByIndexName(r.getIndex())))
                                 .collect(Collectors.toList());
@@ -202,9 +202,8 @@ public class IndexCatInfoCollector extends AbstractMetaDataJob {
                                                          long timeMillis) {
         List<IndexCatCellPO> res = Lists.newArrayList();
         for (CatIndexResult catIndexResult : catIndexMatchAriusTemplateList) {
-            IndexCatCellPO indexCatCellPO = new IndexCatCellPO();
-
-            buildBasicIndexCatInfo(indexCatCellPO, indices2SegmentCountMap, clusterName, timeMillis, catIndexResult);
+            // 构建基础数据
+            IndexCatCellPO indexCatCellPO = buildBasicIndexCatCell(indices2SegmentCountMap, clusterName, timeMillis, catIndexResult);
 
             // 根据索引名称获取平台模板名称, 匹配为null，则不去设置设置模板相关的属性
             String templateName = TemplateUtils.getMatchTemplateNameByIndexName(indexCatCellPO.getIndex());
@@ -244,10 +243,8 @@ public class IndexCatInfoCollector extends AbstractMetaDataJob {
         List<IndexCatCellPO> res = Lists.newArrayList();
 
         for (CatIndexResult catIndexResult : catIndexMatchNativeTemplateList) {
-            IndexCatCellPO indexCatCellPO = new IndexCatCellPO();
             // 构建基础数据
-            buildBasicIndexCatInfo(indexCatCellPO, indices2SegmentCountMap, clusterName, timeMillis, catIndexResult);
-
+            IndexCatCellPO indexCatCellPO = buildBasicIndexCatCell(indices2SegmentCountMap, clusterName, timeMillis, catIndexResult);
             // 索引管理所创建的索引需要构建以下平台相关信息（项目、物理集群、逻辑集群等）
             if (index2IndexCatCellMap.containsKey(indexCatCellPO.getKey())) {
                 IndexCatCell indexCatCell = index2IndexCatCellMap.get(indexCatCellPO.getKey());
@@ -289,30 +286,31 @@ public class IndexCatInfoCollector extends AbstractMetaDataJob {
 
     /**
      * 构建基础数据
-     * @param indexCatCell                   需要构建 indexCatCell
      * @param indices2SegmentCountMap
      * @param clusterName
      * @param timeMillis
      * @param catIndexResult
      */
-    private void buildBasicIndexCatInfo(IndexCatCellPO indexCatCellPO,
+    private IndexCatCellPO buildBasicIndexCatCell(
                                         Map<String, Tuple<Long, Long>> indices2SegmentCountMap,
                                         String clusterName,
                                         long timeMillis,
                                         CatIndexResult catIndexResult) {
-        indexCatCellPO.setCluster(clusterName);
-        indexCatCellPO.setDeleteFlag(false);
-        indexCatCellPO.setTimestamp(timeMillis);
-        try {
-            BeanUtils.copyProperties(catIndexResult, indexCatCellPO);
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            LOGGER.warn("class=IndexCatInfoCollector||method=buildBasicIndexCatInfo||errMsg={}", e);
-        }
+        IndexCatCellPO builder = ConvertUtil.obj2Obj(catIndexResult, IndexCatCellPO.class);
+        builder.setPri(Long.valueOf(null != catIndexResult.getPri() ? catIndexResult.getPri() : "0"));
+        builder.setRep(Long.valueOf(null != catIndexResult.getRep() ? catIndexResult.getRep() : "0"));
+        builder.setDocsCount(Long.valueOf(null != catIndexResult.getDocsCount() ? catIndexResult.getDocsCount() : "0"));
+        builder.setDocsDeleted(Long.valueOf(null != catIndexResult.getDocsDeleted() ? catIndexResult.getDocsDeleted() : "0"));
 
         Optional.ofNullable(indices2SegmentCountMap).map(map -> map.get(catIndexResult.getIndex())).ifPresent(tuple -> {
-            indexCatCellPO.setTotalSegmentCount(tuple.v1());
-            indexCatCellPO.setPrimariesSegmentCount(tuple.v2());
+            builder.setTotalSegmentCount(tuple.v1());
+            builder.setPrimariesSegmentCount(tuple.v2());
         });
+        builder.setCluster(clusterName);
+        builder.setDeleteFlag(false);
+        builder.setTimestamp(timeMillis);
+
+        return builder;
     }
 
     private boolean filterNotCollectorIndexCat(IndexCatCellDTO indexCatCellDTO) {

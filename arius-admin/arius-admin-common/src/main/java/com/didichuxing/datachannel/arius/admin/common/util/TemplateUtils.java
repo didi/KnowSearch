@@ -91,6 +91,7 @@ public class TemplateUtils {
      * @return              模板名称,  null 代表不匹配平台模板
      */
     public  static String getMatchTemplateNameByIndexName(String indexName) {
+        if (AriusObjUtils.isBlank(indexName)) { return null;}
         String[] temp;
 
         try {
