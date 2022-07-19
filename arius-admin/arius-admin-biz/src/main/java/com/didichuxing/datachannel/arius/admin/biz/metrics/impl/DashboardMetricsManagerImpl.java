@@ -1,38 +1,20 @@
 package com.didichuxing.datachannel.arius.admin.biz.metrics.impl;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_DASHBOARD_THRESHOLD_GROUP;
-import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.INDEX_MAPPING_NUM_THRESHOLD;
-import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.INDEX_SEGMENT_MEMORY_SIZE_THRESHOLD;
-import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.INDEX_SEGMENT_NUM_THRESHOLD;
-import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.INDEX_SHARD_SMALL_THRESHOLD;
-import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.INDEX_TEMPLATE_SEGMENT_COUNT_THRESHOLD;
-import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.INDEX_TEMPLATE_SEGMENT_MEMORY_SIZE_THRESHOLD;
-import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.NODE_SHARD_BIG_THRESHOLD;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricListTypeEnum.INDEX_MAPPING_NUM;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricListTypeEnum.INDEX_SEGMENT_MEM_SIZE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricListTypeEnum.INDEX_SEGMENT_NUM;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricListTypeEnum.INDEX_SMALL_SHARD;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricListTypeEnum.NODE_SHARD_NUM;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricListTypeEnum.TEMPLATE_SEGMENT_MEM_NUM;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricListTypeEnum.TEMPLATE_SEGMENT_NUM;
-
 import com.didichuxing.datachannel.arius.admin.biz.component.MetricsValueConvertUtils;
 import com.didichuxing.datachannel.arius.admin.biz.metrics.DashboardMetricsManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.BaseDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsDashboardListDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsDashboardTopNDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.config.AriusConfigInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.VariousLineChartMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.list.MetricList;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.ClusterPhyHealthMetrics;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.config.AriusConfigInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.list.MetricListVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.dashboard.ClusterPhyHealthMetricsVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.top.VariousLineChartMetricsVO;
-import com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricListTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricThresholdValueNameEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricTopTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.metrics.MetricsConstant;
-import com.didichuxing.datachannel.arius.admin.common.constant.metrics.OneLevelTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.metrics.*;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
@@ -41,15 +23,19 @@ import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigIn
 import com.didichuxing.datachannel.arius.admin.metadata.service.DashBoardMetricsService;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
+import org.apache.commons.collections4.CollectionUtils;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import org.apache.commons.collections4.CollectionUtils;
-import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.*;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricListTypeEnum.*;
 
 /**
  * Created by linyunan on 3/14/22
@@ -131,7 +117,13 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
         String oneLevelType = OneLevelTypeEnum.INDEX.getType();
         return commonGetListInfoByOneLevelType(param, projectId, oneLevelType);
     }
-    
+
+    @Override
+    public List<AriusConfigInfoVO> dashboardThresholds() {
+        List<AriusConfigInfo> ariusConfigInfos = ariusConfigInfoService.getConfigByGroup(ARIUS_DASHBOARD_THRESHOLD_GROUP);
+        return ConvertUtil.list2List(ariusConfigInfos,AriusConfigInfoVO.class);
+    }
+
     @Override
     public Result<ClusterPhyHealthMetricsVO> getClusterHealthInfo(Integer projectId) {
         Result<Void> checkCommonParamResult = checkCommonParam(MetricsConstant.CLUSTER, new BaseDTO(), projectId);
