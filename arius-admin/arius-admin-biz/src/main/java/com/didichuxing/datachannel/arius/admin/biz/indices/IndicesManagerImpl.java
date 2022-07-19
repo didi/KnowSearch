@@ -509,7 +509,7 @@ public class IndicesManagerImpl implements IndicesManager {
         if (ret.failed()) {
             return Result.buildFrom(ret);
         }
-        final Result<IndexSettingVO> beforeSetting = getSetting(phyCluster, indexName, projectId);
+        final Result<IndexSettingVO> beforeSetting = getSetting(param.getCluster(), indexName, projectId);
         JSONObject settingObj = JSON.parseObject(param.getSetting());
         if (null == settingObj) {
             return Result.buildFail("setting 配置非法");
@@ -525,7 +525,7 @@ public class IndicesManagerImpl implements IndicesManager {
             syncPutIndexSettings = esIndexService.syncPutIndexSettings(phyCluster,
                     Lists.newArrayList(indexName), finalSettingMap, RETRY_COUNT);
             if (syncPutIndexSettings) {
-                final Result<IndexSettingVO> afterSetting = getSetting(phyCluster, indexName, projectId);
+                final Result<IndexSettingVO> afterSetting = getSetting(param.getCluster(), indexName, projectId);
                 operateRecordService.save(new OperateRecord.Builder()
                         .project(projectService.getProjectBriefByProjectId(projectId)).userOperation(operator)
                         .operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_EDIT_SETTING)
