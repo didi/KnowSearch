@@ -431,7 +431,7 @@ public class IndicesManagerImpl implements IndicesManager {
         if (StringUtils.isBlank(mapping)) {
             return Result.buildFail("请传入索引Mapping");
         }
-        final Result<IndexMappingVO> beforeMapping = getMapping(phyCluster, indexName, projectId);
+        final Result<IndexMappingVO> beforeMapping = getMapping(param.getCluster(), indexName, projectId);
         Result<MappingConfig> mappingRet;
         if (!StringUtils.contains(mapping, PROPERTIES)) {
             //这里为了兼容多 type索引，前端进针对用户输入的内容做封装，所以后端解析封装
@@ -448,7 +448,7 @@ public class IndicesManagerImpl implements IndicesManager {
             mappingRet.getData());
         if (syncUpdateIndexMapping) {
 
-            final Result<IndexMappingVO> afterMapping = getMapping(phyCluster, indexName, projectId);
+            final Result<IndexMappingVO> afterMapping = getMapping(param.getCluster(), indexName, projectId);
 
             operateRecordService.save(new OperateRecord.Builder()
                 .project(projectService.getProjectBriefByProjectId(projectId)).userOperation(operate)

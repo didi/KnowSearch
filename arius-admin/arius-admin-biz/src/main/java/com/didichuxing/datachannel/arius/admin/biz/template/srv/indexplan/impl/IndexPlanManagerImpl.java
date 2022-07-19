@@ -418,8 +418,8 @@ public class IndexPlanManagerImpl extends BaseTemplateSrvImpl implements IndexPl
                 continue;
             }
             //判断集群的模版是否开启了索引规划rollover
-            if (isTemplateSrvOpen(phyTemplate.getLogicId())){
-                return false;
+            if (!isTemplateSrvOpen(phyTemplate.getLogicId())){
+                continue;
             }
             // 获取逻辑模版信息
             IndexTemplate logiTemplate = indexTemplateService.getLogicTemplateById(phyTemplate.getLogicId());
