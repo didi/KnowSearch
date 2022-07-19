@@ -67,6 +67,9 @@
       "deleteFlag": {
         "type": "boolean"
       },
+      "platformCreateFlag": {
+        "type": "boolean"
+      },
       "timestamp": {
         "format": "epoch_millis",
         "type": "date"

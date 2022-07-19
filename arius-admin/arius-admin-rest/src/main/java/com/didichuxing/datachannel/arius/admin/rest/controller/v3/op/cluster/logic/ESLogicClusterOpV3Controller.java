@@ -47,8 +47,7 @@ public class ESLogicClusterOpV3Controller {
     @ResponseBody
     @ApiOperation(value = "根据项目获取逻辑集群下的物理集群名称")
     public Result<List<String>> listClusterLogicNameByProjectId(HttpServletRequest request) {
-        return Result
-            .buildSucc(clusterLogicManager.listClusterLogicNameByProjectId(HttpRequestUtil.getProjectId(request)));
+        return clusterLogicManager.listClusterLogicNameByProjectId(HttpRequestUtil.getProjectId(request));
     }
 
     @GetMapping()
