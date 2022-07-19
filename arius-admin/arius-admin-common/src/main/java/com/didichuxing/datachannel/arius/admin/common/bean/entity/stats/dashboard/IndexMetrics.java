@@ -45,10 +45,6 @@ public class IndexMetrics {
      */
     private Long    shardSize;
     /**
-     * shard大小
-     */
-    private String shardSize;
-    /**
      * mapping字段个数
      */
     private Long    mappingNum;
