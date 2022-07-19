@@ -14,7 +14,7 @@
         },
         {
           "term": {
-            "appid": {
+            "projectId": {
               "value": %d
             }
           }

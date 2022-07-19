@@ -5,12 +5,11 @@ import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dsls.DslsConstant;
 import com.google.common.collect.Lists;
-import lombok.NoArgsConstructor;
-import org.springframework.stereotype.Component;
-
+import java.util.List;
 import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
-import java.util.List;
+import lombok.NoArgsConstructor;
+import org.springframework.stereotype.Component;
 
 @Component
 @NoArgsConstructor
@@ -50,6 +49,7 @@ public class DslAnalyzeResultTypeESDAO extends BaseESDAO {
      * @return
      */
     @Nullable
+    @Deprecated
     public List<DslAnalyzeResultTypePO> getDslAnalyzeResultByProjectId(Integer from, Long projectId) {
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_DSL_ANALYZE_RESULT_BY_PROJECT_ID, from,
             projectId);
@@ -64,6 +64,7 @@ public class DslAnalyzeResultTypeESDAO extends BaseESDAO {
      * @return
      */
     @Nullable
+    @Deprecated
     public List<DslAnalyzeResultTypePO> getDslAnalyzeResultByProjectIdAndRange(Long projectId, Long startDate,
                                                                                Long endDate) {
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_DSL_ANALYZE_RESULT_BY_PROJECT_ID_AND_RANGE,
