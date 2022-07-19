@@ -6,6 +6,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.config.AriusConfigInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.config.AriusConfigInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.config.AriusConfigInfoPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.config.AriusConfigInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.config.AriusConfigDimensionEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.config.AriusConfigStatusEnum;
@@ -23,14 +24,17 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_DASHBOARD_THRESHOLD_GROUP;
 
 /**
  *
@@ -369,6 +373,12 @@ public class AriusConfigInfoServiceImpl implements AriusConfigInfoService {
             }
         }
         return defaultValue;
+    }
+
+    @Override
+    public List<AriusConfigInfoVO> dashboardThresholds() {
+        List<AriusConfigInfo> ariusConfigInfos = getConfigByGroup(ARIUS_DASHBOARD_THRESHOLD_GROUP);
+        return ConvertUtil.list2List(ariusConfigInfos,AriusConfigInfoVO.class);
     }
 
     /******************************************* private method **************************************************/
