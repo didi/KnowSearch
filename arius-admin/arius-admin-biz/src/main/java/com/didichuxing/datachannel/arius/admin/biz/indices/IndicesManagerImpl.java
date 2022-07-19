@@ -142,8 +142,11 @@ public class IndicesManagerImpl implements IndicesManager {
     @Override
     public Result<Void> createIndex(IndexCatCellWithConfigDTO indexCreateDTO, Integer projectId, String operator) {
         // 初始化分配集群信息
-        Result<Void> initRet = init(indexCreateDTO, projectId);
-        if (initRet.failed()) { return Result.buildFrom(initRet);}
+        Result<String> getClusterRet = getClusterPhyByClusterNameAndProjectId(indexCreateDTO.getCluster(), projectId);
+
+        init(indexCreateDTO, projectId);
+
+        if (getClusterRet.failed()) { return Result.buildFrom(getClusterRet);}
 
         // 处理索引 mapping
         IndexConfig indexConfig = new IndexConfig();
@@ -163,14 +166,11 @@ public class IndicesManagerImpl implements IndicesManager {
         boolean succ = false;
         try {
             // 1. es创建真实索引
-            boolean syncCreateIndexRet = esIndexService.syncCreateIndex(indexCreateDTO.getCluster(), indexCreateDTO.getIndex(),
+            boolean syncCreateIndexRet = esIndexService.syncCreateIndex(getClusterRet.getData(), indexCreateDTO.getIndex(),
                     indexConfig, RETRY_COUNT);
 
             // 2. 同步在元数据Cat_index系统索引中添加此索引元数据文档
-            if (syncCreateIndexRet) {
-                indexCreateDTO.setProjectId(projectId);
-                succ = esIndexCatService.syncInsertCatIndex(Lists.newArrayList(indexCreateDTO), RETRY_COUNT);
-            }
+            if (syncCreateIndexRet) { succ = esIndexCatService.syncInsertCatIndex(Lists.newArrayList(indexCreateDTO), RETRY_COUNT);}
 
             if (succ) {
                 operateRecordService.save(new OperateRecord.Builder()
@@ -886,6 +886,7 @@ public class IndicesManagerImpl implements IndicesManager {
             indexCreateDTO.setResourceId(clusterLogic.getId());
             indexCreateDTO.setCluster(clusterRegion.getPhyClusterName());
         }
+        indexCreateDTO.setPlatformCreateFlag(true);
         indexCreateDTO.setProjectId(projectId);
         return Result.buildSucc();
     }
