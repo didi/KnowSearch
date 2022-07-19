@@ -1336,6 +1336,9 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
 
         indexTemplateDTO.setProjectId(projectId);
 
+        // 新建模版默认disableIndexRollover字段为true
+        indexTemplateDTO.setDisableIndexRollover(true);
+
         buildExtraField(indexTemplateDTO);
         buildCyclicalRoll(indexTemplateDTO, param);
         buildShardNum(indexTemplateDTO, param);
