@@ -19,7 +19,7 @@ public class IndexCatCellDTO {
     @ApiModelProperty("主键")
     private String  key;
 
-    @ApiModelProperty("集群名称")
+    @ApiModelProperty("物理集群名称")
     private String  cluster;
 
     @ApiModelProperty("逻辑集群名称")
@@ -41,22 +41,22 @@ public class IndexCatCellDTO {
     private String  index;
 
     @ApiModelProperty("分区shard个数")
-    private Long  pri;
+    private String  pri;
 
     @ApiModelProperty("分区副本个数")
-    private Long  rep;
+    private String  rep;
 
     @ApiModelProperty("分区文档个数")
-    private Long  docsCount;
+    private String  docsCount;
 
     @ApiModelProperty("分区文档删除个数")
-    private Long  docsDeleted;
+    private String  docsDeleted;
 
     @ApiModelProperty("分区主分片存储大小")
-    private Long  storeSize;
+    private String  storeSize;
 
     @ApiModelProperty("分区存储大小")
-    private Long  priStoreSize;
+    private String  priStoreSize;
 
     @ApiModelProperty("可读标志位")
     private Boolean readFlag;

@@ -2,12 +2,14 @@ package com.didichuxing.datachannel.arius.admin.metadata.job.index;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.JOB_SUCCESS;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -21,10 +23,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.shard.Segment;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.index.IndexCatCellPO;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.SizeUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.TemplateUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
@@ -252,8 +252,7 @@ public class IndexCatInfoCollector extends AbstractMetaDataJob {
             if (index2IndexCatCellMap.containsKey(indexCatCellPO.getKey())) {
                 IndexCatCell indexCatCell = index2IndexCatCellMap.get(indexCatCellPO.getKey());
                 indexCatCellPO.setProjectId(indexCatCell.getProjectId());
-                indexCatCellPO.setCluster(indexCatCell.getClusterLogic());
-                indexCatCellPO.setClusterPhy(indexCatCell.getClusterPhy());
+                indexCatCellPO.setCluster(indexCatCell.getCluster());
                 indexCatCellPO.setClusterLogic(indexCatCell.getClusterLogic());
                 indexCatCellPO.setResourceId(indexCatCell.getResourceId());
             }
@@ -296,49 +295,24 @@ public class IndexCatInfoCollector extends AbstractMetaDataJob {
      * @param timeMillis
      * @param catIndexResult
      */
-    private void buildBasicIndexCatInfo(IndexCatCellPO indexCatCell,
+    private void buildBasicIndexCatInfo(IndexCatCellPO indexCatCellPO,
                                         Map<String, Tuple<Long, Long>> indices2SegmentCountMap,
                                         String clusterName,
                                         long timeMillis,
                                         CatIndexResult catIndexResult) {
-
-        if (!AriusObjUtils.isBlack(catIndexResult.getIndex())) {
-            indexCatCell.setIndex(catIndexResult.getIndex());
-        }
-        if (!AriusObjUtils.isBlack(catIndexResult.getStoreSize())) {
-            indexCatCell.setStoreSize(SizeUtil.getUnitSize(catIndexResult.getStoreSize()));
-        }
-        if (!AriusObjUtils.isBlack(catIndexResult.getPriStoreSize())) {
-            indexCatCell.setPriStoreSize(SizeUtil.getUnitSize(catIndexResult.getPriStoreSize()));
-        }
-        if (!AriusObjUtils.isBlack(catIndexResult.getDocsCount())) {
-            indexCatCell.setDocsCount(Long.parseLong(catIndexResult.getDocsCount()));
-        }
-        if (!AriusObjUtils.isBlack(catIndexResult.getDocsDeleted())) {
-            indexCatCell.setDocsDeleted(Long.parseLong(catIndexResult.getDocsDeleted()));
-        }
-        if (!AriusObjUtils.isBlack(catIndexResult.getRep())) {
-            indexCatCell.setRep(Long.parseLong(catIndexResult.getRep()));
-        }
-        if (!AriusObjUtils.isBlack(catIndexResult.getPri())) {
-            indexCatCell.setPri(Long.parseLong(catIndexResult.getPri()));
-        }
-        if (!AriusObjUtils.isBlack(catIndexResult.getStatus())) {
-            indexCatCell.setStatus(catIndexResult.getStatus());
-        }
-        if (!AriusObjUtils.isBlack(catIndexResult.getHealth())) {
-            indexCatCell.setHealth(catIndexResult.getHealth());
+        indexCatCellPO.setCluster(clusterName);
+        indexCatCellPO.setDeleteFlag(false);
+        indexCatCellPO.setTimestamp(timeMillis);
+        try {
+            BeanUtils.copyProperties(catIndexResult, indexCatCellPO);
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            LOGGER.warn("class=IndexCatInfoCollector||method=buildBasicIndexCatInfo||errMsg={}", e);
         }
 
         Optional.ofNullable(indices2SegmentCountMap).map(map -> map.get(catIndexResult.getIndex())).ifPresent(tuple -> {
-            indexCatCell.setTotalSegmentCount(tuple.v1());
-            indexCatCell.setPrimariesSegmentCount(tuple.v2());
+            indexCatCellPO.setTotalSegmentCount(tuple.v1());
+            indexCatCellPO.setPrimariesSegmentCount(tuple.v2());
         });
-
-        indexCatCell.setCluster(clusterName);
-        indexCatCell.setClusterPhy(clusterName);
-        indexCatCell.setDeleteFlag(false);
-        indexCatCell.setTimestamp(timeMillis);
     }
 
     private boolean filterNotCollectorIndexCat(IndexCatCellDTO indexCatCellDTO) {

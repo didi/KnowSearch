@@ -22,8 +22,17 @@ public class IndexCatCellVO extends BaseVO {
     @ApiModelProperty("主键")
     private String       key;
 
-    @ApiModelProperty("集群名称")
+    @ApiModelProperty("物理集群名称")
     private String       cluster;
+
+    @ApiModelProperty("逻辑集群名称")
+    private String       clusterLogic;
+
+    @ApiModelProperty("逻辑集群ID")
+    private Long         resourceId;
+
+    @ApiModelProperty("projectId")
+    private Integer      projectId;
 
     @ApiModelProperty("分区健康")
     private String       health;
@@ -63,18 +72,6 @@ public class IndexCatCellVO extends BaseVO {
 
     @ApiModelProperty("模板ID")
     private Integer      templateId;
-
-    @ApiModelProperty("物理集群名称")
-    private String       clusterPhy;
-
-    @ApiModelProperty("逻辑集群名称")
-    private String       clusterLogic;
-
-    @ApiModelProperty("逻辑集群ID")
-    private Long         resourceId;
-
-    @ApiModelProperty("projectId")
-    private Integer      projectId;
 
     @ApiModelProperty("别名")
     private List<String> aliases;

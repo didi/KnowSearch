@@ -48,7 +48,7 @@ public class ESIndexCatServiceImpl implements ESIndexCatService {
 
         Tuple<Long, List<IndexCatCell>> hitTotal2catIndexInfoTuple = new Tuple<>();
         hitTotal2catIndexInfoTuple.setV1(hitTotal2catIndexInfoTuplePO.getV1());
-        hitTotal2catIndexInfoTuple.setV2(buildIndexCatCell(hitTotal2catIndexInfoTuplePO.getV2()));
+        hitTotal2catIndexInfoTuple.setV2(ConvertUtil.list2List(hitTotal2catIndexInfoTuplePO.getV2(), IndexCatCell.class));
         return hitTotal2catIndexInfoTuple;
     }
 
@@ -132,25 +132,4 @@ public class ESIndexCatServiceImpl implements ESIndexCatService {
 
 
     /*************************************************private*******************************************************/
-    private List<IndexCatCell> buildIndexCatCell(List<IndexCatCellPO> indexCatCellPOList) {
-        List<IndexCatCell> indexCatCellList = Lists.newArrayList();
-        for (IndexCatCellPO indexCatCellPO : indexCatCellPOList) {
-            IndexCatCell indexCatCell = ConvertUtil.obj2Obj(indexCatCellPO, IndexCatCell.class);
-            indexCatCell.setKey(indexCatCellPO.getKey());
-            indexCatCell.setClusterPhy(indexCatCellPO.getCluster());
-            indexCatCell.setIndex(indexCatCellPO.getIndex());
-            indexCatCell.setStoreSize(SizeUtil.getUnitSizeAndFormat(indexCatCellPO.getStoreSize(), 2));
-            indexCatCell.setPriStoreSize(SizeUtil.getUnitSizeAndFormat(indexCatCellPO.getPriStoreSize(), 2));
-            indexCatCell.setDocsCount(String.valueOf(indexCatCellPO.getDocsCount()));
-            indexCatCell.setDocsDeleted(String.valueOf(indexCatCellPO.getDocsDeleted()));
-            indexCatCell.setHealth(indexCatCellPO.getHealth());
-            indexCatCell.setStatus(indexCatCellPO.getStatus());
-            indexCatCell.setPri(String.valueOf(indexCatCellPO.getPri()));
-            indexCatCell.setRep(String.valueOf(indexCatCellPO.getRep()));
-
-            indexCatCellList.add(indexCatCell);
-        }
-
-        return indexCatCellList;
-    }
 }
