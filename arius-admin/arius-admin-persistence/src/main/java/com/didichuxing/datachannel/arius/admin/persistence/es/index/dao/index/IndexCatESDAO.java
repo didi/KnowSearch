@@ -140,13 +140,15 @@ public class IndexCatESDAO extends BaseESDAO {
      * 获取不包含模板id并且包含projectId的IndexCatCell信息，作用于平台索引管理新建索引侧
      * @return          List<IndexCatCell>
      */
-    public List<IndexCatCell> getHasProjectIdButNotTemplateIdCatIndexList() {
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_HAS_PROJECT_ID_BUT_NOT_TEMPLATE_ID_CAT_INDEX);
+    public List<IndexCatCell> getPlatformCreateCatIndexList() {
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_PLATFORM_CREATE_CAT_INDEX);
         int retryTime = 3;
         List<IndexCatCell> indexCatCell;
+        long nowTime = System.currentTimeMillis();
+        long oneDayAgo = nowTime - 24 * 60 * 60 * 1000;
         do {
             indexCatCell = gatewayClient.performRequest(metadataClusterName,
-                    IndexNameUtils.genCurrentDailyIndexName(indexName), typeName, dsl, IndexCatCell.class);
+                    IndexNameUtils.genDailyIndexName(indexName, oneDayAgo, nowTime), typeName, dsl, IndexCatCell.class);
         } while (retryTime-- > 0 && CollectionUtils.isEmpty(indexCatCell));
 
         return indexCatCell;
