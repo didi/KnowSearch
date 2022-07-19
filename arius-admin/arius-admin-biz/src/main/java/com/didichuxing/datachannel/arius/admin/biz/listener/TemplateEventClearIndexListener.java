@@ -6,6 +6,7 @@ import com.didichuxing.datachannel.arius.admin.common.event.index.IndexDeleteEve
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import java.util.stream.Collectors;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
@@ -26,7 +27,7 @@ public class TemplateEventClearIndexListener implements ApplicationListener<Inde
 	 * @param event
 	 */
 	@Override
-	public void onApplicationEvent(IndexDeleteEvent event) {
+	public void onApplicationEvent(@NotNull IndexDeleteEvent event) {
 		try {
 			
 			indicesManager.deleteIndex(event.getCatCellList(), event.getProjectId(), event.getOperator());

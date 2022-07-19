@@ -1,7 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.cluster;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.COMMA;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_OPERATE_MIN_TIMEOUT;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_OPERATE_TIMEOUT;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.INDEX_BLOCKS_READ;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.INDEX_BLOCKS_WRITE;
@@ -27,6 +26,7 @@ import com.didiglobal.logi.elasticsearch.client.request.index.stats.ESIndicesSta
 import com.didiglobal.logi.elasticsearch.client.request.index.stats.IndicesStatsLevel;
 import com.didiglobal.logi.elasticsearch.client.request.index.updatemapping.ESIndicesUpdateMappingRequestBuilder;
 import com.didiglobal.logi.elasticsearch.client.request.index.updatesettings.ESIndicesUpdateSettingsRequestBuilder;
+import com.didiglobal.logi.elasticsearch.client.response.ESAcknowledgedResponse;
 import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
 import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.ESIndicesCatIndicesResponse;
 import com.didiglobal.logi.elasticsearch.client.response.indices.closeindex.ESIndicesCloseIndexResponse;
@@ -51,12 +51,16 @@ import com.didiglobal.logi.elasticsearch.client.response.setting.index.MultiInde
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiFunction;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -121,21 +125,25 @@ public class ESIndexDAO extends BaseESDAO {
      * @param indexConfig 索引配置
      * @return
      */
-    public boolean createIndexWithConfig(String cluster, String indexName, IndexConfig indexConfig) {
+    public boolean createIndexWithConfig(String cluster, String indexName, IndexConfig indexConfig,Integer tryTimes) {
         /*if (exist(cluster, indexName)) {
             LOGGER.warn("class=ESIndexDAO||method=createIndexWithConfig||index already exist||cluster={}||indexName={}",
                 cluster, indexName);
             return true;
         }*/
         ESClient client = fetchESClientByCluster(cluster);
-        if (client != null) {
-            indexConfig.setVersion(ESVersion.valueBy(client.getEsVersion()));
-            ESIndicesPutIndexResponse response = client.admin().indices().preparePutIndex(indexName)
-                .setIndexConfig(indexConfig).execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
-            return response.getAcknowledged();
-        } else {
-            return false;
+        if (client == null) {
+            return Boolean.FALSE;
         }
+        indexConfig.setVersion(ESVersion.valueBy(client.getEsVersion()));
+        ESIndicesPutIndexResponse response = performTryTimesMethods(
+                (timeout, unit) -> client.admin().indices().preparePutIndex(indexName).setIndexConfig(indexConfig)
+                        .execute().actionGet(timeout, unit), esIndicesPutIndexResponse -> Boolean.FALSE.equals(
+                        Optional.ofNullable(esIndicesPutIndexResponse).map(ESAcknowledgedResponse::getAcknowledged)
+                            
+                                .orElse(Boolean.FALSE)), tryTimes);
+         
+        return Optional.ofNullable(response).map(ESAcknowledgedResponse::getAcknowledged).orElse(Boolean.FALSE);
     }
 
     /**
@@ -165,19 +173,15 @@ public class ESIndexDAO extends BaseESDAO {
         }
         ESIndicesExistsRequest esIndicesExistsRequest = new ESIndicesExistsRequest();
         esIndicesExistsRequest.setIndex(indexName);
-        ESIndicesExistsResponse response = null;
-        Long minTimeoutNum = 1L;
-        Long maxTimeoutNum = tryTimes.longValue();
-    
-        do {
-            response = client.admin().indices().exists(esIndicesExistsRequest)
-                    .actionGet(/*降低因为抖动导致的等待时常,等待时常从低到高进行重试*/minTimeoutNum * ES_OPERATE_MIN_TIMEOUT, TimeUnit.SECONDS);
-            minTimeoutNum++;
-            if (minTimeoutNum > maxTimeoutNum) {
-                minTimeoutNum = maxTimeoutNum;
-            }
-        } while (tryTimes-- > 0 && Boolean.FALSE.equals(
-                Optional.ofNullable(response).map(ESIndicesExistsResponse::isExists).orElse(Boolean.FALSE)));
+        ESIndicesExistsResponse response = performTryTimesMethods(
+                (timeout,unit)->client.admin().indices().exists(esIndicesExistsRequest).actionGet(timeout,unit),
+                
+                esIndicesExistsResponse-> Boolean.FALSE.equals(
+                Optional.ofNullable(esIndicesExistsResponse).map(ESIndicesExistsResponse::isExists).orElse(Boolean.FALSE)),
+                tryTimes
+                
+                );
+        
         return Optional.ofNullable(response).map(ESIndicesExistsResponse::isExists).orElse(Boolean.FALSE);
     }
 
@@ -421,16 +425,24 @@ public class ESIndexDAO extends BaseESDAO {
      * @return
      */
     public Map<String/*index*/, AliasIndexNode> getAliasesByIndices(String cluster, String... indices) {
-        try {
-            ESClient client = esOpClient.getESClient(cluster);
-            ESIndicesGetAliasResponse response = client.admin().indices().prepareAlias(indices).execute()
-                .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
-            return response.getM();
-        } catch (Exception e) {
-            LOGGER.warn("class=ESIndexDAO||method=getAliasesByExpression||errMsg={}||cluster={}||indices={}", cluster,
-                e.getMessage(), indices, e);
-            return null;
-        }
+         ESClient client = esOpClient.getESClient(cluster);
+         if (client==null){
+             return null;
+         }
+        BiFunction<Long, TimeUnit, ESIndicesGetAliasResponse> responseBiFunction = (time, unit) -> {
+            try {
+                return client.admin().indices().prepareAlias(indices).execute().actionGet(time, unit);
+            } catch (Exception e) {
+                LOGGER.warn("class=ESIndexDAO||method=getAliasesByExpression||cluster={}||indices={}",
+                        cluster, indices, e);
+                return null;
+            }
+        };
+        ESIndicesGetAliasResponse response =performTryTimesMethods(responseBiFunction, Objects::isNull,
+                3
+                
+                ) ;
+        return Optional.ofNullable(response).map(ESIndicesGetAliasResponse::getM).orElse(null);
     }
 
     /**
@@ -773,20 +785,42 @@ public class ESIndexDAO extends BaseESDAO {
             LOGGER.warn("class=ESIndexDAO||method=editAlias||errMsg=es client not found");
             return Result.buildFail();
         }
-        Long minTimeoutNum = 1L;
-        Long maxTimeoutNum = tryTimes.longValue();
-        ESIndicesPutAliasResponse response =null;
-        do {
-            response = client.admin().indices().preparePutAlias().addPutAliasNodes(aliases).execute()
-                    .actionGet(/*降低因为抖动导致的等待时常,等待时常从低到高进行重试*/minTimeoutNum * ES_OPERATE_MIN_TIMEOUT, TimeUnit.SECONDS);
-            minTimeoutNum++;
-            if (minTimeoutNum > maxTimeoutNum) {
-                minTimeoutNum = maxTimeoutNum;
+        if (CollectionUtils.isEmpty(aliases)){
+          return Result.build(Boolean.TRUE);
+        }
+      String[] indeies= aliases.stream().map(PutAliasNode::getIndex).distinct().toArray(String[]::new);
+        final List<String> aliasLit = aliases.stream().map(PutAliasNode::getAlias).distinct()
+                .collect(Collectors.toList());
+        //这里有两种情况，第一种：直接删除成功，但是因为集群不稳定导致了返回异常；第二种：删除失败；
+        BiFunction<Long, TimeUnit, ESIndicesPutAliasResponse> esIndicesPutAliasResponseBiFunction = (time, unit) -> {
+            try {
+                return client.admin().indices().preparePutAlias().addPutAliasNodes(aliases).execute()
+                        .actionGet(time, unit);
+            } catch (Exception e) {
+                LOGGER.error("class=ESIndexDAO||method=editAlias||clusterName={} ", cluster, e);
+            
+                return null;
             }
-        }while (tryTimes-- > 0 &&Boolean.FALSE.equals(Optional.ofNullable(response).map(ESIndicesPutAliasResponse::getAcknowledged).orElse(Boolean.FALSE)));
-
+        };
+        ESIndicesPutAliasResponse response = performTryTimesMethods(
+                esIndicesPutAliasResponseBiFunction, esIndicesPutAliasResponse -> Boolean.FALSE.equals(
+                        Optional.ofNullable(esIndicesPutAliasResponse).map(ESIndicesPutAliasResponse::getAcknowledged)
+                                .orElse(Boolean.FALSE)), tryTimes);
+        final Boolean acknowledged = Optional.ofNullable(response).map(ESIndicesPutAliasResponse::getAcknowledged)
+                .orElse(Boolean.FALSE);
+        if (Boolean.FALSE.equals(acknowledged)) {
+            //针对第一种情况进行别名存在的情况判断，不存在则认为删除成功
+            final Map<String, AliasIndexNode> aliasesByIndices = getAliasesByIndices(cluster, indeies);
+            if (Objects.isNull(aliasesByIndices)){
+                return Result.build(Boolean.FALSE);
+            }
+            //如果不包含，则都删除成功了
+            return Result.build(aliasesByIndices.values().stream().map(AliasIndexNode::getAliases).map(Map::keySet)
+                    .flatMap(Collection::stream).noneMatch(aliasLit::contains));
+            
+        }
         
-        return Result.build(Optional.ofNullable(response).map(ESIndicesPutAliasResponse::getAcknowledged).orElse(Boolean.FALSE));
+        return Result.build(acknowledged);
     }
 
     public Result<Void> rollover(String cluster, String alias, String conditions) {
