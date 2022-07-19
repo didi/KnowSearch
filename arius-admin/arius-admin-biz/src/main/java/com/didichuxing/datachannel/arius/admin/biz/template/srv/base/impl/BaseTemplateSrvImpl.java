@@ -193,6 +193,7 @@ public abstract class BaseTemplateSrvImpl implements BaseTemplateSrv {
             final Result<Void> result = indexTemplateService
                 .editTemplateInfoTODB(ConvertUtil.obj2Obj(tupleTwo.v2, IndexTemplateDTO.class));
             if (result.success()) {
+                
                 operateRecordService.save(new OperateRecord.Builder()
                     .operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE).triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
                     .bizId(tupleTwo.v2.getId()).project(projectService.getProjectBriefByProjectId(projectId))
@@ -253,15 +254,7 @@ public abstract class BaseTemplateSrvImpl implements BaseTemplateSrv {
     }
 
     ///////////////////////////////////srv
-    @Override
-    public boolean isTemplateSrvOpen(String phyClusterName) {
-        boolean enable = templateSrvManager.isPhyClusterOpenTemplateSrv(phyClusterName, templateSrv().getCode());
-
-        LOGGER.info("class=BaseTemplateSrv||method=enableTemplateSrv||clusterName={}||enable={}||templateSrv={}",
-            phyClusterName, enable, templateServiceName());
-
-        return enable;
-    }
+  
 
     @Override
     public boolean isTemplateSrvOpen(List<IndexTemplatePhy> indexTemplatePhies) {

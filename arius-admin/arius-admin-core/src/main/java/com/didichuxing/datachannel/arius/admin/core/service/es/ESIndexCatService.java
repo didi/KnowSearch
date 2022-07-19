@@ -1,6 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.core.service.es;
 
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatCellDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.IndexCatCell;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.IndexShardInfo;
 import java.util.List;
@@ -50,4 +51,18 @@ public interface ESIndexCatService {
      * @return
      */
     List<IndexShardInfo> syncGetIndexShardInfo(String cluster, String indexName);
+
+
+    /**
+     * 同步插入文档至cat_index元数据索引
+     * @param params         入参
+     * @param retryCount     重试次数
+     * @return               Boolean
+     */
+    Boolean syncInsertCatIndex(List<IndexCatCellDTO> params, int retryCount);
+
+    /**
+     * 获取不包含模板id并且包含projectId的IndexCatCellDTO信息，作用于平台索引管理新建索引侧
+     */
+    List<IndexCatCell> syncGetHasProjectIdButNotTemplateIdCatIndexList();
 }

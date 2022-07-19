@@ -1,13 +1,15 @@
 package com.didichuxing.datachannel.arius.admin.common.util;
 
-import java.util.List;
-
-import org.apache.commons.lang3.StringUtils;
+import static java.util.regex.Pattern.compile;
 
 import com.google.common.collect.Lists;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import org.apache.commons.lang3.StringUtils;
 
 public class ESVersionUtil {
-
+    public static final String                                   VERSION_PREFIX_PATTERN                      = "^\\d*.\\d*";
     private ESVersionUtil() {
     }
 
@@ -87,5 +89,37 @@ public class ESVersionUtil {
             ver2Count = ver2Count + Integer.parseInt(vers2List.get(i)) * number;
         }
         return ver1Count >= ver2Count;
+    }
+    
+    /**
+     * 比较大版本一致性 小版本之间是属于相同的版本：7.6.0==7.6.1 大版本之前的版本是不同的：7.6.0！=7.5.0
+     *
+     * @param esVersion1 7.6.x
+     * @param esVersion2 7.6.x
+     * @return boolean    true
+     */
+    public static Boolean compareBigVersionConsistency(String esVersion1, String esVersion2) {
+        if (StringUtils.isBlank(esVersion1) || StringUtils.isBlank(esVersion2)) {
+            return Boolean.FALSE;
+        }
+        if (StringUtils.equals(esVersion1, esVersion2)) {
+            return Boolean.TRUE;
+        }
+        return StringUtils.equals(getESBigVersion(esVersion1), getESBigVersion(esVersion2));
+    }
+    
+    /**
+     * 获取es的大版本前缀
+     *
+     * @param esVersion
+     * @return {@link String}
+     */
+    private static String getESBigVersion(String esVersion) {
+        Pattern pattern = compile(VERSION_PREFIX_PATTERN);
+        final Matcher matcher = pattern.matcher(esVersion);
+        if (matcher.find()) {
+            return matcher.group(0);
+        }
+        return null;
     }
 }

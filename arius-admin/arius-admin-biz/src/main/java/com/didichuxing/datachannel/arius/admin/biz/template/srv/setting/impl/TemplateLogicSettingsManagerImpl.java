@@ -15,7 +15,6 @@ import com.didichuxing.datachannel.arius.admin.biz.template.srv.setting.Template
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.setting.TemplatePhySettingManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateSettingDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateSettingDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord.template.TemplateSettingOperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
@@ -26,19 +25,20 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateS
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
+import com.didichuxing.datachannel.arius.admin.common.event.index.ReBuildTomorrowIndexEvent;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.mapping.AriusIndexTemplateSetting;
 import com.didichuxing.datachannel.arius.admin.common.mapping.AriusTypeProperty;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
+import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * 索引setting服务实现
@@ -67,29 +67,29 @@ public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrvImpl implem
         return TemplateServiceEnum.TEMPLATE_SETTING;
     }
 
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public Result<Void> modifySetting(ConsoleTemplateSettingDTO settingDTO, String operator,
-                                      Integer projectId) throws AdminOperateException {
-
-        LOGGER.info("class=TemplateLogicServiceImpl||method=modifySetting||operator={}||setting={}", operator,
-            JSON.toJSONString(settingDTO));
-
-        if (AriusObjUtils.isNull(operator)) {
-            return Result.buildParamIllegal("操作人为空");
-        }
-
-        if (settingDTO.getSetting() == null || settingDTO.getSetting().getAnalysis() == null) {
-            return Result.buildParamIllegal("setting信息不能为空");
-        }
-
-        Result<Void> result = updateSettings(settingDTO.getLogicId(), operator, settingDTO.getSetting());
-        if (result.success()) {
-            templatePreCreateManager.reBuildTomorrowIndex(settingDTO.getLogicId(), 3);
-        }
-
-        return result;
-    }
+    //@Override
+    //@Transactional(rollbackFor = Exception.class)
+    //public Result<Void> modifySetting(ConsoleTemplateSettingDTO settingDTO, String operator,
+    //                                  Integer projectId) throws AdminOperateException {
+    //
+    //    LOGGER.info("class=TemplateLogicServiceImpl||method=modifySetting||operator={}||setting={}", operator,
+    //        JSON.toJSONString(settingDTO));
+    //
+    //    if (AriusObjUtils.isNull(operator)) {
+    //        return Result.buildParamIllegal("操作人为空");
+    //    }
+    //
+    //    if (settingDTO.getSetting() == null || settingDTO.getSetting().getAnalysis() == null) {
+    //        return Result.buildParamIllegal("setting信息不能为空");
+    //    }
+    //
+    //    Result<Void> result = updateSettings(settingDTO.getLogicId(), operator, settingDTO.getSetting());
+    //    if (result.success()) {
+    //        templatePreCreateManager.reBuildTomorrowIndex(settingDTO.getLogicId(), 3);
+    //    }
+    //
+    //    return result;
+    //}
 
     @Override
     public Result<Void> customizeSetting(TemplateSettingDTO settingDTO, String operator) throws AdminOperateException {
@@ -108,7 +108,7 @@ public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrvImpl implem
 
         Result<Void> result = updateSettings(settingDTO.getLogicId(), operator, settings);
         if (result.success()) {
-            templatePreCreateManager.reBuildTomorrowIndex(settingDTO.getLogicId(), 3);
+            SpringTool.publish(new ReBuildTomorrowIndexEvent(this, settingDTO.getLogicId()));
         }
 
         return result;
@@ -229,12 +229,8 @@ public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrvImpl implem
                 return Result.buildFail(adminOperateException.getMessage());
             }
         }
-
-        try {
-            templatePreCreateManager.reBuildTomorrowIndex(logicId, 3);
-        } catch (Exception e) {
-            LOGGER.error("class=TemplateLogicServiceImpl||method=updateSettings||logicId:{}", logicId, e);
-        }
+    
+        SpringTool.publish(new ReBuildTomorrowIndexEvent(this, logicId));
         final Result<IndexTemplatePhySetting> afterSetting = getSettings(logicId);
         operateRecordService.save(new OperateRecord.Builder()
             .project(projectService.getProjectBriefByProjectId(projectId)).triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)

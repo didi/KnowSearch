@@ -675,6 +675,7 @@ public class DslsConstant {
      * 条件查询索引cat/index信息
      */
     public static final String GET_CAT_INDEX_INFO_BY_CONDITION                               = "IndexCatESDAO/getCatIndexInfoByCondition";
+    public static final String GET_HAS_PROJECT_ID_BUT_NOT_TEMPLATE_ID_CAT_INDEX  = "IndexCatESDAO/getHasProjectIdButNotTemplateIdCatIndexList";
 
     /************************************************************      ShardCatESDAO     **************************************************************/
     /**

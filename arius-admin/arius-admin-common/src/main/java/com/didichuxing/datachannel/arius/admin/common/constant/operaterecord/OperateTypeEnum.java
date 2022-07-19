@@ -122,11 +122,11 @@ public enum OperateTypeEnum {
     /**
      * 索引模板管理:模板下线
      */
-    INDEX_TEMPLATE_MANAGEMENT_OFFLINE(NewModuleEnum.INDEX_MANAGEMENT, "模板下线", 26),
+    INDEX_TEMPLATE_MANAGEMENT_OFFLINE(NewModuleEnum.TEMPLATE_SERVICE, "模板下线", 26),
     /**
      * 索引模板管理:索引模板信息修改
      */
-    INDEX_TEMPLATE_MANAGEMENT_INFO_MODIFY(NewModuleEnum.INDEX_MANAGEMENT, "索引模板信息修改", 27),
+    INDEX_TEMPLATE_MANAGEMENT_INFO_MODIFY(NewModuleEnum.TEMPLATE_SERVICE, "索引模板信息修改", 27),
     /**
      * 索引模板管理:升级版本
      */

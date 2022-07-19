@@ -2,20 +2,19 @@
 package com.didi.arius.gateway.remote.response;
 
 import com.google.gson.annotations.Expose;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.util.List;
 import java.util.Map;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
 public class SlaveInfoResponse {
 
     @Expose
-    private List<Integer> accessApps;
+    private List<Integer> accessProjects;
     @Expose
-    private String cluster;
+    private String        cluster;
     @Expose
     private Long templateId;
     @Expose
