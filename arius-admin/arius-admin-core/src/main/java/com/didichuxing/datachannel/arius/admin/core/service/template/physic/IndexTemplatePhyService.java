@@ -288,5 +288,5 @@ public interface IndexTemplatePhyService {
 
     boolean updateByIndexTemplatePhyPO(IndexTemplatePhyPO physicalPO);
     
-    String getPhyClusterByLogicTemplateId(Integer logicTemplateId);
+    List<String> getPhyClusterByLogicTemplateId(Integer logicTemplateId);
 }

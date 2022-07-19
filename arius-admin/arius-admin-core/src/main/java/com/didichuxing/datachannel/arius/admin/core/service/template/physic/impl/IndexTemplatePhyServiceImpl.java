@@ -783,8 +783,9 @@ public class IndexTemplatePhyServiceImpl implements IndexTemplatePhyService {
      * @return
      */
     @Override
-    public String getPhyClusterByLogicTemplateId(Integer logicTemplateId) {
-        return  getTemplateById(logicTemplateId.longValue()).getCluster();
+    public List<String> getPhyClusterByLogicTemplateId(Integer logicTemplateId) {
+        return  getTemplateByLogicId(logicTemplateId).stream().map(IndexTemplatePhy::getCluster).distinct().collect(
+                Collectors.toList());
     }
     
     /**************************************************** private method ****************************************************/
