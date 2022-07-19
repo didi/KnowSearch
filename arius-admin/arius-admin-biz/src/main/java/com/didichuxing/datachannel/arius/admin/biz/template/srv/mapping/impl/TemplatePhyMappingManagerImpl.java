@@ -24,13 +24,16 @@ import com.didiglobal.logi.elasticsearch.client.response.setting.template.Templa
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Maps;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import lombok.NoArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.*;
 
 /**
  * @author zhonghua
@@ -387,7 +390,7 @@ public class TemplatePhyMappingManagerImpl implements TemplatePhyMappingManager 
         try {
             esIndexDAO.deleteIndex(clusterName, indexName);
 
-            if (!esIndexDAO.createIndexWithConfig(clusterName, indexName, indexConfig)) {
+            if (!esIndexDAO.createIndexWithConfig(clusterName, indexName, indexConfig,3)) {
                 return Result.buildFail("create index get false");
             }
 

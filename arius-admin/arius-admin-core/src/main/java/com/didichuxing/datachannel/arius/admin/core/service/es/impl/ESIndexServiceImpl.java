@@ -79,7 +79,7 @@ public class ESIndexServiceImpl implements ESIndexService {
     public boolean syncCreateIndex(String cluster, String indexName, IndexConfig indexConfig,
                                    int retryCount) throws ESOperateException {
         return ESOpTimeoutRetry.esRetryExecute("createIndexWithConfig", retryCount,
-            () -> esIndexDAO.createIndexWithConfig(cluster, indexName, indexConfig));
+            () -> esIndexDAO.createIndexWithConfig(cluster, indexName, indexConfig,3));
     }
 
     @Override

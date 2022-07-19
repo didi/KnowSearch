@@ -175,7 +175,7 @@ public class IndexCatESDAO extends BaseESDAO {
         //projectId == null 时，属于超级项目访问；
         if (null == projectId) {
             //get cluster dsl term
-            termCellList.add(DSLSearchUtils.getTermCellForExactSearch(cluster, "clusterPhy"));
+            termCellList.add(DSLSearchUtils.getTermCellForExactSearch(cluster, "cluster"));
         } else {
             //get projectId dsl term
             termCellList.add(DSLSearchUtils.getTermCellForExactSearch(projectId, "projectId"));

@@ -43,7 +43,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.Cluster
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicAggregate;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithClusterAndMasterTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithCluster;
@@ -97,12 +96,15 @@ import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -489,8 +491,8 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         if (checkProjectCorrectly.failed()) {
             return checkProjectCorrectly;
         }
-        IndexTemplateLogicWithClusterAndMasterTemplate template = indexTemplateService.getLogicTemplateWithClusterAndMasterTemplate(
-                logicTemplateId);
+        List<String> phyClusterList=indexTemplatePhyService.getPhyClusterByLogicTemplateId(logicTemplateId);
+       
         Result<ConsoleTemplateClearVO> templateClearInfo = templateLogicManager.getLogicTemplateClearInfo(
                 logicTemplateId);
        
@@ -507,18 +509,30 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             /**
              * [{"cluster":"Zh_test3_cluster_7-6-0-1400","index":"zh_test3_template3_2022-07-18"}]
              */
-            if (templateClearInfo.success() && CollectionUtils.isNotEmpty(templateClearInfo.getData().getIndices())) {
-                List<IndexCatCellDTO> catCellList = templateClearInfo.getData().getIndices().stream().map(index -> {
+            if (templateClearInfo.success() && CollectionUtils.isNotEmpty(templateClearInfo.getData().getIndices())&&CollectionUtils.isNotEmpty(phyClusterList)) {
+    
+                BiFunction</*index*/String,/*phyCluster*/String, IndexCatCellDTO> indexPhyClusterFunc = (index, phyCluster) -> {
                     IndexCatCellDTO indexCatCellDTO = new IndexCatCellDTO();
                     indexCatCellDTO.setIndex(index);
-                    indexCatCellDTO.setCluster(template.getMasterTemplate().getCluster());
+                    indexCatCellDTO.setCluster(phyCluster);
                     return indexCatCellDTO;
-                }).collect(Collectors.toList());
+                };
+                Function</*index*/String,List<IndexCatCellDTO>> phyClusterFunc=
+                        index->phyClusterList.stream().map(phyCluster->indexPhyClusterFunc.apply(index,phyCluster))
+                                       .collect(Collectors.toList());
+    
+                List<IndexCatCellDTO> catCellList = templateClearInfo.getData().getIndices().stream()
+                        .map(phyClusterFunc).flatMap(Collection::stream)
+            
+                        .collect(Collectors.toList());
                 SpringTool.publish(new IndexDeleteEvent(this, catCellList, projectId, operator));
             }
         }
         return result;
     }
+    
+    
+    
 
     @Override
     public PaginationResult<ConsoleTemplateVO> pageGetConsoleTemplateVOS(TemplateConditionDTO condition,
@@ -1321,6 +1335,9 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         IndexTemplateDTO indexTemplateDTO = ConvertUtil.obj2Obj(param, IndexTemplateDTO.class);
 
         indexTemplateDTO.setProjectId(projectId);
+
+        // 新建模版默认disableIndexRollover字段为true
+        indexTemplateDTO.setDisableIndexRollover(true);
 
         buildExtraField(indexTemplateDTO);
         buildCyclicalRoll(indexTemplateDTO, param);

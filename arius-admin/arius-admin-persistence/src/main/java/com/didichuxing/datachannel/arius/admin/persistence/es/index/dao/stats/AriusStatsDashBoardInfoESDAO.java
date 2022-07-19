@@ -150,6 +150,68 @@ public class AriusStatsDashBoardInfoESDAO extends BaseAriusStatsESDAO {
         metricList.setCurrentTime(System.currentTimeMillis());
         return metricList;
     }
+    
+    
+     /**
+     * 处理阈值指标返回结果
+     *
+     * @param s              返回结果
+     * @param oneLevelType   一级指标项
+     * @param metricsType    二级指标项
+     * @param valueName    值名称
+     * @return               MetricList
+     */
+    private MetricList fetchRespThresholdsMetrics(ESQueryResponse s, String oneLevelType, String metricsType,
+                                        String valueName) {
+        MetricList metricList = new MetricList();
+        metricList.setType(metricsType);
+        List<MetricListContent> metricListContents = Lists.newArrayList();
+        // 去重列表
+        List<String> repeatList = Lists.newArrayList();
+        ESHits hits = s.getHits();
+        if (null != hits && CollectionUtils.isNotEmpty(hits.getHits())) {
+            for (ESHit hit : hits.getHits()) {
+                if (null != hit.getSource() && null != ((JSONObject) hit.getSource()).getJSONObject(oneLevelType)
+                    && null != ((JSONObject) hit.getSource()).getJSONObject(oneLevelType).getString(CLUSTER)
+                    && null != ((JSONObject) hit.getSource()).getJSONObject(oneLevelType).getString(oneLevelType)) {
+                
+                    JSONObject healthMetricsJb = ((JSONObject) hit.getSource()).getJSONObject(oneLevelType);
+                    String cluster = healthMetricsJb.getString(CLUSTER);
+                    String metricsTypeValue/*node template index thread-pool*/ = healthMetricsJb.getString(
+                            oneLevelType);
+                    if (AriusObjUtils.isBlank(metricsTypeValue)) {
+                        continue;
+                    }
+                
+                    // 去重处理
+                    String repeatKey = cluster + "@" + metricsTypeValue;
+                    if (repeatList.contains(repeatKey)) {
+                        continue;
+                    } else {
+                        repeatList.add(repeatKey);
+                    }
+                
+                    MetricListContent metricListContent = new MetricListContent();
+                    metricListContent.setClusterPhyName(cluster);
+                    metricListContent.setName(metricsTypeValue);
+                
+                    // 是否需要指标具体值
+                    Double value = 0D;
+                    if (healthMetricsJb.containsKey(valueName)) {
+                        value = healthMetricsJb.getDouble(valueName);
+                    }
+                    value = Double.valueOf(String.format("%.2f", value));
+                    metricListContent.setValue(value);
+                
+                    metricListContents.add(metricListContent);
+                }
+            }
+        }
+    
+        metricList.setMetricListContents(metricListContents);
+        metricList.setCurrentTime(System.currentTimeMillis());
+        return metricList;
+    }
 
     /**
      * 获取dashboard大盘TopN指标信息
@@ -358,7 +420,7 @@ public class AriusStatsDashBoardInfoESDAO extends BaseAriusStatsESDAO {
 
     /**
      * 获取普通指标列表 非负类型指标列表(@link CLUSTER_GATEWAY_FAILED_PER CLUSTER_GATEWAY_SUC_PER)
-     * 
+     *
      * @param metricsTypes 二级指标类型
      * @return Tuple
      */
@@ -632,5 +694,28 @@ public class AriusStatsDashBoardInfoESDAO extends BaseAriusStatsESDAO {
         }
 
         return sb.toString();
+    }
+    
+    public MetricList fetchListThresholdsMetric(String oneLevelType, String metricsType, String valueName, String aggType, String flag, String sortType) {
+       
+       String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.FETCH_LIST_THRESHOLDS_METRIC, oneLevelType, sortType,
+               oneLevelType, oneLevelType, oneLevelType,oneLevelType,valueName, oneLevelType, metricsType, flag,
+               oneLevelType,NOW_6M, NOW_1M);
+
+        String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
+        return gatewayClient.performRequest(metadataClusterName, realIndex, TYPE, dsl,
+            s -> fetchRespThresholdsMetrics(s, oneLevelType, metricsType, /*是否需要设置指标具体值*/valueName), 3);
+    }
+    
+    public MetricList fetchListThresholdsSegmentNumMetric(String oneLevelType, String metricsType, String valueName,
+                                                          String aggType, String flag, String sortType) {
+       
+       String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.FETCH_LIST_THRESHOLDS_METRIC, oneLevelType, sortType,
+               oneLevelType, oneLevelType, oneLevelType,oneLevelType,valueName, oneLevelType, metricsType, flag,
+               oneLevelType,NOW_6M, NOW_1M);
+
+        String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
+        return gatewayClient.performRequest(metadataClusterName, realIndex, TYPE, dsl,
+            s -> fetchRespThresholdsMetrics(s, oneLevelType, metricsType, /*是否需要设置指标具体值*/valueName), 3);
     }
 }

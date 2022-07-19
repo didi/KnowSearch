@@ -6,16 +6,15 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.BaseDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsDashboardListDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsDashboardTopNDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.config.AriusConfigInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.VariousLineChartMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.list.MetricList;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.ClusterPhyHealthMetrics;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.config.AriusConfigInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.list.MetricListVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.dashboard.ClusterPhyHealthMetricsVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.top.VariousLineChartMetricsVO;
-import com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricListTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricTopTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.metrics.MetricsConstant;
-import com.didichuxing.datachannel.arius.admin.common.constant.metrics.OneLevelTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.metrics.*;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
@@ -118,7 +117,13 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
         String oneLevelType = OneLevelTypeEnum.INDEX.getType();
         return commonGetListInfoByOneLevelType(param, projectId, oneLevelType);
     }
-    
+
+    @Override
+    public List<AriusConfigInfoVO> dashboardThresholds() {
+        List<AriusConfigInfo> ariusConfigInfos = ariusConfigInfoService.getConfigByGroup(ARIUS_DASHBOARD_THRESHOLD_GROUP);
+        return ConvertUtil.list2List(ariusConfigInfos,AriusConfigInfoVO.class);
+    }
+
     @Override
     public Result<ClusterPhyHealthMetricsVO> getClusterHealthInfo(Integer projectId) {
         Result<Void> checkCommonParamResult = checkCommonParam(MetricsConstant.CLUSTER, new BaseDTO(), projectId);
@@ -182,10 +187,16 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
         }
         List<String> faultTypeList = DashBoardMetricListTypeEnum.getFaultTypeList();
         List<String> valueTypeList = DashBoardMetricListTypeEnum.getValueTypeList();
+        Map<String,String> thresholds= getDashBoardMetricThresholdNames();
         List<MetricList> listMetrics = Lists.newCopyOnWriteArrayList();
         for (String metricsType : param.getMetricsTypes()) {
             futureUtil.runnableTask(() -> {
-                if (faultTypeList.contains(metricsType)) {
+                if (thresholds.containsKey(metricsType)){
+                    listMetrics.add(
+                            dashBoardMetricsService.getListThresholdsMetrics(oneLevelType, metricsType,
+                                    thresholds.get(metricsType),param.getAggType(),
+                                    param.getOrderByDesc()));
+                }else if (faultTypeList.contains(metricsType)) {
                     listMetrics.add(
                             dashBoardMetricsService.getListFaultMetrics(oneLevelType, metricsType, param.getAggType(),
                                     param.getOrderByDesc()));
@@ -223,6 +234,17 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
                         .collect(Collectors.toList()));
             }
         }
+    }
+    
+    /**
+     * 获取阈值项与值的名称
+     * 如：smallShard->shardSize
+     * @return
+     */
+    private Map<String,String> getDashBoardMetricThresholdNames(){
+        Map<String,String> threshold = new HashMap<>();
+        threshold.put(INDEX_SMALL_SHARD.getType(), DashBoardMetricThresholdValueNameEnum.SHARD_SIZE.getValue());
+        return threshold;
     }
     
     /**
