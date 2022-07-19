@@ -3,7 +3,6 @@ package com.didichuxing.datachannel.arius.admin.core.service.common;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.config.AriusConfigInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.config.AriusConfigInfo;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.config.AriusConfigInfoVO;
 
 import java.util.List;
 import java.util.Set;
@@ -139,10 +138,4 @@ public interface AriusConfigInfoService {
      * @return 如果查到转换后返回,转换报错或者没有查到则返回默认值
      */
     <T> T objectSetting(String group, String name, T defaultValue, Class<T> clazz);
-
-    /**
-     * 获取dashboard配置列表
-     * @return
-     */
-    List<AriusConfigInfoVO> dashboardThresholds();
 }

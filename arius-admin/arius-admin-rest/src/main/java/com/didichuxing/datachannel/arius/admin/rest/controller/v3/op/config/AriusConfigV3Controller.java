@@ -126,12 +126,4 @@ public class AriusConfigV3Controller {
             AriusConfigConstant.ARIUS_COMMON_GROUP, AriusConfigConstant.CLUSTER_NODE_SPECIFICATION_LIST,
             AriusConfigConstant.CLUSTER_NODE_SPECIFICATION_LIST_DEFAULT_VALUE, COMMA)));
     }
-
-    @GetMapping("/dashboard-threshold")
-    @ResponseBody
-    @ApiOperation(value = "获取dashboard阈值")
-    public Result<List<AriusConfigInfoVO>> dashboardThresholds() {
-        return Result.buildSucc(ariusConfigInfoService.dashboardThresholds());
-    }
-
 }
