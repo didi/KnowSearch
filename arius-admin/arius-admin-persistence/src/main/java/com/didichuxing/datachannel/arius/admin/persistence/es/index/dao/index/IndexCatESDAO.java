@@ -144,8 +144,9 @@ public class IndexCatESDAO extends BaseESDAO {
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_PLATFORM_CREATE_CAT_INDEX);
         int retryTime = 3;
         List<IndexCatCell> indexCatCell;
+        // 这里两个时间 用于拿到今天和昨天的数据
         long nowTime = System.currentTimeMillis();
-        long oneDayAgo = nowTime - 24 * 60 * 60 * 1000;
+        long oneDayAgo = nowTime - 20 * 60 * 60 * 1000;
         do {
             indexCatCell = gatewayClient.performRequest(metadataClusterName,
                     IndexNameUtils.genDailyIndexName(indexName, oneDayAgo, nowTime), typeName, dsl, IndexCatCell.class);
