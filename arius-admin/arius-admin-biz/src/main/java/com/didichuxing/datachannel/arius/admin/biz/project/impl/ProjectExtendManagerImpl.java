@@ -393,27 +393,25 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
                                                        BiConsumer<Integer, List<Integer>> operationConsumerFunc,
                                                        Function<ProjectVO, List<UserBriefVO>> operationFuncMapper,
                                                        OperateTypeEnum operateTypeEnum, OperationEnum operation) {
-        if (CollectionUtils.isNotEmpty(userOrOwnerList)) {
-            //超级项目侧校验添加的用户收否存在管理员角色
-            final Result<Void> result = checkProject(beforeProjectVo.getId(), userOrOwnerList, operation);
-            if (result.failed()) {
-                return result;
-            }
-            
-            final String projectName = beforeProjectVo.getProjectName();
-            List<UserBriefVO> beforeProjectUserList = Lists.newArrayList();
-            //操作前的
-            Optional.ofNullable(beforeProjectVo).map(operationFuncMapper).ifPresent(beforeProjectUserList::addAll);
-            //更新/add
-            operationConsumerFunc.accept(beforeProjectVo.getId(), userOrOwnerList);
-            //操作后
-            List<UserBriefVO> afterProjectUserList = Lists.newArrayList();
-            Optional.ofNullable(projectService.getProjectDetailByProjectId(beforeProjectVo.getId())).map(operationFuncMapper)
-                .ifPresent(afterProjectUserList::addAll);
-            TupleTwo</*beforeUserStr*/String, /*afterUserStr*/String> tuple2 = projectOwnerOrMemberChangeStr(
-                beforeProjectUserList, afterProjectUserList);
-            recordProjectOwnerOrUserChange(tuple2, projectName, operator, operateTypeEnum);
+        //超级项目侧校验添加的用户收否存在管理员角色
+        final Result<Void> result = checkProject(beforeProjectVo.getId(), userOrOwnerList, operation);
+        if (result.failed()) {
+            return result;
         }
+    
+        final String projectName = beforeProjectVo.getProjectName();
+        List<UserBriefVO> beforeProjectUserList = Lists.newArrayList();
+        //操作前的
+        Optional.ofNullable(beforeProjectVo).map(operationFuncMapper).ifPresent(beforeProjectUserList::addAll);
+        //更新/add
+        operationConsumerFunc.accept(beforeProjectVo.getId(), userOrOwnerList);
+        //操作后
+        List<UserBriefVO> afterProjectUserList = Lists.newArrayList();
+        Optional.ofNullable(projectService.getProjectDetailByProjectId(beforeProjectVo.getId()))
+                .map(operationFuncMapper).ifPresent(afterProjectUserList::addAll);
+        TupleTwo</*beforeUserStr*/String, /*afterUserStr*/String> tuple2 = projectOwnerOrMemberChangeStr(
+                beforeProjectUserList, afterProjectUserList);
+        recordProjectOwnerOrUserChange(tuple2, projectName, operator, operateTypeEnum);
         return Result.buildSucc();
     }
 
@@ -701,9 +699,9 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
      */
     private TupleTwo</*beforeOwnerUserName*/String, /*afterOwnerUserName*/String> projectOwnerOrMemberChangeStr(List<UserBriefVO> beforeProjectAddOwnerOrUserList,
                                                                                                                 List<UserBriefVO> afterProjectAddOwnerUserList) {
-        String beforeOwnerUserName = afterProjectAddOwnerUserList.stream().map(UserBriefVO::getUserName).sorted()
+        String beforeOwnerUserName = beforeProjectAddOwnerOrUserList.stream().map(UserBriefVO::getUserName).sorted()
             .collect(Collectors.joining(","));
-        String afterOwnerUserName = beforeProjectAddOwnerOrUserList.stream().map(UserBriefVO::getUserName).sorted()
+        String afterOwnerUserName = afterProjectAddOwnerUserList.stream().map(UserBriefVO::getUserName).sorted()
             .collect(Collectors.joining(","));
         return Tuples.of(beforeOwnerUserName, afterOwnerUserName);
 
@@ -719,10 +717,14 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
     private void recordProjectOwnerOrUserChange(TupleTwo</*beforeOwnerOrUser*/String, /*afterOwnerOrUser*/String> tuple2,
                                                 String projectName, String operator, OperateTypeEnum operateTypeEnum) {
         if (!StringUtils.equals(tuple2.v1, tuple2.v2)) {
+            String content=StringUtils.isBlank(tuple2.v1)?String.format("新增:【%s】",tuple2.v2):
+                    StringUtils.isBlank(tuple2.v2)?String.format("删除:【%s】",tuple2.v1):String.format("【%s】-->【%s】",
+                            tuple2.v1,tuple2.v2 );
+            
             operateRecordService.save(new OperateRecord.Builder()
 
                 .projectName(projectName).operationTypeEnum(operateTypeEnum)
-                .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).content(tuple2.v1 + "-->" + tuple2.v2)
+                .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).content(content)
                 .userOperation(operator).build());
         }
     }
