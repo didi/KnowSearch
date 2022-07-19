@@ -28,6 +28,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.TemplateLabel;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatCellDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateRateLimitDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateConfigDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
@@ -63,6 +64,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType
 import com.didichuxing.datachannel.arius.admin.common.constant.template.DataTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
+import com.didichuxing.datachannel.arius.admin.common.event.index.IndexDeleteEvent;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.AmsRemoteException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
@@ -74,6 +76,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.TemplateUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
+import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
@@ -93,12 +96,15 @@ import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -485,6 +491,11 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         if (checkProjectCorrectly.failed()) {
             return checkProjectCorrectly;
         }
+        List<String> phyClusterList=indexTemplatePhyService.getPhyClusterByLogicTemplateId(logicTemplateId);
+       
+        Result<ConsoleTemplateClearVO> templateClearInfo = templateLogicManager.getLogicTemplateClearInfo(
+                logicTemplateId);
+       
         String beforeDeleteName = indexTemplateService.getNameByTemplateLogicId(logicTemplateId);
         Result<Void> result = indexTemplateService.delTemplate(logicTemplateId, operator);
         if (result.success()) {
@@ -494,9 +505,34 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
                     .content(String.format("模板【%s】下线", beforeDeleteName))
                     .project(projectService.getProjectBriefByProjectId(projectId)).userOperation(operator)
                     .operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_OFFLINE).build());
+            //一并下线模板关联的索引
+            /**
+             * [{"cluster":"Zh_test3_cluster_7-6-0-1400","index":"zh_test3_template3_2022-07-18"}]
+             */
+            if (templateClearInfo.success() && CollectionUtils.isNotEmpty(templateClearInfo.getData().getIndices())&&CollectionUtils.isNotEmpty(phyClusterList)) {
+    
+                BiFunction</*index*/String,/*phyCluster*/String, IndexCatCellDTO> indexPhyClusterFunc = (index, phyCluster) -> {
+                    IndexCatCellDTO indexCatCellDTO = new IndexCatCellDTO();
+                    indexCatCellDTO.setIndex(index);
+                    indexCatCellDTO.setCluster(phyCluster);
+                    return indexCatCellDTO;
+                };
+                Function</*index*/String,List<IndexCatCellDTO>> phyClusterFunc=
+                        index->phyClusterList.stream().map(phyCluster->indexPhyClusterFunc.apply(index,phyCluster))
+                                       .collect(Collectors.toList());
+    
+                List<IndexCatCellDTO> catCellList = templateClearInfo.getData().getIndices().stream()
+                        .map(phyClusterFunc).flatMap(Collection::stream)
+            
+                        .collect(Collectors.toList());
+                SpringTool.publish(new IndexDeleteEvent(this, catCellList, projectId, operator));
+            }
         }
         return result;
     }
+    
+    
+    
 
     @Override
     public PaginationResult<ConsoleTemplateVO> pageGetConsoleTemplateVOS(TemplateConditionDTO condition,

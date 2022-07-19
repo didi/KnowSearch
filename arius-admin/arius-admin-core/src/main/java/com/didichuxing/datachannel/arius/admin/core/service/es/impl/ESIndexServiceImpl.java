@@ -1,19 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.core.service.es.impl;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.getBigIndicesRequestContent;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.*;
-
-import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.rest.RestStatus;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.BLOCKS;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.DEFAULTS;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.INDEX;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.READ;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.WRITE;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -36,8 +28,6 @@ import com.didiglobal.logi.elasticsearch.client.request.index.putalias.PutAliasT
 import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
 import com.didiglobal.logi.elasticsearch.client.response.indices.getalias.AliasIndexNode;
 import com.didiglobal.logi.elasticsearch.client.response.indices.stats.IndexNodes;
-import com.didiglobal.logi.elasticsearch.client.response.model.indices.CommonStat;
-import com.didiglobal.logi.elasticsearch.client.response.model.indices.Segments;
 import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
 import com.didiglobal.logi.elasticsearch.client.response.setting.index.IndexConfig;
 import com.didiglobal.logi.elasticsearch.client.response.setting.index.MultiIndexsConfig;
@@ -46,6 +36,23 @@ import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.rest.RestStatus;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * @author d06679
@@ -72,7 +79,7 @@ public class ESIndexServiceImpl implements ESIndexService {
     public boolean syncCreateIndex(String cluster, String indexName, IndexConfig indexConfig,
                                    int retryCount) throws ESOperateException {
         return ESOpTimeoutRetry.esRetryExecute("createIndexWithConfig", retryCount,
-            () -> esIndexDAO.createIndexWithConfig(cluster, indexName, indexConfig));
+            () -> esIndexDAO.createIndexWithConfig(cluster, indexName, indexConfig,3));
     }
 
     @Override
@@ -556,7 +563,7 @@ public class ESIndexServiceImpl implements ESIndexService {
 
     @Override
     public boolean syncIsIndexExist(String cluster, String indexName) {
-        return esIndexDAO.existByClusterAndIndexName(cluster, indexName);
+        return esIndexDAO.existByClusterAndIndexName(cluster, indexName,3);
     }
 
     @Override
@@ -603,7 +610,7 @@ public class ESIndexServiceImpl implements ESIndexService {
         List<PutAliasNode> putAliasNodeList = new ArrayList<>();
         Map<String, List<String>> aliasIndexNodeMap = syncGetIndexAliasesByIndices(cluster, index);
         Set<String> aliasSet = new HashSet<>();
-        Optional.ofNullable(aliasIndexNodeMap.get(index)).map(aliasSet::addAll);
+        Optional.ofNullable(aliasIndexNodeMap.get(index)).ifPresent(aliasSet::addAll);
 
         aliases.stream().filter(StringUtils::isNotBlank).forEach(aliasName -> {
             PutAliasNode putAliasNode = new PutAliasNode();
@@ -616,7 +623,7 @@ public class ESIndexServiceImpl implements ESIndexService {
         });
 
         if (CollectionUtils.isNotEmpty(putAliasNodeList)) {
-            return esIndexDAO.editAlias(cluster, putAliasNodeList);
+            return esIndexDAO.editAlias(cluster, putAliasNodeList,3);
         }
         return Result.buildSucc();
     }
@@ -648,7 +655,7 @@ public class ESIndexServiceImpl implements ESIndexService {
         if (!notExistsAlias.isEmpty()) {
             return Result.buildParamIllegal(String.format("要删除的别名【%s】不存在", StringUtils.join(notExistsAlias, ",")));
         }
-        return esIndexDAO.editAlias(cluster, putAliasNodeList);
+        return esIndexDAO.editAlias(cluster, putAliasNodeList,3);
     }
 
     @Override

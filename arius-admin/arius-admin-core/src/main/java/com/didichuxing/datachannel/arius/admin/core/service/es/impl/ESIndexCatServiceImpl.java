@@ -2,7 +2,18 @@ package com.didichuxing.datachannel.arius.admin.core.service.es.impl;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.getShards2NodeInfoRequestContent;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.rest.RestStatus;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatCellDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.IndexCatCell;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.IndexShardInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.index.IndexCatCellPO;
@@ -15,12 +26,6 @@ import com.didiglobal.logi.elasticsearch.client.gateway.direct.DirectResponse;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
-import java.util.List;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.rest.RestStatus;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 /**
  * Created by linyunan on 2021-10-14
@@ -44,7 +49,7 @@ public class ESIndexCatServiceImpl implements ESIndexCatService {
 
         Tuple<Long, List<IndexCatCell>> hitTotal2catIndexInfoTuple = new Tuple<>();
         hitTotal2catIndexInfoTuple.setV1(hitTotal2catIndexInfoTuplePO.getV1());
-        hitTotal2catIndexInfoTuple.setV2(buildIndexCatCell(hitTotal2catIndexInfoTuplePO.getV2()));
+        hitTotal2catIndexInfoTuple.setV2(ConvertUtil.list2List(hitTotal2catIndexInfoTuplePO.getV2(), IndexCatCell.class));
         return hitTotal2catIndexInfoTuple;
     }
 
@@ -102,25 +107,35 @@ public class ESIndexCatServiceImpl implements ESIndexCatService {
         return Lists.newArrayList();
     }
 
-    private List<IndexCatCell> buildIndexCatCell(List<IndexCatCellPO> indexCatCellPOList) {
-        List<IndexCatCell> indexCatCellList = Lists.newArrayList();
-        for (IndexCatCellPO indexCatCellPO : indexCatCellPOList) {
-            IndexCatCell indexCatCell = ConvertUtil.obj2Obj(indexCatCellPO, IndexCatCell.class);
-            indexCatCell.setKey(indexCatCellPO.getKey());
-            indexCatCell.setClusterPhy(indexCatCellPO.getCluster());
-            indexCatCell.setIndex(indexCatCellPO.getIndex());
-            indexCatCell.setStoreSize(SizeUtil.getUnitSizeAndFormat(indexCatCellPO.getStoreSize(), 2));
-            indexCatCell.setPriStoreSize(SizeUtil.getUnitSizeAndFormat(indexCatCellPO.getPriStoreSize(), 2));
-            indexCatCell.setDocsCount(String.valueOf(indexCatCellPO.getDocsCount()));
-            indexCatCell.setDocsDeleted(String.valueOf(indexCatCellPO.getDocsDeleted()));
-            indexCatCell.setHealth(indexCatCellPO.getHealth());
-            indexCatCell.setStatus(indexCatCellPO.getStatus());
-            indexCatCell.setPri(String.valueOf(indexCatCellPO.getPri()));
-            indexCatCell.setRep(String.valueOf(indexCatCellPO.getRep()));
+    @Override
+    public Boolean syncInsertCatIndex(List<IndexCatCellDTO> params, int retryCount) {
+        BatchProcessor.BatchProcessResult<IndexCatCellDTO, Boolean> result = new BatchProcessor<IndexCatCellDTO, Boolean>()
+                .batchList(params).batchSize(5000)
+                .processor(items -> indexCatESDAO.batchInsert(ConvertUtil.list2List(params, IndexCatCellPO.class), retryCount))
+                .succChecker(succ -> succ).process();
 
-            indexCatCellList.add(indexCatCell);
+        if (!result.isSucc()) {
+            List<String> clusterList = params.stream().map(IndexCatCellDTO::getCluster).distinct().collect(Collectors.toList());
+            List<String> indexList   = params.stream().map(IndexCatCellDTO::getIndex).distinct().collect(Collectors.toList());
+            LOGGER.error("class=ESIndexCatServiceImpl||method=syncInsertCatIndex||cluster={}||indexNameList={}||errMsg=failed to batchInsert, batch total count = {}, batch failed count={}",
+                    ListUtils.strList2String(clusterList), ListUtils.strList2String(indexList),
+                    params.size(), result.getFailAndErrorCount());
         }
 
-        return indexCatCellList;
+        return result.isSucc();
     }
+
+    @Override
+    public List<IndexCatCell> syncGetHasProjectIdButNotTemplateIdCatIndexList() {
+        try {
+            return indexCatESDAO.getHasProjectIdButNotTemplateIdCatIndexList();
+        } catch (Exception e) {
+            LOGGER.error("class=ESIndexCatServiceImpl||method=syncGetHasProjectIdButNotTemplateIdCatIndexList||" +
+                    "errMsg=failed to get syncGetHasProjectIdButNotTemplateIdCatIndexList", e);
+        }
+        return Lists.newArrayList();
+    }
+
+
+    /*************************************************private*******************************************************/
 }

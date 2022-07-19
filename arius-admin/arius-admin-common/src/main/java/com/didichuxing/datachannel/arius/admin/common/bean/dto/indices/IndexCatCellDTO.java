@@ -19,8 +19,17 @@ public class IndexCatCellDTO {
     @ApiModelProperty("主键")
     private String  key;
 
-    @ApiModelProperty("集群名称")
+    @ApiModelProperty("物理集群名称")
     private String  cluster;
+
+    @ApiModelProperty("逻辑集群名称")
+    private String  clusterLogic;
+
+    @ApiModelProperty("逻辑集群Id")
+    private Long    resourceId;
+
+    @ApiModelProperty("项目Id")
+    private Integer projectId;
 
     @ApiModelProperty("分区健康")
     private String  health;
@@ -32,16 +41,16 @@ public class IndexCatCellDTO {
     private String  index;
 
     @ApiModelProperty("分区shard个数")
-    private String  pri;
+    private Long  pri;
 
     @ApiModelProperty("分区副本个数")
-    private String  rep;
+    private Long  rep;
 
     @ApiModelProperty("分区文档个数")
-    private String  docsCount;
+    private Long  docsCount;
 
     @ApiModelProperty("分区文档删除个数")
-    private String  docsDeleted;
+    private Long  docsDeleted;
 
     @ApiModelProperty("分区主分片存储大小")
     private String  storeSize;
@@ -54,4 +63,19 @@ public class IndexCatCellDTO {
 
     @ApiModelProperty("可写标志位")
     private Boolean writeFlag;
+
+    @ApiModelProperty("删除标识")
+    private Boolean deleteFlag;
+
+    @ApiModelProperty("时间戳")
+    private Long    timestamp;
+
+    @ApiModelProperty("primaries segment count")
+    private Long    primariesSegmentCount;
+
+    @ApiModelProperty("total segment count")
+    private Long    totalSegmentCount;
+
+    @ApiModelProperty("平台模板Id")
+    private Integer templateId;
 }
