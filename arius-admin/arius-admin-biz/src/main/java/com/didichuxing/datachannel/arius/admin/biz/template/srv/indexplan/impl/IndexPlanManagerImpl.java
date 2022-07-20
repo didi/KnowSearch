@@ -117,7 +117,7 @@ public class IndexPlanManagerImpl extends BaseTemplateSrvImpl implements IndexPl
     }
 
     @Override
-    public Result<Void> adjustShardNum(Integer logicTemplateId) {
+    public Result<Boolean> adjustShardNum(Integer logicTemplateId) throws ESOperateException {
         LOGGER.info(
             "class=IndexPlanManagerImpl||method=adjustShardCount||logicTemplateId={}||msg=start adjustShardCount",
             logicTemplateId);
@@ -130,17 +130,11 @@ public class IndexPlanManagerImpl extends BaseTemplateSrvImpl implements IndexPl
             LOGGER.info(
                 "class=IndexPlanManagerImpl||method=adjustShardCount||logicTemplateId={}||msg=IndexRolloverTask no physical template",
                 logicTemplateId);
-            return Result.buildSucc();
+            return Result.build(Boolean.TRUE);
         }
 
-        try {
-            governPerTemplate(templatePhyList);
-        } catch (Exception e) {
-            LOGGER.error(
-                "class=IndexPlanManagerImpl||method=adjustShardCount||logicTemplateId={}||msg=adjustShardCount error",
-                logicTemplateId, e);
-        }
-        return Result.buildSucc();
+        governPerTemplate(templatePhyList);
+          return Result.build(Boolean.TRUE);
     }
 
     @Override
@@ -418,8 +412,8 @@ public class IndexPlanManagerImpl extends BaseTemplateSrvImpl implements IndexPl
                 continue;
             }
             //判断集群的模版是否开启了索引规划rollover
-            if (isTemplateSrvOpen(phyTemplate.getLogicId())){
-                return false;
+            if (!isTemplateSrvOpen(phyTemplate.getLogicId())){
+                continue;
             }
             // 获取逻辑模版信息
             IndexTemplate logiTemplate = indexTemplateService.getLogicTemplateById(phyTemplate.getLogicId());

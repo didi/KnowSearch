@@ -25,6 +25,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -56,8 +57,8 @@ public class ColdManagerImpl extends BaseTemplateSrvImpl implements ColdManager 
     }
 
     @Override
-    public Result<Void> move2ColdNode(Integer logicTemplateId) {
-        if (!isTemplateSrvOpen(logicTemplateId)) {
+    public Result<Boolean> move2ColdNode(Integer logicTemplateId) throws ESOperateException {
+        if (Boolean.FALSE.equals(isTemplateSrvOpen(logicTemplateId))) {
             return Result.buildFail("没有开启冷热分离模板服务");
         }
 
@@ -79,21 +80,19 @@ public class ColdManagerImpl extends BaseTemplateSrvImpl implements ColdManager 
             return Result.buildFail("没有冷节点");
         }
         ClusterRegion minUsageColdRegion = getMinUsageColdRegion(masterPhyTemplate.getCluster(), coldRegionList);
-
-        try {
+        //minUsageColdRegion可能为空
+        if (Objects.isNull(minUsageColdRegion)){
+            return Result.buildFail("没有冷节点");
+        }
             Result<Void> moveResult = movePerTemplate(masterPhyTemplate, minUsageColdRegion.getId().intValue());
             if (moveResult.failed()) {
                 LOGGER.warn("class=ColdManagerImpl||method=move2ColdNode||template={}||msg=move2ColdNode fail",
                     masterPhyTemplate.getName());
-                return moveResult;
+                return Result.buildFrom(moveResult);
             }
-        } catch (Exception e) {
-            LOGGER.warn("class=ColdManagerImpl||method=move2ColdNode||template={}||errMsg={}",
-                masterPhyTemplate.getName(), e.getMessage(), e);
-            return Result.buildFail();
-        }
+       
 
-        return Result.buildSucc();
+        return Result.build(Boolean.TRUE);
     }
 
     @Override
@@ -219,19 +218,11 @@ public class ColdManagerImpl extends BaseTemplateSrvImpl implements ColdManager 
 
         return minUsageColdRegion;
     }
+    
 
     /////////////////srv
 
-    /**
-     * 根据接入集群可以连接的地址校验是否可以开启冷热分离服务
-     * @param httpAddresses client地址
-     * @return 校验的结果，返回模板服务id
-     */
-    @Override
-    public Result<Boolean> checkOpenTemplateSrvWhenClusterJoin(String httpAddresses, String password) {
-        return Result.buildSucc();
-    }
-
+   
     /**
      * 确保搬迁配置是打开的
      *
@@ -243,7 +234,42 @@ public class ColdManagerImpl extends BaseTemplateSrvImpl implements ColdManager 
      */
     @Override
     public Result<Boolean> move2ColdNode(String phyCluster) {
-        return Result.buildSucc();
+        final List<ClusterRegion> coldRegionByPhyCluster = clusterRegionManager.getColdRegionByPhyCluster(phyCluster);
+        if (CollectionUtils.isEmpty(coldRegionByPhyCluster)){
+            //没有冷节点
+            return Result.buildFail(String.format("【%s】没有冷节点", phyCluster));
+        }
+        
+    
+        List<IndexTemplatePhy> templatePhysicals = indexTemplatePhyService.getNormalTemplateByCluster(phyCluster);
+    
+        if (CollectionUtils.isEmpty(templatePhysicals)) {
+            return Result.buildSucc(true);
+        }
+        final ClusterRegion region = coldRegionByPhyCluster.get(0);
+    
+        int succ = 0;
+        for (IndexTemplatePhy templatePhysical : templatePhysicals) {
+            try {
+                //该逻辑模版没有开启冷热分离的节点
+                if (Boolean.FALSE.equals(isTemplateSrvOpen(templatePhysical.getLogicId()))) {
+                    continue;
+                }
+                Result<Void> moveResult = movePerTemplate(templatePhysical, region.getId().intValue());
+                if (moveResult.success()) {
+                    succ++;
+                } else {
+                    LOGGER.warn(
+                            "class=TemplateColdManagerImpl||method=move2ColdNode||template={}||msg=move2ColdNode fail",
+                            templatePhysical.getName());
+                }
+            } catch (Exception e) {
+                LOGGER.warn("class=TemplateColdManagerImpl||method=move2ColdNode||template={}||errMsg={}",
+                        templatePhysical.getName(), e.getMessage(), e);
+            }
+        }
+    
+        return Result.buildSucc(succ * 1.0 / templatePhysicals.size() > 0.8);
     }
 
     /**

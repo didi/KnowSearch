@@ -4,6 +4,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConst
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -21,10 +22,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.shard.Segment;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.index.IndexCatCellPO;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.SizeUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.TemplateUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
@@ -91,10 +90,10 @@ public class IndexCatInfoCollector extends AbstractMetaDataJob {
         }
 
         // 2. 获取通过平台索引管理 创建的索引cat_index信息，其中不包含templateId，但包含projectId
-        List<IndexCatCell> indexCatCellList = esIndexCatService.syncGetHasProjectIdButNotTemplateIdCatIndexList();
+        List<IndexCatCell> platformCreateCatIndexList = esIndexCatService.syncGetPlatformCreateCatIndexList();
         // 这里的cluster 用户侧创建为逻辑集群名称，运维侧创建为物理集群名称
-        Map<String/*cluster@index*/, IndexCatCell> index2IndexCatCellMap = ConvertUtil.list2Map(indexCatCellList,
-                IndexCatCell::getKey, r -> r);
+        Map<String/*cluster@index*/, IndexCatCell> index2IndexCatCellFromPlatformCreateMap = ConvertUtil.list2Map(
+                platformCreateCatIndexList, IndexCatCell::getKey, r -> r);
 
         // 3. 并发采集
         for (String clusterName : clusterPhyNameList) {
@@ -127,6 +126,7 @@ public class IndexCatInfoCollector extends AbstractMetaDataJob {
 
                         // 3.1 获取匹配平台模板的cat_index信息
                         List<CatIndexResult> catIndexMatchAriusTemplateList = catIndexResults.stream()
+                                .filter(Objects::nonNull)
                                 .filter(r -> templateName2IndexTemplatePhyWithLogicMap.containsKey(
                                         TemplateUtils.getMatchTemplateNameByIndexName(r.getIndex())))
                                 .collect(Collectors.toList());
@@ -148,7 +148,7 @@ public class IndexCatInfoCollector extends AbstractMetaDataJob {
                         // 4.3 无需模板信息构建原生索引cat_index元数据信息
                         List<IndexCatCellPO> nativeIndexCatCells = buildNativeIndexCatCells(catIndexMatchNativeTemplateList,
                                 indices2SegmentCountMap,
-                                index2IndexCatCellMap,
+                                index2IndexCatCellFromPlatformCreateMap,
                                 clusterName,
                                 timeMillis);
                         indexCatCells.addAll(nativeIndexCatCells);
@@ -202,9 +202,8 @@ public class IndexCatInfoCollector extends AbstractMetaDataJob {
                                                          long timeMillis) {
         List<IndexCatCellPO> res = Lists.newArrayList();
         for (CatIndexResult catIndexResult : catIndexMatchAriusTemplateList) {
-            IndexCatCellPO indexCatCellPO = new IndexCatCellPO();
-
-            buildBasicIndexCatInfo(indexCatCellPO, indices2SegmentCountMap, clusterName, timeMillis, catIndexResult);
+            // 构建基础数据
+            IndexCatCellPO indexCatCellPO = buildBasicIndexCatCell(indices2SegmentCountMap, clusterName, timeMillis, catIndexResult);
 
             // 根据索引名称获取平台模板名称, 匹配为null，则不去设置设置模板相关的属性
             String templateName = TemplateUtils.getMatchTemplateNameByIndexName(indexCatCellPO.getIndex());
@@ -220,6 +219,7 @@ public class IndexCatInfoCollector extends AbstractMetaDataJob {
                     indexCatCellPO.setProjectId(logicTemplate.getProjectId());
                 }
             }
+            indexCatCellPO.setPlatformCreateFlag(false);
             res.add(indexCatCellPO);
 
         }
@@ -230,7 +230,7 @@ public class IndexCatInfoCollector extends AbstractMetaDataJob {
      * 构建原生索引Cat_index信息
      * @param catIndexMatchNativeTemplateList
      * @param indices2SegmentCountMap
-     * @param index2IndexCatCellMap
+     * @param index2IndexCatCellFromPlatformCreateMap  平台创建索引Cat_index信息
      * @param clusterName
      * @param timeMillis
      * @return                                    List<IndexCatCellPO>
@@ -238,24 +238,22 @@ public class IndexCatInfoCollector extends AbstractMetaDataJob {
     private List<IndexCatCellPO> buildNativeIndexCatCells(List<CatIndexResult> catIndexMatchNativeTemplateList,
                                                           Map<String, Tuple<Long /*totalSegmentCount*/, Long /*primarySegmentCount*/>>
                                                                   indices2SegmentCountMap,
-                                                          Map<String/*cluster@index*/, IndexCatCell> index2IndexCatCellMap,
+                                                          Map<String/*cluster@index*/, IndexCatCell> index2IndexCatCellFromPlatformCreateMap,
                                                           String clusterName,
                                                           long timeMillis) {
         List<IndexCatCellPO> res = Lists.newArrayList();
 
         for (CatIndexResult catIndexResult : catIndexMatchNativeTemplateList) {
-            IndexCatCellPO indexCatCellPO = new IndexCatCellPO();
             // 构建基础数据
-            buildBasicIndexCatInfo(indexCatCellPO, indices2SegmentCountMap, clusterName, timeMillis, catIndexResult);
-
+            IndexCatCellPO indexCatCellPO = buildBasicIndexCatCell(indices2SegmentCountMap, clusterName, timeMillis, catIndexResult);
             // 索引管理所创建的索引需要构建以下平台相关信息（项目、物理集群、逻辑集群等）
-            if (index2IndexCatCellMap.containsKey(indexCatCellPO.getKey())) {
-                IndexCatCell indexCatCell = index2IndexCatCellMap.get(indexCatCellPO.getKey());
+            if (index2IndexCatCellFromPlatformCreateMap.containsKey(indexCatCellPO.getKey())) {
+                IndexCatCell indexCatCell = index2IndexCatCellFromPlatformCreateMap.get(indexCatCellPO.getKey());
                 indexCatCellPO.setProjectId(indexCatCell.getProjectId());
-                indexCatCellPO.setCluster(indexCatCell.getClusterLogic());
-                indexCatCellPO.setClusterPhy(indexCatCell.getClusterPhy());
+                indexCatCellPO.setCluster(indexCatCell.getCluster());
                 indexCatCellPO.setClusterLogic(indexCatCell.getClusterLogic());
                 indexCatCellPO.setResourceId(indexCatCell.getResourceId());
+                indexCatCellPO.setPlatformCreateFlag(true);
             }
 
             res.add(indexCatCellPO);
@@ -290,55 +288,31 @@ public class IndexCatInfoCollector extends AbstractMetaDataJob {
 
     /**
      * 构建基础数据
-     * @param indexCatCell                   需要构建 indexCatCell
      * @param indices2SegmentCountMap
      * @param clusterName
      * @param timeMillis
      * @param catIndexResult
      */
-    private void buildBasicIndexCatInfo(IndexCatCellPO indexCatCell,
+    private IndexCatCellPO buildBasicIndexCatCell(
                                         Map<String, Tuple<Long, Long>> indices2SegmentCountMap,
                                         String clusterName,
                                         long timeMillis,
                                         CatIndexResult catIndexResult) {
-
-        if (!AriusObjUtils.isBlack(catIndexResult.getIndex())) {
-            indexCatCell.setIndex(catIndexResult.getIndex());
-        }
-        if (!AriusObjUtils.isBlack(catIndexResult.getStoreSize())) {
-            indexCatCell.setStoreSize(SizeUtil.getUnitSize(catIndexResult.getStoreSize()));
-        }
-        if (!AriusObjUtils.isBlack(catIndexResult.getPriStoreSize())) {
-            indexCatCell.setPriStoreSize(SizeUtil.getUnitSize(catIndexResult.getPriStoreSize()));
-        }
-        if (!AriusObjUtils.isBlack(catIndexResult.getDocsCount())) {
-            indexCatCell.setDocsCount(Long.parseLong(catIndexResult.getDocsCount()));
-        }
-        if (!AriusObjUtils.isBlack(catIndexResult.getDocsDeleted())) {
-            indexCatCell.setDocsDeleted(Long.parseLong(catIndexResult.getDocsDeleted()));
-        }
-        if (!AriusObjUtils.isBlack(catIndexResult.getRep())) {
-            indexCatCell.setRep(Long.parseLong(catIndexResult.getRep()));
-        }
-        if (!AriusObjUtils.isBlack(catIndexResult.getPri())) {
-            indexCatCell.setPri(Long.parseLong(catIndexResult.getPri()));
-        }
-        if (!AriusObjUtils.isBlack(catIndexResult.getStatus())) {
-            indexCatCell.setStatus(catIndexResult.getStatus());
-        }
-        if (!AriusObjUtils.isBlack(catIndexResult.getHealth())) {
-            indexCatCell.setHealth(catIndexResult.getHealth());
-        }
+        IndexCatCellPO builder = ConvertUtil.obj2Obj(catIndexResult, IndexCatCellPO.class);
+        builder.setPri(Long.valueOf(null != catIndexResult.getPri() ? catIndexResult.getPri() : "0"));
+        builder.setRep(Long.valueOf(null != catIndexResult.getRep() ? catIndexResult.getRep() : "0"));
+        builder.setDocsCount(Long.valueOf(null != catIndexResult.getDocsCount() ? catIndexResult.getDocsCount() : "0"));
+        builder.setDocsDeleted(Long.valueOf(null != catIndexResult.getDocsDeleted() ? catIndexResult.getDocsDeleted() : "0"));
 
         Optional.ofNullable(indices2SegmentCountMap).map(map -> map.get(catIndexResult.getIndex())).ifPresent(tuple -> {
-            indexCatCell.setTotalSegmentCount(tuple.v1());
-            indexCatCell.setPrimariesSegmentCount(tuple.v2());
+            builder.setTotalSegmentCount(tuple.v1());
+            builder.setPrimariesSegmentCount(tuple.v2());
         });
+        builder.setCluster(clusterName);
+        builder.setDeleteFlag(false);
+        builder.setTimestamp(timeMillis);
 
-        indexCatCell.setCluster(clusterName);
-        indexCatCell.setClusterPhy(clusterName);
-        indexCatCell.setDeleteFlag(false);
-        indexCatCell.setTimestamp(timeMillis);
+        return builder;
     }
 
     private boolean filterNotCollectorIndexCat(IndexCatCellDTO indexCatCellDTO) {

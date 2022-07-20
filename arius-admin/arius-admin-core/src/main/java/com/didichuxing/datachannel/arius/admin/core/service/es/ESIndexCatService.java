@@ -4,6 +4,7 @@ import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatCellDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.IndexCatCell;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.IndexShardInfo;
+
 import java.util.List;
 
 public interface ESIndexCatService {
@@ -64,5 +65,12 @@ public interface ESIndexCatService {
     /**
      * 获取不包含模板id并且包含projectId的IndexCatCellDTO信息，作用于平台索引管理新建索引侧
      */
-    List<IndexCatCell> syncGetHasProjectIdButNotTemplateIdCatIndexList();
+    List<IndexCatCell> syncGetPlatformCreateCatIndexList();
+
+    /**
+     * 根据逻辑集群获取索引
+     * @param name
+     * @return
+     */
+    List<IndexCatCellDTO> getByClusterLogic(String name);
 }

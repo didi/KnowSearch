@@ -73,9 +73,8 @@ public class IndexPageSearchHandle extends AbstractPageSearchHandle<IndexQueryDT
             String queryCluster = condition.getCluster();
             // 使用超级项目访问时，queryProjectId为null
             Integer queryProjectId = null;
-            if (!AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
-                queryProjectId = projectId;
-            }
+            if (!AuthConstant.SUPER_PROJECT_ID.equals(projectId)) { queryProjectId = projectId;}
+
             Tuple<Long, List<IndexCatCell>> totalHitAndIndexCatCellListTuple = esIndexCatService.syncGetCatIndexInfo(
                 queryCluster, condition.getIndex(), condition.getHealth(), condition.getStatus(), queryProjectId,
                 (condition.getPage() - 1) * condition.getSize(), condition.getSize(), condition.getSortTerm(),
@@ -111,7 +110,7 @@ public class IndexPageSearchHandle extends AbstractPageSearchHandle<IndexQueryDT
     private List<IndexCatCell> batchFetchIndexAliasesAndBlockInfo(List<IndexCatCell> catCellList) {
         List<IndexCatCell> finalIndexCatCellList = Lists.newCopyOnWriteArrayList(catCellList);
         Map<String, List<IndexCatCell>> cluster2IndexCatCellListMap = ConvertUtil.list2MapOfList(finalIndexCatCellList,
-            IndexCatCell::getClusterPhy, indexCatCell -> indexCatCell);
+            IndexCatCell::getCluster, indexCatCell -> indexCatCell);
         if (MapUtils.isEmpty(cluster2IndexCatCellListMap)) {
             return finalIndexCatCellList;
         }

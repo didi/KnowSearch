@@ -22,8 +22,17 @@ public class IndexCatCellVO extends BaseVO {
     @ApiModelProperty("主键")
     private String       key;
 
-    @ApiModelProperty("集群名称")
+    @ApiModelProperty("物理集群名称")
     private String       cluster;
+
+    @ApiModelProperty("逻辑集群名称")
+    private String       clusterLogic;
+
+    @ApiModelProperty("逻辑集群ID")
+    private Long         resourceId;
+
+    @ApiModelProperty("projectId")
+    private Integer      projectId;
 
     @ApiModelProperty("分区健康")
     private String       health;
@@ -35,16 +44,16 @@ public class IndexCatCellVO extends BaseVO {
     private String       index;
 
     @ApiModelProperty("分区shard个数")
-    private String       pri;
+    private Long         pri;
 
     @ApiModelProperty("分区副本个数")
-    private String       rep;
+    private Long         rep;
 
     @ApiModelProperty("分区文档个数")
-    private String       docsCount;
+    private Long         docsCount;
 
     @ApiModelProperty("分区文档删除个数")
-    private String       docsDeleted;
+    private Long         docsDeleted;
 
     @ApiModelProperty("分区主分片存储大小")
     private String       storeSize;
@@ -64,17 +73,8 @@ public class IndexCatCellVO extends BaseVO {
     @ApiModelProperty("模板ID")
     private Integer      templateId;
 
-    @ApiModelProperty("物理集群名称")
-    private String       clusterPhy;
-
-    @ApiModelProperty("逻辑集群名称")
-    private String       clusterLogic;
-
-    @ApiModelProperty("逻辑集群ID")
-    private Long         resourceId;
-
-    @ApiModelProperty("projectId")
-    private Integer      projectId;
+    @ApiModelProperty("通过平台索引创建标识 true 通过平台创建，false不是通过平台创建")
+    private Boolean      platformCreateFlag;
 
     @ApiModelProperty("别名")
     private List<String> aliases;

@@ -1,11 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.core.service.common;
 
-import java.util.List;
-import java.util.Set;
-
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.config.AriusConfigInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.config.AriusConfigInfo;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author d06679

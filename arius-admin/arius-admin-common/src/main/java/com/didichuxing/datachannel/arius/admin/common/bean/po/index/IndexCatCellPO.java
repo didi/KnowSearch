@@ -16,7 +16,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class IndexCatCellPO extends BaseESPO {
     private String  cluster;
-    private String  clusterPhy;
     private String  clusterLogic;
     private Long    resourceId;
     private Integer projectId;
@@ -27,11 +26,12 @@ public class IndexCatCellPO extends BaseESPO {
     private Long    rep;
     private Long    docsCount;
     private Long    docsDeleted;
-    private Long    storeSize;
-    private Long    priStoreSize;
+    private String  storeSize;
+    private String  priStoreSize;
     private Boolean readFlag;
     private Boolean writeFlag;
     private Boolean deleteFlag;
+    private Boolean platformCreateFlag;
     private Long    timestamp;
 
     private Long    primariesSegmentCount;

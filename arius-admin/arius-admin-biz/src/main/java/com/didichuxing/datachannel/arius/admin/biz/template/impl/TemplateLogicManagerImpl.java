@@ -879,8 +879,6 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             final Integer beforeVersion = templatePhy.getVersion();
             final Integer afterVersion =beforeVersion + 1;
             updateParam.setId(templatePhy.getId());
-            updateParam.setShard(updateParam.getShard());
-            updateParam.setRack("");
             updateParam.setVersion(beforeVersion + 1);
             Result<Void> editResult = templatePhyManager.editTemplateWithoutCheck(updateParam, operator, RETRY_TIMES);
             if (editResult.failed()) {
@@ -1335,6 +1333,9 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         IndexTemplateDTO indexTemplateDTO = ConvertUtil.obj2Obj(param, IndexTemplateDTO.class);
 
         indexTemplateDTO.setProjectId(projectId);
+
+        // 新建模版默认disableIndexRollover字段为true
+        indexTemplateDTO.setDisableIndexRollover(true);
 
         buildExtraField(indexTemplateDTO);
         buildCyclicalRoll(indexTemplateDTO, param);

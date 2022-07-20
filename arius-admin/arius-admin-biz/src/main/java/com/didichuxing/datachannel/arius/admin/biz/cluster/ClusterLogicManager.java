@@ -18,8 +18,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTe
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
-import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * @description: 逻辑集群manager
@@ -95,7 +96,7 @@ public interface ClusterLogicManager {
      * @param logicClusterId 逻辑集群ID
      * @return
      */
-    List<ClusterPhy> getLogicClusterAssignedPhysicalClusters(Long logicClusterId);
+    ClusterPhy getLogicClusterAssignedPhysicalClusters(Long logicClusterId);
 
     /**
      * 获取所有逻辑集群列表接口
@@ -181,7 +182,7 @@ public interface ClusterLogicManager {
      * @param projectId 项目id
      * @return
      */
-    List<String> listClusterLogicNameByProjectId(Integer projectId);
+    Result<List<String>> listClusterLogicNameByProjectId(Integer projectId);
 
     /**
      * 根据项目id获取集群的映射关系

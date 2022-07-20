@@ -142,8 +142,11 @@ public class IndicesManagerImpl implements IndicesManager {
     @Override
     public Result<Void> createIndex(IndexCatCellWithConfigDTO indexCreateDTO, Integer projectId, String operator) {
         // 初始化分配集群信息
-        Result<Void> initRet = init(indexCreateDTO, projectId);
-        if (initRet.failed()) { return Result.buildFrom(initRet);}
+        Result<String> getClusterRet = getClusterPhyByClusterNameAndProjectId(indexCreateDTO.getCluster(), projectId);
+        if (getClusterRet.failed()) { return Result.buildFrom(getClusterRet);}
+
+        Result<Void> initRet = initIndexCreateDTO(indexCreateDTO, projectId);
+        if (initRet.failed()) { return initRet;}
 
         // 处理索引 mapping
         IndexConfig indexConfig = new IndexConfig();
@@ -163,14 +166,11 @@ public class IndicesManagerImpl implements IndicesManager {
         boolean succ = false;
         try {
             // 1. es创建真实索引
-            boolean syncCreateIndexRet = esIndexService.syncCreateIndex(indexCreateDTO.getCluster(), indexCreateDTO.getIndex(),
+            boolean syncCreateIndexRet = esIndexService.syncCreateIndex(getClusterRet.getData(), indexCreateDTO.getIndex(),
                     indexConfig, RETRY_COUNT);
 
             // 2. 同步在元数据Cat_index系统索引中添加此索引元数据文档
-            if (syncCreateIndexRet) {
-                indexCreateDTO.setProjectId(projectId);
-                succ = esIndexCatService.syncInsertCatIndex(Lists.newArrayList(indexCreateDTO), RETRY_COUNT);
-            }
+            if (syncCreateIndexRet) { succ = esIndexCatService.syncInsertCatIndex(Lists.newArrayList(indexCreateDTO), RETRY_COUNT);}
 
             if (succ) {
                 operateRecordService.save(new OperateRecord.Builder()
@@ -431,7 +431,7 @@ public class IndicesManagerImpl implements IndicesManager {
         if (StringUtils.isBlank(mapping)) {
             return Result.buildFail("请传入索引Mapping");
         }
-        final Result<IndexMappingVO> beforeMapping = getMapping(phyCluster, indexName, projectId);
+        final Result<IndexMappingVO> beforeMapping = getMapping(param.getCluster(), indexName, projectId);
         Result<MappingConfig> mappingRet;
         if (!StringUtils.contains(mapping, PROPERTIES)) {
             //这里为了兼容多 type索引，前端进针对用户输入的内容做封装，所以后端解析封装
@@ -448,7 +448,7 @@ public class IndicesManagerImpl implements IndicesManager {
             mappingRet.getData());
         if (syncUpdateIndexMapping) {
 
-            final Result<IndexMappingVO> afterMapping = getMapping(phyCluster, indexName, projectId);
+            final Result<IndexMappingVO> afterMapping = getMapping(param.getCluster(), indexName, projectId);
 
             operateRecordService.save(new OperateRecord.Builder()
                 .project(projectService.getProjectBriefByProjectId(projectId)).userOperation(operate)
@@ -509,12 +509,12 @@ public class IndicesManagerImpl implements IndicesManager {
         if (ret.failed()) {
             return Result.buildFrom(ret);
         }
-        final Result<IndexSettingVO> beforeSetting = getSetting(phyCluster, indexName, projectId);
+        final Result<IndexSettingVO> beforeSetting = getSetting(param.getCluster(), indexName, projectId);
         JSONObject settingObj = JSON.parseObject(param.getSetting());
         if (null == settingObj) {
             return Result.buildFail("setting 配置非法");
         }
-        Map<String, IndexConfig> configMap = esIndexService.syncGetIndexSetting(param.getCluster(),
+        Map<String, IndexConfig> configMap = esIndexService.syncGetIndexSetting(phyCluster,
             Lists.newArrayList(indexName), RETRY_COUNT);
         Map<String, String> sourceSettings = AriusOptional.ofObjNullable(configMap.get(indexName))
             .map(IndexConfig::getSettings).orElse(Maps.newHashMap());
@@ -525,7 +525,7 @@ public class IndicesManagerImpl implements IndicesManager {
             syncPutIndexSettings = esIndexService.syncPutIndexSettings(phyCluster,
                     Lists.newArrayList(indexName), finalSettingMap, RETRY_COUNT);
             if (syncPutIndexSettings) {
-                final Result<IndexSettingVO> afterSetting = getSetting(phyCluster, indexName, projectId);
+                final Result<IndexSettingVO> afterSetting = getSetting(param.getCluster(), indexName, projectId);
                 operateRecordService.save(new OperateRecord.Builder()
                         .project(projectService.getProjectBriefByProjectId(projectId)).userOperation(operator)
                         .operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_EDIT_SETTING)
@@ -870,10 +870,8 @@ public class IndicesManagerImpl implements IndicesManager {
         return Result.buildSucc(phyClusterName);
     }
 
-    private Result<Void> init(IndexCatCellWithConfigDTO indexCreateDTO, Integer projectId) {
-        if (AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
-            return Result.buildSucc();
-        } else {
+    private Result<Void> initIndexCreateDTO(IndexCatCellWithConfigDTO indexCreateDTO, Integer projectId) {
+        if (!AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
             ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByName(indexCreateDTO.getCluster());
             if (null == clusterLogic) {
                 return Result.buildParamIllegal(String.format("逻辑集群[%s]不存在", indexCreateDTO.getCluster()));
@@ -882,10 +880,12 @@ public class IndicesManagerImpl implements IndicesManager {
             if (null == clusterRegion) { return Result.buildParamIllegal("逻辑集群未绑定Region");}
 
             // 这里用户侧，传逻辑集群名称 这里先补丁适配
-            indexCreateDTO.setClusterLogic(indexCreateDTO.getCluster());
+            indexCreateDTO.setClusterLogic(clusterLogic.getName());
             indexCreateDTO.setResourceId(clusterLogic.getId());
             indexCreateDTO.setCluster(clusterRegion.getPhyClusterName());
         }
+
+        indexCreateDTO.setPlatformCreateFlag(true);
         indexCreateDTO.setProjectId(projectId);
         return Result.buildSucc();
     }
