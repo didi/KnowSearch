@@ -1,6 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.biz.page;
 
-import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterLogicManager;
 import com.didichuxing.datachannel.arius.admin.common.Triple;
@@ -8,7 +7,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResu
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterLogicConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicContext;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
@@ -16,22 +14,20 @@ import com.didichuxing.datachannel.arius.admin.common.constant.SortConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterNodeService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
-import com.didiglobal.logi.security.service.ProjectService;
-import com.google.common.collect.Lists;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by linyunan on 2021-10-14
@@ -135,14 +131,7 @@ public class ClusterLogicPageSearchHandle extends AbstractPageSearchHandle<Clust
     @Override
     protected PaginationResult<ClusterLogicVO> buildPageData(ClusterLogicConditionDTO condition, Integer projectId) {
         List<ClusterLogic> pagingGetClusterLogicList = clusterLogicService.pagingGetClusterLogicByCondition(condition);
-
-        List<ClusterLogicVO> clusterLogicVOS = clusterLogicManager.buildClusterLogics(pagingGetClusterLogicList);
-
-        //7. 设置逻辑集群基本信息
-        for (ClusterLogicVO clusterLogicVO : clusterLogicVOS) {
-            futureUtilForClusterNum.runnableTask(() -> setClusterLogicBasicInfo(clusterLogicVO));
-        }
-        futureUtilForClusterNum.waitExecute();
+        List<ClusterLogicVO> clusterLogicVOS = ConvertUtil.list2List(pagingGetClusterLogicList,ClusterLogicVO.class);
         long totalHit = clusterLogicService.fuzzyClusterLogicHitByCondition(condition);
         return PaginationResult.buildSucc(clusterLogicVOS, totalHit, condition.getPage(), condition.getSize());
     }
