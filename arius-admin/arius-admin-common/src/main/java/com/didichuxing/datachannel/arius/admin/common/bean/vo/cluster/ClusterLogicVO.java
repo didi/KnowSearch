@@ -109,6 +109,8 @@ public class ClusterLogicVO extends BaseVO implements Comparable<ClusterLogicVO>
 
     @ApiModelProperty("磁盘使用量")
     private Long                         diskUsage;
+    @ApiModelProperty("节点数")
+    private Integer                      nodeNum;
 
     @Override
     public int compareTo(ClusterLogicVO o) {

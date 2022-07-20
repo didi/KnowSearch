@@ -78,6 +78,7 @@ public class ESLogicClusterOpV3Controller {
     @ApiOperation(value = "获取逻辑集群概览信息接口")
     @ApiImplicitParam(type = "Long", name = "clusterLogicId", value = "逻辑集群ID", required = true)
     public Result<ClusterLogicVO> detail(HttpServletRequest request, @PathVariable Long clusterLogicId) {
+        clusterLogicManager.updateClusterLogicHealth(clusterLogicId);
         return Result
             .buildSucc(clusterLogicManager.getClusterLogic(clusterLogicId, HttpRequestUtil.getProjectId(request)));
     }

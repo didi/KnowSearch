@@ -491,7 +491,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
             }
 
             updateLogicClusterDTO.setHealth(ClusterUtils.getClusterLogicHealthByClusterHealth(clusterHealthSet));
-            setDiskUsedInfo(updateLogicClusterDTO);
+            setClusterLogicInfo(updateLogicClusterDTO);
             clusterLogicService.editClusterLogicNotCheck(updateLogicClusterDTO, AriusUser.SYSTEM.getDesc());
         } catch (Exception e) {
             LOGGER.error("class=ClusterLogicManagerImpl||method=updateClusterLogicHealth||clusterLogicId={}||errMsg={}",
@@ -583,7 +583,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
      * 设置磁盘使用信息
      * @param clusterDTO
      */
-    private void setDiskUsedInfo(ESLogicClusterDTO clusterDTO) {
+    private void setClusterLogicInfo(ESLogicClusterDTO clusterDTO) {
         ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(clusterDTO.getId());
         long diskTotal = 0L;
         long diskUsage = 0L;
@@ -595,11 +595,21 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
                 diskTotal += entry.getValue().v1();
                 diskUsage += entry.getValue().v2();
             }
+            //设置节点数
+            clusterDTO.setNodeNum(entries.size());
         }
         clusterDTO.setDiskTotal(diskTotal);
         clusterDTO.setDiskUsage(diskUsage);
         clusterDTO.setDiskUsagePercent(
                 new BigDecimal((double) diskUsage / diskTotal).setScale(4, BigDecimal.ROUND_HALF_UP).doubleValue());
+
+        //设置es集群版本
+        ClusterPhy physicalCluster = getLogicClusterAssignedPhysicalClusters(clusterDTO.getId());
+        if (physicalCluster == null) {
+            return;
+        }
+        clusterDTO.setEsClusterVersion(physicalCluster.getEsVersion());
+
     }
 
     private ClusterPhyVO getPhyNameByLogic(Long clusterLogicId) {

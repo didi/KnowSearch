@@ -70,4 +70,10 @@ public class ESLogicClusterDTO extends PageDTO {
     @ApiModelProperty("磁盘使用量")
     private Long diskUsage;
 
+    @ApiModelProperty("集群版本")
+    private String esClusterVersion;
+
+    @ApiModelProperty("数据节点数")
+    private Integer nodeNum;
+
 }

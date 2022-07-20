@@ -103,6 +103,16 @@ public class ClusterLogic extends BaseEntity implements Comparable<ClusterLogic>
      */
     private Long diskUsage;
 
+    /**
+     * 集群版本
+     */
+    private String esClusterVersion;
+
+    /**
+     * 数据节点数
+     */
+    private Integer nodeNum;
+
     @Override
     public int compareTo(ClusterLogic o) {
         if (null == o) {

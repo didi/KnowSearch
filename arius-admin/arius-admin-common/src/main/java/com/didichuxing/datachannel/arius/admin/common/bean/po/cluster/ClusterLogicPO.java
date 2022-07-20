@@ -92,4 +92,14 @@ public class ClusterLogicPO extends BasePO {
      * 磁盘使用量
      */
     private Long diskUsage;
+
+    /**
+     * 集群版本
+     */
+    private String esClusterVersion;
+
+    /**
+     * 数据节点数
+     */
+    private Integer nodeNum;
 }
