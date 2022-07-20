@@ -25,6 +25,7 @@ public interface ExpireManager {
      * @return true/false
      * @throws
      */
+    @Deprecated
     boolean deleteExpireIndex(String cluster);
 
     /**

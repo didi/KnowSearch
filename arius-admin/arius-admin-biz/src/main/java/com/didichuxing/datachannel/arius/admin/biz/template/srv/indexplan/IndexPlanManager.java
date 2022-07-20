@@ -44,6 +44,7 @@ public interface IndexPlanManager {
      * @param clusterPhyName 物理集群名
      * @return boolean
      */
+    @Deprecated
     boolean indexRollover(String clusterPhyName);
 
     /**

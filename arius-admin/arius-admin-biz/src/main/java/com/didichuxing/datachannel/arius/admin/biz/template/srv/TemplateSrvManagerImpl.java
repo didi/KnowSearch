@@ -2,8 +2,6 @@ package com.didichuxing.datachannel.arius.admin.biz.template.srv;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum.TEMPLATE_SRV;
 
-import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
-import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterRegionManager;
 import com.didichuxing.datachannel.arius.admin.biz.page.TemplateSrvPageSearchHandle;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.BaseTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.cold.ColdManager;
@@ -15,44 +13,33 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.Temp
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithClusterAndMasterTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.srv.TemplateSrv;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.srv.UnavailableTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv.TemplateWithSrvVO;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.SupportSrv;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
-import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
-import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
-import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterNodeService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
@@ -62,7 +49,7 @@ import org.springframework.stereotype.Service;
  * @author chengxiang
  * @date 2022/5/9
  */
-@Service("newTemplateSrvService")
+@Service()
 @DependsOn("springTool")
 public class TemplateSrvManagerImpl implements TemplateSrvManager {
     protected static final ILog                                         LOGGER                                                    = LogFactory
@@ -76,11 +63,7 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
     private final Map<Integer, BaseTemplateSrv>                         BASE_TEMPLATE_SRV_MAP                                     = Maps
         .newConcurrentMap();
 
-    /**
-     * 本地cache 加快无效索引服务过滤
-     */
-    private static final Cache</*logic id*/Integer, SupportSrv> LOGIC_TEMPLATE_ID_2_ASSOCIATED_CLUSTER_VERSION_ENUM_CACHE = CacheBuilder
-        .newBuilder().expireAfterWrite(10, TimeUnit.MINUTES).maximumSize(10000).build();
+
 
     @Autowired
     private IndexTemplateService                                        indexTemplateService;
@@ -92,18 +75,10 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
     private HandleFactory                                               handleFactory;
     @Autowired
     private RoleTool                                                    roleTool;
-    @Autowired
-    private OperateRecordService                                        operateRecordService;
-    @Autowired
-    private ClusterLogicService                                         clusterLogicService;
-    @Autowired
-    private ClusterContextManager                                       clusterContextManager;
+   
     @Autowired
     private ColdManager          coldManager;
-    @Autowired
-    private ESClusterNodeService esClusterNodeService;
-    @Autowired
-    private ClusterRegionManager clusterRegionManager;
+ 
 
     @PostConstruct
     public void init() {
@@ -155,9 +130,9 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
     public List<UnavailableTemplateSrv> getUnavailableSrv(Integer logicTemplateId) {
         List<UnavailableTemplateSrv> unavailableSrvList = Lists.newCopyOnWriteArrayList();
         List<TemplateServiceEnum> allSrvList = TemplateServiceEnum.allTemplateSrv();
-    
-        SupportSrv supportSrv = getLogicTemplateSupportDCDRAndPipelineByLogicId(
-                logicTemplateId);
+        //默认给一个srv就可以了
+        BaseTemplateSrv srvHandle = BASE_TEMPLATE_SRV_MAP.get(TemplateServiceEnum.TEMPLATE_COLD.getCode());
+        SupportSrv supportSrv =srvHandle.getLogicTemplateSupportDCDRAndPipelineByLogicId(logicTemplateId);
         final Boolean dcdrSupport = supportSrv.getDcdrModuleExists();
         final Boolean pipelineSupport = supportSrv.getPipelineModuleExists();
         Boolean coldRegionSupport = supportSrv.getColdRegionExists();
@@ -168,6 +143,7 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
          * 预创建，过期删除（分区才可以操作），冷热分离（分区并且有冷region才能操作），dcdr和pipeline（es有对应module才能操作），rolloer没有限制但是产品侧有提示
          */
         for (TemplateServiceEnum srvEnum : allSrvList) {
+        
            
             //1.非分区模版不支持：预创建、过期删除、冷热划分的能力
             if (Boolean.FALSE.equals(isPartition)&&TemplateServiceEnum.usePartitionService().contains(srvEnum)){
@@ -257,48 +233,6 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
         }
     }
 
-    private SupportSrv getLogicTemplateSupportDCDRAndPipelineByLogicId(Integer logicTemplateId) {
-        try {
-            return LOGIC_TEMPLATE_ID_2_ASSOCIATED_CLUSTER_VERSION_ENUM_CACHE.get(logicTemplateId, () -> {
-                IndexTemplateLogicWithClusterAndMasterTemplate template = indexTemplateService
-                    .getLogicTemplateWithClusterAndMasterTemplate(logicTemplateId);
-               
-                SupportSrv supportSrv = new SupportSrv();
-                if (null == template || null == template.getMasterTemplate()) {
-                    LOGGER.warn(
-                        "class=TemplateSrvPageSearchHandle||method=getLogicTemplateAssociatedEsVersionByLogicTemplateId"
-                                + "||templateId={}||errMsg=masterPhyTemplate is null",
-                        logicTemplateId);
-                 return supportSrv;
-                }
-
-                String masterCluster = template.getMasterTemplate().getCluster();
-                ClusterPhy clusterPhy = clusterPhyService.getClusterByName(masterCluster);
-                if (null == clusterPhy) {
-                    LOGGER.warn(
-                        "class=TemplateSrvPageSearchHandle||method=getLogicTemplateAssociatedEsVersionByLogicTemplateId"
-                                + "||templateId={}||errMsg=clusterPhy of template is null",
-                        logicTemplateId);
-                    return supportSrv;
-                }
-                TupleTwo</*dcdrExist*/Boolean,/*pipelineExist*/ Boolean> existDCDRAndPipelineModule = esClusterNodeService.existDCDRAndPipelineModule(
-                        masterCluster);
-                supportSrv.setDcdrModuleExists(existDCDRAndPipelineModule.v1);
-                supportSrv.setPipelineModuleExists(existDCDRAndPipelineModule.v2);
-                Boolean existColdRegion = clusterRegionManager.existColdRegion(masterCluster,template.getMasterTemplate().getRegionId());
-                supportSrv.setColdRegionExists(existColdRegion);
-                Boolean isPartition= indexTemplateService.getLogicTemplateById(logicTemplateId).getExpression().endsWith("*");
-                supportSrv.setIsPartition(isPartition);
-                return supportSrv;
-            });
-        } catch (ExecutionException e) {
-            LOGGER
-                .error("class=TemplateSrvPageSearchHandle||method=getLogicTemplateAssociatedEsVersionByLogicTemplateId"
-                       + "||templateId={}",
-                    logicTemplateId,  e);
-            return new SupportSrv();
-        }
-    }
 
     @Override
     public List<Integer> getPhyClusterTemplateSrvIds(String phyCluster) {
@@ -451,14 +385,5 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
                 .map(IndexTemplate::getName)
                 .collect(Collectors.toList());
     }
-    @Data
-    @AllArgsConstructor
-    @NoArgsConstructor
-    private static class SupportSrv {
-        private Boolean dcdrModuleExists=false;
-        private Boolean coldRegionExists=false;
-        private Boolean pipelineModuleExists=false;
-        private Boolean enableWriteRateLimit=false;
-        private Boolean isPartition=false;
-    }
+   
 }

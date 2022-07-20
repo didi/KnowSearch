@@ -39,6 +39,7 @@ import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -347,7 +348,34 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
                 //集群侧中只要
                 .anyMatch(coldTruePre);
     }
+    
+    /**
+     * @param phyCluster
+     * @return
+     */
+    @Override
+    public List<ClusterRegion> getColdRegionByPhyCluster(String phyCluster) {
+        List<ClusterRegion> clusterRegions = clusterRegionService.listPhyClusterRegions(phyCluster);
+        //冷region是不会保存在逻辑集群侧的，所以这里关联的region肯定是大于1的，如果是小于1，那么是一定不会具备的
+        if (clusterRegions.size()<=1){
+            return Collections.emptyList();
+        }
+          return clusterRegions.stream().filter(coldTruePreByClusterRegion).collect(Collectors.toList());
+    }
+    
     /***************************************** private method ****************************************************/
+     private final static Predicate<ClusterRegion> coldTruePreByClusterRegion = clusterRegion -> {
+        if (StringUtils.isBlank(clusterRegion.getConfig())) {
+            return Boolean.FALSE;
+        }
+        try {
+            return JSON.parseObject(clusterRegion.getConfig()).getBoolean(COLD);
+        
+        } catch (Exception e) {
+            return Boolean.FALSE;
+        }
+    
+    };
     private final static Predicate<String> coldTruePre = coldJson -> {
         if (StringUtils.isBlank(coldJson)) {
             return Boolean.FALSE;

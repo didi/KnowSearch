@@ -4,7 +4,6 @@ import com.didichuxing.datachannel.arius.admin.biz.template.srv.expire.ExpireMan
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.task.BaseConcurrentClusterTask;
 import com.didichuxing.datachannel.arius.admin.task.TaskConcurrentConstants;
-import com.didiglobal.logi.job.annotation.Task;
 import com.didiglobal.logi.job.common.TaskResult;
 import com.didiglobal.logi.job.core.job.Job;
 import com.didiglobal.logi.job.core.job.JobContext;
@@ -15,7 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 /**
  * Created by d06679 on 2018/3/14.
  */
-@Task(name = "DeleteExpireIndexRandomTask", description = "删除过期索引任务", cron = "0 55 23 */1 * ?", autoRegister = true)
+//@Task(name = "DeleteExpireIndexRandomTask", description = "删除过期索引任务", cron = "0 55 23 */1 * ?", autoRegister = true)
+@Deprecated
 public class DeleteExpireIndexRandomTask extends BaseConcurrentClusterTask implements Job {
 
     private static final ILog LOGGER = LogFactory.getLog(DeleteExpireIndexRandomTask.class);

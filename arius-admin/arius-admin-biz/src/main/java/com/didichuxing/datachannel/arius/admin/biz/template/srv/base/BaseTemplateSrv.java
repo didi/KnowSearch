@@ -2,6 +2,7 @@ package com.didichuxing.datachannel.arius.admin.biz.template.srv.base;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.SupportSrv;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import java.util.List;
@@ -85,4 +86,5 @@ public interface BaseTemplateSrv {
      */
     Result<Boolean> checkOpenTemplateSrvWhenClusterJoin(String httpAddresses, String password);
 
+    SupportSrv getLogicTemplateSupportDCDRAndPipelineByLogicId(Integer logicTemplateId);
 }

@@ -34,6 +34,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.Ope
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.SupportSrv;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDCDRStepEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
@@ -172,7 +173,23 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
         ariusTaskThreadPool = new AriusTaskThreadPool();
         ariusTaskThreadPool.init(10, "TemplateDCDRManagerImpl", 10000);
     }
-
+    
+    /**
+     * @param templateId 逻辑模板id
+     * @return
+     */
+    @Override
+    public boolean isTemplateSrvOpen(Integer templateId) {
+        final boolean templateSrvOpen = super.isTemplateSrvOpen(templateId);
+        if (Boolean.TRUE.equals(templateSrvOpen)){
+          final SupportSrv supportSrv = getLogicTemplateSupportDCDRAndPipelineByLogicId(
+                templateId);
+          return Boolean.TRUE.equals(supportSrv.getDcdrModuleExists());
+        }
+        
+        return Boolean.FALSE;
+    }
+    
     private static final FutureUtil<Void> BATCH_DCDR_FUTURE_UTIL = FutureUtil.init("BATCH_DCDR_FUTURE_UTIL", 10, 10,
         100);
 

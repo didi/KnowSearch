@@ -4,7 +4,6 @@ import com.didichuxing.datachannel.arius.admin.biz.template.srv.cold.ColdManager
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.task.BaseConcurrentClusterTask;
 import com.didichuxing.datachannel.arius.admin.task.TaskConcurrentConstants;
-import com.didiglobal.logi.job.annotation.Task;
 import com.didiglobal.logi.job.common.TaskResult;
 import com.didiglobal.logi.job.core.job.Job;
 import com.didiglobal.logi.job.core.job.JobContext;
@@ -15,7 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 /**
  * Created by d06679 on 2018/3/14.
  */
-@Task(name = "ColdDataMoveRandomTask", description = "admin冷数据搬迁服务", cron = "0 30 22 * * ?", autoRegister = true)
+//@Task(name = "ColdDataMoveRandomTask", description = "admin冷数据搬迁服务", cron = "0 30 22 * * ?", autoRegister = true)
+@Deprecated
 public class ColdDataMoveRandomTask extends BaseConcurrentClusterTask implements Job {
 
     private static final ILog LOGGER = LogFactory.getLog(ColdDataMoveRandomTask.class);

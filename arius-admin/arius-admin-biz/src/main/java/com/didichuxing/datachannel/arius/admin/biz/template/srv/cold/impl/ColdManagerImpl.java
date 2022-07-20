@@ -18,6 +18,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.SupportSrv;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
@@ -58,7 +59,7 @@ public class ColdManagerImpl extends BaseTemplateSrvImpl implements ColdManager 
 
     @Override
     public Result<Void> move2ColdNode(Integer logicTemplateId) {
-        if (!isTemplateSrvOpen(logicTemplateId)) {
+        if (Boolean.FALSE.equals(isTemplateSrvOpen(logicTemplateId))) {
             return Result.buildFail("没有开启冷热分离模板服务");
         }
 
@@ -223,7 +224,21 @@ public class ColdManagerImpl extends BaseTemplateSrvImpl implements ColdManager 
 
         return minUsageColdRegion;
     }
-
+    
+    /**
+     * @param templateId 逻辑模板id
+     * @return
+     */
+    @Override
+    public boolean isTemplateSrvOpen(Integer templateId) {
+        final boolean templateSrvOpen = super.isTemplateSrvOpen(templateId);
+        if (Boolean.TRUE.equals(templateSrvOpen)) {
+            final SupportSrv supportSrv = getLogicTemplateSupportDCDRAndPipelineByLogicId(templateId);
+        
+            return Boolean.TRUE.equals(supportSrv.getIsPartition()) && Boolean.TRUE.equals(
+                    supportSrv.getColdRegionExists());
+        } return Boolean.FALSE;
+    }
     /////////////////srv
 
     /**
@@ -247,7 +262,42 @@ public class ColdManagerImpl extends BaseTemplateSrvImpl implements ColdManager 
      */
     @Override
     public Result<Boolean> move2ColdNode(String phyCluster) {
-        return Result.buildSucc();
+        final List<ClusterRegion> coldRegionByPhyCluster = clusterRegionManager.getColdRegionByPhyCluster(phyCluster);
+        if (CollectionUtils.isEmpty(coldRegionByPhyCluster)){
+            //没有冷节点
+            return Result.buildFail(String.format("【%s】没有冷节点", phyCluster));
+        }
+        
+    
+        List<IndexTemplatePhy> templatePhysicals = indexTemplatePhyService.getNormalTemplateByCluster(phyCluster);
+    
+        if (CollectionUtils.isEmpty(templatePhysicals)) {
+            return Result.buildSucc(true);
+        }
+        final ClusterRegion region = coldRegionByPhyCluster.get(0);
+    
+        int succ = 0;
+        for (IndexTemplatePhy templatePhysical : templatePhysicals) {
+            try {
+                //该逻辑模版没有开启冷热分离的节点
+                if (Boolean.FALSE.equals(isTemplateSrvOpen(templatePhysical.getLogicId()))) {
+                    continue;
+                }
+                Result<Void> moveResult = movePerTemplate(templatePhysical, region.getId().intValue());
+                if (moveResult.success()) {
+                    succ++;
+                } else {
+                    LOGGER.warn(
+                            "class=TemplateColdManagerImpl||method=move2ColdNode||template={}||msg=move2ColdNode fail",
+                            templatePhysical.getName());
+                }
+            } catch (Exception e) {
+                LOGGER.warn("class=TemplateColdManagerImpl||method=move2ColdNode||template={}||errMsg={}",
+                        templatePhysical.getName(), e.getMessage(), e);
+            }
+        }
+    
+        return Result.buildSucc(succ * 1.0 / templatePhysicals.size() > 0.8);
     }
 
     /**

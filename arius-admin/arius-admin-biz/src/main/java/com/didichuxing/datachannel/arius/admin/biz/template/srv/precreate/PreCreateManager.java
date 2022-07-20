@@ -31,6 +31,7 @@ public interface PreCreateManager {
     * @return true/false
     * @throws AdminOperateException
     */
+    @Deprecated
     boolean preCreateIndex(String cluster, int retryCount);
 
     /**

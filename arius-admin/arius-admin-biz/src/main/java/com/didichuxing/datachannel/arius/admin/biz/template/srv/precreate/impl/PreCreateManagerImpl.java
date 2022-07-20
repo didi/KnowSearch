@@ -48,10 +48,24 @@ public class PreCreateManagerImpl extends BaseTemplateSrvImpl implements PreCrea
     public TemplateServiceEnum templateSrv() {
         return TemplateServiceEnum.TEMPLATE_PRE_CREATE;
     }
-
+    
+    /**
+     * @param templateId 逻辑模板id
+     * @return
+     */
+    @Override
+    public boolean isTemplateSrvOpen(Integer templateId) {
+        //预创建能力必须存在分区状态否则就会存在问题
+        if (Boolean.TRUE.equals(super.isTemplateSrvOpen(templateId))){
+            return Boolean.TRUE.equals(getLogicTemplateSupportDCDRAndPipelineByLogicId(templateId).getIsPartition());
+        }
+        
+        return Boolean.FALSE;
+    }
+    
     @Override
     public Result<Void> preCreateIndex(Integer logicTemplateId) {
-        if (!isTemplateSrvOpen(logicTemplateId)) {
+        if (Boolean.FALSE.equals(isTemplateSrvOpen(logicTemplateId))) {
             return Result.buildFail("指定索引模板未开启预先创建能力");
         }
 
