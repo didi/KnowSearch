@@ -23,10 +23,10 @@ public class ClusterLogicConditionDTO extends ESLogicClusterDTO {
     @ApiModelProperty("权限类型 1:配置管理, 2:访问, -1:无权限")
     private Integer      authType;
 
-    @ApiModelProperty("暂无")
+    @ApiModelProperty("排序字段，type，disk_usage_percent,es_cluster_version,node_num")
     private String       sortTerm;
 
-    @ApiModelProperty("排序字段，type，disk_usage_percent,es_cluster_version,node_num")
+    @ApiModelProperty("DESC,ASC")
     private String       sortType;
 
     @ApiModelProperty(value = "是否降序排序（默认降序）", dataType = "Boolean", required = false)
