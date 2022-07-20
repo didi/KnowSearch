@@ -31,6 +31,7 @@ public class IndexCatCellPO extends BaseESPO {
     private Boolean readFlag;
     private Boolean writeFlag;
     private Boolean deleteFlag;
+    private Boolean platformCreateFlag;
     private Long    timestamp;
 
     private Long    primariesSegmentCount;

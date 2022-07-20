@@ -41,16 +41,16 @@ public class IndexCatCellDTO {
     private String  index;
 
     @ApiModelProperty("分区shard个数")
-    private Long  pri;
+    private Long    pri;
 
     @ApiModelProperty("分区副本个数")
-    private Long  rep;
+    private Long    rep;
 
     @ApiModelProperty("分区文档个数")
-    private Long  docsCount;
+    private Long    docsCount;
 
     @ApiModelProperty("分区文档删除个数")
-    private Long  docsDeleted;
+    private Long    docsDeleted;
 
     @ApiModelProperty("分区主分片存储大小")
     private String  storeSize;
@@ -78,4 +78,7 @@ public class IndexCatCellDTO {
 
     @ApiModelProperty("平台模板Id")
     private Integer templateId;
+
+    @ApiModelProperty("通过平台索引创建标识 true 通过平台创建，false不是通过平台创建")
+    private Boolean platformCreateFlag;
 }
