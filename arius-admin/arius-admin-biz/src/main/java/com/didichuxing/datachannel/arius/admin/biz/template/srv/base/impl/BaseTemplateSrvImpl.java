@@ -1,6 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.base.impl;
 
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
+import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterRegionManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.TemplateSrvManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.BaseTemplateSrv;
@@ -16,6 +17,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.constant.ESClusterVersionEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.SupportSrv;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
@@ -33,8 +35,12 @@ import com.didichuxing.datachannel.arius.admin.core.service.template.physic.Inde
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.service.ProjectService;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -68,8 +74,15 @@ public abstract class BaseTemplateSrvImpl implements BaseTemplateSrv {
     @Autowired
     protected AriusConfigInfoService ariusConfigInfoService;
     @Autowired
-    private ESClusterNodeService esClusterNodeService;
-
+    protected   ESClusterNodeService esClusterNodeService;
+    @Autowired
+    protected            ClusterRegionManager                   clusterRegionManager;
+    /**
+     * 本地cache 加快无效索引服务过滤
+     */
+    private static final Cache</*logic id*/Integer, SupportSrv> LOGIC_TEMPLATE_ID_2_ASSOCIATED_CLUSTER_VERSION_ENUM_CACHE = CacheBuilder.newBuilder()
+            .expireAfterWrite(10, TimeUnit.MINUTES).maximumSize(10000).build();
+    
     @Override
     public boolean isTemplateSrvOpen(Integer templateId) {
         return templateSrvManager.isTemplateSrvOpen(templateId, templateSrv().getCode());
@@ -267,18 +280,56 @@ public abstract class BaseTemplateSrvImpl implements BaseTemplateSrv {
         return true;
     }
 
-    @Override
-    public Result<Boolean> checkOpenTemplateSrvByCluster(String phyCluster) {
-        return Result.buildSucc(Boolean.TRUE);
-    }
-
-    @Override
-    public Result<Boolean> checkOpenTemplateSrvWhenClusterJoin(String httpAddresses, String password) {
-        return Result.buildSucc(Boolean.TRUE);
-    }
+    
+  
 
     @Override
     public String templateServiceName() {
         return templateSrv().getServiceName();
     }
+    @Override
+    public SupportSrv getLogicTemplateSupportDCDRAndPipelineByLogicId(Integer logicTemplateId) {
+        try {
+            return LOGIC_TEMPLATE_ID_2_ASSOCIATED_CLUSTER_VERSION_ENUM_CACHE.get(logicTemplateId, () -> {
+                IndexTemplateLogicWithClusterAndMasterTemplate template = indexTemplateService.getLogicTemplateWithClusterAndMasterTemplate(
+                        logicTemplateId);
+                
+                SupportSrv supportSrv = new SupportSrv();
+                if (null == template || null == template.getMasterTemplate()) {
+                    LOGGER.warn(
+                            "class=TemplateSrvPageSearchHandle||method=getLogicTemplateAssociatedEsVersionByLogicTemplateId"
+                            + "||templateId={}||errMsg=masterPhyTemplate is null", logicTemplateId);
+                    return supportSrv;
+                }
+                
+                String masterCluster = template.getMasterTemplate().getCluster();
+                ClusterPhy clusterPhy = clusterPhyService.getClusterByName(masterCluster);
+                if (null == clusterPhy) {
+                    LOGGER.warn(
+                            "class=TemplateSrvPageSearchHandle||method=getLogicTemplateAssociatedEsVersionByLogicTemplateId"
+                            + "||templateId={}||errMsg=clusterPhy of template is null", logicTemplateId);
+                    return supportSrv;
+                }
+                TupleTwo</*dcdrExist*/Boolean,/*pipelineExist*/ Boolean> existDCDRAndPipelineModule = esClusterNodeService.existDCDRAndPipelineModule(
+                        masterCluster);
+                supportSrv.setDcdrModuleExists(existDCDRAndPipelineModule.v1);
+                supportSrv.setPipelineModuleExists(existDCDRAndPipelineModule.v2);
+                Boolean existColdRegion = clusterRegionManager.existColdRegion(masterCluster,
+                        template.getMasterTemplate().getRegionId());
+                supportSrv.setColdRegionExists(existColdRegion);
+                Boolean isPartition = indexTemplateService.getLogicTemplateById(logicTemplateId).getExpression()
+                        .endsWith("*");
+                supportSrv.setPartition(isPartition);
+                return supportSrv;
+            });
+        } catch (ExecutionException e) {
+            LOGGER.error(
+                    "class=TemplateSrvPageSearchHandle||method=getLogicTemplateAssociatedEsVersionByLogicTemplateId"
+                    + "||templateId={}", logicTemplateId, e);
+            return new SupportSrv();
+        }
+    }
+    
+   
+
 }

@@ -879,8 +879,6 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             final Integer beforeVersion = templatePhy.getVersion();
             final Integer afterVersion =beforeVersion + 1;
             updateParam.setId(templatePhy.getId());
-            updateParam.setShard(updateParam.getShard());
-            updateParam.setRack("");
             updateParam.setVersion(beforeVersion + 1);
             Result<Void> editResult = templatePhyManager.editTemplateWithoutCheck(updateParam, operator, RETRY_TIMES);
             if (editResult.failed()) {
