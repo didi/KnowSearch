@@ -19,7 +19,13 @@ public class TemplateUtils {
     private static final ILog LOGGER        = LogFactory.getLog(TemplateUtils.class);
     private static final String REGEX_PATTERN_DAY   = "[0-9]{4}[-][0-9]{1,2}[-][0-9]{1,2}";
     private static final String REGEX_PATTERN_MONTH = "[0-9]{4}[-][0-9]{1,2}";
-    private static final String REGEX_PATTERM_Year  = "[0-9]{4}";
+    private static final String REGEX_PATTERN_YEAR = "[0-9]{4}";
+
+    /**
+     * 兼容匹配平台升级版本后的索引
+     * template6_v1, template6_v2
+     */
+    private static final String REGEX_PATTERN_NO_PARTITION  = "[v][0-9]{1,3}";
 
     private TemplateUtils() {
     }
@@ -122,7 +128,7 @@ public class TemplateUtils {
             }
 
             // 尝试匹配2020
-            Pattern patternOfYear = Pattern.compile(REGEX_PATTERM_Year);
+            Pattern patternOfYear = Pattern.compile(REGEX_PATTERN_YEAR);
             Matcher matcherOfYear = patternOfYear.matcher(indexName);
             if (matcherOfYear.find()) {
                 temp = indexName.split(matcherOfYear.group(0));
@@ -133,10 +139,23 @@ public class TemplateUtils {
                 if (AriusObjUtils.isBlank(template)) { return null;}
                 return template.substring(0, template.length() - 1);
             }
+
+            Pattern patternOfNoPartition = Pattern.compile(REGEX_PATTERN_NO_PARTITION);
+            Matcher matcherOfNoPartition = patternOfNoPartition.matcher(indexName);
+            if (matcherOfNoPartition.find()) {
+                temp = indexName.split(matcherOfNoPartition.group(0));
+                if (temp.length == 0) { return null;}
+
+                // 获取索引前缀
+                String template = temp[0];
+                if (AriusObjUtils.isBlank(template)) { return null;}
+                return template.substring(0, template.length() - 1);
+            }
+
         } catch (Exception e) {
             LOGGER.error("class=TemplateUtils||method=getMatchTemplateNameByIndexName||errMsg={}", e.getMessage(), e);
         }
 
-        return null;
+        return indexName;
     }
 }
