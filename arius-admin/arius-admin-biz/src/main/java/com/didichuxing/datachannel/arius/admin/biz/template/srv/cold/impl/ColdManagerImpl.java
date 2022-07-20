@@ -25,6 +25,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -79,7 +80,10 @@ public class ColdManagerImpl extends BaseTemplateSrvImpl implements ColdManager 
             return Result.buildFail("没有冷节点");
         }
         ClusterRegion minUsageColdRegion = getMinUsageColdRegion(masterPhyTemplate.getCluster(), coldRegionList);
-
+        //minUsageColdRegion可能为空
+        if (Objects.isNull(minUsageColdRegion)){
+            return Result.buildFail("没有冷节点");
+        }
         try {
             Result<Void> moveResult = movePerTemplate(masterPhyTemplate, minUsageColdRegion.getId().intValue());
             if (moveResult.failed()) {

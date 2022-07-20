@@ -335,8 +335,14 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
             return Boolean.FALSE;
         }
         List<ClusterRegion> clusterRegions = clusterRegionService.listPhyClusterRegions(phyCluster);
+        //冷region是不会保存在逻辑集群侧的，所以这里关联的region肯定是大于1的，如果是小于1，那么是一定不会具备的
+        if (clusterRegions.size()<=1){
+            return Boolean.FALSE;
+        }
+        
+        
         return clusterRegions.stream()
-                .filter(clusterRegion ->Objects.equals( clusterRegion.getId().intValue(),regionId))
+                .filter(clusterRegion ->!Objects.equals( clusterRegion.getId().intValue(),regionId))
                 .map(ClusterRegion::getConfig)
                 //集群侧中只要
                 .anyMatch(coldTruePre);

@@ -294,8 +294,8 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
         } catch (ExecutionException e) {
             LOGGER
                 .error("class=TemplateSrvPageSearchHandle||method=getLogicTemplateAssociatedEsVersionByLogicTemplateId"
-                       + "||templateId={}||errMsg={}",
-                    logicTemplateId, e.getMessage(), e);
+                       + "||templateId={}",
+                    logicTemplateId,  e);
             return new SupportSrv();
         }
     }
