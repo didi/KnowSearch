@@ -32,7 +32,8 @@ public class DslLogManager extends AbstractAggLogManager {
     public static final String VERSION = "version";
     public static final String TIME_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS Z";
     public static final String[] OUTPUT_FIELD_NAME = new String[]{
-            "appid", "dslTemplate", "dslTemplateMd5", "timeStamp", "dsl", "indices", "indiceSample", "requestType", "searchType",
+            "appid","projectId", "dslTemplate", "dslTemplateMd5", "timeStamp", "dsl", "indices", "indiceSample",
+            "requestType", "searchType",
             "dslType", "isFromUserConsole", "version", "dslLenAvg", "responseLenAvg", "beforeCostAvg", "esCostAvg",
             "totalCostAvg", "successfulShardsAvg", "totalShardsAvg", "failedShardsAvg", "totalHitsAvg", "searchCount", "gatewayNode", "appidDslTemplateMd5","projectIdDslTemplateMd5"
     };
