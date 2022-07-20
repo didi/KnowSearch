@@ -1,6 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.biz.page;
 
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.TemplateSrvManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.dcdr.TemplateDCDRManager;
+import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.PageDTO;
@@ -38,6 +40,8 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<Templa
     private static final FutureUtil<Void> TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_UNAVAILABLE_SRV_FUTURE_UTIL = FutureUtil
         .init("TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_UNAVAILABLE_SRV_FUTURE_UTIL", 10, 10, 100);
 
+    @Autowired
+    private TemplateDCDRManager templateDCDRManager;
     @Autowired
     private IndexTemplateService          indexTemplateService;
 
@@ -79,6 +83,9 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<Templa
         }
 
         List<TemplateWithSrvVO> templateWithSrvVOList = buildExtraAttribute(matchIndexTemplateList);
+        
+        
+        
         return PaginationResult.buildSucc(templateWithSrvVOList, totalHit, condition.getPage(), condition.getSize());
     }
 
@@ -133,6 +140,10 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<Templa
                 .map(projectService::getProjectBriefByProjectId).map(ProjectBriefVO::getProjectName)
                 .ifPresent(templateWithSrvVO::setProjectName);
             templateWithSrvVOList.add(templateWithSrvVO);
+             //templateWithSrvVO.getId()
+            final Tuple<Long/*主模板位点*/, Long/*从模板位点*/> masterAndSlaveTemplateCheckPoint = templateDCDRManager.getMasterAndSlaveTemplateCheckPoint(
+                    templateWithSrvVO.getId());
+            templateWithSrvVO.setCheckPointDiff((masterAndSlaveTemplateCheckPoint.getV1()-masterAndSlaveTemplateCheckPoint.getV2()));
         }
 
         buildTemplateCluster(templateWithSrvVOList);
