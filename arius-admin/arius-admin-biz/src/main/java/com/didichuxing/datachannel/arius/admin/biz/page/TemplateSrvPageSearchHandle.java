@@ -2,7 +2,6 @@ package com.didichuxing.datachannel.arius.admin.biz.page;
 
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.TemplateSrvManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.dcdr.TemplateDCDRManager;
-import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.PageDTO;
@@ -140,10 +139,6 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<Templa
                 .map(projectService::getProjectBriefByProjectId).map(ProjectBriefVO::getProjectName)
                 .ifPresent(templateWithSrvVO::setProjectName);
             templateWithSrvVOList.add(templateWithSrvVO);
-             //templateWithSrvVO.getId()
-            final Tuple<Long/*主模板位点*/, Long/*从模板位点*/> masterAndSlaveTemplateCheckPoint = templateDCDRManager.getMasterAndSlaveTemplateCheckPoint(
-                    templateWithSrvVO.getId());
-            templateWithSrvVO.setCheckPointDiff((masterAndSlaveTemplateCheckPoint.getV1()-masterAndSlaveTemplateCheckPoint.getV2()));
         }
 
         buildTemplateCluster(templateWithSrvVOList);
