@@ -500,10 +500,8 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
     public Result<Void> editTemplateWithoutCheck(IndexTemplatePhyDTO param, String operator,
                                                  int retryCount) throws ESOperateException {
         IndexTemplatePhy oldIndexTemplatePhy = indexTemplatePhyService.getTemplateById(param.getId());
-
-        if (param.getShard() != null && !oldIndexTemplatePhy.getShard().equals(param.getShard())) {
-            indexPlanManager.initShardRoutingAndAdjustShard(param);
-        }
+        //不需要shard比较
+        
 
         boolean succ = indexTemplatePhyService.update(param).success();
         String tips = "";

@@ -1,30 +1,6 @@
 
 package com.didichuxing.datachannel.arius.admin.biz.cluster;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.openMocks;
-
-import java.lang.reflect.InvocationTargetException;
-import java.util.*;
-
-import org.apache.commons.beanutils.BeanUtils;
-import org.elasticsearch.common.unit.ByteSizeUnit;
-import org.elasticsearch.common.unit.ByteSizeValue;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.context.junit4.SpringRunner;
-
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.impl.ClusterPhyManagerImpl;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyManager;
@@ -64,6 +40,29 @@ import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpClient;
 import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
+import org.apache.commons.beanutils.BeanUtils;
+import org.elasticsearch.common.unit.ByteSizeUnit;
+import org.elasticsearch.common.unit.ByteSizeValue;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.junit4.SpringRunner;
+
+import java.lang.reflect.InvocationTargetException;
+import java.util.*;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+import static org.mockito.MockitoAnnotations.openMocks;
 
 @ActiveProfiles("test")
 @ExtendWith({ SpringExtension.class })
@@ -204,7 +203,7 @@ class ClusterPhyManagerTest {
             "gatewayUrl", null);
 
         clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0, "responsible",
-            "libraDepartmentId", "libraDepartment", "memo", 0.0, 0, "configJson", 0);
+            "libraDepartmentId", "libraDepartment", "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
         region = new ClusterRegion(0L, "name", "logicClusterIds", CLUSTER, "config");
 
         roleHostList = Collections.singletonList(new ClusterRoleHost(0L, 0L, "hostname", "ip", CLUSTER, "port", 0, 0,

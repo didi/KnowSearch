@@ -50,6 +50,7 @@
         <if test="name != null">and `name` = #{name}</if>
         <if test="dataCenter != null">and data_center = #{dataCenter}</if>
          <if test="projectId != null">and project_id = #{projectId}</if>
+        <if test="resourceId != null">and resource_id = #{resourceId}</if>
         order by id desc
     </select>
 

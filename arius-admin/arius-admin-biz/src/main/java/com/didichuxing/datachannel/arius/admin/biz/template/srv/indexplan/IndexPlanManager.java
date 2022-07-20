@@ -2,6 +2,7 @@ package com.didichuxing.datachannel.arius.admin.biz.template.srv.indexplan;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhyDTO;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 
 /**
  * @author chengxiang, jiamin
@@ -22,10 +23,11 @@ public interface IndexPlanManager {
 
     /**
      * 调整索引模版的shard个数配置
+     *
      * @param logicTemplateId 逻辑模板id
      * @return Result 是否成功
      */
-    Result<Void> adjustShardNum(Integer logicTemplateId);
+    Result<Boolean> adjustShardNum(Integer logicTemplateId) throws ESOperateException;
 
     /**
      * 根据shard设置ShardRouting，再把shard调整到合适大小
@@ -44,6 +46,7 @@ public interface IndexPlanManager {
      * @param clusterPhyName 物理集群名
      * @return boolean
      */
+    @Deprecated
     boolean indexRollover(String clusterPhyName);
 
     /**

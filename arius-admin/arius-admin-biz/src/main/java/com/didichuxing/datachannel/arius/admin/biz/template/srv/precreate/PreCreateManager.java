@@ -12,10 +12,11 @@ public interface PreCreateManager {
 
     /**
      * 索引预先创建
+     *
      * @param logicTemplateId 逻辑模板id
      * @return Result 创建是否成功
      */
-    Result<Void> preCreateIndex(Integer logicTemplateId);
+    Result<Boolean> preCreateIndex(Integer logicTemplateId) throws ESOperateException;
 
     /**
      * 异步创建今明天索引
@@ -31,6 +32,7 @@ public interface PreCreateManager {
     * @return true/false
     * @throws AdminOperateException
     */
+    @Deprecated
     boolean preCreateIndex(String cluster, int retryCount);
 
     /**

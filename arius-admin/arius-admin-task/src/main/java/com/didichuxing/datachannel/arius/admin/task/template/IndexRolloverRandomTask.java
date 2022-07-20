@@ -4,7 +4,6 @@ import com.didichuxing.datachannel.arius.admin.biz.template.srv.indexplan.IndexP
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.task.BaseConcurrentClusterTask;
 import com.didichuxing.datachannel.arius.admin.task.TaskConcurrentConstants;
-import com.didiglobal.logi.job.annotation.Task;
 import com.didiglobal.logi.job.common.TaskResult;
 import com.didiglobal.logi.job.core.job.Job;
 import com.didiglobal.logi.job.core.job.JobContext;
@@ -29,7 +28,8 @@ import org.springframework.beans.factory.annotation.Autowired;
  *
  * xxxx-2021-10-22 -> xxxx-2021-10-22_v1
  */
-@Task(name = "IndexRolloverRandomTask", description = "索引Rollover实现", cron = "0 0 0/1 * * ?", autoRegister = true)
+//@Task(name = "IndexRolloverRandomTask", description = "索引Rollover实现", cron = "0 0 0/1 * * ?", autoRegister = true)
+@Deprecated
 public class IndexRolloverRandomTask extends BaseConcurrentClusterTask implements Job {
 
     private static final ILog LOGGER = LogFactory.getLog(IndexRolloverRandomTask.class);

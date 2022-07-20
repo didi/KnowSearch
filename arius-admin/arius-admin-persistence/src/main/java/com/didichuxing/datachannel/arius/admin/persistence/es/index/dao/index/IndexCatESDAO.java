@@ -1,13 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.index;
 
-import java.util.List;
-
-import javax.annotation.PostConstruct;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.IndexCatCell;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.index.IndexCatCellPO;
@@ -20,8 +12,14 @@ import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpTimeout
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dsls.DslsConstant;
 import com.google.common.collect.Lists;
-
 import lombok.NoArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import javax.annotation.PostConstruct;
+import java.util.List;
 
 @Component
 @NoArgsConstructor
@@ -84,7 +82,7 @@ public class IndexCatESDAO extends BaseESDAO {
                                                              Integer projectId, Long from, Long size, String sortTerm,
                                                              Boolean orderByDesc) {
         Tuple<Long, List<IndexCatCellPO>> totalHitAndIndexCatCellListTuple;
-        String queryTermDsl = buildQueryTermDsl(cluster, index, health, status, projectId);
+        String queryTermDsl = buildQueryTermDsl(cluster,null, index, health, status, projectId);
         String sortType = buildSortType(orderByDesc);
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_CAT_INDEX_INFO_BY_CONDITION, queryTermDsl,
             sortTerm, sortType, from, size);
@@ -94,6 +92,18 @@ public class IndexCatESDAO extends BaseESDAO {
                 IndexNameUtils.genCurrentDailyIndexName(indexName), typeName, dsl, IndexCatCellPO.class);
         } while (retryTime-- > 0 && null == totalHitAndIndexCatCellListTuple);
 
+        return totalHitAndIndexCatCellListTuple;
+    }
+
+    public Tuple<Long, List<IndexCatCellPO>> getIndexListByTerms(String clusterLogicName){
+        Tuple<Long, List<IndexCatCellPO>> totalHitAndIndexCatCellListTuple;
+        String queryTermDsl = buildQueryTermDsl(null, clusterLogicName,null, null, null, null);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_ALL_CAT_INDEX_INFO_BY_TERMS, queryTermDsl);
+        int retryTime = 3;
+        do {
+            totalHitAndIndexCatCellListTuple = gatewayClient.performRequestListAndGetTotalCount(metadataClusterName,
+                    IndexNameUtils.genCurrentDailyIndexName(indexName), typeName, dsl, IndexCatCellPO.class);
+        } while (retryTime-- > 0 && null == totalHitAndIndexCatCellListTuple);
         return totalHitAndIndexCatCellListTuple;
     }
 
@@ -169,11 +179,11 @@ public class IndexCatESDAO extends BaseESDAO {
      * @param health
      * @return
      */
-    private String buildQueryTermDsl(String cluster, String index, String health, String status, Integer projectId) {
-        return "[" + buildTermCell(cluster, index, health, status, projectId) + "]";
+    private String buildQueryTermDsl(String cluster,String clusterLogic, String index, String health, String status, Integer projectId) {
+        return "[" + buildTermCell(cluster,clusterLogic, index, health, status, projectId) + "]";
     }
 
-    private String buildTermCell(String cluster, String index, String health, String status, Integer projectId) {
+    private String buildTermCell(String cluster,String clusterLogic, String index, String health, String status, Integer projectId) {
         List<String> termCellList = Lists.newArrayList();
         //projectId == null 时，属于超级项目访问；
         if (null == projectId) {
@@ -186,6 +196,9 @@ public class IndexCatESDAO extends BaseESDAO {
             //get resourceId dsl term
             termCellList.add(DSLSearchUtils.getTermCellForExactSearch(cluster, "clusterLogic"));
 
+        }
+        if (StringUtils.isNotBlank(clusterLogic)){
+            termCellList.add(DSLSearchUtils.getTermCellForExactSearch(clusterLogic, "clusterLogic"));
         }
 
         //get index dsl term

@@ -1,6 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.page;
 
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.TemplateSrvManager;
+import com.didichuxing.datachannel.arius.admin.biz.template.srv.dcdr.TemplateDCDRManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.PageDTO;
@@ -38,6 +39,8 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<Templa
     private static final FutureUtil<Void> TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_UNAVAILABLE_SRV_FUTURE_UTIL = FutureUtil
         .init("TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_UNAVAILABLE_SRV_FUTURE_UTIL", 10, 10, 100);
 
+    @Autowired
+    private TemplateDCDRManager templateDCDRManager;
     @Autowired
     private IndexTemplateService          indexTemplateService;
 
@@ -79,6 +82,9 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<Templa
         }
 
         List<TemplateWithSrvVO> templateWithSrvVOList = buildExtraAttribute(matchIndexTemplateList);
+        
+        
+        
         return PaginationResult.buildSucc(templateWithSrvVOList, totalHit, condition.getPage(), condition.getSize());
     }
 
