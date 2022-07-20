@@ -172,7 +172,8 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
         ariusTaskThreadPool = new AriusTaskThreadPool();
         ariusTaskThreadPool.init(10, "TemplateDCDRManagerImpl", 10000);
     }
-
+  
+    
     private static final FutureUtil<Void> BATCH_DCDR_FUTURE_UTIL = FutureUtil.init("BATCH_DCDR_FUTURE_UTIL", 10, 10,
         100);
 

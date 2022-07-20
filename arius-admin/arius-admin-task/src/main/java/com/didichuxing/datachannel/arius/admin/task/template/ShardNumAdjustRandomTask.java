@@ -5,7 +5,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.task.BaseConcurrentClusterTask;
 import com.didichuxing.datachannel.arius.admin.task.TaskConcurrentConstants;
-import com.didiglobal.logi.job.annotation.Task;
 import com.didiglobal.logi.job.common.TaskResult;
 import com.didiglobal.logi.job.core.job.Job;
 import com.didiglobal.logi.job.core.job.JobContext;
@@ -29,7 +28,8 @@ import org.springframework.beans.factory.annotation.Autowired;
  * 按月滚动的模版：
  *    不动态调整shard
  */
-@Task(name = "ShardNumAdjustRandomTask", description = "shard规划任务", cron = "0 0 3 1/1 * ? *", autoRegister = true)
+//@Task(name = "ShardNumAdjustRandomTask", description = "shard规划任务", cron = "0 0 3 1/1 * ? *", autoRegister = true)
+@Deprecated
 public class ShardNumAdjustRandomTask extends BaseConcurrentClusterTask implements Job {
 
     private static final ILog LOGGER = LogFactory.getLog(ShardNumAdjustRandomTask.class);

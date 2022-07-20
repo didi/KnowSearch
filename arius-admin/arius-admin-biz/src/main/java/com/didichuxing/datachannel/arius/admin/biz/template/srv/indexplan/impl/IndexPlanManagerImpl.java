@@ -117,7 +117,7 @@ public class IndexPlanManagerImpl extends BaseTemplateSrvImpl implements IndexPl
     }
 
     @Override
-    public Result<Void> adjustShardNum(Integer logicTemplateId) {
+    public Result<Boolean> adjustShardNum(Integer logicTemplateId) throws ESOperateException {
         LOGGER.info(
             "class=IndexPlanManagerImpl||method=adjustShardCount||logicTemplateId={}||msg=start adjustShardCount",
             logicTemplateId);
@@ -130,17 +130,11 @@ public class IndexPlanManagerImpl extends BaseTemplateSrvImpl implements IndexPl
             LOGGER.info(
                 "class=IndexPlanManagerImpl||method=adjustShardCount||logicTemplateId={}||msg=IndexRolloverTask no physical template",
                 logicTemplateId);
-            return Result.buildSucc();
+            return Result.build(Boolean.TRUE);
         }
 
-        try {
-            governPerTemplate(templatePhyList);
-        } catch (Exception e) {
-            LOGGER.error(
-                "class=IndexPlanManagerImpl||method=adjustShardCount||logicTemplateId={}||msg=adjustShardCount error",
-                logicTemplateId, e);
-        }
-        return Result.buildSucc();
+        governPerTemplate(templatePhyList);
+          return Result.build(Boolean.TRUE);
     }
 
     @Override

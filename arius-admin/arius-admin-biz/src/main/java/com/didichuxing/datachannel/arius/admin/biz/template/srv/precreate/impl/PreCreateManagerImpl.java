@@ -48,10 +48,11 @@ public class PreCreateManagerImpl extends BaseTemplateSrvImpl implements PreCrea
     public TemplateServiceEnum templateSrv() {
         return TemplateServiceEnum.TEMPLATE_PRE_CREATE;
     }
+    
 
     @Override
-    public Result<Void> preCreateIndex(Integer logicTemplateId) {
-        if (!isTemplateSrvOpen(logicTemplateId)) {
+    public Result<Boolean> preCreateIndex(Integer logicTemplateId) throws ESOperateException {
+        if (Boolean.FALSE.equals(isTemplateSrvOpen(logicTemplateId))) {
             return Result.buildFail("指定索引模板未开启预先创建能力");
         }
 
@@ -65,7 +66,6 @@ public class PreCreateManagerImpl extends BaseTemplateSrvImpl implements PreCrea
 
         Integer succeedCount = 0;
         for (IndexTemplatePhy templatePhy : templatePhyList) {
-            try {
                 if (syncCreateTomorrowIndexByPhysicalId(templatePhy.getId(), RETRY_TIMES)) {
                     succeedCount++;
                 } else {
@@ -73,15 +73,10 @@ public class PreCreateManagerImpl extends BaseTemplateSrvImpl implements PreCrea
                         "class=PreCreateManagerImpl||method=preCreateIndex||logicTemplateId={}||physicalTemplateId={}||msg=preCreateIndex fail",
                         logicTemplateId, templatePhy.getId());
                 }
-            } catch (Exception e) {
-                LOGGER.error(
-                    "class=PreCreateManagerImpl||method=preCreateIndex||errMsg={}||logicTemplate={}||physicalTemplate={}",
-                    e.getMessage(), logicTemplateId, templatePhy.getId(), e);
-            }
+          
         }
 
-        return succeedCount * 1.0 / templatePhyList.size() > SUCCESS_RATE ? Result.buildSucc()
-            : Result.buildFail("预创建失败");
+        return Result.build(( succeedCount * 1.0 / templatePhyList.size() > SUCCESS_RATE));
     }
 
     @Override
