@@ -16,6 +16,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterLo
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterWithRegionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatCellDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateClearDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicContext;
@@ -23,10 +24,10 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.Cluste
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.IndexCatCell;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ProjectClusterLogicAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStatsResponse;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicAggregate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
@@ -64,7 +65,6 @@ import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectClust
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESGatewayClient;
-import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
@@ -382,65 +382,40 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
 
         ClusterLogicTemplateIndexDetailDTO templateIndexVO = getTemplateIndexVO(clusterLogic, projectId);
 
-        for (IndexTemplateLogicAggregate agg : templateIndexVO.getTemplateLogicAggregates()) {
+        for (IndexTemplate agg : templateIndexVO.getTemplates()) {
             final Result<Void> delTemplateResult = templateLogicManager
-                .delTemplate(agg.getIndexTemplateLogicWithCluster().getId(), operator, projectId);
+                .delTemplate(agg.getId(), operator, projectId);
             if (delTemplateResult.failed()) {
                 return delTemplateResult;
             }
         }
-
         indicesManager.deleteIndex(templateIndexVO.getCatIndexResults(), projectId, operator);
 
         //将region解绑
-//        ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(logicClusterId);
-//        clusterRegionService.unbindRegion(clusterRegion.getId(), logicClusterId, operator);
-//
-//        Result<Void> result = clusterLogicService.deleteClusterLogicById(logicClusterId, operator, projectId);
-//        if (result.success()) {
-//            SpringTool.publish(new ClusterLogicEvent(logicClusterId, projectId));
-//            //操作记录 集群下线
-//            operateRecordService
-//                .save(new OperateRecord.Builder().project(projectService.getProjectBriefByProjectId(projectId))
-//                    .operationTypeEnum(OperateTypeEnum.MY_CLUSTER_OFFLINE).triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-//                    .content(clusterLogic.getName()).bizId(logicClusterId.intValue()).userOperation(operator).build());
-//        }
-        return null;
+        ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(logicClusterId);
+        clusterRegionService.unbindRegion(clusterRegion.getId(), logicClusterId, operator);
+
+        Result<Void> result = clusterLogicService.deleteClusterLogicById(logicClusterId, operator, projectId);
+        if (result.success()) {
+            SpringTool.publish(new ClusterLogicEvent(logicClusterId, projectId));
+            //操作记录 集群下线
+            operateRecordService
+                .save(new OperateRecord.Builder().project(projectService.getProjectBriefByProjectId(projectId))
+                    .operationTypeEnum(OperateTypeEnum.MY_CLUSTER_OFFLINE).triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                    .content(clusterLogic.getName()).bizId(logicClusterId.intValue()).userOperation(operator).build());
+        }
+        return result;
     }
 
     private ClusterLogicTemplateIndexDetailDTO getTemplateIndexVO(ClusterLogic clusterLogic, Integer projectId) {
-        List<IndexTemplateLogicAggregate> templateLogicAggregates = templateLogicManager
-            .getLogicClusterTemplatesAggregate(clusterLogic.getId(), projectId);
-
-        List<IndexCatCellDTO> catIndexResults = Lists.newArrayList();
+        IndexTemplateDTO param = new IndexTemplateDTO();
+        param.setResourceId(clusterLogic.getId());
+        List<IndexTemplate> indexTemplates = indexTemplateService.listLogicTemplates(param);
         //通过逻辑集群获取index
-        List<IndexCatCell> indexCatCells = esIndexCatService.getByClusterLogic(clusterLogic.getName());
-        templateLogicAggregates.forEach(templateLogicAggregate -> {
-
-            Integer templateLogic = templateLogicAggregate.getIndexTemplateLogicWithCluster().getId();
-
-            IndexTemplateWithPhyTemplates templateLogicWithPhysical = indexTemplateService
-                .getLogicTemplateWithPhysicalsById(templateLogic);
-            if (templateLogicWithPhysical != null) {
-
-                List<IndexTemplatePhy> physicalMasters = templateLogicWithPhysical.fetchMasterPhysicalTemplates();
-                for (IndexTemplatePhy physicalMaster : physicalMasters) {
-                    List<CatIndexResult> catIndexResultList = esIndexService
-                        .syncCatIndexByExpression(physicalMaster.getCluster(), physicalMaster.getExpression());
-                    catIndexResultList.forEach(catIndexResult -> {
-                        IndexCatCellDTO indicesClearDTO = new IndexCatCellDTO();
-                        indicesClearDTO.setIndex(catIndexResult.getIndex());
-                        indicesClearDTO.setCluster(physicalMaster.getCluster());
-                        catIndexResults.add(indicesClearDTO);
-                    });
-                }
-
-            }
-        });
-
+        List<IndexCatCellDTO> catIndexResults = esIndexCatService.getByClusterLogic(clusterLogic.getName());
         ClusterLogicTemplateIndexDetailDTO templateIndexVO = new ClusterLogicTemplateIndexDetailDTO();
         templateIndexVO.setCatIndexResults(catIndexResults);
-        templateIndexVO.setTemplateLogicAggregates(templateLogicAggregates);
+        templateIndexVO.setTemplates(indexTemplates);
         return templateIndexVO;
     }
 
@@ -516,7 +491,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         ClusterLogicTemplateIndexDetailDTO detailVO = getTemplateIndexVO(clusterLogic, projectId);
         ClusterLogicTemplateIndexCountVO countVO = new ClusterLogicTemplateIndexCountVO();
         countVO.setCatIndexResults(detailVO.getCatIndexResults().size());
-        countVO.setTemplateLogicAggregates(detailVO.getTemplateLogicAggregates().size());
+        countVO.setTemplateLogicAggregates(detailVO.getTemplates().size());
         return Result.buildSucc(countVO);
     }
 

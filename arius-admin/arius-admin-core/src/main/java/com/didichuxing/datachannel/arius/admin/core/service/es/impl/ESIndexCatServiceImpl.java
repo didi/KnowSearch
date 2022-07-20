@@ -20,6 +20,7 @@ import org.elasticsearch.rest.RestStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -135,9 +136,12 @@ public class ESIndexCatServiceImpl implements ESIndexCatService {
     }
 
     @Override
-    public List<IndexCatCell> getByClusterLogic(String clusterLogicName) {
-        indexCatESDAO.getIndexListByTerms(clusterLogicName);
-        return null;
+    public List<IndexCatCellDTO> getByClusterLogic(String clusterLogicName) {
+        Tuple<Long, List<IndexCatCellPO>> totalHitAndIndexCatCellListTuple = indexCatESDAO.getIndexListByTerms(clusterLogicName);
+        if (totalHitAndIndexCatCellListTuple == null){
+            return new ArrayList<>();
+        }
+        return ConvertUtil.list2List(totalHitAndIndexCatCellListTuple.v2(),IndexCatCellDTO.class);
     }
 
     /*************************************************private*******************************************************/
