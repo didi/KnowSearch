@@ -514,7 +514,7 @@ public class IndicesManagerImpl implements IndicesManager {
         if (null == settingObj) {
             return Result.buildFail("setting 配置非法");
         }
-        Map<String, IndexConfig> configMap = esIndexService.syncGetIndexSetting(param.getCluster(),
+        Map<String, IndexConfig> configMap = esIndexService.syncGetIndexSetting(phyCluster,
             Lists.newArrayList(indexName), RETRY_COUNT);
         Map<String, String> sourceSettings = AriusOptional.ofObjNullable(configMap.get(indexName))
             .map(IndexConfig::getSettings).orElse(Maps.newHashMap());

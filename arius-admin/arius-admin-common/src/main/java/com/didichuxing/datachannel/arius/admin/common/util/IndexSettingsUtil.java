@@ -40,8 +40,7 @@ public class IndexSettingsUtil {
                 }
             });
         }
-        excludeIgnoreSettings(result);
-        return result;
+        return excludeIgnoreSettings(result);
     }
 
 }
