@@ -522,7 +522,7 @@ public class GatewayJoinESDAO extends BaseESDAO {
             return new HashSet<>();
         }
 
-        ESAggr esAggr = esAggrMap.getEsAggrMap().get("appid");
+        ESAggr esAggr = esAggrMap.getEsAggrMap().get("projectId");
         if (esAggr == null) {
             return new HashSet<>();
         }
@@ -1174,7 +1174,7 @@ public class GatewayJoinESDAO extends BaseESDAO {
         cellList
             .add(DSLSearchUtils.getTermCellForRangeSearch(queryDTO.getStartTime(), queryDTO.getEndTime(), "timeStamp"));
         // projectId 条件
-        cellList.add(DSLSearchUtils.getTermCellForExactSearch(projectId, "appid"));
+        cellList.add(DSLSearchUtils.getTermCellForExactSearch(projectId, "projectId"));
         // queryIndex 条件
         cellList.add(DSLSearchUtils.getTermCellForPrefixSearch(queryDTO.getQueryIndex(), "indices"));
         // totalCost>=1000即为慢查询
@@ -1194,7 +1194,7 @@ public class GatewayJoinESDAO extends BaseESDAO {
         cellList
             .add(DSLSearchUtils.getTermCellForRangeSearch(queryDTO.getStartTime(), queryDTO.getEndTime(), "timeStamp"));
         // projectId 条件
-        cellList.add(DSLSearchUtils.getTermCellForExactSearch(projectId, "appid"));
+        cellList.add(DSLSearchUtils.getTermCellForExactSearch(projectId, "projectId"));
         // queryIndex 条件
         cellList.add(DSLSearchUtils.getTermCellForPrefixSearch(queryDTO.getQueryIndex(), "indices"));
         // 只获取 ariusType 为error 即为异常

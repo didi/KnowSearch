@@ -2,9 +2,13 @@ package com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.dsl;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.dsl.template.DslTemplateConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.dsl.template.DslTemplateConditionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.DslBase;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.DslCheckMode;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.DslQueryLimit;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.ScrollDslTemplateRequest;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.ScrollDslTemplateResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.dsl.DslTemplatePO;
 import com.didichuxing.datachannel.arius.admin.common.util.DSLSearchUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.DateTimeUtil;
@@ -15,18 +19,17 @@ import com.didiglobal.logi.elasticsearch.client.response.query.query.ESQueryResp
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import javax.annotation.Nullable;
+import javax.annotation.PostConstruct;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
-import javax.annotation.Nullable;
-import javax.annotation.PostConstruct;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 @Component
 @NoArgsConstructor
@@ -246,7 +249,7 @@ public class DslTemplateESDAO extends BaseESDAO {
         // 最近时间范围条件
         cellList.add(DSLSearchUtils.getTermCellForRangeSearch(startTime, endTime, "timeStamp"));
         // projectId 条件
-        cellList.add(DSLSearchUtils.getTermCellForExactSearch(projectId, "appid"));
+        cellList.add(DSLSearchUtils.getTermCellForExactSearch(projectId, "projectId"));
 
         if (StringUtils.isNotBlank(dslTemplateMd5)) {
             // 优先使用 dslTemplateMd5 条件
@@ -303,7 +306,7 @@ public class DslTemplateESDAO extends BaseESDAO {
                 JSON.parse(String.format("{\"range\":{\"timeStamp\":{\"gte\":%d,\"lte\":%d}}}", startDate, endDate)));
 
             if (projectId != null) {
-                mustJson.add(JSON.parse(String.format("{\"term\":{\"appid\":{\"value\":%d}}}", projectId)));
+                mustJson.add(JSON.parse(String.format("{\"term\":{\"projectId\":{\"value\":%d}}}", projectId)));
             }
             if (StringUtils.isNoneBlank(searchKeyword)) {
                 mustJson.add(JSON.parse(String.format("{\"wildcard\":{\"my_all_fields\":\"%s\"}}", searchKeyword)));

@@ -330,7 +330,7 @@ public class GatewayNodeMetricsDAO extends BaseESDAO {
     private List<String> buildBaseTermCondition(String gatewayNode, Long startTime, Long endTime, Integer projectId) {
         List<String> cellList = Lists.newArrayList();
         cellList.add(DSLSearchUtils.getTermCellForRangeSearch(startTime, endTime, "timeStamp"));
-        cellList.add(DSLSearchUtils.getTermCellForExactSearch(projectId, "appid"));
+        cellList.add(DSLSearchUtils.getTermCellForExactSearch(projectId, "projectId"));
         cellList.add(DSLSearchUtils.getTermCellForExactSearch(gatewayNode, "gatewayNode"));
         return cellList;
     }

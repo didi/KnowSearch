@@ -5,7 +5,7 @@
       "must": [
         {
           "term": {
-            "appid": {
+            "projectId": {
               "value": %d
             }
           }
@@ -27,7 +27,7 @@
     }
   },
   "_source": [
-    "appid",
+    "projectId",
     "dslTemplateMd5",
     "totalCostAvg",
     "slowDslThreshold"

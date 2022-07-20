@@ -3,11 +3,10 @@ package com.didichuxing.datachannel.arius.admin.persistence.es.index.datacentre;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import javax.annotation.PostConstruct;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
-import javax.annotation.PostConstruct;
 
 @Component
 @NoArgsConstructor
@@ -35,7 +34,7 @@ public class DataCentreUtil {
  
 
     // projectId维度访问次数索引
-    @Value("${es.appid.template.access.index.name:arius.appid.template.access}")
+    @Value("${es.projectId.template.access.index.name:arius.appid.template.access}")
     private String ariusProjectIdTemplateAccess;
     // 索引维度访问次数索引
     @Value("${es.indexname.access.index.name:arius.indexname.access}")

@@ -24,6 +24,7 @@ public class DslLogEntity {
     private String dslTemplate;
     private String dslTemplateMd5;
     private String appidDslTemplateMd5;
+    private String projectIdDslTemplateMd5;
     private long timeStamp;
     private String dsl;
     private String indices;
