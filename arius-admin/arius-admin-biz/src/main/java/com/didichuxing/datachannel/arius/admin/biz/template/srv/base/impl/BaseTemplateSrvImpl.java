@@ -280,15 +280,8 @@ public abstract class BaseTemplateSrvImpl implements BaseTemplateSrv {
         return true;
     }
 
-    @Override
-    public Result<Boolean> checkOpenTemplateSrvByCluster(String phyCluster) {
-        return Result.buildSucc(Boolean.TRUE);
-    }
-
-    @Override
-    public Result<Boolean> checkOpenTemplateSrvWhenClusterJoin(String httpAddresses, String password) {
-        return Result.buildSucc(Boolean.TRUE);
-    }
+    
+  
 
     @Override
     public String templateServiceName() {
@@ -326,7 +319,7 @@ public abstract class BaseTemplateSrvImpl implements BaseTemplateSrv {
                 supportSrv.setColdRegionExists(existColdRegion);
                 Boolean isPartition = indexTemplateService.getLogicTemplateById(logicTemplateId).getExpression()
                         .endsWith("*");
-                supportSrv.setIsPartition(isPartition);
+                supportSrv.setPartition(isPartition);
                 return supportSrv;
             });
         } catch (ExecutionException e) {

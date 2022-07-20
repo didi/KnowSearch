@@ -1,6 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.task.template.new_srv;
 
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.indexplan.IndexPlanManager;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.task.BaseConcurrentTemplateTask;
 import com.didiglobal.logi.job.annotation.Task;
 import com.didiglobal.logi.job.common.TaskResult;
@@ -61,6 +62,12 @@ public class IndexRolloverTask extends BaseConcurrentTemplateTask implements Job
 
     @Override
     protected boolean executeByLogicTemplate(Integer logicId) {
-        return indexPlanManager.indexRollover(logicId).success();
+        final Result<Void> result = indexPlanManager.indexRollover(logicId);
+        if (result.failed()){
+             LOGGER.warn("class=IndexRolloverTask||method=executeByLogicTemplate||logicId={}||msg={}", logicId,
+                        result.getMessage());
+             return result.failed();
+        }
+        return result.success();
     }
 }

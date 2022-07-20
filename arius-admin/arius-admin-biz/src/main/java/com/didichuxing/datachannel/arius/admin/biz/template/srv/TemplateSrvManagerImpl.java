@@ -22,7 +22,6 @@ import com.didichuxing.datachannel.arius.admin.common.constant.template.SupportS
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
@@ -133,12 +132,12 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
         //默认给一个srv就可以了
         BaseTemplateSrv srvHandle = BASE_TEMPLATE_SRV_MAP.get(TemplateServiceEnum.TEMPLATE_COLD.getCode());
         SupportSrv supportSrv =srvHandle.getLogicTemplateSupportDCDRAndPipelineByLogicId(logicTemplateId);
-        final Boolean dcdrSupport = supportSrv.getDcdrModuleExists();
-        final Boolean pipelineSupport = supportSrv.getPipelineModuleExists();
-        Boolean coldRegionSupport = supportSrv.getColdRegionExists();
+        final boolean dcdrSupport = supportSrv.isDcdrModuleExists();
+        final boolean pipelineSupport = supportSrv.isPipelineModuleExists();
+        boolean coldRegionSupport = supportSrv.isColdRegionExists();
         //校验是否具备分区能力：冷热划分的能力、过期删除
         // isPartition为true代表能分区，false不能分区
-        boolean isPartition =supportSrv.getIsPartition();
+        boolean isPartition =supportSrv.isPartition();
         /**
          * 预创建，过期删除（分区才可以操作），冷热分离（分区并且有冷region才能操作），dcdr和pipeline（es有对应module才能操作），rolloer没有限制但是产品侧有提示
          */
@@ -312,21 +311,6 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
             return true;
     }
 
-    /**
-    * 根据物理集群名称和模板服务的映射id校验是否能够开启指定的模板服务
-    * @param phyCluster 物理集群名称
-    * @param templateSrvId 模板服务id
-    * @return 校验结果
-    */
-    private Result<Boolean> validCanOpenTemplateSrvId(String phyCluster, String templateSrvId) {
-        TemplateServiceEnum templateServiceEnum = TemplateServiceEnum.getById(Integer.parseInt(templateSrvId));
-        if (templateServiceEnum == null
-            || AriusObjUtils.isNull(BASE_TEMPLATE_SRV_MAP.get(Integer.parseInt(templateSrvId)))) {
-            return Result.buildFail("指定模板服务id有误");
-        }
-
-        return BASE_TEMPLATE_SRV_MAP.get(Integer.parseInt(templateSrvId)).checkOpenTemplateSrvByCluster(phyCluster);
-    }
 
     /**
      * 判断物理集群是否打开了某个索引服务

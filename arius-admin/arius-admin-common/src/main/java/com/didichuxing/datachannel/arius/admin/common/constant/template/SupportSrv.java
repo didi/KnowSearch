@@ -14,9 +14,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public   class SupportSrv {
-    private Boolean dcdrModuleExists     = false;
-    private Boolean coldRegionExists     = false;
-    private Boolean pipelineModuleExists = false;
-    private Boolean enableWriteRateLimit = false;
-    private Boolean isPartition          = false;
+    private boolean dcdrModuleExists     = false;
+    private boolean coldRegionExists     = false;
+    private boolean pipelineModuleExists = false;
+    private boolean enableWriteRateLimit = false;
+    private boolean isPartition          = false;
 }

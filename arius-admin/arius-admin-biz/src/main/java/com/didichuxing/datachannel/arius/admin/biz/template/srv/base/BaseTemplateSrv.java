@@ -71,20 +71,9 @@ public interface BaseTemplateSrv {
      */
     String templateServiceName();
 
-    /**
-     * 根据物理集群名称判断是否可以开启对应的模板服务
-     * @param phyCluster 物理集群名称
-     * @return 校验结果
-     */
-    Result<Boolean> checkOpenTemplateSrvByCluster(String phyCluster);
 
-    /**
-     * 根绝可以连接的client的http地址列表，逗号隔开，例如127.0.0.1:8060,127.0.0.2:8060
-     * @param httpAddresses client地址
-     * @param password 集群接入的时候的密码 user:password的形式
-     * @return 校验结果
-     */
-    Result<Boolean> checkOpenTemplateSrvWhenClusterJoin(String httpAddresses, String password);
+
+
 
     SupportSrv getLogicTemplateSupportDCDRAndPipelineByLogicId(Integer logicTemplateId);
 }

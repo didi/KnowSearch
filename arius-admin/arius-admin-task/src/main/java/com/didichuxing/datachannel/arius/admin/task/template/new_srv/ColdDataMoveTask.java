@@ -1,6 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.task.template.new_srv;
 
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.cold.ColdManager;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.task.BaseConcurrentTemplateTask;
 import com.didiglobal.logi.job.annotation.Task;
 import com.didiglobal.logi.job.common.TaskResult;
@@ -45,9 +46,21 @@ public class ColdDataMoveTask extends BaseConcurrentTemplateTask implements Job 
     public int current() {
         return 5;
     }
-
+    
     @Override
     protected boolean executeByLogicTemplate(Integer logicId) {
-        return coldManager.move2ColdNode(logicId).success();
+        try {
+            final Result<Boolean> result = coldManager.move2ColdNode(logicId);
+            if (Boolean.FALSE.equals(result.getData())) {
+                LOGGER.warn("class=ColdDataMoveTask||method=executeByLogicTemplate||logicId={}||msg={}", logicId,
+                        result.getMessage());
+            }
+            return result.getData();
+        } catch (Exception e) {
+            LOGGER.error("class=ColdDataMoveTask||method=executeByLogicTemplate||logicId={}||msg=admin冷数据搬迁服务",
+                    logicId, e);
+        }
+        
+        return Boolean.TRUE;
     }
 }
