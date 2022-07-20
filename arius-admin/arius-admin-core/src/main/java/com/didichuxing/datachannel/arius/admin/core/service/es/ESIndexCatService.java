@@ -64,5 +64,5 @@ public interface ESIndexCatService {
     /**
      * 获取不包含模板id并且包含projectId的IndexCatCellDTO信息，作用于平台索引管理新建索引侧
      */
-    List<IndexCatCell> syncGetHasProjectIdButNotTemplateIdCatIndexList();
+    List<IndexCatCell> syncGetPlatformCreateCatIndexList();
 }

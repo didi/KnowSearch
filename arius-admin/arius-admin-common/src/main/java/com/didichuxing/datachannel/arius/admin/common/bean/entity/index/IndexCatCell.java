@@ -35,6 +35,7 @@ public class IndexCatCell {
     private Long         primariesSegmentCount;
     private Long         totalSegmentCount;
     private Integer      templateId;
+    private Boolean      platformCreateFlag;
     private List<String> aliases;
 
     public String getKey() {

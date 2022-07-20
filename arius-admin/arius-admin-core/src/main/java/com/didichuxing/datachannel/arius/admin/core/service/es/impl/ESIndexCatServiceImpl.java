@@ -19,7 +19,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordina
 import com.didichuxing.datachannel.arius.admin.common.bean.po.index.IndexCatCellPO;
 import com.didichuxing.datachannel.arius.admin.common.util.BatchProcessor;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.SizeUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexCatService;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.index.IndexCatESDAO;
 import com.didiglobal.logi.elasticsearch.client.gateway.direct.DirectResponse;
@@ -126,16 +125,14 @@ public class ESIndexCatServiceImpl implements ESIndexCatService {
     }
 
     @Override
-    public List<IndexCatCell> syncGetHasProjectIdButNotTemplateIdCatIndexList() {
+    public List<IndexCatCell> syncGetPlatformCreateCatIndexList() {
         try {
-            return indexCatESDAO.getHasProjectIdButNotTemplateIdCatIndexList();
+            return indexCatESDAO.getPlatformCreateCatIndexList();
         } catch (Exception e) {
             LOGGER.error("class=ESIndexCatServiceImpl||method=syncGetHasProjectIdButNotTemplateIdCatIndexList||" +
                     "errMsg=failed to get syncGetHasProjectIdButNotTemplateIdCatIndexList", e);
         }
         return Lists.newArrayList();
     }
-
-
     /*************************************************private*******************************************************/
 }

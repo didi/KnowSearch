@@ -1,0 +1,15 @@
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "term": {
+            "platformCreateFlag": {
+              "value": true
+            }
+          }
+        }
+      ]
+    }
+  }
+}
