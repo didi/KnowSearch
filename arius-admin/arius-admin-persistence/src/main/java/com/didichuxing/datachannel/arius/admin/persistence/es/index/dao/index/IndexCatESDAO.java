@@ -1,13 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.index;
 
-import java.util.List;
-
-import javax.annotation.PostConstruct;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.IndexCatCell;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.index.IndexCatCellPO;
@@ -20,8 +12,13 @@ import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpTimeout
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dsls.DslsConstant;
 import com.google.common.collect.Lists;
-
 import lombok.NoArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import javax.annotation.PostConstruct;
+import java.util.List;
 
 @Component
 @NoArgsConstructor
@@ -94,6 +91,18 @@ public class IndexCatESDAO extends BaseESDAO {
                 IndexNameUtils.genCurrentDailyIndexName(indexName), typeName, dsl, IndexCatCellPO.class);
         } while (retryTime-- > 0 && null == totalHitAndIndexCatCellListTuple);
 
+        return totalHitAndIndexCatCellListTuple;
+    }
+
+    public Tuple<Long, List<IndexCatCellPO>> getIndexListByTerms(String clusterLogicName){
+        Tuple<Long, List<IndexCatCellPO>> totalHitAndIndexCatCellListTuple;
+        String queryTermDsl = buildQueryTermDsl(clusterLogicName, null, null, null, null);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_ALL_CAT_INDEX_INFO_BY_TERMS, queryTermDsl);
+        int retryTime = 3;
+        do {
+            totalHitAndIndexCatCellListTuple = gatewayClient.performRequestListAndGetTotalCount(metadataClusterName,
+                    IndexNameUtils.genCurrentDailyIndexName(indexName), typeName, dsl, IndexCatCellPO.class);
+        } while (retryTime-- > 0 && null == totalHitAndIndexCatCellListTuple);
         return totalHitAndIndexCatCellListTuple;
     }
 
