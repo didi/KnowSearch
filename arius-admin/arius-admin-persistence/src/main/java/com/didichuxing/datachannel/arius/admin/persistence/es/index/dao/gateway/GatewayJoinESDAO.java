@@ -9,6 +9,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.ExceptionD
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.QueryQpsMetric;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.gateway.GatewayJoinPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.query.ProjectQueryPO;
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.ESConstant;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.DSLSearchUtils;
@@ -1174,7 +1175,7 @@ public class GatewayJoinESDAO extends BaseESDAO {
         cellList
             .add(DSLSearchUtils.getTermCellForRangeSearch(queryDTO.getStartTime(), queryDTO.getEndTime(), "timeStamp"));
         // projectId 条件
-        cellList.add(DSLSearchUtils.getTermCellForExactSearch(projectId, "projectId"));
+        cellList.add(buildProjectIdCriteriaCell(projectId,queryDTO.getProjectId()));
         // queryIndex 条件
         cellList.add(DSLSearchUtils.getTermCellForPrefixSearch(queryDTO.getQueryIndex(), "indices"));
         // totalCost>=1000即为慢查询
@@ -1194,12 +1195,20 @@ public class GatewayJoinESDAO extends BaseESDAO {
         cellList
             .add(DSLSearchUtils.getTermCellForRangeSearch(queryDTO.getStartTime(), queryDTO.getEndTime(), "timeStamp"));
         // projectId 条件
-        cellList.add(DSLSearchUtils.getTermCellForExactSearch(projectId, "projectId"));
+        cellList.add(buildProjectIdCriteriaCell(projectId,queryDTO.getProjectId()));
         // queryIndex 条件
         cellList.add(DSLSearchUtils.getTermCellForPrefixSearch(queryDTO.getQueryIndex(), "indices"));
         // 只获取 ariusType 为error 即为异常
         cellList.add(DSLSearchUtils.getTermCellForExactSearch("error", "ariusType"));
         return ListUtils.strList2String(cellList);
+    }
+
+    private String buildProjectIdCriteriaCell(Integer currentProjectId, Integer queryProjectId) {
+        // 仅超级项目可用queryProjectId查询
+        if (AuthConstant.SUPER_PROJECT_ID.equals(currentProjectId)) {
+            return DSLSearchUtils.getTermCellForExactSearch(queryProjectId, "projectId");
+        }
+        return DSLSearchUtils.getTermCellForExactSearch(currentProjectId, "projectId");
     }
 
     /**
