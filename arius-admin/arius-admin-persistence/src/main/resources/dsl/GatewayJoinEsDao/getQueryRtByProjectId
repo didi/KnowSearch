@@ -4,7 +4,7 @@
       "must": [
         {
           "match": {
-            "appid": {
+            "projectId": {
               "query": %d
             }
           }
@@ -35,9 +35,9 @@
         }
       },
       "aggs": {
-        "queryByAppid": {
+        "queryByProjectId": {
           "terms": {
-            "field": "appid",
+            "field": "projectId",
             "size": 20,
             "order": {
               "1.99": "desc"

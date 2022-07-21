@@ -72,7 +72,7 @@ integrate.test.admin.ip: 127.0.0.1
 integrate.test.admin.port: 8010
 integrate.test.es.ip: 10.190.55.161
 integrate.test.es.port: 8888
-integrate.test.appid: 1
+integrate.test.esuser: 1
 integrate.test.operator: admin
 
 
