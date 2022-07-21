@@ -560,7 +560,7 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
                     templateLogicWithPhysical.getRoutingField()));
             if (esSuccess) {
                 operateRecordService.save(
-                    new OperateRecord.Builder().operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_INFO_MODIFY)
+                    new OperateRecord.Builder().operationTypeEnum(OperateTypeEnum.TEMPLATE_MANAGEMENT_INFO_MODIFY)
                         .userOperation(SYSTEM.getDesc()).triggerWayEnum(TriggerWayEnum.SCHEDULING_TASKS)
                         .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
                         .content(String.format("rateLimit:%s->%s", rateLimitOld, rateLimitNew))

@@ -258,7 +258,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrvImpl impleme
                 .getMapping(masterTemplatePhysical.getCluster(), masterTemplatePhysical.getName());
             operateRecordService.save(new OperateRecord.Builder()
                 .project(Optional.ofNullable(projectId).map(projectService::getProjectBriefByProjectId).orElse(null))
-                .userOperation(operator).operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE_EDIT_MAPPING)
+                .userOperation(operator).operationTypeEnum(OperateTypeEnum.TEMPLATE_MANAGEMENT_EDIT_MAPPING)
                 .content(new TemplateMappingOperateRecord(beforeResult.getData(), afterResult.getData()).toString())
                 .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
 
@@ -454,7 +454,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrvImpl impleme
             final Result<MappingConfig> afterResult = templatePhyMappingManager
                 .getMapping(templatePhysical.getCluster(), templatePhysical.getName());
             operateRecordService
-                .save(new OperateRecord.Builder().operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE_EDIT_MAPPING)
+                .save(new OperateRecord.Builder().operationTypeEnum(OperateTypeEnum.TEMPLATE_MANAGEMENT_EDIT_MAPPING)
                     .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).userOperation(operator)
                     .project(projectService.getProjectBriefByProjectId(templateLogicWithPhysical.getProjectId()))
                     .content(new TemplateMappingOperateRecord(beforeResult.getData(), afterResult.getData()).toString())

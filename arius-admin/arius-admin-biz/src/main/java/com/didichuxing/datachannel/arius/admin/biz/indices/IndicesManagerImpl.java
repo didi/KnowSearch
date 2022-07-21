@@ -2,16 +2,6 @@ package com.didichuxing.datachannel.arius.admin.biz.indices;
 
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.PRIMARY;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.function.BiFunction;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
@@ -75,6 +65,14 @@ import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.function.BiFunction;
+import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * @author lyn
@@ -260,7 +258,7 @@ public class IndicesManagerImpl implements IndicesManager {
                         .save(new OperateRecord.Builder().project(projectService.getProjectBriefByProjectId(projectId))
                             .content(String.format("开启索引：【%s】",  indexName)).userOperation(operator)
 
-                            .bizId(indexName).operationTypeEnum(OperateTypeEnum.INDEX_MANAGEMENT_OP_INDEX)
+                            .bizId(indexName).operationTypeEnum(OperateTypeEnum.INDEX_SERVICE_OP_INDEX)
                             .buildDefaultManualTrigger());
                 }
 
@@ -293,7 +291,7 @@ public class IndicesManagerImpl implements IndicesManager {
                     operateRecordService.save(
                         new OperateRecord.Builder().content(String.format("关闭索引：【%s】",  indexName))
                             .project(projectService.getProjectBriefByProjectId(projectId))
-                            .operationTypeEnum(OperateTypeEnum.INDEX_MANAGEMENT_OP_INDEX).userOperation(operator)
+                            .operationTypeEnum(OperateTypeEnum.INDEX_SERVICE_OP_INDEX).userOperation(operator)
                             .bizId(indexName)
 
                             .buildDefaultManualTrigger()
@@ -372,7 +370,7 @@ public class IndicesManagerImpl implements IndicesManager {
 
                     if (succ) {
                         String writeOrRead=StringUtils.equals(indicesBlockSetting.getType(),"write")?"写":"读";
-                        String value=indicesBlockSetting.getValue().equals(Boolean.TRUE)?"启用":"禁用";
+                        String value=indicesBlockSetting.getValue().equals(Boolean.FALSE)?"启用":"禁用";
                      
                         
                         for (IndicesBlockSettingDTO param : params) {
@@ -380,7 +378,7 @@ public class IndicesManagerImpl implements IndicesManager {
                             operateRecordService.save(new Builder().content(operateContent).userOperation(operator)
                                     .bizId(param.getIndex())
                                     .project(projectService.getProjectBriefByProjectId(projectId))
-                                    .operationTypeEnum(OperateTypeEnum.INDEX_MANAGEMENT_READ_WRITE_CHANGE)
+                                    .operationTypeEnum(OperateTypeEnum.INDEX_SERVICE_READ_WRITE_CHANGE)
                                     .buildDefaultManualTrigger());
                         }
 

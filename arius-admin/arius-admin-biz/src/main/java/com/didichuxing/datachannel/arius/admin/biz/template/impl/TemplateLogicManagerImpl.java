@@ -70,6 +70,7 @@ import com.didichuxing.datachannel.arius.admin.common.exception.AmsRemoteExcepti
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.mapping.AriusTypeProperty;
+import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
@@ -81,6 +82,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.Cluste
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
+import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterNodeService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectLogicTemplateAuthService;
@@ -176,7 +178,9 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     @Autowired
     private PipelineManager                 templatePipelineManager;
     @Autowired
-    private TemplateLogicManager            templateLogicManager;
+    private   TemplateLogicManager templateLogicManager;
+    @Autowired
+    protected ESClusterNodeService esClusterNodeService;
 
     public static final int                 MAX_PERCENT           = 10000;
     public static final int                 MIN_PERCENT           = -99;
@@ -239,7 +243,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
                             .content(String.format("模版创建：%s", param.getName()))
                             .project(projectService.getProjectBriefByProjectId(projectId))
                             .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                            .operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_CREATE).build());
+                            .operationTypeEnum(OperateTypeEnum.TEMPLATE_MANAGEMENT_CREATE).build());
         } catch (AdminOperateException e) {
             LOGGER.error("class=TemplateLogicManagerImpl||method=create", e);
             // 这里必须显示事务回滚
@@ -468,7 +472,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
                 String descBefore=oldIndexTemplate.getDesc();
                 String descAfter=param.getDesc();
                 operateRecordService.save(
-                    new OperateRecord.Builder().operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_INFO_MODIFY)
+                    new OperateRecord.Builder().operationTypeEnum(OperateTypeEnum.TEMPLATE_MANAGEMENT_INFO_MODIFY)
                         .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).userOperation(operator)
                         .content(String.format("数据类型变更：【%s】->【%s】;描述变更:【%s】->【%s】",dataTypeBefore,dataTypeAfter,
                                 descBefore,descAfter))
@@ -504,7 +508,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
                 .save(new OperateRecord.Builder().bizId(logicTemplateId).triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
                     .content(String.format("模板【%s】下线", beforeDeleteName))
                     .project(projectService.getProjectBriefByProjectId(projectId)).userOperation(operator)
-                    .operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_OFFLINE).build());
+                    .operationTypeEnum(OperateTypeEnum.TEMPLATE_MANAGEMENT_OFFLINE).build());
             //一并下线模板关联的索引
             /**
              * [{"cluster":"Zh_test3_cluster_7-6-0-1400","index":"zh_test3_template3_2022-07-18"}]
@@ -814,7 +818,9 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         String name = Optional.ofNullable(templateLogicWithPhysical).map(IndexTemplateWithPhyTemplates::getName)
             .orElse("");
         String clearIndices = String.join(",", indices);
-        operateRecordService.save(new OperateRecord.Builder().bizId(clearDTO.getLogicId())
+        operateRecordService.save(new OperateRecord.Builder()
+                        .project(projectService.getProjectBriefByProjectId(projectId))
+                .bizId(clearDTO.getLogicId())
             .operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE_CLEAN).userOperation(operator)
             .content(String.format("清理索引模板：%s下的索引列表：【%s】", name, clearIndices)).buildDefaultManualTrigger());
 
@@ -850,7 +856,9 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
                 throw new AdminOperateException(String.format("同步修改es集群[%s]中模板[%s]shard数[%d]失败, 请确认集群是否正常",
                     templatePhy.getCluster(), templatePhy.getName(), shardNum), FAIL);
             }
-            operateRecordService.save(new OperateRecord.Builder().bizId(logicTemplateId)
+            operateRecordService.save(new OperateRecord.Builder()
+                            .project(projectService.getProjectBriefByProjectId(projectId))
+                    .bizId(logicTemplateId)
                 .operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE_CAPACITY)
                 .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).content(String.format("同步修改es集群[%s]中模板[%s]shard数[%d]",
                     templatePhy.getCluster(), templatePhy.getName(), shardNum))
@@ -1341,6 +1349,27 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         buildCyclicalRoll(indexTemplateDTO, param);
         buildShardNum(indexTemplateDTO, param);
         buildPhysicalInfo(indexTemplateDTO, param);
+        //如果是分区模版
+        final boolean isExpression =
+                Optional.ofNullable(indexTemplateDTO.getExpression()).map(expression->expression.endsWith(
+                "*")).orElse(false);
+        List<Integer> openSrvList=Lists.newArrayList();
+        if (Boolean.TRUE.equals(isExpression)) {
+            openSrvList.add(TemplateServiceEnum.TEMPLATE_PRE_CREATE.getCode());
+            openSrvList.add(TemplateServiceEnum.TEMPLATE_DEL_EXPIRE.getCode());
+        }
+        final ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(
+                indexTemplateDTO.getResourceId());
+        final TupleTwo</*dcdrExist*/Boolean,/*pipelineExist*/ Boolean> existDCDRAndPipelineModule = esClusterNodeService.existDCDRAndPipelineModule(
+                clusterRegion.getPhyClusterName());
+        if (Boolean.TRUE.equals(existDCDRAndPipelineModule.v2)) {
+            openSrvList.add(TemplateServiceEnum.TEMPLATE_PIPELINE.getCode());
+        }
+        if (CollectionUtils.isNotEmpty(openSrvList)) {
+            //如果集群支持pipeline
+            indexTemplateDTO.setOpenSrv(ConvertUtil.list2String(openSrvList, ","));
+        }
+      
 
         return indexTemplateDTO;
     }
