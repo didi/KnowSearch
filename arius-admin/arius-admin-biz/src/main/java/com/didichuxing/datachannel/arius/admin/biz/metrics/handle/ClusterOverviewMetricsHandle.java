@@ -84,7 +84,7 @@ public class ClusterOverviewMetricsHandle {
                 metricsType, metricsClusterPhyDTO.getAggType(), metricsClusterPhyDTO.getStartTime(),
                 metricsClusterPhyDTO.getEndTime()));
         }
-        getMultipleMetricFutureUtil.waitExecute();
+        getMultipleMetricFutureUtil.waitExecute(100);
 
         //3. uniform percentage unit
         MetricsValueConvertUtils.convertClusterOverviewMetricsPercent(esClusterOverviewMetricsVO);

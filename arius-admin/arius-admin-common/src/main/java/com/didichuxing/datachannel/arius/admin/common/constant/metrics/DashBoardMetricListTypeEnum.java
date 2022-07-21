@@ -1,15 +1,16 @@
 package com.didichuxing.datachannel.arius.admin.common.constant.metrics;
 
 import com.google.common.collect.Lists;
-import java.util.List;
 import org.apache.commons.collections4.CollectionUtils;
+
+import java.util.List;
 
 /**
  * Created by linyunan on 3/11/22
  */
 public enum DashBoardMetricListTypeEnum {
     UNKNOWN(OneLevelTypeEnum.UNKNOWN, "", "未知"),
-    CLUSTER_ELAPSED_TIME_GTE_5MIN(OneLevelTypeEnum.CLUSTER, "elapsedTimeGte5Min", "采集超过5分钟"),
+    CLUSTER_ELAPSED_TIME_GTE_5MIN(OneLevelTypeEnum.CLUSTER, "clusterElapsedTimeGte5Min", "采集超过5分钟"),
     NODE_DEAD(OneLevelTypeEnum.NODE, "dead", "节点是否死亡"),
     NODE_LARGE_DISK_USAGE(OneLevelTypeEnum.NODE, "largeDiskUsage", "磁盘利用率是否超红线"),
     NODE_LARGE_HEAD(OneLevelTypeEnum.NODE, "largeHead", "堆内存利用率是否超红线"),
