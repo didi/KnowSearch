@@ -1174,13 +1174,8 @@ public class GatewayJoinESDAO extends BaseESDAO {
         // 最近时间范围条件
         cellList
             .add(DSLSearchUtils.getTermCellForRangeSearch(queryDTO.getStartTime(), queryDTO.getEndTime(), "timeStamp"));
-        // projectId 条件 普通项目只能查该项目下的慢查记录
-        if(!AuthConstant.SUPER_PROJECT_ID.equals(projectId)){
-            cellList.add(DSLSearchUtils.getTermCellForExactSearch(projectId, "projectId"));
-            //超级项目不带projectId条件查询时，可查到所有项目的慢查记录
-        } else {
-            cellList.add(DSLSearchUtils.getTermCellForExactSearch(queryDTO.getProjectId(), "projectId"));
-        }
+        // projectId 条件
+        cellList.add(buildProjectIdCriteriaCell(projectId,queryDTO.getProjectId()));
         // queryIndex 条件
         cellList.add(DSLSearchUtils.getTermCellForPrefixSearch(queryDTO.getQueryIndex(), "indices"));
         // totalCost>=1000即为慢查询
@@ -1199,18 +1194,21 @@ public class GatewayJoinESDAO extends BaseESDAO {
         // 最近时间范围条件
         cellList
             .add(DSLSearchUtils.getTermCellForRangeSearch(queryDTO.getStartTime(), queryDTO.getEndTime(), "timeStamp"));
-        // projectId 条件 普通项目只能查该项目下的慢查记录
-        if(!AuthConstant.SUPER_PROJECT_ID.equals(projectId)){
-            cellList.add(DSLSearchUtils.getTermCellForExactSearch(projectId, "projectId"));
-            //超级项目不带projectId条件查询时，可查到所有项目的慢查记录
-        } else {
-            cellList.add(DSLSearchUtils.getTermCellForExactSearch(queryDTO.getProjectId(), "projectId"));
-        }
+        // projectId 条件
+        cellList.add(buildProjectIdCriteriaCell(projectId,queryDTO.getProjectId()));
         // queryIndex 条件
         cellList.add(DSLSearchUtils.getTermCellForPrefixSearch(queryDTO.getQueryIndex(), "indices"));
         // 只获取 ariusType 为error 即为异常
         cellList.add(DSLSearchUtils.getTermCellForExactSearch("error", "ariusType"));
         return ListUtils.strList2String(cellList);
+    }
+
+    private String buildProjectIdCriteriaCell(Integer currentProjectId, Integer queryProjectId) {
+        // 仅超级项目可用queryProjectId查询
+        if (AuthConstant.SUPER_PROJECT_ID.equals(currentProjectId)) {
+            return DSLSearchUtils.getTermCellForExactSearch(queryProjectId, "projectId");
+        }
+        return DSLSearchUtils.getTermCellForExactSearch(currentProjectId, "projectId");
     }
 
     /**
