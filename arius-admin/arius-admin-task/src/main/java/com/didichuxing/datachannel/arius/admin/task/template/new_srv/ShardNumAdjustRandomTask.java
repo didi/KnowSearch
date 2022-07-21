@@ -28,26 +28,23 @@ import org.springframework.beans.factory.annotation.Autowired;
  *    不动态调整shard
  */
 @Task(name = "ShardNumAdjustRandomTask", description = "shard规划任务", cron = "0 0 3 1/1 * ? *", autoRegister = true)
-public class AdjustShardNumTask extends BaseConcurrentTemplateTask implements Job {
+public class ShardNumAdjustRandomTask extends BaseConcurrentTemplateTask implements Job {
 
-    private static final ILog LOGGER = LogFactory.getLog(AdjustShardNumTask.class);
+    private static final ILog LOGGER = LogFactory.getLog(ShardNumAdjustRandomTask.class);
 
     @Autowired
     private IndexPlanManager  indexPlanManager;
 
     @Override
     public TaskResult execute(JobContext jobContext) throws Exception {
-        LOGGER.info("class=AdjustShardNumTask||method=execute||msg=AdjustShardNumTask start");
+        LOGGER.info("class=ShardNumAdjustRandomTask||method=execute||msg=ShardNumAdjustRandomTask start");
         if (execute()) {
             return TaskResult.SUCCESS;
         }
         return TaskResult.FAIL;
     }
 
-    @Override
-    public String getTaskName() {
-        return "IndexRolloverTask";
-    }
+    
 
     @Override
     public int poolSize() {
@@ -64,11 +61,11 @@ public class AdjustShardNumTask extends BaseConcurrentTemplateTask implements Jo
         try {
             final Result<Boolean> result = indexPlanManager.adjustShardNum(logicId);
             if (Boolean.FALSE.equals(result.getData())) {
-                LOGGER.warn("class=AdjustShardNumTask||method=executeByLogicTemplate||logicId={}||msg={}", logicId,
+                LOGGER.warn("class=ShardNumAdjustRandomTask||method=executeByLogicTemplate||logicId={}||msg={}", logicId,
                         result.getMessage());
             }
         } catch (Exception e) {
-            LOGGER.error("class=AdjustShardNumTask||method=executeByLogicTemplate||logicId={}||msg=shard规划任务", logicId,
+            LOGGER.error("class=ShardNumAdjustRandomTask||method=executeByLogicTemplate||logicId={}||msg=shard规划任务", logicId,
                     e);
         }
         

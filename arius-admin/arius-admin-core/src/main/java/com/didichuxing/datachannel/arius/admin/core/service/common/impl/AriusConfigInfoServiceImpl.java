@@ -23,15 +23,14 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 /**
  *
@@ -135,7 +134,9 @@ public class AriusConfigInfoServiceImpl implements AriusConfigInfoService {
         boolean succ = (1 == configInfoDAO.update(ConvertUtil.obj2Obj(configInfoDTO, AriusConfigInfoPO.class)));
 
         if (succ) {
-            operateRecordService.save(buildOperateRecord(configInfoPO.getId(),operator,OperateTypeEnum.SETTING_MODIFY,String.format("编辑平台配置，配置组：%s，配置名称%s，配置值：", configInfoPO.getValueGroup(), configInfoPO.getValueName())));
+            operateRecordService.save(buildOperateRecord(configInfoPO.getId(),operator,OperateTypeEnum.SETTING_MODIFY
+                    ,String.format("编辑平台配置，配置组：%s，配置名称%s，配置值：【%s】->【%s】", configInfoPO.getValueGroup(),
+                            configInfoPO.getValueName(),configInfoPO.getValue(),configInfoDTO.getValue())));
 
         }
 

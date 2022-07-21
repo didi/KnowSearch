@@ -22,4 +22,7 @@ public class GatewayJoinQueryDTO {
 
     @ApiModelProperty(value = "查询总耗时（时间戳ms）", dataType = "Long", required = true)
     private Long   totalCost;
+
+    @ApiModelProperty(value = "应用Id", dataType = "Integer", required = false)
+    private Integer   projectId;
 }
