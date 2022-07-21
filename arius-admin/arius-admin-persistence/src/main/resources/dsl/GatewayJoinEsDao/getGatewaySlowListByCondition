@@ -15,7 +15,7 @@
     }
   },
   "_source": [
-    "appid",
+    "projectId",
     "timeStamp",
     "indices",
     "dsl",

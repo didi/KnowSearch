@@ -1,5 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.app;
 
+import static com.didichuxing.datachannel.arius.admin.common.util.DateTimeUtil.getDateStr;
+
 import com.didichuxing.datachannel.arius.admin.common.bean.po.query.ProjectTemplateAccessCountPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.ESConstant;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
@@ -10,14 +12,11 @@ import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESAggr
 import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESBucket;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import lombok.NoArgsConstructor;
-import org.springframework.stereotype.Component;
-
-import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Set;
-
-import static com.didichuxing.datachannel.arius.admin.common.util.DateTimeUtil.getDateStr;
+import javax.annotation.PostConstruct;
+import lombok.NoArgsConstructor;
+import org.springframework.stereotype.Component;
 
 @Component
 @NoArgsConstructor
@@ -65,7 +64,7 @@ public class ProjectTemplateAccessESDAO extends BaseESDAO {
 
         Set<Integer> projectIdSets = Sets.newTreeSet();
         String key = null;
-        ESAggr esAggr = esAggrMap.getEsAggrMap().get("appId");
+        ESAggr esAggr = esAggrMap.getEsAggrMap().get("projectId");
         List<ESBucket> esBucketList = esAggr.getBucketList();
         if (esBucketList != null) {
             for (ESBucket esBucket : esBucketList) {

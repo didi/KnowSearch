@@ -57,6 +57,9 @@
             "appidDslTemplateMd5":{
                 "type":"keyword"
             },
+            "projectIdDslTemplateMd5":{
+                "type":"keyword"
+            },
             "enable":{
                 "type":"boolean"
             },

@@ -8,9 +8,9 @@
     }
   },
   "aggs": {
-    "appid": {
+    "projectId": {
       "terms": {
-        "field": "appid",
+        "field": "projectId",
         "size": 0
       },
       "aggs": {

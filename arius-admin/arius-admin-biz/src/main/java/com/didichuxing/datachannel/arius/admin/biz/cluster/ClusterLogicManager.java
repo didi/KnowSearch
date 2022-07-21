@@ -96,7 +96,7 @@ public interface ClusterLogicManager {
      * @param logicClusterId 逻辑集群ID
      * @return
      */
-    List<ClusterPhy> getLogicClusterAssignedPhysicalClusters(Long logicClusterId);
+    ClusterPhy getLogicClusterAssignedPhysicalClusters(Long logicClusterId);
 
     /**
      * 获取所有逻辑集群列表接口
