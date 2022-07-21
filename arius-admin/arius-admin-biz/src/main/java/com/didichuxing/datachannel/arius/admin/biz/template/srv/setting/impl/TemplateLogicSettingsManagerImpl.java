@@ -234,7 +234,7 @@ public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrvImpl implem
         final Result<IndexTemplatePhySetting> afterSetting = getSettings(logicId);
         operateRecordService.save(new OperateRecord.Builder()
             .project(projectService.getProjectBriefByProjectId(projectId)).triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-            .userOperation(operator).operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE_EDIT_SETTING)
+            .userOperation(operator).operationTypeEnum(OperateTypeEnum.TEMPLATE_MANAGEMENT_EDIT_SETTING)
             .content(new TemplateSettingOperateRecord(beforeSetting.getData(), afterSetting.getData()).toString())
             .bizId(logicId).build());
 
