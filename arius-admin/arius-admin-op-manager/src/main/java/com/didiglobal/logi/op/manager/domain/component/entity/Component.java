@@ -1,14 +1,17 @@
 package com.didiglobal.logi.op.manager.domain.component.entity;
 
+import com.alibaba.fastjson.JSON;
 import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentGroupConfig;
 import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentHost;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 import com.didiglobal.logi.op.manager.infrastructure.common.ResultCode;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.ComponentStatusEnum;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.DeleteEnum;
+import com.didiglobal.logi.op.manager.infrastructure.util.Constants;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.elasticsearch.common.Strings;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -24,7 +27,7 @@ public class Component {
     /**
      * 组件id
      */
-    private String id;
+    private Integer id;
     /**
      * 状态(0 green,1 yellow,2 red,3 unKnow)
      */
@@ -40,7 +43,7 @@ public class Component {
     /**
      * 关联的安装包id
      */
-    private String packageId;
+    private Integer packageId;
     /**
      * 创建时间
      */
@@ -54,40 +57,44 @@ public class Component {
      */
     private Integer isDelete;
 
+
+
+
     /**
      * 值对象，关联group配置
      */
     private List<ComponentGroupConfig> groupConfigList;
 
+    /**
+     * 关联外部任务
+     */
+    private String associationId;
+
+    /**
+     * 依赖的组件id
+     */
+    private Integer dependComponentId;
 
     /**
      * 值对象，关联host
      */
     private List<ComponentHost> hostList;
 
-    public Result<Void> checkInstallParam(){
-        if (name.isEmpty()) {
-            return Result.fail(ResultCode.PARAM_ERROR.getCode(), "name缺失");
-        }
-
-        if (groupConfigList.isEmpty()) {
-            return Result.fail(ResultCode.PARAM_ERROR.getCode(), "配置组缺失");
-        }
-
-        if (null == packageId) {
-            return Result.fail(ResultCode.PARAM_ERROR.getCode(), "安装包缺失");
-        }
-        return Result.success();
-    }
 
     public Component create(){
         this.status = ComponentStatusEnum.UN_KNOW.getStatus();
         this.isDelete = DeleteEnum.NORMAL.getType();
-        this.groupConfigList.forEach(config -> {
-            config.create();
-        });
         this.createTime = new Timestamp(System.currentTimeMillis());
         this.updateTime = new Timestamp(System.currentTimeMillis());
+        return this;
+    }
+
+    public Component updateContainIds(int componentId){
+       if (Strings.isNullOrEmpty(containComponentIds)) {
+           containComponentIds = String.valueOf(componentId);
+       } else {
+           containComponentIds = containComponentIds + Constants.SPLIT + componentId;
+       }
         return this;
     }
 

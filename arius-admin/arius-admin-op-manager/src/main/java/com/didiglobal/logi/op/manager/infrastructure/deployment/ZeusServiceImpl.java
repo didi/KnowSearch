@@ -7,6 +7,8 @@ import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
+
 import static com.didiglobal.logi.op.manager.infrastructure.util.BaseHttpUtil.buildHeader;
 
 /**
@@ -26,16 +28,16 @@ public class ZeusServiceImpl implements ZeusService {
     @Value("${zeus.grpId}")
     private String zeusGrpId;
 
-    @Value("${zeus.user}")
+    @Value("${zeus.user:root}")
     private String zeusUser;
 
-    @Value("${zeus.batch}")
+    @Value("${zeus.batch:1}")
     private Integer zeusBatch;
 
     @Value("${zeus.timeOut}")
     private Integer zeusTimeOut;
 
-    @Value("${zeus.tolerance}")
+    @Value("${zeus.tolerance:0}")
     private Integer zeusTolerance;
 
     private static final String API_TASK = "/api/task/";
@@ -44,11 +46,24 @@ public class ZeusServiceImpl implements ZeusService {
 
     private static final String API_EDIT_TEMPLATE = "http://%s/api/tpl/%s/edit?token=%s";
 
+    private static final String API_EXECUTE_TASK = "http://%s/api/task?token=%s";
+
+    private static final String API_TASK_STATUS = "http://%s/api/task/%s/request";
+
     @Override
     public String createTemplate(ZeusTemplate zeusTemplate) throws ZeusOperationException {
+        zeusTemplate.setBatch(zeusBatch);
+        zeusTemplate.setAccount(zeusUser);
+        zeusTemplate.setTolerance(zeusTolerance);
+
         String url = String.format(API_TEMPLATE, zeusServer, zeusGrpId, zeusToken);
 
-        String response = BaseHttpUtil.postForString(url, JSON.toJSONString(zeusTemplate), buildHeader());
+        String response = null;
+        try {
+            response = BaseHttpUtil.postForString(url, JSON.toJSONString(zeusTemplate), buildHeader());
+        } catch (Exception e) {
+            throw new ZeusOperationException(e);
+        }
 
         ZeusResult result = JSON.parseObject(response, ZeusResult.class);
         if (result.failed()) {
@@ -59,10 +74,15 @@ public class ZeusServiceImpl implements ZeusService {
     }
 
     @Override
-    public String ditTemplate(ZeusTemplate zeusTemplate) throws ZeusOperationException {
+    public String editTemplate(ZeusTemplate zeusTemplate) throws ZeusOperationException {
         String url = String.format(API_EDIT_TEMPLATE, zeusServer, zeusTemplate.getId(), zeusToken);
 
-        String response = BaseHttpUtil.postForString(url, JSON.toJSONString(zeusTemplate), buildHeader());
+        String response = null;
+        try {
+            response = BaseHttpUtil.postForString(url, JSON.toJSONString(zeusTemplate), buildHeader());
+        } catch (Exception e) {
+            throw new ZeusOperationException(e);
+        }
 
         ZeusResult result = JSON.parseObject(response, ZeusResult.class);
         if (result.failed()) {
@@ -71,4 +91,46 @@ public class ZeusServiceImpl implements ZeusService {
 
         return result.getData().toString();
     }
+
+    @Override
+    public Integer executeTask(ZeusTask zeusTask) throws ZeusOperationException {
+        String url = String.format(API_EXECUTE_TASK, zeusServer, zeusToken);
+
+        String response = null;
+        try {
+            response = BaseHttpUtil.postForString(url, JSON.toJSONString(zeusTask), buildHeader());
+        } catch (Exception e) {
+            throw new ZeusOperationException(e);
+        }
+
+        ZeusResult result = JSON.parseObject(response, ZeusResult.class);
+        if (result.failed()) {
+            throw new ZeusOperationException(result.getMsg());
+        }
+
+        return Integer.parseInt(result.getData().toString());
+    }
+
+    @Override
+    public ZeusTaskStatus getTaskStatus(int taskId) throws ZeusOperationException {
+
+        String response = null;
+        try {
+            response = BaseHttpUtil.get(String.format(API_TASK_STATUS, zeusServer, taskId), null);
+        } catch (Exception e) {
+            throw new ZeusOperationException(e);
+        }
+
+        ZeusResult result = JSON.parseObject(response, ZeusResult.class);
+        if (result.failed()) {
+            throw new ZeusOperationException(result.getMsg());
+        }
+
+        ZeusTaskStatus zeusTaskStatus = JSON.parseObject(JSON.toJSONString(result.getData()),
+                ZeusTaskStatus.class);
+
+        return zeusTaskStatus;
+    }
+
+
 }

@@ -1,0 +1,57 @@
+package com.didiglobal.logi.op.manager.domain.task.entity.value;
+
+import com.didiglobal.logi.op.manager.infrastructure.common.enums.TaskStatusEnum;
+import io.swagger.models.auth.In;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.sql.Timestamp;
+
+/**
+ * @author didi
+ * @date 2022-07-13 10:12 上午
+ */
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class TaskDetail {
+    /**
+     * 关联任务id
+     */
+    private Integer id;
+    /**
+     * 执行任务id
+     */
+    private Integer executeTaskId;
+    /**
+     * 状态
+     */
+    private Integer status;
+    /**
+     * host
+     */
+    private String host;
+    /**
+     * 分组id
+     */
+    private String groupName;
+    /**
+     * 创建时间
+     */
+    private Timestamp createTime;
+    /**
+     * 更新时间
+     */
+    private Timestamp updateTime;
+
+    public TaskDetail create(String groupName, String host) {
+        this.status = TaskStatusEnum.WAITING.getStatus();
+        this.createTime = new Timestamp(System.currentTimeMillis());
+        this.updateTime = new Timestamp(System.currentTimeMillis());
+        this.groupName = groupName;
+        this.host = host;
+        return this;
+    }
+
+}

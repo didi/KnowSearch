@@ -13,6 +13,14 @@ public class ComponentEvent extends DomainEvent {
      */
     private int operateType;
 
+    public int getOperateType() {
+        return operateType;
+    }
+
+    public void setOperateType(int operateType) {
+        this.operateType = operateType;
+    }
+
     private ComponentEvent(Object source) {
         super(source);
     }
@@ -20,7 +28,14 @@ public class ComponentEvent extends DomainEvent {
     public static ComponentEvent createInstallEvent(Object source) {
         ComponentEvent event = new ComponentEvent(source);
         event.operateType = OperationEnum.INSTALL.getType();
-        event.setDescribe("安装组件");
+        event.setDescribe(OperationEnum.INSTALL.getDescribe());
+        return event;
+    }
+
+    public static ComponentEvent createScaleEvent(Object source) {
+        ComponentEvent event = new ComponentEvent(source);
+        event.operateType = OperationEnum.SCALE.getType();
+        event.setDescribe(OperationEnum.SCALE.getDescribe());
         return event;
     }
 

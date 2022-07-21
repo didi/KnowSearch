@@ -6,9 +6,15 @@ package com.didiglobal.logi.op.manager.infrastructure.common.enums;
  */
 public enum DeleteEnum {
 
+    /**
+     * 正常
+     */
     NORMAL(0),
 
-    uninstall(1);
+    /**
+     * 卸载
+     */
+    UNINSTALL(1);
 
     public int type;
 

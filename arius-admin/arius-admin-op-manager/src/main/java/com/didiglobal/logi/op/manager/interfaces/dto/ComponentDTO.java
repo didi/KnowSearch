@@ -20,7 +20,7 @@ public class ComponentDTO {
     /**
      * 组件id
      */
-    private String id;
+    private Integer id;
     /**
      * 状态(0 green,1 yellow,2 red,3 unKnow)
      */
@@ -36,7 +36,7 @@ public class ComponentDTO {
     /**
      * 关联的安装包id
      */
-    private String packageId;
+    private Integer packageId;
     /**
      * 创建时间
      */
@@ -60,5 +60,10 @@ public class ComponentDTO {
      * 值对象，关联host
      */
     private List<ComponentHostDTO> hostList;
+
+    /**
+     * 关联外部任务
+     */
+    private String associationId;
 
 }

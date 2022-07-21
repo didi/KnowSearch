@@ -29,7 +29,12 @@ public enum ResultCode {
 
     /*script操作报错 */
     SCRIPT_OPERATE_ERROR(4001, "脚本操作报错"),
-    ;
+
+    /*task不存在报错 */
+    TASK_NOT_EXIST_ERROR(4001, "任务不存在"),
+
+    /*组件操作处理器处理失败 */
+    HANDLER_OPERATE_ERROR(5001, "组件操作处理器处理失败");
 
     private final Integer code;
 

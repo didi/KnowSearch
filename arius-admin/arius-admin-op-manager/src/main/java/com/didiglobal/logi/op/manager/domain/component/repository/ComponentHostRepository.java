@@ -1,8 +1,16 @@
 package com.didiglobal.logi.op.manager.domain.component.repository;
 
+import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentHost;
+
 /**
  * @author didi
  * @date 2022-07-12 11:08 上午
  */
 public interface ComponentHostRepository {
+
+    /**
+     * 保存组件host
+     * @param componentHost
+     */
+    void saveComponentHost(ComponentHost componentHost);
 }

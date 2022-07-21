@@ -23,4 +23,21 @@ public interface DeploymentService {
      */
     Result<String> editScript(Script script);
 
+
+    /**
+     * 执行
+     * @param templateId
+     * @param taskId
+     * @param groupName
+     * @param hosts
+     * @return
+     */
+    Result<Integer> execute(String templateId, Integer taskId, String groupName, String hosts, String... args);
+
+    /**
+     * 执行状态
+     * @param taskId
+     * @return
+     */
+    Result<ZeusTaskStatus> deployStatus(int taskId);
 }

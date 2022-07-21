@@ -1,0 +1,74 @@
+package com.didiglobal.logi.op.manager.domain.task.service;
+
+import com.didiglobal.logi.op.manager.domain.task.entity.Task;
+import com.didiglobal.logi.op.manager.infrastructure.common.Result;
+import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralGroupConfig;
+
+import java.util.List;
+import java.util.Map;
+
+/**
+ * @author didi
+ * @date 2022-07-13 10:50 上午
+ */
+public interface TaskDomainService {
+
+    /**
+     * 创建任务
+     * @param content
+     * @param type
+     * @param describe
+     * @param associationId
+     * @param groupToIpList
+     * @return
+     */
+    Result<Void> createTask(String content, Integer type, String describe, String associationId,
+                            Map<String, List<String>> groupToIpList);
+
+    /**
+     * 执行任务
+     * @param taskId
+     * @return
+     */
+    Result<Void> executeTask(int taskId);
+
+    /**
+     * 通过id获取任务
+     * @param taskId
+     * @return
+     */
+    Result<Task> getTaskById(int taskId);
+
+    /**
+     * 获取分组配置
+     * @param taskId
+     * @param groupName
+     * @return
+     */
+    Result<GeneralGroupConfig> getConfig(int taskId, String groupName);
+
+    /**
+     * 获取未完成任务列表
+     * @return
+     */
+    Result<List<Task>> getUnFinishTaskList();
+
+    /**
+     * 更新task任务
+     * @param taskId
+     * @param executeId
+     * @param status
+     * @param hosts
+     * @return
+     */
+    Result<Void> updateTaskDetail(int taskId, int executeId, int status, List<String> hosts);
+
+    /**
+     * 更新任务状态以及是否完成
+     * @param taskId
+     * @param isFinish
+     * @param status
+     * @return
+     */
+    Result<Void> updateTaskStatus(int taskId, int isFinish, int status);
+}

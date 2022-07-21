@@ -1,8 +1,16 @@
 package com.didiglobal.logi.op.manager.domain.component.repository;
 
+import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentGroupConfig;
+
 /**
  * @author didi
  * @date 2022-07-12 11:09 上午
  */
 public interface ComponentGroupConfigRepository {
+    /**
+     * 保存分组配置
+     * @param groupConfig
+     * @return
+     */
+    int saveGroupConfig(ComponentGroupConfig groupConfig);
 }

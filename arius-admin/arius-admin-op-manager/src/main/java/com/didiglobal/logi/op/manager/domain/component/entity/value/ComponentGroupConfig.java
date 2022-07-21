@@ -43,6 +43,10 @@ public class ComponentGroupConfig {
      */
     private String installDirectoryConfig;
     /**
+     * 进程数配置
+     */
+    private String processNumConfig;
+    /**
      * 节点列表
      */
     private String hosts;

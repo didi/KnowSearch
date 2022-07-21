@@ -22,5 +22,21 @@ public interface ZeusService {
      * @return
      * @throws ZeusOperationException
      */
-    String ditTemplate(ZeusTemplate zeusTemplate) throws ZeusOperationException;
+    String editTemplate(ZeusTemplate zeusTemplate) throws ZeusOperationException;
+
+    /**
+     * 执行任务
+     * @param zeusTask
+     * @return
+     * @throws ZeusOperationException
+     */
+    Integer executeTask(ZeusTask zeusTask) throws ZeusOperationException;
+
+    /**
+     * 任务状态
+     * @param taskId
+     * @return
+     * @throws ZeusOperationException
+     */
+    ZeusTaskStatus getTaskStatus(int taskId) throws ZeusOperationException;
 }

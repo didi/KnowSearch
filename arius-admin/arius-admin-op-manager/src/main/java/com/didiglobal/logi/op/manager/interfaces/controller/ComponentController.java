@@ -5,6 +5,7 @@ import com.didiglobal.logi.op.manager.infrastructure.common.Constants;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 import com.didiglobal.logi.op.manager.interfaces.assembler.ComponentAssembler;
 import com.didiglobal.logi.op.manager.interfaces.dto.ComponentDTO;
+import com.didiglobal.logi.op.manager.interfaces.dto.GeneraInstallComponentDTO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
@@ -29,9 +30,15 @@ public class ComponentController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PackageController.class);
 
-    @PostMapping("")
+    @PostMapping("/install")
     @ApiOperation(value = "")
-    public Result<Void> install(@RequestBody ComponentDTO componentDTO) {
-        return componentService.installComponent(ComponentAssembler.toDO(componentDTO));
+    public Result<Void> install(@RequestBody GeneraInstallComponentDTO installComponentDTO) {
+        return componentService.installComponent(ComponentAssembler.toInstallComponent(installComponentDTO));
+    }
+
+    @PostMapping("/scale")
+    @ApiOperation(value = "")
+    public Result<Void> scale(@RequestBody GeneraInstallComponentDTO installComponentDTO) {
+        return componentService.installComponent(ComponentAssembler.toInstallComponent(installComponentDTO));
     }
 }

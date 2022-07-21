@@ -1,5 +1,7 @@
 package com.didiglobal.logi.op.manager.domain.component.entity.value;
 
+import com.didiglobal.logi.op.manager.infrastructure.common.enums.DeleteEnum;
+import com.didiglobal.logi.op.manager.infrastructure.common.enums.HostStatusEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -28,9 +30,13 @@ public class ComponentHost {
      */
     private Integer status;
     /**
-     * 目录
+     * 分组id
      */
-    private String directory;
+    private Integer groupId;
+    /**
+     * 进程数量
+     */
+    private Integer processNum;
     /**
      * 是否卸载
      */
@@ -43,4 +49,12 @@ public class ComponentHost {
      * 更新时间
      */
     private Timestamp updateTime;
+
+    public ComponentHost create() {
+        this.createTime = new Timestamp(System.currentTimeMillis());
+        this.updateTime = new Timestamp(System.currentTimeMillis());
+        this.isDeleted = DeleteEnum.NORMAL.getType();
+        this.status = HostStatusEnum.ON_LINE.getStatus();
+        return this;
+    }
 }
