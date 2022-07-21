@@ -246,7 +246,7 @@ public class DslTemplateESDAO extends BaseESDAO {
         // 最近时间范围条件
         cellList.add(DSLSearchUtils.getTermCellForRangeSearch(startTime, endTime, "timeStamp"));
         // projectId 条件
-        cellList.add(DSLSearchUtils.getTermCellForExactSearch(projectId, "appid"));
+        cellList.add(DSLSearchUtils.getTermCellForExactSearch(projectId, "projectId"));
 
         if (StringUtils.isNotBlank(dslTemplateMd5)) {
             // 优先使用 dslTemplateMd5 条件
