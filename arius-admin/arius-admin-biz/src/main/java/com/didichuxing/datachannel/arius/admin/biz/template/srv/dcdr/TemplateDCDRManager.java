@@ -53,12 +53,14 @@ public interface TemplateDCDRManager {
 
     /**
      * deletePhyDCDR
+     *
      * @param param
      * @param operator
+     * @param projectId
      * @return
      * @throws ESOperateException
      */
-    Result<Void> deletePhyDCDR(TemplatePhysicalDCDRDTO param, String operator) throws ESOperateException;
+    Result<Void> deletePhyDCDR(TemplatePhysicalDCDRDTO param, String operator, Integer projectId) throws ESOperateException;
 
     /**
      * 批量DCDR主从切换
