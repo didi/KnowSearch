@@ -63,7 +63,7 @@ public interface ESIndexCatService {
     Boolean syncInsertCatIndex(List<IndexCatCellDTO> params, int retryCount);
 
     /**
-     * 获取不包含模板id并且包含projectId的IndexCatCellDTO信息，作用于平台索引管理新建索引侧
+     * 获取通过平台创建的索引(不经过模板)IndexCatCellDTO信息，作用于平台索引管理新建索引侧
      */
     List<IndexCatCell> syncGetPlatformCreateCatIndexList();
 
