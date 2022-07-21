@@ -10,14 +10,13 @@ import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESAggr
 import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESAggrMap;
 import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESBucket;
 import com.google.common.collect.Lists;
-import lombok.NoArgsConstructor;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.stereotype.Component;
-
-import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import javax.annotation.PostConstruct;
+import lombok.NoArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.stereotype.Component;
 
 /**
  * dsl的指标信息，游flink任务解析dsl语句的时候写入数据
@@ -71,7 +70,7 @@ public class DslMetricsESDAO extends BaseESDAO {
 
         ESAggrMap esAggrMap = gatewayClient.performAggRequest(realIndexName, typeName, dsl);
         if (esAggrMap != null && esAggrMap.getEsAggrMap() != null) {
-            ESAggr esAggr = esAggrMap.getEsAggrMap().get("appidDslTemplateMd5");
+            ESAggr esAggr = esAggrMap.getEsAggrMap().get("projectIdDslTemplateMd5");
             if (esAggr != null) {
                 List<ESBucket> esBucketList = esAggr.getBucketList();
                 if (esBucketList != null) {

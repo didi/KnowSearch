@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.cold;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import java.util.List;
 
 /**
@@ -12,10 +12,11 @@ public interface ColdManager {
 
     /**
      * move2ColdNode
+     *
      * @param logicTemplateId 逻辑模板id
      * @return
      */
-    Result<Void> move2ColdNode(Integer logicTemplateId);
+    Result<Boolean> move2ColdNode(Integer logicTemplateId) throws ESOperateException;
 
     /**
      * fetchClusterDefaultHotDay
@@ -30,6 +31,7 @@ public interface ColdManager {
     * @param cluster
     * @return
     */
+    @Deprecated
     Result<Boolean> move2ColdNode(String cluster);
 
     Result<Integer> batchChangeHotDay(Integer coldSaveDays, String operator, List<Integer> templateIdList,

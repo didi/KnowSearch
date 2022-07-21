@@ -5,14 +5,20 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.operaterec
 import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum.MASTER;
 import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum.SLAVE;
 import static com.didichuxing.datachannel.arius.admin.common.util.IndexNameFactory.genIndexNameClear;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.INDEX_SHARD_NUM;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.SINGLE_TYPE;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.TEMPLATE_INDEX_INCLUDE_NODE_NAME;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.*;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyManager;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.indexplan.IndexPlanManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.precreate.PreCreateManager;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.IndexTemplatePhysicalConfig;
@@ -41,16 +47,10 @@ import com.didichuxing.datachannel.arius.admin.common.event.template.PhysicalTem
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.mapping.AriusIndexTemplateSetting;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusDateUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusIndexMappingConfigUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.IndexNameFactory;
-import com.didichuxing.datachannel.arius.admin.common.util.TemplateUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.*;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
-import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectLogicTemplateAuthService;
@@ -68,20 +68,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class TemplatePhyManagerImpl implements TemplatePhyManager {
@@ -118,10 +104,7 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
     private ESTemplateService               esTemplateService;
 
     @Autowired
-    private PreCreateManager                templatePreCreateManager;
-
-    @Autowired
-    private IndexPlanManager                indexPlanManager;
+    private PreCreateManager                preCreateManager;
 
     @Autowired
     private ClusterRoleHostService          clusterRoleHostService;
@@ -131,9 +114,6 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
 
     @Autowired
     private IndexTemplatePhyService         indexTemplatePhyService;
-
-    @Autowired
-    private AriusConfigInfoService          ariusConfigInfoService;
     @Autowired
     private IndexTemplatePhyService         physicalService;
 
@@ -500,10 +480,8 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
     public Result<Void> editTemplateWithoutCheck(IndexTemplatePhyDTO param, String operator,
                                                  int retryCount) throws ESOperateException {
         IndexTemplatePhy oldIndexTemplatePhy = indexTemplatePhyService.getTemplateById(param.getId());
-
-        if (param.getShard() != null && !oldIndexTemplatePhy.getShard().equals(param.getShard())) {
-            indexPlanManager.initShardRoutingAndAdjustShard(param);
-        }
+        //不需要shard比较
+        
 
         boolean succ = indexTemplatePhyService.update(param).success();
         String tips = "";
@@ -694,11 +672,6 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
             return Result.buildParamIllegal("shard个数非法");
         }
 
-        IndexTemplate logic = indexTemplateService.getLogicTemplateById(oldIndexTemplatePhy.getLogicId());
-        if (TemplateUtils.isOnly1Index(logic.getExpression())) {
-            return Result.buildParamIllegal("不是分区创建的索引，不能升版本");
-        }
-
         return Result.buildSucc();
     }
 
@@ -715,15 +688,23 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
 
         IndexTemplatePhyDTO updateParam = new IndexTemplatePhyDTO();
         updateParam.setId(indexTemplatePhy.getId());
-        updateParam.setShard(param.getShard());
         updateParam.setVersion(param.getVersion());
+        /*
+        这里提前创建当天索引
+          1.避免因为getTemplateConfig失败，导致升版本后不分区索引mapping异常
+          2.避免由于事务原因，导致当天最新版本的分区索引未被创建
+        */
+        if (!preCreateManager.syncCreateTodayIndexByPhysicalId(updateParam.getId(), updateParam.getVersion())) {
+            return Result.buildFail("创建当前最新版本索引失败，请稍后重试！");
+        }
+
         Result<Void> editResult = editTemplateWithoutCheck(updateParam, operator, retryCount);
 
         if (editResult.failed()) {
             return editResult;
         }
 
-        templatePreCreateManager.asyncCreateTodayAndTomorrowIndexByPhysicalId(indexTemplatePhy.getId(), 3);
+        preCreateManager.asyncCreateTodayAndTomorrowIndexByPhysicalId(indexTemplatePhy.getId());
 
         return Result.buildSucc();
     }

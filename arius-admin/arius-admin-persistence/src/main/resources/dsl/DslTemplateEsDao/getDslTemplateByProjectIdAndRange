@@ -13,7 +13,7 @@
                     },
                     {
                         "term":{
-                            "appid":{
+                            "projectId":{
                                 "value":%d
                             }
                         }
@@ -23,7 +23,7 @@
   },
  "sort": [
    {
-     "appid": {
+     "projectId": {
        "order": "asc"
      }
    },
@@ -35,7 +35,7 @@
  ],
  "_source": {
      "includes": [
-       "appid",
+       "projectId",
        "indiceSample",
        "dsl",
        "dslTemplate",

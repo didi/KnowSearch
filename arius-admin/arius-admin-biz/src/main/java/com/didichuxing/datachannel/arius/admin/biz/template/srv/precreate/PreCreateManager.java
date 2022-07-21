@@ -12,10 +12,11 @@ public interface PreCreateManager {
 
     /**
      * 索引预先创建
+     *
      * @param logicTemplateId 逻辑模板id
      * @return Result 创建是否成功
      */
-    Result<Void> preCreateIndex(Integer logicTemplateId);
+    Result<Boolean> preCreateIndex(Integer logicTemplateId) throws ESOperateException;
 
     /**
      * 异步创建今明天索引
@@ -23,7 +24,17 @@ public interface PreCreateManager {
      */
     void asyncCreateTodayAndTomorrowIndexByPhysicalId(Long physicalId);
 
-    ////////////////////srv
+    /**
+     * 同步创建今天索引
+     *
+     * @param physicalId 物理模版id
+     * @param version    版本
+     * @return boolean
+     * @throws ESOperateException esoperate例外
+     */
+    boolean syncCreateTodayIndexByPhysicalId(Long physicalId, int version) throws ESOperateException;
+
+        ////////////////////srv
     /**
     * 索引预先创建
     * @param cluster 集群
@@ -31,6 +42,7 @@ public interface PreCreateManager {
     * @return true/false
     * @throws AdminOperateException
     */
+    @Deprecated
     boolean preCreateIndex(String cluster, int retryCount);
 
     /**
@@ -40,11 +52,4 @@ public interface PreCreateManager {
      * @return true/false
      */
     boolean reBuildTomorrowIndex(Integer logicId, int retryCount) throws ESOperateException;
-
-    /**
-     * 异步创建今明天索引
-     * @param physicalId 物理模板id
-     * @param retryCount 重试次数
-     */
-    void asyncCreateTodayAndTomorrowIndexByPhysicalId(Long physicalId, int retryCount);
 }

@@ -523,7 +523,7 @@ public class GatewayJoinESDAO extends BaseESDAO {
             return new HashSet<>();
         }
 
-        ESAggr esAggr = esAggrMap.getEsAggrMap().get("appid");
+        ESAggr esAggr = esAggrMap.getEsAggrMap().get("projectId");
         if (esAggr == null) {
             return new HashSet<>();
         }

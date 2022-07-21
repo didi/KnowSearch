@@ -14,7 +14,7 @@
     }
   },
   "_source": [
-    "appid",
+    "projectId",
     "indices",
     "requestId",
     "destIndexName"

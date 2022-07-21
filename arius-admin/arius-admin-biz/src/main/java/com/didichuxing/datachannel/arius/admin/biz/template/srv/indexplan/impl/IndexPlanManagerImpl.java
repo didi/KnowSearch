@@ -3,6 +3,14 @@ package com.didichuxing.datachannel.arius.admin.biz.template.srv.indexplan.impl;
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.BYTE_TO_G;
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.G_PER_SHARD;
 
+import java.util.*;
+import java.util.stream.Collectors;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.impl.BaseTemplateSrvImpl;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.indexplan.IndexPlanManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -16,27 +24,13 @@ import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusDateUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.IndexNameUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.TemplateUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.*;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didiglobal.logi.elasticsearch.client.response.indices.stats.IndexNodes;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 /**
  * @author chengxiang, jiamin
@@ -117,7 +111,7 @@ public class IndexPlanManagerImpl extends BaseTemplateSrvImpl implements IndexPl
     }
 
     @Override
-    public Result<Void> adjustShardNum(Integer logicTemplateId) {
+    public Result<Boolean> adjustShardNum(Integer logicTemplateId) throws ESOperateException {
         LOGGER.info(
             "class=IndexPlanManagerImpl||method=adjustShardCount||logicTemplateId={}||msg=start adjustShardCount",
             logicTemplateId);
@@ -130,17 +124,11 @@ public class IndexPlanManagerImpl extends BaseTemplateSrvImpl implements IndexPl
             LOGGER.info(
                 "class=IndexPlanManagerImpl||method=adjustShardCount||logicTemplateId={}||msg=IndexRolloverTask no physical template",
                 logicTemplateId);
-            return Result.buildSucc();
+            return Result.build(Boolean.TRUE);
         }
 
-        try {
-            governPerTemplate(templatePhyList);
-        } catch (Exception e) {
-            LOGGER.error(
-                "class=IndexPlanManagerImpl||method=adjustShardCount||logicTemplateId={}||msg=adjustShardCount error",
-                logicTemplateId, e);
-        }
-        return Result.buildSucc();
+        governPerTemplate(templatePhyList);
+          return Result.build(Boolean.TRUE);
     }
 
     @Override
@@ -198,9 +186,7 @@ public class IndexPlanManagerImpl extends BaseTemplateSrvImpl implements IndexPl
     private void updateTemplateVersion(IndexTemplatePhy templatePhy) {
         TemplatePhysicalUpgradeDTO param = new TemplatePhysicalUpgradeDTO();
         param.setVersion(templatePhy.getVersion() + 1);
-        param.setRack(templatePhy.getRack());
         param.setPhysicalId(templatePhy.getId());
-        param.setShard(templatePhy.getShard());
 
         try {
             Result<Void> result = templatePhyManager.rolloverUpgradeTemplate(param, AriusUser.CAPACITY_PLAN.getDesc());

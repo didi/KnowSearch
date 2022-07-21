@@ -1,7 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.task.template.new_srv;
 
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.expire.ExpireManager;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.task.BaseConcurrentTemplateTask;
+import com.didiglobal.logi.job.annotation.Task;
 import com.didiglobal.logi.job.common.TaskResult;
 import com.didiglobal.logi.job.core.job.Job;
 import com.didiglobal.logi.job.core.job.JobContext;
@@ -13,9 +15,9 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @author chengxiang
  * @date 2022/5/13
  */
-//@Task(name = "DeleteExpireIndexTask", description = "删除过期索引任务", cron = "0 55 23 */1 * ?", autoRegister = true)
+@Task(name = "DeleteExpireIndexTask", description = "删除过期索引任务", cron = "0 55 23 */1 * ?", autoRegister = true)
 public class DeleteExpireIndexTask extends BaseConcurrentTemplateTask implements Job {
-    private static final ILog LOGGER = LogFactory.getLog(IndexRolloverTask.class);
+    private static final ILog LOGGER = LogFactory.getLog(DeleteExpireIndexTask.class);
 
     @Autowired
     private ExpireManager     expireManager;
@@ -46,6 +48,11 @@ public class DeleteExpireIndexTask extends BaseConcurrentTemplateTask implements
 
     @Override
     protected boolean executeByLogicTemplate(Integer logicId) {
-        return expireManager.deleteExpireIndex(logicId).success();
+        final Result<Void> result = expireManager.deleteExpireIndex(logicId);
+        if (result.failed()){
+            LOGGER.warn("class=DeleteExpireIndexTask||method=executeByLogicTemplate||logicId={}||msg={}", logicId,
+                        result.getMessage());
+        }
+        return result.success();
     }
 }

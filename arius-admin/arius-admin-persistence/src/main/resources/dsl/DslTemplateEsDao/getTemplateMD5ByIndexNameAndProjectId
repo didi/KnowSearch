@@ -19,7 +19,7 @@
         },
         {
           "term": {
-            "appid": {
+            "projectId": {
               "value": %s
             }
           }

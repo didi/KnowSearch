@@ -1,7 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.task.template.new_srv;
 
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.indexplan.IndexPlanManager;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.task.BaseConcurrentTemplateTask;
+import com.didiglobal.logi.job.annotation.Task;
 import com.didiglobal.logi.job.common.TaskResult;
 import com.didiglobal.logi.job.core.job.Job;
 import com.didiglobal.logi.job.core.job.JobContext;
@@ -25,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * 按月滚动的模版：
  *    不动态调整shard
  */
+@Task(name = "ShardNumAdjustRandomTask", description = "shard规划任务", cron = "0 0 3 1/1 * ? *", autoRegister = true)
 public class AdjustShardNumTask extends BaseConcurrentTemplateTask implements Job {
 
     private static final ILog LOGGER = LogFactory.getLog(AdjustShardNumTask.class);
@@ -55,9 +58,20 @@ public class AdjustShardNumTask extends BaseConcurrentTemplateTask implements Jo
     public int current() {
         return 5;
     }
-
+    
     @Override
     protected boolean executeByLogicTemplate(Integer logicId) {
-        return indexPlanManager.adjustShardNum(logicId).success();
+        try {
+            final Result<Boolean> result = indexPlanManager.adjustShardNum(logicId);
+            if (Boolean.FALSE.equals(result.getData())) {
+                LOGGER.warn("class=AdjustShardNumTask||method=executeByLogicTemplate||logicId={}||msg={}", logicId,
+                        result.getMessage());
+            }
+        } catch (Exception e) {
+            LOGGER.error("class=AdjustShardNumTask||method=executeByLogicTemplate||logicId={}||msg=shard规划任务", logicId,
+                    e);
+        }
+        
+        return Boolean.TRUE;
     }
 }

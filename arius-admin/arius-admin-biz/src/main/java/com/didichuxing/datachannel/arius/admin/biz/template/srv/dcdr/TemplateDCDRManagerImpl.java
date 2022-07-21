@@ -172,7 +172,8 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
         ariusTaskThreadPool = new AriusTaskThreadPool();
         ariusTaskThreadPool.init(10, "TemplateDCDRManagerImpl", 10000);
     }
-
+  
+    
     private static final FutureUtil<Void> BATCH_DCDR_FUTURE_UTIL = FutureUtil.init("BATCH_DCDR_FUTURE_UTIL", 10, 10,
         100);
 
@@ -276,7 +277,7 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
             return checkResult;
         }
 
-        return deletePhyDCDR(createDCDRMeta(templateId), operator);
+        return deletePhyDCDR(createDCDRMeta(templateId), operator,projectId);
     }
 
     /**
@@ -317,12 +318,13 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
     /**
      * 删除DCDR链路
      *
-     * @param param    参数
-     * @param operator 操作人
+     * @param param     参数
+     * @param operator  操作人
+     * @param projectId
      * @return result
      */
     @Override
-    public Result<Void> deletePhyDCDR(TemplatePhysicalDCDRDTO param, String operator) throws ESOperateException {
+    public Result<Void> deletePhyDCDR(TemplatePhysicalDCDRDTO param, String operator, Integer projectId) throws ESOperateException {
         Result<Void> checkDCDRResult = checkDCDRParam(param);
 
         if (checkDCDRResult.failed()) {
@@ -345,7 +347,9 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
                     }
                 }
                 operateRecordService
-                    .save(new OperateRecord.Builder().operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE_DCDR_SETTING)
+                    .save(new OperateRecord.Builder()
+                            .project(projectService.getProjectBriefByProjectId(projectId))
+                            .operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE_DCDR_SETTING)
                         .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).bizId(templatePhysicalPO.getLogicId())
                         .userOperation(operator).content("replicaCluster:" + param.getReplicaClusters())
 
@@ -976,7 +980,7 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
         dcdrDTO.setReplicaClusters(Arrays.asList(slaveTemplate.getCluster()));
         dcdrDTO.setDeleteIndexDcdr(false);
 
-        Result<Void> delTemDCDRResult = deletePhyDCDR(dcdrDTO, operator);
+        Result<Void> delTemDCDRResult = deletePhyDCDR(dcdrDTO, operator, AuthConstant.SUPER_PROJECT_ID);
         boolean delIndexDCDRResult = syncDeleteIndexDCDR(masterTemplate.getCluster(), slaveTemplate.getCluster(),
             matchNoVersionIndexNames, 3);
 

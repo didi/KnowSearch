@@ -2,7 +2,7 @@
   "size":0,
   "query": {
     "term": {
-      "appid": {
+      "projectId": {
         "value": %d
       }
     }
