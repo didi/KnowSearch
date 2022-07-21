@@ -2,6 +2,17 @@ package com.didichuxing.datachannel.arius.admin.biz.indices;
 
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.PRIMARY;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.function.BiFunction;
+import java.util.stream.Collectors;
+
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
@@ -118,7 +129,7 @@ public class IndicesManagerImpl implements IndicesManager {
     private IndexTemplateService    indexTemplateService;
 
     @Autowired
-    private ESTemplateService       templateService;
+    private ESTemplateService        esTemplateService;
 
     private static final String     DEFAULT_SORT_TERM = "timestamp";
 
@@ -139,10 +150,16 @@ public class IndicesManagerImpl implements IndicesManager {
 
     @Override
     public Result<Void> createIndex(IndexCatCellWithConfigDTO indexCreateDTO, Integer projectId, String operator) {
-        // 初始化分配集群信息
         Result<String> getClusterRet = getClusterPhyByClusterNameAndProjectId(indexCreateDTO.getCluster(), projectId);
         if (getClusterRet.failed()) { return Result.buildFrom(getClusterRet);}
 
+        String realPhyCluster = getClusterRet.getData();
+
+        // 校验创建索引在平台的合法性
+        Result<Void> checkValidRet = checkValid(indexCreateDTO, realPhyCluster);
+        if (checkValidRet.failed()) { return checkValidRet;}
+
+        // 初始化分配集群信息
         Result<Void> initRet = initIndexCreateDTO(indexCreateDTO, projectId);
         if (initRet.failed()) { return initRet;}
 
@@ -164,7 +181,7 @@ public class IndicesManagerImpl implements IndicesManager {
         boolean succ = false;
         try {
             // 1. es创建真实索引
-            boolean syncCreateIndexRet = esIndexService.syncCreateIndex(getClusterRet.getData(), indexCreateDTO.getIndex(),
+            boolean syncCreateIndexRet = esIndexService.syncCreateIndex(realPhyCluster, indexCreateDTO.getIndex(),
                     indexConfig, RETRY_COUNT);
 
             // 2. 同步在元数据Cat_index系统索引中添加此索引元数据文档
@@ -850,6 +867,12 @@ public class IndicesManagerImpl implements IndicesManager {
         }
     }
 
+    /**
+     * 注意， 这里普通用户侧前端传输cluster值是：逻辑集群名称，运维侧是：物理集群名称
+     * @param cluster
+     * @param projectId
+     * @return
+     */
     private Result<String> getClusterPhyByClusterNameAndProjectId(String cluster, Integer projectId) {
         String phyClusterName;
         if (AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
@@ -885,6 +908,24 @@ public class IndicesManagerImpl implements IndicesManager {
 
         indexCreateDTO.setPlatformCreateFlag(true);
         indexCreateDTO.setProjectId(projectId);
+        return Result.buildSucc();
+    }
+
+    private Result<Void> checkValid(IndexCatCellWithConfigDTO params, String phyCluster) {
+        String index = params.getIndex();
+        String key   = phyCluster + "@" + index;
+
+        List<IndexTemplatePhy> indexTemplatePhyList = indexTemplatePhyService.listTemplate();
+        if (CollectionUtils.isEmpty(indexTemplatePhyList)) { return Result.buildSucc();}
+
+        List<String> existKeyList = indexTemplatePhyList.stream().map(r -> r.getCluster() + "@" + r.getName())
+                .distinct().collect(Collectors.toList());
+        for (String existKey : existKeyList) {
+            if (existKey.startsWith(key)) {
+                return Result.buildFail(String.format("创建的索引名称[%s]不允许和该集群模板名称[%s]存在前缀的匹配, 请修改索引名称", index,
+                        existKey.split("@")[1]));
+            }
+        }
         return Result.buildSucc();
     }
 }
