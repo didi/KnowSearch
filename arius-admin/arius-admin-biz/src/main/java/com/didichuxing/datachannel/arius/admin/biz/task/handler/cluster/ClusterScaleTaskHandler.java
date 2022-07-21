@@ -120,6 +120,9 @@ public class ClusterScaleTaskHandler extends AbstractClusterTaskHandler {
             hostScaleParamBaseList.stream().map(EcmParamBase::getRoleName).collect(Collectors.toList())));
         ecmTaskDTO.setEcmParamBaseList(hostScaleParamBaseList);
         String hostOption=content.getOperationType()==2?"扩容":"缩容";
+        if (CollectionUtils.isEmpty(content.getOriginClusterRoleHosts())) {
+            return Result.buildFail("集群角色对应的原始的主机列表不能为空");
+        }
         final String clientNode = content.getOriginClusterRoleHosts().stream()
                 .filter(esClusterRoleHost -> StringUtils.equalsIgnoreCase(esClusterRoleHost.getRole(), "clientnode"))
                 .map(ESClusterRoleHost::getHostname).distinct().collect(Collectors.joining(","));

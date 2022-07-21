@@ -17,7 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 @Task(name = "DeleteExpireIndexTask", description = "删除过期索引任务", cron = "0 55 23 */1 * ?", autoRegister = true)
 public class DeleteExpireIndexTask extends BaseConcurrentTemplateTask implements Job {
-    private static final ILog LOGGER = LogFactory.getLog(IndexRolloverTask.class);
+    private static final ILog LOGGER = LogFactory.getLog(DeleteExpireIndexTask.class);
 
     @Autowired
     private ExpireManager     expireManager;
