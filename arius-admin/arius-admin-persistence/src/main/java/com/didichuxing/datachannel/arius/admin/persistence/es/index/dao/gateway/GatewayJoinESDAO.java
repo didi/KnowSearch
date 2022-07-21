@@ -1357,7 +1357,7 @@ public class GatewayJoinESDAO extends BaseESDAO {
     private void handleBucketListInGetRtCostByProjectId(List<Double> rtCostList, ESAggr queryByTimeStamp) {
         queryByTimeStamp.getBucketList().stream().forEach(esBucket -> {
             try {
-                List<ESBucket> queryByProjectIdBucket = esBucket.getAggrMap().get("queryByAppid").getBucketList();
+                List<ESBucket> queryByProjectIdBucket = esBucket.getAggrMap().get("queryByProjectId").getBucketList();
                 if (CollectionUtils.isNotEmpty(queryByProjectIdBucket)) {
                     for (ESBucket bucket : queryByProjectIdBucket) {
                         JSONObject valueObj = (JSONObject) bucket.getAggrMap().get("1").getUnusedMap().get("values");
