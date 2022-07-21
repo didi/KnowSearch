@@ -15,26 +15,23 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @author chengxiang
  * @date 2022/5/13
  */
-@Task(name = "DeleteExpireIndexTask", description = "删除过期索引任务", cron = "0 55 23 */1 * ?", autoRegister = true)
-public class DeleteExpireIndexTask extends BaseConcurrentTemplateTask implements Job {
-    private static final ILog LOGGER = LogFactory.getLog(DeleteExpireIndexTask.class);
+@Task(name = "DeleteExpireIndexRandomTask", description = "删除过期索引任务", cron = "0 55 23 */1 * ?", autoRegister = true)
+public class DeleteExpireIndexRandomTask extends BaseConcurrentTemplateTask implements Job {
+    private static final ILog LOGGER = LogFactory.getLog(DeleteExpireIndexRandomTask.class);
 
     @Autowired
     private ExpireManager     expireManager;
 
     @Override
     public TaskResult execute(JobContext jobContext) throws Exception {
-        LOGGER.info("class=DeleteExpireIndexTask||method=execute||msg=DeleteExpireIndexTask start");
+        LOGGER.info("class=DeleteExpireIndexRandomTask||method=execute||msg=DeleteExpireIndexRandomTask start");
         if (execute()) {
             return TaskResult.SUCCESS;
         }
         return TaskResult.FAIL;
     }
 
-    @Override
-    public String getTaskName() {
-        return "DeleteExpireIndexTask";
-    }
+    
 
     @Override
     public int poolSize() {
@@ -50,7 +47,7 @@ public class DeleteExpireIndexTask extends BaseConcurrentTemplateTask implements
     protected boolean executeByLogicTemplate(Integer logicId) {
         final Result<Void> result = expireManager.deleteExpireIndex(logicId);
         if (result.failed()){
-            LOGGER.warn("class=DeleteExpireIndexTask||method=executeByLogicTemplate||logicId={}||msg={}", logicId,
+            LOGGER.warn("class=DeleteExpireIndexRandomTask||method=executeByLogicTemplate||logicId={}||msg={}", logicId,
                         result.getMessage());
         }
         return result.success();

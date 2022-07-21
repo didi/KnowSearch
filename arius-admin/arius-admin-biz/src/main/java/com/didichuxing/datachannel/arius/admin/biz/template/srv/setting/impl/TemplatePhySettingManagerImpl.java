@@ -92,7 +92,7 @@ public class TemplatePhySettingManagerImpl implements TemplatePhySettingManager 
         if (result) {
             // 记录setting 更新记录
             operateRecordService.save(new OperateRecord.Builder().bizId(logicId)
-                .operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE_EDIT_SETTING)
+                .operationTypeEnum(OperateTypeEnum.TEMPLATE_MANAGEMENT_EDIT_SETTING)
 
                 .content(new TemplateSettingOperateRecord(oldTemplateSettings, newTemplateSettings).toString())
                 .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).build());
