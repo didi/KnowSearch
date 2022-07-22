@@ -480,7 +480,12 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
                     LOGGER.info(
                             "class=TemplatePipelineManagerImpl||method=syncPipeline||template={}||msg=pipeline not exist, recreate",
                             indexTemplatePhy.getName());
-                    return createPipeline(logicTemplateId);
+                    final Result<Void> pipeline = createPipeline(logicTemplateId);
+                    if (pipeline.failed()){
+                        LOGGER.warn(
+                                "class=TemplatePipelineManagerImpl||method=syncPipeline||indexTemplatePhy={}||errMsg={}",
+                                indexTemplatePhy.getCluster(), indexTemplatePhy.getName(), pipeline.getMessage());
+                    }
                 }
                 // pipeline processor不一致（有变化），以新元数据创建
                 if (notConsistent(indexTemplatePhy, indexTemplate, esPipelineProcessor)) {
