@@ -432,10 +432,13 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
                         LOGGER.warn(
                                 "class=TemplatePipelineManagerImpl||method=syncPipeline||indexTemplatePhy={}||errMsg={}",
                                 indexTemplatePhy.getCluster(), indexTemplatePhy.getName(), pipeline.getMessage());
+                        //创建失败了，就不应该走入下面的逻辑了，直接跳过就可以了
+                        continue;
                     }
-                    //重新获取一遍，否则下层的逻辑是npe的状态
+                    //重新获取一遍，否则下层的逻辑是npe的状态；且此刻默认是能够获取到esPipelineProcessor；如果获取不到，那么下面逻辑就应该报错npe的问题
                     esPipelineProcessor= esPipelineDAO.get(indexTemplatePhy.getCluster(),
                         indexTemplatePhy.getName());
+                   
                 }
                 // pipeline processor不一致（有变化），以新元数据创建
                 if (notConsistent(indexTemplatePhy, logicTemplate, esPipelineProcessor)) {
