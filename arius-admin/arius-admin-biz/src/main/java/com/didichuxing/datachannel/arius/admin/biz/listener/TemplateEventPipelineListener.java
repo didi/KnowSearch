@@ -87,14 +87,15 @@ public class TemplateEventPipelineListener implements ApplicationListener<Templa
 
     private void handlePhysicalTemplateDeleteEvent(PhysicalTemplateDeleteEvent event) throws ESOperateException {
         PhysicalTemplateDeleteEvent e = event;
-        if (templatePipelineManager.deletePipeline(e.getDelTemplate())) {
+        Result<Void> result = templatePipelineManager.deletePipeline(e.getDelTemplate().getId().intValue());
+        if (result.success()) {
             LOGGER.info(
                 "class=TemplateEventPipelineListener||method=onApplicationEvent||msg=PhysicalTemplateDeleteEvent||templateName={}||msg=succ",
                 e.getDelTemplate().getName());
         } else {
             LOGGER.warn(
-                "class=TemplateEventPipelineListener||method=onApplicationEvent||msg=PhysicalTemplateDeleteEvent||templateName={}||msg=fail",
-                e.getDelTemplate().getName());
+                "class=TemplateEventPipelineListener||method=onApplicationEvent||msg=PhysicalTemplateDeleteEvent||templateName={}||msg={}",
+                e.getDelTemplate().getName(),result.getMessage());
         }
     }
 

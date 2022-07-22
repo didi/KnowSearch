@@ -29,12 +29,7 @@ public interface PipelineManager {
 
     //////////////////////////SRV
 
-    /**
-     * 同步pipeline
-     * @param indexTemplatePhysicalInfo  物理模板
-     * @param logicWithPhysical 逻辑模板
-     */
-    void syncPipeline(IndexTemplatePhy indexTemplatePhysicalInfo, IndexTemplateWithPhyTemplates logicWithPhysical);
+
 
     /**
      * 创建
@@ -45,12 +40,7 @@ public interface PipelineManager {
     boolean createPipeline(IndexTemplatePhy indexTemplatePhysicalInfo,
                            IndexTemplateWithPhyTemplates logicWithPhysical) throws ESOperateException;
 
-    /**
-     * 删除
-     * @param indexTemplatePhysicalInfo 物理模板
-     * @return true/false
-     */
-    boolean deletePipeline(IndexTemplatePhy indexTemplatePhysicalInfo) throws ESOperateException;
+
 
     /**
      * 修改物理字段

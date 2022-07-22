@@ -84,8 +84,8 @@ public abstract class BaseTemplateSrvImpl implements BaseTemplateSrv {
             .expireAfterWrite(10, TimeUnit.MINUTES).maximumSize(10000).build();
     
     @Override
-    public boolean isTemplateSrvOpen(Integer templateId) {
-        return templateSrvManager.isTemplateSrvOpen(templateId, templateSrv().getCode());
+    public boolean isTemplateSrvOpen(Integer logicTemplateId) {
+        return templateSrvManager.isTemplateSrvOpen(logicTemplateId, templateSrv().getCode());
     }
 
     @Override

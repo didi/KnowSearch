@@ -224,13 +224,12 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
      * @return
      */
     private boolean isDateFieldFormatChange(String dateFieldFormat, String pipelineDateFieldFormat) {
-        if (MS_TIME_FIELD_PLATFORM_FORMAT.equals(dateFieldFormat)) {
+        if (StringUtils.equals(MS_TIME_FIELD_PLATFORM_FORMAT,dateFieldFormat)) {
             dateFieldFormat = MS_TIME_FIELD_ES_FORMAT;
-        } else if (SECOND_TIME_FIELD_PLATFORM_FORMAT.equals(dateFieldFormat)) {
+        } else if (StringUtils.equals(SECOND_TIME_FIELD_PLATFORM_FORMAT,dateFieldFormat)) {
             dateFieldFormat = SECOND_TIME_FIELD_ES_FORMAT;
         }
-
-        return !dateFieldFormat.equals(pipelineDateFieldFormat);
+        return !StringUtils.equals(dateFieldFormat,pipelineDateFieldFormat);
     }
 
     /**
@@ -340,44 +339,7 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
         return rateLimit;
     }
 
-    /**
-     * 同步pipeline
-     *
-     * @param indexTemplatePhysicalInfo 物理模板
-     * @param logicWithPhysical     逻辑模板
-     */
-    @Override
-    public void syncPipeline(IndexTemplatePhy indexTemplatePhysicalInfo,
-                             IndexTemplateWithPhyTemplates logicWithPhysical) {
-        if (!isTemplateSrvOpen(indexTemplatePhysicalInfo.getLogicId())) {
-            return;
-        }
 
-        try {
-            ESPipelineProcessor esPipelineProcessor = esPipelineDAO.get(indexTemplatePhysicalInfo.getCluster(),
-                indexTemplatePhysicalInfo.getName());
-
-            if (esPipelineProcessor == null) {
-                // pipeline processor不存在，创建
-                LOGGER.info(
-                    "class=TemplatePipelineManagerImpl||method=syncPipeline||template={}||msg=pipeline not exist, recreate",
-                    indexTemplatePhysicalInfo.getName());
-                createPipeline(indexTemplatePhysicalInfo, logicWithPhysical);
-            } else {
-                // pipeline processor不一致（有变化），以新元数据创建
-                if (notConsistent(indexTemplatePhysicalInfo, logicWithPhysical, esPipelineProcessor)) {
-                    LOGGER.info(
-                        "class=TemplatePipelineManagerImpl||method=syncPipeline||template={}||msg=doCreatePipeline",
-                        indexTemplatePhysicalInfo.getName());
-                    doCreatePipeline(indexTemplatePhysicalInfo, logicWithPhysical,
-                        esPipelineProcessor.getThrottle().getInteger("rate_limit"));
-                }
-            }
-        } catch (Exception e) {
-            LOGGER.warn("class=TemplatePipelineManagerImpl||method=syncPipeline||template={}||errMsg={}",
-                indexTemplatePhysicalInfo.getName(), e.getMessage(), e);
-        }
-    }
 
     /**
      * 创建
@@ -398,21 +360,7 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
         return doCreatePipeline(indexTemplatePhysicalInfo, logicWithPhysical, rateLimit);
     }
 
-    /**
-     * 删除
-     *
-     * @param indexTemplatePhysicalInfo 物理模板
-     * @return true/false
-     */
-    @Override
-    public boolean deletePipeline(IndexTemplatePhy indexTemplatePhysicalInfo) throws ESOperateException {
-        if (!isTemplateSrvOpen(indexTemplatePhysicalInfo.getLogicId())) {
-            return false;
-        }
 
-        return ESOpTimeoutRetry.esRetryExecute("deletePipeline", 3,
-            () -> esPipelineDAO.delete(indexTemplatePhysicalInfo.getCluster(), indexTemplatePhysicalInfo.getName()));
-    }
 
     /**
      * 修改物理字段
@@ -455,21 +403,20 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
 
     @Override
     public Result<Void> syncPipeline(Integer logicTemplateId) {
-         IndexTemplate indexTemplate = indexTemplateService.getLogicTemplateById(logicTemplateId);
-        if (null == indexTemplate) {
+    
+      
+        IndexTemplate logicTemplate = indexTemplateService.getLogicTemplateById(logicTemplateId);
+        if (null == logicTemplate) {
             return Result.buildFail("逻辑模板不存在");
+        }
+          if (!isTemplateSrvOpen(logicTemplateId)) {
+            return Result.buildFail("未开启pipeLine服务");
         }
         final List<IndexTemplatePhy> templatePhyList = indexTemplatePhyService.getTemplateByLogicId(logicTemplateId);
         if (CollectionUtils.isEmpty(templatePhyList)) {
             return Result.buildFail("物理模板不存在");
         }
-
-       
-
-        if (!isTemplateSrvOpen(indexTemplate.getId())) {
-            return Result.buildFail("未开启pipeLine服务");
-        }
-    
+        
         for (IndexTemplatePhy indexTemplatePhy : templatePhyList) {
             try {
             
@@ -480,19 +427,22 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
                     LOGGER.info(
                             "class=TemplatePipelineManagerImpl||method=syncPipeline||template={}||msg=pipeline not exist, recreate",
                             indexTemplatePhy.getName());
-                    final Result<Void> pipeline = createPipeline(logicTemplateId);
+                    final Result<Void> pipeline = createPipeline(indexTemplatePhy.getId().intValue());
                     if (pipeline.failed()){
                         LOGGER.warn(
                                 "class=TemplatePipelineManagerImpl||method=syncPipeline||indexTemplatePhy={}||errMsg={}",
                                 indexTemplatePhy.getCluster(), indexTemplatePhy.getName(), pipeline.getMessage());
                     }
+                    //重新获取一遍，否则下层的逻辑是npe的状态
+                    esPipelineProcessor= esPipelineDAO.get(indexTemplatePhy.getCluster(),
+                        indexTemplatePhy.getName());
                 }
                 // pipeline processor不一致（有变化），以新元数据创建
-                if (notConsistent(indexTemplatePhy, indexTemplate, esPipelineProcessor)) {
+                if (notConsistent(indexTemplatePhy, logicTemplate, esPipelineProcessor)) {
                     LOGGER.info(
                             "class=TemplatePipelineManagerImpl||method=syncPipeline||template={}||msg=doCreatePipeline",
                             indexTemplatePhy.getName());
-                    final Result<Void> result = doCreatePipeline(indexTemplatePhy, indexTemplate,
+                    final Result<Void> result = doCreatePipeline(indexTemplatePhy, logicTemplate,
                             esPipelineProcessor.getThrottle().getInteger("rate_limit"));
                     if (result.failed()) {
                         LOGGER.warn(

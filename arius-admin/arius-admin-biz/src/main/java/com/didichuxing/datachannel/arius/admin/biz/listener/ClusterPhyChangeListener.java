@@ -28,10 +28,12 @@ public class ClusterPhyChangeListener implements ApplicationListener<ClusterPhyE
     @Override
     public void onApplicationEvent(ClusterPhyEvent event) {
         try {
+            //保证数据已经刷到数据库，如果立即执行，会存在获取不到数据库中数据的状态
+            Thread.sleep(5000);
             clusterContextManager.flushClusterPhyContext(event.getClusterPhyName());
 
             clusterPhyManager.updateClusterHealth(event.getClusterPhyName(), AriusUser.SYSTEM.getDesc());
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             LOGGER.error(
                 "class=ClusterPhyChangeListener||method=onApplicationEvent||operator={}||clusterPhyName={}||ErrorMsg={}",
                 event.getOperator(), event.getClusterPhyName(), e.getMessage());
