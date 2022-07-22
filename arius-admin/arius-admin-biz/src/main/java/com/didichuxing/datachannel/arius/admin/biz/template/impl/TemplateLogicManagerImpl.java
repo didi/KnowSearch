@@ -239,14 +239,14 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             if (saveTemplateConfigResult.failed()) {
                 throw new AdminOperateException(String.format("创建模板失败:%s", saveTemplateConfigResult.getMessage()));
             }
-            //发布创建pipeline的事件
-            SpringTool.publish(new LogicTemplateCreatePipelineEvent(this,indexTemplateDTO.getId()));
+           
             operateRecordService.save(
                     new OperateRecord.Builder().bizId(indexTemplateDTO.getId()).userOperation(operator)
                             .content(String.format("模版创建：%s", param.getName()))
                             .project(projectService.getProjectBriefByProjectId(projectId))
                             .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
                             .operationTypeEnum(OperateTypeEnum.TEMPLATE_MANAGEMENT_CREATE).build());
+            return Result.buildSucc();
         } catch (AdminOperateException e) {
             LOGGER.error("class=TemplateLogicManagerImpl||method=create", e);
             // 这里必须显示事务回滚
@@ -257,9 +257,12 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             // 这里必须显示事务回滚
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return Result.buildFail("模版创建失败，请重新尝试");
+        }finally {
+             //发布创建pipeline的事件
+            SpringTool.publish(new LogicTemplateCreatePipelineEvent(this,indexTemplateDTO.getId()));
         }
     
-        return Result.buildSucc();
+        
     }
 
     /**

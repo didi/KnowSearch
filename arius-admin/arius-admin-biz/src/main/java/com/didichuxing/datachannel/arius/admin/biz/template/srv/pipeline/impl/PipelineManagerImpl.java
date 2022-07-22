@@ -454,45 +454,57 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
     }
 
     @Override
-    public Result<Void> syncPipeline(Integer templatePhyId) {
-        IndexTemplatePhy indexTemplatePhy = indexTemplatePhyService.getTemplateById(templatePhyId.longValue());
-        if (null == indexTemplatePhy) {
-            return Result.buildFail("物理模板不存在");
-        }
-
-        IndexTemplate indexTemplate = indexTemplateService.getLogicTemplateById(indexTemplatePhy.getLogicId());
+    public Result<Void> syncPipeline(Integer logicTemplateId) {
+         IndexTemplate indexTemplate = indexTemplateService.getLogicTemplateById(logicTemplateId);
         if (null == indexTemplate) {
             return Result.buildFail("逻辑模板不存在");
         }
+        final List<IndexTemplatePhy> templatePhyList = indexTemplatePhyService.getTemplateByLogicId(logicTemplateId);
+        if (CollectionUtils.isEmpty(templatePhyList)) {
+            return Result.buildFail("物理模板不存在");
+        }
+
+       
 
         if (!isTemplateSrvOpen(indexTemplate.getId())) {
             return Result.buildFail("未开启pipeLine服务");
         }
-
-        try {
-            ESPipelineProcessor esPipelineProcessor = esPipelineDAO.get(indexTemplatePhy.getCluster(),
-                indexTemplatePhy.getName());
-            if (esPipelineProcessor == null) {
-                // pipeline processor不存在，创建
-                LOGGER.info(
-                    "class=TemplatePipelineManagerImpl||method=syncPipeline||template={}||msg=pipeline not exist, recreate",
-                    indexTemplatePhy.getName());
-                return createPipeline(templatePhyId);
+    
+        for (IndexTemplatePhy indexTemplatePhy : templatePhyList) {
+            try {
+            
+                ESPipelineProcessor esPipelineProcessor = esPipelineDAO.get(indexTemplatePhy.getCluster(),
+                        indexTemplatePhy.getName());
+                if (esPipelineProcessor == null) {
+                    // pipeline processor不存在，创建
+                    LOGGER.info(
+                            "class=TemplatePipelineManagerImpl||method=syncPipeline||template={}||msg=pipeline not exist, recreate",
+                            indexTemplatePhy.getName());
+                    return createPipeline(logicTemplateId);
+                }
+                // pipeline processor不一致（有变化），以新元数据创建
+                if (notConsistent(indexTemplatePhy, indexTemplate, esPipelineProcessor)) {
+                    LOGGER.info(
+                            "class=TemplatePipelineManagerImpl||method=syncPipeline||template={}||msg=doCreatePipeline",
+                            indexTemplatePhy.getName());
+                    final Result<Void> result = doCreatePipeline(indexTemplatePhy, indexTemplate,
+                            esPipelineProcessor.getThrottle().getInteger("rate_limit"));
+                    if (result.failed()) {
+                        LOGGER.warn(
+                                "class=TemplatePipelineManagerImpl||method=syncPipeline||indexTemplatePhy={}||errMsg={}",
+                                indexTemplatePhy.getCluster(), indexTemplatePhy.getName(), result.getMessage());
+                    }
+                }
+            } catch (Exception e) {
+                LOGGER.error("class=TemplatePipelineManagerImpl||method=syncPipeline||template={}",
+                        indexTemplatePhy.getCluster(), e);
+                return Result.buildFail("sync fail");
             }
-            // pipeline processor不一致（有变化），以新元数据创建
-            if (notConsistent(indexTemplatePhy, indexTemplate, esPipelineProcessor)) {
-                LOGGER.info("class=TemplatePipelineManagerImpl||method=syncPipeline||template={}||msg=doCreatePipeline",
-                    indexTemplatePhy.getName());
-                return doCreatePipeline(indexTemplatePhy, indexTemplate,
-                    esPipelineProcessor.getThrottle().getInteger("rate_limit"));
-            }
-
-            return Result.buildSucc();
-        } catch (Exception e) {
-            LOGGER.warn("class=TemplatePipelineManagerImpl||method=syncPipeline||template={}||errMsg={}",
-                indexTemplatePhy.getCluster(), e.getMessage(), e);
-            return Result.buildFail("sync fail");
+    
         }
+    
+        return Result.buildSucc();
+       
 
     }
 
