@@ -99,7 +99,7 @@ public class IndicesController extends BaseIndicesController {
     @PutMapping("/mapping")
     @ResponseBody
     @ApiOperation(value = "编辑mapping")
-    public Result<Void> editMapping(HttpServletRequest request, @RequestBody IndexCatCellWithConfigDTO param) {
+    public Result<Void> editMapping(HttpServletRequest request, @RequestBody IndexCatCellWithConfigDTO param) throws ESOperateException {
         Result<Boolean> checkClusterValidResult = checkClusterValid(Lists.newArrayList(param.getCluster()));
         if (checkClusterValidResult.failed()) {
             return Result.buildFrom(checkClusterValidResult);

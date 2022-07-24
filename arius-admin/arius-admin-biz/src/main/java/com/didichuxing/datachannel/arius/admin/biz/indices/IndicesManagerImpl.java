@@ -431,7 +431,7 @@ public class IndicesManagerImpl implements IndicesManager {
     }
 
     @Override
-    public Result<Void> editMapping(IndexCatCellWithConfigDTO param, Integer projectId, String operate) {
+    public Result<Void> editMapping(IndexCatCellWithConfigDTO param, Integer projectId, String operate) throws ESOperateException {
         Result<String> getClusterRet = getClusterPhyByClusterNameAndProjectId(param.getCluster(), projectId);
         if (getClusterRet.failed()) {
             return Result.buildFrom(getClusterRet);
@@ -459,23 +459,30 @@ public class IndicesManagerImpl implements IndicesManager {
         if (mappingRet.failed()) {
             return Result.buildFail("mapping 转换异常");
         }
-        final boolean syncUpdateIndexMapping = esIndexService.syncUpdateIndexMapping(phyCluster, indexName,
-            mappingRet.getData());
-        if (syncUpdateIndexMapping) {
 
-            final Result<IndexMappingVO> afterMapping = getMapping(param.getCluster(), indexName, projectId);
+        try {
+            final boolean syncUpdateIndexMapping = esIndexService.syncUpdateIndexMapping(phyCluster, indexName,
+                mappingRet.getData());
+            if (syncUpdateIndexMapping) {
 
-            operateRecordService.save(new OperateRecord.Builder()
-                .project(projectService.getProjectBriefByProjectId(projectId)).userOperation(operate)
-                .operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_EDIT_MAPPING)
-                .content(new TemplateMappingOperateRecord(beforeMapping.getData(), afterMapping.getData()).toString())
+                final Result<IndexMappingVO> afterMapping = getMapping(param.getCluster(), indexName, projectId);
 
-                .bizId(indexName)
+                operateRecordService.save(new Builder()
+                    .project(projectService.getProjectBriefByProjectId(projectId)).userOperation(operate)
+                    .operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_EDIT_MAPPING)
+                    .content(new TemplateMappingOperateRecord(beforeMapping.getData(), afterMapping.getData()).toString())
 
-                .buildDefaultManualTrigger());
+                    .bizId(indexName)
+
+                    .buildDefaultManualTrigger());
+            }
+
+        } catch (ESOperateException e) {
+            LOGGER.error("class=IndicesManagerImpl||method=editMapping||errMsg={}", e.getMessage(), e);
+            return Result.buildFail(e.getMessage());
         }
 
-        return Result.build(syncUpdateIndexMapping);
+        return Result.buildSucc();
     }
 
     @Override
