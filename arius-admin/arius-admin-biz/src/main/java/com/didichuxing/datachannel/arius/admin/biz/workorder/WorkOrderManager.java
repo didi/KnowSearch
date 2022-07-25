@@ -87,12 +87,11 @@ public interface WorkOrderManager {
     /**
      * 获取订单应用列表 获取工单申请列表
      *
-     * @param applicant 申请人
      * @param status    状态
      * @param projectId
      * @return {@link Result}<{@link List}<{@link WorkOrderVO}>>
      */
-    Result<List<WorkOrderVO>> getOrderApplyList(String applicant, Integer status, Integer projectId);
+    Result<List<WorkOrderVO>> getOrderApplyList(Integer status, Integer projectId);
 
     Result<List<WorkOrderVO>> getOrderApplyList(String applicant, Integer status);
 

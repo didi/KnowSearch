@@ -219,15 +219,15 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
     }
 
     @Override
-    public Result<List<WorkOrderVO>> getOrderApplyList(String applicant, Integer status, Integer projectId) {
+    public Result<List<WorkOrderVO>> getOrderApplyList(Integer status, Integer projectId) {
         List<WorkOrderVO> orderDOList = Lists.newArrayList();
         try {
             orderDOList = ConvertUtil.list2List(
-                orderDao.listByApplicantAndStatusAndProjectId(applicant, status, projectId), WorkOrderVO.class);
+                orderDao.listByStatusAndProjectId(status, projectId), WorkOrderVO.class);
         } catch (Exception e) {
             LOGGER.error(
-                "class=WorkOrderManagerImpl||method=getOrderApplyList||applicant={}||status={}||msg=get apply order failed!",
-                applicant, status, e);
+                "class=WorkOrderManagerImpl||method=getOrderApplyList||status={}||msg=get apply order failed!",
+                status, e);
         }
         return Result.buildSucc(orderDOList);
     }

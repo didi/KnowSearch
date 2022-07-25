@@ -47,13 +47,12 @@ public interface WorkOrderDAO {
     /**
      * 由申请人和状态列表
      *
-     * @param applicant 申请人
+     * @param applicantProjectId 项目id
      * @param status 状态
      * @return {@link List}<{@link WorkOrderPO}>
      */
-    List<WorkOrderPO> listByApplicantAndStatusAndProjectId(@Param("applicant") String applicant,
-                                                           @Param("status") Integer status,
-                                                           @Param("applicantProjectId") Integer applicantProjectId);
+    List<WorkOrderPO> listByStatusAndProjectId(@Param("status") Integer status,
+                                               @Param("applicantProjectId") Integer applicantProjectId);
 
     /**
     * 由申请人和状态列表
