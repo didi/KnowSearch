@@ -1,6 +1,6 @@
 # -------------------------------------------------权限点表-----------------------------
 -- auto-generated definition
-create table logi_security_permission
+create table if not exists logi_security_permission
 (
     id              int auto_increment
         primary key,
@@ -170,7 +170,7 @@ values (1593, '物理集群', 0, 0, 1, '物理集群', '2022-05-24 18:08:22.0', 
 
 # ---------------------------------------------角色表------------------------------
 -- auto-generated definition
-create table logi_security_role
+create table if not exists logi_security_role
 (
     id           int auto_increment
         primary key,
@@ -184,15 +184,15 @@ create table logi_security_role
     app_name     varchar(16)                          null comment '应用名称'
 )
     comment '角色信息' charset = utf8;
-insert into es_manager_test.logi_security_role (id, role_code, role_name, description, last_reviser, create_time,
-                                                update_time, is_delete, app_name)
+insert into logi_security_role (id, role_code, role_name, description, last_reviser, create_time,
+                                update_time, is_delete, app_name)
 values (1, 'r14715628', '管理员', '管理员', 'admin', '2022-06-01 21:19:42.0', '2022-07-06 22:23:59.0', 0, 'know_search'),
        (2, 'r14481382', '资源owner', '普通用户拥有的最大权限', 'admin', '2022-06-14 18:08:56.0', '2022-07-06 20:36:31.0', 0,
         'know_search');
 
 # --------------------------------------角色权限点关联表-------------------------------
 -- auto-generated definition
-create table logi_security_role_permission
+create table if not exists logi_security_role_permission
 (
     id            int auto_increment
         primary key,
@@ -204,8 +204,8 @@ create table logi_security_role_permission
     app_name      varchar(16)                          null comment '应用名称'
 )
     comment '角色权限表（只保留叶子权限与角色关系）' charset = utf8;
-insert into es_manager_test.logi_security_role_permission (id, role_id, permission_id, create_time, update_time,
-                                                           is_delete, app_name)
+insert into logi_security_role_permission (id, role_id, permission_id, create_time, update_time,
+                                           is_delete, app_name)
 values (1597, 1, 0, '2022-06-01 21:19:42.0', '2022-06-23 09:15:36.0', 1, 'know_search'),
        (1935, 1, 1593, '2022-06-14 17:41:03.0', '2022-06-23 09:15:36.0', 0, 'know_search'),
        (1937, 1, 1637, '2022-06-14 17:41:03.0', '2022-06-23 09:15:36.0', 0, 'know_search'),
@@ -394,7 +394,7 @@ values (1597, 1, 0, '2022-06-01 21:19:42.0', '2022-06-23 09:15:36.0', 1, 'know_s
 
 # --------------------------------------------------------------项目表-----------------------
 -- auto-generated definition
-create table logi_security_project
+create table if not exists logi_security_project
 (
     id           int auto_increment comment '项目id'
         primary key,
@@ -409,13 +409,13 @@ create table logi_security_project
     app_name     varchar(16)                            null comment '应用名称'
 )
     comment '项目表' charset = utf8;
-insert into es_manager_test.logi_security_project (id, project_code, project_name, description, dept_id, running,
-                                                   create_time, update_time, is_delete, app_name)
+insert into logi_security_project (id, project_code, project_name, description, dept_id, running,
+                                   create_time, update_time, is_delete, app_name)
 values (1, 'p14000143', 'superApp', '超级应用', 0, 1, '2022-05-26 05:49:08.0', '2022-07-25 09:28:50.0', 0, 'know_search');
 
 # -----------------------------user
 -- auto-generated definition
-create table logi_security_user
+create table if not exists logi_security_user
 (
     id          int auto_increment
         primary key,
@@ -433,15 +433,15 @@ create table logi_security_user
 )
     comment '用户信息' charset = utf8;
 # 初始密码：admin
-insert into es_manager_test.logi_security_user (id, user_name, pw, salt, real_name, phone, email, dept_id, is_delete,
-                                                create_time, update_time, app_name)
+insert into logi_security_user (id, user_name, pw, salt, real_name, phone, email, dept_id, is_delete,
+                                create_time, update_time, app_name)
 values (1593, 'admin',
         'V1ZkU2RHRlhOVGRSUmxweFUycFNhR0V6ZEdKSk1FRjRVVU5PWkdaVmJ6SlZiWGh6WVVWQ09YdEFWbXBLTkdGcmUxc2pRREpBSTExOVNqWlNiR3hvUUgwPXtAVmpKNGFre1sjQDNAI119SjZSbGxoQH0=Mv{#cdRgJ45Lqx}3IubEW87!==',
         '', 'admin', '13900', '', null, 0, '2022-05-26 05:46:12.0', '2022-06-23 16:47:13.0', 'know_search');
 
 # ---------------------------用户项目表
 -- auto-generated definition
-create table logi_security_user_project
+create table if not exists logi_security_user_project
 (
     id          int auto_increment
         primary key,
@@ -455,14 +455,14 @@ create table logi_security_user_project
 )
     comment '用户项目关系表（项目负责人）' charset = utf8;
 
-insert into es_manager_test.logi_security_user_project (id, user_id, project_id, create_time, update_time, is_delete,
-                                                        app_name, user_type)
+insert into logi_security_user_project (id, user_id, project_id, create_time, update_time, is_delete,
+                                        app_name, user_type)
 values (2327, 1593, 1, '2022-07-08 18:19:51.0', '2022-07-08 18:19:51.0', 0, 'know_search', 1),
        (2329, 1593, 1, '2022-07-08 18:19:51.0', '2022-07-08 18:19:51.0', 0, 'know_search', 0);
 
 # ------------------------------用户角色表------------------------------
 -- auto-generated definition
-create table logi_security_user_role
+create table if not exists logi_security_user_role
 (
     id          int auto_increment
         primary key,
@@ -475,12 +475,12 @@ create table logi_security_user_role
 )
     comment '用户角色表' charset = utf8;
 
-insert into es_manager_test.logi_security_user_role (id, user_id, role_id, create_time, update_time, is_delete, app_name)
+insert into logi_security_user_role (id, user_id, role_id, create_time, update_time, is_delete, app_name)
 values (2369, 1593, 1, '2022-07-19 16:29:44.0', '2022-07-19 16:29:44.0', 0, 'know_search');
 
 # -----------------默认需要初始化的表
 -- auto-generated definition
-create table logi_security_config
+create table if not exists logi_security_config
 (
     id          bigint unsigned auto_increment comment '主键自增'
         primary key,
@@ -502,7 +502,7 @@ create index idx_group_name
     on logi_security_config (value_group, value_name);
 
 -- auto-generated definition
-create table logi_security_dept
+create table if not exists logi_security_dept
 (
     id          int auto_increment
         primary key,
@@ -519,7 +519,7 @@ create table logi_security_dept
     comment '部门信息表' charset = utf8;
 
 -- auto-generated definition
-create table logi_security_message
+create table if not exists logi_security_message
 (
     id          int auto_increment
         primary key,
@@ -536,7 +536,7 @@ create table logi_security_message
     comment '消息中心' charset = utf8;
 
 -- auto-generated definition
-create table logi_security_oplog
+create table if not exists logi_security_oplog
 (
     id                int auto_increment
         primary key,
@@ -555,7 +555,7 @@ create table logi_security_oplog
 )
     comment '操作日志' charset = utf8;
 -- auto-generated definition
-create table logi_security_oplog_extra
+create table if not exists logi_security_oplog_extra
 (
     id          int auto_increment
         primary key,
@@ -569,7 +569,7 @@ create table logi_security_oplog_extra
     comment '操作日志信息（操作页面、操作类型、对象分类）' charset = utf8;
 
 -- auto-generated definition
-create table logi_security_resource_type
+create table if not exists logi_security_resource_type
 (
     id          int auto_increment
         primary key,
@@ -581,7 +581,7 @@ create table logi_security_resource_type
 )
     comment '资源类型表' charset = utf8;
 -- auto-generated definition
-create table logi_security_user_resource
+create table if not exists logi_security_user_resource
 (
     id               int auto_increment
         primary key,
@@ -599,7 +599,7 @@ create table logi_security_user_resource
 
 # ------------------------------项目关联es user核心数据
 -- auto-generated definition
-create table arius_es_user
+create table if not exists arius_es_user
 (
     id                 bigint(10) unsigned auto_increment comment '主键 自增'
         primary key,
@@ -621,16 +621,16 @@ create table arius_es_user
 )
     comment 'es操作用户表' charset = utf8;
 
-insert into es_manager_test.arius_es_user (id, index_exp, data_center, is_root, memo, ip, verify_code, is_active,
-                                           query_threshold, cluster, search_type, create_time, update_time, project_id,
-                                           is_default_display)
+insert into arius_es_user (id, index_exp, data_center, is_root, memo, ip, verify_code, is_active,
+                           query_threshold, cluster, search_type, create_time, update_time, project_id,
+                           is_default_display)
 values (1, null, 'cn', 1, '管理员APP', '', 'azAWiJhxkho33ac', 1, 100, 'logi-elasticsearch-7.6.0', 1,
         '2022-05-26 09:35:38.0', '2022-06-23 00:16:47.0', 1, 1),
        (233, null, 'cn', 0, '新增', '', 'vkDgPEfD3jQJ1YY', 1, 1000, '', 2, '2022-07-05 08:16:17.0',
         '2022-07-05 08:16:17.0', 1, 0);
 # 项目配置信息
 -- auto-generated definition
-create table project_arius_config
+create table if not exists project_arius_config
 (
     project_id              bigint(10) unsigned auto_increment comment 'project id'
         primary key,
@@ -646,7 +646,7 @@ create table project_arius_config
 )
     comment '项目配置' charset = utf8;
 
-insert into es_manager_test.project_arius_config (project_id, analyze_response_enable, is_source_separated,
-                                                  aggr_analyze_enable, dsl_analyze_enable, slow_query_times, is_active,
-                                                  memo, create_time, update_time)
+insert into project_arius_config (project_id, analyze_response_enable, is_source_separated,
+                                  aggr_analyze_enable, dsl_analyze_enable, slow_query_times, is_active,
+                                  memo, create_time, update_time)
 values (1, 1, 0, 1, 1, 8, 1, '超级应1用11', '2022-06-14 18:52:08.0', '2022-07-08 18:19:51.0');

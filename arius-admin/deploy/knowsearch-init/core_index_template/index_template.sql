@@ -1,6 +1,6 @@
 # ----------------------------------------------平台核心索引模版元数据
 -- auto-generated definition
-create table index_template_info
+create table if not exists index_template_info
 (
     id                bigint unsigned auto_increment comment '主键自增'
         primary key,
@@ -46,11 +46,11 @@ create index idx_name
 
 create index idx_project_id
     on index_template_info (project_id);
-insert into es_manager_test.index_template_info (id, name, data_type, date_format, is_active, data_center, expire_time,
-                                                 hot_time, responsible, date_field, date_field_format, id_field,
-                                                 routing_field, expression, desc, quota, project_id, ingest_pipeline,
-                                                 block_read, block_write, create_time, update_time, write_rate_limit,
-                                                 resource_id, check_point_diff, level, has_dcdr, open_srv, disk_size)
+insert into index_template_info (id, name, data_type, date_format, is_active, data_center, expire_time,
+                                 hot_time, responsible, date_field, date_field_format, id_field,
+                                 routing_field, expression, desc, quota, project_id, ingest_pipeline,
+                                 block_read, block_write, create_time, update_time, write_rate_limit,
+                                 resource_id, check_point_diff, level, has_dcdr, open_srv, disk_size)
 values (24007, 'arius.appid.template.access', 2, '', 1, 'cn', -1, -1, 'admin', 'logTime', '', '', '',
         'arius.appid.template.access', 'appid维度访问次数索引', 1.000, 1, '', 0, 0, '2019-12-19 01:05:29.0',
         '2022-07-21 15:43:00.0', -1, 3865, 0, 1, 0, '2', 1.000),
@@ -93,7 +93,7 @@ values (24007, 'arius.appid.template.access', 2, '', 1, 'cn', -1, -1, 'admin', '
 
 # ------------------------------------物理模版关联元数据逻辑模版信息
 -- auto-generated definition
-create table index_template_physical_info
+create table if not exists index_template_physical_info
 (
     id            bigint unsigned auto_increment comment '主键自增'
         primary key,
@@ -128,9 +128,9 @@ create index idx_region_id
 
 create index idx_status
     on index_template_physical_info (status);
-insert into es_manager_test.index_template_physical_info (id, logic_id, name, expression, cluster, rack, shard,
-                                                          shard_routing, version, role, status, config, create_time,
-                                                          update_time, region_id)
+insert into index_template_physical_info (id, logic_id, name, expression, cluster, rack, shard,
+                                          shard_routing, version, role, status, config, create_time,
+                                          update_time, region_id)
 values (6011, 24007, 'arius.appid.template.access', 'arius.appid.template.access', 'logi-elasticsearch-7.6.0',
         'r1,r2,r3,r4,r5', 10, 1, 1, 1, 1, '{"pipeLineRateLimit":1000000}', '2019-12-19 01:05:30.0',
         '2022-07-19 15:40:42.0', 3741),
@@ -175,7 +175,7 @@ values (6011, 24007, 'arius.appid.template.access', 'arius.appid.template.access
         '2021-07-24 15:22:21.0', '2022-07-01 03:00:03.0', 3741);
 # -----------------------------逻辑模版关联元数据配置信息
 -- auto-generated definition
-create table index_template_config
+create table if not exists index_template_config
 (
     is_source_separated      tinyint        default 0                 not null comment '是否是索引处分分离的 0 不是 1 是',
     idc_flags                tinyint(1)     default 0                 not null comment 'idc标识',
@@ -198,10 +198,10 @@ create table index_template_config
 create index idx_logic_id
     on index_template_config (logic_id);
 
-insert into es_manager_test.index_template_config (is_source_separated, idc_flags, adjust_rack_shard_factor,
-                                                   mapping_improve_enable, pre_create_flags, update_time,
-                                                   disable_source_flags, disable_index_rollover, dynamic_limit_enable,
-                                                   logic_id, create_time, shard_num, adjust_rack_tps_factor, id)
+insert into index_template_config (is_source_separated, idc_flags, adjust_rack_shard_factor,
+                                   mapping_improve_enable, pre_create_flags, update_time,
+                                   disable_source_flags, disable_index_rollover, dynamic_limit_enable,
+                                   logic_id, create_time, shard_num, adjust_rack_tps_factor, id)
 values (0, 0, 1.00, 0, 1, '2022-04-18 09:51:19.0', 0, 0, 1, 24007, '2022-04-18 09:51:19.0', 1, 1.00, 25),
        (0, 0, 1.00, 0, 1, '2022-07-15 10:36:39.0', 0, 1, 1, 1, '2021-10-12 22:03:22.0', -1, 1.00, 1),
        (0, 0, 1.00, 0, 1, '2021-10-12 22:03:22.0', 0, 1, 1, 5, '2021-10-12 22:03:22.0', -1, 1.00, 3),
