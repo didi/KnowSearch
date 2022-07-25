@@ -246,6 +246,8 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
                             .project(projectService.getProjectBriefByProjectId(projectId))
                             .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
                             .operationTypeEnum(OperateTypeEnum.TEMPLATE_MANAGEMENT_CREATE).build());
+            //发布创建pipeline的事件
+            SpringTool.publish(new LogicTemplateCreatePipelineEvent(this,indexTemplateDTO.getId()));
             return Result.buildSucc();
         } catch (AdminOperateException e) {
             LOGGER.error("class=TemplateLogicManagerImpl||method=create", e);
@@ -257,9 +259,6 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             // 这里必须显示事务回滚
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return Result.buildFail("模版创建失败，请重新尝试");
-        }finally {
-             //发布创建pipeline的事件
-            SpringTool.publish(new LogicTemplateCreatePipelineEvent(this,indexTemplateDTO.getId()));
         }
     
         

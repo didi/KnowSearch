@@ -471,8 +471,9 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             if (saveClusterResult.failed()) {
                 throw new AdminOperateException(saveClusterResult.getMessage());
             } else {
-               
+    
                 postProcessingForClusterJoin(param);
+                SpringTool.publish(new ClusterPhyEvent(param.getCluster(), operator));
                 operateRecordService.save(new OperateRecord.Builder()
                     .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
                     .bizId(saveClusterResult.getData().getId())
@@ -501,8 +502,6 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             // 这里必须显示事务回滚
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return Result.buildFail("操作失败,请联系管理员");
-        } finally {
-            SpringTool.publish(new ClusterPhyEvent(param.getCluster(), operator));
         }
 
     }
