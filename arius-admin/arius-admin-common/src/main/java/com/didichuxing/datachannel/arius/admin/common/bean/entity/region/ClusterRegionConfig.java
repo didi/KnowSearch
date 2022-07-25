@@ -16,5 +16,5 @@ public class ClusterRegionConfig {
     /**
      * 冷节点标志
      */
-    private Boolean coldFlag = Boolean.FALSE;
+    private Boolean cold = Boolean.FALSE;
 }

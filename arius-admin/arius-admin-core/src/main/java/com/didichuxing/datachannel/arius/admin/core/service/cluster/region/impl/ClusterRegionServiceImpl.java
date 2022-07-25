@@ -419,7 +419,7 @@ public class ClusterRegionServiceImpl implements ClusterRegionService {
         List<ClusterRegion> coldRegionList = new ArrayList<>();
         for (ClusterRegionPO region : clusterRegions) {
             ClusterRegionConfig config = genClusterRegionConfig(region.getConfig());
-            if (Boolean.TRUE.equals(config.getColdFlag())) {
+            if (Boolean.TRUE.equals(config.getCold())) {
                 coldRegionList.add(ConvertUtil.obj2Obj(region, ClusterRegion.class));
             }
         }
