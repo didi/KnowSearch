@@ -60,7 +60,7 @@ public class ProjectLogicTemplateAuthManagerImpl implements ProjectLogicTemplate
             final ProjectTemplateAuthEnum projectTemplateAuthEnum = ProjectTemplateAuthEnum.valueOf(authDTO.getType());
             operateRecordService.save(
                     new OperateRecord.Builder().triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).userOperation(operator)
-                            .operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_INFO_MODIFY)
+                            .operationTypeEnum(OperateTypeEnum.TEMPLATE_MANAGEMENT_INFO_MODIFY)
                             .bizId(authDTO.getId()).content(String.format("权限变更：%s", projectTemplateAuthEnum.getDesc()))
                             .project(projectService.getProjectBriefByProjectId(authDTO.getProjectId()))
                     
@@ -111,7 +111,7 @@ public class ProjectLogicTemplateAuthManagerImpl implements ProjectLogicTemplate
         Result<Void> result = projectLogicTemplateAuthService.deleteTemplateAuth(authId);
         if (result.success()) {
             operateRecordService
-                .save(new OperateRecord.Builder().operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_OFFLINE)
+                .save(new OperateRecord.Builder().operationTypeEnum(OperateTypeEnum.TEMPLATE_MANAGEMENT_OFFLINE)
                     .bizId(authId).content(String.format("删除模板，模板id：%s", authId))
                     .project(projectService.getProjectBriefByProjectId(projectId))
                     .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
@@ -158,7 +158,7 @@ public class ProjectLogicTemplateAuthManagerImpl implements ProjectLogicTemplate
             final ProjectTemplateAuthEnum projectTemplateAuthEnum = ProjectTemplateAuthEnum.valueOf(authDTO.getType());
             operateRecordService.save(
                     new OperateRecord.Builder().triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).userOperation(operator)
-                            .operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_INFO_MODIFY)
+                            .operationTypeEnum(OperateTypeEnum.TEMPLATE_MANAGEMENT_INFO_MODIFY)
                             .bizId(authDTO.getId())
                             .content(String.format("权限变更：【%s】", projectTemplateAuthEnum.getDesc()))
                             .project(projectService.getProjectBriefByProjectId(authDTO.getProjectId()))

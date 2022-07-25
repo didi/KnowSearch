@@ -1,5 +1,12 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.precreate.impl;
 
+import java.util.List;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.impl.BaseTemplateSrvImpl;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.dcdr.TemplateDCDRManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.precreate.PreCreateManager;
@@ -16,11 +23,6 @@ import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
 import com.didiglobal.logi.elasticsearch.client.response.setting.index.IndexConfig;
 import com.didiglobal.logi.elasticsearch.client.response.setting.template.TemplateConfig;
-import java.util.List;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 /**
  * @author chengxiang, zqr
@@ -66,7 +68,7 @@ public class PreCreateManagerImpl extends BaseTemplateSrvImpl implements PreCrea
 
         Integer succeedCount = 0;
         for (IndexTemplatePhy templatePhy : templatePhyList) {
-                if (syncCreateTomorrowIndexByPhysicalId(templatePhy.getId(), RETRY_TIMES)) {
+                if (syncCreateTomorrowIndexByPhysicalId(templatePhy.getId())) {
                     succeedCount++;
                 } else {
                     LOGGER.warn(
@@ -83,9 +85,11 @@ public class PreCreateManagerImpl extends BaseTemplateSrvImpl implements PreCrea
     public void asyncCreateTodayAndTomorrowIndexByPhysicalId(Long physicalId) {
         ariusOpThreadPool.execute(() -> {
             try {
-                syncCreateTodayIndexByPhysicalId(physicalId, RETRY_TIMES);
-                syncCreateTomorrowIndexByPhysicalId(physicalId, RETRY_TIMES);
-            } catch (ESOperateException e) {
+                //lbq这里睡眠一秒钟，保证上层方法数据事物已经提交；
+                Thread.sleep(1000L);
+                syncCreateTodayIndexByPhysicalId(physicalId);
+                syncCreateTomorrowIndexByPhysicalId(physicalId);
+            } catch (ESOperateException | InterruptedException e) {
                 LOGGER.error(
                     "class=PreCreateManagerImpl||method=asyncCreateTodayIndexAsyncByPhysicalId||errMsg={}||physicalId={}",
                     e.getMessage(), physicalId, e);
@@ -98,11 +102,10 @@ public class PreCreateManagerImpl extends BaseTemplateSrvImpl implements PreCrea
      * 同步创建明天索引
      *
      * @param physicalId 物理模板id
-     * @param retryCount 重试次数
      * @return result
      * @throws ESOperateException
      */
-    private boolean syncCreateTomorrowIndexByPhysicalId(Long physicalId, int retryCount) throws ESOperateException {
+    private boolean syncCreateTomorrowIndexByPhysicalId(Long physicalId) throws ESOperateException {
         IndexTemplatePhyWithLogic physicalWithLogic = indexTemplatePhyService.getTemplateWithLogicById(physicalId);
         if (physicalWithLogic == null || !physicalWithLogic.hasLogic()) {
             return false;
@@ -117,23 +120,38 @@ public class PreCreateManagerImpl extends BaseTemplateSrvImpl implements PreCrea
 
         String tomorrowIndexName = IndexNameFactory.get(physicalWithLogic.getExpression(),
             physicalWithLogic.getLogicTemplate().getDateFormat(), 1, physicalWithLogic.getVersion());
-        return createIndex(tomorrowIndexName, physicalWithLogic, retryCount);
+        return createIndex(tomorrowIndexName, physicalWithLogic, RETRY_TIMES);
+    }
+    /**
+     * 同步创建今天索引
+     *
+     * @param physicalId 物理模板id
+     * @throws ESOperateException
+     */
+    @Override
+    public boolean syncCreateTodayIndexByPhysicalId(Long physicalId, int version) throws ESOperateException {
+        IndexTemplatePhyWithLogic physicalWithLogic = indexTemplatePhyService.getTemplateWithLogicById(physicalId);
+        if (physicalWithLogic == null || !physicalWithLogic.hasLogic()) {
+            return false;
+        }
+        String todayIndexName = IndexNameFactory.get(physicalWithLogic.getExpression(),
+                physicalWithLogic.getLogicTemplate().getDateFormat(), 0, version);
+        return createIndex(todayIndexName, physicalWithLogic, RETRY_TIMES);
     }
 
     /**
      * 同步创建今天索引
      * @param physicalId 物理模板id
-     * @param retryCount 重试次数
      * @throws ESOperateException
      */
-    private boolean syncCreateTodayIndexByPhysicalId(Long physicalId, int retryCount) throws ESOperateException {
+    private boolean syncCreateTodayIndexByPhysicalId(Long physicalId) throws ESOperateException {
         IndexTemplatePhyWithLogic physicalWithLogic = indexTemplatePhyService.getTemplateWithLogicById(physicalId);
         if (physicalWithLogic == null || !physicalWithLogic.hasLogic()) {
             return false;
         }
         String todayIndexName = IndexNameFactory.get(physicalWithLogic.getExpression(),
             physicalWithLogic.getLogicTemplate().getDateFormat(), 0, physicalWithLogic.getVersion());
-        return createIndex(todayIndexName, physicalWithLogic, retryCount);
+        return createIndex(todayIndexName, physicalWithLogic, RETRY_TIMES);
     }
 
     private boolean createIndex(String indexName, IndexTemplatePhyWithLogic physicalWithLogic,
@@ -148,11 +166,11 @@ public class PreCreateManagerImpl extends BaseTemplateSrvImpl implements PreCrea
         return esIndexService.syncCreateIndex(physicalWithLogic.getCluster(), indexName, retryCount);
     }
 
-    private IndexConfig generateIndexConfig(IndexTemplatePhyWithLogic physicalWithLogic) {
+    private IndexConfig generateIndexConfig(IndexTemplatePhyWithLogic physicalWithLogic) throws ESOperateException {
         TemplateConfig templateConfig = esTemplateService.syncGetTemplateConfig(physicalWithLogic.getCluster(),
-            physicalWithLogic.getName());
+                physicalWithLogic.getName());
         if (null == templateConfig) {
-            return null;
+            throw new ESOperateException("获取模板配置失败，请稍后重试");
         }
         IndexConfig indexConfig = new IndexConfig();
         indexConfig.setMappings(templateConfig.getMappings());
@@ -215,7 +233,7 @@ public class PreCreateManagerImpl extends BaseTemplateSrvImpl implements PreCrea
             }
 
             try {
-                if (syncCreateTomorrowIndexByPhysicalId(physical.getId(), retryCount)) {
+                if (syncCreateTomorrowIndexByPhysicalId(physical.getId())) {
                     succeedCount++;
                 } else {
                     LOGGER.warn(
@@ -248,30 +266,11 @@ public class PreCreateManagerImpl extends BaseTemplateSrvImpl implements PreCrea
         boolean succ = true;
         for (IndexTemplatePhy indexTemplatePhy : indexTemplatePhies) {
             if (syncDeleteTomorrowIndexByPhysicalId(indexTemplatePhy.getId(), retryCount)) {
-                succ = succ && syncCreateTomorrowIndexByPhysicalId(indexTemplatePhy.getId(), retryCount);
+                succ = succ && syncCreateTomorrowIndexByPhysicalId(indexTemplatePhy.getId());
             }
         }
 
         return succ;
-    }
-
-    /**
-     * 异步创建今天索引
-     * @param physicalId 物理模板id
-     * @param retryCount 重试次数
-     */
-    @Override
-    public void asyncCreateTodayAndTomorrowIndexByPhysicalId(Long physicalId, int retryCount) {
-        ariusOpThreadPool.execute(() -> {
-            try {
-                syncCreateTomorrowIndexByPhysicalId(physicalId, retryCount);
-                syncCreateTodayIndexByPhysicalId(physicalId, retryCount);
-            } catch (ESOperateException e) {
-                LOGGER.error(
-                    "class=ESIndexServiceImpl||method=asyncCreateTodayIndexAsyncByPhysicalId||errMsg={}||physicalId={}",
-                    e.getMessage(), physicalId, e);
-            }
-        });
     }
 
 }

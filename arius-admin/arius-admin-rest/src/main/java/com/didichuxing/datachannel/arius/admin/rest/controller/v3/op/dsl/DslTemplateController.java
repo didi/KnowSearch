@@ -4,6 +4,7 @@ import com.didichuxing.datachannel.arius.admin.biz.dsl.DslTemplateManager;
 import com.didichuxing.datachannel.arius.admin.biz.gateway.GatewayJoinLogManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.dsl.DslQueryLimitDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.dsl.template.DslTemplateConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayJoinQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.DslTemplateVO;
@@ -53,24 +54,17 @@ public class DslTemplateController {
         return dslTemplateManager.getDslTemplateDetail(HttpRequestUtil.getProjectId(request), dslTemplateMd5);
     }
 
-    @PutMapping(path = "/status/{dslTemplateMd5}")
+    @PutMapping(path = "/change/status/{dslTemplateMd5}")
     @ApiOperation(value = "根据dslTemplateMd5修改DSL模版状态（启用或停用）", notes = "调用该接口，直接对状态取反")
-    @ApiImplicitParam(name = "dslTemplateMd5", value = "查询模板MD5List", required = true)
-    public Result<Boolean> changeStatus(@PathVariable(value = "dslTemplateMd5") String dslTemplateMd5,
-                                        HttpServletRequest request) {
-        return dslTemplateManager.changeDslTemplateStatus(HttpRequestUtil.getProjectId(request),
-            HttpRequestUtil.getOperator(request), dslTemplateMd5);
+    @ApiImplicitParams({@ApiImplicitParam(name = "dslTemplateMd5", value = "查询模板MD5List", required = true), @ApiImplicitParam(name = "appId", value = "查询模板对应的appId", required = false)})
+    public Result<Boolean> changeStatus(@PathVariable(value = "dslTemplateMd5") String dslTemplateMd5, @RequestParam(value = "projectId",required = false) Integer projectId, HttpServletRequest request) {
+        return dslTemplateManager.changeDslTemplateStatus(null != projectId ? projectId : HttpRequestUtil.getProjectId(request), dslTemplateMd5);
     }
 
-    @PutMapping(path = "/query-limit")
+    @PutMapping(path = "/update/queryLimit")
     @ApiOperation(value = "根据dslTemplateMd5修改查询模版限流值", notes = "可批量修改")
-    @ApiImplicitParams({ @ApiImplicitParam(name = "dslTemplateMd5List", value = "查询模板MD5List", required = true),
-                         @ApiImplicitParam(name = "queryLimit", value = "新的限流值", required = true) })
-    public Result<Boolean> updateQueryLimit(@RequestParam(value = "dslTemplateMd5List") List<String> dslTemplateMd5List,
-                                            @RequestParam(value = "queryLimit") Double queryLimit,
-                                            HttpServletRequest request) {
-        return dslTemplateManager.updateDslTemplateQueryLimit(HttpRequestUtil.getProjectId(request),
-            HttpRequestUtil.getOperator(request), dslTemplateMd5List, queryLimit);
+    public Result<Boolean> updateQueryLimit(@RequestBody List<DslQueryLimitDTO> dslTemplateList) {
+        return dslTemplateManager.updateDslTemplateQueryLimit(dslTemplateList);
     }
 
     @PostMapping(path = "/slow/list")

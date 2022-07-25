@@ -137,7 +137,9 @@ public abstract class BaseConcurrentTask<T> {
      * 获取任务名称
      * @return 任务名称
      */
-    public abstract String getTaskName();
+    public  String getTaskName(){
+        return getClass().getSimpleName();
+    }
 
     /**
      * 任务的线程个数

@@ -28,27 +28,24 @@ import org.springframework.beans.factory.annotation.Autowired;
  *
  * xxxx-2021-10-22 -> xxxx-2021-10-22_v1
  */
-@Task(name = "IndexRolloverTask", description = "模板Rollover实现", cron = "0 0 0/1 * * ?", autoRegister = true)
-public class IndexRolloverTask extends BaseConcurrentTemplateTask implements Job {
+@Task(name = "IndexRolloverRandomTask", description = "模板Rollover实现", cron = "0 0 0/1 * * ?", autoRegister = true)
+public class IndexRolloverRandomTask extends BaseConcurrentTemplateTask implements Job {
 
-    private static final ILog LOGGER = LogFactory.getLog(IndexRolloverTask.class);
+    private static final ILog LOGGER = LogFactory.getLog(IndexRolloverRandomTask.class);
 
     @Autowired
     private IndexPlanManager  indexPlanManager;
 
     @Override
     public TaskResult execute(JobContext jobContext) throws Exception {
-        LOGGER.info("class=IndexRolloverTask||method=execute||msg=IndexRolloverTask start");
+        LOGGER.info("class=IndexRolloverRandomTask||method=execute||msg=IndexRolloverRandomTask start");
         if (execute()) {
             return TaskResult.SUCCESS;
         }
         return TaskResult.FAIL;
     }
 
-    @Override
-    public String getTaskName() {
-        return "IndexRolloverTask";
-    }
+   
 
     @Override
     public int poolSize() {
@@ -64,7 +61,7 @@ public class IndexRolloverTask extends BaseConcurrentTemplateTask implements Job
     protected boolean executeByLogicTemplate(Integer logicId) {
         final Result<Void> result = indexPlanManager.indexRollover(logicId);
         if (result.failed()){
-             LOGGER.warn("class=IndexRolloverTask||method=executeByLogicTemplate||logicId={}||msg={}", logicId,
+             LOGGER.warn("class=IndexRolloverRandomTask||method=executeByLogicTemplate||logicId={}||msg={}", logicId,
                         result.getMessage());
              return result.failed();
         }

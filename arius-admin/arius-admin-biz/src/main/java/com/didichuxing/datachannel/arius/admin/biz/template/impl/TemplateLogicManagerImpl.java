@@ -3,15 +3,26 @@ package com.didichuxing.datachannel.arius.admin.biz.template.impl;
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.DEFAULT_INDEX_MAPPING_TYPE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.G_PER_SHARD;
 import static com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum.TEMPLATE_LOGIC;
-import static com.didichuxing.datachannel.arius.admin.common.constant.TemplateConstant.TEMPLATE_NAME_CHAR_SET;
-import static com.didichuxing.datachannel.arius.admin.common.constant.TemplateConstant.TEMPLATE_NAME_SIZE_MAX;
-import static com.didichuxing.datachannel.arius.admin.common.constant.TemplateConstant.TEMPLATE_NAME_SIZE_MIN;
+import static com.didichuxing.datachannel.arius.admin.common.constant.TemplateConstant.*;
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.ADD;
 import static com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectTemplateAuthEnum.OWN;
 import static com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectTemplateAuthEnum.isTemplateAuthExitByCode;
 import static com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType.FAIL;
 import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum.TEMPLATE_MAPPING;
 import static com.didichuxing.datachannel.arius.admin.core.service.template.physic.impl.IndexTemplatePhyServiceImpl.NOT_CHECK;
+
+import java.util.*;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.indices.IndicesManager;
@@ -23,36 +34,15 @@ import com.didichuxing.datachannel.arius.admin.biz.template.srv.dcdr.TemplateDCD
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.pipeline.PipelineManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.precreate.PreCreateManager;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.IndexTemplateValue;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.TemplateLabel;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatCellDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateRateLimitDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateConfigDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhyDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateWithCreateInfoDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateClearDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateConditionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ProjectTemplateAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateConfig;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicAggregate;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithCluster;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateClearVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateDeleteVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateDetailVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateRateLimitVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateCyclicalRollInfoVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.*;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
@@ -70,17 +60,20 @@ import com.didichuxing.datachannel.arius.admin.common.exception.AmsRemoteExcepti
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.mapping.AriusTypeProperty;
+import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.TemplateUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.*;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
+import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterNodeService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectLogicTemplateAuthService;
@@ -95,24 +88,6 @@ import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.function.BiFunction;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 @Component
 public class TemplateLogicManagerImpl implements TemplateLogicManager {
@@ -176,7 +151,9 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     @Autowired
     private PipelineManager                 templatePipelineManager;
     @Autowired
-    private TemplateLogicManager            templateLogicManager;
+    private   TemplateLogicManager templateLogicManager;
+    @Autowired
+    protected ESClusterNodeService esClusterNodeService;
 
     public static final int                 MAX_PERCENT           = 10000;
     public static final int                 MIN_PERCENT           = -99;
@@ -239,7 +216,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
                             .content(String.format("模版创建：%s", param.getName()))
                             .project(projectService.getProjectBriefByProjectId(projectId))
                             .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                            .operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_CREATE).build());
+                            .operationTypeEnum(OperateTypeEnum.TEMPLATE_MANAGEMENT_CREATE).build());
         } catch (AdminOperateException e) {
             LOGGER.error("class=TemplateLogicManagerImpl||method=create", e);
             // 这里必须显示事务回滚
@@ -468,7 +445,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
                 String descBefore=oldIndexTemplate.getDesc();
                 String descAfter=param.getDesc();
                 operateRecordService.save(
-                    new OperateRecord.Builder().operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_INFO_MODIFY)
+                    new OperateRecord.Builder().operationTypeEnum(OperateTypeEnum.TEMPLATE_MANAGEMENT_INFO_MODIFY)
                         .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).userOperation(operator)
                         .content(String.format("数据类型变更：【%s】->【%s】;描述变更:【%s】->【%s】",dataTypeBefore,dataTypeAfter,
                                 descBefore,descAfter))
@@ -504,7 +481,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
                 .save(new OperateRecord.Builder().bizId(logicTemplateId).triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
                     .content(String.format("模板【%s】下线", beforeDeleteName))
                     .project(projectService.getProjectBriefByProjectId(projectId)).userOperation(operator)
-                    .operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_OFFLINE).build());
+                    .operationTypeEnum(OperateTypeEnum.TEMPLATE_MANAGEMENT_OFFLINE).build());
             //一并下线模板关联的索引
             /**
              * [{"cluster":"Zh_test3_cluster_7-6-0-1400","index":"zh_test3_template3_2022-07-18"}]
@@ -814,7 +791,9 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         String name = Optional.ofNullable(templateLogicWithPhysical).map(IndexTemplateWithPhyTemplates::getName)
             .orElse("");
         String clearIndices = String.join(",", indices);
-        operateRecordService.save(new OperateRecord.Builder().bizId(clearDTO.getLogicId())
+        operateRecordService.save(new OperateRecord.Builder()
+                        .project(projectService.getProjectBriefByProjectId(projectId))
+                .bizId(clearDTO.getLogicId())
             .operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE_CLEAN).userOperation(operator)
             .content(String.format("清理索引模板：%s下的索引列表：【%s】", name, clearIndices)).buildDefaultManualTrigger());
 
@@ -850,7 +829,9 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
                 throw new AdminOperateException(String.format("同步修改es集群[%s]中模板[%s]shard数[%d]失败, 请确认集群是否正常",
                     templatePhy.getCluster(), templatePhy.getName(), shardNum), FAIL);
             }
-            operateRecordService.save(new OperateRecord.Builder().bizId(logicTemplateId)
+            operateRecordService.save(new OperateRecord.Builder()
+                            .project(projectService.getProjectBriefByProjectId(projectId))
+                    .bizId(logicTemplateId)
                 .operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE_CAPACITY)
                 .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).content(String.format("同步修改es集群[%s]中模板[%s]shard数[%d]",
                     templatePhy.getCluster(), templatePhy.getName(), shardNum))
@@ -875,6 +856,19 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         }
 
         IndexTemplatePhyDTO updateParam = new IndexTemplatePhyDTO();
+        //这里为了保证逻辑模版下所有物理模版均创建最新索引后再进行pipeline切换，需要遍历两次
+        for (IndexTemplatePhy templatePhy : templatePhyList) {
+            int version = null != templatePhy.getVersion() ? templatePhy.getVersion() : 0;
+            version = version < 0 ? 1 : version + 1;
+            /*
+            这里提前创建当天索引
+             1.避免因为getTemplateConfig失败，导致升版本后不分区索引mapping异常
+             2.避免由于事务原因，导致当天最新版本的分区索引未被创建
+             */
+            if (!preCreateManager.syncCreateTodayIndexByPhysicalId(templatePhy.getId(), version)) {
+                return Result.buildFail("创建当前最新版本索引失败，请稍后重试！");
+            }
+        }
         for (IndexTemplatePhy templatePhy : templatePhyList) {
             final Integer beforeVersion = templatePhy.getVersion();
             final Integer afterVersion =beforeVersion + 1;
@@ -1341,6 +1335,27 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         buildCyclicalRoll(indexTemplateDTO, param);
         buildShardNum(indexTemplateDTO, param);
         buildPhysicalInfo(indexTemplateDTO, param);
+        //如果是分区模版
+        final boolean isExpression =
+                Optional.ofNullable(indexTemplateDTO.getExpression()).map(expression->expression.endsWith(
+                "*")).orElse(false);
+        List<Integer> openSrvList=Lists.newArrayList();
+        if (Boolean.TRUE.equals(isExpression)) {
+            openSrvList.add(TemplateServiceEnum.TEMPLATE_PRE_CREATE.getCode());
+            openSrvList.add(TemplateServiceEnum.TEMPLATE_DEL_EXPIRE.getCode());
+        }
+        final ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(
+                indexTemplateDTO.getResourceId());
+        final TupleTwo</*dcdrExist*/Boolean,/*pipelineExist*/ Boolean> existDCDRAndPipelineModule = esClusterNodeService.existDCDRAndPipelineModule(
+                clusterRegion.getPhyClusterName());
+        if (Boolean.TRUE.equals(existDCDRAndPipelineModule.v2)) {
+            openSrvList.add(TemplateServiceEnum.TEMPLATE_PIPELINE.getCode());
+        }
+        if (CollectionUtils.isNotEmpty(openSrvList)) {
+            //如果集群支持pipeline
+            indexTemplateDTO.setOpenSrv(ConvertUtil.list2String(openSrvList, ","));
+        }
+      
 
         return indexTemplateDTO;
     }

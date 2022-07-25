@@ -99,4 +99,57 @@ class UserMetricsConfigServiceTest {
         // Verify the results
         verify(userMetricsConfigDAO).delete(any());
     }
+    
+    //void setTemplateInit(){
+    //      for (IndexTemplate indexTemplateDTO : indexTemplateService.listAllLogicTemplates()) {
+    //        final Integer logicTemplateId = indexTemplateDTO.getId();
+    //        List<Integer> openSrvList = Lists.newArrayList();
+    //        final String openSrv = indexTemplateDTO.getOpenSrv();
+    //        if (StringUtils.isNotBlank(openSrv)) {
+    //            for (String s : StringUtils.split(openSrv, ",")) {
+    //                if (StringUtils.isNumeric(s)) {
+    //                    openSrvList.add(Integer.parseInt(s));
+    //                }
+    //            }
+    //        }
+    //
+    //
+    //        if (openSrvList.contains(TemplateServiceEnum.TEMPLATE_PRE_CREATE.getCode()) && openSrvList.contains(
+    //                TemplateServiceEnum.TEMPLATE_DEL_EXPIRE.getCode()) && openSrvList.contains(
+    //                TemplateServiceEnum.TEMPLATE_PIPELINE.getCode())) {
+    //            System.out.println("跳过");
+    //            continue;
+    //        }
+    //        //如果是分区模版
+    //        final boolean isExpression = indexTemplateDTO.getExpression().endsWith("*");
+    //
+    //        if (Boolean.TRUE.equals(isExpression)) {
+    //            openSrvList.add(TemplateServiceEnum.TEMPLATE_PRE_CREATE.getCode());
+    //            openSrvList.add(TemplateServiceEnum.TEMPLATE_DEL_EXPIRE.getCode());
+    //        }
+    //        final ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(
+    //                indexTemplateDTO.getResourceId());
+    //        final TupleTwo</*dcdrExist*/Boolean,/*pipelineExist*/ Boolean> existDCDRAndPipelineModule = esClusterNodeService.existDCDRAndPipelineModule(
+    //                clusterRegion.getPhyClusterName());
+    //        if (logicTemplateId.equals(25135)){
+    //            System.out.println(25135);
+    //        }
+    //        if (Boolean.TRUE.equals(existDCDRAndPipelineModule.v2)) {
+    //            openSrvList.add(TemplateServiceEnum.TEMPLATE_PIPELINE.getCode());
+    //        }
+    //        final IndexTemplatePO indexTemplatePO = new IndexTemplatePO();
+    //        if (CollectionUtils.isNotEmpty(openSrvList)) {
+    //            //如果集群支持pipelien
+    //            indexTemplatePO.setOpenSrv(
+    //                    ConvertUtil.list2String(openSrvList.stream().distinct().collect(Collectors.toList()), ","));
+    //            indexTemplatePO.setId(logicTemplateId);
+    //            final boolean update = indexTemplateService.update(indexTemplatePO);
+    //            if (update) {
+    //                System.err.println("success");
+    //            }
+    //        }
+    //
+    //    }
+    //    System.out.println("执行更新完成.......");
+    //}
 }

@@ -89,7 +89,7 @@ public class IndexCatInfoCollector extends AbstractMetaDataJob {
             logicClusterId2NameMap.putAll(ConvertUtil.list2Map(logicClusterList, ClusterLogic::getId, ClusterLogic::getName));
         }
 
-        // 2. 获取通过平台索引管理 创建的索引cat_index信息，其中不包含templateId，但包含projectId
+        // 2. 获取通过平台索引管理 创建的索引cat_index信息
         List<IndexCatCell> platformCreateCatIndexList = esIndexCatService.syncGetPlatformCreateCatIndexList();
         // 这里的cluster 用户侧创建为逻辑集群名称，运维侧创建为物理集群名称
         Map<String/*cluster@index*/, IndexCatCell> index2IndexCatCellFromPlatformCreateMap = ConvertUtil.list2Map(

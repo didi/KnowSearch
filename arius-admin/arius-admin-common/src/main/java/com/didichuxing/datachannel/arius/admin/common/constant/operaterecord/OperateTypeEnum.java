@@ -110,23 +110,18 @@ public enum OperateTypeEnum {
     /**
      * 索引模板管理：模板创建 todo 新建模版
      */
-    INDEX_TEMPLATE_MANAGEMENT_CREATE(NewModuleEnum.INDEX_MANAGEMENT, "模板创建", 23),
+    TEMPLATE_MANAGEMENT_CREATE(NewModuleEnum.TEMPLATE_MANAGEMENT, "模板创建", 23),
+
     /**
-     * 索引模板管理:编辑MAPPING
+     * 模板管理:模板下线
      */
-    INDEX_TEMPLATE_MANAGEMENT_EDIT_MAPPING(NewModuleEnum.INDEX_MANAGEMENT, "编辑MAPPING", 24),
-    /**
-     * 索引模板管理:编辑SETTING
-     */
-    INDEX_TEMPLATE_MANAGEMENT_EDIT_SETTING(NewModuleEnum.INDEX_MANAGEMENT, "编辑SETTING", 25),
-    /**
-     * 索引模板管理:模板下线
-     */
-    INDEX_TEMPLATE_MANAGEMENT_OFFLINE(NewModuleEnum.TEMPLATE_SERVICE, "模板下线", 26),
+    TEMPLATE_MANAGEMENT_OFFLINE(NewModuleEnum.TEMPLATE_MANAGEMENT, "模板下线", 26),
+     TEMPLATE_MANAGEMENT_EDIT_MAPPING(NewModuleEnum.TEMPLATE_MANAGEMENT, "编辑MAPPING", 60),
+    TEMPLATE_MANAGEMENT_EDIT_SETTING(NewModuleEnum.TEMPLATE_MANAGEMENT, "编辑SETTING", 59),
     /**
      * 索引模板管理:索引模板信息修改
      */
-    INDEX_TEMPLATE_MANAGEMENT_INFO_MODIFY(NewModuleEnum.TEMPLATE_SERVICE, "索引模板信息修改", 27),
+    TEMPLATE_MANAGEMENT_INFO_MODIFY(NewModuleEnum.TEMPLATE_MANAGEMENT, "索引模板信息修改", 27),
     /**
      * 索引模板管理:升级版本
      */
@@ -143,8 +138,7 @@ public enum OperateTypeEnum {
      * 模板服务:模板扩缩容
      */
     TEMPLATE_SERVICE_CAPACITY(NewModuleEnum.TEMPLATE_SERVICE, "模板扩缩容", 31),
-    TEMPLATE_SERVICE_EDIT_MAPPING(NewModuleEnum.TEMPLATE_SERVICE, "编辑MAPPING", 60),
-    TEMPLATE_SERVICE_EDIT_SETTING(NewModuleEnum.TEMPLATE_SERVICE, "编辑SETTING", 59),
+   
     
     /**
      * 模板服务
@@ -163,18 +157,27 @@ public enum OperateTypeEnum {
      */
     INDEX_MANAGEMENT_ALIAS_MODIFY(NewModuleEnum.INDEX_MANAGEMENT, "别名调整", 36),
     INDEX_MANAGEMENT_LABEL_MODIFY(NewModuleEnum.INDEX_MANAGEMENT, "标签调整", 56),
-    /**
-     * 索引管理:索引读写变更
+        /**
+     * 索引模板管理:编辑MAPPING
      */
-    INDEX_MANAGEMENT_READ_WRITE_CHANGE(NewModuleEnum.INDEX_MANAGEMENT, "索引读写变更", 37),
+    INDEX_TEMPLATE_MANAGEMENT_EDIT_MAPPING(NewModuleEnum.INDEX_MANAGEMENT, "编辑MAPPING", 24),
+    /**
+     * 索引模板管理:编辑SETTING
+     */
+    INDEX_TEMPLATE_MANAGEMENT_EDIT_SETTING(NewModuleEnum.INDEX_MANAGEMENT, "编辑SETTING", 25),
+
     /**
      * 索引管理:操作索引
      */
-    INDEX_MANAGEMENT_OP_INDEX(NewModuleEnum.INDEX_MANAGEMENT, "操作索引", 38),
+    INDEX_SERVICE_OP_INDEX(NewModuleEnum.INDEX_SERVICE, "操作索引", 38),
     /**
      * 索引服务:执行索引服务
      */
     INDEXING_SERVICE_RUN(NewModuleEnum.INDEX_SERVICE, "执行索引服务", 39),
+        /**
+     * 索引管理:索引读写变更
+     */
+    INDEX_SERVICE_READ_WRITE_CHANGE(NewModuleEnum.INDEX_SERVICE, "索引读写变更", 37),
     /**
      * 查询模板:DSL限流调整
      */

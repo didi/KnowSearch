@@ -16,6 +16,9 @@ import lombok.NoArgsConstructor;
 @ApiModel(description = "DSL模版分页列表查询条件")
 public class DslTemplateConditionDTO extends PageDTO {
 
+    @ApiModelProperty(value = "应用ID", dataType = "Integer", required = false)
+    private Integer  projectId;
+
     @ApiModelProperty(value = "排序信息（精确）", dataType = "String", required = false)
     private String  sortInfo;
 

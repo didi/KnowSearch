@@ -36,7 +36,7 @@ public enum NewModuleEnum {
                            /**
                             * 模板服务:DCDR设置
                             */
-                           TEMPLATE_SERVICE("模板管理", 5),
+                           TEMPLATE_SERVICE("模板服务", 5),
 
                            /**
                             * 索引管理:创建
@@ -47,20 +47,21 @@ public enum NewModuleEnum {
                             * 索引服务:
                             */
                            INDEX_SERVICE("索引服务", 7),
-                           /**
-                            * 查询模板
-                            */
-                           QUERY_TEMPLATE("查询模板", 8),
-
-                           /**
-                            * 配置
-                            */
-                           SETTING("配置", 9),
-                           //SENSE_OP("sense操作", 10),
-                           SCHEDULE("定时任务", 11), ES_CLUSTER_PLUGINS("ES集群插件",
-                                                                    12), ES_CLUSTER_CONFIG("ES集群配置",
-                                                                                           13), ROLE_MANAGER("角色管理",
-                                                                                                             14);
+    /**
+     * 查询模板
+     */
+    QUERY_TEMPLATE("查询模板", 8),
+    TEMPLATE_MANAGEMENT("模板管理", 5),
+    
+    /**
+     * 配置
+     */
+    SETTING("配置", 9),
+    //SENSE_OP("sense操作", 10),
+    SCHEDULE("定时任务", 11),
+    ES_CLUSTER_PLUGINS("ES集群插件", 12),
+    ES_CLUSTER_CONFIG("ES集群配置", 13),
+    ROLE_MANAGER("角色管理", 14);
 
     /**
      * 模块

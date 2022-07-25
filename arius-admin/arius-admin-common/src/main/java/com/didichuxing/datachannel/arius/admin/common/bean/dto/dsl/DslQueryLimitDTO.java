@@ -12,7 +12,6 @@ import io.swagger.annotations.ApiModelProperty;
  * 查询模板限流值
  */
 @ApiModel(value = "DslQueryLimit", description = "查询语句限流值参数")
-@Deprecated
 public class DslQueryLimitDTO extends DslBaseDTO {
 
     @ApiModelProperty(value = "查询语句限流值", example = "50")
