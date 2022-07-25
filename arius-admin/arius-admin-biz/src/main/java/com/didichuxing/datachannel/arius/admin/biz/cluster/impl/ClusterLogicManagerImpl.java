@@ -78,7 +78,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
-import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -568,8 +567,8 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
      */
     private void setClusterLogicInfo(ESLogicClusterDTO clusterDTO) {
         ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(clusterDTO.getId());
-        long diskTotal = 0L;
-        long diskUsage = 0L;
+        Long diskTotal = 0L;
+        Long diskUsage = 0L;
         if (clusterRegion != null) {
             Map<String, Triple<Long, Long, Double>> map = eSClusterNodeService
                     .syncGetNodesDiskUsage(clusterRegion.getPhyClusterName());
@@ -583,8 +582,10 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         }
         clusterDTO.setDiskTotal(diskTotal);
         clusterDTO.setDiskUsage(diskUsage);
-        clusterDTO.setDiskUsagePercent(
-                new BigDecimal((double) diskUsage / diskTotal).setScale(4, BigDecimal.ROUND_HALF_UP).doubleValue());
+        double diskUsagePercent = diskUsage!=0L&&diskTotal!=0L?CommonUtils.divideDoubleAndFormatDouble(
+                diskUsage,
+                diskTotal, 2, 1):0.0;
+        clusterDTO.setDiskUsagePercent(diskUsagePercent);
 
         //设置es集群版本
         ClusterPhy physicalCluster = getLogicClusterAssignedPhysicalClusters(clusterDTO.getId());
