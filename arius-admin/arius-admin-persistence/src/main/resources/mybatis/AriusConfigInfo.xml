@@ -45,17 +45,6 @@
         where id = #{id}
     </update>
 
-    <update id="updateByGroupAndName"
-            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.config.AriusConfigInfoPO">
-        update arius_config_info
-        <trim prefix="set" prefixOverrides=",">
-            <if test="value != null">,`value` = #{value}</if>
-            <if test="dimension != null">,dimension = #{dimension}</if>
-            <if test="status != null">,status = #{status}</if>
-        </trim>
-        where value_group = #{valueGroup} and value_name = #{valueName}
-    </update>
-
     <select id="listByCondition"
             parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.config.AriusConfigInfoPO"
             resultMap="BaseResultMap">
