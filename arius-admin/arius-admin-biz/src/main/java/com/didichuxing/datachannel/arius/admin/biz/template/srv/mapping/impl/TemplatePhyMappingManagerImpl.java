@@ -84,7 +84,7 @@ public class TemplatePhyMappingManagerImpl implements TemplatePhyMappingManager 
     }
 
     @Override
-    public Result<Void> syncTemplateMapping2Index(String cluster, String index, MappingConfig mappingConfig) {
+    public Result<Void> syncTemplateMapping2Index(String cluster, String index, MappingConfig mappingConfig) throws ESOperateException {
         if (!esIndexDAO.updateIndexMapping(cluster, index, mappingConfig)) {
             return Result.buildFail("update index mapping fail");
         }
@@ -170,7 +170,7 @@ public class TemplatePhyMappingManagerImpl implements TemplatePhyMappingManager 
 
     @Override
     public Result<Void> addIndexMapping(String cluster, String expression, String dataFormat, int updateDays,
-                                        MappingConfig mappingConfig) {
+                                        MappingConfig mappingConfig) throws ESOperateException {
         for (int i = 1; i <= updateDays; i++) {
             String indexName = IndexNameFactory.getNoVersion(expression, dataFormat, 2 - i);
 

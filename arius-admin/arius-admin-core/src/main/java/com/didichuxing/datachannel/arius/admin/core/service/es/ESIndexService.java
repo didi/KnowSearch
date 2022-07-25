@@ -81,7 +81,7 @@ public interface ESIndexService {
      * @param mappingConfig
      * @return
      */
-    boolean syncUpdateIndexMapping(String cluster, String index, MappingConfig mappingConfig);
+    boolean syncUpdateIndexMapping(String cluster, String index, MappingConfig mappingConfig) throws ESOperateException;
 
     Map<String, IndexConfig> syncBatchGetIndexConfig(String cluster, List<String> indexList);
 

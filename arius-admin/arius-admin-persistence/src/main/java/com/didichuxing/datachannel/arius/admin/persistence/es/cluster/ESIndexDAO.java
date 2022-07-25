@@ -233,7 +233,7 @@ public class ESIndexDAO extends BaseESDAO {
      * @param indexName 索引名字
      * @return
      */
-    public boolean updateIndexMapping(String cluster, String indexName, MappingConfig mappingConfig) {
+    public boolean updateIndexMapping(String cluster, String indexName, MappingConfig mappingConfig) throws ESOperateException {
         if (!exist(cluster, indexName)) {
             LOGGER.warn("class=ESIndexDAO||method=updateIndexMapping||cluster={}||indexName={}||msg=index not exist",
                 cluster, indexName);
@@ -254,11 +254,14 @@ public class ESIndexDAO extends BaseESDAO {
             if (Integer.parseInt(client.getEsVersion().split("\\.")[0]) >= 7) {
                 builder.setIncludeTypeName(true);
             }
-            ESIndicesUpdateMappingResponse response = builder.execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
-            ;
 
-            if (!response.getAcknowledged().booleanValue()) {
-                return false;
+            try {
+                ESIndicesUpdateMappingResponse response = builder.execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+                if (!response.getAcknowledged().booleanValue()) {
+                    return false;
+                }
+            } catch (Exception e) {
+                throw new ESOperateException("编辑mapping失败", e.getCause());
             }
         }
 
