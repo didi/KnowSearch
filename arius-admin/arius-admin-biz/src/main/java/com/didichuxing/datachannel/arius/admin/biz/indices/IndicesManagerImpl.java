@@ -479,7 +479,7 @@ public class IndicesManagerImpl implements IndicesManager {
 
         } catch (ESOperateException e) {
             LOGGER.error("class=IndicesManagerImpl||method=editMapping||errMsg={}", e.getMessage(), e);
-            return Result.buildFail(e.getMessage());
+            return Result.buildFail(e.getMessage() + ":" + e.getCause());
         }
 
         return Result.buildSucc();
