@@ -7,7 +7,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.impl.BaseTemplateSrvImpl;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping.TemplateLogicMappingManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping.TemplatePhyMappingManager;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.MappingOptimize;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.MappingOptimizeItem;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -286,43 +285,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrvImpl impleme
         return ariusTypeProperty;
     }
 
-    /**
-     * 获取mapping优化信息
-     *
-     * @param logicId logicId
-     * @return result
-     */
-    @Override
-    public Result<List<MappingOptimize>> getTemplateMappingOptimize(Integer logicId) {
-        IndexTemplateWithPhyTemplates logicWithPhysical = this.indexTemplateService
-            .getLogicTemplateWithPhysicalsById(logicId);
 
-        if (logicWithPhysical == null) {
-            return Result.buildNotExist("模板不存在");
-        }
-
-        List<IndexTemplatePhy> templatePhysicals = logicWithPhysical.fetchMasterPhysicalTemplates();
-
-        List<MappingOptimize> mappingOptimizes = new ArrayList<>();
-        for (IndexTemplatePhy master : templatePhysicals) {
-            Result<MappingOptimize> getMappingOptimizeResult = templateStatsService
-                .getMappingOptimize(master.getCluster(), master.getName());
-
-            if (getMappingOptimizeResult.failed()) {
-                return Result.buildFrom(getMappingOptimizeResult);
-            }
-
-            if (!CollectionUtils.isEmpty(getMappingOptimizeResult.getData().getOptimizeItems())) {
-                mappingOptimizes.add(getMappingOptimizeResult.getData());
-            }
-        }
-
-        if (CollectionUtils.isEmpty(mappingOptimizes)) {
-            return Result.buildParamIllegal("mapping不需要优化");
-        }
-
-        return Result.buildSucc(mappingOptimizes);
-    }
 
     /**
      * mapping优化

@@ -1247,10 +1247,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
      */
     private List<IndexTemplateValue> fetchTemplateValues() {
         List<IndexTemplateValue> templateValues = Lists.newArrayList();
-        Result<List<IndexTemplateValue>> listTemplateValueResult = templateStatsService.listTemplateValue();
-        if (listTemplateValueResult.success()) {
-            templateValues.addAll(listTemplateValueResult.getData());
-        }
+      
 
         return templateValues;
     }
