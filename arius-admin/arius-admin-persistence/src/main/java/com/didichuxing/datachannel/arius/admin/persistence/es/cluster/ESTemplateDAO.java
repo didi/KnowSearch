@@ -142,6 +142,12 @@ public class ESTemplateDAO extends BaseESDAO {
      */
     public boolean create(String cluster, String name, String expression, Integer shard, Integer shardRouting) {
         ESClient client = esOpClient.getESClient(cluster);
+        if (client == null) {
+            LOGGER.warn(
+                    "class=ESTemplateDAO||method=create||msg=es client is null||cluster={}||name={}||expression={}||shard={}||shardRouting={}",
+                    cluster, name, expression, shard, shardRouting);
+            return Boolean.FALSE;
+        }
 
         // 获取es中原来index template的配置
         TemplateConfig templateConfig = null;
@@ -188,6 +194,11 @@ public class ESTemplateDAO extends BaseESDAO {
 
     public boolean create(String cluster, String name, TemplateConfig templateConfig) {
         ESClient client = esOpClient.getESClient(cluster);
+        if (client==null){
+            LOGGER.warn("class=ESTemplateDAO||method=create||msg=es client is null ||cluster={}||name={}||templateConfig={}", cluster,
+                name,templateConfig.toString());
+            return Boolean.FALSE;
+        }
 
         // 设置ES版本
         templateConfig.setVersion(client.getEsVersion());
@@ -208,6 +219,12 @@ public class ESTemplateDAO extends BaseESDAO {
      */
     public boolean updateTemplate(String clusterName, String templateName, TemplateConfig templateConfig) {
         ESClient esClient = esOpClient.getESClient(clusterName);
+        if (esClient == null) {
+            LOGGER.warn(
+                    "class=ESTemplateDAO||method=updateTemplate||update template  fail||clusterName={}||templateName={}||esVersion={}||templateConfig={}||msg=es client is null",
+                    clusterName, templateName, templateConfig.toString());
+            return Boolean.FALSE;
+        }
 
         // 设置ES版本
         templateConfig.setVersion(esClient.getEsVersion());
@@ -289,12 +306,14 @@ public class ESTemplateDAO extends BaseESDAO {
      */
     public MultiTemplatesConfig getTemplates(String clusterName, String templateName,Integer tryTimes) {
 
-        LOGGER.warn("class=ESTemplateDAO||method=getTemplates||clusterName={}||templateName={}", clusterName,
-            templateName);
+      
 
         ESClient esClient = esOpClient.getESClient(clusterName);
 
         if (null == esClient) {
+            LOGGER.warn("class=ESTemplateDAO||method=getTemplates||clusterName={}||templateName={}||msg= es client is null",
+                    clusterName,
+            templateName);
             return null;
         }
     

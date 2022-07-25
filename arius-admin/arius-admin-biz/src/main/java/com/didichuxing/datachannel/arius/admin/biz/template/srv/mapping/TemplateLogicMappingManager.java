@@ -1,6 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.common.MappingOptimize;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateSchemaDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateSchemaOptimizeDTO;
@@ -71,12 +70,7 @@ public interface TemplateLogicMappingManager {
      */
     AriusTypeProperty fields2Mapping(List<Field> fields);
 
-    /**
-     * 获取mapping优化信息
-     * @param logicId logicId
-     * @return result
-     */
-    Result<List<MappingOptimize>> getTemplateMappingOptimize(Integer logicId);
+
 
     /**
      * mapping优化

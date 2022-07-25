@@ -25,7 +25,7 @@ public class ColdDataMoveRandomTask extends BaseConcurrentTemplateTask implement
 
     @Override
     public TaskResult execute(JobContext jobContext) throws Exception {
-        LOGGER.info("class=ColdDataMoveRandomTask||method=execute||msg=ColdDataMoveTask start");
+        LOGGER.info("class=ColdDataMoveRandomTask||method=execute||msg=ColdDataMoveRandomTask start");
         if (execute()) {
             return TaskResult.SUCCESS;
         }
