@@ -17,19 +17,19 @@ public interface DslTemplateManager {
     /**
      * 根据appid修改查询模版限流值
      *
-     * @param dslQueryLimitDTOList dsl模板限流值信息，待修改限流值
+     * @param dslTemplateList dsl模板限流值信息，待修改限流值
      * @return Result<Boolean>
      */
-    Result<Boolean> updateDslTemplateQueryLimit(List<DslQueryLimitDTO> dslQueryLimitDTOList);
+    Result<Boolean> updateDslTemplateQueryLimit(Integer projectId,String operator,List<DslQueryLimitDTO> dslTemplateList);
 
     /**
      * 更新查询模版的 启用|停用 状态
      *
-     * @param appId          应用账号
+     * @param projectId          查询模板对应的projectId
      * @param dslTemplateMd5 dsl模板MD5
      * @return Result<Boolean>
      */
-    Result<Boolean> changeDslTemplateStatus(Integer appId, String dslTemplateMd5);
+    Result<Boolean> changeDslTemplateStatus(Integer projectId,String operator, String dslTemplateMd5);
 
     /**
      * 根据dslTemplateMd5查找DSL模版详情

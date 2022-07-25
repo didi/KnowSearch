@@ -2,6 +2,7 @@ package com.didichuxing.datachannel.arius.admin.biz.dsl.impl;
 
 import com.didichuxing.datachannel.arius.admin.biz.dsl.DslTemplateManager;
 import com.didichuxing.datachannel.arius.admin.biz.page.DslTemplatePageSearchHandle;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.dsl.DslQueryLimitDTO;
@@ -9,6 +10,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.dsl.template.DslT
 import com.didichuxing.datachannel.arius.admin.common.bean.po.dsl.DslTemplatePO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.DslTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
@@ -19,7 +21,6 @@ import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.service.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
@@ -44,19 +45,37 @@ public class DslTemplateManagerImpl implements DslTemplateManager {
     @Autowired
     private HandleFactory        handleFactory;
     @Override
-    public Result<Boolean> updateDslTemplateQueryLimit(List<DslQueryLimitDTO> dslQueryLimitDTOList) {
-        if (CollectionUtils.isEmpty(dslQueryLimitDTOList)) {
-            return Result.build(true);
+    public Result<Boolean> updateDslTemplateQueryLimit(Integer projectId,String operator,List<DslQueryLimitDTO> dslTemplateList) {
+        Boolean succeed =  dslTemplateService.updateDslTemplateQueryLimit(dslTemplateList);
+        if (Boolean.TRUE.equals(succeed)) {
+            for (DslQueryLimitDTO entry : dslTemplateList) {
+                OperateRecord operateRecord = new OperateRecord.Builder()
+                        .content(String.format("queryLimit %s->%s", entry.getDslTemplateMd5(),entry.getQueryLimit()))
+                        .operationTypeEnum(OperateTypeEnum.QUERY_TEMPLATE_DSL_CURRENT_LIMIT_ADJUSTMENT)
+                        .project(projectService.getProjectBriefByProjectId(projectId)).userOperation(operator)
+                        .bizId(entry.getProjectIdDslTemplateMd5()).buildDefaultManualTrigger();
+                operateRecordService.save(operateRecord);
+            }
+
         }
-        return Result.buildSucc(dslTemplateService.updateDslTemplateQueryLimit(dslQueryLimitDTOList));
+        return Result.buildSucc();
     }
 
     @Override
-    public Result<Boolean> changeDslTemplateStatus(Integer appId, String dslTemplateMd5) {
+    public Result<Boolean> changeDslTemplateStatus(Integer projectId,String operator, String dslTemplateMd5) {
         if (StringUtils.isEmpty(dslTemplateMd5)) {
             return Result.build(true);
         }
-        return Result.buildSucc(dslTemplateService.updateDslTemplateStatus(appId, dslTemplateMd5));
+       Boolean succeed = dslTemplateService.updateDslTemplateStatus(projectId, dslTemplateMd5);
+        if (Boolean.TRUE.equals(succeed)) {
+            OperateRecord operateRecord = new OperateRecord.Builder()
+                    .content("变更状态:" + dslTemplateMd5)
+                    .operationTypeEnum(OperateTypeEnum.QUERY_TEMPLATE_DISABLE)
+                    .project(projectService.getProjectBriefByProjectId(projectId)).userOperation(operator)
+                    .bizId(dslTemplateMd5).buildDefaultManualTrigger();
+            operateRecordService.save(operateRecord);
+        }
+        return Result.build(succeed);
     }
     @Override
     public Result<DslTemplateVO> getDslTemplateDetail(Integer projectId, String dslTemplateMd5) {
