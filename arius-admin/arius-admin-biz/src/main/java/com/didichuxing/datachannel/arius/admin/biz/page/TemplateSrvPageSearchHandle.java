@@ -138,6 +138,7 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<Templa
             Optional.ofNullable(template).map(IndexTemplate::getProjectId)
                 .map(projectService::getProjectBriefByProjectId).map(ProjectBriefVO::getProjectName)
                 .ifPresent(templateWithSrvVO::setProjectName);
+            templateWithSrvVO.setPartition(template.getExpression().endsWith("*"));
             templateWithSrvVOList.add(templateWithSrvVO);
         }
 
