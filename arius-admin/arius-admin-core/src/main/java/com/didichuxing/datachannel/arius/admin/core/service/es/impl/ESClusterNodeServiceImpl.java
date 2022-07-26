@@ -225,6 +225,9 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
                 if (shardNodeResponse.getRestStatus() == RestStatus.OK
                     && StringUtils.isNoneBlank(shardNodeResponse.getResponseContent())) {
 
+                    /**
+                     * GET /_cat/shards/cn_arius_stats_index_node_info_2021-10-13?format=json&v&h=node,store&master_timeout=20s
+                     */
                     List<IndexShardInfo> indexShardInfos = ConvertUtil
                         .str2ObjArrayByJson(shardNodeResponse.getResponseContent(), IndexShardInfo.class);
 

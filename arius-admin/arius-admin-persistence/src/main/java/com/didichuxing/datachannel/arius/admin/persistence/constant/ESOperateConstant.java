@@ -123,6 +123,7 @@ public class ESOperateConstant {
     public static final String  IP                               = "ip";
     public static final String  NODE                             = "node";
     public static final String  DESCRIPTION                      = "description";
+    public static final String  UNASSIGN                         = "unassign";
 
     /**
      * version
