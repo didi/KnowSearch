@@ -486,6 +486,7 @@ public class ClusterOverviewMetricsHandle {
         Map<String, ClusterNodeStats> clusterNodeStatsMap = esClusterNodeService.syncGetNodeFsStatsMap(clusterName);
         List<NodeInfoForDiskUsageGte75PercentVO> nodeInfoForDiskUsageGte75PercentVOS = Lists.newArrayList();
 
+        //可添加使用率
         clusterNodeStatsMap.values().parallelStream().forEach(nodeStats -> {
             BigDecimal freeInBytesDec = new BigDecimal(nodeStats.getFs().getTotal().getFreeInBytes());
             BigDecimal totalInBytesDec = new BigDecimal(nodeStats.getFs().getTotal().getTotalInBytes());
