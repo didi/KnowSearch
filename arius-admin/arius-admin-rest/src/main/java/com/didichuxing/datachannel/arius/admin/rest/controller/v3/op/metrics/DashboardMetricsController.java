@@ -4,7 +4,7 @@ import com.didichuxing.datachannel.arius.admin.biz.metrics.DashboardMetricsManag
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsDashboardListDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsDashboardTopNDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.config.AriusConfigInfoVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.ThresholdDto;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.list.MetricListVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.dashboard.ClusterPhyHealthMetricsVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.top.VariousLineChartMetricsVO;
@@ -112,7 +112,7 @@ public class DashboardMetricsController {
     @GetMapping("/dashboard-threshold")
     @ResponseBody
     @ApiOperation(value = "获取dashboard阈值")
-    public Result<List<AriusConfigInfoVO>> dashboardThresholds() {
+    public Result<List<ThresholdDto>> dashboardThresholds() {
         return Result.buildSucc(dashboardMetricsManager.dashboardThresholds());
     }
 }

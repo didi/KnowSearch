@@ -1,16 +1,17 @@
 package com.didichuxing.datachannel.arius.admin.biz.metrics.impl;
 
+import com.alibaba.druid.util.StringUtils;
+import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.biz.component.MetricsValueConvertUtils;
 import com.didichuxing.datachannel.arius.admin.biz.metrics.DashboardMetricsManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.BaseDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsDashboardListDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsDashboardTopNDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.config.AriusConfigInfo;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.ThresholdDto;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.VariousLineChartMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.list.MetricList;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.ClusterPhyHealthMetrics;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.config.AriusConfigInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.list.MetricListVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.dashboard.ClusterPhyHealthMetricsVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.top.VariousLineChartMetricsVO;
@@ -36,6 +37,7 @@ import java.util.stream.Collectors;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.*;
 import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricListTypeEnum.*;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricThresholdValueNameEnum.getAllDefaultThresholdValue;
 
 /**
  * Created by linyunan on 3/14/22
@@ -119,9 +121,30 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
     }
 
     @Override
-    public List<AriusConfigInfoVO> dashboardThresholds() {
-        List<AriusConfigInfo> ariusConfigInfos = ariusConfigInfoService.getConfigByGroup(ARIUS_DASHBOARD_THRESHOLD_GROUP);
-        return ConvertUtil.list2List(ariusConfigInfos,AriusConfigInfoVO.class);
+    public List<ThresholdDto> dashboardThresholds() {
+        List<ThresholdDto> thresholds = Lists.newArrayList();
+        List<DashBoardMetricThresholdValueNameEnum> thresholdValueNameEnums = getAllDefaultThresholdValue();
+
+        for (DashBoardMetricThresholdValueNameEnum e : thresholdValueNameEnums) {
+            //根据系统配置筛选,如果库里有对应的指标，就使用配置的指标
+            String configValue = ariusConfigInfoService.stringSetting(ARIUS_DASHBOARD_THRESHOLD_GROUP, e.getName(), "");
+            //使用默认
+            ThresholdDto thresholdDto = null;
+            if (StringUtils.isEmpty(configValue)) {
+                thresholdDto = ThresholdDto.builder()
+                        .name(e.getName())
+                        .compare(e.getCompare())
+                        .desc(e.getDesc())
+                        .value(e.getValue())
+                        .metrics(e.getMetrics())
+                        .unit(e.getUnit())
+                        .build();
+            } else {
+                thresholdDto = JSONObject.parseObject(configValue, ThresholdDto.class);
+            }
+            thresholds.add(thresholdDto);
+        }
+        return thresholds;
     }
 
     @Override
@@ -228,8 +251,8 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
             if (thresholdValues.get(key) != null && thresholdValues.containsKey(key)) {
                 Double configValue = thresholdValues.get(key);
                 metric.setMetricListContents(metric.getMetricListContents().stream()
-                        .filter(metricListContent->metricListContent!=null)
-                        .filter(metricListContent->metricListContent.getValue()!=null)
+                        .filter(metricListContent -> metricListContent != null)
+                        .filter(metricListContent -> metricListContent.getValue() != null)
                         .filter(metricListContent -> metricListContent.getValue() > configValue)
                         .collect(Collectors.toList()));
             }
@@ -243,7 +266,7 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
      */
     private Map<String,String> getDashBoardMetricThresholdNames(){
         Map<String,String> threshold = new HashMap<>();
-        threshold.put(INDEX_SMALL_SHARD.getType(), DashBoardMetricThresholdValueNameEnum.SHARD_SIZE.getValue());
+        threshold.put(INDEX_SMALL_SHARD.getType(), DashBoardMetricThresholdValueNameEnum.SHARD_SIZE.getMetrics());
         return threshold;
     }
     
@@ -275,6 +298,7 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
                 ariusConfigInfoService.doubleSetting(ARIUS_DASHBOARD_THRESHOLD_GROUP, INDEX_MAPPING_NUM_THRESHOLD,
                         100D));
         return thresholdValues;
+
     }
     
     /**

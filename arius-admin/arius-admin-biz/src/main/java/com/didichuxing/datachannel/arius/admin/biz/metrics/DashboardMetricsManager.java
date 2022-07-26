@@ -3,7 +3,7 @@ package com.didichuxing.datachannel.arius.admin.biz.metrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsDashboardListDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsDashboardTopNDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.config.AriusConfigInfoVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.ThresholdDto;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.list.MetricListVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.dashboard.ClusterPhyHealthMetricsVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.top.VariousLineChartMetricsVO;
@@ -59,5 +59,5 @@ public interface DashboardMetricsManager {
      * 获取dashboard配置列表
      * @return
      */
-    List<AriusConfigInfoVO> dashboardThresholds();
+    List<ThresholdDto> dashboardThresholds();
 }
