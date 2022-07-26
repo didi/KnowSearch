@@ -44,7 +44,11 @@ public class TemplateWithSrvVO extends BaseVO {
 
     @ApiModelProperty("项目名称 ")
     private String                         projectName;
+
     @ApiModelProperty("是否具有dcdr")
     private Boolean hasDCDR;
+
+    @ApiModelProperty("是否分区")
+    private Boolean partition;
 
 }

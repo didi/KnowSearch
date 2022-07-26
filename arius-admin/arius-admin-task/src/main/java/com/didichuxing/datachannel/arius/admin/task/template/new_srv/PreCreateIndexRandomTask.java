@@ -2,6 +2,7 @@ package com.didichuxing.datachannel.arius.admin.task.template.new_srv;
 
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.precreate.PreCreateManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.task.BaseConcurrentTemplateTask;
 import com.didiglobal.logi.job.annotation.Task;
 import com.didiglobal.logi.job.common.TaskResult;
@@ -49,15 +50,15 @@ public class PreCreateIndexRandomTask extends BaseConcurrentTemplateTask impleme
     protected boolean executeByLogicTemplate(Integer logicId) {
         try {
             final Result<Boolean> result = preCreateManager.preCreateIndex(logicId);
-            if (Boolean.FALSE.equals(result.getData())) {
+            if (ResultType.FAIL.getCode() == result.getCode()) {
                 LOGGER.warn("class=PreCreateIndexRandomTask||method=executeByLogicTemplate||logicId={}||msg={}", logicId,
                         result.getMessage());
             }
-            return result.getData();
+            return result.getCode() == ResultType.SUCCESS.getCode();
         } catch (Exception e) {
             LOGGER.error("class=PreCreateIndexRandomTask||method=executeByLogicTemplate||logicId={}||msg=预创建失败", logicId, e);
         }
-        
+
         return Boolean.TRUE;
     }
 }
