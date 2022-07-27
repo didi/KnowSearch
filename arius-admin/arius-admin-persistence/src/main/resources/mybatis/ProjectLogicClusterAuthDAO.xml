@@ -6,27 +6,25 @@
         <result column="project_id" jdbcType="INTEGER" property="projectId"/>
         <result column="logic_cluster_id" jdbcType="BIGINT" property="logicClusterId"/>
         <result column="type" jdbcType="INTEGER" property="type"/>
-        <result column="responsible" jdbcType="VARCHAR" property="responsible"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
         <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-        id, project_id, logic_cluster_id, `type`, responsible, create_time, update_time
+        id, project_id, logic_cluster_id, `type`,  create_time, update_time
     </sql>
 
     <insert id="insert" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.project.ProjectClusterLogicAuthPO"
             useGeneratedKeys="true"
             keyColumn="id" keyProperty="id">
-        insert into project_logi_cluster_auth (project_id, logic_cluster_id, `type`, responsible)
-        values (#{projectId}, #{logicClusterId}, #{type}, #{responsible})
+        insert into project_logi_cluster_auth (project_id, logic_cluster_id, `type`)
+        values (#{projectId}, #{logicClusterId}, #{type})
     </insert>
 
     <update id="update" parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.project.ProjectClusterLogicAuthPO">
         update project_logi_cluster_auth
         <trim prefix="set" prefixOverrides=",">
             <if test="type != null">,`type` = #{type}</if>
-            <if test="responsible != null">,responsible = #{responsible}</if>
         </trim>
         where id = #{id}
     </update>
@@ -42,12 +40,6 @@
             <if test="projectId != null">and project_id = #{projectId}</if>
             <if test="logicClusterId != null">and logic_cluster_id = #{logicClusterId}</if>
             <if test="type != null">and `type` &lt;= #{type}</if>
-            <if test="responsible != null">
-                and (responsible = #{responsible}
-                or responsible like concat(#{responsible},',%')
-                or responsible like concat('%,', #{responsible})
-                or responsible like concat('%,', #{responsible},',%'))
-            </if>
         </trim>
         order by id desc
     </select>

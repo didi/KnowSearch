@@ -2,11 +2,10 @@ package com.didichuxing.datachannel.arius.admin.persistence.mysql.resource;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterLogicConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterLogicPO;
-import org.apache.ibatis.annotations.Param;
-import org.springframework.stereotype.Repository;
-
 import java.util.List;
 import java.util.Set;
+import org.apache.ibatis.annotations.Param;
+import org.springframework.stereotype.Repository;
 
 /**
  * 逻辑集群DAO
@@ -38,7 +37,6 @@ public interface LogicClusterDAO {
 
     List<ClusterLogicPO> listAll();
 
-    List<ClusterLogicPO> listByResponsible(String responsible);
 
     List<ClusterLogicPO> pagingByCondition(ClusterLogicConditionDTO param);
 

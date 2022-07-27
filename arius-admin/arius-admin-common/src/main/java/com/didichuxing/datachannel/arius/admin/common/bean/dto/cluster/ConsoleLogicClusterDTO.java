@@ -21,15 +21,11 @@ public class ConsoleLogicClusterDTO extends BaseDTO {
     @ApiModelProperty("逻辑集群ID")
     private Long   id;
 
-    @ApiModelProperty("责任人：后续进行下线，无需再使用")
-    @Deprecated
-    private String responsible;
+ 
 
-    @ApiModelProperty("成本部门ID")
-    private String libraDepartmentId;
+    
 
-    @ApiModelProperty("成本部门名称")
-    private String libraDepartment;
+ 
 
     @ApiModelProperty("备注")
     private String memo;

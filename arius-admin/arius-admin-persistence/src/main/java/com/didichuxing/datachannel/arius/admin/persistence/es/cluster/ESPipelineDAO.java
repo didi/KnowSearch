@@ -1,5 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.cluster;
 
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_OPERATE_TIMEOUT;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ESPipelineProcessor;
@@ -10,14 +12,15 @@ import com.didiglobal.logi.elasticsearch.client.response.ingest.ESDeletePipeline
 import com.didiglobal.logi.elasticsearch.client.response.ingest.ESGetPipelineResponse;
 import com.didiglobal.logi.elasticsearch.client.response.ingest.ESPutPipelineResponse;
 import com.google.common.collect.Lists;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
-
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_OPERATE_TIMEOUT;
 
 /**
  * @author d06679
@@ -76,7 +79,12 @@ public class ESPipelineDAO extends BaseESDAO {
             routingField);
 
         ESClient client = esOpClient.getESClient(cluster);
-
+        if (client == null) {
+            LOGGER.error("class={}||method=save||clusterName={}||pipelineId={}||errMsg=esClient is null",
+                    getClass().getSimpleName(), cluster, pipelineId);
+            return false;
+        }
+        
         Pipeline pipeline = null;
 
         try {
@@ -114,6 +122,11 @@ public class ESPipelineDAO extends BaseESDAO {
      */
     public boolean delete(String cluster, String pipelineId) {
         ESClient client = esOpClient.getESClient(cluster);
+        if (client == null) {
+            LOGGER.warn("class={}||method=delete||clusterName={}||pipelineId={}||errMsg=esClient is null",
+                    getClass().getSimpleName(), cluster, pipelineId);
+            return false;
+        }
 
         ESDeletePipelineResponse response = client.admin().indices().prepareDeletePipeline().setPipelineId(pipelineId)
             .execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
@@ -147,7 +160,11 @@ public class ESPipelineDAO extends BaseESDAO {
 
     private Pipeline getPipeLine(String cluster, String pipelineId) {
         ESClient client = esOpClient.getESClient(cluster);
-
+        if (client == null) {
+            LOGGER.warn("class={}||method=getPipeLine||clusterName={}||pipelineId={}||errMsg=esClient is null",
+                    getClass().getSimpleName(), cluster, pipelineId);
+            return null;
+        }
         ESGetPipelineResponse response = client.admin().indices().prepareGetPipeline().setPipelineId(pipelineId)
             .execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
 

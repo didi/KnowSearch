@@ -1,5 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.biz.metrics;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
+
 import com.didichuxing.datachannel.arius.admin.biz.metrics.impl.ClusterPhyMetricsManagerImpl;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsClusterPhyDTO;
@@ -27,6 +30,9 @@ import com.didichuxing.datachannel.arius.admin.core.service.template.logic.Index
 import com.didichuxing.datachannel.arius.admin.metadata.service.NodeStatsService;
 import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
 import com.didiglobal.logi.security.service.ProjectService;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
@@ -41,13 +47,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
 
 @ActiveProfiles("test")
 @ExtendWith({ SpringExtension.class, MockitoExtension.class })
@@ -92,8 +91,8 @@ class ClusterPhyMetricsManagerTest {
             "aggType", Arrays.asList("value"), 0, 0, "topMethod", Arrays.asList("value"));
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
-        final ClusterLogic clusterLogic  = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0, "responsible",
-                "libraDepartmentId", "libraDepartment", "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
+        final ClusterLogic clusterLogic  = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0,
+                "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
 
         when(clusterLogicService.getClusterLogicByName("clusterLogicName")).thenReturn(clusterLogic);
 
@@ -109,8 +108,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure IndexTemplateService.listByRegionId(...).
         final Result<List<IndexTemplate>> listResult = Result.buildFail(
-            Arrays.asList(new IndexTemplate(0, "name", 0, 0, "dateFormat", "dataCenter", 0, 0, 0, "libraDepartmentId",
-                "libraDepartment", "responsible", "dateField", "dateFieldFormat", "idField", "routingField",
+            Arrays.asList(new IndexTemplate(0, "name", 0, 0, "dateFormat", "dataCenter", 0, 0, 0, "dateField", "dateFieldFormat", "idField", "routingField",
                 "expression", 0L, "desc", 0.0, 0, "ingestPipeline", false, false, 0, false, 0L, "openSrv", 0, 0.0)));
         when(indexTemplateService.listByRegionId(0)).thenReturn(listResult);
 
@@ -144,8 +142,7 @@ class ClusterPhyMetricsManagerTest {
             "aggType", Arrays.asList("value"), 0, 0, "topMethod", Arrays.asList("value"));
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
-        final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0, "responsible",
-            "libraDepartmentId", "libraDepartment", "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
+        final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0,  "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
         when(clusterLogicService.getClusterLogicByName("clusterLogicName")).thenReturn(clusterLogic);
 
         when(clusterRegionService.getRegionByLogicClusterId(0L)).thenReturn(null);
@@ -164,8 +161,8 @@ class ClusterPhyMetricsManagerTest {
             "aggType", Arrays.asList("value"), 0, 0, "topMethod", Arrays.asList("value"));
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
-        final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0, "responsible",
-            "libraDepartmentId", "libraDepartment", "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
+        final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0,
+            "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
         when(clusterLogicService.getClusterLogicByName("clusterLogicName")).thenReturn(clusterLogic);
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
@@ -177,8 +174,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure IndexTemplateService.listByRegionId(...).
         final Result<List<IndexTemplate>> listResult = Result.buildFail(
-            Arrays.asList(new IndexTemplate(0, "name", 0, 0, "dateFormat", "dataCenter", 0, 0, 0, "libraDepartmentId",
-                "libraDepartment", "responsible", "dateField", "dateFieldFormat", "idField", "routingField",
+            Arrays.asList(new IndexTemplate(0, "name", 0, 0, "dateFormat", "dataCenter", 0, 0, 0,  "dateField", "dateFieldFormat", "idField", "routingField",
                 "expression", 0L, "desc", 0.0, 0, "ingestPipeline", false, false, 0, false, 0L, "openSrv", 0, 0.0)));
         when(indexTemplateService.listByRegionId(0)).thenReturn(listResult);
 
@@ -212,8 +208,7 @@ class ClusterPhyMetricsManagerTest {
             "aggType", Arrays.asList("value"), 0, 0, "topMethod", Arrays.asList("value"));
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
-        final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0, "responsible",
-            "libraDepartmentId", "libraDepartment", "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
+        final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0, "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
         when(clusterLogicService.getClusterLogicByName("clusterLogicName")).thenReturn(clusterLogic);
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
@@ -227,8 +222,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure IndexTemplateService.listByRegionId(...).
         final Result<List<IndexTemplate>> listResult = Result.buildFail(
-            Arrays.asList(new IndexTemplate(0, "name", 0, 0, "dateFormat", "dataCenter", 0, 0, 0, "libraDepartmentId",
-                "libraDepartment", "responsible", "dateField", "dateFieldFormat", "idField", "routingField",
+            Arrays.asList(new IndexTemplate(0, "name", 0, 0, "dateFormat", "dataCenter", 0, 0, 0, "dateField", "dateFieldFormat", "idField", "routingField",
                 "expression", 0L, "desc", 0.0, 0, "ingestPipeline", false, false, 0, false, 0L, "openSrv", 0, 0.0)));
         when(indexTemplateService.listByRegionId(0)).thenReturn(listResult);
 
@@ -262,8 +256,7 @@ class ClusterPhyMetricsManagerTest {
             "aggType", Arrays.asList("value"), 0, 0, "topMethod", Arrays.asList("value"));
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
-        final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0, "responsible",
-            "libraDepartmentId", "libraDepartment", "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
+        final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0, "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
         when(clusterLogicService.getClusterLogicByName("clusterLogicName")).thenReturn(clusterLogic);
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
@@ -277,8 +270,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure IndexTemplateService.listByRegionId(...).
         final Result<List<IndexTemplate>> listResult = Result.buildFail(
-            Arrays.asList(new IndexTemplate(0, "name", 0, 0, "dateFormat", "dataCenter", 0, 0, 0, "libraDepartmentId",
-                "libraDepartment", "responsible", "dateField", "dateFieldFormat", "idField", "routingField",
+            Arrays.asList(new IndexTemplate(0, "name", 0, 0, "dateFormat", "dataCenter", 0, 0, 0,  "dateField", "dateFieldFormat", "idField", "routingField",
                 "expression", 0L, "desc", 0.0, 0, "ingestPipeline", false, false, 0, false, 0L, "openSrv", 0, 0.0)));
         when(indexTemplateService.listByRegionId(0)).thenReturn(listResult);
 
@@ -312,8 +304,7 @@ class ClusterPhyMetricsManagerTest {
             "aggType", Arrays.asList("value"), 0, 0, "topMethod", Arrays.asList("value"));
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
-        final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0, "responsible",
-            "libraDepartmentId", "libraDepartment", "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
+        final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0,  "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
         when(clusterLogicService.getClusterLogicByName("clusterLogicName")).thenReturn(clusterLogic);
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
@@ -358,8 +349,7 @@ class ClusterPhyMetricsManagerTest {
             "aggType", Arrays.asList("value"), 0, 0, "topMethod", Arrays.asList("value"));
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
-        final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0, "responsible",
-            "libraDepartmentId", "libraDepartment", "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
+        final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0,  "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
         when(clusterLogicService.getClusterLogicByName("clusterLogicName")).thenReturn(clusterLogic);
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
@@ -406,8 +396,7 @@ class ClusterPhyMetricsManagerTest {
             "aggType", Arrays.asList("value"), 0, 0, "topMethod", Arrays.asList("value"));
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
-        final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0, "responsible",
-            "libraDepartmentId", "libraDepartment", "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
+        final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0,  "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
         when(clusterLogicService.getClusterLogicByName("clusterLogicName")).thenReturn(clusterLogic);
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
@@ -454,8 +443,7 @@ class ClusterPhyMetricsManagerTest {
             "aggType", Arrays.asList("value"), 0, 0, "topMethod", Arrays.asList("value"));
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
-        final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0, "responsible",
-            "libraDepartmentId", "libraDepartment", "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
+        final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0, "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
         when(clusterLogicService.getClusterLogicByName("clusterLogicName")).thenReturn(clusterLogic);
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
@@ -470,8 +458,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure IndexTemplateService.listByRegionId(...).
         final Result<List<IndexTemplate>> listResult = Result.buildFail(
-            Arrays.asList(new IndexTemplate(0, "name", 0, 0, "dateFormat", "dataCenter", 0, 0, 0, "libraDepartmentId",
-                "libraDepartment", "responsible", "dateField", "dateFieldFormat", "idField", "routingField",
+            Arrays.asList(new IndexTemplate(0, "name", 0, 0, "dateFormat", "dataCenter", 0, 0, 0,  "dateField", "dateFieldFormat", "idField", "routingField",
                 "expression", 0L, "desc", 0.0, 0, "ingestPipeline", false, false, 0, false, 0L, "openSrv", 0, 0.0)));
         when(indexTemplateService.listByRegionId(0)).thenReturn(listResult);
 
@@ -495,8 +482,7 @@ class ClusterPhyMetricsManagerTest {
                 .asList(new MetricsContentVO("cluster", "name", Arrays.asList(new MetricsContentCellVO(0.0, 0L)))))));
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
-        final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0, "responsible",
-            "libraDepartmentId", "libraDepartment", "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
+        final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0, "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
         when(clusterLogicService.getClusterLogicByName("clusterLogicName")).thenReturn(clusterLogic);
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
@@ -511,8 +497,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure IndexTemplateService.listByRegionId(...).
         final Result<List<IndexTemplate>> listResult = Result.buildFail(
-            Arrays.asList(new IndexTemplate(0, "name", 0, 0, "dateFormat", "dataCenter", 0, 0, 0, "libraDepartmentId",
-                "libraDepartment", "responsible", "dateField", "dateFieldFormat", "idField", "routingField",
+            Arrays.asList(new IndexTemplate(0, "name", 0, 0, "dateFormat", "dataCenter", 0, 0, 0,  "dateField", "dateFieldFormat", "idField", "routingField",
                 "expression", 0L, "desc", 0.0, 0, "ingestPipeline", false, false, 0, false, 0L, "openSrv", 0, 0.0)));
         when(indexTemplateService.listByRegionId(0)).thenReturn(listResult);
 
@@ -549,8 +534,7 @@ class ClusterPhyMetricsManagerTest {
                 .asList(new MetricsContentVO("cluster", "name", Arrays.asList(new MetricsContentCellVO(0.0, 0L)))))));
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
-        final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0, "responsible",
-            "libraDepartmentId", "libraDepartment", "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
+        final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0, "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
         when(clusterLogicService.getClusterLogicByName("clusterLogicName")).thenReturn(clusterLogic);
 
         when(clusterRegionService.getRegionByLogicClusterId(0L)).thenReturn(null);
@@ -572,8 +556,7 @@ class ClusterPhyMetricsManagerTest {
                 .asList(new MetricsContentVO("cluster", "name", Arrays.asList(new MetricsContentCellVO(0.0, 0L)))))));
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
-        final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0, "responsible",
-            "libraDepartmentId", "libraDepartment", "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
+        final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0,  "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
         when(clusterLogicService.getClusterLogicByName("clusterLogicName")).thenReturn(clusterLogic);
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
@@ -585,8 +568,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure IndexTemplateService.listByRegionId(...).
         final Result<List<IndexTemplate>> listResult = Result.buildFail(
-            Arrays.asList(new IndexTemplate(0, "name", 0, 0, "dateFormat", "dataCenter", 0, 0, 0, "libraDepartmentId",
-                "libraDepartment", "responsible", "dateField", "dateFieldFormat", "idField", "routingField",
+            Arrays.asList(new IndexTemplate(0, "name", 0, 0, "dateFormat", "dataCenter", 0, 0, 0, "dateField", "dateFieldFormat", "idField", "routingField",
                 "expression", 0L, "desc", 0.0, 0, "ingestPipeline", false, false, 0, false, 0L, "openSrv", 0, 0.0)));
         when(indexTemplateService.listByRegionId(0)).thenReturn(listResult);
 
@@ -623,8 +605,7 @@ class ClusterPhyMetricsManagerTest {
                 .asList(new MetricsContentVO("cluster", "name", Arrays.asList(new MetricsContentCellVO(0.0, 0L)))))));
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
-        final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0, "responsible",
-            "libraDepartmentId", "libraDepartment", "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
+        final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0,"memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
         when(clusterLogicService.getClusterLogicByName("clusterLogicName")).thenReturn(clusterLogic);
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
@@ -638,8 +619,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure IndexTemplateService.listByRegionId(...).
         final Result<List<IndexTemplate>> listResult = Result.buildFail(
-            Arrays.asList(new IndexTemplate(0, "name", 0, 0, "dateFormat", "dataCenter", 0, 0, 0, "libraDepartmentId",
-                "libraDepartment", "responsible", "dateField", "dateFieldFormat", "idField", "routingField",
+            Arrays.asList(new IndexTemplate(0, "name", 0, 0, "dateFormat", "dataCenter", 0, 0, 0, "dateField", "dateFieldFormat", "idField", "routingField",
                 "expression", 0L, "desc", 0.0, 0, "ingestPipeline", false, false, 0, false, 0L, "openSrv", 0, 0.0)));
         when(indexTemplateService.listByRegionId(0)).thenReturn(listResult);
 
@@ -676,8 +656,7 @@ class ClusterPhyMetricsManagerTest {
                 .asList(new MetricsContentVO("cluster", "name", Arrays.asList(new MetricsContentCellVO(0.0, 0L)))))));
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
-        final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0, "responsible",
-            "libraDepartmentId", "libraDepartment", "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
+        final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0,  "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
         when(clusterLogicService.getClusterLogicByName("clusterLogicName")).thenReturn(clusterLogic);
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
@@ -691,8 +670,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure IndexTemplateService.listByRegionId(...).
         final Result<List<IndexTemplate>> listResult = Result.buildFail(
-            Arrays.asList(new IndexTemplate(0, "name", 0, 0, "dateFormat", "dataCenter", 0, 0, 0, "libraDepartmentId",
-                "libraDepartment", "responsible", "dateField", "dateFieldFormat", "idField", "routingField",
+            Arrays.asList(new IndexTemplate(0, "name", 0, 0, "dateFormat", "dataCenter", 0, 0, 0, "dateField", "dateFieldFormat", "idField", "routingField",
                 "expression", 0L, "desc", 0.0, 0, "ingestPipeline", false, false, 0, false, 0L, "openSrv", 0, 0.0)));
         when(indexTemplateService.listByRegionId(0)).thenReturn(listResult);
 
@@ -729,8 +707,7 @@ class ClusterPhyMetricsManagerTest {
                 .asList(new MetricsContentVO("cluster", "name", Arrays.asList(new MetricsContentCellVO(0.0, 0L)))))));
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
-        final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0, "responsible",
-            "libraDepartmentId", "libraDepartment", "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
+        final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0, "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
         when(clusterLogicService.getClusterLogicByName("clusterLogicName")).thenReturn(clusterLogic);
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
@@ -778,8 +755,7 @@ class ClusterPhyMetricsManagerTest {
                 .asList(new MetricsContentVO("cluster", "name", Arrays.asList(new MetricsContentCellVO(0.0, 0L)))))));
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
-        final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0, "responsible",
-            "libraDepartmentId", "libraDepartment", "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
+        final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0,  "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
         when(clusterLogicService.getClusterLogicByName("clusterLogicName")).thenReturn(clusterLogic);
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
@@ -829,8 +805,7 @@ class ClusterPhyMetricsManagerTest {
                 .asList(new MetricsContentVO("cluster", "name", Arrays.asList(new MetricsContentCellVO(0.0, 0L)))))));
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
-        final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0, "responsible",
-            "libraDepartmentId", "libraDepartment", "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
+        final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0,  "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
         when(clusterLogicService.getClusterLogicByName("clusterLogicName")).thenReturn(clusterLogic);
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
@@ -880,8 +855,7 @@ class ClusterPhyMetricsManagerTest {
                 .asList(new MetricsContentVO("cluster", "name", Arrays.asList(new MetricsContentCellVO(0.0, 0L)))))));
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
-        final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0, "responsible",
-            "libraDepartmentId", "libraDepartment", "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
+        final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0, "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
         when(clusterLogicService.getClusterLogicByName("clusterLogicName")).thenReturn(clusterLogic);
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
@@ -896,8 +870,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure IndexTemplateService.listByRegionId(...).
         final Result<List<IndexTemplate>> listResult = Result.buildFail(
-            Arrays.asList(new IndexTemplate(0, "name", 0, 0, "dateFormat", "dataCenter", 0, 0, 0, "libraDepartmentId",
-                "libraDepartment", "responsible", "dateField", "dateFieldFormat", "idField", "routingField",
+            Arrays.asList(new IndexTemplate(0, "name", 0, 0, "dateFormat", "dataCenter", 0, 0, 0, "dateField", "dateFieldFormat", "idField", "routingField",
                 "expression", 0L, "desc", 0.0, 0, "ingestPipeline", false, false, 0, false, 0L, "openSrv", 0, 0.0)));
         when(indexTemplateService.listByRegionId(0)).thenReturn(listResult);
 

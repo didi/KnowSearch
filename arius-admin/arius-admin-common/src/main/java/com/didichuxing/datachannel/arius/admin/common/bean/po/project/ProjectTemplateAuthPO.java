@@ -36,10 +36,5 @@ public class ProjectTemplateAuthPO extends BasePO {
      */
     private Integer type;
 
-    /**
-     * 责任人列表
-     */
-    @Deprecated
-    private String  responsible;
 
 }

@@ -33,8 +33,6 @@ public class ProjectTemplateAuthDTO extends BaseDTO {
     @ApiModelProperty("权限类型（1:管理；2:读写；3:读）")
     private Integer type;
 
-    @ApiModelProperty("责任人：后续进行下线，无需再使用")
-    @Deprecated
-    private String  responsible;
+    
 
 }

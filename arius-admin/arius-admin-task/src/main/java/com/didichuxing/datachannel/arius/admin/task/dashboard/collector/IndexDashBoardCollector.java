@@ -26,6 +26,7 @@ import com.google.common.collect.Maps;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
@@ -171,7 +172,10 @@ public class IndexDashBoardCollector extends BaseDashboardCollector {
         }
         Long size = 0L;
         for(ShardMetrics metric:metrics){
-            size+=SizeUtil.getUnitSize(metric.getStore());
+            if (Objects.nonNull(metric.getStore())) {
+                size += SizeUtil.getUnitSize(metric.getStore());
+        
+            }
         }
         return size;
     }

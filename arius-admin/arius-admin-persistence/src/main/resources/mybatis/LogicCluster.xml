@@ -8,7 +8,6 @@
         <result column="type"                       jdbcType="TINYINT" property="type"/>
         <result column="project_id"                 jdbcType="INTEGER" property="projectId"/>
         <result column="data_center"                jdbcType="VARCHAR" property="dataCenter"/>
-        <result column="responsible"                jdbcType="VARCHAR" property="responsible"/>
         <result column="memo"                       jdbcType="VARCHAR" property="memo"/>
         <result column="quota"                      jdbcType="DECIMAL" property="quota"/>
         <result column="level"                      jdbcType="TINYINT" property="level"/>
@@ -27,7 +26,7 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-        id , `name`, `type`, project_id, data_center, responsible, memo, quota, `level`, config_json, create_time, update_time, health,data_node_spec,
+        id , `name`, `type`, project_id, data_center,  memo, quota, `level`, config_json, create_time, update_time, health,data_node_spec,
             disk_total,disk_usage,disk_usage_percent,es_cluster_version,node_num
     </sql>
 
@@ -64,9 +63,9 @@
             useGeneratedKeys="true"
             keyColumn="id" keyProperty="id">
         insert into project_arius_resource_logic
-        (`name`, `type`, project_id, data_center, responsible,  memo, quota, `level`, config_json,
+        (`name`, `type`, project_id, data_center,   memo, quota, `level`, config_json,
          health,`data_node_spec`)
-        values (#{name}, #{type}, #{projectId}, #{dataCenter}, #{responsible},
+        values (#{name}, #{type}, #{projectId}, #{dataCenter},
                 #{memo}, #{quota}, #{level}, #{configJson}, #{health},#{dataNodeSpec})
     </insert>
 
@@ -76,7 +75,6 @@
             <if test="name != null">,`name` = #{name}</if>
             <if test="type != null">,`type` = #{type}</if>
             <if test="projectId != null">,project_id = #{projectId}</if>
-            <if test="responsible != null">,responsible = #{responsible}</if>
            
             <if test="memo != null">,memo = #{memo}</if>
             <if test="quota != null">,quota = #{quota}</if>
@@ -150,15 +148,7 @@
         limit 1
     </select>
 
-    <select id="listByResponsible" parameterType="string" resultMap="BaseResultMap">
-        select
-        <include refid="Base_Column_List"/>
-        from project_arius_resource_logic
-        where responsible = #{responsible}
-        or responsible like concat(#{responsible},',%')
-        or responsible like concat('%,', #{responsible})
-        or responsible like concat('%,', #{responsible},',%')
-    </select>
+   
 
     <select id="pagingByCondition" resultMap="BaseResultMap"
             parameterType="com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterLogicConditionDTO">

@@ -24,16 +24,15 @@ public interface ProjectLogicTemplateAuthService {
     boolean deleteRedundancyTemplateAuths(boolean delete);
 
     /**
-     * 在逻辑模板权限表中设置项目对某逻辑模板的权限
-     * 封装了新增、更新、删除操作，调用接口时只需描述期望的权限状态
-     * @param projectId           project的ID
+     * 在逻辑模板权限表中设置项目对某逻辑模板的权限 封装了新增、更新、删除操作，调用接口时只需描述期望的权限状态
+     *
+     * @param projectId       project的ID
      * @param logicTemplateId 逻辑模板ID
      * @param auth            要设置的权限
-     * @param responsible     责任人，逗号分隔的用户名列表
      * @return 设置结果
      */
     Result<Void> ensureSetLogicTemplateAuth(Integer projectId, Integer logicTemplateId, ProjectTemplateAuthEnum auth,
-                                            String responsible, String operator);
+                                            String operator);
 
     /**
      * 获取project有权限的逻辑模板权限点
@@ -49,7 +48,7 @@ public interface ProjectLogicTemplateAuthService {
      */
     List<ProjectTemplateAuth> getProjectActiveTemplateRWAndRAuths(Integer projectId);
 
-    List<ProjectTemplateAuth> getProjectTemplateRWAndRAuthsWithoutCodecResponsible(Integer projectId);
+    List<ProjectTemplateAuth> getProjectTemplateRWAndRAuthsWithoutCodec(Integer projectId);
 
     List<ProjectTemplateAuth> getProjectActiveTemplateRWAuths(Integer projectId);
 

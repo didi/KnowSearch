@@ -34,10 +34,6 @@ public class TemplateAuthContent extends BaseContent {
      */
     private String  memo;
 
-    /**
-     * 责任人
-     */
-    @Deprecated
-    private String  responsible;
+   
 
 }

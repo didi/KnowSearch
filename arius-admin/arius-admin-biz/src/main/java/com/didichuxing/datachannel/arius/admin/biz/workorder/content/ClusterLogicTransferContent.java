@@ -18,7 +18,6 @@ public class ClusterLogicTransferContent extends BaseContent {
 
     private String  clusterLogicName;
 
-    private String  targetResponsible;
 
     private String  memo;
 }

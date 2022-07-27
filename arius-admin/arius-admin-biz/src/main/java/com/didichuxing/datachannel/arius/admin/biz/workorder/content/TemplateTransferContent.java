@@ -29,9 +29,5 @@ public class TemplateTransferContent extends BaseContent {
      */
     private Integer tgtProjectId;
 
-    /**
-     * 目标责任人
-     */
-    private String  tgtResponsible;
 
 }
