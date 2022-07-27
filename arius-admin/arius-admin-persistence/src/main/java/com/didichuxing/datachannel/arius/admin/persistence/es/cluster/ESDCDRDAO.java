@@ -1,21 +1,24 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.cluster;
 
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_OPERATE_TIMEOUT;
+
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
 import com.didiglobal.logi.elasticsearch.client.ESClient;
-import com.didiglobal.logi.elasticsearch.client.request.dcdr.*;
+import com.didiglobal.logi.elasticsearch.client.request.dcdr.DCDRIndex;
+import com.didiglobal.logi.elasticsearch.client.request.dcdr.DCDRTemplate;
+import com.didiglobal.logi.elasticsearch.client.request.dcdr.ESDeleteDCDRTemplateRequest;
+import com.didiglobal.logi.elasticsearch.client.request.dcdr.ESGetDCDRIndexRequest;
+import com.didiglobal.logi.elasticsearch.client.request.dcdr.ESGetDCDRTemplateRequest;
 import com.didiglobal.logi.elasticsearch.client.response.dcdr.ESDeleteDCDRTemplateResponse;
 import com.didiglobal.logi.elasticsearch.client.response.dcdr.ESGetDCDRIndexResponse;
 import com.didiglobal.logi.elasticsearch.client.response.dcdr.ESGetDCDRTemplateResponse;
 import com.didiglobal.logi.elasticsearch.client.response.dcdr.ESPutDCDRTemplateResponse;
 import com.google.common.collect.Lists;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.stereotype.Repository;
-
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_OPERATE_TIMEOUT;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.stereotype.Repository;
 
 /**
  * @author d06679
@@ -34,6 +37,11 @@ public class ESDCDRDAO extends BaseESDAO {
      */
     public boolean putAutoReplication(String cluster, String name, String template, String replicaCluster) {
         ESClient client = esOpClient.getESClient(cluster);
+        if (client == null) {
+            LOGGER.warn("class={}||method=putAutoReplication||clusterName={}||replicaCluster={}||template={}||errMsg=esClient is null",
+                    getClass().getSimpleName(), cluster, replicaCluster,template);
+            return false;
+        }
         ESPutDCDRTemplateResponse response = client.admin().indices().preparePutDCDRTemplate().setName(name)
             .setTemplate(template).setReplicaCluster(replicaCluster).execute()
             .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
@@ -68,7 +76,11 @@ public class ESDCDRDAO extends BaseESDAO {
      */
     public DCDRTemplate getAutoReplication(String cluster, String name) {
         ESClient client = esOpClient.getESClient(cluster);
-
+        if (client == null) {
+            LOGGER.warn("class={}||method=getAutoReplication||clusterName={}||name={}||errMsg=esClient is null",
+                    getClass().getSimpleName(), cluster, name);
+            return null;
+        }
         ESGetDCDRTemplateRequest request = new ESGetDCDRTemplateRequest();
         request.setName(name);
 
@@ -93,7 +105,12 @@ public class ESDCDRDAO extends BaseESDAO {
      */
     public boolean deleteReplication(String cluster, String replicaCluster, Set<String> indices) {
         ESClient client = esOpClient.getESClient(cluster);
-
+        if (client == null) {
+            LOGGER.warn("class={}||method=deleteReplication||clusterName={}||replicaCluster={}||indices={}||errMsg=esClient is null",
+                    getClass().getSimpleName(), cluster, replicaCluster,indices);
+            return false;
+        }
+        
         ESGetDCDRIndexResponse getDCDRIndexResponse = client.admin().indices().getDCDRIndex(new ESGetDCDRIndexRequest())
             .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
         List<DCDRIndex> allIndexDCDRs = getDCDRIndexResponse.getDcdrs();

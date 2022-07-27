@@ -114,7 +114,7 @@ public class LogicClusterTransferHandler extends BaseWorkOrderHandler {
             ClusterLogicTransferContent.class);
 
         Result<Void> result = clusterLogicService.transferClusterLogic(content.getClusterLogicId(),
-            content.getTargetProjectId(), content.getTargetResponsible(), workOrder.getSubmitor());
+            content.getTargetProjectId(), workOrder.getSubmitor());
 
         return Result.buildFrom(result);
     }

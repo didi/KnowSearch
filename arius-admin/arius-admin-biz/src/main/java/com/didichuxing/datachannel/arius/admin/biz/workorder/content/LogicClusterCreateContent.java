@@ -36,11 +36,7 @@ public class LogicClusterCreateContent extends BaseContent {
      */
     private int     dataNodeNu;
 
-    /**
-     * 责任人
-     */
-    @Deprecated
-    private String  responsible;
+    
 
     /**
      * 备注
@@ -52,14 +48,6 @@ public class LogicClusterCreateContent extends BaseContent {
      */
     private String  plugins;
 
-    /**
-     * 部门id
-     */
-    private String  libraDepartmentId;
-
-    /**
-     * 部门名称
-     */
-    private String  libraDepartment;
+  
 
 }

@@ -83,8 +83,7 @@ public class LogicClusterAuthHandler extends BaseWorkOrderHandler {
 
         
         return  projectClusterLogicAuthService.ensureSetLogicClusterAuth(workOrder.getSubmitorProjectId(),
-            content.getLogicClusterId(), ProjectClusterLogicAuthEnum.valueOf(content.getAuthCode()),
-            workOrder.getSubmitor(), workOrder.getSubmitor());
+            content.getLogicClusterId(), ProjectClusterLogicAuthEnum.valueOf(content.getAuthCode()), workOrder.getSubmitor());
     }
 
     @Override

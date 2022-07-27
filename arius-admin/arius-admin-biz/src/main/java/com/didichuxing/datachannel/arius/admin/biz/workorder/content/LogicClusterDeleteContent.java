@@ -25,8 +25,5 @@ public class LogicClusterDeleteContent extends BaseContent {
      */
     private Integer type;
 
-    /**
-     * 责任人
-     */
-    private String  responsible;
+
 }

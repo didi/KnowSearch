@@ -112,7 +112,7 @@ class ESUserServiceTest {
         // Setup
         // Configure ESUserDAO.listByProjectId(...).
         final List<ESUserPO> esUserPOS = Arrays.asList(new ESUserPO(0, 0, "verifyCode", "memo", 0, 0, "cluster", 0,
-            "dataCenter", 0, false, "ip", "indexExp", "responsible"));
+            "dataCenter", 0, false, "ip", "indexExp"));
         when(esUserDAO.listByProjectId(0)).thenReturn(esUserPOS);
 
         when(esUserDAO.deleteByProjectId(0)).thenReturn(0);
@@ -255,11 +255,11 @@ class ESUserServiceTest {
     @Test
     void testGetDefaultESUserByProject() {
         // Setup
-        final ESUser expectedResult = new ESUser(0, "name", 0, "verifyCode", "departmentId", "department",
-            "responsible", "memo", 0, 0, "cluster", 0, "dataCenter", 0, false, "ip", "indexExp");
+        final ESUser expectedResult = new ESUser(0, "name", 0, "verifyCode",
+           "memo", 0, 0, "cluster", 0, "dataCenter", 0, false, "ip", "indexExp");
 
         // Configure ESUserDAO.getDefaultESUserByProject(...).
-        final ESUser esUser = new ESUser(0, "name", 0, "verifyCode", "departmentId", "department", "responsible",
+        final ESUser esUser = new ESUser(0, "name", 0, "verifyCode",
             "memo", 0, 0, "cluster", 0, "dataCenter", 0, false, "ip", "indexExp");
         when(esUserDAO.getDefaultESUserByProject(0)).thenReturn(esUser);
 

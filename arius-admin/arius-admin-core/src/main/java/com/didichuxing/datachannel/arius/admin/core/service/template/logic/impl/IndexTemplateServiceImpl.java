@@ -549,14 +549,12 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
      * @param logicId         模板id
      * @param sourceProjectId
      * @param tgtProjectId    projectId
-     * @param tgtResponsible  责任人
      * @param operator        操作人
      * @return Result
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result<Void> turnOverLogicTemplate(Integer logicId, Integer sourceProjectId, Integer tgtProjectId,
-                                              String tgtResponsible, String operator) throws AdminOperateException {
+    public Result<Void> turnOverLogicTemplate(Integer logicId, Integer sourceProjectId, Integer tgtProjectId, String operator) throws AdminOperateException {
 
         IndexTemplate templateLogic = getLogicTemplateById(logicId);
         if (templateLogic == null) {
@@ -566,7 +564,6 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
         IndexTemplateDTO logicDTO = new IndexTemplateDTO();
         logicDTO.setId(logicId);
         logicDTO.setProjectId(tgtProjectId);
-        logicDTO.setResponsible(tgtResponsible);
 
         return editTemplate(logicDTO, operator, sourceProjectId);
 
@@ -1235,14 +1232,6 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
     private Result<Void> validateIndexTemplateLogicStep2(IndexTemplateDTO param, String dateFormatFinal,
                                                          String expressionFinal, String nameFinal,
                                                          String dateFieldFinal) {
-        List<String> responsibles = ListUtils.string2StrList(param.getResponsible());
-        //todo 后期变更
-        /**
-        for (String responsible : responsibles) {
-            if (AriusObjUtils.isNull(ariusUserInfoService.getByDomainAccount(responsible))) {
-                return Result.buildParamIllegal(String.format("责任人%s非法", responsible));
-            }
-        }**/
         if (expressionFinal != null && expressionFinal.endsWith("*") && AriusObjUtils.isNull(dateFormatFinal)) {
             return Result.buildParamIllegal("表达式*结尾,后缀格式必填");
         }

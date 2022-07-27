@@ -23,11 +23,7 @@ public class ESUser extends BaseEntity {
 
     private String  verifyCode;
 
-    private String  departmentId;
-
-    private String  department;
-
-    private String  responsible;
+ 
 
     private String  memo;
 

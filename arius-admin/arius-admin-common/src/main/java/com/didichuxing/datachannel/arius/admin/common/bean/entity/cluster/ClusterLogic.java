@@ -47,21 +47,9 @@ public class ClusterLogic extends BaseEntity implements Comparable<ClusterLogic>
      */
     private Integer dataNodeNu;
 
-    /**
-     * 责任人
-     */
-    @Deprecated
-    private String  responsible;
 
-    /**
-     * 成本部门
-     */
-    private String  libraDepartmentId;
 
-    /**
-     * 成本部门
-     */
-    private String  libraDepartment;
+
 
     /**
      * 备注
