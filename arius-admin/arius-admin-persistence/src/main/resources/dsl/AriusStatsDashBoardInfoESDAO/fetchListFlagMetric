@@ -7,7 +7,7 @@
         }
       }
   ],
-  "_source": ["%s.cluster", "%s.%s"],
+  "_source": %s,
   "query": {
     "bool": {
       "filter": [

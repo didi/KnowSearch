@@ -17,11 +17,12 @@ import com.didiglobal.logi.job.core.job.JobContext;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
-import java.util.List;
-import java.util.Map;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by linyunan on 3/11/22
@@ -56,7 +57,8 @@ public class DashboardSingleClusterCollectorBroadcastTask implements Job {
         LOGGER.info(
             "class=DashboardSingleClusterCollectorBroadcastTask||method=execute||msg=DashboardSingleClusterCollectorBroadcastTask start.");
         // 获取单台admin实例能采集的集群数
-        List<ClusterPhy> monitorCluster = ariusMetaJobClusterDistributeService.getSingleMachineMonitorCluster(hostName);
+//        List<ClusterPhy> monitorCluster = ariusMetaJobClusterDistributeService.getSingleMachineMonitorCluster(hostName);
+        List<ClusterPhy> monitorCluster = clusterPhyService.listAllClusters();
         if (CollectionUtils.isEmpty(monitorCluster)) {
             return TaskResult.SUCCESS;
         }

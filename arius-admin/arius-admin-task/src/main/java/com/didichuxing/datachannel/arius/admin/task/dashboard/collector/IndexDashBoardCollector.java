@@ -1,19 +1,12 @@
 package com.didichuxing.datachannel.arius.admin.task.dashboard.collector;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.BYTE_TO_MB;
-
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.ShardMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.shard.Segment;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.DashBoardStats;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.IndexMetrics;
 import com.didichuxing.datachannel.arius.admin.common.constant.index.IndexStatusEnum;
-import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.MappingConfigUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.MetricsUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.SizeUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.*;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESShardService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.ESIndicesStatsService;
@@ -23,14 +16,17 @@ import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+
+import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.BYTE_TO_MB;
 
 /**
  * Created by linyunan on 3/11/22
@@ -120,6 +116,8 @@ public class IndexDashBoardCollector extends BaseDashboardCollector {
             // 5. 是否为小shard索引(小于1G)
             indexMetrics.setSmallShard(index2SmallShardListMap.containsKey(index.getIndex()));
             indexMetrics.setShardSize(countShardSize(index2BigShardListMap,index2SmallShardListMap,index.getIndex()));
+            //获取shard数量
+            indexMetrics.setShardNum(countShardNum(index2BigShardListMap,index2SmallShardListMap,index.getIndex()));
             // 6. 索引Mapping字段个数
             int mappingNum = 0;
             IndexConfig indexConfig = index2IndexConfigMapRef.get().get(index.getIndex());
@@ -174,6 +172,23 @@ public class IndexDashBoardCollector extends BaseDashboardCollector {
             size+=SizeUtil.getUnitSize(metric.getStore());
         }
         return size;
+    }
+
+    /**
+     *  计算对于索引shard数量
+     * @param index2BigShardListMap 大shard集合
+     * @param index2SmallShardListMap 小shard集合
+     * @param index 索引
+     * @return 索引大小
+     */
+    private Long countShardNum(Map<String, List<ShardMetrics>> index2BigShardListMap, Map<String, List<ShardMetrics>> index2SmallShardListMap, String index) {
+        List<ShardMetrics> metrics= new ArrayList<>();
+        if (index2BigShardListMap.containsKey(index)){
+            metrics = index2BigShardListMap.get(index);
+        }else if (index2SmallShardListMap.containsKey(index)){
+            metrics = index2SmallShardListMap.get(index);
+        }
+        return Long.valueOf(metrics.size());
     }
     
     /**
