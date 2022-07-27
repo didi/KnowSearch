@@ -206,13 +206,12 @@ public interface IndexTemplateService {
      * @param logicId         模板id
      * @param sourceProjectId 原项目
      * @param tgtProjectId    projectId
-     * @param tgtResponsible  责任人
      * @param operator        操作人
      * @return Result
      * @throws AdminOperateException
      */
     Result<Void> turnOverLogicTemplate(Integer logicId, Integer sourceProjectId, Integer tgtProjectId,
-                                       String tgtResponsible, String operator) throws AdminOperateException;
+                                        String operator) throws AdminOperateException;
 
     /**
      * 获取每个模板的部署个数

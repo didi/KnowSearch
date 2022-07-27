@@ -269,8 +269,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
                 // 同步模板元数据到ES集群（修改ES集群中的模板）
                 templatePhyManager.syncMeta(physical.getId(), retryCount);
                 // 同步最新元数据到ES集群pipeline
-                templatePipelineManager.syncPipeline(physical,
-                    indexTemplateService.getLogicTemplateWithPhysicalsById(physical.getLogicId()));
+                templatePipelineManager.syncPipeline(physical.getLogicId());
             } catch (Exception e) {
                 LOGGER.error(
                     "class=ESClusterPhyServiceImpl||method=syncTemplateMetaData||errMsg={}||cluster={}||template={}",
@@ -472,8 +471,9 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             if (saveClusterResult.failed()) {
                 throw new AdminOperateException(saveClusterResult.getMessage());
             } else {
-                SpringTool.publish(new ClusterPhyEvent(param.getCluster(), operator));
+    
                 postProcessingForClusterJoin(param);
+                SpringTool.publish(new ClusterPhyEvent(param.getCluster(), operator));
                 operateRecordService.save(new OperateRecord.Builder()
                     .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
                     .bizId(saveClusterResult.getData().getId())

@@ -5,7 +5,6 @@ import com.alibaba.fastjson.JSONArray;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.dsl.template.DslTemplateConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.DslBase;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.DslCheckMode;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.DslQueryLimit;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.ScrollDslTemplateRequest;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.ScrollDslTemplateResponse;
@@ -19,17 +18,18 @@ import com.didiglobal.logi.elasticsearch.client.response.query.query.ESQueryResp
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import javax.annotation.Nullable;
-import javax.annotation.PostConstruct;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.Nullable;
+import javax.annotation.PostConstruct;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Component
 @NoArgsConstructor
@@ -91,30 +91,6 @@ public class DslTemplateESDAO extends BaseESDAO {
         }
 
         return updateClient.batchDelete(indexName, typeName, ids);
-    }
-
-    /**
-     * 更新黑白名单
-     *
-     * @param checkModeList
-     * @return
-     */
-    public boolean updateCheckModeByByProjectIdDslTemplate(List<DslCheckMode> checkModeList) {
-        String ariusModifyTime = DateTimeUtil.getCurrentFormatDateTime();
-        List<DslTemplatePO> list = Lists.newLinkedList();
-        DslTemplatePO item = null;
-
-        for (DslCheckMode dslCheckMode : checkModeList) {
-            item = new DslTemplatePO();
-            item.setCheckMode(dslCheckMode.getCheckMode());
-            item.setAriusModifyTime(ariusModifyTime);
-            item.setProjectId(dslCheckMode.getProjectId());
-            item.setDslTemplateMd5(dslCheckMode.getDslTemplateMd5());
-
-            list.add(item);
-        }
-
-        return updateTemplates(list);
     }
 
     /**

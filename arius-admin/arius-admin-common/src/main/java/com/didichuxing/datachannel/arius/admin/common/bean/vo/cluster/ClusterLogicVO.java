@@ -5,11 +5,10 @@ import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterRe
 import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectClusterLogicAuthEnum;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
 
 /**
  * 集群基本类
@@ -54,18 +53,11 @@ public class ClusterLogicVO extends BaseVO implements Comparable<ClusterLogicVO>
     @ApiModelProperty("gateway地址")
     private String                       gatewayAddress;
 
-    @ApiModelProperty("责任人：后续进行下线")
-    @Deprecated
-    private String                       responsible;
+    
 
     @ApiModelProperty("备注")
     private String                       memo;
 
-    @ApiModelProperty("成本部门ID")
-    private String                       libraDepartmentId;
-
-    @ApiModelProperty("成本部门名称")
-    private String                       libraDepartment;
 
     @ApiModelProperty("服务等级")
     private Integer                      level;

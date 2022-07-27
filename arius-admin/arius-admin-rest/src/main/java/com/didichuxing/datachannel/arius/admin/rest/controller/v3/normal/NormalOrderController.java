@@ -86,8 +86,7 @@ public class NormalOrderController {
     @ApiOperation(value = "工单申请列表")
     public Result<List<WorkOrderVO>> getOrderApplyList(HttpServletRequest httpServletRequest,
                                                        @RequestParam(value = "status") Integer status) throws OperateForbiddenException {
-        return workOrderManager.getOrderApplyList(SpringTool.getUserName(), status,
-            HttpRequestUtil.getProjectId(httpServletRequest));
+        return workOrderManager.getOrderApplyList(status, HttpRequestUtil.getProjectId(httpServletRequest));
     }
 
     @GetMapping("/approvals")

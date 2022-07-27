@@ -2,7 +2,6 @@ package com.didichuxing.datachannel.arius.admin.biz.listener;
 
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.precreate.PreCreateManager;
 import com.didichuxing.datachannel.arius.admin.common.event.index.ReBuildTomorrowIndexEvent;
-import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,13 +20,15 @@ public class ReBuildTomorrowIndexListener implements ApplicationListener<ReBuild
 	@Override
 	public void onApplicationEvent(ReBuildTomorrowIndexEvent reBuildTomorrowIndexEvent) {
 		try {
+			 //保证数据已经刷到数据库，如果立即执行，会存在获取不到数据库中数据的状态，所以等待5000millis
+			Thread.sleep(5000);
 			boolean tomorrowIndex = templatePreCreateManager.reBuildTomorrowIndex(reBuildTomorrowIndexEvent.getLogicId(), 3);
 			if (Boolean.TRUE.equals(tomorrowIndex)){
 				LOGGER.info(
 					"class=ReBuildTomorrowIndexListener||method=onApplicationEvent||logicId={}||error=success rebuild",
 					reBuildTomorrowIndexEvent.getLogicId());
 			}
-		} catch (ESOperateException e) {
+		} catch (Exception e) {
 			LOGGER.error(
 					"class=ReBuildTomorrowIndexListener||method=onApplicationEvent||logicId={}",
 					reBuildTomorrowIndexEvent.getLogicId(),e);

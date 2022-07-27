@@ -66,7 +66,9 @@ public class ClusterPhyMetricsConstant {
 
     public static final String INSERT_PRDER  = "insert_order";
 
-    public static final Long   ONE_BILLION   = 10 * 10000 * 10000L;
+//    10 * 10000 * 10000L;
+    public static final Long   ONE_BILLION   = 100 * 10000L;
 
-    public static final double BIG_SHARD     = 50d;
+    //50d
+    public static final double BIG_SHARD     = 1d;
 }

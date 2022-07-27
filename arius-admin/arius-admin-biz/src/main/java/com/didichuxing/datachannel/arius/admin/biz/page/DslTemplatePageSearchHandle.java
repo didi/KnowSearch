@@ -6,6 +6,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.dsl.template.DslTemplateConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.dsl.DslTemplatePO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.DslTemplateVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.metadata.service.DslTemplateService;
@@ -46,8 +47,15 @@ public class DslTemplatePageSearchHandle extends AbstractPageSearchHandle<DslTem
 
     @Override
     protected PaginationResult<DslTemplateVO> buildPageData(DslTemplateConditionDTO condition, Integer projectId) {
+        Tuple<Long, List<DslTemplatePO>> tuple;
+        //普通项目只能查该项目下的dsl模板
+        if(!AuthConstant.SUPER_PROJECT_ID.equals(projectId)){
+            tuple = dslTemplateService.getDslTemplatePage(projectId, condition);
+            //超级项目不带projectId条件查询时，可查到所有项目的dsl模板
+        }else{
+            tuple = dslTemplateService.getDslTemplatePage(condition.getProjectId(), condition);
+        }
 
-        Tuple<Long, List<DslTemplatePO>> tuple = dslTemplateService.getDslTemplatePage(projectId, condition);
         if (tuple == null) {
             return PaginationResult.buildSucc(new ArrayList<>(), 0L, condition.getPage(), condition.getSize());
         }

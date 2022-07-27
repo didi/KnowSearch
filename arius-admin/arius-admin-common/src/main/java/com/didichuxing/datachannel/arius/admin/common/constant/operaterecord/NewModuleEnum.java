@@ -31,7 +31,7 @@ public enum NewModuleEnum {
                             */
                            TENANT("租户", 3),
 
-
+TEMPLATE_MANAGEMENT("模板管理", 4),
 
                            /**
                             * 模板服务:DCDR设置
@@ -51,7 +51,7 @@ public enum NewModuleEnum {
      * 查询模板
      */
     QUERY_TEMPLATE("查询模板", 8),
-    TEMPLATE_MANAGEMENT("模板管理", 5),
+    
     
     /**
      * 配置

@@ -29,9 +29,7 @@ public class ClusterJoinDTO extends BaseDTO {
     @ApiModelProperty("集群名字")
     private String                     cluster;
 
-    @ApiModelProperty("责任人：后续进行下线，无需在使用")
-    @Deprecated
-    private String                     responsible;
+    
 
     @ApiModelProperty("es版本")
     private String                     esVersion;

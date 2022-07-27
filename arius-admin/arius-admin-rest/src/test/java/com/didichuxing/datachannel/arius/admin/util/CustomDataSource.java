@@ -1,19 +1,21 @@
 package com.didichuxing.datachannel.arius.admin.util;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Stream;
-
-import org.springframework.mock.web.MockMultipartFile;
-
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.GatewayHeartbeat;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectTemplateAuthDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRegionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterSettingDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterRoleDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterRoleHostDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESConfigDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESPackageDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESZeusConfigDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.PluginDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.config.AriusConfigInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.oprecord.OperateRecordDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateConfigDTO;
@@ -38,7 +40,11 @@ import com.didichuxing.datachannel.arius.admin.common.bean.po.project.ESUserPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.project.ProjectClusterLogicAuthPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.project.ProjectConfigPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.project.ProjectTemplateAuthPO;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.template.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePhyPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateAliasPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateConfigPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateTypePO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.DataCenterEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.PluginTypeEnum;
@@ -55,6 +61,11 @@ import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatI
 import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import com.didiglobal.logi.security.common.vo.project.ProjectVO;
 import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Stream;
+import org.springframework.mock.web.MockMultipartFile;
 
 public class CustomDataSource {
 
@@ -227,7 +238,6 @@ public class CustomDataSource {
         esUserPO.setDataCenter("dataCenter");
         esUserPO.setProjectId(1);
         esUserPO.setIp("192.168.111.111");
-        esUserPO.setResponsible("admin");
         return esUserPO;
     }
 
@@ -343,7 +353,6 @@ public class CustomDataSource {
         ESLogicClusterDTO esLogicClusterDTO = new ESLogicClusterDTO();
         esLogicClusterDTO.setName("wpkTest");
         esLogicClusterDTO.setProjectId(1);
-        esLogicClusterDTO.setResponsible("wpk");
         esLogicClusterDTO.setType(ClusterResourceTypeEnum.EXCLUSIVE.getCode());
         esLogicClusterDTO.setQuota(3d);
         esLogicClusterDTO.setMemo("Test");
@@ -370,7 +379,6 @@ public class CustomDataSource {
         projectTemplateAuthDTO.setProjectId(1);
         projectTemplateAuthDTO.setTemplateId(1);
         projectTemplateAuthDTO.setType(ProjectTemplateAuthEnum.RW.getCode());
-        projectTemplateAuthDTO.setResponsible("admin");
         return projectTemplateAuthDTO;
     }
 
@@ -382,7 +390,6 @@ public class CustomDataSource {
         indexTemplateDTO.setDateFormat("_yyyy-MM-dd");
         indexTemplateDTO.setExpression("wpkTest-1*");
         indexTemplateDTO.setDateField("timeStamp");
-        indexTemplateDTO.setResponsible("admin");
         indexTemplateDTO.setDataCenter("cn");
         indexTemplateDTO.setQuota(30D);
 
@@ -412,7 +419,6 @@ public class CustomDataSource {
         projectClusterLogicAuth.setProjectId(1);
         projectClusterLogicAuth.setId(451L);
         projectClusterLogicAuth.setType(ProjectClusterLogicAuthEnum.ACCESS.getCode());
-        projectClusterLogicAuth.setResponsible("admin");
         return projectClusterLogicAuth;
     }
 
@@ -441,7 +447,6 @@ public class CustomDataSource {
         projectTemplateAuthPO.setProjectId(1);
         projectTemplateAuthPO.setTemplateId(1);
         projectTemplateAuthPO.setType(ProjectTemplateAuthEnum.R.getCode());
-        projectTemplateAuthPO.setResponsible("");
         return projectTemplateAuthPO;
     }
 

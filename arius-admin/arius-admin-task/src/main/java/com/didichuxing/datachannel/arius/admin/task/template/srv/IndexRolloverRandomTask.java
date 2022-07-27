@@ -1,9 +1,9 @@
-package com.didichuxing.datachannel.arius.admin.task.template;
+package com.didichuxing.datachannel.arius.admin.task.template.srv;
 
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.indexplan.IndexPlanManager;
-import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
-import com.didichuxing.datachannel.arius.admin.task.BaseConcurrentClusterTask;
-import com.didichuxing.datachannel.arius.admin.task.TaskConcurrentConstants;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.task.BaseConcurrentTemplateTask;
+import com.didiglobal.logi.job.annotation.Task;
 import com.didiglobal.logi.job.common.TaskResult;
 import com.didiglobal.logi.job.core.job.Job;
 import com.didiglobal.logi.job.core.job.JobContext;
@@ -12,7 +12,7 @@ import com.didiglobal.logi.log.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * @author cjm
+ * @author chengxiang, jiamin
  *
  * rollover能力，目标是保证单个索引的大小在合适的范围内（即索引的主shard数 * 50G），一小时执行一次、或者更频繁的执行
  * 获取主shard个数，只能从ES中获取，不能从数据库表获取
@@ -28,9 +28,8 @@ import org.springframework.beans.factory.annotation.Autowired;
  *
  * xxxx-2021-10-22 -> xxxx-2021-10-22_v1
  */
-//@Task(name = "IndexRolloverRandomTask", description = "索引Rollover实现", cron = "0 0 0/1 * * ?", autoRegister = true)
-@Deprecated
-public class IndexRolloverRandomTask extends BaseConcurrentClusterTask implements Job {
+@Task(name = "IndexRolloverRandomTask", description = "模板Rollover实现", cron = "0 0 0/1 * * ?", autoRegister = true)
+public class IndexRolloverRandomTask extends BaseConcurrentTemplateTask implements Job {
 
     private static final ILog LOGGER = LogFactory.getLog(IndexRolloverRandomTask.class);
 
@@ -39,33 +38,33 @@ public class IndexRolloverRandomTask extends BaseConcurrentClusterTask implement
 
     @Override
     public TaskResult execute(JobContext jobContext) throws Exception {
-        LOGGER.info("class=IndexRolloverTaskDriver||method=execute||msg=IndexRolloverTask start.");
+        LOGGER.info("class=IndexRolloverRandomTask||method=execute||msg=IndexRolloverRandomTask start");
         if (execute()) {
             return TaskResult.SUCCESS;
         }
         return TaskResult.FAIL;
     }
 
-    @Override
-    protected boolean executeByCluster(String clusterPhyName) throws AdminOperateException {
-        // cluster 物理集群
-        return indexPlanManager.indexRollover(clusterPhyName);
-    }
-
-    @Override
-    public String getTaskName() {
-        return "IndexRolloverRandomTask";
-    }
+   
 
     @Override
     public int poolSize() {
-        // 任务线程个数
         return 10;
     }
 
     @Override
     public int current() {
-        // 并发度
-        return TaskConcurrentConstants.INDEX_ROLLOVER_TASK_CONCURRENT;
+        return 5;
+    }
+
+    @Override
+    protected boolean executeByLogicTemplate(Integer logicId) {
+        final Result<Void> result = indexPlanManager.indexRollover(logicId);
+        if (result.failed()){
+             LOGGER.warn("class=IndexRolloverRandomTask||method=executeByLogicTemplate||logicId={}||msg={}", logicId,
+                        result.getMessage());
+             return result.failed();
+        }
+        return result.success();
     }
 }

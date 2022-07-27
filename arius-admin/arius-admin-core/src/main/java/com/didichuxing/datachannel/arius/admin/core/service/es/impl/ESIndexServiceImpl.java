@@ -114,7 +114,7 @@ public class ESIndexServiceImpl implements ESIndexService {
     }
 
     @Override
-    public boolean syncUpdateIndexMapping(String cluster, String index, MappingConfig mappingConfig) {
+    public boolean syncUpdateIndexMapping(String cluster, String index, MappingConfig mappingConfig) throws ESOperateException {
         return esIndexDAO.updateIndexMapping(cluster, index, mappingConfig);
     }
 

@@ -1,4 +1,4 @@
-package com.didichuxing.datachannel.arius.admin.task.template.new_srv;
+package com.didichuxing.datachannel.arius.admin.task.template.srv;
 
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.task.OpTaskManager;

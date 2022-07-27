@@ -1,6 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.mapping.AriusTypeProperty;
 import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
 
@@ -47,7 +48,7 @@ public interface TemplatePhyMappingManager {
      * @param mappingConfig
      * @return
      */
-    Result<Void> syncTemplateMapping2Index(String cluster, String index, MappingConfig mappingConfig);
+    Result<Void> syncTemplateMapping2Index(String cluster, String index, MappingConfig mappingConfig) throws ESOperateException;
 
     /**
      * 将index的mapping同步到template上
@@ -67,7 +68,7 @@ public interface TemplatePhyMappingManager {
      * @return result
      */
     Result<Void> addIndexMapping(String cluster, String expression, String dataFormat, int updateDays,
-                                 MappingConfig mappingConfig);
+                                 MappingConfig mappingConfig) throws ESOperateException;
 
     /**
      * 校验模板mapping 模板还不存在

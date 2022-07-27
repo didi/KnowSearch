@@ -15,10 +15,10 @@ public interface BaseTemplateSrv {
 
     /**
      * 判断指定逻辑模板是否开启了当前模板服务
-     * @param templateId 逻辑模板id
+     * @param logicTemplateId 逻辑模板id
      * @return 校验结果
      */
-    boolean isTemplateSrvOpen(Integer templateId);
+    boolean isTemplateSrvOpen(Integer logicTemplateId);
 
     /**
      * 获取当前模板服务的类型

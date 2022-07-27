@@ -98,7 +98,6 @@ public class PhyClusterInfoSource {
     //        clusterRegionDTOs.add(clusterRegionDTO);
     //
     //        Map<String, Object> contentObj = new HashMap<>();
-    //        contentObj.put("responsible", "admin");
     //        contentObj.put("clusterRegionDTOS", clusterRegionDTOs);
     //        contentObj.put("dataCenter", "cn");
     //        contentObj.put("dataNodeSpec", "");
@@ -106,7 +105,6 @@ public class PhyClusterInfoSource {
     //        contentObj.put("configJson", "");
     //        contentObj.put("id", 0);
     //        contentObj.put("libraDepartment", "");
-    //        contentObj.put("libraDepartmentId", "");
     //        contentObj.put("quota", 0);
     //        contentObj.put("name", logicClusterName);
     //        contentObj.put("type", ClusterResourceTypeEnum.PRIVATE.getCode());
