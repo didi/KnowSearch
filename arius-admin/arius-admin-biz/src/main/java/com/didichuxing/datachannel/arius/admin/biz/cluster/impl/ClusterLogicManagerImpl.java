@@ -76,6 +76,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.*;
@@ -370,6 +371,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     }
 
     @Override
+    @Transactional
     public Result<Void> deleteLogicCluster(Long logicClusterId, String operator,
                                            Integer projectId) throws AdminOperateException {
         ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(logicClusterId);
@@ -379,21 +381,45 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
             return checkProjectCorrectly;
         }
 
-        ClusterLogicTemplateIndexDetailDTO templateIndexVO = getTemplateIndexVO(clusterLogic, projectId);
+        //获取逻辑模板和索引
+        ClusterLogicTemplateIndexDetailDTO templateIndexVO = getTemplateIndexVO(clusterLogic);
+        List<IndexTemplatePhy> indexTemplatePhies = Lists.newArrayList();
 
         for (IndexTemplate agg : templateIndexVO.getTemplates()) {
-            final Result<Void> delTemplateResult = templateLogicManager
-                .delTemplate(agg.getId(), operator, projectId);
+            Result<Void> delTemplateResult = templateLogicManager.delTemplate(agg.getId(), operator, projectId);
             if (delTemplateResult.failed()) {
                 return delTemplateResult;
             }
         }
-        indicesManager.deleteIndex(templateIndexVO.getCatIndexResults(), projectId, operator);
+        //删除索引
+        Result<Boolean> delIndexRes = indicesManager.deleteIndex(templateIndexVO.getCatIndexResults(), projectId, operator);
 
-        //将region解绑
+        if (false == delIndexRes.getData()){
+            return Result.buildFail();
+        }
+        //获取绑定的region
         ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(logicClusterId);
-        clusterRegionService.unbindRegion(clusterRegion.getId(), logicClusterId, operator);
 
+        if(Objects.nonNull(clusterRegion)){
+            //获取物理模板
+            Result<List<IndexTemplatePhy>> ret = indexTemplatePhyService.listByRegionId(clusterRegion.getId().intValue());
+            if (ret.success() && CollectionUtils.isNotEmpty(ret.getData())) {
+                indexTemplatePhies = ret.getData();
+            }
+            //删除物理模板
+            for (IndexTemplatePhy indexTemplatePhy:indexTemplatePhies) {
+                Result<Void> delTemplatePhyRes =  indexTemplatePhyService.delTemplate(indexTemplatePhy.getId(),operator);
+                if (false == delTemplatePhyRes.success()){
+                    return Result.buildFail();
+                }
+            }
+            //将region解绑
+            Result<Void>  unbindRes = clusterRegionService.unbindRegion(clusterRegion.getId(), logicClusterId, operator);
+            if (false == unbindRes.success()){
+                return Result.buildFail();
+            }
+        }
+        //删除逻辑集群
         Result<Void> result = clusterLogicService.deleteClusterLogicById(logicClusterId, operator, projectId);
         if (result.success()) {
             SpringTool.publish(new ClusterLogicEvent(logicClusterId, projectId));
@@ -406,7 +432,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         return result;
     }
 
-    private ClusterLogicTemplateIndexDetailDTO getTemplateIndexVO(ClusterLogic clusterLogic, Integer projectId) {
+    private ClusterLogicTemplateIndexDetailDTO getTemplateIndexVO(ClusterLogic clusterLogic) {
         IndexTemplateDTO param = new IndexTemplateDTO();
         param.setResourceId(clusterLogic.getId());
         List<IndexTemplate> indexTemplates = indexTemplateService.listLogicTemplates(param);
@@ -487,7 +513,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     public Result<ClusterLogicTemplateIndexCountVO> indexTemplateCount(Long clusterId, String operator,
                                                                        Integer projectId) {
         ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(clusterId);
-        ClusterLogicTemplateIndexDetailDTO detailVO = getTemplateIndexVO(clusterLogic, projectId);
+        ClusterLogicTemplateIndexDetailDTO detailVO = getTemplateIndexVO(clusterLogic);
         ClusterLogicTemplateIndexCountVO countVO = new ClusterLogicTemplateIndexCountVO();
         countVO.setCatIndexResults(detailVO.getCatIndexResults().size());
         countVO.setTemplateLogicAggregates(detailVO.getTemplates().size());
