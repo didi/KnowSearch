@@ -95,9 +95,8 @@ class ESUserManagerTest {
         final ESUserPO esUserPO = CustomDataSource.esUserPO();
         final ESUserDTO esUserDTO = ConvertUtil.obj2Obj(esUserPO, ESUserDTO.class);
         when(roleTool.isAdmin(anyString())).thenReturn(false);
-        esUserDTO.setResponsible("aaa");
         Assertions.assertEquals(
-            Result.buildParamIllegal(String.format("当前操作[%s] 不能创建es user", esUserDTO.getResponsible())).getMessage(),
+            Result.buildParamIllegal(String.format("当前操作[%s] 不能创建es user")).getMessage(),
             esUserManager.registerESUser(esUserDTO, 1, "admin").getMessage());
         when(roleTool.isAdmin(anyString())).thenReturn(true);
         when(esUserService.validateESUser(any(), any())).thenReturn(Result.buildParamIllegal("应用信息为空"));

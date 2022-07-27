@@ -1,7 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.biz.workorder.content;
 
 import com.didichuxing.datachannel.arius.admin.common.constant.template.DataTypeEnum;
-
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -31,20 +30,11 @@ public class TemplateCreateContent extends BaseContent {
      */
     private Integer dataType;
 
-    /**
-     * 责任人
-     */
-    private String  responsible;
+    
 
-    /**
-     * 部门id
-     */
-    private String  libraDepartmentId;
+    
 
-    /**
-     * 部门名称
-     */
-    private String  libraDepartment;
+
 
     /**
      * 备注

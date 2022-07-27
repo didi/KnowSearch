@@ -128,7 +128,7 @@ public class ProjectLogicTemplateAuthServiceImpl implements ProjectLogicTemplate
 
     @Override
     public Result<Void> ensureSetLogicTemplateAuth(Integer projectId, Integer logicTemplateId,
-                                                   ProjectTemplateAuthEnum auth, String responsible, String operator) {
+                                                   ProjectTemplateAuthEnum auth, String operator) {
         // 参数检查
         if (projectId == null) {
             return Result.buildParamIllegal("未指定projectId");
@@ -155,7 +155,7 @@ public class ProjectLogicTemplateAuthServiceImpl implements ProjectLogicTemplate
 
             // 新增
             return addTemplateAuth(
-                new ProjectTemplateAuthDTO(null, projectId, logicTemplateId, auth.getCode(), responsible));
+                new ProjectTemplateAuthDTO(null, projectId, logicTemplateId, auth.getCode()));
         } else {
             // 有权限记录
             // 期望删除权限
@@ -165,7 +165,7 @@ public class ProjectLogicTemplateAuthServiceImpl implements ProjectLogicTemplate
 
             // 期望更新权限信息
             ProjectTemplateAuthDTO newAuthDTO = new ProjectTemplateAuthDTO(oldAuthPO.getId(), null, null,
-                auth == null ? null : auth.getCode(), StringUtils.isBlank(responsible) ? null : responsible);
+                auth == null ? null : auth.getCode());
             return updateTemplateAuth(newAuthDTO);
         }
     }
@@ -344,7 +344,6 @@ public class ProjectLogicTemplateAuthServiceImpl implements ProjectLogicTemplate
         auth.setProjectId(logicTemplate.getProjectId());
         auth.setTemplateId(logicTemplate.getId());
         auth.setType(projectTemplateAuthEnum.getCode());
-        auth.setResponsible(logicTemplate.getResponsible());
         return auth;
     }
 
@@ -526,7 +525,7 @@ public class ProjectLogicTemplateAuthServiceImpl implements ProjectLogicTemplate
     }
 
     @Override
-    public List<ProjectTemplateAuth> getProjectTemplateRWAndRAuthsWithoutCodecResponsible(Integer projectId) {
+    public List<ProjectTemplateAuth> getProjectTemplateRWAndRAuthsWithoutCodec(Integer projectId) {
         return ConvertUtil.list2List(templateAuthDAO.listWithRwAuthsByProjectId(projectId), ProjectTemplateAuth.class);
     }
 

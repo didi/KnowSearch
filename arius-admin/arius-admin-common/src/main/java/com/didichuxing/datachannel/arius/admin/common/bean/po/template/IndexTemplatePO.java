@@ -53,11 +53,7 @@ public class IndexTemplatePO extends BasePO {
      */
     private Integer hotTime;
 
-    /**
-     * 责任人，id列表，英文逗号分隔
-     */
-    @Deprecated
-    private String  responsible;
+   
 
     /**
      * 时间字段

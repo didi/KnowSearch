@@ -12,7 +12,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.Ro
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
-
 import java.util.List;
 import java.util.Set;
 
@@ -171,13 +170,13 @@ public interface ClusterLogicService {
 
     /**
      * 转移逻辑集群
-     * @param clusterLogicId       逻辑集群Id
-     * @param targetProjectId          项目Id
-     * @param targetResponsible    目标负责人
-     * @param submitor             提交人
+     *
+     * @param clusterLogicId  逻辑集群Id
+     * @param targetProjectId 项目Id
+     * @param submitor        提交人
      * @return 成功/失败
      */
-    Result<Void> transferClusterLogic(Long clusterLogicId, Integer targetProjectId, String targetResponsible,
+    Result<Void> transferClusterLogic(Long clusterLogicId, Integer targetProjectId,
                                       String submitor);
 
     /**

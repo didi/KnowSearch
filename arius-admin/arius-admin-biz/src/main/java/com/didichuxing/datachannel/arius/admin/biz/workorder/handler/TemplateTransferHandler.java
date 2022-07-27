@@ -172,7 +172,7 @@ public class TemplateTransferHandler extends BaseWorkOrderHandler {
             TemplateTransferContent.class);
 
         Result<Void> result = indexTemplateService.turnOverLogicTemplate(content.getId(), content.getSourceProjectId(),
-            content.getTgtProjectId(), content.getTgtResponsible(), workOrder.getSubmitor());
+            content.getTgtProjectId(), workOrder.getSubmitor());
 
         if (result.success()) {
             operateRecordService.save(

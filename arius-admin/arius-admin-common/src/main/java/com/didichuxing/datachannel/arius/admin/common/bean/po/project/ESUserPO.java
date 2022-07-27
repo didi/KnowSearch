@@ -71,7 +71,5 @@ public class ESUserPO extends BasePO {
     private String  ip;
 
     private String  indexExp;
-    @Deprecated
-    private String  responsible;
 
 }

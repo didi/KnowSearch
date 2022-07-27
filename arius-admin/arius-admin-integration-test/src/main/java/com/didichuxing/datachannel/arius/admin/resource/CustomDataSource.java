@@ -62,7 +62,6 @@ public class CustomDataSource {
         param.setEsVersion("7.6.2");
         param.setPhyClusterDesc("");
         param.setPassword("");
-        param.setResponsible(operator);
         param.setImportRule(ESClusterImportRuleEnum.AUTO_IMPORT.getCode());
         param.setTags("\"createSource\":0}");
         List<ESClusterRoleHostDTO> list = new ArrayList<>();

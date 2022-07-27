@@ -114,10 +114,6 @@ public class ESUserManagerImpl implements ESUserManager {
 
         }
 
-        //暂定校验超级用户 user name
-        if (Objects.nonNull(appDTO) && Objects.nonNull(appDTO.getResponsible()) && !roleTool.isAdmin(operator)) {
-            return Result.buildParamIllegal(String.format("当前操作[%s] 不能创建es user", appDTO.getResponsible()));
-        }
 
         final TupleTwo</*创建的es user*/Result, /*创建的es user po*/ ESUserPO> resultESUserPOTuple = esUserService
             .registerESUser(appDTO, operator);

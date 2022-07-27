@@ -440,7 +440,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             case NO_PERMISSION:
                 List<IndexTemplate> allLogicTemplates = indexTemplateService.listAllLogicTemplates();
                 List<Integer> projectRAndRwAuthTemplateIdList = projectLogicTemplateAuthService
-                    .getProjectTemplateRWAndRAuthsWithoutCodecResponsible(projectId).stream()
+                    .getProjectTemplateRWAndRAuthsWithoutCodec(projectId).stream()
                     .map(ProjectTemplateAuth::getTemplateId).collect(Collectors.toList());
 
                 List<IndexTemplate> notAuthIndexTemplateList = allLogicTemplates.stream().filter(
