@@ -480,26 +480,20 @@ public class GatewayNodeMetricsDAO extends BaseTopNMetricsDAO {
             case WRITE_GATEWAY_NODE:
                 params = new Object[] { queryDslByFiled, AGG_KEY_FIELD, GATEWAY_NODE, AGG_TERMS_SIZE, interval,
                                         DSL_LEN_AVG, AVG, DSL_LEN };
-                //params = new Object[] { queryDslByFiled, AGG_KEY_FIELD, GATEWAY_NODE, AGG_TERMS_SIZE, interval,
-                //                        DSL_LEN_AVG, AVG, DSL_LEN };
                 break;
             case QUERY_GATEWAY_NODE:
                 //queryRequest true
                 params = new Object[] { queryDslByFiled, AGG_KEY_FIELD, GATEWAY_NODE, AGG_TERMS_SIZE, interval };
-                //params = new Object[] { queryDslByFiled, AGG_KEY_FIELD, GATEWAY_NODE, AGG_TERMS_SIZE, interval };
                 break;
             //queryRequest false
             case WRITE_CLIENT_NODE:
             case DSLLEN_CLIENT_NODE:
                 params = new Object[] { queryDslByFiled, AGG_KEY_FIELD, CLIENT_NODE, AGG_TERMS_SIZE, interval,
                                         DSL_LEN_AVG, AVG, DSL_LEN };
-                //params = new Object[] { queryDslByFiled, AGG_KEY_FIELD, CLIENT_NODE, AGG_TERMS_SIZE, interval,
-                //                        DSL_LEN_AVG, AVG, DSL_LEN };
                 break;
             //query true
             case QUERY_CLIENT_NODE:
                 params = new Object[] { queryDslByFiled, AGG_KEY_FIELD, CLIENT_NODE, AGG_TERMS_SIZE, interval };
-                //params = new Object[] { queryDslByFiled, AGG_KEY_FIELD, CLIENT_NODE, AGG_TERMS_SIZE, interval };
                 break;
             default:
                 return Collections.emptyList();
