@@ -57,8 +57,7 @@ public class DashboardSingleClusterCollectorBroadcastTask implements Job {
         LOGGER.info(
             "class=DashboardSingleClusterCollectorBroadcastTask||method=execute||msg=DashboardSingleClusterCollectorBroadcastTask start.");
         // 获取单台admin实例能采集的集群数
-//        List<ClusterPhy> monitorCluster = ariusMetaJobClusterDistributeService.getSingleMachineMonitorCluster(hostName);
-        List<ClusterPhy> monitorCluster = clusterPhyService.listAllClusters();
+        List<ClusterPhy> monitorCluster = ariusMetaJobClusterDistributeService.getSingleMachineMonitorCluster(hostName);
         if (CollectionUtils.isEmpty(monitorCluster)) {
             return TaskResult.SUCCESS;
         }
