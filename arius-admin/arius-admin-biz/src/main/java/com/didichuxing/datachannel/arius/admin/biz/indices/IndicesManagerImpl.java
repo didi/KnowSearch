@@ -918,9 +918,9 @@ public class IndicesManagerImpl implements IndicesManager {
         List<String> existKeyList = indexTemplatePhyList.stream().map(r -> r.getCluster() + "@" + r.getName())
                 .distinct().collect(Collectors.toList());
         for (String existKey : existKeyList) {
-            if (existKey.startsWith(key)) {
-                return Result.buildFail(String.format("创建的索引名称[%s]不允许和该集群模板名称[%s]存在前缀的匹配, 请修改索引名称", index,
-                        existKey.split("@")[1]));
+            if (existKey.startsWith(key) || key.startsWith(existKey)) {
+                return Result.buildFail(String.format("创建的索引名称[%s]不允许和该集群模板名称[%s]存在相互前缀的匹配, 请修改索引名称",
+                        index, existKey.split("@")[1]));
             }
         }
         return Result.buildSucc();

@@ -553,6 +553,17 @@ public class DslsConstant {
     public static final String GET_GATEWAY_APP_FIELD_COUNT_BY_PROJECT_ID = "GatewayAppMetricsDao/getAggFieldCountByProjectId";
 
     /************************************************************** GatewayDslMetricsDao **************************************************************/
+    public static final String GET_TOTAL_COST_BY_FIELD = "GatewayDslMetricsDao/getTotalCostByField";
+    public static final String GET_DSL_COUNT_BY_FILELD = "GatewayDslMetricsDao/getDslCountByFileld";
+    public static final String GET_DSL_COUNT_EXTENDED_BOUNDS_BY_FILELD = "GatewayDslMetricsDao/getDslCountExtendedBoundsByFileld";
+    /**
+     * 获取某个指定字段下第一个有时间的数据
+     */
+    public static final String GET_HAS_METRIC_INFO_TIME_BY_FIELD = "GatewayDslMetricsDao/getHasMetricInfoTimeByField";
+    /**
+     * 保持和之前的结果相同
+     */
+    public static final String GET_TOTAL_COST_EXTENDED_BOUNDS_BY_FIELD = "GatewayDslMetricsDao/getTotalCostExtendedBoundsByField";
     /**
      * 获取各个查询模版访问量 topNu
      */
