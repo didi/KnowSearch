@@ -17,13 +17,12 @@ public class AdminConstant {
     private AdminConstant() {
     }
 
-    public static final String       DEFAULT_TYPE                            = "type";
+//    public static final String       DEFAULT_TYPE                            = "type";
 
     public static final String       DEFAULT_INDEX_MAPPING_TYPE              = "_doc";
     public static final String       DEFAULT_DYNAMIC_TEMPLATES_KEY           = "dynamic_templates";
-
-    public static final String       SINGLE_TYPE_KEY                         = "index.mapping.single_type";
-    public static final String       DEFAULT_SINGLE_TYPE                     = "true";
+//    public static final String       SINGLE_TYPE_KEY                         = "index.mapping.single_type";
+//    public static final String       DEFAULT_SINGLE_TYPE                     = "true";
 
     public static final String       HOST_NAME                               = HostUtil.getHostName();
 

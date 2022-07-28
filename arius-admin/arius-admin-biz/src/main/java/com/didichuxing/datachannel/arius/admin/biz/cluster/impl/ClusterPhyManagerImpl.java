@@ -383,7 +383,8 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             return Result.buildParamIllegal("集群资源类型非法");
         }
         List<String> clusters = Lists.newArrayList();
-        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(clusterLogicId);
+        ClusterLogic clusterLogic =
+                clusterLogicService.getClusterLogicById(clusterLogicId ).stream().findFirst().orElse(null);
         if (clusterLogic == null) {
             return Result.buildFail("选定的逻辑集群不存在");
         }
@@ -1068,7 +1069,6 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
      */
     private boolean setTemplateSettingSingleType(String cluster, String template) {
         Map<String, String> setting = new HashMap<>(2);
-        setting.put(AdminConstant.SINGLE_TYPE_KEY, AdminConstant.DEFAULT_SINGLE_TYPE);
         try {
             return esTemplateService.syncUpsertSetting(cluster, template, setting, 3);
         } catch (ESOperateException e) {
@@ -1092,7 +1092,8 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         }
         Result<List<String>> canBeAssociatedClustersPhyNames = Result.buildSucc(Lists.newArrayList());
         if (clusterLogicId != null) {
-            ClusterLogic clusterLogicById = clusterLogicService.getClusterLogicById(clusterLogicId);
+            ClusterLogic clusterLogicById =
+                    clusterLogicService.getClusterLogicById(clusterLogicId).stream().findFirst().orElse(null);
             if (clusterLogicById == null) {
                 return Result.buildFail("选定的逻辑集群不存在");
             }
@@ -1458,7 +1459,11 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
         List<Long> clusterLogicIds = clusterPhyContext.getAssociatedClusterLogicIds();
         for (Long clusterLogicId : clusterLogicIds) {
-            final ClusterLogic deleteById = clusterLogicService.getClusterLogicById(clusterLogicId);
+            final ClusterLogic deleteById = clusterLogicService.getClusterLogicById(clusterLogicId)
+                    .stream().findFirst().orElse(null);
+            if (Objects.isNull(deleteById)){
+                continue;
+            }
             Result<Void> deleteLogicClusterResult = clusterLogicService.deleteClusterLogicById(clusterLogicId, operator,
                 projectId);
             if (deleteLogicClusterResult.failed()) {

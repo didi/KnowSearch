@@ -1,5 +1,13 @@
 package com.didichuxing.datachannel.arius.admin.biz.cluster.impl;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum.CLUSTER_LOGIC;
+import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum.GREEN;
+import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum.RED;
+import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum.UNKNOWN;
+import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum.YELLOW;
+import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.DATA_NODE;
+import static com.didichuxing.datachannel.arius.admin.common.util.SizeUtil.getUnitSize;
+
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterLogicManager;
@@ -32,7 +40,14 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESMachineNormsPO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicTemplateIndexCountVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicTemplateIndexDetailDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterStatusVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PluginVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.ecm.ESClusterNodeSepcVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
@@ -48,7 +63,12 @@ import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateExcepti
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
 import com.didichuxing.datachannel.arius.admin.common.tuple.Tuples;
-import com.didichuxing.datachannel.arius.admin.common.util.*;
+import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.ClusterUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESMachineNormsService;
@@ -72,20 +92,19 @@ import com.didiglobal.logi.security.service.ProjectService;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-
-import javax.servlet.http.HttpServletRequest;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum.CLUSTER_LOGIC;
-import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum.*;
-import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.DATA_NODE;
-import static com.didichuxing.datachannel.arius.admin.common.util.SizeUtil.getUnitSize;
 
 @Component
 public class ClusterLogicManagerImpl implements ClusterLogicManager {
@@ -278,6 +297,25 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         return Result.buildSucc(list);
     }
 
+    /**
+     * @param level
+     * @return
+     */
+    @Override
+    public Result<List<ClusterLogicVO>> getLogicClustersByLevel(Integer level) {
+
+        List<ClusterLogicVO> list = ConvertUtil.list2List(clusterLogicService.getLogicClustersByLevel(level),
+                ClusterLogicVO.class);
+        for (ClusterLogicVO clusterLogicVO : list) {
+            List<String> clusterPhyNames = clusterRegionService.listPhysicClusterNames(clusterLogicVO.getId());
+            clusterLogicVO.setPhyClusterAssociated(!AriusObjUtils.isEmptyList(clusterPhyNames));
+            clusterLogicVO.setAssociatedPhyClusterName(clusterPhyNames);
+            Optional.ofNullable(clusterLogicVO.getProjectId()).map(projectService::getProjectBriefByProjectId)
+                    .map(ProjectBriefVO::getProjectName).ifPresent(clusterLogicVO::setProjectName);
+        }
+        return Result.buildSucc(list);
+    }
+
     @Override
     public Result<List<Tuple<Long/*逻辑集群Id*/, String/*逻辑集群名称*/>>> listProjectClusterLogicIdsAndNames(Integer projectId) {
         List<Tuple<Long/*逻辑集群Id*/, String/*逻辑集群名称*/>> res = Lists.newArrayList();
@@ -350,7 +388,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
 
     @Override
     public ClusterLogicVO getClusterLogic(Long clusterLogicId, Integer currentProjectId) {
-        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(clusterLogicId);
+        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(clusterLogicId, currentProjectId);
         ClusterLogicVO clusterLogicVO = ConvertUtil.obj2Obj(clusterLogic, ClusterLogicVO.class);
 
         futureUtil.runnableTask(() -> buildLogicClusterStatus(clusterLogicVO, clusterLogic))
@@ -371,10 +409,21 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     }
 
     @Override
-    @Transactional
     public Result<Void> deleteLogicCluster(Long logicClusterId, String operator,
                                            Integer projectId) throws AdminOperateException {
-        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(logicClusterId);
+        //一个逻辑集群对应了多个项目的情况
+        final List<ClusterLogic> clusterLogicList = clusterLogicService.getClusterLogicById(logicClusterId);
+        if (CollectionUtils.isEmpty(clusterLogicList)) {
+            return Result.buildSucc();
+        }
+        final ClusterLogic clusterLogic = clusterLogicList.stream()
+                .filter(c -> Objects.equals(c.getProjectId(), projectId)).findFirst()
+                .orElse(null);
+        if (Objects.isNull(clusterLogic)) {
+            return Result.buildFail(String.format("项目【%s】不存在逻辑集群",
+                    projectService.getProjectBriefByProjectId(projectId).getProjectName()));
+        }
+
         final Result<Void> checkProjectCorrectly = ProjectUtils.checkProjectCorrectly(ClusterLogic::getProjectId,
             clusterLogic, projectId);
         if (checkProjectCorrectly.failed()) {
@@ -391,32 +440,30 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
                 return delTemplateResult;
             }
         }
-        //删除索引
-        Result<Boolean> delIndexRes = indicesManager.deleteIndex(templateIndexVO.getCatIndexResults(), projectId, operator);
+        indicesManager.deleteIndex(templateIndexVO.getCatIndexResults(), projectId, operator);
+        if (clusterLogicList.size() == 1) {
+            //将region解绑
+            ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(logicClusterId);
+            clusterRegionService.unbindRegion(clusterRegion.getId(), logicClusterId, operator);
 
-        if (false == delIndexRes.getData()){
-            return Result.buildFail();
-        }
-        //获取绑定的region
-        ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(logicClusterId);
-
-        if(Objects.nonNull(clusterRegion)){
-            //获取物理模板
-            Result<List<IndexTemplatePhy>> ret = indexTemplatePhyService.listByRegionId(clusterRegion.getId().intValue());
-            if (ret.success() && CollectionUtils.isNotEmpty(ret.getData())) {
-                indexTemplatePhies = ret.getData();
-            }
-            //删除物理模板
-            for (IndexTemplatePhy indexTemplatePhy:indexTemplatePhies) {
-                Result<Void> delTemplatePhyRes =  indexTemplatePhyService.delTemplate(indexTemplatePhy.getId(),operator);
-                if (false == delTemplatePhyRes.success()){
+            if (Objects.nonNull(clusterRegion)) {
+                //获取物理模板
+                Result<List<IndexTemplatePhy>> ret = indexTemplatePhyService.listByRegionId(clusterRegion.getId().intValue());
+                if (ret.success() && CollectionUtils.isNotEmpty(ret.getData())) {
+                    indexTemplatePhies = ret.getData();
+                }
+                //删除物理模板
+                for (IndexTemplatePhy indexTemplatePhy : indexTemplatePhies) {
+                    Result<Void> delTemplatePhyRes = indexTemplatePhyService.delTemplate(indexTemplatePhy.getId(), operator);
+                    if (false == delTemplatePhyRes.success()) {
+                        return Result.buildFail();
+                    }
+                }
+                //将region解绑
+                Result<Void> unbindRes = clusterRegionService.unbindRegion(clusterRegion.getId(), logicClusterId, operator);
+                if (false == unbindRes.success()) {
                     return Result.buildFail();
                 }
-            }
-            //将region解绑
-            Result<Void>  unbindRes = clusterRegionService.unbindRegion(clusterRegion.getId(), logicClusterId, operator);
-            if (false == unbindRes.success()){
-                return Result.buildFail();
             }
         }
         //删除逻辑集群
@@ -425,9 +472,9 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
             SpringTool.publish(new ClusterLogicEvent(logicClusterId, projectId));
             //操作记录 集群下线
             operateRecordService
-                .save(new OperateRecord.Builder().project(projectService.getProjectBriefByProjectId(projectId))
-                    .operationTypeEnum(OperateTypeEnum.MY_CLUSTER_OFFLINE).triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                    .content(clusterLogic.getName()).bizId(logicClusterId.intValue()).userOperation(operator).build());
+                    .save(new OperateRecord.Builder().project(projectService.getProjectBriefByProjectId(projectId))
+                            .operationTypeEnum(OperateTypeEnum.MY_CLUSTER_OFFLINE).triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                            .content(clusterLogic.getName()).bizId(logicClusterId.intValue()).userOperation(operator).build());
         }
         return result;
     }
@@ -446,7 +493,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
 
     @Override
     public Result<Void> editLogicCluster(ESLogicClusterDTO param, String operator, Integer projectId) {
-        final ClusterLogic logic = clusterLogicService.getClusterLogicById(param.getId());
+        final ClusterLogic logic = clusterLogicService.getClusterLogicById(param.getId(), projectId);
         Result<Void> result = clusterLogicService.editClusterLogic(param, operator, projectId);
         if (result.success()) {
             SpringTool.publish(new ClusterLogicEvent(param.getId(), projectId));
@@ -522,9 +569,13 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
 
     @Override
     public Result<Long> estimatedDiskSize(Long clusterLogicId, Integer count) {
-        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(clusterLogicId);
+        ClusterLogic clusterLogic =
+                clusterLogicService.getClusterLogicById(clusterLogicId).stream().findFirst().orElse(null);
+        if (Objects.isNull(clusterLogic)){
+            return Result.buildFail("逻辑集群不存在");
+        }
         String nodeSpec = clusterLogic.getDataNodeSpec();
-        if (StringUtils.isNotBlank(nodeSpec)&&Objects.nonNull(nodeSpec.split("-")[2])) {
+        if (StringUtils.isNotBlank(nodeSpec)) {
             return Result.buildSucc(getUnitSize(nodeSpec.split("-")[2]) * count);
         }
         return Result.buildSucc(UNKNOWN_SIZE);
@@ -571,7 +622,8 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
 
     @Override
     public Result<Boolean> isLogicClusterRegionIsNotEmpty(Long logicClusterId) {
-        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(logicClusterId);
+        ClusterLogic clusterLogic =
+                clusterLogicService.getClusterLogicById(logicClusterId).stream().findFirst().orElse(null);
         if (null == clusterLogic) {
             return Result.buildWithMsg(false, "逻辑集群不存在！");
         }

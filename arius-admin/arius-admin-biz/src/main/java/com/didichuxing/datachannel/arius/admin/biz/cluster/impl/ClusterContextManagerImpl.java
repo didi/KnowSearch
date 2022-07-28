@@ -1,19 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.biz.cluster.impl;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum.*;
+import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum.EXCLUSIVE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum.PRIVATE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum.PUBLIC;
+import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum.UNKNOWN;
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.DATA_NODE;
-
-import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
-import com.didiglobal.logi.security.service.ProjectService;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import javax.annotation.PostConstruct;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -35,9 +26,23 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.Clust
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
+import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+import javax.annotation.PostConstruct;
+import org.apache.commons.collections4.CollectionUtils;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * 集群上下文类, 包含以下信息:
@@ -206,7 +211,9 @@ public class ClusterContextManagerImpl implements ClusterContextManager {
             return Lists.newArrayList();
         }
 
-        return clusterLogicIds.stream().map(r -> clusterLogicService.getClusterLogicById(r)).map(ClusterLogic::getName)
+        return clusterLogicIds.stream().map(r -> clusterLogicService.getClusterLogicById(r ))
+                .flatMap(Collection::stream)
+                .map(ClusterLogic::getName)
             .distinct().collect(Collectors.toList());
     }
 
@@ -245,7 +252,8 @@ public class ClusterContextManagerImpl implements ClusterContextManager {
 
     @Override
     public ClusterLogicContext getClusterLogicContext(Long clusterLogicId) {
-        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(clusterLogicId);
+        ClusterLogic clusterLogic =
+                clusterLogicService.getClusterLogicById(clusterLogicId).stream().findFirst().orElse(null);
         if (null == clusterLogic) {
             LOGGER.error(
                 "class=ClusterContextManagerImpl||method=flushClusterLogicContext||clusterLogicId={}||msg=clusterLogic is empty",
@@ -561,11 +569,13 @@ public class ClusterContextManagerImpl implements ClusterContextManager {
         Set<String> clusterLogicSet = new HashSet<>();
         if (!CollectionUtils.isEmpty(associatedClusterLogicIds)) {
             for (Long associatedClusterLogicId : associatedClusterLogicIds) {
-                ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(associatedClusterLogicId);
-                if (null != clusterLogic && null != clusterLogic.getProjectId() && null != clusterLogic.getName()) {
-                    projectIdSet.add(clusterLogic.getProjectId());
-                    clusterLogicSet.add(clusterLogic.getName());
-                }
+                clusterLogicService.getClusterLogicById(associatedClusterLogicId).stream().filter(Objects::nonNull)
+                        .filter(clusterLogic -> null != clusterLogic.getProjectId() && null != clusterLogic.getName())
+                        .forEach(clusterLogic -> {
+                            projectIdSet.add(clusterLogic.getProjectId());
+                            clusterLogicSet.add(clusterLogic.getName());
+                        });
+                
             }
         }
 

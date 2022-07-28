@@ -97,7 +97,8 @@ public class LogicClusterIndecreaseHandler extends BaseWorkOrderHandler {
             return Result.buildParamIllegal("集群id为空");
         }
 
-        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(content.getLogicClusterId());
+        ClusterLogic clusterLogic =
+                clusterLogicService.getClusterLogicById(content.getLogicClusterId()).stream().findFirst().orElse(null);
         if (clusterLogic == null) {
             return Result.buildParamIllegal("集群不存在");
         }

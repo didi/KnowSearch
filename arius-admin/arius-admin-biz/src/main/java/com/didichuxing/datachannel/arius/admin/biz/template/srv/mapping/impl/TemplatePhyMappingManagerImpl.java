@@ -247,26 +247,26 @@ public class TemplatePhyMappingManagerImpl implements TemplatePhyMappingManager 
     private Map<String, String> createDefaultSettings(String indexName, Map<String, TypeConfig> typeConfigMap) {
         Map<String, String> settings = Maps.newHashMap();
         settings.put("index.mapping.total_fields.limit", "100000");
-        if (typeConfigMap != null) {
-            if (typeConfigMap.containsKey("_default_")) {
-                if (typeConfigMap.size() == 2) {
-                    settings.put(AdminConstant.SINGLE_TYPE_KEY, AdminConstant.DEFAULT_SINGLE_TYPE);
-                }
-
-            } else {
-                if (typeConfigMap.size() == 1) {
-                    settings.put(AdminConstant.SINGLE_TYPE_KEY, AdminConstant.DEFAULT_SINGLE_TYPE);
-                }
-            }
-
-            String settingValue = settings.get(AdminConstant.SINGLE_TYPE_KEY);
-            if (null == settingValue || !AdminConstant.DEFAULT_SINGLE_TYPE.equals(settingValue)) {
-                LOGGER.warn("class=TemplatePhyMappingManagerImpl||method=checkMapping||"
-                            + "singleTypeSettings={}||indexTemplate={}",
-                    settings.keySet(), indexName);
-                settings.put(AdminConstant.SINGLE_TYPE_KEY, AdminConstant.DEFAULT_SINGLE_TYPE);
-            }
-        }
+//        if (typeConfigMap != null) {
+//            if (typeConfigMap.containsKey("_default_")) {
+//                if (typeConfigMap.size() == 2) {
+//                    settings.put(AdminConstant.SINGLE_TYPE_KEY, AdminConstant.DEFAULT_SINGLE_TYPE);
+//                }
+//
+//            } else {
+//                if (typeConfigMap.size() == 1) {
+//                    settings.put(AdminConstant.SINGLE_TYPE_KEY, AdminConstant.DEFAULT_SINGLE_TYPE);
+//                }
+//            }
+//
+//            String settingValue = settings.get(AdminConstant.SINGLE_TYPE_KEY);
+//            if (null == settingValue || !AdminConstant.DEFAULT_SINGLE_TYPE.equals(settingValue)) {
+//                LOGGER.warn("class=TemplatePhyMappingManagerImpl||method=checkMapping||"
+//                            + "singleTypeSettings={}||indexTemplate={}",
+//                    settings.keySet(), indexName);
+//                settings.put(AdminConstant.SINGLE_TYPE_KEY, AdminConstant.DEFAULT_SINGLE_TYPE);
+//            }
+//        }
 
         return settings;
     }
