@@ -26,7 +26,6 @@ import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -216,28 +215,10 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
             indexResponses = ConvertUtil.str2ObjArrayByJson(directResponse.getResponseContent(), IndexResponse.class);
 
             indexResponses.stream().filter(index ->!Objects.isNull(index.getDc())).filter(index -> index.getDc() > ONE_BILLION).forEach(r -> {
-
-                String requestContent = getShardToNodeRequestContentByIndexName(r.getIndex(), "20s");
-
-                DirectResponse shardNodeResponse = esClusterNodeDAO.getDirectResponse(clusterName, "Get",
-                    requestContent);
-
-                if (shardNodeResponse.getRestStatus() == RestStatus.OK
-                    && StringUtils.isNoneBlank(shardNodeResponse.getResponseContent())) {
-
-                    /**
-                     * GET /_cat/shards/cn_arius_stats_index_node_info_2021-10-13?format=json&v&h=node,store&master_timeout=20s
-                     */
-                    List<IndexShardInfo> indexShardInfos = ConvertUtil
-                        .str2ObjArrayByJson(shardNodeResponse.getResponseContent(), IndexShardInfo.class);
-
-                    BigIndexMetrics bigIndexMetrics = new BigIndexMetrics();
-                    bigIndexMetrics.setIndexName(r.getIndex());
-
-                    bigIndexMetrics.setBelongNodeInfo(Lists.newArrayList(Sets.newHashSet(indexShardInfos)));
-
-                    bigIndicesMetrics.add(bigIndexMetrics);
-                }
+                BigIndexMetrics bigIndexMetrics = new BigIndexMetrics();
+                bigIndexMetrics.setIndexName(r.getIndex());
+                bigIndexMetrics.setDocsCount(r.getDc());
+                bigIndicesMetrics.add(bigIndexMetrics);
             });
         }
         return bigIndicesMetrics;
