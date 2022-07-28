@@ -64,7 +64,7 @@ public class ClusterDashBoardCollector extends BaseDashboardCollector {
         long currentTimeMillis = System.currentTimeMillis();
         //11._cluster/stats 和_nodes/stats 消耗时间
         clusterMetrics.setClusterElapsedTime(esClusterPhyStatsService.getClusterStatusElapsedTime(cluster));
-        clusterMetrics.setClusterElapsedTime(esClusterPhyStatsService.getNodeStatusElapsedTime(cluster));
+        clusterMetrics.setNodeElapsedTime(esClusterPhyStatsService.getNodeStatusElapsedTime(cluster));
         Long nearestPoint = esClusterPhyStatsService.getTimeDifferenceBetweenNearestPointAndNow(cluster);
         long elapsedTime = currentTimeMillis - nearestPoint;
 
