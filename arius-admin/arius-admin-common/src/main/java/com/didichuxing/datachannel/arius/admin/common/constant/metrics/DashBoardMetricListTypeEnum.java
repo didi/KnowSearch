@@ -80,6 +80,20 @@ public enum DashBoardMetricListTypeEnum {
         
         return DashBoardMetricListTypeEnum.UNKNOWN;
     }
+
+    public static DashBoardMetricListTypeEnum valueOfTypeAndOneLevelType(String type,String oneLevelType) {
+        if (null == type) {
+            return DashBoardMetricListTypeEnum.UNKNOWN;
+        }
+
+        for (DashBoardMetricListTypeEnum typeEnum : DashBoardMetricListTypeEnum.values()) {
+            if (type.equals(typeEnum.getType())&&oneLevelType.equals(typeEnum.getOneLevelTypeEnum().getType())) {
+                return typeEnum;
+            }
+        }
+
+        return DashBoardMetricListTypeEnum.UNKNOWN;
+    }
     
     public static List<DashBoardMetricListTypeEnum> valueOfTypes(List<String> types) {
         List<DashBoardMetricListTypeEnum> resList = Lists.newArrayList();

@@ -34,6 +34,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyClusterMetricsEnum.getClusterPhyMetricsType;
@@ -98,6 +99,9 @@ public class ClusterPhyMetricsManagerImpl implements ClusterPhyMetricsManager {
         try {
             if (StringUtils.isNotBlank(param.getClusterLogicName())) {
                 ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByName(param.getClusterLogicName());
+                if (Objects.isNull(clusterLogic)){
+                    return Result.buildFail(String.format("逻辑集群【%s】不存在",param.getClusterLogicName()));
+                }
                 ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(clusterLogic.getId());
                 if (clusterRegion == null) {
                     return Result.buildFail();

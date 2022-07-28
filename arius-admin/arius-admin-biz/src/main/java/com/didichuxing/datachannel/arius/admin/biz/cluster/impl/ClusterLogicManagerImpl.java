@@ -524,7 +524,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     public Result<Long> estimatedDiskSize(Long clusterLogicId, Integer count) {
         ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(clusterLogicId);
         String nodeSpec = clusterLogic.getDataNodeSpec();
-        if (StringUtils.isNotBlank(nodeSpec)) {
+        if (StringUtils.isNotBlank(nodeSpec)&&Objects.nonNull(nodeSpec.split("-")[2])) {
             return Result.buildSucc(getUnitSize(nodeSpec.split("-")[2]) * count);
         }
         return Result.buildSucc(UNKNOWN_SIZE);
