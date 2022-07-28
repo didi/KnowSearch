@@ -778,6 +778,15 @@ public class IndicesManagerImpl implements IndicesManager {
         if (!clusterPhyService.isClusterExists(phyClusterName)) {
             return Result.buildParamIllegal(String.format("物理集群[%s]不存在", phyClusterName));
         }
+
+        // 判断索引名称是否和集群模版名称前缀匹配
+        IndexCatCellWithConfigDTO indexWithConfigDTO = new IndexCatCellWithConfigDTO();
+        indexWithConfigDTO.setIndex(indexName);
+        Result<Void> checkValidRet = checkValid(indexWithConfigDTO, phyClusterName);
+        if (checkValidRet.failed()) {
+            return Result.buildFrom(checkValidRet);
+        }
+
         return Result.buildSucc(esIndexService.syncIsIndexExist(phyClusterName, indexName));
     }
 
