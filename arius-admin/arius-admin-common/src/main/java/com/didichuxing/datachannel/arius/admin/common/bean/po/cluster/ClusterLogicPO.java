@@ -30,7 +30,7 @@ public class ClusterLogicPO extends BasePO {
     /**
      * 所属projectID
      */
-    private Integer projectId;
+    private String projectId;
 
     /**
      * 数据中心

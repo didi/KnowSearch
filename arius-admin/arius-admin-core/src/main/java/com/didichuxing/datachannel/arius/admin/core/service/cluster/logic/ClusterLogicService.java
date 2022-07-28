@@ -85,12 +85,16 @@ public interface ClusterLogicService {
 
     /**
      * 查询指定逻辑集群
+     *
      * @param logicClusterId 逻辑集群id
+     * @param projectId
      * @return 逻辑集群 不存在返回null
      */
-    ClusterLogic getClusterLogicById(Long logicClusterId);
+    ClusterLogic getClusterLogicById(Long logicClusterId, Integer projectId);
+    List<ClusterLogic> getClusterLogicById(Long logicClusterId);
 
-    ClusterLogic getClusterLogicByName(String logicClusterName);
+    ClusterLogic getClusterLogicByName(String logicClusterName, Integer projectId);
+    List<ClusterLogic> getClusterLogicByName(String logicClusterName);
 
     /**
      * 获取逻辑集群配置
@@ -198,11 +202,5 @@ public interface ClusterLogicService {
      */
     List<ClusterLogic> getClusterLogicListByIds(List<Long> clusterLogicIdList);
 
-    /**
-     * 获取项目id通过clusterLogicId
-     *
-     * @param clusterLogicId 集群逻辑id
-     * @return {@code Integer}
-     */
-    Integer getProjectIdById(Long clusterLogicId);
+
 }

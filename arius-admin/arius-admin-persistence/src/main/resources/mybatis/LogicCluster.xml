@@ -6,7 +6,7 @@
         <result column="id" jdbcType="BIGINT" property="id"/>
         <result column="name" jdbcType="VARCHAR" property="name"/>
         <result column="type"                       jdbcType="TINYINT" property="type"/>
-        <result column="project_id"                 jdbcType="INTEGER" property="projectId"/>
+        <result column="project_id"                 jdbcType="VARCHAR" property="projectId"/>
         <result column="data_center"                jdbcType="VARCHAR" property="dataCenter"/>
         <result column="memo"                       jdbcType="VARCHAR" property="memo"/>
         <result column="quota"                      jdbcType="DECIMAL" property="quota"/>
@@ -41,7 +41,7 @@
             <if test="name != null">and `name` = #{name}</if>
             <if test="type != null">and `type` = #{type}</if>
             <if test="level != null">and `level` = #{level}</if>
-            <if test="projectId != null">and project_id = #{projectId}</if>
+            <if test="projectId != null">and ( project_id = #{projectId} or find_in_set(#{projectId}, project_id))</if>
             <if test="dataCenter != null">and data_center = #{dataCenter}</if>
             <if test="health != null">and health = #{health}</if>
         </trim>
@@ -54,7 +54,7 @@
         from project_arius_resource_logic
         <trim prefix="where" prefixOverrides="and">
             <if test="name != null and name != ''">and `name` LIKE CONCAT('%',#{name},'%')</if>
-            <if test="projectId != null">and project_id = #{projectId}</if>
+            <if test="projectId != null">and ( project_id = #{projectId} or find_in_set(#{projectId}, project_id))</if>
         </trim>
         order by id desc
     </select>
@@ -89,7 +89,7 @@
         </trim>
         where id = #{id}
     </update>
-
+    
     <delete id="delete" parameterType="long">
         delete from project_arius_resource_logic
         where id = #{resourceId}
@@ -137,6 +137,7 @@
         <include refid="Base_Column_List"/>
         from project_arius_resource_logic
         where project_id = #{projectId}
+           or find_in_set(#{projectId}, project_id)
     </select>
 
     <select id="getLastCommon" parameterType="string" resultMap="BaseResultMap">
@@ -158,7 +159,7 @@
         where id > 0
         <if test="id != null">and id = #{id}</if>
         <if test="name != null">and `name` LIKE CONCAT('%',#{name},'%')</if>
-        <if test="projectId != null">and project_id = #{projectId}</if>
+        <if test="projectId != null">and ( project_id = #{projectId} or find_in_set(#{projectId}, project_id))</if>
         <if test="health != null">and health = #{health}</if>
         <if test="type != null">and type = #{type}</if>
         <if test="memo != null">and `memo` LIKE CONCAT('%',#{memo},'%')</if>
@@ -177,15 +178,11 @@
         where id > 0
         <if test="id != null">and id = #{id}</if>
         <if test="name != null">and `name` LIKE CONCAT('%',#{name},'%')</if>
-        <if test="projectId != null">and project_id = #{projectId}</if>
+        <if test="projectId != null">and ( project_id = #{projectId} or find_in_set(#{projectId}, project_id)) </if>
         <if test="health != null">and health = #{health}</if>
         <if test="type != null">and type = #{type}</if>
         <if test="memo != null">and `memo` LIKE CONCAT('%',#{memo},'%')</if>
     </select>
 	
-	<select id="getProjectIdById" resultType="java.lang.Integer">
-		select project_id
-		from project_arius_resource_logic
-		where id = #{resourceId}
-	</select>
+	
 </mapper>

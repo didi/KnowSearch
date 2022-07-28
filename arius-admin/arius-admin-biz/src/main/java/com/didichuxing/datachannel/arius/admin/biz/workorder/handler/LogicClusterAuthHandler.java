@@ -47,7 +47,8 @@ public class LogicClusterAuthHandler extends BaseWorkOrderHandler {
             return Result.buildParamIllegal("申请的权限为空");
         }
 
-        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(content.getLogicClusterId());
+        ClusterLogic clusterLogic =
+                clusterLogicService.getClusterLogicById(content.getLogicClusterId()).stream().findFirst().orElse(null);
         if (clusterLogic == null) {
             return Result.buildParamIllegal("集群不存在");
         }

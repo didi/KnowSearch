@@ -94,7 +94,7 @@ class ClusterPhyMetricsManagerTest {
         final ClusterLogic clusterLogic  = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0,
                 "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
 
-        when(clusterLogicService.getClusterLogicByName("clusterLogicName")).thenReturn(clusterLogic);
+        when(clusterLogicService.getClusterLogicByName("clusterLogicName", null)).thenReturn(clusterLogic);
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
         final ClusterRegion clusterRegion = new ClusterRegion(0L, "name", "logicClusterIds", "clusterPhyName",
@@ -143,7 +143,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
         final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0,  "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
-        when(clusterLogicService.getClusterLogicByName("clusterLogicName")).thenReturn(clusterLogic);
+        when(clusterLogicService.getClusterLogicByName("clusterLogicName", null)).thenReturn(clusterLogic);
 
         when(clusterRegionService.getRegionByLogicClusterId(0L)).thenReturn(null);
 
@@ -163,7 +163,7 @@ class ClusterPhyMetricsManagerTest {
         // Configure ClusterLogicService.getClusterLogicByName(...).
         final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0,
             "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
-        when(clusterLogicService.getClusterLogicByName("clusterLogicName")).thenReturn(clusterLogic);
+        when(clusterLogicService.getClusterLogicByName("clusterLogicName", null)).thenReturn(clusterLogic);
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
         final ClusterRegion clusterRegion = new ClusterRegion(0L, "name", "logicClusterIds", "clusterPhyName",
@@ -209,7 +209,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
         final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0, "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
-        when(clusterLogicService.getClusterLogicByName("clusterLogicName")).thenReturn(clusterLogic);
+        when(clusterLogicService.getClusterLogicByName("clusterLogicName", null)).thenReturn(clusterLogic);
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
         final ClusterRegion clusterRegion = new ClusterRegion(0L, "name", "logicClusterIds", "clusterPhyName",
@@ -257,7 +257,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
         final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0, "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
-        when(clusterLogicService.getClusterLogicByName("clusterLogicName")).thenReturn(clusterLogic);
+        when(clusterLogicService.getClusterLogicByName("clusterLogicName", null)).thenReturn(clusterLogic);
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
         final ClusterRegion clusterRegion = new ClusterRegion(0L, "name", "logicClusterIds", "clusterPhyName",
@@ -305,7 +305,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
         final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0,  "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
-        when(clusterLogicService.getClusterLogicByName("clusterLogicName")).thenReturn(clusterLogic);
+        when(clusterLogicService.getClusterLogicByName("clusterLogicName", null)).thenReturn(clusterLogic);
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
         final ClusterRegion clusterRegion = new ClusterRegion(0L, "name", "logicClusterIds", "clusterPhyName",
@@ -350,7 +350,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
         final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0,  "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
-        when(clusterLogicService.getClusterLogicByName("clusterLogicName")).thenReturn(clusterLogic);
+        when(clusterLogicService.getClusterLogicByName("clusterLogicName", null)).thenReturn(clusterLogic);
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
         final ClusterRegion clusterRegion = new ClusterRegion(0L, "name", "logicClusterIds", "clusterPhyName",
@@ -397,7 +397,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
         final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0,  "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
-        when(clusterLogicService.getClusterLogicByName("clusterLogicName")).thenReturn(clusterLogic);
+        when(clusterLogicService.getClusterLogicByName("clusterLogicName", null)).thenReturn(clusterLogic);
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
         final ClusterRegion clusterRegion = new ClusterRegion(0L, "name", "logicClusterIds", "clusterPhyName",
@@ -444,7 +444,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
         final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0, "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
-        when(clusterLogicService.getClusterLogicByName("clusterLogicName")).thenReturn(clusterLogic);
+        when(clusterLogicService.getClusterLogicByName("clusterLogicName", null)).thenReturn(clusterLogic);
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
         final ClusterRegion clusterRegion = new ClusterRegion(0L, "name", "logicClusterIds", "clusterPhyName",
@@ -483,7 +483,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
         final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0, "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
-        when(clusterLogicService.getClusterLogicByName("clusterLogicName")).thenReturn(clusterLogic);
+        when(clusterLogicService.getClusterLogicByName("clusterLogicName", null)).thenReturn(clusterLogic);
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
         final ClusterRegion clusterRegion = new ClusterRegion(0L, "name", "logicClusterIds", "clusterPhyName",
@@ -535,7 +535,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
         final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0, "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
-        when(clusterLogicService.getClusterLogicByName("clusterLogicName")).thenReturn(clusterLogic);
+        when(clusterLogicService.getClusterLogicByName("clusterLogicName", null)).thenReturn(clusterLogic);
 
         when(clusterRegionService.getRegionByLogicClusterId(0L)).thenReturn(null);
 
@@ -557,7 +557,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
         final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0,  "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
-        when(clusterLogicService.getClusterLogicByName("clusterLogicName")).thenReturn(clusterLogic);
+        when(clusterLogicService.getClusterLogicByName("clusterLogicName", null)).thenReturn(clusterLogic);
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
         final ClusterRegion clusterRegion = new ClusterRegion(0L, "name", "logicClusterIds", "clusterPhyName",
@@ -606,7 +606,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
         final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0,"memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
-        when(clusterLogicService.getClusterLogicByName("clusterLogicName")).thenReturn(clusterLogic);
+        when(clusterLogicService.getClusterLogicByName("clusterLogicName", null)).thenReturn(clusterLogic);
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
         final ClusterRegion clusterRegion = new ClusterRegion(0L, "name", "logicClusterIds", "clusterPhyName",
@@ -657,7 +657,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
         final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0,  "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
-        when(clusterLogicService.getClusterLogicByName("clusterLogicName")).thenReturn(clusterLogic);
+        when(clusterLogicService.getClusterLogicByName("clusterLogicName", null)).thenReturn(clusterLogic);
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
         final ClusterRegion clusterRegion = new ClusterRegion(0L, "name", "logicClusterIds", "clusterPhyName",
@@ -708,7 +708,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
         final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0, "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
-        when(clusterLogicService.getClusterLogicByName("clusterLogicName")).thenReturn(clusterLogic);
+        when(clusterLogicService.getClusterLogicByName("clusterLogicName", null)).thenReturn(clusterLogic);
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
         final ClusterRegion clusterRegion = new ClusterRegion(0L, "name", "logicClusterIds", "clusterPhyName",
@@ -756,7 +756,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
         final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0,  "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
-        when(clusterLogicService.getClusterLogicByName("clusterLogicName")).thenReturn(clusterLogic);
+        when(clusterLogicService.getClusterLogicByName("clusterLogicName", null)).thenReturn(clusterLogic);
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
         final ClusterRegion clusterRegion = new ClusterRegion(0L, "name", "logicClusterIds", "clusterPhyName",
@@ -806,7 +806,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
         final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0,  "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
-        when(clusterLogicService.getClusterLogicByName("clusterLogicName")).thenReturn(clusterLogic);
+        when(clusterLogicService.getClusterLogicByName("clusterLogicName", null)).thenReturn(clusterLogic);
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
         final ClusterRegion clusterRegion = new ClusterRegion(0L, "name", "logicClusterIds", "clusterPhyName",
@@ -856,7 +856,7 @@ class ClusterPhyMetricsManagerTest {
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
         final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0, "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
-        when(clusterLogicService.getClusterLogicByName("clusterLogicName")).thenReturn(clusterLogic);
+        when(clusterLogicService.getClusterLogicByName("clusterLogicName", null)).thenReturn(clusterLogic);
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
         final ClusterRegion clusterRegion = new ClusterRegion(0L, "name", "logicClusterIds", "clusterPhyName",

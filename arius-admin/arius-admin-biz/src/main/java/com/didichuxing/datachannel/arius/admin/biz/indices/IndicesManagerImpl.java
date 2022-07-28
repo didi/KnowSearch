@@ -2,17 +2,6 @@ package com.didichuxing.datachannel.arius.admin.biz.indices;
 
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.PRIMARY;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.function.BiFunction;
-import java.util.stream.Collectors;
-
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
@@ -35,6 +24,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord.
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord.template.TemplateSettingOperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexCatCellVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexMappingVO;
@@ -753,7 +743,7 @@ public class IndicesManagerImpl implements IndicesManager {
 
     @Override
     public Result<List<String>> getClusterLogicIndexName(String clusterLogicName, Integer projectId) {
-        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByName(clusterLogicName);
+        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByName(clusterLogicName, projectId);
         if (clusterLogic == null) {
             return Result.buildFail();
         }
@@ -885,7 +875,7 @@ public class IndicesManagerImpl implements IndicesManager {
         if (AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
             phyClusterName = cluster;
         } else {
-            ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByName(cluster);
+            ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByName(cluster,projectId );
             if (null == clusterLogic) {
                 return Result.buildParamIllegal(String.format("逻辑集群[%s]不存在", cluster));
             }
@@ -900,7 +890,7 @@ public class IndicesManagerImpl implements IndicesManager {
 
     private Result<Void> initIndexCreateDTO(IndexCatCellWithConfigDTO indexCreateDTO, Integer projectId) {
         if (!AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
-            ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByName(indexCreateDTO.getCluster());
+            ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByName(indexCreateDTO.getCluster(), projectId);
             if (null == clusterLogic) {
                 return Result.buildParamIllegal(String.format("逻辑集群[%s]不存在", indexCreateDTO.getCluster()));
             }
