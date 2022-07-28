@@ -79,6 +79,9 @@
                     "clusterElapsedTime":{
                         "type":"long"
                     },
+                    "nodeElapsedTime":{
+                         "type":"long"
+                    },
                     "clusterElapsedTimeGte5Min":{
                         "type":"boolean"
                     }

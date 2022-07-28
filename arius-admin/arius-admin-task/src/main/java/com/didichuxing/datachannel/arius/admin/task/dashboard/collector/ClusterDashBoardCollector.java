@@ -9,10 +9,11 @@ import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import java.util.List;
-import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by linyunan on 3/11/22
@@ -61,10 +62,13 @@ public class ClusterDashBoardCollector extends BaseDashboardCollector {
         clusterMetrics.setDocUprushNum(getDocUprushNum(cluster));
 
         long currentTimeMillis = System.currentTimeMillis();
-        long elapsedTime = currentTimeMillis - startTime;
-        //11.消耗时间 开始采集到结束采集的时间
-        clusterMetrics.setClusterElapsedTime(elapsedTime);
-        //12.消耗时间是否大于5分钟,开始采集到结束采集的时间
+        //11._cluster/stats 和_nodes/stats 消耗时间
+        clusterMetrics.setClusterElapsedTime(esClusterPhyStatsService.getClusterStatusElapsedTime(cluster));
+        clusterMetrics.setClusterElapsedTime(esClusterPhyStatsService.getNodeStatusElapsedTime(cluster));
+        Long nearestPoint = esClusterPhyStatsService.getTimeDifferenceBetweenNearestPointAndNow(cluster);
+        long elapsedTime = currentTimeMillis - nearestPoint;
+
+        //12.消耗时间是否大于5分钟,开始采集到结束采集的时间，指标看板的采集任务，当前时间到最近一次采集的时间
         clusterMetrics.setClusterElapsedTimeGte5Min(elapsedTime > FIVE_MINUTE);
 
         dashBoardStats.setCluster(clusterMetrics);

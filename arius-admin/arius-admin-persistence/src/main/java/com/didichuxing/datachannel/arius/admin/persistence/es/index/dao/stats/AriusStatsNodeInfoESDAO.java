@@ -513,4 +513,18 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
         }
         return clusterLogicDiskUsedInfoPO;
     }
+
+    public Long getClusterStatusElapsedTime(String cluster) {
+        long startTime = System.currentTimeMillis();
+        getDirectResponse(cluster, "GET","_cluster/stats");
+        long endTime = System.currentTimeMillis();
+        return endTime-startTime;
+    }
+
+    public Long getNodeStatusElapsedTime(String cluster) {
+        long startTime = System.currentTimeMillis();
+        getDirectResponse(cluster, "GET","_nodes/stats");
+        long endTime = System.currentTimeMillis();
+        return endTime-startTime;
+    }
 }

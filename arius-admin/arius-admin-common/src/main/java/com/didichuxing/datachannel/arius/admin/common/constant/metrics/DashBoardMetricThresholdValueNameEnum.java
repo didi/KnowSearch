@@ -18,6 +18,7 @@ public enum DashBoardMetricThresholdValueNameEnum {
      * {"name":"模板Segments内存大小","metrics":"segmentMemSize","unit":"kb","compare":">","value":50}
      * {"name":"节点分片个数","metrics":"shardNum""unit":"个","compare":">","value":500}
      * {"name":"小shard索引列表","metrics":"shardSize","unit":"个","compare":">","value":100}
+     * {"name":"索引Mapping个数","metrics":"mappingNum","unit":"个","compare":">","value":100}
      */
 
     INDEX_SEGMENTS_NUM_THRESHOLD(INDEX_SEGMENT_NUM_THRESHOLD,INDEX_SEGMENT_NUM,"索引Segments个数","segmentNum", "个",">",1D),
