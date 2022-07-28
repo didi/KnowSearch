@@ -382,7 +382,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         }
 
         //获取逻辑模板和索引
-        ClusterLogicTemplateIndexDetailDTO templateIndexVO = getTemplateIndexVO(clusterLogic);
+        ClusterLogicTemplateIndexDetailDTO templateIndexVO = getTemplateIndexVO(clusterLogic,projectId);
         List<IndexTemplatePhy> indexTemplatePhies = Lists.newArrayList();
 
         for (IndexTemplate agg : templateIndexVO.getTemplates()) {
@@ -432,12 +432,12 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         return result;
     }
 
-    private ClusterLogicTemplateIndexDetailDTO getTemplateIndexVO(ClusterLogic clusterLogic) {
+    private ClusterLogicTemplateIndexDetailDTO getTemplateIndexVO(ClusterLogic clusterLogic,Integer projectId) {
         IndexTemplateDTO param = new IndexTemplateDTO();
         param.setResourceId(clusterLogic.getId());
         List<IndexTemplate> indexTemplates = indexTemplateService.listLogicTemplates(param);
         //通过逻辑集群获取index
-        List<IndexCatCellDTO> catIndexResults = esIndexCatService.getByClusterLogic(clusterLogic.getName());
+        List<IndexCatCellDTO> catIndexResults = esIndexCatService.getByClusterLogic(clusterLogic.getName(),projectId);
         ClusterLogicTemplateIndexDetailDTO templateIndexVO = new ClusterLogicTemplateIndexDetailDTO();
         templateIndexVO.setCatIndexResults(catIndexResults);
         templateIndexVO.setTemplates(indexTemplates);
@@ -513,7 +513,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     public Result<ClusterLogicTemplateIndexCountVO> indexTemplateCount(Long clusterId, String operator,
                                                                        Integer projectId) {
         ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(clusterId);
-        ClusterLogicTemplateIndexDetailDTO detailVO = getTemplateIndexVO(clusterLogic);
+        ClusterLogicTemplateIndexDetailDTO detailVO = getTemplateIndexVO(clusterLogic,projectId);
         ClusterLogicTemplateIndexCountVO countVO = new ClusterLogicTemplateIndexCountVO();
         countVO.setCatIndexResults(detailVO.getCatIndexResults().size());
         countVO.setTemplateLogicAggregates(detailVO.getTemplates().size());
