@@ -42,4 +42,5 @@ public interface LogicClusterDAO {
 
     Long getTotalHitByCondition(ClusterLogicConditionDTO param);
     
+    List<ClusterLogicPO> listByLevel(Integer level);
 }

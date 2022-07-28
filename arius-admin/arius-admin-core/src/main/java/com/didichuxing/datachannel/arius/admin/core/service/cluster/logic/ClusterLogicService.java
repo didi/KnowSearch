@@ -201,6 +201,6 @@ public interface ClusterLogicService {
      * @return                    List<ClusterLogic>
      */
     List<ClusterLogic> getClusterLogicListByIds(List<Long> clusterLogicIdList);
-
-
+    
+    List<ClusterLogic> getLogicClustersByLevel(Integer level);
 }

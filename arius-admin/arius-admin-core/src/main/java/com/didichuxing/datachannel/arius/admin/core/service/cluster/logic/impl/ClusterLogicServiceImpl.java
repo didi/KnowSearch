@@ -572,7 +572,19 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
                 .filter(clusterLogic -> filterClusterLogicByProjectId(clusterLogic,projectId))
                 .collect(Collectors.toList());
     }
-
+    
+    /**
+     * @param level
+     * @return
+     */
+    @Override
+    public List<ClusterLogic> getLogicClustersByLevel(Integer level) {
+         return logicClusterDAO.listByLevel(level)
+                 .stream()
+                 .map(this::clusterLogicPoProjectIdStrConvertClusterLogic)
+                .flatMap(Collection::stream)
+                 .collect(Collectors.toList());
+    }
     /***************************************** private method ****************************************************/
     /**
      * Check逻辑集群参数

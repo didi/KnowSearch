@@ -296,7 +296,26 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         }
         return Result.buildSucc(list);
     }
-
+    
+    /**
+     * @param level
+     * @return
+     */
+    @Override
+    public Result<List<ClusterLogicVO>> getLogicClustersByLevel(Integer level) {
+    
+        List<ClusterLogicVO> list = ConvertUtil.list2List(clusterLogicService.getLogicClustersByLevel(level),
+                ClusterLogicVO.class);
+        for (ClusterLogicVO clusterLogicVO : list) {
+            List<String> clusterPhyNames = clusterRegionService.listPhysicClusterNames(clusterLogicVO.getId());
+            clusterLogicVO.setPhyClusterAssociated(!AriusObjUtils.isEmptyList(clusterPhyNames));
+            clusterLogicVO.setAssociatedPhyClusterName(clusterPhyNames);
+            Optional.ofNullable(clusterLogicVO.getProjectId()).map(projectService::getProjectBriefByProjectId)
+                    .map(ProjectBriefVO::getProjectName).ifPresent(clusterLogicVO::setProjectName);
+        }
+        return Result.buildSucc(list);
+    }
+    
     @Override
     public Result<List<Tuple<Long/*逻辑集群Id*/, String/*逻辑集群名称*/>>> listProjectClusterLogicIdsAndNames(Integer projectId) {
         List<Tuple<Long/*逻辑集群Id*/, String/*逻辑集群名称*/>> res = Lists.newArrayList();

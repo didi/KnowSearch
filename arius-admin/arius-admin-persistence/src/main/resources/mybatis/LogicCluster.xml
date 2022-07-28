@@ -183,6 +183,10 @@
         <if test="type != null">and type = #{type}</if>
         <if test="memo != null">and `memo` LIKE CONCAT('%',#{memo},'%')</if>
     </select>
-	
-	
+    <select id="listByLevel"
+      resultType="com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterLogicPO">
+         select
+        <include refid="Base_Column_List"/>
+        from project_arius_resource_logic where level=#{level}
+    </select>
 </mapper>
