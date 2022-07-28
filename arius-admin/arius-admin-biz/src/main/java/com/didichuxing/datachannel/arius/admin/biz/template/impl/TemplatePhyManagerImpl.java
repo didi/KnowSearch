@@ -968,7 +968,6 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
             settingsMap.putAll(AriusIndexTemplateSetting.flat(JSONObject.parseObject(settings)));
         }
 
-        settingsMap.put(SINGLE_TYPE, "true");
         return settingsMap;
     }
 

@@ -53,10 +53,10 @@ public class NormalPackageController {
             HttpRequestUtil.getProjectId(request));
     }
 
-    @PutMapping("/update")
+    @PostMapping("/update")
     @ResponseBody
     @ApiOperation(value = "修改程序包接口", notes = "")
-    public Result<ESPackageVO> updatePackage(HttpServletRequest request, @RequestBody ESPackageDTO esPackageDTO) {
+    public Result<ESPackageVO> updatePackage(HttpServletRequest request, ESPackageDTO esPackageDTO) {
         return packageManager.updateESPackage(esPackageDTO, HttpRequestUtil.getOperator(request),
             HttpRequestUtil.getProjectId(request));
     }

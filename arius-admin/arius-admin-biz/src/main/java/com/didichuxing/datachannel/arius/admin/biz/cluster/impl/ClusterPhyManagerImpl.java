@@ -1069,7 +1069,6 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
      */
     private boolean setTemplateSettingSingleType(String cluster, String template) {
         Map<String, String> setting = new HashMap<>(2);
-        setting.put(AdminConstant.SINGLE_TYPE_KEY, AdminConstant.DEFAULT_SINGLE_TYPE);
         try {
             return esTemplateService.syncUpsertSetting(cluster, template, setting, 3);
         } catch (ESOperateException e) {
