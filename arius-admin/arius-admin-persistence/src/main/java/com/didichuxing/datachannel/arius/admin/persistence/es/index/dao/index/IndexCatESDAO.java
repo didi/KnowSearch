@@ -94,9 +94,9 @@ public class IndexCatESDAO extends BaseESDAO {
         return totalHitAndIndexCatCellListTuple;
     }
 
-    public Tuple<Long, List<IndexCatCellPO>> getIndexListByTerms(String clusterLogicName,Integer projectId){
+    public Tuple<Long, List<IndexCatCellPO>> getIndexListByTerms(String cluster,Integer projectId){
         Tuple<Long, List<IndexCatCellPO>> totalHitAndIndexCatCellListTuple;
-        String queryTermDsl = buildQueryTermDsl( clusterLogicName,null, null, null, projectId);
+        String queryTermDsl = buildQueryTermDsl( cluster,null, null, null, projectId);
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_ALL_CAT_INDEX_INFO_BY_TERMS, queryTermDsl);
         int retryTime = 3;
         do {

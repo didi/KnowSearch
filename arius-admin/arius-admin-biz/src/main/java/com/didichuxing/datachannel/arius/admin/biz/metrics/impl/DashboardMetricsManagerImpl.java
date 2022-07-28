@@ -173,6 +173,7 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
         
         List<VariousLineChartMetrics> variousLineChartMetrics = dashBoardMetricsService.getToNMetrics(param,
                 oneLevelType);
+
         // 毛刺点优化
         MetricsValueConvertUtils.doOptimizeQueryBurrForNodeOrIndicesMetrics(variousLineChartMetrics);
         
