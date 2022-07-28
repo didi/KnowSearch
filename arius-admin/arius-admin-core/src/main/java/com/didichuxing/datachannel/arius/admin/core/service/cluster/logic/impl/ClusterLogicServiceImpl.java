@@ -48,6 +48,9 @@ import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -57,6 +60,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -106,8 +110,11 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
      */
     @Override
     public List<ClusterLogic> listClusterLogics(ESLogicClusterDTO param) {
-        return ConvertUtil.list2List(logicClusterDAO.listByCondition(ConvertUtil.obj2Obj(param, ClusterLogicPO.class)),
-            ClusterLogic.class);
+        return logicClusterDAO.listByCondition(ConvertUtil.obj2Obj(param, ClusterLogicPO.class)).stream()
+                .map(this::clusterLogicPoProjectIdStrConvertClusterLogic).flatMap(Collection::stream)
+                .filter(clusterLogic -> filterClusterLogicByProjectId(clusterLogic, param.getProjectId()))
+                .collect(Collectors.toList());
+        
     }
 
     /**
@@ -117,7 +124,11 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
      */
     @Override
     public List<ClusterLogic> listAllClusterLogics() {
-        return ConvertUtil.list2List(logicClusterDAO.listAll(), ClusterLogic.class);
+        return logicClusterDAO.listAll()
+                .stream()
+                .map(this::clusterLogicPoProjectIdStrConvertClusterLogic)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -125,13 +136,13 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
      *
      * @param logicClusterId 资源id
      * @param operator       操作人
-     * @param projectId     项目id
+     * @param deleteProjectId     项目id
      * @return result
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Result<Void> deleteClusterLogicById(Long logicClusterId, String operator,
-                                               Integer projectId) throws AdminOperateException {
+                                               Integer deleteProjectId) throws AdminOperateException {
         ClusterLogicPO logicCluster = logicClusterDAO.getById(logicClusterId);
         if (logicCluster == null) {
             return Result.buildNotExist("逻辑集群不存在");
@@ -140,13 +151,17 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
         if (hasLogicClusterWithTemplates(logicClusterId)) {
             return Result.build(ResultType.IN_USE_ERROR.getCode(), "逻辑集群使用中");
         }
-        final Result<Void> result = ProjectUtils.checkProjectCorrectly(ClusterLogicPO::getProjectId, logicCluster,
-            projectId);
-        if (result.failed()) {
-            return result;
+        boolean succeed = false;
+        if (StringUtils.contains(logicCluster.getProjectId(), ",")) {
+            final ClusterLogicPO clusterLogicPO = new ClusterLogicPO();
+            clusterLogicPO.setId(logicClusterId);
+            final List<Integer> projectIds = str2ListProjectIds(logicCluster);
+            projectIds.remove(deleteProjectId);
+            clusterLogicPO.setProjectId(ConvertUtil.list2String(projectIds, ","));
+            succeed = (logicClusterDAO.update(clusterLogicPO) == 1);
+        } else {
+            succeed = (logicClusterDAO.delete(logicClusterId) == 1);
         }
-
-        boolean succeed = (logicClusterDAO.delete(logicClusterId) > 0);
         if (!succeed) {
             throw new AdminOperateException("删除逻辑集群失败");
         }
@@ -178,12 +193,23 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
             LOGGER.warn("class=ClusterLogicServiceImpl||method=createClusterLogic||msg={}", checkResult.getMessage());
             return Result.buildFrom(checkResult);
         }
-
-        initLogicCluster(param);
-
-        ClusterLogicPO logicPO = ConvertUtil.obj2Obj(param, ClusterLogicPO.class);
-        boolean succeed = logicClusterDAO.insert(logicPO) == 1;
-        return Result.build(succeed, logicPO.getId());
+        ClusterLogicPO clusterLogicPO = logicClusterDAO.getByName(param.getName());
+        if (Objects.nonNull(clusterLogicPO)) {
+            final List<Integer> projectIds = str2ListProjectIds(clusterLogicPO);
+            projectIds.add(param.getProjectId());
+            final String projectIdStr = ConvertUtil.list2String(
+                    projectIds.stream().distinct().collect(Collectors.toList()), ",");
+            clusterLogicPO.setProjectId(projectIdStr);
+            return Result.build(logicClusterDAO.update(clusterLogicPO) == 1, clusterLogicPO.getId());
+        
+        } else {
+            initLogicCluster(param);
+        
+            ClusterLogicPO logicPO = ConvertUtil.obj2Obj(param, ClusterLogicPO.class);
+            boolean succeed = logicClusterDAO.insert(logicPO) == 1;
+            return Result.build(succeed, logicPO.getId());
+        }
+    
     }
 
     /**
@@ -214,21 +240,54 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
     @Override
     public Result<Void> editClusterLogicNotCheck(ESLogicClusterDTO param, String operator) {
         ClusterLogicPO paramPO = ConvertUtil.obj2Obj(param, ClusterLogicPO.class);
+        if (Objects.nonNull(paramPO.getProjectId())) {
+            final ClusterLogicPO clusterLogicPO = logicClusterDAO.getById(param.getId());
+            final List<Integer> listProjectIds = str2ListProjectIds(clusterLogicPO);
+            listProjectIds.add(param.getProjectId());
+            final String projectIdStr = ConvertUtil.list2String(
+                    listProjectIds.stream().distinct().collect(Collectors.toList()), ",");
+            paramPO.setProjectId(projectIdStr);
+        }
+        
+    
         boolean succ = (1 == logicClusterDAO.update(paramPO));
 
         return Result.build(succ);
     }
 
     @Override
-    public ClusterLogic getClusterLogicById(Long logicClusterId) {
-        return ConvertUtil.obj2Obj(logicClusterDAO.getById(logicClusterId), ClusterLogic.class);
+    public ClusterLogic getClusterLogicById(Long logicClusterId, Integer projectId) {
+        return clusterLogicPoProjectIdStrConvertClusterLogic(logicClusterDAO.getById(logicClusterId)).stream()
+                .filter(clusterLogic -> filterClusterLogicByProjectId(clusterLogic, projectId)).findFirst()
+                .orElse(null);
+       
     }
-
+    
+    /**
+     * @param logicClusterId
+     * @return
+     */
     @Override
-    public ClusterLogic getClusterLogicByName(String logicClusterName) {
-        return ConvertUtil.obj2Obj(logicClusterDAO.getByName(logicClusterName), ClusterLogic.class);
+    public List<ClusterLogic> getClusterLogicById(Long logicClusterId) {
+        return clusterLogicPoProjectIdStrConvertClusterLogic(logicClusterDAO.getById(logicClusterId));
     }
-
+    
+    @Override
+    public ClusterLogic getClusterLogicByName(String logicClusterName, Integer projectId) {
+        return clusterLogicPoProjectIdStrConvertClusterLogic(logicClusterDAO.getByName(logicClusterName)).stream()
+                .filter(clusterLogic -> filterClusterLogicByProjectId(clusterLogic, projectId)).findFirst()
+                .orElse(new ClusterLogic());
+    }
+    
+    /**
+     * @param logicClusterName
+     * @return
+     */
+    @Override
+    public List<ClusterLogic> getClusterLogicByName(String logicClusterName) {
+         return clusterLogicPoProjectIdStrConvertClusterLogic(logicClusterDAO.getByName(logicClusterName));
+    }
+    
     /**
      * 查询指定逻辑集群的配置
      *
@@ -237,7 +296,7 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
      */
     @Override
     public LogicResourceConfig getClusterLogicConfigById(Long logicClusterId) {
-        ClusterLogic clusterLogic = getClusterLogicById(logicClusterId);
+        ClusterLogic clusterLogic =ConvertUtil.obj2Obj(logicClusterDAO.getById(logicClusterId), ClusterLogic.class);
         if (clusterLogic == null) {
             return null;
         }
@@ -252,7 +311,10 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
      */
     @Override
     public List<ClusterLogic> getOwnedClusterLogicListByProjectId(Integer projectId) {
-        return ConvertUtil.list2List(logicClusterDAO.listByProjectId(projectId), ClusterLogic.class);
+        return logicClusterDAO.listByProjectId(projectId).stream()
+                .map(this::clusterLogicPoProjectIdStrConvertClusterLogic).flatMap(Collection::stream)
+                .filter(clusterLogic -> filterClusterLogicByProjectId(clusterLogic,projectId))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -305,8 +367,11 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
                 hasAuthLogicClusters.add(ownedLogicCluster);
             }
         }
-
-        return ConvertUtil.list2List(hasAuthLogicClusters, ClusterLogic.class);
+        return hasAuthLogicClusters.stream().map(this::clusterLogicPoProjectIdStrConvertClusterLogic)
+                .flatMap(Collection::stream)
+                .filter(clusterLogic -> filterClusterLogicByProjectId(clusterLogic,projectId))
+                
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -445,14 +510,7 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
         return new ArrayList<>(pluginMap.values());
     }
 
-    /**
-     * @param clusterLogicId 集群逻辑id
-     * @return ProjectId 项目id
-     */
-    @Override
-    public Integer getProjectIdById(Long clusterLogicId) {
-        return logicClusterDAO.getProjectIdById(clusterLogicId);
-    }
+
 
     @Override
     public Result<Long> addPlugin(Long logicClusterId, PluginDTO pluginDTO,
@@ -489,7 +547,9 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
             LOGGER.error("class=ClusterPhyServiceImpl||method=pagingGetClusterPhyByCondition||msg={}", e.getMessage(),
                 e);
         }
-        return ConvertUtil.list2List(clusters, ClusterLogic.class);
+      return clusters.stream().map(this::clusterLogicPoProjectIdStrConvertClusterLogic).flatMap(Collection::stream)
+              .filter(clusterLogic -> filterClusterLogicByProjectId(clusterLogic,param.getProjectId()))
+              .collect(Collectors.toList());
     }
 
     @Override
@@ -499,15 +559,32 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
 
     @Override
     public List<ClusterLogic> getClusterLogicListByIds(List<Long> clusterLogicIdList) {
-        return ConvertUtil.list2List(logicClusterDAO.listByIds(new HashSet<>(clusterLogicIdList)), ClusterLogic.class);
+        return logicClusterDAO.listByIds(new HashSet<>(clusterLogicIdList)).stream()
+                .map(this::clusterLogicPoProjectIdStrConvertClusterLogic).flatMap(Collection::stream)
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<ClusterLogic> listClusterLogicByProjectIdAndName(Integer projectId, String clusterName) {
-        return ConvertUtil.list2List(logicClusterDAO.listByNameAndProjectId(clusterName, projectId),
-            ClusterLogic.class);
+        return logicClusterDAO.listByNameAndProjectId(clusterName, projectId).stream()
+                .map(this::clusterLogicPoProjectIdStrConvertClusterLogic)
+                .flatMap(Collection::stream)
+                .filter(clusterLogic -> filterClusterLogicByProjectId(clusterLogic,projectId))
+                .collect(Collectors.toList());
     }
-
+    
+    /**
+     * @param level
+     * @return
+     */
+    @Override
+    public List<ClusterLogic> getLogicClustersByLevel(Integer level) {
+         return logicClusterDAO.listByLevel(level)
+                 .stream()
+                 .map(this::clusterLogicPoProjectIdStrConvertClusterLogic)
+                .flatMap(Collection::stream)
+                 .collect(Collectors.toList());
+    }
     /***************************************** private method ****************************************************/
     /**
      * Check逻辑集群参数
@@ -548,11 +625,11 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
         if (isFieldNullResult.failed()) {
             return isFieldNullResult;
         }
-
-        ClusterLogicPO logicPO = logicClusterDAO.getByName(param.getName());
-        if (!AriusObjUtils.isNull(logicPO)) {
-            return Result.buildDuplicate("逻辑集群重复");
-        }
+        //逻辑集群绑定多个项目
+        //ClusterLogicPO logicPO = logicClusterDAO.getByName(param.getName());
+        //if (!AriusObjUtils.isNull(logicPO)) {
+        //    return Result.buildDuplicate("逻辑集群重复");
+        //}
         return null;
     }
 
@@ -568,23 +645,35 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
         }
         //当param中projectid存在
         if (Objects.nonNull(param.getProjectId())) {
-            final Result<Void> result = ProjectUtils.checkProjectCorrectly(ClusterLogicPO::getProjectId, oldPO,
-                param.getProjectId());
-            if (result.failed()) {
-                return result;
+            final boolean failed = str2ListProjectIds(oldPO).stream()
+                    .map(pid -> ProjectUtils.checkProjectCorrectly(a -> a, pid, param.getProjectId()))
+                
+                    .allMatch(Result::failed);
+            if (failed) {
+                return Result.buildFail("当前项目不属于超级项目或者持有该操作的项目");
             }
-
+        
         } else {
             //校验路径
-            final Result<Void> result = ProjectUtils.checkProjectCorrectly(ClusterLogicPO::getProjectId, oldPO,
-                projectId);
-            if (result.failed()) {
-                return result;
+            final boolean failed = str2ListProjectIds(oldPO).stream()
+                    .map(pid -> ProjectUtils.checkProjectCorrectly(a -> a, pid, projectId))
+                
+                    .allMatch(Result::failed);
+        
+            if (failed) {
+                return Result.buildFail("当前项目不属于超级项目或者持有该操作的项目");
             }
         }
         return null;
     }
-
+    
+    @NotNull
+    private static List<Integer> str2ListProjectIds(ClusterLogicPO oldPO) {
+        return Arrays.stream(StringUtils.split(oldPO.getProjectId(), ","))
+                .map(Integer::parseInt)
+                .collect(Collectors.toList());
+    }
+    
     private Result<Void> isFieldNull(ESLogicClusterDTO param) {
         if (AriusObjUtils.isNull(param.getName())) {
             return Result.buildParamIllegal("集群名字为空");
@@ -690,5 +779,31 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
 
             clusterRoleHosts.add(clusterRoleHost);
         }
+    }
+    
+    /**
+     * 逻辑集群po中的projectId转换为int类型的ClusterLogic
+     *
+     * @param clusterLogicPO 集群逻辑po
+     * @return {@code List<ClusterLogic>}
+     */
+    public List<ClusterLogic> clusterLogicPoProjectIdStrConvertClusterLogic(ClusterLogicPO clusterLogicPO) {
+        if (clusterLogicPO==null){
+            return Collections.emptyList();
+        }
+        if (!StringUtils.contains(clusterLogicPO.getProjectId(), ",")) {
+            return Collections.singletonList(ConvertUtil.obj2Obj(clusterLogicPO, ClusterLogic.class,
+                    clusterLogic -> clusterLogic.setProjectId(Integer.parseInt(clusterLogicPO.getProjectId()))
+            
+            ));
+        } else {
+            return str2ListProjectIds(clusterLogicPO).stream()
+                    .map(projectId -> ConvertUtil.obj2Obj(clusterLogicPO, ClusterLogic.class,
+                            clusterLogic -> clusterLogic.setProjectId(projectId))).distinct()
+                    .collect(Collectors.toList());
+        }
+    }
+    private boolean filterClusterLogicByProjectId(ClusterLogic clusterLogic, Integer projectId){
+        return Objects.isNull(projectId) || Objects.equals(clusterLogic.getProjectId(), projectId);
     }
 }

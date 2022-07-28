@@ -48,7 +48,7 @@ public class ClusterIndexManagerImpl implements ClusterIndexManager {
 
     @Override
     public Result<List<ESClusterRoleHostVO>> listClusterLogicIndices(Integer clusterId, Integer projectId) {
-        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(Long.valueOf(clusterId));
+        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(Long.valueOf(clusterId), projectId);
         if (AriusObjUtils.isNull(clusterLogic)) {
             return Result.buildFail(String.format("集群[%s]不存在", clusterId));
         }

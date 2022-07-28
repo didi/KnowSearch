@@ -1352,7 +1352,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
         if (levelOfTemplateLower(param)) {
             return Result.buildParamIllegal("模板设置的服务等级低于所属逻辑集群的服务等级");
         }
-        if (AriusObjUtils.isNull(clusterLogicService.getClusterLogicById(param.getResourceId()))) {
+        if (CollectionUtils.isEmpty(clusterLogicService.getClusterLogicById(param.getResourceId() ))) {
             return Result.buildNotExist("逻辑集群不存在");
         }
 
@@ -1360,7 +1360,8 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
     }
 
     private boolean levelOfTemplateLower(IndexTemplateDTO param) {
-        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(param.getResourceId());
+        ClusterLogic clusterLogic =
+                clusterLogicService.getClusterLogicById(param.getResourceId()).stream().findFirst().orElse(null);
         return !AriusObjUtils.isNull(clusterLogic) && clusterLogic.getLevel() < param.getLevel();
     }
 
