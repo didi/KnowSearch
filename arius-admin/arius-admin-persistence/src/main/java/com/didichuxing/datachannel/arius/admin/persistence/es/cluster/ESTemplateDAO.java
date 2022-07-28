@@ -2,7 +2,6 @@ package com.didichuxing.datachannel.arius.admin.persistence.es.cluster;
 
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_OPERATE_TIMEOUT;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.INDEX_SHARD_NUM;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.SINGLE_TYPE;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.TEMPLATE_DEFAULT_ORDER;
 
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
@@ -201,8 +200,6 @@ public class ESTemplateDAO extends BaseESDAO {
         if (templateConfig.getOrder() == null) {
             templateConfig.setOrder(TEMPLATE_DEFAULT_ORDER);
         }
-
-        templateConfig.setSettings(SINGLE_TYPE, "true");
 
         // 设置ES版本
         templateConfig.setVersion(client.getEsVersion());

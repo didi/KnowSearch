@@ -1,7 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.core.service.es.impl;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.getTemplateNameRequestContent;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.SINGLE_TYPE;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.TEMPLATE_DEFAULT_ORDER;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePhyPO;
@@ -100,7 +99,6 @@ public class ESTemplateServiceImpl implements ESTemplateService {
         if (null != mappings) {
             templateConfig.setMappings(mappings);
         }
-        templateConfig.setSettings(SINGLE_TYPE, "true");
         TemplateConfig finalTemplateConfig = templateConfig;
         return ESOpTimeoutRetry.esRetryExecute("createTemplate", retryCount,
             () -> esTemplateDAO.create(cluster, name, finalTemplateConfig));

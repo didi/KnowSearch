@@ -74,11 +74,6 @@ public class ESOperateConstant {
     public static final String  ES_ROLE_MASTER_DATA              = "master_data";
 
     /**
-     * 单type配置项
-     */
-    public static final String  SINGLE_TYPE                      = "index.mapping.single_type";
-
-    /**
      * 指标看板相关
      */
     public static final String  STATUS                           = "status";
