@@ -24,10 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -495,9 +492,14 @@ public class ClusterOverviewMetricsHandle {
                 NodeInfoForDiskUsageGte75PercentVO build = new NodeInfoForDiskUsageGte75PercentVO();
                 build.setNodeIp(nodeStats.getHost());
                 build.setNodeName(nodeStats.getName());
+                build.setValue(100 - freePercent);
                 nodeInfoForDiskUsageGte75PercentVOS.add(build);
             }
         });
+        //倒序排列
+        nodeInfoForDiskUsageGte75PercentVOS.stream()
+                .sorted(Comparator.comparing(NodeInfoForDiskUsageGte75PercentVO::getValue))
+                .collect(Collectors.toList());
 
         return nodeInfoForDiskUsageGte75PercentVOS;
     }
