@@ -59,9 +59,9 @@ public class AriusStatsDashBoardInfoESDAO extends BaseAriusStatsESDAO {
      * @param sortType      排序类型   asc decs
      * @return              List<MetricList>
      */
-    public MetricList fetchListFlagMetric(String oneLevelType, String metricsType, String valueMetric, List<String> sources, String flag,
+    public MetricList fetchListFlagMetric(String oneLevelType, String metricsType,String  sortItem,String valueMetric, List<String> sources, String flag,
                                           String sortType) {
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.FETCH_LIST_FLAG_METRIC, oneLevelType, sortType,
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.FETCH_LIST_FLAG_METRIC, oneLevelType, sortItem,sortType,
                 JSON.toJSONString(sources), oneLevelType, metricsType, flag, oneLevelType, NOW_6M, NOW_1M);
         String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
 

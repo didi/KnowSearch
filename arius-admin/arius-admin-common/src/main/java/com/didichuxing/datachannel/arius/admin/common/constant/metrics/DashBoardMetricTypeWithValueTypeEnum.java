@@ -13,7 +13,14 @@ import java.util.Map;
 public enum DashBoardMetricTypeWithValueTypeEnum {
     BIG_SHARD("bigShard","shardSize");
 
+    /**
+     * 统计指标
+     */
     private String metricType;
+
+    /**
+     * 获取值的指标
+     */
     private String valueType;
 
     DashBoardMetricTypeWithValueTypeEnum(String metricType, String valueType) {

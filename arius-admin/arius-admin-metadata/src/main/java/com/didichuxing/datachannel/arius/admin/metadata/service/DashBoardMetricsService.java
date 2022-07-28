@@ -24,6 +24,8 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.Me
  */
 @Service
 public class DashBoardMetricsService {
+    //默认排序字段
+    private static final String                                 TIMESTAMP                     = "timestamp";
 
     @Autowired
     private AriusStatsDashBoardInfoESDAO ariusStatsDashBoardInfoESDAO;
@@ -60,6 +62,7 @@ public class DashBoardMetricsService {
                                           Boolean orderByDesc) {
         Map<String,String> metricTypeWithValue = getAllDashBoardMetricTypeWithValueTypes();
         String valueMetric = "";
+        String sortItem = TIMESTAMP;
         String sortType = orderByDesc ? SortConstant.DESC : SortConstant.ASC;
         List<String> sources = Lists.newArrayList();
         sources.add(oneLevelType+".cluster");
@@ -67,9 +70,10 @@ public class DashBoardMetricsService {
         if (metricTypeWithValue.containsKey(metricsType)){
             sources.add(oneLevelType+"."+metricTypeWithValue.get(metricsType));
             valueMetric = metricTypeWithValue.get(metricsType);
+            sortItem = valueMetric;
         }
 
-        return ariusStatsDashBoardInfoESDAO.fetchListFlagMetric(oneLevelType, metricsType,valueMetric, sources, FAULT_FLAG,
+        return ariusStatsDashBoardInfoESDAO.fetchListFlagMetric(oneLevelType, metricsType,sortItem,valueMetric, sources, FAULT_FLAG,
             sortType);
     }
 

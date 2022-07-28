@@ -2,7 +2,7 @@
   "size": 10000,
   "sort": [
       {
-        "%s.timestamp": {
+        "%s.%s": {
           "order": "%s"
         }
       }
