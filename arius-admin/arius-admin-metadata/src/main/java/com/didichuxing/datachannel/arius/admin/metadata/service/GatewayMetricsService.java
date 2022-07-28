@@ -1,23 +1,41 @@
 package com.didichuxing.datachannel.arius.admin.metadata.service;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.ClientNodeDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayDslDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayIndexDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayMetricsDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayNodeDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayProjectDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.GatewayOverviewMetrics;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.MetricsContent;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.VariousLineChartMetrics;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.GatewayMetricsTypeEnum;
-import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.gateway.*;
+import com.didichuxing.datachannel.arius.admin.common.constant.metrics.MetricsConstant;
+import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
+import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.gateway.GatewayAppMetricsDAO;
+import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.gateway.GatewayDslMetricsDAO;
+import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.gateway.GatewayIndexMetricsDAO;
+import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.gateway.GatewayNodeMetricsDAO;
+import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.gateway.GatewayOverviewMetricsDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dsls.DslsConstant;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
+import com.google.common.collect.Lists;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 /**
  * Created by fitz on 2021-08-16
  */
 @Service
 public class GatewayMetricsService {
-
+    private static final ILog LOGGER = LogFactory.getLog(GatewayMetricsService.class);
     @Autowired
-    private GatewayOverviewMetricsDAO gatewayOverviewMetricsDAO;
+    private           GatewayOverviewMetricsDAO gatewayOverviewMetricsDAO;
 
     @Autowired
     private GatewayIndexMetricsDAO    gatewayIndexMetricsDAO;
@@ -184,5 +202,153 @@ public class GatewayMetricsService {
     public List<String> getEsClientNodeIpListByGatewayNode(String gatewayNode, Long startTime, Long endTime,
                                                            Integer projectId) {
         return gatewayNodeMetricsDAO.getEsClientNodeIpListByGatewayNode(gatewayNode, startTime, endTime, projectId);
+    }
+    
+    /**
+     * 构建topnsingle指标
+     *
+     * @param buildMetrics           构建指标
+     * @param startTime              开始时间
+     * @param endTime                结束时间
+     * @param variousLineChartMetric 各种各样折线图度量
+     * @param projectId              projectId
+     * @param gatewayMetricsTypeEnum {@link GatewayMetricsTypeEnum#getGroup()}
+     * @param nodeIp                 节点ip {@linkplain  GatewayMetricsTypeEnum CLIENT_NODE} 需要设置该参数
+     */
+    private void buildTopNSingleMetrics(List<VariousLineChartMetrics> buildMetrics, Long startTime, Long endTime,
+                                        VariousLineChartMetrics variousLineChartMetric, Integer projectId,
+                                        GatewayMetricsTypeEnum gatewayMetricsTypeEnum, String nodeIp) {
+        List<String> values = variousLineChartMetric.getMetricsContents().stream().map(MetricsContent::getName)
+                .collect(Collectors.toList());
+        String type = variousLineChartMetric.getType();
+        VariousLineChartMetrics variousLineChartMetrics = new VariousLineChartMetrics();
+        variousLineChartMetrics.setType(type);
+        variousLineChartMetrics.setMetricsContents(Lists.newArrayList());
+        List<MetricsContent> contents = null;
+        try {
+            switch (gatewayMetricsTypeEnum.getGroup()) {
+                case MetricsConstant.NODE:
+                    contents = gatewayNodeMetricsDAO.getByRangeTopN(values, gatewayMetricsTypeEnum, startTime, endTime,
+                            projectId);
+                    break;
+                case MetricsConstant.CLIENT_NODE:
+                    contents = gatewayNodeMetricsDAO.getByRangeTopN(values, gatewayMetricsTypeEnum, startTime, endTime,
+                            projectId, nodeIp);
+                    break;
+                case MetricsConstant.INDEX:
+                    contents = gatewayIndexMetricsDAO.getByRangeTopN(values, gatewayMetricsTypeEnum, startTime, endTime,
+                            projectId);
+                    break;
+                case MetricsConstant.DSL:
+                    contents = gatewayDslMetricsDAO.getByRangeTopN(values, gatewayMetricsTypeEnum, startTime, endTime,
+                            projectId);
+                    break;
+                case MetricsConstant.APP:
+                    contents = gatewayAppMetricsDAO.getByRangeTopN(values, gatewayMetricsTypeEnum, startTime, endTime);
+                    break;
+                default:
+                    return;
+            }
+        } catch (AdminOperateException e) {
+            LOGGER.error("class=GatewayMetricsService||method=buildTopNSingleMetrics||msg={}||msg=check fail!",
+                    e.getMessage());
+        }
+    
+        if (CollectionUtils.isNotEmpty(contents)) {
+            variousLineChartMetrics.getMetricsContents().addAll(contents);
+        }
+        buildMetrics.add(variousLineChartMetrics);
+    }
+    
+    public <T extends GatewayMetricsDTO> Optional<List<VariousLineChartMetrics>> getTopNMetrics(Integer projectId,
+                                                                                                T dto,
+                                                                                                GatewayMetricsTypeEnum gatewayMetricsTypeEnum) {
+        Long startTime = dto.getStartTime();
+        Long endTime = dto.getEndTime();
+        List<VariousLineChartMetrics> variousLineChartMetrics = Lists.newArrayList();
+        List<VariousLineChartMetrics> buildMetrics = Lists.newCopyOnWriteArrayList();
+        int topNu;    //第一阶段结果召回
+        try {
+            switch (gatewayMetricsTypeEnum.getGroup()) {
+                case MetricsConstant.NODE:
+                    topNu = ((GatewayNodeDTO) dto).getTopNu() == 0 ? 1 : ((GatewayNodeDTO) dto).getTopNu();
+                    String nodeIp = ((GatewayNodeDTO) dto).getNodeIp();
+                    variousLineChartMetrics.addAll(
+                            gatewayNodeMetricsDAO.fetchTopMetric(gatewayMetricsTypeEnum, startTime, endTime, topNu,
+                                    projectId, nodeIp));
+                    break;
+                case MetricsConstant.CLIENT_NODE:
+                    topNu = ((ClientNodeDTO) dto).getTopNu() == 0 ? 1 : ((ClientNodeDTO) dto).getTopNu();
+                    String clientNodeIp = ((ClientNodeDTO) dto).getClientNodeIp();
+                    String nodeIpByClientNodeIp = ((ClientNodeDTO) dto).getNodeIp();
+                    variousLineChartMetrics.addAll(
+                            gatewayNodeMetricsDAO.fetchTopMetric(gatewayMetricsTypeEnum, startTime, endTime, topNu,
+                                    projectId, clientNodeIp, nodeIpByClientNodeIp));
+                    break;
+                case MetricsConstant.INDEX:
+                    topNu = ((GatewayIndexDTO) dto).getTopNu() == 0 ? 1 : ((GatewayIndexDTO) dto).getTopNu();
+                    String indexName = ((GatewayIndexDTO) dto).getIndexName();
+                    variousLineChartMetrics.addAll(
+                            gatewayIndexMetricsDAO.fetchTopMetric(gatewayMetricsTypeEnum, startTime, endTime, topNu,
+                                    projectId, indexName));
+                    break;
+                case MetricsConstant.DSL:
+                    topNu = ((GatewayDslDTO) dto).getTopNu() == 0 ? 1 : ((GatewayDslDTO) dto).getTopNu();
+                    String dslMd5 = ((GatewayDslDTO) dto).getDslMd5();
+                    variousLineChartMetrics.addAll(
+                            gatewayDslMetricsDAO.fetchTopMetric(gatewayMetricsTypeEnum, startTime, endTime, topNu,
+                                    projectId, dslMd5));
+                    break;
+                default:
+                    return Optional.empty();
+            }
+        } catch (AdminOperateException e) {
+            LOGGER.error("class=GatewayMetricsService||method=getTopNMetrics||msg={}||msg=check fail!", e.getMessage());
+        }
+        
+        //第二阶段结果召回
+        for (VariousLineChartMetrics variousLineChartMetric : variousLineChartMetrics) {
+            String nodeIpByClientNodeIp = null;
+            if (gatewayMetricsTypeEnum.getGroup().equals(MetricsConstant.CLIENT_NODE) && dto instanceof ClientNodeDTO) {
+                nodeIpByClientNodeIp = ((ClientNodeDTO) dto).getNodeIp();
+            }
+            String finalNodeIpByClientNodeIp = nodeIpByClientNodeIp;
+            Integer finalProjectId = projectId;
+            buildTopNSingleMetrics(buildMetrics, startTime, endTime, variousLineChartMetric, finalProjectId,
+                    gatewayMetricsTypeEnum, finalNodeIpByClientNodeIp);
+        }
+        return Optional.of(buildMetrics);
+    }
+    
+    public <T extends GatewayMetricsDTO> Optional<List<VariousLineChartMetrics>> getTopNMetrics(T dto,
+                                                                                                GatewayMetricsTypeEnum gatewayMetricsTypeEnum) {
+        final Long endTime = dto.getEndTime();
+        final Long startTime = dto.getStartTime();
+        final String group = dto.getGroup();
+        List<VariousLineChartMetrics> variousLineChartMetrics = Lists.newArrayList();
+        List<VariousLineChartMetrics> buildMetrics = Lists.newCopyOnWriteArrayList();
+        try {
+            switch (group) {
+                case MetricsConstant.APP:
+                    final String projectId = ((GatewayProjectDTO) dto).getProjectId();
+                    final Integer topNu =
+                            ((GatewayProjectDTO) dto).getTopNu() == 0 ? 1 : ((GatewayProjectDTO) dto).getTopNu();
+                    variousLineChartMetrics.addAll(
+                            gatewayAppMetricsDAO.fetchTopMetric(gatewayMetricsTypeEnum, startTime, endTime, topNu,
+                                    projectId));
+                    break;
+                default:
+                    return Optional.empty();
+            }
+        } catch (AdminOperateException e) {
+            LOGGER.error("class=GatewayMetricsService||method=getTopNMetrics||msg={}||msg=check fail!", e.getMessage());
+        }
+        
+        //第二阶段结果召回
+        for (VariousLineChartMetrics variousLineChartMetric : variousLineChartMetrics) {
+            buildTopNSingleMetrics(buildMetrics, startTime, endTime, variousLineChartMetric, null,
+                    gatewayMetricsTypeEnum, null);
+        }
+        return Optional.of(buildMetrics);
     }
 }

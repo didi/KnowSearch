@@ -1,0 +1,47 @@
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "range": {
+            "timeStamp": {
+              "gte": %d,
+              "lte": %d
+            }
+          }
+        }
+        %s
+      ]
+    }
+  },
+  "aggs": {
+    "%s": {
+      "terms": {
+        "field": "%s",
+        "size": %d,
+        "execution_hint": "map",
+        "order": {
+          "_count": "desc"
+        },
+        "collect_mode": "breadth_first"
+      },
+      "aggs": {
+        "group_by_timeStamp": {
+          "date_histogram": {
+            "field": "timeStamp",
+            "fixed_interval": "%s",
+            "time_zone": "Asia/Shanghai"
+          },
+          "aggs": {
+            "%s": {
+              "%s": {
+                "field": "%s"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

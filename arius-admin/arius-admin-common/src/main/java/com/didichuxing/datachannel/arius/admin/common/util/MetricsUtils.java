@@ -1,18 +1,17 @@
 package com.didichuxing.datachannel.arius.admin.common.util;
 
+import com.didichuxing.datachannel.arius.admin.common.Tuple;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.top.MetricsContentVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.top.VariousLineChartMetricsVO;
+import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESBucket;
+import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.MetricsContentCell;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.top.MetricsContentVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.top.VariousLineChartMetricsVO;
-import com.didichuxing.datachannel.arius.admin.common.Tuple;
-import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESBucket;
-import com.google.common.collect.Lists;
+import java.util.TimeZone;
 
 /**
  * Created by linyunan on 2021-08-05
@@ -185,6 +184,20 @@ public class MetricsUtils {
             result.add(variousLineChartMetricsVO);
         }
         return result;
+    }
+    
+    /**
+     * 获取每天下一个一个一分钟
+     *
+     * @param timeStamp 时间戳
+     * @return {@code Long}
+     */
+    public static Long getDailyNextOneMinute(Long timeStamp) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(timeStamp);
+        calendar.setTimeZone(TimeZone.getDefault());
+        calendar.set(Calendar.MINUTE, calendar.get(Calendar.MINUTE) + 1);
+        return calendar.getTimeInMillis();
     }
 
     public enum Interval {
