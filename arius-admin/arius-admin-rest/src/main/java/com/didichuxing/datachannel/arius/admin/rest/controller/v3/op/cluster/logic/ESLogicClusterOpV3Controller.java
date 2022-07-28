@@ -64,7 +64,7 @@ public class ESLogicClusterOpV3Controller {
         return clusterLogicManager.getLogicClustersByProjectId(HttpRequestUtil.getProjectId(request));
     }
     
-    @GetMapping("/{level}")
+    @GetMapping("/level/{level}")
     @ResponseBody
     @ApiOperation(value = "根据逻辑集群的等级获取逻辑集群信息列表")
     public Result<List<ClusterLogicVO>> getLogicClusterByLevel(HttpServletRequest request,
