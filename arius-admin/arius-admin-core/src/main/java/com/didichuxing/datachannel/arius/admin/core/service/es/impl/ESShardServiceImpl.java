@@ -15,7 +15,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.shard.Segment;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.shard.SegmentPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.ShardAssignmenNodeVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.ShardAssignmentDescriptionVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESShardService;
 import com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESShardDAO;
 import com.didiglobal.logi.elasticsearch.client.gateway.direct.DirectResponse;
@@ -52,6 +54,9 @@ public class ESShardServiceImpl implements ESShardService {
     
     @Autowired
     private ESShardDAO esShardDAO;
+
+    @Autowired
+    private AriusConfigInfoService ariusConfigInfoService;
 
     @Override
     public List<MovingShardMetrics> syncGetMovingShards(String clusterName) {
@@ -129,12 +134,16 @@ public class ESShardServiceImpl implements ESShardService {
 
         String store = shardMetrics.getStore();
         if (null == store) { return false;}
-        String value = store.substring(0, store.length() - 2);
+        double value = Double.valueOf(store.substring(0, store.length() - 2));
+
+        double bigShardThreshold = ariusConfigInfoService.doubleSetting(AriusConfigConstant.ARIUS_COMMON_GROUP,
+                AriusConfigConstant.BIG_SHARD_THRESHOLD, 50.0);
+
         if (store.endsWith("tb")) {
-            value += "1024";
-            return BIG_SHARD <= Double.valueOf(value);
+            value *= 1024;
+            return bigShardThreshold <= value;
         }else if (store.endsWith("gb")){
-            return BIG_SHARD <= Double.valueOf(value);
+            return bigShardThreshold <= value;
         }else {
             return false;
         }
