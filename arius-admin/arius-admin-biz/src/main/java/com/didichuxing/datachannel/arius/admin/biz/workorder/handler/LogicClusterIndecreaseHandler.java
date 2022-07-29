@@ -7,7 +7,6 @@ import com.didichuxing.datachannel.arius.admin.biz.workorder.content.LogicCluste
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRegionWithNodeInfoDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.LogicClusterIndecreaseOrderDetail;
@@ -97,9 +96,8 @@ public class LogicClusterIndecreaseHandler extends BaseWorkOrderHandler {
             return Result.buildParamIllegal("集群id为空");
         }
 
-        ClusterLogic clusterLogic =
-                clusterLogicService.getClusterLogicById(content.getLogicClusterId()).stream().findFirst().orElse(null);
-        if (clusterLogic == null) {
+        
+        if (!clusterLogicService.existClusterLogicById(content.getLogicClusterId())) {
             return Result.buildParamIllegal("集群不存在");
         }
 

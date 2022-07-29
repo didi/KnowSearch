@@ -147,7 +147,7 @@ public class ClusterRegionServiceImpl implements ClusterRegionService {
             List<String> logicClusterNames = Lists.newArrayList();
             for (Long logicClusterId : logicClusterIds) {
                 ClusterLogic clusterLogic =
-                        clusterLogicService.getClusterLogicById(logicClusterId ).stream().findFirst().orElse(null);
+                        clusterLogicService.getClusterLogicByIdThatNotContainsProjectId(logicClusterId );
                 if (AriusObjUtils.isNull(clusterLogic)) {
                     continue;
                 }
@@ -178,7 +178,7 @@ public class ClusterRegionServiceImpl implements ClusterRegionService {
 
             // 检查逻辑集群存在
             ClusterLogic clusterLogic =
-                    clusterLogicService.getClusterLogicById(logicClusterId ).stream().findFirst().orElse(null);
+                    clusterLogicService.getClusterLogicByIdThatNotContainsProjectId(logicClusterId );
             if (AriusObjUtils.isNull(clusterLogic)) {
                 return Result.buildFail(String.format("逻辑集群 %S 不存在", logicClusterId));
             }
@@ -205,7 +205,6 @@ public class ClusterRegionServiceImpl implements ClusterRegionService {
 
             // 绑定
             updateRegion(regionId, constructNewLogicIds(logicClusterId, region.getLogicClusterIds()));
-            final ClusterRegionPO bindRegion = clusterRegionDAO.getById(regionId);
 
             return Result.buildSucc();
         } catch (Exception e) {
@@ -360,7 +359,7 @@ public class ClusterRegionServiceImpl implements ClusterRegionService {
         // 只有共享逻辑集群下的region能够被重复绑定
         Long logicClusterId = ListUtils.string2LongList(region.getLogicClusterIds()).get(0);
         ClusterLogic clusterLogic =
-                clusterLogicService.getClusterLogicById(logicClusterId).stream().findFirst().orElse(null);
+                clusterLogicService.getClusterLogicByIdThatNotContainsProjectId(logicClusterId);
 
         return !AriusObjUtils.isNull(clusterLogic)
                && clusterLogic.getType().equals(ClusterResourceTypeEnum.PUBLIC.getCode());

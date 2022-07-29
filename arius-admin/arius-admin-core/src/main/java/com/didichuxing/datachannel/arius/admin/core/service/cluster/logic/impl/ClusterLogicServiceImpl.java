@@ -254,9 +254,29 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
 
         return Result.build(succ);
     }
-
+    
+    /**
+     * 获取集群逻辑通过id那不包含项目id
+     *
+     * @param logicClusterId 逻辑集群id
+     * @return {@code ClusterLogic}
+     */
     @Override
-    public ClusterLogic getClusterLogicById(Long logicClusterId, Integer projectId) {
+    public ClusterLogic getClusterLogicByIdThatNotContainsProjectId(Long logicClusterId) {
+        return ConvertUtil.obj2Obj(logicClusterDAO.getById(logicClusterId),ClusterLogic.class);
+    }
+    
+    /**
+     * @param logicClusterId
+     * @return
+     */
+    @Override
+    public boolean existClusterLogicById(Long logicClusterId) {
+        return Objects.nonNull(logicClusterDAO.getById(logicClusterId));
+    }
+    
+    @Override
+    public ClusterLogic getClusterLogicByIdAndProjectId(Long logicClusterId, Integer projectId) {
         return clusterLogicPoProjectIdStrConvertClusterLogic(logicClusterDAO.getById(logicClusterId)).stream()
                 .filter(clusterLogic -> filterClusterLogicByProjectId(clusterLogic, projectId)).findFirst()
                 .orElse(null);
@@ -268,15 +288,15 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
      * @return
      */
     @Override
-    public List<ClusterLogic> getClusterLogicById(Long logicClusterId) {
+    public List<ClusterLogic> listClusterLogicByIdThatProjectIdStrConvertProjectIdList(Long logicClusterId) {
         return clusterLogicPoProjectIdStrConvertClusterLogic(logicClusterDAO.getById(logicClusterId));
     }
     
     @Override
-    public ClusterLogic getClusterLogicByName(String logicClusterName, Integer projectId) {
+    public ClusterLogic getClusterLogicByNameAndProjectId(String logicClusterName, Integer projectId) {
         return clusterLogicPoProjectIdStrConvertClusterLogic(logicClusterDAO.getByName(logicClusterName)).stream()
                 .filter(clusterLogic -> filterClusterLogicByProjectId(clusterLogic, projectId)).findFirst()
-                .orElse(new ClusterLogic());
+                .orElse(null);
     }
     
     /**
@@ -284,7 +304,16 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
      * @return
      */
     @Override
-    public List<ClusterLogic> getClusterLogicByName(String logicClusterName) {
+    public ClusterLogic getClusterLogicByNameThatNotContainsProjectId(String logicClusterName) {
+        return ConvertUtil.obj2Obj(logicClusterDAO.getByName(logicClusterName), ClusterLogic.class);
+    }
+    
+    /**
+     * @param logicClusterName
+     * @return
+     */
+    @Override
+    public List<ClusterLogic> listClusterLogicByNameThatProjectIdStrConvertProjectIdList(String logicClusterName) {
          return clusterLogicPoProjectIdStrConvertClusterLogic(logicClusterDAO.getByName(logicClusterName));
     }
     
@@ -578,7 +607,7 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
      * @return
      */
     @Override
-    public List<ClusterLogic> getLogicClustersByLevel(Integer level) {
+    public List<ClusterLogic> listLogicClustersByLevelThatProjectIdStrConvertProjectIdList(Integer level) {
          return logicClusterDAO.listByLevel(level)
                  .stream()
                  .map(this::clusterLogicPoProjectIdStrConvertClusterLogic)

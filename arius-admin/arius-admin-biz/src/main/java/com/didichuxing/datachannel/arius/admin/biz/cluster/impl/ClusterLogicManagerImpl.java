@@ -304,7 +304,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     @Override
     public Result<List<ClusterLogicVO>> getLogicClustersByLevel(Integer level) {
     
-        List<ClusterLogicVO> list = ConvertUtil.list2List(clusterLogicService.getLogicClustersByLevel(level),
+        List<ClusterLogicVO> list = ConvertUtil.list2List(clusterLogicService.listLogicClustersByLevelThatProjectIdStrConvertProjectIdList(level),
                 ClusterLogicVO.class);
         for (ClusterLogicVO clusterLogicVO : list) {
             List<String> clusterPhyNames = clusterRegionService.listPhysicClusterNames(clusterLogicVO.getId());
@@ -388,7 +388,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
 
     @Override
     public ClusterLogicVO getClusterLogic(Long clusterLogicId, Integer currentProjectId) {
-        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(clusterLogicId, currentProjectId);
+        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByIdAndProjectId(clusterLogicId, currentProjectId);
         ClusterLogicVO clusterLogicVO = ConvertUtil.obj2Obj(clusterLogic, ClusterLogicVO.class);
 
         futureUtil.runnableTask(() -> buildLogicClusterStatus(clusterLogicVO, clusterLogic))
@@ -412,7 +412,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     public Result<Void> deleteLogicCluster(Long logicClusterId, String operator,
                                            Integer projectId) throws AdminOperateException {
         //一个逻辑集群对应了多个项目的情况
-        final List<ClusterLogic> clusterLogicList = clusterLogicService.getClusterLogicById(logicClusterId);
+        final List<ClusterLogic> clusterLogicList = clusterLogicService.listClusterLogicByIdThatProjectIdStrConvertProjectIdList(logicClusterId);
         if (CollectionUtils.isEmpty(clusterLogicList)) {
             return Result.buildSucc();
         }
@@ -473,7 +473,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
 
     @Override
     public Result<Void> editLogicCluster(ESLogicClusterDTO param, String operator, Integer projectId) {
-        final ClusterLogic logic = clusterLogicService.getClusterLogicById(param.getId(), projectId);
+        final ClusterLogic logic = clusterLogicService.getClusterLogicByIdAndProjectId(param.getId(), projectId);
         Result<Void> result = clusterLogicService.editClusterLogic(param, operator, projectId);
         if (result.success()) {
             SpringTool.publish(new ClusterLogicEvent(param.getId(), projectId));
@@ -539,7 +539,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     @Override
     public Result<ClusterLogicTemplateIndexCountVO> indexTemplateCount(Long clusterId, String operator,
                                                                        Integer projectId) {
-        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(clusterId, projectId);
+        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByIdAndProjectId(clusterId, projectId);
         ClusterLogicTemplateIndexDetailDTO detailVO = getTemplateIndexVO(clusterLogic, projectId);
         ClusterLogicTemplateIndexCountVO countVO = new ClusterLogicTemplateIndexCountVO();
         countVO.setCatIndexResults(detailVO.getCatIndexResults().size());
@@ -550,7 +550,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     @Override
     public Result<Long> estimatedDiskSize(Long clusterLogicId, Integer count) {
         ClusterLogic clusterLogic =
-                clusterLogicService.getClusterLogicById(clusterLogicId).stream().findFirst().orElse(null);
+                clusterLogicService.getClusterLogicByIdThatNotContainsProjectId(clusterLogicId);
         if (Objects.isNull(clusterLogic)){
             return Result.buildFail("逻辑集群不存在");
         }
@@ -602,9 +602,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
 
     @Override
     public Result<Boolean> isLogicClusterRegionIsNotEmpty(Long logicClusterId) {
-        ClusterLogic clusterLogic =
-                clusterLogicService.getClusterLogicById(logicClusterId).stream().findFirst().orElse(null);
-        if (null == clusterLogic) {
+        if (!clusterLogicService.existClusterLogicById(logicClusterId)) {
             return Result.buildWithMsg(false, "逻辑集群不存在！");
         }
         ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(logicClusterId);

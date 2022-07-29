@@ -92,7 +92,7 @@ public class LogicClusterTransferHandler extends BaseWorkOrderHandler {
             return Result.buildSucc();
         }
     
-        final boolean noneMatch = clusterLogicService.getClusterLogicById(content.getClusterLogicId()).stream()
+        final boolean noneMatch = clusterLogicService.listClusterLogicByIdThatProjectIdStrConvertProjectIdList(content.getClusterLogicId()).stream()
                 .noneMatch(clusterLogic -> clusterLogic.getProjectId().equals(workOrder.getSubmitorProjectId()));
         if (noneMatch) {
             return Result.buildOpForBidden("您无权对该集群进行转让操作");
