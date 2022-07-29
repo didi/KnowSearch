@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
@@ -36,7 +35,8 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<TemplateQueryDTO, TemplateWithSrvVO> {
-    private static final FutureUtil<Void> TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_CLUSTER_FUTURE_UTIL         = FutureUtil
+    private static final FutureUtil<TemplateWithSrvVO> TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_CLUSTER_FUTURE_UTIL         =
+            FutureUtil
         .init("TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_CLUSTER_FUTURE_UTIL", 10, 10, 100);
  
 
@@ -132,20 +132,16 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<Templa
         final Map<Integer, String> projectId2ProjectName = ConvertUtil.list2Map(projectService.getProjectBriefList(),
                 ProjectBriefVO::getId, ProjectBriefVO::getProjectName);
         
-        List<TemplateWithSrvVO> templateWithSrvVOList = new CopyOnWriteArrayList<>();
         // 构建基础信息
         for (IndexTemplate template : templateList) {
-            TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_CLUSTER_FUTURE_UTIL.runnableTask(()-> buildTemplateWithSrvVO(
-                    template,projectId2ProjectName,templateWithSrvVOList));
+            TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_CLUSTER_FUTURE_UTIL.callableTask(()-> buildTemplateWithSrvVO(
+                    template,projectId2ProjectName));
            
         }
-        TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_CLUSTER_FUTURE_UTIL.waitExecute();
-
-        return templateWithSrvVOList;
+        return  TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_CLUSTER_FUTURE_UTIL.waitResult();
     }
     
-    private void buildTemplateWithSrvVO(IndexTemplate template, Map<Integer, String> projectId2ProjectName,
-                                        List<TemplateWithSrvVO> templateWithSrvVOList) {
+    private TemplateWithSrvVO buildTemplateWithSrvVO(IndexTemplate template, Map<Integer, String> projectId2ProjectName) {
         TemplateWithSrvVO templateWithSrvVO = ConvertUtil.obj2Obj(template, TemplateWithSrvVO.class);
         templateWithSrvVO.setCluster(Lists.newArrayList());
         templateWithSrvVO.setOpenSrv(
@@ -157,9 +153,9 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<Templa
                 .map(IndexTemplatePhy::getCluster).distinct().forEach(templateWithSrvVO.getCluster()::add);
         templateWithSrvVO.setPartition(template.getExpression().endsWith("*"));
         templateWithSrvVO.setUnavailableSrv(
-                ConvertUtil.list2List(templateSrvManager.getUnavailableSrv(templateWithSrvVO.getId()),
+                ConvertUtil.list2List(templateSrvManager.getUnavailableSrv(template.getId()),
                         UnavailableTemplateSrvVO.class));
-        templateWithSrvVOList.add(templateWithSrvVO);
+        return templateWithSrvVO;
         
     }
 

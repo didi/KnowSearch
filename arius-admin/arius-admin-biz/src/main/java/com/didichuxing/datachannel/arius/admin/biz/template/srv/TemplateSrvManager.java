@@ -34,8 +34,8 @@ public interface TemplateSrvManager {
 
     /**
      * 获取指定模板「不可用的」服务
-     * @param logicTemplateId 逻辑模板id
-     * @return
+     *
+     * @param template@return
      */
     List<UnavailableTemplateSrv> getUnavailableSrv(Integer logicTemplateId);
 

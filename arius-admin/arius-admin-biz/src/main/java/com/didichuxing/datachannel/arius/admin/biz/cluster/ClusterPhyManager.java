@@ -12,7 +12,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhy
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PluginVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterDynamicConfigsTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
+import com.didichuxing.datachannel.arius.admin.common.tuple.TupleThree;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -31,6 +33,7 @@ public interface ClusterPhyManager {
      * @return true/false
      */
     boolean copyMapping(String cluster, int retryCount);
+    TupleThree</*dcdrExist*/Boolean,/*pipelineExist*/ Boolean,/*existColdRegion*/ Boolean> getDCDRAndPipelineAndColdRegionTupleByClusterPhyWithCache(String clusterPhy,Integer regionId);
 
     /**
      * 同步元数据
@@ -310,5 +313,8 @@ public interface ClusterPhyManager {
      * @return {@link Result}<{@link List}<{@link String}>>
      */
     Result<List<String>> listClusterPhyNameByResourceType(Integer clusterResourceType, Integer projectId);
-
+    
+    Result<ClusterPhy> getClusterByName(String masterCluster);
+    
+    boolean ensureDCDRRemoteCluster(String cluster, String remoteCluster) throws ESOperateException;
 }
