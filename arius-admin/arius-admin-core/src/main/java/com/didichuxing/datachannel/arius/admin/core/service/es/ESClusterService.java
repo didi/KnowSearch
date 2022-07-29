@@ -1,9 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.core.service.es;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.setting.ESClusterGetSettingsAllResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStatsResponse;
@@ -17,6 +13,10 @@ import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateExcepti
 import com.didiglobal.logi.elasticsearch.client.response.cluster.ESClusterHealthResponse;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodes.ClusterNodeInfo;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodessetting.ClusterNodeSettings;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author d06679
@@ -209,33 +209,33 @@ public interface ESClusterService {
      * @param cluster
      * @return
      */
-    List<PendingTaskAnalysisVO> pendingTaskAnalysis(String cluster);
+    List<PendingTaskAnalysisVO> syncPendingTaskAnalysis(String cluster);
 
     /**
      * task任务分析
      * @param cluster
      * @return
      */
-    List<TaskMissionAnalysisVO> taskMissionAnalysis(String cluster);
+    List<TaskMissionAnalysisVO> syncTaskMissionAnalysis(String cluster);
 
     /**
      * 热点线程分析
      * @param cluster
      * @return
      */
-    String hotThreadAnalysis(String cluster);
+    String syncHotThreadAnalysis(String cluster);
 
     /**
      * 异常shard分配重试
      * @param cluster
      * @return
      */
-    boolean abnormalShardAllocationRetry(String cluster);
+    boolean syncAbnormalShardAllocationRetry(String cluster);
 
     /**
      * 清除fielddata内存
      * @param cluster
      * @return
      */
-    boolean clearFieldDataMemory(String cluster);
+    boolean syncClearFieldDataMemory(String cluster);
 }

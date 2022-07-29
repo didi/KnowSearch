@@ -1,11 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.core.service.es.impl;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.BIG_SHARD;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.GET_MOVING_SHARD;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.getSegmentsCountContent;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.getSegmentsPartInfoRequestContent;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.getShardsAllInfoRequestContent;
-
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
@@ -24,14 +18,17 @@ import com.didiglobal.logi.elasticsearch.client.gateway.direct.DirectResponse;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.rest.RestStatus;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.*;
 
 /**
  * Created by linyunan on 3/22/22
@@ -110,7 +107,7 @@ public class ESShardServiceImpl implements ESShardService {
 
 
     @Override
-    public ShardAssignmentDescriptionVO shardAssignmentDescription(String cluster) {
+    public ShardAssignmentDescriptionVO syncShardAssignmentDescription(String cluster) {
         String response = esShardDAO.shardAssignment(cluster);
         if (null!=response){
             return buildShardAssignment(JSONObject.parseObject(response));

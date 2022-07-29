@@ -820,6 +820,12 @@ public class DslsConstant {
      */
     public static final String GET_HAS_CLUSTER_NODE_TASK_DATA_TIME                           = "AriusStatsClusterTaskInfoEsDao/getHasNodeTaskInfoTime";
 
+    /**
+     * 获取指定集群采集最近的时间点
+     * getTimeDifferenceBetweenNearestPointAndNow
+     */
+    public static final String GET_TIME_DIFFERENCE_BETWEEN_NEAREST_POINT_AND_NOW             = "AriusStatsClusterPhyInfoEsDao/getTimeDifferenceBetweenNearestPointAndNow";
+
     /***********************************************   AriusStatsDashBoardInfoESDAO   **************************************************************/
     public static final String FETCH_CLUSTER_HEALTH_INFO                                     = "AriusStatsDashBoardInfoESDAO/fetchClusterHealthInfo";
 
