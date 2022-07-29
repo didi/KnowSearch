@@ -539,7 +539,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     @Override
     public Result<ClusterLogicTemplateIndexCountVO> indexTemplateCount(Long clusterId, String operator,
                                                                        Integer projectId) {
-        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(clusterId,projectId);
+        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByIdAndProjectId(clusterId,projectId);
         ClusterLogicTemplateIndexDetailDTO detailVO = getTemplateIndexVO(clusterLogic,projectId);
         ClusterLogicTemplateIndexCountVO countVO = new ClusterLogicTemplateIndexCountVO();
         countVO.setCatIndexResults(detailVO.getCatIndexResults().size());
