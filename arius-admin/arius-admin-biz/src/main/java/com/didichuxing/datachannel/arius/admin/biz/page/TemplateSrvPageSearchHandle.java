@@ -1,7 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.biz.page;
 
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.TemplateSrvManager;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.dcdr.TemplateDCDRManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.PageDTO;
@@ -20,6 +19,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.template.physic.Inde
 import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import com.google.common.collect.Lists;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -40,8 +40,7 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<Templa
         .init("TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_CLUSTER_FUTURE_UTIL", 10, 10, 100);
  
 
-    @Autowired
-    private TemplateDCDRManager templateDCDRManager;
+    
     @Autowired
     private IndexTemplateService          indexTemplateService;
 
@@ -107,27 +106,18 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<Templa
         List<Integer> matchTemplateLogicIdList = indexTemplatePhyList.stream().map(IndexTemplatePhy::getLogicId)
             .distinct().collect(Collectors.toList());
     
-        Predicate<IndexTemplate> conditionNotNullIdPre = indexTemplate -> {
-            if (null != condition.getId()) {
-                return Objects.equals(indexTemplate.getId(), condition.getId());
-            } else {
-                return true;
-            }
-        };
-        Predicate<IndexTemplate> conditionNotNullNamePre = indexTemplate -> {
-            if (StringUtils.isNotBlank(condition.getName())) {
-                return StringUtils.equals(indexTemplate.getName(), condition.getName());
-            } else {
-                return true;
-            }
-        };
-        Predicate<IndexTemplate> conditionNotNullProjectIdPre = indexTemplate -> {
-            if (null != condition.getProjectId()) {
-                return Objects.equals(indexTemplate.getProjectId(), condition.getProjectId());
-            } else {
-                return true;
-            }
-        };
+        Predicate<IndexTemplate> conditionNotNullIdPre = indexTemplate -> Objects.isNull(condition.getId())
+                                                                          || Objects.equals(indexTemplate.getId(),
+                condition.getId());
+    
+        Predicate<IndexTemplate> conditionNotNullNamePre = indexTemplate -> !StringUtils.isNotBlank(condition.getName())
+                                                                            || StringUtils.equals(
+                indexTemplate.getName(), condition.getName());
+    
+        Predicate<IndexTemplate> conditionNotNullProjectIdPre = indexTemplate ->
+                Objects.isNull(condition.getProjectId()) || Objects.equals(indexTemplate.getProjectId(),
+                        condition.getProjectId());
+        
         return indexTemplateService.listLogicTemplatesByIds(matchTemplateLogicIdList).stream()
                 .filter(conditionNotNullProjectIdPre).filter(conditionNotNullIdPre).filter(conditionNotNullNamePre)
                 .collect(Collectors.toList());
@@ -139,13 +129,14 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<Templa
         if (CollectionUtils.isEmpty(templateList)) {
             return Lists.newArrayList();
         }
-        final String projectName = Optional.ofNullable(projectId).map(projectService::getProjectBriefByProjectId)
-                .map(ProjectBriefVO::getProjectName).orElse(null);
+        final Map<Integer, String> projectId2ProjectName = ConvertUtil.list2Map(projectService.getProjectBriefList(),
+                ProjectBriefVO::getId, ProjectBriefVO::getProjectName);
+        
         List<TemplateWithSrvVO> templateWithSrvVOList = new CopyOnWriteArrayList<>();
         // 构建基础信息
         for (IndexTemplate template : templateList) {
             TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_CLUSTER_FUTURE_UTIL.runnableTask(()-> buildTemplateWithSrvVO(
-                    template,projectName,templateWithSrvVOList));
+                    template,projectId2ProjectName,templateWithSrvVOList));
            
         }
         TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_CLUSTER_FUTURE_UTIL.waitExecute();
@@ -153,19 +144,14 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<Templa
         return templateWithSrvVOList;
     }
     
-    private void buildTemplateWithSrvVO(IndexTemplate template, String projectName,
+    private void buildTemplateWithSrvVO(IndexTemplate template, Map<Integer, String> projectId2ProjectName,
                                         List<TemplateWithSrvVO> templateWithSrvVOList) {
         TemplateWithSrvVO templateWithSrvVO = ConvertUtil.obj2Obj(template, TemplateWithSrvVO.class);
         templateWithSrvVO.setCluster(Lists.newArrayList());
         templateWithSrvVO.setOpenSrv(
                 ConvertUtil.list2List(TemplateSrv.codeStr2SrvList(template.getOpenSrv()), TemplateSrvVO.class));
-        if (StringUtils.isNotBlank(projectName)) {
-            templateWithSrvVO.setProjectName(projectName);
-        } else {
-            Optional.ofNullable(template).map(IndexTemplate::getProjectId)
-                    .map(projectService::getProjectBriefByProjectId).map(ProjectBriefVO::getProjectName)
-                    .ifPresent(templateWithSrvVO::setProjectName);
-        }
+        Optional.ofNullable(template).map(IndexTemplate::getProjectId).map(projectId2ProjectName::get)
+                .ifPresent(templateWithSrvVO::setProjectName);
    
         indexTemplatePhyService.getTemplateByLogicId(templateWithSrvVO.getId()).stream()
                 .map(IndexTemplatePhy::getCluster).distinct().forEach(templateWithSrvVO.getCluster()::add);
