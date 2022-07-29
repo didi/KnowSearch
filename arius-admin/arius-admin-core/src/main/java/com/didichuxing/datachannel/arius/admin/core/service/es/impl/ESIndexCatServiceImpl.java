@@ -136,7 +136,7 @@ public class ESIndexCatServiceImpl implements ESIndexCatService {
     }
 
     @Override
-    public List<IndexCatCellDTO> getByClusterLogic(String clusterLogicName,Integer projectId) {
+    public List<IndexCatCellDTO> syncGetByClusterLogic(String clusterLogicName, Integer projectId) {
         Tuple<Long, List<IndexCatCellPO>> totalHitAndIndexCatCellListTuple = indexCatESDAO.getIndexListByTerms(clusterLogicName,projectId);
         if (totalHitAndIndexCatCellListTuple == null){
             return new ArrayList<>();

@@ -72,5 +72,5 @@ public interface ESIndexCatService {
      * @param name
      * @return
      */
-    List<IndexCatCellDTO> getByClusterLogic(String name, Integer projectId);
+    List<IndexCatCellDTO> syncGetByClusterLogic(String name, Integer projectId);
 }
