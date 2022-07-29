@@ -743,7 +743,7 @@ public class IndicesManagerImpl implements IndicesManager {
 
     @Override
     public Result<List<String>> getClusterLogicIndexName(String clusterLogicName, Integer projectId) {
-        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByName(clusterLogicName, projectId);
+        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByNameAndProjectId(clusterLogicName, projectId);
         if (clusterLogic == null) {
             return Result.buildFail();
         }
@@ -778,6 +778,15 @@ public class IndicesManagerImpl implements IndicesManager {
         if (!clusterPhyService.isClusterExists(phyClusterName)) {
             return Result.buildParamIllegal(String.format("物理集群[%s]不存在", phyClusterName));
         }
+
+        // 判断索引名称是否和集群模版名称前缀匹配
+        IndexCatCellWithConfigDTO indexWithConfigDTO = new IndexCatCellWithConfigDTO();
+        indexWithConfigDTO.setIndex(indexName);
+        Result<Void> checkValidRet = checkValid(indexWithConfigDTO, phyClusterName);
+        if (checkValidRet.failed()) {
+            return Result.buildFrom(checkValidRet);
+        }
+
         return Result.buildSucc(esIndexService.syncIsIndexExist(phyClusterName, indexName));
     }
 
@@ -875,7 +884,7 @@ public class IndicesManagerImpl implements IndicesManager {
         if (AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
             phyClusterName = cluster;
         } else {
-            ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByName(cluster,projectId );
+            ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByNameAndProjectId(cluster,projectId );
             if (null == clusterLogic) {
                 return Result.buildParamIllegal(String.format("逻辑集群[%s]不存在", cluster));
             }
@@ -890,7 +899,7 @@ public class IndicesManagerImpl implements IndicesManager {
 
     private Result<Void> initIndexCreateDTO(IndexCatCellWithConfigDTO indexCreateDTO, Integer projectId) {
         if (!AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
-            ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByName(indexCreateDTO.getCluster(), projectId);
+            ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByNameAndProjectId(indexCreateDTO.getCluster(), projectId);
             if (null == clusterLogic) {
                 return Result.buildParamIllegal(String.format("逻辑集群[%s]不存在", indexCreateDTO.getCluster()));
             }

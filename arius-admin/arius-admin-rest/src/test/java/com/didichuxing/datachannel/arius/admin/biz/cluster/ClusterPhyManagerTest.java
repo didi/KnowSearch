@@ -441,7 +441,7 @@ class ClusterPhyManagerTest {
         Result<List<String>> result = clusterPhyManager.listCanBeAssociatedRegionOfClustersPhys(0, 0L);
         assertEquals(Result.buildParamIllegal("集群资源类型非法").getMessage(), result.getMessage());
 
-        when(mockClusterLogicService.getClusterLogicById(0L, null)).thenReturn(clusterLogic);
+        when(mockClusterLogicService.getClusterLogicByIdAndProjectId(0L, null)).thenReturn(clusterLogic);
         when(mockClusterRegionService.getRegionByLogicClusterId(0L)).thenReturn(region);
         result = clusterPhyManager.listCanBeAssociatedRegionOfClustersPhys(1, 0L);
         assertEquals(Collections.emptyList(), result.getData());

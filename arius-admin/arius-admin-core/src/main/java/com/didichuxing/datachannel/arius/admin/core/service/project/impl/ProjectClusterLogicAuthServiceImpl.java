@@ -27,6 +27,7 @@ import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.service.ProjectService;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -276,7 +277,7 @@ public class ProjectClusterLogicAuthServiceImpl implements ProjectClusterLogicAu
         }
 
         // 从逻辑集群表获取创建信息
-        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(logicClusterId, projectId);
+        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByIdAndProjectId(logicClusterId, projectId);
         ProjectClusterLogicAuthEnum authFromCreateRecord = (clusterLogic != null
                                                             && projectId.equals(clusterLogic.getProjectId()))
                                                                 ? ProjectClusterLogicAuthEnum.OWN
@@ -327,11 +328,12 @@ public class ProjectClusterLogicAuthServiceImpl implements ProjectClusterLogicAu
 
         // 从逻辑集群表获取APP作为owner的集群
         if (logicClusterId != null && clusterAuthType == ProjectClusterLogicAuthEnum.OWN) {
-            ClusterLogic clusterLogic =
-                    clusterLogicService.getClusterLogicById(logicClusterId).stream().findFirst().orElse(null);
-            if (clusterLogic != null) {
-                authDTOS.add(buildLogicClusterAuth(clusterLogic, ProjectClusterLogicAuthEnum.OWN));
-            }
+    
+            clusterLogicService.listClusterLogicByIdThatProjectIdStrConvertProjectIdList(logicClusterId).stream()
+                    .filter(Objects::nonNull)
+                    //需要绑定项目
+                    .map(clusterLogic -> buildLogicClusterAuth(clusterLogic, ProjectClusterLogicAuthEnum.OWN))
+                    .filter(Objects::nonNull).forEach(authDTOS::add);
         }
 
         return authDTOS;
@@ -458,7 +460,7 @@ public class ProjectClusterLogicAuthServiceImpl implements ProjectClusterLogicAu
             return judgeResult;
         }
 
-        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(logicClusterId, projectId);
+        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByIdAndProjectId(logicClusterId, projectId);
         if (AriusObjUtils.isNull(clusterLogic)) {
             return Result.buildParamIllegal(String.format("逻辑集群[%d]不存在", logicClusterId));
         }

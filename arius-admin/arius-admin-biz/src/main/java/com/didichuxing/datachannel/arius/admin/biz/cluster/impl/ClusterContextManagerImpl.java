@@ -31,7 +31,6 @@ import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -211,8 +210,7 @@ public class ClusterContextManagerImpl implements ClusterContextManager {
             return Lists.newArrayList();
         }
 
-        return clusterLogicIds.stream().map(r -> clusterLogicService.getClusterLogicById(r ))
-                .flatMap(Collection::stream)
+        return clusterLogicIds.stream().map(r -> clusterLogicService.getClusterLogicByIdThatNotContainsProjectId(r ))
                 .map(ClusterLogic::getName)
             .distinct().collect(Collectors.toList());
     }
@@ -253,7 +251,7 @@ public class ClusterContextManagerImpl implements ClusterContextManager {
     @Override
     public ClusterLogicContext getClusterLogicContext(Long clusterLogicId) {
         ClusterLogic clusterLogic =
-                clusterLogicService.getClusterLogicById(clusterLogicId).stream().findFirst().orElse(null);
+                clusterLogicService.listClusterLogicByIdThatProjectIdStrConvertProjectIdList(clusterLogicId).stream().findFirst().orElse(null);
         if (null == clusterLogic) {
             LOGGER.error(
                 "class=ClusterContextManagerImpl||method=flushClusterLogicContext||clusterLogicId={}||msg=clusterLogic is empty",
@@ -569,7 +567,7 @@ public class ClusterContextManagerImpl implements ClusterContextManager {
         Set<String> clusterLogicSet = new HashSet<>();
         if (!CollectionUtils.isEmpty(associatedClusterLogicIds)) {
             for (Long associatedClusterLogicId : associatedClusterLogicIds) {
-                clusterLogicService.getClusterLogicById(associatedClusterLogicId).stream().filter(Objects::nonNull)
+                clusterLogicService.listClusterLogicByIdThatProjectIdStrConvertProjectIdList(associatedClusterLogicId).stream().filter(Objects::nonNull)
                         .filter(clusterLogic -> null != clusterLogic.getProjectId() && null != clusterLogic.getName())
                         .forEach(clusterLogic -> {
                             projectIdSet.add(clusterLogic.getProjectId());

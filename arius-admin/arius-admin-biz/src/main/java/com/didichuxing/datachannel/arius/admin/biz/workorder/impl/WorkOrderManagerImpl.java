@@ -49,7 +49,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -102,13 +101,12 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
             throws AdminOperateException {
         final JoinLogicClusterContent joinLogicClusterContent = ConvertUtil.obj2ObjByJSON(workOrderDTO.getContentObj(),
                 JoinLogicClusterContent.class);
-        final List<ClusterLogic> clusterLogicList = clusterLogicService.getClusterLogicById(
+        final ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByIdThatNotContainsProjectId(
                 joinLogicClusterContent.getJoinLogicClusterId());
-        if (CollectionUtils.isEmpty(clusterLogicList)) {
+        if (Objects.isNull(clusterLogic)) {
             return Result.buildFail("逻辑集群不存在");
         }
         
-        final ClusterLogic clusterLogic = clusterLogicList.get(0);
         LogicClusterCreateContent content = new LogicClusterCreateContent();
         content.setDataNodeNu(clusterLogic.getDataNodeNu());
         content.setDataNodeSpec(clusterLogic.getDataNodeSpec());

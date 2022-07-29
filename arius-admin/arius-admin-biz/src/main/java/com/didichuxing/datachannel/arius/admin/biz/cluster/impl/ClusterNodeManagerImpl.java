@@ -192,12 +192,10 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
 
     @Override
     public Result<List<ESClusterRoleHostVO>> listClusterLogicNode(Integer clusterId) {
-        ClusterLogic clusterLogic =
-                clusterLogicService.getClusterLogicById(Long.valueOf(clusterId)).stream().findFirst().orElse(null);
-        if (Objects.isNull(clusterLogic)) {
+        if (!clusterLogicService.existClusterLogicById(clusterId.longValue())) {
             return Result.buildFail(String.format("集群[%s]不存在", clusterId));
         }
-        ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(clusterLogic.getId());
+        ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(clusterId.longValue());
         if (clusterRegion == null) {
             return Result.buildFail(String.format("集群[%s]未绑定region", clusterId));
         }
@@ -213,7 +211,7 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
     @Override
     public Result listClusterLogicNodeByName(String clusterLogicName) {
         ClusterLogic clusterLogic =
-                clusterLogicService.getClusterLogicByName(clusterLogicName).stream().findFirst().orElse(null);
+                clusterLogicService.listClusterLogicByNameThatProjectIdStrConvertProjectIdList(clusterLogicName).stream().findFirst().orElse(null);
         if (AriusObjUtils.isNull(clusterLogic)) {
             return Result.buildFail(String.format("集群[%s]不存在", clusterLogicName));
         }

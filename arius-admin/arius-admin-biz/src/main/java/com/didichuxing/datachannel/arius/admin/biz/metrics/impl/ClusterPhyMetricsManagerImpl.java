@@ -101,8 +101,7 @@ public class ClusterPhyMetricsManagerImpl implements ClusterPhyMetricsManager {
                                                         ClusterPhyTypeMetricsEnum metricsTypeEnum) {
         try {
             if (StringUtils.isNotBlank(param.getClusterLogicName())) {
-                ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByName(param.getClusterLogicName()).stream()
-                        .findFirst().orElse(null);
+                ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByNameThatNotContainsProjectId(param.getClusterLogicName());
                 if (clusterLogic==null){
                     return Result.buildFail();
                 }
