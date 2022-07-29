@@ -7,7 +7,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPh
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyQuickCommandShardsQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.*;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
-import com.didichuxing.datachannel.arius.admin.metadata.service.ESClusterPhyStatsService;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -101,8 +100,4 @@ public class ESPhyClusterQuickCommandController {
     public Result<Void> clearFieldDataMemory(@PathVariable String cluster) {
         return clusterPhyQuickCommandManager.clearFieldDataMemory(cluster);
     }
-
-    @Autowired
-    private ESClusterPhyStatsService esClusterPhyStatsService;
-
 }

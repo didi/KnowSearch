@@ -4,6 +4,8 @@ import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.percentiles.BasePercentileMetrics;
 import com.didichuxing.datachannel.arius.admin.common.constant.PercentilesEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
+import com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESClusterDAO;
+import com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESClusterNodeDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.gateway.GatewayNodeMetricsDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats.AriusStatsClusterInfoESDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats.AriusStatsNodeInfoESDAO;
@@ -26,6 +28,11 @@ public class ESClusterPhyStatsService {
 
     @Autowired
     private AriusStatsNodeInfoESDAO       ariusStatsNodeInfoESDAO;
+
+    @Autowired
+    private ESClusterDAO                  esClusterDAO;
+    @Autowired
+    private ESClusterNodeDAO              esClusterNodeDAO;
     @Autowired
     private GatewayNodeMetricsDAO         gatewayNodeMetricsDAO;
 
@@ -189,14 +196,20 @@ public class ESClusterPhyStatsService {
      * _cluster/stats 耗时
      */
     public Long getClusterStatusElapsedTime(String cluster) {
-        return ariusStatsNodeInfoESDAO.getClusterStatusElapsedTime(cluster);
+        long startTime = System.currentTimeMillis();
+        esClusterDAO.getClusterStats(cluster);
+        long endTime = System.currentTimeMillis();
+        return endTime-startTime;
     }
 
     /**
      * _cluster/stats 耗时
      */
     public Long getNodeStatusElapsedTime(String cluster) {
-        return ariusStatsNodeInfoESDAO.getNodeStatusElapsedTime(cluster);
+        long startTime = System.currentTimeMillis();
+        esClusterNodeDAO.getNodeState(cluster);
+        long endTime = System.currentTimeMillis();
+        return endTime-startTime;
     }
 
     /**
