@@ -928,7 +928,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
 
     @Override
     public Result<List<ConsoleTemplateVO>> listTemplateVOByLogicCluster(String clusterLogicName, Integer projectId) {
-        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByName(clusterLogicName, projectId);
+        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByNameAndProjectId(clusterLogicName, projectId);
         if (clusterLogic == null) {
             return Result.buildFail();
         }

@@ -743,7 +743,7 @@ public class IndicesManagerImpl implements IndicesManager {
 
     @Override
     public Result<List<String>> getClusterLogicIndexName(String clusterLogicName, Integer projectId) {
-        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByName(clusterLogicName, projectId);
+        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByNameAndProjectId(clusterLogicName, projectId);
         if (clusterLogic == null) {
             return Result.buildFail();
         }
@@ -875,7 +875,7 @@ public class IndicesManagerImpl implements IndicesManager {
         if (AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
             phyClusterName = cluster;
         } else {
-            ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByName(cluster,projectId );
+            ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByNameAndProjectId(cluster,projectId );
             if (null == clusterLogic) {
                 return Result.buildParamIllegal(String.format("逻辑集群[%s]不存在", cluster));
             }
@@ -890,7 +890,7 @@ public class IndicesManagerImpl implements IndicesManager {
 
     private Result<Void> initIndexCreateDTO(IndexCatCellWithConfigDTO indexCreateDTO, Integer projectId) {
         if (!AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
-            ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByName(indexCreateDTO.getCluster(), projectId);
+            ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByNameAndProjectId(indexCreateDTO.getCluster(), projectId);
             if (null == clusterLogic) {
                 return Result.buildParamIllegal(String.format("逻辑集群[%s]不存在", indexCreateDTO.getCluster()));
             }

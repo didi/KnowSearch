@@ -114,7 +114,7 @@ public class TemplateLogicPageSearchHandle extends AbstractPageSearchHandle<Temp
 
         for (ConsoleTemplateVO consoleTemplateVO : consoleTemplateVOList) {
             BUILD_BELONG_CLUSTER_FUTURE_UTIL.runnableTask(() -> {
-                ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(consoleTemplateVO.getResourceId()
+                ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByIdAndProjectId(consoleTemplateVO.getResourceId()
                         , consoleTemplateVO.getProjectId());
                 if (null != clusterLogic) {
                     consoleTemplateVO.setCluster(clusterLogic.getName());

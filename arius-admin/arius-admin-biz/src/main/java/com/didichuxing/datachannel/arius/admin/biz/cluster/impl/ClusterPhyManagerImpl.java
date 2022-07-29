@@ -384,7 +384,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         }
         List<String> clusters = Lists.newArrayList();
         ClusterLogic clusterLogic =
-                clusterLogicService.getClusterLogicById(clusterLogicId ).stream().findFirst().orElse(null);
+                clusterLogicService.getClusterLogicByIdThatNotContainsProjectId(clusterLogicId );
         if (clusterLogic == null) {
             return Result.buildFail("选定的逻辑集群不存在");
         }
@@ -1093,7 +1093,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         Result<List<String>> canBeAssociatedClustersPhyNames = Result.buildSucc(Lists.newArrayList());
         if (clusterLogicId != null) {
             ClusterLogic clusterLogicById =
-                    clusterLogicService.getClusterLogicById(clusterLogicId).stream().findFirst().orElse(null);
+                    clusterLogicService.listClusterLogicByIdThatProjectIdStrConvertProjectIdList(clusterLogicId).stream().findFirst().orElse(null);
             if (clusterLogicById == null) {
                 return Result.buildFail("选定的逻辑集群不存在");
             }
@@ -1459,9 +1459,8 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
         List<Long> clusterLogicIds = clusterPhyContext.getAssociatedClusterLogicIds();
         for (Long clusterLogicId : clusterLogicIds) {
-            final ClusterLogic deleteById = clusterLogicService.getClusterLogicById(clusterLogicId)
-                    .stream().findFirst().orElse(null);
-            if (Objects.isNull(deleteById)){
+            final ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByIdThatNotContainsProjectId(clusterLogicId);
+            if (Objects.isNull(clusterLogic)){
                 continue;
             }
             Result<Void> deleteLogicClusterResult = clusterLogicService.deleteClusterLogicById(clusterLogicId, operator,
@@ -1471,7 +1470,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             } else {
                 //删除逻辑集群
                 operateRecordService.save(new OperateRecord.Builder()
-                    .content(String.format("删除逻辑集群：%s", deleteById.getName()))
+                    .content(String.format("删除逻辑集群：%s", clusterLogic.getName()))
                     .operationTypeEnum(OperateTypeEnum.MY_CLUSTER_OFFLINE).triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
                     .project(projectService.getProjectBriefByProjectId(projectId)).userOperation(operator)
                     .bizId(clusterPhy.getId()).build());
