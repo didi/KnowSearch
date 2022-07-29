@@ -433,7 +433,7 @@ public class ESClusterServiceImpl implements ESClusterService {
     }
 
     @Override
-    public List<PendingTaskAnalysisVO> pendingTaskAnalysis(String cluster) {
+    public List<PendingTaskAnalysisVO> syncPendingTaskAnalysis(String cluster) {
         String response = esClusterDAO.pendingTask(cluster);
         return Optional.ofNullable(response).map(JSONObject::parseObject)
             .map(jsonObject -> jsonObject.getJSONArray(TASKS))
@@ -442,27 +442,27 @@ public class ESClusterServiceImpl implements ESClusterService {
     }
 
     @Override
-    public List<TaskMissionAnalysisVO> taskMissionAnalysis(String cluster) {
+    public List<TaskMissionAnalysisVO> syncTaskMissionAnalysis(String cluster) {
         String response = esClusterDAO.taskMission(cluster);
         return Optional.ofNullable(response).map(JSONObject::parseObject)
             .map(jsonObject -> buildTaskMission(jsonObject)).orElse(new ArrayList<>());
     }
 
     @Override
-    public String hotThreadAnalysis(String cluster) {
+    public String syncHotThreadAnalysis(String cluster) {
         String response = esClusterDAO.hotThread(cluster);
         return response;
     }
 
     @Override
-    public boolean abnormalShardAllocationRetry(String cluster) {
+    public boolean syncAbnormalShardAllocationRetry(String cluster) {
         String response = esClusterDAO.abnormalShardAllocationRetry(cluster);
         return Optional.ofNullable(response).map(JSONObject::parseObject)
             .map(jsonObject -> jsonObject.getBoolean(ACKNOWLEDGED)).orElse(false);
     }
 
     @Override
-    public boolean clearFieldDataMemory(String cluster) {
+    public boolean syncClearFieldDataMemory(String cluster) {
         String response = esClusterDAO.clearFieldDataMemory(cluster);
         return Optional.ofNullable(response).map(JSONObject::parseObject)
             .map(jsonObject -> jsonObject.getJSONObject(SHARDS)).map(shards -> shards.getInteger(FAILED))

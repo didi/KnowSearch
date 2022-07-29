@@ -209,35 +209,35 @@ public interface ESClusterService {
      * @param cluster
      * @return
      */
-    List<PendingTaskAnalysisVO> pendingTaskAnalysis(String cluster);
+    List<PendingTaskAnalysisVO> syncPendingTaskAnalysis(String cluster);
 
     /**
      * task任务分析
      * @param cluster
      * @return
      */
-    List<TaskMissionAnalysisVO> taskMissionAnalysis(String cluster);
+    List<TaskMissionAnalysisVO> syncTaskMissionAnalysis(String cluster);
 
     /**
      * 热点线程分析
      * @param cluster
      * @return
      */
-    String hotThreadAnalysis(String cluster);
+    String syncHotThreadAnalysis(String cluster);
 
     /**
      * 异常shard分配重试
      * @param cluster
      * @return
      */
-    boolean abnormalShardAllocationRetry(String cluster);
+    boolean syncAbnormalShardAllocationRetry(String cluster);
 
     /**
      * 清除fielddata内存
      * @param cluster
      * @return
      */
-    boolean clearFieldDataMemory(String cluster);
+    boolean syncClearFieldDataMemory(String cluster);
 
     /**
      * 获取集群所有节点的tcp连接地址

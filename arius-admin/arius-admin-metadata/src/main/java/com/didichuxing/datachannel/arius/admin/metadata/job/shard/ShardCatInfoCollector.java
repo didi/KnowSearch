@@ -108,7 +108,7 @@ public class ShardCatInfoCollector extends AbstractMetaDataJob {
     }
 
     private List<ShardCatCellPO> getShardCatCells(String clusterName) {
-        List<ShardCatCellPO> shardDistributionVOS = esShardCatService.shardDistribution(clusterName);
+        List<ShardCatCellPO> shardDistributionVOS = esShardCatService.syncShardDistribution(clusterName);
         return shardDistributionVOS;
     }
 }

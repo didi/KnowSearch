@@ -79,6 +79,9 @@
                     "clusterElapsedTime":{
                         "type":"long"
                     },
+                    "nodeElapsedTime":{
+                         "type":"long"
+                    },
                     "clusterElapsedTimeGte5Min":{
                         "type":"boolean"
                     }
@@ -208,6 +211,9 @@
                         "type":"boolean"
                     },
                     "shardSize":{
+                        "type":"long"
+                    },
+                    "shardNum":{
                         "type":"long"
                     },
                     "singReplicate":{
