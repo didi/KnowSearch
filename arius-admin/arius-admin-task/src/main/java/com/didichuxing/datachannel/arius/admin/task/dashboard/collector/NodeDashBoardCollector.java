@@ -36,7 +36,10 @@ import java.util.concurrent.atomic.AtomicReference;
 @Component
 public class NodeDashBoardCollector extends BaseDashboardCollector {
     private static final int                                                                     NODE_FREE_DISK_THRESHOLD          = 15;
-    private static final int                                                                     HEAD_USED_PERCENT_THRESHOLD       = 80;
+
+    //临时测试将 80 修改为2
+    private static final int                                                                     HEAD_USED_PERCENT_THRESHOLD       = 2;
+//    private static final int                                                                     HEAD_USED_PERCENT_THRESHOLD       = 80;
 
     //临时测试将 80 修改为2
     private static final int                                                                     CPU_PERCENT_THRESHOLD             = 2;
