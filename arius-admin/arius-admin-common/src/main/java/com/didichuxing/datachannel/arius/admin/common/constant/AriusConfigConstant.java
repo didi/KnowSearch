@@ -114,7 +114,15 @@ public class AriusConfigConstant {
      */
     public static final String INDEX_MAPPING_NUM_THRESHOLD                             = "index.mapping.num_threshold";
 
+    /**
+     * rollover阈值，当索引大小超过该值自动rollover
+     */
     public static final String INDEX_ROLLOVER_THRESHOLD                                = "index.rollover.threshold";
+
+    /**
+     * 大shard阈值，用于集群指标看板，超过该值被认为是大shard
+     */
+    public static final String BIG_SHARD_THRESHOLD                                     = "big_shard.threshold";
 
 
 
