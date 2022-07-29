@@ -238,4 +238,11 @@ public interface ESClusterService {
      * @return
      */
     boolean clearFieldDataMemory(String cluster);
+
+    /**
+     * 获取集群所有节点的tcp连接地址
+     * @param cluster
+     * @return
+     */
+    List<String> syncGetTcpAddress(String cluster);
 }

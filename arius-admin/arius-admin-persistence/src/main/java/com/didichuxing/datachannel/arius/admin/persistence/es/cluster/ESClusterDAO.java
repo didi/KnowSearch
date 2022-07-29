@@ -33,6 +33,8 @@ import com.didiglobal.logi.elasticsearch.client.response.cluster.nodes.ClusterNo
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodes.ESClusterNodesResponse;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodessetting.ClusterNodeSettings;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodessetting.ESClusterNodesSettingResponse;
+import com.didiglobal.logi.elasticsearch.client.response.cluster.nodesstats.ClusterNodeStats;
+import com.didiglobal.logi.elasticsearch.client.response.cluster.nodesstats.ESClusterNodesStatsResponse;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.updatesetting.ESClusterUpdateSettingsResponse;
 import com.didiglobal.logi.elasticsearch.client.response.indices.getalias.ESIndicesGetAliasResponse;
 import com.didiglobal.logi.elasticsearch.client.utils.JsonUtils;
@@ -45,6 +47,7 @@ import org.springframework.stereotype.Repository;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterQuickCommandMethodsEnum.*;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.*;
@@ -293,11 +296,13 @@ public class ESClusterDAO extends BaseESDAO {
 
     public Map<String, ClusterNodeSettings> getPartOfSettingsByCluster(String cluster, Integer tryTimes) {
         ESClusterNodesSettingResponse response = null;
+
         try {
             ESClient client = esOpClient.getESClient(cluster);
             if (null == client) {
                 return null;
             }
+
             do {
                 response = client.admin().cluster().prepareNodesSetting().execute().actionGet(ES_OPERATE_TIMEOUT,
                     TimeUnit.SECONDS);
@@ -350,7 +355,7 @@ public class ESClusterDAO extends BaseESDAO {
             DirectRequest directRequest = new DirectRequest("GET", "");
 
             do {
-                directResponse = client.direct(directRequest).actionGet(30, TimeUnit.SECONDS);
+                directResponse = client.direct(directRequest).actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
             } while (tryTimes-- > 0 && null == directResponse);
         } catch (Exception e) {
             LOGGER.warn("class=ESClusterDAO||method=getESVersionByCluster||cluster={}||mg=get es segments fail",
@@ -381,7 +386,7 @@ public class ESClusterDAO extends BaseESDAO {
         }
         try {
             DirectRequest directRequest = new DirectRequest("GET", "_cat/nodes?v&h=sc,ip&format=json");
-            DirectResponse directResponse = client.direct(directRequest).actionGet(30, TimeUnit.SECONDS);
+            DirectResponse directResponse = client.direct(directRequest).actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
             if (directResponse.getRestStatus() == RestStatus.OK
                 && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
                 ecSegmentOnIps = JSONArray.parseArray(directResponse.getResponseContent(), ECSegmentOnIp.class);
@@ -405,11 +410,11 @@ public class ESClusterDAO extends BaseESDAO {
 
         try {
             DirectRequest directRequest = new DirectRequest("GET", "_cluster/stats");
-            DirectResponse directResponse = esClient.direct(directRequest).actionGet(30, TimeUnit.SECONDS);
+            DirectResponse directResponse = esClient.direct(directRequest).actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
 
             //获取
             DirectRequest directHealthRequest = new DirectRequest("GET", "_cat/health?format=json");
-            DirectResponse directHealthResponse = esClient.direct(directHealthRequest).actionGet(30, TimeUnit.SECONDS);
+            DirectResponse directHealthResponse = esClient.direct(directHealthRequest).actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
 
             if (directResponse.getRestStatus() == RestStatus.OK
                 && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
@@ -479,7 +484,7 @@ public class ESClusterDAO extends BaseESDAO {
 
         try {
             DirectRequest taskStatsRequest = new DirectRequest("GET", "_cat/tasks?v&detailed&format=json");
-            DirectResponse directResponse = esClient.direct(taskStatsRequest).actionGet(30, TimeUnit.SECONDS);
+            DirectResponse directResponse = esClient.direct(taskStatsRequest).actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
             if (directResponse.getRestStatus() == RestStatus.OK
                 && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
                 JSONArray jsonArray = JSON.parseArray(directResponse.getResponseContent());
@@ -634,7 +639,7 @@ public class ESClusterDAO extends BaseESDAO {
         }
         try {
             DirectRequest directRequest = new DirectRequest(PENDING_TASK.getMethod(), PENDING_TASK.getUri());
-            DirectResponse directResponse = client.direct(directRequest).actionGet(30, TimeUnit.SECONDS);
+            DirectResponse directResponse = client.direct(directRequest).actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
             if (directResponse.getRestStatus() == RestStatus.OK
                 && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
                 ecSegmentsOnIps = directResponse.getResponseContent();
@@ -657,7 +662,7 @@ public class ESClusterDAO extends BaseESDAO {
         try {
             DirectRequest directRequest = new DirectRequest(TASK_MISSION_ANALYSIS.getMethod(),
                 TASK_MISSION_ANALYSIS.getUri());
-            DirectResponse directResponse = client.direct(directRequest).actionGet(30, TimeUnit.SECONDS);
+            DirectResponse directResponse = client.direct(directRequest).actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
             if (directResponse.getRestStatus() == RestStatus.OK
                 && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
                 result = directResponse.getResponseContent();
@@ -678,7 +683,7 @@ public class ESClusterDAO extends BaseESDAO {
         }
         try {
             DirectRequest directRequest = new DirectRequest(HOT_THREAD.getMethod(), HOT_THREAD.getUri());
-            DirectResponse directResponse = client.direct(directRequest).actionGet(30, TimeUnit.SECONDS);
+            DirectResponse directResponse = client.direct(directRequest).actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
             if (directResponse.getRestStatus() == RestStatus.OK
                 && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
                 result = directResponse.getResponseContent();
@@ -701,7 +706,7 @@ public class ESClusterDAO extends BaseESDAO {
         try {
             DirectRequest directRequest = new DirectRequest(CLEAR_FIELDDATA_MEMORY.getMethod(),
                 CLEAR_FIELDDATA_MEMORY.getUri());
-            DirectResponse directResponse = client.direct(directRequest).actionGet(30, TimeUnit.SECONDS);
+            DirectResponse directResponse = client.direct(directRequest).actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
             if (directResponse.getRestStatus() == RestStatus.OK
                 && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
                 result = directResponse.getResponseContent();
@@ -726,7 +731,7 @@ public class ESClusterDAO extends BaseESDAO {
         try {
             DirectRequest directRequest = new DirectRequest(ABNORMAL_SHARD_RETRY.getMethod(),
                 ABNORMAL_SHARD_RETRY.getUri());
-            DirectResponse directResponse = client.direct(directRequest).actionGet(30, TimeUnit.SECONDS);
+            DirectResponse directResponse = client.direct(directRequest).actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
             if (directResponse.getRestStatus() == RestStatus.OK
                 && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
                 result = directResponse.getResponseContent();
@@ -739,4 +744,21 @@ public class ESClusterDAO extends BaseESDAO {
         return result;
     }
 
+    /**
+     * 这里获取所有节点的tcp地址，暂时不做角色区分
+     * @param cluster
+     * @return
+     */
+    public List<String> getNodeTcpAddress(String cluster) {
+        ESClient client = esOpClient.getESClient(cluster);
+        if (Objects.isNull(client)) {
+            LOGGER.error(
+                    "class=ESClusterDAO||method=abnormalShardAllocationRetry||clusterName={}||errMsg=esClient is null",
+                    cluster);
+            return new ArrayList<>();
+        }
+        ESClusterNodesStatsResponse nodesStatsResponse = client.admin().cluster().prepareNodeStats().execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+        Map<String, ClusterNodeStats> nodes = nodesStatsResponse.getNodes();
+        return nodes.values().stream().map(ClusterNodeStats::getTransportAddress).distinct().collect(Collectors.toList());
+    }
 }
