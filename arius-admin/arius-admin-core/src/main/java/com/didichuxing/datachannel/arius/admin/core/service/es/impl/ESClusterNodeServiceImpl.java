@@ -398,7 +398,7 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
     /*********************************************private******************************************/
 
     @Override
-    public List<NodeStateVO> nodeStateAnalysis(String cluster) {
+    public List<NodeStateVO> syncNodeStateAnalysis(String cluster) {
         List<ClusterNodeStats> nodeStats = esClusterNodeDAO.getNodeState(cluster);
         List<NodeStateVO> vos = new ArrayList<>();
         nodeStats.forEach(nodeStat -> {

@@ -1,10 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.core.service.es.impl;
 
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_OPERATE_TIMEOUT;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.VERSION;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.VERSION_INNER_NUMBER;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.VERSION_NUMBER;
-
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.NodeAttrInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -37,15 +32,6 @@ import com.didiglobal.logi.log.LogFactory;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import java.net.InetAddress;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.compress.utils.Sets;
 import org.apache.commons.lang3.StringUtils;
@@ -54,6 +40,12 @@ import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.rest.RestStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.net.InetAddress;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.*;
 
 /**
  * @author d06679
@@ -435,7 +427,7 @@ public class ESClusterServiceImpl implements ESClusterService {
     }
 
     @Override
-    public List<PendingTaskAnalysisVO> pendingTaskAnalysis(String cluster) {
+    public List<PendingTaskAnalysisVO> syncPendingTaskAnalysis(String cluster) {
         String response = esClusterDAO.pendingTask(cluster);
         return Optional.ofNullable(response).map(JSONObject::parseObject)
             .map(jsonObject -> jsonObject.getJSONArray(TASKS))
@@ -444,27 +436,27 @@ public class ESClusterServiceImpl implements ESClusterService {
     }
 
     @Override
-    public List<TaskMissionAnalysisVO> taskMissionAnalysis(String cluster) {
+    public List<TaskMissionAnalysisVO> syncTaskMissionAnalysis(String cluster) {
         String response = esClusterDAO.taskMission(cluster);
         return Optional.ofNullable(response).map(JSONObject::parseObject)
             .map(jsonObject -> buildTaskMission(jsonObject)).orElse(new ArrayList<>());
     }
 
     @Override
-    public String hotThreadAnalysis(String cluster) {
+    public String syncHotThreadAnalysis(String cluster) {
         String response = esClusterDAO.hotThread(cluster);
         return response;
     }
 
     @Override
-    public boolean abnormalShardAllocationRetry(String cluster) {
+    public boolean syncAbnormalShardAllocationRetry(String cluster) {
         String response = esClusterDAO.abnormalShardAllocationRetry(cluster);
         return Optional.ofNullable(response).map(JSONObject::parseObject)
             .map(jsonObject -> jsonObject.getBoolean(ACKNOWLEDGED)).orElse(false);
     }
 
     @Override
-    public boolean clearFieldDataMemory(String cluster) {
+    public boolean syncClearFieldDataMemory(String cluster) {
         String response = esClusterDAO.clearFieldDataMemory(cluster);
         return Optional.ofNullable(response).map(JSONObject::parseObject)
             .map(jsonObject -> jsonObject.getJSONObject(SHARDS)).map(shards -> shards.getInteger(FAILED))

@@ -48,6 +48,11 @@ public interface ESShardService {
     List<Segment> syncGetSegmentsCountInfo(String clusterName);
 
 
-    ShardAssignmentDescriptionVO shardAssignmentDescription(String cluster);
+    /**
+     *  shard分配说明
+     * @param cluster
+     * @return
+     */
+    ShardAssignmentDescriptionVO syncShardAssignmentDescription(String cluster);
 
 }

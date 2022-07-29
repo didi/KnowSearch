@@ -12,7 +12,7 @@ public interface ESShardCatService {
      * @param cluster
      * @return
      */
-    List<ShardCatCellPO> shardDistribution(String cluster);
+    List<ShardCatCellPO> syncShardDistribution(String cluster);
 
     Tuple<Long, List<ShardDistributionVO>> syncGetCatShardInfo(String queryCluster, Integer queryProjectId,String keyword, long from, Long size, String sortTerm, Boolean orderByDesc);
 
