@@ -665,6 +665,7 @@ public class IndicesManagerImpl implements IndicesManager {
             }
             //操作记录
         operateRecordService.save(new OperateRecord.Builder()
+                        .userOperation(operator)
                         .operationTypeEnum(OperateTypeEnum.INDEXING_SERVICE_RUN)
                         .project(projectService.getProjectBriefByProjectId(projectId))
                         .content(String.format("【%s】执行rollover",indexCatCellDTO.getIndex()))
@@ -683,6 +684,7 @@ public class IndicesManagerImpl implements IndicesManager {
             //操作记录
             operateRecordService.save(
                     new OperateRecord.Builder().operationTypeEnum(OperateTypeEnum.INDEXING_SERVICE_RUN)
+                            .userOperation(operator)
                             .project(projectService.getProjectBriefByProjectId(projectId))
                             .content(String.format("【%s】执行shrink", param.getIndex())).bizId(param.getIndex())
                             .buildDefaultManualTrigger());
@@ -698,6 +700,7 @@ public class IndicesManagerImpl implements IndicesManager {
         if (result.success()){
               //操作记录
         operateRecordService.save(new OperateRecord.Builder()
+                        .userOperation(operator)
                         .operationTypeEnum(OperateTypeEnum.INDEXING_SERVICE_RUN)
                         .project(projectService.getProjectBriefByProjectId(projectId))
                         .content(String.format("【%s】执行split",param.getIndex()))
@@ -723,6 +726,7 @@ public class IndicesManagerImpl implements IndicesManager {
                  //操作记录
         operateRecordService.save(new OperateRecord.Builder()
                         .operationTypeEnum(OperateTypeEnum.INDEXING_SERVICE_RUN)
+                        .userOperation(operator)
                         .project(projectService.getProjectBriefByProjectId(projectId))
                         .content(String.format("【%s】执行forceMerge",indexCatCellDTO.getIndex()))
                         .bizId(indexCatCellDTO.getIndex())
