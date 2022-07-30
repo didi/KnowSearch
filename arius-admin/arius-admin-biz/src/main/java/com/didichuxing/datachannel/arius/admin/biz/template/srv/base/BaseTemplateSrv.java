@@ -74,7 +74,6 @@ public interface BaseTemplateSrv {
 
 
 
-
-
-    SupportSrv getLogicTemplateSupportDCDRAndPipelineByLogicId(IndexTemplate template);
+    
+    SupportSrv getSupportDCDRAndPipelineByLogicTemplate(IndexTemplate template);
 }

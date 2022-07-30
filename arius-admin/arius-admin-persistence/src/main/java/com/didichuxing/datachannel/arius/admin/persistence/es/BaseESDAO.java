@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.rest.RestStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -113,6 +114,15 @@ public class BaseESDAO {
             if (minTimeoutNum > maxTimeoutNum) {
                 minTimeoutNum = maxTimeoutNum;
             }
+        } while (tryTimes-- > 0 && doWhilePredicate.test(t));
+        
+        return t;
+    }
+    
+    protected <T> T performTryTimesMethods(Supplier<T> esClientFunc, Predicate<T> doWhilePredicate, Integer tryTimes) {
+        T t = null;
+        do {
+            t = esClientFunc.get();
         } while (tryTimes-- > 0 && doWhilePredicate.test(t));
         
         return t;
