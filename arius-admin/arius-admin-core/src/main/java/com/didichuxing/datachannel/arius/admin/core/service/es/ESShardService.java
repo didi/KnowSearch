@@ -19,7 +19,7 @@ public interface ESShardService {
     List<MovingShardMetrics> syncGetMovingShards(String clusterName);
 
     /**
-     * 获取ES集群大Shard(50G)信息
+     * 获取ES集群大Shard(平台可配置，默认50G)信息
      */
     List<ShardMetrics> syncGetBigShards(String clusterName);
 
