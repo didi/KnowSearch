@@ -12,13 +12,12 @@ import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpTimeout
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dsls.DslsConstant;
 import com.google.common.collect.Lists;
+import java.util.List;
+import javax.annotation.PostConstruct;
 import lombok.NoArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
-import javax.annotation.PostConstruct;
-import java.util.List;
 
 @Component
 @NoArgsConstructor
@@ -149,8 +148,8 @@ public class IndexCatESDAO extends BaseESDAO {
      * 获取不包含模板id并且包含projectId的IndexCatCell信息，作用于平台索引管理新建索引侧
      * @return          List<IndexCatCell>
      */
-    public List<IndexCatCell> getPlatformCreateCatIndexList() {
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_PLATFORM_CREATE_CAT_INDEX);
+    public List<IndexCatCell> syncGetPlatformCreateCatExistsHealthIndexList() {
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_PLATFORM_CREATE_CAT_INDEX_EXISTS_HEALTH);
         int retryTime = 3;
         List<IndexCatCell> indexCatCell;
         // 这里两个时间 用于拿到今天和昨天的数据, 否则无法个获取昨天用户创建的索引数据

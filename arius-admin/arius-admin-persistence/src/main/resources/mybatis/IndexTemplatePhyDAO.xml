@@ -135,6 +135,11 @@
         from index_template_physical_info
         where logic_id = #{logicId} and status = #{status}
     </select>
+    <select id="getTemplateByLogicIdAndRole" parameterType="map" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from index_template_physical_info where status > 0 and logic_id = #{logicId} and role = #{role}
+    </select>
 
     <select id="getByClusterAndStatus" parameterType="map" resultMap="BaseResultMap">
         select

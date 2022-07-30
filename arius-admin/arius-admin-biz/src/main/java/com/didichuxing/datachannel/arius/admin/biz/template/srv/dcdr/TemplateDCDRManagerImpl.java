@@ -47,7 +47,6 @@ import com.didichuxing.datachannel.arius.admin.common.util.ESVersionUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
-import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterNodeService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpTimeoutRetry;
@@ -146,8 +145,7 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
 
     @Autowired
     private OpTaskManager         opTaskManager;
-    @Autowired
-    private ESClusterNodeService esClusterNodeService;
+  
 
     
     private static final int      TRY_LOCK_TIMEOUT            = 5;
@@ -204,8 +202,8 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
         }
 
         // 2. 校验目标集群合法性
-        ClusterPhy targetClusterPhy = clusterPhyService.getClusterByName(targetCluster);
-        if (null == targetClusterPhy) {
+        Result<ClusterPhy> targetClusterPhyResult = clusterPhyManager.getClusterByName(targetCluster);
+        if (null == targetClusterPhyResult.getData()) {
             return Result.buildFail(String.format("目标集群[%s]不存在", targetCluster));
         }
         IndexTemplatePhy masterPhyTemplate = templateLogicWithPhysical.getMasterPhyTemplate();
@@ -217,12 +215,13 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
             return Result.buildFail(String.format("模板Id[%s]所在集群[%s]不存在", templateId, masterPhyTemplate.getCluster()));
         }
 
-        ClusterPhy sourceClusterPhy = clusterPhyService.getClusterByName(masterPhyTemplate.getCluster());
-        if (null == sourceClusterPhy) {
+        Result<ClusterPhy> sourceClusterPhyResult = clusterPhyManager.getClusterByName(masterPhyTemplate.getCluster());
+        if (null == sourceClusterPhyResult.getData()) {
             return Result.buildFail(String.format("原集群[%s]不存在", masterPhyTemplate.getCluster()));
         }
         //大版本一致就可以，小之间是不应该产生影响的
-        if (Boolean.FALSE.equals(ESVersionUtil.compareBigVersionConsistency(sourceClusterPhy.getEsVersion(),targetClusterPhy.getEsVersion()))) {
+        if (Boolean.FALSE.equals(ESVersionUtil.compareBigVersionConsistency(sourceClusterPhyResult.getData().getEsVersion(),
+                targetClusterPhyResult.getData().getEsVersion()))) {
             return Result.buildFail("主从集群版本必须一致");
         }
 
@@ -246,8 +245,8 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
             operateRecordService.save(new OperateRecord.Builder()
                 .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID)).content(
 
-                    String.format("创建DCDR链路，主集群：%s，从集群：%s", sourceClusterPhy.getCluster(),
-                        targetClusterPhy.getCluster()))
+                    String.format("创建DCDR链路，主集群：%s，从集群：%s", sourceClusterPhyResult.getData().getCluster(),
+                        targetClusterPhyResult.getData().getCluster()))
                 .userOperation(operator).bizId(templateId).triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
                 .operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE_DCDR_SETTING)
 
@@ -299,7 +298,7 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
                 .getTemplateById(param.getPhysicalIds().get(i));
 
             // 判断集群与从集群是否配置了
-            if (!clusterPhyService.ensureDCDRRemoteCluster(templatePhysicalPO.getCluster(),
+            if (!clusterPhyManager.ensureDCDRRemoteCluster(templatePhysicalPO.getCluster(),
                 param.getReplicaClusters().get(i))) {
                 return Result.buildFail("创建remote-cluster失败, 请检查从集群是否正常");
             }
@@ -892,7 +891,7 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
                 return Result.buildNotExist("物理模板不存在");
             }
 
-            if (!clusterPhyService.isClusterExists(param.getReplicaClusters().get(i))) {
+            if (!clusterPhyManager.isClusterExists(param.getReplicaClusters().get(i))) {
                 return Result.buildNotExist("从集群不存在");
             }
 

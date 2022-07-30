@@ -19,7 +19,6 @@ import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Consumer;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -39,8 +38,7 @@ public class TemplateLogicPageSearchHandle extends AbstractPageSearchHandle<Temp
     private static final FutureUtil<Void> BUILD_BELONG_CLUSTER_FUTURE_UTIL = FutureUtil
         .init("BUILD_BELONG_CLUSTER_FUTURE_UTIL", 10, 10, 100);
 
-    private static final FutureUtil<Void> RESOURCE_BUILD_FUTURE_UTIL       = FutureUtil
-        .init("RESOURCE_BUILD_FUTURE_UTIL", 10, 10, 100);
+
 
     @Override
     protected Result<Boolean> checkCondition(TemplateConditionDTO templateConditionDTO, Integer projectId) {
@@ -76,19 +74,11 @@ public class TemplateLogicPageSearchHandle extends AbstractPageSearchHandle<Temp
         Integer totalHit = indexTemplateService.fuzzyLogicTemplatesHitByCondition(condition).intValue();
 
         List<ConsoleTemplateVO> consoleTemplateVOList = buildOtherInfo(matchIndexTemplate);
-        consoleTemplateVOList.forEach(buildIsPartition);
+      
         return PaginationResult.buildSucc(consoleTemplateVOList, totalHit, condition.getPage(), condition.getSize());
     }
     
-    private final Consumer<ConsoleTemplateVO> buildIsPartition = consoleTemplateVO -> {
-        if (Objects.isNull(consoleTemplateVO.getExpression())) {
-            consoleTemplateVO.setIsPartition(Boolean.FALSE);
-        } else {
-            consoleTemplateVO.setIsPartition(consoleTemplateVO.getExpression().endsWith("*"));
-            
-        }
-        
-    };
+  
     /******************************************private***********************************************/
     private List<ConsoleTemplateVO> buildOtherInfo(List<IndexTemplate> indexTemplateList) {
         if (CollectionUtils.isEmpty(indexTemplateList)) {
@@ -96,14 +86,9 @@ public class TemplateLogicPageSearchHandle extends AbstractPageSearchHandle<Temp
         }
         List<ConsoleTemplateVO> consoleTemplateVOList = ConvertUtil.list2List(indexTemplateList,
             ConsoleTemplateVO.class);
-        consoleTemplateVOList.forEach(consoleTemplateVO -> {
-
-            Optional.ofNullable(consoleTemplateVO.getProjectId()).map(projectService::getProjectBriefByProjectId)
-                .map(ProjectBriefVO::getProjectName).ifPresent(consoleTemplateVO::setProjectName);
-
-        });
+       
         //1. 设置逻辑集群
-        RESOURCE_BUILD_FUTURE_UTIL.runnableTask(() -> setTemplateClusterName(consoleTemplateVOList)).waitExecute();
+        setTemplateClusterName(consoleTemplateVOList);
         return consoleTemplateVOList;
     }
 
@@ -111,15 +96,19 @@ public class TemplateLogicPageSearchHandle extends AbstractPageSearchHandle<Temp
         if (CollectionUtils.isEmpty(consoleTemplateVOList)) {
             return;
         }
-
         for (ConsoleTemplateVO consoleTemplateVO : consoleTemplateVOList) {
             BUILD_BELONG_CLUSTER_FUTURE_UTIL.runnableTask(() -> {
-                ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByIdAndProjectId(consoleTemplateVO.getResourceId()
-                        , consoleTemplateVO.getProjectId());
+                Optional.ofNullable(consoleTemplateVO.getProjectId()).map(projectService::getProjectBriefByProjectId)
+                        .map(ProjectBriefVO::getProjectName).ifPresent(consoleTemplateVO::setProjectName);
+                ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByIdAndProjectId(
+                        consoleTemplateVO.getResourceId(), consoleTemplateVO.getProjectId());
                 if (null != clusterLogic) {
                     consoleTemplateVO.setCluster(clusterLogic.getName());
                 }
             });
+            consoleTemplateVO.setIsPartition(
+                    Objects.nonNull(consoleTemplateVO.getExpression()) && consoleTemplateVO.getExpression()
+                            .endsWith("*"));
         }
         BUILD_BELONG_CLUSTER_FUTURE_UTIL.waitExecute();
     }

@@ -1178,13 +1178,13 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrvImpl impleme
             return false;
         }
 
-        ClusterPhy clusterPhy = clusterPhyService
+        Result<ClusterPhy> clusterPhyResult = clusterPhyManager
             .getClusterByName(logicWithPhysical.getMasterPhyTemplate().getCluster());
-        if (null == clusterPhy) {
+        if (null == clusterPhyResult.getData()) {
             return false;
         }
 
-        return ESVersionUtil.isHigher(clusterPhy.getEsVersion(), "6.5.1");
+        return ESVersionUtil.isHigher(clusterPhyResult.getData().getEsVersion(), "6.5.1");
     }
 
     protected void fillSpecialField(IndexTemplateWithMapping templateLogicWithMapping) {
