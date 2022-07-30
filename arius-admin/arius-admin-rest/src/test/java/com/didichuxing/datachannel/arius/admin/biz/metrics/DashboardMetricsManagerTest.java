@@ -69,7 +69,7 @@ class DashboardMetricsManagerTest {
 
         // Configure DashBoardMetricsService.getToNMetrics(...).
         final List<VariousLineChartMetrics> variousLineChartMetrics = Arrays.asList(new VariousLineChartMetrics("type",
-            Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0))));
+            Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0,0L))));
         when(dashBoardMetricsService
             .getToNMetrics(new MetricsDashboardTopNDTO(0L, 0L, "aggType", Arrays.asList("value"), 0), "oneLevelType"))
                 .thenReturn(variousLineChartMetrics);
@@ -110,7 +110,7 @@ class DashboardMetricsManagerTest {
 
         // Configure DashBoardMetricsService.getToNMetrics(...).
         final List<VariousLineChartMetrics> variousLineChartMetrics = Arrays.asList(new VariousLineChartMetrics("type",
-            Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0))));
+            Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0,0L))));
         when(dashBoardMetricsService
             .getToNMetrics(new MetricsDashboardTopNDTO(0L, 0L, "aggType", Arrays.asList("value"), 0), "oneLevelType"))
                 .thenReturn(variousLineChartMetrics);
@@ -149,7 +149,7 @@ class DashboardMetricsManagerTest {
 
         // Configure DashBoardMetricsService.getToNMetrics(...).
         final List<VariousLineChartMetrics> variousLineChartMetrics = Arrays.asList(new VariousLineChartMetrics("type",
-            Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0))));
+            Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0,0L))));
         when(dashBoardMetricsService
             .getToNMetrics(new MetricsDashboardTopNDTO(0L, 0L, "aggType", Arrays.asList("value"), 0), "oneLevelType"))
                 .thenReturn(variousLineChartMetrics);
@@ -190,7 +190,7 @@ class DashboardMetricsManagerTest {
 
         // Configure DashBoardMetricsService.getToNMetrics(...).
         final List<VariousLineChartMetrics> variousLineChartMetrics = Arrays.asList(new VariousLineChartMetrics("type",
-            Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0))));
+            Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0,0L))));
         when(dashBoardMetricsService
             .getToNMetrics(new MetricsDashboardTopNDTO(0L, 0L, "aggType", Arrays.asList("value"), 0), "oneLevelType"))
                 .thenReturn(variousLineChartMetrics);
@@ -229,7 +229,7 @@ class DashboardMetricsManagerTest {
 
         // Configure DashBoardMetricsService.getToNMetrics(...).
         final List<VariousLineChartMetrics> variousLineChartMetrics = Arrays.asList(new VariousLineChartMetrics("type",
-            Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0))));
+            Arrays.asList(new MetricsContent("cluster", "name", Arrays.asList(new MetricsContentCell(0.0, 0L)), 0.0,0L))));
         when(dashBoardMetricsService
             .getToNMetrics(new MetricsDashboardTopNDTO(0L, 0L, "aggType", Arrays.asList("value"), 0), "oneLevelType"))
                 .thenReturn(variousLineChartMetrics);

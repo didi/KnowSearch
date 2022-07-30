@@ -291,9 +291,7 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
     public Result<Void> createPhyDCDR(TemplatePhysicalDCDRDTO param, String operator) throws ESOperateException {
         Result<Void> checkDCDRResult = checkDCDRParam(param);
 
-        if (checkDCDRResult.failed()) {
-            throw new ESOperateException(checkDCDRResult.getMessage());
-        }
+        if (checkDCDRResult.failed()) { return Result.buildFrom(checkDCDRResult);}
 
         for (int i = 0; i < param.getPhysicalIds().size(); ++i) {
             IndexTemplatePhy templatePhysicalPO = indexTemplatePhyService
@@ -302,11 +300,11 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
             // 判断集群与从集群是否配置了
             if (!clusterPhyManager.ensureDCDRRemoteCluster(templatePhysicalPO.getCluster(),
                 param.getReplicaClusters().get(i))) {
-                return Result.buildFail("创建remote-cluster失败");
+                return Result.buildFail("创建remote-cluster失败, 请检查从集群是否正常");
             }
 
             if (!syncCreateTemplateDCDR(param.getPhysicalIds().get(i), param.getReplicaClusters().get(i), 3)) {
-                return Result.buildFail("创建DCDR链路失败");
+                return Result.buildFail("创建DCDR链路失败, 请检查主从集群是否正常");
 
             }
         }
@@ -652,6 +650,10 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
                                           int retryCount) throws ESOperateException {
 
         IndexTemplatePhy templatePhysical = indexTemplatePhyService.getTemplateById(physicalId);
+        if (null == templatePhysical) {
+            LOGGER.error("method=syncCreateTemplateDCDR||physicalId={}||replicaCluster={}||errMsg=templatePhysical is null", physicalId, replicaCluster);
+            return false;
+        }
 
         LOGGER.info("method=syncCreateTemplateDCDR||physicalId={}||replicaCluster={}", physicalId, replicaCluster);
 

@@ -9,6 +9,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcomma
 import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodes.ClusterNodeInfo;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodesstats.ClusterNodeStats;
+
 import java.util.List;
 import java.util.Map;
 
@@ -82,7 +83,7 @@ public interface ESClusterNodeService {
      * @param cluster
      * @return
      */
-    List<NodeStateVO> nodeStateAnalysis(String cluster);
+    List<NodeStateVO> syncNodeStateAnalysis(String cluster);
 
     /**
      * 同步获取节点内存和磁盘

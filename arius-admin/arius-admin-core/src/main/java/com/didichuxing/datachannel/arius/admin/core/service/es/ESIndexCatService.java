@@ -2,10 +2,12 @@ package com.didichuxing.datachannel.arius.admin.core.service.es;
 
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatCellDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.IndexCatCell;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.IndexShardInfo;
 import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
+import java.util.Collection;
 import java.util.Collection;
 import java.util.List;
 
@@ -75,7 +77,7 @@ public interface ESIndexCatService {
      * @param name
      * @return
      */
-    List<IndexCatCellDTO> getByClusterLogic(String name);
+    List<IndexCatCellDTO> syncGetByClusterLogic(String name, Integer projectId);
     
     Result<List<IndexCatCellDTO>> syncGetSegmentsIndexList(String cluster, Collection<String> indexList);
 }

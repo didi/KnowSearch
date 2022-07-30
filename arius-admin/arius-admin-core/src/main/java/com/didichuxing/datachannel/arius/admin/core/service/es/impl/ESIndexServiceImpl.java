@@ -678,7 +678,7 @@ public class ESIndexServiceImpl implements ESIndexService {
     }
 
     @Override
-    public List<CatIndexResult> indicesDistribution(String cluster) {
+    public List<CatIndexResult> syncIndicesDistribution(String cluster) {
         List<CatIndexResult> catIndexResultList = esIndexDAO.catIndices(cluster);
         return catIndexResultList;
     }

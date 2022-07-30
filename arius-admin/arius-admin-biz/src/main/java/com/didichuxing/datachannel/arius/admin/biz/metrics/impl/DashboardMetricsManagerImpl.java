@@ -173,6 +173,7 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
         
         List<VariousLineChartMetrics> variousLineChartMetrics = dashBoardMetricsService.getToNMetrics(param,
                 oneLevelType);
+
         // 毛刺点优化
         MetricsValueConvertUtils.doOptimizeQueryBurrForNodeOrIndicesMetrics(variousLineChartMetrics);
         
@@ -230,7 +231,7 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
         Map<DashBoardMetricListTypeEnum, DashBoardMetricThresholdDTO> thresholdValues = getDashBoardMetricThresholdValues();
         
         for (MetricList metric : listMetrics) {
-            DashBoardMetricListTypeEnum key = DashBoardMetricListTypeEnum.valueOfType(metric.getType());
+            DashBoardMetricListTypeEnum key = DashBoardMetricListTypeEnum.valueOfTypeAndOneLevelType(metric.getType(),oneLevelType);
             if (thresholdValues.get(key) != null && thresholdValues.containsKey(key)) {
                 DashBoardMetricThresholdDTO thresholdDTO = thresholdValues.get(key);
                 Double value = Double.parseDouble(String.valueOf(SizeUtil.getDasboardUnitSize(thresholdDTO.getValue()+thresholdDTO.getUnit())));

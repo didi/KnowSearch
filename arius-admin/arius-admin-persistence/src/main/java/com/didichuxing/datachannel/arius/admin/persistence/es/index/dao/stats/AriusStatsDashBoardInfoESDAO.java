@@ -1,9 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.FIELD;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricTopTypeEnum.listNoNegativeMetricTypes;
-import static com.didichuxing.datachannel.arius.admin.common.constant.routing.ESRoutingConstant.CLUSTER_PHY_HEALTH_ROUTING;
-
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
@@ -18,27 +14,27 @@ import com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoard
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricOtherTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricTopTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.OneLevelTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.IndexNameUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.MetricsUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.*;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dsls.DslsConstant;
 import com.didiglobal.logi.elasticsearch.client.response.query.query.ESQueryResponse;
 import com.didiglobal.logi.elasticsearch.client.response.query.query.hits.ESHit;
 import com.didiglobal.logi.elasticsearch.client.response.query.query.hits.ESHits;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Component;
+
+import javax.annotation.PostConstruct;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import javax.annotation.PostConstruct;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Component;
+
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.FIELD;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricTopTypeEnum.listNoNegativeMetricTypes;
+import static com.didichuxing.datachannel.arius.admin.common.constant.routing.ESRoutingConstant.CLUSTER_PHY_HEALTH_ROUTING;
 
 @Component
 public class AriusStatsDashBoardInfoESDAO extends BaseAriusStatsESDAO {
@@ -58,20 +54,21 @@ public class AriusStatsDashBoardInfoESDAO extends BaseAriusStatsESDAO {
      * @see                  DashBoardMetricListTypeEnum
      * @param oneLevelType  一级指标 支持cluster node index template thread
      * @param metricsType   二级指标
-     * @param aggType       聚合类型
+     * @param sources       _source内容
      * @param flag          是否为异常列表 true 是， false 否
      * @param sortType      排序类型   asc decs
      * @return              List<MetricList>
      */
-    public MetricList fetchListFlagMetric(String oneLevelType, String metricsType, String aggType, String flag,
+    public MetricList fetchListFlagMetric(String oneLevelType, String metricsType,String  sortItem,String valueMetric, List<String> sources, String flag,
                                           String sortType) {
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.FETCH_LIST_FLAG_METRIC, oneLevelType, sortType,
-            oneLevelType, oneLevelType, oneLevelType, oneLevelType, metricsType, flag, oneLevelType, NOW_6M, NOW_1M);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.FETCH_LIST_FLAG_METRIC, oneLevelType, sortItem,sortType,
+                JSON.toJSONString(sources), oneLevelType, metricsType, flag, oneLevelType, NOW_6M, NOW_1M);
         String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
 
         return gatewayClient.performRequest(metadataClusterName, realIndex, TYPE, dsl,
-            s -> fetchRespMetrics(s, oneLevelType, metricsType, /*是否需要设置指标具体值*/false), 3);
+            s -> fetchRespMetrics(s, oneLevelType, metricsType, /*是否需要设置指标具体值*/true,valueMetric), 3);
     }
+
 
     /**
      * 获取dashboard大盘list列表指标信息
@@ -89,7 +86,7 @@ public class AriusStatsDashBoardInfoESDAO extends BaseAriusStatsESDAO {
 
         String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
         return gatewayClient.performRequest(metadataClusterName, realIndex, TYPE, dsl,
-            s -> fetchRespMetrics(s, oneLevelType, metricsType, /*是否需要设置指标具体值*/true), 3);
+            s -> fetchRespMetrics(s, oneLevelType, metricsType, /*是否需要设置指标具体值*/true,metricsType), 3);
     }
 
     /**
@@ -99,10 +96,11 @@ public class AriusStatsDashBoardInfoESDAO extends BaseAriusStatsESDAO {
      * @param oneLevelType   一级指标项
      * @param metricsType    二级指标项
      * @param hasGetValue    是否需要设置指标项值
+     * @param valueMetric    值的字段
      * @return               MetricList
      */
     private MetricList fetchRespMetrics(ESQueryResponse s, String oneLevelType, String metricsType,
-                                        boolean hasGetValue) {
+                                        boolean hasGetValue,String valueMetric) {
         MetricList metricList = new MetricList();
         metricList.setType(metricsType);
         List<MetricListContent> metricListContents = Lists.newArrayList();
@@ -113,7 +111,7 @@ public class AriusStatsDashBoardInfoESDAO extends BaseAriusStatsESDAO {
             for (ESHit hit : hits.getHits()) {
                 if (null != hit.getSource() && null != ((JSONObject) hit.getSource()).getJSONObject(oneLevelType)
                     && null != ((JSONObject) hit.getSource()).getJSONObject(oneLevelType).getString(CLUSTER)
-                    && null != ((JSONObject) hit.getSource()).getJSONObject(oneLevelType).getString(oneLevelType)) {
+                    && null != ((JSONObject) hit.getSource()).getJSONObject(oneLevelType).getString(oneLevelType)){
 
                     JSONObject healthMetricsJb = ((JSONObject) hit.getSource()).getJSONObject(oneLevelType);
                     String cluster = healthMetricsJb.getString(CLUSTER);
@@ -136,8 +134,10 @@ public class AriusStatsDashBoardInfoESDAO extends BaseAriusStatsESDAO {
                     metricListContent.setName(metricsTypeValue);
 
                     // 是否需要指标具体值
-                    if (hasGetValue) {
-                        Double value = healthMetricsJb.getDouble(metricsType);
+                    if (hasGetValue
+                            && StringUtils.isNotBlank(valueMetric)
+                            && null != ((JSONObject) hit.getSource()).getJSONObject(oneLevelType).getString(valueMetric)) {
+                        Double value = healthMetricsJb.getDouble(valueMetric);
                         value = Double.valueOf(String.format("%.2f", value));
                         metricListContent.setValue(value);
                     }
@@ -381,7 +381,7 @@ public class AriusStatsDashBoardInfoESDAO extends BaseAriusStatsESDAO {
     /**
      * 由于非负型指标的结果不能再<em>query</em>条件进行<em>filter</em>过滤，问题是会导致召回结果数量不正常，
      * 这里使用<em>agg</em>的<em>filter</em>模式进行构建，同时可以拉去更多的召回数据，若后续对结果进行处理时，
-     * 可参照{@linkplain #fetchMultipleNoNegativeAggMetrics(ESQueryResponse, List, Integer)}
+     * 可参照{#fetchMultipleNoNegativeAggMetrics(com.didiglobal.logi.elasticsearch.client.response.query.query.ESQueryResponse, java.lang.String, java.util.List, java.lang.Integer)(ESQueryResponse, List, Integer)}
      * 的方法进行结果处理
      * agg:
      *             "gatewaySucPer": {

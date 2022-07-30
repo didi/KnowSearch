@@ -8,12 +8,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyQuickCommandIndicesQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyQuickCommandShardsQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.IndicesDistributionVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.NodeStateVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.PendingTaskAnalysisVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.ShardAssignmentDescriptionVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.ShardDistributionVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.TaskMissionAnalysisVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.*;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 import com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
@@ -21,15 +16,12 @@ import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
-import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterNodeService;
-import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
-import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
-import com.didichuxing.datachannel.arius.admin.core.service.es.ESShardCatService;
-import com.didichuxing.datachannel.arius.admin.core.service.es.ESShardService;
+import com.didichuxing.datachannel.arius.admin.core.service.es.*;
 import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
-import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /**
  * 快捷指令实现.
@@ -68,7 +60,7 @@ public class ClusterPhyQuickCommandManagerImpl implements ClusterPhyQuickCommand
         if (checkResult.failed()) {
             return Result.buildFail(checkResult.getMessage());
         }
-        return Result.buildSucc(esClusterNodeService.nodeStateAnalysis(cluster));
+        return Result.buildSucc(esClusterNodeService.syncNodeStateAnalysis(cluster));
     }
     
     @Override
@@ -78,7 +70,7 @@ public class ClusterPhyQuickCommandManagerImpl implements ClusterPhyQuickCommand
             return Result.buildFail(checkResult.getMessage());
         }
         // 把 List<CatIndexResult> 转为 List<IndicesDistributionVO>
-        List<CatIndexResult> catIndexResultList = esIndexService.indicesDistribution(cluster);
+        List<CatIndexResult> catIndexResultList = esIndexService.syncIndicesDistribution(cluster);
         return Result.buildSucc(ConvertUtil.list2List(catIndexResultList, IndicesDistributionVO.class));
     }
     
@@ -88,7 +80,7 @@ public class ClusterPhyQuickCommandManagerImpl implements ClusterPhyQuickCommand
         if (checkResult.failed()) {
             return Result.buildFail(checkResult.getMessage());
         }
-        List<PendingTaskAnalysisVO> vos = esClusterService.pendingTaskAnalysis(cluster);
+        List<PendingTaskAnalysisVO> vos = esClusterService.syncPendingTaskAnalysis(cluster);
         if (vos == null) {
             return Result.buildFail();
         }
@@ -101,7 +93,7 @@ public class ClusterPhyQuickCommandManagerImpl implements ClusterPhyQuickCommand
         if (checkResult.failed()) {
             return Result.buildFail(checkResult.getMessage());
         }
-        List<TaskMissionAnalysisVO> vos = esClusterService.taskMissionAnalysis(cluster);
+        List<TaskMissionAnalysisVO> vos = esClusterService.syncTaskMissionAnalysis(cluster);
         if (vos == null) {
             return Result.buildFail();
         }
@@ -114,7 +106,7 @@ public class ClusterPhyQuickCommandManagerImpl implements ClusterPhyQuickCommand
         if (checkResult.failed()) {
             return Result.buildFail(checkResult.getMessage());
         }
-        return Result.buildSucc(esClusterService.hotThreadAnalysis(cluster));
+        return Result.buildSucc(esClusterService.syncHotThreadAnalysis(cluster));
     }
     
     @Override
@@ -123,7 +115,7 @@ public class ClusterPhyQuickCommandManagerImpl implements ClusterPhyQuickCommand
         if (checkResult.failed()) {
             return Result.buildFail(checkResult.getMessage());
         }
-        ShardAssignmentDescriptionVO vo = esShardService.shardAssignmentDescription(cluster);
+        ShardAssignmentDescriptionVO vo = esShardService.syncShardAssignmentDescription(cluster);
         if (vo == null) {
             return Result.buildFail();
         }
@@ -136,7 +128,7 @@ public class ClusterPhyQuickCommandManagerImpl implements ClusterPhyQuickCommand
         if (checkResult.failed()) {
             return Result.buildFail(checkResult.getMessage());
         }
-        boolean result = esClusterService.abnormalShardAllocationRetry(cluster);
+        boolean result = esClusterService.syncAbnormalShardAllocationRetry(cluster);
         if (result) {
             return Result.buildSucc();
         }
@@ -149,7 +141,7 @@ public class ClusterPhyQuickCommandManagerImpl implements ClusterPhyQuickCommand
         if (checkResult.failed()) {
             return Result.buildFail(checkResult.getMessage());
         }
-        boolean result = esClusterService.clearFieldDataMemory(cluster);
+        boolean result = esClusterService.syncClearFieldDataMemory(cluster);
         if (result) {
             return Result.buildSucc();
         }

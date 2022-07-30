@@ -312,13 +312,8 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
             return false;
         }
 
-        if (esClusterService.hasSettingExist(cluster,
-            String.format(ESOperateConstant.REMOTE_CLUSTER_FORMAT, remoteCluster))) {
-            return true;
-        }
-
         return esClusterService.syncPutRemoteCluster(cluster, remoteCluster,
-            genTcpAddr(remoteClusterPhy.getHttpWriteAddress(), 9300), 3);
+            buildTcpAddress(remoteCluster), 3);
     }
 
     @Override
@@ -421,16 +416,11 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
     }
 
     /**************************************** private method ***************************************************/
-    private List<String> genTcpAddr(String httpAddress, int tcpPort) {
+    private List<String> buildTcpAddress(String cluster) {
         try {
-            String[] httpAddrArr = httpAddress.split(",");
-            List<String> result = Lists.newArrayList();
-            for (String httpAddr : httpAddrArr) {
-                result.add(httpAddr.split(":")[0] + ":" + tcpPort);
-            }
-            return result;
+            return esClusterService.syncGetTcpAddress(cluster);
         } catch (Exception e) {
-            LOGGER.warn("method=genTcpAddr||httpAddress={}||errMsg={}", httpAddress, e.getMessage(), e);
+            LOGGER.error("method=genTcpAddr||cluster={}||errMsg={}", cluster, e.getMessage(), e);
         }
 
         return Lists.newArrayList();

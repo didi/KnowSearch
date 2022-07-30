@@ -71,9 +71,15 @@ public class ClusterMetrics {
     private Long    reqUprushNum;
 
     /**
-     * 消耗时间 （开始采集到结束采集的时间）
+     * _cluster/stats消耗时间 （开始采集到结束采集的时间）
      */
     private Long    clusterElapsedTime;
+
+    /**
+     * _node/stats消耗时间 （开始采集到结束采集的时间）
+     */
+    private Long    nodeElapsedTime;
+
 
     /**
      * 消耗时间是否大于5分钟（开始采集到结束采集的时间）

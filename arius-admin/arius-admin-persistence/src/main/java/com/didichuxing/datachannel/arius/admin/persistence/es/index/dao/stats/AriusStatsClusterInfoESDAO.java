@@ -1,6 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.constant.AriusStatsEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.IndexNameUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.MetricsUtils;
@@ -164,5 +165,31 @@ public class AriusStatsClusterInfoESDAO extends BaseAriusStatsESDAO {
         }
 
         return timeSlip2ValueMap;
+    }
+
+    /**
+     * {
+     *   "size": 1,
+     *   "sort": [
+     *     {
+     *       "timestamp": {
+     *         "order": "DESC"
+     *       }
+     *     }
+     *   ]
+     * }
+     * @param cluster
+     */
+    public Long getTimeDifferenceBetweenNearestPointAndNow(String cluster) {
+        long startTime = System.currentTimeMillis();
+        String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTime, startTime);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_TIME_DIFFERENCE_BETWEEN_NEAREST_POINT_AND_NOW,cluster);
+        return gatewayClient.performRequest(metadataClusterName, realIndexName, TYPE, dsl,
+                (ESQueryResponse response) -> getNearestTime(response), 3);
+    }
+
+    private Long getNearestTime(ESQueryResponse response){
+      return   response.getHits().getHits().stream().map(esHit -> esHit.getSource()).filter(Objects::nonNull)
+                .map(source->((JSONObject)source).getLong("timestamp")).findFirst().orElse(0L);
     }
 }
