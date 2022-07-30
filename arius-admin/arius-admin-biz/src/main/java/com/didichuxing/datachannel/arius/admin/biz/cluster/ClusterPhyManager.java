@@ -33,7 +33,7 @@ public interface ClusterPhyManager {
      * @return true/false
      */
     boolean copyMapping(String cluster, int retryCount);
-    TupleThree</*dcdrExist*/Boolean,/*pipelineExist*/ Boolean,/*existColdRegion*/ Boolean> getDCDRAndPipelineAndColdRegionTupleByClusterPhyWithCache(String clusterPhy,Integer regionId);
+    TupleThree</*dcdrExist*/Boolean,/*pipelineExist*/ Boolean,/*existColdRegion*/ Boolean> getDCDRAndPipelineAndColdRegionTupleByClusterPhyWithCache(String clusterPhy);
 
     /**
      * 同步元数据

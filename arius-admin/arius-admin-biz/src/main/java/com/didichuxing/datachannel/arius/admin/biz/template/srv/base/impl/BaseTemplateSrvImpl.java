@@ -41,6 +41,8 @@ import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -288,33 +290,40 @@ public abstract class BaseTemplateSrvImpl implements BaseTemplateSrv {
     }
     
     @Override
-    public SupportSrv getLogicTemplateSupportDCDRAndPipelineByLogicId(Integer logicTemplateId) {
-        IndexTemplateLogicWithClusterAndMasterTemplate template = indexTemplateService.getLogicTemplateWithClusterAndMasterTemplate(
-                logicTemplateId);
-        
+    public SupportSrv getLogicTemplateSupportDCDRAndPipelineByLogicId(IndexTemplate template) {
+        List<TemplateServiceEnum> templateServiceEnums = TemplateServiceEnum.str2Srv(template.getOpenSrv());
         SupportSrv supportSrv = new SupportSrv();
-        if (null == template || null == template.getMasterTemplate()) {
-            LOGGER.warn("class=TemplateSrvPageSearchHandle||method=getLogicTemplateAssociatedEsVersionByLogicTemplateId"
-                        + "||templateId={}||errMsg=masterPhyTemplate is null", logicTemplateId);
-            return supportSrv;
-        }
+        //这么做的目的是最大程度的跳过查库或者缓存的一个刷库、刷es的情况
+        if (CollectionUtils.isNotEmpty(templateServiceEnums) &&
+                /*如果dcdr被开启*/Objects.equals(template.getHasDCDR(),Boolean.TRUE) &&/*如果PIPELINE
+        已经被开启*/templateServiceEnums.contains(TemplateServiceEnum.TEMPLATE_PIPELINE) &&
+                /*如果冷热分离已经被开启*/  templateServiceEnums.contains(TemplateServiceEnum.TEMPLATE_COLD)
+          ) {
         
-        String masterCluster = template.getMasterTemplate().getCluster();
-        
-        if (!clusterPhyManager.isClusterExists(masterCluster)) {
-            LOGGER.warn("class=TemplateSrvPageSearchHandle||method=getLogicTemplateAssociatedEsVersionByLogicTemplateId"
-                        + "||templateId={}||errMsg=clusterPhy of template is null", logicTemplateId);
-            return supportSrv;
+            supportSrv.setDcdrModuleExists(true);
+            supportSrv.setPipelineModuleExists(true);
+            supportSrv.setColdRegionExists(true);
+            //以上所有的判断的基础都是在于分区模板的状态
+            supportSrv.setPartition(true);
+        } else {
+            String masterCluster = indexTemplateService.getMaterClusterPhyByLogicTemplateId(template.getId());
+            if (Objects.isNull(masterCluster) || !clusterPhyManager.isClusterExists(masterCluster)) {
+                LOGGER.warn(
+                        "class=TemplateSrvPageSearchHandle||method=getLogicTemplateAssociatedEsVersionByLogicTemplateId"
+                        + "||templateId={}||errMsg=clusterPhy of template is null", template.getId());
+                return supportSrv;
+            }
+            TupleThree</*dcdrExist*/Boolean,/*pipelineExist*/ Boolean,/*existColdRegion*/ Boolean> existDCDRAndPipelineModule = clusterPhyManager.getDCDRAndPipelineAndColdRegionTupleByClusterPhyWithCache(
+                    masterCluster);
+            supportSrv.setDcdrModuleExists(Boolean.TRUE.equals(existDCDRAndPipelineModule.v1));
+            supportSrv.setPipelineModuleExists(Boolean.TRUE.equals(existDCDRAndPipelineModule.v2));
+            supportSrv.setColdRegionExists((Boolean.TRUE.equals(existDCDRAndPipelineModule.v3)));
+            supportSrv.setPartition(StringUtils.endsWith(template.getExpression(), "*"));
+            
         }
-        TupleThree</*dcdrExist*/Boolean,/*pipelineExist*/ Boolean,/*existColdRegion*/ Boolean> existDCDRAndPipelineModule = clusterPhyManager.getDCDRAndPipelineAndColdRegionTupleByClusterPhyWithCache(
-                masterCluster, template.getMasterTemplate().getRegionId());
-        supportSrv.setDcdrModuleExists(existDCDRAndPipelineModule.v1);
-        supportSrv.setPipelineModuleExists(existDCDRAndPipelineModule.v2);
-        supportSrv.setColdRegionExists(existDCDRAndPipelineModule.v3);
-        supportSrv.setPartition(template.getExpression().endsWith("*"));
         return supportSrv;
     }
     
-   
+  
 
 }

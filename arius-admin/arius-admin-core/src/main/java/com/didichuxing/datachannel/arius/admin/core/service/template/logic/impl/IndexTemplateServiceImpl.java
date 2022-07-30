@@ -714,7 +714,22 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
     public IndexTemplateLogicWithClusterAndMasterTemplate getLogicTemplateWithClusterAndMasterTemplate(Integer logicTemplateId) {
         return convert(getLogicTemplateWithCluster(logicTemplateId));
     }
-
+    
+    /**
+     * @param logicTemplateId
+     * @return
+     */
+    @Override
+    public String getMaterClusterPhyByLogicTemplateId(Integer logicTemplateId) {
+        IndexTemplatePhy IndexTemplatePhy = indexTemplatePhyService.getTemplateByLogicIdAndRole(logicTemplateId,
+                TemplateDeployRoleEnum.MASTER.getCode());
+        if (IndexTemplatePhy==null){
+            return null;
+        }
+     
+        return IndexTemplatePhy.getCluster();
+    }
+    
     @Override
     public List<IndexTemplateLogicWithClusterAndMasterTemplate> listLogicTemplatesWithClusterAndMasterTemplate(Set<Integer> logicTemplateIds) {
 

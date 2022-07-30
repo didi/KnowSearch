@@ -125,7 +125,17 @@ public class IndexTemplatePhyServiceImpl implements IndexTemplatePhyService {
     public List<IndexTemplatePhy> getTemplateByLogicId(Integer logicId) {
         return ConvertUtil.list2List(indexTemplatePhyDAO.listByLogicId(logicId), IndexTemplatePhy.class);
     }
-
+    
+    /**
+     * @param logicId
+     * @param role
+     * @return
+     */
+    @Override
+    public IndexTemplatePhy getTemplateByLogicIdAndRole(Integer logicId, Integer role) {
+        return ConvertUtil.obj2Obj(indexTemplatePhyDAO.getTemplateByLogicIdAndRole(logicId,role),IndexTemplatePhy.class);
+    }
+    
     /**
      * 从缓存中查询指定逻辑模板对应的物理模板
      * @param logicId 逻辑模板

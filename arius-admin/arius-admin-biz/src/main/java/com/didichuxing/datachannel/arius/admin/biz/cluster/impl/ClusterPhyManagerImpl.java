@@ -122,6 +122,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.ElasticsearchTimeoutException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
@@ -211,35 +212,40 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
     @Autowired
     private RoleTool                                             roleTool;
- 
-    private static final Cache</*clusterPhy*/String,TupleThree</*dcdrExist*/Boolean,/*pipelineExist*/ Boolean,/*existColdRegion*/ Boolean>> CLUSTER_PHY_DCDR_PIPELINE=  CacheBuilder.newBuilder()
+    private static final FutureUtil<Void>                                                                                                    FUTURE_UTIL               = FutureUtil.init(
+            "ClusterPhyManagerImpl", 20, 40, 100);
+    private static final Cache</*clusterPhy*/String, TupleThree</*dcdrExist*/Boolean,/*pipelineExist*/ Boolean,/*existColdRegion*/ Boolean>> CLUSTER_PHY_DCDR_PIPELINE = CacheBuilder.newBuilder()
             .expireAfterWrite(10, TimeUnit.MINUTES).maximumSize(10000).build();
-
     @PostConstruct
     private void init() {
         ariusScheduleThreadPool.submitScheduleAtFixedDelayTask(this::refreshClusterDistInfo, 60, 180);
-        //初始化获取集群dcdr和pipeline
-        initDCDRAndPipelineAndColdRegionTupleByClusterPhy();
-    }
 
-    private static final FutureUtil<Void> FUTURE_UTIL = FutureUtil.init("ClusterPhyManagerImpl", 20, 40, 100);
+    }
+    
+    @Scheduled(cron = "0 9/1 * * * ?")
+    private synchronized void refreshDCDRAndPipelineAndColdRegionTupleByClusterPhyWithCache() {
+    
+        for (String clusterName : clusterPhyService.listClusterNames()) {
+            CLUSTER_PHY_DCDR_PIPELINE.put(clusterName, getDCDRAndPipelineTupleByClusterPhy(clusterName));
+        }
+    }
+    
+
+  
     
     /**
      * @param clusterPhy
-     * @param regionId
      * @return
      */
     @Override
-    public TupleThree</*dcdrExist*/Boolean,/*pipelineExist*/ Boolean,/*existColdRegion*/ Boolean> getDCDRAndPipelineAndColdRegionTupleByClusterPhyWithCache(String clusterPhy,
-                                                                                                           Integer regionId) {
+    public TupleThree</*dcdrExist*/Boolean,/*pipelineExist*/ Boolean,/*existColdRegion*/ Boolean> getDCDRAndPipelineAndColdRegionTupleByClusterPhyWithCache(
+            String clusterPhy) {
         try {
-            return CLUSTER_PHY_DCDR_PIPELINE.get(clusterPhy, () -> getDCDRAndPipelineTupleByClusterPhy(clusterPhy));
-        } catch (Exception e) {
-            LOGGER.error("class={}||method=getDCDRAndPipelineTupleByClusterPhyWithCache||cluster={}",
-                    getClass().getSimpleName(), clusterPhy, e);
-            return Tuples.of(false, false,false);
+           return CLUSTER_PHY_DCDR_PIPELINE.get(
+                clusterPhy,()->getDCDRAndPipelineTupleByClusterPhy(clusterPhy));
+        }catch (Exception e){
+            return Tuples.of(false, false, false);
         }
-    
     }
     
     @Override
@@ -1672,20 +1678,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         return Tuples.of(tupleTwo.v1,tupleTwo.v2,CollectionUtils.isNotEmpty(getColdRegionByPhyCluster(clusterPhy)));
     }
     
-    private void initDCDRAndPipelineAndColdRegionTupleByClusterPhy() {
-        for (String clusterName : clusterPhyService.listClusterNames()) {
-            TupleTwo</*dcdrExist*/Boolean,/*pipelineExist*/ Boolean> existDCDRAndPipelineModule = esClusterNodeService.existDCDRAndPipelineModule(
-                    clusterName);
-            List<ClusterRegion> regionByPhyCluster = getColdRegionByPhyCluster(clusterName);
-            //如果dcdr和pipeline都是false，则不计入缓存
-            if (Boolean.FALSE.equals(existDCDRAndPipelineModule.v1)&&Boolean.FALSE.equals(existDCDRAndPipelineModule.v2)){
-                continue;
-            }
-            CLUSTER_PHY_DCDR_PIPELINE.put(clusterName,
-                    Tuples.of(true, true,
-                            CollectionUtils.isNotEmpty(regionByPhyCluster)));
-        }
-    }
+   
     
      public List<ClusterRegion> getColdRegionByPhyCluster(String phyCluster) {
         List<ClusterRegion> clusterRegions = clusterRegionService.listPhyClusterRegions(phyCluster);

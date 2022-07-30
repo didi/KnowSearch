@@ -5,6 +5,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.ColdSrvOpenDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.TemplateQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.srv.TemplateSrv;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.srv.UnavailableTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv.TemplateWithSrvVO;
@@ -35,9 +36,9 @@ public interface TemplateSrvManager {
     /**
      * 获取指定模板「不可用的」服务
      *
-     * @param template@return
+     * @param template @return
      */
-    List<UnavailableTemplateSrv> getUnavailableSrv(Integer logicTemplateId);
+    List<UnavailableTemplateSrv> getUnavailableSrv(IndexTemplate template);
 
     /**
      * 分页模糊查询模板服务

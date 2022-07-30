@@ -81,7 +81,7 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<Templa
             matchIndexTemplateList = filterFullDataByPage(meetConditionTemplateList, condition);
         }
 
-        List<TemplateWithSrvVO> templateWithSrvVOList = buildExtraAttribute(matchIndexTemplateList,condition.getProjectId());
+        List<TemplateWithSrvVO> templateWithSrvVOList = buildExtraAttribute(matchIndexTemplateList);
         
         
         
@@ -125,7 +125,7 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<Templa
         
     }
 
-    private List<TemplateWithSrvVO> buildExtraAttribute(List<IndexTemplate> templateList,Integer projectId) {
+    private List<TemplateWithSrvVO> buildExtraAttribute(List<IndexTemplate> templateList) {
         if (CollectionUtils.isEmpty(templateList)) {
             return Lists.newArrayList();
         }
@@ -151,10 +151,11 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<Templa
    
         indexTemplatePhyService.getTemplateByLogicId(templateWithSrvVO.getId()).stream()
                 .map(IndexTemplatePhy::getCluster).distinct().forEach(templateWithSrvVO.getCluster()::add);
-        templateWithSrvVO.setPartition(template.getExpression().endsWith("*"));
         templateWithSrvVO.setUnavailableSrv(
-                ConvertUtil.list2List(templateSrvManager.getUnavailableSrv(template.getId()),
+                ConvertUtil.list2List(templateSrvManager.getUnavailableSrv(template),
                         UnavailableTemplateSrvVO.class));
+        templateWithSrvVO.setPartition(StringUtils.endsWith(template.getExpression(),"*"));
+        
         return templateWithSrvVO;
         
     }
