@@ -74,6 +74,9 @@ public class ESClusterOverviewMetricsVO extends MetricsVO {
     @ApiModelProperty("大shard列表")
     private List<BigShardMetricsVO>                  bigShards;
 
+    @ApiModelProperty("大shard阈值")
+    private Double                                   bigShardThreshold;
+
     /******************************************6.节点信息******************************************/
 
     @ApiModelProperty("大于75%磁盘利用率节点列表")
