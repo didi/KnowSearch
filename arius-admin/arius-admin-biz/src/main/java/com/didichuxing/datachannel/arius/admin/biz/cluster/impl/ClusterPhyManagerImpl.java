@@ -222,7 +222,10 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
     }
     
-    @Scheduled(cron = "0 9/1 * * * ?")
+    /**
+     * 每45分钟全量更新一遍集群
+     */
+    @Scheduled(cron = "45 * * * * ?")
     private synchronized void refreshDCDRAndPipelineAndColdRegionTupleByClusterPhyWithCache() {
     
         for (String clusterName : clusterPhyService.listClusterNames()) {
@@ -235,7 +238,6 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     
     /**
      * @param clusterPhy
-     * @return
      */
     @Override
     public TupleThree</*dcdrExist*/Boolean,/*pipelineExist*/ Boolean,/*existColdRegion*/ Boolean> getDCDRAndPipelineAndColdRegionTupleByClusterPhyWithCache(
