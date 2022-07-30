@@ -18,18 +18,18 @@ import com.didiglobal.logi.elasticsearch.client.response.query.query.ESQueryResp
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import javax.annotation.Nullable;
+import javax.annotation.PostConstruct;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
-import javax.annotation.Nullable;
-import javax.annotation.PostConstruct;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 @Component
 @NoArgsConstructor
@@ -259,7 +259,8 @@ public class DslTemplateESDAO extends BaseESDAO {
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_DSL_TEMPLATE_BY_CONDITION,
             (queryDTO.getPage() - 1) * queryDTO.getSize(), queryDTO.getSize(), queryCriteriaDsl, sortInfo, sortOrder);
 
-        return gatewayClient.performRequestListAndGetTotalCount(null, indexName, typeName, dsl, DslTemplatePO.class);
+        return performTryTimesMethods(()->gatewayClient.performRequestListAndGetTotalCount(null, indexName, typeName,
+                dsl, DslTemplatePO.class), Objects::isNull,3);
     }
 
     /**
