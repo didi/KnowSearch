@@ -105,8 +105,7 @@ public class IndexCatInfoCollector extends AbstractMetaDataJob {
         if (CollectionUtils.isEmpty(platformCreateCatIndexList)) {
             return JOB_SUCCESS;
         }
-        List<String> collectIndexLists = platformCreateCatIndexList.stream().map(IndexCatCell::getIndex)
-                .collect(Collectors.toList());
+       
         // 这里的cluster 用户侧创建为逻辑集群名称，运维侧创建为物理集群名称
         Map<String/*cluster@index*/, IndexCatCell> index2IndexCatCellFromPlatformCreateMap = ConvertUtil.list2Map(
                 platformCreateCatIndexList, IndexCatCell::getKey, r -> r);
@@ -191,9 +190,8 @@ public class IndexCatInfoCollector extends AbstractMetaDataJob {
         //移除已删除索引, 不采集
         List<IndexCatCellDTO> finalSaveIndexCatList = res.stream()
                 .filter(this::filterNotCollectorIndexCat)
-                //只需要回写我们已经采集到的索引
-                .filter(indexCatCellDTO -> collectIndexLists.contains(indexCatCellDTO.getIndex()))
                 .filter(indexCatCellDTO -> Objects.nonNull(indexCatCellDTO.getProjectId()))
+                
                 .collect(Collectors.toList());
         esIndexCatService.syncUpsertCatIndex(finalSaveIndexCatList, RETRY_TIMES);
     
