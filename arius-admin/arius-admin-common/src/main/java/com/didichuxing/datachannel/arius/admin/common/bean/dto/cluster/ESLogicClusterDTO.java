@@ -39,8 +39,6 @@ public class ESLogicClusterDTO extends PageDTO {
     @ApiModelProperty("数据节点个数")
     private Integer dataNodeNum;
 
-   
-
     @ApiModelProperty("备注")
     private String  memo;
 

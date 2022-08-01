@@ -621,27 +621,36 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
      * 设置磁盘使用信息
      * @param clusterDTO
      */
-    private void setClusterLogicInfo(ESLogicClusterDTO clusterDTO) {
+    public void setClusterLogicInfo(ESLogicClusterDTO clusterDTO) {
         ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(clusterDTO.getId());
-        Long diskTotal = 0L;
-        Long diskUsage = 0L;
-        if (clusterRegion != null) {
-            Map<String, Triple<Long, Long, Double>> map = eSClusterNodeService
-                    .syncGetNodesDiskUsage(clusterRegion.getPhyClusterName());
-            Set<Map.Entry<String, Triple<Long, Long, Double>>> entries = map.entrySet();
-            for (Map.Entry<String, Triple<Long, Long, Double>> entry : entries) {
-                diskTotal += entry.getValue().v1();
-                diskUsage += entry.getValue().v2();
+        Result<List<ClusterRoleHost>> result = clusterRoleHostService
+                .listByRegionId(Math.toIntExact(clusterRegion.getId()));
+        if (result.success()) {
+            List<String> clusterRoleHostList = result.getData().stream().map(ClusterRoleHost::getNodeSet).collect(Collectors.toList());
+
+            Long diskTotal = 0L;
+            Long diskUsage = 0L;
+            if (clusterRegion != null) {
+                Map<String, Triple<Long, Long, Double>> map = eSClusterNodeService
+                        .syncGetNodesDiskUsage(clusterRegion.getPhyClusterName());
+                Set<Map.Entry<String, Triple<Long, Long, Double>>> entries = map.entrySet();
+                for (Map.Entry<String, Triple<Long, Long, Double>> entry : entries) {
+                    if (clusterRoleHostList.contains(entry.getKey())) {
+                        diskTotal += entry.getValue().v1();
+                        diskUsage += entry.getValue().v2();
+                    }
+                }
+
+                //设置节点数
+                clusterDTO.setNodeNum(clusterRoleHostList.size());
             }
-            //设置节点数
-            clusterDTO.setNodeNum(entries.size());
+            clusterDTO.setDiskTotal(diskTotal);
+            clusterDTO.setDiskUsage(diskUsage);
+            double diskUsagePercent = diskUsage != 0L && diskTotal != 0L ? CommonUtils.divideDoubleAndFormatDouble(
+                    diskUsage,
+                    diskTotal, 2, 1) : 0.0;
+            clusterDTO.setDiskUsagePercent(diskUsagePercent);
         }
-        clusterDTO.setDiskTotal(diskTotal);
-        clusterDTO.setDiskUsage(diskUsage);
-        double diskUsagePercent = diskUsage!=0L&&diskTotal!=0L?CommonUtils.divideDoubleAndFormatDouble(
-                diskUsage,
-                diskTotal, 2, 1):0.0;
-        clusterDTO.setDiskUsagePercent(diskUsagePercent);
 
         //设置es集群版本
         ClusterPhy physicalCluster = getLogicClusterAssignedPhysicalClusters(clusterDTO.getId());
