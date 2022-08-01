@@ -2,17 +2,6 @@ package com.didichuxing.datachannel.arius.admin.metadata.job.index;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.JOB_SUCCESS;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatCellDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
@@ -38,6 +27,15 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * @author lyn
@@ -47,6 +45,7 @@ import com.google.common.collect.Multimap;
 public class IndexCatInfoCollector extends AbstractMetaDataJob {
 
     private static final Integer        RETRY_TIMES                = 3;
+    private static final Integer         SEARCH_SIZE=5000;
     @Autowired
     private ClusterPhyService           clusterPhyService;
 
@@ -89,8 +88,12 @@ public class IndexCatInfoCollector extends AbstractMetaDataJob {
             logicClusterId2NameMap.putAll(ConvertUtil.list2Map(logicClusterList, ClusterLogic::getId, ClusterLogic::getName));
         }
 
-        // 2. 获取通过平台索引管理 创建的索引cat_index信息
-        List<IndexCatCell> platformCreateCatIndexList = esIndexCatService.syncGetPlatformCreateCatIndexList();
+        // 2. 获取通过平台索引管理 创建的索引cat_index信息且没有生成索引健康的数据
+        List<IndexCatCell> platformCreateCatIndexList = esIndexCatService.syncGetPlatformCreateCatIndexList(SEARCH_SIZE);
+        //获取不到索引了就直接返回
+        if (CollectionUtils.isEmpty(platformCreateCatIndexList)){
+             return JOB_SUCCESS;
+        }
         // 这里的cluster 用户侧创建为逻辑集群名称，运维侧创建为物理集群名称
         Map<String/*cluster@index*/, IndexCatCell> index2IndexCatCellFromPlatformCreateMap = ConvertUtil.list2Map(
                 platformCreateCatIndexList, IndexCatCell::getKey, r -> r);
@@ -173,8 +176,9 @@ public class IndexCatInfoCollector extends AbstractMetaDataJob {
         //TODO: 部署多台admin，这里会出现过滤失败的问题
         //移除已删除索引, 不采集
         List<IndexCatCellDTO> finalSaveIndexCatList = res.stream().filter(this::filterNotCollectorIndexCat)
+                //只需要回写我们已经采集到的索引
             .collect(Collectors.toList());
-        esIndexCatService.syncInsertCatIndex(finalSaveIndexCatList, RETRY_TIMES);
+        esIndexCatService.syncUpsertCatIndex(finalSaveIndexCatList, RETRY_TIMES);
         return JOB_SUCCESS;
     }
 

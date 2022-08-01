@@ -35,9 +35,12 @@ import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.index.IndexBlockEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.event.index.RefreshCatIndexInfoEvent;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.mapping.AriusIndexTemplateSetting;
+import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
+import com.didichuxing.datachannel.arius.admin.common.tuple.Tuples;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusIndexMappingConfigUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusOptional;
@@ -46,6 +49,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.IndexSettingsUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.SizeUtil;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
+import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
@@ -716,7 +720,7 @@ public class IndicesManagerImpl implements IndicesManager {
         if (null == param.getIndices()) {
             return Result.buildFail("索引为空");
         }
-
+        List<TupleTwo</*cluster*/String,/*index*/String>> clusterIndexTuple=Lists.newArrayList();
         for (IndexCatCellDTO indexCatCellDTO : param.getIndices()) {
             Result<Void> forceMergeResult = esIndexService.forceMerge(indexCatCellDTO.getCluster(),
                 indexCatCellDTO.getIndex(), param.getMaxNumSegments(), param.getOnlyExpungeDeletes());
@@ -731,8 +735,10 @@ public class IndicesManagerImpl implements IndicesManager {
                         .content(String.format("【%s】执行forceMerge",indexCatCellDTO.getIndex()))
                         .bizId(indexCatCellDTO.getIndex())
                 .buildDefaultManualTrigger());
+            clusterIndexTuple.add(Tuples.of(indexCatCellDTO.getCluster(), indexCatCellDTO.getIndex()));
         }
-
+        //需要发布事件进行arius_cat_index_info 采集更新信息，尽可能保证数据的时效性
+        SpringTool.publish(new RefreshCatIndexInfoEvent(this, clusterIndexTuple));
         return Result.buildSucc();
     }
 

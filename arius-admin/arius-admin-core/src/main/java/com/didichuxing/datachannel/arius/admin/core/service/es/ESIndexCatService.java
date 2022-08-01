@@ -1,10 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.core.service.es;
 
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatCellDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.IndexCatCell;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.IndexShardInfo;
-
+import java.util.Collection;
 import java.util.List;
 
 public interface ESIndexCatService {
@@ -61,11 +62,12 @@ public interface ESIndexCatService {
      * @return               Boolean
      */
     Boolean syncInsertCatIndex(List<IndexCatCellDTO> params, int retryCount);
+    Boolean syncUpsertCatIndex(List<IndexCatCellDTO> params, int retryCount);
 
     /**
      * 获取通过平台创建的索引(不经过模板)IndexCatCellDTO信息，作用于平台索引管理新建索引侧
      */
-    List<IndexCatCell> syncGetPlatformCreateCatIndexList();
+     List<IndexCatCell> syncGetPlatformCreateCatIndexList( Integer searchSize);
 
     /**
      * 根据逻辑集群获取索引
@@ -73,4 +75,6 @@ public interface ESIndexCatService {
      * @return
      */
     List<IndexCatCellDTO> syncGetByClusterLogic(String name, Integer projectId);
+    
+    Result<List<IndexCatCellDTO>> syncGetSegmentsIndexList(String cluster, Collection<String> indexList);
 }

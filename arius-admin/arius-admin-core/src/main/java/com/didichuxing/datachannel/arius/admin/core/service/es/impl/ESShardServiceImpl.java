@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.BIG_SHARD;
 import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.*;
 
 /**
@@ -134,7 +135,7 @@ public class ESShardServiceImpl implements ESShardService {
         double value = Double.valueOf(store.substring(0, store.length() - 2));
 
         double bigShardThreshold = ariusConfigInfoService.doubleSetting(AriusConfigConstant.ARIUS_COMMON_GROUP,
-                AriusConfigConstant.BIG_SHARD_THRESHOLD, 50.0);
+                AriusConfigConstant.BIG_SHARD_THRESHOLD, BIG_SHARD);
 
         if (store.endsWith("tb")) {
             value *= 1024;

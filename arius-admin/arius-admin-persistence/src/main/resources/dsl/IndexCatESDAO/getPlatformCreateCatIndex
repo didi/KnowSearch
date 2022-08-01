@@ -1,7 +1,8 @@
 {
+  "size": %d,
   "query": {
     "bool": {
-      "must": [
+      "filter": [
         {
           "term": {
             "platformCreateFlag": {

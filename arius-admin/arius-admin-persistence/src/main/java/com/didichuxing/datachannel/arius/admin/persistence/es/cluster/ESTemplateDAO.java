@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.cluster;
 
+import static com.didichuxing.datachannel.arius.admin.common.RetryUtils.performTryTimesMethods;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_OPERATE_TIMEOUT;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.INDEX_SHARD_NUM;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.TEMPLATE_DEFAULT_ORDER;
@@ -20,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 import org.apache.commons.lang3.StringUtils;
@@ -168,22 +170,25 @@ public class ESTemplateDAO extends BaseESDAO {
                     cluster, name, expression, shard, shardRouting);
             return Boolean.FALSE;
         }
-
+    
         // 获取es中原来index template的配置
-        TemplateConfig templateConfig = null;
-        try {
-            ESIndicesGetTemplateResponse getTemplateResponse = client.admin().indices().prepareGetTemplate(name + "*")
-                .execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
-            templateConfig = getTemplateResponse.getMultiTemplatesConfig().getSingleConfig();
-        } catch (Exception e) {
-            LOGGER.warn("class=ESTemplateDAO||method=create||msg=get src template fail||cluster={}||name={}", cluster,
-                name);
-        }
+        BiFunction<Long, TimeUnit, ESIndicesGetTemplateResponse> getTemplateResponseBiFunction = (time, unit) -> {
+            try {
+                return client.admin().indices().prepareGetTemplate(name + "*").execute()
+                        .actionGet(time,unit);
+            } catch (Exception e) {
+                LOGGER.warn("class=ESTemplateDAO||method=create||msg=get src template fail||cluster={}||name={}",
+                        cluster, name);
+                return null;
+            }
+        };
+        TemplateConfig templateConfig = Optional.ofNullable(
+                        performTryTimesMethods(getTemplateResponseBiFunction, Objects::isNull, 1))
+                .map(ESIndicesGetTemplateResponse::getMultiTemplatesConfig).map(MultiTemplatesConfig::getSingleConfig)
+                .orElse(new TemplateConfig());
+       
 
-        if (templateConfig == null) {
-            templateConfig = new TemplateConfig();
-        }
-
+       
         if (StringUtils.isNotBlank(expression)) {
             templateConfig.setTemplate(expression);
         }
@@ -203,11 +208,23 @@ public class ESTemplateDAO extends BaseESDAO {
 
         // 设置ES版本
         templateConfig.setVersion(client.getEsVersion());
-
-        ESIndicesPutTemplateResponse response = client.admin().indices().preparePutTemplate(name)
-            .setTemplateConfig(templateConfig).execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
-
-        return response.getAcknowledged();
+        
+        BiFunction<Long, TimeUnit, ESIndicesPutTemplateResponse> getESIndicesPutTemplateResponseBiFunction = (time, unit) -> {
+            try {
+                return client.admin().indices().preparePutTemplate(name).setTemplateConfig(templateConfig)
+                        .execute().actionGet(time, unit);
+            } catch (Exception e) {
+                LOGGER.error("class=ESTemplateDAO||method=create||msg=put template fail||cluster={}||name={}", cluster,
+                        name, e);
+                return null;
+            }
+        
+        };
+    
+        return Optional.ofNullable(
+                        performTryTimesMethods(getESIndicesPutTemplateResponseBiFunction, Objects::isNull, 1))
+                .map(ESIndicesPutTemplateResponse::getAcknowledged).orElse(false);
+                
     }
 
     public boolean create(String cluster, String name, TemplateConfig templateConfig) {
@@ -220,12 +237,21 @@ public class ESTemplateDAO extends BaseESDAO {
 
         // 设置ES版本
         templateConfig.setVersion(client.getEsVersion());
-
         // 向ES中创建模板流程
-        ESIndicesPutTemplateResponse response = client.admin().indices().preparePutTemplate(name)
-            .setTemplateConfig(templateConfig).execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
-
-        return response.getAcknowledged();
+        BiFunction<Long, TimeUnit, ESIndicesPutTemplateResponse> responseBiFunction = (time, unit) -> {
+            try {
+                return client.admin().indices().preparePutTemplate(name).setTemplateConfig(templateConfig).execute()
+                        .actionGet(time, unit);
+            
+            } catch (Exception e) {
+                LOGGER.error("class=ESTemplateDAO||method=create||put templates fail||clusterName={}||templateName={}",
+                        cluster, name, e);
+                return null;
+            }
+        };
+    
+        return Optional.ofNullable(performTryTimesMethods(responseBiFunction, Objects::isNull, 1))
+                .map(ESIndicesPutTemplateResponse::getAcknowledged).orElse(false);
     }
 
     /**

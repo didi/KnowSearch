@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.cluster;
 
+import static com.didichuxing.datachannel.arius.admin.common.RetryUtils.performTryTimesMethods;
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.COMMA;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_OPERATE_TIMEOUT;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.INDEX_BLOCKS_READ;
@@ -80,6 +81,8 @@ public class ESIndexDAO extends BaseESDAO {
     public static final String MAX_NUM_SEGMENTS = "max_num_segments";
     public static final String ONLY_EXPUNGE_DELETES = "only_expunge_deletes";
     public static final String ROLLOVER_API         = "/_rollover";
+ 
+    
 
     /**
      * 创建索引
@@ -132,12 +135,17 @@ public class ESIndexDAO extends BaseESDAO {
             return Boolean.FALSE;
         }
         indexConfig.setVersion(ESVersion.valueBy(client.getEsVersion()));
-        ESIndicesPutIndexResponse response = performTryTimesMethods(
-                (timeout, unit) -> client.admin().indices().preparePutIndex(indexName).setIndexConfig(indexConfig)
-                        .execute().actionGet(timeout, unit), esIndicesPutIndexResponse -> Boolean.FALSE.equals(
-                        Optional.ofNullable(esIndicesPutIndexResponse).map(ESAcknowledgedResponse::getAcknowledged)
-                            
-                                .orElse(Boolean.FALSE)), tryTimes);
+        BiFunction<Long, TimeUnit, ESIndicesPutIndexResponse> esIndicesExistsResponseBiFunction = (timeout, unit) -> {
+            try {
+                return client.admin().indices().preparePutIndex(indexName).setIndexConfig(indexConfig).execute()
+                        .actionGet(timeout, unit);
+            } catch (Exception e) {
+                LOGGER.error("class=ESIndexDAO||method=createIndexWithConfig||cluster={}||indexName={}", cluster);
+                return null;
+            }
+        };
+        ESIndicesPutIndexResponse response = performTryTimesMethods(esIndicesExistsResponseBiFunction, Objects::isNull,
+                tryTimes);
          
         return Optional.ofNullable(response).map(ESAcknowledgedResponse::getAcknowledged).orElse(Boolean.FALSE);
     }
@@ -169,14 +177,20 @@ public class ESIndexDAO extends BaseESDAO {
         }
         ESIndicesExistsRequest esIndicesExistsRequest = new ESIndicesExistsRequest();
         esIndicesExistsRequest.setIndex(indexName);
-        ESIndicesExistsResponse response = performTryTimesMethods(
-                (timeout,unit)->client.admin().indices().exists(esIndicesExistsRequest).actionGet(timeout,unit),
-                
-                esIndicesExistsResponse-> Boolean.FALSE.equals(
-                Optional.ofNullable(esIndicesExistsResponse).map(ESIndicesExistsResponse::isExists).orElse(Boolean.FALSE)),
-                tryTimes
-                
-                );
+        BiFunction<Long,TimeUnit,ESIndicesExistsResponse> esIndicesExistsResponseBiFunction=(timeout,unit)->{
+            try {
+              return   client.admin().indices().exists(esIndicesExistsRequest).actionGet(timeout,unit);
+            }catch (Exception e){
+                 LOGGER.error("class=ESIndexDAO||method=existByClusterAndIndexName||cluster={}||indexName={}",
+                cluster);
+                 return null;
+            }
+        };
+        ESIndicesExistsResponse response = performTryTimesMethods(esIndicesExistsResponseBiFunction,
+            
+                Objects::isNull, tryTimes
+    
+        );
         
         return Optional.ofNullable(response).map(ESIndicesExistsResponse::isExists).orElse(Boolean.FALSE);
     }
@@ -908,4 +922,5 @@ public class ESIndexDAO extends BaseESDAO {
             return Result.buildFail(String.format(FAILED_MSG, "split"));
         }
     }
+ 
 }
