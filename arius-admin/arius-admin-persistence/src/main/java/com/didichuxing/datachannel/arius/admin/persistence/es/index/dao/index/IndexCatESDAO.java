@@ -5,8 +5,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.IndexCat
 import com.didichuxing.datachannel.arius.admin.common.bean.po.index.IndexCatCellPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.index.IndexStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
-import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
-import com.didichuxing.datachannel.arius.admin.common.tuple.Tuples;
 import com.didichuxing.datachannel.arius.admin.common.util.DSLSearchUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.IndexNameUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
@@ -14,16 +12,11 @@ import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpTimeout
 import com.didichuxing.datachannel.arius.admin.persistence.component.ScrollResultVisitor;
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dsls.DslsConstant;
-import com.didiglobal.logi.elasticsearch.client.response.query.query.ESQueryResponse;
 import com.google.common.collect.Lists;
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.function.Supplier;
 import javax.annotation.PostConstruct;
 import lombok.NoArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -165,9 +158,10 @@ public class IndexCatESDAO extends BaseESDAO {
 
     /**
      * 获取不包含模板id并且包含projectId的IndexCatCell信息，作用于平台索引管理新建索引侧
-     * @return          List<IndexCatCell>
+     *
+     * @return List<IndexCatCell>
      */
-    public TupleTwo<List<IndexCatCell>, String> getPlatformCreateCatIndexList(String scrollId, Integer searchSize) {
+    public  List<IndexCatCell> getPlatformCreateCatIndexList( Integer searchSize) {
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_PLATFORM_CREATE_CAT_INDEX,searchSize);
    
         // 这里两个时间 用于拿到今天和昨天的数据, 否则无法个获取昨天用户创建的索引数据
@@ -180,26 +174,19 @@ public class IndexCatESDAO extends BaseESDAO {
                 indexCatCellList.addAll(resultList);
             }
         };
-        Supplier<ESQueryResponse> esQueryResponseSupplier = () -> {
-            try {
-                if (StringUtils.isBlank(scrollId)) {
-                    return gatewayClient.prepareScrollQuery(metadataClusterName, genDailyIndexName, TYPE, dsl, null,
-                            IndexCatCell.class, scrollResultVisitor);
-                } else {
-                    return gatewayClient.queryScrollQuery(metadataClusterName, genDailyIndexName, scrollId,
-                            IndexCatCell.class, scrollResultVisitor);
-                }
-            } catch (Exception e) {
-                LOGGER.error("class=IndexCatESDAO||method=getPlatformCreateCatIndexList", e);
-                return null;
-            }
-        };
-        ESQueryResponse response = performTryTimesMethods(esQueryResponseSupplier, Objects::isNull, 3);
-        String scrollIdRes = Optional.ofNullable(response).map(ESQueryResponse::getUnusedMap)
-                .map(unusedMap -> unusedMap.get("_scroll_id")).map(Object::toString).orElse(null);
+        try {
+            ESOpTimeoutRetry.esRetryExecute("getPlatformCreateCatIndexList", 3, () -> {
+            
+                gatewayClient.queryWithScroll(metadataClusterName, genDailyIndexName, TYPE, dsl, searchSize, null,
+                        IndexCatCell.class, scrollResultVisitor);
+                return true;
+            
+            });
+        } catch (ESOperateException e) {
+            LOGGER.error("class=IndexCatESDAO||method=getPlatformCreateCatIndexList", e);
+        }
     
-        return Tuples.of(indexCatCellList,
-                scrollIdRes);
+        return indexCatCellList;
     }
 
     /**************************************************private******************************************************/

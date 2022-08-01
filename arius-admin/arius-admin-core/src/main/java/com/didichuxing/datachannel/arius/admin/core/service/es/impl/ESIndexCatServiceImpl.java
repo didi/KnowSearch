@@ -8,8 +8,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatC
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.IndexCatCell;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.IndexShardInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.index.IndexCatCellPO;
-import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
-import com.didichuxing.datachannel.arius.admin.common.tuple.Tuples;
 import com.didichuxing.datachannel.arius.admin.common.util.BatchProcessor;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
@@ -153,14 +151,14 @@ public class ESIndexCatServiceImpl implements ESIndexCatService {
     }
 
     @Override
-    public TupleTwo<List<IndexCatCell>, String> syncGetPlatformCreateCatIndexList(String scrollId, Integer searchSize) {
+    public List<IndexCatCell> syncGetPlatformCreateCatIndexList(Integer searchSize) {
         try {
-            return indexCatESDAO.getPlatformCreateCatIndexList(scrollId,searchSize);
+            return indexCatESDAO.getPlatformCreateCatIndexList(searchSize);
         } catch (Exception e) {
             LOGGER.error("class=ESIndexCatServiceImpl||method=syncGetHasProjectIdButNotTemplateIdCatIndexList||" +
                     "errMsg=failed to get syncGetHasProjectIdButNotTemplateIdCatIndexList", e);
         }
-        return Tuples.of(Collections.emptyList(),null);
+        return Collections.emptyList();
     }
 
     @Override
