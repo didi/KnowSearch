@@ -499,37 +499,37 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
         return variousLineChartsMetrics;
     }
 
-    /**
-     *
-     * @param response         返回值
-     * @param oneLevelType     一级指标类型(@link OneLevelTypeEnum)
-     * @param metricsKeys      多个指标类型
-     * @param topNu            topN
-     * @return                 结果
-     */
-    List<VariousLineChartMetrics> fetchMultipleAggMetricsTop(ESQueryResponse response, String oneLevelType,
-                                                             List<String> metricsKeys, Integer topNu,
-                                                             Integer topMethod) {
-        List<VariousLineChartMetrics> variousLineChartsMetrics = Lists.newArrayList();
-
-        if (null == response || response.getAggs() == null) {
-            LOGGER.warn("class=BaseAriusStatsESDAO||method=fetchMultipleAggMetrics||msg=esQueryResponse is null");
-            return variousLineChartsMetrics;
-        }
-
-        Map<String, ESAggr> esAggrMap = response.getAggs().getEsAggrMap();
-        if (null != esAggrMap && null != esAggrMap.get(HIST)) {
-            metricsKeys.forEach(
-                key -> variousLineChartsMetrics.add(buildVariousLineChartMetrics(oneLevelType, key, esAggrMap)));
-        }
-
-        //get topNu
-        if (topNu != null) {
-            variousLineChartsMetrics.forEach(metrics -> mergeTopNu(metrics, topNu));
-        }
-
-        return variousLineChartsMetrics;
-    }
+//    /**
+//     *
+//     * @param response         返回值
+//     * @param oneLevelType     一级指标类型(@link OneLevelTypeEnum)
+//     * @param metricsKeys      多个指标类型
+//     * @param topNu            topN
+//     * @return                 结果
+//     */
+//    List<VariousLineChartMetrics> fetchMultipleAggMetricsTop(ESQueryResponse response, String oneLevelType,
+//                                                             List<String> metricsKeys, Integer topNu,
+//                                                             Integer topMethod) {
+//        List<VariousLineChartMetrics> variousLineChartsMetrics = Lists.newArrayList();
+//
+//        if (null == response || response.getAggs() == null) {
+//            LOGGER.warn("class=BaseAriusStatsESDAO||method=fetchMultipleAggMetrics||msg=esQueryResponse is null");
+//            return variousLineChartsMetrics;
+//        }
+//
+//        Map<String, ESAggr> esAggrMap = response.getAggs().getEsAggrMap();
+//        if (null != esAggrMap && null != esAggrMap.get(HIST)) {
+//            metricsKeys.forEach(
+//                key -> variousLineChartsMetrics.add(buildVariousLineChartMetrics(oneLevelType, key, esAggrMap)));
+//        }
+//
+//        //get topNu
+//        if (topNu != null) {
+//            variousLineChartsMetrics.forEach(metrics -> mergeTopNu(metrics, topNu));
+//        }
+//
+//        return variousLineChartsMetrics;
+//    }
 
     /**
      * @param response    返回值
@@ -579,9 +579,11 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
         }
 
         Map<String, ESAggr> esAggrMap = response.getAggs().getEsAggrMap();
+        //集群对应的索引数量
+        Map<String,Long> clusterIndexCount = Maps.newHashMap();
         if (null != esAggrMap && null != esAggrMap.get(HIST)) {
             metricsKeys.forEach(
-                key -> variousLineChartsMetrics.add(buildVariousLineChartMetrics(oneLevelType, key, esAggrMap)));
+                key -> variousLineChartsMetrics.add(buildVariousLineChartMetrics(oneLevelType, key, esAggrMap,clusterIndexCount)));
         }
 
         //get topNu
@@ -669,10 +671,10 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
     }
 
     private VariousLineChartMetrics buildVariousLineChartMetrics(String oneLevelType, String key,
-                                                                 Map<String, ESAggr> esAggrMap) {
+                                                                 Map<String, ESAggr> esAggrMap,Map<String,Long> clusterIndexCount) {
         VariousLineChartMetrics variousLineChartMetrics = new VariousLineChartMetrics();
         variousLineChartMetrics.setType(key);
-        variousLineChartMetrics.setMetricsContents(buildMetricsContents(oneLevelType, key, esAggrMap));
+        variousLineChartMetrics.setMetricsContents(buildMetricsContents(oneLevelType, key, esAggrMap,clusterIndexCount));
         return variousLineChartMetrics;
     }
 
@@ -747,9 +749,8 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
         return metricsContents;
     }
 
-    private List<MetricsContent> buildMetricsContents(String oneLevelType, String key, Map<String, ESAggr> esAggrMap) {
+    private List<MetricsContent> buildMetricsContents(String oneLevelType, String key, Map<String, ESAggr> esAggrMap,Map<String,Long> clusterIndexCount) {
         List<MetricsContent> metricsContents = Lists.newArrayList();
-
         esAggrMap.get(HIST).getBucketList().forEach(esBucket -> {
             //get nodeName
             if (null != esBucket.getUnusedMap().get(KEY)) {
@@ -769,8 +770,14 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
                     metricsContent.setName(keyValue);
                     metricsContent.setCluster(keyValue);
                     //获取集群下的索引数量
-                    Tuple<Long, List<IndexCatCellPO>> index = indexCatESDAO.getIndexListByTerms(keyValue,null);
-                    metricsContent.setIndexCount(Objects.nonNull(index)?index.v1():0L);
+                    Long indexCount = 0L;
+                    if (Objects.nonNull(clusterIndexCount.get(keyValue))){
+                        indexCount = clusterIndexCount.get(keyValue);
+                    }else {
+                        Tuple<Long, List<IndexCatCellPO>> index = indexCatESDAO.getIndexListByTerms(keyValue,null);
+                        indexCount = Objects.nonNull(index)?index.v1():0L;
+                    }
+                    metricsContent.setIndexCount(indexCount);
                 }
 
                 metricsContent.setMetricsContentCells(buildMetricsContentCells(key, esBucket));
