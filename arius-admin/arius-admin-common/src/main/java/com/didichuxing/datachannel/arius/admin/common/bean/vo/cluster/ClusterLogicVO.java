@@ -49,7 +49,7 @@ public class ClusterLogicVO extends BaseVO implements Comparable<ClusterLogicVO>
     private List<String>                 associatedPhyClusterName;
 
     @ApiModelProperty("数据节点数")
-    private Integer                      dataNodesNum;
+    private Integer                      dataNodeNum;
 
     @ApiModelProperty("gateway地址")
     private String                       gatewayAddress;
