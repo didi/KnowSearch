@@ -47,8 +47,6 @@ public class ClusterLogicPO extends BasePO {
      */
     private Integer dataNodeNu;
 
-
-
     /**
      * 备注
      */
