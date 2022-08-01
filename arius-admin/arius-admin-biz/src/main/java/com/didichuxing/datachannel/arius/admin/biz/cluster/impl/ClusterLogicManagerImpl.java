@@ -510,26 +510,24 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         ESLogicClusterDTO updateLogicClusterDTO = new ESLogicClusterDTO();
         Set<Integer> clusterHealthSet = Sets.newHashSet();
         updateLogicClusterDTO.setId(clusterLogicId);
+
         try {
-            ClusterLogicContext clusterLogicContext = clusterContextManager.getClusterLogicContext(clusterLogicId);
-            if (null == clusterLogicContext) {
+            ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(clusterLogicId);
+            if (null == clusterRegion) {
                 LOGGER.error(
-                    "class=ClusterLogicManagerImpl||method=updateClusterLogicHealth||clusterLogicId={}||errMsg=clusterLogicContext is empty",
-                    clusterLogicId);
+                        "class=ClusterLogicManagerImpl||method=updateClusterLogicHealth||clusterLogicId={}||errMsg=clusterLogicContext is empty",
+                        clusterLogicId);
                 clusterHealthSet.add(UNKNOWN.getCode());
             } else {
-                List<String> associatedClusterPhyNames = clusterLogicContext.getAssociatedClusterPhyNames();
-                clusterHealthSet
-                    .addAll(associatedClusterPhyNames.stream().map(esClusterService::syncGetClusterHealthEnum)
-                        .map(ClusterHealthEnum::getCode).collect(Collectors.toSet()));
+                clusterHealthSet.add(esClusterService.syncGetClusterHealthEnum(clusterRegion.getPhyClusterName()).getCode());
             }
 
             updateLogicClusterDTO.setHealth(ClusterUtils.getClusterLogicHealthByClusterHealth(clusterHealthSet));
-            setClusterLogicInfo(updateLogicClusterDTO);
+            setClusterLogicInfo(updateLogicClusterDTO,clusterRegion);
             clusterLogicService.editClusterLogicNotCheck(updateLogicClusterDTO, AriusUser.SYSTEM.getDesc());
         } catch (Exception e) {
             LOGGER.error("class=ClusterLogicManagerImpl||method=updateClusterLogicHealth||clusterLogicId={}||errMsg={}",
-                clusterLogicId, e.getMessage(), e);
+                    clusterLogicId, e.getMessage(), e);
             return false;
         }
 
@@ -621,8 +619,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
      * 设置磁盘使用信息
      * @param clusterDTO
      */
-    public void setClusterLogicInfo(ESLogicClusterDTO clusterDTO) {
-        ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(clusterDTO.getId());
+    public void setClusterLogicInfo(ESLogicClusterDTO clusterDTO,ClusterRegion clusterRegion) {
         Result<List<ClusterRoleHost>> result = clusterRoleHostService
                 .listByRegionId(Math.toIntExact(clusterRegion.getId()));
         if (result.success()) {
@@ -640,9 +637,8 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
                         diskUsage += entry.getValue().v2();
                     }
                 }
-
                 //设置节点数
-                clusterDTO.setNodeNum(clusterRoleHostList.size());
+                clusterDTO.setDataNodeNum(clusterRoleHostList.size());
             }
             clusterDTO.setDiskTotal(diskTotal);
             clusterDTO.setDiskUsage(diskUsage);

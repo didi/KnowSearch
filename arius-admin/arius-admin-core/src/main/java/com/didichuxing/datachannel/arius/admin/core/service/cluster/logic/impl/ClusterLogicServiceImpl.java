@@ -775,7 +775,7 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
 
     private void setLogicClusterInfo(Long logicClusterId, ClusterLogicPO clusterLogicPO,
                                      ClusterRoleInfo clusterRoleInfo, List<ClusterRoleHost> clusterRoleHosts) {
-        clusterRoleInfo.setPodNumber(clusterLogicPO.getNodeNum());
+        clusterRoleInfo.setPodNumber(clusterLogicPO.getDataNodeNum());
         clusterRoleInfo.setMachineSpec(clusterLogicPO.getDataNodeSpec());
 
         ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(logicClusterId);

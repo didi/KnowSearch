@@ -45,7 +45,7 @@ public class ClusterLogicPO extends BasePO {
     /**
      * dataNode的个数
      */
-    private Integer dataNodeNu;
+    private Integer dataNodeNum;
 
     /**
      * 备注
@@ -91,9 +91,4 @@ public class ClusterLogicPO extends BasePO {
      * 集群版本
      */
     private String esClusterVersion;
-
-    /**
-     * 数据节点数
-     */
-    private Integer nodeNum;
 }
