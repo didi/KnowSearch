@@ -131,7 +131,7 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
         List<TemplateServiceEnum> allSrvList = TemplateServiceEnum.allTemplateSrv();
         //默认给一个srv就可以了
         BaseTemplateSrv srvHandle = BASE_TEMPLATE_SRV_MAP.get(TemplateServiceEnum.TEMPLATE_COLD.getCode());
-        SupportSrv supportSrv =srvHandle.getLogicTemplateSupportDCDRAndPipelineByLogicId(template);
+        SupportSrv supportSrv =srvHandle.getSupportDCDRAndPipelineByLogicTemplate(template);
         final boolean dcdrSupport = supportSrv.isDcdrModuleExists();
         final boolean pipelineSupport = supportSrv.isPipelineModuleExists();
         boolean coldRegionSupport = supportSrv.isColdRegionExists();

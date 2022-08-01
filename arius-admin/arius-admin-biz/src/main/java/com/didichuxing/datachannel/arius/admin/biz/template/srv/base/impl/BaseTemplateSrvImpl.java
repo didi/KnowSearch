@@ -290,12 +290,12 @@ public abstract class BaseTemplateSrvImpl implements BaseTemplateSrv {
     }
     
     @Override
-    public SupportSrv getLogicTemplateSupportDCDRAndPipelineByLogicId(IndexTemplate template) {
-        List<TemplateServiceEnum> templateServiceEnums = TemplateServiceEnum.str2Srv(template.getOpenSrv());
+    public SupportSrv getSupportDCDRAndPipelineByLogicTemplate(IndexTemplate logicIndexTemplate) {
+        List<TemplateServiceEnum> templateServiceEnums = TemplateServiceEnum.str2Srv(logicIndexTemplate.getOpenSrv());
         SupportSrv supportSrv = new SupportSrv();
         //这么做的目的是最大程度的跳过查库或者缓存的一个刷库、刷es的情况
         if (CollectionUtils.isNotEmpty(templateServiceEnums) &&
-                /*如果dcdr被开启*/Objects.equals(template.getHasDCDR(),Boolean.TRUE) &&/*如果PIPELINE
+                /*如果dcdr被开启*/Objects.equals(logicIndexTemplate.getHasDCDR(),Boolean.TRUE) &&/*如果PIPELINE
         已经被开启*/templateServiceEnums.contains(TemplateServiceEnum.TEMPLATE_PIPELINE) &&
                 /*如果冷热分离已经被开启*/  templateServiceEnums.contains(TemplateServiceEnum.TEMPLATE_COLD)
           ) {
@@ -306,11 +306,11 @@ public abstract class BaseTemplateSrvImpl implements BaseTemplateSrv {
             //以上所有的判断的基础都是在于分区模板的状态
             supportSrv.setPartition(true);
         } else {
-            String masterCluster = indexTemplateService.getMaterClusterPhyByLogicTemplateId(template.getId());
+            String masterCluster = indexTemplateService.getMaterClusterPhyByLogicTemplateId(logicIndexTemplate.getId());
             if (Objects.isNull(masterCluster) || !clusterPhyManager.isClusterExists(masterCluster)) {
                 LOGGER.warn(
                         "class=TemplateSrvPageSearchHandle||method=getLogicTemplateAssociatedEsVersionByLogicTemplateId"
-                        + "||templateId={}||errMsg=clusterPhy of template is null", template.getId());
+                        + "||templateId={}||errMsg=clusterPhy of template is null", logicIndexTemplate.getId());
                 return supportSrv;
             }
             TupleThree</*dcdrExist*/Boolean,/*pipelineExist*/ Boolean,/*existColdRegion*/ Boolean> existDCDRAndPipelineModule = clusterPhyManager.getDCDRAndPipelineAndColdRegionTupleByClusterPhyWithCache(
@@ -318,7 +318,7 @@ public abstract class BaseTemplateSrvImpl implements BaseTemplateSrv {
             supportSrv.setDcdrModuleExists(Boolean.TRUE.equals(existDCDRAndPipelineModule.v1));
             supportSrv.setPipelineModuleExists(Boolean.TRUE.equals(existDCDRAndPipelineModule.v2));
             supportSrv.setColdRegionExists((Boolean.TRUE.equals(existDCDRAndPipelineModule.v3)));
-            supportSrv.setPartition(StringUtils.endsWith(template.getExpression(), "*"));
+            supportSrv.setPartition(StringUtils.endsWith(logicIndexTemplate.getExpression(), "*"));
             
         }
         return supportSrv;

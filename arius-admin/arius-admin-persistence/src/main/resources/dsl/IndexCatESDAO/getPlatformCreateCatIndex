@@ -1,20 +1,13 @@
 {
-  "size": 2000,
+  "size": %d,
   "query": {
     "bool": {
-      "must": [
+      "filter": [
         {
           "term": {
             "platformCreateFlag": {
               "value": true
             }
-          }
-        }
-      ],
-      "must_not": [
-        {
-          "exists": {
-            "field": "health"
           }
         }
       ]

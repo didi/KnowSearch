@@ -3,6 +3,7 @@ package com.didichuxing.datachannel.arius.admin.core.service.es.impl;
 import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.getShards2NodeInfoRequestContent;
 
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatCellDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.IndexCatCell;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.IndexShardInfo;
@@ -17,6 +18,8 @@ import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
@@ -33,7 +36,8 @@ public class ESIndexCatServiceImpl implements ESIndexCatService {
 
     private static final ILog LOGGER = LogFactory.getLog(ESIndexCatService.class);
     @Autowired
-    private IndexCatESDAO     indexCatESDAO;
+    private IndexCatESDAO indexCatESDAO;
+   
 
     @Override
     public Tuple<Long, List<IndexCatCell>> syncGetCatIndexInfo(String cluster, String index, String health,
@@ -122,16 +126,37 @@ public class ESIndexCatServiceImpl implements ESIndexCatService {
 
         return result.isSucc();
     }
+    
+    @Override
+    public Boolean syncUpsertCatIndex(List<IndexCatCellDTO> params, int retryCount) {
+        BatchProcessor.BatchProcessResult<IndexCatCellDTO, Boolean> result = new BatchProcessor<IndexCatCellDTO, Boolean>().batchList(
+                        params).batchSize(5000).processor(
+                        items -> indexCatESDAO.batchUpsert(ConvertUtil.list2List(params, IndexCatCellPO.class), retryCount))
+                .succChecker(succ -> succ).process();
+        
+        if (!result.isSucc()) {
+            List<String> clusterList = params.stream().map(IndexCatCellDTO::getCluster).distinct()
+                    .collect(Collectors.toList());
+            List<String> indexList = params.stream().map(IndexCatCellDTO::getIndex).distinct()
+                    .collect(Collectors.toList());
+            LOGGER.error(
+                    "class=ESIndexCatServiceImpl||method=syncUpsertCatIndex||cluster={}||indexNameList={}||errMsg=failed to batchInsert, batch total count = {}, batch failed count={}",
+                    ListUtils.strList2String(clusterList), ListUtils.strList2String(indexList), params.size(),
+                    result.getFailAndErrorCount());
+        }
+        
+        return result.isSucc();
+    }
 
     @Override
-    public List<IndexCatCell> syncGetPlatformCreateCatExistsHealthIndexList() {
+    public List<IndexCatCell> syncGetPlatformCreateCatIndexList(Integer searchSize) {
         try {
-            return indexCatESDAO.syncGetPlatformCreateCatExistsHealthIndexList();
+            return indexCatESDAO.getPlatformCreateCatIndexList(searchSize);
         } catch (Exception e) {
             LOGGER.error("class=ESIndexCatServiceImpl||method=syncGetHasProjectIdButNotTemplateIdCatIndexList||" +
                     "errMsg=failed to get syncGetHasProjectIdButNotTemplateIdCatIndexList", e);
         }
-        return Lists.newArrayList();
+        return Collections.emptyList();
     }
 
     @Override
@@ -142,6 +167,15 @@ public class ESIndexCatServiceImpl implements ESIndexCatService {
         }
         return ConvertUtil.list2List(totalHitAndIndexCatCellListTuple.v2(),IndexCatCellDTO.class);
     }
-
+    
+    /**
+     * @param cluster
+     * @param indexList
+     * @return
+     */
+    @Override
+    public Result<List<IndexCatCellDTO>> syncGetSegmentsIndexList(String cluster, Collection<String> indexList) {
+        return indexCatESDAO.syncGetSegmentsIndexList(cluster,indexList);
+    }
     /*************************************************private*******************************************************/
 }

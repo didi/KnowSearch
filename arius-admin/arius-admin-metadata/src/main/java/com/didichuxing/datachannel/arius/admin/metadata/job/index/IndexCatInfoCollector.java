@@ -45,6 +45,7 @@ import org.springframework.stereotype.Component;
 public class IndexCatInfoCollector extends AbstractMetaDataJob {
 
     private static final Integer        RETRY_TIMES                = 3;
+    private static final Integer         SEARCH_SIZE=5000;
     @Autowired
     private ClusterPhyService           clusterPhyService;
 
@@ -88,13 +89,11 @@ public class IndexCatInfoCollector extends AbstractMetaDataJob {
         }
 
         // 2. 获取通过平台索引管理 创建的索引cat_index信息且没有生成索引健康的数据
-        List<IndexCatCell> platformCreateCatIndexList = esIndexCatService.syncGetPlatformCreateCatExistsHealthIndexList();
+        List<IndexCatCell> platformCreateCatIndexList = esIndexCatService.syncGetPlatformCreateCatIndexList(SEARCH_SIZE);
         //获取不到索引了就直接返回
         if (CollectionUtils.isEmpty(platformCreateCatIndexList)){
              return JOB_SUCCESS;
         }
-        List<String> collectIndexLists = platformCreateCatIndexList.stream().map(IndexCatCell::getIndex)
-                .collect(Collectors.toList());
         // 这里的cluster 用户侧创建为逻辑集群名称，运维侧创建为物理集群名称
         Map<String/*cluster@index*/, IndexCatCell> index2IndexCatCellFromPlatformCreateMap = ConvertUtil.list2Map(
                 platformCreateCatIndexList, IndexCatCell::getKey, r -> r);
@@ -178,9 +177,8 @@ public class IndexCatInfoCollector extends AbstractMetaDataJob {
         //移除已删除索引, 不采集
         List<IndexCatCellDTO> finalSaveIndexCatList = res.stream().filter(this::filterNotCollectorIndexCat)
                 //只需要回写我们已经采集到的索引
-                .filter(indexCatCellDTO -> collectIndexLists.contains(indexCatCellDTO.getIndex()))
             .collect(Collectors.toList());
-        esIndexCatService.syncInsertCatIndex(finalSaveIndexCatList, RETRY_TIMES);
+        esIndexCatService.syncUpsertCatIndex(finalSaveIndexCatList, RETRY_TIMES);
         return JOB_SUCCESS;
     }
 

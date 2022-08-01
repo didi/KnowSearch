@@ -1,6 +1,13 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.index;
 
+import static com.didichuxing.datachannel.arius.admin.common.RetryUtils.performTryTimesMethods;
+
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatCellDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.IndexCatCell;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.index.IndexCatCellPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.index.IndexStatusEnum;
@@ -9,14 +16,27 @@ import com.didichuxing.datachannel.arius.admin.common.util.DSLSearchUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.IndexNameUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpTimeoutRetry;
+import com.didichuxing.datachannel.arius.admin.persistence.component.ScrollResultVisitor;
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dsls.DslsConstant;
+import com.didiglobal.logi.elasticsearch.client.ESClient;
+import com.didiglobal.logi.elasticsearch.client.gateway.direct.DirectRequest;
+import com.didiglobal.logi.elasticsearch.client.gateway.direct.DirectResponse;
 import com.google.common.collect.Lists;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map.Entry;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+import java.util.function.BiFunction;
+import java.util.function.Predicate;
 import javax.annotation.PostConstruct;
 import lombok.NoArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
+import org.elasticsearch.rest.RestStatus;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -24,15 +44,20 @@ import org.springframework.stereotype.Component;
 public class IndexCatESDAO extends BaseESDAO {
     @Value("${es.update.cluster.name}")
     private String metadataClusterName;
-
+    
     /**
      * 索引名称
      */
-    private String indexName;
+    private             String indexName;
     /**
      * type名称
      */
-    private String typeName = "_doc";
+    private             String typeName       = "_doc";
+    public static final String SEGMENTS       = "/_segments";
+    public static final String INDICES        = "indices";
+    public static final String SHARDS         = "shards";
+    public static final String SEGMENTS_SHARD = "segments";
+    private             String TYPE           = "type";
 
     @PostConstruct
     public void init() {
@@ -54,6 +79,16 @@ public class IndexCatESDAO extends BaseESDAO {
         }
         return false;
     }
+    public boolean batchUpsert(List<IndexCatCellPO> list, int retryCount) {
+        try {
+            return ESOpTimeoutRetry.esRetryExecute("batchInsert", retryCount,
+                    () -> updateClient.batchUpdate(IndexNameUtils.genCurrentDailyIndexName(indexName), typeName, list));
+        } catch (ESOperateException e) {
+            LOGGER.error("class=IndexCatESDAO||method=batchInsert||errMsg={}", e.getMessage(), e);
+        }
+        return false;
+    }
+
 
     /**
      * 更新查询模板信息
@@ -146,22 +181,72 @@ public class IndexCatESDAO extends BaseESDAO {
 
     /**
      * 获取不包含模板id并且包含projectId的IndexCatCell信息，作用于平台索引管理新建索引侧
-     * @return          List<IndexCatCell>
+     *
+     * @return List<IndexCatCell>
      */
-    public List<IndexCatCell> syncGetPlatformCreateCatExistsHealthIndexList() {
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_PLATFORM_CREATE_CAT_INDEX_EXISTS_HEALTH);
-        int retryTime = 3;
-        List<IndexCatCell> indexCatCell;
+    public  List<IndexCatCell> getPlatformCreateCatIndexList( Integer searchSize) {
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_PLATFORM_CREATE_CAT_INDEX,searchSize);
+   
         // 这里两个时间 用于拿到今天和昨天的数据, 否则无法个获取昨天用户创建的索引数据
         long nowTime = System.currentTimeMillis();
         long oneDayAgo = nowTime - 20 * 60 * 60 * 1000;
-        do {
-            indexCatCell = gatewayClient.performRequest(metadataClusterName,
-                    IndexNameUtils.genDailyIndexName(indexName, oneDayAgo, nowTime), typeName, dsl, IndexCatCell.class);
-        } while (retryTime-- > 0 && CollectionUtils.isEmpty(indexCatCell));
-
-        return indexCatCell;
+        List<IndexCatCell> indexCatCellList = Lists.newCopyOnWriteArrayList();
+        String genDailyIndexName = IndexNameUtils.genDailyIndexName(indexName, oneDayAgo, nowTime);
+        ScrollResultVisitor<IndexCatCell> scrollResultVisitor = resultList -> {
+            if (CollectionUtils.isNotEmpty(resultList)) {
+                indexCatCellList.addAll(resultList);
+            }
+        };
+        try {
+            ESOpTimeoutRetry.esRetryExecute("getPlatformCreateCatIndexList", 3, () -> {
+            
+                gatewayClient.queryWithScroll(metadataClusterName, genDailyIndexName, TYPE, dsl, searchSize, null,
+                        IndexCatCell.class, scrollResultVisitor);
+                return true;
+            
+            });
+        } catch (ESOperateException e) {
+            LOGGER.error("class=IndexCatESDAO||method=getPlatformCreateCatIndexList", e);
+        }
+    
+        return indexCatCellList;
     }
+    
+    public Result<List<IndexCatCellDTO>> syncGetSegmentsIndexList(String cluster, Collection<String> indexList) {
+        ESClient esClient = esOpClient.getESClient(cluster);
+        if (esClient == null) {
+            LOGGER.error("class={}||method=syncGetSegmentsIndexList||clusterName={}||errMsg=esClient is null",
+                    getClass().getSimpleName(),cluster);
+             return Result.buildFail("集群不存在");
+        }
+        if (CollectionUtils.isEmpty(indexList)) {
+            return Result.buildFail("索引不存在");
+        }
+        String uri = String.format("/%s%s", String.join(",", indexList), SEGMENTS);
+        DirectRequest directRequest = new DirectRequest(HttpMethod.GET.name(), uri);
+        Predicate<DirectResponse> directRequestPredicate = directResponse -> Objects.isNull(directResponse)
+                                                                             || RestStatus.OK
+                                                                                != directResponse.getRestStatus();
+        BiFunction<Long, TimeUnit, DirectResponse> directRequestBiFunction = (timeout, unit) -> {
+            try {
+                return esClient.direct(directRequest).actionGet(timeout, unit);
+            } catch (Exception e) {
+                LOGGER.error("class=ESIndexDAO||cluster={}||method=syncGetSegmentsIndexList", cluster, e);
+                return null;
+            }
+            
+        };
+        
+        DirectResponse response = performTryTimesMethods(directRequestBiFunction, directRequestPredicate, 3);
+        List<IndexCatCellDTO> indexCatCellDTOS = Optional.ofNullable(response)
+                .filter(r -> RestStatus.OK == r.getRestStatus()).map(DirectResponse::getResponseContent)
+                .map(JSON::parseObject).map(json -> json.getJSONObject(INDICES)).map(i->buildIndexCatCellDTOList(i,cluster))
+                
+                .orElse(Lists.newArrayList());
+        return Result.buildSucc(indexCatCellDTOS);
+    }
+    
+   
 
     /**************************************************private******************************************************/
     /**
@@ -257,5 +342,24 @@ public class IndexCatESDAO extends BaseESDAO {
         return "asc";
     }
 
+     private List<IndexCatCellDTO> buildIndexCatCellDTOList(JSONObject jsonObject, String clusterPhy) {
+        List<IndexCatCellDTO> indexCatCellDTOList = Lists.newArrayList();
+        for (Entry<String, Object> indexJson : jsonObject.entrySet()) {
+            String index = indexJson.getKey();
+            
+            JSONObject value = (JSONObject) indexJson.getValue();
+            Long shardSizeIndex = (long) value.getJSONObject(SHARDS).size();
+            Long indexShardSegmentsSize = value.getJSONObject(SHARDS).values().stream().filter(Objects::nonNull)
+                    .map(JSONArray.class::cast).flatMap(Collection::stream).map(JSONObject.class::cast)
+                    .map(json -> json.getJSONObject(SEGMENTS_SHARD)).mapToLong(JSONObject::size).sum();
+            IndexCatCellDTO catCellDTO = new IndexCatCellDTO();
+            catCellDTO.setIndex(index);
+            catCellDTO.setPri(shardSizeIndex);
+            catCellDTO.setTotalSegmentCount(indexShardSegmentsSize);
+            catCellDTO.setCluster(clusterPhy);
+            indexCatCellDTOList.add(catCellDTO);
+        }
+        return indexCatCellDTOList;
+    }
 
 }

@@ -30,8 +30,7 @@ public class IndexPageSearchHandle extends AbstractPageSearchHandle<IndexQueryDT
 
     @Autowired
     private ESIndexService                esIndexService;
-    private static final FutureUtil<Void> INDEX_BUILD_FUTURE = FutureUtil.init("INDEX_BUILD_FUTURE", 10, 10, 100);
-
+    private static final FutureUtil<List<IndexCatCell>> INDEX_BUILD_FUTURE = FutureUtil.init("INDEX_BUILD_FUTURE", 10, 10, 100);
     @Override
     protected Result<Boolean> checkCondition(IndexQueryDTO condition, Integer projectId) {
 

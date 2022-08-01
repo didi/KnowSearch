@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.cluster;
 
+import static com.didichuxing.datachannel.arius.admin.common.RetryUtils.performTryTimesMethods;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_OPERATE_TIMEOUT;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.INDEX_SHARD_NUM;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.TEMPLATE_DEFAULT_ORDER;
