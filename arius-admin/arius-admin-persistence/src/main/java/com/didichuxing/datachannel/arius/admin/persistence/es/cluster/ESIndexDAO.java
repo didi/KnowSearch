@@ -9,10 +9,7 @@ import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOpe
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.TEMPLATE_INDEX_INCLUDE_NODE_NAME;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatCellDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.setting.ESIndicesGetAllSettingRequest;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
@@ -59,13 +56,11 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import org.apache.commons.collections4.CollectionUtils;
@@ -86,10 +81,7 @@ public class ESIndexDAO extends BaseESDAO {
     public static final String MAX_NUM_SEGMENTS = "max_num_segments";
     public static final String ONLY_EXPUNGE_DELETES = "only_expunge_deletes";
     public static final String ROLLOVER_API         = "/_rollover";
-    public static final String SEGMENTS = "/_segments";
-    public static final String INDICES  = "indices";
-    public static final String SHARDS   = "shards";
-    public static final String SEGMENTS_SHARD = "segments";
+ 
     
 
     /**
@@ -930,56 +922,5 @@ public class ESIndexDAO extends BaseESDAO {
             return Result.buildFail(String.format(FAILED_MSG, "split"));
         }
     }
-    
-    public Result<List<IndexCatCellDTO>> syncGetSegmentsIndexList(String cluster, Collection<String> indexList) {
-        ESClient client = fetchESClientByCluster(cluster);
-        if (client == null) {
-            return Result.buildFail("集群不存在");
-        }
-        if (CollectionUtils.isEmpty(indexList)) {
-            return Result.buildFail("索引不存在");
-        }
-        String uri = String.format("/%s%s", String.join(",", indexList), SEGMENTS);
-        DirectRequest directRequest = new DirectRequest(HttpMethod.GET.name(), uri);
-        Predicate<DirectResponse> directRequestPredicate = directResponse -> Objects.isNull(directResponse)
-                                                                             || RestStatus.OK
-                                                                                != directResponse.getRestStatus();
-        BiFunction<Long, TimeUnit, DirectResponse> directRequestBiFunction = (timeout, unit) -> {
-            try {
-                return client.direct(directRequest).actionGet(timeout, unit);
-            } catch (Exception e) {
-                LOGGER.error("class=ESIndexDAO||cluster={}||method=syncGetSegmentsIndexList", cluster, e);
-                return null;
-            }
-            
-        };
-        
-        DirectResponse response = performTryTimesMethods(directRequestBiFunction, directRequestPredicate, 3);
-        List<IndexCatCellDTO> indexCatCellDTOS = Optional.ofNullable(response)
-                .filter(r -> RestStatus.OK == r.getRestStatus()).map(DirectResponse::getResponseContent)
-                .map(JSON::parseObject).map(json -> json.getJSONObject(INDICES)).map(i->buildIndexCatCellDTOList(i,cluster))
-                
-                .orElse(Lists.newArrayList());
-        return Result.buildSucc(indexCatCellDTOS);
-    }
-    
-    private List<IndexCatCellDTO> buildIndexCatCellDTOList(JSONObject jsonObject,String clusterPhy) {
-        List<IndexCatCellDTO> indexCatCellDTOList = Lists.newArrayList();
-        for (Entry<String, Object> indexJson : jsonObject.entrySet()) {
-            String index = indexJson.getKey();
-            
-            JSONObject value = (JSONObject) indexJson.getValue();
-            Long shardSizeIndex = (long) value.getJSONObject(SHARDS).size();
-            Long indexShardSegmentsSize = value.getJSONObject(SHARDS).values().stream().filter(Objects::nonNull)
-                    .map(JSONArray.class::cast).flatMap(Collection::stream).map(JSONObject.class::cast)
-                    .map(json -> json.getJSONObject(SEGMENTS_SHARD)).mapToLong(JSONObject::size).sum();
-            IndexCatCellDTO catCellDTO = new IndexCatCellDTO();
-            catCellDTO.setIndex(index);
-            catCellDTO.setPri(shardSizeIndex);
-            catCellDTO.setTotalSegmentCount(indexShardSegmentsSize);
-            catCellDTO.setCluster(clusterPhy);
-            indexCatCellDTOList.add(catCellDTO);
-        }
-        return indexCatCellDTOList;
-    }
+ 
 }

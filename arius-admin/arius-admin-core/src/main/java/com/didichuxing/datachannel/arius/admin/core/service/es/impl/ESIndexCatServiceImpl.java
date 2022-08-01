@@ -12,7 +12,6 @@ import com.didichuxing.datachannel.arius.admin.common.util.BatchProcessor;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexCatService;
-import com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESIndexDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.index.IndexCatESDAO;
 import com.didiglobal.logi.elasticsearch.client.gateway.direct.DirectResponse;
 import com.didiglobal.logi.log.ILog;
@@ -38,8 +37,7 @@ public class ESIndexCatServiceImpl implements ESIndexCatService {
     private static final ILog LOGGER = LogFactory.getLog(ESIndexCatService.class);
     @Autowired
     private IndexCatESDAO indexCatESDAO;
-    @Autowired
-    private ESIndexDAO    esIndexDAO;
+   
 
     @Override
     public Tuple<Long, List<IndexCatCell>> syncGetCatIndexInfo(String cluster, String index, String health,
@@ -177,7 +175,7 @@ public class ESIndexCatServiceImpl implements ESIndexCatService {
      */
     @Override
     public Result<List<IndexCatCellDTO>> syncGetSegmentsIndexList(String cluster, Collection<String> indexList) {
-        return esIndexDAO.syncGetSegmentsIndexList(cluster,indexList);
+        return indexCatESDAO.syncGetSegmentsIndexList(cluster,indexList);
     }
     /*************************************************private*******************************************************/
 }
