@@ -11,6 +11,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.ESClusterVersionE
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -183,6 +184,8 @@ public enum TemplateServiceEnum {
                 TemplateServiceEnum.TEMPLATE_COLD);
     }
     
+   
+    
     /**
      * str是否保存传入的枚举类
      *
@@ -196,6 +199,15 @@ public enum TemplateServiceEnum {
         }
         return Arrays.stream(StringUtils.split(openSrvStr, ",")).filter(StringUtils::isNumeric).map(Integer::parseInt)
                 .map(TemplateServiceEnum::getById).filter(Objects::nonNull).anyMatch(srv -> srv.equals(serviceEnum));
+    }
+    
+    public static List<TemplateServiceEnum> str2Srv(String openSrvStr) {
+        if (StringUtils.isBlank(openSrvStr)){
+            return Collections.emptyList();
+        }
+        
+        return Arrays.stream(StringUtils.split(openSrvStr, ",")).filter(StringUtils::isNumeric).map(Integer::parseInt)
+                .map(TemplateServiceEnum::getById).filter(Objects::nonNull).distinct().collect(Collectors.toList());
     }
     
 }

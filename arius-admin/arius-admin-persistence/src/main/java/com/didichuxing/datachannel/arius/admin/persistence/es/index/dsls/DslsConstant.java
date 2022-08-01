@@ -692,7 +692,7 @@ public class DslsConstant {
      */
     public static final String GET_ALL_CAT_INDEX_INFO_BY_TERMS                               = "IndexCatESDAO/getAllCatIndexInfoByTerms";
 
-    public static final String GET_PLATFORM_CREATE_CAT_INDEX  = "IndexCatESDAO/getPlatformCreateCatIndex";
+    public static final String GET_PLATFORM_CREATE_CAT_INDEX_EXISTS_HEALTH = "IndexCatESDAO/getPlatformCreateCatIndexExistsHealth";
 
     /************************************************************      ShardCatESDAO     **************************************************************/
     /**

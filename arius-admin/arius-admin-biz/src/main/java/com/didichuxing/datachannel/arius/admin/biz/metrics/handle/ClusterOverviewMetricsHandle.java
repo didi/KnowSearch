@@ -8,9 +8,11 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordina
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.percentiles.BasePercentileMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStatsResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.*;
+import com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyClusterMetricsEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.*;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
+import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterNodeService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESShardService;
@@ -57,6 +59,9 @@ public class ClusterOverviewMetricsHandle {
 
     @Autowired
     private ESTemplateService             esTemplateService;
+
+    @Autowired
+    private AriusConfigInfoService        ariusConfigInfoService;
 
     private static final FutureUtil<Void> getMultipleMetricFutureUtil   = FutureUtil.init("getMultipleMetricFutureUtil",
         10, 10, 100);
@@ -135,6 +140,8 @@ public class ClusterOverviewMetricsHandle {
         esClusterOverviewMetricsVO.setDataCenter(EnvUtil.getDC().getCode());
         esClusterOverviewMetricsVO.setBasic(basicMetricsVO);
         esClusterOverviewMetricsVO.setCurrentTime(DateTimeUtil.formatTimestamp(System.currentTimeMillis()));
+        esClusterOverviewMetricsVO.setBigShardThreshold(ariusConfigInfoService.doubleSetting(AriusConfigConstant.ARIUS_COMMON_GROUP,
+                AriusConfigConstant.BIG_SHARD_THRESHOLD, 50.0));
         return esClusterOverviewMetricsVO;
     }
 

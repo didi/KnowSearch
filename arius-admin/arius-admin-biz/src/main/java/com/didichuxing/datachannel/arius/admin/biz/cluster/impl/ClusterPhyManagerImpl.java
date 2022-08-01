@@ -11,6 +11,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.resource.E
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.DATA_NODE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.MASTER_NODE;
 
+import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.page.ClusterPhyPageSearchHandle;
@@ -68,6 +69,9 @@ import com.didichuxing.datachannel.arius.admin.common.exception.AdminTaskExcepti
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.threadpool.AriusScheduleThreadPool;
+import com.didichuxing.datachannel.arius.admin.common.tuple.TupleThree;
+import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
+import com.didichuxing.datachannel.arius.admin.common.tuple.Tuples;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ClusterUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
@@ -97,6 +101,8 @@ import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.base.Strings;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -107,6 +113,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -115,6 +122,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.ElasticsearchTimeoutException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
@@ -139,6 +147,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     private static final Map<String, Triple<Long, Long, Double>> CLUSTER_NAME_TO_ES_CLUSTER_STATS_TRIPLE_MAP = Maps
         .newConcurrentMap();
     public static final String                                   SEPARATOR_CHARS                             = ",";
+    private static final String COLD = "cold";
     
 
     @Autowired
@@ -203,14 +212,42 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
     @Autowired
     private RoleTool                                             roleTool;
-
+    private static final FutureUtil<Void>                                                                                                    FUTURE_UTIL               = FutureUtil.init(
+            "ClusterPhyManagerImpl", 20, 40, 100);
+    private static final Cache</*clusterPhy*/String, TupleThree</*dcdrExist*/Boolean,/*pipelineExist*/ Boolean,/*existColdRegion*/ Boolean>> CLUSTER_PHY_DCDR_PIPELINE = CacheBuilder.newBuilder()
+            .expireAfterWrite(10, TimeUnit.MINUTES).maximumSize(10000).build();
     @PostConstruct
     private void init() {
         ariusScheduleThreadPool.submitScheduleAtFixedDelayTask(this::refreshClusterDistInfo, 60, 180);
+
     }
+    
+    @Scheduled(cron = "0 9/1 * * * ?")
+    private synchronized void refreshDCDRAndPipelineAndColdRegionTupleByClusterPhyWithCache() {
+    
+        for (String clusterName : clusterPhyService.listClusterNames()) {
+            CLUSTER_PHY_DCDR_PIPELINE.put(clusterName, getDCDRAndPipelineTupleByClusterPhy(clusterName));
+        }
+    }
+    
 
-    private static final FutureUtil<Void> FUTURE_UTIL = FutureUtil.init("ClusterPhyManagerImpl", 20, 40, 100);
-
+  
+    
+    /**
+     * @param clusterPhy
+     * @return
+     */
+    @Override
+    public TupleThree</*dcdrExist*/Boolean,/*pipelineExist*/ Boolean,/*existColdRegion*/ Boolean> getDCDRAndPipelineAndColdRegionTupleByClusterPhyWithCache(
+            String clusterPhy) {
+        try {
+           return CLUSTER_PHY_DCDR_PIPELINE.get(
+                clusterPhy,()->getDCDRAndPipelineTupleByClusterPhy(clusterPhy));
+        }catch (Exception e){
+            return Tuples.of(false, false, false);
+        }
+    }
+    
     @Override
     public boolean copyMapping(String cluster, int retryCount) {
         // 获取物理集群下的所有物理模板
@@ -617,7 +654,26 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         return regions.stream().map(ClusterRegion::getPhyClusterName).distinct().sorted(Comparator.naturalOrder())
             .collect(Collectors.toList());
     }
-
+    
+    /**
+     * @param clusterPhy
+     * @return
+     */
+    @Override
+    public Result<ClusterPhy> getClusterByName(String clusterPhy) {
+        return Result.buildSucc(clusterPhyService.getClusterByName(clusterPhy));
+    }
+    
+    /**
+     * @param cluster
+     * @param remoteCluster
+     * @return
+     */
+    @Override
+    public boolean ensureDCDRRemoteCluster(String cluster, String remoteCluster) throws ESOperateException {
+        return clusterPhyService.ensureDCDRRemoteCluster(cluster,remoteCluster);
+    }
+    
     @Override
     public Result<List<String>> listClusterPhyNameByResourceType(Integer clusterResourceType, Integer projectId) {
 
@@ -1615,4 +1671,33 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             return true;
         }
     }
+    
+    private TupleThree</*dcdrExist*/Boolean,/*pipelineExist*/ Boolean,/*existColdRegion*/ Boolean> getDCDRAndPipelineTupleByClusterPhy(
+            String clusterPhy) {
+        TupleTwo<Boolean, Boolean> tupleTwo = esClusterNodeService.existDCDRAndPipelineModule(clusterPhy);
+        return Tuples.of(tupleTwo.v1,tupleTwo.v2,CollectionUtils.isNotEmpty(getColdRegionByPhyCluster(clusterPhy)));
+    }
+    
+   
+    
+     public List<ClusterRegion> getColdRegionByPhyCluster(String phyCluster) {
+        List<ClusterRegion> clusterRegions = clusterRegionService.listPhyClusterRegions(phyCluster);
+        //冷region是不会保存在逻辑集群侧的，所以这里关联的region肯定是大于1的，如果是小于1，那么是一定不会具备的
+        if (clusterRegions.size()<=1){
+            return Collections.emptyList();
+        }
+          return clusterRegions.stream().filter(coldTruePreByClusterRegion).collect(Collectors.toList());
+    }
+     private final static Predicate<ClusterRegion> coldTruePreByClusterRegion = clusterRegion -> {
+        if (StringUtils.isBlank(clusterRegion.getConfig())) {
+            return Boolean.FALSE;
+        }
+        try {
+            return JSON.parseObject(clusterRegion.getConfig()).getBoolean(COLD);
+        
+        } catch (Exception e) {
+            return Boolean.FALSE;
+        }
+    
+    };
 }

@@ -269,6 +269,7 @@ public interface IndexTemplateService {
      * @param logicTemplateId 逻辑模板id
      */
     IndexTemplateLogicWithClusterAndMasterTemplate getLogicTemplateWithClusterAndMasterTemplate(Integer logicTemplateId);
+    String getMaterClusterPhyByLogicTemplateId(Integer logicTemplateId);
 
     /**
      * 获取指定逻辑模板列表信息（带有逻辑集群和物理模板）

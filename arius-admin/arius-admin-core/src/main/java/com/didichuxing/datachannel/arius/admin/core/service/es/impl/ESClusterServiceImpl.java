@@ -1,5 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.core.service.es.impl;
 
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_OPERATE_TIMEOUT;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.VERSION;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.VERSION_INNER_NUMBER;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.VERSION_NUMBER;
+
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.NodeAttrInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -32,6 +37,15 @@ import com.didiglobal.logi.log.LogFactory;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import java.net.InetAddress;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.compress.utils.Sets;
 import org.apache.commons.lang3.StringUtils;
@@ -41,16 +55,6 @@ import org.elasticsearch.rest.RestStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.net.InetAddress;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.*;
-
-/**
- * @author d06679
- * @date 2019/5/8
- */
 @Service
 public class ESClusterServiceImpl implements ESClusterService {
 
@@ -109,6 +113,8 @@ public class ESClusterServiceImpl implements ESClusterService {
     @Override
     public boolean syncPutRemoteCluster(String cluster, String remoteCluster, List<String> tcpAddresses,
                                         Integer retryCount) throws ESOperateException {
+        if (CollectionUtils.isEmpty(tcpAddresses)) { return false;}
+
         return ESOpTimeoutRetry.esRetryExecute("syncPutRemoteCluster", retryCount,
             () -> esClusterDAO.putPersistentRemoteClusters(cluster,
                 String.format(ESOperateConstant.REMOTE_CLUSTER_FORMAT, remoteCluster), tcpAddresses));
@@ -461,6 +467,11 @@ public class ESClusterServiceImpl implements ESClusterService {
         return Optional.ofNullable(response).map(JSONObject::parseObject)
             .map(jsonObject -> jsonObject.getJSONObject(SHARDS)).map(shards -> shards.getInteger(FAILED))
             .map(failed -> failed.equals(0)).orElse(false);
+    }
+
+    @Override
+    public List<String> syncGetTcpAddress(String cluster) {
+        return esClusterDAO.getNodeTcpAddress(cluster);
     }
 
     private List<TaskMissionAnalysisVO> buildTaskMission(JSONObject responseJson) {
