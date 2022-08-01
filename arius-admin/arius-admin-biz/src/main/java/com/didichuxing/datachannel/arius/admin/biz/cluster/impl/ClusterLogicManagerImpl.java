@@ -372,12 +372,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         ClusterLogicVO clusterLogicVO = ConvertUtil.obj2Obj(clusterLogic, ClusterLogicVO.class);
 
         futureUtil.runnableTask(() -> buildLogicClusterStatus(clusterLogicVO, clusterLogic))
-            .runnableTask(() -> buildConsoleClusterVersions(clusterLogicVO))
-            .runnableTask(() -> buildOpLogicClusterPermission(clusterLogicVO, currentProjectId))
-            .runnableTask(
-                () -> Optional.ofNullable(projectService.getProjectBriefByProjectId(clusterLogicVO.getProjectId()))
-                    .map(ProjectBriefVO::getProjectName).ifPresent(clusterLogicVO::setProjectName))
-            .runnableTask(() -> buildClusterNodeInfo(clusterLogicVO)).waitExecute();
+                .runnableTask(() -> buildClusterNodeInfo(clusterLogicVO)).waitExecute();
 
         return clusterLogicVO;
     }
@@ -831,7 +826,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     private void buildEsClusterRoleHostVOList(ClusterLogic clusterLogic, Long logicClusterId,
                                               ESClusterRoleVO esClusterRoleVO,
                                               List<ESClusterRoleHostVO> esClusterRoleHostVOS) {
-        esClusterRoleVO.setPodNumber(clusterLogic.getDataNodeNu());
+        esClusterRoleVO.setPodNumber(clusterLogic.getDataNodeNum());
         esClusterRoleVO.setMachineSpec(clusterLogic.getDataNodeSpec());
 
         ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(logicClusterId);
@@ -858,28 +853,13 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
      * 5. 获取gateway地址
      */
     private void buildClusterNodeInfo(ClusterLogicVO clusterLogicVO) {
-        ClusterLogicContext clusterLogicContext = clusterContextManager.getClusterLogicContext(clusterLogicVO.getId());
-        if (null == clusterLogicContext) {
-            return;
-        }
 
-        //1. 是否关联物理集群
-        clusterLogicVO.setPhyClusterAssociated(clusterLogicContext.getAssociatedPhyNum() > 0);
-
-        //2. 获取关联物理集群列表
-        if (CollectionUtils.isNotEmpty(clusterLogicContext.getAssociatedClusterPhyNames())) {
-            clusterLogicVO.setAssociatedPhyClusterName(clusterLogicContext.getAssociatedClusterPhyNames());
-        }
-
-        //3. 逻辑集群拥有的数据节点数
-        clusterLogicVO.setDataNodesNumber(clusterLogicContext.getAssociatedDataNodeNum());
-
-        //4. 没有关联物理集群下, 逻辑集群状态至为red
+        //1. 没有关联物理集群下, 逻辑集群状态至为red
         if (clusterLogicVO.getPhyClusterAssociated().equals(false)) {
             clusterLogicVO.getClusterStatus().setStatus(RED.getDesc());
         }
 
-        //5. 获取gateway地址
+        //2. 获取gateway地址
         clusterLogicVO.setGatewayAddress(esGatewayClient.getGatewayAddress());
     }
 

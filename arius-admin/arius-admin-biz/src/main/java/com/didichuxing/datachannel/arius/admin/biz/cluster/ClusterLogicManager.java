@@ -18,8 +18,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTe
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
-import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * @description: 逻辑集群manager
@@ -115,7 +116,6 @@ public interface ClusterLogicManager {
     /**
      * 新建逻辑集群, 关联 logicCluster 关联 region
      *
-     * @param aTrue
      * @param param    集群信息
      * @param operator 操作人
      * @return 成功或失败

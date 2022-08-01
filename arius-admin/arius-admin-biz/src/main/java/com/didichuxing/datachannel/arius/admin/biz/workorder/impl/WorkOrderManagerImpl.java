@@ -1,8 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.biz.workorder.impl;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.workorder.BpmAuditTypeEnum.AGREE;
-import static com.didichuxing.datachannel.arius.admin.common.constant.workorder.BpmAuditTypeEnum.DISAGREE;
-
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.WorkOrderHandler;
@@ -43,16 +40,16 @@ import com.didiglobal.logi.security.service.DeptService;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.didiglobal.logi.security.service.UserService;
 import com.google.common.collect.Lists;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static com.didichuxing.datachannel.arius.admin.common.constant.workorder.BpmAuditTypeEnum.AGREE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.workorder.BpmAuditTypeEnum.DISAGREE;
 
 /**
  * @author d06679
@@ -108,7 +105,7 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
         }
         
         LogicClusterCreateContent content = new LogicClusterCreateContent();
-        content.setDataNodeNu(clusterLogic.getDataNodeNu());
+        content.setDataNodeNu(clusterLogic.getDataNodeNum());
         content.setDataNodeSpec(clusterLogic.getDataNodeSpec());
         content.setLevel(clusterLogic.getLevel());
         content.setMemo(clusterLogic.getMemo());

@@ -5,10 +5,11 @@ import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterRe
 import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectClusterLogicAuthEnum;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 /**
  * 集群基本类
@@ -48,7 +49,7 @@ public class ClusterLogicVO extends BaseVO implements Comparable<ClusterLogicVO>
     private List<String>                 associatedPhyClusterName;
 
     @ApiModelProperty("数据节点数")
-    private Integer                      dataNodesNumber;
+    private Integer                      dataNodesNum;
 
     @ApiModelProperty("gateway地址")
     private String                       gatewayAddress;
@@ -101,8 +102,6 @@ public class ClusterLogicVO extends BaseVO implements Comparable<ClusterLogicVO>
 
     @ApiModelProperty("磁盘使用量")
     private Long                         diskUsage;
-    @ApiModelProperty("节点数")
-    private Integer                      nodeNum;
 
     @Override
     public int compareTo(ClusterLogicVO o) {
