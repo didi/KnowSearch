@@ -37,19 +37,15 @@ import java.util.concurrent.atomic.AtomicReference;
 public class NodeDashBoardCollector extends BaseDashboardCollector {
     private static final int                                                                     NODE_FREE_DISK_THRESHOLD          = 15;
 
-    //临时测试将 80 修改为2
-    private static final int                                                                     HEAD_USED_PERCENT_THRESHOLD       = 2;
-//    private static final int                                                                     HEAD_USED_PERCENT_THRESHOLD       = 80;
+    private static final int                                                                     HEAD_USED_PERCENT_THRESHOLD       = 80;
 
-    //临时测试将 80 修改为2
-    private static final int                                                                     CPU_PERCENT_THRESHOLD             = 2;
+    private static final int                                                                     CPU_PERCENT_THRESHOLD             = 80;
 
     private static final long                                                                    LARGE_HEAD_USED_PERCENT_TIME      = 10
                                                                                                                                      * 60
                                                                                                                                      * 1000;
 
-    //临时测试，将30分钟改为2分钟
-    private static final long                                                                    LARGE_CPU_PERCENT_TIME            = 2
+    private static final long                                                                    LARGE_CPU_PERCENT_TIME            = 30
                                                                                                                                      * 60
                                                                                                                                      * 1000;
     private static final ILog                                                                    LOGGER                            = LogFactory
