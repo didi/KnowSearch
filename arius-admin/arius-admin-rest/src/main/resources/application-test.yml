@@ -129,7 +129,6 @@ spring:
     driver-class-name: org.mariadb.jdbc.Driver
     max-lifetime: 60000
     init-sql: true
-    enable: false
     init-thread-num: 50
     max-thread-num: 100
     log-exipre: 3 # 日志保存天数，以天为单位
