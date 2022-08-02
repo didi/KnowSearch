@@ -138,16 +138,16 @@ public class ClusterOverviewMetricsHandle {
                 metricsClusterPhyDTO.getEndTime()));
         }
         getMultipleMetricFutureUtil.waitExecute();
-
-        //3. uniform percentage unit
+        //3.非超级项目进行大索引过滤
+        filterESClusterOverviewMetricsVOByProjectIdAndClusterLogicName(esClusterOverviewMetricsVO,
+                metricsClusterPhyDTO.getProjectId(), metricsClusterPhyDTO.getClusterLogicName(),
+                metricsClusterPhyDTO.getStartTime(), metricsClusterPhyDTO.getEndTime());
+        //4. uniform percentage unit
         MetricsValueConvertUtils.convertClusterOverviewMetricsPercent(esClusterOverviewMetricsVO);
 
-        //4. optimize query burr
+        //5. optimize query burr
         optimizeQueryBurrForClusterOverviewMetrics(esClusterOverviewMetricsVO);
-        //5.非超级项目进行大索引过滤
-        filterESClusterOverviewMetricsVOByProjectIdAndClusterLogicName(esClusterOverviewMetricsVO,
-                metricsClusterPhyDTO.getProjectId(),metricsClusterPhyDTO.getClusterLogicName(),
-                metricsClusterPhyDTO.getStartTime(),metricsClusterPhyDTO.getEndTime());
+        
         return esClusterOverviewMetricsVO;
     }
 
