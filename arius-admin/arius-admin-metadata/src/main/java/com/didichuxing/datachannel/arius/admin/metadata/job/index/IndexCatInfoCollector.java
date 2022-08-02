@@ -34,6 +34,7 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -130,8 +131,10 @@ public class IndexCatInfoCollector extends AbstractMetaDataJob {
                         // 3.1 获取匹配平台模板的cat_index信息
                         List<CatIndexResult> catIndexMatchAriusTemplateList = catIndexResults.stream()
                                 .filter(Objects::nonNull)
-                                .filter(r -> templateName2IndexTemplatePhyWithLogicMap.containsKey(
-                                        TemplateUtils.getMatchTemplateNameByIndexName(r.getIndex())))
+                                .filter(r -> templateName2IndexTemplatePhyWithLogicMap.containsKey(r.getIndex())
+                                             || templateName2IndexTemplatePhyWithLogicMap.containsKey(
+                                        TemplateUtils.getMatchTemplateNameByIndexName(r.getIndex()))
+                                )
                                 .collect(Collectors.toList());
 
                         // 3.2 根据模板信息构建Arius平台索引cat_index元数据信息
@@ -208,12 +211,20 @@ public class IndexCatInfoCollector extends AbstractMetaDataJob {
         for (CatIndexResult catIndexResult : catIndexMatchAriusTemplateList) {
             // 构建基础数据
             IndexCatCellPO indexCatCellPO = buildBasicIndexCatCell(indices2SegmentCountMap, clusterName, timeMillis, catIndexResult);
-
+    
             // 根据索引名称获取平台模板名称, 匹配为null，则不去设置设置模板相关的属性
-            String templateName = TemplateUtils.getMatchTemplateNameByIndexName(indexCatCellPO.getIndex());
-            if (null != templateName && null != templateName2IndexTemplatePhyWithLogicMap.get(templateName)) {
-                IndexTemplatePhyWithLogic indexTemplatePhyWithLogic = templateName2IndexTemplatePhyWithLogicMap.get(templateName);
-
+            IndexTemplatePhyWithLogic indexTemplatePhyWithLogic = templateName2IndexTemplatePhyWithLogicMap.get(
+                    indexCatCellPO.getIndex());
+    
+            if (Objects.isNull(indexTemplatePhyWithLogic)) {
+                String templateName = TemplateUtils.getMatchTemplateNameByIndexName(indexCatCellPO.getIndex());
+                if (StringUtils.isNotBlank(templateName)) {
+                    indexTemplatePhyWithLogic = templateName2IndexTemplatePhyWithLogicMap.get(templateName);
+                }
+        
+            }
+            if (Objects.nonNull(indexTemplatePhyWithLogic)) {
+        
                 IndexTemplate logicTemplate = indexTemplatePhyWithLogic.getLogicTemplate();
                 if (null != logicTemplate) {
                     String clusterLogic = logicClusterId2NameMap.get(logicTemplate.getResourceId());
