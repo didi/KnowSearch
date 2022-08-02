@@ -2,14 +2,12 @@ package com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONPath;
-import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.MetricsContent;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.MetricsContentCell;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.TopMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.VariousLineChartMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.ESClusterTaskDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.BaseESPO;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.index.IndexCatCellPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AriusStatsEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.PercentilesEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.OneLevelTypeEnum;
@@ -39,6 +37,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.*;
+import static com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats.AriusStatsDashBoardInfoESDAO.INDEX_COUNT;
 
 @NoArgsConstructor
 public class BaseAriusStatsESDAO extends BaseESDAO {
@@ -579,11 +578,9 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
         }
 
         Map<String, ESAggr> esAggrMap = response.getAggs().getEsAggrMap();
-        //集群对应的索引数量
-        Map<String,Long> clusterIndexCount = Maps.newHashMap();
         if (null != esAggrMap && null != esAggrMap.get(HIST)) {
             metricsKeys.forEach(
-                key -> variousLineChartsMetrics.add(buildVariousLineChartMetrics(oneLevelType, key, esAggrMap,clusterIndexCount)));
+                key -> variousLineChartsMetrics.add(buildVariousLineChartMetrics(oneLevelType, key, esAggrMap)));
         }
 
         //get topNu
@@ -671,10 +668,10 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
     }
 
     private VariousLineChartMetrics buildVariousLineChartMetrics(String oneLevelType, String key,
-                                                                 Map<String, ESAggr> esAggrMap,Map<String,Long> clusterIndexCount) {
+                                                                 Map<String, ESAggr> esAggrMap) {
         VariousLineChartMetrics variousLineChartMetrics = new VariousLineChartMetrics();
         variousLineChartMetrics.setType(key);
-        variousLineChartMetrics.setMetricsContents(buildMetricsContents(oneLevelType, key, esAggrMap,clusterIndexCount));
+        variousLineChartMetrics.setMetricsContents(buildMetricsContents(oneLevelType, key, esAggrMap));
         return variousLineChartMetrics;
     }
 
@@ -749,7 +746,7 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
         return metricsContents;
     }
 
-    private List<MetricsContent> buildMetricsContents(String oneLevelType, String key, Map<String, ESAggr> esAggrMap,Map<String,Long> clusterIndexCount) {
+    private List<MetricsContent> buildMetricsContents(String oneLevelType, String key, Map<String, ESAggr> esAggrMap) {
         List<MetricsContent> metricsContents = Lists.newArrayList();
         esAggrMap.get(HIST).getBucketList().forEach(esBucket -> {
             //get nodeName
@@ -769,18 +766,8 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
                     // 针对集群维度指标
                     metricsContent.setName(keyValue);
                     metricsContent.setCluster(keyValue);
-                    //获取集群下的索引数量
-                    Long indexCount = 0L;
-                    if (Objects.nonNull(clusterIndexCount.get(keyValue))){
-                        indexCount = clusterIndexCount.get(keyValue);
-                    }else {
-                        Tuple<Long, List<IndexCatCellPO>> index = indexCatESDAO.getIndexListByTerms(keyValue,null);
-                        indexCount = Objects.nonNull(index)?index.v1():0L;
-                    }
-                    metricsContent.setIndexCount(indexCount);
                 }
-
-                metricsContent.setMetricsContentCells(buildMetricsContentCells(key, esBucket));
+                buildMetricsContentCells(metricsContent,key, esBucket);
                 metricsContents.add(metricsContent);
             }
         });
@@ -788,7 +775,7 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
         return metricsContents;
     }
 
-    private List<MetricsContentCell> buildMetricsContentCells(String key, ESBucket esBucket) {
+    private void buildMetricsContentCells(MetricsContent metricsContent,String key, ESBucket esBucket) {
         List<MetricsContentCell> metricsContentCells = Lists.newArrayList();
 
         esBucket.getAggrMap().get(HIST).getBucketList().forEach(esSubBucket -> {
@@ -804,11 +791,15 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
             if (null != esAggr && null != esAggr.getUnusedMap().get(VALUE)) {
                 metricsContentCell.setValue(Double.parseDouble(esAggr.getUnusedMap().get(VALUE).toString()));
             }
+            //get indexCount
+            if (INDEX_COUNT.equals(key)&&null != esAggr && null != esAggr.getUnusedMap().get(VALUE)) {
+                metricsContent.setIndexCount(Double.parseDouble(esAggr.getUnusedMap().get(VALUE).toString()));
+            }
 
             metricsContentCells.add(metricsContentCell);
         });
 
-        return metricsContentCells;
+        metricsContent.setMetricsContentCells(metricsContentCells);
     }
 
     private List<MetricsContentCell> buildMetricsNoNegativeContentCells(String key, ESBucket esBucket) {

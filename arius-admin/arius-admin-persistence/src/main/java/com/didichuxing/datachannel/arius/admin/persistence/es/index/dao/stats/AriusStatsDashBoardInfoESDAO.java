@@ -42,6 +42,9 @@ public class AriusStatsDashBoardInfoESDAO extends BaseAriusStatsESDAO {
     public static final String            GTE         = "gte";
     public static final String            CLUSTER     = "cluster";
     public static final String            EMPTY_STR   = "";
+    public static final String            INDEX_COUNT = "indexCount";
+
+
 
     @PostConstruct
     public void init() {
@@ -680,6 +683,7 @@ public class AriusStatsDashBoardInfoESDAO extends BaseAriusStatsESDAO {
      * @return             StringText
      */
     private String dynamicBuildDashboardAggsDSLForTop(String oneLevelType, List<String> metrics, String aggType) {
+        metrics.add(INDEX_COUNT);
         StringBuilder sb = new StringBuilder();
 
         for (int i = 0; i < metrics.size(); i++) {

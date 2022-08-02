@@ -37,6 +37,6 @@ public class MetricsContent implements Serializable {
     /**
      * 集群索引数量
      */
-    private Long                   indexCount;
+    private Double                   indexCount;
 
 }
