@@ -10,6 +10,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.Cl
 import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyClusterMetricsEnum.SEARCH_LATENCY;
 import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyClusterMetricsEnum.TASK_COST;
 
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.didichuxing.datachannel.arius.admin.biz.component.MetricsValueConvertUtils;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsClusterPhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
@@ -140,8 +141,7 @@ public class ClusterOverviewMetricsHandle {
         getMultipleMetricFutureUtil.waitExecute();
         //3.非超级项目进行大索引过滤
         filterESClusterOverviewMetricsVOByProjectIdAndClusterLogicName(esClusterOverviewMetricsVO,
-                metricsClusterPhyDTO.getProjectId(), metricsClusterPhyDTO.getClusterLogicName(),
-                metricsClusterPhyDTO.getStartTime(), metricsClusterPhyDTO.getEndTime());
+                metricsClusterPhyDTO.getProjectId(), metricsClusterPhyDTO.getClusterLogicName());
         //4. uniform percentage unit
         MetricsValueConvertUtils.convertClusterOverviewMetricsPercent(esClusterOverviewMetricsVO);
 
@@ -154,11 +154,16 @@ public class ClusterOverviewMetricsHandle {
     /******************************************private*******************************************************/
 
     private void filterESClusterOverviewMetricsVOByProjectIdAndClusterLogicName(
-            ESClusterOverviewMetricsVO esClusterOverviewMetricsVO, Integer projectId, String clusterLogicName,
-            Long startTime, Long endTime) {
+            ESClusterOverviewMetricsVO esClusterOverviewMetricsVO, Integer projectId, String clusterLogicName) {
         if (!AuthConstant.SUPER_PROJECT_ID.equals(projectId) && StringUtils.isNotBlank(clusterLogicName)) {
             List<String> belongToProjectIdIndexList = esIndexCatService.syncGetIndexListByProjectId(projectId,
-                    startTime, endTime, clusterLogicName);
+                    clusterLogicName);
+            if (CollectionUtils.isEmpty(belongToProjectIdIndexList)) {
+                esClusterOverviewMetricsVO.setBigIndices(Collections.emptyList());
+                esClusterOverviewMetricsVO.setBigShards(Collections.emptyList());
+                return;
+            }
+            
             //过滤出项目所属大索引, 大于10亿文档数的索引
             List<BigIndexMetricsVO> filterProjectIdBigIndex = Optional.ofNullable(
                             esClusterOverviewMetricsVO.getBigIndices()).orElse(Collections.emptyList()).stream()

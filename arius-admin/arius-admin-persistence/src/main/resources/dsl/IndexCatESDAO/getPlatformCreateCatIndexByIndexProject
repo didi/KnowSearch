@@ -1,5 +1,4 @@
 {
-	"size":0,
   "query": {
     "bool": {
       "filter": [
@@ -21,16 +20,6 @@
       ]
     }
   },
-  "aggs": {
-    "group_by_index": {
-      "terms": {
-        "field": "index",
-        "size": %d,
-        "min_doc_count": 1,
-        "order": {
-          "_count": "desc"
-        }
-      }
-    }
-  }
+   "_source": "index",
+   "size":%d
 }

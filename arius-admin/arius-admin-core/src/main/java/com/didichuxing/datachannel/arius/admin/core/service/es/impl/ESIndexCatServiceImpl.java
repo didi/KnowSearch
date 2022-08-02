@@ -183,9 +183,8 @@ public class ESIndexCatServiceImpl implements ESIndexCatService {
      * @return
      */
     @Override
-    public List<String> syncGetIndexListByProjectId(Integer projectId,
-                                                    Long startTime, Long endTime, String clusterLogic) {
-        return indexCatESDAO.syncGetIndexListByProjectIdAndClusterLogic(projectId,startTime,endTime,
+    public List<String> syncGetIndexListByProjectId(Integer projectId, String clusterLogic) {
+        return indexCatESDAO.syncGetIndexListByProjectIdAndClusterLogic(projectId,
                 clusterLogic);
     }
     /*************************************************private*******************************************************/

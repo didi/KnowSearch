@@ -50,7 +50,7 @@ public class PhyIndicesClusterMetricsHandler extends BaseClusterMetricsHandle {
                 ((MetricsClusterPhyIndicesDTO) param).getIndexName())) {
             //找到平台侧属于该项目的索引
             List<String> belongToProjectIndexName = esIndexCatService.syncGetIndexListByProjectId(param.getProjectId(),
-                    param.getStartTime(), param.getEndTime(), param.getClusterLogicName());
+                    param.getClusterLogicName());
             return esIndicesStatsService.getAggClusterPhyIndicesMetrics((MetricsClusterPhyIndicesDTO) param,
                     belongToProjectIndexName);
             
