@@ -498,38 +498,6 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
         return variousLineChartsMetrics;
     }
 
-//    /**
-//     *
-//     * @param response         返回值
-//     * @param oneLevelType     一级指标类型(@link OneLevelTypeEnum)
-//     * @param metricsKeys      多个指标类型
-//     * @param topNu            topN
-//     * @return                 结果
-//     */
-//    List<VariousLineChartMetrics> fetchMultipleAggMetricsTop(ESQueryResponse response, String oneLevelType,
-//                                                             List<String> metricsKeys, Integer topNu,
-//                                                             Integer topMethod) {
-//        List<VariousLineChartMetrics> variousLineChartsMetrics = Lists.newArrayList();
-//
-//        if (null == response || response.getAggs() == null) {
-//            LOGGER.warn("class=BaseAriusStatsESDAO||method=fetchMultipleAggMetrics||msg=esQueryResponse is null");
-//            return variousLineChartsMetrics;
-//        }
-//
-//        Map<String, ESAggr> esAggrMap = response.getAggs().getEsAggrMap();
-//        if (null != esAggrMap && null != esAggrMap.get(HIST)) {
-//            metricsKeys.forEach(
-//                key -> variousLineChartsMetrics.add(buildVariousLineChartMetrics(oneLevelType, key, esAggrMap)));
-//        }
-//
-//        //get topNu
-//        if (topNu != null) {
-//            variousLineChartsMetrics.forEach(metrics -> mergeTopNu(metrics, topNu));
-//        }
-//
-//        return variousLineChartsMetrics;
-//    }
-
     /**
      * @param response    返回值
      * @param metricsKeys 多个指标类型
