@@ -180,30 +180,10 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
         List<VariousLineChartMetrics> variousLineChartMetrics = dashBoardMetricsService.getToNMetrics(param,
                 oneLevelType);
 
-        //设置索引数量
-        setClusterIndexCount(variousLineChartMetrics,oneLevelType);
-
         // 毛刺点优化
         MetricsValueConvertUtils.doOptimizeQueryBurrForNodeOrIndicesMetrics(variousLineChartMetrics);
         
         return Result.buildSucc(ConvertUtil.list2List(variousLineChartMetrics, VariousLineChartMetricsVO.class));
-    }
-
-    /**
-     * 当为dashboard的shard数的时候，设置indexCount
-     * @param variousLineChartMetrics
-     * @param oneLevelType
-     */
-    private void setClusterIndexCount(List<VariousLineChartMetrics> variousLineChartMetrics, String oneLevelType) {
-        variousLineChartMetrics.forEach(v->{
-            if (CLUSTER_SHARD_NUM.getType().equals(v.getType())&&oneLevelType.equals(CLUSTER_SHARD_NUM.getOneLevelTypeEnum().getType())){
-                v.getMetricsContents().forEach(metricsContent -> {
-                    //获取集群下的索引数量
-                    List<IndexCatCellDTO> indexCatCellDTOList = esIndexCatService.syncGetByCluster(metricsContent.getCluster(),null);
-                    metricsContent.setIndexCount(Long.valueOf(indexCatCellDTOList.size()));
-                });
-            }
-        });
     }
 
     /**
@@ -242,6 +222,8 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
         }
         futureUtil.waitExecute();
         try {
+            //设置索引数量
+            setClusterIndexCount(listMetrics,oneLevelType);
             filterBySystemConfiguration(listMetrics, oneLevelType);
         } catch (AdminOperateException e) {
             return Result.buildFail(e.getMessage());
@@ -401,5 +383,22 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
         } catch (Exception e) {
             throw new AdminOperateException(errMsg);
         }
+    }
+
+    /**
+     * 当为dashboard的shard数的时候，设置indexCount
+     * @param listMetrics
+     * @param oneLevelType
+     */
+    private void setClusterIndexCount(List<MetricList> listMetrics, String oneLevelType) {
+        listMetrics.forEach(v->{
+            if (CLUSTER_SHARD_NUM.getType().equals(v.getType())&&oneLevelType.equals(CLUSTER_SHARD_NUM.getOneLevelTypeEnum().getType())){
+                v.getMetricListContents().forEach(metricsContent -> {
+                    //获取集群下的索引数量
+                    List<IndexCatCellDTO> indexCatCellDTOList = esIndexCatService.syncGetByCluster(metricsContent.getClusterPhyName(),null);
+                    metricsContent.setIndexCount(Long.valueOf(indexCatCellDTOList.size()));
+                });
+            }
+        });
     }
 }
