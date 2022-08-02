@@ -5,6 +5,7 @@ import com.didichuxing.datachannel.arius.admin.biz.component.MetricsValueConvert
 import com.didichuxing.datachannel.arius.admin.biz.metrics.DashboardMetricsManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.BaseDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatCellDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.DashBoardMetricThresholdDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsDashboardListDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsDashboardTopNDTO;
@@ -23,6 +24,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.SizeUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
+import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexCatService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.DashBoardMetricsService;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
@@ -42,6 +44,7 @@ import java.util.stream.Collectors;
 import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_DASHBOARD_THRESHOLD_GROUP;
 import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricListTypeEnum.INDEX_SMALL_SHARD;
 import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricThresholdValueNameEnum.getAllDefaultThresholdValue;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricTopTypeEnum.CLUSTER_SHARD_NUM;
 
 /**
  * Created by linyunan on 3/14/22
@@ -59,6 +62,9 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
     
     @Autowired
     private AriusConfigInfoService ariusConfigInfoService;
+
+    @Autowired
+    private ESIndexCatService esIndexCatService;
     
     @Override
     public Result<List<VariousLineChartMetricsVO>> getTopClusterMetricsInfo(MetricsDashboardTopNDTO param,
@@ -174,12 +180,31 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
         List<VariousLineChartMetrics> variousLineChartMetrics = dashBoardMetricsService.getToNMetrics(param,
                 oneLevelType);
 
+        setClusterIndexCount(variousLineChartMetrics,oneLevelType);
+
         // 毛刺点优化
         MetricsValueConvertUtils.doOptimizeQueryBurrForNodeOrIndicesMetrics(variousLineChartMetrics);
         
         return Result.buildSucc(ConvertUtil.list2List(variousLineChartMetrics, VariousLineChartMetricsVO.class));
     }
-    
+
+    /**
+     * 当为dashboard的shard数的时候，设置indexCount
+     * @param variousLineChartMetrics
+     * @param oneLevelType
+     */
+    private void setClusterIndexCount(List<VariousLineChartMetrics> variousLineChartMetrics, String oneLevelType) {
+        variousLineChartMetrics.forEach(v->{
+            if (CLUSTER_SHARD_NUM.getType().equals(v.getType())&&oneLevelType.equals(CLUSTER_SHARD_NUM.getOneLevelTypeEnum().getType())){
+                v.getMetricsContents().forEach(metricsContent -> {
+                    //获取集群下的索引数量
+                    List<IndexCatCellDTO> indexCatCellDTOList = esIndexCatService.syncGetByCluster(metricsContent.getCluster(),null);
+                    metricsContent.setIndexCount(Long.valueOf(indexCatCellDTOList.size()));
+                });
+            }
+        });
+    }
+
     /**
      * @param param        MetricsDashboardListDTO
      * @param projectId    项目

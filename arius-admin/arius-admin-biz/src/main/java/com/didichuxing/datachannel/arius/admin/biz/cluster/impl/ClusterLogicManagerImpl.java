@@ -544,7 +544,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         param.setProjectId(projectId);
         List<IndexTemplate> indexTemplates = indexTemplateService.listLogicTemplates(param);
         //通过逻辑集群获取index
-        List<IndexCatCellDTO> catIndexResults = esIndexCatService.syncGetByClusterLogic(clusterLogic.getName(),projectId);
+        List<IndexCatCellDTO> catIndexResults = esIndexCatService.syncGetByCluster(clusterLogic.getName(),projectId);
         ClusterLogicTemplateIndexDetailDTO templateIndexVO = new ClusterLogicTemplateIndexDetailDTO();
         templateIndexVO.setCatIndexResults(catIndexResults);
         templateIndexVO.setTemplates(indexTemplates);
