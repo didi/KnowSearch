@@ -38,6 +38,14 @@ import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassE
 import com.didichuxing.datachannel.arius.admin.common.mapping.AriusIndexTemplateSetting;
 import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
 import com.didichuxing.datachannel.arius.admin.common.tuple.Tuples;
+import com.didichuxing.datachannel.arius.admin.common.util.AriusIndexMappingConfigUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.AriusOptional;
+import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.IndexSettingsUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.SizeUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.*;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
@@ -61,12 +69,15 @@ import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import java.util.Collection;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
@@ -118,7 +129,14 @@ public class IndicesManagerImpl implements IndicesManager {
     @Autowired
     private ESTemplateService        esTemplateService;
 
-    private static final String     DEFAULT_SORT_TERM = "timestamp";
+    private static final    String                   DEFAULT_SORT_TERM  = "timestamp";
+    private static final FutureUtil<Result<Void>> FUTURE_UTIL_RESULT = FutureUtil.init("IndicesManagerImpl", 10, 10,
+            100);
+        private static final FutureUtil<List</*indexName*/String>> FUTURE_UTIL_RESULT_INDEX_NAME = FutureUtil.init(
+                "IndicesManagerImpl",
+                10,
+                10,
+            100);
 
     @Override
     public PaginationResult<IndexCatCellVO> pageGetIndex(IndexQueryDTO condition,
@@ -212,6 +230,14 @@ public class IndicesManagerImpl implements IndicesManager {
         });
     }
 
+    /**
+     * 批处理操作指数
+     *
+     * @param params    参数个数 {@link IndexCatCellDTO#getCluster()}这里使用此参数作为集群名称；如果是超级项目，就是物理集群，反之为逻辑集群
+     * @param projectId 项目id
+     * @param function  函数
+     * @return {@code Result<Boolean>}
+     */
     @Override
     public <T, U, R> Result<Boolean> batchOperateIndex(List<IndexCatCellDTO> params, Integer projectId,
                                                        BiFunction<String, List<String>, Result<Void>> function) {
@@ -234,10 +260,11 @@ public class IndicesManagerImpl implements IndicesManager {
         for (Map.Entry<String, List<String>> entry : cluster2IndexNameListMap.entrySet()) {
             String cluster = entry.getKey();
             List<String> indexNameList = entry.getValue();
-            Result<Void> r = function.apply(cluster, indexNameList);
-            if (r.failed()) {
-                return Result.buildFrom(r);
-            }
+            FUTURE_UTIL_RESULT.callableTask(() -> function.apply(cluster, indexNameList));
+        }
+        Optional<Result<Void>> voidResult = FUTURE_UTIL_RESULT.waitResult().stream().filter(Result::failed).findAny();
+        if (voidResult.isPresent()) {
+            return Result.buildFrom(voidResult.get());
         }
         sleep(1000L);
         return Result.buildSucc(true);
@@ -746,9 +773,29 @@ public class IndicesManagerImpl implements IndicesManager {
 
     @Override
     public Result<List<String>> getClusterLogicIndexName(String clusterLogicName, Integer projectId) {
-        List<IndexCatCellDTO> indexCatCellDTOList = esIndexCatService.syncGetByCluster(clusterLogicName,projectId);
-        List<String> indexNames = indexCatCellDTOList.stream().map(IndexCatCellDTO::getIndex)
-            .collect(Collectors.toList());
+        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByNameAndProjectId(clusterLogicName, projectId);
+        if (clusterLogic == null) {
+            return Result.buildFail();
+        }
+        ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(clusterLogic.getId());
+        if (clusterRegion == null) {
+            return Result.buildFail();
+        }
+        Result<List<IndexTemplate>> listResult = indexTemplateService
+            .listByRegionId(Math.toIntExact(clusterRegion.getId()));
+        List<IndexTemplate> indexTemplates = listResult.getData()
+                .stream()
+                .filter(i -> AuthConstant.SUPER_PROJECT_ID.equals(projectId) || Objects.equals(i.getProjectId(),
+                        projectId))
+
+                .collect(Collectors.toList());
+
+
+        indexTemplates.forEach(indexTemplate -> FUTURE_UTIL_RESULT_INDEX_NAME.callableTask(()->esIndexService.syncCatIndexByExpression(clusterRegion.getPhyClusterName(),
+                indexTemplate.getExpression()).stream().map(CatIndexResult::getIndex).distinct().collect(Collectors.toList())));
+
+        List<String> indexNames = FUTURE_UTIL_RESULT_INDEX_NAME.waitResult().stream().flatMap(Collection::stream)
+                .distinct().collect(Collectors.toList());
         return Result.buildSucc(indexNames);
     }
 

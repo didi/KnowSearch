@@ -2,16 +2,12 @@
   "size": 0,
   "query": {
     "bool": {
-      "must_not": [
-        {
-          "term": {
-            "logicTemplateId": {
-              "value": "0"
-            }
-          }
-        }
-      ],
       "filter": [
+       {
+          "terms": {
+            "logicTemplateId": %s
+          }
+        },
         {
           "term": {
             "cluster": {

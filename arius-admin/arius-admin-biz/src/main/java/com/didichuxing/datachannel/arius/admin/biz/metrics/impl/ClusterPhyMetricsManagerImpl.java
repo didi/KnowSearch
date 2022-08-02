@@ -19,6 +19,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.MetricsVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.ESClusterTaskDetailVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.top.VariousLineChartMetricsVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyTypeMetricsEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
@@ -39,6 +40,7 @@ import com.google.common.collect.Lists;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -100,6 +102,7 @@ public class ClusterPhyMetricsManagerImpl implements ClusterPhyMetricsManager {
     public <T> Result<T> getClusterMetricsByMetricsType(MetricsClusterPhyDTO param, Integer projectId, String userName,
                                                         ClusterPhyTypeMetricsEnum metricsTypeEnum) {
         try {
+            param.setProjectId(projectId);
             if (StringUtils.isNotBlank(param.getClusterLogicName())) {
                 ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByNameThatNotContainsProjectId(param.getClusterLogicName());
                 if (clusterLogic==null){
@@ -111,7 +114,7 @@ public class ClusterPhyMetricsManagerImpl implements ClusterPhyMetricsManager {
                 }
                 List<String> itemNamesUnderClusterLogic;
                 //获取逻辑集群下面的节点，索引，模板的名称列表
-                itemNamesUnderClusterLogic = buildItemsUnderClusterLogic(metricsTypeEnum, clusterRegion);
+                itemNamesUnderClusterLogic = buildItemsUnderClusterLogic(metricsTypeEnum, clusterRegion,projectId);
                 param.setItemNamesUnderClusterLogic(itemNamesUnderClusterLogic);
                 param.setClusterPhyName(clusterRegion.getPhyClusterName());
             }
@@ -128,12 +131,18 @@ public class ClusterPhyMetricsManagerImpl implements ClusterPhyMetricsManager {
                 // 折线图数据
                 Result<List<VariousLineChartMetricsVO>> clusterPhyMetricsResult = metricsHandle
                     .getClusterPhyRelatedCurveMetrics(param, projectId, userName);
-                result = clusterPhyMetricsResult.success() ? (T) clusterPhyMetricsResult.getData() : null;
+                if (clusterPhyMetricsResult.failed()) {
+                    return Result.buildFrom(clusterPhyMetricsResult);
+                }
+                result = (T) clusterPhyMetricsResult.getData();
             } else {
                 // 折线图和列表图数据
                 Result<MetricsVO> metricsVoResult = metricsHandle.getOtherClusterPhyRelatedMetricsVO(param, projectId,
                     userName);
-                result = metricsVoResult.success() ? (T) metricsVoResult.getData() : null;
+                if (metricsVoResult.failed()) {
+                    return Result.buildFrom(metricsVoResult);
+                }
+                result = (T) metricsVoResult.getData();
             }
 
             return Result.buildSucc(result);
@@ -208,7 +217,10 @@ public class ClusterPhyMetricsManagerImpl implements ClusterPhyMetricsManager {
      * @return  节点，索引，模板信息 名称集合
      */
     private List<String> buildItemsUnderClusterLogic(ClusterPhyTypeMetricsEnum metricsTypeEnum,
-                                                     ClusterRegion clusterRegion) {
+                                                     ClusterRegion clusterRegion, Integer projectId) {
+        Predicate<IndexTemplate> filterBelongProjectIdIndexTemplatePre=indexTemplate -> AuthConstant.SUPER_PROJECT_ID
+                                                                                                .equals(projectId)||
+                                                                                        Objects.equals(indexTemplate.getProjectId(),projectId);
         List<String> nodeNamesUnderClusterLogic;
         //节点名称列表
         switch (metricsTypeEnum) {
@@ -221,17 +233,22 @@ public class ClusterPhyMetricsManagerImpl implements ClusterPhyMetricsManager {
             case TEMPLATES:
                 Result<List<IndexTemplate>> indexTemplates = indexTemplateService
                     .listByRegionId(Math.toIntExact(clusterRegion.getId()));
-                nodeNamesUnderClusterLogic = indexTemplates.getData().stream().map(IndexTemplate::getName)
+                nodeNamesUnderClusterLogic = indexTemplates.getData().stream()
+                        .filter(filterBelongProjectIdIndexTemplatePre)
+                        
+                        .map(IndexTemplate::getName)
                     .collect(Collectors.toList());
                 break;
             case INDICES:
                 Result<List<IndexTemplate>> listResult = indexTemplateService
                     .listByRegionId(Math.toIntExact(clusterRegion.getId()));
-                List<IndexTemplate> indexTemplatesList = listResult.getData();
+                List<IndexTemplate> indexTemplatesList = listResult.getData().stream()
+                        .filter(filterBelongProjectIdIndexTemplatePre).collect(Collectors.toList());
                 List<CatIndexResult> catIndexResultList = new ArrayList<>();
                 indexTemplatesList.forEach(indexTemplate -> catIndexResultList.addAll(esIndexService
                     .syncCatIndexByExpression(clusterRegion.getPhyClusterName(), indexTemplate.getExpression())));
-                nodeNamesUnderClusterLogic = catIndexResultList.stream().map(CatIndexResult::getIndex)
+                nodeNamesUnderClusterLogic = catIndexResultList.stream()
+                        .map(CatIndexResult::getIndex)
                     .collect(Collectors.toList());
                 break;
             default:

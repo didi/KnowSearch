@@ -790,7 +790,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
         if (physicalTemplates == null) {
             return null;
         }
-        return convert2WithCluster(Arrays.asList(physicalTemplates)).stream().filter(Objects::nonNull).findFirst()
+        return convert2WithCluster(Arrays.asList(physicalTemplates)).stream().distinct().filter(Objects::nonNull).findFirst()
             .orElse(null);
     }
 
@@ -998,7 +998,12 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
             List<String> logicClusterIdStrList = ListUtils.string2StrList(logicClusterIds);
             List<Long> logicClusterIdList = logicClusterIdStrList.stream().map(Long::parseLong).distinct()
                 .collect(Collectors.toList());
-            List<ClusterLogic> clusterLogicList = clusterLogicService.getClusterLogicListByIds(logicClusterIdList);
+            List<ClusterLogic> clusterLogicList = clusterLogicService.getClusterLogicListByIds(logicClusterIdList)
+                    .stream()
+                    .filter(clusterLogic -> Objects.equals(clusterLogic.getProjectId(),
+                            indexTemplateWithPhyTemplate.getProjectId()))
+                    .collect(Collectors.toList());
+                    
 
             indexTemplateWithCluster.setLogicClusters(clusterLogicList);
         }
@@ -1060,7 +1065,16 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
     public String getNameByTemplateLogicId(Integer logicTemplateId) {
         return indexTemplateDAO.getNameByTemplateLogicId(logicTemplateId);
     }
-
+    
+    /**
+     * @param projectId
+     * @return
+     */
+    @Override
+    public List<Integer> getLogicTemplateIdListByProjectId(Integer projectId) {
+        return indexTemplateDAO.getLogicTemplateIdListByProjectId(projectId);
+    }
+    
     /**************************************** private method ****************************************************/
     private List<IndexTemplateWithPhyTemplates> batchConvertLogicTemplateCombinePhysicalWithFunction(List<IndexTemplatePO> logicTemplates,
                                                                                          Supplier<List<IndexTemplatePhy>> supplier){
