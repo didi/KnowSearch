@@ -260,11 +260,14 @@ public class ESIndexDAO extends BaseESDAO {
             String typeName = entry.getKey();
             ESIndicesUpdateMappingRequestBuilder builder = client.admin().indices().prepareUpdateMapping();
             builder.setIndex(indexName).setType(typeName).setTypeConfig(typeConfigMap.get(typeName));
-            // es 集群版本7 以上需要带includeTypeName 参数，方可以更新index mapping
-            if (Integer.parseInt(client.getEsVersion().split("\\.")[0]) >= 7) {
+            // es 集群版本7 需要带includeTypeName 参数，方可以更新index mapping
+            if (Integer.parseInt(client.getEsVersion().split("\\.")[0]) == 7) {
                 builder.setIncludeTypeName(true);
             }
-
+            //es集群版本8 不需要type参数
+            if (Integer.parseInt(client.getEsVersion().split("\\.")[0]) == 8) {
+                builder.setIsNeedType(false);
+            }
             try {
                 ESIndicesUpdateMappingResponse response = builder.execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
                 if (!response.getAcknowledged().booleanValue()) {
