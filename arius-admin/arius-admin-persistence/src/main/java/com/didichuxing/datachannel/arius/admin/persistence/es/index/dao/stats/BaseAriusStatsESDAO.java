@@ -2,14 +2,12 @@ package com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.JSONPath;
-import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.MetricsContent;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.MetricsContentCell;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.TopMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.VariousLineChartMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.ESClusterTaskDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.BaseESPO;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.index.IndexCatCellPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AriusStatsEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.PercentilesEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.OneLevelTypeEnum;
@@ -768,9 +766,6 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
                     // 针对集群维度指标
                     metricsContent.setName(keyValue);
                     metricsContent.setCluster(keyValue);
-                    //获取集群下的索引数量
-                    Tuple<Long, List<IndexCatCellPO>> index = indexCatESDAO.getIndexListByTerms(keyValue,null);
-                    metricsContent.setIndexCount(Objects.nonNull(index)?index.v1():0L);
                 }
 
                 metricsContent.setMetricsContentCells(buildMetricsContentCells(key, esBucket));
