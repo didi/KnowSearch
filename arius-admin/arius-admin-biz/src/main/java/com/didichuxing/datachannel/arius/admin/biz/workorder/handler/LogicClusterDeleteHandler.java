@@ -14,7 +14,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
@@ -104,17 +103,12 @@ public class LogicClusterDeleteHandler extends BaseWorkOrderHandler {
     protected Result<Void> doProcessAgree(WorkOrder workOrder, String approver) {
         LogicClusterDeleteContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
             LogicClusterDeleteContent.class);
-        try {
-            Result<Void> deleteLogicClusterResult = clusterLogicManager.deleteLogicCluster(content.getId(),
-                workOrder.getSubmitor(), workOrder.getSubmitorProjectId());
-            if (deleteLogicClusterResult.success()) {
-                projectClusterLogicAuthService.deleteLogicClusterAuthByLogicClusterId(content.getId());
-            }
-        } catch (AdminOperateException e) {
-            LOGGER.error("class=LogicClusterDeleteHandler||method=doProcessAgree||clusterLogicId={}||errMsg={}",
-                content.getId(), e.getMessage(), e);
-        }
-        return Result.buildSucc();
+	    Result<Void> deleteLogicClusterResult = clusterLogicManager.deleteLogicCluster(content.getId(),
+	        workOrder.getSubmitor(), workOrder.getSubmitorProjectId());
+	    if (deleteLogicClusterResult.success()) {
+	        projectClusterLogicAuthService.deleteLogicClusterAuthByLogicClusterId(content.getId());
+	    }
+	    return Result.buildSucc();
     }
 
     @Override

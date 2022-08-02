@@ -60,24 +60,36 @@ public class NormalOrderController {
         return workOrderManager.submit(workOrderDTO);
     }
     
-     @PutMapping("/joinLogicCluster/submit")
+    @PutMapping("/join-logic-cluster/submit")
     @ResponseBody
-    @ApiOperation(value = "项目加入已经存在的逻辑集群")
-    @ApiImplicitParams({ @ApiImplicitParam(paramType = "path", dataType = "String", name = "type", value = "工单类型", required = true) })
-    public Result<AriusWorkOrderInfoSubmittedVO> submitByJoinLogicCluster(
-                                                        @RequestBody WorkOrderDTO workOrderDTO) throws AdminOperateException {
+    @ApiOperation(value = "项目加入已经存在的逻辑集群",notes = "三方接口")
+    @ApiImplicitParams({
+            @ApiImplicitParam(paramType = "path", dataType = "String", name = "type", value = "工单类型", required = true) })
+    public Result<AriusWorkOrderInfoSubmittedVO> submitByJoinLogicCluster(@RequestBody WorkOrderDTO workOrderDTO)
+            throws AdminOperateException {
         return workOrderManager.submitByJoinLogicCluster(workOrderDTO);
+    }
+    
+    @PutMapping("/join-logic-cluster/{orderId}")
+    @ResponseBody
+    @ApiOperation(value = "审核",notes = "三方接口")
+    public Result<Void> processByJoinLogicCluster(HttpServletRequest httpServletRequest,@PathVariable(value = "orderId") Long orderId,
+                                                  @RequestBody WorkOrderProcessDTO processDTO)
+            throws NotFindSubclassException, OperateForbiddenException {
+        //设置当前操作人
+        processDTO.setAssignee(SpringTool.getUserName());
+        return workOrderManager.processByJoinLogicCluster(processDTO,HttpRequestUtil.getProjectId(httpServletRequest));
     }
 
     @PutMapping("/{orderId}")
     @ResponseBody
     @ApiOperation(value = "审核")
-    public Result<Void> process(@PathVariable(value = "orderId") Long orderId,
+    public Result<Void> process(HttpServletRequest httpServletRequest,@PathVariable(value = "orderId") Long orderId,
                                 @RequestBody WorkOrderProcessDTO processDTO) throws NotFindSubclassException,
                                                                              OperateForbiddenException {
         //设置当前操作人
         processDTO.setAssignee(SpringTool.getUserName());
-        return workOrderManager.process(processDTO);
+        return workOrderManager.process(processDTO,HttpRequestUtil.getProjectId(httpServletRequest));
     }
 
     @DeleteMapping("/{orderId}")

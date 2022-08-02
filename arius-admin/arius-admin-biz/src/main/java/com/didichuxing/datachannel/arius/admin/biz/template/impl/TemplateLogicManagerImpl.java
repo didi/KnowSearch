@@ -108,6 +108,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -936,9 +937,15 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         if (clusterRegion == null) {
             return Result.buildFail();
         }
+        Predicate<IndexTemplate> filterProjectId = indexTemplate -> AuthConstant.SUPER_PROJECT_ID.equals(projectId)
+                                                                    || Objects.equals(indexTemplate.getProjectId(),
+                projectId);
         Result<List<IndexTemplate>> listResult = indexTemplateService
             .listByRegionId(Math.toIntExact(clusterRegion.getId()));
-        List<ConsoleTemplateVO> vos = listResult.getData().stream().map(indexTemplate -> {
+        List<ConsoleTemplateVO> vos = listResult.getData().stream()
+                .filter(filterProjectId)
+                
+                .map(indexTemplate -> {
             ConsoleTemplateVO vo = new ConsoleTemplateVO();
             BeanUtils.copyProperties(indexTemplate, vo);
             return vo;

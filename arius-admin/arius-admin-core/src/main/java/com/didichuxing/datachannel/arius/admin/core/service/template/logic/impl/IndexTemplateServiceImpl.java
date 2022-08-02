@@ -1060,7 +1060,16 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
     public String getNameByTemplateLogicId(Integer logicTemplateId) {
         return indexTemplateDAO.getNameByTemplateLogicId(logicTemplateId);
     }
-
+    
+    /**
+     * @param projectId
+     * @return
+     */
+    @Override
+    public List<Integer> getLogicTemplateIdListByProjectId(Integer projectId) {
+        return indexTemplateDAO.getLogicTemplateIdListByProjectId(projectId);
+    }
+    
     /**************************************** private method ****************************************************/
     private List<IndexTemplateWithPhyTemplates> batchConvertLogicTemplateCombinePhysicalWithFunction(List<IndexTemplatePO> logicTemplates,
                                                                                          Supplier<List<IndexTemplatePhy>> supplier){
