@@ -88,6 +88,8 @@ public enum OperationEnum {
                            CLOSE_INDEX(52, "关闭索引"),
 
                            OPEN_INDEX(53, "开启索引"),
+    ADD_BIND_MULTIPLE_PROJECT(54, "绑定逻辑集群"),
+
 
                            UNKNOWN(-1, "unknown");
 

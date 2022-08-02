@@ -1,6 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.index;
 
 import static com.didichuxing.datachannel.arius.admin.common.RetryUtils.performTryTimesMethods;
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.KEY;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -22,8 +23,13 @@ import com.didichuxing.datachannel.arius.admin.persistence.es.index.dsls.DslsCon
 import com.didiglobal.logi.elasticsearch.client.ESClient;
 import com.didiglobal.logi.elasticsearch.client.gateway.direct.DirectRequest;
 import com.didiglobal.logi.elasticsearch.client.gateway.direct.DirectResponse;
+import com.didiglobal.logi.elasticsearch.client.response.query.query.ESQueryResponse;
+import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESAggr;
+import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESAggrMap;
+import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESBucket;
 import com.google.common.collect.Lists;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Objects;
@@ -31,6 +37,7 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import lombok.NoArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
@@ -57,7 +64,9 @@ public class IndexCatESDAO extends BaseESDAO {
     public static final String INDICES        = "indices";
     public static final String SHARDS         = "shards";
     public static final String SEGMENTS_SHARD = "segments";
-    private             String TYPE           = "type";
+    private              String TYPE           = "type";
+    private static final String  GROUP_BY_INDEX = "group_by_index";
+    private static final Integer AGG_SIZE       = 5000;
 
     @PostConstruct
     public void init() {
@@ -246,6 +255,23 @@ public class IndexCatESDAO extends BaseESDAO {
         return Result.buildSucc(indexCatCellDTOS);
     }
     
+    public List<String> syncGetIndexListByProjectIdAndClusterLogic(Integer projectId, Long startTime, Long endTime,
+                                                                   String clusterLogic) {
+        String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTime, endTime);
+        if (Objects.isNull(projectId)) {
+            return Collections.emptyList();
+        }
+        
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_PLATFORM_CREATE_CAT_INDEX_BY_INDEX_PROJECT,
+                clusterLogic, projectId, AGG_SIZE);
+        return gatewayClient.performRequest(metadataClusterName, realIndexName, TYPE, dsl,
+                response -> Optional.ofNullable(response).map(ESQueryResponse::getAggs).map(ESAggrMap::getEsAggrMap)
+                        .map(i -> i.get(GROUP_BY_INDEX)).map(ESAggr::getBucketList).orElse(Collections.emptyList())
+                        .stream().map(ESBucket::getUnusedMap).map(m->m.get(KEY))
+                        .filter(Objects::nonNull)
+                        .map(String.class::cast)
+                        .collect(Collectors.toList()), 3);
+    }
    
 
     /**************************************************private******************************************************/

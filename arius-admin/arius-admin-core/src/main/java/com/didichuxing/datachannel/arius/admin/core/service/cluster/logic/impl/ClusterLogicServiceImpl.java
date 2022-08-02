@@ -2,6 +2,7 @@ package com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.impl;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.DEFAULT_CLUSTER_HEALTH;
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.ADD;
+import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.ADD_BIND_MULTIPLE_PROJECT;
 import static com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum.EDIT;
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.DATA_NODE;
 
@@ -147,8 +148,9 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
         if (logicCluster == null) {
             return Result.buildNotExist("逻辑集群不存在");
         }
-
-        if (hasLogicClusterWithTemplates(logicClusterId)) {
+        final List<Integer> projectIdList = str2ListProjectIds(logicCluster);
+        //兼容逻辑集群-》project 1->N的状态
+        if (projectIdList.size() == 1 && hasLogicClusterWithTemplates(logicClusterId)) {
             return Result.build(ResultType.IN_USE_ERROR.getCode(), "逻辑集群使用中");
         }
         boolean succeed = false;
@@ -188,12 +190,20 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
      */
     @Override
     public Result<Long> createClusterLogic(ESLogicClusterDTO param) {
-        Result<Void> checkResult = validateClusterLogicParams(param, ADD, param.getProjectId());
+        Result<Void> checkResult = null;
+        if (Objects.isNull(param.getId())) {
+            checkResult = validateClusterLogicParams(param, ADD, param.getProjectId());
+        } else {
+            //兼容行内一个项目绑定多个集群的状态
+            checkResult = validateClusterLogicParams(param, ADD_BIND_MULTIPLE_PROJECT, param.getProjectId());
+        }
+        
+       
         if (checkResult.failed()) {
             LOGGER.warn("class=ClusterLogicServiceImpl||method=createClusterLogic||msg={}", checkResult.getMessage());
             return Result.buildFrom(checkResult);
         }
-        ClusterLogicPO clusterLogicPO = logicClusterDAO.getByName(param.getName());
+        ClusterLogicPO clusterLogicPO = logicClusterDAO.getById(param.getId());
         if (Objects.nonNull(clusterLogicPO)) {
             final List<Integer> projectIds = str2ListProjectIds(clusterLogicPO);
             projectIds.add(param.getProjectId());
@@ -643,6 +653,10 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
             if (editVoidResult != null) {
                 return editVoidResult;
             }
+        }else if (ADD_BIND_MULTIPLE_PROJECT.equals(operation)){
+            if (!existClusterLogicById(param.getId())){
+                return Result.buildFail("逻辑集群不存在");
+            }
         }
 
         return Result.buildSucc();
@@ -655,10 +669,10 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
             return isFieldNullResult;
         }
         //逻辑集群绑定多个项目
-        //ClusterLogicPO logicPO = logicClusterDAO.getByName(param.getName());
-        //if (!AriusObjUtils.isNull(logicPO)) {
-        //    return Result.buildDuplicate("逻辑集群重复");
-        //}
+        ClusterLogicPO logicPO = logicClusterDAO.getByName(param.getName());
+        if (!AriusObjUtils.isNull(logicPO)) {
+            return Result.buildDuplicate("逻辑集群重复");
+        }
         return null;
     }
 

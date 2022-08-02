@@ -7,13 +7,15 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsClusterPhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsClusterPhyIndicesDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.VariousLineChartMetrics;
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.AggMetricsTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyIndicesMetricsEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
+import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexCatService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.ESIndicesStatsService;
 import java.util.List;
-
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -27,7 +29,8 @@ import org.springframework.stereotype.Service;
 public class PhyIndicesClusterMetricsHandler extends BaseClusterMetricsHandle {
     @Autowired
     private ESIndicesStatsService esIndicesStatsService;
-
+    @Autowired
+    private              ESIndexCatService        esIndexCatService;
     @Override
     protected Result<Void> checkSpecialParam(MetricsClusterPhyDTO param) {
         for (String metricsType : param.getMetricsTypes()) {
@@ -38,10 +41,25 @@ public class PhyIndicesClusterMetricsHandler extends BaseClusterMetricsHandle {
 
         return Result.buildSucc();
     }
-
+    
     @Override
     protected List<VariousLineChartMetrics> getAggClusterPhyMetrics(MetricsClusterPhyDTO param) {
-        return esIndicesStatsService.getAggClusterPhyIndicesMetrics((MetricsClusterPhyIndicesDTO) param);
+        //这里其实需要做修改；1.普通项目侧，我们从cat index info中获取项目侧创建的索引后，再然后再通过指标去查询，
+        if (!AuthConstant.SUPER_PROJECT_ID.equals(param.getProjectId()) && StringUtils.isNotBlank(
+                param.getClusterLogicName()) && StringUtils.isBlank(
+                ((MetricsClusterPhyIndicesDTO) param).getIndexName())) {
+            //找到平台侧属于该项目的索引
+            List<String> belongToProjectIndexName = esIndexCatService.syncGetIndexListByProjectId(param.getProjectId(),
+                    param.getStartTime(), param.getEndTime(), param.getClusterLogicName());
+            return esIndicesStatsService.getAggClusterPhyIndicesMetrics((MetricsClusterPhyIndicesDTO) param,
+                    belongToProjectIndexName);
+            
+        } else {
+            //2.超级项目侧/有索引带入的时候，直接查询
+            return esIndicesStatsService.getAggClusterPhyIndicesMetrics((MetricsClusterPhyIndicesDTO) param);
+            
+        }
+        
     }
 
     @Override

@@ -55,8 +55,10 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -608,7 +610,8 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
             .getProjectBriefByUserId(userId);
         if (listResult.successed()) {
             final List<ProjectBriefExtendVO> dtoList = ConvertUtil.list2List(listResult.getData(),
-                ProjectBriefExtendVO.class);
+                ProjectBriefExtendVO.class).stream()
+                    .filter(distinctByKey(ProjectBriefVO::getId)).collect(Collectors.toList());
             return getListResult(dtoList);
         } else {
             return Result.buildFail(listResult.getMessage());
@@ -728,5 +731,9 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
                 .userOperation(operator).build());
         }
     }
+    public static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
+        Map<Object,Boolean> seen = new ConcurrentHashMap<>();
+        return t -> seen.putIfAbsent(keyExtractor.apply(t), Boolean.TRUE) == null;
+}
 
 }

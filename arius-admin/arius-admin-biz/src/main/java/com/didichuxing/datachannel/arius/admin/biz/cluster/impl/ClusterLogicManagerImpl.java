@@ -1,5 +1,13 @@
 package com.didichuxing.datachannel.arius.admin.biz.cluster.impl;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum.CLUSTER_LOGIC;
+import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum.GREEN;
+import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum.RED;
+import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum.UNKNOWN;
+import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum.YELLOW;
+import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.DATA_NODE;
+import static com.didichuxing.datachannel.arius.admin.common.util.SizeUtil.getUnitSize;
+
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterLogicManager;
@@ -32,7 +40,14 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESMachineNormsPO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicTemplateIndexCountVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicTemplateIndexDetailDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterStatusVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PluginVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.ecm.ESClusterNodeSepcVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
@@ -48,7 +63,12 @@ import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateExcepti
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
 import com.didichuxing.datachannel.arius.admin.common.tuple.Tuples;
-import com.didichuxing.datachannel.arius.admin.common.util.*;
+import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.ClusterUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESMachineNormsService;
@@ -72,19 +92,22 @@ import com.didiglobal.logi.security.service.ProjectService;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.ElasticsearchTimeoutException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import javax.servlet.http.HttpServletRequest;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum.CLUSTER_LOGIC;
-import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum.*;
-import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.DATA_NODE;
-import static com.didichuxing.datachannel.arius.admin.common.util.SizeUtil.getUnitSize;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 @Component
 public class ClusterLogicManagerImpl implements ClusterLogicManager {
@@ -150,8 +173,11 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
 
     @Autowired
     private ESClusterNodeService           eSClusterNodeService;
-
-    private static final FutureUtil<Void>  futureUtil   = FutureUtil.init("ClusterLogicManager", 10, 10, 100);
+    
+    private static final FutureUtil<Void>         FUTURE_UTIL        = FutureUtil.init("ClusterLogicManager", 10, 10,
+            100);
+    private static final FutureUtil<Result<Void>> FUTURE_UTIL_RESULT = FutureUtil.init("ClusterLogicManager", 10, 10,
+            100);
 
     private static final Long              UNKNOWN_SIZE = -1L;
 
@@ -184,7 +210,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     public ClusterLogicVO buildClusterLogic(ClusterLogic clusterLogic) {
         ClusterLogicVO clusterLogicVO = ConvertUtil.obj2Obj(clusterLogic, ClusterLogicVO.class);
 
-        futureUtil.runnableTask(() -> buildLogicClusterStatus(clusterLogicVO, clusterLogic))
+        FUTURE_UTIL.runnableTask(() -> buildLogicClusterStatus(clusterLogicVO, clusterLogic))
             .runnableTask(() -> buildLogicRole(clusterLogicVO, clusterLogic))
             .runnableTask(() -> buildConsoleClusterVersions(clusterLogicVO));
 
@@ -371,7 +397,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByIdAndProjectId(clusterLogicId, currentProjectId);
         ClusterLogicVO clusterLogicVO = ConvertUtil.obj2Obj(clusterLogic, ClusterLogicVO.class);
 
-        futureUtil.runnableTask(() -> buildLogicClusterStatus(clusterLogicVO, clusterLogic))
+        FUTURE_UTIL.runnableTask(() -> buildLogicClusterStatus(clusterLogicVO, clusterLogic))
             .runnableTask(() -> buildConsoleClusterVersions(clusterLogicVO))
             .runnableTask(() -> buildOpLogicClusterPermission(clusterLogicVO, currentProjectId))
             .runnableTask(
@@ -387,10 +413,22 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
                                                          String operator) throws AdminOperateException {
         return clusterRegionManager.batchBindRegionToClusterLogic(param, operator, Boolean.TRUE);
     }
-
+    
+    /**
+     * 删除逻辑集群 这里是及其容易触发操作超时的，
+     * 1.如果模板没有下线干净，那么这里就不能把逻辑集群下线干净，
+     * 2.如果索引没有下线干净，那么逻辑集群也是不能下线的，否则系统和数据库共同残留下来，业务侧就出现了问题
+     *
+     * @param logicClusterId logicclusterid
+     * @param operator
+     * @param projectId      projectid
+     * @return {@link Result}<{@link Void}>
+     * @throws AdminOperateException
+     */
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public Result<Void> deleteLogicCluster(Long logicClusterId, String operator,
-                                           Integer projectId) throws AdminOperateException {
+                                           Integer projectId) {
         //一个逻辑集群对应了多个项目的情况
         final List<ClusterLogic> clusterLogicList = clusterLogicService.listClusterLogicByIdThatProjectIdStrConvertProjectIdList(logicClusterId);
         if (CollectionUtils.isEmpty(clusterLogicList)) {
@@ -409,59 +447,101 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         if (checkProjectCorrectly.failed()) {
             return checkProjectCorrectly;
         }
-
+    
         //获取逻辑模板和索引
-        ClusterLogicTemplateIndexDetailDTO templateIndexVO = getTemplateIndexVO(clusterLogic,projectId);
-        List<IndexTemplatePhy> indexTemplatePhies = Lists.newArrayList();
-
-        for (IndexTemplate agg : templateIndexVO.getTemplates()) {
-            Result<Void> delTemplateResult = templateLogicManager.delTemplate(agg.getId(), operator, projectId);
-            if (delTemplateResult.failed()) {
-                return delTemplateResult;
+        ClusterLogicTemplateIndexDetailDTO templateIndexVO = getTemplateIndexVO(clusterLogic, projectId);
+        try {
+            List<IndexTemplatePhy> indexTemplatePhies = Lists.newArrayList();
+            // 如果模板数量膨胀，那么这里极容易发生超时的问题,这里要考虑并行来触发我们的下线操作
+            for (IndexTemplate agg : templateIndexVO.getTemplates()) {
+                FUTURE_UTIL_RESULT.callableTask(()-> templateLogicManager.delTemplate(agg.getId(), operator,
+                        projectId));
+                
             }
-        }
-        indicesManager.deleteIndex(templateIndexVO.getCatIndexResults(), projectId, operator);
-        if (clusterLogicList.size() == 1) {
-            //将region解绑
-            ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(logicClusterId);
-            clusterRegionService.unbindRegion(clusterRegion.getId(), logicClusterId, operator);
-
-            if (Objects.nonNull(clusterRegion)) {
-                //获取物理模板
-                Result<List<IndexTemplatePhy>> ret = indexTemplatePhyService.listByRegionId(clusterRegion.getId().intValue());
-                if (ret.success() && CollectionUtils.isNotEmpty(ret.getData())) {
-                    indexTemplatePhies = ret.getData();
-                }
-                //删除物理模板
-                for (IndexTemplatePhy indexTemplatePhy : indexTemplatePhies) {
-                    Result<Void> delTemplatePhyRes = indexTemplatePhyService.delTemplate(indexTemplatePhy.getId(), operator);
-                    if (false == delTemplatePhyRes.success()) {
+            Optional<Result<Void>> voidResult = FUTURE_UTIL_RESULT.waitResult().stream().filter(Result::failed)
+                    .findAny();
+            if (voidResult.isPresent()) {
+                return voidResult.get();
+            }
+            for (IndexCatCellDTO indexCatCellDTO : templateIndexVO.getCatIndexResults()) {
+    
+                FUTURE_UTIL.runnableTask(() -> {
+                    if (!AuthConstant.SUPER_PROJECT_ID.equals(projectId) && StringUtils.isNotBlank(
+                            indexCatCellDTO.getClusterLogic())) {
+                        indexCatCellDTO.setCluster(indexCatCellDTO.getClusterLogic());
+                    }
+                });
+            }
+            FUTURE_UTIL.waitExecute();
+    
+            // 这里要考虑一下，如果用户侧绑定了20个逻辑集群，每个逻辑集超过了1000个索引，那么这里会出发事务超时的,索引这里的实现需要改成多线程的模式来操作
+            Result<Boolean> deleteIndex = indicesManager.deleteIndex(templateIndexVO.getCatIndexResults(), projectId,
+                    operator);
+            if (deleteIndex.failed()) {
+                return Result.buildFrom(deleteIndex);
+            }
+            if (clusterLogicList.size() == 1) {
+                //将region解绑
+                ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(logicClusterId);
+                if (Objects.nonNull(clusterRegion)) {
+                    clusterRegionService.unbindRegion(clusterRegion.getId(), logicClusterId, operator);
+                    //获取物理模板
+                    Result<List<IndexTemplatePhy>> ret = indexTemplatePhyService.listByRegionId(
+                            clusterRegion.getId().intValue());
+                    if (ret.success() && CollectionUtils.isNotEmpty(ret.getData())) {
+                        indexTemplatePhies = ret.getData();
+                    }
+                    //删除物理模板
+                    for (IndexTemplatePhy indexTemplatePhy : indexTemplatePhies) {
+                        FUTURE_UTIL_RESULT.callableTask(
+                                () -> indexTemplatePhyService.delTemplate(indexTemplatePhy.getId(), operator));
+        
+                    }
+                    Optional<Result<Void>> delTemplatePhyRes = FUTURE_UTIL_RESULT.waitResult().stream().filter(Result::failed)
+                            .findAny();
+                    if (delTemplatePhyRes.isPresent()) {
+                            return Result.buildFrom(delTemplatePhyRes.get());
+                        }
+                    //将region解绑
+                    Result<Void> unbindRes = clusterRegionService.unbindRegion(clusterRegion.getId(), logicClusterId,
+                            operator);
+                    if (!unbindRes.failed()) {
                         return Result.buildFail();
                     }
                 }
-                //将region解绑
-                Result<Void> unbindRes = clusterRegionService.unbindRegion(clusterRegion.getId(), logicClusterId, operator);
-                if (false == unbindRes.success()) {
-                    return Result.buildFail();
-                }
             }
+            //删除逻辑集群
+            Result<Void> result = clusterLogicService.deleteClusterLogicById(logicClusterId, operator, projectId);
+            if (result.success()) {
+                SpringTool.publish(new ClusterLogicEvent(logicClusterId, projectId));
+                //操作记录 集群下线
+                operateRecordService.save(
+                        new OperateRecord.Builder().project(projectService.getProjectBriefByProjectId(projectId))
+                                .operationTypeEnum(OperateTypeEnum.MY_CLUSTER_OFFLINE)
+                                .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).content(clusterLogic.getName())
+                                .bizId(logicClusterId.intValue()).userOperation(operator).build());
+            }
+            return result;
+        } catch (AdminOperateException | ElasticsearchTimeoutException e) {
+            LOGGER.error("class={}||method=deleteLogicCluster||clusterLogic={}||es operation errMsg={}",
+                    getClass().getSimpleName(), clusterLogic.getName(), e);
+            // 这里必须显示事务回滚
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return Result.buildFail("集群失败, 请重新尝试下线集群,多次重试不成功,请联系管理员");
+        } catch (Exception e) {
+            LOGGER.error("class={}||method=deleteLogicCluster||clusterLogic={}||es operation errMsg={}",
+                    getClass().getSimpleName(), clusterLogic.getName(), e);
+            // 这里必须显示事务回滚
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return Result.buildFail("操作失败,请联系管理员");
         }
-        //删除逻辑集群
-        Result<Void> result = clusterLogicService.deleteClusterLogicById(logicClusterId, operator, projectId);
-        if (result.success()) {
-            SpringTool.publish(new ClusterLogicEvent(logicClusterId, projectId));
-            //操作记录 集群下线
-            operateRecordService
-                .save(new OperateRecord.Builder().project(projectService.getProjectBriefByProjectId(projectId))
-                    .operationTypeEnum(OperateTypeEnum.MY_CLUSTER_OFFLINE).triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                    .content(clusterLogic.getName()).bizId(logicClusterId.intValue()).userOperation(operator).build());
-        }
-        return result;
+        
     }
 
     private ClusterLogicTemplateIndexDetailDTO getTemplateIndexVO(ClusterLogic clusterLogic,Integer projectId) {
         IndexTemplateDTO param = new IndexTemplateDTO();
         param.setResourceId(clusterLogic.getId());
+        param.setProjectId(projectId);
         List<IndexTemplate> indexTemplates = indexTemplateService.listLogicTemplates(param);
         //通过逻辑集群获取index
         List<IndexCatCellDTO> catIndexResults = esIndexCatService.syncGetByClusterLogic(clusterLogic.getName(),projectId);

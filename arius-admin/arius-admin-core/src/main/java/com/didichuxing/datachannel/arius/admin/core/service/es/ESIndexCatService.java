@@ -77,4 +77,7 @@ public interface ESIndexCatService {
     List<IndexCatCellDTO> syncGetByClusterLogic(String name, Integer projectId);
     
     Result<List<IndexCatCellDTO>> syncGetSegmentsIndexList(String cluster, Collection<String> indexList);
+    
+    List<String> syncGetIndexListByProjectId(Integer projectId,
+                                             Long startTime, Long endTime, String clusterLogic);
 }

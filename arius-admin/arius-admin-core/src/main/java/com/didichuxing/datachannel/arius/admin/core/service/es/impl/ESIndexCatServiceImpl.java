@@ -177,5 +177,16 @@ public class ESIndexCatServiceImpl implements ESIndexCatService {
     public Result<List<IndexCatCellDTO>> syncGetSegmentsIndexList(String cluster, Collection<String> indexList) {
         return indexCatESDAO.syncGetSegmentsIndexList(cluster,indexList);
     }
+    
+    /**
+     * @param projectId
+     * @return
+     */
+    @Override
+    public List<String> syncGetIndexListByProjectId(Integer projectId,
+                                                    Long startTime, Long endTime, String clusterLogic) {
+        return indexCatESDAO.syncGetIndexListByProjectIdAndClusterLogic(projectId,startTime,endTime,
+                clusterLogic);
+    }
     /*************************************************private*******************************************************/
 }
