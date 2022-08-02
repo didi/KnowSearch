@@ -1,7 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.biz.indices;
 
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.PRIMARY;
-
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
@@ -23,7 +21,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordina
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord.template.TemplateMappingOperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord.template.TemplateSettingOperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexCatCellVO;
@@ -41,13 +38,7 @@ import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassE
 import com.didichuxing.datachannel.arius.admin.common.mapping.AriusIndexTemplateSetting;
 import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
 import com.didichuxing.datachannel.arius.admin.common.tuple.Tuples;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusIndexMappingConfigUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusOptional;
-import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.IndexSettingsUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.SizeUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.*;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
@@ -70,14 +61,16 @@ import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import java.util.ArrayList;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.PRIMARY;
 
 /**
  * @author lyn
@@ -753,24 +746,8 @@ public class IndicesManagerImpl implements IndicesManager {
 
     @Override
     public Result<List<String>> getClusterLogicIndexName(String clusterLogicName, Integer projectId) {
-        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByNameAndProjectId(clusterLogicName, projectId);
-        if (clusterLogic == null) {
-            return Result.buildFail();
-        }
-        ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(clusterLogic.getId());
-        if (clusterRegion == null) {
-            return Result.buildFail();
-        }
-        Result<List<IndexTemplate>> listResult = indexTemplateService
-            .listByRegionId(Math.toIntExact(clusterRegion.getId()));
-        List<IndexTemplate> indexTemplates = listResult.getData();
-
-        List<CatIndexResult> catIndexResultList = new ArrayList<>();
-        indexTemplates.forEach(indexTemplate -> {
-            catIndexResultList.addAll(esIndexService.syncCatIndexByExpression(clusterRegion.getPhyClusterName(),
-                indexTemplate.getExpression()));
-        });
-        List<String> indexNames = catIndexResultList.stream().map(CatIndexResult::getIndex)
+        List<IndexCatCellDTO> indexCatCellDTOList = esIndexCatService.syncGetByCluster(clusterLogicName,projectId);
+        List<String> indexNames = indexCatCellDTOList.stream().map(IndexCatCellDTO::getIndex)
             .collect(Collectors.toList());
         return Result.buildSucc(indexNames);
     }

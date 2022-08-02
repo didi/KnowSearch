@@ -180,6 +180,7 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
         List<VariousLineChartMetrics> variousLineChartMetrics = dashBoardMetricsService.getToNMetrics(param,
                 oneLevelType);
 
+        //设置索引数量
         setClusterIndexCount(variousLineChartMetrics,oneLevelType);
 
         // 毛刺点优化
