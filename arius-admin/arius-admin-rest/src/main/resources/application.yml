@@ -95,7 +95,7 @@ spring:
   messages:
     encoding: UTF-8
   profiles:
-    active: test
+    active: dev
   datasource:
     name: data
     type: com.alibaba.druid.pool.DruidDataSource
