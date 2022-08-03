@@ -11,6 +11,7 @@ import java.util.Map;
  * @date 2022/6/22 19:44
  */
 public enum DashBoardMetricTypeWithValueTypeEnum {
+    SMALL_SHARD("smallShard","shardSize"),
     BIG_SHARD("bigShard","shardSize");
 
     /**
