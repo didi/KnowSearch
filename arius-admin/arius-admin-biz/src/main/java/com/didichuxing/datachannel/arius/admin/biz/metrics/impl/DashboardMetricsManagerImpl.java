@@ -1,23 +1,32 @@
 package com.didichuxing.datachannel.arius.admin.biz.metrics.impl;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_DASHBOARD_THRESHOLD_GROUP;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricListTypeEnum.INDEX_SMALL_SHARD;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricThresholdValueNameEnum.getAllDefaultThresholdValue;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricTopTypeEnum.CLUSTER_SHARD_NUM;
+
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.biz.component.MetricsValueConvertUtils;
 import com.didichuxing.datachannel.arius.admin.biz.metrics.DashboardMetricsManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.BaseDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatCellDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.DashBoardMetricThresholdDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsDashboardListDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsDashboardTopNDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.config.AriusConfigInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.VariousLineChartMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.list.MetricList;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.list.MetricListContent;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.ClusterPhyHealthMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.config.AriusConfigInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.list.MetricListVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.dashboard.ClusterPhyHealthMetricsVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.top.VariousLineChartMetricsVO;
-import com.didichuxing.datachannel.arius.admin.common.constant.metrics.*;
+import com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricListTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricThresholdValueNameEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricTopTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.metrics.MetricsConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.metrics.OneLevelTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
@@ -28,23 +37,18 @@ import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexCatService
 import com.didichuxing.datachannel.arius.admin.metadata.service.DashBoardMetricsService;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_DASHBOARD_THRESHOLD_GROUP;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricListTypeEnum.INDEX_SMALL_SHARD;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricThresholdValueNameEnum.getAllDefaultThresholdValue;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricTopTypeEnum.CLUSTER_SHARD_NUM;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * Created by linyunan on 3/14/22
@@ -221,31 +225,28 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
             });
         }
         futureUtil.waitExecute();
-        try {
             //设置索引数量
-            setClusterIndexCount(listMetrics,oneLevelType);
+          setClusterIndexCount(listMetrics,oneLevelType);
+          
             filterBySystemConfiguration(listMetrics, oneLevelType);
-        } catch (AdminOperateException e) {
-            return Result.buildFail(e.getMessage());
-        }
         return Result.buildSucc(ConvertUtil.list2List(listMetrics, MetricListVO.class));
     }
     
     /**
      * 根据系统配置筛选
      */
-    private void filterBySystemConfiguration(List<MetricList> listMetrics, String oneLevelType)
-            throws AdminOperateException {
+    private void filterBySystemConfiguration(List<MetricList> listMetrics, String oneLevelType) {
         Map<DashBoardMetricListTypeEnum, DashBoardMetricThresholdDTO> thresholdValues = getDashBoardMetricThresholdValues();
-        
+       
         for (MetricList metric : listMetrics) {
             DashBoardMetricListTypeEnum key = DashBoardMetricListTypeEnum.valueOfTypeAndOneLevelType(metric.getType(),oneLevelType);
-            if (thresholdValues.get(key) != null && thresholdValues.containsKey(key)) {
+            final DashBoardMetricThresholdDTO dashBoardMetricThresholdDTO = thresholdValues.get(key);
+            if (Objects.nonNull(dashBoardMetricThresholdDTO)) {
                 DashBoardMetricThresholdDTO thresholdDTO = thresholdValues.get(key);
                 Double value = Double.parseDouble(String.valueOf(SizeUtil.getDasboardUnitSize(thresholdDTO.getValue()+thresholdDTO.getUnit())));
                 
                 metric.setMetricListContents(metric.getMetricListContents().stream()
-                        .filter(metricListContent -> metricListContent != null)
+                        .filter(Objects::nonNull)
                         .filter(metricListContent -> metricListContent.getValue() != null)
                         .filter(metricListContent -> judgeMetricListContent(metricListContent.getValue(),value,thresholdDTO.getCompare()))
                         .collect(Collectors.toList()));
@@ -391,14 +392,25 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
      * @param oneLevelType
      */
     private void setClusterIndexCount(List<MetricList> listMetrics, String oneLevelType) {
-        listMetrics.forEach(v->{
-            if (CLUSTER_SHARD_NUM.getType().equals(v.getType())&&oneLevelType.equals(CLUSTER_SHARD_NUM.getOneLevelTypeEnum().getType())){
-                v.getMetricListContents().forEach(metricsContent -> {
-                    //获取集群下的索引数量
-                    List<IndexCatCellDTO> indexCatCellDTOList = esIndexCatService.syncGetByCluster(metricsContent.getClusterPhyName(),null);
-                    metricsContent.setIndexCount(Long.valueOf(indexCatCellDTOList.size()));
-                });
-            }
-        });
+        if (CollectionUtils.isEmpty(listMetrics)){
+            return;
+        }
+        final List<String> clusterPhyList = listMetrics.stream()
+                .filter(v -> CLUSTER_SHARD_NUM.getType().equals(v.getType()) && oneLevelType.equals(
+                        CLUSTER_SHARD_NUM.getOneLevelTypeEnum().getType())).map(MetricList::getMetricListContents)
+                .flatMap(Collection::stream).map(MetricListContent::getClusterPhyName).filter(StringUtils::isNotBlank)
+                .distinct().collect(Collectors.toList());
+        final Map</*clusterPhy*/String,/*index count*/ Integer> ClusterPhy2CountMap =
+                esIndexCatService.syncGetByClusterPhyList(clusterPhyList);
+    
+     
+    
+        listMetrics.stream()
+               .filter(v -> CLUSTER_SHARD_NUM.getType().equals(v.getType()) && oneLevelType.equals(
+                        CLUSTER_SHARD_NUM.getOneLevelTypeEnum().getType()))
+                .map(MetricList::getMetricListContents)
+                .flatMap(Collection::stream)
+           
+                .forEach(metricsContent->metricsContent.setIndexCount(ClusterPhy2CountMap.getOrDefault(metricsContent.getClusterPhyName(),0).longValue()));
     }
 }
