@@ -150,15 +150,10 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<Templa
         //这里会出现多个集群，那么就会产生问题，比如lyn-dcdr-1，lyn-dcdr-2两个集群，一种有插件，一个没有插件，那么其实关注master即可
         final List<IndexTemplatePhy> indexTemplatePhies = indexTemplatePhyService.getTemplateByLogicId(
                 templateWithSrvVO.getId());
-        String materClusterPhy;
-        //说明此处是没有副集群
-        if (indexTemplatePhies.size() == 1) {
-            materClusterPhy = indexTemplatePhies.get(0).getCluster();
-        } else {
-            materClusterPhy = indexTemplatePhies.stream()
-                    .filter(i -> TemplateDeployRoleEnum.MASTER.getCode().equals(i.getRole()))
-                    .map(IndexTemplatePhy::getCluster).findFirst().orElse(null);
-        }
+        String materClusterPhy = indexTemplatePhies.stream()
+                .filter(i -> TemplateDeployRoleEnum.MASTER.getCode().equals(i.getRole()))
+                .map(IndexTemplatePhy::getCluster).findFirst().orElse(null);
+       
         indexTemplatePhies.stream().map(IndexTemplatePhy::getCluster).distinct()
                 .forEach(templateWithSrvVO.getCluster()::add);
         templateWithSrvVO.setUnavailableSrv(ConvertUtil.list2List(
