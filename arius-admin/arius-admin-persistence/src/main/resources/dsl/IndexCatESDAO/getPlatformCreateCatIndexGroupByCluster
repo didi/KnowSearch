@@ -22,7 +22,7 @@
     "group_by_cluster": {
       "terms": {
         "field": "cluster",
-        "min_doc_count": 0,
+        "min_doc_count": 1,
         "size": %d,
         "include":%s
       }

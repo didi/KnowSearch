@@ -400,7 +400,8 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
                         CLUSTER_SHARD_NUM.getOneLevelTypeEnum().getType())).map(MetricList::getMetricListContents)
                 .flatMap(Collection::stream).map(MetricListContent::getClusterPhyName).filter(StringUtils::isNotBlank)
                 .distinct().collect(Collectors.toList());
-        final Map<String, Integer> ClusterPhy2CountMap = esIndexCatService.syncGetByClusterPhyList(clusterPhyList);
+        final Map</*clusterPhy*/String,/*index count*/ Integer> ClusterPhy2CountMap =
+                esIndexCatService.syncGetByClusterPhyList(clusterPhyList);
     
      
     
@@ -410,6 +411,6 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
                 .map(MetricList::getMetricListContents)
                 .flatMap(Collection::stream)
            
-                .forEach(metricsContent->metricsContent.setIndexCount(ClusterPhy2CountMap.get(metricsContent.getClusterPhyName()).longValue()));
+                .forEach(metricsContent->metricsContent.setIndexCount(ClusterPhy2CountMap.getOrDefault(metricsContent.getClusterPhyName(),0).longValue()));
     }
 }
