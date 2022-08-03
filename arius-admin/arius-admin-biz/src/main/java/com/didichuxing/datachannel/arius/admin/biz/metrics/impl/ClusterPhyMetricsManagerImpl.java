@@ -1,25 +1,15 @@
 package com.didichuxing.datachannel.arius.admin.biz.metrics.impl;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyClusterMetricsEnum.getClusterPhyMetricsType;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyIndicesMetricsEnum.getClusterPhyIndicesMetricsType;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyNodeMetricsEnum.getClusterPhyNodeMetricsType;
-
 import com.didichuxing.datachannel.arius.admin.biz.metrics.ClusterPhyMetricsManager;
 import com.didichuxing.datachannel.arius.admin.biz.metrics.handle.BaseClusterMetricsHandle;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsClusterPhyDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsClusterPhyNodeDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsClusterPhyNodeTaskDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsConfigInfoDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MultiMetricsClusterPhyNodeDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.MetricsVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.ESClusterTaskDetailVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.top.VariousLineChartMetricsVO;
-import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyTypeMetricsEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
@@ -28,23 +18,27 @@ import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
+import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexCatService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.metrics.UserMetricsConfigService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.NodeStatsService;
-import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyClusterMetricsEnum.getClusterPhyMetricsType;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyIndicesMetricsEnum.getClusterPhyIndicesMetricsType;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyNodeMetricsEnum.getClusterPhyNodeMetricsType;
 
 /**
  * @author Created by linyunan on
@@ -81,6 +75,8 @@ public class ClusterPhyMetricsManagerImpl implements ClusterPhyMetricsManager {
 
     @Autowired
     private ESIndexService           esIndexService;
+    @Autowired
+    private ESIndexCatService        esIndexCatService;
 
     @Override
     public List<String> getMetricsCode2TypeMap(String type) {
@@ -114,7 +110,7 @@ public class ClusterPhyMetricsManagerImpl implements ClusterPhyMetricsManager {
                 }
                 List<String> itemNamesUnderClusterLogic;
                 //获取逻辑集群下面的节点，索引，模板的名称列表
-                itemNamesUnderClusterLogic = buildItemsUnderClusterLogic(metricsTypeEnum, clusterRegion,projectId);
+                itemNamesUnderClusterLogic = buildItemsUnderClusterLogic(metricsTypeEnum, clusterRegion);
                 param.setItemNamesUnderClusterLogic(itemNamesUnderClusterLogic);
                 param.setClusterPhyName(clusterRegion.getPhyClusterName());
             }
@@ -217,43 +213,14 @@ public class ClusterPhyMetricsManagerImpl implements ClusterPhyMetricsManager {
      * @return  节点，索引，模板信息 名称集合
      */
     private List<String> buildItemsUnderClusterLogic(ClusterPhyTypeMetricsEnum metricsTypeEnum,
-                                                     ClusterRegion clusterRegion, Integer projectId) {
-        Predicate<IndexTemplate> filterBelongProjectIdIndexTemplatePre=indexTemplate -> AuthConstant.SUPER_PROJECT_ID
-                                                                                                .equals(projectId)||
-                                                                                        Objects.equals(indexTemplate.getProjectId(),projectId);
-        List<String> nodeNamesUnderClusterLogic;
+                                                     ClusterRegion clusterRegion) {
         //节点名称列表
-        switch (metricsTypeEnum) {
-            case NODE:
-                Result<List<ClusterRoleHost>> result = clusterRoleHostService
+        if (Objects.equals(metricsTypeEnum, ClusterPhyTypeMetricsEnum.NODE)) {
+            Result<List<ClusterRoleHost>> result = clusterRoleHostService
                     .listByRegionId(Math.toIntExact(clusterRegion.getId()));
-                nodeNamesUnderClusterLogic = result.getData().stream().map(ClusterRoleHost::getNodeSet)
+            return result.getData().stream().map(ClusterRoleHost::getNodeSet)
                     .collect(Collectors.toList());
-                break;
-            case TEMPLATES:
-                Result<List<IndexTemplate>> indexTemplates = indexTemplateService
-                    .listByRegionId(Math.toIntExact(clusterRegion.getId()));
-                nodeNamesUnderClusterLogic = indexTemplates.getData().stream()
-                        .filter(filterBelongProjectIdIndexTemplatePre)
-                        
-                        .map(IndexTemplate::getName)
-                    .collect(Collectors.toList());
-                break;
-            case INDICES:
-                Result<List<IndexTemplate>> listResult = indexTemplateService
-                    .listByRegionId(Math.toIntExact(clusterRegion.getId()));
-                List<IndexTemplate> indexTemplatesList = listResult.getData().stream()
-                        .filter(filterBelongProjectIdIndexTemplatePre).collect(Collectors.toList());
-                List<CatIndexResult> catIndexResultList = new ArrayList<>();
-                indexTemplatesList.forEach(indexTemplate -> catIndexResultList.addAll(esIndexService
-                    .syncCatIndexByExpression(clusterRegion.getPhyClusterName(), indexTemplate.getExpression())));
-                nodeNamesUnderClusterLogic = catIndexResultList.stream()
-                        .map(CatIndexResult::getIndex)
-                    .collect(Collectors.toList());
-                break;
-            default:
-                nodeNamesUnderClusterLogic = new ArrayList<>();
         }
-        return nodeNamesUnderClusterLogic;
+        return Lists.newArrayList();
     }
 }

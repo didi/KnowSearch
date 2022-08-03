@@ -410,9 +410,10 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
                             List<String> nodeNamesUnderClusterLogic) {
         List<MetricsContent> sortedList;
         sortedList = variousLineChartsMetrics.getMetricsContents().stream()
-            .filter(metricsContent -> nodeNamesUnderClusterLogic == null
-                                      || (nodeNamesUnderClusterLogic != null
-                                          && nodeNamesUnderClusterLogic.contains(metricsContent.getName())))
+                //如果nodeNamesUnderClusterLogic为空，就是索引和模板，不需要这里拦截
+                //如果是节点，nodeNamesUnderClusterLogic就不为空，就判断拦截
+            .filter(metricsContent -> CollectionUtils.isEmpty(nodeNamesUnderClusterLogic)
+                                      || (nodeNamesUnderClusterLogic.contains(metricsContent.getName())))
             .sorted(Comparator.comparing(x -> x.getValueInTimePeriod(), Comparator.reverseOrder()))
             .limit(topNu != null ? topNu : 0).collect(Collectors.toList());
 
