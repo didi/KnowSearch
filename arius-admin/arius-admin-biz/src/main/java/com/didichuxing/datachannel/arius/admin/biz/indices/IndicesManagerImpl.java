@@ -70,8 +70,10 @@ import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
@@ -599,16 +601,14 @@ public class IndicesManagerImpl implements IndicesManager {
         }
         String phyCluster = getClusterRet.getData();
     
-        final Map</* clusterPhy*/String,/*IndexName*/ String> clusterPhy2IndexNameMaps = Maps.newHashMap();
-        clusterPhy2IndexNameMaps.put(phyCluster, indexName);
-        final List<IndexCatCell> indexCatCells = esIndexCatService.syncGetCatIndexInfoById(clusterPhy2IndexNameMaps);
+        IndexCatCell indexCatCell = esIndexCatService.syncGetCatIndexInfoById(phyCluster, indexName);
     
-        if (CollectionUtils.isEmpty(indexCatCells)) {
+        if (Objects.isNull(indexCatCell)) {
             return Result.buildFail("获取单个索引详情信息失败");
         }
         //设置索引阻塞信息
         List<IndexCatCell> finalIndexCatCellList = esIndexService.buildIndexAliasesAndBlockInfo(phyCluster,
-                indexCatCells);
+                Collections.singletonList(indexCatCell));
         List<IndexCatCellVO> indexCatCellVOList = ConvertUtil.list2List(finalIndexCatCellList, IndexCatCellVO.class);
     
         return Result.buildSucc(indexCatCellVOList.get(0));

@@ -46,7 +46,6 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import lombok.NoArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
 import org.elasticsearch.rest.RestStatus;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
@@ -306,14 +305,10 @@ public class IndexCatESDAO extends BaseESDAO {
                 , 3);
     }
     
-    public List<IndexCatCell> syncGetCatIndexInfoById(Map</* clusterPhy*/String,/*IndexName*/ String> clusterPhy2IndexNameMaps) {
-        if (MapUtils.isEmpty(clusterPhy2IndexNameMaps)) {
-           return Collections.emptyList();
-        }
+    public IndexCatCell syncGetCatIndexInfoById(/* clusterPhy*/String clusterPhy,/*IndexName*/ String index) {
+        
         IndexNameUtils.genCurrentDailyIndexName(indexName);
-        List<String> ids = Lists.newArrayList();
-        clusterPhy2IndexNameMaps.forEach(
-                (clusterPhy, indexNameValue) -> ids.add(String.format("%s@%s", clusterPhy, indexNameValue)));
+        List<String> ids = Collections.singletonList(String.format("%s@%s", clusterPhy, index));
         
         final String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_PLATFORM_CREATE_CAT_INDEX_BY_ID,
                 ids.size(), JSON.toJSONString(ids));
@@ -322,11 +317,10 @@ public class IndexCatESDAO extends BaseESDAO {
                 () -> gatewayClient.performRequestListAndGetTotalCount(metadataClusterName,
                         IndexNameUtils.genCurrentDailyIndexName(indexName), typeName, dsl, IndexCatCellPO.class),
                 Objects::isNull, 3);
-        if (Objects.isNull(tuple) || CollectionUtils.isEmpty(tuple.getV2())) {
-            return Collections.emptyList();
-        }
         
-        return ConvertUtil.list2List(tuple.getV2(), IndexCatCell.class);
+        return Optional.ofNullable(tuple).map(Tuple::getV2).map(i -> ConvertUtil.list2List(i, IndexCatCell.class))
+                .filter(CollectionUtils::isNotEmpty).orElse(Collections.emptyList()).stream().findFirst().orElse(null);
+        
     }
 
     /**************************************************private******************************************************/

@@ -199,11 +199,12 @@ public class ESIndexCatServiceImpl implements ESIndexCatService {
     }
     
     /**
-     * @param clusterPhy2IndexNameMaps@return
+     * @param clusterPhy
+     * @param index
      */
     @Override
-    public List<IndexCatCell> syncGetCatIndexInfoById(Map</* clusterPhy*/String,/*IndexName*/ String> clusterPhy2IndexNameMaps) {
-        return indexCatESDAO.syncGetCatIndexInfoById(clusterPhy2IndexNameMaps);
+    public IndexCatCell syncGetCatIndexInfoById(String clusterPhy, String index) {
+        return indexCatESDAO.syncGetCatIndexInfoById(clusterPhy,index);
     }
     /*************************************************private*******************************************************/
 }
