@@ -126,12 +126,13 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
     }
 
     @Override
-    public List<UnavailableTemplateSrv> getUnavailableSrv(IndexTemplate template) {
+    public List<UnavailableTemplateSrv> getUnavailableSrvByTemplateAndMasterPhy(IndexTemplate template,
+                                                                                String materClusterPhy) {
         List<UnavailableTemplateSrv> unavailableSrvList = Lists.newCopyOnWriteArrayList();
         List<TemplateServiceEnum> allSrvList = TemplateServiceEnum.allTemplateSrv();
         //默认给一个srv就可以了
         BaseTemplateSrv srvHandle = BASE_TEMPLATE_SRV_MAP.get(TemplateServiceEnum.TEMPLATE_COLD.getCode());
-        SupportSrv supportSrv =srvHandle.getSupportDCDRAndPipelineByLogicTemplate(template);
+        SupportSrv supportSrv =srvHandle.getSupportSrvByLogicTemplateAndMasterClusterPhy(template,materClusterPhy);
         final boolean dcdrSupport = supportSrv.isDcdrModuleExists();
         final boolean pipelineSupport = supportSrv.isPipelineModuleExists();
         boolean coldRegionSupport = supportSrv.isColdRegionExists();

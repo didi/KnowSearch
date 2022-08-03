@@ -1,5 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.gateway;
 
+import static com.didichuxing.datachannel.arius.admin.common.RetryUtils.performTryTimesMethods;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -1222,7 +1224,9 @@ public class GatewayJoinESDAO extends BaseESDAO {
         String realName = IndexNameUtils.genDailyIndexName(indexName, queryDTO.getStartTime(), queryDTO.getEndTime());
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_SLOW_LIST_BY_CONDITION,
             queryCriteriaDsl);
-        return gatewayClient.performRequest(realName, typeName, dsl, GatewayJoinPO.class);
+        
+        return performTryTimesMethods(()-> gatewayClient.performRequest(realName, typeName, dsl, GatewayJoinPO.class)
+                ,CollectionUtils::isEmpty,3);
     }
 
     /**
@@ -1236,7 +1240,8 @@ public class GatewayJoinESDAO extends BaseESDAO {
         String realName = IndexNameUtils.genDailyIndexName(indexName, queryDTO.getStartTime(), queryDTO.getEndTime());
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_ERROR_LIST_BY_CONDITION,
             queryCriteriaDsl);
-        return gatewayClient.performRequest(realName, typeName, dsl, GatewayJoinPO.class);
+        return performTryTimesMethods(()->gatewayClient.performRequest(realName, typeName, dsl, GatewayJoinPO.class),
+                CollectionUtils::isEmpty,3);
     }
 
     /**************************************************** private methods ****************************************************/

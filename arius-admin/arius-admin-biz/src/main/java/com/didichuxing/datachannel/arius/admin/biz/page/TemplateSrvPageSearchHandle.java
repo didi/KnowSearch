@@ -11,6 +11,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.srv.T
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv.TemplateSrvVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv.TemplateWithSrvVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv.UnavailableTemplateSrvVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
@@ -131,12 +132,10 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<Templa
         }
         final Map<Integer, String> projectId2ProjectName = ConvertUtil.list2Map(projectService.getProjectBriefList(),
                 ProjectBriefVO::getId, ProjectBriefVO::getProjectName);
-        
         // 构建基础信息
         for (IndexTemplate template : templateList) {
             TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_CLUSTER_FUTURE_UTIL.callableTask(()-> buildTemplateWithSrvVO(
                     template,projectId2ProjectName));
-           
         }
         return  TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_CLUSTER_FUTURE_UTIL.waitResult();
     }
@@ -148,14 +147,25 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<Templa
                 ConvertUtil.list2List(TemplateSrv.codeStr2SrvList(template.getOpenSrv()), TemplateSrvVO.class));
         Optional.ofNullable(template).map(IndexTemplate::getProjectId).map(projectId2ProjectName::get)
                 .ifPresent(templateWithSrvVO::setProjectName);
-   
-        indexTemplatePhyService.getTemplateByLogicId(templateWithSrvVO.getId()).stream()
-                .map(IndexTemplatePhy::getCluster).distinct().forEach(templateWithSrvVO.getCluster()::add);
-        templateWithSrvVO.setUnavailableSrv(
-                ConvertUtil.list2List(templateSrvManager.getUnavailableSrv(template),
-                        UnavailableTemplateSrvVO.class));
-        templateWithSrvVO.setPartition(StringUtils.endsWith(template.getExpression(),"*"));
-        
+        //这里会出现多个集群，那么就会产生问题，比如lyn-dcdr-1，lyn-dcdr-2两个集群，一种有插件，一个没有插件，那么其实关注master即可
+        final List<IndexTemplatePhy> indexTemplatePhies = indexTemplatePhyService.getTemplateByLogicId(
+                templateWithSrvVO.getId());
+        String materClusterPhy;
+        //说明此处是没有副集群
+        if (indexTemplatePhies.size() == 1) {
+            materClusterPhy = indexTemplatePhies.get(0).getCluster();
+        } else {
+            materClusterPhy = indexTemplatePhies.stream()
+                    .filter(i -> TemplateDeployRoleEnum.MASTER.getCode().equals(i.getRole()))
+                    .map(IndexTemplatePhy::getCluster).findFirst().orElse(null);
+        }
+        indexTemplatePhies.stream().map(IndexTemplatePhy::getCluster).distinct()
+                .forEach(templateWithSrvVO.getCluster()::add);
+        templateWithSrvVO.setUnavailableSrv(ConvertUtil.list2List(
+                templateSrvManager.getUnavailableSrvByTemplateAndMasterPhy(template, materClusterPhy),
+                UnavailableTemplateSrvVO.class));
+        templateWithSrvVO.setPartition(StringUtils.endsWith(template.getExpression(), "*"));
+    
         return templateWithSrvVO;
         
     }
