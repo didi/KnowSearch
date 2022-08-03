@@ -307,7 +307,6 @@ public class IndexCatESDAO extends BaseESDAO {
     
     public IndexCatCell syncGetCatIndexInfoById(/* clusterPhy*/String clusterPhy,/*IndexName*/ String index) {
         
-        IndexNameUtils.genCurrentDailyIndexName(indexName);
         List<String> ids = Collections.singletonList(String.format("%s@%s", clusterPhy, index));
         
         final String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_PLATFORM_CREATE_CAT_INDEX_BY_ID,
