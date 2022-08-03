@@ -395,7 +395,7 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
             if (CLUSTER_SHARD_NUM.getType().equals(v.getType())&&oneLevelType.equals(CLUSTER_SHARD_NUM.getOneLevelTypeEnum().getType())){
                 v.getMetricListContents().forEach(metricsContent -> {
                     //获取集群下的索引数量
-                    List<IndexCatCellDTO> indexCatCellDTOList = esIndexCatService.syncGetByCluster(metricsContent.getClusterPhyName(),null);
+                    List<IndexCatCellDTO> indexCatCellDTOList = esIndexCatService.syncGetIndexByCluster(metricsContent.getClusterPhyName(),null);
                     metricsContent.setIndexCount(Long.valueOf(indexCatCellDTOList.size()));
                 });
             }
