@@ -36,9 +36,10 @@ public interface TemplateSrvManager {
     /**
      * 获取指定模板「不可用的」服务
      *
-     * @param template @return
+     * @param template        @return
+     * @param materClusterPhy
      */
-    List<UnavailableTemplateSrv> getUnavailableSrv(IndexTemplate template);
+    List<UnavailableTemplateSrv> getUnavailableSrvByTemplateAndMasterPhy(IndexTemplate template, String materClusterPhy);
 
     /**
      * 分页模糊查询模板服务

@@ -139,6 +139,7 @@ public class TemplateLogicV3Controller {
                                                                       @RequestParam("cluster") String cluster) {
         return templateLogicManager.getTemplateVOByPhyCluster(cluster);
     }
+   
 
     @PostMapping("")
     @ResponseBody
@@ -183,7 +184,7 @@ public class TemplateLogicV3Controller {
             HttpRequestUtil.getProjectId(request));
     }
 
-    @GetMapping("{clusterPhyName}/phy/templates")
+    @GetMapping("/{clusterPhyName}/phy/templates")
     @ResponseBody
     @ApiOperation(value = "根据物理集群名称获取对应全量逻辑模板列表", notes = "")
     public Result<List<ConsoleTemplateVO>> getLogicTemplatesByPhyCluster(HttpServletRequest request,
@@ -191,7 +192,7 @@ public class TemplateLogicV3Controller {
         return templateLogicManager.getTemplateVOByPhyCluster(clusterPhyName);
     }
 
-    @GetMapping("{clusterLogicName}/logic/templates")
+    @GetMapping("/{clusterLogicName}/logic/templates")
     @ResponseBody
     @ApiOperation(value = "根据逻辑集群名称获取对应全量逻辑模板列表", notes = "")
     public Result<List<ConsoleTemplateVO>> listTemplateVOByLogicCluster(HttpServletRequest request,

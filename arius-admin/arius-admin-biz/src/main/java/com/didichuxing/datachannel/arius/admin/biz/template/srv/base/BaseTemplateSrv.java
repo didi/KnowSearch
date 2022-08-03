@@ -75,5 +75,6 @@ public interface BaseTemplateSrv {
 
 
     
-    SupportSrv getSupportDCDRAndPipelineByLogicTemplate(IndexTemplate template);
+    SupportSrv getSupportSrvByLogicTemplateAndMasterClusterPhy(IndexTemplate template,
+                                                               String materClusterPhy);
 }
