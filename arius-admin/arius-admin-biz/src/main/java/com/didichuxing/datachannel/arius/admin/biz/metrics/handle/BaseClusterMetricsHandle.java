@@ -1,9 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.biz.metrics.handle;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.ALL_CLUSTER;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.DEFAULT_TIME_INTERVAL;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.MAX_TIME_INTERVAL;
-
 import com.didichuxing.datachannel.arius.admin.biz.component.MetricsValueConvertUtils;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsClusterPhyDTO;
@@ -18,10 +14,13 @@ import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.common.entity.user.User;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.didiglobal.logi.security.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import org.springframework.beans.factory.annotation.Autowired;
+
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.*;
 
 /**
  * 抽象类集群指标处理
@@ -114,19 +113,10 @@ public abstract class BaseClusterMetricsHandle implements BaseHandle {
         if (null == param) {
             return Result.buildParamIllegal("param is empty");
         }
-
-        if (null == projectId) {
-            return Result.buildParamIllegal("projectId is empty");
-        }
         final User user = userService.getUserByUserName(userName);
         if (Objects.isNull(user)) {
             return Result.buildParamIllegal("user info is empty");
         }
-
-        if (!projectService.checkProjectExist(projectId)) {
-            return Result.buildParamIllegal(String.format("There is no projectId:%s", projectId));
-        }
-
         return Result.buildSucc();
     }
 

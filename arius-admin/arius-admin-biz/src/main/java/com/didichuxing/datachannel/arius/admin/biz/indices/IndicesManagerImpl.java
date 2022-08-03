@@ -767,9 +767,7 @@ public class IndicesManagerImpl implements IndicesManager {
 
     @Override
     public Result<List<String>> getClusterLogicIndexName(String clusterLogicName, Integer projectId) {
-        List<IndexCatCellDTO> indexCatCellDTOList = esIndexCatService.syncGetByCluster(clusterLogicName, projectId);
-        List<String> indexNames = indexCatCellDTOList.stream().map(IndexCatCellDTO::getIndex)
-                .collect(Collectors.toList());
+        List<String> indexNames = esIndexCatService.syncGetIndexListByProjectId(projectId,clusterLogicName);
         return Result.buildSucc(indexNames);
     }
 

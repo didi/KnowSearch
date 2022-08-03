@@ -1,21 +1,26 @@
 package com.didichuxing.datachannel.arius.admin.metadata.service;
 
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayJoinQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.GatewayJoin;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectConfigService;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.gateway.GatewayJoinESDAO;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class GatewayJoinLogService {
 
     @Autowired
     private GatewayJoinESDAO gatewayJoinESDAO;
+
+    @Autowired
+    private ProjectConfigService projectConfigService;
 
     public Result<Long> getSearchCountByProjectId(Long projectId, Long startDate, Long endDate) {
         return Result.buildSucc(gatewayJoinESDAO.getSearchCountByProjectId(projectId, startDate, endDate));
@@ -32,7 +37,8 @@ public class GatewayJoinLogService {
     }
 
     public List<GatewayJoin> getGatewaySlowList(Integer projectId, GatewayJoinQueryDTO queryDTO) {
-        initGatewaySlowQueryCondition(queryDTO);
+        Integer slowQueryTime = projectConfigService.getProjectConfig(projectId).getSlowQueryTimes();
+        initGatewaySlowQueryCondition(queryDTO, slowQueryTime);
         return ConvertUtil.list2List(gatewayJoinESDAO.getGatewayJoinSlowList(projectId, queryDTO), GatewayJoin.class);
     }
 
@@ -41,10 +47,10 @@ public class GatewayJoinLogService {
         return ConvertUtil.list2List(gatewayJoinESDAO.getGatewayJoinErrorList(projectId, queryDTO), GatewayJoin.class);
     }
 
-    private void initGatewaySlowQueryCondition(GatewayJoinQueryDTO queryDTO) {
+    private void initGatewaySlowQueryCondition(GatewayJoinQueryDTO queryDTO, int defaultSlowTime) {
         initQueryTimeRange(queryDTO);
         if (queryDTO.getTotalCost() == null) {
-            queryDTO.setTotalCost(1000L);
+            queryDTO.setTotalCost((long) defaultSlowTime);
         }
     }
 

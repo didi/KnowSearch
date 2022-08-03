@@ -161,14 +161,14 @@ public class ESIndexCatServiceImpl implements ESIndexCatService {
     }
 
     @Override
-    public List<IndexCatCellDTO> syncGetByCluster(String clusterLogicName, Integer projectId) {
+    public List<IndexCatCellDTO> syncGetIndexByCluster(String clusterLogicName, Integer projectId) {
         Tuple<Long, List<IndexCatCellPO>> totalHitAndIndexCatCellListTuple = indexCatESDAO.getIndexListByTerms(clusterLogicName,projectId);
         if (totalHitAndIndexCatCellListTuple == null){
             return new ArrayList<>();
         }
         return ConvertUtil.list2List(totalHitAndIndexCatCellListTuple.v2(),IndexCatCellDTO.class);
     }
-    
+
     /**
      * @param cluster
      * @param indexList
