@@ -1,5 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.core.service.es.impl;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.getShards2NodeInfoRequestContent;
+
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatCellDTO;
@@ -15,19 +17,17 @@ import com.didiglobal.logi.elasticsearch.client.gateway.direct.DirectResponse;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.rest.RestStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.getShards2NodeInfoRequestContent;
 
 /**
  * Created by linyunan on 2021-10-14
@@ -187,6 +187,15 @@ public class ESIndexCatServiceImpl implements ESIndexCatService {
     public List<String> syncGetIndexListByProjectId(Integer projectId, String clusterLogic) {
         return indexCatESDAO.syncGetIndexListByProjectIdAndClusterLogic(projectId,
                 clusterLogic);
+    }
+    
+    /**
+     * @param clusterPhyList
+     * @return
+     */
+    @Override
+    public Map<String, Integer> syncGetByClusterPhyList(List<String> clusterPhyList) {
+        return indexCatESDAO.syncGetByClusterPhyList(clusterPhyList);
     }
     /*************************************************private*******************************************************/
 }

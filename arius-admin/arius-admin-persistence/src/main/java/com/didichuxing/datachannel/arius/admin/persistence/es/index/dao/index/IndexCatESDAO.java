@@ -12,6 +12,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.IndexCat
 import com.didichuxing.datachannel.arius.admin.common.bean.po.index.IndexCatCellPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.index.IndexStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
+import com.didichuxing.datachannel.arius.admin.common.tuple.Tuples;
 import com.didichuxing.datachannel.arius.admin.common.util.DSLSearchUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.IndexNameUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
@@ -23,12 +25,16 @@ import com.didiglobal.logi.elasticsearch.client.ESClient;
 import com.didiglobal.logi.elasticsearch.client.gateway.direct.DirectRequest;
 import com.didiglobal.logi.elasticsearch.client.gateway.direct.DirectResponse;
 import com.didiglobal.logi.elasticsearch.client.response.query.query.ESQueryResponse;
+import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESAggr;
+import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESAggrMap;
+import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESBucket;
 import com.didiglobal.logi.elasticsearch.client.response.query.query.hits.ESHit;
 import com.didiglobal.logi.elasticsearch.client.response.query.query.hits.ESHits;
 import com.google.common.collect.Lists;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
@@ -64,7 +70,10 @@ public class IndexCatESDAO extends BaseESDAO {
     public static final String SEGMENTS_SHARD = "segments";
     private              String TYPE           = "type";
     private static final String  INDEX = "index";
+    private static final String  KEY = "key";
+    private static final String  DOC_COUNT = "doc_count";
     private static final Integer AGG_SIZE       = 5000;
+    private static final String GROUP_BY_CLUSTER="group_by_cluster";
 
     @PostConstruct
     public void init() {
@@ -391,5 +400,22 @@ public class IndexCatESDAO extends BaseESDAO {
         }
         return indexCatCellDTOList;
     }
-
+    
+    public Map<String, Integer> syncGetByClusterPhyList(List<String> clusterPhyList) {
+        if (CollectionUtils.isEmpty(clusterPhyList)) {
+            return Collections.emptyMap();
+        }
+        String realIndexName = IndexNameUtils.genCurrentDailyIndexName(indexName);
+        final String clusterPhyStr = JSON.toJSONString(clusterPhyList);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_PLATFORM_CREATE_CAT_INDEX_GROUP_BY_CLUSTER,
+                clusterPhyStr, clusterPhyList.size(), clusterPhyStr);
+        return gatewayClient.performRequest(metadataClusterName, realIndexName, TYPE, dsl,
+                res ->Optional.ofNullable(res).map(ESQueryResponse::getAggs).map(ESAggrMap::getEsAggrMap)
+                        .map(i -> i.get(GROUP_BY_CLUSTER)).map(ESAggr::getBucketList).orElse(Collections.emptyList())
+                        .stream().map(ESBucket::getUnusedMap).map(map -> Tuples.of(map.get(KEY).toString(),
+                                ((Integer) map.getOrDefault(DOC_COUNT, 0))))
+                        .collect(Collectors.toMap(TupleTwo::v1, TupleTwo::v2))
+                
+                , 3);
+    }
 }

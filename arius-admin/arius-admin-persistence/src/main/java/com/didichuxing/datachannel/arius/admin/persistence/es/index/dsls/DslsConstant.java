@@ -696,6 +696,8 @@ public class DslsConstant {
 
     public static final String GET_PLATFORM_CREATE_CAT_INDEX  = "IndexCatESDAO/getPlatformCreateCatIndex";
     public static final String GET_PLATFORM_CREATE_CAT_INDEX_BY_INDEX_PROJECT  = "IndexCatESDAO/getPlatformCreateCatIndexByIndexProject";
+    public static final String GET_PLATFORM_CREATE_CAT_INDEX_GROUP_BY_CLUSTER  = "IndexCatESDAO"
+                                                                 + "/GET_PLATFORM_CREATE_CAT_INDEX_GROUP_BY_CLUSTER";
 
     /************************************************************      ShardCatESDAO     **************************************************************/
     /**
