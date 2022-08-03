@@ -290,9 +290,9 @@ public abstract class BaseTemplateSrvImpl implements BaseTemplateSrv {
     
     @Override
     public SupportSrv getSupportSrvByLogicTemplateAndMasterClusterPhy(IndexTemplate logicIndexTemplate,
-                                                                      String materClusterPhy) {
+                                                                      String clusterPhy) {
         TupleThree</*dcdrExist*/Boolean,/*pipelineExist*/ Boolean,/*existColdRegion*/ Boolean> existDCDRAndPipelineModule = clusterPhyManager.getDCDRAndPipelineAndColdRegionTupleByClusterPhyWithCache(
-                materClusterPhy);
+                clusterPhy);
         List<TemplateServiceEnum> templateServiceEnums = TemplateServiceEnum.str2Srv(logicIndexTemplate.getOpenSrv());
         SupportSrv supportSrv = new SupportSrv();
         supportSrv.setPartition(StringUtils.endsWith(logicIndexTemplate.getExpression(), "*"));
