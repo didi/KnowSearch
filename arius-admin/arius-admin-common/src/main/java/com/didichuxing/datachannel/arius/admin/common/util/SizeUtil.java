@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.util;
 
+import com.alibaba.druid.util.StringUtils;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 
@@ -18,6 +19,17 @@ public class SizeUtil {
 
     private static final ILog LOGGER = LogFactory.getLog(SizeUtil.class);
 
+
+    public static Long getDasboardUnitSize(String proStoreSize) {
+        if (StringUtils.isEmpty(proStoreSize)){
+            return 0L;
+        }
+        if (proStoreSize.contains("个")){
+            return (long) (Double.parseDouble(proStoreSize.replaceAll("个","")));
+        }else {
+            return getUnitSize(proStoreSize);
+        }
+    }
     /**
      * 得到字节数
      *

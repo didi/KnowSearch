@@ -1,0 +1,24 @@
+{
+  "size": 1,
+  "sort": [
+    {
+      "timestamp": {
+        "order": "DESC"
+      }
+    }
+  ],
+  "_source": [
+    "timestamp"
+  ],
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "term": {
+            "cluster": "%s"
+          }
+        }
+      ]
+    }
+  }
+}

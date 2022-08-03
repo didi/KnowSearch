@@ -1,22 +1,21 @@
 package com.didichuxing.datachannel.arius.admin.core.service.es;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicLong;
-
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.IndexCatCell;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.IndicesDistributionVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
 import com.didiglobal.logi.elasticsearch.client.response.indices.stats.IndexNodes;
 import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
 import com.didiglobal.logi.elasticsearch.client.response.setting.index.IndexConfig;
 import com.didiglobal.logi.elasticsearch.client.response.setting.index.MultiIndexsConfig;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @author d06679
@@ -81,7 +80,7 @@ public interface ESIndexService {
      * @param mappingConfig
      * @return
      */
-    boolean syncUpdateIndexMapping(String cluster, String index, MappingConfig mappingConfig);
+    boolean syncUpdateIndexMapping(String cluster, String index, MappingConfig mappingConfig) throws ESOperateException;
 
     Map<String, IndexConfig> syncBatchGetIndexConfig(String cluster, List<String> indexList);
 
@@ -383,7 +382,7 @@ public interface ESIndexService {
      * @param cluster
      * @return
      */
-    List<CatIndexResult> indicesDistribution(String cluster);
+    List<CatIndexResult> syncIndicesDistribution(String cluster);
 
     /**
      * 构建索引实时数据(包含block和aliases)

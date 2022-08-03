@@ -12,7 +12,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.Ro
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
-
 import java.util.List;
 import java.util.Set;
 
@@ -86,12 +85,56 @@ public interface ClusterLogicService {
 
     /**
      * 查询指定逻辑集群
+     *
      * @param logicClusterId 逻辑集群id
+     * @param projectId
      * @return 逻辑集群 不存在返回null
      */
-    ClusterLogic getClusterLogicById(Long logicClusterId);
-
-    ClusterLogic getClusterLogicByName(String logicClusterName);
+    ClusterLogic getClusterLogicByIdAndProjectId(Long logicClusterId, Integer projectId);
+    
+    /**
+     * 获取集群逻辑通过id那不包含项目id
+     *
+     * @param logicClusterId 逻辑集群id
+     * @return {@code ClusterLogic}
+     */
+    ClusterLogic getClusterLogicByIdThatNotContainsProjectId(Long logicClusterId);
+    
+    boolean  existClusterLogicById(Long logicClusterId);
+    
+    
+    /**
+     *通过逻辑集群id获取逻辑集群而且将projectIdStr转换为ProjectIdList
+     *
+     * @param logicClusterId 逻辑集群id
+     * @return {@code List<ClusterLogic>}
+     */
+    List<ClusterLogic> listClusterLogicByIdThatProjectIdStrConvertProjectIdList(Long logicClusterId);
+    
+    /**
+     * 获取逻辑集群通过名字和项目id
+     *
+     * @param logicClusterName 逻辑集群名称
+     * @param projectId        项目id
+     * @return {@code ClusterLogic}
+     */
+    ClusterLogic getClusterLogicByNameAndProjectId(String logicClusterName, Integer projectId);
+    
+    /**
+     * 获取集群逻辑通过名字然后不包含项目id
+     *
+     * @param logicClusterName 逻辑集群名称
+     * @return {@code ClusterLogic}
+     */
+    ClusterLogic getClusterLogicByNameThatNotContainsProjectId(String logicClusterName);
+    
+    /**
+     * 通过逻辑集群名称获取逻辑集群而且将projectIdStr转换为ProjectIdList
+     *
+     * @param logicClusterName 逻辑集群名称
+     * @return {@code List<ClusterLogic>}
+     */
+    List<ClusterLogic> listClusterLogicByNameThatProjectIdStrConvertProjectIdList(String logicClusterName);
 
     /**
      * 获取逻辑集群配置
@@ -171,13 +214,13 @@ public interface ClusterLogicService {
 
     /**
      * 转移逻辑集群
-     * @param clusterLogicId       逻辑集群Id
-     * @param targetProjectId          项目Id
-     * @param targetResponsible    目标负责人
-     * @param submitor             提交人
+     *
+     * @param clusterLogicId  逻辑集群Id
+     * @param targetProjectId 项目Id
+     * @param submitor        提交人
      * @return 成功/失败
      */
-    Result<Void> transferClusterLogic(Long clusterLogicId, Integer targetProjectId, String targetResponsible,
+    Result<Void> transferClusterLogic(Long clusterLogicId, Integer targetProjectId,
                                       String submitor);
 
     /**
@@ -198,12 +241,12 @@ public interface ClusterLogicService {
      * @return                    List<ClusterLogic>
      */
     List<ClusterLogic> getClusterLogicListByIds(List<Long> clusterLogicIdList);
-
+    
     /**
-     * 获取项目id通过clusterLogicId
      *
-     * @param clusterLogicId 集群逻辑id
-     * @return {@code Integer}
+     * 通过level获取逻辑集群并且将projectIdStr convert projectId list
+     * @param level 水平
+     * @return {@code List<ClusterLogic>}
      */
-    Integer getProjectIdById(Long clusterLogicId);
+    List<ClusterLogic> listLogicClustersByLevelThatProjectIdStrConvertProjectIdList(Integer level);
 }

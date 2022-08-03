@@ -30,7 +30,7 @@ public class ClusterLogicPO extends BasePO {
     /**
      * 所属projectID
      */
-    private Integer projectId;
+    private String projectId;
 
     /**
      * 数据中心
@@ -47,11 +47,7 @@ public class ClusterLogicPO extends BasePO {
      */
     private Integer dataNodeNu;
 
-    /**
-     * 责任人
-     */
-    @Deprecated
-    private String  responsible;
+
 
     /**
      * 备注

@@ -1,11 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart;
 
-import java.io.Serializable;
-import java.util.List;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.io.Serializable;
+import java.util.List;
 
 /**
  * Created by linyunan on 2021-08-01
@@ -33,5 +33,10 @@ public class MetricsContent implements Serializable {
      * 时间段内的最大值或平均值
      */
     private Double                   valueInTimePeriod;
+
+    /**
+     * 集群索引数量
+     */
+    private Long                   indexCount;
 
 }

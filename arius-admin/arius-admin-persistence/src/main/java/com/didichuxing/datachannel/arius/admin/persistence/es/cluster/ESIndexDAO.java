@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.cluster;
 
+import static com.didichuxing.datachannel.arius.admin.common.RetryUtils.performTryTimesMethods;
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.COMMA;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_OPERATE_TIMEOUT;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.INDEX_BLOCKS_READ;
@@ -76,10 +77,12 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class ESIndexDAO extends BaseESDAO {
 
-    public static final String failedMsg            = "%s 执行失败,请检查参数与索引配置";
-    public static final String MAX_NUM_SEGMENTS     = "max_num_segments";
+    public static final String FAILED_MSG       = "%s 执行失败,请检查参数与索引配置";
+    public static final String MAX_NUM_SEGMENTS = "max_num_segments";
     public static final String ONLY_EXPUNGE_DELETES = "only_expunge_deletes";
     public static final String ROLLOVER_API         = "/_rollover";
+ 
+    
 
     /**
      * 创建索引
@@ -126,22 +129,23 @@ public class ESIndexDAO extends BaseESDAO {
      * @return
      */
     public boolean createIndexWithConfig(String cluster, String indexName, IndexConfig indexConfig,Integer tryTimes) {
-        /*if (exist(cluster, indexName)) {
-            LOGGER.warn("class=ESIndexDAO||method=createIndexWithConfig||index already exist||cluster={}||indexName={}",
-                cluster, indexName);
-            return true;
-        }*/
+        
         ESClient client = fetchESClientByCluster(cluster);
         if (client == null) {
             return Boolean.FALSE;
         }
         indexConfig.setVersion(ESVersion.valueBy(client.getEsVersion()));
-        ESIndicesPutIndexResponse response = performTryTimesMethods(
-                (timeout, unit) -> client.admin().indices().preparePutIndex(indexName).setIndexConfig(indexConfig)
-                        .execute().actionGet(timeout, unit), esIndicesPutIndexResponse -> Boolean.FALSE.equals(
-                        Optional.ofNullable(esIndicesPutIndexResponse).map(ESAcknowledgedResponse::getAcknowledged)
-                            
-                                .orElse(Boolean.FALSE)), tryTimes);
+        BiFunction<Long, TimeUnit, ESIndicesPutIndexResponse> esIndicesExistsResponseBiFunction = (timeout, unit) -> {
+            try {
+                return client.admin().indices().preparePutIndex(indexName).setIndexConfig(indexConfig).execute()
+                        .actionGet(timeout, unit);
+            } catch (Exception e) {
+                LOGGER.error("class=ESIndexDAO||method=createIndexWithConfig||cluster={}||indexName={}", cluster);
+                return null;
+            }
+        };
+        ESIndicesPutIndexResponse response = performTryTimesMethods(esIndicesExistsResponseBiFunction, Objects::isNull,
+                tryTimes);
          
         return Optional.ofNullable(response).map(ESAcknowledgedResponse::getAcknowledged).orElse(Boolean.FALSE);
     }
@@ -173,14 +177,20 @@ public class ESIndexDAO extends BaseESDAO {
         }
         ESIndicesExistsRequest esIndicesExistsRequest = new ESIndicesExistsRequest();
         esIndicesExistsRequest.setIndex(indexName);
-        ESIndicesExistsResponse response = performTryTimesMethods(
-                (timeout,unit)->client.admin().indices().exists(esIndicesExistsRequest).actionGet(timeout,unit),
-                
-                esIndicesExistsResponse-> Boolean.FALSE.equals(
-                Optional.ofNullable(esIndicesExistsResponse).map(ESIndicesExistsResponse::isExists).orElse(Boolean.FALSE)),
-                tryTimes
-                
-                );
+        BiFunction<Long,TimeUnit,ESIndicesExistsResponse> esIndicesExistsResponseBiFunction=(timeout,unit)->{
+            try {
+              return   client.admin().indices().exists(esIndicesExistsRequest).actionGet(timeout,unit);
+            }catch (Exception e){
+                 LOGGER.error("class=ESIndexDAO||method=existByClusterAndIndexName||cluster={}||indexName={}",
+                cluster);
+                 return null;
+            }
+        };
+        ESIndicesExistsResponse response = performTryTimesMethods(esIndicesExistsResponseBiFunction,
+            
+                Objects::isNull, tryTimes
+    
+        );
         
         return Optional.ofNullable(response).map(ESIndicesExistsResponse::isExists).orElse(Boolean.FALSE);
     }
@@ -233,7 +243,7 @@ public class ESIndexDAO extends BaseESDAO {
      * @param indexName 索引名字
      * @return
      */
-    public boolean updateIndexMapping(String cluster, String indexName, MappingConfig mappingConfig) {
+    public boolean updateIndexMapping(String cluster, String indexName, MappingConfig mappingConfig) throws ESOperateException {
         if (!exist(cluster, indexName)) {
             LOGGER.warn("class=ESIndexDAO||method=updateIndexMapping||cluster={}||indexName={}||msg=index not exist",
                 cluster, indexName);
@@ -250,15 +260,21 @@ public class ESIndexDAO extends BaseESDAO {
             String typeName = entry.getKey();
             ESIndicesUpdateMappingRequestBuilder builder = client.admin().indices().prepareUpdateMapping();
             builder.setIndex(indexName).setType(typeName).setTypeConfig(typeConfigMap.get(typeName));
-            // es 集群版本7 以上需要带includeTypeName 参数，方可以更新index mapping
-            if (Integer.parseInt(client.getEsVersion().split("\\.")[0]) >= 7) {
+            // es 集群版本7 需要带includeTypeName 参数，方可以更新index mapping
+            if (Integer.parseInt(client.getEsVersion().split("\\.")[0]) == 7) {
                 builder.setIncludeTypeName(true);
             }
-            ESIndicesUpdateMappingResponse response = builder.execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
-            ;
-
-            if (!response.getAcknowledged().booleanValue()) {
-                return false;
+            //es集群版本8 不需要type参数
+            if (Integer.parseInt(client.getEsVersion().split("\\.")[0]) == 8) {
+                builder.setIsNeedType(false);
+            }
+            try {
+                ESIndicesUpdateMappingResponse response = builder.execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+                if (!response.getAcknowledged().booleanValue()) {
+                    return false;
+                }
+            } catch (Exception e) {
+                throw new ESOperateException("编辑mapping失败", e.getCause());
             }
         }
 
@@ -348,8 +364,8 @@ public class ESIndexDAO extends BaseESDAO {
                 .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
             return response.getIndicesMap();
         } catch (Exception e) {
-            LOGGER.warn("class=ESIndexDAO||method=getIndexByExpression||errMsg={}||cluster={}||expression={}",
-                e.getMessage(), cluster, expression, e);
+            LOGGER.error("class=ESIndexDAO||method=getIndexByExpression||cluster={}||expression={}",
+                 cluster, expression, e);
             return null;
         }
     }
@@ -728,10 +744,7 @@ public class ESIndexDAO extends BaseESDAO {
             return Maps.newHashMap();
         }
 
-        /* //这里toString()方法会抛json异常，应该是脏数据引起
-        if (!EnvUtil.isOnline()) {
-            LOGGER.warn("class=ESTemplateDAO||method=getIndexConfigs||response={}", JSON.toJSONString(response));
-        }*/
+      
 
         return response.getIndexsMapping().getIndexConfigMap();
     }
@@ -841,14 +854,15 @@ public class ESIndexDAO extends BaseESDAO {
                 directResponse.getResponseContent());
         } catch (Exception e) {
             LOGGER.warn("class=ESIndexDAO||method=rollover||errMsg=index rollover fail");
-            return Result.buildFail(String.format(failedMsg, "rollover"));
+            return Result.buildFail(String.format(FAILED_MSG, "rollover"));
         }
     }
 
     public Result<Void> forceMerge(String cluster, String index, Integer maxNumSegments, Boolean onlyExpungeDeletes) {
         ESClient client = fetchESClientByCluster(cluster);
         if (client == null) {
-            LOGGER.warn("class=ESIndexDAO||method=forceMerge||errMsg=es client not found");
+            LOGGER.warn("class={}||method=forceMerge||cluster={}||index={}||errMsg=es client not found",
+                    getClass().getSimpleName(), client, index);
             return Result.buildFail();
         }
 
@@ -868,7 +882,7 @@ public class ESIndexDAO extends BaseESDAO {
                 directResponse.getResponseContent());
         } catch (Exception e) {
             LOGGER.warn("class=ESIndexDAO||method=forceMerge||errMsg=index forceMerge fail");
-            return Result.buildFail(String.format(failedMsg, "forceMerge"));
+            return Result.buildFail(String.format(FAILED_MSG, "forceMerge"));
         }
     }
 
@@ -888,7 +902,7 @@ public class ESIndexDAO extends BaseESDAO {
                 directResponse.getResponseContent());
         } catch (Exception e) {
             LOGGER.warn("class=ESIndexDAO||method=shrink||errMsg=index shrink fail");
-            return Result.buildFail(String.format(failedMsg, "shrink"));
+            return Result.buildFail(String.format(FAILED_MSG, "shrink"));
         }
     }
 
@@ -908,7 +922,8 @@ public class ESIndexDAO extends BaseESDAO {
                 directResponse.getResponseContent());
         } catch (Exception e) {
             LOGGER.warn("class=ESIndexDAO||method=split||errMsg=index split fail");
-            return Result.buildFail(String.format(failedMsg, "split"));
+            return Result.buildFail(String.format(FAILED_MSG, "split"));
         }
     }
+ 
 }

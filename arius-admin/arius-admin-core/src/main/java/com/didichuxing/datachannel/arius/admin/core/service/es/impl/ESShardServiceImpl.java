@@ -1,11 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.core.service.es.impl;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.BIG_SHARD;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.GET_MOVING_SHARD;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.getSegmentsCountContent;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.getSegmentsPartInfoRequestContent;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.getShardsAllInfoRequestContent;
-
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
@@ -15,21 +9,27 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.shard.Segment;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.shard.SegmentPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.ShardAssignmenNodeVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.ShardAssignmentDescriptionVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESShardService;
 import com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESShardDAO;
 import com.didiglobal.logi.elasticsearch.client.gateway.direct.DirectResponse;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.rest.RestStatus;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.BIG_SHARD;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.*;
 
 /**
  * Created by linyunan on 3/22/22
@@ -52,6 +52,9 @@ public class ESShardServiceImpl implements ESShardService {
     
     @Autowired
     private ESShardDAO esShardDAO;
+
+    @Autowired
+    private AriusConfigInfoService ariusConfigInfoService;
 
     @Override
     public List<MovingShardMetrics> syncGetMovingShards(String clusterName) {
@@ -105,7 +108,7 @@ public class ESShardServiceImpl implements ESShardService {
 
 
     @Override
-    public ShardAssignmentDescriptionVO shardAssignmentDescription(String cluster) {
+    public ShardAssignmentDescriptionVO syncShardAssignmentDescription(String cluster) {
         String response = esShardDAO.shardAssignment(cluster);
         if (null!=response){
             return buildShardAssignment(JSONObject.parseObject(response));
@@ -129,12 +132,16 @@ public class ESShardServiceImpl implements ESShardService {
 
         String store = shardMetrics.getStore();
         if (null == store) { return false;}
-        String value = store.substring(0, store.length() - 2);
+        double value = Double.valueOf(store.substring(0, store.length() - 2));
+
+        double bigShardThreshold = ariusConfigInfoService.doubleSetting(AriusConfigConstant.ARIUS_COMMON_GROUP,
+                AriusConfigConstant.BIG_SHARD_THRESHOLD, BIG_SHARD);
+
         if (store.endsWith("tb")) {
-            value += "1024";
-            return BIG_SHARD <= Double.valueOf(value);
+            value *= 1024;
+            return bigShardThreshold <= value;
         }else if (store.endsWith("gb")){
-            return BIG_SHARD <= Double.valueOf(value);
+            return bigShardThreshold <= value;
         }else {
             return false;
         }

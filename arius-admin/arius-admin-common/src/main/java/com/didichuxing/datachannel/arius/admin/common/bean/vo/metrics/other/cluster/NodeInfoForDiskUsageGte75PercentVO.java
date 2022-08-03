@@ -2,11 +2,11 @@ package com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.clu
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.io.Serializable;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.io.Serializable;
 
 /**
  * Created by linyunan on 2021-08-09
@@ -22,4 +22,7 @@ public class NodeInfoForDiskUsageGte75PercentVO implements Serializable {
 
     @ApiModelProperty("大于75%磁盘利用率节点名称列表")
     private String nodeName;
+
+    @ApiModelProperty("利用率")
+    private Double value;
 }

@@ -25,7 +25,6 @@ public class LogicClusterInfoSource {
     //        contentObj.put("name", logicClusterName);
     //        contentObj.put("dataNodeSpec", "16-64Gi-3072g");
     //        contentObj.put("dataNodeNu", 3);
-    //        contentObj.put("responsible", "admin");
     //        contentObj.put("type", ClusterResourceTypeEnum.PRIVATE.getCode());
     //        workOrderDTO.setContentObj(contentObj);
     //        Result<AriusWorkOrderInfoSubmittedVO> result = NormalOrderControllerMethod.submit(type, workOrderDTO);

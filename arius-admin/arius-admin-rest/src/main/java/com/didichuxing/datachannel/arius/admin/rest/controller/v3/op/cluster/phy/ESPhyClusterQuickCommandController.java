@@ -100,5 +100,4 @@ public class ESPhyClusterQuickCommandController {
     public Result<Void> clearFieldDataMemory(@PathVariable String cluster) {
         return clusterPhyQuickCommandManager.clearFieldDataMemory(cluster);
     }
-
 }

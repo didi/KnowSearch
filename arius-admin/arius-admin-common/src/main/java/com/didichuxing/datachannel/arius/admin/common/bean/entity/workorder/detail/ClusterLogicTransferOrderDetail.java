@@ -20,7 +20,6 @@ public class ClusterLogicTransferOrderDetail extends AbstractOrderDetail {
 
     private String  clusterLogicName;
 
-    private String  targetResponsible;
 
     private String  memo;
 

@@ -7,14 +7,12 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ProjectId
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateStatsInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateStatsService;
-import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateValueService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Map;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * @author d06679
@@ -28,8 +26,7 @@ public class TemplatePhyStaticsManagerImpl implements TemplatePhyStaticsManager 
     @Autowired
     private TemplateStatsService templateStatsService;
 
-    @Autowired
-    private TemplateValueService templateValueService;
+   
 
     @Override
     public Result<Map<Integer, Long>> getAccessStatsInfoByTemplateIdAndDays(int logicTemplateId, int days) {

@@ -1,5 +1,12 @@
 package com.didichuxing.datachannel.arius.admin.core.service.es.impl;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.getBigIndicesRequestContent;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.BLOCKS;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.DEFAULTS;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.INDEX;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.READ;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.WRITE;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
@@ -29,20 +36,23 @@ import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.rest.RestStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.getBigIndicesRequestContent;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.*;
 
 /**
  * @author d06679
@@ -68,8 +78,7 @@ public class ESIndexServiceImpl implements ESIndexService {
     @Override
     public boolean syncCreateIndex(String cluster, String indexName, IndexConfig indexConfig,
                                    int retryCount) throws ESOperateException {
-        return ESOpTimeoutRetry.esRetryExecute("createIndexWithConfig", retryCount,
-            () -> esIndexDAO.createIndexWithConfig(cluster, indexName, indexConfig,3));
+        return esIndexDAO.createIndexWithConfig(cluster, indexName, indexConfig,retryCount);
     }
 
     @Override
@@ -114,7 +123,7 @@ public class ESIndexServiceImpl implements ESIndexService {
     }
 
     @Override
-    public boolean syncUpdateIndexMapping(String cluster, String index, MappingConfig mappingConfig) {
+    public boolean syncUpdateIndexMapping(String cluster, String index, MappingConfig mappingConfig) throws ESOperateException {
         return esIndexDAO.updateIndexMapping(cluster, index, mappingConfig);
     }
 
@@ -669,7 +678,7 @@ public class ESIndexServiceImpl implements ESIndexService {
     }
 
     @Override
-    public List<CatIndexResult> indicesDistribution(String cluster) {
+    public List<CatIndexResult> syncIndicesDistribution(String cluster) {
         List<CatIndexResult> catIndexResultList = esIndexDAO.catIndices(cluster);
         return catIndexResultList;
     }

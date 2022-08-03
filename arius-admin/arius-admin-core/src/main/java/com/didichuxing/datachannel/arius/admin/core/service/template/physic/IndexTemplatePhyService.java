@@ -32,6 +32,7 @@ public interface IndexTemplatePhyService {
      * @return list
      */
     List<IndexTemplatePhy> getTemplateByLogicId(Integer logicId);
+    IndexTemplatePhy getTemplateByLogicIdAndRole(Integer logicId,Integer role);
 
     /**
      * 从缓存中查询指定逻辑模板对应的物理模板

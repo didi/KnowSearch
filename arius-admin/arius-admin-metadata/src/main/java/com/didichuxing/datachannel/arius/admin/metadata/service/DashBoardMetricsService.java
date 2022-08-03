@@ -1,7 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.metadata.service;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.MetricsConstant.FAULT_FLAG;
-
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsDashboardTopNDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.VariousLineChartMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.list.MetricList;
@@ -11,15 +9,23 @@ import com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoard
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricOtherTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricTopTypeEnum;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats.AriusStatsDashBoardInfoESDAO;
-import java.util.List;
+import com.google.common.collect.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Map;
+
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricTypeWithValueTypeEnum.getAllDashBoardMetricTypeWithValueTypes;
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.MetricsConstant.FAULT_FLAG;
 
 /**
  * Created by linyunan on 3/14/22
  */
 @Service
 public class DashBoardMetricsService {
+    //默认排序字段
+    private static final String                                 TIMESTAMP                     = "timestamp";
 
     @Autowired
     private AriusStatsDashBoardInfoESDAO ariusStatsDashBoardInfoESDAO;
@@ -54,8 +60,20 @@ public class DashBoardMetricsService {
      */
     public MetricList getListFaultMetrics(String oneLevelType, String metricsType, String aggType,
                                           Boolean orderByDesc) {
+        Map<String,String> metricTypeWithValue = getAllDashBoardMetricTypeWithValueTypes();
+        String valueMetric = "";
+        String sortItem = TIMESTAMP;
         String sortType = orderByDesc ? SortConstant.DESC : SortConstant.ASC;
-        return ariusStatsDashBoardInfoESDAO.fetchListFlagMetric(oneLevelType, metricsType, aggType, FAULT_FLAG,
+        List<String> sources = Lists.newArrayList();
+        sources.add(oneLevelType+".cluster");
+        sources.add(oneLevelType+"."+oneLevelType);
+        if (metricTypeWithValue.containsKey(metricsType)){
+            sources.add(oneLevelType+"."+metricTypeWithValue.get(metricsType));
+            valueMetric = metricTypeWithValue.get(metricsType);
+            sortItem = valueMetric;
+        }
+
+        return ariusStatsDashBoardInfoESDAO.fetchListFlagMetric(oneLevelType, metricsType,sortItem,valueMetric, sources, FAULT_FLAG,
             sortType);
     }
 

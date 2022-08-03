@@ -94,7 +94,7 @@ public class TemplateAuthHandler extends BaseWorkOrderHandler {
             return Result.buildParamIllegal("权限类型非法");
         }
 
-        if (authEnum.equals(ProjectTemplateAuthEnum.OWN) && AriusObjUtils.isNull(content.getResponsible())) {
+        if (authEnum.equals(ProjectTemplateAuthEnum.OWN) ) {
             return Result.buildParamIllegal("管理责任人为空");
         }
 

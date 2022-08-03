@@ -15,6 +15,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.DateTimeUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.IndexNameUtils;
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
+import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.index.IndexCatESDAO;
 import com.didiglobal.logi.elasticsearch.client.response.query.query.ESQueryResponse;
 import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESAggr;
 import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESBucket;
@@ -24,6 +25,7 @@ import com.google.common.collect.Maps;
 import lombok.NoArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.beans.IntrospectionException;
@@ -81,6 +83,9 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
     public static final String                                            HISTS_GT                = "hist>";
     public static final String                                            BUCKET                  = "_bucket";
     public static final String                                            VALUE                   = "value";
+
+    @Autowired
+    private IndexCatESDAO indexCatESDAO;
 
     /**
      * 不同维度es监控数据
@@ -405,9 +410,10 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
                             List<String> nodeNamesUnderClusterLogic) {
         List<MetricsContent> sortedList;
         sortedList = variousLineChartsMetrics.getMetricsContents().stream()
-            .filter(metricsContent -> nodeNamesUnderClusterLogic == null
-                                      || (nodeNamesUnderClusterLogic != null
-                                          && nodeNamesUnderClusterLogic.contains(metricsContent.getName())))
+                //如果nodeNamesUnderClusterLogic为空，就是索引和模板，不需要这里拦截
+                //如果是节点，nodeNamesUnderClusterLogic就不为空，就判断拦截
+            .filter(metricsContent -> CollectionUtils.isEmpty(nodeNamesUnderClusterLogic)
+                                      || (nodeNamesUnderClusterLogic.contains(metricsContent.getName())))
             .sorted(Comparator.comparing(x -> x.getValueInTimePeriod(), Comparator.reverseOrder()))
             .limit(topNu != null ? topNu : 0).collect(Collectors.toList());
 

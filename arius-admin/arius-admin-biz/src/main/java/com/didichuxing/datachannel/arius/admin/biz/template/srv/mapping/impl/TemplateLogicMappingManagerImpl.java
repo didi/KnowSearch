@@ -7,7 +7,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.impl.BaseTemplateSrvImpl;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping.TemplateLogicMappingManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping.TemplatePhyMappingManager;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.MappingOptimize;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.MappingOptimizeItem;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -30,6 +29,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.Tri
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.event.index.ReBuildTomorrowIndexEvent;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.mapping.AnalyzerEnum;
 import com.didichuxing.datachannel.arius.admin.common.mapping.AriusTypeProperty;
 import com.didichuxing.datachannel.arius.admin.common.mapping.Field;
@@ -286,43 +286,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrvImpl impleme
         return ariusTypeProperty;
     }
 
-    /**
-     * 获取mapping优化信息
-     *
-     * @param logicId logicId
-     * @return result
-     */
-    @Override
-    public Result<List<MappingOptimize>> getTemplateMappingOptimize(Integer logicId) {
-        IndexTemplateWithPhyTemplates logicWithPhysical = this.indexTemplateService
-            .getLogicTemplateWithPhysicalsById(logicId);
 
-        if (logicWithPhysical == null) {
-            return Result.buildNotExist("模板不存在");
-        }
-
-        List<IndexTemplatePhy> templatePhysicals = logicWithPhysical.fetchMasterPhysicalTemplates();
-
-        List<MappingOptimize> mappingOptimizes = new ArrayList<>();
-        for (IndexTemplatePhy master : templatePhysicals) {
-            Result<MappingOptimize> getMappingOptimizeResult = templateStatsService
-                .getMappingOptimize(master.getCluster(), master.getName());
-
-            if (getMappingOptimizeResult.failed()) {
-                return Result.buildFrom(getMappingOptimizeResult);
-            }
-
-            if (!CollectionUtils.isEmpty(getMappingOptimizeResult.getData().getOptimizeItems())) {
-                mappingOptimizes.add(getMappingOptimizeResult.getData());
-            }
-        }
-
-        if (CollectionUtils.isEmpty(mappingOptimizes)) {
-            return Result.buildParamIllegal("mapping不需要优化");
-        }
-
-        return Result.buildSucc(mappingOptimizes);
-    }
 
     /**
      * mapping优化
@@ -1214,13 +1178,13 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrvImpl impleme
             return false;
         }
 
-        ClusterPhy clusterPhy = clusterPhyService
+        Result<ClusterPhy> clusterPhyResult = clusterPhyManager
             .getClusterByName(logicWithPhysical.getMasterPhyTemplate().getCluster());
-        if (null == clusterPhy) {
+        if (null == clusterPhyResult.getData()) {
             return false;
         }
 
-        return ESVersionUtil.isHigher(clusterPhy.getEsVersion(), "6.5.1");
+        return ESVersionUtil.isHigher(clusterPhyResult.getData().getEsVersion(), "6.5.1");
     }
 
     protected void fillSpecialField(IndexTemplateWithMapping templateLogicWithMapping) {
@@ -1285,7 +1249,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrvImpl impleme
      * @param logicId
      * @return
      */
-    private void syncTemplateMapping2Index(Integer logicId) {
+    private void syncTemplateMapping2Index(Integer logicId) throws ESOperateException {
         IndexTemplateWithPhyTemplates templateLogicWithPhysical = indexTemplateService
             .getLogicTemplateWithPhysicalsById(logicId);
 

@@ -84,7 +84,7 @@ public class TemplatePhyMappingManagerImpl implements TemplatePhyMappingManager 
     }
 
     @Override
-    public Result<Void> syncTemplateMapping2Index(String cluster, String index, MappingConfig mappingConfig) {
+    public Result<Void> syncTemplateMapping2Index(String cluster, String index, MappingConfig mappingConfig) throws ESOperateException {
         if (!esIndexDAO.updateIndexMapping(cluster, index, mappingConfig)) {
             return Result.buildFail("update index mapping fail");
         }
@@ -170,7 +170,7 @@ public class TemplatePhyMappingManagerImpl implements TemplatePhyMappingManager 
 
     @Override
     public Result<Void> addIndexMapping(String cluster, String expression, String dataFormat, int updateDays,
-                                        MappingConfig mappingConfig) {
+                                        MappingConfig mappingConfig) throws ESOperateException {
         for (int i = 1; i <= updateDays; i++) {
             String indexName = IndexNameFactory.getNoVersion(expression, dataFormat, 2 - i);
 
@@ -247,26 +247,26 @@ public class TemplatePhyMappingManagerImpl implements TemplatePhyMappingManager 
     private Map<String, String> createDefaultSettings(String indexName, Map<String, TypeConfig> typeConfigMap) {
         Map<String, String> settings = Maps.newHashMap();
         settings.put("index.mapping.total_fields.limit", "100000");
-        if (typeConfigMap != null) {
-            if (typeConfigMap.containsKey("_default_")) {
-                if (typeConfigMap.size() == 2) {
-                    settings.put(AdminConstant.SINGLE_TYPE_KEY, AdminConstant.DEFAULT_SINGLE_TYPE);
-                }
-
-            } else {
-                if (typeConfigMap.size() == 1) {
-                    settings.put(AdminConstant.SINGLE_TYPE_KEY, AdminConstant.DEFAULT_SINGLE_TYPE);
-                }
-            }
-
-            String settingValue = settings.get(AdminConstant.SINGLE_TYPE_KEY);
-            if (null == settingValue || !AdminConstant.DEFAULT_SINGLE_TYPE.equals(settingValue)) {
-                LOGGER.warn("class=TemplatePhyMappingManagerImpl||method=checkMapping||"
-                            + "singleTypeSettings={}||indexTemplate={}",
-                    settings.keySet(), indexName);
-                settings.put(AdminConstant.SINGLE_TYPE_KEY, AdminConstant.DEFAULT_SINGLE_TYPE);
-            }
-        }
+//        if (typeConfigMap != null) {
+//            if (typeConfigMap.containsKey("_default_")) {
+//                if (typeConfigMap.size() == 2) {
+//                    settings.put(AdminConstant.SINGLE_TYPE_KEY, AdminConstant.DEFAULT_SINGLE_TYPE);
+//                }
+//
+//            } else {
+//                if (typeConfigMap.size() == 1) {
+//                    settings.put(AdminConstant.SINGLE_TYPE_KEY, AdminConstant.DEFAULT_SINGLE_TYPE);
+//                }
+//            }
+//
+//            String settingValue = settings.get(AdminConstant.SINGLE_TYPE_KEY);
+//            if (null == settingValue || !AdminConstant.DEFAULT_SINGLE_TYPE.equals(settingValue)) {
+//                LOGGER.warn("class=TemplatePhyMappingManagerImpl||method=checkMapping||"
+//                            + "singleTypeSettings={}||indexTemplate={}",
+//                    settings.keySet(), indexName);
+//                settings.put(AdminConstant.SINGLE_TYPE_KEY, AdminConstant.DEFAULT_SINGLE_TYPE);
+//            }
+//        }
 
         return settings;
     }

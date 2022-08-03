@@ -27,6 +27,7 @@ import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.service.ProjectService;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,19 +57,17 @@ public class ProjectClusterLogicAuthServiceImpl implements ProjectClusterLogicAu
     private RoleTool                   roleTool;
 
     /**
-     * 设置APP对某逻辑集群的权限.
-     * 封装了新增、更新、删除操作，调用接口时只需描述期望的权限状态
-     * @param projectId          APP的ID
+     * 设置APP对某逻辑集群的权限. 封装了新增、更新、删除操作，调用接口时只需描述期望的权限状态
+     *
+     * @param projectId      APP的ID
      * @param logicClusterId 逻辑集群ID
      * @param auth           要设置的权限
-     * @param responsible    责任人，逗号分隔的用户名列表
      * @param operator       操作人
      * @return 设置结果
      */
     @Override
     public Result<Void> ensureSetLogicClusterAuth(Integer projectId, Long logicClusterId,
-                                                  ProjectClusterLogicAuthEnum auth, String responsible,
-                                                  String operator) {
+                                                  ProjectClusterLogicAuthEnum auth, String operator) {
         // 参数检查
         if (projectId == null) {
             return Result.buildParamIllegal("未指定projectId");
@@ -87,31 +86,31 @@ public class ProjectClusterLogicAuthServiceImpl implements ProjectClusterLogicAu
 
         if (oldAuth == null || oldAuth.getType().equals(ProjectClusterLogicAuthEnum.NO_PERMISSIONS.getCode())) {
             // 之前无权限
-            return handleNoAuth(projectId, logicClusterId, auth, responsible, operator);
+            return handleNoAuth(projectId, logicClusterId, auth, operator);
         } else {
             // 之前有权限
             if (oldAuth.getId() != null) {
                 // 期望删除权限
-                return deleteAuth(auth, responsible, operator, oldAuth);
+                return deleteAuth(auth,  operator, oldAuth);
             } else {
                 //权限来自于创建信息表（权限肯定为OWN）,对于集群owner的app权限信息不能修改，只能增加大于OWN的权限
-                return addAuth(projectId, logicClusterId, auth, responsible, operator);
+                return addAuth(projectId, logicClusterId, auth,  operator);
             }
         }
     }
 
     private Result<Void> addAuth(Integer projectId, Long logicClusterId, ProjectClusterLogicAuthEnum auth,
-                                 String responsible, String operator) {
+                                 String operator) {
         if (auth != null
             && ProjectClusterLogicAuthEnum.valueOf(auth.getCode()).higher(ProjectClusterLogicAuthEnum.OWN)) {
             return addLogicClusterAuth(
-                new ProjectLogicClusterAuthDTO(null, projectId, logicClusterId, auth.getCode(), responsible), operator);
+                new ProjectLogicClusterAuthDTO(null, projectId, logicClusterId, auth.getCode()), operator);
         } else {
             return Result.buildFail("不支持对集群owner的权限进行修改");
         }
     }
 
-    private Result<Void> deleteAuth(ProjectClusterLogicAuthEnum auth, String responsible, String operator,
+    private Result<Void> deleteAuth(ProjectClusterLogicAuthEnum auth,String operator,
                                     ProjectClusterLogicAuth oldAuth) {
         if (auth == ProjectClusterLogicAuthEnum.NO_PERMISSIONS) {
             return deleteLogicClusterAuthById(oldAuth.getId(), operator);
@@ -119,12 +118,12 @@ public class ProjectClusterLogicAuthServiceImpl implements ProjectClusterLogicAu
 
         // 期望更新权限信息
         ProjectLogicClusterAuthDTO newAuthDTO = new ProjectLogicClusterAuthDTO(oldAuth.getId(), null, null,
-            auth == null ? null : auth.getCode(), StringUtils.isBlank(responsible) ? null : responsible);
+            auth == null ? null : auth.getCode() );
         return updateLogicClusterAuth(newAuthDTO, operator);
     }
 
     private Result<Void> handleNoAuth(Integer projectId, Long logicClusterId, ProjectClusterLogicAuthEnum auth,
-                                      String responsible, String operator) {
+                                       String operator) {
         // NO_PERMISSIONS不需添加
         if (auth == null || auth == ProjectClusterLogicAuthEnum.NO_PERMISSIONS) {
             return Result.buildSucc();
@@ -132,7 +131,7 @@ public class ProjectClusterLogicAuthServiceImpl implements ProjectClusterLogicAu
 
         // 新增
         return addLogicClusterAuth(
-            new ProjectLogicClusterAuthDTO(null, projectId, logicClusterId, auth.getCode(), responsible), operator);
+            new ProjectLogicClusterAuthDTO(null, projectId, logicClusterId, auth.getCode()), operator);
     }
 
     /**
@@ -278,7 +277,7 @@ public class ProjectClusterLogicAuthServiceImpl implements ProjectClusterLogicAu
         }
 
         // 从逻辑集群表获取创建信息
-        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(logicClusterId);
+        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByIdAndProjectId(logicClusterId, projectId);
         ProjectClusterLogicAuthEnum authFromCreateRecord = (clusterLogic != null
                                                             && projectId.equals(clusterLogic.getProjectId()))
                                                                 ? ProjectClusterLogicAuthEnum.OWN
@@ -329,10 +328,12 @@ public class ProjectClusterLogicAuthServiceImpl implements ProjectClusterLogicAu
 
         // 从逻辑集群表获取APP作为owner的集群
         if (logicClusterId != null && clusterAuthType == ProjectClusterLogicAuthEnum.OWN) {
-            ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(logicClusterId);
-            if (clusterLogic != null) {
-                authDTOS.add(buildLogicClusterAuth(clusterLogic, ProjectClusterLogicAuthEnum.OWN));
-            }
+    
+            clusterLogicService.listClusterLogicByIdThatProjectIdStrConvertProjectIdList(logicClusterId).stream()
+                    .filter(Objects::nonNull)
+                    //需要绑定项目
+                    .map(clusterLogic -> buildLogicClusterAuth(clusterLogic, ProjectClusterLogicAuthEnum.OWN))
+                    .filter(Objects::nonNull).forEach(authDTOS::add);
         }
 
         return authDTOS;
@@ -369,8 +370,6 @@ public class ProjectClusterLogicAuthServiceImpl implements ProjectClusterLogicAu
                 .userOperation(operator).operationTypeEnum(OperateTypeEnum.MY_CLUSTER_INFO_MODIFY)
                 .project(projectService.getProjectBriefByProjectId(authDTO.getProjectId())).bizId(authPO.getId())
                 .build());
-            //operateRecordService.save(ModuleEnum.LOGIC_CLUSTER_PERMISSIONS, OperationEnum.ADD, authPO.getId(),
-            //    JSON.toJSONString(authPO), operator);
         }
 
         return Result.build(succeed);
@@ -461,7 +460,7 @@ public class ProjectClusterLogicAuthServiceImpl implements ProjectClusterLogicAu
             return judgeResult;
         }
 
-        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(logicClusterId);
+        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByIdAndProjectId(logicClusterId, projectId);
         if (AriusObjUtils.isNull(clusterLogic)) {
             return Result.buildParamIllegal(String.format("逻辑集群[%d]不存在", logicClusterId));
         }
@@ -524,7 +523,6 @@ public class ProjectClusterLogicAuthServiceImpl implements ProjectClusterLogicAu
         appLogicClusterAuth.setProjectId(clusterLogic.getProjectId());
         appLogicClusterAuth.setLogicClusterId(clusterLogic.getId());
         appLogicClusterAuth.setType(projectClusterLogicAuthEnum.getCode());
-        appLogicClusterAuth.setResponsible(clusterLogic.getResponsible());
         return appLogicClusterAuth;
     }
 

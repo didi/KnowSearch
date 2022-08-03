@@ -120,7 +120,7 @@ public interface IndicesManager {
      * @param operate
      * @return
      */
-    Result<Void> editMapping(IndexCatCellWithConfigDTO param, Integer projectId, String operate);
+    Result<Void> editMapping(IndexCatCellWithConfigDTO param, Integer projectId, String operate) throws ESOperateException;
 
     /**
      * 获取索引setting信息

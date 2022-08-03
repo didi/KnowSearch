@@ -1,49 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.cluster;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterQuickCommandMethodsEnum.ABNORMAL_SHARD_RETRY;
-import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterQuickCommandMethodsEnum.CLEAR_FIELDDATA_MEMORY;
-import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterQuickCommandMethodsEnum.HOT_THREAD;
-import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterQuickCommandMethodsEnum.PENDING_TASK;
-import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterQuickCommandMethodsEnum.TASK_MISSION_ANALYSIS;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ACTION;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.COUNT;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.DESCRIPTION;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.DOCS;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_OPERATE_MIN_TIMEOUT;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_OPERATE_TIMEOUT;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_ROLE_CLIENT;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_ROLE_COORDINATING_ONLY;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_ROLE_DATA;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_ROLE_DATA_ONLY;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_ROLE_INGEST;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_ROLE_MASTER;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_ROLE_MASTER_DATA;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_ROLE_MASTER_ONLY;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.FREE_IN_BYTES;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.FREE_PERCENT;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.FS;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.HEAP_MAX_IN_BYTES;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.HEAP_USED_IN_BYTES;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.INDICES;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.IP;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.JVM;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.MEM;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.NODE;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.NODES;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.OS;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.PARENT_TASK_ID;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.REBALANCE;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.RUNNING_TIME;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.SHARDS;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.START_TIME;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.STATUS;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.TASK_ID;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.TOTAL;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.TOTAL_IN_BYTES;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.TYPE;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.USED_IN_BYTES;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.USED_PERCENT;
-
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -77,21 +33,24 @@ import com.didiglobal.logi.elasticsearch.client.response.cluster.nodes.ClusterNo
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodes.ESClusterNodesResponse;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodessetting.ClusterNodeSettings;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodessetting.ESClusterNodesSettingResponse;
+import com.didiglobal.logi.elasticsearch.client.response.cluster.nodesstats.ClusterNodeStats;
+import com.didiglobal.logi.elasticsearch.client.response.cluster.nodesstats.ESClusterNodesStatsResponse;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.updatesetting.ESClusterUpdateSettingsResponse;
 import com.didiglobal.logi.elasticsearch.client.response.indices.getalias.ESIndicesGetAliasResponse;
 import com.didiglobal.logi.elasticsearch.client.utils.JsonUtils;
 import com.google.common.collect.Lists;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.common.unit.ByteSizeValue;
 import org.elasticsearch.rest.RestStatus;
 import org.springframework.stereotype.Repository;
+
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterQuickCommandMethodsEnum.*;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.*;
 
 /**
  * @author d06679
@@ -337,11 +296,13 @@ public class ESClusterDAO extends BaseESDAO {
 
     public Map<String, ClusterNodeSettings> getPartOfSettingsByCluster(String cluster, Integer tryTimes) {
         ESClusterNodesSettingResponse response = null;
+
         try {
             ESClient client = esOpClient.getESClient(cluster);
             if (null == client) {
                 return null;
             }
+
             do {
                 response = client.admin().cluster().prepareNodesSetting().execute().actionGet(ES_OPERATE_TIMEOUT,
                     TimeUnit.SECONDS);
@@ -394,7 +355,7 @@ public class ESClusterDAO extends BaseESDAO {
             DirectRequest directRequest = new DirectRequest("GET", "");
 
             do {
-                directResponse = client.direct(directRequest).actionGet(30, TimeUnit.SECONDS);
+                directResponse = client.direct(directRequest).actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
             } while (tryTimes-- > 0 && null == directResponse);
         } catch (Exception e) {
             LOGGER.warn("class=ESClusterDAO||method=getESVersionByCluster||cluster={}||mg=get es segments fail",
@@ -425,7 +386,7 @@ public class ESClusterDAO extends BaseESDAO {
         }
         try {
             DirectRequest directRequest = new DirectRequest("GET", "_cat/nodes?v&h=sc,ip&format=json");
-            DirectResponse directResponse = client.direct(directRequest).actionGet(30, TimeUnit.SECONDS);
+            DirectResponse directResponse = client.direct(directRequest).actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
             if (directResponse.getRestStatus() == RestStatus.OK
                 && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
                 ecSegmentOnIps = JSONArray.parseArray(directResponse.getResponseContent(), ECSegmentOnIp.class);
@@ -449,10 +410,28 @@ public class ESClusterDAO extends BaseESDAO {
 
         try {
             DirectRequest directRequest = new DirectRequest("GET", "_cluster/stats");
-            DirectResponse directResponse = esClient.direct(directRequest).actionGet(30, TimeUnit.SECONDS);
+            DirectResponse directResponse = esClient.direct(directRequest).actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+
+            //获取
+            DirectRequest directHealthRequest = new DirectRequest("GET", "_cat/health?format=json");
+            DirectResponse directHealthResponse = esClient.direct(directHealthRequest).actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
 
             if (directResponse.getRestStatus() == RestStatus.OK
                 && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
+
+                if (directHealthResponse.getRestStatus() == RestStatus.OK
+                        && StringUtils.isNoneBlank(directHealthResponse.getResponseContent())) {
+
+                    JSONArray jsonArray = JSON.parseArray(directHealthResponse.getResponseContent());
+                    jsonArray.stream()
+                            .filter(Objects::nonNull)
+                            .filter(j -> j instanceof JSONObject)
+                            .map(j -> (JSONObject) j)
+                            .map(jsonObject -> Long.parseLong(jsonObject.getString(SHARDS)) +
+                                    Long.parseLong(jsonObject.getString(UNASSIGN)))
+                            .findFirst()
+                            .ifPresent(responses::setTotalShard);
+                }
 
                 JSONObject jsonObject = JSON.parseObject(directResponse.getResponseContent());
                 responses.setStatus(jsonObject.getObject(STATUS, String.class));
@@ -460,8 +439,6 @@ public class ESClusterDAO extends BaseESDAO {
                 JSONObject indicesObj = jsonObject.getJSONObject(INDICES);
                 responses.setIndexCount(indicesObj.getLongValue(COUNT));
 
-                JSONObject shardsObj = indicesObj.getJSONObject(SHARDS);
-                responses.setTotalShard(shardsObj.getLongValue(TOTAL));
 
                 JSONObject docsObj = indicesObj.getJSONObject(DOCS);
                 responses.setDocsCount(docsObj.getLongValue(COUNT));
@@ -507,7 +484,7 @@ public class ESClusterDAO extends BaseESDAO {
 
         try {
             DirectRequest taskStatsRequest = new DirectRequest("GET", "_cat/tasks?v&detailed&format=json");
-            DirectResponse directResponse = esClient.direct(taskStatsRequest).actionGet(30, TimeUnit.SECONDS);
+            DirectResponse directResponse = esClient.direct(taskStatsRequest).actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
             if (directResponse.getRestStatus() == RestStatus.OK
                 && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
                 JSONArray jsonArray = JSON.parseArray(directResponse.getResponseContent());
@@ -662,7 +639,7 @@ public class ESClusterDAO extends BaseESDAO {
         }
         try {
             DirectRequest directRequest = new DirectRequest(PENDING_TASK.getMethod(), PENDING_TASK.getUri());
-            DirectResponse directResponse = client.direct(directRequest).actionGet(30, TimeUnit.SECONDS);
+            DirectResponse directResponse = client.direct(directRequest).actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
             if (directResponse.getRestStatus() == RestStatus.OK
                 && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
                 ecSegmentsOnIps = directResponse.getResponseContent();
@@ -685,7 +662,7 @@ public class ESClusterDAO extends BaseESDAO {
         try {
             DirectRequest directRequest = new DirectRequest(TASK_MISSION_ANALYSIS.getMethod(),
                 TASK_MISSION_ANALYSIS.getUri());
-            DirectResponse directResponse = client.direct(directRequest).actionGet(30, TimeUnit.SECONDS);
+            DirectResponse directResponse = client.direct(directRequest).actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
             if (directResponse.getRestStatus() == RestStatus.OK
                 && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
                 result = directResponse.getResponseContent();
@@ -706,7 +683,7 @@ public class ESClusterDAO extends BaseESDAO {
         }
         try {
             DirectRequest directRequest = new DirectRequest(HOT_THREAD.getMethod(), HOT_THREAD.getUri());
-            DirectResponse directResponse = client.direct(directRequest).actionGet(30, TimeUnit.SECONDS);
+            DirectResponse directResponse = client.direct(directRequest).actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
             if (directResponse.getRestStatus() == RestStatus.OK
                 && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
                 result = directResponse.getResponseContent();
@@ -729,7 +706,7 @@ public class ESClusterDAO extends BaseESDAO {
         try {
             DirectRequest directRequest = new DirectRequest(CLEAR_FIELDDATA_MEMORY.getMethod(),
                 CLEAR_FIELDDATA_MEMORY.getUri());
-            DirectResponse directResponse = client.direct(directRequest).actionGet(30, TimeUnit.SECONDS);
+            DirectResponse directResponse = client.direct(directRequest).actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
             if (directResponse.getRestStatus() == RestStatus.OK
                 && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
                 result = directResponse.getResponseContent();
@@ -754,7 +731,7 @@ public class ESClusterDAO extends BaseESDAO {
         try {
             DirectRequest directRequest = new DirectRequest(ABNORMAL_SHARD_RETRY.getMethod(),
                 ABNORMAL_SHARD_RETRY.getUri());
-            DirectResponse directResponse = client.direct(directRequest).actionGet(30, TimeUnit.SECONDS);
+            DirectResponse directResponse = client.direct(directRequest).actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
             if (directResponse.getRestStatus() == RestStatus.OK
                 && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
                 result = directResponse.getResponseContent();
@@ -767,4 +744,21 @@ public class ESClusterDAO extends BaseESDAO {
         return result;
     }
 
+    /**
+     * 这里获取所有节点的tcp地址，暂时不做角色区分
+     * @param cluster
+     * @return
+     */
+    public List<String> getNodeTcpAddress(String cluster) {
+        ESClient client = esOpClient.getESClient(cluster);
+        if (Objects.isNull(client)) {
+            LOGGER.error(
+                    "class=ESClusterDAO||method=abnormalShardAllocationRetry||clusterName={}||errMsg=esClient is null",
+                    cluster);
+            return new ArrayList<>();
+        }
+        ESClusterNodesStatsResponse nodesStatsResponse = client.admin().cluster().prepareNodeStats().execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+        Map<String, ClusterNodeStats> nodes = nodesStatsResponse.getNodes();
+        return nodes.values().stream().map(ClusterNodeStats::getTransportAddress).distinct().collect(Collectors.toList());
+    }
 }

@@ -1,19 +1,18 @@
 package com.didichuxing.datachannel.arius.admin.biz.workorder;
 
-import java.util.List;
-
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.workorder.WorkOrderDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.workorder.WorkOrderProcessDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.OrderTypeVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.AriusWorkOrderInfoSubmittedVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.WorkOrderVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.detail.OrderDetailBaseVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.OrderInfoDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.AriusWorkOrderInfoSubmittedVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.OrderTypeVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.WorkOrderVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.order.detail.OrderDetailBaseVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.exception.OperateForbiddenException;
+import java.util.List;
 
 /**
  * @author d06679
@@ -35,12 +34,14 @@ public interface WorkOrderManager {
      */
     Result<AriusWorkOrderInfoSubmittedVO> submit(WorkOrderDTO workOrderDTO) throws AdminOperateException;
 
-    /**过程
-     * 工单处理流程
-     @param workOrderProcessDTO 工作订单流程dto
-      * @return {@link Result}<{@link Void}>
+    /**
+     * 过程 工单处理流程
+     *
+     * @param workOrderProcessDTO 工作订单流程dto
+     * @param projectId
+     * @return {@link Result}<{@link Void}>
      */
-    Result<Void> process(WorkOrderProcessDTO workOrderProcessDTO) throws NotFindSubclassException;
+    Result<Void> process(WorkOrderProcessDTO workOrderProcessDTO, Integer projectId) throws NotFindSubclassException;
 
     /**新增
      * 插入一条工单
@@ -87,12 +88,11 @@ public interface WorkOrderManager {
     /**
      * 获取订单应用列表 获取工单申请列表
      *
-     * @param applicant 申请人
      * @param status    状态
      * @param projectId
      * @return {@link Result}<{@link List}<{@link WorkOrderVO}>>
      */
-    Result<List<WorkOrderVO>> getOrderApplyList(String applicant, Integer status, Integer projectId);
+    Result<List<WorkOrderVO>> getOrderApplyList(Integer status, Integer projectId);
 
     Result<List<WorkOrderVO>> getOrderApplyList(String applicant, Integer status);
 
@@ -130,4 +130,9 @@ public interface WorkOrderManager {
       * @return {@link Result}<{@link List}<{@link WorkOrderVO}>>
      */
     Result<List<WorkOrderVO>> getOrderApprovalListByStatus(Integer status) throws OperateForbiddenException;
+    
+    Result<AriusWorkOrderInfoSubmittedVO> submitByJoinLogicCluster(WorkOrderDTO workOrderDTO)
+            throws AdminOperateException;
+    
+    Result<Void> processByJoinLogicCluster(WorkOrderProcessDTO processDTO, Integer projectId) throws NotFindSubclassException;
 }

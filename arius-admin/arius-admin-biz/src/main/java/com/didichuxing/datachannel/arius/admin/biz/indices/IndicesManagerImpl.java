@@ -1,18 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.biz.indices;
 
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.PRIMARY;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.function.BiFunction;
-import java.util.stream.Collectors;
-
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
@@ -34,7 +21,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordina
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord.template.TemplateMappingOperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord.template.TemplateSettingOperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexCatCellVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexMappingVO;
@@ -45,17 +32,15 @@ import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.index.IndexBlockEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.event.index.RefreshCatIndexInfoEvent;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.mapping.AriusIndexTemplateSetting;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusIndexMappingConfigUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusOptional;
-import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.IndexSettingsUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.SizeUtil;
+import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
+import com.didichuxing.datachannel.arius.admin.common.tuple.Tuples;
+import com.didichuxing.datachannel.arius.admin.common.util.*;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
+import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
@@ -76,14 +61,17 @@ import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.function.BiFunction;
-import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.BiFunction;
+import java.util.stream.Collectors;
+
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.PRIMARY;
 
 /**
  * @author lyn
@@ -131,7 +119,14 @@ public class IndicesManagerImpl implements IndicesManager {
     @Autowired
     private ESTemplateService        esTemplateService;
 
-    private static final String     DEFAULT_SORT_TERM = "timestamp";
+    private static final    String                   DEFAULT_SORT_TERM  = "timestamp";
+    private static final FutureUtil<Result<Void>> FUTURE_UTIL_RESULT = FutureUtil.init("IndicesManagerImpl", 10, 10,
+            100);
+        private static final FutureUtil<List</*indexName*/String>> FUTURE_UTIL_RESULT_INDEX_NAME = FutureUtil.init(
+                "IndicesManagerImpl",
+                10,
+                10,
+            100);
 
     @Override
     public PaginationResult<IndexCatCellVO> pageGetIndex(IndexQueryDTO condition,
@@ -225,6 +220,14 @@ public class IndicesManagerImpl implements IndicesManager {
         });
     }
 
+    /**
+     * 批处理操作指数
+     *
+     * @param params    参数个数 {@link IndexCatCellDTO#getCluster()}这里使用此参数作为集群名称；如果是超级项目，就是物理集群，反之为逻辑集群
+     * @param projectId 项目id
+     * @param function  函数
+     * @return {@code Result<Boolean>}
+     */
     @Override
     public <T, U, R> Result<Boolean> batchOperateIndex(List<IndexCatCellDTO> params, Integer projectId,
                                                        BiFunction<String, List<String>, Result<Void>> function) {
@@ -247,10 +250,11 @@ public class IndicesManagerImpl implements IndicesManager {
         for (Map.Entry<String, List<String>> entry : cluster2IndexNameListMap.entrySet()) {
             String cluster = entry.getKey();
             List<String> indexNameList = entry.getValue();
-            Result<Void> r = function.apply(cluster, indexNameList);
-            if (r.failed()) {
-                return Result.buildFrom(r);
-            }
+            FUTURE_UTIL_RESULT.callableTask(() -> function.apply(cluster, indexNameList));
+        }
+        Optional<Result<Void>> voidResult = FUTURE_UTIL_RESULT.waitResult().stream().filter(Result::failed).findAny();
+        if (voidResult.isPresent()) {
+            return Result.buildFrom(voidResult.get());
         }
         sleep(1000L);
         return Result.buildSucc(true);
@@ -431,7 +435,7 @@ public class IndicesManagerImpl implements IndicesManager {
     }
 
     @Override
-    public Result<Void> editMapping(IndexCatCellWithConfigDTO param, Integer projectId, String operate) {
+    public Result<Void> editMapping(IndexCatCellWithConfigDTO param, Integer projectId, String operate) throws ESOperateException {
         Result<String> getClusterRet = getClusterPhyByClusterNameAndProjectId(param.getCluster(), projectId);
         if (getClusterRet.failed()) {
             return Result.buildFrom(getClusterRet);
@@ -459,23 +463,30 @@ public class IndicesManagerImpl implements IndicesManager {
         if (mappingRet.failed()) {
             return Result.buildFail("mapping 转换异常");
         }
-        final boolean syncUpdateIndexMapping = esIndexService.syncUpdateIndexMapping(phyCluster, indexName,
-            mappingRet.getData());
-        if (syncUpdateIndexMapping) {
 
-            final Result<IndexMappingVO> afterMapping = getMapping(param.getCluster(), indexName, projectId);
+        try {
+            final boolean syncUpdateIndexMapping = esIndexService.syncUpdateIndexMapping(phyCluster, indexName,
+                mappingRet.getData());
+            if (syncUpdateIndexMapping) {
 
-            operateRecordService.save(new OperateRecord.Builder()
-                .project(projectService.getProjectBriefByProjectId(projectId)).userOperation(operate)
-                .operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_EDIT_MAPPING)
-                .content(new TemplateMappingOperateRecord(beforeMapping.getData(), afterMapping.getData()).toString())
+                final Result<IndexMappingVO> afterMapping = getMapping(param.getCluster(), indexName, projectId);
 
-                .bizId(indexName)
+                operateRecordService.save(new Builder()
+                    .project(projectService.getProjectBriefByProjectId(projectId)).userOperation(operate)
+                    .operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_EDIT_MAPPING)
+                    .content(new TemplateMappingOperateRecord(beforeMapping.getData(), afterMapping.getData()).toString())
 
-                .buildDefaultManualTrigger());
+                    .bizId(indexName)
+
+                    .buildDefaultManualTrigger());
+            }
+
+        } catch (ESOperateException e) {
+            LOGGER.error("class=IndicesManagerImpl||method=editMapping||errMsg={}", e.getMessage(), e);
+            return Result.buildFail(e.getMessage() + ":" + e.getCause());
         }
 
-        return Result.build(syncUpdateIndexMapping);
+        return Result.buildSucc();
     }
 
     @Override
@@ -668,6 +679,7 @@ public class IndicesManagerImpl implements IndicesManager {
             }
             //操作记录
         operateRecordService.save(new OperateRecord.Builder()
+                        .userOperation(operator)
                         .operationTypeEnum(OperateTypeEnum.INDEXING_SERVICE_RUN)
                         .project(projectService.getProjectBriefByProjectId(projectId))
                         .content(String.format("【%s】执行rollover",indexCatCellDTO.getIndex()))
@@ -686,6 +698,7 @@ public class IndicesManagerImpl implements IndicesManager {
             //操作记录
             operateRecordService.save(
                     new OperateRecord.Builder().operationTypeEnum(OperateTypeEnum.INDEXING_SERVICE_RUN)
+                            .userOperation(operator)
                             .project(projectService.getProjectBriefByProjectId(projectId))
                             .content(String.format("【%s】执行shrink", param.getIndex())).bizId(param.getIndex())
                             .buildDefaultManualTrigger());
@@ -701,6 +714,7 @@ public class IndicesManagerImpl implements IndicesManager {
         if (result.success()){
               //操作记录
         operateRecordService.save(new OperateRecord.Builder()
+                        .userOperation(operator)
                         .operationTypeEnum(OperateTypeEnum.INDEXING_SERVICE_RUN)
                         .project(projectService.getProjectBriefByProjectId(projectId))
                         .content(String.format("【%s】执行split",param.getIndex()))
@@ -716,7 +730,7 @@ public class IndicesManagerImpl implements IndicesManager {
         if (null == param.getIndices()) {
             return Result.buildFail("索引为空");
         }
-
+        List<TupleTwo</*cluster*/String,/*index*/String>> clusterIndexTuple=Lists.newArrayList();
         for (IndexCatCellDTO indexCatCellDTO : param.getIndices()) {
             Result<Void> forceMergeResult = esIndexService.forceMerge(indexCatCellDTO.getCluster(),
                 indexCatCellDTO.getIndex(), param.getMaxNumSegments(), param.getOnlyExpungeDeletes());
@@ -726,12 +740,15 @@ public class IndicesManagerImpl implements IndicesManager {
                  //操作记录
         operateRecordService.save(new OperateRecord.Builder()
                         .operationTypeEnum(OperateTypeEnum.INDEXING_SERVICE_RUN)
+                        .userOperation(operator)
                         .project(projectService.getProjectBriefByProjectId(projectId))
                         .content(String.format("【%s】执行forceMerge",indexCatCellDTO.getIndex()))
                         .bizId(indexCatCellDTO.getIndex())
                 .buildDefaultManualTrigger());
+            clusterIndexTuple.add(Tuples.of(indexCatCellDTO.getCluster(), indexCatCellDTO.getIndex()));
         }
-
+        //需要发布事件进行arius_cat_index_info 采集更新信息，尽可能保证数据的时效性
+        SpringTool.publish(new RefreshCatIndexInfoEvent(this, clusterIndexTuple));
         return Result.buildSucc();
     }
 
@@ -746,25 +763,9 @@ public class IndicesManagerImpl implements IndicesManager {
 
     @Override
     public Result<List<String>> getClusterLogicIndexName(String clusterLogicName, Integer projectId) {
-        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByName(clusterLogicName);
-        if (clusterLogic == null) {
-            return Result.buildFail();
-        }
-        ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(clusterLogic.getId());
-        if (clusterRegion == null) {
-            return Result.buildFail();
-        }
-        Result<List<IndexTemplate>> listResult = indexTemplateService
-            .listByRegionId(Math.toIntExact(clusterRegion.getId()));
-        List<IndexTemplate> indexTemplates = listResult.getData();
-
-        List<CatIndexResult> catIndexResultList = new ArrayList<>();
-        indexTemplates.forEach(indexTemplate -> {
-            catIndexResultList.addAll(esIndexService.syncCatIndexByExpression(clusterRegion.getPhyClusterName(),
-                indexTemplate.getExpression()));
-        });
-        List<String> indexNames = catIndexResultList.stream().map(CatIndexResult::getIndex)
-            .collect(Collectors.toList());
+        List<IndexCatCellDTO> indexCatCellDTOList = esIndexCatService.syncGetByCluster(clusterLogicName, projectId);
+        List<String> indexNames = indexCatCellDTOList.stream().map(IndexCatCellDTO::getIndex)
+                .collect(Collectors.toList());
         return Result.buildSucc(indexNames);
     }
 
@@ -781,6 +782,15 @@ public class IndicesManagerImpl implements IndicesManager {
         if (!clusterPhyService.isClusterExists(phyClusterName)) {
             return Result.buildParamIllegal(String.format("物理集群[%s]不存在", phyClusterName));
         }
+
+        // 判断索引名称是否和集群模版名称前缀匹配
+        IndexCatCellWithConfigDTO indexWithConfigDTO = new IndexCatCellWithConfigDTO();
+        indexWithConfigDTO.setIndex(indexName);
+        Result<Void> checkValidRet = checkValid(indexWithConfigDTO, phyClusterName);
+        if (checkValidRet.failed()) {
+            return Result.buildFrom(checkValidRet);
+        }
+
         return Result.buildSucc(esIndexService.syncIsIndexExist(phyClusterName, indexName));
     }
 
@@ -878,7 +888,7 @@ public class IndicesManagerImpl implements IndicesManager {
         if (AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
             phyClusterName = cluster;
         } else {
-            ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByName(cluster);
+            ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByNameAndProjectId(cluster,projectId );
             if (null == clusterLogic) {
                 return Result.buildParamIllegal(String.format("逻辑集群[%s]不存在", cluster));
             }
@@ -893,7 +903,7 @@ public class IndicesManagerImpl implements IndicesManager {
 
     private Result<Void> initIndexCreateDTO(IndexCatCellWithConfigDTO indexCreateDTO, Integer projectId) {
         if (!AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
-            ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByName(indexCreateDTO.getCluster());
+            ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByNameAndProjectId(indexCreateDTO.getCluster(), projectId);
             if (null == clusterLogic) {
                 return Result.buildParamIllegal(String.format("逻辑集群[%s]不存在", indexCreateDTO.getCluster()));
             }
@@ -921,9 +931,9 @@ public class IndicesManagerImpl implements IndicesManager {
         List<String> existKeyList = indexTemplatePhyList.stream().map(r -> r.getCluster() + "@" + r.getName())
                 .distinct().collect(Collectors.toList());
         for (String existKey : existKeyList) {
-            if (existKey.startsWith(key)) {
-                return Result.buildFail(String.format("创建的索引名称[%s]不允许和该集群模板名称[%s]存在前缀的匹配, 请修改索引名称", index,
-                        existKey.split("@")[1]));
+            if (existKey.startsWith(key) || key.startsWith(existKey)) {
+                return Result.buildFail(String.format("创建的索引名称[%s]不允许和该集群模板名称[%s]存在相互前缀的匹配, 请修改索引名称",
+                        index, existKey.split("@")[1]));
             }
         }
         return Result.buildSucc();

@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandler;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.LogicClusterAuthContent;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.LogicClusterAuthOrderDetail;
@@ -47,8 +46,7 @@ public class LogicClusterAuthHandler extends BaseWorkOrderHandler {
             return Result.buildParamIllegal("申请的权限为空");
         }
 
-        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(content.getLogicClusterId());
-        if (clusterLogic == null) {
+        if (!clusterLogicService.existClusterLogicById(content.getLogicClusterId())) {
             return Result.buildParamIllegal("集群不存在");
         }
 
@@ -83,8 +81,7 @@ public class LogicClusterAuthHandler extends BaseWorkOrderHandler {
 
         
         return  projectClusterLogicAuthService.ensureSetLogicClusterAuth(workOrder.getSubmitorProjectId(),
-            content.getLogicClusterId(), ProjectClusterLogicAuthEnum.valueOf(content.getAuthCode()),
-            workOrder.getSubmitor(), workOrder.getSubmitor());
+            content.getLogicClusterId(), ProjectClusterLogicAuthEnum.valueOf(content.getAuthCode()), workOrder.getSubmitor());
     }
 
     @Override

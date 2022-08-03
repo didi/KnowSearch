@@ -206,13 +206,12 @@ public interface IndexTemplateService {
      * @param logicId         模板id
      * @param sourceProjectId 原项目
      * @param tgtProjectId    projectId
-     * @param tgtResponsible  责任人
      * @param operator        操作人
      * @return Result
      * @throws AdminOperateException
      */
     Result<Void> turnOverLogicTemplate(Integer logicId, Integer sourceProjectId, Integer tgtProjectId,
-                                       String tgtResponsible, String operator) throws AdminOperateException;
+                                        String operator) throws AdminOperateException;
 
     /**
      * 获取每个模板的部署个数
@@ -270,6 +269,7 @@ public interface IndexTemplateService {
      * @param logicTemplateId 逻辑模板id
      */
     IndexTemplateLogicWithClusterAndMasterTemplate getLogicTemplateWithClusterAndMasterTemplate(Integer logicTemplateId);
+    String getMaterClusterPhyByLogicTemplateId(Integer logicTemplateId);
 
     /**
      * 获取指定逻辑模板列表信息（带有逻辑集群和物理模板）
@@ -403,5 +403,7 @@ public interface IndexTemplateService {
     int batchChangeHotDay(Integer days, List<Integer> templateIdList);
 
     String getNameByTemplateLogicId(Integer logicTemplateId);
+    
+    List<Integer> getLogicTemplateIdListByProjectId(Integer projectId);
 
 }

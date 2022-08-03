@@ -1,6 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.base;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.SupportSrv;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
@@ -15,10 +16,10 @@ public interface BaseTemplateSrv {
 
     /**
      * 判断指定逻辑模板是否开启了当前模板服务
-     * @param templateId 逻辑模板id
+     * @param logicTemplateId 逻辑模板id
      * @return 校验结果
      */
-    boolean isTemplateSrvOpen(Integer templateId);
+    boolean isTemplateSrvOpen(Integer logicTemplateId);
 
     /**
      * 获取当前模板服务的类型
@@ -73,7 +74,6 @@ public interface BaseTemplateSrv {
 
 
 
-
-
-    SupportSrv getLogicTemplateSupportDCDRAndPipelineByLogicId(Integer logicTemplateId);
+    
+    SupportSrv getSupportDCDRAndPipelineByLogicTemplate(IndexTemplate template);
 }

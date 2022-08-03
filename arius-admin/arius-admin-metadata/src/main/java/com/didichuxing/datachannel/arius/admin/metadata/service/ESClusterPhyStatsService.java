@@ -4,15 +4,18 @@ import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.percentiles.BasePercentileMetrics;
 import com.didichuxing.datachannel.arius.admin.common.constant.PercentilesEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
+import com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESClusterDAO;
+import com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESClusterNodeDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.gateway.GatewayNodeMetricsDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats.AriusStatsClusterInfoESDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats.AriusStatsNodeInfoESDAO;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 /**
  * Created by linyunan on 2021-08-05
@@ -25,6 +28,11 @@ public class ESClusterPhyStatsService {
 
     @Autowired
     private AriusStatsNodeInfoESDAO       ariusStatsNodeInfoESDAO;
+
+    @Autowired
+    private ESClusterDAO                  esClusterDAO;
+    @Autowired
+    private ESClusterNodeDAO              esClusterNodeDAO;
     @Autowired
     private GatewayNodeMetricsDAO         gatewayNodeMetricsDAO;
 
@@ -182,5 +190,33 @@ public class ESClusterPhyStatsService {
      */
     public Long getHttpConnectionTotal(String cluster) {
         return ariusStatsNodeInfoESDAO.getHttpConnectionTotal(cluster);
+    }
+
+    /**
+     * _cluster/stats 耗时
+     */
+    public Long getClusterStatusElapsedTime(String cluster) {
+        long startTime = System.currentTimeMillis();
+        esClusterDAO.getClusterStats(cluster);
+        long endTime = System.currentTimeMillis();
+        return endTime-startTime;
+    }
+
+    /**
+     * _cluster/stats 耗时
+     */
+    public Long getNodeStatusElapsedTime(String cluster) {
+        long startTime = System.currentTimeMillis();
+        esClusterNodeDAO.getNodeState(cluster);
+        long endTime = System.currentTimeMillis();
+        return endTime-startTime;
+    }
+
+    /**
+     * 获取集群采集的最近一个节点和当前时间的时间差
+     * @return
+     */
+    public Long getTimeDifferenceBetweenNearestPointAndNow(String cluster){
+        return ariusStatsClusterInfoEsDao.getTimeDifferenceBetweenNearestPointAndNow(cluster);
     }
 }

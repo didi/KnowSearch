@@ -1,0 +1,25 @@
+{
+  "query": {
+    "bool": {
+      "filter": [
+      {
+          "term": {
+            "deleteFlag": false
+          }
+        },
+          {
+          "term": {
+            "clusterLogic": "%s"
+          }
+        },
+        {
+          "term": {
+            "projectId": %d
+          }
+        }
+      ]
+    }
+  },
+   "_source": "index",
+   "size":%d
+}

@@ -18,9 +18,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTe
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
-
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * @description: 逻辑集群manager
@@ -133,7 +132,7 @@ public interface ClusterLogicManager {
      * @throws AdminOperateException
      */
     Result<Void> deleteLogicCluster(Long logicClusterId, String operator,
-                                    Integer projectId) throws AdminOperateException;
+                                    Integer projectId) ;
 
     /**
      *  修改逻辑集群信息
@@ -205,4 +204,6 @@ public interface ClusterLogicManager {
      * @return {@link Result}<{@link Boolean}>
      */
     Result<Boolean> isLogicClusterRegionIsNotEmpty(Long logicClusterId);
+    
+    Result<List<ClusterLogicVO>> getLogicClustersByLevel(Integer level);
 }

@@ -31,8 +31,4 @@ public class ProjectClusterPhyAuth extends BaseEntity {
      */
     private Integer type;
 
-    /**
-     * 责任人列表
-     */
-    private String  responsible;
 }

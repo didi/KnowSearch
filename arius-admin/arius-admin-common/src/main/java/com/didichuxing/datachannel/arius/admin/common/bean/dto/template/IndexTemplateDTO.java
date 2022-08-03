@@ -42,9 +42,7 @@ public class IndexTemplateDTO extends PageDTO {
     @ApiModelProperty("热数据保存天数, 单位天")
     private Integer                   hotTime;
 
-    @ApiModelProperty("责任人：后续再使用")
-    @Deprecated
-    private String                    responsible;
+   
 
     @ApiModelProperty("时间分区字段")
     private String                    dateField;

@@ -74,12 +74,7 @@ public interface ESUserDAO {
      */
     List<ESUserPO> listByProjectIds(@Param("projectIds") List<Integer> projectIds);
 
-    /**
-    * 根据责任人获取关联的app列表信息
-    * @param responsible    责任人
-    * @return               List<AppPO>
-    */
-    List<ESUserPO> listByResponsible(String responsible);
+
 
     Integer maxById();
 

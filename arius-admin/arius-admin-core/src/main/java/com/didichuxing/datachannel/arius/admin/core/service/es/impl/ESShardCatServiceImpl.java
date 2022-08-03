@@ -6,10 +6,11 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcomma
 import com.didichuxing.datachannel.arius.admin.common.util.SizeUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESShardCatService;
 import com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESShardDAO;
-import java.util.ArrayList;
-import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 详细介绍类情况.
@@ -25,7 +26,7 @@ public class ESShardCatServiceImpl implements ESShardCatService {
     private ESShardDAO esShardDAO;
 
     @Override
-    public List<ShardCatCellPO> shardDistribution(String cluster) {
+    public List<ShardCatCellPO> syncShardDistribution(String cluster) {
         List<ShardCatCellPO> shardCatCellPOS = esShardDAO.catShard(cluster);
         shardCatCellPOS.forEach(shardCatCellPO -> {
             shardCatCellPO.setClusterPhy(cluster);

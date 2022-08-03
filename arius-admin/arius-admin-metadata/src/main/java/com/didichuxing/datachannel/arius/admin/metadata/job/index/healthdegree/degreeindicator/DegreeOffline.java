@@ -1,11 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.metadata.job.index.healthdegree.degreeindicator;
 
-import com.didichuxing.datachannel.arius.admin.common.constant.IndicatorsType;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.BaseDegree;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.OffLine;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithClusterAndMasterTemplate;
+import com.didichuxing.datachannel.arius.admin.common.constant.IndicatorsType;
 import com.didichuxing.datachannel.arius.admin.metadata.job.index.healthdegree.AbstractDegreeIndicator;
 import com.didichuxing.datachannel.arius.admin.metadata.utils.ReadExprValueUtil;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithClusterAndMasterTemplate;
 
 @Deprecated
 public class DegreeOffline extends AbstractDegreeIndicator {
@@ -19,7 +19,6 @@ public class DegreeOffline extends AbstractDegreeIndicator {
         long templateAccessCount = degreeParam.getTemplateAccessCount();
 
         offLinePO.setCluster(indexTemplate.getMasterTemplate().getCluster());
-        offLinePO.setDepartment(indexTemplate.getLibraDepartment());
         offLinePO.setTemplate(indexTemplate.getName());
         offLinePO.setTemplateId(indexTemplate.getId());
         offLinePO.setZeroCount(0 == degreeParam.getTemplateDocNu());

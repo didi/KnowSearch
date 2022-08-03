@@ -58,21 +58,9 @@ public class IndexTemplate extends BaseEntity implements Comparable<IndexTemplat
      */
     private Integer replicaTime;
 
-    /**
-     * 成本部门
-     */
-    private String  libraDepartmentId;
 
-    /**
-     * 成本部门
-     */
-    private String  libraDepartment;
 
-    /**
-     * 责任人
-     */
-    @Deprecated
-    private String  responsible;
+
 
     /**
      * 时间字段

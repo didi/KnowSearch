@@ -549,14 +549,12 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
      * @param logicId         模板id
      * @param sourceProjectId
      * @param tgtProjectId    projectId
-     * @param tgtResponsible  责任人
      * @param operator        操作人
      * @return Result
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result<Void> turnOverLogicTemplate(Integer logicId, Integer sourceProjectId, Integer tgtProjectId,
-                                              String tgtResponsible, String operator) throws AdminOperateException {
+    public Result<Void> turnOverLogicTemplate(Integer logicId, Integer sourceProjectId, Integer tgtProjectId, String operator) throws AdminOperateException {
 
         IndexTemplate templateLogic = getLogicTemplateById(logicId);
         if (templateLogic == null) {
@@ -566,7 +564,6 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
         IndexTemplateDTO logicDTO = new IndexTemplateDTO();
         logicDTO.setId(logicId);
         logicDTO.setProjectId(tgtProjectId);
-        logicDTO.setResponsible(tgtResponsible);
 
         return editTemplate(logicDTO, operator, sourceProjectId);
 
@@ -717,7 +714,22 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
     public IndexTemplateLogicWithClusterAndMasterTemplate getLogicTemplateWithClusterAndMasterTemplate(Integer logicTemplateId) {
         return convert(getLogicTemplateWithCluster(logicTemplateId));
     }
-
+    
+    /**
+     * @param logicTemplateId
+     * @return
+     */
+    @Override
+    public String getMaterClusterPhyByLogicTemplateId(Integer logicTemplateId) {
+        IndexTemplatePhy IndexTemplatePhy = indexTemplatePhyService.getTemplateByLogicIdAndRole(logicTemplateId,
+                TemplateDeployRoleEnum.MASTER.getCode());
+        if (IndexTemplatePhy==null){
+            return null;
+        }
+     
+        return IndexTemplatePhy.getCluster();
+    }
+    
     @Override
     public List<IndexTemplateLogicWithClusterAndMasterTemplate> listLogicTemplatesWithClusterAndMasterTemplate(Set<Integer> logicTemplateIds) {
 
@@ -778,7 +790,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
         if (physicalTemplates == null) {
             return null;
         }
-        return convert2WithCluster(Arrays.asList(physicalTemplates)).stream().filter(Objects::nonNull).findFirst()
+        return convert2WithCluster(Arrays.asList(physicalTemplates)).stream().distinct().filter(Objects::nonNull).findFirst()
             .orElse(null);
     }
 
@@ -986,7 +998,12 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
             List<String> logicClusterIdStrList = ListUtils.string2StrList(logicClusterIds);
             List<Long> logicClusterIdList = logicClusterIdStrList.stream().map(Long::parseLong).distinct()
                 .collect(Collectors.toList());
-            List<ClusterLogic> clusterLogicList = clusterLogicService.getClusterLogicListByIds(logicClusterIdList);
+            List<ClusterLogic> clusterLogicList = clusterLogicService.getClusterLogicListByIds(logicClusterIdList)
+                    .stream()
+                    .filter(clusterLogic -> Objects.equals(clusterLogic.getProjectId(),
+                            indexTemplateWithPhyTemplate.getProjectId()))
+                    .collect(Collectors.toList());
+                    
 
             indexTemplateWithCluster.setLogicClusters(clusterLogicList);
         }
@@ -1048,7 +1065,16 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
     public String getNameByTemplateLogicId(Integer logicTemplateId) {
         return indexTemplateDAO.getNameByTemplateLogicId(logicTemplateId);
     }
-
+    
+    /**
+     * @param projectId
+     * @return
+     */
+    @Override
+    public List<Integer> getLogicTemplateIdListByProjectId(Integer projectId) {
+        return indexTemplateDAO.getLogicTemplateIdListByProjectId(projectId);
+    }
+    
     /**************************************** private method ****************************************************/
     private List<IndexTemplateWithPhyTemplates> batchConvertLogicTemplateCombinePhysicalWithFunction(List<IndexTemplatePO> logicTemplates,
                                                                                          Supplier<List<IndexTemplatePhy>> supplier){
@@ -1235,14 +1261,6 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
     private Result<Void> validateIndexTemplateLogicStep2(IndexTemplateDTO param, String dateFormatFinal,
                                                          String expressionFinal, String nameFinal,
                                                          String dateFieldFinal) {
-        List<String> responsibles = ListUtils.string2StrList(param.getResponsible());
-        //todo 后期变更
-        /**
-        for (String responsible : responsibles) {
-            if (AriusObjUtils.isNull(ariusUserInfoService.getByDomainAccount(responsible))) {
-                return Result.buildParamIllegal(String.format("责任人%s非法", responsible));
-            }
-        }**/
         if (expressionFinal != null && expressionFinal.endsWith("*") && AriusObjUtils.isNull(dateFormatFinal)) {
             return Result.buildParamIllegal("表达式*结尾,后缀格式必填");
         }
@@ -1363,7 +1381,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
         if (levelOfTemplateLower(param)) {
             return Result.buildParamIllegal("模板设置的服务等级低于所属逻辑集群的服务等级");
         }
-        if (AriusObjUtils.isNull(clusterLogicService.getClusterLogicById(param.getResourceId()))) {
+        if (!clusterLogicService.existClusterLogicById(param.getResourceId() )) {
             return Result.buildNotExist("逻辑集群不存在");
         }
 
@@ -1371,7 +1389,8 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
     }
 
     private boolean levelOfTemplateLower(IndexTemplateDTO param) {
-        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicById(param.getResourceId());
+        ClusterLogic clusterLogic =
+                clusterLogicService.getClusterLogicByIdThatNotContainsProjectId(param.getResourceId());
         return !AriusObjUtils.isNull(clusterLogic) && clusterLogic.getLevel() < param.getLevel();
     }
 
