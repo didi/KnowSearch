@@ -953,8 +953,12 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         long totalFsBytes = clusterStats.getTotalFs().getBytes();
         long usageFsBytes = clusterStats.getTotalFs().getBytes() - clusterStats.getFreeFs().getBytes();
 
-        double diskFreePercent = clusterStats.getFreeFs().getGbFrac() / clusterStats.getTotalFs().getGbFrac();
-        diskFreePercent = CommonUtils.formatDouble(1 - diskFreePercent, 5);
+        double diskFreePercent = 0d;
+        double clusterTotalFs = clusterStats.getTotalFs().getGbFrac();
+        if(clusterTotalFs > 0){
+            diskFreePercent = clusterStats.getFreeFs().getGbFrac() / clusterTotalFs;
+            diskFreePercent = CommonUtils.formatDouble(1 - diskFreePercent, 5);
+        }
 
         ClusterPhyDTO esClusterDTO = new ClusterPhyDTO();
         esClusterDTO.setId(clusterPhy.getId());

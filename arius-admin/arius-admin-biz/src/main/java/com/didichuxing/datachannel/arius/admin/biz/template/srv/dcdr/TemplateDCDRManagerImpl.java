@@ -1723,8 +1723,6 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
         //是否需要设置下一批DCDR模板切换任务的状态为running
         setNextBatchDCDRTaskDetailStateToRunning(dcdrTasksDetail);
 
-        taskForDCDRSwitch.setExpandData(ConvertUtil.obj2Json(dcdrTasksDetail));
-
         if (DCDRStatusEnum.SUCCESS.getCode().equals(dcdrTasksDetail.getState())) {
             taskForDCDRSwitch.setStatus(OpTaskStatusEnum.SUCCESS.getStatus());
             //成功删除DCDR链路
@@ -1740,6 +1738,8 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
         if (DCDRStatusEnum.RUNNING.getCode().equals(dcdrTasksDetail.getState())) {
             taskForDCDRSwitch.setStatus(OpTaskStatusEnum.RUNNING.getStatus());
         }
+
+        taskForDCDRSwitch.setExpandData(ConvertUtil.obj2Json(dcdrTasksDetail));
 
         // 解决分布式部署由于时序不一致带来更新不一致的问题
         Result<OpTask> workTaskResult = opTaskManager.getById(taskForDCDRSwitch.getId());

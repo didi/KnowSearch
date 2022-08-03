@@ -43,7 +43,7 @@ public class DeleteDirtyDCDRLinksRandomTask implements Job {
     public TaskResult execute(JobContext jobContext) throws Exception {
         LOGGER.info("class=DeleteDirtyDCDRLinksRandomTask||method=execute||msg=start");
 
-        //获取失败的dcdr主从切换任务
+        //获取成功的dcdr主从切换任务
         List<OpTask> successDcdrSwitchTaskList = opTaskManager
             .getSuccessTaskByType(OpTaskTypeEnum.TEMPLATE_DCDR.getType());
         if (CollectionUtils.isEmpty(successDcdrSwitchTaskList)) {
@@ -67,7 +67,7 @@ public class DeleteDirtyDCDRLinksRandomTask implements Job {
             for (DCDRSingleTemplateMasterSlaveSwitchDetail switchDetail : switchDetailList) {
                 //强切任务失败，删除脏链路
                 if (DCDRSwithTypeEnum.FORCE.getCode().equals(switchDetail.getSwitchType())
-                    && !switchDetail.getDeleteDcdrChannelFlag()) {
+                    && (switchDetail.getDeleteDcdrChannelFlag() == null || !switchDetail.getDeleteDcdrChannelFlag())) {
                     try {
                         Result<Void> deleteDcdrResult = templateDcdrManager.deleteDCDR(
                             switchDetail.getTemplateId().intValue(), AriusUser.SYSTEM.getDesc(),
