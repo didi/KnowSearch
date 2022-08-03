@@ -83,4 +83,6 @@ public interface ESIndexCatService {
                                              String clusterLogic);
     
     Map</*clusterPhy*/String,/*docCount*/Integer> syncGetByClusterPhyList(List<String> clusterPhyList);
+    
+    List<IndexCatCell> syncGetCatIndexInfoById(Map</* clusterPhy*/String,/*IndexName*/ String> clusterPhy2IndexNameMaps);
 }

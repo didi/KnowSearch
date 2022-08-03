@@ -197,5 +197,13 @@ public class ESIndexCatServiceImpl implements ESIndexCatService {
     public Map<String, Integer> syncGetByClusterPhyList(List<String> clusterPhyList) {
         return indexCatESDAO.syncGetByClusterPhyList(clusterPhyList);
     }
+    
+    /**
+     * @param clusterPhy2IndexNameMaps@return
+     */
+    @Override
+    public List<IndexCatCell> syncGetCatIndexInfoById(Map</* clusterPhy*/String,/*IndexName*/ String> clusterPhy2IndexNameMaps) {
+        return indexCatESDAO.syncGetCatIndexInfoById(clusterPhy2IndexNameMaps);
+    }
     /*************************************************private*******************************************************/
 }

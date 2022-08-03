@@ -14,6 +14,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.index.IndexStatus
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
 import com.didichuxing.datachannel.arius.admin.common.tuple.Tuples;
+import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.DSLSearchUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.IndexNameUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
@@ -45,6 +46,7 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import lombok.NoArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.elasticsearch.rest.RestStatus;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
@@ -285,7 +287,47 @@ public class IndexCatESDAO extends BaseESDAO {
         .distinct()
         .collect(Collectors.toList()), 3);
     }
-   
+    
+    public Map<String, Integer> syncGetByClusterPhyList(List<String> clusterPhyList) {
+        if (CollectionUtils.isEmpty(clusterPhyList)) {
+            return Collections.emptyMap();
+        }
+        String realIndexName = IndexNameUtils.genCurrentDailyIndexName(indexName);
+        final String clusterPhyStr = JSON.toJSONString(clusterPhyList);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_PLATFORM_CREATE_CAT_INDEX_GROUP_BY_CLUSTER,
+                clusterPhyStr, clusterPhyList.size(), clusterPhyStr);
+        return gatewayClient.performRequest(metadataClusterName, realIndexName, TYPE, dsl,
+                res -> Optional.ofNullable(res).map(ESQueryResponse::getAggs).map(ESAggrMap::getEsAggrMap)
+                        .map(i -> i.get(GROUP_BY_CLUSTER)).map(ESAggr::getBucketList).orElse(Collections.emptyList())
+                        .stream().map(ESBucket::getUnusedMap)
+                        .map(map -> Tuples.of(map.get(KEY).toString(), ((Integer) map.getOrDefault(DOC_COUNT, 0))))
+                        .collect(Collectors.toMap(TupleTwo::v1, TupleTwo::v2))
+                
+                , 3);
+    }
+    
+    public List<IndexCatCell> syncGetCatIndexInfoById(Map</* clusterPhy*/String,/*IndexName*/ String> clusterPhy2IndexNameMaps) {
+        if (MapUtils.isEmpty(clusterPhy2IndexNameMaps)) {
+           return Collections.emptyList();
+        }
+        IndexNameUtils.genCurrentDailyIndexName(indexName);
+        List<String> ids = Lists.newArrayList();
+        clusterPhy2IndexNameMaps.forEach(
+                (clusterPhy, indexNameValue) -> ids.add(String.format("%s@%s", clusterPhy, indexNameValue)));
+        
+        final String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_PLATFORM_CREATE_CAT_INDEX_BY_ID,
+                ids.size(), JSON.toJSONString(ids));
+        
+        final Tuple<Long, List<IndexCatCellPO>> tuple = performTryTimesMethods(
+                () -> gatewayClient.performRequestListAndGetTotalCount(metadataClusterName,
+                        IndexNameUtils.genCurrentDailyIndexName(indexName), typeName, dsl, IndexCatCellPO.class),
+                Objects::isNull, 3);
+        if (Objects.isNull(tuple) || CollectionUtils.isEmpty(tuple.getV2())) {
+            return Collections.emptyList();
+        }
+        
+        return ConvertUtil.list2List(tuple.getV2(), IndexCatCell.class);
+    }
 
     /**************************************************private******************************************************/
     /**
@@ -367,6 +409,7 @@ public class IndexCatESDAO extends BaseESDAO {
 
         return updateCatIndexInfo(indexCatCellPOSList);
     }
+    
 
     private String buildSortType(Boolean orderByDesc) {
         String sortType = "desc";
@@ -401,21 +444,7 @@ public class IndexCatESDAO extends BaseESDAO {
         return indexCatCellDTOList;
     }
     
-    public Map<String, Integer> syncGetByClusterPhyList(List<String> clusterPhyList) {
-        if (CollectionUtils.isEmpty(clusterPhyList)) {
-            return Collections.emptyMap();
-        }
-        String realIndexName = IndexNameUtils.genCurrentDailyIndexName(indexName);
-        final String clusterPhyStr = JSON.toJSONString(clusterPhyList);
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_PLATFORM_CREATE_CAT_INDEX_GROUP_BY_CLUSTER,
-                clusterPhyStr, clusterPhyList.size(), clusterPhyStr);
-        return gatewayClient.performRequest(metadataClusterName, realIndexName, TYPE, dsl,
-                res ->Optional.ofNullable(res).map(ESQueryResponse::getAggs).map(ESAggrMap::getEsAggrMap)
-                        .map(i -> i.get(GROUP_BY_CLUSTER)).map(ESAggr::getBucketList).orElse(Collections.emptyList())
-                        .stream().map(ESBucket::getUnusedMap).map(map -> Tuples.of(map.get(KEY).toString(),
-                                ((Integer) map.getOrDefault(DOC_COUNT, 0))))
-                        .collect(Collectors.toMap(TupleTwo::v1, TupleTwo::v2))
-                
-                , 3);
-    }
+   
+    
+  
 }
