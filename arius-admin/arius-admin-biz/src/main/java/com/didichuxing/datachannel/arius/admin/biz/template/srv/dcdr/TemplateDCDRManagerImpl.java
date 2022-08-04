@@ -206,6 +206,11 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
         if (null == targetClusterPhyResult.getData()) {
             return Result.buildFail(String.format("目标集群[%s]不存在", targetCluster));
         }
+        //校验target具备dcdr
+        if (Boolean.FALSE.equals(
+                clusterPhyManager.getDCDRAndPipelineAndColdRegionTupleByClusterPhyWithCache(targetCluster).v1)) {
+            return Result.buildFail(String.format("目标集群【%s】不支持dcdr", targetCluster));
+        }
         IndexTemplatePhy masterPhyTemplate = templateLogicWithPhysical.getMasterPhyTemplate();
         if (null == masterPhyTemplate) {
             return Result.buildFail(String.format("模板Id[%s]不存在", templateId));
