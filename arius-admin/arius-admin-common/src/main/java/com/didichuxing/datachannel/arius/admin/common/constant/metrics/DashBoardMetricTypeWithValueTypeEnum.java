@@ -12,7 +12,8 @@ import java.util.Map;
  */
 public enum DashBoardMetricTypeWithValueTypeEnum {
     SMALL_SHARD("smallShard","shardSize"),
-    BIG_SHARD("bigShard","shardSize");
+    BIG_SHARD("bigShard","shardSize"),
+    CLUSTER_ELAPSED_TIME_GTE_5_MIN("clusterElapsedTimeGte5Min","collectorDelayed");
 
     /**
      * 统计指标
