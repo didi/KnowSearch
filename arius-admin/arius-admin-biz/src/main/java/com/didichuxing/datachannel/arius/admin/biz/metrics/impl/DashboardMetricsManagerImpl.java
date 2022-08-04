@@ -298,7 +298,7 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
                     .configName(threshold.getConfigName())
                     .unit(threshold.getUnit())
                     .build();
-            String configValue = Objects.isNull(ariusConfigInfoMap.get(threshold.getConfigName()))?ariusConfigInfoMap.get(threshold.getConfigName()):"";
+            String configValue = Objects.nonNull(ariusConfigInfoMap.get(threshold.getConfigName()))?ariusConfigInfoMap.get(threshold.getConfigName()):"";
             if (StringUtils.isNotBlank(configValue)){
                 try {
                     DashBoardMetricThresholdDTO configThreshold = JSONObject.parseObject(configValue,DashBoardMetricThresholdDTO.class);
