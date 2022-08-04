@@ -739,11 +739,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             if (null != masterPhyTemplate && null != slavePhyTemplate) {
                 dcdrFlag = templateDcdrManager.syncExistTemplateDCDR(masterPhyTemplate.getId(),
                         slavePhyTemplate.getCluster());
-                //如果为false，说明链路不存在
-                if (Boolean.FALSE.equals(dcdrFlag)) {
-                    return false;
-                }
-        
+                
             }
         } catch (Exception e) {
             LOGGER.error("class=TemplateLogicManagerImpl||method=updateDCDRInfo||templateName={}||errorMsg={}", logicId,
