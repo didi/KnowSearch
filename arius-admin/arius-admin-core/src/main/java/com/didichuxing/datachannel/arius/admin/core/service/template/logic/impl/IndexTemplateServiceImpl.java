@@ -994,18 +994,25 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
             if (REGION_NOT_BOUND_LOGIC_CLUSTER_ID.equals(logicClusterIds)) {
                 continue;
             }
-
+    
             List<String> logicClusterIdStrList = ListUtils.string2StrList(logicClusterIds);
             List<Long> logicClusterIdList = logicClusterIdStrList.stream().map(Long::parseLong).distinct()
-                .collect(Collectors.toList());
-            List<ClusterLogic> clusterLogicList = clusterLogicService.getClusterLogicListByIds(logicClusterIdList)
-                    .stream()
-                    .filter(clusterLogic -> Objects.equals(clusterLogic.getProjectId(),
-                            indexTemplateWithPhyTemplate.getProjectId()))
                     .collect(Collectors.toList());
+            //这里存在逻辑集群创建项目被超级项目拿来使用了，且创建了模版，但是集群个数1的情况
+            final List<ClusterLogic> clusterLogicListByIds = clusterLogicService.getClusterLogicListByIds(
+                    logicClusterIdList);
+            if (clusterLogicListByIds.size() == 1) {
+                indexTemplateWithCluster.setLogicClusters(
+                      clusterLogicListByIds  );
+            } else {
+                List<ClusterLogic> clusterLogicList = clusterLogicListByIds
+                        .stream().filter(clusterLogic -> Objects.equals(clusterLogic.getProjectId(),
+                                indexTemplateWithPhyTemplate.getProjectId())).collect(Collectors.toList());
+                indexTemplateWithCluster.setLogicClusters(clusterLogicList);
+            }
+            
                     
 
-            indexTemplateWithCluster.setLogicClusters(clusterLogicList);
         }
         return res;
     }
