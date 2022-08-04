@@ -112,6 +112,15 @@ public class ESPhyClusterController {
         return clusterPhyManager.getTemplateSameVersionClusterNamesByTemplateId(HttpRequestUtil.getProjectId(request),
             templateId);
     }
+    
+    @GetMapping("/{templateId}/same-version/cluster-names/dcdr")
+    @ResponseBody
+    @ApiOperation(value = "根据模板所在集群，获取与该集群相同版本号具备dcdr插件的集群名称列表")
+    public Result<List<String>> getTemplateSameVersionClusterNamesByTemplateIdExistDCDR(HttpServletRequest request,
+                                                                                        @PathVariable Integer templateId) {
+        return clusterPhyManager.getTemplateSameVersionClusterNamesByTemplateIdExistDCDR(
+                HttpRequestUtil.getProjectId(request), templateId);
+    }
 
     @PostMapping("/page")
     @ResponseBody

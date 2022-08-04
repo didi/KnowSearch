@@ -158,6 +158,9 @@ public interface ClusterPhyManager {
      * @return {@link Result}<{@link List}<{@link String}>>
      */
     Result<List<String>> getTemplateSameVersionClusterNamesByTemplateId(Integer projectId, Integer templateId);
+    
+    Result<List<String>> getTemplateSameVersionClusterNamesByTemplateIdExistDCDR(Integer projectId, Integer templateId);
+
 
     /**
      * 获取物理集群节点名称列表

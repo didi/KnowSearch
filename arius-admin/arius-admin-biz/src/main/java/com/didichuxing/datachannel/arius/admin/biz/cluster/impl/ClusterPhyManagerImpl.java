@@ -706,7 +706,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         }
         return Result.buildSucc(clusters);
     }
-
+    
     @Override
     public Result<List<String>> getTemplateSameVersionClusterNamesByTemplateId(Integer projectId, Integer templateId) {
         List<String> clusterPhyNameList = listClusterPhyNameByProjectId(projectId);
@@ -731,13 +731,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         if (null == clusterPhy) {
             return Result.buildFail(String.format("the cluster[%s] from templateId[%s] is empty", cluster, templateId));
         }
-        //校验master具备dcdr
-        if (Boolean.FALSE.equals(getDCDRAndPipelineAndColdRegionTupleByClusterPhyWithCache(clusterPhy.getCluster()).v1)) {
-            return Result.buildFail(
-                    String.format("template[%s] 所属集群【%s】不支持dcdr", logicTemplateWithPhysicals.getName(),
-                            clusterPhy.getCluster()));
-        }
-
+        
         String esVersion = clusterPhy.getEsVersion();
 
         List<ClusterPhy> clusterPhies = clusterPhyService.listAllClusters();
@@ -745,22 +739,37 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         Predicate<ClusterPhy> matchingSameVersionESVersionPredicate =
                 cp -> ESVersionUtil.compareBigVersionConsistency(esVersion,cp.getEsVersion());
         List<String> sameVersionClusterNameList = clusterPhies.stream().filter(Objects::nonNull)
-                //正常的集群才能够进行dcdr
                 .filter(r-> !ClusterHealthEnum.UNKNOWN.getCode().equals(r.getHealth()))
             .filter(r -> clusterPhyNameList.contains(r.getCluster()))
             .filter(rCluster -> !StringUtils.equals(logicTemplateWithPhysicals.getMasterPhyTemplate().getCluster(),
                 rCluster.getCluster()))
             .filter(matchingSameVersionESVersionPredicate).map(ClusterPhy::getCluster)
-                //校验具备dcdr插件的集群
-                .filter(cp->getDCDRAndPipelineAndColdRegionTupleByClusterPhyWithCache(cp).v1)
                 .distinct()
             .collect(Collectors.toList());
 
         return Result.buildSucc(sameVersionClusterNameList);
     }
-
- 
-
+    
+    /**
+     * @param projectId
+     * @param templateId
+     * @return
+     */
+    @Override
+    public Result<List<String>> getTemplateSameVersionClusterNamesByTemplateIdExistDCDR(Integer projectId,
+                                                                                        Integer templateId) {
+        final Result<List<String>> clusterPhyListRes = getTemplateSameVersionClusterNamesByTemplateId(projectId,
+                templateId);
+        if (clusterPhyListRes.failed()) {
+            return clusterPhyListRes;
+        }
+        final List<String> existDCDRPluginClusterPhyList = clusterPhyListRes.getData().stream()
+                .filter(clusterPhy -> Boolean.TRUE.equals(
+                        getDCDRAndPipelineAndColdRegionTupleByClusterPhyWithCache(clusterPhy).v1))
+                .collect(Collectors.toList());
+        return Result.buildSucc(existDCDRPluginClusterPhyList);
+    }
+    
     @Override
     public List<String> listClusterPhyNodeName(String clusterPhyName) {
         if (null == clusterPhyName) {
