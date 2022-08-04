@@ -738,13 +738,20 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             IndexTemplatePhy masterPhyTemplate = logicTemplateWithPhysicals.getMasterPhyTemplate();
             if (null != masterPhyTemplate && null != slavePhyTemplate) {
                 dcdrFlag = templateDcdrManager.syncExistTemplateDCDR(masterPhyTemplate.getId(),
-                    slavePhyTemplate.getCluster());
+                        slavePhyTemplate.getCluster());
+                //如果为false，说明链路不存在
+                if (Boolean.FALSE.equals(dcdrFlag)) {
+                    return false;
+                }
+        
             }
         } catch (Exception e) {
             LOGGER.error("class=TemplateLogicManagerImpl||method=updateDCDRInfo||templateName={}||errorMsg={}", logicId,
                 e.getMessage(), e);
+            return false;
         }
-
+       
+       
         // 2. 获取位点差dcdr
         if (dcdrFlag) {
             try {
@@ -755,7 +762,9 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             } catch (Exception e) {
                 LOGGER.error("class=TemplateLogicManagerImpl||method=updateDCDRInfo||templateId={}||errorMsg={}",
                     logicId, e.getMessage(), e);
+                 return false;
             }
+    
         }
 
         try {
