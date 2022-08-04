@@ -743,8 +743,9 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         } catch (Exception e) {
             LOGGER.error("class=TemplateLogicManagerImpl||method=updateDCDRInfo||templateName={}||errorMsg={}", logicId,
                 e.getMessage(), e);
+            return false;
         }
-
+       
         // 2. 获取位点差dcdr
         if (dcdrFlag) {
             try {
@@ -755,7 +756,9 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             } catch (Exception e) {
                 LOGGER.error("class=TemplateLogicManagerImpl||method=updateDCDRInfo||templateId={}||errorMsg={}",
                     logicId, e.getMessage(), e);
+                 return false;
             }
+    
         }
 
         try {
