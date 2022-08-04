@@ -731,6 +731,12 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         if (null == clusterPhy) {
             return Result.buildFail(String.format("the cluster[%s] from templateId[%s] is empty", cluster, templateId));
         }
+        //校验master具备dcdr
+        if (Boolean.FALSE.equals(getDCDRAndPipelineAndColdRegionTupleByClusterPhyWithCache(clusterPhy.getCluster()).v1)) {
+            return Result.buildFail(
+                    String.format("template[%s] 所属集群【%s】不支持dcdr", logicTemplateWithPhysicals.getName(),
+                            clusterPhy.getCluster()));
+        }
 
         String esVersion = clusterPhy.getEsVersion();
 
@@ -744,7 +750,10 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             .filter(r -> clusterPhyNameList.contains(r.getCluster()))
             .filter(rCluster -> !StringUtils.equals(logicTemplateWithPhysicals.getMasterPhyTemplate().getCluster(),
                 rCluster.getCluster()))
-            .filter(matchingSameVersionESVersionPredicate).map(ClusterPhy::getCluster).distinct()
+            .filter(matchingSameVersionESVersionPredicate).map(ClusterPhy::getCluster)
+                //校验具备dcdr插件的集群
+                .filter(cp->getDCDRAndPipelineAndColdRegionTupleByClusterPhyWithCache(cp).v1)
+                .distinct()
             .collect(Collectors.toList());
 
         return Result.buildSucc(sameVersionClusterNameList);
