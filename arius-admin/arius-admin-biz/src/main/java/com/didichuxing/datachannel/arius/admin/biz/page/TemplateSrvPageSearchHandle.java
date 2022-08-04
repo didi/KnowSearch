@@ -8,6 +8,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.Temp
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.srv.TemplateSrv;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.srv.UnavailableTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv.TemplateSrvVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv.TemplateWithSrvVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv.UnavailableTemplateSrvVO;
@@ -18,10 +19,12 @@ import com.didichuxing.datachannel.arius.admin.core.service.template.logic.Index
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
@@ -131,12 +134,10 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<Templa
         }
         final Map<Integer, String> projectId2ProjectName = ConvertUtil.list2Map(projectService.getProjectBriefList(),
                 ProjectBriefVO::getId, ProjectBriefVO::getProjectName);
-        
         // 构建基础信息
         for (IndexTemplate template : templateList) {
             TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_CLUSTER_FUTURE_UTIL.callableTask(()-> buildTemplateWithSrvVO(
                     template,projectId2ProjectName));
-           
         }
         return  TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_CLUSTER_FUTURE_UTIL.waitResult();
     }
@@ -148,14 +149,33 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<Templa
                 ConvertUtil.list2List(TemplateSrv.codeStr2SrvList(template.getOpenSrv()), TemplateSrvVO.class));
         Optional.ofNullable(template).map(IndexTemplate::getProjectId).map(projectId2ProjectName::get)
                 .ifPresent(templateWithSrvVO::setProjectName);
-   
-        indexTemplatePhyService.getTemplateByLogicId(templateWithSrvVO.getId()).stream()
-                .map(IndexTemplatePhy::getCluster).distinct().forEach(templateWithSrvVO.getCluster()::add);
-        templateWithSrvVO.setUnavailableSrv(
-                ConvertUtil.list2List(templateSrvManager.getUnavailableSrv(template),
-                        UnavailableTemplateSrvVO.class));
-        templateWithSrvVO.setPartition(StringUtils.endsWith(template.getExpression(),"*"));
+        //这里会出现多个集群，那么就会产生问题，比如lyn-dcdr-1，lyn-dcdr-2两个集群，一种有插件，一个没有插件，那么其实关注master即可
+        final List<IndexTemplatePhy> indexTemplatePhies = indexTemplatePhyService.getTemplateByLogicId(
+                templateWithSrvVO.getId());
+        final List<List<UnavailableTemplateSrv>> lists = indexTemplatePhies.stream().map(IndexTemplatePhy::getCluster)
+                .map(cluster -> templateSrvManager.getUnavailableSrvByTemplateAndMasterPhy(template, cluster))
+                .collect(Collectors.toList());
+        if (CollectionUtils.isNotEmpty(lists)) {
+            if (lists.size() == 1) {
+                templateWithSrvVO.setUnavailableSrv(
+                        ConvertUtil.list2List(lists.get(0), UnavailableTemplateSrvVO.class));
+            } else {
+                //只会有一主一丛的情况
+                Set<UnavailableTemplateSrv> intersectionUnavailableTemplateSrv = Sets.intersection(
+                        Sets.newHashSet(lists.get(0)), Sets.newHashSet(lists.get(1)));
+                templateWithSrvVO.setUnavailableSrv(
+                        ConvertUtil.list2List(Lists.newArrayList(intersectionUnavailableTemplateSrv),
+                                UnavailableTemplateSrvVO.class));
+                
+            }
+        }
         
+        
+        indexTemplatePhies.stream().map(IndexTemplatePhy::getCluster).distinct()
+                .forEach(templateWithSrvVO.getCluster()::add);
+        
+        templateWithSrvVO.setPartition(StringUtils.endsWith(template.getExpression(), "*"));
+    
         return templateWithSrvVO;
         
     }
