@@ -82,9 +82,12 @@
                     "nodeElapsedTime":{
                          "type":"long"
                     },
+                    "collectorDelayed":{
+                         "type":"long"
+                    },
                     "clusterElapsedTimeGte5Min":{
                         "type":"boolean"
-                    }
+                    },
                     "timestamp":{
                         "format":"epoch_millis",
                         "type":"date"

@@ -6,6 +6,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.list.M
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.ClusterPhyHealthMetrics;
 import com.didichuxing.datachannel.arius.admin.common.constant.SortConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricListTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricListTypeWithExtendValueFieldEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricOtherTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricTopTypeEnum;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats.AriusStatsDashBoardInfoESDAO;
@@ -14,9 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Map;
+import java.util.Objects;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricTypeWithValueTypeEnum.getAllDashBoardMetricTypeWithValueTypes;
 import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.MetricsConstant.FAULT_FLAG;
 
 /**
@@ -60,20 +60,19 @@ public class DashBoardMetricsService {
      */
     public MetricList getListFaultMetrics(String oneLevelType, String metricsType, String aggType,
                                           Boolean orderByDesc) {
-        Map<String,String> metricTypeWithValue = getAllDashBoardMetricTypeWithValueTypes();
-        String valueMetric = "";
+        String extendValueField = "";
         String sortItem = TIMESTAMP;
         String sortType = orderByDesc ? SortConstant.DESC : SortConstant.ASC;
         List<String> sources = Lists.newArrayList();
         sources.add(oneLevelType+".cluster");
         sources.add(oneLevelType+"."+oneLevelType);
-        if (metricTypeWithValue.containsKey(metricsType)){
-            sources.add(oneLevelType+"."+metricTypeWithValue.get(metricsType));
-            valueMetric = metricTypeWithValue.get(metricsType);
-            sortItem = valueMetric;
+        if (Objects.nonNull(DashBoardMetricListTypeWithExtendValueFieldEnum.valueOfMetricType(metricsType))){
+            extendValueField = DashBoardMetricListTypeWithExtendValueFieldEnum.valueOfMetricType(metricsType).getExtendValueField();
+            sources.add(oneLevelType+"."+extendValueField);
+            sortItem = extendValueField;
         }
 
-        return ariusStatsDashBoardInfoESDAO.fetchListFlagMetric(oneLevelType, metricsType,sortItem,valueMetric, sources, FAULT_FLAG,
+        return ariusStatsDashBoardInfoESDAO.fetchListFlagMetric(oneLevelType, metricsType,sortItem, extendValueField, sources, FAULT_FLAG,
             sortType);
     }
 
