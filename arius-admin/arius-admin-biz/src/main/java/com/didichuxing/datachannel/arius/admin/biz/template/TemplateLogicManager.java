@@ -218,7 +218,7 @@ public interface TemplateLogicManager {
 
     Result<ConsoleTemplateRateLimitVO> getTemplateRateLimit(Integer logicId);
 
-    Result<ConsoleTemplateDetailVO> getDetailVoByLogicId(Integer logicId);
+    Result<ConsoleTemplateDetailVO> getDetailVoByLogicId(Integer logicId, Integer projectId);
 
     Result<ConsoleTemplateClearVO> getLogicTemplateClearInfo(Integer logicId) throws AmsRemoteException;
 
