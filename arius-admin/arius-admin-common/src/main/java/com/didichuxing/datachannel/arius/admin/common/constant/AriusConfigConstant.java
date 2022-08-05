@@ -124,7 +124,10 @@ public class AriusConfigConstant {
      */
     public static final String BIG_SHARD_THRESHOLD                                     = "big_shard.threshold";
 
-
+    /**
+     * 集群shard数阈值
+     */
+    public static final String CLUSTER_SHARD_NUM_THRESHOLD                             = "cluster.shardNum.threshold";
 
     /**
      * 模板冷热配置组
