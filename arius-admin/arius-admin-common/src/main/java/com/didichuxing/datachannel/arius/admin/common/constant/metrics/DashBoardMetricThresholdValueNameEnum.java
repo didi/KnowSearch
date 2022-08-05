@@ -19,6 +19,7 @@ public enum DashBoardMetricThresholdValueNameEnum {
      * {"name":"节点分片个数","metrics":"shardNum""unit":"个","compare":">","value":500}
      * {"name":"小shard索引列表","metrics":"shardSize","unit":"个","compare":">","value":100}
      * {"name":"索引Mapping个数","metrics":"mappingNum","unit":"个","compare":">","value":100}
+     * {"name":"集群shard个数","metrics":"shardNum","unit":"个","compare":">","value":10000}
      */
 
     INDEX_SEGMENTS_NUM_THRESHOLD(INDEX_SEGMENT_NUM_THRESHOLD,INDEX_SEGMENT_NUM,"索引Segments个数","segmentNum", "个",">",1D),
@@ -27,8 +28,8 @@ public enum DashBoardMetricThresholdValueNameEnum {
     TEMPLATE_SEGMENTS_MEN_SIZE_THRESHOLD(INDEX_TEMPLATE_SEGMENT_MEMORY_SIZE_THRESHOLD,TEMPLATE_SEGMENT_MEM_NUM,"模板Segments内存大小","segmentMemSize","kb",">",50D),
     NODE_SHARD_SIZE_THRESHOLD(NODE_SHARD_BIG_THRESHOLD,NODE_SHARD_NUM,"节点分片个数","shardNum","个",">",500D),
     MAPPING_NUM_THRESHOLD(INDEX_MAPPING_NUM_THRESHOLD,INDEX_MAPPING_NUM,"索引Mapping个数","mappingNum","个",">",1D),
-    INDEX_SMALL_SHARD_THRESHOLD(INDEX_SHARD_SMALL_THRESHOLD,INDEX_SMALL_SHARD,"小shard索引列表","shardSize","个",">",100D);
-
+    INDEX_SMALL_SHARD_THRESHOLD(INDEX_SHARD_SMALL_THRESHOLD,INDEX_SMALL_SHARD,"小shard索引列表","shardSize","个",">",100D),
+    SHARD_NUM_THRESHOLD(CLUSTER_SHARD_NUM_THRESHOLD,CLUSTER_SHARD_NUM, "集群shard个数", "shardNum", "个", ">", 10000D);
     /**
      * 配置名称
      */
