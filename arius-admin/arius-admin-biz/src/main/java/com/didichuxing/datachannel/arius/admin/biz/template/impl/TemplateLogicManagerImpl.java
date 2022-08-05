@@ -1014,10 +1014,11 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
 
     /**
      * @param logicId
+     * @param projectId
      * @return
      */
     @Override
-    public Result<ConsoleTemplateDetailVO> getDetailVoByLogicId(Integer logicId) {
+    public Result<ConsoleTemplateDetailVO> getDetailVoByLogicId(Integer logicId, Integer projectId) {
         if (Objects.isNull(logicId)) {
             return Result.buildSucc();
         }
@@ -1033,11 +1034,19 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             ConsoleTemplateDetailVO.class);
 
         consoleTemplateDetail.setCyclicalRoll(indexTemplateLogicWithCluster.getExpression().endsWith("*"));
-        consoleTemplateDetail
-            .setCluster(templateLogicManager.jointCluster(indexTemplateLogicWithCluster.getLogicClusters()));
+
+        // supperApp显示物理集群，其他项目显示逻辑集群
+        if(AuthConstant.SUPER_PROJECT_ID.equals(projectId)){
+            List<IndexTemplatePhy> indexTemplatePhyList = indexTemplatePhyService.getTemplateByLogicId(logicId);
+            List<String> phyClusters = indexTemplatePhyList.stream().map(IndexTemplatePhy::getCluster).collect(Collectors.toList());
+            consoleTemplateDetail.setCluster(StringUtils.join(phyClusters, ","));
+        }else {
+            consoleTemplateDetail
+                    .setCluster(templateLogicManager.jointCluster(indexTemplateLogicWithCluster.getLogicClusters()));
+        }
 
         // 仅对有一个逻辑集群的情况设置集群类型与等级
-        if (indexTemplateLogicWithCluster.getLogicClusters().size() == 1) {
+git        if (indexTemplateLogicWithCluster.getLogicClusters().size() == 1) {
             consoleTemplateDetail.setClusterType(indexTemplateLogicWithCluster.getLogicClusters().get(0).getType());
             consoleTemplateDetail.setClusterLevel(indexTemplateLogicWithCluster.getLogicClusters().get(0).getLevel());
         }
