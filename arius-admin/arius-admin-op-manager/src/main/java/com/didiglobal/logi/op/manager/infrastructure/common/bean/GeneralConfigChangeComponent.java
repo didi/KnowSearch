@@ -6,11 +6,10 @@ import lombok.NoArgsConstructor;
 
 /**
  * @author didi
- * @date 2022-07-20 3:47 下午
+ * @date 2022-07-25 5:40 下午
  */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class GeneralScaleComponent extends GeneralBaseOperationComponent {
-    private Integer type;
+public class GeneralConfigChangeComponent extends GeneralBaseOperationComponent {
 }

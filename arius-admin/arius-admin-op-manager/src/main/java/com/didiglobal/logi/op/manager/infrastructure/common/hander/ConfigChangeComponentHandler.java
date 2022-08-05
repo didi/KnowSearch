@@ -4,13 +4,9 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.didiglobal.logi.op.manager.domain.component.entity.Component;
 import com.didiglobal.logi.op.manager.domain.component.event.ComponentEvent;
-import com.didiglobal.logi.op.manager.domain.component.service.ComponentDomainService;
-import com.didiglobal.logi.op.manager.domain.packages.entity.Package;
-import com.didiglobal.logi.op.manager.domain.packages.service.PackageDomainService;
-import com.didiglobal.logi.op.manager.domain.script.service.impl.ScriptDomainService;
 import com.didiglobal.logi.op.manager.domain.task.service.TaskDomainService;
 import com.didiglobal.logi.op.manager.infrastructure.common.Constants;
-import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralInstallComponent;
+import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralConfigChangeComponent;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralScaleComponent;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.OperationEnum;
 import com.didiglobal.logi.op.manager.infrastructure.exception.ComponentHandlerException;
@@ -27,34 +23,32 @@ import java.util.Map;
 
 /**
  * @author didi
- * @date 2022-07-20 4:01 下午
+ * @date 2022-07-25 5:55 下午
  */
 @org.springframework.stereotype.Component
 @DefaultHandler
-public class ScaleComponentHandler extends BaseComponentHandler implements ComponentHandler {
+public class ConfigChangeComponentHandler extends BaseComponentHandler implements ComponentHandler {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ScaleComponentHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConfigChangeComponentHandler.class);
 
     @Autowired
     private TaskDomainService taskDomainService;
 
-
     @Override
     public void eventProcess(ComponentEvent componentEvent) throws ComponentHandlerException {
         try {
-            GeneralScaleComponent scaleComponent = (GeneralScaleComponent) componentEvent.getSource();
-
-            scaleComponent.setTemplateId(getTemplateId(scaleComponent.getComponentId()));
-            String content = JSONObject.toJSON(scaleComponent).toString();
+            GeneralConfigChangeComponent changeComponent = (GeneralConfigChangeComponent) componentEvent.getSource();
+            changeComponent.setTemplateId(getTemplateId(changeComponent.getComponentId()));
+            String content = JSONObject.toJSON(changeComponent).toString();
             Map<String, List<String>> groupToIpList = new LinkedHashMap<>(16);
-            scaleComponent.getGroupConfigList().forEach(config ->
+            changeComponent.getGroupConfigList().forEach(config ->
             {
                 if (!StringUtils.isEmpty(config.getHosts())) {
                     groupToIpList.put(config.getGroupName(), Arrays.asList(config.getHosts().split(Constants.SPLIT)));
                 }
             });
-            taskDomainService.createTask(content, scaleComponent.getType(),
-                    componentEvent.getDescribe(), scaleComponent.getAssociationId(), groupToIpList);
+            taskDomainService.createTask(content, componentEvent.getOperateType(),
+                    componentEvent.getDescribe(), changeComponent.getAssociationId(), groupToIpList);
         } catch (Exception e) {
             LOGGER.error("event process error.", e);
             throw new ComponentHandlerException(e);
@@ -65,13 +59,9 @@ public class ScaleComponentHandler extends BaseComponentHandler implements Compo
     @Override
     public void taskFinishProcess(String content) throws ComponentHandlerException {
         try {
-            GeneralScaleComponent scaleComponent = JSON.parseObject(content, GeneralScaleComponent.class);
+            GeneralConfigChangeComponent scaleComponent = JSON.parseObject(content, GeneralConfigChangeComponent.class);
             Component component = ConvertUtil.obj2Obj(scaleComponent, Component.class);
-            if (scaleComponent.getType() == OperationEnum.EXPAND.getType()) {
-                componentDomainService.expandComponent(component);
-            } else {
-                componentDomainService.shrinkComponent(component);
-            }
+            componentDomainService.changeComponentConfig(component);
         } catch (Exception e) {
             LOGGER.error("task finish process error.", e);
             throw new ComponentHandlerException(e);
@@ -81,6 +71,6 @@ public class ScaleComponentHandler extends BaseComponentHandler implements Compo
 
     @Override
     public Integer getOperationType() throws ComponentHandlerException {
-        return OperationEnum.SCALE.getType();
+        return OperationEnum.CONFIG_CHANGE.getType();
     }
 }

@@ -6,7 +6,11 @@ package com.didiglobal.logi.op.manager.infrastructure.common.enums;
  */
 public enum OperationEnum {
     INSTALL(0, "组件安装"),
-    SCALE(1, "组件扩缩容"),
+    EXPAND(1, "组件扩缩"),
+    SHRINK(2, "组件缩容"),
+    SCALE(3, "组件扩缩容"),
+    CONFIG_CHANGE(4, "配置变更"),
+    RESTART(5, "重启"),
     UN_KNOW(-1, "未知");
 
     private int type;

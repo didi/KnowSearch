@@ -1,9 +1,9 @@
 package com.didiglobal.logi.op.manager.application;
 
-import com.didiglobal.logi.op.manager.domain.component.entity.Component;
 import com.didiglobal.logi.op.manager.domain.component.service.ComponentDomainService;
-import com.didiglobal.logi.op.manager.domain.packages.service.PackageDomainService;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
+import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralBaseOperationComponent;
+import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralConfigChangeComponent;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralInstallComponent;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralScaleComponent;
 import org.slf4j.Logger;
@@ -22,7 +22,7 @@ public class ComponentService {
     @Autowired
     private ComponentDomainService componentDomainService;
 
-    public Result<Void> installComponent(GeneralInstallComponent installComponent){
+    public Result<Void> installComponent(GeneralInstallComponent installComponent) {
         LOGGER.info("start install component[{}]", installComponent.getName());
         Result checkRes = installComponent.checkInstallParam();
         if (checkRes.failed()) {
@@ -32,13 +32,33 @@ public class ComponentService {
         return Result.success();
     }
 
-    public Result<Void> scaleComponent(GeneralScaleComponent scaleComponent){
+    public Result<Void> scaleComponent(GeneralScaleComponent scaleComponent) {
         LOGGER.info("start scale component[{}]", scaleComponent);
-        Result checkRes = scaleComponent.checkScaleParam();
+        Result checkRes = scaleComponent.checkParam();
         if (checkRes.failed()) {
             return checkRes;
         }
         componentDomainService.submitScaleComponent(scaleComponent);
+        return Result.success();
+    }
+
+    public Result<Void> configChangeComponent(GeneralConfigChangeComponent configChangeComponent) {
+        LOGGER.info("start change component config[{}]", configChangeComponent);
+        Result checkRes = configChangeComponent.checkParam();
+        if (checkRes.failed()) {
+            return checkRes;
+        }
+        componentDomainService.submitConfigChangeComponent(configChangeComponent);
+        return Result.success();
+    }
+
+    public Result<Void> restartComponent(GeneralBaseOperationComponent restartOperationComponent) {
+        LOGGER.info("start restart component[{}]", restartOperationComponent);
+        Result checkRes = restartOperationComponent.checkParam();
+        if (checkRes.failed()) {
+            return checkRes;
+        }
+        componentDomainService.submitRestartComponent(restartOperationComponent);
         return Result.success();
     }
 }

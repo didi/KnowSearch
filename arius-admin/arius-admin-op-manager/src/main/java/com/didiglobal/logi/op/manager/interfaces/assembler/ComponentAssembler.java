@@ -2,13 +2,9 @@ package com.didiglobal.logi.op.manager.interfaces.assembler;
 
 import com.alibaba.fastjson.JSON;
 import com.didiglobal.logi.op.manager.domain.component.entity.Component;
-import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralGroupConfig;
-import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralInstallComponent;
-import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralScaleComponent;
+import com.didiglobal.logi.op.manager.infrastructure.common.bean.*;
 import com.didiglobal.logi.op.manager.infrastructure.util.ConvertUtil;
-import com.didiglobal.logi.op.manager.interfaces.dto.ComponentDTO;
-import com.didiglobal.logi.op.manager.interfaces.dto.GeneraInstallComponentDTO;
-import com.didiglobal.logi.op.manager.interfaces.dto.GeneralScaleComponentDTO;
+import com.didiglobal.logi.op.manager.interfaces.dto.*;
 import com.didiglobal.logi.op.manager.interfaces.vo.GeneralGroupConfigHostVO;
 
 /**
@@ -27,6 +23,14 @@ public class ComponentAssembler {
 
     public static GeneralScaleComponent toScaleComponent(GeneralScaleComponentDTO dto) {
         return ConvertUtil.obj2Obj(dto, GeneralScaleComponent.class);
+    }
+
+    public static GeneralConfigChangeComponent toConfigChangeComponent(GeneralConfigChangeComponentDTO dto) {
+        return ConvertUtil.obj2Obj(dto, GeneralConfigChangeComponent.class);
+    }
+
+    public static GeneralBaseOperationComponent toRestartComponent(GeneralBaseOperationComponentDTO dto) {
+        return ConvertUtil.obj2Obj(dto, GeneralBaseOperationComponent.class);
     }
 
 

@@ -15,4 +15,11 @@ public interface ComponentGroupConfigDao {
      * @return
      */
     int insert(ComponentGroupConfigPO groupConfigPO);
+
+    /**
+     * 通过id获取配置
+     * @param id
+     * @return
+     */
+    ComponentGroupConfigPO getById(int id);
 }

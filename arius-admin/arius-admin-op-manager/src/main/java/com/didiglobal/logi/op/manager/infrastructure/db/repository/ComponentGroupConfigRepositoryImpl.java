@@ -23,4 +23,14 @@ public class ComponentGroupConfigRepositoryImpl implements ComponentGroupConfigR
     public int saveGroupConfig(ComponentGroupConfig groupConfig) {
         return configDao.insert(ComponentConverter.convertComponentConfigDO2PO(groupConfig));
     }
+
+    @Override
+    public void updateGroupConfig(ComponentGroupConfig groupConfig) {
+
+    }
+
+    @Override
+    public ComponentGroupConfig getConfigById(int groupId) {
+        return ComponentConverter.convertComponentConfigPO2DO(configDao.getById(groupId));
+    }
 }

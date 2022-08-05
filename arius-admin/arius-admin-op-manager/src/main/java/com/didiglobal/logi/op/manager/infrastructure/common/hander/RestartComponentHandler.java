@@ -1,0 +1,61 @@
+package com.didiglobal.logi.op.manager.infrastructure.common.hander;
+
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.didiglobal.logi.op.manager.domain.component.entity.Component;
+import com.didiglobal.logi.op.manager.domain.component.event.ComponentEvent;
+import com.didiglobal.logi.op.manager.domain.task.service.TaskDomainService;
+import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralBaseOperationComponent;
+import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralScaleComponent;
+import com.didiglobal.logi.op.manager.infrastructure.common.enums.OperationEnum;
+import com.didiglobal.logi.op.manager.infrastructure.exception.ComponentHandlerException;
+import com.didiglobal.logi.op.manager.infrastructure.util.ConvertUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.List;
+import java.util.Map;
+
+/**
+ * @author didi
+ * @date 2022-07-26 3:57 下午
+ */
+@org.springframework.stereotype.Component
+@DefaultHandler
+public class RestartComponentHandler extends BaseComponentHandler implements ComponentHandler {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RestartComponentHandler.class);
+
+    @Autowired
+    private TaskDomainService taskDomainService;
+
+
+    @Override
+    public void eventProcess(ComponentEvent componentEvent) throws ComponentHandlerException {
+        try {
+            GeneralBaseOperationComponent baseOperationComponent = (GeneralBaseOperationComponent) componentEvent.getSource();
+
+            baseOperationComponent.setTemplateId(getTemplateId(baseOperationComponent.getComponentId()));
+            String content = JSONObject.toJSON(baseOperationComponent).toString();
+            Map<String, List<String>> groupToIpList = getGroupToIpList(baseOperationComponent);
+            taskDomainService.createTask(content, componentEvent.getOperateType(),
+                    componentEvent.getDescribe(), baseOperationComponent.getAssociationId(), groupToIpList);
+        } catch (Exception e) {
+            LOGGER.error("event process error.", e);
+            throw new ComponentHandlerException(e);
+        }
+
+    }
+
+    @Override
+    public void taskFinishProcess(String content) throws ComponentHandlerException {
+        //暂时不用操作
+    }
+
+    @Override
+    public Integer getOperationType() throws ComponentHandlerException {
+        return OperationEnum.RESTART.getType();
+    }
+}
+

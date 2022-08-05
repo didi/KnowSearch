@@ -9,6 +9,10 @@ import lombok.Data;
 @Data
 public class GeneralGroupConfig {
     /**
+     * 分组id
+     */
+    private Integer id;
+    /**
      * 分组名
      */
     private String groupName;

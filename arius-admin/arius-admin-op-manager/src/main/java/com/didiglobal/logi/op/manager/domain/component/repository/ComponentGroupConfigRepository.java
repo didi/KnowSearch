@@ -13,4 +13,17 @@ public interface ComponentGroupConfigRepository {
      * @return
      */
     int saveGroupConfig(ComponentGroupConfig groupConfig);
+
+    /**
+     * 更新分组配置
+     * @param groupConfig
+     */
+    void updateGroupConfig(ComponentGroupConfig  groupConfig);
+
+    /**
+     * 根据id获取配置
+     * @param groupId
+     * @return
+     */
+    ComponentGroupConfig getConfigById(int groupId);
 }

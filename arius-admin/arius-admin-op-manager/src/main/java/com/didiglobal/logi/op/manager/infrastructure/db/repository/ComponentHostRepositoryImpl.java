@@ -22,4 +22,9 @@ public class ComponentHostRepositoryImpl implements ComponentHostRepository {
     public void saveComponentHost(ComponentHost componentHost) {
         componentHostDao.insert(ComponentConverter.convertComponentHostDO2PO(componentHost));
     }
+
+    @Override
+    public void updateComponentHostStatus(int componentId, String host, int groupId, int status) {
+        componentHostDao.updateStatus(componentId, host, groupId, status);
+    }
 }

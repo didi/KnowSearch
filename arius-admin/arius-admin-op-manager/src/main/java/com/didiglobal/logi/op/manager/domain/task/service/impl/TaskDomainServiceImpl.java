@@ -170,7 +170,6 @@ public class TaskDomainServiceImpl implements TaskDomainService {
                         return Result.success(new Tuple<>(config, installComponent.getTemplateId()));
                     }
                 }
-                ;
             case UN_KNOW:
             default:
                 return Result.fail("分组名未匹配到相应配置");

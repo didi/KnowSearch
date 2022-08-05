@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Field;
 import java.util.HashSet;
@@ -40,51 +41,53 @@ public class TaskScheduler {
     public void monitor() {
         try {
             List<Task> taskList = taskDomainService.getUnFinishTaskList().getData();
-
             taskList.forEach(task -> {
-                try {
-                    Set<Integer> executeIdSet = new HashSet<>();
-                    task.getDetailList().forEach(taskDetail -> {
-                        executeIdSet.add(taskDetail.getExecuteTaskId());
-                    });
-
-                    if (executeIdSet.size() > 0) {
-                        int finalStatus = task.getStatus();
-                        int isFinish = 0;
-                        ZeusTaskStatus totalStatus = new ZeusTaskStatus();
-                        for (Integer id : executeIdSet) {
-                            //TODO要考虑定时任务和手动操作
-                            ZeusTaskStatus zeusTaskStatus = deploymentService.deployStatus(id).getData();
-                            for (Field declaredField : zeusTaskStatus.getClass().getDeclaredFields()) {
-                                List<String> hostList = (List<String>) declaredField.get(zeusTaskStatus);
-                                taskDomainService.updateTaskDetail(task.getId(), id, TaskStatusEnum.valueOf(declaredField.getName().toUpperCase()).getStatus(),
-                                        hostList);
-                            }
-
-                            totalStatus.addZeusTaskStatus(zeusTaskStatus);
-                        }
-
-                        finalStatus = getFinalStatusAndUpdate(task, finalStatus, isFinish, totalStatus);
-
-                        if (finalStatus == TaskStatusEnum.SUCCESS.getStatus()) {
-                            componentHandlerFactory.getByType(task.getType()).taskFinishProcess(task.getContent());
-                        }
-                    }
-                } catch (Exception e) {
-                    LOGGER.error("task[{}] monitor error", task.getId(), e);
-                    throw new RuntimeException(e);
-                }
-
+                handle(task);
             });
-
         } catch (Exception e) {
             LOGGER.error("task monitor error", e);
         }
     }
 
+    @Transactional(rollbackFor = Exception.class)
+    public void handle(Task task) {
+        try {
+            Set<Integer> executeIdSet = new HashSet<>();
+            task.getDetailList().forEach(taskDetail -> {
+                executeIdSet.add(taskDetail.getExecuteTaskId());
+            });
+
+            if (executeIdSet.size() > 0) {
+                int finalStatus = task.getStatus();
+                int isFinish = 0;
+                ZeusTaskStatus totalStatus = new ZeusTaskStatus();
+                for (Integer id : executeIdSet) {
+                    //TODO要考虑定时任务和手动操作
+                    ZeusTaskStatus zeusTaskStatus = deploymentService.deployStatus(id).getData();
+                    for (Field declaredField : zeusTaskStatus.getClass().getDeclaredFields()) {
+                        List<String> hostList = (List<String>) declaredField.get(zeusTaskStatus);
+                        taskDomainService.updateTaskDetail(task.getId(), id, TaskStatusEnum.valueOf(declaredField.getName().toUpperCase()).getStatus(),
+                                hostList);
+                    }
+
+                    totalStatus.addZeusTaskStatus(zeusTaskStatus);
+                }
+
+                finalStatus = getFinalStatusAndUpdate(task, finalStatus, isFinish, totalStatus);
+
+                if (finalStatus == TaskStatusEnum.SUCCESS.getStatus()) {
+                    componentHandlerFactory.getByType(task.getType()).taskFinishProcess(task.getContent());
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.error("task[{}] monitor error", task.getId(), e);
+            throw new RuntimeException(e);
+        }
+    }
+
     private int getFinalStatusAndUpdate(Task task, int finalStatus, int isFinish, ZeusTaskStatus totalStatus) {
         //更新任务最终状态
-        //TODO这里的状态有点混乱
+        //TODO 里的状态有点混乱
         if ((null != totalStatus.getTimeout() || null != totalStatus.getFailed()) &&
                 null != totalStatus.getWaiting()) {
             finalStatus = TaskStatusEnum.WAITING.getStatus();

@@ -1,13 +1,10 @@
 package com.didiglobal.logi.op.manager.domain.component.entity;
 
-import com.alibaba.fastjson.JSON;
 import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentGroupConfig;
 import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentHost;
-import com.didiglobal.logi.op.manager.infrastructure.common.Result;
-import com.didiglobal.logi.op.manager.infrastructure.common.ResultCode;
+import com.didiglobal.logi.op.manager.infrastructure.common.Constants;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.ComponentStatusEnum;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.DeleteEnum;
-import com.didiglobal.logi.op.manager.infrastructure.util.Constants;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -58,8 +55,6 @@ public class Component {
     private Integer isDelete;
 
 
-
-
     /**
      * 值对象，关联group配置
      */
@@ -81,7 +76,7 @@ public class Component {
     private List<ComponentHost> hostList;
 
 
-    public Component create(){
+    public Component create() {
         this.status = ComponentStatusEnum.UN_KNOW.getStatus();
         this.isDelete = DeleteEnum.NORMAL.getType();
         this.createTime = new Timestamp(System.currentTimeMillis());
@@ -89,12 +84,12 @@ public class Component {
         return this;
     }
 
-    public Component updateContainIds(int componentId){
-       if (Strings.isNullOrEmpty(containComponentIds)) {
-           containComponentIds = String.valueOf(componentId);
-       } else {
-           containComponentIds = containComponentIds + Constants.SPLIT + componentId;
-       }
+    public Component updateContainIds(int componentId) {
+        if (Strings.isNullOrEmpty(containComponentIds)) {
+            containComponentIds = String.valueOf(componentId);
+        } else {
+            containComponentIds = containComponentIds + Constants.SPLIT + componentId;
+        }
         return this;
     }
 

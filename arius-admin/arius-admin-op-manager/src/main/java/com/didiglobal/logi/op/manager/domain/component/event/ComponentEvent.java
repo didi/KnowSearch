@@ -39,4 +39,18 @@ public class ComponentEvent extends DomainEvent {
         return event;
     }
 
+    public static ComponentEvent createConfigChangeEvent(Object source) {
+        ComponentEvent event = new ComponentEvent(source);
+        event.operateType = OperationEnum.CONFIG_CHANGE.getType();
+        event.setDescribe(OperationEnum.CONFIG_CHANGE.getDescribe());
+        return event;
+    }
+
+    public static ComponentEvent createRestartEvent(Object source) {
+        ComponentEvent event = new ComponentEvent(source);
+        event.operateType = OperationEnum.RESTART.getType();
+        event.setDescribe(OperationEnum.RESTART.getDescribe());
+        return event;
+    }
+
 }

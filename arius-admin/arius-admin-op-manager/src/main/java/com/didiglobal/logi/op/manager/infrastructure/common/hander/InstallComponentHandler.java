@@ -29,7 +29,7 @@ import java.util.Map;
  */
 @org.springframework.stereotype.Component
 @DefaultHandler
-public class InstallComponentHandler implements ComponentHandler {
+public class InstallComponentHandler extends BaseComponentHandler implements ComponentHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InstallComponentHandler.class);
 

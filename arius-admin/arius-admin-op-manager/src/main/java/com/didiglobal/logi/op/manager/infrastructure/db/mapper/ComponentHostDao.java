@@ -14,4 +14,13 @@ public interface ComponentHostDao {
       * @param hostPO
       */
      void insert(ComponentHostPO hostPO);
+
+     /**
+      * 更新状态
+      * @param componentId
+      * @param host
+      * @param groupId
+      * @param status
+      */
+     void updateStatus(int componentId, String host, int groupId, int status);
 }

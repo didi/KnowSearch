@@ -13,4 +13,13 @@ public interface ComponentHostRepository {
      * @param componentHost
      */
     void saveComponentHost(ComponentHost componentHost);
+
+    /**
+     * 更新节点状态
+     * @param componentId
+     * @param host
+     * @param groupId
+     * @param status
+     */
+    void updateComponentHostStatus(int componentId, String host, int groupId, int status);
 }

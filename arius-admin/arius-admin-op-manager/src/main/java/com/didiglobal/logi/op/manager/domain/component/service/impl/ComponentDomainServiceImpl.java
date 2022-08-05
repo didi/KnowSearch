@@ -9,11 +9,14 @@ import com.didiglobal.logi.op.manager.domain.component.repository.ComponentGroup
 import com.didiglobal.logi.op.manager.domain.component.repository.ComponentHostRepository;
 import com.didiglobal.logi.op.manager.domain.component.repository.ComponentRepository;
 import com.didiglobal.logi.op.manager.domain.component.service.ComponentDomainService;
+import com.didiglobal.logi.op.manager.infrastructure.common.Constants;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
+import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralBaseOperationComponent;
+import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralConfigChangeComponent;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralInstallComponent;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralScaleComponent;
+import com.didiglobal.logi.op.manager.infrastructure.common.enums.DeleteEnum;
 import com.didiglobal.logi.op.manager.infrastructure.common.event.SpringEventPublisher;
-import com.didiglobal.logi.op.manager.infrastructure.util.Constants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,6 +56,20 @@ public class ComponentDomainServiceImpl implements ComponentDomainService {
     }
 
     @Override
+    public Result<Void> submitConfigChangeComponent(GeneralConfigChangeComponent changeComponent) {
+        //发送事件，领域解耦
+        publisher.publish(ComponentEvent.createConfigChangeEvent(changeComponent));
+        return Result.success();
+    }
+
+    @Override
+    public Result<Void> submitRestartComponent(GeneralBaseOperationComponent restartComponent) {
+        //发送事件，领域解耦
+        publisher.publish(ComponentEvent.createRestartEvent(restartComponent));
+        return Result.success();
+    }
+
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public Result<Integer> createComponent(Component component) {
         //创建并保存组件
@@ -78,7 +95,6 @@ public class ComponentDomainServiceImpl implements ComponentDomainService {
                 ComponentHost componentHost = new ComponentHost();
                 componentHost.setHost(host);
                 componentHost.setProcessNum(JSON.parseObject(groupConfig.getProcessNumConfig()).getInteger(host));
-                componentHost.getCreateTime();
                 componentHost.setComponentId(componentId);
                 componentHost.setGroupId(groupId);
                 componentHost.create();
@@ -86,8 +102,49 @@ public class ComponentDomainServiceImpl implements ComponentDomainService {
             }
 
         }
-
-
-        return null;
+        return Result.success();
     }
+
+    @Override
+    public Result<Component> getComponentById(Integer id) {
+        return Result.buildSuccess(componentRepository.getComponentById(id));
+
+    }
+
+    @Override
+    public Result<Void> expandComponent(Component component) {
+        for (ComponentGroupConfig config : component.getGroupConfigList()) {
+            for (String host : config.getHosts().split(Constants.SPLIT)) {
+                ComponentHost componentHost = new ComponentHost();
+                componentHost.setHost(host);
+                componentHost.setProcessNum(JSON.parseObject(config.getProcessNumConfig()).getInteger(host));
+                componentHost.setComponentId(component.getId());
+                componentHost.setGroupId(config.getId());
+                componentHost.create();
+                componentHostRepository.saveComponentHost(componentHost);
+            }
+        }
+        return Result.success();
+    }
+
+    @Override
+    public Result<Void> shrinkComponent(Component component) {
+        for (ComponentGroupConfig config : component.getGroupConfigList()) {
+            for (String host : config.getHosts().split(Constants.SPLIT)) {
+                componentHostRepository.updateComponentHostStatus(component.getId(), host, config.getId(), DeleteEnum.UNINSTALL.getType());
+            }
+        }
+        return Result.success();
+    }
+
+    @Override
+    public Result<Void> changeComponentConfig(Component component) {
+        for (ComponentGroupConfig config : component.getGroupConfigList()) {
+            config.setVersion(String.valueOf(Integer.parseInt(config.getVersion()) + 1));
+            componentGroupConfigRepository.saveGroupConfig(config);
+        }
+        return Result.success();
+    }
+
+
 }

@@ -13,6 +13,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class GeneralGroupConfigDTO {
     /**
+     * 分组id
+     */
+    private Integer id;
+    /**
      * 分组名
      */
     private String groupName;

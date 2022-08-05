@@ -26,6 +26,10 @@ public class ComponentConverter {
         return ConvertUtil.obj2Obj(groupConfig, ComponentGroupConfigPO.class);
     }
 
+    public static ComponentGroupConfig convertComponentConfigPO2DO(ComponentGroupConfigPO po) {
+        return ConvertUtil.obj2Obj(po, ComponentGroupConfig.class);
+    }
+
     public static ComponentHostPO convertComponentHostDO2PO(ComponentHost componentHost) {
         return ConvertUtil.obj2Obj(componentHost, ComponentHostPO.class);
     }
