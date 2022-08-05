@@ -1046,7 +1046,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         }
 
         // 仅对有一个逻辑集群的情况设置集群类型与等级
-git        if (indexTemplateLogicWithCluster.getLogicClusters().size() == 1) {
+        if (indexTemplateLogicWithCluster.getLogicClusters().size() == 1) {
             consoleTemplateDetail.setClusterType(indexTemplateLogicWithCluster.getLogicClusters().get(0).getType());
             consoleTemplateDetail.setClusterLevel(indexTemplateLogicWithCluster.getLogicClusters().get(0).getLevel());
         }
