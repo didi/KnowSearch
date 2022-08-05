@@ -1,5 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.metrics.handle.handler;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyIndicesMetricsEnum.getClusterPhyIndicesMetricsType;
+
 import com.didichuxing.datachannel.arius.admin.biz.metrics.handle.BaseClusterMetricsHandle;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsClusterPhyDTO;
@@ -9,19 +11,22 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linech
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.VariousLineChartMetrics;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyIndicesMetricsEnum;
+import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
+import com.didichuxing.datachannel.arius.admin.common.tuple.Tuples;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.ESIndicesStatsService;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.Objects;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyIndicesMetricsEnum.getClusterPhyIndicesMetricsType;
 
 /**
  *
@@ -37,7 +42,9 @@ public class PhyTemplateClusterMetricsHandler extends BaseClusterMetricsHandle {
     @Autowired
     private IndexTemplateService  indexTemplateService;
     
-    private static final FutureUtil<Void> OPTIMIZE_QUERY_BURR_FUTURE_UTIL = FutureUtil.init("PhyTemplateClusterMetricsHandler",
+    private static final FutureUtil<TupleTwo</*logicTemplateId*/String,/*name*/String>> OPTIMIZE_QUERY_BURR_FUTURE_UTIL =
+            FutureUtil.init(
+            "PhyTemplateClusterMetricsHandler",
             10, 10, 50);
 
     @Override
@@ -92,22 +99,25 @@ public class PhyTemplateClusterMetricsHandler extends BaseClusterMetricsHandle {
      * @param aggClusterPhyTemplateMetrics 聚合的模板指标数据列表
      */
     private void convertTemplateIdToName(List<VariousLineChartMetrics> aggClusterPhyTemplateMetrics) {
-        for (VariousLineChartMetrics variousLineChartMetrics : aggClusterPhyTemplateMetrics) {
-            if (CollectionUtils.isEmpty(variousLineChartMetrics.getMetricsContents())) {
-                continue;
-            }
-            OPTIMIZE_QUERY_BURR_FUTURE_UTIL.runnableTask(() -> {
-            
-                // 将逻辑模板的id转化为对应的逻辑模板名称，使用*进行数据库兜底操作
-                for (MetricsContent param : variousLineChartMetrics.getMetricsContents()) {
-                    String logicTemplate = indexTemplateService.getNameByTemplateLogicId(
-                            Integer.parseInt(param.getName()));
-                    param.setName(StringUtils.isBlank(logicTemplate)  ? "*" : logicTemplate);
-                }
+        //获取所有的模版id
+        final List<Integer> logicTemplateIds = aggClusterPhyTemplateMetrics.stream()
+                .map(VariousLineChartMetrics::getMetricsContents).filter(CollectionUtils::isNotEmpty)
+                .flatMap(Collection::stream).map(MetricsContent::getName).filter(StringUtils::isNumeric)
+                .map(Integer::parseInt).distinct().collect(Collectors.toList());
+        //并行查询所有的模版
+        for (Integer logicTemplateId : logicTemplateIds) {
+            OPTIMIZE_QUERY_BURR_FUTURE_UTIL.callableTask(() -> {
+                String logicTemplate = indexTemplateService.getNameByTemplateLogicId(logicTemplateId);
+                return Tuples.of(logicTemplateId.toString(), logicTemplate);
             
             });
-        
         }
-        OPTIMIZE_QUERY_BURR_FUTURE_UTIL.waitExecute();
+        final Map<String, String> logicTemplateId2Name = ConvertUtil.list2Map(
+                OPTIMIZE_QUERY_BURR_FUTURE_UTIL.waitResult(), TupleTwo::v1, TupleTwo::v2);
+        //设置模版名称
+        aggClusterPhyTemplateMetrics.stream().map(VariousLineChartMetrics::getMetricsContents)
+                .filter(CollectionUtils::isNotEmpty).flatMap(Collection::stream)
+                .forEach(metricsContent -> metricsContent.setName(logicTemplateId2Name.get(metricsContent.getName())));
+       
     }
 }
