@@ -230,7 +230,7 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
             final DashBoardMetricThresholdDTO dashBoardMetricThresholdDTO = thresholdValues.get(key);
             if (Objects.nonNull(dashBoardMetricThresholdDTO)) {
                 DashBoardMetricThresholdDTO thresholdDTO = thresholdValues.get(key);
-                Double value = Double.parseDouble(String.valueOf(SizeUtil.getDasboardUnitSize(thresholdDTO.getValue()+thresholdDTO.getUnit())));
+                 Double value = Double.parseDouble(String.valueOf(SizeUtil.getDasboardUnitSize(thresholdDTO.getValue().intValue()+thresholdDTO.getUnit().toLowerCase())));
                 
                 metric.setMetricListContents(metric.getMetricListContents().stream()
                         .filter(Objects::nonNull)
