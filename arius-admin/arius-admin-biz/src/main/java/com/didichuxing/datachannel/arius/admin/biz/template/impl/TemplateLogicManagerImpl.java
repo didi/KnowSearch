@@ -742,8 +742,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
                 
             }
         } catch (Exception e) {
-            LOGGER.error("class=TemplateLogicManagerImpl||method=updateDCDRInfo||templateName={}||errorMsg={}", logicId,
-                e.getMessage(), e);
+            LOGGER.error("class={}||method=updateDCDRInfo||templateName={}",getClass().getSimpleName(), logicId, e);
             return false;
         }
        
@@ -756,8 +755,8 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
                 totalIndexCheckPointDiff = Math
                     .abs(masterAndSlaveTemplateCheckPointTuple.getV1() - masterAndSlaveTemplateCheckPointTuple.getV2());
             } catch (Exception e) {
-                LOGGER.error("class=TemplateLogicManagerImpl||method=updateDCDRInfo||templateId={}||errorMsg={}",
-                    logicId, e.getMessage(), e);
+                LOGGER.error("class={}||method=updateDCDRInfo||templateId={}",
+                    getClass().getSimpleName(),logicId,  e);
                  return false;
             }
     
@@ -771,8 +770,8 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             indexTemplateService.editTemplateInfoTODB(indexTemplateDTO);
         } catch (AdminOperateException e) {
             LOGGER.error(
-                "class=TemplateLogicManagerImpl||method=updateDCDRInfo||templateId={}||errorMsg=failed to edit template",
-                logicId, e.getMessage(), e);
+                "class={}||method=updateDCDRInfo||templateId={}",
+                getClass().getSimpleName(),logicId, e);
         }
 
         return true;

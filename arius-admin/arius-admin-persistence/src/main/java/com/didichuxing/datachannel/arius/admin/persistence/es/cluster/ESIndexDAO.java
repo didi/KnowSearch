@@ -51,7 +51,6 @@ import com.didiglobal.logi.elasticsearch.client.response.setting.index.IndexConf
 import com.didiglobal.logi.elasticsearch.client.response.setting.index.MultiIndexsConfig;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -307,19 +306,25 @@ public class ESIndexDAO extends BaseESDAO {
      * @return
      */
     public List<CatIndexResult> catIndexByExpression(String cluster, String expression) {
-        List<CatIndexResult> indices = new ArrayList<>();
-
-        try {
-            ESClient client = fetchESClientByCluster(cluster);
-            if (client != null) {
-                ESIndicesCatIndicesResponse response = client.admin().indices().prepareCatIndices(expression).execute()
-                    .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
-                indices.addAll(response.getCatIndexResults());
-            }
-        } catch (Exception e) {
-            LOGGER.warn("class=ESIndexDAO||method=catIndexByExpression||errMsg={}||cluster={}||expression={}",
-                e.getMessage(), cluster, expression, e);
+        List<CatIndexResult> indices =Lists.newArrayList();
+        ESClient client = fetchESClientByCluster(cluster);
+        if (client != null) {
+            BiFunction<Long, TimeUnit, ESIndicesCatIndicesResponse> catIndicesResponseBiFunction = (timeout, unit) -> {
+                try {
+                    return client.admin().indices().prepareCatIndices(expression).execute()
+                            .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+                } catch (Exception e) {
+                    LOGGER.warn("class=ESIndexDAO||method=catIndexByExpression||errMsg={}||cluster={}||expression={}",
+                            e.getMessage(), cluster, expression, e);
+                    return null;
+                }
+            };
+        
+            Optional.ofNullable(performTryTimesMethods(catIndicesResponseBiFunction, Objects::isNull, 3))
+                    .map(ESIndicesCatIndicesResponse::getCatIndexResults).ifPresent(indices::addAll);
+        
         }
+
 
         return indices;
     }
