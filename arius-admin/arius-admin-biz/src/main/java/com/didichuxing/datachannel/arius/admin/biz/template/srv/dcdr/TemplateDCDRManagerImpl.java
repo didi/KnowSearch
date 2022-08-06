@@ -833,7 +833,7 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
             } catch (Exception e) {
                 LOGGER.error("method=getTemplateDCDRInfoVO||templateId={}||error=master cluster is null", templateId);
                 //链路获取失败可能是集群连接不到,所以这里做出一个补偿，设置为true
-                templateDCDRInfoVO.setDcdrFlag(Boolean.TRUE);
+               return Result.buildFail("模板所属集群异常");
             }
         }
 
@@ -849,6 +849,7 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
             LOGGER.error(
                 "class=TemplateDCDRManagerImpl||method=getTemplateDCDRInfoVO||templateId={}||msg=masterAndSlaveTemplateCheckPointTuple is empty",
                 templateId, e);
+            return Result.buildFail("获取主从位点差失败,请检查主从集群是否正常");
         }
         templateDCDRInfoVO.setMasterClusterName(masterPhyTemplate.getCluster());
         templateDCDRInfoVO.setMasterTemplateCheckPoint(masterAndSlaveTemplateCheckPointTuple.getV1());
@@ -1510,30 +1511,7 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
         if (step > TemplateDCDRStepEnum.STEP_9.getStep() || step < TemplateDCDRStepEnum.STEP_1.getStep()) {
             step = TemplateDCDRStepEnum.STEP_1.getStep();
         }
-        /**
-        boolean syncExistTemplateDCDR = false;
-        try {
-            syncExistTemplateDCDR = syncExistTemplateDCDR(masterTemplate.getId(), slaveTemplate.getCluster());
-        
-        } catch (Exception ignore) {
-            LOGGER.error(
-                    "method={}||logicId={}||operator={}||expectMasterPhysicalId={}||msg=step {} syncExistTemplateDCD is null ",
-                    getClass().getSimpleName(),logicId, operator, expectMasterPhysicalId, step);
-        
-        }
-          if (step < TemplateDCDRStepEnum.STEP_3.getStep() && Boolean.FALSE.equals(syncExistTemplateDCDR)) {
-                //不具备DCDR,主从切换
-                if (step == TemplateDCDRStepEnum.STEP_1.getStep()) {
-                    Result<Void> result = templatePhyManager.switchMasterSlave(masterTemplate.getLogicId(),
-                            slaveTemplate.getId(), operator);
-                    if (result.success()) {
-                        return Result.buildSuccWithMsg("switch");
-                    }
-                    return result;
-                }
-                return Result.buildParamIllegal("DCDR链路不存在");
-            }
-         **/
+     
        
 
         return Result.buildSucc();
