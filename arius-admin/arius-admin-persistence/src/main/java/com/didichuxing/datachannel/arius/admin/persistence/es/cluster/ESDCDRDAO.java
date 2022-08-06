@@ -55,10 +55,17 @@ public class ESDCDRDAO extends BaseESDAO {
      * @return true/false
      */
     public boolean deleteAutoReplication(String cluster, String name) {
-        DCDRTemplate dcdrTemplate = getAutoReplication(cluster, name);
-        if (dcdrTemplate == null) {
-            return true;
+        try {
+            DCDRTemplate dcdrTemplate = getAutoReplication(cluster, name);
+            if (dcdrTemplate == null) {
+                return true;
+            }
+        } catch (Exception e) {
+            LOGGER.error("class={}||method=deleteAutoReplication||clusterName={}||name={}", getClass().getSimpleName(),
+                    cluster, name, e);
+            return false;
         }
+       
 
         ESClient client = esOpClient.getESClient(cluster);
         ESDeleteDCDRTemplateRequest request = new ESDeleteDCDRTemplateRequest();
