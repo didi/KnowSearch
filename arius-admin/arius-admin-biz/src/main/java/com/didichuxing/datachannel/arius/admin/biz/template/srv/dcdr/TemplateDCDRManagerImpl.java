@@ -832,7 +832,6 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
                
             } catch (Exception e) {
                 LOGGER.error("method=getTemplateDCDRInfoVO||templateId={}||error=master cluster is null", templateId);
-                //链路获取失败可能是集群连接不到,所以这里做出一个补偿，设置为true
                return Result.buildFail("模板所属集群异常");
             }
         }
