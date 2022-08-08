@@ -65,6 +65,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
@@ -817,8 +818,10 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
             .getLogicTemplateWithPhysicalsById(templateId);
         IndexTemplatePhy slavePhyTemplate = logicTemplateWithPhysicals.getSlavePhyTemplate();
         IndexTemplatePhy masterPhyTemplate = logicTemplateWithPhysicals.getMasterPhyTemplate();
-        templateDCDRInfoVO.setMasterClusterName(masterPhyTemplate.getCluster());
-        templateDCDRInfoVO.setSlaveClusterName(slavePhyTemplate.getCluster());
+        Optional.ofNullable(masterPhyTemplate)
+                .map(IndexTemplatePhy::getCluster).ifPresent(templateDCDRInfoVO::setMasterClusterName);
+        Optional.ofNullable(slavePhyTemplate)
+                .map(IndexTemplatePhy::getCluster).ifPresent(templateDCDRInfoVO::setSlaveClusterName);
         if (null == masterPhyTemplate) {
             return Result.buildFail(TEMPLATE_NO_EXIST);
         }
