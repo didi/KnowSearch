@@ -10,6 +10,6 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @AllArgsConstructor
-@NoArgsConstructor
+//@NoArgsConstructor
 public class GeneralConfigChangeComponent extends GeneralBaseOperationComponent {
 }

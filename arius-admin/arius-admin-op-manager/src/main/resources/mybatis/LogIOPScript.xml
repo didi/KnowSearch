@@ -23,6 +23,16 @@
         values (#{name}, #{templateId}, #{contentUrl}, #{describe}, #{createTime}, #{updateTime})
     </insert>
 
+    <update id="update" parameterType="com.didiglobal.logi.op.manager.infrastructure.db.ScriptPO">
+        update logi_op_script
+        <trim prefix="set" prefixOverrides=",">
+            <if test="templateId != null">,template_id = #{templateId}</if>
+            <if test="contentUrl != null">,content_url = #{contentUrl}</if>
+            <if test="describe != null">,`describe` = #{describe}</if>
+            <if test="updateTime != null">,update_time = #{updateTime}</if>
+        </trim>
+        where id = #{id}
+    </update>
     <!--<update id="update"
             parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.config.AriusConfigInfoPO">
         update arius_config_info
@@ -35,19 +45,32 @@
         </trim>
         where id = #{id}
     </update>-->
+    <select id="findById"
+            parameterType="com.didiglobal.logi.op.manager.infrastructure.db.ScriptPO"
+            resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from logi_op_script
+        where id = #{id}
+    </select>
 
     <select id="queryScript"
             parameterType="com.didiglobal.logi.op.manager.infrastructure.db.ScriptPO"
             resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
-        from logi_op_script where 1=1
+        from logi_op_script
+        where 1 = 1
         <if test="name != null">and `name` LIKE CONCAT('%', #{name}, '%')</if>
         <if test="describe != null">and `describe` LIKE CONCAT('%', #{describe}, '%')</if>
+        <if test="id != null">and id = #{id}</if>
         order by id desc
     </select>
 
-
+    <delete id="delete" parameterType="com.didiglobal.logi.op.manager.infrastructure.db.ScriptPO">
+        delete from logi_op_script
+        where id = #{id}
+    </delete>
     <!--<select id="getById" parameterType="integer" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>

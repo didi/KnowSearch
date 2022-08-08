@@ -45,13 +45,13 @@ public class ScriptController {
 
     @PostMapping("")
     @ApiOperation(value = "新建脚本")
-    public Result<Void> createScript(@RequestBody ScriptDTO queryScriptDTO) {
+    public Result<Void> createScript( ScriptDTO queryScriptDTO) {
         return scriptService.createScript(ScriptAssembler.toDO(queryScriptDTO));
     }
 
-    @PutMapping("")
+    @PostMapping("edit")
     @ApiOperation(value = "编辑脚本")
-    public Result<Void> editScript(@RequestBody ScriptDTO editScriptDTO) {
+    public Result<Void> editScript( ScriptDTO editScriptDTO) {
         return scriptService.updateScript(ScriptAssembler.toDO(editScriptDTO));
     }
 

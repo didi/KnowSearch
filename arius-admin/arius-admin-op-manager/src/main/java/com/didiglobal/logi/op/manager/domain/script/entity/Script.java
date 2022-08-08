@@ -67,7 +67,7 @@ public class Script {
 
     public Result<Void> checkCreateParam() {
         if (name.isEmpty()) {
-            return Result.fail(ResultCode.PARAM_ERROR.getCode(), "name缺失");
+            return Result.fail(ResultCode.PARAM_ERROR.getCode(), "请填写脚本名称，支持中英文、数字、-、_、4-128位字符");
         }
 
         if (uploadFile.isEmpty()) {
@@ -84,6 +84,7 @@ public class Script {
         if (uploadFile.isEmpty() && null == describe) {
             return Result.fail(ResultCode.PARAM_ERROR.getCode(), "请指定要修改的值（脚本或者描述）");
         }
+
         return Result.success();
     }
 

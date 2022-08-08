@@ -84,7 +84,7 @@ public class ScriptDomainServiceImpl implements com.didiglobal.logi.op.manager.d
             }
             script.setContentUrl(storageRes.getData());
 
-            //修改
+            //修改部署的脚本
             Result<String> deployRes = deploymentService.deployScript(script);
             if (deployRes.failed()) {
                 return Result.fail(deployRes.getCode(), deployRes.getMessage());
@@ -99,6 +99,13 @@ public class ScriptDomainServiceImpl implements com.didiglobal.logi.op.manager.d
 
     @Override
     public Result<Void> deleteScript(int id) {
+        //删除文件存储中的相关脚本文件
+        String contentUrl = getScriptById(id).getData().getContentUrl();
+        String fileName = contentUrl.substring(contentUrl.lastIndexOf("/")+1);
+        Result<String> deleteStorage = storageService.remove(fileName);
+        if (deleteStorage.failed()) {
+            return Result.fail(deleteStorage.getCode(),deleteStorage.getMessage());
+        }
         scriptRepository.deleteScript(id);
         return Result.success();
     }

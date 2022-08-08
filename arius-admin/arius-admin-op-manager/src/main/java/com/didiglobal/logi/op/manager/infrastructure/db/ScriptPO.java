@@ -1,6 +1,7 @@
 package com.didiglobal.logi.op.manager.infrastructure.db;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -17,7 +18,7 @@ public class ScriptPO {
     /**
      * 脚本id
      */
-    private int id;
+    private Integer id;
     /**
      * 脚本名
      */
