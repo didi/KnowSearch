@@ -43,7 +43,7 @@ public class ShardCatCellPO extends BaseESPO {
     @Override
     @JSONField(serialize = false)
     public String getKey() {
-        return index + "@" + shard;
+        return index+"@"+clusterPhy;
     }
 
     @Override
