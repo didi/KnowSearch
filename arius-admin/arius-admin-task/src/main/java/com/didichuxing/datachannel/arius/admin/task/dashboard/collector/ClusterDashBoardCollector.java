@@ -72,7 +72,7 @@ public class ClusterDashBoardCollector extends BaseDashboardCollector {
         //12.消耗时间是否大于5分钟,开始采集到结束采集的时间，指标看板的采集任务，当前时间到最近一次采集的时间
         clusterMetrics.setClusterElapsedTimeGte5Min(collectorDelayed > FIVE_MINUTE);
         clusterMetrics.setCollectorDelayed(collectorDelayed);
-        clusterMetrics.setClusterElapsedTimeGte5Min(elapsedTime > FIVE_MINUTE);
+        clusterMetrics.setClusterElapsedTimeGte5Min(collectorDelayed > FIVE_MINUTE);
         //13.集群下索引数量
         clusterMetrics.setIndexCount(esClusterPhyStatsService.getIndexCountByCluster(cluster));
 
