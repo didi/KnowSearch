@@ -816,8 +816,12 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
         TemplateDCDRInfoVO templateDCDRInfoVO = new TemplateDCDRInfoVO();
         IndexTemplateWithPhyTemplates logicTemplateWithPhysicals = indexTemplateService
             .getLogicTemplateWithPhysicalsById(templateId);
-        IndexTemplatePhy slavePhyTemplate = logicTemplateWithPhysicals.getSlavePhyTemplate();
-        IndexTemplatePhy masterPhyTemplate = logicTemplateWithPhysicals.getMasterPhyTemplate();
+        IndexTemplatePhy slavePhyTemplate = Optional.ofNullable(logicTemplateWithPhysicals)
+                .map(IndexTemplateWithPhyTemplates::getSlavePhyTemplate)
+                .orElse(null);
+        IndexTemplatePhy masterPhyTemplate = Optional.ofNullable(logicTemplateWithPhysicals)
+                .map(IndexTemplateWithPhyTemplates::getMasterPhyTemplate)
+                .orElse(null);
         Optional.ofNullable(masterPhyTemplate)
                 .map(IndexTemplatePhy::getCluster).ifPresent(templateDCDRInfoVO::setMasterClusterName);
         Optional.ofNullable(slavePhyTemplate)
