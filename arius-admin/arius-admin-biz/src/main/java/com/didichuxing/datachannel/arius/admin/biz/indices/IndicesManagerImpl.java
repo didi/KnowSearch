@@ -23,7 +23,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordina
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord.template.TemplateMappingOperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord.template.TemplateSettingOperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexCatCellVO;
@@ -45,6 +44,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.AriusIndexMappingConf
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusOptional;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.IndexSettingsUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.SizeUtil;
@@ -70,9 +70,11 @@ import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
@@ -125,7 +127,14 @@ public class IndicesManagerImpl implements IndicesManager {
     @Autowired
     private ESTemplateService        esTemplateService;
 
-    private static final String     DEFAULT_SORT_TERM = "timestamp";
+    private static final    String                   DEFAULT_SORT_TERM  = "timestamp";
+    private static final FutureUtil<Result<Void>> FUTURE_UTIL_RESULT = FutureUtil.init("IndicesManagerImpl", 10, 10,
+            100);
+        private static final FutureUtil<List</*indexName*/String>> FUTURE_UTIL_RESULT_INDEX_NAME = FutureUtil.init(
+                "IndicesManagerImpl",
+                10,
+                10,
+            100);
 
     @Override
     public PaginationResult<IndexCatCellVO> pageGetIndex(IndexQueryDTO condition,
@@ -219,6 +228,14 @@ public class IndicesManagerImpl implements IndicesManager {
         });
     }
 
+    /**
+     * 批处理操作指数
+     *
+     * @param params    参数个数 {@link IndexCatCellDTO#getCluster()}这里使用此参数作为集群名称；如果是超级项目，就是物理集群，反之为逻辑集群
+     * @param projectId 项目id
+     * @param function  函数
+     * @return {@code Result<Boolean>}
+     */
     @Override
     public <T, U, R> Result<Boolean> batchOperateIndex(List<IndexCatCellDTO> params, Integer projectId,
                                                        BiFunction<String, List<String>, Result<Void>> function) {
@@ -241,10 +258,11 @@ public class IndicesManagerImpl implements IndicesManager {
         for (Map.Entry<String, List<String>> entry : cluster2IndexNameListMap.entrySet()) {
             String cluster = entry.getKey();
             List<String> indexNameList = entry.getValue();
-            Result<Void> r = function.apply(cluster, indexNameList);
-            if (r.failed()) {
-                return Result.buildFrom(r);
-            }
+            FUTURE_UTIL_RESULT.callableTask(() -> function.apply(cluster, indexNameList));
+        }
+        Optional<Result<Void>> voidResult = FUTURE_UTIL_RESULT.waitResult().stream().filter(Result::failed).findAny();
+        if (voidResult.isPresent()) {
+            return Result.buildFrom(voidResult.get());
         }
         sleep(1000L);
         return Result.buildSucc(true);
@@ -582,21 +600,17 @@ public class IndicesManagerImpl implements IndicesManager {
             return Result.buildFrom(getClusterRet);
         }
         String phyCluster = getClusterRet.getData();
-        Integer queryProjectId = null;
-        if (!AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
-            queryProjectId = projectId;
-        }
-        Tuple<Long, List<IndexCatCell>> totalHitAndIndexCatCellListTuple = esIndexCatService
-            .syncGetCatIndexInfo(cluster, indexName, null, null, queryProjectId, 0L, 1L, DEFAULT_SORT_TERM, true);
-        if (null == totalHitAndIndexCatCellListTuple
-            || CollectionUtils.isEmpty(totalHitAndIndexCatCellListTuple.getV2())) {
+    
+        IndexCatCell indexCatCell = esIndexCatService.syncGetCatIndexInfoById(phyCluster, indexName);
+    
+        if (Objects.isNull(indexCatCell)) {
             return Result.buildFail("获取单个索引详情信息失败");
         }
         //设置索引阻塞信息
         List<IndexCatCell> finalIndexCatCellList = esIndexService.buildIndexAliasesAndBlockInfo(phyCluster,
-            totalHitAndIndexCatCellListTuple.getV2());
+                Collections.singletonList(indexCatCell));
         List<IndexCatCellVO> indexCatCellVOList = ConvertUtil.list2List(finalIndexCatCellList, IndexCatCellVO.class);
-
+    
         return Result.buildSucc(indexCatCellVOList.get(0));
     }
 
@@ -753,25 +767,7 @@ public class IndicesManagerImpl implements IndicesManager {
 
     @Override
     public Result<List<String>> getClusterLogicIndexName(String clusterLogicName, Integer projectId) {
-        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByNameAndProjectId(clusterLogicName, projectId);
-        if (clusterLogic == null) {
-            return Result.buildFail();
-        }
-        ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(clusterLogic.getId());
-        if (clusterRegion == null) {
-            return Result.buildFail();
-        }
-        Result<List<IndexTemplate>> listResult = indexTemplateService
-            .listByRegionId(Math.toIntExact(clusterRegion.getId()));
-        List<IndexTemplate> indexTemplates = listResult.getData();
-
-        List<CatIndexResult> catIndexResultList = new ArrayList<>();
-        indexTemplates.forEach(indexTemplate -> {
-            catIndexResultList.addAll(esIndexService.syncCatIndexByExpression(clusterRegion.getPhyClusterName(),
-                indexTemplate.getExpression()));
-        });
-        List<String> indexNames = catIndexResultList.stream().map(CatIndexResult::getIndex)
-            .collect(Collectors.toList());
+        List<String> indexNames = esIndexCatService.syncGetIndexListByProjectId(projectId,clusterLogicName);
         return Result.buildSucc(indexNames);
     }
 

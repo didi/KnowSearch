@@ -1,10 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.metadata.service;
 
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsClusterPhyNodeDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsClusterPhyNodeTaskDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.VariousLineChartMetrics;
@@ -12,6 +7,10 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordina
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats.AriusStatsClusterTaskInfoESDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats.AriusStatsNodeInfoESDAO;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class NodeStatsService {
@@ -53,7 +52,6 @@ public class NodeStatsService {
         Long startTime = param.getStartTime();
         List<String> metricsTypes = param.getMetricsTypes();
         List<String> aggTypes = param.getAggTypes();
-        List<String> nodeNamesUnderClusterLogic = param.getItemNamesUnderClusterLogic();
 
         if (!AriusObjUtils.isBlack(param.getNodeName())) {
             return ariusStatsClusterTaskInfoESDAO.getAggClusterPhySingleNodeMetrics(clusterPhyName, metricsTypes,

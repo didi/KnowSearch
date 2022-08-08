@@ -132,7 +132,7 @@ public interface ClusterLogicManager {
      * @throws AdminOperateException
      */
     Result<Void> deleteLogicCluster(Long logicClusterId, String operator,
-                                    Integer projectId) throws AdminOperateException;
+                                    Integer projectId) ;
 
     /**
      *  修改逻辑集群信息

@@ -269,13 +269,13 @@ class DashboardMetricsManagerTest {
 
         // Configure DashBoardMetricsService.getListFaultMetrics(...).
         final MetricList metricList = new MetricList(0L, "type",
-            Arrays.asList(new MetricListContent("clusterPhyName", "name", 0.0)));
+            Arrays.asList(new MetricListContent("clusterPhyName", "name", 0.0,0L)));
         when(dashBoardMetricsService.getListFaultMetrics("oneLevelType", "metricsType", "aggType", false))
             .thenReturn(metricList);
 
         // Configure DashBoardMetricsService.getListValueMetrics(...).
         final MetricList metricList1 = new MetricList(0L, "type",
-            Arrays.asList(new MetricListContent("clusterPhyName", "name", 0.0)));
+            Arrays.asList(new MetricListContent("clusterPhyName", "name", 0.0,0L)));
         when(dashBoardMetricsService.getListValueMetrics("oneLevelType", "metricsType", "aggType", false))
             .thenReturn(metricList1);
 
@@ -298,13 +298,13 @@ class DashboardMetricsManagerTest {
 
         // Configure DashBoardMetricsService.getListFaultMetrics(...).
         final MetricList metricList = new MetricList(0L, "type",
-            Arrays.asList(new MetricListContent("clusterPhyName", "name", 0.0)));
+            Arrays.asList(new MetricListContent("clusterPhyName", "name", 0.0,0L)));
         when(dashBoardMetricsService.getListFaultMetrics("oneLevelType", "metricsType", "aggType", false))
             .thenReturn(metricList);
 
         // Configure DashBoardMetricsService.getListValueMetrics(...).
         final MetricList metricList1 = new MetricList(0L, "type",
-            Arrays.asList(new MetricListContent("clusterPhyName", "name", 0.0)));
+            Arrays.asList(new MetricListContent("clusterPhyName", "name", 0.0,0L)));
         when(dashBoardMetricsService.getListValueMetrics("oneLevelType", "metricsType", "aggType", false))
             .thenReturn(metricList1);
 
@@ -327,13 +327,13 @@ class DashboardMetricsManagerTest {
 
         // Configure DashBoardMetricsService.getListFaultMetrics(...).
         final MetricList metricList = new MetricList(0L, "type",
-            Arrays.asList(new MetricListContent("clusterPhyName", "name", 0.0)));
+            Arrays.asList(new MetricListContent("clusterPhyName", "name", 0.0,0L)));
         when(dashBoardMetricsService.getListFaultMetrics("oneLevelType", "metricsType", "aggType", false))
             .thenReturn(metricList);
 
         // Configure DashBoardMetricsService.getListValueMetrics(...).
         final MetricList metricList1 = new MetricList(0L, "type",
-            Arrays.asList(new MetricListContent("clusterPhyName", "name", 0.0)));
+            Arrays.asList(new MetricListContent("clusterPhyName", "name", 0.0,0L)));
         when(dashBoardMetricsService.getListValueMetrics("oneLevelType", "metricsType", "aggType", false))
             .thenReturn(metricList1);
 
@@ -356,13 +356,13 @@ class DashboardMetricsManagerTest {
 
         // Configure DashBoardMetricsService.getListFaultMetrics(...).
         final MetricList metricList = new MetricList(0L, "type",
-            Arrays.asList(new MetricListContent("clusterPhyName", "name", 0.0)));
+            Arrays.asList(new MetricListContent("clusterPhyName", "name", 0.0,0L)));
         when(dashBoardMetricsService.getListFaultMetrics("oneLevelType", "metricsType", "aggType", false))
             .thenReturn(metricList);
 
         // Configure DashBoardMetricsService.getListValueMetrics(...).
         final MetricList metricList1 = new MetricList(0L, "type",
-            Arrays.asList(new MetricListContent("clusterPhyName", "name", 0.0)));
+            Arrays.asList(new MetricListContent("clusterPhyName", "name", 0.0,0L)));
         when(dashBoardMetricsService.getListValueMetrics("oneLevelType", "metricsType", "aggType", false))
             .thenReturn(metricList1);
 

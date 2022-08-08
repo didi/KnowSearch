@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
@@ -25,6 +26,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyIndicesMetricsEnum.INDEXING_RATE;
@@ -1110,6 +1112,38 @@ public class AriusStatsIndexInfoESDAO extends BaseAriusStatsESDAO {
         return buildMetrics;
     }
 
+    public List<VariousLineChartMetrics> getTopNIndicesAggMetricsWithStep(String clusterPhyName,
+                                                                          List<String> metricsTypes, Integer topNu,
+                                                                          String topMethod, Integer topTimeStep,
+                                                                          String aggType, Long startTime,
+                                                                          Long endTime, List<String> belongToProjectIndexName) {
+        if (CollectionUtils.isEmpty(belongToProjectIndexName)) {
+            return Collections.emptyList();
+        }
+        List<VariousLineChartMetrics> buildMetrics = Lists.newCopyOnWriteArrayList();
+
+        List<TopMetrics> topNIndexMetricsList = Lists.newArrayList();
+        if (belongToProjectIndexName.size() < topNu) {
+            Function<String,TopMetrics> metricsFunction=metricsType->{
+                TopMetrics topMetrics = new TopMetrics();
+                topMetrics.setType(metricsType);
+                topMetrics.setTopNames(belongToProjectIndexName);
+                return topMetrics;
+            };
+            topNIndexMetricsList = metricsTypes.stream().map(type->metricsFunction.apply(type)).collect(Collectors.toList());
+        }else {
+            topNIndexMetricsList = buildTopNIndexMetricsInfoWithStep(clusterPhyName, metricsTypes, topNu,
+                    topMethod, topTimeStep, indicesBucketsMaxNum, startTime, endTime, belongToProjectIndexName);
+        }
+
+        for (TopMetrics topMetrics : topNIndexMetricsList) {
+            futureUtil.runnableTask(() -> buildTopNSingleMetricsForIndex(buildMetrics, clusterPhyName, aggType,
+                    indicesBucketsMaxNum, startTime, endTime, topMetrics));
+        }
+        futureUtil.waitExecute();
+
+        return buildMetrics;
+    }
     private List<TopMetrics> buildTopNIndexMetricsInfoWithStep(String clusterPhyName, List<String> metricsTypes,
                                                                Integer topNu, String topMethod, Integer topTimeStep,
                                                                int indicesBucketsMaxNum, Long startTime, Long endTime) {
@@ -1137,6 +1171,36 @@ public class AriusStatsIndexInfoESDAO extends BaseAriusStatsESDAO {
 
         return variousLineChartMetrics.stream().map(this::buildTopMetrics).collect(Collectors.toList());
     }
+    
+    private List<TopMetrics> buildTopNIndexMetricsInfoWithStep(String clusterPhyName, List<String> metricsTypes,
+                                                               Integer topNu, String topMethod, Integer topTimeStep,
+                                                               int indicesBucketsMaxNum, Long startTime, Long endTime,
+                                                               List<String> belongToProjectIndexName) {
+        List<VariousLineChartMetrics> variousLineChartMetrics;
+        Long timePoint = getHasDataTime(clusterPhyName, startTime, endTime,
+                DslsConstant.GET_HAS_INDEX_METRICS_DATA_TIME);
+        //没有数据则提前终止
+        if (null == timePoint) {
+            return new ArrayList<>();
+        }
+        
+        long startTimeForOneInterval = timePoint - topTimeStep;
+        long endTimeForOneInterval = timePoint;
+        
+        String dsl = dslLoaderUtil.getFormatDslByFileName(
+                DslsConstant.GET_AGG_MULTIPLE_INDICES_METRICS_WITH_STEP_AND_INDEX_LIST, clusterPhyName,
+                JSON.toJSONString(belongToProjectIndexName), startTimeForOneInterval, endTimeForOneInterval,
+                indicesBucketsMaxNum, STEP_INTERVAL, buildAggsDSL(metricsTypes, topMethod),
+                buildAggsDSLWithStep(metricsTypes, topMethod));
+        
+        String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTimeForOneInterval,
+                endTimeForOneInterval);
+        
+        variousLineChartMetrics = gatewayClient.performRequestWithRouting(metadataClusterName, null, realIndexName,
+                TYPE, dsl, s -> fetchMultipleAggMetricsWithStep(s, metricsTypes, topNu, topMethod, null), 3);
+        
+        return variousLineChartMetrics.stream().map(this::buildTopMetrics).collect(Collectors.toList());
+    }
 
     public List<VariousLineChartMetrics> getTopNTemplateAggMetricsWithStep(String clusterPhyName,
                                                                            List<String> metricsTypes, Integer topNu,
@@ -1146,6 +1210,39 @@ public class AriusStatsIndexInfoESDAO extends BaseAriusStatsESDAO {
         List<VariousLineChartMetrics> buildMetrics = Lists.newCopyOnWriteArrayList();
         List<TopMetrics> topNTemplateMetricsList = buildTopNTemplateMetricsInfoWithStep(clusterPhyName, metricsTypes,
             topNu, topMethod, topTimeStep, aggType, indicesBucketsMaxNum, startTime, endTime);
+
+        for (TopMetrics topMetrics : topNTemplateMetricsList) {
+            futureUtil.runnableTask(() -> buildTopNSingleMetricsForTemplate(buildMetrics, clusterPhyName, aggType,
+                indicesBucketsMaxNum, startTime, endTime, topMetrics));
+        }
+        futureUtil.waitExecute();
+
+        return buildMetrics;
+    }
+     public List<VariousLineChartMetrics> getTopNTemplateAggMetricsWithStep(String clusterPhyName,
+                                                                           List<String> metricsTypes, Integer topNu,
+                                                                           String topMethod, Integer topTimeStep,
+                                                                           String aggType, Long startTime,
+                                                                           Long endTime,List<Integer> belongToProjectIdLogicTemplateIdList) {
+         if (CollectionUtils.isEmpty(belongToProjectIdLogicTemplateIdList)) {
+             return Collections.emptyList();
+         }
+         List<VariousLineChartMetrics> buildMetrics = Lists.newCopyOnWriteArrayList();
+
+         List<TopMetrics> topNTemplateMetricsList = Lists.newArrayList();
+         if (belongToProjectIdLogicTemplateIdList.size() < topNu) {
+             Function<String,TopMetrics> metricsFunction=metricsType->{
+                 TopMetrics topMetrics = new TopMetrics();
+                 topMetrics.setType(metricsType);
+                 topMetrics.setTopNames(belongToProjectIdLogicTemplateIdList.stream().map(String::valueOf).collect(Collectors.toList()));
+                 return topMetrics;
+             };
+             topNTemplateMetricsList = metricsTypes.stream().map(type->metricsFunction.apply(type)).collect(Collectors.toList());
+         }else {
+             topNTemplateMetricsList = buildTopNTemplateMetricsInfoWithStep(clusterPhyName, metricsTypes,
+                     topNu, topMethod, topTimeStep, aggType, indicesBucketsMaxNum, startTime, endTime,belongToProjectIdLogicTemplateIdList);
+         }
+
 
         for (TopMetrics topMetrics : topNTemplateMetricsList) {
             futureUtil.runnableTask(() -> buildTopNSingleMetricsForTemplate(buildMetrics, clusterPhyName, aggType,
@@ -1175,6 +1272,36 @@ public class AriusStatsIndexInfoESDAO extends BaseAriusStatsESDAO {
 
         String dsl = dslLoaderUtil.getFormatDslByFileName(
             DslsConstant.GET_MULTIPLE_TEMPLATE_FIRST_INTERVAL_AGG_METRICS_WITH_STEP, clusterPhyName,
+            startTimeForOneInterval, endTimeForOneInterval, indicesBucketsMaxNum, interval,
+            buildAggsDSL(metricsTypes, topMethod), buildAggsDSLWithStep(metricsTypes, topMethod));
+
+        String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTimeForOneInterval,
+            endTimeForOneInterval);
+
+        variousLineChartMetrics = gatewayClient.performRequestWithRouting(metadataClusterName, null, realIndexName,
+            TYPE, dsl, s -> fetchMultipleAggMetricsWithStep(s, metricsTypes, topNu, topMethod, null), 3);
+
+        return variousLineChartMetrics.stream().map(this::buildTopMetrics).collect(Collectors.toList());
+    }
+    private List<TopMetrics> buildTopNTemplateMetricsInfoWithStep(String clusterPhyName, List<String> metricsTypes,
+                                                                  Integer topNu, String topMethod, Integer topTimeStep,
+                                                                  String aggType, int indicesBucketsMaxNum,
+                                                                  Long startTime, Long endTime,List<Integer> belongToProjectIdLogicTemplateIdList) {
+        List<VariousLineChartMetrics> variousLineChartMetrics ;
+        Long timePoint = getHasDataTime(clusterPhyName, startTime, endTime,
+            DslsConstant.GET_HAS_INDEX_METRICS_DATA_TIME);
+        //没有数据则提前终止
+        if (null == timePoint) {
+            return new ArrayList<>();
+        }
+
+        long startTimeForOneInterval = timePoint - topTimeStep;
+        long endTimeForOneInterval = timePoint;
+
+        String interval = "1m";
+    
+        String dsl = dslLoaderUtil.getFormatDslByFileName(
+            DslsConstant.GET_AGG_MULTIPLE_TEMPLATE_METRICS_WITH_STEP_AND_LOGIC_IDS, JSON.toJSONString(belongToProjectIdLogicTemplateIdList),clusterPhyName,
             startTimeForOneInterval, endTimeForOneInterval, indicesBucketsMaxNum, interval,
             buildAggsDSL(metricsTypes, topMethod), buildAggsDSLWithStep(metricsTypes, topMethod));
 

@@ -108,6 +108,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -737,13 +738,15 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             IndexTemplatePhy masterPhyTemplate = logicTemplateWithPhysicals.getMasterPhyTemplate();
             if (null != masterPhyTemplate && null != slavePhyTemplate) {
                 dcdrFlag = templateDcdrManager.syncExistTemplateDCDR(masterPhyTemplate.getId(),
-                    slavePhyTemplate.getCluster());
+                        slavePhyTemplate.getCluster());
+                
             }
         } catch (Exception e) {
-            LOGGER.error("class=TemplateLogicManagerImpl||method=updateDCDRInfo||templateName={}||errorMsg={}", logicId,
-                e.getMessage(), e);
+            LOGGER.error("class={}||method=updateDCDRInfo||templateName={}",getClass().getSimpleName(), logicId, e);
+            return false;
         }
-
+       
+       
         // 2. 获取位点差dcdr
         if (dcdrFlag) {
             try {
@@ -752,9 +755,11 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
                 totalIndexCheckPointDiff = Math
                     .abs(masterAndSlaveTemplateCheckPointTuple.getV1() - masterAndSlaveTemplateCheckPointTuple.getV2());
             } catch (Exception e) {
-                LOGGER.error("class=TemplateLogicManagerImpl||method=updateDCDRInfo||templateId={}||errorMsg={}",
-                    logicId, e.getMessage(), e);
+                LOGGER.error("class={}||method=updateDCDRInfo||templateId={}",
+                    getClass().getSimpleName(),logicId,  e);
+                 return false;
             }
+    
         }
 
         try {
@@ -765,8 +770,8 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             indexTemplateService.editTemplateInfoTODB(indexTemplateDTO);
         } catch (AdminOperateException e) {
             LOGGER.error(
-                "class=TemplateLogicManagerImpl||method=updateDCDRInfo||templateId={}||errorMsg=failed to edit template",
-                logicId, e.getMessage(), e);
+                "class={}||method=updateDCDRInfo||templateId={}",
+                getClass().getSimpleName(),logicId, e);
         }
 
         return true;
@@ -936,9 +941,15 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         if (clusterRegion == null) {
             return Result.buildFail();
         }
+        Predicate<IndexTemplate> filterProjectId = indexTemplate -> AuthConstant.SUPER_PROJECT_ID.equals(projectId)
+                                                                    || Objects.equals(indexTemplate.getProjectId(),
+                projectId);
         Result<List<IndexTemplate>> listResult = indexTemplateService
             .listByRegionId(Math.toIntExact(clusterRegion.getId()));
-        List<ConsoleTemplateVO> vos = listResult.getData().stream().map(indexTemplate -> {
+        List<ConsoleTemplateVO> vos = listResult.getData().stream()
+                .filter(filterProjectId)
+                
+                .map(indexTemplate -> {
             ConsoleTemplateVO vo = new ConsoleTemplateVO();
             BeanUtils.copyProperties(indexTemplate, vo);
             return vo;
@@ -1002,10 +1013,11 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
 
     /**
      * @param logicId
+     * @param projectId
      * @return
      */
     @Override
-    public Result<ConsoleTemplateDetailVO> getDetailVoByLogicId(Integer logicId) {
+    public Result<ConsoleTemplateDetailVO> getDetailVoByLogicId(Integer logicId, Integer projectId) {
         if (Objects.isNull(logicId)) {
             return Result.buildSucc();
         }
@@ -1021,8 +1033,16 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             ConsoleTemplateDetailVO.class);
 
         consoleTemplateDetail.setCyclicalRoll(indexTemplateLogicWithCluster.getExpression().endsWith("*"));
-        consoleTemplateDetail
-            .setCluster(templateLogicManager.jointCluster(indexTemplateLogicWithCluster.getLogicClusters()));
+
+        // supperApp显示物理集群，其他项目显示逻辑集群
+        if(AuthConstant.SUPER_PROJECT_ID.equals(projectId)){
+            List<IndexTemplatePhy> indexTemplatePhyList = indexTemplatePhyService.getTemplateByLogicId(logicId);
+            List<String> phyClusters = indexTemplatePhyList.stream().map(IndexTemplatePhy::getCluster).collect(Collectors.toList());
+            consoleTemplateDetail.setCluster(StringUtils.join(phyClusters, ","));
+        }else {
+            consoleTemplateDetail
+                    .setCluster(templateLogicManager.jointCluster(indexTemplateLogicWithCluster.getLogicClusters()));
+        }
 
         // 仅对有一个逻辑集群的情况设置集群类型与等级
         if (indexTemplateLogicWithCluster.getLogicClusters().size() == 1) {

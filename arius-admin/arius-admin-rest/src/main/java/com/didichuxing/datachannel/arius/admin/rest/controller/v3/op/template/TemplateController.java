@@ -73,7 +73,7 @@ public class TemplateController extends BaseTemplateController {
     public Result<ConsoleTemplateDetailVO> detail(HttpServletRequest request,
                                                   @PathVariable("logicId") Integer logicId) {
 
-        return templateLogicManager.getDetailVoByLogicId(logicId);
+        return templateLogicManager.getDetailVoByLogicId(logicId, HttpRequestUtil.getProjectId(request));
 
     }
 

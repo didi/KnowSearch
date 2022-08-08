@@ -152,6 +152,7 @@ public class DslsConstant {
      * 查询第一个时间分片中指标数值的索引指标信息
      */
     public static final String GET_MULTIPLE_INDEX_FIRST_INTERVAL_AGG_METRICS_WITH_STEP       = "AriusStatsIndexInfoEsDao/getAggMultipleIndicesMetricsWithStep";
+    public static final String GET_AGG_MULTIPLE_INDICES_METRICS_WITH_STEP_AND_INDEX_LIST       = "AriusStatsIndexInfoEsDao/getAggMultipleIndicesMetricsWithStepAndIndexList";
 
 
     /**
@@ -168,6 +169,7 @@ public class DslsConstant {
      * 查询单个模板聚合信息
      */
     public static final String GET_AGG_SINGLE_TEMPLATE_METRICS                               = "AriusStatsIndexInfoEsDao/getAggSingleTemplateMetrics";
+    public static final String GET_AGG_MULTIPLE_TEMPLATE_METRICS_WITH_STEP_AND_LOGIC_IDS                               = "AriusStatsIndexInfoEsDao/getAggMultipleTemplateMetricsWithStepAndLogicIds";
 
     /**
      * 获取单个指标项
@@ -693,6 +695,10 @@ public class DslsConstant {
     public static final String GET_ALL_CAT_INDEX_INFO_BY_TERMS                               = "IndexCatESDAO/getAllCatIndexInfoByTerms";
 
     public static final String GET_PLATFORM_CREATE_CAT_INDEX  = "IndexCatESDAO/getPlatformCreateCatIndex";
+    public static final String GET_PLATFORM_CREATE_CAT_INDEX_BY_INDEX_PROJECT  = "IndexCatESDAO/getPlatformCreateCatIndexByIndexProject";
+    public static final String GET_PLATFORM_CREATE_CAT_INDEX_GROUP_BY_CLUSTER  = "IndexCatESDAO/getPlatformCreateCatIndexGroupByCluster";
+    
+    public static final String GET_PLATFORM_CREATE_CAT_INDEX_BY_ID  = "IndexCatESDAO/getPlatformCreateCatIndexById";
 
     /************************************************************      ShardCatESDAO     **************************************************************/
     /**

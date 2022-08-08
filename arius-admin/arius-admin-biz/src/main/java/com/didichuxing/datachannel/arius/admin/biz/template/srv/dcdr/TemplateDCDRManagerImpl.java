@@ -206,6 +206,11 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
         if (null == targetClusterPhyResult.getData()) {
             return Result.buildFail(String.format("目标集群[%s]不存在", targetCluster));
         }
+        //校验target具备dcdr
+        if (Boolean.FALSE.equals(
+                clusterPhyManager.getDCDRAndPipelineAndColdRegionTupleByClusterPhyWithCache(targetCluster).v1)) {
+            return Result.buildFail(String.format("目标集群【%s】不支持dcdr", targetCluster));
+        }
         IndexTemplatePhy masterPhyTemplate = templateLogicWithPhysical.getMasterPhyTemplate();
         if (null == masterPhyTemplate) {
             return Result.buildFail(String.format("模板Id[%s]不存在", templateId));
@@ -820,11 +825,18 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
             templateDCDRInfoVO.setDcdrFlag(false);
             return Result.buildSuccWithTips(templateDCDRInfoVO, "模板未开启DCDR链路");
         } else {
-            templateDCDRInfoVO
-                .setDcdrFlag(syncExistTemplateDCDR(masterPhyTemplate.getId(), slavePhyTemplate.getCluster()));
+            try {
+        
+                templateDCDRInfoVO.setDcdrFlag(
+                        syncExistTemplateDCDR(masterPhyTemplate.getId(), slavePhyTemplate.getCluster()));
+               
+            } catch (Exception e) {
+                LOGGER.error("method=getTemplateDCDRInfoVO||templateId={}||error=master cluster is null", templateId);
+               return Result.buildFail("模板所属集群异常");
+            }
         }
 
-        if (!templateDCDRInfoVO.getDcdrFlag()) {
+        if (Boolean.FALSE.equals(templateDCDRInfoVO.getDcdrFlag())) {
             return Result.buildSuccWithTips(templateDCDRInfoVO, "模板未开启DCDR链路");
         }
 
@@ -836,6 +848,7 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
             LOGGER.error(
                 "class=TemplateDCDRManagerImpl||method=getTemplateDCDRInfoVO||templateId={}||msg=masterAndSlaveTemplateCheckPointTuple is empty",
                 templateId, e);
+            return Result.buildFail("获取主从位点差失败,请检查主从集群是否正常");
         }
         templateDCDRInfoVO.setMasterClusterName(masterPhyTemplate.getCluster());
         templateDCDRInfoVO.setMasterTemplateCheckPoint(masterAndSlaveTemplateCheckPointTuple.getV1());
@@ -843,7 +856,8 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
         templateDCDRInfoVO.setSlaveClusterName(slavePhyTemplate.getCluster());
         templateDCDRInfoVO.setSlaveTemplateCheckPoint(masterAndSlaveTemplateCheckPointTuple.getV2());
 
-        long checkPointDiff = Math
+        long checkPointDiff =
+                Math
             .abs(masterAndSlaveTemplateCheckPointTuple.getV1() - masterAndSlaveTemplateCheckPointTuple.getV2());
         templateDCDRInfoVO.setTemplateCheckPointDiff(checkPointDiff);
         return Result.buildSucc(templateDCDRInfoVO);
@@ -1005,7 +1019,7 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
                                                      Long expectMasterPhysicalId, int step,
                                                      IndexTemplatePhy masterTemplate, IndexTemplatePhy slaveTemplate,
                                                      String operator) {
-        List<String> matchIndexNames = indexTemplatePhyService.getMatchIndexNames(masterTemplate.getId());
+        List<String> matchIndexNames = indexTemplatePhyService.getMatchIndexNames(slaveTemplate.getId());
         int templateId = switchDetail.getTemplateId().intValue();
         try {
             if (DCDR_SWITCH_STEP_1 == step) {
@@ -1016,9 +1030,7 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
                     setSettingResult = Result.buildFail(TASK_IS_CANCEL);
                 } else {
                     Result<Void> changeSlaveDCDRConfig = changeDCDRConfig(slaveTemplate.getCluster(), matchIndexNames,
-                        false);
-                    changeDCDRConfig(masterTemplate.getCluster(), matchIndexNames, true);
-
+                            false);
                     if (changeSlaveDCDRConfig.failed()) {
                         setSettingResult = Result.buildFail(changeSlaveDCDRConfig.getMessage());
                     }
@@ -1081,7 +1093,7 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
                                                       Long expectMasterPhysicalId, int step,
                                                       IndexTemplatePhy masterTemplate, IndexTemplatePhy slaveTemplate,
                                                       String operator) {
-        List<String> matchIndexNames = indexTemplatePhyService.getMatchIndexNames(masterTemplate.getId());
+        List<String> matchIndexNames = indexTemplatePhyService.getMatchIndexNames(slaveTemplate.getId());
 
         int templateId = switchDetail.getTemplateId().intValue();
 
@@ -1498,20 +1510,8 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
         if (step > TemplateDCDRStepEnum.STEP_9.getStep() || step < TemplateDCDRStepEnum.STEP_1.getStep()) {
             step = TemplateDCDRStepEnum.STEP_1.getStep();
         }
-
-        if (step < TemplateDCDRStepEnum.STEP_3.getStep()
-            && !syncExistTemplateDCDR(masterTemplate.getId(), slaveTemplate.getCluster())) {
-            //不具备DCDR,主从切换
-            if (step == TemplateDCDRStepEnum.STEP_1.getStep()) {
-                Result<Void> result = templatePhyManager.switchMasterSlave(masterTemplate.getLogicId(),
-                    slaveTemplate.getId(), operator);
-                if (result.success()) {
-                    return Result.buildSuccWithMsg("switch");
-                }
-                return result;
-            }
-            return Result.buildParamIllegal("DCDR链路不存在");
-        }
+     
+       
 
         return Result.buildSucc();
     }
@@ -1723,8 +1723,6 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
         //是否需要设置下一批DCDR模板切换任务的状态为running
         setNextBatchDCDRTaskDetailStateToRunning(dcdrTasksDetail);
 
-        taskForDCDRSwitch.setExpandData(ConvertUtil.obj2Json(dcdrTasksDetail));
-
         if (DCDRStatusEnum.SUCCESS.getCode().equals(dcdrTasksDetail.getState())) {
             taskForDCDRSwitch.setStatus(OpTaskStatusEnum.SUCCESS.getStatus());
             //成功删除DCDR链路
@@ -1740,6 +1738,8 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
         if (DCDRStatusEnum.RUNNING.getCode().equals(dcdrTasksDetail.getState())) {
             taskForDCDRSwitch.setStatus(OpTaskStatusEnum.RUNNING.getStatus());
         }
+
+        taskForDCDRSwitch.setExpandData(ConvertUtil.obj2Json(dcdrTasksDetail));
 
         // 解决分布式部署由于时序不一致带来更新不一致的问题
         Result<OpTask> workTaskResult = opTaskManager.getById(taskForDCDRSwitch.getId());

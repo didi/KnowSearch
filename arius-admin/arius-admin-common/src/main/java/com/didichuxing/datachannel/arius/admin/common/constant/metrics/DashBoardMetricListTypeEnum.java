@@ -18,6 +18,7 @@ public enum DashBoardMetricListTypeEnum {
     NODE_WRITE_REJECTED_NUM(OneLevelTypeEnum.NODE, "writeRejectedNum", "WriteRejected节点"),
     NODE_SEARCH_REJECTED_NUM(OneLevelTypeEnum.NODE, "searchRejectedNum", "SearchRejected节点"),
     NODE_SHARD_NUM(OneLevelTypeEnum.NODE, "shardNum", "shardNum节点"),
+    CLUSTER_SHARD_NUM(OneLevelTypeEnum.CLUSTER, "shardNum", "shardNum节点"),
     
     TEMPLATE_SEGMENT_MEM_NUM(OneLevelTypeEnum.TEMPLATE, "segmentMemSize", "模板Segments内存大小（MB）"),
     TEMPLATE_SEGMENT_NUM(OneLevelTypeEnum.TEMPLATE, "segmentNum", "模板Segments个数"),
@@ -124,7 +125,7 @@ public enum DashBoardMetricListTypeEnum {
     
     public static List<String> getValueTypeList() {
         return Lists.newArrayList(NODE_WRITE_REJECTED_NUM.getType(), NODE_SEARCH_REJECTED_NUM.getType(),
-                NODE_SHARD_NUM.getType(), NODE_LARGE_DISK_USAGE.getType(), NODE_LARGE_HEAD.getType(),
+                NODE_SHARD_NUM.getType(),CLUSTER_SHARD_NUM.getType(), NODE_LARGE_DISK_USAGE.getType(), NODE_LARGE_HEAD.getType(),
                 NODE_LARGE_CPU_USAGE.getType(), TEMPLATE_SEGMENT_MEM_NUM.getType(), TEMPLATE_SEGMENT_NUM.getType(),
                 INDEX_MAPPING_NUM.getType(), INDEX_SEGMENT_MEM_SIZE.getType(), INDEX_SEGMENT_NUM.getType());
     }

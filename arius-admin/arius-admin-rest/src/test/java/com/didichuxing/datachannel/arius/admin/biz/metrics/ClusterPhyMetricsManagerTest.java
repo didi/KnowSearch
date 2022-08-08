@@ -88,7 +88,7 @@ class ClusterPhyMetricsManagerTest {
     void getClusterMetricsByMetricsTypeTest() throws NotFindSubclassException {
         // Setup
         final MetricsClusterPhyDTO param = new MetricsClusterPhyDTO("clusterPhyName", "clusterLogicName", 0L, 0L,
-            "aggType", Arrays.asList("value"), 0, 0, "topMethod", Arrays.asList("value"));
+            "aggType", Arrays.asList("value"), 0, 0, "topMethod", Arrays.asList("value"),null);
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
         final ClusterLogic clusterLogic  = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0,
@@ -139,7 +139,7 @@ class ClusterPhyMetricsManagerTest {
     void getClusterMetricsByMetricsTypeClusterRegionServiceReturnsNullTest() {
         // Setup
         final MetricsClusterPhyDTO param = new MetricsClusterPhyDTO("clusterPhyName", "clusterLogicName", 0L, 0L,
-            "aggType", Arrays.asList("value"), 0, 0, "topMethod", Arrays.asList("value"));
+            "aggType", Arrays.asList("value"), 0, 0, "topMethod", Arrays.asList("value"),null);
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
         final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0,  "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
@@ -158,7 +158,7 @@ class ClusterPhyMetricsManagerTest {
     void getClusterMetricsByMetricsTypeClusterRoleHostServiceReturnsNoItemTest() throws NotFindSubclassException {
         // Setup
         final MetricsClusterPhyDTO param = new MetricsClusterPhyDTO("clusterPhyName", "clusterLogicName", 0L, 0L,
-            "aggType", Arrays.asList("value"), 0, 0, "topMethod", Arrays.asList("value"));
+            "aggType", Arrays.asList("value"), 0, 0, "topMethod", Arrays.asList("value"),null);
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
         final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0,
@@ -205,7 +205,7 @@ class ClusterPhyMetricsManagerTest {
     void getClusterMetricsByMetricsTypeClusterRoleHostServiceReturnsNoItemsTest() throws NotFindSubclassException {
         // Setup
         final MetricsClusterPhyDTO param = new MetricsClusterPhyDTO("clusterPhyName", "clusterLogicName", 0L, 0L,
-            "aggType", Arrays.asList("value"), 0, 0, "topMethod", Arrays.asList("value"));
+            "aggType", Arrays.asList("value"), 0, 0, "topMethod", Arrays.asList("value"),null);
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
         final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0, "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
@@ -253,7 +253,7 @@ class ClusterPhyMetricsManagerTest {
     void getClusterMetricsByMetricsTypeClusterRoleHostServiceReturnsFailureTest() throws NotFindSubclassException {
         // Setup
         final MetricsClusterPhyDTO param = new MetricsClusterPhyDTO("clusterPhyName", "clusterLogicName", 0L, 0L,
-            "aggType", Arrays.asList("value"), 0, 0, "topMethod", Arrays.asList("value"));
+            "aggType", Arrays.asList("value"), 0, 0, "topMethod", Arrays.asList("value"),null);
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
         final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0, "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
@@ -301,7 +301,7 @@ class ClusterPhyMetricsManagerTest {
     void getClusterMetricsByMetricsTypeIndexTemplateServiceReturnsNoItemTest() throws NotFindSubclassException {
         // Setup
         final MetricsClusterPhyDTO param = new MetricsClusterPhyDTO("clusterPhyName", "clusterLogicName", 0L, 0L,
-            "aggType", Arrays.asList("value"), 0, 0, "topMethod", Arrays.asList("value"));
+            "aggType", Arrays.asList("value"), 0, 0, "topMethod", Arrays.asList("value"),null);
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
         final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0,  "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
@@ -346,7 +346,7 @@ class ClusterPhyMetricsManagerTest {
     void getClusterMetricsByMetricsTypeIndexTemplateServiceReturnsNoItemsTest() throws NotFindSubclassException {
         // Setup
         final MetricsClusterPhyDTO param = new MetricsClusterPhyDTO("clusterPhyName", "clusterLogicName", 0L, 0L,
-            "aggType", Arrays.asList("value"), 0, 0, "topMethod", Arrays.asList("value"));
+            "aggType", Arrays.asList("value"), 0, 0, "topMethod", Arrays.asList("value"),null);
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
         final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0,  "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
@@ -393,7 +393,7 @@ class ClusterPhyMetricsManagerTest {
     void getClusterMetricsByMetricsTypeIndexTemplateServiceReturnsFailureTest() throws NotFindSubclassException {
         // Setup
         final MetricsClusterPhyDTO param = new MetricsClusterPhyDTO("clusterPhyName", "clusterLogicName", 0L, 0L,
-            "aggType", Arrays.asList("value"), 0, 0, "topMethod", Arrays.asList("value"));
+            "aggType", Arrays.asList("value"), 0, 0, "topMethod", Arrays.asList("value"),null);
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
         final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0,  "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
@@ -440,7 +440,7 @@ class ClusterPhyMetricsManagerTest {
     void getClusterMetricsByMetricsTypeESIndexServiceReturnsNoItemsTest() throws NotFindSubclassException {
         // Setup
         final MetricsClusterPhyDTO param = new MetricsClusterPhyDTO("clusterPhyName", "clusterLogicName", 0L, 0L,
-            "aggType", Arrays.asList("value"), 0, 0, "topMethod", Arrays.asList("value"));
+            "aggType", Arrays.asList("value"), 0, 0, "topMethod", Arrays.asList("value"),null);
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
         final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0, "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);

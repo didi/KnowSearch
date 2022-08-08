@@ -2,10 +2,12 @@ package com.didichuxing.datachannel.arius.admin.biz.listener;
 
 import com.didichuxing.datachannel.arius.admin.biz.indices.IndicesManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatCellDTO;
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.event.index.IndexDeleteEvent;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
@@ -29,7 +31,11 @@ public class TemplateEventClearIndexListener implements ApplicationListener<Inde
 	@Override
 	public void onApplicationEvent(@NotNull IndexDeleteEvent event) {
 		try {
-			
+			for (IndexCatCellDTO indexCatCellDTO : event.getCatCellList()) {
+				if (!AuthConstant.SUPER_PROJECT_ID.equals( event.getProjectId()) && StringUtils.isNotBlank(indexCatCellDTO.getClusterLogic())){
+					indexCatCellDTO.setCluster(indexCatCellDTO.getClusterLogic());
+				}
+			}
 			indicesManager.deleteIndex(event.getCatCellList(), event.getProjectId(), event.getOperator());
 		} catch (Exception e) {
 			String index = event.getCatCellList().stream().map(IndexCatCellDTO::getIndex)

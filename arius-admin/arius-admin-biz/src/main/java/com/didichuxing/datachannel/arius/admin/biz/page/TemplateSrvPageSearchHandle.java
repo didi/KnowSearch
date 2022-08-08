@@ -11,6 +11,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.srv.T
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv.TemplateSrvVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv.TemplateWithSrvVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv.UnavailableTemplateSrvVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
@@ -131,12 +132,10 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<Templa
         }
         final Map<Integer, String> projectId2ProjectName = ConvertUtil.list2Map(projectService.getProjectBriefList(),
                 ProjectBriefVO::getId, ProjectBriefVO::getProjectName);
-        
         // 构建基础信息
         for (IndexTemplate template : templateList) {
             TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_CLUSTER_FUTURE_UTIL.callableTask(()-> buildTemplateWithSrvVO(
                     template,projectId2ProjectName));
-           
         }
         return  TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_CLUSTER_FUTURE_UTIL.waitResult();
     }
@@ -148,14 +147,23 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<Templa
                 ConvertUtil.list2List(TemplateSrv.codeStr2SrvList(template.getOpenSrv()), TemplateSrvVO.class));
         Optional.ofNullable(template).map(IndexTemplate::getProjectId).map(projectId2ProjectName::get)
                 .ifPresent(templateWithSrvVO::setProjectName);
-   
-        indexTemplatePhyService.getTemplateByLogicId(templateWithSrvVO.getId()).stream()
-                .map(IndexTemplatePhy::getCluster).distinct().forEach(templateWithSrvVO.getCluster()::add);
-        templateWithSrvVO.setUnavailableSrv(
-                ConvertUtil.list2List(templateSrvManager.getUnavailableSrv(template),
-                        UnavailableTemplateSrvVO.class));
-        templateWithSrvVO.setPartition(StringUtils.endsWith(template.getExpression(),"*"));
+        //这里整改为只要校验master即可，原因是由于我们在创建链路/获取相同版本出得集群的时候，进行插件的校验，不能放在这里，会损耗性能
+        final List<IndexTemplatePhy> indexTemplatePhies = indexTemplatePhyService.getTemplateByLogicId(
+                templateWithSrvVO.getId());
+        indexTemplatePhies.stream().filter(i -> TemplateDeployRoleEnum.MASTER.getCode().equals(i.getRole()))
+            
+                .map(IndexTemplatePhy::getCluster)
+                .map(cluster -> templateSrvManager.getUnavailableSrvByTemplateAndMasterPhy(template, cluster))
+                .map(unavailableTemplateSrvs -> ConvertUtil.list2List(Lists.newArrayList(unavailableTemplateSrvs),
+                        UnavailableTemplateSrvVO.class)).findFirst().ifPresent(templateWithSrvVO::setUnavailableSrv);
+      
         
+        
+        indexTemplatePhies.stream().map(IndexTemplatePhy::getCluster).distinct()
+                .forEach(templateWithSrvVO.getCluster()::add);
+        
+        templateWithSrvVO.setPartition(StringUtils.endsWith(template.getExpression(), "*"));
+    
         return templateWithSrvVO;
         
     }

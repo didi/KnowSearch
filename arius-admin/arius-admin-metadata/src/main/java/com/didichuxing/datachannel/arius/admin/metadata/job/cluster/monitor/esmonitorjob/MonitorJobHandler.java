@@ -150,13 +150,13 @@ public class MonitorJobHandler extends AbstractMetaDataJob {
     }
 
     @Override
-    public Object handleBrocastJobTask(String params, String curretnWorker, List<String> allWorders) {
+    public Object handleBrocastJobTask(String params, String curretnWorker, List<String> allWorkers) {
         if (StringUtils.isEmpty(hostName)) {
             LOGGER.error("class=MonitorJobHandler||method=handleJobTask||hostName is empty!");
             return JOB_FAILED;
         }
 
-        if (CollectionUtils.isEmpty(allWorders)) {
+        if (CollectionUtils.isEmpty(allWorkers)) {
             LOGGER.error("class=MonitorJobHandler||method=handleJobTask||allWorders is empty!");
             return JOB_FAILED;
         }
@@ -164,7 +164,7 @@ public class MonitorJobHandler extends AbstractMetaDataJob {
         List<ClusterPhy> clusterPhyList = dataSourceFilter(phyClusterService.listAllClusters());
         List<AriusMetaJobClusterDistributePO> allTaskPOList = ariusMetaJobClusterDistributeDAO.getAllTask();
 
-        int jobTotalNu = allWorders.size();
+        int jobTotalNu = allWorkers.size();
 
         //计算本机需要采集的具体es集群
         if (needReAcquireCluster(jobTotalNu, clusterPhyList, allTaskPOList)) {

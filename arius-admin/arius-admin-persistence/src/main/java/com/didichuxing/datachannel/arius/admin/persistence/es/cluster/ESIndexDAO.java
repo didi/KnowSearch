@@ -51,7 +51,6 @@ import com.didiglobal.logi.elasticsearch.client.response.setting.index.IndexConf
 import com.didiglobal.logi.elasticsearch.client.response.setting.index.MultiIndexsConfig;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -260,11 +259,14 @@ public class ESIndexDAO extends BaseESDAO {
             String typeName = entry.getKey();
             ESIndicesUpdateMappingRequestBuilder builder = client.admin().indices().prepareUpdateMapping();
             builder.setIndex(indexName).setType(typeName).setTypeConfig(typeConfigMap.get(typeName));
-            // es 集群版本7 以上需要带includeTypeName 参数，方可以更新index mapping
-            if (Integer.parseInt(client.getEsVersion().split("\\.")[0]) >= 7) {
+            // es 集群版本7 需要带includeTypeName 参数，方可以更新index mapping
+            if (Integer.parseInt(client.getEsVersion().split("\\.")[0]) == 7) {
                 builder.setIncludeTypeName(true);
             }
-
+            //es集群版本8 不需要type参数
+            if (Integer.parseInt(client.getEsVersion().split("\\.")[0]) == 8) {
+                builder.setIsNeedType(false);
+            }
             try {
                 ESIndicesUpdateMappingResponse response = builder.execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
                 if (!response.getAcknowledged().booleanValue()) {
@@ -304,19 +306,25 @@ public class ESIndexDAO extends BaseESDAO {
      * @return
      */
     public List<CatIndexResult> catIndexByExpression(String cluster, String expression) {
-        List<CatIndexResult> indices = new ArrayList<>();
-
-        try {
-            ESClient client = fetchESClientByCluster(cluster);
-            if (client != null) {
-                ESIndicesCatIndicesResponse response = client.admin().indices().prepareCatIndices(expression).execute()
-                    .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
-                indices.addAll(response.getCatIndexResults());
-            }
-        } catch (Exception e) {
-            LOGGER.warn("class=ESIndexDAO||method=catIndexByExpression||errMsg={}||cluster={}||expression={}",
-                e.getMessage(), cluster, expression, e);
+        List<CatIndexResult> indices =Lists.newArrayList();
+        ESClient client = fetchESClientByCluster(cluster);
+        if (client != null) {
+            BiFunction<Long, TimeUnit, ESIndicesCatIndicesResponse> catIndicesResponseBiFunction = (timeout, unit) -> {
+                try {
+                    return client.admin().indices().prepareCatIndices(expression).execute()
+                            .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+                } catch (Exception e) {
+                    LOGGER.warn("class=ESIndexDAO||method=catIndexByExpression||errMsg={}||cluster={}||expression={}",
+                            e.getMessage(), cluster, expression, e);
+                    return null;
+                }
+            };
+        
+            Optional.ofNullable(performTryTimesMethods(catIndicesResponseBiFunction, Objects::isNull, 3))
+                    .map(ESIndicesCatIndicesResponse::getCatIndexResults).ifPresent(indices::addAll);
+        
         }
+
 
         return indices;
     }

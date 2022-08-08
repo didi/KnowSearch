@@ -22,6 +22,8 @@ import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -87,7 +89,12 @@ public class LogicClusterCreateHandler extends BaseWorkOrderHandler {
         ESLogicClusterDTO resourceLogicDTO = ConvertUtil.obj2Obj(content, ESLogicClusterDTO.class);
         resourceLogicDTO.setProjectId(workOrder.getSubmitorProjectId());
         resourceLogicDTO.setType(ClusterResourceTypeEnum.PRIVATE.getCode());
-        return clusterLogicService.validateClusterLogicParams(resourceLogicDTO, OperationEnum.ADD,
+        Optional.ofNullable(content.getLogicId())
+                .map(Integer::longValue)
+                .ifPresent(resourceLogicDTO::setId);
+        return clusterLogicService.validateClusterLogicParams(resourceLogicDTO,
+                Objects.isNull(content.getLogicId())?
+                OperationEnum.ADD:OperationEnum.ADD_BIND_MULTIPLE_PROJECT,
             resourceLogicDTO.getProjectId());
     }
 
@@ -123,8 +130,20 @@ public class LogicClusterCreateHandler extends BaseWorkOrderHandler {
             ESLogicClusterWithRegionDTO.class);
         esLogicClusterWithRegionDTO.setProjectId(workOrder.getSubmitorProjectId());
 
-        // 创建逻辑集群并且批量绑定指定的region,默认是能成功
+      
         Result<Void> result = Result.buildSucc();
+        if ( //针对行内内置，默认绑定已经存在逻辑集群的时候，系统内置为true，跳过region判定
+                Objects.nonNull(esLogicClusterWithRegionDTO.getId()) && Objects.equals(
+                        esLogicClusterWithRegionDTO.getBindExistLogicCluster(), Boolean.TRUE)) {
+            final ESLogicClusterDTO param = new ESLogicClusterDTO();
+            param.setId(esLogicClusterWithRegionDTO.getId());
+            param.setProjectId(esLogicClusterWithRegionDTO.getProjectId());
+            param.setType(esLogicClusterWithRegionDTO.getType());
+            Result<Long> longResult = clusterLogicService.createClusterLogic(param);
+            result = Result.buildFrom(longResult);
+    
+        } else
+            // 创建逻辑集群并且批量绑定指定的region,默认是能成功
         if (!CollectionUtils.isEmpty(esLogicClusterWithRegionDTO.getClusterRegionDTOS())) {
             //这里申请逻辑集群
             result = clusterLogicManager.addLogicClusterAndClusterRegions(esLogicClusterWithRegionDTO, approver);

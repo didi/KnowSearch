@@ -47,7 +47,8 @@ public class LogicClusterCreateContent extends BaseContent {
      * 插件上传
      */
     private String  plugins;
-
+    
+    private Integer logicId;
   
 
 }

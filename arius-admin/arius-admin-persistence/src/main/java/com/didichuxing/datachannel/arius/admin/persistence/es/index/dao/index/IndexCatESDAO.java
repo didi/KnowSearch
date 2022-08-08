@@ -12,6 +12,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.IndexCat
 import com.didichuxing.datachannel.arius.admin.common.bean.po.index.IndexCatCellPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.index.IndexStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
+import com.didichuxing.datachannel.arius.admin.common.tuple.Tuples;
+import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.DSLSearchUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.IndexNameUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
@@ -22,15 +25,24 @@ import com.didichuxing.datachannel.arius.admin.persistence.es.index.dsls.DslsCon
 import com.didiglobal.logi.elasticsearch.client.ESClient;
 import com.didiglobal.logi.elasticsearch.client.gateway.direct.DirectRequest;
 import com.didiglobal.logi.elasticsearch.client.gateway.direct.DirectResponse;
+import com.didiglobal.logi.elasticsearch.client.response.query.query.ESQueryResponse;
+import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESAggr;
+import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESAggrMap;
+import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESBucket;
+import com.didiglobal.logi.elasticsearch.client.response.query.query.hits.ESHit;
+import com.didiglobal.logi.elasticsearch.client.response.query.query.hits.ESHits;
 import com.google.common.collect.Lists;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import lombok.NoArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
@@ -57,7 +69,12 @@ public class IndexCatESDAO extends BaseESDAO {
     public static final String INDICES        = "indices";
     public static final String SHARDS         = "shards";
     public static final String SEGMENTS_SHARD = "segments";
-    private             String TYPE           = "type";
+    private              String TYPE           = "type";
+    private static final String  INDEX = "index";
+    private static final String  KEY = "key";
+    private static final String  DOC_COUNT = "doc_count";
+    private static final Integer AGG_SIZE       = 5000;
+    private static final String GROUP_BY_CLUSTER="group_by_cluster";
 
     @PostConstruct
     public void init() {
@@ -246,7 +263,64 @@ public class IndexCatESDAO extends BaseESDAO {
         return Result.buildSucc(indexCatCellDTOS);
     }
     
-   
+    public List<String> syncGetIndexListByProjectIdAndClusterLogic(Integer projectId,
+                                                                   String clusterLogic) {
+        String realIndexName =IndexNameUtils.genCurrentDailyIndexName(indexName);
+        if (Objects.isNull(projectId)) {
+            return Collections.emptyList();
+        }
+        
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_PLATFORM_CREATE_CAT_INDEX_BY_INDEX_PROJECT,
+                clusterLogic, projectId, AGG_SIZE);
+        return gatewayClient.performRequest(metadataClusterName, realIndexName, TYPE, dsl,
+                response -> Optional.ofNullable(response).map(ESQueryResponse::getHits)
+        .map(ESHits::getHits)
+        .orElse(Collections.emptyList())
+        .stream()
+        .filter(Objects::nonNull)
+        .map(ESHit::getSource)
+        .filter(Objects::nonNull)
+        .map(JSONObject.class::cast)
+        .map(jsonObject -> jsonObject.getString(INDEX))
+        .filter(Objects::nonNull)
+        .distinct()
+        .collect(Collectors.toList()), 3);
+    }
+    
+    public Map<String, Integer> syncGetByClusterPhyList(List<String> clusterPhyList) {
+        if (CollectionUtils.isEmpty(clusterPhyList)) {
+            return Collections.emptyMap();
+        }
+        String realIndexName = IndexNameUtils.genCurrentDailyIndexName(indexName);
+        final String clusterPhyStr = JSON.toJSONString(clusterPhyList);
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_PLATFORM_CREATE_CAT_INDEX_GROUP_BY_CLUSTER,
+                clusterPhyStr, clusterPhyList.size(), clusterPhyStr);
+        return gatewayClient.performRequest(metadataClusterName, realIndexName, TYPE, dsl,
+                res -> Optional.ofNullable(res).map(ESQueryResponse::getAggs).map(ESAggrMap::getEsAggrMap)
+                        .map(i -> i.get(GROUP_BY_CLUSTER)).map(ESAggr::getBucketList).orElse(Collections.emptyList())
+                        .stream().map(ESBucket::getUnusedMap)
+                        .map(map -> Tuples.of(map.get(KEY).toString(), ((Integer) map.getOrDefault(DOC_COUNT, 0))))
+                        .collect(Collectors.toMap(TupleTwo::v1, TupleTwo::v2))
+                
+                , 3);
+    }
+    
+    public IndexCatCell syncGetCatIndexInfoById(/* clusterPhy*/String clusterPhy,/*IndexName*/ String index) {
+        
+        List<String> ids = Collections.singletonList(String.format("%s@%s", clusterPhy, index));
+        
+        final String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_PLATFORM_CREATE_CAT_INDEX_BY_ID,
+                ids.size(), JSON.toJSONString(ids));
+        
+        final Tuple<Long, List<IndexCatCellPO>> tuple = performTryTimesMethods(
+                () -> gatewayClient.performRequestListAndGetTotalCount(metadataClusterName,
+                        IndexNameUtils.genCurrentDailyIndexName(indexName), typeName, dsl, IndexCatCellPO.class),
+                Objects::isNull, 3);
+        
+        return Optional.ofNullable(tuple).map(Tuple::getV2).map(i -> ConvertUtil.list2List(i, IndexCatCell.class))
+                .filter(CollectionUtils::isNotEmpty).orElse(Collections.emptyList()).stream().findFirst().orElse(null);
+        
+    }
 
     /**************************************************private******************************************************/
     /**
@@ -328,6 +402,7 @@ public class IndexCatESDAO extends BaseESDAO {
 
         return updateCatIndexInfo(indexCatCellPOSList);
     }
+    
 
     private String buildSortType(Boolean orderByDesc) {
         String sortType = "desc";
@@ -361,5 +436,8 @@ public class IndexCatESDAO extends BaseESDAO {
         }
         return indexCatCellDTOList;
     }
-
+    
+   
+    
+  
 }

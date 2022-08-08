@@ -1,19 +1,18 @@
 package com.didichuxing.datachannel.arius.admin.metadata.service;
 
-import java.util.List;
-import java.util.Map;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsClusterPhyIndicesDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsClusterPhyTemplateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.VariousLineChartMetrics;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats.AriusStatsIndexInfoESDAO;
 import com.google.common.collect.Maps;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by linyunan on 2021-08-16
@@ -21,7 +20,9 @@ import com.google.common.collect.Maps;
 @Service
 public class ESIndicesStatsService {
     @Autowired
-    private AriusStatsIndexInfoESDAO ariusStatsIndexInfoESDAO;
+    private   AriusStatsIndexInfoESDAO ariusStatsIndexInfoESDAO;
+    @Value("${es.metrics.indices.buckets.max.num}")
+    protected int                      indicesBucketsMaxNum;
 
     public List<VariousLineChartMetrics> getAggClusterPhyIndicesMetrics(MetricsClusterPhyIndicesDTO param) {
         Integer topNu = param.getTopNu();
@@ -42,9 +43,24 @@ public class ESIndicesStatsService {
         return ariusStatsIndexInfoESDAO.getTopNIndicesAggMetricsWithStep(clusterPhyName, metricsTypes, topNu, topMethod,
             topTimeStep, aggType, startTime, endTime);
     }
-
-    @Value("${es.metrics.indices.buckets.max.num}")
-    protected int indicesBucketsMaxNum;
+    
+    public List<VariousLineChartMetrics> getAggClusterPhyIndicesMetrics(MetricsClusterPhyIndicesDTO param,
+                                                                        List<String> belongToProjectIndexName) {
+        Integer topNu = param.getTopNu();
+        String topMethod = param.getTopMethod();
+        Integer topTimeStep = param.getTopTimeStep();
+        
+        String clusterPhyName = param.getClusterPhyName();
+        String aggType = param.getAggType();
+        Long endTime = param.getEndTime();
+        Long startTime = param.getStartTime();
+        List<String> metricsTypes = param.getMetricsTypes();
+        
+      
+        return ariusStatsIndexInfoESDAO.getTopNIndicesAggMetricsWithStep(clusterPhyName, metricsTypes, topNu, topMethod,
+                topTimeStep, aggType, startTime, endTime,belongToProjectIndexName);
+    }
+   
 
     /**
      * 获取并且聚合对应的物理集群的模板指标类型
@@ -68,6 +84,21 @@ public class ESIndicesStatsService {
         }
         return ariusStatsIndexInfoESDAO.getTopNTemplateAggMetricsWithStep(clusterPhyName, metricsTypes, topNu,
             topMethod, topTimeStep, aggType, startTime, endTime);
+    }
+    
+      public List<VariousLineChartMetrics> getAggClusterPhyTemplateMetrics(MetricsClusterPhyTemplateDTO param,List<Integer> belongToProjectIdLogicTemplateIdList) {
+        Integer topNu = param.getTopNu();
+        String topMethod = param.getTopMethod();
+        Integer topTimeStep = param.getTopTimeStep();
+        String clusterPhyName = param.getClusterPhyName();
+        String aggType = param.getAggType();
+        Long endTime = param.getEndTime();
+        Long startTime = param.getStartTime();
+        List<String> metricsTypes = param.getMetricsTypes();
+
+       
+        return ariusStatsIndexInfoESDAO.getTopNTemplateAggMetricsWithStep(clusterPhyName, metricsTypes, topNu,
+            topMethod, topTimeStep, aggType, startTime, endTime,belongToProjectIdLogicTemplateIdList);
     }
 
     /**

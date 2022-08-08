@@ -706,7 +706,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         }
         return Result.buildSucc(clusters);
     }
-
+    
     @Override
     public Result<List<String>> getTemplateSameVersionClusterNamesByTemplateId(Integer projectId, Integer templateId) {
         List<String> clusterPhyNameList = listClusterPhyNameByProjectId(projectId);
@@ -731,7 +731,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         if (null == clusterPhy) {
             return Result.buildFail(String.format("the cluster[%s] from templateId[%s] is empty", cluster, templateId));
         }
-
+        
         String esVersion = clusterPhy.getEsVersion();
 
         List<ClusterPhy> clusterPhies = clusterPhyService.listAllClusters();
@@ -739,19 +739,37 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         Predicate<ClusterPhy> matchingSameVersionESVersionPredicate =
                 cp -> ESVersionUtil.compareBigVersionConsistency(esVersion,cp.getEsVersion());
         List<String> sameVersionClusterNameList = clusterPhies.stream().filter(Objects::nonNull)
-                //正常的集群才能够进行dcdr
                 .filter(r-> !ClusterHealthEnum.UNKNOWN.getCode().equals(r.getHealth()))
             .filter(r -> clusterPhyNameList.contains(r.getCluster()))
             .filter(rCluster -> !StringUtils.equals(logicTemplateWithPhysicals.getMasterPhyTemplate().getCluster(),
                 rCluster.getCluster()))
-            .filter(matchingSameVersionESVersionPredicate).map(ClusterPhy::getCluster).distinct()
+            .filter(matchingSameVersionESVersionPredicate).map(ClusterPhy::getCluster)
+                .distinct()
             .collect(Collectors.toList());
 
         return Result.buildSucc(sameVersionClusterNameList);
     }
-
- 
-
+    
+    /**
+     * @param projectId
+     * @param templateId
+     * @return
+     */
+    @Override
+    public Result<List<String>> getTemplateSameVersionClusterNamesByTemplateIdExistDCDR(Integer projectId,
+                                                                                        Integer templateId) {
+        final Result<List<String>> clusterPhyListRes = getTemplateSameVersionClusterNamesByTemplateId(projectId,
+                templateId);
+        if (clusterPhyListRes.failed()) {
+            return clusterPhyListRes;
+        }
+        final List<String> existDCDRPluginClusterPhyList = clusterPhyListRes.getData().stream()
+                .filter(clusterPhy -> Boolean.TRUE.equals(
+                        getDCDRAndPipelineAndColdRegionTupleByClusterPhyWithCache(clusterPhy).v1))
+                .collect(Collectors.toList());
+        return Result.buildSucc(existDCDRPluginClusterPhyList);
+    }
+    
     @Override
     public List<String> listClusterPhyNodeName(String clusterPhyName) {
         if (null == clusterPhyName) {
@@ -953,8 +971,12 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         long totalFsBytes = clusterStats.getTotalFs().getBytes();
         long usageFsBytes = clusterStats.getTotalFs().getBytes() - clusterStats.getFreeFs().getBytes();
 
-        double diskFreePercent = clusterStats.getFreeFs().getGbFrac() / clusterStats.getTotalFs().getGbFrac();
-        diskFreePercent = CommonUtils.formatDouble(1 - diskFreePercent, 5);
+        double diskFreePercent = 0d;
+        double clusterTotalFs = clusterStats.getTotalFs().getGbFrac();
+        if(clusterTotalFs > 0){
+            diskFreePercent = clusterStats.getFreeFs().getGbFrac() / clusterTotalFs;
+            diskFreePercent = CommonUtils.formatDouble(1 - diskFreePercent, 5);
+        }
 
         ClusterPhyDTO esClusterDTO = new ClusterPhyDTO();
         esClusterDTO.setId(clusterPhy.getId());

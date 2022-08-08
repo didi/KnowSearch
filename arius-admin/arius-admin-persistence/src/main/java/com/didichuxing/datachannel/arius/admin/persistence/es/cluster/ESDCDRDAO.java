@@ -55,10 +55,17 @@ public class ESDCDRDAO extends BaseESDAO {
      * @return true/false
      */
     public boolean deleteAutoReplication(String cluster, String name) {
-        DCDRTemplate dcdrTemplate = getAutoReplication(cluster, name);
-        if (dcdrTemplate == null) {
-            return true;
+        try {
+            DCDRTemplate dcdrTemplate = getAutoReplication(cluster, name);
+            if (dcdrTemplate == null) {
+                return true;
+            }
+        } catch (Exception e) {
+            LOGGER.error("class={}||method=deleteAutoReplication||clusterName={}||name={}", getClass().getSimpleName(),
+                    cluster, name, e);
+            return false;
         }
+       
 
         ESClient client = esOpClient.getESClient(cluster);
         ESDeleteDCDRTemplateRequest request = new ESDeleteDCDRTemplateRequest();
@@ -75,12 +82,9 @@ public class ESDCDRDAO extends BaseESDAO {
      * @return dcdr模板
      */
     public DCDRTemplate getAutoReplication(String cluster, String name) {
+        //如果集群挂掉，就是可以抛出NPE
         ESClient client = esOpClient.getESClient(cluster);
-        if (client == null) {
-            LOGGER.warn("class={}||method=getAutoReplication||clusterName={}||name={}||errMsg=esClient is null",
-                    getClass().getSimpleName(), cluster, name);
-            return null;
-        }
+        
         ESGetDCDRTemplateRequest request = new ESGetDCDRTemplateRequest();
         request.setName(name);
 

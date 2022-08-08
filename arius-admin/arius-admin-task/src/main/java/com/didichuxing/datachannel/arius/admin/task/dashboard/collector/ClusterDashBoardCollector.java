@@ -65,10 +65,13 @@ public class ClusterDashBoardCollector extends BaseDashboardCollector {
         //11._cluster/stats 和_nodes/stats 消耗时间
         clusterMetrics.setClusterElapsedTime(esClusterPhyStatsService.getClusterStatusElapsedTime(cluster));
         clusterMetrics.setNodeElapsedTime(esClusterPhyStatsService.getNodeStatusElapsedTime(cluster));
+        //最近一个采集点的时间
         Long nearestPoint = esClusterPhyStatsService.getTimeDifferenceBetweenNearestPointAndNow(cluster);
-        long elapsedTime = currentTimeMillis - nearestPoint;
+        long collectorDelayed = currentTimeMillis - nearestPoint;
 
         //12.消耗时间是否大于5分钟,开始采集到结束采集的时间，指标看板的采集任务，当前时间到最近一次采集的时间
+        clusterMetrics.setClusterElapsedTimeGte5Min(collectorDelayed > FIVE_MINUTE);
+        clusterMetrics.setCollectorDelayed(collectorDelayed);
         clusterMetrics.setClusterElapsedTimeGte5Min(elapsedTime > FIVE_MINUTE);
         //13.集群下索引数量
         clusterMetrics.setIndexCount(esClusterPhyStatsService.getIndexCountByCluster(cluster));

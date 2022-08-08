@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -160,14 +161,14 @@ public class ESIndexCatServiceImpl implements ESIndexCatService {
     }
 
     @Override
-    public List<IndexCatCellDTO> syncGetByClusterLogic(String clusterLogicName, Integer projectId) {
+    public List<IndexCatCellDTO> syncGetIndexByCluster(String clusterLogicName, Integer projectId) {
         Tuple<Long, List<IndexCatCellPO>> totalHitAndIndexCatCellListTuple = indexCatESDAO.getIndexListByTerms(clusterLogicName,projectId);
         if (totalHitAndIndexCatCellListTuple == null){
             return new ArrayList<>();
         }
         return ConvertUtil.list2List(totalHitAndIndexCatCellListTuple.v2(),IndexCatCellDTO.class);
     }
-    
+
     /**
      * @param cluster
      * @param indexList
@@ -176,6 +177,34 @@ public class ESIndexCatServiceImpl implements ESIndexCatService {
     @Override
     public Result<List<IndexCatCellDTO>> syncGetSegmentsIndexList(String cluster, Collection<String> indexList) {
         return indexCatESDAO.syncGetSegmentsIndexList(cluster,indexList);
+    }
+    
+    /**
+     * @param projectId
+     * @return
+     */
+    @Override
+    public List<String> syncGetIndexListByProjectId(Integer projectId, String clusterLogic) {
+        return indexCatESDAO.syncGetIndexListByProjectIdAndClusterLogic(projectId,
+                clusterLogic);
+    }
+    
+    /**
+     * @param clusterPhyList
+     * @return
+     */
+    @Override
+    public Map<String, Integer> syncGetByClusterPhyList(List<String> clusterPhyList) {
+        return indexCatESDAO.syncGetByClusterPhyList(clusterPhyList);
+    }
+    
+    /**
+     * @param clusterPhy
+     * @param index
+     */
+    @Override
+    public IndexCatCell syncGetCatIndexInfoById(String clusterPhy, String index) {
+        return indexCatESDAO.syncGetCatIndexInfoById(clusterPhy,index);
     }
     /*************************************************private*******************************************************/
 }
