@@ -817,6 +817,8 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
             .getLogicTemplateWithPhysicalsById(templateId);
         IndexTemplatePhy slavePhyTemplate = logicTemplateWithPhysicals.getSlavePhyTemplate();
         IndexTemplatePhy masterPhyTemplate = logicTemplateWithPhysicals.getMasterPhyTemplate();
+        templateDCDRInfoVO.setMasterClusterName(masterPhyTemplate.getCluster());
+        templateDCDRInfoVO.setSlaveClusterName(slavePhyTemplate.getCluster());
         if (null == masterPhyTemplate) {
             return Result.buildFail(TEMPLATE_NO_EXIST);
         }
@@ -832,7 +834,7 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
                
             } catch (Exception e) {
                 LOGGER.error("method=getTemplateDCDRInfoVO||templateId={}||error=master cluster is null", templateId);
-               return Result.buildFail("模板所属集群异常");
+               return Result.buildFailWithMsg(templateDCDRInfoVO,"主集群异常，获取主从位点差失败");
             }
         }
 
@@ -848,12 +850,11 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
             LOGGER.error(
                 "class=TemplateDCDRManagerImpl||method=getTemplateDCDRInfoVO||templateId={}||msg=masterAndSlaveTemplateCheckPointTuple is empty",
                 templateId, e);
-            return Result.buildFail("获取主从位点差失败,请检查主从集群是否正常");
+            return Result.buildFailWithMsg(templateDCDRInfoVO,"从集群异常，获取主从位点差失败");
         }
-        templateDCDRInfoVO.setMasterClusterName(masterPhyTemplate.getCluster());
+        
         templateDCDRInfoVO.setMasterTemplateCheckPoint(masterAndSlaveTemplateCheckPointTuple.getV1());
 
-        templateDCDRInfoVO.setSlaveClusterName(slavePhyTemplate.getCluster());
         templateDCDRInfoVO.setSlaveTemplateCheckPoint(masterAndSlaveTemplateCheckPointTuple.getV2());
 
         long checkPointDiff =
