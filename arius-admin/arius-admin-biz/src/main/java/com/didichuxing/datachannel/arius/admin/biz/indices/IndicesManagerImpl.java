@@ -819,7 +819,37 @@ public class IndicesManagerImpl implements IndicesManager {
         }
         return esIndexService.syncCatIndexByExpression(templatePhysicalWithLogic.getCluster(), expression);
     }
-
+    
+    /**
+     * @param clusterPhy
+     * @param indexNameList
+     * @param projectId
+     * @param operator
+     * @return
+     */
+    @Override
+    public Result<Void> deleteIndexByCLusterPhy(String clusterPhy, List<String> indexNameList, Integer projectId,
+                                                String operator) {
+        if (indexNameList.size() == esIndexService.syncBatchDeleteIndices(clusterPhy, indexNameList, RETRY_COUNT)) {
+            Result<Void> batchSetIndexFlagInvalidResult = updateIndexFlagInvalid(clusterPhy, indexNameList);
+            if (batchSetIndexFlagInvalidResult.success()) {
+                for (String indexName : indexNameList) {
+                    operateRecordService.save(
+                            new OperateRecord.Builder().operationTypeEnum(OperateTypeEnum.INDEX_MANAGEMENT_DELETE)
+                                    .userOperation(operator).content(String.format("删除索引：【%s】", indexName))
+                                    .project(projectService.getProjectBriefByProjectId(projectId))
+                                    .bizId(indexName)
+                                    .buildDefaultManualTrigger());
+                }
+            
+            }
+            
+        }
+        
+        
+        return Result.buildSucc();
+    }
+    
     /***************************************************private**********************************************************/
     private Result<Void> basicCheckParam(String cluster, String index, Integer projectId) {
         if (!projectService.checkProjectExist(projectId)) {
