@@ -215,7 +215,8 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
         } else {
             initLogicCluster(param);
         
-            ClusterLogicPO logicPO = ConvertUtil.obj2Obj(param, ClusterLogicPO.class);
+            ClusterLogicPO logicPO = ConvertUtil.obj2Obj(param, ClusterLogicPO.class,
+                    po ->po.setProjectId(param.getProjectId().toString()) );
             boolean succeed = logicClusterDAO.insert(logicPO) == 1;
             return Result.build(succeed, logicPO.getId());
         }
