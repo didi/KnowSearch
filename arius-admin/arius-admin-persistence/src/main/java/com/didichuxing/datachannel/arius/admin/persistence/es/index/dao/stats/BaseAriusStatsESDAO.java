@@ -762,7 +762,7 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
             }
             //get indexCount
             if (INDEX_COUNT.equals(key)&&null != esAggr && null != esAggr.getUnusedMap().get(VALUE)) {
-                metricsContent.setIndexCount(Double.parseDouble(esAggr.getUnusedMap().get(VALUE).toString()));
+                metricsContent.setIndexCount(Long.parseLong(esAggr.getUnusedMap().get(VALUE).toString()));
             }
 
             metricsContentCells.add(metricsContentCell);
