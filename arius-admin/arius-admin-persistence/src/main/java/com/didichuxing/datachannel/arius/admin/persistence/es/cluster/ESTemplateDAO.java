@@ -5,6 +5,7 @@ import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOpe
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.INDEX_SHARD_NUM;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.TEMPLATE_DEFAULT_ORDER;
 
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
 import com.didiglobal.logi.elasticsearch.client.ESClient;
@@ -75,23 +76,24 @@ public class ESTemplateDAO extends BaseESDAO {
      * @param shardNum 表达式
      * @return
      */
-    public boolean updateShardNum(String cluster, String name, Integer shardNum) {
+    public boolean updateShardNum(String cluster, String name, Integer shardNum) throws ESOperateException{
         ESClient client = esOpClient.getESClient(cluster);
         if (client == null) {
             LOGGER.warn("class={}||method=updateShardNum||clusterName={}||shardNum={}||errMsg=esClient is null",
                     getClass().getSimpleName(), cluster, shardNum);
-            return false;
+            throw new ESOperateException(String.format("集群【%s】异常，无法更新模版【%s】分片",cluster,name));
         }
 
         // 获取es中原来index template的配置
          ESIndicesGetTemplateResponse getTemplateResponse = getESIndicesGetTemplateResponse(cluster,
                 name, 3);
         TemplateConfig templateConfig = getTemplateResponse.getMultiTemplatesConfig().getSingleConfig();
-
+       
         // 修改分片数目
         if (shardNum != null && shardNum > 0) {
             templateConfig.setSettings(INDEX_SHARD_NUM, String.valueOf(shardNum));
         }
+        
 
         // 设置ES版本
         templateConfig.setVersion(client.getEsVersion());
@@ -290,7 +292,16 @@ public class ESTemplateDAO extends BaseESDAO {
 
         return response.getAcknowledged();
     }
-
+    
+    /**
+     * 同步获取集群是正常
+     *
+     * @param clusterName 集群名称
+     * @return boolean
+     */
+    public boolean syncGetClusterIsNormal(String clusterName) {
+        return esOpClient.getESClient(clusterName) != null;
+    }
     /**
      * 获取模板信息
      * @param clusterName       集群名

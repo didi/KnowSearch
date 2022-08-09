@@ -852,29 +852,26 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             if (templatePhy.getShard().equals(shardNum)) {
                 throw new AdminOperateException("该模板已经是" + shardNum + "分片", FAIL);
             }
-
+    
             updateParam.setId(templatePhy.getId());
             updateParam.setShard(shardNum);
-            Result<Void> updateDBResult = indexTemplatePhyService.update(updateParam);
-            if (updateDBResult.failed()) {
-                throw new AdminOperateException(updateDBResult.getMessage(), FAIL);
-            }
-            
             boolean succ = esTemplateService.syncUpdateShardNum(templatePhy.getCluster(), templatePhy.getName(),
-                shardNum, RETRY_TIMES);
-            if (!succ) {
-                throw new AdminOperateException(String.format("同步修改es集群[%s]中模板[%s]shard数[%d]失败, 请确认集群是否正常",
-                    templatePhy.getCluster(), templatePhy.getName(), shardNum), FAIL);
+                    shardNum, RETRY_TIMES);
+            if (succ) {
+                Result<Void> updateDBResult = indexTemplatePhyService.update(updateParam);
+                if (updateDBResult.failed()) {
+                    throw new AdminOperateException(updateDBResult.getMessage(), FAIL);
+                }
+        
+                operateRecordService.save(
+                        new OperateRecord.Builder().project(projectService.getProjectBriefByProjectId(projectId))
+                                .bizId(logicTemplateId).operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE_CAPACITY)
+                                .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).content(
+                                        String.format("同步修改es集群[%s]中模板[%s]shard数[%d]", templatePhy.getCluster(),
+                                                templatePhy.getName(), shardNum)).userOperation(operator).build()
+        
+                );
             }
-            operateRecordService.save(new OperateRecord.Builder()
-                            .project(projectService.getProjectBriefByProjectId(projectId))
-                    .bizId(logicTemplateId)
-                .operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE_CAPACITY)
-                .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).content(String.format("同步修改es集群[%s]中模板[%s]shard数[%d]",
-                    templatePhy.getCluster(), templatePhy.getName(), shardNum))
-                .userOperation(operator).build()
-
-            );
         }
 
         return Result.buildSucc();

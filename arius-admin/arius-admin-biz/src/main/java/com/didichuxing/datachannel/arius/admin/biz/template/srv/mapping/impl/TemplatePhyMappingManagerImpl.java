@@ -71,6 +71,9 @@ public class TemplatePhyMappingManagerImpl implements TemplatePhyMappingManager 
 
     @Override
     public Result<MappingConfig> getMapping(String cluster, String name) {
+        if (!templateService.syncGetEsClusterIsNormal(cluster)) {
+            return Result.buildFail(String.format("模版【%s】所属集群【%s】异常,无法获取mapping信息", name, cluster));
+        }
         TemplateConfig templateConfig = templateService.syncGetTemplateConfig(cluster, name);
         if (templateConfig != null) {
             MappingConfig mappingConfig = templateConfig.getMappings();
@@ -79,7 +82,6 @@ public class TemplatePhyMappingManagerImpl implements TemplatePhyMappingManager 
                 return Result.buildSucc(mappingConfig);
             }
         }
-
         return Result.buildFail("not find template mapping, cluster:" + cluster + ", template:" + name);
     }
 
