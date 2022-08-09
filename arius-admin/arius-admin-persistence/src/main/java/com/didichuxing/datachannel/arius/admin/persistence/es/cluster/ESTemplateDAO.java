@@ -292,7 +292,16 @@ public class ESTemplateDAO extends BaseESDAO {
 
         return response.getAcknowledged();
     }
-
+    
+    /**
+     * 同步获取集群是正常
+     *
+     * @param clusterName 集群名称
+     * @return boolean
+     */
+    public boolean syncGetClusterIsNormal(String clusterName) {
+        return esOpClient.getESClient(clusterName) != null;
+    }
     /**
      * 获取模板信息
      * @param clusterName       集群名

@@ -1,12 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.core.service.es;
 
-import java.util.List;
-import java.util.Map;
-
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
 import com.didiglobal.logi.elasticsearch.client.response.setting.template.MultiTemplatesConfig;
 import com.didiglobal.logi.elasticsearch.client.response.setting.template.TemplateConfig;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author d06679
@@ -185,5 +184,7 @@ public interface ESTemplateService {
      * @return 集群模板个数
      */
     long synGetTemplateNumForAllVersion(String cluster);
+    
+    boolean syncGetEsClusterIsNormal(String cluster);
 
 }

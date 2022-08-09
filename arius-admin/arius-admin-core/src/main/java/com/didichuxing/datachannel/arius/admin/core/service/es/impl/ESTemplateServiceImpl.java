@@ -308,5 +308,13 @@ public class ESTemplateServiceImpl implements ESTemplateService {
         Map<String, TemplateConfig> allTemplate = esTemplateDAO.getAllTemplate(Collections.singletonList(cluster));
         return MapUtils.isEmpty(allTemplate) ? 0 : allTemplate.size();
     }
-
+    
+    /**
+     * @param cluster
+     * @return
+     */
+    @Override
+    public boolean syncGetEsClusterIsNormal(String cluster) {
+        return esTemplateDAO.syncGetClusterIsNormal(cluster);
+    }
 }
