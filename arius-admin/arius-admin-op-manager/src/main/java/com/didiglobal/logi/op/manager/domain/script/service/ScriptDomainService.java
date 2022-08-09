@@ -19,7 +19,7 @@ public interface ScriptDomainService {
     Result<Script> getScriptById(int id);
 
     /**
-     * 通过名字获取脚本
+     * 通过传入的脚本参数进行id查询以及名字和描述模糊匹配查询获取脚本
      * @param script
      * @return
      */

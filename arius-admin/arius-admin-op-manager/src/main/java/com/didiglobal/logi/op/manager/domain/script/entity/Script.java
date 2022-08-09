@@ -84,6 +84,7 @@ public class Script {
         if (uploadFile.isEmpty() && null == describe) {
             return Result.fail(ResultCode.PARAM_ERROR.getCode(), "请指定要修改的值（脚本或者描述）");
         }
+
         return Result.success();
     }
 

@@ -12,6 +12,6 @@ import java.util.List;
  */
 @Data
 @AllArgsConstructor
-@NoArgsConstructor
+//@NoArgsConstructor
 public class GeneralConfigChangeComponentDTO extends GeneralBaseOperationComponentDTO{
 }

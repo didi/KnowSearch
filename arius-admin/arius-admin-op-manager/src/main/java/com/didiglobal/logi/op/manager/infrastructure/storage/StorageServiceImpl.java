@@ -32,4 +32,16 @@ public class StorageServiceImpl implements StorageService {
             return Result.fail(e.getCode(), e.getMessage());
         }
     }
+
+    @Override
+    public Result<String> remove(String fileName) {
+        try {
+            FileStorageHandle handle = fileStorageFactory.getHandlerByType(type);
+            handle.remove(fileName);
+            return Result.success();
+        } catch (FileStorageException e) {
+            return Result.fail(e.getCode(), e.getMessage());
+        }
+    }
+
 }

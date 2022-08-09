@@ -17,7 +17,7 @@ public class ScriptPO {
     /**
      * 脚本id
      */
-    private int id;
+    private Integer id;
     /**
      * 脚本名
      */

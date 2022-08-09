@@ -3,6 +3,7 @@ package com.didiglobal.logi.op.manager.domain.script.service.impl;
 import com.didiglobal.logi.op.manager.domain.script.entity.Script;
 import com.didiglobal.logi.op.manager.domain.script.repository.ScriptRepository;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
+import com.didiglobal.logi.op.manager.infrastructure.common.ResultCode;
 import com.didiglobal.logi.op.manager.infrastructure.deployment.DeploymentService;
 import com.didiglobal.logi.op.manager.infrastructure.storage.StorageService;
 import org.jetbrains.annotations.NotNull;
@@ -49,6 +50,12 @@ public class ScriptDomainServiceImpl implements com.didiglobal.logi.op.manager.d
 
     @Override
     public Result<Void> createScript(Script script) {
+
+        //判断新建的脚本名称是否已经在数据库中存在，确保数据库中脚本唯一
+        if (null != scriptRepository.findByName(script.getName())) {
+            return Result.fail(ResultCode.PARAM_ERROR.getCode(),"脚本名称重复请重新输入");
+        }
+
         //新建
         script.create();
 
@@ -84,7 +91,7 @@ public class ScriptDomainServiceImpl implements com.didiglobal.logi.op.manager.d
             }
             script.setContentUrl(storageRes.getData());
 
-            //修改
+            //修改部署的脚本
             Result<String> deployRes = deploymentService.deployScript(script);
             if (deployRes.failed()) {
                 return Result.fail(deployRes.getCode(), deployRes.getMessage());
@@ -99,6 +106,11 @@ public class ScriptDomainServiceImpl implements com.didiglobal.logi.op.manager.d
 
     @Override
     public Result<Void> deleteScript(int id) {
+        //删除文件存储中的相关脚本文件
+        Result<String> deleteStorage = storageService.remove(getDeleteFileName(getScriptById(id).getData()));
+        if (deleteStorage.failed()) {
+            return Result.fail(deleteStorage.getCode(),deleteStorage.getMessage());
+        }
         scriptRepository.deleteScript(id);
         return Result.success();
     }
@@ -106,6 +118,11 @@ public class ScriptDomainServiceImpl implements com.didiglobal.logi.op.manager.d
     @NotNull
     private String getUniqueFileName(Script script) {
         return script.getName() + "_" + System.currentTimeMillis();
+    }
+
+    @NotNull
+    private String getDeleteFileName(Script script) {
+        return script.getContentUrl().substring(script.getContentUrl().lastIndexOf("/")+1);
     }
 
 }

@@ -16,4 +16,10 @@ public interface StorageService {
      * @return
      */
     Result<String> upload(String fileName, MultipartFile uploadFile);
+    /**
+     * 删除文件
+     * @param fileName
+     * @return
+     */
+    Result<String> remove(String fileName);
 }

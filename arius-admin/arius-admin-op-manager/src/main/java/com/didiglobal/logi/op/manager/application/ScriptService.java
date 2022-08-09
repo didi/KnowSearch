@@ -31,7 +31,7 @@ public class ScriptService {
     /**
      * 根据条件获取所有的脚本list
      * @param script 脚本
-     * @return
+     * @return result
      */
     public Result<List<Script>> listScript(Script script) {
         return scriptDomainService.queryScript(script);
@@ -40,11 +40,11 @@ public class ScriptService {
     /**
      * 创建脚本
      * @param script
-     * @return
+     * @return result
      */
     public Result<Void> createScript(Script script) {
         //校验参数
-        Result checkResult = script.checkCreateParam();
+        Result<Void> checkResult = script.checkCreateParam();
         if (checkResult.failed()) {
             return checkResult;
         }
@@ -55,11 +55,11 @@ public class ScriptService {
     /**
      * 更新脚本
      * @param script
-     * @return
+     * @return result
      */
     public Result<Void> updateScript(Script script) {
         //检验参数
-        Result checkResult = script.checkUpdateParam();
+        Result<Void>  checkResult = script.checkUpdateParam();
         if (checkResult.failed()) {
             return checkResult;
         }
@@ -73,16 +73,17 @@ public class ScriptService {
      * @return
      */
     public Result<Void> deleteScript(Integer id) {
-        //检验参数
-        if (null == id) {
-            Result.fail(ResultCode.PARAM_ERROR.getCode(), "id不能为空");
+        //检验参数id是否为空以及数据库中是否能找到对应id的脚本
+        if (null == id || null == scriptDomainService.getScriptById(id).getData() ) {
+            return Result.fail(ResultCode.PARAM_ERROR.getCode(), "输入的id参数有问题，请核对");
         }
-        //判断及
-        Package pk = new Package();
-        pk.setScriptId(id);
-        if (!packageDomainService.queryPackage(pk).getData().isEmpty()) {
-            Result.fail(ResultCode.SCRIPT_OPERATE_ERROR.getCode(), "脚本已被绑定，不能删除");
-        }
+        //todo
+        //判断,若脚本已经绑定了包则不能删除
+//        Package pk = new Package();
+//        pk.setScriptId(id);
+//        if (!packageDomainService.queryPackage(pk).getData().isEmpty()) {
+//            Result.fail(ResultCode.SCRIPT_OPERATE_ERROR.getCode(), "脚本已被绑定，不能删除");
+//        }
 
         return scriptDomainService.deleteScript(id);
     }
