@@ -3,6 +3,7 @@ package com.didichuxing.datachannel.arius.admin.biz.listener;
 import com.didichuxing.datachannel.arius.admin.biz.indices.IndicesManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatCellDTO;
 import com.didichuxing.datachannel.arius.admin.common.event.index.IndexDeleteEvent;
+import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import java.util.List;
@@ -33,9 +34,9 @@ public class TemplateEventClearIndexListener implements ApplicationListener<Inde
 	@Override
 	public void onApplicationEvent(@NotNull IndexDeleteEvent event) {
 		try {
-			final Map<String, List<String>> clusterPhy2IndexListMap = event.getCatCellList().stream().collect(
-					Collectors.groupingBy(IndexCatCellDTO::getCluster,
-							Collectors.mapping(IndexCatCellDTO::getIndex, Collectors.toList())));
+			final Map<String, List<String>> clusterPhy2IndexListMap = ConvertUtil.list2MapOfList(event.getCatCellList(),
+					IndexCatCellDTO::getCluster, IndexCatCellDTO::getIndex);
+					
 			for (Entry<String, List<String>> clusterPhy2IndexList : clusterPhy2IndexListMap.entrySet()) {
 				indicesManager.deleteIndexByCLusterPhy(clusterPhy2IndexList.getKey(),clusterPhy2IndexList.getValue(),event.getProjectId(), event.getOperator());
 			}
