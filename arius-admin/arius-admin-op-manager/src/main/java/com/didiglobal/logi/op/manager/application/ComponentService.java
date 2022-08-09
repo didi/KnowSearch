@@ -2,10 +2,7 @@ package com.didiglobal.logi.op.manager.application;
 
 import com.didiglobal.logi.op.manager.domain.component.service.ComponentDomainService;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
-import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralBaseOperationComponent;
-import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralConfigChangeComponent;
-import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralInstallComponent;
-import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralScaleComponent;
+import com.didiglobal.logi.op.manager.infrastructure.common.bean.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,6 +56,16 @@ public class ComponentService {
             return checkRes;
         }
         componentDomainService.submitRestartComponent(restartOperationComponent);
+        return Result.success();
+    }
+
+    public Result<Void> upgradeComponent(GeneralUpgradeComponent generalUpgradeComponent) {
+        LOGGER.info("start upgrade component[{}]",generalUpgradeComponent);
+        Result checkRes = generalUpgradeComponent.checkParam();
+        if (checkRes.failed()) {
+            return checkRes;
+        }
+        componentDomainService.submitUpgradeComponent(generalUpgradeComponent);
         return Result.success();
     }
 }

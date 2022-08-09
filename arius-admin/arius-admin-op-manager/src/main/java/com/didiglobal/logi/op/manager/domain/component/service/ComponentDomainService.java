@@ -2,10 +2,10 @@ package com.didiglobal.logi.op.manager.domain.component.service;
 
 import com.didiglobal.logi.op.manager.domain.component.entity.Component;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
-import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralBaseOperationComponent;
-import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralConfigChangeComponent;
-import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralInstallComponent;
-import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralScaleComponent;
+import com.didiglobal.logi.op.manager.infrastructure.common.bean.*;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author didi
@@ -82,4 +82,26 @@ public interface ComponentDomainService {
      * @return
      */
     Result<Void> submitRestartComponent(GeneralBaseOperationComponent restartComponent);
+
+    /**
+     * 升级组件
+     * @param upgradeComponent
+     * @return
+     */
+    Result<Void> submitUpgradeComponent(GeneralUpgradeComponent upgradeComponent);
+
+    /**
+     * 获取组件配置
+     * @param componentId
+     * @return
+     */
+    Result<Map<String, List<String>>> getComponentConfig(int componentId);
+
+    /**
+     * 更新组件
+     * @param component
+     * @return
+     */
+    Result<Void> updateComponent(Component component);
+
 }

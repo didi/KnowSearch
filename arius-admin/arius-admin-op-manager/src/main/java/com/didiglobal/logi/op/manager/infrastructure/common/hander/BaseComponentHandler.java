@@ -16,6 +16,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.didiglobal.logi.op.manager.infrastructure.common.Constants.MAP_SIZE;
+
 /**
  * @author didi
  * @date 2022-07-25 5:59 下午
@@ -40,7 +42,7 @@ public abstract class BaseComponentHandler implements ComponentHandler {
 
     @NotNull
     protected Map<String, List<String>> getGroupToIpList(GeneralBaseOperationComponent baseOperationComponent) {
-        Map<String, List<String>> groupToIpList = new LinkedHashMap<>(16);
+        Map<String, List<String>> groupToIpList = new LinkedHashMap<>(MAP_SIZE);
         baseOperationComponent.getGroupConfigList().forEach(config ->
         {
             if (!StringUtils.isEmpty(config.getHosts())) {
@@ -48,5 +50,11 @@ public abstract class BaseComponentHandler implements ComponentHandler {
             }
         });
         return groupToIpList;
+    }
+
+    protected String getTemplateIdByPackageId(int packageId) {
+        Package pk = packageDomainService.queryPackage(Package.builder().id(packageId).build()).
+                getData().get(0);
+        return scriptDomainService.getScriptById(pk.getScriptId()).getData().getTemplateId();
     }
 }

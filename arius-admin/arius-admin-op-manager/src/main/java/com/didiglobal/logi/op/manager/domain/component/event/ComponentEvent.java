@@ -53,4 +53,11 @@ public class ComponentEvent extends DomainEvent {
         return event;
     }
 
+    public static ComponentEvent createUpdateEvent(Object source) {
+        ComponentEvent event = new ComponentEvent(source);
+        event.operateType = OperationEnum.UPGRADE.getType();
+        event.setDescribe(OperationEnum.UPGRADE.getDescribe());
+        return event;
+    }
+
 }

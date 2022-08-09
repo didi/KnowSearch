@@ -75,6 +75,11 @@ public class Component {
      */
     private List<ComponentHost> hostList;
 
+    /**
+     * 依赖配置组件id
+     */
+    private Integer dependConfigComponentId;
+
 
     public Component create() {
         this.status = ComponentStatusEnum.UN_KNOW.getStatus();
@@ -90,6 +95,11 @@ public class Component {
         } else {
             containComponentIds = containComponentIds + Constants.SPLIT + componentId;
         }
+        return this;
+    }
+
+    public Component newDeployComponent() {
+        this.setId(this.getDependConfigComponentId());
         return this;
     }
 

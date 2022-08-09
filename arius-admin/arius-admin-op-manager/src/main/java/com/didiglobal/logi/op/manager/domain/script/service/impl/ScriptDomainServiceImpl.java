@@ -17,6 +17,9 @@ import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
+import static com.didiglobal.logi.op.manager.infrastructure.common.Constants.SLASH;
+import static com.didiglobal.logi.op.manager.infrastructure.common.Constants.UNDER_SCORE;
+
 
 /**
  * @author didi
@@ -105,24 +108,27 @@ public class ScriptDomainServiceImpl implements com.didiglobal.logi.op.manager.d
     }
 
     @Override
-    public Result<Void> deleteScript(int id) {
+    public Result<Void> deleteScript(Script script) {
         //删除文件存储中的相关脚本文件
-        Result<String> deleteStorage = storageService.remove(getDeleteFileName(getScriptById(id).getData()));
+        Result<String> deleteStorage = storageService.remove(getDeleteFileName(script.getContentUrl()));
         if (deleteStorage.failed()) {
             return Result.fail(deleteStorage.getCode(),deleteStorage.getMessage());
         }
-        scriptRepository.deleteScript(id);
+        //部署脚本删除
+        deploymentService.removeScript(script);
+        //删除脚本
+        scriptRepository.deleteScript(script.getId());
         return Result.success();
     }
 
     @NotNull
     private String getUniqueFileName(Script script) {
-        return script.getName() + "_" + System.currentTimeMillis();
+        return script.getName() + UNDER_SCORE + System.currentTimeMillis();
     }
 
     @NotNull
-    private String getDeleteFileName(Script script) {
-        return script.getContentUrl().substring(script.getContentUrl().lastIndexOf("/")+1);
+    private String getDeleteFileName(String contentUrl) {
+        return contentUrl.substring(contentUrl.lastIndexOf(SLASH) + 1);
     }
 
 }

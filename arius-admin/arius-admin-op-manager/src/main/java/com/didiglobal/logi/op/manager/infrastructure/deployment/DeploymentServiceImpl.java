@@ -1,21 +1,15 @@
 package com.didiglobal.logi.op.manager.infrastructure.deployment;
 
-import com.alibaba.druid.support.logging.Log;
-import com.alibaba.druid.support.logging.LogFactory;
-import com.didiglobal.logi.op.manager.application.ScriptService;
 import com.didiglobal.logi.op.manager.domain.script.entity.Script;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
+import com.didiglobal.logi.op.manager.infrastructure.common.enums.TaskActionEnum;
 import com.didiglobal.logi.op.manager.infrastructure.exception.ZeusOperationException;
-import com.didiglobal.logi.op.manager.infrastructure.storage.hander.S3FileStorageHandle;
-import io.swagger.models.auth.In;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-
-import static com.didiglobal.logi.op.manager.infrastructure.common.ResultCode.ZEUS_OPERATE_ERROR;
 
 /**
  * @author didi
@@ -67,7 +61,7 @@ public class DeploymentServiceImpl implements DeploymentService {
     public Result<Integer> execute(String templateId, Integer taskId, String groupName, String hosts, String... args) {
         try {
             ZeusTask task = new ZeusTask();
-            task.setAction("start");
+            task.setAction(TaskActionEnum.START.getAction());
             task.setHosts(hosts);
             task.setTemplateId(Integer.parseInt(templateId));
             task.setArgs(String.format("%s %s %s %s", "execute", groupName, taskId, String.join(" ", args)));
@@ -82,6 +76,17 @@ public class DeploymentServiceImpl implements DeploymentService {
     public Result<ZeusTaskStatus> deployStatus(int taskId) {
         try {
             return Result.success(zeusService.getTaskStatus(taskId));
+        } catch (ZeusOperationException e) {
+            LOGGER.error("class=DeploymentServiceImpl||method=deployStatus||errMsg={}||msg=get status error", e.getMessage());
+            return Result.fail(e.getCode(), e.getMessage());
+        }
+    }
+
+    @Override
+    public Result<Void> removeScript(Script script) {
+        try {
+            zeusService.deleteTemplate(Integer.parseInt(script.getTemplateId()));
+            return Result.success();
         } catch (ZeusOperationException e) {
             LOGGER.error("class=DeploymentServiceImpl||method=deployStatus||errMsg={}||msg=get status error", e.getMessage());
             return Result.fail(e.getCode(), e.getMessage());

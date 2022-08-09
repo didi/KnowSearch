@@ -5,10 +5,7 @@ import com.didiglobal.logi.op.manager.infrastructure.common.Constants;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.OperationEnum;
 import com.didiglobal.logi.op.manager.interfaces.assembler.ComponentAssembler;
-import com.didiglobal.logi.op.manager.interfaces.dto.GeneraInstallComponentDTO;
-import com.didiglobal.logi.op.manager.interfaces.dto.GeneralBaseOperationComponentDTO;
-import com.didiglobal.logi.op.manager.interfaces.dto.GeneralConfigChangeComponentDTO;
-import com.didiglobal.logi.op.manager.interfaces.dto.GeneralScaleComponentDTO;
+import com.didiglobal.logi.op.manager.interfaces.dto.*;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
@@ -64,5 +61,12 @@ public class ComponentController {
     @ApiOperation(value = "")
     public Result<Void> restart(@RequestBody GeneralBaseOperationComponentDTO restartOperationComponentDTO) {
         return componentService.restartComponent(ComponentAssembler.toRestartComponent(restartOperationComponentDTO));
+    }
+
+
+    @PutMapping("/upgrade")
+    @ApiOperation(value = "")
+    public Result<Void> upgrade(@RequestBody GeneralUpgradeComponentDTO generalUpgradeComponentDTO) {
+        return componentService.upgradeComponent(ComponentAssembler.toUpgradeComponent(generalUpgradeComponentDTO));
     }
 }

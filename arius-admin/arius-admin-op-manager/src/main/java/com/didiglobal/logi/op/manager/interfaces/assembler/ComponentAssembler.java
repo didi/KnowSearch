@@ -7,6 +7,8 @@ import com.didiglobal.logi.op.manager.infrastructure.util.ConvertUtil;
 import com.didiglobal.logi.op.manager.interfaces.dto.*;
 import com.didiglobal.logi.op.manager.interfaces.vo.GeneralGroupConfigHostVO;
 
+import static com.didiglobal.logi.op.manager.infrastructure.common.Constants.SPLIT;
+
 /**
  * @author didi
  * @date 2022-07-12 2:29 下午
@@ -33,6 +35,10 @@ public class ComponentAssembler {
         return ConvertUtil.obj2Obj(dto, GeneralBaseOperationComponent.class);
     }
 
+    public static GeneralUpgradeComponent toUpgradeComponent(GeneralUpgradeComponentDTO dto) {
+        return ConvertUtil.obj2Obj(dto, GeneralUpgradeComponent.class);
+    }
+
 
     public static GeneralGroupConfigHostVO toGeneralGroupConfigVO(GeneralGroupConfig config, String host) {
         GeneralGroupConfigHostVO vo = ConvertUtil.obj2Obj(config, GeneralGroupConfigHostVO.class);
@@ -42,7 +48,7 @@ public class ComponentAssembler {
                 if (0 == directory.length()) {
                     directory.append(dc);
                 } else {
-                    directory.append(",").append(dc);
+                    directory.append(SPLIT).append(dc);
                 }
 
             }

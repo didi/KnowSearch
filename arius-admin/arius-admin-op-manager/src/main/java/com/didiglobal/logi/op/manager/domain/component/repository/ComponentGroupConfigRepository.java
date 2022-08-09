@@ -2,6 +2,8 @@ package com.didiglobal.logi.op.manager.domain.component.repository;
 
 import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentGroupConfig;
 
+import java.util.List;
+
 /**
  * @author didi
  * @date 2022-07-12 11:09 上午
@@ -26,4 +28,11 @@ public interface ComponentGroupConfigRepository {
      * @return
      */
     ComponentGroupConfig getConfigById(int groupId);
+
+    /**
+     * 通过组件id获取配置
+     * @param componentId
+     * @return
+     */
+    List<ComponentGroupConfig> getConfigByComponentId(int componentId);
 }

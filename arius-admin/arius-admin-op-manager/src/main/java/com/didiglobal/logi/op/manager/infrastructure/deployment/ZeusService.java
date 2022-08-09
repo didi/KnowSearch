@@ -39,4 +39,11 @@ public interface ZeusService {
      * @throws ZeusOperationException
      */
     ZeusTaskStatus getTaskStatus(int taskId) throws ZeusOperationException;
+
+    /**
+     * 删除模板
+     * @param templateId
+     * @throws ZeusOperationException
+     */
+    void deleteTemplate(int templateId) throws ZeusOperationException;
 }

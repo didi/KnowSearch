@@ -73,8 +73,9 @@ public class ScriptService {
      * @return
      */
     public Result<Void> deleteScript(Integer id) {
+        Script script;
         //检验参数id是否为空以及数据库中是否能找到对应id的脚本
-        if (null == id || null == scriptDomainService.getScriptById(id).getData() ) {
+        if (null == id || (script = scriptDomainService.getScriptById(id).getData()) == null ) {
             return Result.fail(ResultCode.PARAM_ERROR.getCode(), "输入的id参数有问题，请核对");
         }
         //todo
@@ -85,6 +86,6 @@ public class ScriptService {
 //            Result.fail(ResultCode.SCRIPT_OPERATE_ERROR.getCode(), "脚本已被绑定，不能删除");
 //        }
 
-        return scriptDomainService.deleteScript(id);
+        return scriptDomainService.deleteScript(script);
     }
 }

@@ -11,6 +11,7 @@ public enum OperationEnum {
     SCALE(3, "组件扩缩容"),
     CONFIG_CHANGE(4, "配置变更"),
     RESTART(5, "重启"),
+    UPGRADE(6, "升级"),
     UN_KNOW(-1, "未知");
 
     private int type;

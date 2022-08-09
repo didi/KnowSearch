@@ -29,4 +29,10 @@ public interface ComponentDao {
      * @param containIds
      */
     void updateContainIds(int componentId, String containIds);
+
+    /**
+     * 更新组件（安装包id）
+     * @param componentPO
+     */
+    void update(ComponentPO componentPO);
 }

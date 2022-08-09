@@ -8,6 +8,8 @@ import com.didiglobal.logi.op.manager.infrastructure.db.ComponentHostPO;
 import com.didiglobal.logi.op.manager.infrastructure.db.ComponentPO;
 import com.didiglobal.logi.op.manager.infrastructure.util.ConvertUtil;
 
+import java.util.List;
+
 /**
  * @author didi
  * @date 2022-07-19 3:07 下午
@@ -28,6 +30,10 @@ public class ComponentConverter {
 
     public static ComponentGroupConfig convertComponentConfigPO2DO(ComponentGroupConfigPO po) {
         return ConvertUtil.obj2Obj(po, ComponentGroupConfig.class);
+    }
+
+    public static List<ComponentGroupConfig> convertComponentConfigPO2DOList(List<ComponentGroupConfigPO> poList) {
+        return ConvertUtil.list2List(poList, ComponentGroupConfig.class);
     }
 
     public static ComponentHostPO convertComponentHostDO2PO(ComponentHost componentHost) {

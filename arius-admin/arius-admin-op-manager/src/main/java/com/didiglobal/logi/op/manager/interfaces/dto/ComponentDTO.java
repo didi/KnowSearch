@@ -66,4 +66,14 @@ public class ComponentDTO {
      */
     private String associationId;
 
+    /**
+     * 依赖的组件id
+     */
+    private Integer dependComponentId;
+
+    /**
+     * 依赖的配置组件id
+     */
+    private Integer dependConfigComponentId;
+
 }

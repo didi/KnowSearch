@@ -3,6 +3,8 @@ package com.didiglobal.logi.op.manager.infrastructure.db.mapper;
 import com.didiglobal.logi.op.manager.infrastructure.db.ComponentGroupConfigPO;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 /**
  * @author didi
  * @date 2022-07-19 3:20 下午
@@ -22,4 +24,11 @@ public interface ComponentGroupConfigDao {
      * @return
      */
     ComponentGroupConfigPO getById(int id);
+
+    /**
+     * 通过组件id获取配置
+     * @param component
+     * @return
+     */
+    List<ComponentGroupConfigPO> getByComponentId(int component);
 }

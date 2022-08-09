@@ -41,8 +41,8 @@ public interface ScriptDomainService {
 
     /**
      * 删除脚本
-     * @param id
+     * @param script
      * @return
      */
-    Result<Void> deleteScript(int id);
+    Result<Void> deleteScript(Script script);
 }

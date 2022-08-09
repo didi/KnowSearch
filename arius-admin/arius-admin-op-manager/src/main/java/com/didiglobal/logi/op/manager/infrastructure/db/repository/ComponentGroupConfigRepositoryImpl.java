@@ -8,6 +8,8 @@ import com.didiglobal.logi.op.manager.infrastructure.util.ConvertUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 /**
  * @author didi
  * @date 2022-07-19 3:18 下午
@@ -32,5 +34,10 @@ public class ComponentGroupConfigRepositoryImpl implements ComponentGroupConfigR
     @Override
     public ComponentGroupConfig getConfigById(int groupId) {
         return ComponentConverter.convertComponentConfigPO2DO(configDao.getById(groupId));
+    }
+
+    @Override
+    public List<ComponentGroupConfig> getConfigByComponentId(int componentId) {
+        return ComponentConverter.convertComponentConfigPO2DOList(configDao.getByComponentId(componentId));
     }
 }

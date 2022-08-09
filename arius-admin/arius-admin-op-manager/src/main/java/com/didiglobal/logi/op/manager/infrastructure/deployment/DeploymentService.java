@@ -25,11 +25,12 @@ public interface DeploymentService {
 
 
     /**
-     * 执行
+     * 执行任务
      * @param templateId
      * @param taskId
      * @param groupName
      * @param hosts
+     * @param args
      * @return
      */
     Result<Integer> execute(String templateId, Integer taskId, String groupName, String hosts, String... args);
@@ -40,4 +41,11 @@ public interface DeploymentService {
      * @return
      */
     Result<ZeusTaskStatus> deployStatus(int taskId);
+
+    /**
+     * 移除脚本
+     * @param script
+     * @return
+     */
+    Result<Void> removeScript(Script script);
 }

@@ -28,4 +28,11 @@ public interface ComponentRepository {
      * @param containIds
      */
     void updateContainIds(int componentId, String containIds);
+
+
+    /**
+     * 更新组件信息
+     * @param component
+     */
+    void updateComponent(Component component);
 }
