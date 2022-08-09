@@ -2,12 +2,13 @@ package com.didichuxing.datachannel.arius.admin.biz.listener;
 
 import com.didichuxing.datachannel.arius.admin.biz.indices.IndicesManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatCellDTO;
-import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.event.index.IndexDeleteEvent;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class TemplateEventClearIndexListener implements ApplicationListener<IndexDeleteEvent> {
 	private static final ILog           LOGGER = LogFactory.getLog(TemplateEventClearIndexListener.class);
+
 	@Autowired
 	private              IndicesManager indicesManager;
 	
@@ -31,12 +33,12 @@ public class TemplateEventClearIndexListener implements ApplicationListener<Inde
 	@Override
 	public void onApplicationEvent(@NotNull IndexDeleteEvent event) {
 		try {
-			for (IndexCatCellDTO indexCatCellDTO : event.getCatCellList()) {
-				if (!AuthConstant.SUPER_PROJECT_ID.equals( event.getProjectId()) && StringUtils.isNotBlank(indexCatCellDTO.getClusterLogic())){
-					indexCatCellDTO.setCluster(indexCatCellDTO.getClusterLogic());
-				}
+			final Map<String, List<String>> clusterPhy2IndexListMap = event.getCatCellList().stream().collect(
+					Collectors.groupingBy(IndexCatCellDTO::getCluster,
+							Collectors.mapping(IndexCatCellDTO::getIndex, Collectors.toList())));
+			for (Entry<String, List<String>> clusterPhy2IndexList : clusterPhy2IndexListMap.entrySet()) {
+				indicesManager.deleteIndexByCLusterPhy(clusterPhy2IndexList.getKey(),clusterPhy2IndexList.getValue(),event.getProjectId(), event.getOperator());
 			}
-			indicesManager.deleteIndex(event.getCatCellList(), event.getProjectId(), event.getOperator());
 		} catch (Exception e) {
 			String index = event.getCatCellList().stream().map(IndexCatCellDTO::getIndex)
 					.collect(Collectors.joining(","));
