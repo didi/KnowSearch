@@ -67,7 +67,7 @@ public class Script {
 
     public Result<Void> checkCreateParam() {
         if (name.isEmpty()) {
-            return Result.fail(ResultCode.PARAM_ERROR.getCode(), "脚本名称缺失");
+            return Result.fail(ResultCode.PARAM_ERROR.getCode(), "name缺失");
         }
 
         if (uploadFile.isEmpty()) {

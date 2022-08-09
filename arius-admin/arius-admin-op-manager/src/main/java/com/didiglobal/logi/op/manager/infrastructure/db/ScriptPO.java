@@ -1,7 +1,6 @@
 package com.didiglobal.logi.op.manager.infrastructure.db;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
