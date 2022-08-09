@@ -13,10 +13,7 @@ import java.util.List;
 public class ScriptConverter {
 
     public static Script convertScriptPO2DO(ScriptPO scriptPO) {
-        return Script.builder().id(scriptPO.getId()).contentUrl(scriptPO.getContentUrl()).
-                templateId(scriptPO.getTemplateId()).describe(scriptPO.getDescribe()).
-                name(scriptPO.getName()).updateTime(scriptPO.getUpdateTime()).
-                createTime(scriptPO.getCreateTime()).build();
+        return ConvertUtil.obj2Obj(scriptPO, Script.class);
     }
 
     public static ScriptPO convertScriptDO2PO(Script script) {

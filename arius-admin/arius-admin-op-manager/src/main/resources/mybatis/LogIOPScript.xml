@@ -54,6 +54,16 @@
         where id = #{id}
     </select>
 
+    <select id="findByName"
+            parameterType="com.didiglobal.logi.op.manager.infrastructure.db.ScriptPO"
+            resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from logi_op_script
+        where `name` = #{name}
+        order by id desc
+    </select>
+
     <select id="queryScript"
             parameterType="com.didiglobal.logi.op.manager.infrastructure.db.ScriptPO"
             resultMap="BaseResultMap">

@@ -46,7 +46,7 @@ public class ScriptService {
         //校验参数
         Result<Void> checkResult = script.checkCreateParam();
         if (checkResult.failed()) {
-            return Result.fail(checkResult.getCode(),checkResult.getMessage());
+            return checkResult;
         }
         //新建脚本
         return scriptDomainService.createScript(script);
@@ -61,7 +61,7 @@ public class ScriptService {
         //检验参数
         Result<Void>  checkResult = script.checkUpdateParam();
         if (checkResult.failed()) {
-            return Result.fail(checkResult.getCode(),checkResult.getMessage());
+            return checkResult;
         }
         //修改脚本
         return scriptDomainService.updateScript(script);
@@ -73,14 +73,11 @@ public class ScriptService {
      * @return
      */
     public Result<Void> deleteScript(Integer id) {
-        //检验参数
-        if (null == id) {
-            Result.fail(ResultCode.PARAM_ERROR.getCode(), "id不能为空");
+        //检验参数id是否为空以及数据库中是否能找到对应id的脚本
+        if (null == id || null == scriptDomainService.getScriptById(id).getData() ) {
+            return Result.fail(ResultCode.PARAM_ERROR.getCode(), "输入的id参数有问题，请核对");
         }
-        //判断,数据库中是否存在该脚本
-        if (null == scriptDomainService.getScriptById(id).getData()){
-            Result.fail(ResultCode.SCRIPT_OPERATE_ERROR.getCode(), "数据库中不存在该脚本，请核实");
-        }
+        //todo
         //判断,若脚本已经绑定了包则不能删除
 //        Package pk = new Package();
 //        pk.setScriptId(id);

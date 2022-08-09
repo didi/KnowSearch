@@ -12,14 +12,21 @@ public interface ScriptRepository {
     /**
      * 根据id获取脚本
      * @param id
-     * @return
+     * @return Script
      */
     Script findById(int id);
 
     /**
+     * 根据name获取脚本
+     * @param name
+     * @return Script
+     */
+    Script findByName(String name);
+
+    /**
      * 获取脚本list
      * @param script
-     * @return
+     * @return List<Script>
      */
     List<Script> queryScript(Script script);
 

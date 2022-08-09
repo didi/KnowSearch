@@ -27,6 +27,12 @@ public class ScriptRepositoryImpl implements ScriptRepository {
     }
 
     @Override
+    public Script findByName(String name) {
+        ScriptPO scriptPO = scriptDao.findByName(name);
+        return ScriptConverter.convertScriptPO2DO(scriptPO);
+    }
+
+    @Override
     public List<Script> queryScript(Script script) {
         ScriptPO scriptPO = ScriptConverter.convertScriptDO2PO(script);
         return ScriptConverter.convertScriptPO2DOList(scriptDao.queryScript(scriptPO));

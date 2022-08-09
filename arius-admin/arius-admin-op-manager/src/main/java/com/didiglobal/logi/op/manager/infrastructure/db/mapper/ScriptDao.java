@@ -16,9 +16,16 @@ public interface ScriptDao {
     /**
      * 通过id获取脚本po
      * @param id
-     * @return
+     * @return ScriptPO
      */
     ScriptPO findById(int id);
+
+    /**
+     * 通过name获取脚本po
+     * @param name
+     * @return ScriptPO
+     */
+    ScriptPO findByName(String name);
 
     /**
      * 查询script
