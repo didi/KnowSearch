@@ -122,7 +122,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.ElasticsearchTimeoutException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
@@ -219,13 +218,13 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     @PostConstruct
     private void init() {
         ariusScheduleThreadPool.submitScheduleAtFixedDelayTask(this::refreshClusterDistInfo, 60, 180);
-
+        ariusScheduleThreadPool.submitScheduleAtFixedDelayTask(this::refreshDCDRAndPipelineAndColdRegionTupleByClusterPhyWithCache,
+                60,45*60L);
     }
     
     /**
      * 每45分钟全量更新一遍集群
      */
-    @Scheduled(cron = "45 * * * * ?")
     private synchronized void refreshDCDRAndPipelineAndColdRegionTupleByClusterPhyWithCache() {
     
         for (String clusterName : clusterPhyService.listClusterNames()) {
