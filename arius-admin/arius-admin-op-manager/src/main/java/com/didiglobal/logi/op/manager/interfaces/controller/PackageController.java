@@ -15,9 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -50,11 +48,16 @@ public class PackageController {
         return Result.success();
     }
 
-    //TODO 删除
-    //TODO 编辑
     @PostMapping("edit")
     @ApiOperation(value = "编辑安装包")
     public Result<Void> editPackage( PackageDTO packageDTO) {
         return packageService.updatePackage(PackageAssembler.toDO(packageDTO));
     }
+
+    @DeleteMapping("/{id}")
+    @ApiOperation(value = "删除安装包")
+    public Result<Void> deleteScript(@PathVariable Integer id) {
+        return packageService.deletePackage(id);
+    }
+
 }

@@ -52,4 +52,10 @@ public interface PackageDao {
      * @return List<PackagePO>
      */
     List<PackagePO> query(PackagePO po);
+
+    /**
+     * 删除包
+     * @param id
+     */
+    void delete(int id);
 }

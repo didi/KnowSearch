@@ -5,6 +5,7 @@ import com.didiglobal.logi.op.manager.domain.packages.service.PackageDomainServi
 import com.didiglobal.logi.op.manager.domain.script.entity.Script;
 import com.didiglobal.logi.op.manager.domain.script.service.impl.ScriptDomainService;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
+import com.didiglobal.logi.op.manager.infrastructure.common.ResultCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,5 +64,23 @@ public class PackageService {
 
     public Result<List<Package>> queryPackage(Package pk) {
         return packageDomainService.queryPackage(pk);
+    }
+
+    /**
+     * 删除包
+     * @param id
+     * @return Result
+     */
+    public Result<Void> deletePackage(Integer id) {
+        Package pk;
+        //检验参数id是否为空以及数据库中是否能找到对应id的包
+        if (null == id || (pk = packageDomainService.getPackageById(id).getData()) == null ) {
+            return Result.fail(ResultCode.PARAM_ERROR.getCode(), "输入的id参数有问题，请核对");
+        }
+
+        //todo
+        //判断,若包已经绑定了组件则不能删除
+
+        return packageDomainService.deletePackage(pk);
     }
 }

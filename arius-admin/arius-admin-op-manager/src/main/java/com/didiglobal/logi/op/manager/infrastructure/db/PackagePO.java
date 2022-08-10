@@ -1,6 +1,5 @@
 package com.didiglobal.logi.op.manager.infrastructure.db;
 
-import com.didiglobal.logi.op.manager.domain.packages.entity.PackageGroupConfig;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

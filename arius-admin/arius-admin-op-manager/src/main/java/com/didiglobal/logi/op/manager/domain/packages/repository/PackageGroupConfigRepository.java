@@ -22,4 +22,11 @@ public interface PackageGroupConfigRepository {
      * @return
      */
     List<PackageGroupConfig> queryConfigByPackageId(int id);
+
+    /**
+     * 根据安装包id删除配置组
+     * @param id
+     * @return
+     */
+    void deleteByPackageId(int id);
 }

@@ -81,4 +81,9 @@
         order by id desc
     </select>
 
+    <delete id="delete" parameterType="com.didiglobal.logi.op.manager.infrastructure.db.PackagePO">
+        delete from logi_op_package
+        where id = #{id}
+    </delete>
+
 </mapper>

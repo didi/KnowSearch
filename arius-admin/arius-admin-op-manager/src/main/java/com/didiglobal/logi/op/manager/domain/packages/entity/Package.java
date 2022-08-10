@@ -89,7 +89,7 @@ public class Package {
     public Package update() {
         this.updateTime = new Timestamp(System.currentTimeMillis());
         if (null != groupConfigList) {
-            groupConfigList.forEach(config -> config.update());
+            groupConfigList.forEach(config -> config.create());
         }
         return this;
     }
@@ -118,9 +118,6 @@ public class Package {
         if (null == id) {
             return Result.fail(ResultCode.PARAM_ERROR.getCode(), "id缺失");
         }
-//        if (uploadFile.isEmpty() && null == describe) {
-//            return Result.fail(ResultCode.PARAM_ERROR.getCode(), "请指定要修改的值（脚本或者描述）");
-//        }
         return Result.success();
     }
 }

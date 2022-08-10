@@ -31,4 +31,10 @@ public class PackageGroupConfigRepositoryImpl implements PackageGroupConfigRepos
         List<PackageGroupConfigPO> list = packageGroupConfigDao.listByPackageId(id);
         return PackageGroupConfigConverter.convertScriptPO2DOList(list);
     }
+
+    @Override
+    public void deleteByPackageId(int id) {
+        packageGroupConfigDao.deleteByPackageId(id);
+    }
+
 }

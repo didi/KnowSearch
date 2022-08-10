@@ -51,4 +51,9 @@ public interface PackageRepository {
      */
     List<Package> queryPackage(Package pk);
 
+    /**
+     * 删除包
+     * @param id
+     */
+    void deletePackage(int id);
 }

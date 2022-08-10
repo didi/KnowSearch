@@ -33,4 +33,18 @@ public interface PackageDomainService {
      */
     Result<List<Package>> queryPackage(Package pk);
 
+    /**
+     * 根据id获取安装包
+     * @param id
+     * @return
+     */
+    Result<Package> getPackageById(int id);
+
+    /**
+     * 删除包
+     * @param pk
+     * @return
+     */
+    Result<Void> deletePackage(Package pk);
+
 }

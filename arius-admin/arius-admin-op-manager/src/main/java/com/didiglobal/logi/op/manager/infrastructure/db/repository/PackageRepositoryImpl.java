@@ -56,4 +56,9 @@ public class PackageRepositoryImpl implements PackageRepository {
         List<PackagePO> pos = packageDao.query(po);
         return PackageConverter.convertPackagePO2DOList(pos);
     }
+
+    @Override
+    public void deletePackage(int id) {
+        packageDao.delete(id);
+    }
 }
