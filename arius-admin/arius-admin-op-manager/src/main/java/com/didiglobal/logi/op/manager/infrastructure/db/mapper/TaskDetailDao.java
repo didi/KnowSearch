@@ -33,4 +33,13 @@ public interface TaskDetailDao {
      */
     void updateExecuteId(int taskId, String groupName, int executeId);
 
+
+    /**
+     * 根据taskId
+     * @param taskId
+     * @param host
+     * @param groupName
+     * @return
+     */
+    TaskDetailPO getByHostAndGroupName(int taskId, String host, String groupName);
 }

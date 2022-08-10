@@ -32,5 +32,9 @@ public class GeneralGroupConfigHostVO {
      * 安装目录配置，多个用逗号隔开
      */
     private String installDirector;
+    /**
+     * 进程数配置
+     */
+    private String processNumConfig;
 
 }

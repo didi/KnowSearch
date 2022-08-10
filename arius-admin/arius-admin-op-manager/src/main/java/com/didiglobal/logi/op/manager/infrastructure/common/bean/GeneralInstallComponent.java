@@ -33,6 +33,11 @@ public class GeneralInstallComponent {
     private Integer dependComponentId;
 
     /**
+     * 依赖配置组件id
+     */
+    private Integer dependConfigComponentId;
+
+    /**
      * 模板id
      */
     private String templateId;

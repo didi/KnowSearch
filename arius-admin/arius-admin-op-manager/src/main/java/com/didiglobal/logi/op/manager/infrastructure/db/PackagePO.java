@@ -1,7 +1,5 @@
 package com.didiglobal.logi.op.manager.infrastructure.db;
 
-import com.didiglobal.logi.op.manager.domain.packages.entity.PackageGroupConfig;
-
 import java.sql.Timestamp;
 
 /**

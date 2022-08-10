@@ -8,6 +8,8 @@ import com.didiglobal.logi.op.manager.domain.task.service.TaskDomainService;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 import com.didiglobal.logi.op.manager.infrastructure.common.ResultCode;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralGroupConfig;
+import com.didiglobal.logi.op.manager.infrastructure.common.enums.HostActionEnum;
+import com.didiglobal.logi.op.manager.infrastructure.common.enums.TaskActionEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +30,7 @@ public class TaskService {
 
     /**
      * 执行脚本
-     * @param task
+     * @param taskId
      * @return
      */
     public Result<Void> execute(Integer taskId) {
@@ -36,8 +38,43 @@ public class TaskService {
             return Result.fail(ResultCode.PARAM_ERROR.getCode(), "task id为空");
         }
 
-        //新建脚本
+        //执行任务
         return taskDomainService.executeTask(taskId);
+    }
+
+
+    /**
+     * 对任务执行相应的操作，暂停，取消，杀死，继续
+     * @param taskId
+     * @param action
+     * @return
+     */
+    public Result<Void> operateTask(Integer taskId, String action) {
+        if (null == taskId) {
+            return Result.fail(ResultCode.PARAM_ERROR.getCode(), "task id为空");
+        }
+        TaskActionEnum taskAction = TaskActionEnum.find(action);
+        if (taskAction == TaskActionEnum.UN_KNOW) {
+            return Result.fail(ResultCode.PARAM_ERROR.getCode(), "action未知");
+        }
+        return taskDomainService.actionTask(taskId, taskAction);
+    }
+
+    /**
+     * 对host执行相应的操作，取消，重试，kill
+     * @param taskId
+     * @param action
+     * @return
+     */
+    public Result<Void> operateHost(Integer taskId, String action, String host, String groupName) {
+        if (null == taskId || null == host || null == groupName) {
+            return Result.fail(ResultCode.PARAM_ERROR.getCode(), "id or host or groupName can not be null");
+        }
+        HostActionEnum hostActionEnum = HostActionEnum.find(action);
+        if (hostActionEnum == HostActionEnum.UN_KNOW) {
+            return Result.fail(ResultCode.PARAM_ERROR.getCode(), "action未知");
+        }
+        return taskDomainService.actionHost(taskId, host, groupName, hostActionEnum);
     }
 
     /**

@@ -1,8 +1,13 @@
 package com.didiglobal.logi.op.manager.infrastructure.deployment;
 
+import com.alibaba.fastjson.JSONObject;
 import com.didiglobal.logi.op.manager.domain.script.entity.Script;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.TaskActionEnum;
+import com.didiglobal.logi.op.manager.infrastructure.deployment.zeus.ZeusService;
+import com.didiglobal.logi.op.manager.infrastructure.deployment.zeus.ZeusTask;
+import com.didiglobal.logi.op.manager.infrastructure.deployment.zeus.ZeusTaskStatus;
+import com.didiglobal.logi.op.manager.infrastructure.deployment.zeus.ZeusTemplate;
 import com.didiglobal.logi.op.manager.infrastructure.exception.ZeusOperationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,6 +73,35 @@ public class DeploymentServiceImpl implements DeploymentService {
             return Result.success(zeusService.executeTask(task));
         } catch (ZeusOperationException e) {
             LOGGER.error("class=DeploymentServiceImpl||method=execute||errMsg={}||msg=execute failed", e.getMessage());
+            return Result.fail(e.getCode(), e.getMessage());
+        }
+    }
+
+    @Override
+    public Result<Void> actionTask(int executeTaskId, String action) {
+        try {
+            JSONObject param = new JSONObject();
+            param.put("task_id", executeTaskId);
+            param.put("action", action);
+            zeusService.actionTask(param);
+            return Result.success();
+        } catch (ZeusOperationException e) {
+            LOGGER.error("class=DeploymentServiceImpl||method=actionTask||errMsg={}||msg=execute failed", e.getMessage());
+            return Result.fail(e.getCode(), e.getMessage());
+        }
+    }
+
+    @Override
+    public Result<Void> actionHost(int executeTaskId, String host, String action) {
+        try {
+            JSONObject param = new JSONObject();
+            param.put("task_id", executeTaskId);
+            param.put("hostname", host);
+            param.put("action", action);
+            zeusService.actionTask(param);
+            return Result.success();
+        } catch (ZeusOperationException e) {
+            LOGGER.error("class=DeploymentServiceImpl||method=actionHost||errMsg={}||msg=execute failed", e.getMessage());
             return Result.fail(e.getCode(), e.getMessage());
         }
     }

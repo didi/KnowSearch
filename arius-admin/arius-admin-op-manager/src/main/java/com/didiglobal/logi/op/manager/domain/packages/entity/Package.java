@@ -1,5 +1,6 @@
 package com.didiglobal.logi.op.manager.domain.packages.entity;
 
+import com.didiglobal.logi.op.manager.domain.packages.entity.value.PackageGroupConfig;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 import com.didiglobal.logi.op.manager.infrastructure.common.ResultCode;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.PackageTypeEnum;
@@ -42,7 +43,7 @@ public class Package {
      */
     private String describe;
     /**
-     * 类型，0是配置依赖，1是配置独立
+     * 类型，1是配置独立，0是配置依赖
      */
     private Integer type;
     /**

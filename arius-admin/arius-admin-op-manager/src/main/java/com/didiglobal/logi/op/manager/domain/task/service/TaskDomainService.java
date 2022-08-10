@@ -3,6 +3,8 @@ package com.didiglobal.logi.op.manager.domain.task.service;
 import com.didiglobal.logi.op.manager.domain.task.entity.Task;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralGroupConfig;
+import com.didiglobal.logi.op.manager.infrastructure.common.enums.HostActionEnum;
+import com.didiglobal.logi.op.manager.infrastructure.common.enums.TaskActionEnum;
 
 import java.util.List;
 import java.util.Map;
@@ -31,6 +33,24 @@ public interface TaskDomainService {
      * @return
      */
     Result<Void> executeTask(int taskId);
+
+    /**
+     * 对任务执行相应的操作，暂停，取消，杀死，继续
+     * @param taskId
+     * @param action
+     * @return
+     */
+    Result<Void> actionTask(int taskId, TaskActionEnum action);
+
+    /**
+     * 对节点执行相应的操作，重试，忽略，kill
+     * @param taskId
+     * @param host
+     * @param groupName
+     * @param action
+     * @return
+     */
+    Result<Void> actionHost(int taskId, String host, String groupName, HostActionEnum action);
 
     /**
      * 通过id获取任务

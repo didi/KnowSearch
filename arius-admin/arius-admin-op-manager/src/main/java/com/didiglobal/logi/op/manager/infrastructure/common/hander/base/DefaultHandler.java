@@ -1,4 +1,4 @@
-package com.didiglobal.logi.op.manager.infrastructure.common.hander;
+package com.didiglobal.logi.op.manager.infrastructure.common.hander.base;
 
 /**
  * @author didi

@@ -1,6 +1,9 @@
 package com.didiglobal.logi.op.manager.domain.task.entity;
 
 import com.didiglobal.logi.op.manager.domain.task.entity.value.TaskDetail;
+import com.didiglobal.logi.op.manager.infrastructure.common.Result;
+import com.didiglobal.logi.op.manager.infrastructure.common.ResultCode;
+import com.didiglobal.logi.op.manager.infrastructure.common.enums.TaskActionEnum;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.TaskStatusEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -87,6 +90,46 @@ public class Task {
     public Task updateStatus(int status) {
         this.status = status;
         return this;
+
+    }
+
+    public Result<Void> checkExecuteTaskStatus() {
+        if (status == TaskStatusEnum.RUNNING.getStatus()) {
+            return Result.fail(ResultCode.TASK_IS_RUNNING);
+        }
+        if (status == TaskStatusEnum.FAILED.getStatus() ||
+                status == TaskStatusEnum.SUCCESS.getStatus() ||
+                status == TaskStatusEnum.CANCELLED.getStatus() ||
+                status == TaskStatusEnum.KILLED.getStatus()) {
+            return Result.fail(ResultCode.TASK_IS_FINISH);
+        }
+        return Result.success();
+    }
+
+    public Result<Void> checkTaskActionStatus(TaskActionEnum action) {
+        switch (action) {
+            case PAUSE:
+                if (status != TaskStatusEnum.RUNNING.getStatus()) {
+                    return Result.fail(ResultCode.TASK_IS_NOT_RUNNING);
+                }
+                break;
+            case START:
+                if (status == TaskStatusEnum.RUNNING.getStatus()) {
+                    return Result.fail(ResultCode.TASK_IS_RUNNING);
+                }
+                break;
+            case CANCEL:
+            case KILL:
+                if (status != TaskStatusEnum.WAITING.getStatus() &&
+                        status != TaskStatusEnum.RUNNING.getStatus() &&
+                        status != TaskStatusEnum.PAUSE.getStatus()) {
+                    return Result.fail(ResultCode.TASK_IS_FINISH);
+                }
+                break;
+            default:
+                return Result.fail(ResultCode.COMMON_FAIL);
+        }
+        return Result.success();
 
     }
 

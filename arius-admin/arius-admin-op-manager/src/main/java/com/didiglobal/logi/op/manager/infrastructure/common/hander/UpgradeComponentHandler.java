@@ -8,6 +8,9 @@ import com.didiglobal.logi.op.manager.domain.component.service.ComponentDomainSe
 import com.didiglobal.logi.op.manager.domain.task.service.TaskDomainService;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralUpgradeComponent;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.OperationEnum;
+import com.didiglobal.logi.op.manager.infrastructure.common.hander.base.BaseComponentHandler;
+import com.didiglobal.logi.op.manager.infrastructure.common.hander.base.ComponentHandler;
+import com.didiglobal.logi.op.manager.infrastructure.common.hander.base.DefaultHandler;
 import com.didiglobal.logi.op.manager.infrastructure.exception.ComponentHandlerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

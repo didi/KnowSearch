@@ -5,7 +5,7 @@ import com.didiglobal.logi.op.manager.domain.task.service.TaskDomainService;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.TaskStatusEnum;
 import com.didiglobal.logi.op.manager.infrastructure.common.hander.ComponentHandlerFactory;
 import com.didiglobal.logi.op.manager.infrastructure.deployment.DeploymentService;
-import com.didiglobal.logi.op.manager.infrastructure.deployment.ZeusTaskStatus;
+import com.didiglobal.logi.op.manager.infrastructure.deployment.zeus.ZeusTaskStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

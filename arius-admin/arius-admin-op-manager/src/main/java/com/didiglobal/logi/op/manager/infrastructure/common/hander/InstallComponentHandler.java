@@ -11,6 +11,10 @@ import com.didiglobal.logi.op.manager.domain.script.service.impl.ScriptDomainSer
 import com.didiglobal.logi.op.manager.domain.task.service.TaskDomainService;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralInstallComponent;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.OperationEnum;
+import com.didiglobal.logi.op.manager.infrastructure.common.enums.PackageTypeEnum;
+import com.didiglobal.logi.op.manager.infrastructure.common.hander.base.BaseComponentHandler;
+import com.didiglobal.logi.op.manager.infrastructure.common.hander.base.ComponentHandler;
+import com.didiglobal.logi.op.manager.infrastructure.common.hander.base.DefaultHandler;
 import com.didiglobal.logi.op.manager.infrastructure.exception.ComponentHandlerException;
 import com.didiglobal.logi.op.manager.infrastructure.util.ConvertUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -55,6 +59,9 @@ public class InstallComponentHandler extends BaseComponentHandler implements Com
 
             Package pk = packageDomainService.queryPackage(Package.builder().id(installComponent.getPackageId()).build()).
                     getData().get(0);
+            if (pk.getType() == PackageTypeEnum.CONFIG_DEPENDENT.type) {
+                installComponent.setDependConfigComponentId(installComponent.getDependComponentId());
+            }
             installComponent.setTemplateId(scriptDomainService.getScriptById(pk.getScriptId()).getData().getTemplateId());
             String content = JSONObject.toJSON(installComponent).toString();
 
