@@ -269,4 +269,6 @@ public interface IndicesManager {
      * @return {@link List}<{@link CatIndexResult}>
      */
     List<CatIndexResult> listIndexCatInfoByTemplatePhyId(Long physicalId);
+    
+    Result<Void> deleteIndexByCLusterPhy(String clusterPhy, List<String> indexNameList, Integer projectId, String operator);
 }
