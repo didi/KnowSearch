@@ -803,8 +803,7 @@ public class IndicesManagerImpl implements IndicesManager {
         if (CollectionUtils.isEmpty(indices)) {
             return Lists.newArrayList();
         }
-        return indices.stream().sorted(Comparator.nullsLast(Comparator.comparing(CatIndexResult::getPriStoreSize))
-                        .thenComparing(CatIndexResult::getIndex))
+        return indices.stream().sorted(Comparator.comparing(CatIndexResult::getIndex))
                 .map(i -> new Tuple<String, String>(i.getIndex(), i.getPriStoreSize())).collect(Collectors.toList());
     }
 
