@@ -176,7 +176,7 @@ public interface TemplateDCDRManager {
      * @param replicaCluster 从集群名称
      * @return true/false
      */
-    boolean syncExistTemplateDCDR(Long physicalId, String replicaCluster);
+    boolean syncExistTemplateDCDR(Long physicalId, String replicaCluster) throws ESOperateException;
 
     /**
      * 删除索引DCDR链路

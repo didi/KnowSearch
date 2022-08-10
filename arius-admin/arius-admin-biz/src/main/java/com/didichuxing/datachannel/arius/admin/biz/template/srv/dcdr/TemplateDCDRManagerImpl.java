@@ -65,6 +65,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -697,9 +698,11 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
      * @return true/false
      */
     @Override
-    public boolean syncExistTemplateDCDR(Long physicalId, String replicaCluster) {
+    public boolean syncExistTemplateDCDR(Long physicalId, String replicaCluster) throws ESOperateException {
         IndexTemplatePhy templatePhysical = indexTemplatePhyService.getTemplateById(physicalId);
-
+        if (Objects.isNull(templatePhysical)) {
+            throw new ESOperateException("获取不到物理模版:【%s】");
+        }
         LOGGER.info("method=syncExistTemplateDCDR||physicalId={}||replicaCluster={}", physicalId, replicaCluster);
 
         DCDRTemplate dcdrTemplate = esDCDRDAO.getAutoReplication(templatePhysical.getCluster(),
@@ -840,7 +843,7 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
                         syncExistTemplateDCDR(masterPhyTemplate.getId(), slavePhyTemplate.getCluster()));
                
             } catch (Exception e) {
-                LOGGER.error("method=getTemplateDCDRInfoVO||templateId={}||error=master cluster is null", templateId);
+                LOGGER.error("method=getTemplateDCDRInfoVO||templateId={}", templateId,e);
                return Result.buildFailWithMsg(templateDCDRInfoVO,"主集群异常，获取主从位点差失败");
             }
         }
