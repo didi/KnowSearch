@@ -43,6 +43,7 @@ public class ComponentAssembler {
     public static GeneralGroupConfigHostVO toGeneralGroupConfigVO(GeneralGroupConfig config, String host) {
         GeneralGroupConfigHostVO vo = ConvertUtil.obj2Obj(config, GeneralGroupConfigHostVO.class);
         StringBuilder directory = new StringBuilder();
+        //设置目录
         JSON.parseObject(config.getInstallDirectoryConfig()).forEach((name, dc) -> {
             if (name.equals(host)) {
                 if (0 == directory.length()) {
@@ -53,8 +54,12 @@ public class ComponentAssembler {
 
             }
         });
-
-        vo.setInstallDirector(directory.toString());
+        //设置进程数
+        JSON.parseObject(config.getProcessNumConfig()).forEach((name, processNum) -> {
+            if (name.equals(host)) {
+                vo.setProcessNum(directory.toString());
+            }
+        });
         return vo;
     }
 }

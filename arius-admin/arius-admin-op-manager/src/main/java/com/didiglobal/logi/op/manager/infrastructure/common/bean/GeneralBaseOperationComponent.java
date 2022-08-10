@@ -19,7 +19,7 @@ import java.util.List;
 public class GeneralBaseOperationComponent {
     protected Integer componentId;
 
-    protected List<GeneralGroupConfigDTO> groupConfigList;
+    protected List<GeneralGroupConfig> groupConfigList;
 
     protected String associationId;
 

@@ -31,6 +31,14 @@ public interface TaskRepository {
     void updateTaskStatus(int id, int status);
 
     /**
+     * 更新任务状态以及是否完成状态
+     * @param id
+     * @param status
+     * @param isFinish
+     */
+    void updateTaskStatusAndIsFinish(int id, int status, int isFinish);
+
+    /**
      * 获取未完成的任务列表
      * @return
      */

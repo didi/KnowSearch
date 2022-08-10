@@ -42,7 +42,6 @@ public class TaskService {
         return taskDomainService.executeTask(taskId);
     }
 
-
     /**
      * 对任务执行相应的操作，暂停，取消，杀死，继续
      * @param taskId
@@ -58,6 +57,13 @@ public class TaskService {
             return Result.fail(ResultCode.PARAM_ERROR.getCode(), "action未知");
         }
         return taskDomainService.actionTask(taskId, taskAction);
+    }
+
+    public Result<Void> retryTask(Integer taskId) {
+        if (null == taskId) {
+            return Result.fail(ResultCode.PARAM_ERROR.getCode(), "task id为空");
+        }
+        return taskDomainService.retryTask(taskId);
     }
 
     /**

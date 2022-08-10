@@ -43,6 +43,13 @@ public interface TaskDomainService {
     Result<Void> actionTask(int taskId, TaskActionEnum action);
 
     /**
+     * 任务重试
+     * @param taskId
+     * @return
+     */
+    Result<Void> retryTask(int taskId);
+
+    /**
      * 对节点执行相应的操作，重试，忽略，kill
      * @param taskId
      * @param host
@@ -90,5 +97,5 @@ public interface TaskDomainService {
      * @param status
      * @return
      */
-    Result<Void> updateTaskStatus(int taskId, int isFinish, int status);
+    Result<Void> updateTaskStatusAndIsFinish(int taskId, int isFinish, int status);
 }

@@ -37,13 +37,19 @@ public class TaskController {
 
     @PostMapping("/{action}/{taskId}")
     @ApiOperation(value = "")
-    public Result<Void> action(@PathVariable String action, @PathVariable Integer taskId) {
+    public Result<Void> operateTask(@PathVariable String action, @PathVariable Integer taskId) {
         return taskService.operateTask(taskId, action);
+    }
+
+    @PostMapping("/retry/{taskId}")
+    @ApiOperation(value = "")
+    public Result<Void> retryTask(@PathVariable Integer taskId) {
+        return taskService.retryTask(taskId);
     }
 
     @PostMapping("/{action}/{taskId}/{host}")
     @ApiOperation(value = "")
-    public Result<Void> actionHost(@PathVariable String action, @PathVariable Integer taskId, @PathVariable String host,
+    public Result<Void> operateHost(@PathVariable String action, @PathVariable Integer taskId, @PathVariable String host,
                                    @RequestParam(value = "groupName", required = true) String groupName) {
         return taskService.operateHost(taskId, action, host, groupName);
     }

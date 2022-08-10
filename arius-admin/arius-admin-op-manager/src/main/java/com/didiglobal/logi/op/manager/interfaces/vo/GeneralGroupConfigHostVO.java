@@ -35,6 +35,6 @@ public class GeneralGroupConfigHostVO {
     /**
      * 进程数配置
      */
-    private String processNumConfig;
+    private String processNum;
 
 }

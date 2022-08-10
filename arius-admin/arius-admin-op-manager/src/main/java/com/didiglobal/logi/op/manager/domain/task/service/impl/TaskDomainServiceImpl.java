@@ -7,8 +7,8 @@ import com.didiglobal.logi.op.manager.domain.task.repository.TaskRepository;
 import com.didiglobal.logi.op.manager.domain.task.service.TaskDomainService;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 import com.didiglobal.logi.op.manager.infrastructure.common.ResultCode;
+import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralBaseOperationComponent;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralGroupConfig;
-import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralInstallComponent;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.HostActionEnum;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.OperationEnum;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.TaskActionEnum;
@@ -131,6 +131,24 @@ public class TaskDomainServiceImpl implements TaskDomainService {
     }
 
     @Override
+    public Result<Void> retryTask(int taskId) {
+        Task task = taskRepository.getTaskById(taskId);
+        if (null == task) {
+            return Result.fail(ResultCode.TASK_NOT_EXIST_ERROR);
+        }
+        Result checkRes = task.checkRetryActionStatus();
+
+        if (checkRes.failed()) {
+            return checkRes;
+        }
+
+        taskDetailRepository.deleteByTaskId(taskId);
+        //更新任务状态
+        taskRepository.updateTaskStatus(taskId, TaskStatusEnum.WAITING.getStatus());
+        return Result.success();
+    }
+
+    @Override
     public Result<Void> actionHost(int taskId, String host, String groupName, HostActionEnum action) {
         TaskDetail taskDetail = taskDetailRepository.getDetailByHostAndGroupName(taskId, host, groupName);
 
@@ -152,7 +170,7 @@ public class TaskDomainServiceImpl implements TaskDomainService {
         updateTaskDetail(taskId, taskDetail.getExecuteTaskId(), action.getStatus(), Collections.singletonList(host));
 
         //更新主任务状态，这里因为zeus执行中如果一个节点失败了，然后重试或其他操作，这时整个任务是暂停的，需要再次重启
-        taskRepository.updateTaskStatus(taskId, TaskStatusEnum.PAUSE.getStatus());
+        taskRepository.updateTaskStatusAndIsFinish(taskId, TaskStatusEnum.PAUSE.getStatus(), 0);
         return Result.success();
     }
 
@@ -222,18 +240,23 @@ public class TaskDomainServiceImpl implements TaskDomainService {
     }
 
     @Override
-    public synchronized Result<Void> updateTaskStatus(int taskId, int isFinish, int status) {
-        return null;
+    public Result<Void> updateTaskStatusAndIsFinish(int taskId, int isFinish, int status) {
+        taskRepository.updateTaskStatusAndIsFinish(taskId, status, isFinish);
+        return Result.success();
     }
 
     private Result<Tuple<GeneralGroupConfig, String>> getConfigByGroupName(Task task, String name) {
 
         switch (OperationEnum.valueOfType(task.getType())) {
             case INSTALL:
-                GeneralInstallComponent installComponent = ConvertUtil.obj2ObjByJSON(task.getContent(), GeneralInstallComponent.class);
-                for (GeneralGroupConfig config : installComponent.getGroupConfigList()) {
+            case EXPAND:
+            case SHRINK:
+            case CONFIG_CHANGE:
+            case RESTART:
+                GeneralBaseOperationComponent baseOperationComponent = ConvertUtil.obj2ObjByJSON(task.getContent(), GeneralBaseOperationComponent.class);
+                for (GeneralGroupConfig config : baseOperationComponent.getGroupConfigList()) {
                     if (config.getGroupName().equals(name)) {
-                        return Result.success(new Tuple<>(config, installComponent.getTemplateId()));
+                        return Result.success(new Tuple<>(config, baseOperationComponent.getTemplateId()));
                     }
                 }
             case UN_KNOW:

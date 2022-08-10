@@ -36,7 +36,7 @@ public class TaskScheduler {
     @Autowired
     ComponentHandlerFactory componentHandlerFactory;
 
-    //TODO 一个任务的最后一个节点失败，那这个节点就没法重试了以及忽略
+    //TODO 一个任务的最后一个节点失败，那这个节点就没法重试了以及忽略, 等志勇他们解决
     @Scheduled(initialDelay = 10000, fixedDelay = 300000)
     public void monitor() {
         try {
@@ -58,11 +58,10 @@ public class TaskScheduler {
             });
 
             if (executeIdSet.size() > 0) {
-                int finalStatus = task.getStatus();
-                int isFinish = 0;
                 ZeusTaskStatus totalStatus = new ZeusTaskStatus();
                 for (Integer id : executeIdSet) {
-                    //TODO要考虑定时任务和手动操作
+                    //TODO 要考虑并发时定时任务和手动操作数据库产生的不一致情况
+                    //TODO 这里会有重复更新的情况，如何性能最大化
                     ZeusTaskStatus zeusTaskStatus = deploymentService.deployStatus(id).getData();
                     for (Field declaredField : zeusTaskStatus.getClass().getDeclaredFields()) {
                         List<String> hostList = (List<String>) declaredField.get(zeusTaskStatus);
@@ -73,7 +72,7 @@ public class TaskScheduler {
                     totalStatus.addZeusTaskStatus(zeusTaskStatus);
                 }
 
-                finalStatus = getFinalStatusAndUpdate(task, finalStatus, isFinish, totalStatus);
+                int finalStatus = getFinalStatusAndUpdate(task, totalStatus);
 
                 if (finalStatus == TaskStatusEnum.SUCCESS.getStatus()) {
                     componentHandlerFactory.getByType(task.getType()).taskFinishProcess(task.getContent());
@@ -85,24 +84,22 @@ public class TaskScheduler {
         }
     }
 
-    private int getFinalStatusAndUpdate(Task task, int finalStatus, int isFinish, ZeusTaskStatus totalStatus) {
-        //更新任务最终状态
-        //TODO 里的状态有点混乱
-        if ((null != totalStatus.getTimeout() || null != totalStatus.getFailed()) &&
-                null != totalStatus.getWaiting()) {
-            finalStatus = TaskStatusEnum.WAITING.getStatus();
-        } else if (null != totalStatus.getTimeout() || null != totalStatus.getFailed()) {
+    private int getFinalStatusAndUpdate(Task task, ZeusTaskStatus totalStatus) {
+        int isFinish = 0;
+        int finalStatus;
+        if (null != totalStatus.getTimeout() || null != totalStatus.getFailed()) {
             finalStatus = TaskStatusEnum.FAILED.getStatus();
             isFinish = 1;
-        } else if (null == totalStatus.getWaiting() && null == totalStatus.getRunning()) {
-            finalStatus = TaskStatusEnum.SUCCESS.getStatus();
-            isFinish = 1;
-        } else if (null != totalStatus.getWaiting() && null == totalStatus.getRunning()) {
+        } else if (null != totalStatus.getRunning()) {
+            finalStatus = TaskStatusEnum.RUNNING.getStatus();
+        } else if (null != totalStatus.getWaiting()) {
             finalStatus = TaskStatusEnum.WAITING.getStatus();
+        } else {
+            finalStatus = TaskStatusEnum.SUCCESS.getStatus();
         }
 
         if (task.getStatus() != finalStatus) {
-            taskDomainService.updateTaskStatus(task.getId(), task.getStatus(), isFinish);
+            taskDomainService.updateTaskStatusAndIsFinish(task.getId(), isFinish, task.getStatus());
         }
         return finalStatus;
     }

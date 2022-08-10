@@ -39,4 +39,11 @@ public interface TaskDetailRepository {
      * @param executeTaskId
      */
     void updateTaskDetailExecuteIdByTaskIdAndGroupName(int taskId, String groupName, int executeTaskId);
+
+    /**
+     * 通过taskId删除
+     * @param taskId
+     * @return
+     */
+    void deleteByTaskId(int taskId);
 }
