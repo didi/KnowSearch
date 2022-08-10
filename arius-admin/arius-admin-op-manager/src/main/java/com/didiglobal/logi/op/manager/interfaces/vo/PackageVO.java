@@ -51,6 +51,10 @@ public class PackageVO {
      * 更新时间
      */
     private Timestamp updateTime;
+    /**
+     * 创建者
+     */
+    private String creator;
 
     /**
      * 关联的默认安装包分组配置

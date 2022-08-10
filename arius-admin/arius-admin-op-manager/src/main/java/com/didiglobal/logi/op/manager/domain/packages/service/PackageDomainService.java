@@ -20,6 +20,13 @@ public interface PackageDomainService {
     Result<Void> createPackage(Package pk);
 
     /**
+     * 编辑安装包
+     * @param pk
+     * @return
+     */
+    Result<Void> updatePackage(Package pk);
+
+    /**
      * 查询脚本
      * @param pk
      * @return

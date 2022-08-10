@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.didiglobal.logi.op.manager.infrastructure.db.mapper.PackageGroupConfigDao">
+    <resultMap id="BaseResultMap"
+               type="com.didiglobal.logi.op.manager.infrastructure.db.PackageGroupConfigPO">
+        <result column="id" jdbcType="INTEGER" property="id"/>
+        <result column="group_name" jdbcType="VARCHAR" property="groupName"/>
+        <result column="system_config" jdbcType="VARCHAR" property="systemConfig"/>
+        <result column="running_config" jdbcType="VARCHAR" property="runningConfig"/>
+        <result column="file_config" jdbcType="VARCHAR" property="fileConfig"/>
+        <result column="package_id" jdbcType="INTEGER" property="packageId"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, group_name, system_config, running_config, file_config, package_id, create_time, update_time
+    </sql>
+
+    <insert id="insert" parameterType="com.didiglobal.logi.op.manager.infrastructure.db.PackageGroupConfigPO"
+            useGeneratedKeys="true"
+            keyColumn="id" keyProperty="id">
+        insert into logi_op_package_group_config (group_name, system_config, running_config, file_config, package_id, create_time, update_time)
+        values (#{groupName}, #{systemConfig}, #{runningConfig}, #{fileConfig}, #{packageId}, #{createTime}, #{updateTime})
+    </insert>
+
+    <select id="listByPackageId"
+            parameterType="com.didiglobal.logi.op.manager.infrastructure.db.PackageGroupConfigPO"
+            resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from logi_op_package_group_config
+        where package_id = #{package_id}
+    </select>
+
+</mapper>

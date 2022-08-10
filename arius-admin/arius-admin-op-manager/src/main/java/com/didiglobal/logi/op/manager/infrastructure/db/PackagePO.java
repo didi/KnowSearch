@@ -1,6 +1,9 @@
 package com.didiglobal.logi.op.manager.infrastructure.db;
 
 import com.didiglobal.logi.op.manager.domain.packages.entity.PackageGroupConfig;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.sql.Timestamp;
 
@@ -8,6 +11,9 @@ import java.sql.Timestamp;
  * @author didi
  * @date 2022-07-11 2:25 下午
  */
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class PackagePO {
     /**
      * 安装包id
@@ -45,4 +51,8 @@ public class PackagePO {
      * 更新时间
      */
     private Timestamp updateTime;
+    /**
+     * 创建者
+     */
+    private String creator;
 }

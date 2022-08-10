@@ -5,7 +5,9 @@ import com.didiglobal.logi.op.manager.domain.packages.entity.Package;
 import com.didiglobal.logi.op.manager.infrastructure.common.Constants;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 import com.didiglobal.logi.op.manager.interfaces.assembler.PackageAssembler;
+import com.didiglobal.logi.op.manager.interfaces.assembler.ScriptAssembler;
 import com.didiglobal.logi.op.manager.interfaces.dto.PackageDTO;
+import com.didiglobal.logi.op.manager.interfaces.dto.ScriptDTO;
 import com.didiglobal.logi.op.manager.interfaces.vo.PackageVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -34,20 +36,25 @@ public class PackageController {
 
     @PostMapping("")
     @ApiOperation(value = "新建安装包")
-    public Result<Void> createPackage(@RequestBody PackageDTO packageDTO) {
+    public Result<Void> createPackage(PackageDTO packageDTO) {
         return packageService.createPackage(PackageAssembler.toDO(packageDTO));
     }
 
-    @PostMapping("query-package")
+    @PostMapping("/query-package")
     @ApiOperation(value = "查询安装包")
-    public Result<List<PackageVO>> queryScript(@RequestBody PackageDTO packageDTO) {
+    public Result<List<PackageVO>> queryPackage(@RequestBody PackageDTO packageDTO) {
         Result result = packageService.queryPackage(PackageAssembler.toDO(packageDTO));
         if (result.isSuccess()) {
             result.setData(PackageAssembler.toVOList((List<Package>) result.getData()));
         }
-        return result;
+        return Result.success();
     }
 
     //TODO 删除
     //TODO 编辑
+    @PostMapping("edit")
+    @ApiOperation(value = "编辑安装包")
+    public Result<Void> editPackage( PackageDTO packageDTO) {
+        return packageService.updatePackage(PackageAssembler.toDO(packageDTO));
+    }
 }

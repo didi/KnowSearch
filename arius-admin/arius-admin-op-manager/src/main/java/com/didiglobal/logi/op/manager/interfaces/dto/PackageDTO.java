@@ -54,6 +54,10 @@ public class PackageDTO {
      */
     private Timestamp updateTime;
     /**
+     * 创建者
+     */
+    private String creator;
+    /**
      * 传输文件
      */
     private MultipartFile uploadFile;

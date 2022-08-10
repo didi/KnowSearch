@@ -78,13 +78,13 @@ public class ScriptService {
         if (null == id || (script = scriptDomainService.getScriptById(id).getData()) == null ) {
             return Result.fail(ResultCode.PARAM_ERROR.getCode(), "输入的id参数有问题，请核对");
         }
-        //todo
+
         //判断,若脚本已经绑定了包则不能删除
-//        Package pk = new Package();
-//        pk.setScriptId(id);
-//        if (!packageDomainService.queryPackage(pk).getData().isEmpty()) {
-//            Result.fail(ResultCode.SCRIPT_OPERATE_ERROR.getCode(), "脚本已被绑定，不能删除");
-//        }
+        Package pk = new Package();
+        pk.setScriptId(id);
+        if (!packageDomainService.queryPackage(pk).getData().isEmpty()) {
+            return Result.fail(ResultCode.SCRIPT_OPERATE_ERROR.getCode(), "脚本已被绑定，不能删除");
+        }
 
         return scriptDomainService.deleteScript(script);
     }

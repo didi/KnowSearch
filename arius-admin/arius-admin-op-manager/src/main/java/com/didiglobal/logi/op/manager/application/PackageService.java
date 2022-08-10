@@ -2,6 +2,7 @@ package com.didiglobal.logi.op.manager.application;
 
 import com.didiglobal.logi.op.manager.domain.packages.entity.Package;
 import com.didiglobal.logi.op.manager.domain.packages.service.PackageDomainService;
+import com.didiglobal.logi.op.manager.domain.script.entity.Script;
 import com.didiglobal.logi.op.manager.domain.script.service.impl.ScriptDomainService;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 import org.slf4j.Logger;
@@ -28,7 +29,7 @@ public class PackageService {
     /**
      * 创建安装包
      * @param pk
-     * @return
+     * @return Result
      */
     public Result<Void> createPackage(Package pk) {
         //校验参数
@@ -43,6 +44,21 @@ public class PackageService {
 
         //新建安装包
         return packageDomainService.createPackage(pk);
+    }
+
+    /**
+     * 更新安装包
+     * @param pk
+     * @return result
+     */
+    public Result<Void> updatePackage(Package pk) {
+        //检验参数
+        Result<Void>  checkResult = pk.checkUpdateParam();
+        if (checkResult.failed()) {
+            return checkResult;
+        }
+        //修改安装包
+        return packageDomainService.updatePackage(pk);
     }
 
     public Result<List<Package>> queryPackage(Package pk) {

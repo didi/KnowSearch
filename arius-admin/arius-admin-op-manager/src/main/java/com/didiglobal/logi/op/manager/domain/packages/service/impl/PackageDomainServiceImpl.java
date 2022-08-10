@@ -6,6 +6,7 @@ import com.didiglobal.logi.op.manager.domain.packages.repository.PackageReposito
 import com.didiglobal.logi.op.manager.domain.packages.service.PackageDomainService;
 import com.didiglobal.logi.op.manager.domain.script.entity.Script;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
+import com.didiglobal.logi.op.manager.infrastructure.common.ResultCode;
 import com.didiglobal.logi.op.manager.infrastructure.deployment.DeploymentService;
 import com.didiglobal.logi.op.manager.infrastructure.storage.StorageService;
 import org.jetbrains.annotations.NotNull;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 /**
@@ -35,6 +37,11 @@ public class PackageDomainServiceImpl implements PackageDomainService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Result<Void> createPackage(Package pk) {
+        //判断新建的安装包名称是否已经在数据库中存在，确保数据库中安装包名称唯一
+        if (null != packageRepository.findByName(pk.getName())) {
+            return Result.fail(ResultCode.PARAM_ERROR.getCode(),"安装包名称已存在，请重新输入");
+        }
+
         //创建
         pk.create();
 
@@ -46,10 +53,12 @@ public class PackageDomainServiceImpl implements PackageDomainService {
         pk.setUrl(storageRes.getData());
 
         //入库
-        int packageId = packageRepository.insertPackage(pk);
-        if (!pk.getGroupConfigList().isEmpty()) {
+        packageRepository.insertPackage(pk);
+        int packageId = packageRepository.findByName(pk.getName()).getId();
+        if (null != pk.getGroupConfigList()) {
             pk.getGroupConfigList().forEach(packageGroupConfig -> {
                 packageGroupConfig.setPackageId(packageId);
+                packageGroupConfig.setCreateTime(new Timestamp(System.currentTimeMillis()));
                 packageGroupConfigRepository.insertPackageGroupConfig(packageGroupConfig);
             });
 
@@ -64,6 +73,37 @@ public class PackageDomainServiceImpl implements PackageDomainService {
             p.setGroupConfigList(packageGroupConfigRepository.queryConfigByPackageId(p.getId()));
         });
         return Result.buildSuccess(list);
+    }
+
+    @Override
+    public Result<Void> updatePackage(Package pk) {
+
+        //todo
+        // 跟组件相关，若绑定了组件，则所绑定的脚本和版本以及安装包都不可以更改。
+
+        //更新
+        pk.update();
+
+        if (null != pk.getUploadFile()) {
+            Result<String> storageRes = storageService.upload(getUniqueFileName(pk), pk.getUploadFile());
+            if (storageRes.failed()) {
+                return Result.fail(storageRes.getCode(), storageRes.getMessage());
+            }
+            pk.setUrl(storageRes.getData());
+        }
+
+        //更新
+        packageRepository.updatePackage(pk);
+        int packageId = pk.getId();
+        if (null != pk.getGroupConfigList()) {
+
+            pk.getGroupConfigList().forEach(packageGroupConfig -> {
+                packageGroupConfig.setPackageId(packageId);
+                packageGroupConfigRepository.insertPackageGroupConfig(packageGroupConfig);
+            });
+
+        }
+        return Result.success();
     }
 
     @NotNull

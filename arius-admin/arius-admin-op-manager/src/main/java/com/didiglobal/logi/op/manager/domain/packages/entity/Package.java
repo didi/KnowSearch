@@ -1,5 +1,6 @@
 package com.didiglobal.logi.op.manager.domain.packages.entity;
 
+import com.didiglobal.logi.op.manager.domain.script.entity.Script;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 import com.didiglobal.logi.op.manager.infrastructure.common.ResultCode;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.PackageTypeEnum;
@@ -58,10 +59,13 @@ public class Package {
      */
     private Timestamp updateTime;
     /**
+     * 创建者
+     */
+    private String creator;
+    /**
      * 传输文件
      */
     private MultipartFile uploadFile;
-
 
     /**
      * 关联的默认安装包分组配置
@@ -81,6 +85,13 @@ public class Package {
         return this;
     }
 
+    public Package update() {
+        this.updateTime = new Timestamp(System.currentTimeMillis());
+        if (null != groupConfigList) {
+            groupConfigList.forEach(config -> config.update());
+        }
+        return this;
+    }
 
     public Result<Void> checkCreateParam() {
         if (name.isEmpty()) {
@@ -98,6 +109,17 @@ public class Package {
         if (uploadFile.isEmpty()) {
             return Result.fail(ResultCode.PARAM_ERROR.getCode(), "安装包内容缺失");
         }
+        return Result.success();
+    }
+
+
+    public Result<Void> checkUpdateParam() {
+        if (null == id) {
+            return Result.fail(ResultCode.PARAM_ERROR.getCode(), "id缺失");
+        }
+//        if (uploadFile.isEmpty() && null == describe) {
+//            return Result.fail(ResultCode.PARAM_ERROR.getCode(), "请指定要修改的值（脚本或者描述）");
+//        }
         return Result.success();
     }
 }
