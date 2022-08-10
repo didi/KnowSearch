@@ -447,64 +447,26 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         if (checkProjectCorrectly.failed()) {
             return checkProjectCorrectly;
         }
-    
+        
         //获取逻辑模板和索引
         ClusterLogicTemplateIndexDetailDTO templateIndexVO = getTemplateIndexVO(clusterLogic, projectId);
         try {
-            //todo 这里后期改造成定时任务，目前这里暂时改一下，索引先全量下线后，项目再进行下线，否则分区模版数量太大，会出现模版下线完成
+          
             //但是索引下线没有完成，导致了脏数据的产生
-            for (IndexCatCellDTO indexCatCellDTO : templateIndexVO.getCatIndexResults()) {
-    
-                FUTURE_UTIL.runnableTask(() -> {
-                    if (!AuthConstant.SUPER_PROJECT_ID.equals(projectId) && StringUtils.isNotBlank(
-                            indexCatCellDTO.getClusterLogic())) {
-                        indexCatCellDTO.setCluster(indexCatCellDTO.getClusterLogic());
-                    }
-                });
+            if (CollectionUtils.isNotEmpty( templateIndexVO.getCatIndexResults())||
+                CollectionUtils.isNotEmpty(templateIndexVO.getTemplates())){
+                return Result.buildFail(String.format(
+                        "该集群下还有%d项模板资源、%d项索引资源，如需下线集群，请前往模板管理、索引管理下线掉对应的模板及索引",
+                        Optional.ofNullable(templateIndexVO.getTemplates()).orElse(Collections.emptyList()).size(),
+                        Optional.ofNullable(templateIndexVO.getCatIndexResults()).orElse(Collections.emptyList()).size()
+                ));
             }
-            FUTURE_UTIL.waitExecute();
-    
-            // 这里要考虑一下，如果用户侧绑定了20个逻辑集群，每个逻辑集超过了1000个索引，那么这里会出发事务超时的,索引这里的实现需要改成多线程的模式来操作
-            Result<Boolean> deleteIndex = indicesManager.deleteIndex(templateIndexVO.getCatIndexResults(), projectId,
-                    operator);
-            if (deleteIndex.failed()) {
-                return Result.buildFrom(deleteIndex);
-            }
-            
-            List<IndexTemplatePhy> indexTemplatePhies = Lists.newArrayList();
-            // 如果模板数量膨胀，那么这里极容易发生超时的问题,这里要考虑并行来触发我们的下线操作
-            for (IndexTemplate agg : templateIndexVO.getTemplates()) {
-                FUTURE_UTIL_RESULT.callableTask(()-> templateLogicManager.delTemplate(agg.getId(), operator,
-                        projectId));
-                
-            }
-            Optional<Result<Void>> voidResult = FUTURE_UTIL_RESULT.waitResult().stream().filter(Result::failed)
-                    .findAny();
-            if (voidResult.isPresent()) {
-                return voidResult.get();
-            }
+          
             if (clusterLogicList.size() == 1) {
                 //将region解绑
                 ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(logicClusterId);
                 if (Objects.nonNull(clusterRegion)) {
                     clusterRegionService.unbindRegion(clusterRegion.getId(), logicClusterId, operator);
-                    //获取物理模板
-                    Result<List<IndexTemplatePhy>> ret = indexTemplatePhyService.listByRegionId(
-                            clusterRegion.getId().intValue());
-                    if (ret.success() && CollectionUtils.isNotEmpty(ret.getData())) {
-                        indexTemplatePhies = ret.getData();
-                    }
-                    //删除物理模板
-                    for (IndexTemplatePhy indexTemplatePhy : indexTemplatePhies) {
-                        FUTURE_UTIL_RESULT.callableTask(
-                                () -> indexTemplatePhyService.delTemplate(indexTemplatePhy.getId(), operator));
-        
-                    }
-                    Optional<Result<Void>> delTemplatePhyRes = FUTURE_UTIL_RESULT.waitResult().stream().filter(Result::failed)
-                            .findAny();
-                    if (delTemplatePhyRes.isPresent()) {
-                            return Result.buildFrom(delTemplatePhyRes.get());
-                        }
                     //将region解绑
                     Result<Void> unbindRes = clusterRegionService.unbindRegion(clusterRegion.getId(), logicClusterId,
                             operator);
@@ -523,14 +485,16 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
                                 .operationTypeEnum(OperateTypeEnum.MY_CLUSTER_OFFLINE)
                                 .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).content(clusterLogic.getName())
                                 .bizId(logicClusterId.intValue()).userOperation(operator).build());
+                return Result.buildSuccWithTips(result.getData(),
+                        String.format("逻辑集群%s下线成功", clusterLogic.getName()));
             }
-            return result;
+            return Result.buildFailWithMsg(result.getData(),String.format("逻辑集群%s下线失败", clusterLogic.getName()));
         } catch (AdminOperateException | ElasticsearchTimeoutException e) {
             LOGGER.error("class={}||method=deleteLogicCluster||clusterLogic={}||es operation errMsg={}",
                     getClass().getSimpleName(), clusterLogic.getName(), e);
             // 这里必须显示事务回滚
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
-            return Result.buildFail("集群失败, 请重新尝试下线集群,多次重试不成功,请联系管理员");
+            return Result.buildFail(String.format("逻辑集群%s下线失败,, 请重新尝试下线集群,多次重试不成功,请联系管理员", clusterLogic.getName()));
         } catch (Exception e) {
             LOGGER.error("class={}||method=deleteLogicCluster||clusterLogic={}||es operation errMsg={}",
                     getClass().getSimpleName(), clusterLogic.getName(), e);
