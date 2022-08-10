@@ -59,5 +59,5 @@ public class PackageVO {
     /**
      * 关联的默认安装包分组配置
      */
-    private List<PackageGroupConfigVO> groupConfigVOList;
+    private List<PackageGroupConfigVO> groupConfigList;
 }

@@ -74,8 +74,6 @@ public class PackageDomainServiceImpl implements PackageDomainService {
         list.stream().forEach(p -> {
             p.setGroupConfigList(packageGroupConfigRepository.queryConfigByPackageId(p.getId()));
         });
-        List<PackageGroupConfig> list1 = packageGroupConfigRepository.queryConfigByPackageId(pk.getId());
-        pk.getId();
         return Result.buildSuccess(list);
     }
 
