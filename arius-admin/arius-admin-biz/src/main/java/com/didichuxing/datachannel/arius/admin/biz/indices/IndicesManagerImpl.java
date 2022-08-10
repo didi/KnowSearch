@@ -26,6 +26,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.Cluster
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexCatCellVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexCatCellWithTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexMappingVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexSettingVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexShardInfoVO;
@@ -71,7 +72,6 @@ import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -798,13 +798,12 @@ public class IndicesManagerImpl implements IndicesManager {
     }
 
     @Override
-    public List<Tuple<String,String>> listIndexNameByTemplatePhyId(Long physicalId) {
+    public List<IndexCatCellWithTemplateVO> listIndexCatCellWithTemplateByTemplatePhyId(Long physicalId) {
         List<CatIndexResult> indices = listIndexCatInfoByTemplatePhyId(physicalId);
         if (CollectionUtils.isEmpty(indices)) {
             return Lists.newArrayList();
         }
-        return indices.stream().sorted(Comparator.comparing(CatIndexResult::getIndex))
-                .map(i -> new Tuple<String, String>(i.getIndex(), i.getPriStoreSize())).collect(Collectors.toList());
+        return ConvertUtil.list2List(indices,IndexCatCellWithTemplateVO.class);
     }
 
     @Override

@@ -47,6 +47,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithCluster;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexCatCellWithTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateClearVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateDeleteVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateDetailVO;
@@ -534,7 +535,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
                 List<IndexCatCellDTO> catCellList = templateClearInfo.getData().getIndices()
                        
                         .stream()
-                        .map(Tuple::getV1)
+                        .map(IndexCatCellWithTemplateVO::getIndex)
                         .map(phyClusterFunc).flatMap(Collection::stream)
             
                         .collect(Collectors.toList());
@@ -1082,7 +1083,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         consoleTemplateClearVO.setLogicId(templateLogicWithPhysical.getId());
         consoleTemplateClearVO.setName(templateLogicWithPhysical.getName());
         consoleTemplateClearVO.setIndices(
-            indicesManager.listIndexNameByTemplatePhyId(templateLogicWithPhysical.getMasterPhyTemplate().getId()));
+            indicesManager.listIndexCatCellWithTemplateByTemplatePhyId(templateLogicWithPhysical.getMasterPhyTemplate().getId()));
         consoleTemplateClearVO.setAccessApps(templateLogicManager.getLogicTemplateProjectAccess(logicId));
 
         return Result.buildSucc(consoleTemplateClearVO);
