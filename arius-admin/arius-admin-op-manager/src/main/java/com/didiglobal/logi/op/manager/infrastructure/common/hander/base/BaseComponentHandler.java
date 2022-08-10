@@ -1,4 +1,4 @@
-package com.didiglobal.logi.op.manager.infrastructure.common.hander;
+package com.didiglobal.logi.op.manager.infrastructure.common.hander.base;
 
 import com.didiglobal.logi.op.manager.domain.component.entity.Component;
 import com.didiglobal.logi.op.manager.domain.component.service.ComponentDomainService;

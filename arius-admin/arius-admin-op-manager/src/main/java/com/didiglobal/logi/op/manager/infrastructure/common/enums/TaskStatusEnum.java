@@ -30,8 +30,12 @@ public enum TaskStatusEnum {
     /**
      * 任务详情中host特有
      */
-    IGNORED(8, "忽略");
+    IGNORED(8, "忽略"),
 
+    /**
+     * 未知状态
+     */
+    UN_KNOW(9, "未知");
 
     private int status;
     private String describe;

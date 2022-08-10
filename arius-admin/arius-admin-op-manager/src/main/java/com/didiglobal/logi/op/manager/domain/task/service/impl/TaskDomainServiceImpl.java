@@ -9,7 +9,9 @@ import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 import com.didiglobal.logi.op.manager.infrastructure.common.ResultCode;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralGroupConfig;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralInstallComponent;
+import com.didiglobal.logi.op.manager.infrastructure.common.enums.HostActionEnum;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.OperationEnum;
+import com.didiglobal.logi.op.manager.infrastructure.common.enums.TaskActionEnum;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.TaskStatusEnum;
 import com.didiglobal.logi.op.manager.infrastructure.deployment.DeploymentService;
 import com.didiglobal.logi.op.manager.infrastructure.util.ConvertUtil;
@@ -20,10 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author didi
@@ -70,6 +69,10 @@ public class TaskDomainServiceImpl implements TaskDomainService {
         if (null == task) {
             return Result.fail(ResultCode.TASK_NOT_EXIST_ERROR);
         }
+        Result checkRes = task.checkExecuteTaskStatus();
+        if (checkRes.failed()) {
+            return checkRes;
+        }
 
         //获取要执行的分组信息
         List<TaskDetail> detailList = taskDetailRepository.listTaskDetailByTaskId(taskId);
@@ -99,6 +102,69 @@ public class TaskDomainServiceImpl implements TaskDomainService {
         taskDetailRepository.updateTaskDetailExecuteIdByTaskIdAndGroupName(taskId, group2ListRes.getData().getKey(),
                 deployRes.getData());
         return Result.success();
+    }
+
+    @Override
+    public Result<Void> actionTask(int taskId, TaskActionEnum action) {
+        Task task = taskRepository.getTaskById(taskId);
+        if (null == task) {
+            return Result.fail(ResultCode.TASK_NOT_EXIST_ERROR);
+        }
+        Result checkRes = task.checkTaskActionStatus(action);
+        if (checkRes.failed()) {
+            return checkRes;
+        }
+
+        //获取正在执行的任务id
+        int executeTaskId = getExecuteTaskId(taskId);
+
+
+        //执行zeus任务
+        Result<Void> actionRes = deploymentService.actionTask(executeTaskId, action.getAction());
+        if (actionRes.failed()) {
+            return actionRes;
+        }
+
+        //更新任务状态
+        taskRepository.updateTaskStatus(taskId, action.getStatus());
+        return Result.success();
+    }
+
+    @Override
+    public Result<Void> actionHost(int taskId, String host, String groupName, HostActionEnum action) {
+        TaskDetail taskDetail = taskDetailRepository.getDetailByHostAndGroupName(taskId, host, groupName);
+
+        if (null == taskDetail) {
+            return Result.fail(ResultCode.TASK_HOST_IS_NOT_EXIST);
+        }
+        Result checkRes = taskDetail.checkHostActionStatus(action);
+        if (checkRes.failed()) {
+            return checkRes;
+        }
+
+        //执行zeus任务
+        Result<Void> actionRes = deploymentService.actionHost(taskDetail.getExecuteTaskId(), host, action.getAction());
+        if (actionRes.failed()) {
+            return actionRes;
+        }
+
+        //更新子任务状态
+        updateTaskDetail(taskId, taskDetail.getExecuteTaskId(), action.getStatus(), Collections.singletonList(host));
+
+        //更新主任务状态，这里因为zeus执行中如果一个节点失败了，然后重试或其他操作，这时整个任务是暂停的，需要再次重启
+        taskRepository.updateTaskStatus(taskId, TaskStatusEnum.PAUSE.getStatus());
+        return Result.success();
+    }
+
+
+    private int getExecuteTaskId(int taskId) {
+        List<TaskDetail> detailList = taskDetailRepository.listTaskDetailByTaskId(taskId);
+        int executeTaskId = detailList.stream().filter(detail ->
+                null != detail.getExecuteTaskId() &&
+                        (detail.getStatus() == TaskStatusEnum.RUNNING.getStatus() ||
+                                detail.getStatus() == TaskStatusEnum.WAITING.getStatus())
+        ).findFirst().get().getExecuteTaskId();
+        return executeTaskId;
     }
 
     @NotNull

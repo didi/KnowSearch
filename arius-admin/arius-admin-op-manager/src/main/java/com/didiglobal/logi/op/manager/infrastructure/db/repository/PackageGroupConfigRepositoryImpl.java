@@ -1,6 +1,6 @@
 package com.didiglobal.logi.op.manager.infrastructure.db.repository;
 
-import com.didiglobal.logi.op.manager.domain.packages.entity.PackageGroupConfig;
+import com.didiglobal.logi.op.manager.domain.packages.entity.value.PackageGroupConfig;
 import com.didiglobal.logi.op.manager.domain.packages.repository.PackageGroupConfigRepository;
 import com.didiglobal.logi.op.manager.infrastructure.db.PackageGroupConfigPO;
 import com.didiglobal.logi.op.manager.infrastructure.db.converter.PackageGroupConfigConverter;

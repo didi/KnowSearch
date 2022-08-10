@@ -1,4 +1,4 @@
-package com.didiglobal.logi.op.manager.domain.packages.entity;
+package com.didiglobal.logi.op.manager.domain.packages.entity.value;
 
 import com.alibaba.fastjson.JSONObject;
 import lombok.Data;

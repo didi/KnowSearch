@@ -1,14 +1,13 @@
-package com.didiglobal.logi.op.manager.infrastructure.deployment;
+package com.didiglobal.logi.op.manager.infrastructure.deployment.zeus;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.didiglobal.logi.op.manager.infrastructure.exception.ZeusOperationException;
 import com.didiglobal.logi.op.manager.infrastructure.util.BaseHttpUtil;
 import lombok.Data;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
-import java.util.HashMap;
 
 import static com.didiglobal.logi.op.manager.infrastructure.util.BaseHttpUtil.buildHeader;
 
@@ -52,6 +51,10 @@ public class ZeusServiceImpl implements ZeusService {
     private static final String API_TASK_STATUS = "http://%s/api/task/%s/request";
 
     private static final String API_TEMPLATE_REMOVE = "http://%s/tpl/%s";
+
+    private static final String API_TASK_ACTION = "http://%s/api/task/action?token=%s";
+
+    private static final String API_HOST_ACTION = "http://%s/api/task/host-action?token=%s";
 
     @Override
     public String createTemplate(ZeusTemplate zeusTemplate) throws ZeusOperationException {
@@ -117,6 +120,19 @@ public class ZeusServiceImpl implements ZeusService {
             throw new ZeusOperationException(result.getMsg());
         }
     }
+
+    @Override
+    public void actionTask(JSONObject param) throws ZeusOperationException {
+        String url = String.format(API_TASK_ACTION, zeusServer, zeusToken);
+        getZeusResultForPost(param, url);
+    }
+
+    @Override
+    public void actionHost(JSONObject param) throws ZeusOperationException {
+        String url = String.format(API_HOST_ACTION, zeusServer, zeusToken);
+        getZeusResultForPost(param, url);
+    }
+
 
     @NotNull
     private ZeusResult getZeusResultForPost(Object param, String url) throws ZeusOperationException {

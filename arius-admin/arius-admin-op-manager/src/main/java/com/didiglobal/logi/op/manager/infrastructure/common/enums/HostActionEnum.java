@@ -2,15 +2,14 @@ package com.didiglobal.logi.op.manager.infrastructure.common.enums;
 
 /**
  * @author didi
+ * @date 2022-08-10 10:05 上午
  */
-public enum TaskActionEnum {
-    START("start", TaskStatusEnum.RUNNING.getStatus()),
+public enum HostActionEnum {
+    IGNORE("ignore", TaskStatusEnum.IGNORED.getStatus()),
 
-    PAUSE("pause", TaskStatusEnum.PAUSE.getStatus()),
+    REDO("redo", TaskStatusEnum.RUNNING.getStatus()),
 
     KILL("kill", TaskStatusEnum.KILLED.getStatus()),
-
-    CANCEL("cancel", TaskStatusEnum.CANCELLED.getStatus()),
 
     UN_KNOW("un_know", TaskStatusEnum.UN_KNOW.getStatus());
 
@@ -18,7 +17,7 @@ public enum TaskActionEnum {
 
     private Integer status;
 
-    TaskActionEnum(String action, Integer status) {
+    HostActionEnum(String action, Integer status) {
         this.action = action;
         this.status = status;
     }
@@ -31,8 +30,8 @@ public enum TaskActionEnum {
         return status;
     }
 
-    public static TaskActionEnum find(String action) {
-        for (TaskActionEnum value : TaskActionEnum.values()) {
+    public static HostActionEnum find(String action) {
+        for (HostActionEnum value : HostActionEnum.values()) {
             if (value.getAction().equals(action)) {
                 return value;
             }

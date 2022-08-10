@@ -1,7 +1,9 @@
 package com.didiglobal.logi.op.manager.domain.task.entity.value;
 
+import com.didiglobal.logi.op.manager.infrastructure.common.Result;
+import com.didiglobal.logi.op.manager.infrastructure.common.ResultCode;
+import com.didiglobal.logi.op.manager.infrastructure.common.enums.HostActionEnum;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.TaskStatusEnum;
-import io.swagger.models.auth.In;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -52,6 +54,27 @@ public class TaskDetail {
         this.groupName = groupName;
         this.host = host;
         return this;
+    }
+
+    public Result<Void> checkHostActionStatus(HostActionEnum action) {
+        switch (action) {
+            case IGNORE:
+            case REDO:
+                if (status != TaskStatusEnum.TIMEOUT.getStatus() &&
+                        status != TaskStatusEnum.FAILED.getStatus()) {
+                    return Result.fail(ResultCode.TASK_HOST_IS_NOT_ERROR);
+                }
+                break;
+            case KILL:
+                if (status != TaskStatusEnum.RUNNING.getStatus()) {
+                    return Result.fail(ResultCode.TASK_IS_NOT_RUNNING);
+                }
+                break;
+            default:
+                return Result.fail(ResultCode.COMMON_FAIL);
+        }
+        return Result.success();
+
     }
 
 }

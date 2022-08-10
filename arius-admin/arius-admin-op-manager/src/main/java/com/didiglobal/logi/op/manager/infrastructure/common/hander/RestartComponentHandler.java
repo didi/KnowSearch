@@ -1,15 +1,14 @@
 package com.didiglobal.logi.op.manager.infrastructure.common.hander;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.didiglobal.logi.op.manager.domain.component.entity.Component;
 import com.didiglobal.logi.op.manager.domain.component.event.ComponentEvent;
 import com.didiglobal.logi.op.manager.domain.task.service.TaskDomainService;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralBaseOperationComponent;
-import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralScaleComponent;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.OperationEnum;
+import com.didiglobal.logi.op.manager.infrastructure.common.hander.base.BaseComponentHandler;
+import com.didiglobal.logi.op.manager.infrastructure.common.hander.base.ComponentHandler;
+import com.didiglobal.logi.op.manager.infrastructure.common.hander.base.DefaultHandler;
 import com.didiglobal.logi.op.manager.infrastructure.exception.ComponentHandlerException;
-import com.didiglobal.logi.op.manager.infrastructure.util.ConvertUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

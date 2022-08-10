@@ -1,6 +1,6 @@
 package com.didiglobal.logi.op.manager.domain.packages.repository;
 
-import com.didiglobal.logi.op.manager.domain.packages.entity.PackageGroupConfig;
+import com.didiglobal.logi.op.manager.domain.packages.entity.value.PackageGroupConfig;
 
 import java.util.List;
 

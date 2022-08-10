@@ -30,6 +30,11 @@ public class TaskDetailRepositoryImpl implements TaskDetailRepository {
     }
 
     @Override
+    public TaskDetail getDetailByHostAndGroupName(int taskId, String host, String groupName) {
+        return TaskDetailConverter.convertTaskPO2DO(taskDetailDao.getByHostAndGroupName(taskId, host, groupName));
+    }
+
+    @Override
     public void updateTaskDetailExecuteIdByTaskIdAndGroupName(int taskId, String groupName, int executeTaskId) {
         taskDetailDao.updateExecuteId(taskId, groupName, executeTaskId);
     }

@@ -2,6 +2,7 @@ package com.didiglobal.logi.op.manager.infrastructure.deployment;
 
 import com.didiglobal.logi.op.manager.domain.script.entity.Script;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
+import com.didiglobal.logi.op.manager.infrastructure.deployment.zeus.ZeusTaskStatus;
 
 /**
  * @author didi
@@ -34,6 +35,24 @@ public interface DeploymentService {
      * @return
      */
     Result<Integer> execute(String templateId, Integer taskId, String groupName, String hosts, String... args);
+
+
+    /**
+     * 对任务id执行action操作
+     * @param executeTaskId
+     * @param action
+     * @return
+     */
+    Result<Void> actionTask(int executeTaskId, String action);
+
+    /**
+     * 对任务host执行action操作
+     * @param executeTaskId
+     * @param host
+     * @param action
+     * @return
+     */
+    Result<Void> actionHost(int executeTaskId, String host, String action);
 
     /**
      * 执行状态

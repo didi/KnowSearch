@@ -24,6 +24,15 @@ public interface TaskDetailRepository {
     List<TaskDetail> listTaskDetailByTaskId(int taskId);
 
     /**
+     * 通过任务id，host以及groupName获取信息
+     * @param taskId
+     * @param host
+     * @param groupName
+     * @return
+     */
+    TaskDetail getDetailByHostAndGroupName(int taskId, String host, String groupName);
+
+    /**
      * 更新执行的id
      * @param taskId
      * @param groupName

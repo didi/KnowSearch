@@ -1,5 +1,6 @@
-package com.didiglobal.logi.op.manager.infrastructure.deployment;
+package com.didiglobal.logi.op.manager.infrastructure.deployment.zeus;
 
+import com.alibaba.fastjson.JSONObject;
 import com.didiglobal.logi.op.manager.infrastructure.exception.ZeusOperationException;
 
 /**
@@ -46,4 +47,19 @@ public interface ZeusService {
      * @throws ZeusOperationException
      */
     void deleteTemplate(int templateId) throws ZeusOperationException;
+
+
+    /**
+     * 对任务进行操作
+     * @param param
+     * @throws ZeusOperationException
+     */
+    void actionTask(JSONObject param) throws ZeusOperationException;
+
+    /**
+     * 对host进行操作
+     * @param param
+     * @throws ZeusOperationException
+     */
+    void actionHost(JSONObject param) throws ZeusOperationException;
 }

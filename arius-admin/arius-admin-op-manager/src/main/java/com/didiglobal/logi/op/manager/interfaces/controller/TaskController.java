@@ -35,10 +35,23 @@ public class TaskController {
         return taskService.execute(taskId);
     }
 
+    @PostMapping("/{action}/{taskId}")
+    @ApiOperation(value = "")
+    public Result<Void> action(@PathVariable String action, @PathVariable Integer taskId) {
+        return taskService.operateTask(taskId, action);
+    }
+
+    @PostMapping("/{action}/{taskId}/{host}")
+    @ApiOperation(value = "")
+    public Result<Void> actionHost(@PathVariable String action, @PathVariable Integer taskId, @PathVariable String host,
+                                   @RequestParam(value = "groupName", required = true) String groupName) {
+        return taskService.operateHost(taskId, action, host, groupName);
+    }
+
     @GetMapping("/task-config")
     @ApiOperation(value = "")
-    public Result<GeneralGroupConfigHostVO> execute(@RequestParam(value = "taskId", required = true) Integer taskId,
-                                                    @RequestParam(value = "groupName", required = true) String groupName, HttpServletRequest request) {
+    public Result<GeneralGroupConfigHostVO> getConfig(@RequestParam(value = "taskId", required = true) Integer taskId,
+                                                      @RequestParam(value = "groupName", required = true) String groupName, HttpServletRequest request) {
         Result res = taskService.getGroupConfig(taskId, groupName);
         if (res.isSuccess()) {
             res.setData(ComponentAssembler.toGeneralGroupConfigVO((GeneralGroupConfig) res.getData(),
@@ -46,4 +59,6 @@ public class TaskController {
         }
         return res;
     }
+
+
 }

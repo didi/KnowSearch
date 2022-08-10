@@ -19,4 +19,8 @@ public class TaskDetailConverter {
         return ConvertUtil.list2List(list, TaskDetail.class);
     }
 
+    public static TaskDetail convertTaskPO2DO(TaskDetailPO po) {
+        return ConvertUtil.obj2Obj(po, TaskDetail.class);
+    }
+
 }
