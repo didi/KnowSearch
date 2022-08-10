@@ -2,6 +2,7 @@ package com.didichuxing.datachannel.arius.admin.persistence.es.cluster;
 
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_OPERATE_TIMEOUT;
 
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
 import com.didiglobal.logi.elasticsearch.client.ESClient;
 import com.didiglobal.logi.elasticsearch.client.request.dcdr.DCDRIndex;
@@ -81,9 +82,12 @@ public class ESDCDRDAO extends BaseESDAO {
      * @param name 名字
      * @return dcdr模板
      */
-    public DCDRTemplate getAutoReplication(String cluster, String name) {
+    public DCDRTemplate getAutoReplication(String cluster, String name) throws ESOperateException {
         //如果集群挂掉，就是可以抛出NPE
         ESClient client = esOpClient.getESClient(cluster);
+        if (client==null){
+            throw new ESOperateException(String.format("cluster:【%s】无法获取到es client",cluster));
+        }
         
         ESGetDCDRTemplateRequest request = new ESGetDCDRTemplateRequest();
         request.setName(name);
