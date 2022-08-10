@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.vo.template;
 
+import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.BaseVO;
 import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import io.swagger.annotations.ApiModel;
@@ -26,7 +27,7 @@ public class ConsoleTemplateClearVO extends BaseVO {
     private String               name;
 
     @ApiModelProperty("清理索引列表")
-    private List<String>         indices;
+    private List<Tuple<String,String>> indices;
 
     /**
      * 最近一段时间有访问的app

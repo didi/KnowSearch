@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.biz.indices;
 
+import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatCellDTO;
@@ -260,7 +261,7 @@ public interface IndicesManager {
      * @param physicalId 物理模板id
      * @return {@link List}<{@link String}>
      */
-    List<String> listIndexNameByTemplatePhyId(Long physicalId);
+    List<Tuple<String,String>> listIndexNameByTemplatePhyId(Long physicalId);
 
     /**
      * 获取物理模版所有匹配的索引catinfo

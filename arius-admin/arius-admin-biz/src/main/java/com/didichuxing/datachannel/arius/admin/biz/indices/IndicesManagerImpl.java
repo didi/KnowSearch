@@ -797,12 +797,12 @@ public class IndicesManagerImpl implements IndicesManager {
     }
 
     @Override
-    public List<String> listIndexNameByTemplatePhyId(Long physicalId) {
+    public List<Tuple<String,String>> listIndexNameByTemplatePhyId(Long physicalId) {
         List<CatIndexResult> indices = listIndexCatInfoByTemplatePhyId(physicalId);
         if (CollectionUtils.isEmpty(indices)) {
             return Lists.newArrayList();
         }
-        return indices.stream().map(CatIndexResult::getIndex).sorted().collect(Collectors.toList());
+        return indices.stream().map(i->new Tuple<String,String>(i.getIndex(),i.getPriStoreSize())).sorted().collect(Collectors.toList());
     }
 
     @Override

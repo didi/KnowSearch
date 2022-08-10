@@ -531,7 +531,10 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
                         index->phyClusterList.stream().map(phyCluster->indexPhyClusterFunc.apply(index,phyCluster))
                                        .collect(Collectors.toList());
     
-                List<IndexCatCellDTO> catCellList = templateClearInfo.getData().getIndices().stream()
+                List<IndexCatCellDTO> catCellList = templateClearInfo.getData().getIndices()
+                       
+                        .stream()
+                        .map(Tuple::getV1)
                         .map(phyClusterFunc).flatMap(Collection::stream)
             
                         .collect(Collectors.toList());
