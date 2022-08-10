@@ -71,6 +71,7 @@ import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -802,7 +803,9 @@ public class IndicesManagerImpl implements IndicesManager {
         if (CollectionUtils.isEmpty(indices)) {
             return Lists.newArrayList();
         }
-        return indices.stream().map(i->new Tuple<String,String>(i.getIndex(),i.getPriStoreSize())).sorted().collect(Collectors.toList());
+        return indices.stream().sorted(Comparator.nullsLast(Comparator.comparing(CatIndexResult::getPriStoreSize))
+                        .thenComparing(CatIndexResult::getIndex))
+                .map(i -> new Tuple<String, String>(i.getIndex(), i.getPriStoreSize())).collect(Collectors.toList());
     }
 
     @Override
