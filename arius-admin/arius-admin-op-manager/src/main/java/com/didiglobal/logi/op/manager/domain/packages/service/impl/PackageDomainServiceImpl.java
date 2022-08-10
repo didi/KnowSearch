@@ -5,10 +5,8 @@ import com.didiglobal.logi.op.manager.domain.packages.entity.value.PackageGroupC
 import com.didiglobal.logi.op.manager.domain.packages.repository.PackageGroupConfigRepository;
 import com.didiglobal.logi.op.manager.domain.packages.repository.PackageRepository;
 import com.didiglobal.logi.op.manager.domain.packages.service.PackageDomainService;
-import com.didiglobal.logi.op.manager.domain.script.entity.Script;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 import com.didiglobal.logi.op.manager.infrastructure.common.ResultCode;
-import com.didiglobal.logi.op.manager.infrastructure.deployment.DeploymentService;
 import com.didiglobal.logi.op.manager.infrastructure.storage.StorageService;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;

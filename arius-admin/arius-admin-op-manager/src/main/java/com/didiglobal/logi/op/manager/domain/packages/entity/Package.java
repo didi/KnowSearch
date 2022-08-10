@@ -1,7 +1,6 @@
 package com.didiglobal.logi.op.manager.domain.packages.entity;
 
 import com.didiglobal.logi.op.manager.domain.packages.entity.value.PackageGroupConfig;
-import com.didiglobal.logi.op.manager.domain.script.entity.Script;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 import com.didiglobal.logi.op.manager.infrastructure.common.ResultCode;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.PackageTypeEnum;
