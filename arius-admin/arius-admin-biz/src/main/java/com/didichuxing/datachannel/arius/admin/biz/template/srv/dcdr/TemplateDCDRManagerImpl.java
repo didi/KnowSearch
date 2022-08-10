@@ -843,7 +843,7 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
                         syncExistTemplateDCDR(masterPhyTemplate.getId(), slavePhyTemplate.getCluster()));
                
             } catch (Exception e) {
-                LOGGER.error("method=getTemplateDCDRInfoVO||templateId={}||error=master cluster is null", templateId);
+                LOGGER.error("method=getTemplateDCDRInfoVO||templateId={}", templateId,e);
                return Result.buildFailWithMsg(templateDCDRInfoVO,"主集群异常，获取主从位点差失败");
             }
         }
