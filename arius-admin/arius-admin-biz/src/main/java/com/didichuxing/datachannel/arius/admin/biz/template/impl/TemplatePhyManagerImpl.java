@@ -529,7 +529,7 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
                 return new Tuple<>();
             }
 
-            return getHotAndColdIndexSet(physicalWithLogic, days, logicTemplate, indices);
+            return getHotAndColdIndexSet( days, logicTemplate, indices);
         } catch (Exception e) {
             LOGGER.warn("class=TemplatePhyManagerImpl||method=getIndexByBeforeDay||templateName={}||errMsg={}",
                 physicalWithLogic.getName(), e.getMessage(), e);
@@ -560,7 +560,7 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
                 return Sets.newHashSet();
             }
 
-            return getFinalIndexSet(physicalWithLogic, days, logicTemplate, indices);
+            return getFinalIndexSet( days, logicTemplate, indices);
         } catch (Exception e) {
             LOGGER.warn("class=TemplatePhyManagerImpl||method=getIndexByBeforeDay||templateName={}||errMsg={}",
                 physicalWithLogic.getName(), e.getMessage(), e);
@@ -892,7 +892,7 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         }
     }
 
-    private Set<String> getFinalIndexSet(IndexTemplatePhyWithLogic physicalWithLogic, int days,
+    private Set<String> getFinalIndexSet( int days,
                                          IndexTemplate logicTemplate, List<String> indices) {
         Set<String> finalIndexSet = Sets.newHashSet();
         for (String indexName : indices) {
@@ -984,7 +984,7 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         return settingsMap;
     }
 
-    private Tuple</*存放冷存索引列表*/Set<String>, /*存放热存索引列表*/Set<String>> getHotAndColdIndexSet(IndexTemplatePhyWithLogic physicalWithLogic,
+    private Tuple</*存放冷存索引列表*/Set<String>, /*存放热存索引列表*/Set<String>> getHotAndColdIndexSet(
                                                                                           int days,
                                                                                           IndexTemplate logicTemplate,
                                                                                           List<String> indices) {

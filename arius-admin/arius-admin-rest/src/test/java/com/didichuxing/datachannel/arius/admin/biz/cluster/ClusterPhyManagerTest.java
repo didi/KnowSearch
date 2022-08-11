@@ -176,7 +176,7 @@ class ClusterPhyManagerTest {
         clusterPhyDTO = new ClusterPhyDTO(0, CLUSTER, "desc", "readAddress", "writeAddress", "httpAddress",
             "httpAddress", 0, "tags", "code", "idc", 0, "esVersion", "imageName", "nsTree", "plugIds", 0L, esConfigDTO,
             Collections.singletonList(pluginDTO), Collections.singletonList(esClusterRoleDTO),
-            Collections.singletonList(esClusterRoleHostDTO), 0, "machineSpec", "operator", "templateSrvs", "password",
+            Collections.singletonList(esClusterRoleHostDTO), 0, "machineSpec", "operator",  "password",
             0, "writeAction", 0, 0L, 0L, 0L, 0.0, "platformType", 0, "gatewayUrl");
 
         clusterPhyVO = new ClusterPhyVO(0, CLUSTER, "desc", "readAddress", "writeAddress", "httpAddress",
@@ -191,17 +191,17 @@ class ClusterPhyManagerTest {
             "plugIds", false, Collections.singletonList(clusterRoleHost));
         clusterPhy = new ClusterPhy(0, CLUSTER, "desc", "readAddress", "writeAddress", "httpAddress",
             "httpWriteAddress", 0, "tags", "dataCenter", "idc", 0, "esVersion", 0L, "plugIds", 0L, "imageName",
-            "nsTree", 0, "machineSpec", "templateSrvs", "password", "creator",
+            "nsTree", 0, "machineSpec", "password", "creator",
             Collections.singletonList(clusterRoleInfo), Collections.singletonList(clusterRoleHost), 0, "writeAction", 0,
             0L, 0L, 0L, 0.0, "platformType", 1, "gatewayUrl");
         privateClusterPhy = new ClusterPhy(0, CLUSTER, "desc", "readAddress", "writeAddress", "httpAddress",
             "httpWriteAddress", 0, "tags", "dataCenter", "idc", 0, "esVersion", 0L, "plugIds", 0L, "imageName",
-            "nsTree", 0, "machineSpec", "templateSrvs", "password", "creator",
+            "nsTree", 0, "machineSpec", "password", "creator",
             Collections.singletonList(clusterRoleInfo), Collections.singletonList(clusterRoleHost), 0, "writeAction", 0,
             0L, 0L, 0L, 0.0, "platformType", 1, "gatewayUrl");
         exclusiveClusterPhy = new ClusterPhy(0, CLUSTER, "desc", "readAddress", "writeAddress", "httpAddress",
             "httpWriteAddress", 0, "tags", "dataCenter", "idc", 0, "esVersion", 0L, "plugIds", 0L, "imageName",
-            "nsTree", 0, "machineSpec", "templateSrvs", "password", "creator",
+            "nsTree", 0, "machineSpec", "password", "creator",
             Collections.singletonList(clusterRoleInfo), Collections.singletonList(clusterRoleHost), 0, "writeAction", 0,
             0L, 0L, 0L, 0.0, "platformType", 1, "gatewayUrl");
         clusterPhyList = Collections.singletonList(clusterPhy);

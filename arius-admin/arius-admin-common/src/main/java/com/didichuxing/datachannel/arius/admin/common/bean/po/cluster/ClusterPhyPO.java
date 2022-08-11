@@ -103,10 +103,7 @@ public class ClusterPhyPO extends BasePO {
      */
     private String  creator;
 
-    /**
-     * 集群支持的索引服务id，英文逗号分隔
-     */
-    private String  templateSrvs;
+
 
     /**
      * 镜像名

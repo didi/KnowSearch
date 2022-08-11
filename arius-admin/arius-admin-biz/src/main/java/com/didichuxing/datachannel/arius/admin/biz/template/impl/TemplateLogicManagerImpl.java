@@ -10,7 +10,6 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.operaterec
 import static com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectTemplateAuthEnum.OWN;
 import static com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectTemplateAuthEnum.isTemplateAuthExitByCode;
 import static com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType.FAIL;
-import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum.TEMPLATE_MAPPING;
 import static com.didichuxing.datachannel.arius.admin.core.service.template.physic.impl.IndexTemplatePhyServiceImpl.NOT_CHECK;
 
 import com.alibaba.fastjson.JSON;
@@ -75,7 +74,6 @@ import com.didichuxing.datachannel.arius.admin.common.mapping.AriusTypeProperty;
 import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.TemplateUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
@@ -606,10 +604,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
                 return Result.buildFail(String.format("模板归属集群[%s]不存在", clusterPhyName));
             }
 
-            List<String> templateSrvList = ListUtils.string2StrList(clusterPhy.getTemplateSrvs());
-            if (!templateSrvList.contains(TEMPLATE_MAPPING.getCode().toString())) {
-                return Result.buildFail("该模板归属集群未开启mapping修改服务");
-            }
+            
         }
 
         return Result.buildSucc(true);
@@ -682,18 +677,10 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         }
 
         // 获取逻辑集群对应的物理模板的物理集群名称列表
-        List<String> clusterPhyNameList = logicTemplateWithPhysicals.getPhysicals().stream()
-            .map(IndexTemplatePhy::getCluster).distinct().collect(Collectors.toList());
-
-        // 查看对应的物理集群是否开启了指定的索引模板服务
-        for (String clusterPhyName : clusterPhyNameList) {
-            Result<Boolean> checkResult = checkTemplateSrvByClusterName(clusterPhyName, templateSrvId);
-            if (checkResult.failed()) {
-                return Result.buildFailWithMsg(false, checkResult.getMessage());
-            }
-        }
-
-        return Result.buildSucc(true);
+        final Optional<Result<Boolean>> resultOptional = logicTemplateWithPhysicals.getPhysicals().stream()
+                .map(IndexTemplatePhy::getCluster).distinct().map(this::checkExistClusterNamePhy).findFirst();
+        return resultOptional.map(booleanResult -> Result.buildFailWithMsg(false, booleanResult.getMessage()))
+                .orElseGet(() -> Result.buildSucc(true));
     }
 
     @Override
@@ -1221,20 +1208,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         return consoleTemplateVO;
     }
 
-    /**
-     * 获取逻辑模板标签列表
-     * @param includeLabelIds 包含的标签ID列表
-     * @param excludeLabelIds 排除的标签ID列表
-     * @return
-     */
-    private List<TemplateLabel> fetchLabels(String includeLabelIds, String excludeLabelIds) throws AmsRemoteException {
-        Result<List<TemplateLabel>> result = templateLabelService.listByLabelIds(includeLabelIds, excludeLabelIds);
-        if (result.failed()) {
-            throw new AmsRemoteException("获取模板标签失败");
-        }
 
-        return result.getData();
-    }
 
     /**
      * 获取逻辑模板详情
@@ -1312,28 +1286,16 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     }
 
     /**
-     * 校验物理集群是否开启了指定的索引模板服务
+     * 校验物理集群的合法性
      * @param clusterPhyName 物理集群
-     * @param templateSrvId  索引服务id
      * @return 校验结果
      */
-    private Result<Boolean> checkTemplateSrvByClusterName(String clusterPhyName, Integer templateSrvId) {
-        TemplateServiceEnum templateServiceEnum = TemplateServiceEnum.getById(templateSrvId);
-        if (AriusObjUtils.isNull(templateServiceEnum)) {
-            return Result.buildFail("指定校验的索引服务id不存在");
-        }
-
+    private Result<Boolean> checkExistClusterNamePhy(String clusterPhyName) {
+        
         ClusterPhy clusterPhy = clusterPhyService.getClusterByName(clusterPhyName);
         if (AriusObjUtils.isNull(clusterPhy)) {
             return Result.buildFail(String.format("模板归属集群[%s]不存在", clusterPhyName));
         }
-
-        // 校验物理集群是否已经开启了指定的索引模板服务
-        List<String> templateSrvList = ListUtils.string2StrList(clusterPhy.getTemplateSrvs());
-        if (!templateSrvList.contains(templateSrvId.toString())) {
-            return Result.buildFail(String.format("该模板归属集群未开启%s服务", templateServiceEnum.getServiceName()));
-        }
-
         return Result.buildSucc();
     }
 

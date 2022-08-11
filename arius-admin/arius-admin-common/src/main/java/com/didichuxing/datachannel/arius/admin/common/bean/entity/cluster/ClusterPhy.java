@@ -5,7 +5,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.Cl
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -121,12 +120,6 @@ public class ClusterPhy extends BaseEntity implements Comparable<ClusterPhy> {
      */
     private String                machineSpec;
 
-    /**
-     * 集群支持的索引服务
-     * @see TemplateServiceEnum
-     */
-    @Deprecated
-    private String                templateSrvs;
 
     /**
      * 集群密码

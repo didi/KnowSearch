@@ -183,7 +183,6 @@ public class CustomDataSource {
         esClusterDTO.setDataCenter(DataCenterEnum.CN.getCode());
         esClusterDTO.setIdc("a test");
         esClusterDTO.setEsVersion("7.6.0.0");
-        esClusterDTO.setTemplateSrvs("1,2,3");
         esClusterDTO.setImageName("test");
         esClusterDTO.setCreator("wpk");
         esClusterDTO.setLevel(0);
@@ -674,7 +673,7 @@ public class CustomDataSource {
 
         return new ClusterPhy(0, "cluster", "desc", "readAddress", "writeAddress", "httpAddress", "httpWriteAddress", 0,
             "tags", "dataCenter", "idc", 0, "esVersion", 0L, "plugIds", 0L, "imageName", "nsTree", 0, "machineSpec",
-            "templateSrvs", "password", "creator", Collections.singletonList(getClusterRoleInfo()),
+            "password", "creator", Collections.singletonList(getClusterRoleInfo()),
             Collections.singletonList(getClusterRoleHost()), 0, "writeAction", 0, 0L, 0L, 0L, 0.0, "platformType", 0,
             "gatewayUrl");
     }
