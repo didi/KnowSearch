@@ -12,6 +12,7 @@ import com.didichuxing.datachannel.arius.admin.biz.template.srv.cold.ColdManager
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegionFSInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
@@ -20,6 +21,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.google.common.collect.Lists;
@@ -27,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -44,7 +47,9 @@ public class ColdManagerImpl extends BaseTemplateSrvImpl implements ColdManager 
     private ESIndexService       esIndexService;
 
     @Autowired
-    private ClusterRegionService clusterRegionService;
+    private ClusterRegionService   clusterRegionService;
+    @Autowired
+    private ClusterRoleHostService clusterRoleHostService;
 
     public static final int      MAX_HOT_DAY = 2;
     public static final int      MIN_HOT_DAY = -2;
@@ -147,16 +152,18 @@ public class ColdManagerImpl extends BaseTemplateSrvImpl implements ColdManager 
         Tuple<Set<String>, Set<String>> coldAndHotIndices = getColdAndHotIndex(templatePhysical.getId());
         Set<String> coldIndex = coldAndHotIndices.getV1();
         Set<String> hotIndices = coldAndHotIndices.getV2();
-
+        
         Boolean moveSuccFlag = Boolean.TRUE;
+        Function</*coldRegionId*/Integer,Result<List<ClusterRoleHost>>> coldRegionIdFunc=
+                coldId-> clusterRoleHostService.listByRegionId(coldId);
         if (!CollectionUtils.isEmpty(coldIndex)) {
             moveSuccFlag = esIndexService.syncBatchUpdateRegion(templatePhysical.getCluster(),
-                Lists.newArrayList(coldIndex), coldRegionId, RETRY_TIME);
+                Lists.newArrayList(coldIndex), coldRegionId, RETRY_TIME,coldRegionIdFunc );
         }
 
         if (!moveSuccFlag && !CollectionUtils.isEmpty(hotIndices)) {
             moveSuccFlag = esIndexService.syncBatchUpdateRegion(templatePhysical.getCluster(),
-                Lists.newArrayList(hotIndices), templatePhysical.getRegionId(), RETRY_TIME);
+                Lists.newArrayList(hotIndices), templatePhysical.getRegionId(), RETRY_TIME, coldRegionIdFunc);
         }
 
         return Result.build(moveSuccFlag);
