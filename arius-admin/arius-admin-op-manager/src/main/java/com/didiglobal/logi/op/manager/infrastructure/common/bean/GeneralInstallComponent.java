@@ -34,12 +34,9 @@ public class GeneralInstallComponent extends GeneralBaseOperationComponent{
     private Integer dependConfigComponentId;
 
     public Result<Void> checkInstallParam(){
+        super.checkParam();
         if (name.isEmpty()) {
             return Result.fail(ResultCode.PARAM_ERROR.getCode(), "name缺失");
-        }
-
-        if (groupConfigList.isEmpty()) {
-            return Result.fail(ResultCode.PARAM_ERROR.getCode(), "配置组缺失");
         }
 
         if (null == packageId) {

@@ -68,11 +68,11 @@ public interface TaskDomainService {
 
     /**
      * 获取分组配置
-     * @param taskId
+     * @param task
      * @param groupName
      * @return
      */
-    Result<GeneralGroupConfig> getConfig(int taskId, String groupName);
+    Result<GeneralGroupConfig> getConfig(Task task, String groupName);
 
     /**
      * 获取未完成任务列表

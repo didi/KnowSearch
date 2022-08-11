@@ -40,7 +40,7 @@ public class ComponentAssembler {
     }
 
 
-    public static GeneralGroupConfigHostVO toGeneralGroupConfigVO(GeneralGroupConfig config, String host) {
+    public static GeneralGroupConfigHostVO toGeneralGroupConfigVO(GeneralGroupConfig config, String url, String host) {
         GeneralGroupConfigHostVO vo = ConvertUtil.obj2Obj(config, GeneralGroupConfigHostVO.class);
         StringBuilder directory = new StringBuilder();
         //设置目录
@@ -60,6 +60,7 @@ public class ComponentAssembler {
                 vo.setProcessNum(directory.toString());
             }
         });
+        vo.setUrl(url);
         return vo;
     }
 }

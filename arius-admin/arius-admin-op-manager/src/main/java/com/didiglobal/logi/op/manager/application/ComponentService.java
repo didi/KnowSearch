@@ -61,7 +61,7 @@ public class ComponentService {
 
     public Result<Void> upgradeComponent(GeneralUpgradeComponent generalUpgradeComponent) {
         LOGGER.info("start upgrade component[{}]",generalUpgradeComponent);
-        Result checkRes = generalUpgradeComponent.checkParam();
+        Result checkRes = generalUpgradeComponent.checkUpgradeParam();
         if (checkRes.failed()) {
             return checkRes;
         }

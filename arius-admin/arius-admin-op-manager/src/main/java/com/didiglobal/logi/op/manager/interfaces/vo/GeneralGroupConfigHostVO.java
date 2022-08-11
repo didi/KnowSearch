@@ -37,4 +37,9 @@ public class GeneralGroupConfigHostVO {
      */
     private String processNum;
 
+    /**
+     * 安装包url
+     */
+    private String url;
+
 }

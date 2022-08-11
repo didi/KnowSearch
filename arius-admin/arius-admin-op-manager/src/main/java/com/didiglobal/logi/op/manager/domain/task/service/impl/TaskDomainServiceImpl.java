@@ -208,12 +208,7 @@ public class TaskDomainServiceImpl implements TaskDomainService {
     }
 
     @Override
-    public Result<GeneralGroupConfig> getConfig(int taskId, String groupName) {
-        Task task = taskRepository.getTaskById(taskId);
-        if (null == task) {
-            return Result.fail(ResultCode.TASK_NOT_EXIST_ERROR);
-        }
-
+    public Result<GeneralGroupConfig> getConfig(Task task, String groupName) {
         Result<Tuple<GeneralGroupConfig, String>> configRes = getConfigByGroupName(task, groupName);
 
         if (configRes.failed()) {
