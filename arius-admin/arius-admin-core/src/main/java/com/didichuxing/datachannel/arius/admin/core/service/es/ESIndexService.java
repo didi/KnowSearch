@@ -2,6 +2,7 @@ package com.didichuxing.datachannel.arius.admin.core.service.es;
 
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.IndexCatCell;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
@@ -9,13 +10,13 @@ import com.didiglobal.logi.elasticsearch.client.response.indices.stats.IndexNode
 import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
 import com.didiglobal.logi.elasticsearch.client.response.setting.index.IndexConfig;
 import com.didiglobal.logi.elasticsearch.client.response.setting.index.MultiIndexsConfig;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Function;
 
 /**
  * @author d06679
@@ -197,15 +198,17 @@ public interface ESIndexService {
 
     /**
      * 修改索引的region
+     *
      * @param cluster
      * @param indices
      * @param tgtRegionId
      * @param retryCount
+     * @param coldRegionIdFunc
      * @return
      * @throws ESOperateException
      */
     boolean syncBatchUpdateRegion(String cluster, List<String> indices, Integer tgtRegionId,
-                                  int retryCount) throws ESOperateException;
+                                  int retryCount, Function</*coldRegionId*/Integer,Result<List<ClusterRoleHost>>> coldRegionIdFunc) throws ESOperateException;
 
     /**
      * 修改索引只读配置
