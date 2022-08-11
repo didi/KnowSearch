@@ -2,17 +2,6 @@ package com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.impl.ha
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.INVALID_VALUE;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Pattern;
-
-import javax.annotation.PostConstruct;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.EcmParamBase;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.EsConfigAction;
@@ -42,6 +31,14 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.Clust
 import com.didichuxing.datachannel.arius.admin.remote.zeus.ZeusClusterRemoteService;
 import com.didichuxing.datachannel.arius.admin.remote.zeus.bean.constant.EcmActionEnum;
 import com.didichuxing.datachannel.arius.admin.remote.zeus.bean.constant.ZeusClusterActionEnum;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Pattern;
+import javax.annotation.PostConstruct;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 @Service("ecmHostHandler")
 public class EcmHostHandler extends AbstractEcmBaseHandle {
@@ -130,7 +127,6 @@ public class EcmHostHandler extends AbstractEcmBaseHandle {
 
         esClusterDTO.setPlugIds(buildEsClusterPlugins(esClusterDTO));
         esClusterDTO.setPackageId(esPackage.getId());
-        esClusterDTO.setTemplateSrvs(ClusterConstant.DEFAULT_CLUSTER_TEMPLATE_SRVS);
         esClusterDTO.setHttpAddress(ClusterConstant.DEFAULT_HTTP_ADDRESS);
         if (StringUtils.isBlank(esClusterDTO.getDataCenter())) {
             esClusterDTO.setDataCenter(EnvUtil.getDC().getCode());

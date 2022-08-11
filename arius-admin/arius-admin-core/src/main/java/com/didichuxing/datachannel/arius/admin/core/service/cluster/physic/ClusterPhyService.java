@@ -6,7 +6,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPh
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterSettingDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import java.util.List;
 import java.util.Set;
@@ -153,21 +152,8 @@ public interface ClusterPhyService {
      */
     boolean isClusterExistsByPackageId(Long packageId);
 
-    /**
-     * 得到phy srv集群模板
-     *
-     * @param phyCluster phy集群
-     * @return {@link Result}<{@link List}<{@link ClusterTemplateSrv}>>
-     */
-    Result<List<ClusterTemplateSrv>> getPhyClusterTemplateSrv(String phyCluster);
 
-    /**
-     * 得到phy srv集群模板
-     *
-     * @param phyCluster phy集群
-     * @return {@link Result}<{@link List}<{@link ClusterTemplateSrv}>>
-     */
-    @Deprecated
-    Result<List<ClusterTemplateSrv>> getPhyClusterTemplateSrv(ClusterPhy phyCluster);
+
+
 
 }

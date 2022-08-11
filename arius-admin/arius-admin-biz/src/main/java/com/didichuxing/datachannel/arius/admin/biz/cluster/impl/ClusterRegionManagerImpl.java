@@ -6,13 +6,11 @@ import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterNodeManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterRegionManager;
-import com.didichuxing.datachannel.arius.admin.biz.template.srv.TemplateSrvManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRegionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRegionWithNodeInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterWithRegionDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicContext;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
@@ -68,8 +66,6 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
     @Autowired
     private ClusterPhyService      clusterPhyService;
 
-    @Autowired
-    private TemplateSrvManager     templateSrvManager;
 
     @Autowired
     private ClusterRoleHostService clusterRoleHostService;
@@ -193,8 +189,6 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
             return result;
         }
 
-        //5. 初始化物理集群索引服务
-        initTemplateSrvOfClusterPhy(param, operator);
 
         //6. 为逻辑集群绑定region
         return doBindRegionToClusterLogic(param, operator);
@@ -303,52 +297,9 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
         return deletResult;
     }
 
-    @Override
-    public Result<Void> unbindRegion(Long regionId, Long logicClusterId, String operator, Integer projectId) {
-        //校验操作合法性
-        final Result<Void> result = ProjectUtils.checkProjectCorrectly(i -> i, projectId, projectId);
-        if (result.failed()) {
-            return result;
-        }
-        ClusterRegion region = clusterRegionService.getRegionById(regionId);
-        Result<Void> voidResult = clusterRegionService.unbindRegion(regionId, logicClusterId, operator);
-        if (voidResult.success()) {
-            // 操作记录
-            operateRecordService.save(new OperateRecord.Builder()
-                .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_REGION_CHANGE)
-                .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                .content(String.format("region解绑:%s", region.getName()))
-                .project(projectService.getProjectBriefByProjectId(projectId)).userOperation(operator)
-                .bizId(clusterPhyService.getClusterByName(region.getPhyClusterName())).build());
-        }
+    
+    
 
-        return voidResult;
-    }
-    
-    /**
-     * @param phyCluster
-     * @param regionId
-     * @return
-     */
-    @Override
-    public Boolean existColdRegion(String phyCluster, Integer regionId) {
-        if (Objects.isNull(regionId) || regionId < 1){
-            return Boolean.FALSE;
-        }
-        List<ClusterRegion> clusterRegions = clusterRegionService.listPhyClusterRegions(phyCluster);
-        //冷region是不会保存在逻辑集群侧的，所以这里关联的region肯定是大于1的，如果是小于1，那么是一定不会具备的
-        if (clusterRegions.size()<=1){
-            return Boolean.FALSE;
-        }
-        
-        
-        return clusterRegions.stream()
-                .filter(clusterRegion ->!Objects.equals( clusterRegion.getId().intValue(),regionId))
-                .map(ClusterRegion::getConfig)
-                //集群侧中只要
-                .anyMatch(coldTruePre);
-    }
-    
     /**
      * @param phyCluster
      * @return
@@ -376,18 +327,7 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
         }
     
     };
-    private final static Predicate<String> coldTruePre = coldJson -> {
-        if (StringUtils.isBlank(coldJson)) {
-            return Boolean.FALSE;
-        }
-        try {
-            return JSON.parseObject(coldJson).getBoolean(COLD);
-        
-        } catch (Exception e) {
-            return Boolean.FALSE;
-        }
-    
-    };
+   
     /**
      * 对于逻辑集群绑定的物理集群的版本进行一致性校验
      *
@@ -448,83 +388,9 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
         return Result.buildSucc();
     }
 
-    /**
-     * 1. 逻辑集群无关联物理集群, 直接清理
-     * 2. (共享类型)逻辑集群已关联物理集群, 新关联的物理集群添加逻辑集群已有索引服务
-     * @param param             region实体
-     * @param operator          操作者
-     * @return
-     */
-    private void initTemplateSrvOfClusterPhy(ESLogicClusterWithRegionDTO param, String operator) {
 
-        ClusterLogicContext clusterLogicContext = clusterContextManager.getClusterLogicContext(param.getId());
-        if (null == clusterLogicContext) {
-            LOGGER.error(
-                "class=ClusterRegionManagerImpl||method=initTemplateSrvOfClusterPhy||clusterLogicId={}||errMsg=clusterLogicContext is empty",
-                param.getId());
-            return;
-        }
 
-        List<ClusterRegionDTO> clusterRegionDTOS = param.getClusterRegionDTOS();
-        List<String> associatedClusterPhyNames = clusterLogicContext.getAssociatedClusterPhyNames();
-        if (CollectionUtils.isEmpty(associatedClusterPhyNames)) {
-            clearTemplateSrvOfClusterPhy(param.getId(), associatedClusterPhyNames, clusterRegionDTOS, operator);
-        } else {
-            addTemplateSrvToNewClusterPhy(param.getId(), associatedClusterPhyNames, clusterRegionDTOS, operator);
-        }
-    }
 
-    /**
-     * (共享类型)逻辑集群已关联物理集群, 新关联的物理集群默开启逻辑集群已有索引服务
-     * @param clusterLogicId               逻辑集群ID
-     * @param associatedClusterPhyNames    已关联物理集群名称
-     * @param clusterRegionDTOS            region信息
-     * @param operator                     操作者
-     */
-    private void addTemplateSrvToNewClusterPhy(Long clusterLogicId, List<String> associatedClusterPhyNames,
-                                               List<ClusterRegionDTO> clusterRegionDTOS, String operator) {
-        //获取已有逻辑集群索引服务
-        List<Integer> clusterTemplateSrvIdList = templateSrvManager
-            .getPhyClusterTemplateSrvIds(associatedClusterPhyNames.get(0));
 
-        //更新已有新绑定物理集群中的索引服务
-        for (ClusterRegionDTO clusterRegionDTO : clusterRegionDTOS) {
-            if (associatedClusterPhyNames.contains(clusterRegionDTO.getPhyClusterName())) {
-                continue;
-            }
 
-            try {
-                String phyClusterName = clusterRegionDTO.getPhyClusterName();
-                templateSrvManager.replaceTemplateServes(phyClusterName, clusterTemplateSrvIdList, operator);
-            } catch (Exception e) {
-                LOGGER.error(
-                    "class=ClusterRegionManagerImpl||method=addTemplateSrvToNewClusterPhy||clusterLogicId={}||clusterPhy={}||errMsg={}",
-                    clusterLogicId, clusterRegionDTO.getPhyClusterName(), e.getMessage());
-            }
-        }
-    }
-
-    /**
-     * 逻辑集群无关联物理集群, 清理绑定物理集群索引服务
-     * @param clusterLogicId               逻辑集群Id
-     * @param associatedClusterPhyNames    已关联物理集群名称
-     * @param clusterRegionDTOS             region信息
-     * @param operator                      操作者
-     */
-    private void clearTemplateSrvOfClusterPhy(Long clusterLogicId, List<String> associatedClusterPhyNames,
-                                              List<ClusterRegionDTO> clusterRegionDTOS, String operator) {
-        for (ClusterRegionDTO clusterRegionDTO : clusterRegionDTOS) {
-            if (associatedClusterPhyNames.contains(clusterRegionDTO.getPhyClusterName())) {
-                continue;
-            }
-
-            try {
-                templateSrvManager.delAllTemplateSrvByClusterPhy(clusterRegionDTO.getPhyClusterName(), operator);
-            } catch (Exception e) {
-                LOGGER.error(
-                    "class=ClusterRegionManagerImpl||method=clearTemplateSrvOfClusterPhy||clusterLogicId={}||errMsg={}",
-                    clusterLogicId, e.getMessage());
-            }
-        }
-    }
 }
