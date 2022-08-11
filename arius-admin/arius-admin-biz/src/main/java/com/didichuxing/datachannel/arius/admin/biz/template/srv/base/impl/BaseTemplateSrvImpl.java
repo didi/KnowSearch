@@ -128,8 +128,6 @@ public abstract class BaseTemplateSrvImpl implements BaseTemplateSrv {
     }
 
     protected Result<Void> checkSrvIsValid(Integer logicTemplateId) {
-        ESClusterVersionEnum requireESClusterVersion = templateSrv().getEsClusterVersion();
-
         IndexTemplateLogicWithClusterAndMasterTemplate template = indexTemplateService
             .getLogicTemplateWithClusterAndMasterTemplate(logicTemplateId);
         if (null == template || null == template.getMasterTemplate()) {
@@ -148,12 +146,6 @@ public abstract class BaseTemplateSrvImpl implements BaseTemplateSrv {
             return Result.buildFail();
         }
 
-        String esVersion = cluster.getData().getEsVersion();
-
-        if (ESVersionUtil.isHigher(requireESClusterVersion.getVersion(), esVersion)) {
-            return Result.buildFail(String.format("不支持该模板服务, 模板[%s]归属集群目前版本为:%s, 模板服务需要的最低版本为:%s", logicTemplateId,
-                esVersion, requireESClusterVersion.getVersion()));
-        }
         return Result.buildSucc();
     }
 
