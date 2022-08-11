@@ -710,9 +710,41 @@ public class ESIndexServiceImpl implements ESIndexService {
         }
         return indexCatCellList;
     }
-
-
-
+    
+    /**
+     * @param cluster
+     * @param index
+     * @param mappingConfig
+     * @return
+     */
+    @Override
+    public boolean updateIndexMapping(String cluster, String index, MappingConfig mappingConfig)
+            throws ESOperateException {
+        return esIndexDAO.updateIndexMapping(cluster,index,mappingConfig);
+    }
+    
+    /**
+     * @param clusterName
+     * @param indexName
+     * @param indexConfig
+     * @param tryTimes
+     * @return
+     */
+    @Override
+    public boolean createIndexWithConfig(String clusterName, String indexName, IndexConfig indexConfig, int tryTimes) {
+        return esIndexDAO.createIndexWithConfig(clusterName,indexName,indexConfig,tryTimes);
+    }
+    
+    /**
+     * @param clusterName
+     * @param indexName
+     * @return
+     */
+    @Override
+    public boolean deleteIndex(String clusterName, String indexName) {
+        return esIndexDAO.deleteIndex(clusterName,indexName);
+    }
+    
     /***************************************** private method ****************************************************/
 
     private Tuple<Boolean, Boolean> getWriteAndReadBlock(IndexConfig indexConfig) {

@@ -44,7 +44,6 @@ import com.didichuxing.datachannel.arius.admin.common.util.ESVersionUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.impl.IndexTemplateServiceImpl;
-import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateStatsService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateConfigDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateTypeDAO;
 import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
@@ -88,8 +87,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrvImpl impleme
     @Autowired
     private TemplatePhyMappingManager templatePhyMappingManager;
 
-    @Autowired
-    private TemplateStatsService      templateStatsService;
+  
 
 
 
