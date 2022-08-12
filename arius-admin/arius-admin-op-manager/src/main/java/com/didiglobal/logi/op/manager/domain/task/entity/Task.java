@@ -130,7 +130,13 @@ public class Task {
                 return Result.fail(ResultCode.COMMON_FAIL);
         }
         return Result.success();
+    }
 
+    public Result<Void> checkRetryActionStatus() {
+        if (status != TaskStatusEnum.FAILED.getStatus()) {
+            return Result.fail(ResultCode.TASK_IS_NOT_FAILED);
+        }
+        return Result.success();
     }
 
 }

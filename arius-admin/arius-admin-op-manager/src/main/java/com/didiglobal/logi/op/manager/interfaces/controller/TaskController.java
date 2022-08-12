@@ -3,6 +3,7 @@ package com.didiglobal.logi.op.manager.interfaces.controller;
 import com.didiglobal.logi.op.manager.application.TaskService;
 import com.didiglobal.logi.op.manager.infrastructure.common.Constants;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
+import com.didiglobal.logi.op.manager.infrastructure.common.Tuple;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralGroupConfig;
 import com.didiglobal.logi.op.manager.interfaces.assembler.ComponentAssembler;
 import com.didiglobal.logi.op.manager.interfaces.vo.GeneralGroupConfigHostVO;
@@ -37,13 +38,19 @@ public class TaskController {
 
     @PostMapping("/{action}/{taskId}")
     @ApiOperation(value = "")
-    public Result<Void> action(@PathVariable String action, @PathVariable Integer taskId) {
+    public Result<Void> operateTask(@PathVariable String action, @PathVariable Integer taskId) {
         return taskService.operateTask(taskId, action);
+    }
+
+    @PostMapping("/retry/{taskId}")
+    @ApiOperation(value = "")
+    public Result<Void> retryTask(@PathVariable Integer taskId) {
+        return taskService.retryTask(taskId);
     }
 
     @PostMapping("/{action}/{taskId}/{host}")
     @ApiOperation(value = "")
-    public Result<Void> actionHost(@PathVariable String action, @PathVariable Integer taskId, @PathVariable String host,
+    public Result<Void> operateHost(@PathVariable String action, @PathVariable Integer taskId, @PathVariable String host,
                                    @RequestParam(value = "groupName", required = true) String groupName) {
         return taskService.operateHost(taskId, action, host, groupName);
     }
@@ -54,7 +61,8 @@ public class TaskController {
                                                       @RequestParam(value = "groupName", required = true) String groupName, HttpServletRequest request) {
         Result res = taskService.getGroupConfig(taskId, groupName);
         if (res.isSuccess()) {
-            res.setData(ComponentAssembler.toGeneralGroupConfigVO((GeneralGroupConfig) res.getData(),
+            Tuple<GeneralGroupConfig, String> tuple = (Tuple<GeneralGroupConfig, String>) res.getData();
+            res.setData(ComponentAssembler.toGeneralGroupConfigVO(tuple.v1(), tuple.v2(),
                     request.getRemoteAddr()));
         }
         return res;

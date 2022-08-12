@@ -13,7 +13,7 @@ import java.util.List;
  * @date 2022-07-13 8:01 下午
  */
 @Data
-public class GeneralInstallComponent {
+public class GeneralInstallComponent extends GeneralBaseOperationComponent{
     /**
      * 组件名
      */
@@ -22,10 +22,6 @@ public class GeneralInstallComponent {
      * 关联的安装包id
      */
     private Integer packageId;
-    /**
-     * 值对象，关联group配置
-     */
-    private List<GeneralGroupConfig> groupConfigList;
 
     /**
      * 依赖的组件id
@@ -37,20 +33,10 @@ public class GeneralInstallComponent {
      */
     private Integer dependConfigComponentId;
 
-    /**
-     * 模板id
-     */
-    private String templateId;
-
-    private String associationId;
-
     public Result<Void> checkInstallParam(){
+        super.checkParam();
         if (name.isEmpty()) {
             return Result.fail(ResultCode.PARAM_ERROR.getCode(), "name缺失");
-        }
-
-        if (groupConfigList.isEmpty()) {
-            return Result.fail(ResultCode.PARAM_ERROR.getCode(), "配置组缺失");
         }
 
         if (null == packageId) {

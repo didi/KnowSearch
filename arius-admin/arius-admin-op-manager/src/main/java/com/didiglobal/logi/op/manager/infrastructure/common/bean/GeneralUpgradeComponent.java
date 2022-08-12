@@ -13,28 +13,15 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class GeneralUpgradeComponent {
+public class GeneralUpgradeComponent extends GeneralBaseOperationComponent{
     /**
      * 关联的安装包id
      */
     private Integer packageId;
 
-    /**
-     * 依赖的组件id
-     */
-    private Integer componentId;
 
-    /**
-     * 模板id
-     */
-    protected String templateId;
-
-    protected String associationId;
-
-    public Result<Void> checkParam() {
-        if (null == componentId) {
-            return Result.fail(ResultCode.PARAM_ERROR.getCode(), "id缺失");
-        }
+    public Result<Void> checkUpgradeParam() {
+        super.checkParam();
 
         if (null == packageId) {
             return Result.fail(ResultCode.PARAM_ERROR.getCode(), "升级版本缺失");

@@ -34,6 +34,7 @@ public enum ResultCode {
     TASK_NOT_EXIST_ERROR(4001, "任务不存在"),
     TASK_IS_RUNNING(4002, "任务正在运行"),
     TASK_IS_FINISH(4003, "任务已经结束"),
+    TASK_IS_NOT_FAILED(4003, "任务处于非失败状态"),
     TASK_IS_NOT_RUNNING(4004, "任务处于非运行状态"),
     TASK_HOST_IS_NOT_EXIST(4005, "任务host不存在"),
     TASK_HOST_IS_NOT_ERROR(4006, "任务host状态未失败"),
