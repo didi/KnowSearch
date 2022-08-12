@@ -55,7 +55,7 @@ public class PackageDomainServiceImpl implements PackageDomainService {
         pk.setUrl(storageRes.getData());
 
         //TODO
-        //入库
+        //入库,完善如何返回自增ID
         packageRepository.insertPackage(pk);
         int packageId = packageRepository.findByName(pk.getName()).getId();
         if (null != pk.getGroupConfigList()) {
