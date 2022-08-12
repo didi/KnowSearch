@@ -164,13 +164,13 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<Templa
                 .forEach(templateWithSrvVO.getCluster()::add);
     
         templateWithSrvVO.setPartition(StringUtils.endsWith(template.getExpression(), "*"));
-        final List<ClusterConnectionStatusWithTemplateVO> statusWithTemplateVOS = indexTemplatePhies.stream()
+        final List<ClusterConnectionStatusWithTemplateVO> statusWithTemplateList = indexTemplatePhies.stream()
                 //获取到主副本集群的连通状态
                 .map(indexTemplatePhy -> new ClusterConnectionStatusWithTemplateVO(indexTemplatePhy.getCluster(),
                         templateSrvManager.getClusterConnectionStatus(indexTemplatePhy.getCluster())))
                 .collect(Collectors.toList());
     
-        templateWithSrvVO.setClusterConnectionStatus(statusWithTemplateVOS);
+        templateWithSrvVO.setClusterConnectionStatus(statusWithTemplateList);
         return templateWithSrvVO;
         
     }
