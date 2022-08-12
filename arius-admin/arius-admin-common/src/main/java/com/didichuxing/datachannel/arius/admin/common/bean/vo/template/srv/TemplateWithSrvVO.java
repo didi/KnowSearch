@@ -56,6 +56,6 @@ public class TemplateWithSrvVO extends BaseVO {
      * 指示主集群的联通状态
      */
     @ApiModelProperty(value = "主集群是否能够连通的标志的标志",notes = "清理，升版本，扩缩容接口使用")
-    private ClusterConnectionStatusWithTemplateVO clusterConnectionStatus;
+    private List<ClusterConnectionStatusWithTemplateVO> clusterConnectionStatus;
 
 }

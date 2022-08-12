@@ -15,10 +15,13 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ClusterConnectionStatusWithTemplateVO {
+    private String cluster;
     private String status;
     private String desc;
     
-    public ClusterConnectionStatusWithTemplateVO(ClusterConnectionStatusWithTemplateEnum clusterConnectionStatusWithTemplateEnum) {
+    public ClusterConnectionStatusWithTemplateVO(String clusterPhy,
+            ClusterConnectionStatusWithTemplateEnum clusterConnectionStatusWithTemplateEnum) {
+        this.cluster=clusterPhy;
         this.status = clusterConnectionStatusWithTemplateEnum.toString();
         this.desc = clusterConnectionStatusWithTemplateEnum.getDesc();
     }

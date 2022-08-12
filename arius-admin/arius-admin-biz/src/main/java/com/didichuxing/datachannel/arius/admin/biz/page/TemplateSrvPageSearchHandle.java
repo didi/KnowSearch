@@ -12,8 +12,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterCon
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv.TemplateSrvVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv.TemplateWithSrvVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv.UnavailableTemplateSrvVO;
-import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterConnectionStatusWithTemplateEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
+import com.didichuxing.datachannel.arius.admin.common.tuple.Tuples;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
@@ -165,18 +165,14 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<Templa
                 .forEach(templateWithSrvVO.getCluster()::add);
     
         templateWithSrvVO.setPartition(StringUtils.endsWith(template.getExpression(), "*"));
-        final ClusterConnectionStatusWithTemplateEnum statusWithTemplateEnum = indexTemplatePhies.stream()
+        final List<ClusterConnectionStatusWithTemplateVO> statusWithTemplateVOS = indexTemplatePhies.stream()
                 .map(IndexTemplatePhy::getCluster)
                 //获取到主副本集群的连通状态
-                .map(templateSrvManager::getClusterConnectionStatus)
-                //过滤出连接不通的状态
-                .filter(clusterConnectionStatusWithTemplateEnum -> clusterConnectionStatusWithTemplateEnum.equals(
-                        ClusterConnectionStatusWithTemplateEnum.DISCONNECTED)).findFirst()
-                //如果没有默认全是正常的
-                .orElse(ClusterConnectionStatusWithTemplateEnum.NORMAL);
+                .map(clusterPhy -> Tuples.of(clusterPhy, templateSrvManager.getClusterConnectionStatus(clusterPhy)))
+                .map(tupleTwo -> new ClusterConnectionStatusWithTemplateVO(tupleTwo.v1(), tupleTwo.v2))
+                .collect(Collectors.toList());
     
-        templateWithSrvVO.setClusterConnectionStatus(
-                new ClusterConnectionStatusWithTemplateVO(statusWithTemplateEnum));
+        templateWithSrvVO.setClusterConnectionStatus(statusWithTemplateVOS);
         return templateWithSrvVO;
         
     }
