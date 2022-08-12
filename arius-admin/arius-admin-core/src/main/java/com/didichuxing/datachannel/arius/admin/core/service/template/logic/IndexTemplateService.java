@@ -14,6 +14,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithCluster;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateConfigPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateTypePO;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
@@ -405,5 +407,21 @@ public interface IndexTemplateService {
     String getNameByTemplateLogicId(Integer logicTemplateId);
     
     List<Integer> getLogicTemplateIdListByProjectId(Integer projectId);
+    
+     /**
+     * 获取通过逻辑id
+     *
+     * @param logicId 逻辑标识
+     * @return {@link TemplateConfigPO}
+     */
+    TemplateConfigPO getTemplateConfigByLogicId(Integer logicId);
+    
+    /**
+     * 更新
+     *
+     * @param param 入参
+     * @return boolean
+     */
+    boolean updateTemplateType(TemplateTypePO param);
 
 }

@@ -32,6 +32,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateConfigPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateTypePO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.DataCenterEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.LevelEnum;
@@ -60,6 +61,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.template.physic.Inde
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateConfigDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateTypeDAO;
+import com.didiglobal.logi.elasticsearch.client.response.setting.template.TemplateConfig;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.service.ProjectService;
@@ -389,7 +391,18 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
         return Result.build(
             1 == indexTemplateConfigDAO.insert(ConvertUtil.obj2Obj(indexTemplateConfig, TemplateConfigPO.class)));
     }
-
+    
+     /**
+     * 获取通过逻辑id
+     *
+     * @param logicId 逻辑标识
+     * @return {@link TemplateConfig}
+     */
+    @Override
+    public TemplateConfigPO getTemplateConfigByLogicId(Integer logicId) {
+        return indexTemplateConfigDAO.getByLogicId(logicId);
+    }
+    
     /**
      * 更新模板配置
      *
@@ -605,6 +618,17 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
     @Override
     public List<IndexTemplateType> listLogicTemplateTypes(Integer logicId) {
         return ConvertUtil.list2List(indexTemplateTypeDAO.listByIndexTemplateId(logicId), IndexTemplateType.class);
+    }
+    
+    /**
+     * 更新
+     *
+     * @param param 入参
+     * @return boolean
+     */
+    @Override
+    public boolean updateTemplateType(TemplateTypePO param) {
+        return indexTemplateTypeDAO.update(param) == 1;
     }
 
     /**

@@ -43,9 +43,8 @@ import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ESVersionUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
+import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.impl.IndexTemplateServiceImpl;
-import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateConfigDAO;
-import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateTypeDAO;
 import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
 import com.didiglobal.logi.elasticsearch.client.response.setting.common.TypeConfig;
 import com.didiglobal.logi.elasticsearch.client.response.setting.common.TypeDefine;
@@ -86,16 +85,11 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrvImpl impleme
     private static final String       PHYSICAL_TEMPLATE_NOT_EXISTS_TIPS = "物理模板不存在，ID:%d";
     @Autowired
     private TemplatePhyMappingManager templatePhyMappingManager;
-
-  
-
-
-
+    
     @Autowired
-    private IndexTemplateConfigDAO    templateConfigDAO;
-
-    @Autowired
-    private IndexTemplateTypeDAO      indexTemplateTypeDAO;
+    private IndexTemplateService indexTemplateService;
+    
+ 
    
 
 
@@ -317,8 +311,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrvImpl impleme
         if (!templateLogicWithPhysical.hasPhysicals()) {
             return Result.buildNotExist(String.format(PHYSICAL_TEMPLATE_NOT_EXISTS_TIPS, logicId));
         }
-
-        TemplateConfigPO config = templateConfigDAO.getByLogicId(logicId);
+        TemplateConfigPO config = indexTemplateService.getTemplateConfigByLogicId(logicId);
 
         List<IndexTemplatePhy> templatePhysicals = templateLogicWithPhysical.fetchMasterPhysicalTemplates();
         for (IndexTemplatePhy templatePhysical : templatePhysicals) {
@@ -364,7 +357,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrvImpl impleme
             return Result.buildNotExist(String.format(PHYSICAL_TEMPLATE_NOT_EXISTS_TIPS, logicId));
         }
 
-        TemplateConfigPO config = templateConfigDAO.getByLogicId(logicId);
+        TemplateConfigPO config = indexTemplateService.getTemplateConfigByLogicId(logicId);
 
         List<IndexTemplatePhy> templatePhysicals = templateLogicWithPhysical.fetchMasterPhysicalTemplates();
         boolean isSingleIndex = isSingleIndex(logicId);
@@ -1139,7 +1132,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrvImpl impleme
                 param.setId(indexTemplateType.getId());
                 param.setIdField(typeProperty.getIdField());
                 param.setRouting(typeProperty.getRoutingField());
-                if (1 != indexTemplateTypeDAO.update(param)) {
+                if (!indexTemplateService.updateTemplateType(param)) {
                     return Result.buildFail("保存特征字段失败");
                 } else {
                     LOGGER.info("method=saveSpecialFieldByJSON||msg=update db succ||typeId={}", param.getId());

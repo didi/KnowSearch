@@ -49,16 +49,13 @@ import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
-import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpTimeoutRetry;
-import com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESDCDRDAO;
-import com.didiglobal.logi.elasticsearch.client.request.dcdr.DCDRTemplate;
+import com.didichuxing.datachannel.arius.admin.core.service.template.dcdr.ESDCDRService;
 import com.didiglobal.logi.elasticsearch.client.response.indices.stats.IndexNodes;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -135,9 +132,9 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
 
     @Value("${dcdr.fault.tolerant:5}")
     private Integer               dcdrFaultTolerant;
-
+    
     @Autowired
-    private ESDCDRDAO             esDCDRDAO;
+    private ESDCDRService esDCDRService;
 
     @Autowired
     private ESIndexService        esIndexService;
@@ -663,11 +660,10 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
         }
 
         LOGGER.info("method=syncCreateTemplateDCDR||physicalId={}||replicaCluster={}", physicalId, replicaCluster);
-
-        return ESOpTimeoutRetry.esRetryExecute("putDCDRForTemplate", retryCount,
-            () -> esDCDRDAO.putAutoReplication(templatePhysical.getCluster(),
+        return esDCDRService.put("putDCDRForTemplate",templatePhysical.getCluster(),
                 String.format(DCDR_TEMPLATE_NAME_FORMAT, templatePhysical.getName(), replicaCluster),
-                templatePhysical.getName(), replicaCluster));
+                templatePhysical.getName(), replicaCluster,retryCount );
+     
     }
 
     /**
@@ -684,10 +680,9 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
         IndexTemplatePhy templatePhysical = indexTemplatePhyService.getTemplateById(physicalId);
 
         LOGGER.info("method=syncDeleteTemplateDCDR||physicalId={}||replicaCluster={}", physicalId, replicaCluster);
-
-        return ESOpTimeoutRetry.esRetryExecute("deleteDCDRForTemplate", retryCount,
-            () -> esDCDRDAO.deleteAutoReplication(templatePhysical.getCluster(),
-                String.format(DCDR_TEMPLATE_NAME_FORMAT, templatePhysical.getName(), replicaCluster)));
+    
+        return esDCDRService.delete("deleteDCDRForTemplate", templatePhysical.getCluster(),
+                String.format(DCDR_TEMPLATE_NAME_FORMAT, templatePhysical.getName(), replicaCluster), retryCount);
     }
 
     /**
@@ -704,11 +699,8 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
             throw new ESOperateException("获取不到物理模版:【%s】");
         }
         LOGGER.info("method=syncExistTemplateDCDR||physicalId={}||replicaCluster={}", physicalId, replicaCluster);
-
-        DCDRTemplate dcdrTemplate = esDCDRDAO.getAutoReplication(templatePhysical.getCluster(),
-            String.format(DCDR_TEMPLATE_NAME_FORMAT, templatePhysical.getName(), replicaCluster));
-
-        return dcdrTemplate != null;
+        
+        return esDCDRService.exist(templatePhysical.getCluster(),String.format(DCDR_TEMPLATE_NAME_FORMAT, templatePhysical.getName(), replicaCluster));
     }
 
     /**
@@ -723,8 +715,7 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
     @Override
     public boolean syncDeleteIndexDCDR(String cluster, String replicaCluster, List<String> indices,
                                        int retryCount) throws ESOperateException {
-        return ESOpTimeoutRetry.esRetryExecute("syncDeleteIndexDCDR", retryCount,
-            () -> esDCDRDAO.deleteReplication(cluster, replicaCluster, Sets.newHashSet(indices)));
+        return esDCDRService.delete("syncDeleteIndexDCDR",cluster,replicaCluster,retryCount);
     }
 
     /**
