@@ -393,4 +393,31 @@ public interface ESIndexService {
      * @param indexCatCellList 索引cat/index基本信息
      */
     List<IndexCatCell> buildIndexAliasesAndBlockInfo(String cluster, List<IndexCatCell> indexCatCellList);
+    
+    /**
+     * 更新索引映射
+     *
+     * @param cluster       集群
+     * @param index
+     * @param mappingConfig
+     * @return boolean
+     * @throws ESOperateException
+     */
+    boolean updateIndexMapping(String cluster, String index, MappingConfig mappingConfig) throws ESOperateException;
+    
+    /**
+     * @param clusterName 集群名称
+     * @param indexName
+     * @param indexConfig
+     * @param tryTimes    试次
+     * @return boolean
+     */
+    boolean createIndexWithConfig(String clusterName, String indexName, IndexConfig indexConfig, int tryTimes);
+    
+    /**
+     * @param clusterName 集群名称
+     * @param indexName
+     * @return boolean
+     */
+    boolean deleteIndex(String clusterName, String indexName);
 }

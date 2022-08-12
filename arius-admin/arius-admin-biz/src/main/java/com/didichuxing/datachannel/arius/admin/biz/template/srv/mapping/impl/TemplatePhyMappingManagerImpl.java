@@ -15,7 +15,6 @@ import com.didichuxing.datachannel.arius.admin.common.util.IndexNameFactory;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.impl.IndexTemplateServiceImpl;
-import com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESIndexDAO;
 import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
 import com.didiglobal.logi.elasticsearch.client.response.setting.common.TypeConfig;
 import com.didiglobal.logi.elasticsearch.client.response.setting.index.IndexConfig;
@@ -55,8 +54,7 @@ public class TemplatePhyMappingManagerImpl implements TemplatePhyMappingManager 
     @Autowired
     private ESIndexService       indexService;
 
-    @Autowired
-    private ESIndexDAO           esIndexDAO;
+
 
     @Override
     public Result<Void> updateMapping(String cluster, String template, String mappingStr) {
@@ -87,7 +85,7 @@ public class TemplatePhyMappingManagerImpl implements TemplatePhyMappingManager 
 
     @Override
     public Result<Void> syncTemplateMapping2Index(String cluster, String index, MappingConfig mappingConfig) throws ESOperateException {
-        if (!esIndexDAO.updateIndexMapping(cluster, index, mappingConfig)) {
+        if (!indexService.updateIndexMapping(cluster, index, mappingConfig)) {
             return Result.buildFail("update index mapping fail");
         }
         return Result.buildSucc();
@@ -176,7 +174,7 @@ public class TemplatePhyMappingManagerImpl implements TemplatePhyMappingManager 
         for (int i = 1; i <= updateDays; i++) {
             String indexName = IndexNameFactory.getNoVersion(expression, dataFormat, 2 - i);
 
-            if (!esIndexDAO.updateIndexMapping(cluster, indexName, mappingConfig)) {
+            if (!indexService.updateIndexMapping(cluster, indexName, mappingConfig)) {
                 return Result.buildFail("update index mapping fail");
             }
         }
@@ -390,9 +388,9 @@ public class TemplatePhyMappingManagerImpl implements TemplatePhyMappingManager 
 
     private Result<Void> tryCreateIndex(String clusterName, String indexName, IndexConfig indexConfig) {
         try {
-            esIndexDAO.deleteIndex(clusterName, indexName);
+            indexService.deleteIndex(clusterName, indexName);
 
-            if (!esIndexDAO.createIndexWithConfig(clusterName, indexName, indexConfig,3)) {
+            if (!indexService.createIndexWithConfig(clusterName, indexName, indexConfig,3)) {
                 return Result.buildFail("create index get false");
             }
 
@@ -422,7 +420,7 @@ public class TemplatePhyMappingManagerImpl implements TemplatePhyMappingManager 
             return Result.buildFail("mapping不能创建索引，异常信息:" + message);
 
         } finally {
-            if (!esIndexDAO.deleteIndex(clusterName, indexName)) {
+            if (!indexService.deleteIndex(clusterName, indexName)) {
                 LOGGER.warn(
                     "class=TemplatePhyMappingManagerImpl||method=tryCreateIndex||msg=delete index error, indexName:{}",
                     indexName);
