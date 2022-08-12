@@ -884,8 +884,8 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         }
         //检测集群连通状态
         final Optional<TupleTwo<String, Boolean>> clusterConnectionStatusOption = templatePhyList.stream()
-                .map(IndexTemplatePhy::getCluster)
-                .map(cluster -> Tuples.of(cluster, esClusterService.syncConnectionStatus(cluster)))
+                .map(indexTemplatePhy -> Tuples.of(indexTemplatePhy.getCluster(),
+                        esClusterService.syncConnectionStatus(indexTemplatePhy.getCluster())))
                 .filter(tuple -> Boolean.FALSE.equals(tuple.v2)).findFirst();
         if (clusterConnectionStatusOption.isPresent()) {
             return Result.buildFail(
