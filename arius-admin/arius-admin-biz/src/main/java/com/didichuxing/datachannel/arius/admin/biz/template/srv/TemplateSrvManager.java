@@ -97,5 +97,5 @@ public interface TemplateSrvManager {
      * @param clusterPhy 集群的名称。
      * @return 主集群连接状态。
      */
-    ClusterConnectionStatusWithTemplateEnum getMasterClusterConnectionStatus(String clusterPhy);
+    ClusterConnectionStatusWithTemplateEnum getClusterConnectionStatus(String clusterPhy);
 }

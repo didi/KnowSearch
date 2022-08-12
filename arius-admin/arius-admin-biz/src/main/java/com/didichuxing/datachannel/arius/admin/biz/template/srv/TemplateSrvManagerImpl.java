@@ -273,9 +273,9 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
      * @return 主集群连接状态。
      */
     @Override
-    public ClusterConnectionStatusWithTemplateEnum getMasterClusterConnectionStatus(String clusterPhy) {
+    public ClusterConnectionStatusWithTemplateEnum getClusterConnectionStatus(String clusterPhy) {
         //默认给一个srv就可以了
         BaseTemplateSrv srvHandle = BASE_TEMPLATE_SRV_MAP.get(TemplateServiceEnum.TEMPLATE_COLD.getCode());
-        return srvHandle.getMasterClusterConnectionStatus(clusterPhy);
+        return srvHandle.getClusterConnectionStatus(clusterPhy);
     }
 }

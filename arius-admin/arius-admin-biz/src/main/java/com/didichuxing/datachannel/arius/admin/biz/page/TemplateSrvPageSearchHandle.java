@@ -168,7 +168,7 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<Templa
         final ClusterConnectionStatusWithTemplateEnum statusWithTemplateEnum = indexTemplatePhies.stream()
                 .map(IndexTemplatePhy::getCluster)
                 //获取到主副本集群的连通状态
-                .map(templateSrvManager::getMasterClusterConnectionStatus)
+                .map(templateSrvManager::getClusterConnectionStatus)
                 //过滤出连接不通的状态
                 .filter(clusterConnectionStatusWithTemplateEnum -> clusterConnectionStatusWithTemplateEnum.equals(
                         ClusterConnectionStatusWithTemplateEnum.DISCONNECTED)).findFirst()
