@@ -1,6 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.vo.operaterecord;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.BaseVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.Date;
@@ -24,7 +25,7 @@ public class OperateRecordVO extends BaseVO {
     private Integer id;
 
     /**
-     * @see com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.NewModuleEnum
+     * @see ModuleEnum
      */
     @ApiModelProperty("模块")
     private String  module;
