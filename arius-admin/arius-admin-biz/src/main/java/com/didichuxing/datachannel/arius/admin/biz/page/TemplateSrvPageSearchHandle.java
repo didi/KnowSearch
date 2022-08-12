@@ -13,7 +13,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv.Templ
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv.TemplateWithSrvVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv.UnavailableTemplateSrvVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
-import com.didichuxing.datachannel.arius.admin.common.tuple.Tuples;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
@@ -166,10 +165,9 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<Templa
     
         templateWithSrvVO.setPartition(StringUtils.endsWith(template.getExpression(), "*"));
         final List<ClusterConnectionStatusWithTemplateVO> statusWithTemplateVOS = indexTemplatePhies.stream()
-                .map(IndexTemplatePhy::getCluster)
                 //获取到主副本集群的连通状态
-                .map(clusterPhy -> Tuples.of(clusterPhy, templateSrvManager.getClusterConnectionStatus(clusterPhy)))
-                .map(tupleTwo -> new ClusterConnectionStatusWithTemplateVO(tupleTwo.v1(), tupleTwo.v2))
+                .map(indexTemplatePhy -> new ClusterConnectionStatusWithTemplateVO(indexTemplatePhy.getCluster(),
+                        templateSrvManager.getClusterConnectionStatus(indexTemplatePhy.getCluster())))
                 .collect(Collectors.toList());
     
         templateWithSrvVO.setClusterConnectionStatus(statusWithTemplateVOS);
