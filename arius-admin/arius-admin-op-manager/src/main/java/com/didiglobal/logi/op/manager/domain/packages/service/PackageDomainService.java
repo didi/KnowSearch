@@ -26,16 +26,16 @@ public interface PackageDomainService {
     Result<Void> updatePackage(Package pk);
 
     /**
-     * 查询脚本
-     * @param pk
-     * @return
+     * 查询安装包
+     * @param pk 安装包
+     * @return Result<List<Package>> 所查询的安装包集合
      */
     Result<List<Package>> queryPackage(Package pk);
 
     /**
      * 根据id获取安装包
      * @param id
-     * @return
+     * @return Result<Package> 安装包
      */
     Result<Package> getPackageById(int id);
 

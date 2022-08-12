@@ -15,7 +15,7 @@ import java.util.List;
  * @date 2022-07-13 1:44 下午
  */
 @Repository
-public class TaskRepositoryImpl implements TaskRepository {
+public  class TaskRepositoryImpl implements TaskRepository {
 
     @Autowired
     private TaskDao taskDao;

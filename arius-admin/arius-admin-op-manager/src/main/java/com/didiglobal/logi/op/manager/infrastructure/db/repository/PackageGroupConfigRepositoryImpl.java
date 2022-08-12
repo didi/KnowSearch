@@ -22,7 +22,7 @@ public class PackageGroupConfigRepositoryImpl implements PackageGroupConfigRepos
 
     @Override
     public void insertPackageGroupConfig(PackageGroupConfig packageGroupConfig) {
-        PackageGroupConfigPO po = PackageGroupConfigConverter.convertScriptDO2PO(packageGroupConfig);
+        PackageGroupConfigPO po = PackageGroupConfigConverter.convertPackageDO2PO(packageGroupConfig);
         packageGroupConfigDao.insert(po);
     }
 
@@ -35,7 +35,7 @@ public class PackageGroupConfigRepositoryImpl implements PackageGroupConfigRepos
     @Override
     public List<PackageGroupConfig> queryConfigByPackageId(int id) {
         List<PackageGroupConfigPO> list = packageGroupConfigDao.listByPackageId(id);
-        return PackageGroupConfigConverter.convertScriptPO2DOList(list);
+        return PackageGroupConfigConverter.convertPackagePO2DOList(list);
     }
 
     @Override
