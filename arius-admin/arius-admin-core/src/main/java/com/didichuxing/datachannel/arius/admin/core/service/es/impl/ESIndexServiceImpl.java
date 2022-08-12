@@ -18,7 +18,6 @@ import com.didichuxing.datachannel.arius.admin.common.constant.index.IndexBlockE
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.BatchProcessor;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpTimeoutRetry;
 import com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESIndexDAO;
@@ -46,6 +45,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -66,8 +66,7 @@ public class ESIndexServiceImpl implements ESIndexService {
     @Autowired
     private ESIndexDAO             esIndexDAO;
 
-    @Autowired
-    private ClusterRoleHostService clusterRoleHostService;
+   
 
     @Override
     public boolean syncCreateIndex(String cluster, String indexName, int retryCount) throws ESOperateException {
@@ -338,13 +337,14 @@ public class ESIndexServiceImpl implements ESIndexService {
 
     @Override
     public boolean syncBatchUpdateRegion(String cluster, List<String> indices, Integer tgtRegionId,
-                                         int retryCount) throws ESOperateException {
+                                         int retryCount,
+                                         Function</*coldRegionId*/Integer, Result<List<ClusterRoleHost>>> coldRegionIdFunc) throws ESOperateException {
         Set<String> nodeNames = new HashSet<>();
-        Result<List<ClusterRoleHost>> clusterRoleHostResult = clusterRoleHostService.listByRegionId(tgtRegionId);
-        if (clusterRoleHostResult.failed()) {
+        final Result<List<ClusterRoleHost>> clusterRoleHostResult = coldRegionIdFunc.apply(tgtRegionId);
+        if (clusterRoleHostResult.failed() || CollectionUtils.isEmpty(clusterRoleHostResult.getData())) {
             return false;
         }
-        clusterRoleHostResult.getData().stream()
+        clusterRoleHostResult.getData()
             .forEach(clusterRoleHost -> nodeNames.add(clusterRoleHost.getNodeSet()));
 
         return ESOpTimeoutRetry.esRetryExecute("syncBatchUpdateRegion", retryCount,
@@ -710,9 +710,41 @@ public class ESIndexServiceImpl implements ESIndexService {
         }
         return indexCatCellList;
     }
-
-
-
+    
+    /**
+     * @param cluster
+     * @param index
+     * @param mappingConfig
+     * @return
+     */
+    @Override
+    public boolean updateIndexMapping(String cluster, String index, MappingConfig mappingConfig)
+            throws ESOperateException {
+        return esIndexDAO.updateIndexMapping(cluster,index,mappingConfig);
+    }
+    
+    /**
+     * @param clusterName
+     * @param indexName
+     * @param indexConfig
+     * @param tryTimes
+     * @return
+     */
+    @Override
+    public boolean createIndexWithConfig(String clusterName, String indexName, IndexConfig indexConfig, int tryTimes) {
+        return esIndexDAO.createIndexWithConfig(clusterName,indexName,indexConfig,tryTimes);
+    }
+    
+    /**
+     * @param clusterName
+     * @param indexName
+     * @return
+     */
+    @Override
+    public boolean deleteIndex(String clusterName, String indexName) {
+        return esIndexDAO.deleteIndex(clusterName,indexName);
+    }
+    
     /***************************************** private method ****************************************************/
 
     private Tuple<Boolean, Boolean> getWriteAndReadBlock(IndexConfig indexConfig) {

@@ -21,6 +21,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.ESPipelineProc
 import com.didichuxing.datachannel.arius.admin.common.bean.common.IndexTemplatePhysicalConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.ESPipeline;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
@@ -32,8 +33,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.Tri
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
-import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpTimeoutRetry;
-import com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESPipelineDAO;
+import com.didichuxing.datachannel.arius.admin.core.service.template.pipeline.ESPipelineService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import java.util.List;
@@ -53,7 +53,7 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
     private static final Integer RETRY_TIMES = 3;
 
     @Autowired
-    private ESPipelineDAO        esPipelineDAO;
+    private ESPipelineService esPipelineService;
 
     @Override
     public TemplateServiceEnum templateSrv() {
@@ -127,9 +127,19 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
         for (IndexTemplatePhy physical : templatePhysicals) {
             Integer rateLimit = getDynamicRateLimit(physical);
             try {
-                if (!esPipelineDAO.save(physical.getCluster(), physical.getName(), dateField, dateFieldFormat,
-                    dateFormat, expireDay, rateLimit, physical.getVersion(), newTemplate.getIdField(),
-                    newTemplate.getRoutingField())) {
+                final ESPipeline esPipeline = new ESPipeline();
+                esPipeline.setCluster(physical.getCluster());
+                esPipeline.setPipelineId(physical.getName());
+                esPipeline.setDateField(dateField);
+                esPipeline.setDateFieldFormat(dateFieldFormat);
+                esPipeline.setDateFormat(dateFormat);
+                esPipeline.setExpireDay(expireDay);
+                esPipeline.setRateLimit(rateLimit);
+                esPipeline.setVersion(physical.getVersion());
+                esPipeline.setIdField(newTemplate.getIdField());
+                esPipeline.setRoutingField(newTemplate.getRoutingField());
+    
+                if (!esPipelineService.save("editFromTemplateLogic", esPipeline, 3)) {
                     return Result.buildFail("edit fail");
                 }
             } catch (Exception e) {
@@ -288,9 +298,18 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
         saveRateLimitToDB(indexTemplatePhy, rateLimit);
 
         try {
-            return Result.build(
-                ESOpTimeoutRetry.esRetryExecute("doCreatePipeline", 3, () -> esPipelineDAO.save(cluster, pipelineId,
-                    dateField, dateFieldFormat, dateFormat, expireDay, rateLimit, version, idField, routingField)));
+            final ESPipeline esPipeline = new ESPipeline();
+            esPipeline.setCluster(cluster);
+            esPipeline.setPipelineId(pipelineId);
+            esPipeline.setDateField(dateField);
+            esPipeline.setDateFieldFormat(dateFieldFormat);
+            esPipeline.setDateFormat(dateFormat);
+            esPipeline.setExpireDay(expireDay);
+            esPipeline.setRateLimit(rateLimit);
+            esPipeline.setVersion(version);
+            esPipeline.setIdField(idField);
+            esPipeline.setRoutingField(routingField);
+            return Result.build(esPipelineService.save("doCreatePipeline",esPipeline,3));
         } catch (Exception e) {
             LOGGER.error("class=PipelineManagerImpl||method=doCreatePipeline||error", e);
             return Result.buildFail();
@@ -383,20 +402,28 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
         LOGGER.info(
             "class=TemplatePipelineManagerImpl||method=editFromTemplatePhysical||cluster={}||pipelineId={}||version={}",
             newTemplate.getCluster(), newTemplate.getName(), newTemplate.getVersion());
-
+    
         Integer rateLimit = getManualRateLimit(newTemplate);
-
-        return ESOpTimeoutRetry.esRetryExecute("editFromTemplatePhysical", 3,
-            () -> esPipelineDAO.save(newTemplate.getCluster(), newTemplate.getName(), logicWithPhysical.getDateField(),
-                logicWithPhysical.getDateFieldFormat(), logicWithPhysical.getDateFormat(),
-                logicWithPhysical.getHotTime() > 0 ? logicWithPhysical.getHotTime() : logicWithPhysical.getExpireTime(),
-                rateLimit, newTemplate.getVersion(), logicWithPhysical.getIdField(),
-                logicWithPhysical.getRoutingField()));
+        final ESPipeline esPipeline = new ESPipeline();
+        esPipeline.setCluster(newTemplate.getCluster());
+        esPipeline.setPipelineId(newTemplate.getName());
+        esPipeline.setDateField(logicWithPhysical.getDateField());
+        esPipeline.setDateFieldFormat(logicWithPhysical.getDateFieldFormat());
+        esPipeline.setDateFormat(logicWithPhysical.getDateFormat());
+        esPipeline.setExpireDay(logicWithPhysical.getHotTime() > 0
+                ? logicWithPhysical.getHotTime()
+                : logicWithPhysical.getExpireTime());
+        esPipeline.setRateLimit(rateLimit);
+        esPipeline.setVersion(newTemplate.getVersion());
+        esPipeline.setIdField(logicWithPhysical.getIdField());
+        esPipeline.setRoutingField(logicWithPhysical.getRoutingField());
+        return esPipelineService.save("editFromTemplatePhysical", esPipeline, 3);
+       
     }
 
     @Override
     public Integer getRateLimit(IndexTemplatePhy indexTemplatePhysicalMasterInfo) {
-        ESPipelineProcessor esPipelineProcessor = esPipelineDAO.get(indexTemplatePhysicalMasterInfo.getCluster(),
+        ESPipelineProcessor esPipelineProcessor = esPipelineService.get(indexTemplatePhysicalMasterInfo.getCluster(),
             indexTemplatePhysicalMasterInfo.getName());
         return null != esPipelineProcessor ? esPipelineProcessor.getThrottle().getInteger(RATE_LIMIT) : 0;
     }
@@ -419,8 +446,9 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
         
         for (IndexTemplatePhy indexTemplatePhy : templatePhyList) {
             try {
-            
-                ESPipelineProcessor esPipelineProcessor = esPipelineDAO.get(indexTemplatePhy.getCluster(),
+                esPipelineService.get(indexTemplatePhy.getCluster(),
+                        indexTemplatePhy.getName());
+                ESPipelineProcessor esPipelineProcessor = esPipelineService.get(indexTemplatePhy.getCluster(),
                         indexTemplatePhy.getName());
                 if (esPipelineProcessor == null) {
                     // pipeline processor不存在，创建
@@ -436,7 +464,7 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
                         continue;
                     }
                     //重新获取一遍，否则下层的逻辑是npe的状态；且此刻默认是能够获取到esPipelineProcessor；如果获取不到，那么下面逻辑就应该报错npe的问题
-                    esPipelineProcessor= esPipelineDAO.get(indexTemplatePhy.getCluster(),
+                    esPipelineProcessor= esPipelineService.get(indexTemplatePhy.getCluster(),
                         indexTemplatePhy.getName());
                    
                 }
@@ -478,8 +506,8 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
         }
 
         try {
-            return Result.build(ESOpTimeoutRetry.esRetryExecute("deletePipeline", RETRY_TIMES,
-                () -> esPipelineDAO.delete(indexTemplatePhy.getCluster(), indexTemplatePhy.getName())));
+            return Result.build(esPipelineService.delete(indexTemplatePhy.getCluster(), indexTemplatePhy.getName(),
+                    "deletePipeline", RETRY_TIMES));
         } catch (Exception e) {
             LOGGER.error("class=PipelineManagerImpl||method=deletePipeline||template={}||errMsg={}",
                 indexTemplatePhy.getName(), e.getMessage(), e);
@@ -519,15 +547,21 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
         if (rateLimitOld != rateLimitNew) {
             // 保存到DB
             saveRateLimitToDB(templatePhysical, finalRateLimitNew);
-
-            boolean esSuccess = ESOpTimeoutRetry.esRetryExecute("editFromTemplatePhysical", 3,
-                () -> esPipelineDAO.save(templatePhysical.getCluster(), templatePhysical.getName(),
-                    templateLogicWithPhysical.getDateField(), templateLogicWithPhysical.getDateFieldFormat(),
-                    templateLogicWithPhysical.getDateFormat(),
-                    templateLogicWithPhysical.getHotTime() > 0 ? templateLogicWithPhysical.getHotTime()
-                        : templateLogicWithPhysical.getExpireTime(),
-                    finalRateLimitNew, templatePhysical.getVersion(), templateLogicWithPhysical.getIdField(),
-                    templateLogicWithPhysical.getRoutingField()));
+            final ESPipeline esPipeline = new ESPipeline();
+            esPipeline.setCluster(templatePhysical.getCluster());
+            esPipeline.setPipelineId(templatePhysical.getName());
+            esPipeline.setDateField(templateLogicWithPhysical.getDateField());
+            esPipeline.setDateFieldFormat(templateLogicWithPhysical.getDateFieldFormat());
+            esPipeline.setDateFormat(templateLogicWithPhysical.getDateFormat());
+            esPipeline.setExpireDay(templateLogicWithPhysical.getHotTime() > 0
+                    ? templateLogicWithPhysical.getHotTime()
+                    : templateLogicWithPhysical.getExpireTime());
+            esPipeline.setRateLimit(finalRateLimitNew);
+            esPipeline.setVersion(templatePhysical.getVersion());
+            esPipeline.setIdField(templateLogicWithPhysical.getIdField());
+            esPipeline.setRoutingField(templateLogicWithPhysical.getRoutingField());
+            boolean esSuccess = esPipelineService.save("editFromTemplatePhysical", esPipeline, 3);
+            
             if (esSuccess) {
                 operateRecordService.save(
                     new OperateRecord.Builder().operationTypeEnum(OperateTypeEnum.TEMPLATE_MANAGEMENT_INFO_MODIFY)
@@ -637,130 +671,24 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
 
         // 保存限流值到DB
         saveRateLimitToDB(indexTemplatePhysicalInfo, rateLimit);
-
-        return ESOpTimeoutRetry.esRetryExecute("createPipeline", 3, () -> esPipelineDAO.save(cluster, pipelineId,
-            dateField, dateFieldFormat, dateFormat, expireDay, rateLimit, version, idField, routingField));
+        final ESPipeline esPipeline = new ESPipeline();
+        esPipeline.setCluster(cluster);
+        esPipeline.setPipelineId(pipelineId);
+        esPipeline.setDateField(dateField);
+        esPipeline.setDateFieldFormat(dateFieldFormat);
+        esPipeline.setDateFormat(dateFormat);
+        esPipeline.setExpireDay(expireDay);
+        esPipeline.setRateLimit(rateLimit);
+        esPipeline.setVersion(version);
+        esPipeline.setIdField(idField);
+        esPipeline.setRoutingField(routingField);
+    
+        return esPipelineService.save("createPipeline", esPipeline, RETRY_TIMES);
     }
 
-    private boolean notConsistent(IndexTemplatePhy indexTemplatePhysicalInfo,
-                                  IndexTemplateWithPhyTemplates logicWithPhysical,
-                                  ESPipelineProcessor esPipelineProcessor) {
+ 
 
-        if (StringUtils.isNotEmpty(logicWithPhysical.getDateField())
-            && (!isDateFieldEqual(logicWithPhysical.getDateField(),
-                esPipelineProcessor.getIndexTemplate().getString(DATE_FIELD)))) {
-            LOGGER.info(
-                "class=TemplatePipelineManagerImpl||method=notConsistent||msg=dateField change||pipelineId={}||templateDateField={}||pipelineDateField={}",
-                logicWithPhysical.getName(), logicWithPhysical.getDateField(),
-                esPipelineProcessor.getIndexTemplate().getString(DATE_FIELD));
-            return true;
-        }
 
-        if (StringUtils.isNotEmpty(logicWithPhysical.getDateFieldFormat())
-            && (isDateFieldFormatChange(logicWithPhysical.getDateFieldFormat(), logicWithPhysical.getDateField(),
-                esPipelineProcessor.getIndexTemplate().getString(DATE_FIELD_FORMAT)))) {
-            LOGGER.info(
-                "class=TemplatePipelineManagerImpl||method=notConsistent||msg=dateFieldFormat change||pipelineId={}||dateFieldFormat={}||dateField={}"
-                        + "||pipelineDateFieldFormat={}",
-                logicWithPhysical.getName(), logicWithPhysical.getDateFieldFormat(), logicWithPhysical.getDateField(),
-                esPipelineProcessor.getIndexTemplate().getString(DATE_FIELD_FORMAT));
-            return true;
-        }
 
-        if (StringUtils.isNotEmpty(logicWithPhysical.getDateFormat()) && (!logicWithPhysical.getDateFormat()
-            .equals(esPipelineProcessor.getIndexTemplate().getString(INDEX_NAME_FORMAT)))) {
-            LOGGER.info(
-                "class=TemplatePipelineManagerImpl||method=notConsistent||msg=date format change||pipelineId={}||dateFormat={}"
-                        + "||pipelineDateFormat={}",
-                logicWithPhysical.getName(), logicWithPhysical.getDateFormat(),
-                esPipelineProcessor.getIndexTemplate().getString(INDEX_NAME_FORMAT));
-            return true;
-        }
 
-        if (isExpireDayChange(logicWithPhysical.getExpireTime(), logicWithPhysical.getHotTime(),
-            esPipelineProcessor.getIndexTemplate().getInteger(EXPIRE_DAY))) {
-            LOGGER.info(
-                "class=TemplatePipelineManagerImpl||method=notConsistent||msg=expireDay change||pipelineId={}||expireTime={}"
-                        + "||hotTime={}||pipelineExpireDay={}",
-                logicWithPhysical.getName(), logicWithPhysical.getExpireTime(), logicWithPhysical.getHotTime(),
-                esPipelineProcessor.getIndexTemplate().getInteger(EXPIRE_DAY));
-            return true;
-        }
-
-        if (!indexTemplatePhysicalInfo.getVersion()
-            .equals(esPipelineProcessor.getIndexTemplate().getInteger(INDEX_VERSION))) {
-            LOGGER.info(
-                "class=TemplatePipelineManagerImpl||method=notConsistent||msg=version change||pipelineId={}||version={}"
-                        + "||pipelineVersion={}",
-                logicWithPhysical.getName(), indexTemplatePhysicalInfo.getVersion(),
-                esPipelineProcessor.getIndexTemplate().getInteger(INDEX_VERSION));
-            return true;
-        }
-
-        if (isRateLimitNoConsistent(indexTemplatePhysicalInfo.fetchConfig(), esPipelineProcessor.getThrottle())) {
-            LOGGER.info(
-                "class=TemplatePipelineManagerImpl||method=notConsistent||msg=rateLimit change||pipelineId={}||physicalConfig={}||throttle={}",
-                logicWithPhysical.getName(), indexTemplatePhysicalInfo.getConfig(), esPipelineProcessor.getThrottle());
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * 校验日期字段格式是否改变
-     *
-     * @param dateFieldFormat         日期字段格式
-     * @param dateField               日期格式
-     * @param pipelineDateFieldFormat pipeline日期字段格式
-     * @return
-     */
-    private boolean isDateFieldFormatChange(String dateFieldFormat, String dateField, String pipelineDateFieldFormat) {
-        if (MS_TIME_FIELD_PLATFORM_FORMAT.equals(dateFieldFormat)) {
-            dateFieldFormat = MS_TIME_FIELD_ES_FORMAT;
-        } else if (SECOND_TIME_FIELD_PLATFORM_FORMAT.equals(dateFieldFormat)) {
-            dateFieldFormat = SECOND_TIME_FIELD_ES_FORMAT;
-        }
-
-        return !dateFieldFormat.equals(pipelineDateFieldFormat);
-    }
-
-    private boolean handleTemplatePhysicals(IndexTemplate newTemplate, String dateField, String dateFieldFormat,
-                                            String dateFormat, Integer expireDay,
-                                            List<IndexTemplatePhy> templatePhysicals) {
-        boolean succ = true;
-        for (IndexTemplatePhy physical : templatePhysicals) {
-
-            String cluster = physical.getCluster();
-            String name = physical.getName();
-            Integer rateLimit = getManualRateLimit(physical);
-
-            try {
-                String finalDateField = dateField;
-                String finalDateFieldFormat = dateFieldFormat;
-                String finalDateFormat = dateFormat;
-                Integer finalExpireDay = expireDay;
-
-                if (ESOpTimeoutRetry.esRetryExecute("editFromTemplateLogic", 5,
-                    () -> esPipelineDAO.save(cluster, name, finalDateField, finalDateFieldFormat, finalDateFormat,
-                        finalExpireDay, rateLimit, physical.getVersion(), newTemplate.getIdField(),
-                        newTemplate.getRoutingField()))) {
-                    LOGGER.info(
-                        "class=TemplatePipelineManagerImpl||method=editFromTemplateLogic||msg=succ||cluster={}||pipelineId={}||dateField={}||dateFormat={}||expireDay={}",
-                        cluster, name, dateField, dateFormat, expireDay);
-                } else {
-                    LOGGER.info(
-                        "class=TemplatePipelineManagerImpl||method=editFromTemplateLogic||msg=fail||cluster={}||pipelineId={}||dateField={}||dateFormat={}||expireDay={}",
-                        cluster, name, dateField, dateFormat, expireDay);
-                    succ = false;
-                }
-            } catch (Exception e) {
-                LOGGER.error(
-                    "class=TemplatePipelineManagerImpl||method=editFromTemplateLogic||errMsg={}||cluster={}||pipelineId={}||dateField={}||dateFormat={}||expireDay={}",
-                    e.getMessage(), cluster, name, dateField, dateFormat, expireDay, e);
-                succ = false;
-            }
-        }
-        return succ;
-    }
 }

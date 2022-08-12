@@ -2,6 +2,7 @@ package com.didichuxing.datachannel.arius.admin.common.bean.dto.oprecord;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.PageDTO;
 import com.didichuxing.datachannel.arius.admin.common.constant.OperateRecordSortEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -29,7 +30,7 @@ public class OperateRecordDTO extends PageDTO {
     private Integer id;
 
     /**
-     * @see com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.NewModuleEnum
+     * @see ModuleEnum
      */
     @ApiModelProperty("模块ID")
     private Integer moduleId;

@@ -1,6 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.po.operaterecord;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.po.BasePO;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import java.util.Date;
 import lombok.AllArgsConstructor;
@@ -22,7 +23,7 @@ public class OperateRecordInfoPO extends BasePO {
     private Integer id;
 
     /**
-     * @see com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.NewModuleEnum
+     * @see ModuleEnum
      */
     private Integer moduleId;
 

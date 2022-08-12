@@ -6,7 +6,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskProcessDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.OpTask;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.task.OpTaskPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskHandleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
@@ -14,13 +13,10 @@ import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassE
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
-import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
-import com.didichuxing.datachannel.arius.admin.persistence.mysql.task.OpTaskDAO;
+import com.didichuxing.datachannel.arius.admin.core.service.task.OpTaskService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-import com.didiglobal.logi.security.service.ProjectService;
 import com.didiglobal.logi.security.service.UserService;
-import com.google.common.collect.Lists;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -34,17 +30,14 @@ public class OpTaskManagerImpl implements OpTaskManager {
     private static final ILog    LOGGER = LogFactory.getLog(OpTaskManagerImpl.class);
 
     @Autowired
-    private OpTaskDAO            opTaskDao;
+    private OpTaskService opTaskService;
 
     @Autowired
     private HandleFactory        handleFactory;
 
     @Autowired
     private UserService          userService;
-    @Autowired
-    private ProjectService       projectService;
-    @Autowired
-    private OperateRecordService operateRecordService;
+    
 
     @Override
     public Result<OpTask> addTask(OpTaskDTO opTaskDTO, Integer projectId) throws NotFindSubclassException {
@@ -78,11 +71,7 @@ public class OpTaskManagerImpl implements OpTaskManager {
     @Override
     public void insert(OpTask task) {
         try {
-            OpTaskPO opTaskPO = ConvertUtil.obj2Obj(task, OpTaskPO.class);
-            boolean succ = opTaskDao.insert(opTaskPO) > 0;
-            if (succ) {
-                task.setId(opTaskPO.getId());
-            }
+            opTaskService.insert(task);
         } catch (Exception e) {
             LOGGER.error("class=DCDRWorkTaskHandler||method=addTask||taskType={}||businessKey={}||errMsg={}",
                 task.getTaskType(), task.getBusinessKey(), e.getStackTrace(), e);
@@ -91,25 +80,23 @@ public class OpTaskManagerImpl implements OpTaskManager {
 
     @Override
     public void updateTask(OpTask task) {
-        opTaskDao.update(ConvertUtil.obj2Obj(task, OpTaskPO.class));
+        opTaskService.update(task);
     }
 
     @Override
     public Result<OpTask> getById(Integer id) {
-        OpTaskPO opTaskPO = opTaskDao.getById(id);
-        if (opTaskPO == null) {
+        OpTask opTask = opTaskService.getById(id);
+        if (opTask == null) {
             return Result.buildFail(ResultType.NOT_EXIST.getMessage());
         }
-        return Result.buildSucc(ConvertUtil.obj2Obj(opTaskPO, OpTask.class));
+        return Result.buildSucc(opTask);
     }
 
     @Override
     public Result<List<OpTask>> list() {
-        List<OpTaskPO> opTasks = opTaskDao.listAll();
-        if (opTasks == null) {
-            return Result.buildSucc(Lists.newArrayList());
-        }
-        return Result.buildSucc(ConvertUtil.list2List(opTasks, OpTask.class));
+        final List<OpTask> tasks = opTaskService.listAll();
+      
+        return Result.buildSucc(tasks);
     }
 
     @Override
@@ -117,37 +104,37 @@ public class OpTaskManagerImpl implements OpTaskManager {
         if (AriusObjUtils.isNull(processDTO.getTaskId())) {
             return Result.buildParamIllegal("任务id为空");
         }
-        OpTaskPO taskPO = opTaskDao.getById(processDTO.getTaskId());
+        OpTask task = opTaskService.getById(processDTO.getTaskId());
 
-        OpTaskTypeEnum typeEnum = OpTaskTypeEnum.valueOfType(taskPO.getTaskType());
+        OpTaskTypeEnum typeEnum = OpTaskTypeEnum.valueOfType(task.getTaskType());
         if (OpTaskTypeEnum.UNKNOWN.equals(typeEnum)) {
             return Result.buildNotExist("任务类型不存在");
         }
 
-        OpTaskHandleEnum taskHandleEnum = OpTaskHandleEnum.valueOfType(taskPO.getTaskType());
+        OpTaskHandleEnum taskHandleEnum = OpTaskHandleEnum.valueOfType(task.getTaskType());
 
         OpTaskHandler handler = (OpTaskHandler) handleFactory.getByHandlerNamePer(taskHandleEnum.getMessage());
 
-        return handler.process(ConvertUtil.obj2Obj(taskPO, OpTask.class), processDTO.getTaskProgress(),
+        return handler.process(task, processDTO.getTaskProgress(),
             processDTO.getStatus(), processDTO.getExpandData());
     }
 
     @Override
     public Result<OpTask> getLatestTask(String businessKey, Integer taskType) {
-        OpTaskPO opTaskPO = opTaskDao.getLatestTask(businessKey, taskType);
-        if (opTaskPO == null) {
+        OpTask opTask = opTaskService.getLatestTask(businessKey, taskType);
+        if (opTask == null) {
             return Result.buildFail(ResultType.NOT_EXIST.getMessage());
         }
-        return Result.buildSucc(ConvertUtil.obj2Obj(opTaskPO, OpTask.class));
+        return Result.buildSucc(opTask);
     }
 
     @Override
     public List<OpTask> getPendingTaskByType(Integer taskType) {
-        return ConvertUtil.list2List(opTaskDao.getPendingTaskByType(taskType), OpTask.class);
+       return opTaskService.getPendingTaskByType(taskType);
     }
 
     @Override
     public List<OpTask> getSuccessTaskByType(Integer taskType) {
-        return ConvertUtil.list2List(opTaskDao.getSuccessTaskByType(taskType), OpTask.class);
+       return opTaskService.getSuccessTaskByType(taskType);
     }
 }

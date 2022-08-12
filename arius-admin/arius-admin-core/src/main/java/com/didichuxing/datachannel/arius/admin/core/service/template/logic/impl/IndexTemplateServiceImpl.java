@@ -20,7 +20,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTem
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.TemplateQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ProjectClusterLogicAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ProjectTemplateAuth;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
@@ -33,6 +32,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateConfigPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateTypePO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.DataCenterEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.LevelEnum;
@@ -41,7 +41,6 @@ import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.DataTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.event.template.LogicTemplateModifyEvent;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
@@ -62,6 +61,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.template.physic.Inde
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateConfigDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateTypeDAO;
+import com.didiglobal.logi.elasticsearch.client.response.setting.template.TemplateConfig;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.service.ProjectService;
@@ -391,7 +391,18 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
         return Result.build(
             1 == indexTemplateConfigDAO.insert(ConvertUtil.obj2Obj(indexTemplateConfig, TemplateConfigPO.class)));
     }
-
+    
+     /**
+     * 获取通过逻辑id
+     *
+     * @param logicId 逻辑标识
+     * @return {@link TemplateConfig}
+     */
+    @Override
+    public TemplateConfigPO getTemplateConfigByLogicId(Integer logicId) {
+        return indexTemplateConfigDAO.getByLogicId(logicId);
+    }
+    
     /**
      * 更新模板配置
      *
@@ -607,6 +618,17 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
     @Override
     public List<IndexTemplateType> listLogicTemplateTypes(Integer logicId) {
         return ConvertUtil.list2List(indexTemplateTypeDAO.listByIndexTemplateId(logicId), IndexTemplateType.class);
+    }
+    
+    /**
+     * 更新
+     *
+     * @param param 入参
+     * @return boolean
+     */
+    @Override
+    public boolean updateTemplateType(TemplateTypePO param) {
+        return indexTemplateTypeDAO.update(param) == 1;
     }
 
     /**
@@ -913,14 +935,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
 
     @Override
     public Result updateTemplateWriteRateLimit(ConsoleTemplateRateLimitDTO dto) throws ESOperateException {
-        List<IndexTemplatePhy> phyList = indexTemplatePhyService.getTemplateByLogicId(dto.getLogicId());
-        for (IndexTemplatePhy indexTemplatePhy : phyList) {
-            ClusterPhy clusterPhy = clusterPhyService.getClusterByName(indexTemplatePhy.getCluster());
-            List<String> templateServices = ListUtils.string2StrList(clusterPhy.getTemplateSrvs());
-            if (!templateServices.contains(TemplateServiceEnum.TEMPLATE_LIMIT_W.getCode().toString())) {
-                return Result.buildFail("指定物理集群没有开启写入限流服务");
-            }
-        }
+     
         IndexTemplatePO oldPO = indexTemplateDAO.getById(dto.getLogicId());
         IndexTemplatePO editTemplate = ConvertUtil.obj2Obj(dto, IndexTemplatePO.class);
         editTemplate.setId(dto.getLogicId());

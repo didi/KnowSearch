@@ -40,7 +40,7 @@ import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
-import com.didichuxing.datachannel.arius.admin.persistence.mysql.workorder.WorkOrderDAO;
+import com.didichuxing.datachannel.arius.admin.core.service.workorder.WorkOrderService;
 import com.didiglobal.logi.security.common.entity.dept.Dept;
 import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
@@ -79,8 +79,9 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
     @Autowired
     private UserService         userService;
 
+    
     @Autowired
-    private WorkOrderDAO        orderDao;
+    private WorkOrderService workOrderService;
     @Autowired
     private DeptService         deptService;
     @Autowired
@@ -166,8 +167,7 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
         if (checkProcessResult.failed()) {
             return checkProcessResult;
         }
-
-        WorkOrderPO orderPO = orderDao.getById(processDTO.getOrderId());
+        WorkOrderPO orderPO = workOrderService.getById(processDTO.getOrderId());
         if (AriusObjUtils.isNull(orderPO)) {
             return Result.buildFail(ResultType.NOT_EXIST.getMessage());
         }
@@ -186,8 +186,7 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
         if (checkProcessResult.failed()) {
             return checkProcessResult;
         }
-
-        WorkOrderPO orderPO = orderDao.getById(processDTO.getOrderId());
+        WorkOrderPO orderPO = workOrderService.getById(processDTO.getOrderId());
         if (AriusObjUtils.isNull(orderPO)) {
             return Result.buildFail(ResultType.NOT_EXIST.getMessage());
         }
@@ -214,7 +213,7 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
             if (orderPO.getApproverProjectId() == null) {
                 orderPO.setApproverProjectId(AuthConstant.SUPER_PROJECT_ID);
             }
-            orderDao.insert(orderPO);
+            workOrderService.insert(orderPO);
             return orderPO.getId().intValue();
         } catch (Exception e) {
             LOGGER.error("class=WorkOrderManagerImpl||method=insert||orderPO={}||msg=add order failed!", orderPO, e);
@@ -225,7 +224,7 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
     @Override
     public int updateOrderById(WorkOrderPO orderPO) {
         try {
-            return orderDao.update(orderPO);
+            return workOrderService.update(orderPO);
         } catch (Exception e) {
             LOGGER.error("class=WorkOrderManagerImpl||method=updateOrderById||orderPO={}||msg=update order failed!",
                 orderPO, e);
@@ -236,7 +235,7 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
     @Override
     public Result<OrderDetailBaseVO> getById(Long id) {
         try {
-            WorkOrderPO orderPO = orderDao.getById(id);
+            WorkOrderPO orderPO = workOrderService.getById(id);
             if (AriusObjUtils.isNull(orderPO)) {
                 return Result.buildFail(ResultType.NOT_EXIST.getMessage());
             }
@@ -252,7 +251,8 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
     @Override
     public List<WorkOrderPO> list() {
         try {
-            return orderDao.list();
+            return workOrderService.list();
+            
         } catch (Exception e) {
             LOGGER.error("class=WorkOrderManagerImpl||method=list||msg=get all order failed!", e);
         }
@@ -262,7 +262,7 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
     @Override
     public Result<Void> cancelOrder(Long id, String userName) {
         try {
-            WorkOrderPO orderPO = orderDao.getById(id);
+            WorkOrderPO orderPO = workOrderService.getById(id);
             if (AriusObjUtils.isNull(orderPO)) {
                 return Result.buildFail(ResultType.NOT_EXIST.getMessage());
             }
@@ -270,8 +270,8 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
             if (!userName.equals(orderPO.getApplicant())) {
                 return Result.buildFail(ResultType.OPERATE_FORBIDDEN_ERROR.getMessage());
             }
-
-            if (orderDao.updateOrderStatusById(id, OrderStatusEnum.CANCELLED.getCode()) > 0) {
+    
+            if (workOrderService.updateOrderStatusById(id, OrderStatusEnum.CANCELLED.getCode())) {
                 return Result.buildSucc();
             }
 
@@ -285,11 +285,11 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
     @Override
     public Result<Void> processOrder(WorkOrderPO order) {
         try {
-            WorkOrderPO orderPO = orderDao.getById(order.getId());
+            WorkOrderPO orderPO = workOrderService.getById(order.getId());
             if (AriusObjUtils.isNull(orderPO)) {
                 return Result.buildFail(ResultType.NOT_EXIST.getMessage());
             }
-            if (orderDao.update(order) > 0) {
+            if (workOrderService.update(order) > 0) {
                 return Result.buildSucc();
             }
         } catch (Exception e) {
@@ -304,8 +304,7 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
     public Result<List<WorkOrderVO>> getOrderApplyList(Integer status, Integer projectId) {
         List<WorkOrderVO> orderDOList = Lists.newArrayList();
         try {
-            orderDOList = ConvertUtil.list2List(
-                orderDao.listByStatusAndProjectId(status, projectId), WorkOrderVO.class);
+            orderDOList=workOrderService.listByStatusAndProjectId(status, projectId);
         } catch (Exception e) {
             LOGGER.error(
                 "class=WorkOrderManagerImpl||method=getOrderApplyList||status={}||msg=get apply order failed!",
@@ -323,8 +322,7 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
     public Result<List<WorkOrderVO>> getOrderApplyList(String applicant, Integer status) {
         List<WorkOrderVO> orderDOList = Lists.newArrayList();
         try {
-            orderDOList = ConvertUtil.list2List(orderDao.listByApplicantAndStatus(applicant, status),
-                WorkOrderVO.class);
+            orderDOList = workOrderService.listByApplicantAndStatus(applicant, status);
         } catch (Exception e) {
             LOGGER.error(
                 "class=WorkOrderManagerImpl||method=getOrderApplyList||applicant={}||status={}||msg=get apply order failed!",
@@ -338,9 +336,9 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
         try {
             //是用户 但不是管理员
             if (!roleTool.isAdmin(approver) && Objects.nonNull(userService.getUserBriefByUserName(approver))) {
-                return orderDao.listByApproverAndStatus(approver, null);
+                return workOrderService.listByApproverAndStatus(approver, null);
             }
-            return orderDao.list();
+            return workOrderService.list();
         } catch (Exception e) {
             LOGGER.error(
                 "class=WorkOrderManagerImpl||method=getApprovalList||approver={}||msg=get approval order failed!",
@@ -353,9 +351,9 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
     public List<WorkOrderPO> getPassApprovalList(String approver) {
         try {
             if (!roleTool.isAdmin(approver)) {
-                return orderDao.listByApproverAndStatus(approver, OrderStatusEnum.PASSED.getCode());
+                return workOrderService.listByApproverAndStatus(approver, OrderStatusEnum.PASSED.getCode());
             }
-            return orderDao.listByStatus(OrderStatusEnum.PASSED.getCode());
+            return workOrderService.listByStatus(OrderStatusEnum.PASSED.getCode());
         } catch (Exception e) {
             LOGGER.error(
                 "class=WorkOrderManagerImpl||method=getPassApprovalList||approver={}||msg=get approval order list failed!",
@@ -368,7 +366,7 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
     public List<WorkOrderPO> getWaitApprovalList(String userName) {
         List<WorkOrderPO> orderList = new ArrayList<>();
         try {
-            orderList = orderDao.listByStatus(OrderStatusEnum.WAIT_DEAL.getCode());
+            orderList = workOrderService.listByStatus(OrderStatusEnum.WAIT_DEAL.getCode());
         } catch (Exception e) {
             LOGGER.error(
                 "class=WorkOrderManagerImpl||method=getWaitApprovalList||userName={}||msg=get wait order list failed!",

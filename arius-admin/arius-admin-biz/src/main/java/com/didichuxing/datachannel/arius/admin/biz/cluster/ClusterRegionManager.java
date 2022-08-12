@@ -65,18 +65,6 @@ public interface ClusterRegionManager {
      */
     Result<Void> deletePhyClusterRegion(Long regionId, String operator, Integer projectId) throws AdminOperateException;
 
-    /**
-     * 解绑逻辑集群已经绑定的region
-     *
-     * @param regionId       regionId
-     * @param logicClusterId 逻辑集群id
-     * @param operator       operator
-     * @param projectId
-     * @return
-     */
-    Result<Void> unbindRegion(Long regionId, Long logicClusterId, String operator, Integer projectId);
-    
-    Boolean existColdRegion(String phyCluster, Integer regionId);
     
     List<ClusterRegion> getColdRegionByPhyCluster(String phyCluster);
 }

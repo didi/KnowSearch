@@ -26,6 +26,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.Cluster
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexCatCellVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexCatCellWithTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexMappingVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexSettingVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexShardInfoVO;
@@ -797,12 +798,12 @@ public class IndicesManagerImpl implements IndicesManager {
     }
 
     @Override
-    public List<String> listIndexNameByTemplatePhyId(Long physicalId) {
+    public List<IndexCatCellWithTemplateVO> listIndexCatCellWithTemplateByTemplatePhyId(Long physicalId) {
         List<CatIndexResult> indices = listIndexCatInfoByTemplatePhyId(physicalId);
         if (CollectionUtils.isEmpty(indices)) {
             return Lists.newArrayList();
         }
-        return indices.stream().map(CatIndexResult::getIndex).sorted().collect(Collectors.toList());
+        return ConvertUtil.list2List(indices,IndexCatCellWithTemplateVO.class);
     }
 
     @Override
