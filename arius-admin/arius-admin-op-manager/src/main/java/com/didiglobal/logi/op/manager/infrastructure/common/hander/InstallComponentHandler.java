@@ -27,6 +27,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.didiglobal.logi.op.manager.infrastructure.common.Constants.SPLIT;
+
 /**
  * @author didi
  * @date 2022-07-16 2:15 下午
@@ -36,8 +38,6 @@ import java.util.Map;
 public class InstallComponentHandler extends BaseComponentHandler implements ComponentHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InstallComponentHandler.class);
-
-    private static final String REX = ",";
 
     @Autowired
     private TaskDomainService taskDomainService;
@@ -69,7 +69,7 @@ public class InstallComponentHandler extends BaseComponentHandler implements Com
             installComponent.getGroupConfigList().forEach(config ->
             {
                 if (!StringUtils.isEmpty(config.getHosts())) {
-                    groupToIpList.put(config.getGroupName(), Arrays.asList(config.getHosts().split(REX)));
+                    groupToIpList.put(config.getGroupName(), Arrays.asList(config.getHosts().split(SPLIT)));
                 }
             });
             taskDomainService.createTask(content, componentEvent.getOperateType(),

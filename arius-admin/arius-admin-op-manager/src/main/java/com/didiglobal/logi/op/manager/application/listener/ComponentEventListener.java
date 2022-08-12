@@ -12,9 +12,9 @@ import org.springframework.context.ApplicationListener;
  * @date 2022-07-12 8:30 下午
  */
 @org.springframework.stereotype.Component
-public class ComponentListener implements ApplicationListener<ComponentEvent> {
+public class ComponentEventListener implements ApplicationListener<ComponentEvent> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ComponentListener.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ComponentEventListener.class);
 
     @Autowired
     private ComponentHandlerFactory componentHandlerFactory;

@@ -35,4 +35,10 @@ public interface ComponentGroupConfigRepository {
      * @return
      */
     List<ComponentGroupConfig> getConfigByComponentId(int componentId);
+
+    /**
+     * 获取所有的组件分组配置
+     * @return List<ComponentGroupConfig>  组件分组配置
+     */
+    List<ComponentGroupConfig> listGroupConfig();
 }

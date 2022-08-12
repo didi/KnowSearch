@@ -40,4 +40,9 @@ public class ComponentGroupConfigRepositoryImpl implements ComponentGroupConfigR
     public List<ComponentGroupConfig> getConfigByComponentId(int componentId) {
         return ComponentConverter.convertComponentConfigPO2DOList(configDao.getByComponentId(componentId));
     }
+
+    @Override
+    public List<ComponentGroupConfig> listGroupConfig() {
+        return ComponentConverter.convertComponentConfigPO2DOList(configDao.listAll());
+    }
 }

@@ -24,6 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
+import static com.didiglobal.logi.op.manager.infrastructure.common.Constants.REX;
+
 /**
  * @author didi
  * @date 2022-07-13 10:51 上午
@@ -39,8 +41,6 @@ public class TaskDomainServiceImpl implements TaskDomainService {
 
     @Autowired
     private DeploymentService deploymentService;
-
-    private static final Character REX = ',';
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -76,21 +76,21 @@ public class TaskDomainServiceImpl implements TaskDomainService {
 
         //获取要执行的分组信息
         List<TaskDetail> detailList = taskDetailRepository.listTaskDetailByTaskId(taskId);
-        Result<Map.Entry<String, List<String>>> group2ListRes = getFirstGroup(detailList);
-        if (group2ListRes.failed()) {
-            return Result.fail(group2ListRes.getMessage());
+        Result<Map.Entry<String, List<String>>> group2HostListRes = getFirstGroup(detailList);
+        if (group2HostListRes.failed()) {
+            return Result.fail(group2HostListRes.getMessage());
         }
 
         //获取模板和分组
-        Result<Tuple<GeneralGroupConfig, String>> configAndTemplateIdRes = getConfigByGroupName(task, group2ListRes.getData().getKey());
+        Result<Tuple<GeneralGroupConfig, String>> configAndTemplateIdRes = getConfigByGroupName(task, group2HostListRes.getData().getKey());
         if (configAndTemplateIdRes.failed()) {
             return Result.fail(configAndTemplateIdRes.getMessage());
         }
 
         //执行zeus任务
         Result<Integer> deployRes = deploymentService.execute(configAndTemplateIdRes.getData().v2(),
-                taskId, group2ListRes.getData().getKey(), Strings.join(group2ListRes.getData().getValue(), REX),
-                task.getType().toString());
+                Strings.join(group2HostListRes.getData().getValue(), REX), task.getType().toString(),
+                task.getId().toString(), group2HostListRes.getData().getKey());
 
         if (deployRes.failed()) {
             return Result.fail(deployRes.getMessage());
@@ -99,7 +99,7 @@ public class TaskDomainServiceImpl implements TaskDomainService {
         //更新任务状态
         taskRepository.updateTaskStatus(taskId, TaskStatusEnum.RUNNING.getStatus());
         //回写执行id
-        taskDetailRepository.updateTaskDetailExecuteIdByTaskIdAndGroupName(taskId, group2ListRes.getData().getKey(),
+        taskDetailRepository.updateTaskDetailExecuteIdByTaskIdAndGroupName(taskId, group2HostListRes.getData().getKey(),
                 deployRes.getData());
         return Result.success();
     }

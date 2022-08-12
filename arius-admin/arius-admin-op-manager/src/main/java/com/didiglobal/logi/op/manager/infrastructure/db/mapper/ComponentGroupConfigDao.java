@@ -31,4 +31,10 @@ public interface ComponentGroupConfigDao {
      * @return
      */
     List<ComponentGroupConfigPO> getByComponentId(int component);
+
+    /**
+     * 获取所有的组件分组配置
+     * @return List<ComponentGroupConfigPO> 分组配置
+     */
+    List<ComponentGroupConfigPO> listAll();
 }

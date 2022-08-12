@@ -28,13 +28,12 @@ public interface DeploymentService {
     /**
      * 执行任务
      * @param templateId
-     * @param taskId
-     * @param groupName
      * @param hosts
+     * @param action
      * @param args
      * @return
      */
-    Result<Integer> execute(String templateId, Integer taskId, String groupName, String hosts, String... args);
+    Result<Integer> execute(String templateId, String hosts, String action, String... args);
 
 
     /**

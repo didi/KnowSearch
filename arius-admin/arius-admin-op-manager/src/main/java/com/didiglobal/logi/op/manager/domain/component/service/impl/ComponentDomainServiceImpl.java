@@ -97,6 +97,35 @@ public class ComponentDomainServiceImpl implements ComponentDomainService {
     }
 
     @Override
+    public Result<List<Component>> listComponent() {
+        List<Component> componentList = componentRepository.listAllComponent();
+        List<ComponentHost> hosts = componentHostRepository.listComponentHost();
+        List<ComponentGroupConfig>  configs = componentGroupConfigRepository.listGroupConfig();
+        Map<String, List<ComponentHost>> componentIdToHostMap = new HashMap<>(componentList.size());
+        Map<String, List<ComponentGroupConfig>> componentIdToGroupConfigMap = new HashMap<>(componentList.size());
+        hosts.forEach(componentHost -> {
+            List<ComponentHost> hostList = componentIdToHostMap.get(componentHost.getComponentId().toString());
+            if (null == hostList) {
+                hostList = new ArrayList<>();
+                componentIdToHostMap.put(componentHost.getComponentId().toString(), hostList);
+            }
+            hostList.add(componentHost);
+        });
+        configs.forEach(groupConfig -> {
+            List<ComponentGroupConfig> groupConfigList = componentIdToGroupConfigMap.get(groupConfig.getComponentId().toString());
+            if (null == groupConfigList) {
+                groupConfigList = new ArrayList<>();
+                componentIdToGroupConfigMap.put(groupConfig.getComponentId().toString(), groupConfigList);
+            }
+            groupConfigList.add(groupConfig);
+        });
+        componentList.forEach(component -> {
+            component.setHostList(componentIdToHostMap.get(component.getId().toString()));
+        });
+        return Result.success(componentList);
+    }
+
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public Result<Integer> createComponent(Component component) {
         //创建并保存组件

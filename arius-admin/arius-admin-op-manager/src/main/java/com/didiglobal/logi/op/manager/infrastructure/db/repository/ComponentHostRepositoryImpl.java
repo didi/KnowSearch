@@ -8,6 +8,8 @@ import com.didiglobal.logi.op.manager.interfaces.dto.ComponentHostDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 /**
  * @author didi
  * @date 2022-07-19 3:34 下午
@@ -26,5 +28,10 @@ public class ComponentHostRepositoryImpl implements ComponentHostRepository {
     @Override
     public void updateComponentHostStatus(int componentId, String host, int groupId, int status) {
         componentHostDao.updateStatus(componentId, host, groupId, status);
+    }
+
+    @Override
+    public List<ComponentHost> listComponentHost() {
+        return ComponentConverter.convertComponentHostPO2DOList(componentHostDao.listAll());
     }
 }

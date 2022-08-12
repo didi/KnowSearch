@@ -104,4 +104,12 @@ public interface ComponentDomainService {
      */
     Result<Void> updateComponent(Component component);
 
+
+    /**
+     * 获取所有的component
+     * @param 无
+     * @return Result<List<Component>>，组件列表
+     */
+    Result<List<Component>> listComponent();
+
 }

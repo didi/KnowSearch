@@ -1,8 +1,5 @@
 package com.didiglobal.logi.op.manager.interfaces.controller;
 
-import com.alibaba.druid.pool.DruidDataSource;
-import com.alibaba.druid.support.logging.Log;
-import com.alibaba.druid.support.logging.LogFactory;
 import com.didiglobal.logi.op.manager.application.ScriptService;
 import com.didiglobal.logi.op.manager.domain.script.entity.Script;
 import com.didiglobal.logi.op.manager.infrastructure.common.Constants;
@@ -33,7 +30,7 @@ public class ScriptController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ScriptController.class);
 
-    @PostMapping("query-script")
+    @PostMapping("/query")
     @ApiOperation(value = "获取脚本中心列表")
     public Result<List<ScriptVO>> listScript(@RequestBody ScriptDTO queryScriptDTO) {
         Result res = scriptService.listScript(ScriptAssembler.toDO(queryScriptDTO));
@@ -45,13 +42,13 @@ public class ScriptController {
 
     @PostMapping("")
     @ApiOperation(value = "新建脚本")
-    public Result<Void> createScript( ScriptDTO queryScriptDTO) {
+    public Result<Void> createScript(ScriptDTO queryScriptDTO) {
         return scriptService.createScript(ScriptAssembler.toDO(queryScriptDTO));
     }
 
-    @PostMapping("edit")
+    @PostMapping("/edit")
     @ApiOperation(value = "编辑脚本")
-    public Result<Void> editScript( ScriptDTO editScriptDTO) {
+    public Result<Void> editScript(ScriptDTO editScriptDTO) {
         return scriptService.updateScript(ScriptAssembler.toDO(editScriptDTO));
     }
 
