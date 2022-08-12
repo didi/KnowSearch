@@ -19,4 +19,8 @@ public class PackageGroupConfigConverter {
     public static List<PackageGroupConfig> convertScriptPO2DOList(List<PackageGroupConfigPO> poList) {
         return ConvertUtil.list2List(poList, PackageGroupConfig.class);
     }
+
+    public static List<PackageGroupConfigPO> convertPackageDOList2POList(List<PackageGroupConfig> dolist) {
+        return ConvertUtil.list2List(dolist,PackageGroupConfigPO.class);
+    }
 }

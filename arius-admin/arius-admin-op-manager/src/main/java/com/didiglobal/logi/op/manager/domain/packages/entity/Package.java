@@ -87,6 +87,7 @@ public class Package {
 
     public Package update() {
         this.updateTime = new Timestamp(System.currentTimeMillis());
+        //由于在修改包时对应的组件配置的修改是先删除之前的组件配置，再增添新的组件配置，因此对应着组件配置的creat函数
         if (null != groupConfigList) {
             groupConfigList.forEach(config -> config.create());
         }

@@ -53,7 +53,7 @@ public interface PackageRepository {
 
     /**
      * 删除包
-     * @param id
+     * @param id 要删除的包对应的id
      */
     void deletePackage(int id);
 }

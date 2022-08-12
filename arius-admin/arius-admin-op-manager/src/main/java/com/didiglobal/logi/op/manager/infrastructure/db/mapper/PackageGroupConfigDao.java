@@ -19,11 +19,18 @@ public interface PackageGroupConfigDao {
     void insert(PackageGroupConfigPO po);
 
     /**
+     * 批量新增安装包默认配置组
+     * @param poList 安装包配置组集合
+     */
+    void batchInsert(List<PackageGroupConfigPO> poList);
+
+    /**
      * 根据安装包id获取配置组
      * @param id
      * @return
      */
     List<PackageGroupConfigPO> listByPackageId(int id);
+
 
     /**
      * 根据安装包id删除配置组

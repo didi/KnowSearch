@@ -17,6 +17,12 @@ public interface PackageGroupConfigRepository {
     void insertPackageGroupConfig(PackageGroupConfig packageGroupConfig);
 
     /**
+     * 批量新增安装包默认配置
+     * @param packageGroupConfigs 安装包默认配置组
+     */
+    void batchInsertPackageGroupConfig(List<PackageGroupConfig> packageGroupConfigs);
+
+    /**
      * 根据安装包id查询配置组
      * @param id
      * @return

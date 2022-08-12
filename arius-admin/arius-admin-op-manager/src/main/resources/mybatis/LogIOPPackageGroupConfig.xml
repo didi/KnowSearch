@@ -24,6 +24,24 @@
         values (#{groupName}, #{systemConfig}, #{runningConfig}, #{fileConfig}, #{packageId}, #{createTime}, #{updateTime})
     </insert>
 
+    <insert id="batchInsert" parameterType="com.didiglobal.logi.op.manager.infrastructure.db.PackageGroupConfigPO"
+            useGeneratedKeys="true"
+            keyColumn="id" keyProperty="id">
+        insert into logi_op_package_group_config (group_name, system_config, running_config, file_config, package_id, create_time, update_time)
+        values
+        <foreach collection="list" index="index" item="item" separator=",">
+            (
+             #{item.groupName},
+             #{item.systemConfig},
+             #{item.runningConfig},
+             #{item.fileConfig},
+             #{item.packageId},
+             #{item.createTime},
+             #{item.updateTime}
+            )
+        </foreach>
+    </insert>
+
     <select id="listByPackageId"
             parameterType="com.didiglobal.logi.op.manager.infrastructure.db.PackageGroupConfigPO"
             resultMap="BaseResultMap">

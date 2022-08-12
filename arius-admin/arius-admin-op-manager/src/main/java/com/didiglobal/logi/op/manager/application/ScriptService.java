@@ -75,14 +75,14 @@ public class ScriptService {
     public Result<Void> deleteScript(Integer id) {
         Script script;
         //检验参数id是否为空以及数据库中是否能找到对应id的脚本
-        if (null == id || (script = scriptDomainService.getScriptById(id).getData()) == null ) {
+        if (null == id || null == (script = scriptDomainService.getScriptById(id).getData()) ) {
             return Result.fail(ResultCode.PARAM_ERROR.getCode(), "输入的id参数有问题，请核对");
         }
 
         //判断,若脚本已经绑定了包则不能删除
         Package pk = new Package();
         pk.setScriptId(id);
-        if (!packageDomainService.queryPackage(pk).getData().isEmpty()) {
+        if (null == packageDomainService.queryPackage(pk).getData()) {
             return Result.fail(ResultCode.SCRIPT_OPERATE_ERROR.getCode(), "脚本已被绑定，不能删除");
         }
 

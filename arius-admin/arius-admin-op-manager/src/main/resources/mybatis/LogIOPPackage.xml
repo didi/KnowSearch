@@ -22,6 +22,9 @@
     <insert id="insert" parameterType="com.didiglobal.logi.op.manager.infrastructure.db.PackagePO"
             useGeneratedKeys="true"
             keyColumn="id" keyProperty="id">
+        <selectKey resultType="integer" order="AFTER" keyProperty="id">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
         insert into logi_op_package (`name`, url, version, `describe`, `type`, script_id,create_time, update_time, creator)
         values (#{name}, #{url}, #{version}, #{describe}, #{type}, #{scriptId}, #{createTime}, #{updateTime}, #{creator})
     </insert>

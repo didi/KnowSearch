@@ -55,8 +55,4 @@ public class PackageGroupConfig {
         return this;
     }
 
-    public PackageGroupConfig update() {
-        updateTime = new Timestamp(System.currentTimeMillis());
-        return this;
-    }
 }

@@ -27,6 +27,12 @@ public class PackageGroupConfigRepositoryImpl implements PackageGroupConfigRepos
     }
 
     @Override
+    public void batchInsertPackageGroupConfig(List<PackageGroupConfig> packageGroupConfigs) {
+        List<PackageGroupConfigPO> poList = PackageGroupConfigConverter.convertPackageDOList2POList(packageGroupConfigs);
+        packageGroupConfigDao.batchInsert(poList);
+    }
+
+    @Override
     public List<PackageGroupConfig> queryConfigByPackageId(int id) {
         List<PackageGroupConfigPO> list = packageGroupConfigDao.listByPackageId(id);
         return PackageGroupConfigConverter.convertScriptPO2DOList(list);

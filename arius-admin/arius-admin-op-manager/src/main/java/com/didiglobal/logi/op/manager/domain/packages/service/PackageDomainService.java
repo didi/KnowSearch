@@ -13,8 +13,8 @@ public interface PackageDomainService {
 
     /**
      * 创建脚本
-     * @param pk
-     * @return
+     * @param pk 安装包
+     * @return result
      */
     Result<Void> createPackage(Package pk);
 
@@ -41,8 +41,8 @@ public interface PackageDomainService {
 
     /**
      * 删除包
-     * @param pk
-     * @return
+     * @param pk 包
+     * @return Result
      */
     Result<Void> deletePackage(Package pk);
 

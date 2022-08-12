@@ -28,7 +28,7 @@ public class PackageService {
 
     /**
      * 创建安装包
-     * @param pk
+     * @param pk 安装包
      * @return Result
      */
     public Result<Void> createPackage(Package pk) {
@@ -67,17 +67,17 @@ public class PackageService {
 
     /**
      * 删除包
-     * @param id
+     * @param id 要删除的包所对应id
      * @return Result
      */
     public Result<Void> deletePackage(Integer id) {
         Package pk;
         //检验参数id是否为空以及数据库中是否能找到对应id的包
-        if (null == id || (pk = packageDomainService.getPackageById(id).getData()) == null ) {
+        if (null == id || null == (pk = packageDomainService.getPackageById(id).getData()) ) {
             return Result.fail(ResultCode.PARAM_ERROR.getCode(), "输入的id参数有问题，请核对");
         }
 
-        //todo
+        //TODO
         //判断,若包已经绑定了组件则不能删除
 
         return packageDomainService.deletePackage(pk);
