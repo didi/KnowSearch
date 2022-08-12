@@ -16,6 +16,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.srv.U
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv.TemplateWithSrvVO;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterConnectionStatusWithTemplateEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.SupportSrv;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
@@ -264,5 +265,17 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
                 .map(IndexTemplate::getName)
                 .collect(Collectors.toList());
     }
-   
+    
+    /**
+     * 返回主集群连接的状态
+     *
+     * @param clusterPhy 集群的名称。
+     * @return 主集群连接状态。
+     */
+    @Override
+    public ClusterConnectionStatusWithTemplateEnum getMasterClusterConnectionStatus(String clusterPhy) {
+        //默认给一个srv就可以了
+        BaseTemplateSrv srvHandle = BASE_TEMPLATE_SRV_MAP.get(TemplateServiceEnum.TEMPLATE_COLD.getCode());
+        return srvHandle.getMasterClusterConnectionStatus(clusterPhy);
+    }
 }

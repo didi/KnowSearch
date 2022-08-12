@@ -1,9 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.core.service.es;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.setting.ESClusterGetSettingsAllResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStatsResponse;
@@ -17,6 +13,9 @@ import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateExcepti
 import com.didiglobal.logi.elasticsearch.client.response.cluster.ESClusterHealthResponse;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodes.ClusterNodeInfo;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodessetting.ClusterNodeSettings;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author d06679
@@ -245,4 +244,12 @@ public interface ESClusterService {
      * @return
      */
     List<String> syncGetTcpAddress(String cluster);
+    
+    /**
+     * 获取连接状态
+     *
+     * @param cluster 集群phy
+     * @return boolean
+     */
+    boolean syncConnectionStatus(String cluster);
 }

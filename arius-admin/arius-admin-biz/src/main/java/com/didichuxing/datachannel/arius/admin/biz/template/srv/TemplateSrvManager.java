@@ -8,6 +8,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.srv.TemplateSrv;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.srv.UnavailableTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv.TemplateWithSrvVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterConnectionStatusWithTemplateEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import java.util.List;
 
@@ -89,4 +90,12 @@ public interface TemplateSrvManager {
      */
     List<String> getIndexTemplateContainsSrv(int srvId);
     
+   
+    /**
+     * 返回主集群连接的状态
+     *
+     * @param clusterPhy 集群的名称。
+     * @return 主集群连接状态。
+     */
+    ClusterConnectionStatusWithTemplateEnum getMasterClusterConnectionStatus(String clusterPhy);
 }

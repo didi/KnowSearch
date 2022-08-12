@@ -8,9 +8,11 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.Temp
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.srv.TemplateSrv;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterConnectionStatusWithTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv.TemplateSrvVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv.TemplateWithSrvVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv.UnavailableTemplateSrvVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterConnectionStatusWithTemplateEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
@@ -161,9 +163,20 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<Templa
         
         indexTemplatePhies.stream().map(IndexTemplatePhy::getCluster).distinct()
                 .forEach(templateWithSrvVO.getCluster()::add);
-        
-        templateWithSrvVO.setPartition(StringUtils.endsWith(template.getExpression(), "*"));
     
+        templateWithSrvVO.setPartition(StringUtils.endsWith(template.getExpression(), "*"));
+        final ClusterConnectionStatusWithTemplateEnum statusWithTemplateEnum = indexTemplatePhies.stream()
+                .map(IndexTemplatePhy::getCluster)
+                //获取到主副本集群的连通状态
+                .map(templateSrvManager::getMasterClusterConnectionStatus)
+                //过滤出连接不通的状态
+                .filter(clusterConnectionStatusWithTemplateEnum -> clusterConnectionStatusWithTemplateEnum.equals(
+                        ClusterConnectionStatusWithTemplateEnum.DISCONNECTED)).findFirst()
+                //如果没有默认全是正常的
+                .orElse(ClusterConnectionStatusWithTemplateEnum.NORMAL);
+    
+        templateWithSrvVO.setMasterClusterConnectionStatus(
+                new ClusterConnectionStatusWithTemplateVO(statusWithTemplateEnum));
         return templateWithSrvVO;
         
     }

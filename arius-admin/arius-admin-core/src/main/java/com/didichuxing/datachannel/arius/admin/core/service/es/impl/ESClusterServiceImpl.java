@@ -473,7 +473,18 @@ public class ESClusterServiceImpl implements ESClusterService {
     public List<String> syncGetTcpAddress(String cluster) {
         return esClusterDAO.getNodeTcpAddress(cluster);
     }
-
+    
+    /**
+     * 获取连接状态
+     *
+     * @param cluster 集群phy
+     * @return boolean
+     */
+    @Override
+    public boolean syncConnectionStatus(String cluster) {
+        return esClusterDAO.syncConnectionStatus(cluster);
+    }
+    
     private List<TaskMissionAnalysisVO> buildTaskMission(JSONObject responseJson) {
         List<TaskMissionAnalysisVO> vos = new ArrayList<>();
         JSONObject nodes = responseJson.getJSONObject(NODES);

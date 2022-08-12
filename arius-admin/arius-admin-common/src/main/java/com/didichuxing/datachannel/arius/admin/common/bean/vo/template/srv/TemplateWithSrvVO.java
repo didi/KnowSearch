@@ -1,6 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.BaseVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterConnectionStatusWithTemplateVO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.List;
@@ -50,5 +51,11 @@ public class TemplateWithSrvVO extends BaseVO {
 
     @ApiModelProperty("是否分区")
     private Boolean partition;
+    
+    /**
+     * 指示主集群的联通状态
+     */
+    @ApiModelProperty(value = "主集群是否能够连通的标志的标志",notes = "清理，升版本，扩缩容接口使用")
+    private ClusterConnectionStatusWithTemplateVO masterClusterConnectionStatus;
 
 }
