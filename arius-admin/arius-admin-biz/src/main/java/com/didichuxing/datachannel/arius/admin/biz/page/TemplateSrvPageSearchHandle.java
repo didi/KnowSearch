@@ -175,7 +175,7 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<Templa
                 //如果没有默认全是正常的
                 .orElse(ClusterConnectionStatusWithTemplateEnum.NORMAL);
     
-        templateWithSrvVO.setMasterClusterConnectionStatus(
+        templateWithSrvVO.setClusterConnectionStatus(
                 new ClusterConnectionStatusWithTemplateVO(statusWithTemplateEnum));
         return templateWithSrvVO;
         
