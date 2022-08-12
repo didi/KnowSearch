@@ -43,7 +43,7 @@ public class Package {
      */
     private String describe;
     /**
-     * 类型，1是配置独立，0是配置依赖
+     * 类型，0是配置依赖，1是配置独立
      */
     private Integer type;
     /**
@@ -59,10 +59,13 @@ public class Package {
      */
     private Timestamp updateTime;
     /**
+     * 创建者
+     */
+    private String creator;
+    /**
      * 传输文件
      */
     private MultipartFile uploadFile;
-
 
     /**
      * 关联的默认安装包分组配置
@@ -82,6 +85,14 @@ public class Package {
         return this;
     }
 
+    public Package update() {
+        this.updateTime = new Timestamp(System.currentTimeMillis());
+        //由于在修改包时对应的组件配置的修改是先删除之前的组件配置，再增添新的组件配置，因此对应着组件配置的creat函数
+        if (null != groupConfigList) {
+            groupConfigList.forEach(config -> config.create());
+        }
+        return this;
+    }
 
     public Result<Void> checkCreateParam() {
         if (name.isEmpty()) {
@@ -98,6 +109,14 @@ public class Package {
 
         if (uploadFile.isEmpty()) {
             return Result.fail(ResultCode.PARAM_ERROR.getCode(), "安装包内容缺失");
+        }
+        return Result.success();
+    }
+
+
+    public Result<Void> checkUpdateParam() {
+        if (null == id) {
+            return Result.fail(ResultCode.PARAM_ERROR.getCode(), "id缺失");
         }
         return Result.success();
     }

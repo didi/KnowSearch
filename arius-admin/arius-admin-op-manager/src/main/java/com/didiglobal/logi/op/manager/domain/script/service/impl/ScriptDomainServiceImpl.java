@@ -54,7 +54,7 @@ public class ScriptDomainServiceImpl implements com.didiglobal.logi.op.manager.d
     @Override
     public Result<Void> createScript(Script script) {
 
-        //判断新建的脚本名称是否已经在数据库中存在，确保数据库中脚本唯一
+        //判断新建的脚本名称是否已经在数据库中存在，确保数据库中脚本名称唯一
         if (null != scriptRepository.findByName(script.getName())) {
             return Result.fail(ResultCode.PARAM_ERROR.getCode(),"脚本名称重复请重新输入");
         }

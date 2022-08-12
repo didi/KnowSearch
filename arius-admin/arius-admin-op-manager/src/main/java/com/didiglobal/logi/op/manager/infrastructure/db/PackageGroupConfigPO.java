@@ -1,9 +1,18 @@
 package com.didiglobal.logi.op.manager.infrastructure.db;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.sql.Timestamp;
+
 /**
  * @author didi
  * @date 2022-07-11 2:25 下午
  */
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class PackageGroupConfigPO {
     /**
      * 分组id
@@ -29,4 +38,12 @@ public class PackageGroupConfigPO {
      * 关联安装包id
      */
     private Integer packageId;
+    /**
+     * 创建时间
+     */
+    private Timestamp createTime;
+    /**
+     * 更新时间
+     */
+    private Timestamp updateTime;
 }

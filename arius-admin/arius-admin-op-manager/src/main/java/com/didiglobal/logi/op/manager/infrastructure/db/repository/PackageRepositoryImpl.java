@@ -21,9 +21,33 @@ public class PackageRepositoryImpl implements PackageRepository {
     private PackageDao packageDao;
 
     @Override
+    public Package findByName(String name) {
+        PackagePO packagePO = packageDao.findByName(name);
+        return PackageConverter.convertPackagePO2DO(packagePO);
+    }
+
+    @Override
+    public Package findByVersion(String version) {
+        PackagePO packagePO = packageDao.findByVersion(version);
+        return PackageConverter.convertPackagePO2DO(packagePO);
+    }
+
+    @Override
+    public Package findById(int id) {
+        PackagePO packagePO = packageDao.findById(id);
+        return PackageConverter.convertPackagePO2DO(packagePO);
+    }
+
+    @Override
     public int insertPackage(Package pk) {
         PackagePO po = PackageConverter.convertPackageDO2PO(pk);
         return packageDao.insert(po);
+    }
+
+    @Override
+    public void updatePackage(Package pk) {
+        PackagePO po = PackageConverter.convertPackageDO2PO(pk);
+        packageDao.update(po);
     }
 
     @Override
@@ -31,5 +55,10 @@ public class PackageRepositoryImpl implements PackageRepository {
         PackagePO po = PackageConverter.convertPackageDO2PO(pk);
         List<PackagePO> pos = packageDao.query(po);
         return PackageConverter.convertPackagePO2DOList(pos);
+    }
+
+    @Override
+    public void deletePackage(int id) {
+        packageDao.delete(id);
     }
 }

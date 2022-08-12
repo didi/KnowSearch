@@ -53,6 +53,10 @@ public class PackageDTO {
      */
     private Timestamp updateTime;
     /**
+     * 创建者
+     */
+    private String creator;
+    /**
      * 传输文件
      */
     private MultipartFile uploadFile;
@@ -61,5 +65,5 @@ public class PackageDTO {
     /**
      * 关联的默认安装包分组配置
      */
-    private List<PackageGroupConfigDTO> groupConfigDTOList;
+    private List<PackageGroupConfigDTO> groupConfigList;
 }

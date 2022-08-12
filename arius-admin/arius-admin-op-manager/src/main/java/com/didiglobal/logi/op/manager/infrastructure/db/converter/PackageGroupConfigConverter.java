@@ -12,11 +12,15 @@ import java.util.List;
  */
 public class PackageGroupConfigConverter {
 
-    public static PackageGroupConfigPO convertScriptDO2PO(PackageGroupConfig packageGroupConfig) {
+    public static PackageGroupConfigPO convertPackageDO2PO(PackageGroupConfig packageGroupConfig) {
         return ConvertUtil.obj2Obj(packageGroupConfig, PackageGroupConfigPO.class);
     }
 
-    public static List<PackageGroupConfig> convertScriptPO2DOList(List<PackageGroupConfigPO> poList) {
+    public static List<PackageGroupConfig> convertPackagePO2DOList(List<PackageGroupConfigPO> poList) {
         return ConvertUtil.list2List(poList, PackageGroupConfig.class);
+    }
+
+    public static List<PackageGroupConfigPO> convertPackageDOList2POList(List<PackageGroupConfig> dolist) {
+        return ConvertUtil.list2List(dolist,PackageGroupConfigPO.class);
     }
 }

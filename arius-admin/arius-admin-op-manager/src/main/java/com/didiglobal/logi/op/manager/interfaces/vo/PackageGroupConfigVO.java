@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.sql.Timestamp;
+
 /**
  * @author didi
  * @date 2022-07-11 6:58 下午
@@ -32,4 +34,16 @@ public class PackageGroupConfigVO {
      * 文件配置
      */
     private String fileConfig;
+    /**
+     * 关联安装包id
+     */
+    private Integer packageId;
+    /**
+     * 创建时间
+     */
+    private Timestamp createTime;
+    /**
+     * 更新时间
+     */
+    private Timestamp updateTime;
 }

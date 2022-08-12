@@ -12,6 +12,10 @@ import java.util.List;
  */
 public class PackageConverter {
 
+    public static Package convertPackagePO2DO(PackagePO packagePO) {
+        return ConvertUtil.obj2Obj(packagePO, Package.class);
+    }
+
     public static PackagePO convertPackageDO2PO(Package pk) {
         return ConvertUtil.obj2Obj(pk, PackagePO.class);
     }

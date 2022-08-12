@@ -1,7 +1,9 @@
 package com.didiglobal.logi.op.manager.domain.packages.entity.value;
 
 import com.alibaba.fastjson.JSONObject;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.sql.Timestamp;
 
@@ -10,6 +12,8 @@ import java.sql.Timestamp;
  * @date 2022-07-11 2:17 下午
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class PackageGroupConfig {
     /**
      * 分组id
@@ -50,4 +54,5 @@ public class PackageGroupConfig {
         updateTime = new Timestamp(System.currentTimeMillis());
         return this;
     }
+
 }
