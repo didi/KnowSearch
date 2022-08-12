@@ -2,6 +2,14 @@ package com.didichuxing.datachannel.arius.admin.biz.indices;
 
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.PRIMARY;
 
+import java.util.*;
+import java.util.function.BiFunction;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
@@ -25,11 +33,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord.
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexCatCellVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexCatCellWithTemplateVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexMappingVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexSettingVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexShardInfoVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.*;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum;
@@ -41,14 +45,7 @@ import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassE
 import com.didichuxing.datachannel.arius.admin.common.mapping.AriusIndexTemplateSetting;
 import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
 import com.didichuxing.datachannel.arius.admin.common.tuple.Tuples;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusIndexMappingConfigUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusOptional;
-import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.IndexSettingsUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.SizeUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.*;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
@@ -57,8 +54,6 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.Clust
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexCatService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
-import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
-import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.metadata.job.index.IndexCatInfoCollector;
 import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
@@ -71,16 +66,6 @@ import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.function.BiFunction;
-import java.util.stream.Collectors;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  * @author lyn
@@ -122,19 +107,7 @@ public class IndicesManagerImpl implements IndicesManager {
     @Autowired
     private ClusterRegionService    clusterRegionService;
 
-    @Autowired
-    private IndexTemplateService    indexTemplateService;
-
-    @Autowired
-    private ESTemplateService        esTemplateService;
-
-    private static final    String                   DEFAULT_SORT_TERM  = "timestamp";
     private static final FutureUtil<Result<Void>> FUTURE_UTIL_RESULT = FutureUtil.init("IndicesManagerImpl", 10, 10,
-            100);
-        private static final FutureUtil<List</*indexName*/String>> FUTURE_UTIL_RESULT_INDEX_NAME = FutureUtil.init(
-                "IndicesManagerImpl",
-                10,
-                10,
             100);
 
     @Override
@@ -189,7 +162,11 @@ public class IndicesManagerImpl implements IndicesManager {
                     indexConfig, RETRY_COUNT);
 
             // 2. 同步在元数据Cat_index系统索引中添加此索引元数据文档
-            if (syncCreateIndexRet) { succ = esIndexCatService.syncInsertCatIndex(Lists.newArrayList(indexCreateDTO), RETRY_COUNT);}
+            if (syncCreateIndexRet) {
+                //在分页查询的时候被强制要求deleteFlag=false，如果数据不存在deleteFlag会导致查询不到；
+                indexCreateDTO.setDeleteFlag(false);
+                succ = esIndexCatService.syncInsertCatIndex(Lists.newArrayList(indexCreateDTO), RETRY_COUNT);
+            }
 
             if (succ) {
                 operateRecordService.save(new OperateRecord.Builder()
@@ -202,7 +179,7 @@ public class IndicesManagerImpl implements IndicesManager {
                 indexCreateDTO.getIndex(), e);
             return Result.buildFail(String.format("索引创建失败, errMsg:%s", e.getCause()));
         }
-        if (succ) { return Result.buildSuccWithMsg("索引创建成功，请五分钟后再进行查询与操作");}
+        if (succ) { return Result.buildSuccWithMsg("索引创建成功");}
 
         return Result.buildFail("创建索引失败, 请检查集群是否异常");
     }
