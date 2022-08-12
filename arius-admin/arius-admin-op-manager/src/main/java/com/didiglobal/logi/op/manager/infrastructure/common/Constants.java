@@ -16,4 +16,6 @@ public class Constants {
     public static final String UNDER_SCORE = "_";
 
     public static final String SLASH = "/";
+
+    public static final Character REX = ',';
 }

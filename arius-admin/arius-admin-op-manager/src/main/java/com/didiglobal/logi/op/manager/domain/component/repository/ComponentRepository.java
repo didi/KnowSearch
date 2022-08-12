@@ -2,6 +2,8 @@ package com.didiglobal.logi.op.manager.domain.component.repository;
 
 import com.didiglobal.logi.op.manager.domain.component.entity.Component;
 
+import java.util.List;
+
 /**
  * @author didi
  * @date 2022-07-12 11:08 上午
@@ -35,4 +37,10 @@ public interface ComponentRepository {
      * @param component
      */
     void updateComponent(Component component);
+
+    /**
+     * 获取所有的组件列表
+     * @return
+     */
+    List<Component> listAllComponent();
 }

@@ -8,6 +8,8 @@ import com.didiglobal.logi.op.manager.infrastructure.db.mapper.ComponentDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 /**
  * @author didi
  * @date 2022-07-19 3:02 下午
@@ -36,5 +38,10 @@ public class ComponentRepositoryImpl implements ComponentRepository {
     @Override
     public void updateComponent(Component component) {
         componentDao.update(ComponentConverter.convertComponentDO2PO(component));
+    }
+
+    @Override
+    public List<Component> listAllComponent() {
+        return ComponentConverter.convertComponentPO2DOList(componentDao.listAll());
     }
 }

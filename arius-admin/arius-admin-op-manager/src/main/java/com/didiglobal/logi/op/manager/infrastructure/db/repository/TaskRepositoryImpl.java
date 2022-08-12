@@ -37,6 +37,11 @@ public  class TaskRepositoryImpl implements TaskRepository {
     }
 
     @Override
+    public void updateTaskStatusAndIsFinish(int id, int status, int isFinish) {
+        //TODO
+    }
+
+    @Override
     public List<Task> getUnFinishTaskList() {
         return taskDao.getUnFinishTaskList();
     }

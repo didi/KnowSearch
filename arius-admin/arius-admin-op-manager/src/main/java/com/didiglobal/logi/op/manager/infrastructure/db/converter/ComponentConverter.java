@@ -24,6 +24,10 @@ public class ComponentConverter {
         return ConvertUtil.obj2Obj(componentPO, Component.class);
     }
 
+    public static List<Component> convertComponentPO2DOList(List<ComponentPO> pOList) {
+        return ConvertUtil.list2List(pOList, Component.class);
+    }
+
     public static ComponentGroupConfigPO convertComponentConfigDO2PO(ComponentGroupConfig groupConfig) {
         return ConvertUtil.obj2Obj(groupConfig, ComponentGroupConfigPO.class);
     }
@@ -38,5 +42,9 @@ public class ComponentConverter {
 
     public static ComponentHostPO convertComponentHostDO2PO(ComponentHost componentHost) {
         return ConvertUtil.obj2Obj(componentHost, ComponentHostPO.class);
+    }
+
+    public static List<ComponentHost> convertComponentHostPO2DOList(List<ComponentHostPO> poList) {
+        return ConvertUtil.list2List(poList, ComponentHost.class);
     }
 }

@@ -95,7 +95,7 @@ public class ScriptDomainServiceImpl implements com.didiglobal.logi.op.manager.d
             script.setContentUrl(storageRes.getData());
 
             //修改部署的脚本
-            Result<String> deployRes = deploymentService.deployScript(script);
+            Result<String> deployRes = deploymentService.editScript(script);
             if (deployRes.failed()) {
                 return Result.fail(deployRes.getCode(), deployRes.getMessage());
             }

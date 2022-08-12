@@ -3,6 +3,8 @@ package com.didiglobal.logi.op.manager.infrastructure.db.mapper;
 import com.didiglobal.logi.op.manager.infrastructure.db.ComponentHostPO;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 /**
  * @author didi
  * @date 2022-07-19 3:37 下午
@@ -23,4 +25,10 @@ public interface ComponentHostDao {
       * @param status
       */
      void updateStatus(int componentId, String host, int groupId, int status);
+
+     /**
+      * 获取所有组件host列表
+      * @return List<ComponentHostPO> 组件po
+      */
+     List<ComponentHostPO> listAll();
 }

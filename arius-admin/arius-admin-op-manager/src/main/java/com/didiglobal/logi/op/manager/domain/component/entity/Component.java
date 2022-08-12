@@ -11,7 +11,12 @@ import lombok.NoArgsConstructor;
 import org.elasticsearch.common.Strings;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import static com.didiglobal.logi.op.manager.infrastructure.common.Constants.MAP_SIZE;
 
 /**
  * @author didi
@@ -101,6 +106,19 @@ public class Component {
     public Component newDeployComponent() {
         this.setId(this.getDependConfigComponentId());
         return this;
+    }
+
+    public Map<String, List<String>> groupIdToHost() {
+        Map<String, List<String>> groupToHostList = new HashMap<>(MAP_SIZE);
+        for (ComponentHost componentHost : this.getHostList()) {
+            List<String> hostList = groupToHostList.get(componentHost.getGroupId());
+            if (null == hostList) {
+                hostList = new ArrayList<>();
+                groupToHostList.put(componentHost.getGroupId().toString(), hostList);
+            }
+            hostList.add(componentHost.getHost());
+        }
+        return groupToHostList;
     }
 
 }

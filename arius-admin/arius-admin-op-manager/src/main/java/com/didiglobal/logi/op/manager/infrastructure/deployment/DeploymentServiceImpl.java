@@ -63,13 +63,13 @@ public class DeploymentServiceImpl implements DeploymentService {
     }
 
     @Override
-    public Result<Integer> execute(String templateId, Integer taskId, String groupName, String hosts, String... args) {
+    public Result<Integer> execute(String templateId, String hosts, String action, String... args) {
         try {
             ZeusTask task = new ZeusTask();
             task.setAction(TaskActionEnum.START.getAction());
             task.setHosts(hosts);
             task.setTemplateId(Integer.parseInt(templateId));
-            task.setArgs(String.format("%s %s %s %s", "execute", groupName, taskId, String.join(" ", args)));
+            task.setArgs(String.format("%s %s", action, String.join(" ", args)));
             return Result.success(zeusService.executeTask(task));
         } catch (ZeusOperationException e) {
             LOGGER.error("class=DeploymentServiceImpl||method=execute||errMsg={}||msg=execute failed", e.getMessage());

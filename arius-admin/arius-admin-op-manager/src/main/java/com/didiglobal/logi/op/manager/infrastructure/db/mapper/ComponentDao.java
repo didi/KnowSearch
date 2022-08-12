@@ -3,6 +3,8 @@ package com.didiglobal.logi.op.manager.infrastructure.db.mapper;
 import com.didiglobal.logi.op.manager.infrastructure.db.ComponentPO;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 /**
  * @author didi
  * @date 2022-07-19 3:05 下午
@@ -35,4 +37,10 @@ public interface ComponentDao {
      * @param componentPO
      */
     void update(ComponentPO componentPO);
+
+    /**
+     * 获取所有组件
+     * @return
+     */
+    List<ComponentPO> listAll();
 }
