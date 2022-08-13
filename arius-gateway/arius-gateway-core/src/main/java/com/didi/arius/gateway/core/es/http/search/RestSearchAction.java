@@ -73,7 +73,6 @@ public class RestSearchAction extends ESAction {
         params.remove("index");
         params.remove("type");
         params.remove("filter_path");
-        params.put(QueryConsts.SEARCH_IGNORE_THROTTLED, "false");
         esSearchRequest.setParams(params);
 
         esSearchRequest.extraSource(parseSearchExtraSource(request));
