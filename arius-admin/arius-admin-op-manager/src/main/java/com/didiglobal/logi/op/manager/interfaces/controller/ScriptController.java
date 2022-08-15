@@ -33,6 +33,7 @@ public class ScriptController {
     @PostMapping("/query")
     @ApiOperation(value = "获取脚本中心列表")
     public Result<List<ScriptVO>> listScript(@RequestBody ScriptDTO queryScriptDTO) {
+        LOGGER.info("111111");
         Result res = scriptService.listScript(ScriptAssembler.toDO(queryScriptDTO));
         if (res.isSuccess()) {
             res.setData(ScriptAssembler.toVOList((List<Script>) res.getData()));

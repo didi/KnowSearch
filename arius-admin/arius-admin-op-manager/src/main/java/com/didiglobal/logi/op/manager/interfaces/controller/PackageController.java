@@ -21,7 +21,7 @@ import java.util.List;
  * @author didi
  * @date 2022-07-11 2:38 下午
  */
-@Controller
+@RestController
 @Api(value = "安装包中心api")
 @RequestMapping(Constants.API_PREFIX_V3 + "/package")
 public class PackageController {
@@ -36,14 +36,14 @@ public class PackageController {
         return packageService.createPackage(PackageAssembler.toDO(packageDTO));
     }
 
-    @PostMapping("/query-package")
+    @PostMapping("/query")
     @ApiOperation(value = "查询安装包")
     public Result<List<PackageVO>> queryPackage(@RequestBody PackageDTO packageDTO) {
         Result result = packageService.queryPackage(PackageAssembler.toDO(packageDTO));
         if (result.isSuccess()) {
             result.setData(PackageAssembler.toVOList((List<Package>) result.getData()));
         }
-        return Result.success();
+        return result;
     }
 
     @PostMapping("edit")

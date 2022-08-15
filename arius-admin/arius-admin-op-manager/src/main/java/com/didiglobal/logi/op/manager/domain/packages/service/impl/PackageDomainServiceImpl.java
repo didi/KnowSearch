@@ -17,6 +17,8 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import static com.didiglobal.logi.op.manager.infrastructure.common.Constants.SLASH;
+import static com.didiglobal.logi.op.manager.infrastructure.util.FileUtil.getDeleteFileName;
+import static com.didiglobal.logi.op.manager.infrastructure.util.FileUtil.getUniqueFileName;
 
 /**
  * @author didi
@@ -48,7 +50,7 @@ public class PackageDomainServiceImpl implements PackageDomainService {
         pk.create();
 
         //上传
-        Result<String> storageRes = storageService.upload(getUniqueFileName(pk), pk.getUploadFile());
+        Result<String> storageRes = storageService.upload(getUniqueFileName(pk.getName()), pk.getUploadFile());
         if (storageRes.failed()) {
             return Result.fail(storageRes.getCode(), storageRes.getMessage());
         }
@@ -93,7 +95,7 @@ public class PackageDomainServiceImpl implements PackageDomainService {
         pk.update();
 
         if (null != pk.getUploadFile()) {
-            Result<String> storageRes = storageService.upload(getUniqueFileName(pk), pk.getUploadFile());
+            Result<String> storageRes = storageService.upload(getUniqueFileName(pk.getName()), pk.getUploadFile());
             if (storageRes.failed()) {
                 return Result.fail(storageRes.getCode(), storageRes.getMessage());
             }
@@ -126,15 +128,5 @@ public class PackageDomainServiceImpl implements PackageDomainService {
         //删除包
         packageRepository.deletePackage(pk.getId());
         return Result.success();
-    }
-
-    @NotNull
-    private String getUniqueFileName(Package pk) {
-        return pk.getName() + "_" + System.currentTimeMillis();
-    }
-
-    @NotNull
-    private String getDeleteFileName(String url) {
-        return url.substring(url.lastIndexOf(SLASH) + 1);
     }
 }

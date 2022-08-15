@@ -12,16 +12,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @author didi
  * @date 2022-07-12 2:06 下午
  */
-@Controller
+@RestController
 @Api(value = "安装包中心api")
 @RequestMapping(Constants.API_PREFIX_V3 + "/component")
 public class ComponentController {

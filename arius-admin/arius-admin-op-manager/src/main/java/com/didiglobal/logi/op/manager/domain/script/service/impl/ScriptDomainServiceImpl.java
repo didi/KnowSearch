@@ -19,6 +19,8 @@ import java.util.UUID;
 
 import static com.didiglobal.logi.op.manager.infrastructure.common.Constants.SLASH;
 import static com.didiglobal.logi.op.manager.infrastructure.common.Constants.UNDER_SCORE;
+import static com.didiglobal.logi.op.manager.infrastructure.util.FileUtil.getDeleteFileName;
+import static com.didiglobal.logi.op.manager.infrastructure.util.FileUtil.getUniqueFileName;
 
 
 /**
@@ -63,7 +65,7 @@ public class ScriptDomainServiceImpl implements com.didiglobal.logi.op.manager.d
         script.create();
 
         //上传
-        Result<String> storageRes = storageService.upload(getUniqueFileName(script), script.getUploadFile());
+        Result<String> storageRes = storageService.upload(getUniqueFileName(script.getName()), script.getUploadFile());
         if (storageRes.failed()) {
             return Result.fail(storageRes.getCode(), storageRes.getMessage());
         }
@@ -88,7 +90,7 @@ public class ScriptDomainServiceImpl implements com.didiglobal.logi.op.manager.d
 
         if (null != script.getUploadFile()) {
             //上传
-            Result<String> storageRes = storageService.upload(getUniqueFileName(script), script.getUploadFile());
+            Result<String> storageRes = storageService.upload(getUniqueFileName(script.getName()), script.getUploadFile());
             if (storageRes.failed()) {
                 return Result.fail(storageRes.getCode(), storageRes.getMessage());
             }
@@ -119,16 +121,6 @@ public class ScriptDomainServiceImpl implements com.didiglobal.logi.op.manager.d
         //删除脚本
         scriptRepository.deleteScript(script.getId());
         return Result.success();
-    }
-
-    @NotNull
-    private String getUniqueFileName(Script script) {
-        return script.getName() + UNDER_SCORE + System.currentTimeMillis();
-    }
-
-    @NotNull
-    private String getDeleteFileName(String contentUrl) {
-        return contentUrl.substring(contentUrl.lastIndexOf(SLASH) + 1);
     }
 
 }

@@ -1,7 +1,5 @@
 package com.didiglobal.logi.op.manager.infrastructure.util;
 
-import com.didiglobal.logi.log.ILog;
-import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Maps;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
@@ -18,6 +16,8 @@ import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
@@ -31,7 +31,7 @@ import java.util.*;
  * @modified By D10865
  */
 public class BaseHttpUtil {
-    private static final ILog LOGGER = LogFactory.getLog(BaseHttpUtil.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(BaseHttpUtil.class);
     public static final String UTF8 = "UTF-8";
     public static final String GBK = "GBK";
     public static final String GB2312 = "GB2312";
