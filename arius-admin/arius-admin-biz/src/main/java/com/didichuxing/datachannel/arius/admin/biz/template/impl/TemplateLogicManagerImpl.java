@@ -1112,7 +1112,39 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
 
         return Result.buildSucc(consoleTemplateDeleteVO);
     }
-
+    
+    /**
+     * 它通过其逻辑 ID 更新模板的健康状况。
+     *
+     * @param logicId 模板的 logicId。
+     * @return 一个布尔值。
+     */
+    @Override
+    public boolean updateTemplateHealthByLogicId(Integer logicId) {
+        if (!indexTemplateService.exist(logicId)) {
+            return true;
+        }
+        IndexTemplateWithPhyTemplates indexTemplateWithPhyTemplates =
+                indexTemplateService.getLogicTemplateWithPhysicalsById(
+                logicId);
+        String masterCluster = Optional.ofNullable(indexTemplateWithPhyTemplates)
+                .map(IndexTemplateWithPhyTemplates::getMasterPhyTemplate)
+                .map(IndexTemplatePhy::getCluster).orElse(null);
+        if (Objects.isNull(masterCluster)) {
+            LOGGER.warn(
+                    "class={}||method=updateTemplateHealthByLogicId||logicId={}||error=don't find index template cluster",
+                    getClass().getSimpleName(), logicId);
+            return false;
+        }
+        if (!esClusterService.syncConnectionStatus(masterCluster)) {
+            LOGGER.warn(
+                    "class={}||method=updateTemplateHealthByLogicId||logicId={}||error=don't find index template cluster",
+                    getClass().getSimpleName(), logicId);
+            // 健康为 unknow
+        }
+        return false;
+    }
+    
     /**
      * @param consoleTemplateRateLimitDTO
      * @param operator
