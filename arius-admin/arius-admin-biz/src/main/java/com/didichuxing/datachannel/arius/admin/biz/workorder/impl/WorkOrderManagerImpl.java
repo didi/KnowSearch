@@ -7,15 +7,9 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.WorkOrderHandler;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.WorkOrderManager;
-import com.didichuxing.datachannel.arius.admin.biz.workorder.content.JoinLogicClusterContent;
-import com.didichuxing.datachannel.arius.admin.biz.workorder.content.LogicClusterCreateContent;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRegionDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterWithRegionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.workorder.WorkOrderDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.workorder.WorkOrderProcessDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.OrderInfoDetail;
@@ -38,8 +32,6 @@ import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.workorder.WorkOrderService;
 import com.didiglobal.logi.security.common.entity.dept.Dept;
 import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
@@ -53,7 +45,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,10 +77,7 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
     private DeptService         deptService;
     @Autowired
     private RoleTool            roleTool;
-    @Autowired
-    private ClusterLogicService clusterLogicService;
-    @Autowired
-    private ClusterRegionService clusterRegionService;
+  
 
     @Override
     public Result<List<OrderTypeVO>> getOrderTypes() {
@@ -98,6 +86,8 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
             WorkOrderTypeEnum.LOGIC_CLUSTER_CREATE.getMessage()));
         orderTypeVOList.add(new OrderTypeVO(WorkOrderTypeEnum.LOGIC_CLUSTER_INDECREASE.getName(),
             WorkOrderTypeEnum.LOGIC_CLUSTER_INDECREASE.getMessage()));
+        orderTypeVOList.add(new OrderTypeVO(WorkOrderTypeEnum.LOGIC_CLUSTER_JOIN.getName(),
+            WorkOrderTypeEnum.LOGIC_CLUSTER_JOIN.getMessage()));
         return Result.buildSucc(orderTypeVOList);
     }
     
@@ -108,26 +98,9 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
     @Override
     public Result<AriusWorkOrderInfoSubmittedVO> submitByJoinLogicCluster(WorkOrderDTO workOrderDTO)
             throws AdminOperateException {
-        final JoinLogicClusterContent joinLogicClusterContent = ConvertUtil.obj2ObjByJSON(workOrderDTO.getContentObj(),
-                JoinLogicClusterContent.class);
-        final ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByIdThatNotContainsProjectId(
-                joinLogicClusterContent.getJoinLogicClusterId());
-        if (Objects.isNull(clusterLogic)) {
-            return Result.buildFail("逻辑集群不存在");
-        }
-        
-        LogicClusterCreateContent content = new LogicClusterCreateContent();
-        content.setDataNodeNu(Optional.ofNullable(clusterLogic.getNodeNum()).orElse(0));
-        content.setDataNodeSpec(clusterLogic.getDataNodeSpec());
-        content.setLevel(clusterLogic.getLevel());
-        content.setMemo(clusterLogic.getMemo());
-        //保证多个项目提交同一个逻辑集群的时候名称不会冲突
-        content.setName(clusterLogic.getName() + workOrderDTO.getSubmitorProjectId() );
-        content.setType(clusterLogic.getType());
-        content.setLogicId(joinLogicClusterContent.getJoinLogicClusterId().intValue());
-        workOrderDTO.setContentObj(content);
-        workOrderDTO.setType(WorkOrderTypeEnum.LOGIC_CLUSTER_CREATE.getName());
-        
+    
+        workOrderDTO.setType(WorkOrderTypeEnum.LOGIC_CLUSTER_JOIN.getName());
+    
         return submit(workOrderDTO);
     }
     
@@ -182,27 +155,7 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
      */
     @Override
     public Result<Void> processByJoinLogicCluster(WorkOrderProcessDTO processDTO, Integer projectId) throws NotFindSubclassException {
-         Result<Void> checkProcessResult = checkProcessValid(processDTO);
-        if (checkProcessResult.failed()) {
-            return checkProcessResult;
-        }
-        WorkOrderPO orderPO = workOrderService.getById(processDTO.getOrderId());
-        if (AriusObjUtils.isNull(orderPO)) {
-            return Result.buildFail(ResultType.NOT_EXIST.getMessage());
-        }
-        final JoinLogicClusterContent joinLogicClusterContent = ConvertUtil.obj2ObjByJSON(processDTO.getContentObj(),
-                JoinLogicClusterContent.class);
-        final ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByIdThatNotContainsProjectId(
-                joinLogicClusterContent.getJoinLogicClusterId());
-        final ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(
-                joinLogicClusterContent.getJoinLogicClusterId());
-        final ClusterRegionDTO clusterRegionDTO = ConvertUtil.obj2Obj(clusterRegion, ClusterRegionDTO.class);
-        ESLogicClusterWithRegionDTO esLogicClusterWithRegionDTO=new ESLogicClusterWithRegionDTO();
         
-        esLogicClusterWithRegionDTO.setClusterRegionDTOS(Collections.singletonList(clusterRegionDTO));
-        esLogicClusterWithRegionDTO.setId(clusterLogic.getId());
-        esLogicClusterWithRegionDTO.setBindExistLogicCluster(true);
-        processDTO.setContentObj(esLogicClusterWithRegionDTO);
         
         return process(processDTO, projectId);
     }

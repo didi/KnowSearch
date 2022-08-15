@@ -12,7 +12,6 @@ import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterLogicManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterRegionManager;
-import com.didichuxing.datachannel.arius.admin.biz.indices.IndicesManager;
 import com.didichuxing.datachannel.arius.admin.biz.page.ClusterLogicPageSearchHandle;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager;
 import com.didichuxing.datachannel.arius.admin.common.Triple;
@@ -51,10 +50,12 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PluginVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.ecm.ESClusterNodeSepcVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
+import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectClusterLogicAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.event.resource.ClusterLogicEvent;
@@ -68,6 +69,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.ClusterUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
@@ -93,6 +95,7 @@ import com.didiglobal.logi.security.util.HttpRequestUtil;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -165,8 +168,6 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     @Autowired
     private HandleFactory                  handleFactory;
 
-    @Autowired
-    private IndicesManager                 indicesManager;
 
     @Autowired
     private ESIndexCatService              esIndexCatService;
@@ -175,8 +176,6 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     private ESClusterNodeService           eSClusterNodeService;
     
     private static final FutureUtil<Void>         FUTURE_UTIL        = FutureUtil.init("ClusterLogicManager", 10, 10,
-            100);
-    private static final FutureUtil<Result<Void>> FUTURE_UTIL_RESULT = FutureUtil.init("ClusterLogicManager", 10, 10,
             100);
 
     private static final Long              UNKNOWN_SIZE = -1L;
@@ -304,8 +303,38 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     }
     
     /**
-     * @param level
-     * @return
+     * 验证集群逻辑的参数
+     *
+     * @param param     要验证的参数对象。
+     * @param operation OperationEnum.ADD、OperationEnum.UPDATE、OperationEnum.DELETE
+     * @param projectId 项目编号
+     */
+    @Override
+    public Result<Void> validateClusterLogicParams(ESLogicClusterDTO param, OperationEnum operation,
+                                                   Integer projectId) {
+        return clusterLogicService.validateClusterLogicParams(param,operation,projectId);
+    }
+    
+    /**
+     * “将具有给定 id 的集群加入到具有给定 id 的项目中。”
+     * <p>
+     * 函数的第一行是注释。编译器会忽略注释
+     *
+     * @param logicClusterId            要加入的集群的 ID。
+     * @param joinProjectId 加入的项目ID
+     * @return 返回类型是 Result<Void>
+     */
+    @Override
+    public Result<Void> joinClusterLogic(Long logicClusterId, Integer joinProjectId) {
+        final ESLogicClusterDTO param = new ESLogicClusterDTO();
+        param.setId(logicClusterId);
+        param.setProjectId(joinProjectId);
+        param.setType(clusterLogicService.getClusterLogicByIdThatNotContainsProjectId(logicClusterId).getType());
+        return Result.buildFrom(clusterLogicService.joinClusterLogic(param));
+    }
+    /**
+     * @param level level
+     * @return Result<List<ClusterLogicVO>>
      */
     @Override
     public Result<List<ClusterLogicVO>> getLogicClustersByLevel(Integer level) {
@@ -386,11 +415,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         return Result.buildSucc(ConvertUtil.list2List(esMachineNormsPOS, ESClusterNodeSepcVO.class));
     }
 
-    @Override
-    public List<ClusterLogicVO> getClusterLogics(ESLogicClusterDTO param, Integer projectId) {
-        List<ClusterLogic> clusterLogics = clusterLogicService.listClusterLogics(param);
-        return buildClusterLogics(clusterLogics);
-    }
+    
 
     @Override
     public ClusterLogicVO getClusterLogic(Long clusterLogicId, Integer currentProjectId) {
@@ -558,17 +583,14 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         Set<Integer> clusterHealthSet = Sets.newHashSet();
         updateLogicClusterDTO.setId(clusterLogicId);
         try {
-            ClusterLogicContext clusterLogicContext = clusterContextManager.getClusterLogicContext(clusterLogicId);
-            if (null == clusterLogicContext) {
+            final ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(clusterLogicId);
+            if (Objects.isNull(clusterRegion)) {
                 LOGGER.error(
                     "class=ClusterLogicManagerImpl||method=updateClusterLogicHealth||clusterLogicId={}||errMsg=clusterLogicContext is empty",
                     clusterLogicId);
                 clusterHealthSet.add(UNKNOWN.getCode());
             } else {
-                List<String> associatedClusterPhyNames = clusterLogicContext.getAssociatedClusterPhyNames();
-                clusterHealthSet
-                    .addAll(associatedClusterPhyNames.stream().map(esClusterService::syncGetClusterHealthEnum)
-                        .map(ClusterHealthEnum::getCode).collect(Collectors.toSet()));
+                clusterHealthSet.add(esClusterService.syncGetClusterHealthEnum(clusterRegion.getPhyClusterName()).getCode());
             }
 
             updateLogicClusterDTO.setHealth(ClusterUtils.getClusterLogicHealthByClusterHealth(clusterHealthSet));
@@ -726,7 +748,41 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
             buildLogicClusterPermission(clusterLogicVO, projectIdForAuthJudge);
         }
     }
-
+    
+    /**
+     * 返回与给定物理集群名称关联的逻辑集群名称列表
+     *
+     * @param phyClusterName 物理集群的名称。
+     * @return 与给定集群物理名称关联的集群逻辑名称列表。
+     */
+    @Override
+    public List<String> getClusterPhyAssociatedClusterLogicNames(String phyClusterName) {
+        ClusterPhy clusterPhy = clusterPhyService.getClusterByName(phyClusterName);
+        if (null == clusterPhy) {
+            LOGGER.error(
+                    "class=ClusterContextManagerImpl||method=flushClusterPhyContext||clusterPhyName={}||msg=clusterPhy is empty",
+                    phyClusterName);
+            return Collections.emptyList();
+        }
+    
+        final List<Long> logicIds = clusterRegionManager.listRegionByPhyCluster(phyClusterName).stream()
+                .filter(clusterRegion -> Objects.nonNull(clusterRegion.getLogicClusterIds()))
+                .map(clusterRegion -> ListUtils.string2LongList(clusterRegion.getLogicClusterIds()))
+                .filter(CollectionUtils::isNotEmpty).flatMap(Collection::stream)
+                .filter(logicId -> Objects.equals(logicId,
+                        Long.parseLong(AdminConstant.REGION_NOT_BOUND_LOGIC_CLUSTER_ID))).distinct()
+                .collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(logicIds)){
+            return Collections.emptyList();
+        }
+       return clusterLogicService.getClusterLogicListByIds(logicIds)
+                .stream()
+                .map(ClusterLogic::getName)
+                .distinct()
+                .collect(Collectors.toList());
+    
+    }
+    
     /**
      * 构建ES集群版本
      * @param logicCluster 逻辑集群
