@@ -2,7 +2,9 @@ package com.didiglobal.logi.op.manager.infrastructure.common.hander;
 
 import com.alibaba.fastjson.JSONObject;
 import com.didiglobal.logi.op.manager.domain.component.event.ComponentEvent;
+import com.didiglobal.logi.op.manager.domain.task.entity.Task;
 import com.didiglobal.logi.op.manager.domain.task.service.TaskDomainService;
+import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralBaseOperationComponent;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.OperationEnum;
 import com.didiglobal.logi.op.manager.infrastructure.common.hander.base.BaseComponentHandler;
@@ -53,8 +55,13 @@ public class RestartComponentHandler extends BaseComponentHandler implements Com
     }
 
     @Override
-    public Integer getOperationType() throws ComponentHandlerException {
+    public Integer getOperationType() {
         return OperationEnum.RESTART.getType();
+    }
+
+    @Override
+    public Result<Void> execute(Task task) {
+        return taskDomainService.executeDeployTask(task);
     }
 }
 

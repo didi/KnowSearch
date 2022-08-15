@@ -68,4 +68,14 @@ public class ComponentService {
         componentDomainService.submitUpgradeComponent(generalUpgradeComponent);
         return Result.success();
     }
+
+    public Result<Void> executeFunctionComponent(GeneralExecuteComponentFunction executeComponentFunction) {
+        LOGGER.info("start execute function component[{}]",executeComponentFunction);
+        Result checkRes = executeComponentFunction.checkParam();
+        if (checkRes.failed()) {
+            return checkRes;
+        }
+        componentDomainService.submitExecuteFunctionComponent(executeComponentFunction);
+        return Result.success();
+    }
 }

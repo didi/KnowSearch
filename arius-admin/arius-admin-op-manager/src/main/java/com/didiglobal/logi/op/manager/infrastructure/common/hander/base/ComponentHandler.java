@@ -1,7 +1,9 @@
 package com.didiglobal.logi.op.manager.infrastructure.common.hander.base;
 
 import com.didiglobal.logi.op.manager.domain.component.event.ComponentEvent;
-import com.didiglobal.logi.op.manager.infrastructure.common.enums.OperationEnum;
+import com.didiglobal.logi.op.manager.domain.task.entity.Task;
+import com.didiglobal.logi.op.manager.infrastructure.common.ProcessStatus;
+import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 import com.didiglobal.logi.op.manager.infrastructure.exception.ComponentHandlerException;
 
 /**
@@ -17,6 +19,23 @@ public interface ComponentHandler {
     void eventProcess(ComponentEvent componentEvent) throws ComponentHandlerException;
 
     /**
+     * 任务执行
+     * @param task
+     * @return
+     * @throws ComponentHandlerException
+     */
+    Result<Void> execute(Task task);
+
+    /**
+     * 获取进度
+     * @param task
+     * @param <T>
+     * @return
+     * @throws ComponentHandlerException
+     */
+    <T extends ProcessStatus> T getProcessStatus(Task task) throws ComponentHandlerException;
+
+    /**
      * 任务完成后的处理
      * @param content
      * @throws ComponentHandlerException
@@ -26,9 +45,8 @@ public interface ComponentHandler {
     /**
      * 处理器类型
      * @return
-     * @throws ComponentHandlerException
      */
-    Integer getOperationType() throws ComponentHandlerException;
+    Integer getOperationType();
 
 }
 

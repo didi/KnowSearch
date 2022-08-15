@@ -4,8 +4,10 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.didiglobal.logi.op.manager.domain.component.entity.Component;
 import com.didiglobal.logi.op.manager.domain.component.event.ComponentEvent;
+import com.didiglobal.logi.op.manager.domain.task.entity.Task;
 import com.didiglobal.logi.op.manager.domain.task.service.TaskDomainService;
 import com.didiglobal.logi.op.manager.infrastructure.common.Constants;
+import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralScaleComponent;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.OperationEnum;
 import com.didiglobal.logi.op.manager.infrastructure.common.hander.base.BaseComponentHandler;
@@ -78,7 +80,12 @@ public class ScaleComponentHandler extends BaseComponentHandler implements Compo
     }
 
     @Override
-    public Integer getOperationType() throws ComponentHandlerException {
+    public Integer getOperationType() {
         return OperationEnum.SCALE.getType();
+    }
+
+    @Override
+    public Result<Void> execute(Task task) {
+        return taskDomainService.executeDeployTask(task);
     }
 }

@@ -25,19 +25,15 @@ public class ComponentHandlerFactory implements BeanPostProcessor {
 
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-        try {
-            if (bean instanceof ComponentHandler) {
-                ComponentHandler handler = (ComponentHandler) bean;
-                if (handlerMap.containsKey(handler.getOperationType())) {
-                    if (null != bean.getClass().getAnnotation(DefaultHandler.class)) {
-                        handlerMap.put(handler.getOperationType(), handler);
-                    }
-                } else {
+        if (bean instanceof ComponentHandler) {
+            ComponentHandler handler = (ComponentHandler) bean;
+            if (handlerMap.containsKey(handler.getOperationType())) {
+                if (null != bean.getClass().getAnnotation(DefaultHandler.class)) {
                     handlerMap.put(handler.getOperationType(), handler);
                 }
+            } else {
+                handlerMap.put(handler.getOperationType(), handler);
             }
-        } catch (ComponentHandlerException e) {
-            LOGGER.error("component handler post processor", e);
         }
         return bean;
     }

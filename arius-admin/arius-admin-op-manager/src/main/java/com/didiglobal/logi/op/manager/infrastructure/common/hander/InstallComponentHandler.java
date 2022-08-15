@@ -8,7 +8,9 @@ import com.didiglobal.logi.op.manager.domain.component.service.ComponentDomainSe
 import com.didiglobal.logi.op.manager.domain.packages.entity.Package;
 import com.didiglobal.logi.op.manager.domain.packages.service.PackageDomainService;
 import com.didiglobal.logi.op.manager.domain.script.service.impl.ScriptDomainService;
+import com.didiglobal.logi.op.manager.domain.task.entity.Task;
 import com.didiglobal.logi.op.manager.domain.task.service.TaskDomainService;
+import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralInstallComponent;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.OperationEnum;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.PackageTypeEnum;
@@ -93,8 +95,13 @@ public class InstallComponentHandler extends BaseComponentHandler implements Com
     }
 
     @Override
-    public Integer getOperationType() throws ComponentHandlerException {
+    public Integer getOperationType() {
         return OperationEnum.INSTALL.getType();
+    }
+
+    @Override
+    public Result<Void> execute(Task task) {
+        return taskDomainService.executeDeployTask(task);
     }
 
 

@@ -69,4 +69,10 @@ public class ComponentController {
     public Result<Void> upgrade(@RequestBody GeneralUpgradeComponentDTO generalUpgradeComponentDTO) {
         return componentService.upgradeComponent(ComponentAssembler.toUpgradeComponent(generalUpgradeComponentDTO));
     }
+
+    @PutMapping("/execute-function")
+    @ApiOperation(value = "")
+    public Result<Void> executeFunction(@RequestBody GeneralExecuteComponentFunctionDTO executeComponentFunctionDTO) {
+        return componentService.executeFunctionComponent(ComponentAssembler.toExecuteFunctionComponent(executeComponentFunctionDTO));
+    }
 }

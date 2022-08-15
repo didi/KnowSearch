@@ -79,6 +79,13 @@ public class ComponentDomainServiceImpl implements ComponentDomainService {
     }
 
     @Override
+    public Result<Void> submitExecuteFunctionComponent(GeneralExecuteComponentFunction executeComponentFunction) {
+        //发送事件，领域解耦
+        publisher.publish(ComponentEvent.createExecuteFunctionEvent(executeComponentFunction));
+        return Result.success();
+    }
+
+    @Override
     public Result<Map<String, List<String>>> getComponentConfig(int componentId) {
         Map<String, List<String>> groupToIpList = new HashMap<>(MAP_SIZE);
         List<ComponentGroupConfig> groupConfigList = componentGroupConfigRepository.getConfigByComponentId(componentId);

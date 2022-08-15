@@ -5,8 +5,13 @@ import com.didiglobal.logi.op.manager.domain.component.service.ComponentDomainSe
 import com.didiglobal.logi.op.manager.domain.packages.entity.Package;
 import com.didiglobal.logi.op.manager.domain.packages.service.PackageDomainService;
 import com.didiglobal.logi.op.manager.domain.script.service.impl.ScriptDomainService;
+import com.didiglobal.logi.op.manager.domain.task.entity.Task;
+import com.didiglobal.logi.op.manager.domain.task.service.TaskDomainService;
 import com.didiglobal.logi.op.manager.infrastructure.common.Constants;
+import com.didiglobal.logi.op.manager.infrastructure.common.ProcessStatus;
+import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralBaseOperationComponent;
+import com.didiglobal.logi.op.manager.infrastructure.exception.ComponentHandlerException;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +38,9 @@ public abstract class BaseComponentHandler implements ComponentHandler {
     @Autowired
     protected ScriptDomainService scriptDomainService;
 
+    @Autowired
+    protected TaskDomainService taskDomainService;
+
     protected String getTemplateId(int componentId) {
         Component component = componentDomainService.getComponentById(componentId).getData();
         Package pk = packageDomainService.queryPackage(Package.builder().id(component.getPackageId()).build()).
@@ -56,5 +64,10 @@ public abstract class BaseComponentHandler implements ComponentHandler {
         Package pk = packageDomainService.queryPackage(Package.builder().id(packageId).build()).
                 getData().get(0);
         return scriptDomainService.getScriptById(pk.getScriptId()).getData().getTemplateId();
+    }
+
+    @Override
+    public <T extends ProcessStatus> T getProcessStatus(Task task) throws ComponentHandlerException {
+        return null;
     }
 }

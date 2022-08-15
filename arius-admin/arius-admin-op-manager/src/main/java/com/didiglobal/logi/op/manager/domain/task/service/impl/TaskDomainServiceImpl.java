@@ -8,11 +8,9 @@ import com.didiglobal.logi.op.manager.domain.task.service.TaskDomainService;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 import com.didiglobal.logi.op.manager.infrastructure.common.ResultCode;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralBaseOperationComponent;
+import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralExecuteComponentFunction;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralGroupConfig;
-import com.didiglobal.logi.op.manager.infrastructure.common.enums.HostActionEnum;
-import com.didiglobal.logi.op.manager.infrastructure.common.enums.OperationEnum;
-import com.didiglobal.logi.op.manager.infrastructure.common.enums.TaskActionEnum;
-import com.didiglobal.logi.op.manager.infrastructure.common.enums.TaskStatusEnum;
+import com.didiglobal.logi.op.manager.infrastructure.common.enums.*;
 import com.didiglobal.logi.op.manager.infrastructure.deployment.DeploymentService;
 import com.didiglobal.logi.op.manager.infrastructure.util.ConvertUtil;
 import org.apache.logging.log4j.util.Strings;
@@ -64,18 +62,14 @@ public class TaskDomainServiceImpl implements TaskDomainService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result<Void> executeTask(int taskId) {
-        Task task = taskRepository.getTaskById(taskId);
-        if (null == task) {
-            return Result.fail(ResultCode.TASK_NOT_EXIST_ERROR);
-        }
+    public Result<Void> executeDeployTask(Task task) {
         Result checkRes = task.checkExecuteTaskStatus();
         if (checkRes.failed()) {
             return checkRes;
         }
 
         //获取要执行的分组信息
-        List<TaskDetail> detailList = taskDetailRepository.listTaskDetailByTaskId(taskId);
+        List<TaskDetail> detailList = taskDetailRepository.listTaskDetailByTaskId(task.getId());
         Result<Map.Entry<String, List<String>>> group2HostListRes = getFirstGroup(detailList);
         if (group2HostListRes.failed()) {
             return Result.fail(group2HostListRes.getMessage());
@@ -97,9 +91,43 @@ public class TaskDomainServiceImpl implements TaskDomainService {
         }
 
         //更新任务状态
-        taskRepository.updateTaskStatus(taskId, TaskStatusEnum.RUNNING.getStatus());
+        taskRepository.updateTaskStatus(task.getId(), TaskStatusEnum.RUNNING.getStatus());
         //回写执行id
-        taskDetailRepository.updateTaskDetailExecuteIdByTaskIdAndGroupName(taskId, group2HostListRes.getData().getKey(),
+        taskDetailRepository.updateTaskDetailExecuteIdByTaskIdAndGroupName(task.getId(), group2HostListRes.getData().getKey(),
+                deployRes.getData());
+        return Result.success();
+    }
+
+    @Override
+    public Result<Void> executeFunctionTask(Task task) {
+        Result checkRes = task.checkExecuteTaskStatus();
+        if (checkRes.failed()) {
+            return checkRes;
+        }
+
+        //获取要执行的分组信息,只有一个分组（function的执行这里只考虑一个分组）
+        List<TaskDetail> detailList = taskDetailRepository.listTaskDetailByTaskId(task.getId());
+        List<String> hostList = new ArrayList<>();
+        //只要取其中一个就行
+        String groupName = detailList.get(0).getGroupName();
+        detailList.forEach(detail -> { 
+            hostList.add(detail.getHost());
+        });
+        GeneralExecuteComponentFunction function = ConvertUtil.obj2ObjByJSON(task.getContent(), GeneralExecuteComponentFunction.class);
+
+        //执行zeus任务
+        Result<Integer> deployRes = deploymentService.execute(function.getTemplateId(),
+                Strings.join(hostList, REX), task.getType().toString(),
+                task.getId().toString(), function.getParam().toString());
+
+        if (deployRes.failed()) {
+            return Result.fail(deployRes.getMessage());
+        }
+
+        //更新任务状态
+        taskRepository.updateTaskStatus(task.getId(), TaskStatusEnum.RUNNING.getStatus());
+        //回写执行id
+        taskDetailRepository.updateTaskDetailExecuteIdByTaskIdAndGroupName(task.getId(), groupName,
                 deployRes.getData());
         return Result.success();
     }
@@ -117,7 +145,6 @@ public class TaskDomainServiceImpl implements TaskDomainService {
 
         //获取正在执行的任务id
         int executeTaskId = getExecuteTaskId(taskId);
-
 
         //执行zeus任务
         Result<Void> actionRes = deploymentService.actionTask(executeTaskId, action.getAction());

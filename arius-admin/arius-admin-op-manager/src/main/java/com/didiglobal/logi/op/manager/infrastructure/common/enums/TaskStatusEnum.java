@@ -60,4 +60,13 @@ public enum TaskStatusEnum {
     public void setDescribe(String describe) {
         this.describe = describe;
     }
+
+    public static TaskStatusEnum find(int type) {
+        for (TaskStatusEnum value : TaskStatusEnum.values()) {
+            if (type == value.getStatus()) {
+                return value;
+            }
+        }
+        return UN_KNOW;
+    }
 }

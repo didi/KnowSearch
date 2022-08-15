@@ -39,6 +39,10 @@ public class ComponentAssembler {
         return ConvertUtil.obj2Obj(dto, GeneralUpgradeComponent.class);
     }
 
+    public static GeneralExecuteComponentFunction toExecuteFunctionComponent(GeneralExecuteComponentFunctionDTO dto) {
+        return ConvertUtil.obj2Obj(dto, GeneralExecuteComponentFunction.class);
+    }
+
 
     public static GeneralGroupConfigHostVO toGeneralGroupConfigVO(GeneralGroupConfig config, String url, String host) {
         GeneralGroupConfigHostVO vo = ConvertUtil.obj2Obj(config, GeneralGroupConfigHostVO.class);

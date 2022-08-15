@@ -29,10 +29,18 @@ public interface TaskDomainService {
 
     /**
      * 执行任务
-     * @param taskId
+     * @param task
      * @return
      */
-    Result<Void> executeTask(int taskId);
+    Result<Void> executeDeployTask(Task task);
+
+
+    /**
+     * 执行功能任务
+     * @param task
+     * @return
+     */
+    Result<Void> executeFunctionTask(Task task);
 
     /**
      * 对任务执行相应的操作，暂停，取消，杀死，继续

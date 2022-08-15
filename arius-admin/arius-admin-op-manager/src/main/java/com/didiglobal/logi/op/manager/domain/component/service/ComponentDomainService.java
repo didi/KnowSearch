@@ -91,6 +91,13 @@ public interface ComponentDomainService {
     Result<Void> submitUpgradeComponent(GeneralUpgradeComponent upgradeComponent);
 
     /**
+     * 执行相应功能的组件爱你
+     * @param executeComponentFunction
+     * @return
+     */
+    Result<Void> submitExecuteFunctionComponent(GeneralExecuteComponentFunction executeComponentFunction);
+
+    /**
      * 获取组件配置
      * @param componentId
      * @return

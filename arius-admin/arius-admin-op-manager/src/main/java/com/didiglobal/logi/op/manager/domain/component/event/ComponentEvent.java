@@ -60,4 +60,11 @@ public class ComponentEvent extends DomainEvent {
         return event;
     }
 
+    public static ComponentEvent createExecuteFunctionEvent(Object source) {
+        ComponentEvent event = new ComponentEvent(source);
+        event.operateType = OperationEnum.FUNCTION_EXECUTE.getType();
+        event.setDescribe(OperationEnum.FUNCTION_EXECUTE.getDescribe());
+        return event;
+    }
+
 }

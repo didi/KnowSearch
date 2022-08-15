@@ -12,6 +12,8 @@ import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralInstallC
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.HostActionEnum;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.OperationEnum;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.TaskActionEnum;
+import com.didiglobal.logi.op.manager.infrastructure.common.hander.ComponentHandlerFactory;
+import com.didiglobal.logi.op.manager.infrastructure.common.hander.base.ComponentHandler;
 import com.didiglobal.logi.op.manager.infrastructure.util.ConvertUtil;
 import com.google.common.base.Strings;
 import org.slf4j.Logger;
@@ -33,18 +35,21 @@ public class TaskService {
     @Autowired
     private PackageDomainService packageDomainService;
 
+    @Autowired
+    private ComponentHandlerFactory componentHandlerFactory;
+
     /**
-     * 执行脚本
+     * 执行任务
      * @param taskId
      * @return
      */
     public Result<Void> execute(Integer taskId) {
-        if (null == taskId) {
-            return Result.fail(ResultCode.PARAM_ERROR.getCode(), "task id为空");
+        Result<Task> result = taskDomainService.getTaskById(taskId);
+        if (result.failed() || null == result.getData()) {
+            return Result.fail(ResultCode.TASK_NOT_EXIST_ERROR);
         }
-
         //执行任务
-        return taskDomainService.executeTask(taskId);
+        return componentHandlerFactory.getByType(result.getData().getType()).execute(result.getData());
     }
 
     /**
