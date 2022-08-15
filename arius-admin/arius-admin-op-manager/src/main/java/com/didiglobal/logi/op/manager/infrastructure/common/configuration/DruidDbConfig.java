@@ -21,7 +21,6 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import javax.sql.DataSource;
 
 /**
- *
  * @author d06679
  */
 @Configuration
@@ -37,10 +36,10 @@ public class DruidDbConfig {
     }
 
     @Bean
-    public GlobalConfig globalConfigByArius(){
-        GlobalConfig globalConfig=new GlobalConfig();
+    public GlobalConfig globalConfigByArius() {
+        GlobalConfig globalConfig = new GlobalConfig();
         globalConfig.setBanner(false);
-        GlobalConfig.DbConfig dbConfig=new GlobalConfig.DbConfig();
+        GlobalConfig.DbConfig dbConfig = new GlobalConfig.DbConfig();
         dbConfig.setIdType(IdType.AUTO);
         globalConfig.setDbConfig(dbConfig);
         return globalConfig;
@@ -84,7 +83,7 @@ public class DruidDbConfig {
         // 设置mybatis的xml所在位置
         return bean.getObject();
     }
-    
+
     @Bean({"opSqlSessionTemplate"})
     @Primary
     public SqlSessionTemplate primarySqlSessionTemplate(@Qualifier("opSqlSessionFactory") SqlSessionFactory sessionFactory) {

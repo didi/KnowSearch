@@ -37,8 +37,9 @@ public interface ScriptDao {
     /**
      * 插入数据
      * @param scriptPO
+     * @return
      */
-    void insert(ScriptPO scriptPO);
+    int insert(ScriptPO scriptPO);
 
     /**
      * 更新脚本

@@ -45,9 +45,10 @@ public class ScriptRepositoryImpl implements ScriptRepository {
     }
 
     @Override
-    public void insertScript(Script script) {
+    public int insertScript(Script script) {
         ScriptPO scriptPO = ScriptConverter.convertScriptDO2PO(script);
         scriptDao.insert(scriptPO);
+        return scriptPO.getId();
     }
 
     @Override

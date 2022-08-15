@@ -38,9 +38,10 @@ public interface ScriptRepository {
 
     /**
      * 新增
-     * @param script
+     * @param script 脚本
+     * @return 主键
      */
-    void insertScript(Script script);
+    int insertScript(Script script);
 
     /**
      * 删除脚本
