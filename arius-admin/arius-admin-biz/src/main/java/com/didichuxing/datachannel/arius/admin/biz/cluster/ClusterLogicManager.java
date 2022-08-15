@@ -98,13 +98,7 @@ public interface ClusterLogicManager {
      */
     ClusterPhy getLogicClusterAssignedPhysicalClusters(Long logicClusterId);
 
-    /**
-     * 获取所有逻辑集群列表接口
-     * @param param
-     * @param projectId 项目id
-     * @return
-     */
-    List<ClusterLogicVO> getClusterLogics(ESLogicClusterDTO param, Integer projectId);
+
 
     /**
      *  获取单个逻辑集群overView信息

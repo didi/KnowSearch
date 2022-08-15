@@ -80,4 +80,14 @@ public interface ClusterRegionManager {
      * @return ClusterRegion 对象列表
      */
     List<ClusterRegion> listRegionByPhyCluster(String phyCluster);
+    
+    /**
+     * > 通过逻辑集群 id 构建逻辑集群region vo
+     *
+     * @param logicClusterId 逻辑集群 ID
+     * @return 列表<ClusterRegionVO>
+     */
+    Result<List<ClusterRegionVO>> buildLogicClusterRegionVOByLogicClusterId(Long logicClusterId);
+    
+    
 }

@@ -122,15 +122,13 @@ public class LogicClusterCreateHandler extends BaseWorkOrderHandler {
         ESLogicClusterWithRegionDTO esLogicClusterWithRegionDTO = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(),
             ESLogicClusterWithRegionDTO.class);
         esLogicClusterWithRegionDTO.setProjectId(workOrder.getSubmitorProjectId());
-
-      
-        Result<Void> result = Result.buildSucc();
-       
-            // 创建逻辑集群并且批量绑定指定的region,默认是能成功
-        if (!CollectionUtils.isEmpty(esLogicClusterWithRegionDTO.getClusterRegionDTOS())) {
-            //这里申请逻辑集群
-            result = clusterLogicManager.addLogicClusterAndClusterRegions(esLogicClusterWithRegionDTO, approver);
+    
+        if (CollectionUtils.isEmpty(esLogicClusterWithRegionDTO.getClusterRegionDTOS())) {
+            return Result.buildFail("集群未绑定region");
         }
+        Result<Void> result = clusterLogicManager.addLogicClusterAndClusterRegions(esLogicClusterWithRegionDTO,
+                approver);
+        
         if (result.success()) {
             //操作记录
             //逻辑集群创建添加操作记录

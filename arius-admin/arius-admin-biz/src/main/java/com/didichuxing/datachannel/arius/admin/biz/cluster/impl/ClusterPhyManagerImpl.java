@@ -30,7 +30,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterSe
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterRoleHostDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhyContext;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterTag;
@@ -106,6 +105,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -1499,12 +1499,14 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
     private void doDeleteClusterJoin(ClusterPhy clusterPhy, String operator,
                                      Integer projectId) throws AdminOperateException {
-        ClusterPhyContext clusterPhyContext = clusterContextManager.getClusterPhyContext(clusterPhy.getCluster());
-        if (null == clusterPhyContext) {
+        
+           // 1. set region
+        List<ClusterRegion> regions = clusterRegionService.listPhyClusterRegions(clusterPhy.getCluster());
+        if (CollectionUtils.isEmpty(regions)) {
             return;
         }
-
-        List<Long> associatedRegionIds = clusterPhyContext.getAssociatedRegionIds();
+    
+        List<Long> associatedRegionIds = regions.stream().map(ClusterRegion::getId).collect(Collectors.toList());
         for (Long associatedRegionId : associatedRegionIds) {
             final ClusterRegion region = clusterRegionService.getRegionById(associatedRegionId);
             Result<Void> unbindRegionResult = clusterRegionService.unbindRegion(associatedRegionId, null, operator);
@@ -1536,7 +1538,13 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             }
         }
 
-        List<Long> clusterLogicIds = clusterPhyContext.getAssociatedClusterLogicIds();
+        List<Long> clusterLogicIds =regions.stream()
+                .filter(clusterRegion -> Objects.nonNull(clusterRegion.getLogicClusterIds()))
+                .map(clusterRegion -> ListUtils.string2LongList(clusterRegion.getLogicClusterIds()))
+                .filter(CollectionUtils::isNotEmpty).flatMap(Collection::stream)
+                .filter(logicId -> Objects.equals(logicId,
+                        Long.parseLong(AdminConstant.REGION_NOT_BOUND_LOGIC_CLUSTER_ID))).distinct()
+                .collect(Collectors.toList());
         for (Long clusterLogicId : clusterLogicIds) {
             final ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByIdThatNotContainsProjectId(clusterLogicId);
             if (Objects.isNull(clusterLogic)){

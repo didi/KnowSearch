@@ -12,7 +12,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.deta
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.LogicClusterCreateOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicVO;
-import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
@@ -70,7 +69,6 @@ public class LogicClusterJoinHandler extends BaseWorkOrderHandler {
                 JoinLogicClusterContent.class);
         ESLogicClusterDTO resourceLogicDTO = ConvertUtil.obj2Obj(content, ESLogicClusterDTO.class);
         resourceLogicDTO.setProjectId(workOrder.getSubmitorProjectId());
-        resourceLogicDTO.setType(ClusterResourceTypeEnum.PRIVATE.getCode());
         resourceLogicDTO.setId(content.getId());
         return clusterLogicManager.validateClusterLogicParams(resourceLogicDTO, OperationEnum.ADD_BIND_MULTIPLE_PROJECT,
                 resourceLogicDTO.getProjectId());

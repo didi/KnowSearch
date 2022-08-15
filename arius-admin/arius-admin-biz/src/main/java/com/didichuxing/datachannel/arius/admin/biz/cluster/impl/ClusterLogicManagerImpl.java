@@ -12,7 +12,6 @@ import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterLogicManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterRegionManager;
-import com.didichuxing.datachannel.arius.admin.biz.indices.IndicesManager;
 import com.didichuxing.datachannel.arius.admin.biz.page.ClusterLogicPageSearchHandle;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager;
 import com.didichuxing.datachannel.arius.admin.common.Triple;
@@ -169,8 +168,6 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     @Autowired
     private HandleFactory                  handleFactory;
 
-    @Autowired
-    private IndicesManager                 indicesManager;
 
     @Autowired
     private ESIndexCatService              esIndexCatService;
@@ -179,8 +176,6 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     private ESClusterNodeService           eSClusterNodeService;
     
     private static final FutureUtil<Void>         FUTURE_UTIL        = FutureUtil.init("ClusterLogicManager", 10, 10,
-            100);
-    private static final FutureUtil<Result<Void>> FUTURE_UTIL_RESULT = FutureUtil.init("ClusterLogicManager", 10, 10,
             100);
 
     private static final Long              UNKNOWN_SIZE = -1L;
@@ -420,11 +415,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         return Result.buildSucc(ConvertUtil.list2List(esMachineNormsPOS, ESClusterNodeSepcVO.class));
     }
 
-    @Override
-    public List<ClusterLogicVO> getClusterLogics(ESLogicClusterDTO param, Integer projectId) {
-        List<ClusterLogic> clusterLogics = clusterLogicService.listClusterLogics(param);
-        return buildClusterLogics(clusterLogics);
-    }
+    
 
     @Override
     public ClusterLogicVO getClusterLogic(Long clusterLogicId, Integer currentProjectId) {
@@ -592,17 +583,14 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         Set<Integer> clusterHealthSet = Sets.newHashSet();
         updateLogicClusterDTO.setId(clusterLogicId);
         try {
-            ClusterLogicContext clusterLogicContext = clusterContextManager.getClusterLogicContext(clusterLogicId);
-            if (null == clusterLogicContext) {
+            final ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(clusterLogicId);
+            if (Objects.isNull(clusterRegion)) {
                 LOGGER.error(
                     "class=ClusterLogicManagerImpl||method=updateClusterLogicHealth||clusterLogicId={}||errMsg=clusterLogicContext is empty",
                     clusterLogicId);
                 clusterHealthSet.add(UNKNOWN.getCode());
             } else {
-                List<String> associatedClusterPhyNames = clusterLogicContext.getAssociatedClusterPhyNames();
-                clusterHealthSet
-                    .addAll(associatedClusterPhyNames.stream().map(esClusterService::syncGetClusterHealthEnum)
-                        .map(ClusterHealthEnum::getCode).collect(Collectors.toSet()));
+                clusterHealthSet.add(esClusterService.syncGetClusterHealthEnum(clusterRegion.getPhyClusterName()).getCode());
             }
 
             updateLogicClusterDTO.setHealth(ClusterUtils.getClusterLogicHealthByClusterHealth(clusterHealthSet));

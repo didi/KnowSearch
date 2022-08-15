@@ -317,6 +317,22 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
         return clusterRegionService.listPhyClusterRegions(phyCluster);
     }
     
+    
+    
+    /**
+     * > 通过逻辑集群 id 构建逻辑集群region vo
+     *
+     * @param logicClusterId 逻辑集群 ID
+     * @return 列表<ClusterRegionVO>
+     */
+    @Override
+    public Result<List<ClusterRegionVO>> buildLogicClusterRegionVOByLogicClusterId(Long logicClusterId) {
+        final ClusterRegion region = clusterRegionService.getRegionByLogicClusterId(logicClusterId);
+    
+        return Result.buildSucc(buildLogicClusterRegionVO(Collections.singletonList(region)));
+    }
+    
+    
     /***************************************** private method ****************************************************/
      private final static Predicate<ClusterRegion> coldTruePreByClusterRegion = clusterRegion -> {
         if (StringUtils.isBlank(clusterRegion.getConfig())) {
