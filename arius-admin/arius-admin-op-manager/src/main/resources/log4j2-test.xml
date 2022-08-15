@@ -1,17 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
-<log4j:configuration>
+<!-- status="OFF"，可以去掉，它的含义为是否记录log4j2本身的event信息，默认是OFF -->
+<configuration status="debug" monitorInterval="30">
+    <!-- 定义下面的引用名 -->
+    <Properties>
 
-    <appender name="console" class="org.apache.log4j.ConsoleAppender">
-        <param name="Target" value="System.out"/>
-        <layout class="org.apache.log4j.PatternLayout">
-            <param name="ConversionPattern" value="[%d] [%p] [DBServer:%t] [%c{1}:%M:%L], %m%n"/>
-        </layout>
-    </appender>
+        <Property name="log_pattern">[%d] [%p] [DBServer:%t] [%c{1}:%M:%L], %m%n</Property>
+        <!-- name的值是变量的名称，value的值时变量定义的值。通过定义的值会被插入到logger上下文中。定义后，可以使"${}"来使用变量。 -->
+        <property name="log.path">./logs/</property>
+    </Properties>
+    <!--先定义所有的appender -->
+    <appenders>
 
-    <root>
-        <level value="info"/>
-        <appender-ref ref="console"/>
-    </root>
 
-</log4j:configuration>
+        <RollingFile name="systemLog"
+                     filename="${log.path}/system.log" filePattern="${log.path}/system.log.%d{yyyy-MM-dd}"
+                     append="true">
+            <!--输出日志的格式 -->
+            <PatternLayout pattern="${log_pattern}" />
+            <Filters>
+                <!-- 只要level及其以上级别的信息（onMatch），其他的直接拒绝（onMismatch）-->
+                <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+
+            <Policies>
+                <TimeBasedTriggeringPolicy modulate="true"
+                                           interval="1" />
+            </Policies>
+            <DefaultRolloverStrategy max="3"/>
+        </RollingFile>
+
+    </appenders>
+    <!-- 非开发环境只需要打印到文件就行 -->
+    <loggers>
+
+        <Root level="INFO" includeLocation="true">
+            <AppenderRef ref="systemLog" />
+        </Root>
+
+    </loggers>
+</configuration>

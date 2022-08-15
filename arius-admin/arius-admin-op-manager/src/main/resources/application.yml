@@ -1,5 +1,10 @@
 server.port: 8888
 
+logging.pattern.file: "[%level][%d{yyyy-MM-dd'T'HH:mm:ss.SSS}][%t] %msg%xEx%n"
+logging.config: classpath:log4j2-test.xml
+logging.path: .
+logging.file.max-history: 5
+
 #zeus的相关信息
 zeus.server: 10.96.65.64:8010
 zeus.token: 9e2dbb6e5b1e594d1820e0f21669b240
@@ -9,18 +14,11 @@ zeus.batch: 1
 zeus.timeOut: 300
 zeus.tolerance: 0
 zeus.grpId: 3
-
 #s3的相关配置
 s3.endpoint: s3-gzpu-inter.didistatic.com
 s3.access-key: AKDD00000000000O5XVS8IBAXT7R9X
 s3.secret-key: ASDDhiAaCIjLqFswvIXzyVvkqLJKYtLNLAlabXFS
 s3.bucket: logi-data-es
-
-#日志相关配置
-logging.pattern.file: "[%level][%d{yyyy-MM-dd'T'HH:mm:ss.SSS}][%t] %msg%xEx%n"
-logging.config: classpath:log4j2-test.xml
-logging.path: .
-logging.file.max-history: 5
 
 spring:
   datasource:

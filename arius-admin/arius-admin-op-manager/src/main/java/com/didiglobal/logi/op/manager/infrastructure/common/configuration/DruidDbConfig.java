@@ -26,10 +26,10 @@ import javax.sql.DataSource;
  */
 @Configuration
 @MapperScan(value = "com.didiglobal.logi.op.manager.infrastructure.db.mapper",
-        sqlSessionFactoryRef = "adminSqlSessionFactory")
+        sqlSessionFactoryRef = "opSqlSessionFactory")
 public class DruidDbConfig {
 
-    @Bean("adminDataSource")
+    @Bean("opDataSource")
     @Primary
     @ConfigurationProperties(prefix = "spring.datasource.druid")
     public DataSource dataSource() {
@@ -63,10 +63,10 @@ public class DruidDbConfig {
      * @return SqlSessionFactory
      * @throws Exception Exception
      */
-    @Bean("adminSqlSessionFactory")
+    @Bean("opSqlSessionFactory")
     @Primary
     public SqlSessionFactory sqlSessionFactory(
-            @Qualifier("adminDataSource") DataSource dataSource) throws Exception {
+            @Qualifier("opDataSource") DataSource dataSource) throws Exception {
         //将SqlSessionFactoryBean 替换为 MybatisSqlSessionFactoryBean， 否则mybatis-plus 提示 Invalid bound statement (not found)
         MybatisSqlSessionFactoryBean bean = new MybatisSqlSessionFactoryBean();
         bean.setDataSource(dataSource);
@@ -85,9 +85,9 @@ public class DruidDbConfig {
         return bean.getObject();
     }
     
-    @Bean({"adminSqlSessionTemplate"})
+    @Bean({"opSqlSessionTemplate"})
     @Primary
-    public SqlSessionTemplate primarySqlSessionTemplate(@Qualifier("adminSqlSessionFactory") SqlSessionFactory sessionFactory) {
+    public SqlSessionTemplate primarySqlSessionTemplate(@Qualifier("opSqlSessionFactory") SqlSessionFactory sessionFactory) {
         return new SqlSessionTemplate(sessionFactory);
     }
 }
