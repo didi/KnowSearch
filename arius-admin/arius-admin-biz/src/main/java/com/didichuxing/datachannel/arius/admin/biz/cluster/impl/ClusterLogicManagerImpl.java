@@ -777,14 +777,22 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
             return Collections.emptyList();
         }
     
-        return clusterRegionManager.listRegionByPhyCluster(phyClusterName).stream()
+        final List<Long> logicIds = clusterRegionManager.listRegionByPhyCluster(phyClusterName).stream()
                 .filter(clusterRegion -> Objects.nonNull(clusterRegion.getLogicClusterIds()))
                 .map(clusterRegion -> ListUtils.string2LongList(clusterRegion.getLogicClusterIds()))
                 .filter(CollectionUtils::isNotEmpty).flatMap(Collection::stream)
                 .filter(logicId -> Objects.equals(logicId,
                         Long.parseLong(AdminConstant.REGION_NOT_BOUND_LOGIC_CLUSTER_ID))).distinct()
-                .map(logId -> clusterLogicService.getClusterLogicByIdThatNotContainsProjectId(logId))
-                .filter(Objects::nonNull).map(ClusterLogic::getName).collect(Collectors.toList());
+                .collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(logicIds)){
+            return Collections.emptyList();
+        }
+       return clusterLogicService.getClusterLogicListByIds(logicIds)
+                .stream()
+                .map(ClusterLogic::getName)
+                .distinct()
+                .collect(Collectors.toList());
+    
     }
     
     /**
