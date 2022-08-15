@@ -86,6 +86,8 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
             WorkOrderTypeEnum.LOGIC_CLUSTER_CREATE.getMessage()));
         orderTypeVOList.add(new OrderTypeVO(WorkOrderTypeEnum.LOGIC_CLUSTER_INDECREASE.getName(),
             WorkOrderTypeEnum.LOGIC_CLUSTER_INDECREASE.getMessage()));
+        orderTypeVOList.add(new OrderTypeVO(WorkOrderTypeEnum.LOGIC_CLUSTER_JOIN.getName(),
+            WorkOrderTypeEnum.LOGIC_CLUSTER_JOIN.getMessage()));
         return Result.buildSucc(orderTypeVOList);
     }
     
