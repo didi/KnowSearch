@@ -182,13 +182,7 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
             }
             param.setId(createLogicClusterResult.getData());
         }
-        //校验项目的合法性
-        final Result<Void> result = ProjectUtils.checkProjectCorrectly(ESLogicClusterWithRegionDTO::getProjectId, param,
-            param.getProjectId());
-        if (result.failed()) {
-            return result;
-        }
-
+    
 
         //6. 为逻辑集群绑定region
         return doBindRegionToClusterLogic(param, operator);
@@ -312,6 +306,15 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
             return Collections.emptyList();
         }
           return clusterRegions.stream().filter(coldTruePreByClusterRegion).collect(Collectors.toList());
+    }
+    
+    /**
+     * @param phyCluster
+     * @return
+     */
+    @Override
+    public List<ClusterRegion> listRegionByPhyCluster(String phyCluster) {
+        return clusterRegionService.listPhyClusterRegions(phyCluster);
     }
     
     /***************************************** private method ****************************************************/

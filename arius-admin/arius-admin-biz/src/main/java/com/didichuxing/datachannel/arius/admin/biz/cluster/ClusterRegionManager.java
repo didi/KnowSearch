@@ -67,4 +67,5 @@ public interface ClusterRegionManager {
 
     
     List<ClusterRegion> getColdRegionByPhyCluster(String phyCluster);
+    List<ClusterRegion> listRegionByPhyCluster(String phyCluster);
 }

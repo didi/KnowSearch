@@ -14,5 +14,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class JoinLogicClusterContent extends BaseContent{
-    private Long joinLogicClusterId;
+    private Long id;
 }

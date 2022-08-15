@@ -181,7 +181,29 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
         Result<List<IndexTemplatePhy>> ret = indexTemplatePhyService.listByRegionId(clusterRegion.getId().intValue());
         return ret.success() && CollectionUtils.isNotEmpty(ret.getData());
     }
-
+    
+    /**
+     * > 加入集群
+     *
+     * @param param 加入集群逻辑的参数对象。
+     * @return 加入集群逻辑的结果。
+     */
+    @Override
+    public Result<Long> joinClusterLogic(ESLogicClusterDTO param) {
+        Result<Void> checkResult = validateClusterLogicParams(param, ADD_BIND_MULTIPLE_PROJECT, param.getProjectId());
+        if (checkResult.failed()) {
+            LOGGER.warn("class=ClusterLogicServiceImpl||method=joinClusterLogic||msg={}", checkResult.getMessage());
+            return Result.buildFrom(checkResult);
+        }
+        ClusterLogicPO clusterLogicPO = logicClusterDAO.getById(param.getId());
+        final List<Integer> projectIds = str2ListProjectIds(clusterLogicPO);
+        projectIds.add(param.getProjectId());
+        final String projectIdStr = ConvertUtil.list2String(projectIds.stream().distinct().collect(Collectors.toList()),
+                ",");
+        clusterLogicPO.setProjectId(projectIdStr);
+        return Result.build(logicClusterDAO.update(clusterLogicPO) == 1, clusterLogicPO.getId());
+    }
+    
     /**
      * 新建逻辑集群
      *
@@ -190,36 +212,18 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
      */
     @Override
     public Result<Long> createClusterLogic(ESLogicClusterDTO param) {
-        Result<Void> checkResult = null;
-        if (Objects.isNull(param.getId())) {
-            checkResult = validateClusterLogicParams(param, ADD, param.getProjectId());
-        } else {
-            //兼容行内一个项目绑定多个集群的状态
-            checkResult = validateClusterLogicParams(param, ADD_BIND_MULTIPLE_PROJECT, param.getProjectId());
-        }
-        
-       
+        Result<Void>  checkResult = validateClusterLogicParams(param, ADD, param.getProjectId());
         if (checkResult.failed()) {
             LOGGER.warn("class=ClusterLogicServiceImpl||method=createClusterLogic||msg={}", checkResult.getMessage());
             return Result.buildFrom(checkResult);
         }
-        ClusterLogicPO clusterLogicPO = logicClusterDAO.getById(param.getId());
-        if (Objects.nonNull(clusterLogicPO)) {
-            final List<Integer> projectIds = str2ListProjectIds(clusterLogicPO);
-            projectIds.add(param.getProjectId());
-            final String projectIdStr = ConvertUtil.list2String(
-                    projectIds.stream().distinct().collect(Collectors.toList()), ",");
-            clusterLogicPO.setProjectId(projectIdStr);
-            return Result.build(logicClusterDAO.update(clusterLogicPO) == 1, clusterLogicPO.getId());
-        
-        } else {
-            initLogicCluster(param);
-        
-            ClusterLogicPO logicPO = ConvertUtil.obj2Obj(param, ClusterLogicPO.class,
-                    po ->po.setProjectId(param.getProjectId().toString()) );
-            boolean succeed = logicClusterDAO.insert(logicPO) == 1;
-            return Result.build(succeed, logicPO.getId());
-        }
+    
+        initLogicCluster(param);
+    
+        ClusterLogicPO logicPO = ConvertUtil.obj2Obj(param, ClusterLogicPO.class,
+                po -> po.setProjectId(param.getProjectId().toString()));
+        boolean succeed = logicClusterDAO.insert(logicPO) == 1;
+        return Result.build(succeed, logicPO.getId());
     
     }
 
@@ -638,7 +642,12 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
         if (AriusObjUtils.isNull(param)) {
             return Result.buildParamIllegal("逻辑集群信息为空");
         }
-
+        if (ADD_BIND_MULTIPLE_PROJECT.equals(operation)) {
+            if (!existClusterLogicById(param.getId())) {
+                return Result.buildFail("逻辑集群不存在");
+            }
+            return Result.buildSucc();
+        }
         Result<Void> isIllegalResult = isIllegal(param);
         if (isIllegalResult.failed()) {
             return isIllegalResult;
@@ -653,10 +662,6 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
             Result<Void> editVoidResult = editVoidResult(param, projectId);
             if (editVoidResult != null) {
                 return editVoidResult;
-            }
-        }else if (ADD_BIND_MULTIPLE_PROJECT.equals(operation)){
-            if (!existClusterLogicById(param.getId())){
-                return Result.buildFail("逻辑集群不存在");
             }
         }
 
