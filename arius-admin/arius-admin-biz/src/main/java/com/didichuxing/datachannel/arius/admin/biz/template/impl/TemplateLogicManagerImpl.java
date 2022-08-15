@@ -72,6 +72,7 @@ import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateExcepti
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.mapping.AriusTypeProperty;
 import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
+import com.didichuxing.datachannel.arius.admin.common.tuple.Tuples;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
@@ -83,6 +84,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.Clust
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterNodeService;
+import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectLogicTemplateAuthService;
@@ -178,10 +180,11 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     private IndicesManager                  indicesManager;
     @Autowired
     private PipelineManager                 templatePipelineManager;
-    @Autowired
-    private   TemplateLogicManager templateLogicManager;
+    
     @Autowired
     protected ESClusterNodeService esClusterNodeService;
+    @Autowired
+    private ESClusterService esClusterService;
 
     public static final int                 MAX_PERCENT           = 10000;
     public static final int                 MIN_PERCENT           = -99;
@@ -502,7 +505,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         }
         List<String> phyClusterList=indexTemplatePhyService.getPhyClusterByLogicTemplateId(logicTemplateId);
        
-        Result<ConsoleTemplateClearVO> templateClearInfo = templateLogicManager.getLogicTemplateClearInfo(
+        Result<ConsoleTemplateClearVO> templateClearInfo = getLogicTemplateClearInfo(
                 logicTemplateId);
        
         String beforeDeleteName = indexTemplateService.getNameByTemplateLogicId(logicTemplateId);
@@ -879,7 +882,15 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         if (CollectionUtils.isEmpty(templatePhyList)) {
             return Result.buildFail("模板不存在");
         }
-
+        //检测集群连通状态
+        final Optional<TupleTwo<String, Boolean>> clusterConnectionStatusOption = templatePhyList.stream()
+                .map(indexTemplatePhy -> Tuples.of(indexTemplatePhy.getCluster(),
+                        esClusterService.syncConnectionStatus(indexTemplatePhy.getCluster())))
+                .filter(tuple -> Boolean.FALSE.equals(tuple.v2)).findFirst();
+        if (clusterConnectionStatusOption.isPresent()) {
+            return Result.buildFail(
+                    String.format("集群%s故障，请检查集群状态后重试。", clusterConnectionStatusOption.get().v1()));
+        }
         IndexTemplatePhyDTO updateParam = new IndexTemplatePhyDTO();
         //这里为了保证逻辑模版下所有物理模版均创建最新索引后再进行pipeline切换，需要遍历两次
         for (IndexTemplatePhy templatePhy : templatePhyList) {
@@ -1029,7 +1040,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             consoleTemplateDetail.setCluster(StringUtils.join(phyClusters, ","));
         }else {
             consoleTemplateDetail
-                    .setCluster(templateLogicManager.jointCluster(indexTemplateLogicWithCluster.getLogicClusters()));
+                    .setCluster(jointCluster(indexTemplateLogicWithCluster.getLogicClusters()));
         }
 
         // 仅对有一个逻辑集群的情况设置集群类型与等级
@@ -1071,7 +1082,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         consoleTemplateClearVO.setName(templateLogicWithPhysical.getName());
         consoleTemplateClearVO.setIndices(
             indicesManager.listIndexCatCellWithTemplateByTemplatePhyId(templateLogicWithPhysical.getMasterPhyTemplate().getId()));
-        consoleTemplateClearVO.setAccessApps(templateLogicManager.getLogicTemplateProjectAccess(logicId));
+        consoleTemplateClearVO.setAccessApps(getLogicTemplateProjectAccess(logicId));
 
         return Result.buildSucc(consoleTemplateClearVO);
     }
@@ -1097,7 +1108,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             return Result.buildParamIllegal("索引没有部署");
         }
 
-        consoleTemplateDeleteVO.setAccessApps(templateLogicManager.getLogicTemplateProjectAccess(logicId));
+        consoleTemplateDeleteVO.setAccessApps(getLogicTemplateProjectAccess(logicId));
 
         return Result.buildSucc(consoleTemplateDeleteVO);
     }
