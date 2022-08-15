@@ -41,7 +41,8 @@ public class PackageRepositoryImpl implements PackageRepository {
     @Override
     public int insertPackage(Package pk) {
         PackagePO po = PackageConverter.convertPackageDO2PO(pk);
-        return packageDao.insert(po);
+        packageDao.insert(po);
+        return po.getId();
     }
 
     @Override
