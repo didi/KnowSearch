@@ -91,7 +91,7 @@ public class ScriptService {
         //判断,若脚本已经绑定了包则不能删除
         Package pk = new Package();
         pk.setScriptId(id);
-        if (null == packageDomainService.queryPackage(pk).getData()) {
+        if (!packageDomainService.queryPackage(pk).getData().isEmpty()) {
             return Result.fail(ResultCode.SCRIPT_OPERATE_ERROR.getCode(), "脚本已被绑定，不能删除");
         }
 
