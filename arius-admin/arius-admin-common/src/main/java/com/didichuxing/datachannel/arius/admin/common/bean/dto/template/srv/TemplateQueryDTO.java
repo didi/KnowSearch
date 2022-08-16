@@ -19,4 +19,9 @@ public class TemplateQueryDTO extends IndexTemplateDTO {
 
     @ApiModelProperty("所属物理集群")
     private String cluster;
+     @ApiModelProperty("排序字段(health_rate)、id")
+    private String  sortTerm;
+
+    @ApiModelProperty(value = "是否降序排序（默认降序）", dataType = "Boolean", required = false)
+    private Boolean orderByDesc = true;
 }

@@ -46,6 +46,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithCluster;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexCatCellWithTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateClearVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateDeleteVO;
@@ -74,6 +75,7 @@ import com.didichuxing.datachannel.arius.admin.common.mapping.AriusTypeProperty;
 import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
 import com.didichuxing.datachannel.arius.admin.common.tuple.Tuples;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.TemplateUtils;
@@ -1115,7 +1117,6 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     
     /**
      * 它通过其逻辑 ID 更新模板的健康状况。
-     *
      * @param logicId 模板的 logicId。
      * @return 一个布尔值。
      */
@@ -1136,13 +1137,47 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
                     getClass().getSimpleName(), logicId);
             return false;
         }
+        final IndexTemplatePO templatePO = new IndexTemplatePO();
+        templatePO.setId(logicId);
         if (!esClusterService.syncConnectionStatus(masterCluster)) {
             LOGGER.warn(
                     "class={}||method=updateTemplateHealthByLogicId||logicId={}||error=don't find index template cluster",
                     getClass().getSimpleName(), logicId);
-            // 健康为 unknow
+            /**
+             * 未知
+             */
+            templatePO.setHealthRate(-1.0);
+            indexTemplateService.update(templatePO);
+            return true;
+            
         }
-        return false;
+        try {
+            final List<CatIndexResult> catIndexResults = indicesManager.listIndexCatInfoByTemplatePhyId(
+                    indexTemplateWithPhyTemplates.getMasterPhyTemplate().getId());
+            // 总数
+            final int healthTotal = catIndexResults.size();
+            // 统计 green 的个数
+            final long greenTotal = catIndexResults.stream().filter(catIndexResult ->
+                    // 可能由于新建的索引，暂时没有采集到，导致了 health 为 null，这里也算做健康的
+                    Objects.isNull(catIndexResult.getHealth()) || StringUtils.equalsIgnoreCase(
+                            catIndexResult.getHealth(), "green")).count();
+            if (healthTotal == 0 || Objects.equals((int) greenTotal, healthTotal)) {
+                templatePO.setHealthRate(1.0);
+                indexTemplateService.update(templatePO);
+            }
+            final double healthRate = CommonUtils.divideIntAndFormatDouble((int) greenTotal, healthTotal, 2, 1);
+            templatePO.setHealthRate(healthRate);
+            indexTemplateService.update(templatePO);
+        
+            return true;
+        } catch (Exception e) {
+            LOGGER.warn("class=TemplateLogicManagerImpl||method=getCyclicalRollInfo||logicId={}||errMsg={}", logicId,
+                    e.getMessage(), e);
+            return false;
+        }
+        
+        
+        
     }
     
     /**

@@ -20,6 +20,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.template.logic.Index
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import com.google.common.collect.Lists;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -40,8 +41,8 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<Templa
     private static final FutureUtil<TemplateWithSrvVO> TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_CLUSTER_FUTURE_UTIL         =
             FutureUtil
         .init("TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_CLUSTER_FUTURE_UTIL", 10, 10, 100);
- 
-
+    
+    private static final String HEALTH_RATE = "health_rate";
     
     @Autowired
     private IndexTemplateService          indexTemplateService;
@@ -119,9 +120,19 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<Templa
         Predicate<IndexTemplate> conditionNotNullProjectIdPre = indexTemplate ->
                 Objects.isNull(condition.getProjectId()) || Objects.equals(indexTemplate.getProjectId(),
                         condition.getProjectId());
-        
+        Comparator<IndexTemplate> comparator = Comparator.nullsLast(Comparator.comparing(indexTemplate -> {
+            if (StringUtils.equalsIgnoreCase(condition.getSortTerm(), HEALTH_RATE)) {
+                return indexTemplate.getHealthRate();
+            } else {
+                return indexTemplate.getId().doubleValue();
+            }
+        }));
+        comparator=condition.getOrderByDesc()?comparator.reversed():comparator;
+    
         return indexTemplateService.listLogicTemplatesByIds(matchTemplateLogicIdList).stream()
-                .filter(conditionNotNullProjectIdPre).filter(conditionNotNullIdPre).filter(conditionNotNullNamePre)
+                .filter(conditionNotNullProjectIdPre).filter(conditionNotNullIdPre)
+                .filter(conditionNotNullNamePre)
+                .sorted(comparator)
                 .collect(Collectors.toList());
                 
         

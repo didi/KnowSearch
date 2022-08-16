@@ -29,13 +29,14 @@
         <result column="level"                   jdbcType="TINYINT" property="level"/>
         <result column="open_srv"                jdbcType="VARCHAR" property="openSrv"/>
         <result column="disk_size"               jdbcType="DECIMAL" property="diskSize"/>
+        <result column="health_rate"               jdbcType="DECIMAL" property="healthRate"/>
     </resultMap>
 
     <sql id="Base_Column_List">
          id, `name`, data_type, date_format, data_center, expire_time, hot_time,
            date_field, date_field_format, id_field, routing_field, expression,
          `desc`, quota, write_rate_limit, project_id, ingest_pipeline,block_read, block_write, resource_id,
-          check_point_diff, has_dcdr, create_time, update_time, `level`, `open_srv`, disk_size
+          check_point_diff, has_dcdr, create_time, update_time, `level`, `open_srv`, disk_size,health_rate
     </sql>
 
     <select id="listByCondition"
@@ -174,6 +175,7 @@
             <if test="hasDCDR != null">,has_dcdr = #{hasDCDR}</if>
             <if test="openSrv != null">,open_srv = #{openSrv}</if>
             <if test="diskSize != null">,disk_size = #{diskSize}</if>
+            <if test="healthRate != null">,health_rate = #{healthRate}</if>
         </trim>
         where id = #{id}
     </update>

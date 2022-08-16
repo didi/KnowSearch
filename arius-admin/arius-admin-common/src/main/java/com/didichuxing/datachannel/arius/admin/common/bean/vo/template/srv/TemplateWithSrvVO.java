@@ -51,6 +51,8 @@ public class TemplateWithSrvVO extends BaseVO {
 
     @ApiModelProperty("是否分区")
     private Boolean partition;
+    @ApiModelProperty("模版健康率:-1：未知")
+    private Double healthRate;
     
     /**
      * 指示主集群的联通状态

@@ -153,6 +153,10 @@ public class IndexTemplate extends BaseEntity implements Comparable<IndexTemplat
      * 可用磁盘容量
      */
     private Double  diskSize;
+    /**
+     * 模版健康率
+     */
+    private Double healthRate;
 
     @Override
     public int compareTo(IndexTemplate o) {
