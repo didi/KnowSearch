@@ -1164,11 +1164,11 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             if (healthTotal == 0 || Objects.equals((int) greenTotal, healthTotal)) {
                 templatePO.setHealthRate(1.0);
                 indexTemplateService.update(templatePO);
+                return true;
             }
             final double healthRate = CommonUtils.divideIntAndFormatDouble((int) greenTotal, healthTotal, 2, 1);
             templatePO.setHealthRate(healthRate);
             indexTemplateService.update(templatePO);
-        
             return true;
         } catch (Exception e) {
             LOGGER.warn("class=TemplateLogicManagerImpl||method=getCyclicalRollInfo||logicId={}||errMsg={}", logicId,
