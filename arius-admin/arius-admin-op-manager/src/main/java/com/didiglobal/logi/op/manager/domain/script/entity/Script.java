@@ -81,7 +81,7 @@ public class Script {
             return Result.fail(ResultCode.PARAM_ERROR.getCode(), "id缺失");
         }
 
-        if (uploadFile.isEmpty() && null == describe) {
+        if (null == uploadFile && null == describe) {
             return Result.fail(ResultCode.PARAM_ERROR.getCode(), "请指定要修改的值（脚本或者描述）");
         }
 

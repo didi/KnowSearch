@@ -22,7 +22,7 @@ public interface DeploymentService {
      * @param script
      * @return
      */
-    Result<String> editScript(Script script);
+    Result<Void> editScript(Script script);
 
 
     /**

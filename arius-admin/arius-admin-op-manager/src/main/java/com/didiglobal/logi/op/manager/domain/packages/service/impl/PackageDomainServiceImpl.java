@@ -50,7 +50,7 @@ public class PackageDomainServiceImpl implements PackageDomainService {
         pk.create();
 
         //上传
-        Result<String> storageRes = storageService.upload(getUniqueFileName(pk.getName()), pk.getUploadFile());
+        Result<String> storageRes = storageService.upload(getUniqueFileName(pk.getName(), pk.getUploadFile().getOriginalFilename()), pk.getUploadFile());
         if (storageRes.failed()) {
             return Result.fail(storageRes.getCode(), storageRes.getMessage());
         }
@@ -92,7 +92,7 @@ public class PackageDomainServiceImpl implements PackageDomainService {
         pk.update();
 
         if (null != pk.getUploadFile()) {
-            Result<String> storageRes = storageService.upload(getUniqueFileName(pk.getName()), pk.getUploadFile());
+            Result<String> storageRes = storageService.upload(getUniqueFileName(pk.getName(), pk.getUploadFile().getOriginalFilename()), pk.getUploadFile());
             if (storageRes.failed()) {
                 return Result.fail(storageRes.getCode(), storageRes.getMessage());
             }

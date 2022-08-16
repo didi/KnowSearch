@@ -3,6 +3,7 @@ package com.didiglobal.logi.op.manager.infrastructure.deployment;
 import com.alibaba.fastjson.JSONObject;
 import com.didiglobal.logi.op.manager.domain.script.entity.Script;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
+import com.didiglobal.logi.op.manager.infrastructure.common.ResultCode;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.TaskActionEnum;
 import com.didiglobal.logi.op.manager.infrastructure.deployment.zeus.ZeusService;
 import com.didiglobal.logi.op.manager.infrastructure.deployment.zeus.ZeusTask;
@@ -46,13 +47,14 @@ public class DeploymentServiceImpl implements DeploymentService {
     }
 
     @Override
-    public Result<String> editScript(Script script) {
+    public Result<Void> editScript(Script script) {
         try {
             ZeusTemplate zeusTemplate = new ZeusTemplate();
-            zeusTemplate.setId(script.getTemplateId());
+            zeusTemplate.setId(Integer.parseInt(script.getTemplateId()));
             zeusTemplate.setKeywords(script.getName());
             zeusTemplate.setScript(new String(script.getUploadFile().getBytes()));
-            return Result.buildSuccess(zeusService.editTemplate(zeusTemplate));
+            zeusService.editTemplate(zeusTemplate);
+            return Result.success();
         } catch (IOException e) {
             LOGGER.error("class=DeploymentServiceImpl||method=editScript||errMsg={}||msg=file to string failed", e.getMessage());
             return Result.fail();
@@ -122,8 +124,11 @@ public class DeploymentServiceImpl implements DeploymentService {
             zeusService.deleteTemplate(Integer.parseInt(script.getTemplateId()));
             return Result.success();
         } catch (ZeusOperationException e) {
-            LOGGER.error("class=DeploymentServiceImpl||method=deployStatus||errMsg={}||msg=get status error", e.getMessage());
+            LOGGER.error("class=DeploymentServiceImpl||method=deployStatus||errMsg={}||msg=remove error", e.getMessage());
             return Result.fail(e.getCode(), e.getMessage());
+        } catch (Exception exception) {
+            LOGGER.error("script[{}] remove error", script.getName(), exception);
+            return Result.fail(ResultCode.ZEUS_OPERATE_ERROR);
         }
     }
 

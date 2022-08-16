@@ -63,6 +63,15 @@ public class ScriptService {
         if (checkResult.failed()) {
             return checkResult;
         }
+
+        //补全参数信息
+        Script originalScript = scriptDomainService.getScriptById(script.getId()).getData();
+        if (null == originalScript) {
+            return Result.fail(ResultCode.PARAM_ERROR.getCode(), "输入的id参数有问题，未找到脚本");
+        }
+        script.setTemplateId(originalScript.getTemplateId());
+        script.setName(originalScript.getName());
+
         //修改脚本
         return scriptDomainService.updateScript(script);
     }
@@ -75,7 +84,7 @@ public class ScriptService {
     public Result<Void> deleteScript(Integer id) {
         Script script;
         //检验参数id是否为空以及数据库中是否能找到对应id的脚本
-        if (null == id || null == (script = scriptDomainService.getScriptById(id).getData()) ) {
+        if (null == id || null == (script = scriptDomainService.getScriptById(id).getData())) {
             return Result.fail(ResultCode.PARAM_ERROR.getCode(), "输入的id参数有问题，请核对");
         }
 

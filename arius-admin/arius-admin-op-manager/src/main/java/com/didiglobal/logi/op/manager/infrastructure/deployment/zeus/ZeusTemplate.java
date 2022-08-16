@@ -8,7 +8,7 @@ import lombok.Data;
  */
 @Data
 public class ZeusTemplate {
-    private String id;
+    private int id;
     private String keywords;
     private String account = "root";
     private int batch = 1;

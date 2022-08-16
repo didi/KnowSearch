@@ -19,11 +19,11 @@ public interface ZeusService {
 
     /**
      * 修改模板
-     * @param zeusTemplate
+     * @param zeusTemplate 模板
      * @return
      * @throws ZeusOperationException
      */
-    String editTemplate(ZeusTemplate zeusTemplate) throws ZeusOperationException;
+    void editTemplate(ZeusTemplate zeusTemplate) throws ZeusOperationException;
 
     /**
      * 执行任务

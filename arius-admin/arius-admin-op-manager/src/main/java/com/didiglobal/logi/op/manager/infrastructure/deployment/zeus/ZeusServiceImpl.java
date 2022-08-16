@@ -6,6 +6,8 @@ import com.didiglobal.logi.op.manager.infrastructure.exception.ZeusOperationExce
 import com.didiglobal.logi.op.manager.infrastructure.util.BaseHttpUtil;
 import lombok.Data;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -18,6 +20,8 @@ import static com.didiglobal.logi.op.manager.infrastructure.util.BaseHttpUtil.bu
 @Data
 @Component
 public class ZeusServiceImpl implements ZeusService {
+
+    public static final Logger LOGGER = LoggerFactory.getLogger(ZeusServiceImpl.class);
 
     @Value("${zeus.server}")
     private String zeusServer;
@@ -70,12 +74,12 @@ public class ZeusServiceImpl implements ZeusService {
     }
 
     @Override
-    public String editTemplate(ZeusTemplate zeusTemplate) throws ZeusOperationException {
+    public void editTemplate(ZeusTemplate zeusTemplate) throws ZeusOperationException {
         String url = String.format(API_EDIT_TEMPLATE, zeusServer, zeusTemplate.getId(), zeusToken);
 
         ZeusResult result = getZeusResultForPost(zeusTemplate, url);
 
-        return result.getData().toString();
+        LOGGER.info("edit Template[{}], message:{}", zeusTemplate.getId(), result.getMsg());
     }
 
     @Override

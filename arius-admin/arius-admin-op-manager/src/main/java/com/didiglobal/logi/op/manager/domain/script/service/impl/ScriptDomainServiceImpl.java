@@ -65,7 +65,8 @@ public class ScriptDomainServiceImpl implements com.didiglobal.logi.op.manager.d
         script.create();
 
         //上传
-        Result<String> storageRes = storageService.upload(getUniqueFileName(script.getName()), script.getUploadFile());
+        Result<String> storageRes = storageService.upload(getUniqueFileName(script.getName(), script.getUploadFile().getOriginalFilename()),
+                script.getUploadFile());
         if (storageRes.failed()) {
             return Result.fail(storageRes.getCode(), storageRes.getMessage());
         }
@@ -90,18 +91,17 @@ public class ScriptDomainServiceImpl implements com.didiglobal.logi.op.manager.d
 
         if (null != script.getUploadFile()) {
             //上传
-            Result<String> storageRes = storageService.upload(getUniqueFileName(script.getName()), script.getUploadFile());
+            Result<String> storageRes = storageService.upload(getUniqueFileName(script.getName(), script.getUploadFile().getOriginalFilename()), script.getUploadFile());
             if (storageRes.failed()) {
                 return Result.fail(storageRes.getCode(), storageRes.getMessage());
             }
             script.setContentUrl(storageRes.getData());
 
             //修改部署的脚本
-            Result<String> deployRes = deploymentService.editScript(script);
+            Result<Void> deployRes = deploymentService.editScript(script);
             if (deployRes.failed()) {
                 return Result.fail(deployRes.getCode(), deployRes.getMessage());
             }
-            script.setTemplateId(deployRes.getData());
         }
 
         //更新
@@ -116,7 +116,7 @@ public class ScriptDomainServiceImpl implements com.didiglobal.logi.op.manager.d
         if (deleteStorage.failed()) {
             return Result.fail(deleteStorage.getCode(),deleteStorage.getMessage());
         }
-        //部署脚本删除
+        //部署脚本删除,这里是zeus的一个缺陷不支持模板的删除，所以这里判断是否成功
         deploymentService.removeScript(script);
         //删除脚本
         scriptRepository.deleteScript(script.getId());

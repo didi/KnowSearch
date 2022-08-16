@@ -60,6 +60,7 @@ public class S3FileStorageHandle implements FileStorageHandle {
         } catch (Exception e) {
             LOGGER.error("class=S3FileStorageHandle||method=remove||fileName={}||errMsg={}||msg=upload failed",
                     fileName, e.getMessage());
+            throw new FileStorageException(e);
 
         }
     }
@@ -69,11 +70,12 @@ public class S3FileStorageHandle implements FileStorageHandle {
         InputStream inputStream = null;
         try {
             if (!createBucketIfNotExist()) {
-                throw new Exception("create bucket error");
+                throw new FileStorageException("create bucket error");
             }
 
             if (this.getFileNames().contains(fileName)) {
-                throw new Exception("fileName has existed,please modify!");
+                LOGGER.warn("fileName[{}] has existed", fileName);
+                return minioClient.getObjectUrl(bucket, fileName);
             }
 
             inputStream = uploadFile.getInputStream();
@@ -81,7 +83,7 @@ public class S3FileStorageHandle implements FileStorageHandle {
                     .stream(inputStream, inputStream.available(), -1).build());
             return minioClient.getObjectUrl(bucket, fileName);
         } catch (Exception e) {
-            LOGGER.error("class=S3FileStorageHandle||method=upload||fileName={}||errMsg={}||msg=upload failed",
+            LOGGER.error("class=S3FileStorageHandle||method=upload||fileName={}||errMsg={}||msg=remove failed",
                     fileName, e.getMessage());
             throw new FileStorageException(e);
         } finally {
@@ -137,7 +139,7 @@ public class S3FileStorageHandle implements FileStorageHandle {
      *
      * @return fileNamesOfBucket List<String>
      */
-    private List<String> getFileNames() {
+    public List<String> getFileNames() {
         Iterable<io.minio.Result<Item>> results = minioClient.listObjects(ListObjectsArgs.builder().bucket(this.bucket).build());
         List<String> fileNamesOfBucket = Lists.newArrayList();
         results.forEach(
