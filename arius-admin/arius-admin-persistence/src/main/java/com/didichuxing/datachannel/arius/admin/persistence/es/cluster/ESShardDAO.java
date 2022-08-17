@@ -4,12 +4,10 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.shard.ShardCatCellPO;
-import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.DSLSearchUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.IndexNameUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.SizeUtil;
-import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpTimeoutRetry;
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dsls.DslsConstant;
 import com.didiglobal.logi.elasticsearch.client.ESClient;
@@ -164,22 +162,6 @@ public class ESShardDAO extends BaseESDAO {
      */
     public boolean batchInsert(List<ShardCatCellPO> list) {
         return updateClient.batchInsert(IndexNameUtils.genCurrentDailyIndexName(indexName), typeName, list);
-    }
-
-    /**
-     * 批量更新
-     * @param list
-     * @param retryCount
-     * @return
-     */
-    public boolean batchUpsert(List<ShardCatCellPO> list, int retryCount) {
-        try {
-            return ESOpTimeoutRetry.esRetryExecute("batchInsert", retryCount,
-                    () -> updateClient.batchUpdate(IndexNameUtils.genCurrentDailyIndexName(indexName), typeName, list));
-        } catch (ESOperateException e) {
-            LOGGER.error("class=IndexCatESDAO||method=batchInsert||errMsg={}", e.getMessage(), e);
-        }
-        return false;
     }
 
     /**************************************************private******************************************************/
