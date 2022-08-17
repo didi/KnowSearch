@@ -926,6 +926,10 @@ public class ESIndexDAO extends BaseESDAO {
             return Result.buildWithMsg(RestStatus.OK == directResponse.getRestStatus(),
                 directResponse.getResponseContent());
         } catch (Exception e) {
+            final JSONObject exception = ParsingExceptionUtils.getResponseExceptionJsonMessageByException(e);
+            if (Objects.nonNull(exception)) {
+                return Result.buildFail(exception.toJSONString());
+            }
             LOGGER.warn("class=ESIndexDAO||method=forceMerge||errMsg=index forceMerge fail");
             return Result.buildFail(String.format(FAILED_MSG, "forceMerge"));
         }
@@ -976,6 +980,10 @@ public class ESIndexDAO extends BaseESDAO {
             return Result.buildWithMsg(RestStatus.OK == directResponse.getRestStatus(),
                 directResponse.getResponseContent());
         } catch (Exception e) {
+            final JSONObject exception = ParsingExceptionUtils.getResponseExceptionJsonMessageByException(e);
+            if (Objects.nonNull(exception)) {
+                return Result.buildFail(exception.toJSONString());
+            }
             LOGGER.warn("class=ESIndexDAO||method=split||errMsg=index split fail");
             return Result.buildFail(String.format(FAILED_MSG, "split"));
         }
