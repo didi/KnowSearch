@@ -6,10 +6,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Component;
+import org.springframework.util.FileCopyUtils;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.support.StandardMultipartHttpServletRequest;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
+import java.net.InetAddress;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
@@ -22,19 +29,29 @@ public class LocalFileStorageHandle implements FileStorageHandle {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LocalFileStorageHandle.class);
 
-    @Value("${file.upload.path:./}")
+    @Value("${file.upload.path:upload/}")
     private String path;
 
     @Override
     public String upload(String fileName, MultipartFile uploadFile) throws FileStorageException {
         try {
-            File file = new File(path, fileName);
+            File file = new File(new File(path).getAbsolutePath(), fileName);
             if (file.exists()) {
                 throw new FileStorageException("文件已经存在");
             }
+            if (!file.getParentFile().exists()) {
+                file.getParentFile().mkdirs();
+            }
+            ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+            HttpServletRequest request = requestAttributes.getRequest();
             // 文件保存
-            uploadFile.transferTo(file);
-            return file.getAbsolutePath();
+            FileCopyUtils.copy(uploadFile.getBytes(), file);
+            StringBuffer url = new StringBuffer();
+            url.append(request.getScheme()).append("://").
+                    append(request.getLocalAddr()).append(":").
+                    append(request.getServerPort()).append("/").
+                    append(fileName);
+            return url.toString();
         } catch (Exception e) {
             LOGGER.error("class=LocalFileStorageHandle||method=upload||fileName={}||errMsg={}||msg=upload failed",
                     fileName, e.getMessage());
@@ -59,7 +76,7 @@ public class LocalFileStorageHandle implements FileStorageHandle {
     @Override
     public void remove(String fileName) throws FileStorageException {
         try {
-            Files.delete(Paths.get(path,fileName));
+            Files.delete(Paths.get(path, fileName));
         } catch (Exception e) {
             LOGGER.error("class=LocalFileStorageHandle||method=remove||fileName={}||errMsg={}||msg=remove failed",
                     fileName, e.getMessage());

@@ -74,8 +74,7 @@ public class S3FileStorageHandle implements FileStorageHandle {
             }
 
             if (this.getFileNames().contains(fileName)) {
-                LOGGER.warn("fileName[{}] has existed", fileName);
-                return minioClient.getObjectUrl(bucket, fileName);
+                throw new FileStorageException(String.format("fileName[{}] has existed", fileName));
             }
 
             inputStream = uploadFile.getInputStream();

@@ -81,6 +81,7 @@
         where 1 = 1
         <if test="name != null">and `name` LIKE CONCAT('%', #{name}, '%')</if>
         <if test="id != null">and id = #{id}</if>
+        <if test="scriptId != null">and script_id = #{scriptId}</if>
         order by id desc
     </select>
 

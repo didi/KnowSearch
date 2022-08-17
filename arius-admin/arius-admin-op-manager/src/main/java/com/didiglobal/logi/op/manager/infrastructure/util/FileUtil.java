@@ -10,7 +10,7 @@ import static com.didiglobal.logi.op.manager.infrastructure.common.Constants.UND
 public class FileUtil {
 
     public static String getUniqueFileName(String name, String fileName) {
-        return name + UNDER_SCORE + fileName;
+        return name + UNDER_SCORE + System.currentTimeMillis() + UNDER_SCORE + fileName;
     }
 
     public static String getDeleteFileName(String contentUrl) {

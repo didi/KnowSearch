@@ -51,3 +51,8 @@ spring:
     multipart:
       max-file-size: 600MB
       max-request-size: 600MB
+  resources:
+    static-locations: file:${file.upload.path}
+file.upload.path: upload/
+server:
+  address: 0.0.0.0
