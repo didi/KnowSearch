@@ -1,7 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.biz.indices;
 
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.PRIMARY;
-import static java.util.regex.Pattern.compile;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -49,6 +48,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.IndexSettingsUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.RegexUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.SizeUtil;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
@@ -76,7 +76,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiFunction;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -665,11 +664,10 @@ public class IndicesManagerImpl implements IndicesManager {
         if (null == param.getIndices()) {
             return Result.buildFail("索引为空");
         }
-        Pattern regex = compile("-\\d+$");
 
         for (IndexCatCellDTO indexCatCellDTO : param.getIndices()) {
             String cluster = indexCatCellDTO.getCluster();
-            if (!regex.matcher(indexCatCellDTO.getIndex()).find()) {
+            if (!RegexUtils.checkEndWithHyphenNumbers(indexCatCellDTO.getIndex())) {
                 return Result.buildFail("索引后缀必须按照横杠加数字为结尾才可以进行 rollover, 如：test-1");
             }
             final List<String> aliasList = esIndexService.syncGetIndexAliasesByExpression(cluster,
@@ -698,7 +696,7 @@ public class IndicesManagerImpl implements IndicesManager {
                         .userOperation(operator)
                         .operationTypeEnum(OperateTypeEnum.INDEXING_SERVICE_RUN)
                         .project(projectService.getProjectBriefByProjectId(projectId))
-                        .content(String.format("【%s】使用别名{%s}执行rollover",aliasName))
+                        .content(String.format("【%s】使用别名{%s}执行rollover",indexCatCellDTO.getIndex(),aliasName))
                         .bizId(indexCatCellDTO.getIndex())
                 .buildDefaultManualTrigger());
         }
