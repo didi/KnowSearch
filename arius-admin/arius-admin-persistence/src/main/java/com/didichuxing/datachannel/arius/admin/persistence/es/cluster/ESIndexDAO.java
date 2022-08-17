@@ -86,9 +86,6 @@ public class ESIndexDAO extends BaseESDAO {
     public static final String ROLLOVER_API         = "/_rollover";
     public static final  String ALIAS_API              = "/%s/_alias";
     
-    public static final String REASON = "reason";
-    public static final String ERROR     = "error";
-    public static final String CAUSED_BY = "caused_by";
     /**
      * 创建索引
      * @param cluster 集群
@@ -929,6 +926,10 @@ public class ESIndexDAO extends BaseESDAO {
             return Result.buildWithMsg(RestStatus.OK == directResponse.getRestStatus(),
                 directResponse.getResponseContent());
         } catch (Exception e) {
+            final JSONObject exception = ParsingExceptionUtils.getResponseExceptionJsonMessageByException(e);
+            if (Objects.nonNull(exception)) {
+                return Result.buildFail(exception.toJSONString());
+            }
             LOGGER.warn("class=ESIndexDAO||method=forceMerge||errMsg=index forceMerge fail");
             return Result.buildFail(String.format(FAILED_MSG, "forceMerge"));
         }
@@ -979,6 +980,10 @@ public class ESIndexDAO extends BaseESDAO {
             return Result.buildWithMsg(RestStatus.OK == directResponse.getRestStatus(),
                 directResponse.getResponseContent());
         } catch (Exception e) {
+            final JSONObject exception = ParsingExceptionUtils.getResponseExceptionJsonMessageByException(e);
+            if (Objects.nonNull(exception)) {
+                return Result.buildFail(exception.toJSONString());
+            }
             LOGGER.warn("class=ESIndexDAO||method=split||errMsg=index split fail");
             return Result.buildFail(String.format(FAILED_MSG, "split"));
         }

@@ -170,9 +170,11 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
     @Override
     public List<IndexTemplate> pagingGetTemplateSrvByCondition(TemplateQueryDTO param) {
         List<IndexTemplatePO> indexTemplatePOS = Lists.newArrayList();
+        String sortTerm = null == param.getSortTerm() ? SortConstant.ID : param.getSortTerm();
+        String sortType = param.getOrderByDesc() ? SortConstant.DESC : SortConstant.ASC;
         try {
             indexTemplatePOS = indexTemplateDAO.pagingByCondition(ConvertUtil.obj2Obj(param, IndexTemplatePO.class),
-                (param.getPage() - 1) * param.getSize(), param.getSize(), SortConstant.ID, SortConstant.DESC);
+                (param.getPage() - 1) * param.getSize(), param.getSize(), sortTerm, sortType);
         } catch (Exception e) {
             LOGGER.error("class=IndexTemplateServiceImpl||method=pagingGetTemplateSrvByCondition||err={}",
                 e.getMessage(), e);

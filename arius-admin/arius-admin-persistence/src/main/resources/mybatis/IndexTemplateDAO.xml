@@ -76,6 +76,8 @@
         <if test="param.resourceId != null"> and `resource_id` = #{param.resourceId}</if>
         <if test="param.desc != null"> and `desc` LIKE CONCAT('%', #{param.desc}, '%')</if>
         <if test="param.projectId != null"> and `project_id` = #{param.projectId}</if>
+        <if test="param.hasDCDR != null"> and `has_dcdr` = #{param.hasDCDR}</if>
+        
         order by  ${sortTerm}  ${sortType}
         limit #{from}, #{size}
     </select>
