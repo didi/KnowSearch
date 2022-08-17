@@ -86,9 +86,6 @@ public class ESIndexDAO extends BaseESDAO {
     public static final String ROLLOVER_API         = "/_rollover";
     public static final  String ALIAS_API              = "/%s/_alias";
     
-    public static final String REASON = "reason";
-    public static final String ERROR     = "error";
-    public static final String CAUSED_BY = "caused_by";
     /**
      * 创建索引
      * @param cluster 集群
