@@ -10,6 +10,7 @@ import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOpe
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.didichuxing.datachannel.arius.admin.common.BiFunctionWithESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.setting.ESIndicesGetAllSettingRequest;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
@@ -130,20 +131,25 @@ public class ESIndexDAO extends BaseESDAO {
      * @param indexConfig 索引配置
      * @return
      */
-    public boolean createIndexWithConfig(String cluster, String indexName, IndexConfig indexConfig,Integer tryTimes) {
+    public boolean createIndexWithConfig(String cluster, String indexName, IndexConfig indexConfig,Integer tryTimes)
+            throws ESOperateException {
         
         ESClient client = fetchESClientByCluster(cluster);
         if (client == null) {
             return Boolean.FALSE;
         }
         indexConfig.setVersion(ESVersion.valueBy(client.getEsVersion()));
-        BiFunction<Long, TimeUnit, ESIndicesPutIndexResponse> esIndicesExistsResponseBiFunction = (timeout, unit) -> {
+        BiFunctionWithESOperateException<Long, TimeUnit, ESIndicesPutIndexResponse> esIndicesExistsResponseBiFunction = (timeout, unit) -> {
             try {
                 return client.admin().indices().preparePutIndex(indexName).setIndexConfig(indexConfig).execute()
                         .actionGet(timeout, unit);
             } catch (Exception e) {
+                final JSONObject exception = ParsingExceptionUtils.getResponseExceptionJsonMessageByException(e);
+                if (Objects.nonNull(exception)) {
+                    throw new ESOperateException(exception.toJSONString());
+                }
                 LOGGER.error("class=ESIndexDAO||method=createIndexWithConfig||cluster={}||indexName={}", cluster);
-                return null;
+                throw  new ESOperateException(e.getMessage());
             }
         };
         ESIndicesPutIndexResponse response = performTryTimesMethods(esIndicesExistsResponseBiFunction, Objects::isNull,
