@@ -32,7 +32,7 @@ public class AriusMetaJobClusterDistributeServiceImpl implements AriusMetaJobClu
      * maxPoolSize，当前monitor-job能支持的最大集群采集个数，
      * 超过maxPoolSize的集群不会被采集，保证maxPoolSize个集群采集的稳定性
      */
-    @Value("${dashboard.threadPool.maxsize:30}")
+    @Value("${monitorJob.threadPool.maxsize:30}")
     private int                              maxPoolSize;
 
     @Autowired

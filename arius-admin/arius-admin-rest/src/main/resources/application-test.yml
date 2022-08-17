@@ -35,8 +35,6 @@ es.client.io.thread.count: 8
 #可观测性相关配置
 monitorJob.threadPool.initsize: 20
 monitorJob.threadPool.maxsize: 20
-dashboard.threadPool.initsize: 5
-dashboard.threadPool.maxsize: 10
 
 #扩展服务相关配置
 extend.service:
