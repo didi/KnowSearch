@@ -182,13 +182,7 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
             }
             param.setId(createLogicClusterResult.getData());
         }
-        //校验项目的合法性
-        final Result<Void> result = ProjectUtils.checkProjectCorrectly(ESLogicClusterWithRegionDTO::getProjectId, param,
-            param.getProjectId());
-        if (result.failed()) {
-            return result;
-        }
-
+    
 
         //6. 为逻辑集群绑定region
         return doBindRegionToClusterLogic(param, operator);
@@ -313,6 +307,31 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
         }
           return clusterRegions.stream().filter(coldTruePreByClusterRegion).collect(Collectors.toList());
     }
+    
+    /**
+     * @param phyCluster
+     * @return
+     */
+    @Override
+    public List<ClusterRegion> listRegionByPhyCluster(String phyCluster) {
+        return clusterRegionService.listPhyClusterRegions(phyCluster);
+    }
+    
+    
+    
+    /**
+     * > 通过逻辑集群 id 构建逻辑集群region vo
+     *
+     * @param logicClusterId 逻辑集群 ID
+     * @return 列表<ClusterRegionVO>
+     */
+    @Override
+    public Result<List<ClusterRegionVO>> buildLogicClusterRegionVOByLogicClusterId(Long logicClusterId) {
+        final ClusterRegion region = clusterRegionService.getRegionByLogicClusterId(logicClusterId);
+    
+        return Result.buildSucc(buildLogicClusterRegionVO(Collections.singletonList(region)));
+    }
+    
     
     /***************************************** private method ****************************************************/
      private final static Predicate<ClusterRegion> coldTruePreByClusterRegion = clusterRegion -> {

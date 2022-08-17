@@ -8,6 +8,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.Temp
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.srv.TemplateSrv;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterConnectionStatusWithTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv.TemplateSrvVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv.TemplateWithSrvVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv.UnavailableTemplateSrvVO;
@@ -19,6 +20,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.template.logic.Index
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import com.google.common.collect.Lists;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -39,9 +41,9 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<Templa
     private static final FutureUtil<TemplateWithSrvVO> TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_CLUSTER_FUTURE_UTIL         =
             FutureUtil
         .init("TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_CLUSTER_FUTURE_UTIL", 10, 10, 100);
- 
-
     
+    private static final String HEALTH_RATE      = "health_rate";
+    private static final String CHECK_POINT_DIFF = "check_point_diff";
     @Autowired
     private IndexTemplateService          indexTemplateService;
 
@@ -118,9 +120,26 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<Templa
         Predicate<IndexTemplate> conditionNotNullProjectIdPre = indexTemplate ->
                 Objects.isNull(condition.getProjectId()) || Objects.equals(indexTemplate.getProjectId(),
                         condition.getProjectId());
-        
+        Predicate<IndexTemplate> hasDCDRPre = indexTemplate -> Objects.isNull(condition.getHasDCDR()) || Objects.equals(
+                indexTemplate.getHasDCDR(),
+            
+                condition.getHasDCDR());
+        Comparator<IndexTemplate> comparator = Comparator.nullsLast(Comparator.comparing(indexTemplate -> {
+            if (StringUtils.equalsIgnoreCase(condition.getSortTerm(), CHECK_POINT_DIFF)) {
+                return indexTemplate.getCheckPointDiff() == null
+                        ? 0.0
+                        : indexTemplate.getCheckPointDiff().doubleValue();
+            } else {
+                return indexTemplate.getId().doubleValue();
+            }
+        }));
+        comparator=condition.getOrderByDesc()?comparator.reversed():comparator;
+    
         return indexTemplateService.listLogicTemplatesByIds(matchTemplateLogicIdList).stream()
-                .filter(conditionNotNullProjectIdPre).filter(conditionNotNullIdPre).filter(conditionNotNullNamePre)
+                .filter(conditionNotNullProjectIdPre).filter(conditionNotNullIdPre)
+                .filter(conditionNotNullNamePre)
+                .filter(hasDCDRPre)
+                .sorted(comparator)
                 .collect(Collectors.toList());
                 
         
@@ -161,9 +180,15 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<Templa
         
         indexTemplatePhies.stream().map(IndexTemplatePhy::getCluster).distinct()
                 .forEach(templateWithSrvVO.getCluster()::add);
-        
-        templateWithSrvVO.setPartition(StringUtils.endsWith(template.getExpression(), "*"));
     
+        templateWithSrvVO.setPartition(StringUtils.endsWith(template.getExpression(), "*"));
+        final List<ClusterConnectionStatusWithTemplateVO> statusWithTemplateList = indexTemplatePhies.stream()
+                //获取到主副本集群的连通状态
+                .map(indexTemplatePhy -> new ClusterConnectionStatusWithTemplateVO(indexTemplatePhy.getCluster(),
+                        templateSrvManager.getClusterConnectionStatus(indexTemplatePhy.getCluster())))
+                .collect(Collectors.toList());
+    
+        templateWithSrvVO.setClusterConnectionStatus(statusWithTemplateList);
         return templateWithSrvVO;
         
     }

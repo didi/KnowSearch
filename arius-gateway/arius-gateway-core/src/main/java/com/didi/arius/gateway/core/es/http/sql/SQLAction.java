@@ -86,7 +86,6 @@ public class SQLAction extends HttpRestHandler {
 		params.remove("filter_path");
 		params.remove(RestConsts.SEARCH_DATE_FROM_PARAMS);
 		params.remove(RestConsts.SEARCH_DATE_TO_PARAMS);
-		params.put(QueryConsts.SEARCH_IGNORE_THROTTLED, "false");
 		setRouteAndScroll(searchRequest, params);
 
 		esSearchRequest.setParams(params);

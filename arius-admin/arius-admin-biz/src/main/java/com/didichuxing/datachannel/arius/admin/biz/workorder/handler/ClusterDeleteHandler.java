@@ -1,6 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.workorder.handler;
 
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
+import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterLogicManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandler;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.ClusterDeleteContent;
@@ -16,7 +17,6 @@ import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType
 import com.didichuxing.datachannel.arius.admin.common.constant.workorder.WorkOrderTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
@@ -41,9 +41,10 @@ public class ClusterDeleteHandler extends BaseWorkOrderHandler {
 
     @Autowired
     private ClusterPhyManager       clusterPhyManager;
-
     @Autowired
-    private ClusterPhyService       clusterPhyService;
+    private ClusterLogicManager clusterLogicManager;
+
+   
 
     @Autowired
     private IndexTemplatePhyService indexTemplatePhyService;
@@ -54,9 +55,9 @@ public class ClusterDeleteHandler extends BaseWorkOrderHandler {
         if (!clusterPhyManager.isClusterExists(content.getPhyClusterName())) {
             return Result.buildFail(String.format("物理集群[%s]不存在", content.getPhyClusterName()));
         }
-
-        List<String> clusterLogicIdList = clusterContextManager
-            .getClusterPhyAssociatedClusterLogicNames(content.getPhyClusterName());
+        
+        List<String> clusterLogicIdList = clusterLogicManager.getClusterPhyAssociatedClusterLogicNames(content.getPhyClusterName());
+        
         if (CollectionUtils.isNotEmpty(clusterLogicIdList)) {
             return Result.buildFail(String.format("物理集群[%s]和逻辑集群[%s]关联", content.getPhyClusterName(),
                 ListUtils.strList2String(clusterLogicIdList)));
@@ -100,12 +101,12 @@ public class ClusterDeleteHandler extends BaseWorkOrderHandler {
     @Override
     protected Result<Void> doProcessAgree(WorkOrder workOrder, String approver) {
         ClusterDeleteContent content = ConvertUtil.obj2ObjByJSON(workOrder.getContentObj(), ClusterDeleteContent.class);
-        ClusterPhy clusterPhy = clusterPhyService.getClusterByName(content.getPhyClusterName());
-        if (null == clusterPhy) {
+        final Result<ClusterPhy> clusterPhyResult = clusterPhyManager.getClusterByName(content.getPhyClusterName());
+        if (null == clusterPhyResult.getData()) {
             return Result.buildFail(String.format("物理集群[%s]不存在", content.getPhyClusterName()));
         }
 
-        Result<Boolean> deleteClusterResult = clusterPhyManager.deleteCluster(clusterPhy.getId(),
+        Result<Boolean> deleteClusterResult = clusterPhyManager.deleteCluster(clusterPhyResult.getData().getId(),
             workOrder.getSubmitor(), AuthConstant.SUPER_PROJECT_ID);
         if (deleteClusterResult.failed()) {
             return Result.buildFail(deleteClusterResult.getMessage());

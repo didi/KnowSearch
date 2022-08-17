@@ -66,5 +66,28 @@ public interface ClusterRegionManager {
     Result<Void> deletePhyClusterRegion(Long regionId, String operator, Integer projectId) throws AdminOperateException;
 
     
+    /**
+     * 通过物理集群获取冷region
+     *
+     * @param phyCluster 物理集群名称
+     * @return ClusterRegion 对象列表
+     */
     List<ClusterRegion> getColdRegionByPhyCluster(String phyCluster);
+    /**
+     * 列出物理集群的所有region
+     *
+     * @param phyCluster 物理集群名称
+     * @return ClusterRegion 对象列表
+     */
+    List<ClusterRegion> listRegionByPhyCluster(String phyCluster);
+    
+    /**
+     * > 通过逻辑集群 id 构建逻辑集群region vo
+     *
+     * @param logicClusterId 逻辑集群 ID
+     * @return 列表<ClusterRegionVO>
+     */
+    Result<List<ClusterRegionVO>> buildLogicClusterRegionVOByLogicClusterId(Long logicClusterId);
+    
+    
 }

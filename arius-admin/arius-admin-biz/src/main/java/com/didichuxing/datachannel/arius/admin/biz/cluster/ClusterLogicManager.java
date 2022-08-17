@@ -15,6 +15,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhy
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PluginVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.ecm.ESClusterNodeSepcVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
@@ -98,13 +99,7 @@ public interface ClusterLogicManager {
      */
     ClusterPhy getLogicClusterAssignedPhysicalClusters(Long logicClusterId);
 
-    /**
-     * 获取所有逻辑集群列表接口
-     * @param param
-     * @param projectId 项目id
-     * @return
-     */
-    List<ClusterLogicVO> getClusterLogics(ESLogicClusterDTO param, Integer projectId);
+
 
     /**
      *  获取单个逻辑集群overView信息
@@ -206,4 +201,32 @@ public interface ClusterLogicManager {
     Result<Boolean> isLogicClusterRegionIsNotEmpty(Long logicClusterId);
     
     Result<List<ClusterLogicVO>> getLogicClustersByLevel(Integer level);
+    
+    /**
+     * 验证集群逻辑的参数
+     *
+     * @param param 要验证的参数对象。
+     * @param operation OperationEnum.ADD、OperationEnum.UPDATE、OperationEnum.DELETE
+     * @param projectId 项目编号
+     */
+    Result<Void> validateClusterLogicParams(ESLogicClusterDTO param, OperationEnum operation, Integer projectId);
+    
+    
+   
+    /**
+     * 加入逻辑集群
+     *
+     * @param logicClusterId 要加入的逻辑集群 ID。
+     * @param joinProjectId 待加入的项目ID
+     * @return 返回类型是 Result<Void>，它是操作结果的包装类。
+     */
+    Result<Void> joinClusterLogic(Long logicClusterId, Integer joinProjectId);
+   
+    /**
+     * 返回与给定物理集群名称关联的逻辑集群名称列表
+     *
+     * @param phyClusterName 物理集群的名称。
+     * @return 与给定集群物理名称关联的集群逻辑名称列表。
+     */
+    List<String> getClusterPhyAssociatedClusterLogicNames(String phyClusterName);
 }

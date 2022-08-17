@@ -23,6 +23,10 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 public class BaseESDAO {
     protected static final ILog LOGGER = LogFactory.getLog(BaseESDAO.class);
+    public static final String REASON    = "reason";
+    public static final String ERROR     = "error";
+    public static final String TYPE      = "type";
+    public static final String CAUSED_BY = "caused_by";
 
     /**
      * 索引名数据中心加载工具类
