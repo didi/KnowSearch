@@ -24,13 +24,13 @@ public class IndicesDistributionVO {
     @ApiModelProperty("索引名")
     private String index;
     @ApiModelProperty("主分片数量")
-    private String pri;
+    private Long pri;
     @ApiModelProperty("副分片数量")
-    private String rep;
+    private Long rep;
     @ApiModelProperty("文档数量")
-    private String docsCount;
+    private Long docsCount;
     @ApiModelProperty("文档删数量")
-    private String docsDeleted;
+    private Long docsDeleted;
     @ApiModelProperty("存储主副本和副本的大小")
     private String storeSize;
     @ApiModelProperty("主分片大小")

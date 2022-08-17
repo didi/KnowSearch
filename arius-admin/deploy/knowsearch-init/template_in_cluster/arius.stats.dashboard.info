@@ -85,6 +85,9 @@
                     "collectorDelayed":{
                          "type":"long"
                     },
+                    "indexCount":{
+                         "type":"long"
+                    },
                     "clusterElapsedTimeGte5Min":{
                         "type":"boolean"
                     },
