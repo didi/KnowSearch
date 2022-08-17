@@ -420,4 +420,13 @@ public interface ESIndexService {
      * @return boolean
      */
     boolean deleteIndex(String clusterName, String indexName);
+    
+    /**
+     * 返回与指定别名匹配的索引数
+     *
+     * @param cluster 集群的名称。
+     * @param alias   索引的别名
+     * @return 与别名匹配的索引数。
+     */
+    Result<Integer> countIndexByAlias(String cluster, String alias);
 }

@@ -7,8 +7,10 @@ import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOpe
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.INDEX_BLOCKS_WRITE;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.INDEX_SETTING_PRE;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.TEMPLATE_INDEX_INCLUDE_NODE_NAME;
+import static java.util.regex.Pattern.compile;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.setting.ESIndicesGetAllSettingRequest;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
@@ -19,6 +21,7 @@ import com.didiglobal.logi.elasticsearch.client.ESClient;
 import com.didiglobal.logi.elasticsearch.client.gateway.direct.DirectRequest;
 import com.didiglobal.logi.elasticsearch.client.gateway.direct.DirectResponse;
 import com.didiglobal.logi.elasticsearch.client.model.Client;
+import com.didiglobal.logi.elasticsearch.client.model.exception.ESAlreadyExistsException;
 import com.didiglobal.logi.elasticsearch.client.model.type.ESVersion;
 import com.didiglobal.logi.elasticsearch.client.request.index.exists.ESIndicesExistsRequest;
 import com.didiglobal.logi.elasticsearch.client.request.index.getindex.ESIndicesGetIndexRequest;
@@ -60,6 +63,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import org.apache.commons.collections4.CollectionUtils;
@@ -80,6 +85,8 @@ public class ESIndexDAO extends BaseESDAO {
     public static final String MAX_NUM_SEGMENTS = "max_num_segments";
     public static final String ONLY_EXPUNGE_DELETES = "only_expunge_deletes";
     public static final String ROLLOVER_API         = "/_rollover";
+    public static final  String ALIAS_API              = "/%s/_alias";
+    private static final String ROLLOVER_ERROR_PATTERN = "index \\[\\w*-\\w*/\\w*] already exists";
  
     
 
@@ -845,8 +852,9 @@ public class ESIndexDAO extends BaseESDAO {
         ESClient client = fetchESClientByCluster(cluster);
         if (client == null) {
             LOGGER.warn("class=ESIndexDAO||method=rollover||errMsg=es client not found");
-            return Result.buildFail();
+            return Result.buildFail("所属集群异常，请检查集群是否正常");
         }
+        
 
         try {
             DirectRequest directRequest = new DirectRequest(HttpMethod.POST.name(), alias + ROLLOVER_API);
@@ -856,12 +864,44 @@ public class ESIndexDAO extends BaseESDAO {
             DirectResponse directResponse = client.direct(directRequest).actionGet(ES_OPERATE_TIMEOUT,
                 TimeUnit.SECONDS);
             return Result.buildWithMsg(RestStatus.OK == directResponse.getRestStatus(),
-                directResponse.getResponseContent());
+                    RestStatus.OK == directResponse.getRestStatus() ? String.format("别名 %s 执行 rollover 成功", alias)
+                            : directResponse.getResponseContent());
+        } catch (ESAlreadyExistsException e){
+            final Pattern compile = compile(ROLLOVER_ERROR_PATTERN);
+            final Matcher matcher = compile.matcher(e.getMessage());
+            String error="";
+            if (matcher.find()) {
+                error = matcher.group();
+            }
+            return Result.buildFail(String.format("%s 需要先删除此索引",error));
         } catch (Exception e) {
             LOGGER.warn("class=ESIndexDAO||method=rollover||errMsg=index rollover fail");
             return Result.buildFail(String.format(FAILED_MSG, "rollover"));
         }
     }
+    
+    
+    public int countIndexByAlias(String cluster, String alias) throws ESOperateException {
+        ESClient client = fetchESClientByCluster(cluster);
+        if (client == null) {
+            LOGGER.warn("class=ESIndexDAO||method=rollover||errMsg=es client not found");
+            throw new ESOperateException(String.format("所属集群 %s 异常，请检查集群是否正常", cluster));
+        }
+        DirectRequest directRequest = new DirectRequest(HttpMethod.GET.name(), String.format(ALIAS_API, alias));
+        try {
+            DirectResponse directResponse = client.direct(directRequest)
+                    .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+            if (RestStatus.OK != directResponse.getRestStatus()) {
+                throw new ESOperateException(directResponse.getResponseContent());
+            }
+            return JSONObject.parseObject(directResponse.getResponseContent()).values().size();
+            
+        } catch (Exception e) {
+            throw new ESOperateException(e.getMessage(), e);
+        }
+        
+    }
+    
 
     public Result<Void> forceMerge(String cluster, String index, Integer maxNumSegments, Boolean onlyExpungeDeletes) {
         ESClient client = fetchESClientByCluster(cluster);
