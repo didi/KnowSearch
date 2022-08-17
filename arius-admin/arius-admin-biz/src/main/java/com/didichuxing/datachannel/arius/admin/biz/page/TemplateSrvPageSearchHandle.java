@@ -120,12 +120,10 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<Templa
         Predicate<IndexTemplate> conditionNotNullProjectIdPre = indexTemplate ->
                 Objects.isNull(condition.getProjectId()) || Objects.equals(indexTemplate.getProjectId(),
                         condition.getProjectId());
-        Predicate<IndexTemplate> hasDCDRPre = indexTemplate -> {
-            if (Objects.isNull(condition.getHasDCDR())) {
-                return true;
-            }
-            return Objects.equals(indexTemplate.getHasDCDR(), condition.getHasDCDR());
-        };
+        Predicate<IndexTemplate> hasDCDRPre = indexTemplate -> Objects.isNull(condition.getHasDCDR()) || Objects.equals(
+                indexTemplate.getHasDCDR(),
+            
+                condition.getHasDCDR());
         Comparator<IndexTemplate> comparator = Comparator.nullsLast(Comparator.comparing(indexTemplate -> {
             if (StringUtils.equalsIgnoreCase(condition.getSortTerm(), CHECK_POINT_DIFF)) {
                 return indexTemplate.getCheckPointDiff() == null
