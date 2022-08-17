@@ -865,7 +865,7 @@ public class ESIndexDAO extends BaseESDAO {
                             : directResponse.getResponseContent());
         } catch (ESAlreadyExistsException e){
             return Result.buildFail(String.format("%s 需要先删除此索引",
-                    RegexUtils.matchExceptionErrorByESAlreadyExistsException(e)));
+                    RegexUtils.matchAlreadyExistsErrorByESAlreadyExistsException(e)));
         } catch (Exception e) {
             LOGGER.warn("class=ESIndexDAO||method=rollover||errMsg=index rollover fail");
             return Result.buildFail(String.format(FAILED_MSG, "rollover"));
@@ -929,14 +929,17 @@ public class ESIndexDAO extends BaseESDAO {
             LOGGER.warn("class=ESIndexDAO||method=forceMerge||errMsg=es client not found");
             return Result.buildFail();
         }
-
+    
         try {
             DirectRequest directRequest = new DirectRequest(HttpMethod.POST.name(), index + "/_shrink/" + targetIndex);
             directRequest.setPostContent(config);
-            DirectResponse directResponse = client.direct(directRequest).actionGet(ES_OPERATE_TIMEOUT,
-                TimeUnit.SECONDS);
+            DirectResponse directResponse = client.direct(directRequest)
+                    .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
             return Result.buildWithMsg(RestStatus.OK == directResponse.getRestStatus(),
-                directResponse.getResponseContent());
+                    directResponse.getResponseContent());
+        } catch (ESAlreadyExistsException e) {
+            return Result.buildFail(String.format("%s 需要先删除此索引",
+                    RegexUtils.matchAlreadyExistsErrorByESAlreadyExistsException(e)));
         } catch (Exception e) {
             LOGGER.warn("class=ESIndexDAO||method=shrink||errMsg=index shrink fail");
             return Result.buildFail(String.format(FAILED_MSG, "shrink"));

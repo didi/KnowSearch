@@ -16,7 +16,6 @@ public final class RegexUtils {
     private RegexUtils() {
     }
     
-    private static final String ROLLOVER_ERROR_PATTERN = "index \\[\\w*-\\w*/\\w*] already exists";
     
     /**
      * 它检查索引名称是否以连字符结尾，后跟一个或多个数字
@@ -29,18 +28,24 @@ public final class RegexUtils {
         return regex.matcher(indexName).find();
     }
     
+    
     /**
-     * 它接受一个 ESAlreadyExistsException 并从异常返回错误消息
+     * 它接受一个 ESAlreadyExistsException 并返回一个包含已存在的索引名称的字符串
      *
-     * @param e 异常对象
+     * @param e 抛出的异常。
      * @return 来自异常的错误消息。
      */
-    public static String matchExceptionErrorByESAlreadyExistsException(ESAlreadyExistsException e) {
-        final Pattern compile = compile(ROLLOVER_ERROR_PATTERN);
+    public static String matchAlreadyExistsErrorByESAlreadyExistsException(ESAlreadyExistsException e) {
+        final Pattern compile = compile("index \\[.+\\d+/\\w+] already exists");
         final Matcher matcher = compile.matcher(e.getMessage());
         String error = "";
         if (matcher.find()) {
-            error = matcher.group();
+            final String group = matcher.group();
+            final Pattern pattern = compile("\"index \\[.+\\d+/\\w+] already exists$");
+            final Matcher m = pattern.matcher(group);
+            if (m.find()) {
+                error = m.group().replace("\"","");
+            }
         }
         return error;
     }
