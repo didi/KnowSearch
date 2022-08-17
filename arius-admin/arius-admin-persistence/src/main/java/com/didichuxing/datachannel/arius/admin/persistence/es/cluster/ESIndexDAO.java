@@ -979,6 +979,9 @@ public class ESIndexDAO extends BaseESDAO {
                 TimeUnit.SECONDS);
             return Result.buildWithMsg(RestStatus.OK == directResponse.getRestStatus(),
                 directResponse.getResponseContent());
+        } catch (ESAlreadyExistsException e) {
+            return Result.buildFail(String.format("%s 需要先删除此索引",
+                    RegexUtils.matchAlreadyExistsErrorByESAlreadyExistsException(e)));
         } catch (Exception e) {
             final JSONObject exception = ParsingExceptionUtils.getResponseExceptionJsonMessageByException(e);
             if (Objects.nonNull(exception)) {
