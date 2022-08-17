@@ -19,7 +19,5 @@ public class ESLogicClusterWithRegionDTO extends ESLogicClusterDTO {
 
     @ApiModelProperty("集群Region")
     private List<ClusterRegionDTO> clusterRegionDTOS;
-     @ApiModelProperty(value = "招行内置",hidden = true)
-    private Boolean bindExistLogicCluster;
     
 }

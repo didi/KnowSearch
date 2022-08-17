@@ -5,7 +5,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRe
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegionConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegionFSInfo;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -21,13 +20,7 @@ public interface ClusterRegionService {
      */
     ClusterRegion getRegionById(Long regionId);
 
-    /**
-     * 获取逻辑集群有的region信息
-     * @param logicClusterId 逻辑集群ID
-     * @return 已经被绑定到指定逻辑集群的region
-     */
-    @Deprecated
-    List<ClusterRegion> listLogicClusterRegions(Long logicClusterId);
+
 
     ClusterRegion getRegionByLogicClusterId(Long logicClusterId);
 

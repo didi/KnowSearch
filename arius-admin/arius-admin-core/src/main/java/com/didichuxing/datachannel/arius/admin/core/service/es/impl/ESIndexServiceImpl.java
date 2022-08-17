@@ -745,6 +745,22 @@ public class ESIndexServiceImpl implements ESIndexService {
         return esIndexDAO.deleteIndex(clusterName,indexName);
     }
     
+    /**
+     * 返回与指定别名匹配的索引数
+     *
+     * @param cluster 集群的名称。
+     * @param alias   索引的别名
+     * @return 与别名匹配的索引数。
+     */
+    @Override
+    public Result<Integer> countIndexByAlias(String cluster, String alias) {
+        try {
+            return Result.buildSucc(esIndexDAO.countIndexByAlias(cluster, alias));
+        } catch (ESOperateException e) {
+            return Result.buildFail(e.getMessage());
+        }
+    }
+    
     /***************************************** private method ****************************************************/
 
     private Tuple<Boolean, Boolean> getWriteAndReadBlock(IndexConfig indexConfig) {

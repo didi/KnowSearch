@@ -9,7 +9,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicCl
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
-import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -50,7 +49,8 @@ public class ESLogicClusterController {
 
     public Result<List<ClusterLogicVO>> queryAllLogicClusters(@RequestBody ESLogicClusterDTO param,
                                                               HttpServletRequest request) {
-        return Result.buildSucc(clusterLogicManager.getClusterLogics(param, HttpRequestUtil.getProjectId(request)));
+        //return Result.buildSucc(clusterLogicManager.getClusterLogics(param, HttpRequestUtil.getProjectId(request)));
+         return Result.buildFail("接口已经下线：迁移到v3");
     }
 
     @GetMapping("/resource/get")

@@ -249,4 +249,12 @@ public interface ClusterLogicService {
      * @return {@code List<ClusterLogic>}
      */
     List<ClusterLogic> listLogicClustersByLevelThatProjectIdStrConvertProjectIdList(Integer level);
+    
+    /**
+     * > 加入集群
+     *
+     * @param param 加入集群逻辑的参数对象。
+     * @return 加入集群逻辑的结果。
+     */
+    Result<Long> joinClusterLogic(ESLogicClusterDTO param);
 }
