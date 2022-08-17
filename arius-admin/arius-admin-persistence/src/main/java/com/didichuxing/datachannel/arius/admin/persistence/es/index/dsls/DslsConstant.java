@@ -161,7 +161,7 @@ public class DslsConstant {
     public static final String GET_MULTIPLE_TEMPLATE_FIRST_INTERVAL_AGG_METRICS_WITH_STEP    = "AriusStatsIndexInfoEsDao/getAggMultipleTemplateMetricsWithStep";
 
     /**
-     * 查询topN索引聚合信息
+     * 查询topN模板聚合信息
      */
     public static final String GET_TOPN_TEMPLATE_AGG_METRICS                                 = "AriusStatsIndexInfoEsDao/getTopNTemplateAggMetrics";
 
