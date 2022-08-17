@@ -88,7 +88,7 @@ public class ShardCatInfoCollector extends AbstractMetaDataJob {
         for (List<ShardCatCellPO> shardCatCellPOS : resultList) {
             shardCatCellList.addAll(shardCatCellPOS);
         }
-        esShardCatService.syncUpsertCatShard(shardCatCellList,RETRY_TIMES);
+        esShardCatService.syncInsertCatShard(shardCatCellList,RETRY_TIMES);
         return JOB_SUCCESS;
     }
 

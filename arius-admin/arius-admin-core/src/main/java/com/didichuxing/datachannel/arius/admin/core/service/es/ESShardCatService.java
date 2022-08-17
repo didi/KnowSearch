@@ -33,5 +33,5 @@ public interface ESShardCatService {
      * @param retryCount
      * @return
      */
-    Boolean syncUpsertCatShard(List<ShardCatCellPO> params, int retryCount);
+    Boolean syncInsertCatShard(List<ShardCatCellPO> params, int retryCount);
 }

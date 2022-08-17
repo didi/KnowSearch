@@ -58,17 +58,17 @@ public class ESShardCatServiceImpl implements ESShardCatService {
     }
 
     @Override
-    public Boolean syncUpsertCatShard(List<ShardCatCellPO> params, int retryCount) {
+    public Boolean syncInsertCatShard(List<ShardCatCellPO> params, int retryCount) {
         BatchProcessor.BatchProcessResult<ShardCatCellPO, Boolean> result = new BatchProcessor<ShardCatCellPO, Boolean>().batchList(
                         params).batchSize(5000).processor(
-                        items -> esShardDAO.batchUpsert(ConvertUtil.list2List(params, ShardCatCellPO.class), retryCount))
+                        items -> esShardDAO.batchInsert(ConvertUtil.list2List(params, ShardCatCellPO.class)))
                 .succChecker(succ -> succ).process();
 
         if (!result.isSucc()) {
             List<String> clusterList = params.stream().map(ShardCatCellPO::getClusterPhy).distinct()
                     .collect(Collectors.toList());
             LOGGER.error(
-                    "class=ESShardCatServiceImpl||method=syncUpsertCatShard||cluster={}||errMsg=failed to batchInsert, batch total count = {}, batch failed count={}",
+                    "class=ESShardCatServiceImpl||method=syncInsertCatShard||cluster={}||errMsg=failed to batchInsert, batch total count = {}, batch failed count={}",
                     ListUtils.strList2String(clusterList),  params.size(),
                     result.getFailAndErrorCount());
         }
