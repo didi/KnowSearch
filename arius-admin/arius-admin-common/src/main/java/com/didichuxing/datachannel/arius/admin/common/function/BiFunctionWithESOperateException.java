@@ -1,4 +1,4 @@
-package com.didichuxing.datachannel.arius.admin.common;
+package com.didichuxing.datachannel.arius.admin.common.function;
 
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import java.util.Objects;

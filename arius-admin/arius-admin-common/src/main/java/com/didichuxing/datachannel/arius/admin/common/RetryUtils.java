@@ -1,6 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.common;
 
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import com.didichuxing.datachannel.arius.admin.common.function.BiFunctionWithESOperateException;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
