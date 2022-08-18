@@ -79,8 +79,8 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public class ESIndexDAO extends BaseESDAO {
-
-    public static final String FAILED_MSG       = "%s 执行失败,请检查参数与索引配置";
+    
+    public static final String FAILED_MSG = "%s 执行失败, 请检查参数与索引配置";
     public static final String MAX_NUM_SEGMENTS = "max_num_segments";
     public static final String ONLY_EXPUNGE_DELETES = "only_expunge_deletes";
     public static final String ROLLOVER_API         = "/_rollover";
@@ -973,7 +973,9 @@ public class ESIndexDAO extends BaseESDAO {
             LOGGER.warn("class=ESIndexDAO||method=forceMerge||errMsg=es client not found");
             return Result.buildFail();
         }
-
+        if (Integer.parseInt(client.getEsVersion().substring(0, 1)) < 6) {
+            return Result.buildFail(String.format("es %s 不支持 split 功能", client.getEsVersion()));
+        }
         try {
             DirectRequest directRequest = new DirectRequest(HttpMethod.POST.name(), index + "/_split/" + targetIndex);
             directRequest.setPostContent(config);
