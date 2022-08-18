@@ -152,4 +152,12 @@ public class ESLogicClusterOpV3Controller {
     public Result<List<PluginVO>> pluginList(Long clusterId) {
         return clusterLogicManager.getClusterLogicPlugins(clusterId);
     }
+
+    //展示物理集群对应的逻辑集群名
+    @GetMapping("/cluster-phy-logic-names/{phyClusterName}")
+    @ResponseBody
+    @ApiOperation(value = "获取物理集群所对应的逻辑集群名")
+    public Result<List<String>> listClusterLogicNameByPhy(@PathVariable String phyClusterName) {
+        return Result.buildSucc(clusterLogicManager.listClusterLogicNameByPhy(phyClusterName));
+    }
 }

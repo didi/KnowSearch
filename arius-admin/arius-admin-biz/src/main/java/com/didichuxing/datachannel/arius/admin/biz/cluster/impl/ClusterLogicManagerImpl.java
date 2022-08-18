@@ -733,6 +733,23 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     }
 
     /**
+     * 根据物理集群名获取对应的逻辑集群列表，若传入为空，则返回全量
+     * @param phyClusterName 物理集群的名称
+     * @return Result<List<String>>
+     */
+    @Override
+    public List<String> listClusterLogicNameByPhy(String phyClusterName) {
+        List<String> names = Lists.newArrayList();
+        //若传入为空，则返回全量
+        if (null == phyClusterName) {
+            names = clusterPhyService.listClusterNames();
+        } else {
+            names = getClusterPhyAssociatedClusterLogicNames(phyClusterName);
+        }
+        return names;
+    }
+
+    /**
      * 返回与给定物理集群名称关联的逻辑集群名称列表
      *
      * @param phyClusterName 物理集群的名称。
@@ -752,7 +769,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
                 .filter(clusterRegion -> Objects.nonNull(clusterRegion.getLogicClusterIds()))
                 .map(clusterRegion -> ListUtils.string2LongList(clusterRegion.getLogicClusterIds()))
                 .filter(CollectionUtils::isNotEmpty).flatMap(Collection::stream)
-                .filter(logicId -> Objects.equals(logicId,
+                .filter(logicId -> !Objects.equals(logicId,
                         Long.parseLong(AdminConstant.REGION_NOT_BOUND_LOGIC_CLUSTER_ID))).distinct()
                 .collect(Collectors.toList());
         if (CollectionUtils.isEmpty(logicIds)){
