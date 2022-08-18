@@ -114,6 +114,7 @@ public class PackageDomainServiceImpl implements PackageDomainService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Result<Void> deletePackage(Package pk) {
         //删除文件存储中的相关包文件
         Result<String> deleteStorage = storageService.remove(getDeleteFileName(pk.getUrl()));

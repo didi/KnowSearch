@@ -66,4 +66,9 @@ public class PackageDTO {
      * 关联的默认安装包分组配置
      */
     private List<PackageGroupConfigDTO> groupConfigList;
+
+    /**
+     * 关联的默认安装包分组配置String
+     */
+    private String groupConfigListString;
 }

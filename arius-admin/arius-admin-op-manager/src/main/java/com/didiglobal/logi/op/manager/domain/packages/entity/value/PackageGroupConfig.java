@@ -26,15 +26,15 @@ public class PackageGroupConfig {
     /**
      * 系统配置
      */
-    private JSONObject systemConfig;
+    private String systemConfig;
     /**
      * 运行时配置
      */
-    private JSONObject runningConfig;
+    private String runningConfig;
     /**
      * 文件配置
      */
-    private JSONObject fileConfig;
+    private String fileConfig;
     /**
      * 关联安装包id
      */

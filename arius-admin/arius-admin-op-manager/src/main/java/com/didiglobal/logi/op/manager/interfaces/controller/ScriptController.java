@@ -4,14 +4,11 @@ import com.didiglobal.logi.op.manager.application.ScriptService;
 import com.didiglobal.logi.op.manager.domain.script.entity.Script;
 import com.didiglobal.logi.op.manager.infrastructure.common.Constants;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
-import com.didiglobal.logi.op.manager.infrastructure.storage.hander.S3FileStorageHandle;
 import com.didiglobal.logi.op.manager.interfaces.assembler.ScriptAssembler;
 import com.didiglobal.logi.op.manager.interfaces.dto.ScriptDTO;
 import com.didiglobal.logi.op.manager.interfaces.vo.ScriptVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,11 +25,6 @@ public class ScriptController {
 
     @Autowired
     private ScriptService scriptService;
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(ScriptController.class);
-
-    @Autowired
-    S3FileStorageHandle s3FileStorageHandle;
 
     @PostMapping("/query")
     @ApiOperation(value = "获取脚本中心列表")
