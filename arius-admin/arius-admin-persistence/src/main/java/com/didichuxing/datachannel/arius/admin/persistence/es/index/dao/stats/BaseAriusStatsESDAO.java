@@ -37,6 +37,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.*;
+import static com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats.AriusStatsDashBoardInfoESDAO.INDEX_COUNT;
 
 @NoArgsConstructor
 public class BaseAriusStatsESDAO extends BaseESDAO {
@@ -499,38 +500,6 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
     }
 
     /**
-     *
-     * @param response         返回值
-     * @param oneLevelType     一级指标类型(@link OneLevelTypeEnum)
-     * @param metricsKeys      多个指标类型
-     * @param topNu            topN
-     * @return                 结果
-     */
-    List<VariousLineChartMetrics> fetchMultipleAggMetricsTop(ESQueryResponse response, String oneLevelType,
-                                                             List<String> metricsKeys, Integer topNu,
-                                                             Integer topMethod) {
-        List<VariousLineChartMetrics> variousLineChartsMetrics = Lists.newArrayList();
-
-        if (null == response || response.getAggs() == null) {
-            LOGGER.warn("class=BaseAriusStatsESDAO||method=fetchMultipleAggMetrics||msg=esQueryResponse is null");
-            return variousLineChartsMetrics;
-        }
-
-        Map<String, ESAggr> esAggrMap = response.getAggs().getEsAggrMap();
-        if (null != esAggrMap && null != esAggrMap.get(HIST)) {
-            metricsKeys.forEach(
-                key -> variousLineChartsMetrics.add(buildVariousLineChartMetrics(oneLevelType, key, esAggrMap)));
-        }
-
-        //get topNu
-        if (topNu != null) {
-            variousLineChartsMetrics.forEach(metrics -> mergeTopNu(metrics, topNu));
-        }
-
-        return variousLineChartsMetrics;
-    }
-
-    /**
      * @param response    返回值
      * @param metricsKeys 多个指标类型
      * @param topNu       topN
@@ -748,7 +717,6 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
 
     private List<MetricsContent> buildMetricsContents(String oneLevelType, String key, Map<String, ESAggr> esAggrMap) {
         List<MetricsContent> metricsContents = Lists.newArrayList();
-
         esAggrMap.get(HIST).getBucketList().forEach(esBucket -> {
             //get nodeName
             if (null != esBucket.getUnusedMap().get(KEY)) {
@@ -768,8 +736,7 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
                     metricsContent.setName(keyValue);
                     metricsContent.setCluster(keyValue);
                 }
-
-                metricsContent.setMetricsContentCells(buildMetricsContentCells(key, esBucket));
+                buildMetricsContentCells(metricsContent,key, esBucket);
                 metricsContents.add(metricsContent);
             }
         });
@@ -777,7 +744,7 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
         return metricsContents;
     }
 
-    private List<MetricsContentCell> buildMetricsContentCells(String key, ESBucket esBucket) {
+    private void buildMetricsContentCells(MetricsContent metricsContent,String key, ESBucket esBucket) {
         List<MetricsContentCell> metricsContentCells = Lists.newArrayList();
 
         esBucket.getAggrMap().get(HIST).getBucketList().forEach(esSubBucket -> {
@@ -793,11 +760,15 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
             if (null != esAggr && null != esAggr.getUnusedMap().get(VALUE)) {
                 metricsContentCell.setValue(Double.parseDouble(esAggr.getUnusedMap().get(VALUE).toString()));
             }
+            //get indexCount
+            if (INDEX_COUNT.equals(key)&&null != esAggr && null != esAggr.getUnusedMap().get(VALUE)) {
+                metricsContent.setIndexCount(Long.parseLong(esAggr.getUnusedMap().get(VALUE).toString()));
+            }
 
             metricsContentCells.add(metricsContentCell);
         });
 
-        return metricsContentCells;
+        metricsContent.setMetricsContentCells(metricsContentCells);
     }
 
     private List<MetricsContentCell> buildMetricsNoNegativeContentCells(String key, ESBucket esBucket) {

@@ -20,14 +20,14 @@
         <result column="disk_usage"                 jdbcType="BIGINT" property="diskUsage"/>
         <result column="disk_usage_percent"         jdbcType="DECIMAL" property="diskUsagePercent"/>
         <result column="es_cluster_version"         jdbcType="VARCHAR" property="esClusterVersion"/>
-        <result column="node_num"                   jdbcType="INTEGER" property="nodeNum"/>
+        <result column="data_node_num"              jdbcType="INTEGER" property="dataNodeNum"/>
 
 
     </resultMap>
 
     <sql id="Base_Column_List">
         id , `name`, `type`, project_id, data_center,  memo, quota, `level`, config_json, create_time, update_time, health,data_node_spec,
-            disk_total,disk_usage,disk_usage_percent,es_cluster_version,node_num
+            disk_total,disk_usage,disk_usage_percent,es_cluster_version,data_node_num
     </sql>
 
     <select id="listByCondition"
@@ -85,7 +85,7 @@
             <if test="diskUsage != null">, disk_usage = #{diskUsage}</if>
             <if test="diskUsagePercent != null">, disk_usage_percent = #{diskUsagePercent}</if>
             <if test="esClusterVersion != null">, es_cluster_version = #{esClusterVersion}</if>
-            <if test="nodeNum != null">, node_num = #{nodeNum}</if>
+            <if test="dataNodeNum != null">, data_node_num = #{dataNodeNum}</if>
         </trim>
         where id = #{id}
     </update>

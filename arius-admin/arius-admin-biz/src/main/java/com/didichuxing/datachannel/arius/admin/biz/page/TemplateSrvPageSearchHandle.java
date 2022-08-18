@@ -42,8 +42,8 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<Templa
             FutureUtil
         .init("TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_CLUSTER_FUTURE_UTIL", 10, 10, 100);
     
-    private static final String HEALTH_RATE = "health_rate";
-    
+    private static final String HEALTH_RATE      = "health_rate";
+    private static final String CHECK_POINT_DIFF = "check_point_diff";
     @Autowired
     private IndexTemplateService          indexTemplateService;
 
@@ -120,9 +120,15 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<Templa
         Predicate<IndexTemplate> conditionNotNullProjectIdPre = indexTemplate ->
                 Objects.isNull(condition.getProjectId()) || Objects.equals(indexTemplate.getProjectId(),
                         condition.getProjectId());
+        Predicate<IndexTemplate> hasDCDRPre = indexTemplate -> Objects.isNull(condition.getHasDCDR()) || Objects.equals(
+                indexTemplate.getHasDCDR(),
+            
+                condition.getHasDCDR());
         Comparator<IndexTemplate> comparator = Comparator.nullsLast(Comparator.comparing(indexTemplate -> {
-            if (StringUtils.equalsIgnoreCase(condition.getSortTerm(), HEALTH_RATE)) {
-                return indexTemplate.getHealthRate();
+            if (StringUtils.equalsIgnoreCase(condition.getSortTerm(), CHECK_POINT_DIFF)) {
+                return indexTemplate.getCheckPointDiff() == null
+                        ? 0.0
+                        : indexTemplate.getCheckPointDiff().doubleValue();
             } else {
                 return indexTemplate.getId().doubleValue();
             }
@@ -132,6 +138,7 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<Templa
         return indexTemplateService.listLogicTemplatesByIds(matchTemplateLogicIdList).stream()
                 .filter(conditionNotNullProjectIdPre).filter(conditionNotNullIdPre)
                 .filter(conditionNotNullNamePre)
+                .filter(hasDCDRPre)
                 .sorted(comparator)
                 .collect(Collectors.toList());
                 

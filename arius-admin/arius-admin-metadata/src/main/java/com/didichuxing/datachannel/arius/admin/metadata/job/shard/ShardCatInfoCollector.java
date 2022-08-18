@@ -86,12 +86,9 @@ public class ShardCatInfoCollector extends AbstractMetaDataJob {
         }
         List<List<ShardCatCellPO>> resultList = batchResult.getResultList();
         for (List<ShardCatCellPO> shardCatCellPOS : resultList) {
-            for (ShardCatCellPO shardCatCellPO:shardCatCellPOS) {
-                shardCatCellPO.setTimestamp(currentTimeMillis);
-            }
             shardCatCellList.addAll(shardCatCellPOS);
         }
-        esShardDAO.batchInsert(shardCatCellList);
+        esShardCatService.syncInsertCatShard(shardCatCellList,RETRY_TIMES);
         return JOB_SUCCESS;
     }
 
@@ -103,12 +100,12 @@ public class ShardCatInfoCollector extends AbstractMetaDataJob {
                 catShardCellList.addAll(shardCatCells);
             }
         }
-
         return catShardCellList;
     }
 
     private List<ShardCatCellPO> getShardCatCells(String clusterName) {
-        List<ShardCatCellPO> shardDistributionVOS = esShardCatService.syncShardDistribution(clusterName);
+        long currentTimeMillis = System.currentTimeMillis();
+        List<ShardCatCellPO> shardDistributionVOS = esShardCatService.syncShardDistribution(clusterName,currentTimeMillis);
         return shardDistributionVOS;
     }
 }

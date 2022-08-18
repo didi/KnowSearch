@@ -3,6 +3,7 @@ package com.didichuxing.datachannel.arius.admin.metadata.job.index;
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.JOB_SUCCESS;
 
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
+import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatCellDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
@@ -114,8 +115,13 @@ public class IndexCatInfoCollector extends AbstractMetaDataJob {
                         long timeMillis = System.currentTimeMillis();
 
                         // 1. 构建segment count 信息
+                        // 对于高版本集群（7以上），直接通过_cat/segments命令获取集群segments数据(默认跳过关闭索引)
                         Map<String, Tuple<Long /*totalSegmentCount*/, Long /*primarySegmentCount*/>> indices2SegmentCountMap =
                                 getIndex2SegmentCountMap(clusterName);
+                        // 对于低版本集群（7以下），如果有索引关闭，则上面方法获取不到集群segment数据，要通过下面方法获取（相比来说较为麻烦，所以优先使用上面方法）
+                        if(indices2SegmentCountMap.isEmpty()){
+                            indices2SegmentCountMap = getLowVersionIndex2SegmentCountMap(clusterName);
+                        }
 
                         // 2. 获取物理集群下所有逻辑模板
                         List<IndexTemplatePhyWithLogic> indexTemplatePhyWithLogicList = indexTemplatePhyService.getTemplateByPhyCluster(clusterName);
@@ -211,20 +217,20 @@ public class IndexCatInfoCollector extends AbstractMetaDataJob {
         for (CatIndexResult catIndexResult : catIndexMatchAriusTemplateList) {
             // 构建基础数据
             IndexCatCellPO indexCatCellPO = buildBasicIndexCatCell(indices2SegmentCountMap, clusterName, timeMillis, catIndexResult);
-    
+
             // 根据索引名称获取平台模板名称, 匹配为null，则不去设置设置模板相关的属性
             IndexTemplatePhyWithLogic indexTemplatePhyWithLogic = templateName2IndexTemplatePhyWithLogicMap.get(
                     indexCatCellPO.getIndex());
-    
+
             if (Objects.isNull(indexTemplatePhyWithLogic)) {
                 String templateName = TemplateUtils.getMatchTemplateNameByIndexName(indexCatCellPO.getIndex());
                 if (StringUtils.isNotBlank(templateName)) {
                     indexTemplatePhyWithLogic = templateName2IndexTemplatePhyWithLogicMap.get(templateName);
                 }
-        
+
             }
             if (Objects.nonNull(indexTemplatePhyWithLogic)) {
-        
+
                 IndexTemplate logicTemplate = indexTemplatePhyWithLogic.getLogicTemplate();
                 if (null != logicTemplate) {
                     String clusterLogic = logicClusterId2NameMap.get(logicTemplate.getResourceId());
@@ -299,6 +305,39 @@ public class IndexCatInfoCollector extends AbstractMetaDataJob {
         }
 
         return index2SegmentCountMap;
+    }
+
+    /**
+     * 对于低版本集群（7以下），如果有索引关闭，则不能直接通过_cat/segments命令获取集群的segment数据，
+     * 要先把close的索引过滤掉，再对其他索引逐一获取segment信息
+     * @param clusterName
+     * @return
+     */
+    private  Map<String, Tuple<Long /*totalSegmentCount*/, Long /*primarySegmentCount*/>> getLowVersionIndex2SegmentCountMap(String clusterName){
+        Map<String, Tuple<Long/*totalSegmentCount*/, Long/*primarySegmentCount*/>> lowVersionIndex2SegmentCountMap = Maps.newHashMap();
+
+        // 获取集群的索引列表
+        List<CatIndexResult> catIndices = esIndexService.syncCatIndex(clusterName, 3);
+        // 过滤掉close状态的索引
+        List<String> openIndexNameList = catIndices.stream().filter(index -> index.getStatus().equals("open"))
+                .map(CatIndexResult::getIndex).collect(Collectors.toList());
+        // 获取含segments信息的索引
+        Result<List<IndexCatCellDTO>> result = esIndexCatService.syncGetSegmentsIndexList(clusterName, openIndexNameList);
+        if (result.failed()) {
+            LOGGER.warn("class=IndexCatInfoCollector||method=getLowVersionIndex2SegmentCountMap||cluster={}||msg={}",
+                    clusterName, result.getMessage());
+            return lowVersionIndex2SegmentCountMap;
+        }
+        List<IndexCatCellDTO> indexCatCellList = result.getData();
+        for (IndexCatCellDTO index : indexCatCellList) {
+            Tuple<Long, Long> totalSegmentCount2PrimarySegmentCountTuple = new Tuple<>();
+            totalSegmentCount2PrimarySegmentCountTuple.setV1(index.getTotalSegmentCount());
+            totalSegmentCount2PrimarySegmentCountTuple.setV2(index.getPrimariesSegmentCount());
+
+            lowVersionIndex2SegmentCountMap.put(index.getIndex(), totalSegmentCount2PrimarySegmentCountTuple);
+        }
+
+        return lowVersionIndex2SegmentCountMap;
     }
 
     /**
