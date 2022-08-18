@@ -731,7 +731,8 @@ public class ESIndexServiceImpl implements ESIndexService {
      * @return
      */
     @Override
-    public boolean createIndexWithConfig(String clusterName, String indexName, IndexConfig indexConfig, int tryTimes) {
+    public boolean createIndexWithConfig(String clusterName, String indexName, IndexConfig indexConfig, int tryTimes)
+            throws ESOperateException {
         return esIndexDAO.createIndexWithConfig(clusterName,indexName,indexConfig,tryTimes);
     }
     
