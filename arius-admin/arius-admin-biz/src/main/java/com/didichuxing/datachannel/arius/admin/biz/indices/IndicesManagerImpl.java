@@ -3,6 +3,7 @@ package com.didichuxing.datachannel.arius.admin.biz.indices;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.PRIMARY;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.didichuxing.datachannel.arius.admin.biz.page.IndexPageSearchHandle;
@@ -664,7 +665,7 @@ public class IndicesManagerImpl implements IndicesManager {
         if (null == param.getIndices()) {
             return Result.buildFail("索引为空");
         }
-
+        JSONArray resultMessage=new JSONArray();
         for (IndexCatCellDTO indexCatCellDTO : param.getIndices()) {
             String cluster = indexCatCellDTO.getCluster();
             if (!RegexUtils.checkEndWithHyphenNumbers(indexCatCellDTO.getIndex())) {
@@ -691,6 +692,7 @@ public class IndicesManagerImpl implements IndicesManager {
             if (rolloverResult.failed()) {
                 return rolloverResult;
             }
+            resultMessage.add(JSONObject.parseObject(rolloverResult.getMessage()));
             //操作记录
         operateRecordService.save(new OperateRecord.Builder()
                         .userOperation(operator)
@@ -701,7 +703,7 @@ public class IndicesManagerImpl implements IndicesManager {
                 .buildDefaultManualTrigger());
         }
 
-        return Result.buildSucc();
+        return Result.buildSuccWithMsg(resultMessage.toJSONString());
     }
 
     @Override
@@ -744,12 +746,13 @@ public class IndicesManagerImpl implements IndicesManager {
         if (null == param.getIndices()) {
             return Result.buildFail("索引为空");
         }
+        JSONArray resultMessage=new JSONArray();
         List<TupleTwo</*cluster*/String,/*index*/String>> clusterIndexTuple=Lists.newArrayList();
         for (IndexCatCellDTO indexCatCellDTO : param.getIndices()) {
             Result<Void> forceMergeResult = esIndexService.forceMerge(indexCatCellDTO.getCluster(),
                 indexCatCellDTO.getIndex(), param.getMaxNumSegments(), param.getOnlyExpungeDeletes());
             if (forceMergeResult.failed()) {
-                return forceMergeResult;
+                return Result.buildFrom(forceMergeResult);
             }
                  //操作记录
         operateRecordService.save(new OperateRecord.Builder()
@@ -760,10 +763,11 @@ public class IndicesManagerImpl implements IndicesManager {
                         .bizId(indexCatCellDTO.getIndex())
                 .buildDefaultManualTrigger());
             clusterIndexTuple.add(Tuples.of(indexCatCellDTO.getCluster(), indexCatCellDTO.getIndex()));
+            resultMessage.add(JSON.parseObject(forceMergeResult.getMessage()));
         }
         //需要发布事件进行arius_cat_index_info 采集更新信息，尽可能保证数据的时效性
         SpringTool.publish(new RefreshCatIndexInfoEvent(this, clusterIndexTuple));
-        return Result.buildSucc();
+        return Result.buildSuccWithMsg(resultMessage.toJSONString());
     }
 
     @Override
