@@ -5,7 +5,6 @@ import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOpe
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.INDEX_SHARD_NUM;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.TEMPLATE_DEFAULT_ORDER;
 
-import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.function.BiFunctionWithESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
@@ -182,9 +181,9 @@ public class ESTemplateDAO extends BaseESDAO {
                 return client.admin().indices().prepareGetTemplate(name + "*").execute()
                         .actionGet(time,unit);
             } catch (Exception e) {
-                  final JSONObject exception = ParsingExceptionUtils.getResponseExceptionJsonMessageByException(e);
+                  final String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
                 if (Objects.nonNull(exception)) {
-                    throw  new ESOperateException(exception.toJSONString());
+                    throw  new ESOperateException(exception);
                 }
                 LOGGER.warn("class=ESTemplateDAO||method=create||msg=get src template fail||cluster={}||name={}",
                         cluster, name);
@@ -253,9 +252,9 @@ public class ESTemplateDAO extends BaseESDAO {
                         .actionGet(time, unit);
             
             } catch (Exception e) {
-                final JSONObject exception = ParsingExceptionUtils.getResponseExceptionJsonMessageByException(e);
+                final String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
                 if (Objects.nonNull(exception)) {
-                    throw new ESOperateException(exception.toJSONString());
+                    throw new ESOperateException(exception);
                 }
                 LOGGER.error("class=ESTemplateDAO||method=create||put templates fail||clusterName={}||templateName={}",
                         cluster, name, e);

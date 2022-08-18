@@ -17,7 +17,6 @@ import com.didichuxing.datachannel.arius.admin.common.function.BiFunctionWithESO
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ParsingExceptionUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.RegexUtils;
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
 import com.didiglobal.logi.elasticsearch.client.ESClient;
 import com.didiglobal.logi.elasticsearch.client.gateway.direct.DirectRequest;
@@ -144,9 +143,9 @@ public class ESIndexDAO extends BaseESDAO {
                 return client.admin().indices().preparePutIndex(indexName).setIndexConfig(indexConfig).execute()
                         .actionGet(timeout, unit);
             } catch (Exception e) {
-                final JSONObject exception = ParsingExceptionUtils.getResponseExceptionJsonMessageByException(e);
+                final String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
                 if (Objects.nonNull(exception)) {
-                    throw new ESOperateException(exception.toJSONString());
+                    throw new ESOperateException(exception);
                 }
                 LOGGER.error("class=ESIndexDAO||method=createIndexWithConfig||cluster={}||indexName={}", cluster);
                 throw  new ESOperateException(e.getMessage());
@@ -870,16 +869,14 @@ public class ESIndexDAO extends BaseESDAO {
                             : directResponse.getResponseContent());
         }catch (ESAlreadyExistsException e){
             return Result.buildFail(String.format("%s 需要先删除此索引",
-                    RegexUtils.matchAlreadyExistsErrorByESAlreadyExistsException(e)));
+                    ParsingExceptionUtils.getESErrorMessageByException(e)));
         }
         catch (Exception e) {
-            final JSONObject exception = ParsingExceptionUtils.getResponseExceptionJsonMessageByException(e);
-            final Optional<String> reason = Optional.ofNullable(exception).map(json -> json.getJSONObject(ERROR))
-                    .map(json -> json.getJSONObject(CAUSED_BY)).map(json -> json.getJSONObject(CAUSED_BY))
-                    .map(json -> json.getString(REASON));
-            if (reason.isPresent()) {
-                return Result.buildFail(reason.get());
+            final String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
+            if (Objects.nonNull(exception)) {
+                return Result.buildFail(exception);
             }
+            
             
             LOGGER.warn("class=ESIndexDAO||method=rollover||errMsg=index rollover fail");
             return Result.buildFail(String.format(FAILED_MSG, "rollover"));
@@ -932,9 +929,9 @@ public class ESIndexDAO extends BaseESDAO {
             return Result.buildWithMsg(RestStatus.OK == directResponse.getRestStatus(),
                 directResponse.getResponseContent());
         } catch (Exception e) {
-            final JSONObject exception = ParsingExceptionUtils.getResponseExceptionJsonMessageByException(e);
+            final String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
             if (Objects.nonNull(exception)) {
-                return Result.buildFail(exception.toJSONString());
+                return Result.buildFail(exception);
             }
             LOGGER.warn("class=ESIndexDAO||method=forceMerge||errMsg=index forceMerge fail");
             return Result.buildFail(String.format(FAILED_MSG, "forceMerge"));
@@ -957,14 +954,13 @@ public class ESIndexDAO extends BaseESDAO {
                     directResponse.getResponseContent());
         } catch (ESAlreadyExistsException e) {
             return Result.buildFail(String.format("%s 需要先删除此索引",
-                    RegexUtils.matchAlreadyExistsErrorByESAlreadyExistsException(e)));
+                    ParsingExceptionUtils.getESErrorMessageByException(e)));
         } catch (Exception e) {
-            final JSONObject exception = ParsingExceptionUtils.getResponseExceptionJsonMessageByException(
+            final String exception = ParsingExceptionUtils.getESErrorMessageByException(
                     e);
-            final Optional<String> reason = Optional.ofNullable(exception).map(json -> json.getJSONObject(ERROR))
-                    .map(json -> json.getString(REASON));
-            if (reason.isPresent()) {
-                return Result.buildFail(reason.get());
+        
+            if (Objects.nonNull(exception)) {
+                return Result.buildFail(exception);
             }
             LOGGER.warn("class=ESIndexDAO||method=shrink||errMsg=index shrink fail");
             return Result.buildFail(String.format(FAILED_MSG, "shrink"));
@@ -987,11 +983,11 @@ public class ESIndexDAO extends BaseESDAO {
                 directResponse.getResponseContent());
         } catch (ESAlreadyExistsException e) {
             return Result.buildFail(String.format("%s 需要先删除此索引",
-                    RegexUtils.matchAlreadyExistsErrorByESAlreadyExistsException(e)));
+                    ParsingExceptionUtils.getESErrorMessageByException(e)));
         } catch (Exception e) {
-            final JSONObject exception = ParsingExceptionUtils.getResponseExceptionJsonMessageByException(e);
+            final String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
             if (Objects.nonNull(exception)) {
-                return Result.buildFail(exception.toJSONString());
+                return Result.buildFail(exception);
             }
             LOGGER.warn("class=ESIndexDAO||method=split||errMsg=index split fail");
             return Result.buildFail(String.format(FAILED_MSG, "split"));

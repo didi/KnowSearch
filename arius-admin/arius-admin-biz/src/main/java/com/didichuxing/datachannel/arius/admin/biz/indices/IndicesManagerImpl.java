@@ -195,8 +195,8 @@ public class IndicesManagerImpl implements IndicesManager {
             }
         } catch (ESOperateException e) {
             LOGGER.error("class=IndicesManagerImpl||method=createIndex||msg=create index failed||index={}",
-                indexCreateDTO.getIndex(), e);
-            return Result.buildFail(String.format("索引创建失败, errMsg:%s", e.getCause()));
+                    indexCreateDTO.getIndex(), e);
+            return Result.buildFail(String.format("索引创建失败, %s", e.getMessage()));
         }
         if (succ) { return Result.buildSuccWithMsg("索引创建成功");}
 
