@@ -181,13 +181,13 @@ public class ESTemplateDAO extends BaseESDAO {
                 return client.admin().indices().prepareGetTemplate(name + "*").execute()
                         .actionGet(time,unit);
             } catch (Exception e) {
-                  final String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
+                final String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
                 if (Objects.nonNull(exception)) {
-                    throw  new ESOperateException(exception);
+                    throw new ESOperateException(exception);
                 }
                 LOGGER.warn("class=ESTemplateDAO||method=create||msg=get src template fail||cluster={}||name={}",
                         cluster, name);
-                throw  new ESOperateException(e.getMessage());
+                throw new ESOperateException(e.getMessage());
             }
         };
         TemplateConfig templateConfig = Optional.ofNullable(
@@ -217,14 +217,18 @@ public class ESTemplateDAO extends BaseESDAO {
         // 设置ES版本
         templateConfig.setVersion(client.getEsVersion());
         
-        BiFunction<Long, TimeUnit, ESIndicesPutTemplateResponse> getESIndicesPutTemplateResponseBiFunction = (time, unit) -> {
+        BiFunctionWithESOperateException<Long, TimeUnit, ESIndicesPutTemplateResponse> getESIndicesPutTemplateResponseBiFunction = (time, unit) -> {
             try {
                 return client.admin().indices().preparePutTemplate(name).setTemplateConfig(templateConfig)
                         .execute().actionGet(time, unit);
             } catch (Exception e) {
+                 final String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
+                if (Objects.nonNull(exception)) {
+                    throw new ESOperateException(exception);
+                }
                 LOGGER.error("class=ESTemplateDAO||method=create||msg=put template fail||cluster={}||name={}", cluster,
                         name, e);
-                return null;
+                throw new ESOperateException(e.getMessage());
             }
         
         };
