@@ -1,15 +1,13 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster;
 
-import java.util.List;
-
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.BaseVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterTypeEnum;
 import com.google.common.collect.Lists;
-
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -114,7 +112,8 @@ public class ClusterPhyVO extends BaseVO implements Comparable<ClusterPhyVO> {
 
     @ApiModelProperty("gateway地址")
     private String                                       gatewayUrl;
-
+    @ApiModelProperty("是否支持 zeus:（扩缩容、升级、重启、配置变更）")
+    private Boolean supportZeus = true;
     @ApiModelProperty("逻辑集群与对应region的列表")
     private List<Tuple<ClusterLogicVO, ClusterRegionVO>> logicClusterAndRegionList;
 
