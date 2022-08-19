@@ -32,6 +32,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.template.Template
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.TemplateUtils;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.gateway.GatewayService;
 import com.didichuxing.datachannel.arius.admin.core.service.project.ESUserService;
@@ -96,6 +97,8 @@ public class GatewayManagerImpl implements GatewayManager {
     @Autowired
     private GatewayService                  gatewayService;
 
+    @Autowired
+    private ClusterPhyService clusterPhyService;
     @Autowired
     private AriusConfigInfoService          ariusConfigInfoService;
 
@@ -326,6 +329,9 @@ public class GatewayManagerImpl implements GatewayManager {
         if (projectId == null || !esUserService.checkDefaultESUserByProject(projectId)) {
             return Result.buildParamIllegal("对应的projectId字段非法");
         }
+        if (!clusterPhyService.isClusterExists(phyClusterName)) {
+            return Result.buildNotExist("集群不存在");
+        }
         final ESUser esUser = esUserService.getDefaultESUserByProject(projectId);
 
         return gatewayService.sqlOperate(sql, phyClusterName, esUser, GatewaySqlConstant.SQL_EXPLAIN);
@@ -335,6 +341,9 @@ public class GatewayManagerImpl implements GatewayManager {
     public Result<String> directSqlSearch(String sql, String phyClusterName, Integer projectId) {
         if (projectId == null || !esUserService.checkDefaultESUserByProject(projectId)) {
             return Result.buildParamIllegal("对应的projectId字段非法");
+        }
+        if (!clusterPhyService.isClusterExists(phyClusterName)) {
+            return Result.buildNotExist("集群不存在");
         }
         final ESUser esUser = esUserService.getDefaultESUserByProject(projectId);
         return gatewayService.sqlOperate(sql, phyClusterName, esUser, GatewaySqlConstant.SQL_SEARCH);
