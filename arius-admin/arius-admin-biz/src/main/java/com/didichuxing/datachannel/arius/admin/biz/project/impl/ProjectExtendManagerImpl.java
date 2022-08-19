@@ -128,10 +128,10 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
                 .collect(Collectors.toList());
         long templateSize = clusterLogicTemplateIndexDetailDTOS.stream()
                 .map(ClusterLogicTemplateIndexDetailDTO::getTemplates).filter(CollectionUtils::isNotEmpty)
-                .flatMap(Collection::stream).count();
+                .mapToLong(Collection::size).sum();
         long indexSize = clusterLogicTemplateIndexDetailDTOS.stream()
                 .map(ClusterLogicTemplateIndexDetailDTO::getCatIndexResults).filter(CollectionUtils::isNotEmpty)
-                .flatMap(Collection::stream).count();
+                .mapToLong(Collection::size).sum();
         if (CollectionUtils.isEmpty(clusterLogics) || templateSize != 0 || indexSize != 0) {
             return Result.buildFail(String.format(
                     "若应用关联的资源未全部下线掉，提示：无法删除 %s！如需删除，请下线掉应用关联的全部集群、模板、索引资源。",
