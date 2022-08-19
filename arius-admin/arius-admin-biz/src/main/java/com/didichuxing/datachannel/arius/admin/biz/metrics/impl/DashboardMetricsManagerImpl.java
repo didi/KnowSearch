@@ -62,7 +62,7 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
 
     @Autowired
     private ESIndexCatService esIndexCatService;
-    
+
     @Override
     public Result<List<VariousLineChartMetricsVO>> getTopClusterMetricsInfo(MetricsDashboardTopNDTO param,
                                                                             Integer projectId) {
@@ -182,7 +182,7 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
         
         return Result.buildSucc(ConvertUtil.list2List(variousLineChartMetrics, VariousLineChartMetricsVO.class));
     }
-
+    
     /**
      * @param param        MetricsDashboardListDTO
      * @param projectId    项目
@@ -224,7 +224,7 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
      */
     private void filterBySystemConfiguration(List<MetricList> listMetrics, String oneLevelType) {
         Map<DashBoardMetricListTypeEnum, DashBoardMetricThresholdDTO> thresholdValues = getDashBoardMetricThresholdValues();
-
+        
         for (MetricList metric : listMetrics) {
             DashBoardMetricListTypeEnum key = DashBoardMetricListTypeEnum.valueOfTypeAndOneLevelType(metric.getType(),oneLevelType);
             final DashBoardMetricThresholdDTO dashBoardMetricThresholdDTO = thresholdValues.get(key);

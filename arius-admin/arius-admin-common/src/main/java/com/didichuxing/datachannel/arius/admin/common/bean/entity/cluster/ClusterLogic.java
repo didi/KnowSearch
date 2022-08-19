@@ -45,11 +45,7 @@ public class ClusterLogic extends BaseEntity implements Comparable<ClusterLogic>
     /**
      * dataNode的个数
      */
-    private Integer dataNodeNu;
-
-
-
-
+    private Integer dataNodeNum;
 
     /**
      * 备注

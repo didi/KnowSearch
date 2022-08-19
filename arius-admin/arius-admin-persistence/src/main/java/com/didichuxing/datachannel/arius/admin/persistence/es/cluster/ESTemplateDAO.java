@@ -6,7 +6,9 @@ import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOpe
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.TEMPLATE_DEFAULT_ORDER;
 
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import com.didichuxing.datachannel.arius.admin.common.function.BiFunctionWithESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.ParsingExceptionUtils;
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
 import com.didiglobal.logi.elasticsearch.client.ESClient;
 import com.didiglobal.logi.elasticsearch.client.model.type.ESVersion;
@@ -164,7 +166,7 @@ public class ESTemplateDAO extends BaseESDAO {
      * @param shardRouting shardRouting
      * @return result
      */
-    public boolean create(String cluster, String name, String expression, Integer shard, Integer shardRouting) {
+    public boolean create(String cluster, String name, String expression, Integer shard, Integer shardRouting) throws ESOperateException {
         ESClient client = esOpClient.getESClient(cluster);
         if (client == null) {
             LOGGER.warn(
@@ -174,14 +176,18 @@ public class ESTemplateDAO extends BaseESDAO {
         }
     
         // 获取es中原来index template的配置
-        BiFunction<Long, TimeUnit, ESIndicesGetTemplateResponse> getTemplateResponseBiFunction = (time, unit) -> {
+        BiFunctionWithESOperateException<Long, TimeUnit, ESIndicesGetTemplateResponse> getTemplateResponseBiFunction = (time, unit) -> {
             try {
                 return client.admin().indices().prepareGetTemplate(name + "*").execute()
                         .actionGet(time,unit);
             } catch (Exception e) {
+                final String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
+                if (Objects.nonNull(exception)) {
+                    throw new ESOperateException(exception);
+                }
                 LOGGER.warn("class=ESTemplateDAO||method=create||msg=get src template fail||cluster={}||name={}",
                         cluster, name);
-                return null;
+                throw new ESOperateException(e.getMessage());
             }
         };
         TemplateConfig templateConfig = Optional.ofNullable(
@@ -211,14 +217,18 @@ public class ESTemplateDAO extends BaseESDAO {
         // 设置ES版本
         templateConfig.setVersion(client.getEsVersion());
         
-        BiFunction<Long, TimeUnit, ESIndicesPutTemplateResponse> getESIndicesPutTemplateResponseBiFunction = (time, unit) -> {
+        BiFunctionWithESOperateException<Long, TimeUnit, ESIndicesPutTemplateResponse> getESIndicesPutTemplateResponseBiFunction = (time, unit) -> {
             try {
                 return client.admin().indices().preparePutTemplate(name).setTemplateConfig(templateConfig)
                         .execute().actionGet(time, unit);
             } catch (Exception e) {
+                 final String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
+                if (Objects.nonNull(exception)) {
+                    throw new ESOperateException(exception);
+                }
                 LOGGER.error("class=ESTemplateDAO||method=create||msg=put template fail||cluster={}||name={}", cluster,
                         name, e);
-                return null;
+                throw new ESOperateException(e.getMessage());
             }
         
         };
@@ -229,7 +239,7 @@ public class ESTemplateDAO extends BaseESDAO {
                 
     }
 
-    public boolean create(String cluster, String name, TemplateConfig templateConfig) {
+    public boolean create(String cluster, String name, TemplateConfig templateConfig) throws ESOperateException{
         ESClient client = esOpClient.getESClient(cluster);
         if (client==null){
             LOGGER.warn("class=ESTemplateDAO||method=create||msg=es client is null ||cluster={}||name={}||templateConfig={}", cluster,
@@ -240,15 +250,19 @@ public class ESTemplateDAO extends BaseESDAO {
         // 设置ES版本
         templateConfig.setVersion(client.getEsVersion());
         // 向ES中创建模板流程
-        BiFunction<Long, TimeUnit, ESIndicesPutTemplateResponse> responseBiFunction = (time, unit) -> {
+        BiFunctionWithESOperateException<Long, TimeUnit, ESIndicesPutTemplateResponse> responseBiFunction = (time, unit) -> {
             try {
                 return client.admin().indices().preparePutTemplate(name).setTemplateConfig(templateConfig).execute()
                         .actionGet(time, unit);
             
             } catch (Exception e) {
+                final String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
+                if (Objects.nonNull(exception)) {
+                    throw new ESOperateException(exception);
+                }
                 LOGGER.error("class=ESTemplateDAO||method=create||put templates fail||clusterName={}||templateName={}",
                         cluster, name, e);
-                return null;
+                throw new ESOperateException("模板创建失败");
             }
         };
     

@@ -2,8 +2,6 @@ package com.didichuxing.datachannel.arius.admin.common.util;
 
 import static java.util.regex.Pattern.compile;
 
-import com.didiglobal.logi.elasticsearch.client.model.exception.ESAlreadyExistsException;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -29,25 +27,5 @@ public final class RegexUtils {
     }
     
     
-    /**
-     * 它接受一个 ESAlreadyExistsException 并返回一个包含已存在的索引名称的字符串
-     *
-     * @param e 抛出的异常。
-     * @return 来自异常的错误消息。
-     */
-    public static String matchAlreadyExistsErrorByESAlreadyExistsException(ESAlreadyExistsException e) {
-        final Pattern compile = compile("index \\[.+\\d+/\\w+] already exists");
-        final Matcher matcher = compile.matcher(e.getMessage());
-        String error = "";
-        if (matcher.find()) {
-            final String group = matcher.group();
-            final Pattern pattern = compile("\"index \\[.+\\d+/\\w+] already exists$");
-            final Matcher m = pattern.matcher(group);
-            if (m.find()) {
-                error = m.group().replace("\"","");
-            }
-        }
-        return error;
-    }
     
 }
