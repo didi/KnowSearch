@@ -1156,25 +1156,28 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             String cluster = indexTemplateWithPhyTemplates.getMasterPhyTemplate().getCluster();
             String expression = indexTemplateWithPhyTemplates.getMasterPhyTemplate().getExpression();
             if (esTemplateService.hasMatchHealthIndexByExpressionTemplateHealthEnum(cluster, expression,
+                    TemplateHealthEnum.RED)) {
+                templatePO.setHealth(TemplateHealthEnum.RED.getCode());
+                indexTemplateService.update(templatePO);
+                return true;
+            }
+             if (esTemplateService.hasMatchHealthIndexByExpressionTemplateHealthEnum(cluster, expression,
+                    TemplateHealthEnum.YELLOW)) {
+                templatePO.setHealth(TemplateHealthEnum.YELLOW.getCode());
+                indexTemplateService.update(templatePO);
+                return true;
+            }
+            
+            if (esTemplateService.hasMatchHealthIndexByExpressionTemplateHealthEnum(cluster, expression,
                     TemplateHealthEnum.GREEN)) {
                 templatePO.setHealth(TemplateHealthEnum.GREEN.getCode());
                 indexTemplateService.update(templatePO);
                 return true;
             }
     
-            if (esTemplateService.hasMatchHealthIndexByExpressionTemplateHealthEnum(cluster, expression,
-                    TemplateHealthEnum.YELLOW)) {
-                templatePO.setHealth(TemplateHealthEnum.YELLOW.getCode());
-                indexTemplateService.update(templatePO);
-                return true;
-            }
+           
     
-            if (esTemplateService.hasMatchHealthIndexByExpressionTemplateHealthEnum(cluster, expression,
-                    TemplateHealthEnum.RED)) {
-                templatePO.setHealth(TemplateHealthEnum.RED.getCode());
-                indexTemplateService.update(templatePO);
-                return true;
-            }
+            
             return true;
         } catch (Exception e) {
             LOGGER.error("class=TemplateLogicManagerImpl||method=updateTemplateHealthByLogicId||logicId={}", logicId, e);
