@@ -4,26 +4,27 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.shard.ShardCatCellPO;
-import com.didichuxing.datachannel.arius.admin.common.util.DSLSearchUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.IndexNameUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.SizeUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.*;
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dsls.DslsConstant;
 import com.didiglobal.logi.elasticsearch.client.ESClient;
 import com.didiglobal.logi.elasticsearch.client.gateway.direct.DirectRequest;
 import com.didiglobal.logi.elasticsearch.client.gateway.direct.DirectResponse;
+import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.rest.RestStatus;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterQuickCommandMethodsEnum.SHARD;
 import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterQuickCommandMethodsEnum.SHARD_ASSIGNMENT;
@@ -35,6 +36,10 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.Cl
 public class ESShardDAO extends BaseESDAO {
     @Value("${es.update.cluster.name}")
     private String              metadataClusterName;
+
+    @Autowired
+    private ESIndexDAO indexDAO;
+
     /**
      * 索引名称
      */
@@ -51,6 +56,11 @@ public class ESShardDAO extends BaseESDAO {
     private String              node                       = "node";
     private String              prirep                     = "prirep";
     private String              state                      = "state";
+    private String              CLOSED                     = "closed";
+    private String              OPEN                     = "open";
+
+    private static final FutureUtil<List<ShardCatCellPO>> CAT_SHARD_FUTURE = FutureUtil.init("CAT_SHARD_FUTURE", 10, 10, 100);
+
 
     @PostConstruct
     public void init() {
@@ -72,10 +82,58 @@ public class ESShardDAO extends BaseESDAO {
                 ecSegmentsOnIps = buildShardCatCellPOs(directResponse.getResponseContent(),clusterName);
             }
         } catch (Exception e) {
+            final String exception = ParsingExceptionUtils.getESErrorMessageByException(
+                    e);
+            if (StringUtils.equals(exception,CLOSED)){
+                ecSegmentsOnIps = getLowerVersionShardCatCellPOList(clusterName);
+            }
             LOGGER.warn("class=ESClusterDAO||method=catShard||cluster={}||mg=get es segments fail", clusterName, e);
             return new ArrayList<>();
         }
         return ecSegmentsOnIps;
+    }
+
+    private List<ShardCatCellPO> getLowerVersionShardCatCellPOList(String cluster) {
+
+        List<ShardCatCellPO> shardCatCellPOS = Lists.newArrayList();
+        ESClient client = fetchESClientByCluster(cluster);
+        if (client != null) {
+            List<CatIndexResult> catIndexResults = indexDAO.catIndices(cluster);
+            List<String> openIndexNames = catIndexResults.stream().filter(index->StringUtils.equals(OPEN,index.getStatus()))
+                    .map(CatIndexResult::getIndex).collect(Collectors.toList());
+            //如果索引特别多，需要分批构造uri进行处理
+            List<List<String>> openIndexNamesList = org.apache.commons.collections4.ListUtils.partition(openIndexNames, 50);
+            for(List<String> openIndexNamePartition:openIndexNamesList){
+                String uri = SHARD.getUri() + "/" + String.join(",", openIndexNamePartition);
+                CAT_SHARD_FUTURE.callableTask(()->getShardCatCellPOS(cluster, client, uri));
+            }
+            CAT_SHARD_FUTURE.waitResult().forEach(catCellList->shardCatCellPOS.addAll(catCellList));
+        }
+        return shardCatCellPOS;
+    }
+
+    private List<ShardCatCellPO> getShardCatCellPOS(String cluster, ESClient client, String uri) {
+        DirectRequest directRequest = new DirectRequest(SHARD.getMethod(), uri);
+        DirectResponse directResponse = client.direct(directRequest).actionGet(30, TimeUnit.SECONDS);
+        if (directResponse.getRestStatus() == RestStatus.OK
+                && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
+            return buildShardCatCellPOs(directResponse.getResponseContent(), cluster);
+        }
+        return Collections.emptyList();
+    }
+
+    /**
+     * 通过集群名称获取对应的ES Client
+     * @param clusterName 集群名称
+     * @return
+     */
+    private ESClient fetchESClientByCluster(String clusterName) {
+        ESClient client = esOpClient.getESClient(clusterName);
+        if (client == null) {
+            LOGGER.warn("class=ESIndexDAO||method=fetchESClientByCluster||cannot get es client,cluster={}",
+                    clusterName);
+        }
+        return client;
     }
 
     private List<ShardCatCellPO> buildShardCatCellPOs(String responseContent, String clusterName) {
@@ -129,7 +187,7 @@ public class ESShardDAO extends BaseESDAO {
     }
 
     /**
-     * 根据条件获取CatIndex信息
+     * 根据条件获取Catshard信息
      *
      * @param from         起始值
      * @param size         每页大小
