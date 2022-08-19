@@ -233,7 +233,7 @@ public interface ClusterLogicManager {
     /**
      * 根据物理集群名获取对应的逻辑集群列表，若传入为空，则返回全量
      * @param phyClusterName 物理集群的名称
-     * @return Result<List<String>>
+     * @return List<String> 逻辑集群名称列表
      */
-    List<String> listClusterLogicNameByPhy(String phyClusterName);
+    List<String> listClusterLogicNameByPhyName(String phyClusterName);
 }
