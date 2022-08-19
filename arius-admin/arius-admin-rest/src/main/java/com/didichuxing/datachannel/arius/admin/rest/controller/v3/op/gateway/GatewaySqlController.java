@@ -26,7 +26,7 @@ public class GatewaySqlController {
     @Autowired
     private GatewayManager gatewayManager;
 
-    @PostMapping(value = { "/{phyClusterName}", ""})
+    @PostMapping(value = { "/{phyClusterName}"})
     @ResponseBody
     @ApiOperation(value = "根据sql语句查询gateway集群")
     public Result<String> directSqlSearch(@RequestBody String sql,
