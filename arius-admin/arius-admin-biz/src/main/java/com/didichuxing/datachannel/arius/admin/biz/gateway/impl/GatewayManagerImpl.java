@@ -322,13 +322,13 @@ public class GatewayManagerImpl implements GatewayManager {
     }
 
     @Override
-    public Result<String> sqlExplain(String sql, Integer projectId) {
+    public Result<String> sqlExplain(String sql, String phyClusterName, Integer projectId) {
         if (projectId == null || !esUserService.checkDefaultESUserByProject(projectId)) {
             return Result.buildParamIllegal("对应的projectId字段非法");
         }
         final ESUser esUser = esUserService.getDefaultESUserByProject(projectId);
 
-        return gatewayService.sqlOperate(sql, null, esUser, GatewaySqlConstant.SQL_EXPLAIN);
+        return gatewayService.sqlOperate(sql, phyClusterName, esUser, GatewaySqlConstant.SQL_EXPLAIN);
     }
 
     @Override
