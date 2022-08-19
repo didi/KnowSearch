@@ -3,6 +3,7 @@ package com.didichuxing.datachannel.arius.admin.core.service.es;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.shard.ShardCatCellPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.ShardDistributionVO;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 
 import java.util.List;
 
@@ -12,7 +13,7 @@ public interface ESShardCatService {
      * @param cluster
      * @return
      */
-    List<ShardCatCellPO> syncShardDistribution(String cluster,long currentTimeMillis);
+    List<ShardCatCellPO> syncShardDistribution(String cluster,long currentTimeMillis) throws ESOperateException;
 
     /**
      * 分页获取shard信息
