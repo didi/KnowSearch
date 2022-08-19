@@ -5,12 +5,15 @@ import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOpe
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.INDEX_SHARD_NUM;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.TEMPLATE_DEFAULT_ORDER;
 
+import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateHealthEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.function.BiFunctionWithESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ParsingExceptionUtils;
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
 import com.didiglobal.logi.elasticsearch.client.ESClient;
+import com.didiglobal.logi.elasticsearch.client.gateway.direct.DirectRequest;
+import com.didiglobal.logi.elasticsearch.client.gateway.direct.DirectResponse;
 import com.didiglobal.logi.elasticsearch.client.model.type.ESVersion;
 import com.didiglobal.logi.elasticsearch.client.request.index.gettemplate.ESIndicesGetTemplateRequest;
 import com.didiglobal.logi.elasticsearch.client.request.index.puttemplate.ESIndicesPutTemplateRequest;
@@ -28,7 +31,9 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.rest.RestStatus;
 import org.springframework.stereotype.Repository;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 /**
  * @author d06679
@@ -36,6 +41,8 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public class ESTemplateDAO extends BaseESDAO {
+    public static final String CAT_INDIES_HEALTH = "/_cat/indices/%s?v=true&format=json&health=%s&filter_path=index";
+    public static final String CAT_INDIES = "/_cat/indices/%s?v=true&format=json&filter_path=index";
 
     /**
      * 修改模板表达式
@@ -513,5 +520,53 @@ public class ESTemplateDAO extends BaseESDAO {
         }
 
         return response.getAcknowledged();
+    }
+    
+    
+  
+    /**
+     * > 通过表达式模板健康枚举判断是否有匹配索引
+     *
+     * @param cluster 集群名称
+     * @param expression 索引名称表达式，可以是通配符表达式，如“logstash-*”
+     * @param templateHealthEnum 索引的状态，为枚举类，枚举类如下：
+     */
+    public boolean hasMatchHealthIndexByExpressionTemplateHealthEnum(String cluster, String expression,
+                                                                     TemplateHealthEnum templateHealthEnum) throws ESOperateException{
+        ESClient client = esOpClient.getESClient(cluster);
+        if (client == null) {
+            return false;
+        }
+        DirectResponse response = getDirectResponseByClusterAndUrl(client,
+                String.format(CAT_INDIES_HEALTH, expression, templateHealthEnum.getDesc()));
+    
+        if (templateHealthEnum.equals(TemplateHealthEnum.GREEN)) {
+            DirectResponse directResponse = getDirectResponseByClusterAndUrl(client,
+                    String.format(CAT_INDIES, expression));
+            return (response.getRestStatus() == RestStatus.OK && StringUtils.isNotBlank(response.getResponseContent()))
+                   || (directResponse.getRestStatus() == RestStatus.OK && StringUtils.isEmpty(
+                    directResponse.getResponseContent()));
+        }
+        return (response.getRestStatus() == RestStatus.OK && StringUtils.isNotBlank(response.getResponseContent()));
+    }
+  
+    /**
+     * > 通过集群和url获取模板的健康度
+     *
+     * @param client 用于连接 ES 集群的客户端对象。
+     * @param uri    请求地址，即模板的地址。
+     */
+    private DirectResponse getDirectResponseByClusterAndUrl(ESClient client, String uri) throws ESOperateException {
+        DirectRequest directRequest = new DirectRequest(RequestMethod.GET.name(), uri);
+        try {
+            return client.direct(directRequest).actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
+            if (Objects.nonNull(exception)) {
+                throw new ESOperateException(exception);
+            }
+            throw new ESOperateException(e.getMessage(), e);
+        }
+    
     }
 }

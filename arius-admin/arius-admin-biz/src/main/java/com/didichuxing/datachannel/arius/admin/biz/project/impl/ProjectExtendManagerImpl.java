@@ -10,12 +10,15 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectConfigDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectExtendSaveDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectQueryExtendDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatCellDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ESUser;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ProjectConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.project.ESUserPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.project.ProjectConfigPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicTemplateIndexDetailDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.ProjectBriefExtendVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.ProjectConfigVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.ProjectExtendVO;
@@ -31,6 +34,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.VerifyCodeFactory;
 import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
+import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexCatService;
 import com.didichuxing.datachannel.arius.admin.core.service.project.ESUserService;
 import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectConfigService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
@@ -53,6 +57,7 @@ import com.didiglobal.logi.security.service.UserService;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -99,8 +104,43 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
     @Autowired
     private RoleService          roleService;
     @Autowired
-    private RoleTool             roleTool;
-
+    private RoleTool          roleTool;
+    @Autowired
+    private ESIndexCatService esIndexCatService;
+    
+    /**
+     * “检查一个项目的资源是否可用。”
+     * <p>
+     * 函数定义如下：
+     * <p>
+     * * 该函数返回一个 Result<Void> 对象。 * 该函数接受一个参数，一个名为 projectId 的整数对象
+     *
+     * @param projectId 项目的 ID。
+     * @return 一个 Result 对象，里面有一个 Void 对象。
+     */
+    @Override
+    public Result<Void> checkResourcesByProjectId(Integer projectId) {
+        List<ClusterLogic> clusterLogics = clusterLogicService.getOwnedClusterLogicListByProjectId(projectId);
+        
+        List<ClusterLogicTemplateIndexDetailDTO> clusterLogicTemplateIndexDetailDTOS = clusterLogics.stream()
+                .map(clusterLogic -> getTemplateIndexVO(clusterLogic, projectId))
+                
+                .collect(Collectors.toList());
+        long templateSize = clusterLogicTemplateIndexDetailDTOS.stream()
+                .map(ClusterLogicTemplateIndexDetailDTO::getTemplates).filter(CollectionUtils::isNotEmpty)
+                .mapToLong(Collection::size).sum();
+        long indexSize = clusterLogicTemplateIndexDetailDTOS.stream()
+                .map(ClusterLogicTemplateIndexDetailDTO::getCatIndexResults).filter(CollectionUtils::isNotEmpty)
+                .mapToLong(Collection::size).sum();
+        if (CollectionUtils.isEmpty(clusterLogics) || templateSize != 0 || indexSize != 0) {
+            return Result.buildFail(String.format(
+                    "无法删除 %s！如需删除，请下线掉应用关联的全部集群、模板、索引资源。",
+                    projectService.getProjectDetailByProjectId(projectId).getProjectName()));
+        }
+        
+        return Result.buildSucc();
+    }
+    
     @Override
     public Result<ProjectExtendVO> createProject(ProjectExtendSaveDTO saveDTO, String operator, Integer operatorId) {
         try {
@@ -212,16 +252,10 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
         if (AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
             return Result.buildFail("系统内置项目，不能删除");
         }
-        //校验项目绑定逻辑集群
-        List<ClusterLogic> clusterLogics = clusterLogicService.getOwnedClusterLogicListByProjectId(projectId);
-        if (CollectionUtils.isNotEmpty(clusterLogics)) {
-            return Result.buildFail("项目已绑定逻辑集群，不能删除");
-        }
-
-        //校验项目绑定模板服务
-        List<IndexTemplate> indexTemplates = indexTemplateService.listProjectLogicTemplatesByProjectId(projectId);
-        if (CollectionUtils.isNotEmpty(indexTemplates)) {
-            return Result.buildFail("项目已绑定模板服务，不能删除");
+        // 校验项目绑定逻辑集群
+        Result<Void> result = checkResourcesByProjectId(projectId);
+        if (result.failed()) {
+            return result;
         }
         ProjectBriefVO projectBriefVO = projectService.getProjectBriefByProjectId(projectId);
         projectService.deleteProjectByProjectId(projectId, operator);
@@ -731,9 +765,23 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
                 .userOperation(operator).build());
         }
     }
+    
     public static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
-        Map<Object,Boolean> seen = new ConcurrentHashMap<>();
+        Map<Object, Boolean> seen = new ConcurrentHashMap<>();
         return t -> seen.putIfAbsent(keyExtractor.apply(t), Boolean.TRUE) == null;
-}
-
+    }
+    
+    private ClusterLogicTemplateIndexDetailDTO getTemplateIndexVO(ClusterLogic clusterLogic, Integer projectId) {
+        IndexTemplateDTO param = new IndexTemplateDTO();
+        param.setResourceId(clusterLogic.getId());
+        param.setProjectId(projectId);
+        List<IndexTemplate> indexTemplates = indexTemplateService.listLogicTemplates(param);
+        // 通过逻辑集群获取 index
+        List<IndexCatCellDTO> catIndexResults = esIndexCatService.syncGetIndexByCluster(clusterLogic.getName(),
+                projectId);
+        ClusterLogicTemplateIndexDetailDTO templateIndexVO = new ClusterLogicTemplateIndexDetailDTO();
+        templateIndexVO.setCatIndexResults(catIndexResults);
+        templateIndexVO.setTemplates(indexTemplates);
+        return templateIndexVO;
+    }
 }

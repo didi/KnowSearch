@@ -46,6 +46,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithCluster;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexCatCellWithTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateClearVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateDeleteVO;
@@ -63,6 +64,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectTe
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.DataTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateHealthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.event.index.IndexDeleteEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.template.LogicTemplateCreatePipelineEvent;
@@ -1112,7 +1114,80 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
 
         return Result.buildSucc(consoleTemplateDeleteVO);
     }
-
+    
+    /**
+     *
+     * 它通过其逻辑 ID 更新模板的健康状况。
+     * {@link  TemplateHealthEnum}
+     * @param logicId 模板的 logicId。
+     * @return 一个布尔值。
+     */
+    @Override
+    public boolean updateTemplateHealthByLogicId(Integer logicId) {
+        if (!indexTemplateService.exist(logicId)) {
+            return true;
+        }
+        IndexTemplateWithPhyTemplates indexTemplateWithPhyTemplates = indexTemplateService.getLogicTemplateWithPhysicalsById(
+                logicId);
+        String masterCluster = Optional.ofNullable(indexTemplateWithPhyTemplates)
+                .map(IndexTemplateWithPhyTemplates::getMasterPhyTemplate).map(IndexTemplatePhy::getCluster)
+                .orElse(null);
+        if (Objects.isNull(masterCluster)) {
+            LOGGER.warn(
+                    "class={}||method=updateTemplateHealthByLogicId||logicId={}||error=don't find index template cluster",
+                    getClass().getSimpleName(), logicId);
+            return false;
+        }
+        final IndexTemplatePO templatePO = new IndexTemplatePO();
+        templatePO.setId(logicId);
+        if (!esClusterService.syncConnectionStatus(masterCluster)) {
+            LOGGER.warn(
+                    "class={}||method=updateTemplateHealthByLogicId||logicId={}||error=don't find index template cluster",
+                    getClass().getSimpleName(), logicId);
+            /**
+             * {@link TemplateHealthEnum}
+             */
+            templatePO.setHealth(TemplateHealthEnum.UNKNOWN.getCode());
+            indexTemplateService.update(templatePO);
+            return true;
+        
+        }
+        try {
+            String cluster = indexTemplateWithPhyTemplates.getMasterPhyTemplate().getCluster();
+            String expression = indexTemplateWithPhyTemplates.getMasterPhyTemplate().getExpression();
+            if (esTemplateService.hasMatchHealthIndexByExpressionTemplateHealthEnum(cluster, expression,
+                    TemplateHealthEnum.RED)) {
+                templatePO.setHealth(TemplateHealthEnum.RED.getCode());
+                indexTemplateService.update(templatePO);
+                return true;
+            }
+             if (esTemplateService.hasMatchHealthIndexByExpressionTemplateHealthEnum(cluster, expression,
+                    TemplateHealthEnum.YELLOW)) {
+                templatePO.setHealth(TemplateHealthEnum.YELLOW.getCode());
+                indexTemplateService.update(templatePO);
+                return true;
+            }
+            
+            if (esTemplateService.hasMatchHealthIndexByExpressionTemplateHealthEnum(cluster, expression,
+                    TemplateHealthEnum.GREEN)) {
+                templatePO.setHealth(TemplateHealthEnum.GREEN.getCode());
+                indexTemplateService.update(templatePO);
+                return true;
+            }
+    
+           
+    
+            
+            return true;
+        } catch (Exception e) {
+            LOGGER.error("class=TemplateLogicManagerImpl||method=updateTemplateHealthByLogicId||logicId={}", logicId, e);
+            return false;
+        }
+        
+        
+        
+    }
+    
     /**
      * @param consoleTemplateRateLimitDTO
      * @param operator

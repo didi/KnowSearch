@@ -142,5 +142,10 @@ public class IndexTemplatePO extends BasePO {
      * 可用磁盘容量
      */
     private Double  diskSize;
+    /**
+     * 模版健康率 -1 是unknown
+     *
+     */
+    private Integer health;
 
 }
