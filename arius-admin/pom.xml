@@ -40,7 +40,7 @@
         <maven.compiler.target>1.8</maven.compiler.target>
         <flatten-maven-plugin.version>1.2.2</flatten-maven-plugin.version>
         <logi-security-spring-boot-starter.version>2.10.11</logi-security-spring-boot-starter.version>
-        <logi-elasticsearch-client.version>1.0.21</logi-elasticsearch-client.version>
+        <logi-elasticsearch-client.version>1.0.23</logi-elasticsearch-client.version>
         <java-diff-utils.version>4.11</java-diff-utils.version>
         <json-patch.version>1.13</json-patch.version>
     </properties>

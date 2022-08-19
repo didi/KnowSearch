@@ -33,6 +33,7 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -762,7 +763,8 @@ public class BaseAriusStatsESDAO extends BaseESDAO {
             }
             //get indexCount
             if (INDEX_COUNT.equals(key)&&null != esAggr && null != esAggr.getUnusedMap().get(VALUE)) {
-                metricsContent.setIndexCount(Long.parseLong(esAggr.getUnusedMap().get(VALUE).toString()));
+                BigDecimal indexCount = (BigDecimal) esAggr.getUnusedMap().get(VALUE);
+                metricsContent.setIndexCount(indexCount.longValue());
             }
 
             metricsContentCells.add(metricsContentCell);
