@@ -98,7 +98,15 @@ public class ProjectV3Controller {
 
         return projectExtendManager.deleteProjectByProjectId(id, HttpRequestUtil.getOperator(request));
     }
-
+    
+    @GetMapping("/check-resources/{id}")
+    @ResponseBody
+    @ApiOperation(value = "检查一个项目的资源是否可用", notes = "检查一个项目的资源是否可用")
+    @ApiImplicitParam(name = "id", value = "项目 id", dataType = "int", paramType = "path", required = true)
+    public Result<Void> checkResourcesByProjectId(@PathVariable Integer id, HttpServletRequest request) {
+        
+        return projectExtendManager.checkResourcesByProjectId(id);
+    }
     @GetMapping("")
     @ResponseBody
     @ApiOperation(value = "获取所有项目简要信息", notes = "获取全部项目简要信息（只返回id、项目名）")

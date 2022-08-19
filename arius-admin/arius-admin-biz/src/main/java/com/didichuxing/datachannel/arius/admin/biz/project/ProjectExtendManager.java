@@ -163,4 +163,18 @@ public interface ProjectExtendManager {
      * @return {@code Result<List<UserBriefVO>>}
      */
     Result<List<UserBriefVO>> listUserListByProjectId(Integer projectId);
+    
+    
+    /**
+     * “检查一个项目的资源是否可用。”
+     *
+     * 函数定义如下：
+     *
+     * * 该函数返回一个 Result<Void> 对象。
+     * * 该函数接受一个参数，一个名为 projectId 的整数对象
+     *
+     * @param projectId 项目的 ID。
+     * @return 一个 Result 对象，里面有一个 Void 对象。
+     */
+    Result<Void> checkResourcesByProjectId(Integer projectId);
 }

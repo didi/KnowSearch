@@ -320,7 +320,7 @@ public class GatewayManagerTest {
                 "SQL_EXPLAIN")).thenReturn(Result.buildFail("value"));
 
         // Run the test
-        final Result<String> result = gatewayManagerImplUnderTest.sqlExplain("sql", 0);
+        final Result<String> result = gatewayManagerImplUnderTest.sqlExplain("sql", "", 0);
 
         // Verify the results
         assertThat(result).isEqualTo(expectedResult);
