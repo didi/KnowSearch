@@ -134,7 +134,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
                 .mapToLong(Collection::size).sum();
         if (CollectionUtils.isEmpty(clusterLogics) || templateSize != 0 || indexSize != 0) {
             return Result.buildFail(String.format(
-                    "若应用关联的资源未全部下线掉，提示：无法删除 %s！如需删除，请下线掉应用关联的全部集群、模板、索引资源。",
+                    "无法删除 %s！如需删除，请下线掉应用关联的全部集群、模板、索引资源。",
                     projectService.getProjectDetailByProjectId(projectId).getProjectName()));
         }
         
