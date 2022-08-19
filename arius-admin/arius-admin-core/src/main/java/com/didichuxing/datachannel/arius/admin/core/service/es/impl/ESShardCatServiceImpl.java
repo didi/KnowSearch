@@ -3,6 +3,7 @@ package com.didichuxing.datachannel.arius.admin.core.service.es.impl;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.shard.ShardCatCellPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.ShardDistributionVO;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.BatchProcessor;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
@@ -34,7 +35,7 @@ public class ESShardCatServiceImpl implements ESShardCatService {
     private ESShardDAO esShardDAO;
 
     @Override
-    public List<ShardCatCellPO> syncShardDistribution(String cluster,long currentTimeMillis) {
+    public List<ShardCatCellPO> syncShardDistribution(String cluster,long currentTimeMillis) throws ESOperateException {
         List<ShardCatCellPO> shardCatCellPOS = esShardDAO.catShard(cluster);
         shardCatCellPOS.forEach(shardCatCellPO -> {
             shardCatCellPO.setClusterPhy(cluster);
