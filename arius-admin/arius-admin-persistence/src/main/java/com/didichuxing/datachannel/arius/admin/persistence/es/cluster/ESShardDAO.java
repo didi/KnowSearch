@@ -112,10 +112,10 @@ public class ESShardDAO extends BaseESDAO {
     }
 
     /**
-     *
-     * @param cluster
-     * @param client
-     * @param uri
+     * 获取集群下的shard分布信息
+     * @param cluster 物理集群
+     * @param client client
+     * @param uri uri
      * @return
      */
     private List<ShardCatCellPO> getShardCatCellPOS(String cluster, ESClient client, String uri) {
