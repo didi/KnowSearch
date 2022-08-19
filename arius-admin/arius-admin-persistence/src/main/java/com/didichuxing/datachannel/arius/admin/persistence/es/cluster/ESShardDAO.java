@@ -179,7 +179,7 @@ public class ESShardDAO extends BaseESDAO {
     private String buildQueryTermDsl(String cluster,  Integer projectId,String keyword) {
         return "[" + buildTermCell(cluster, projectId,keyword) +"]";
     }
-
+  
     private String buildTermCell(String cluster, Integer projectId,String keyword) {
         List<String> termCellList = Lists.newArrayList();
         //projectId == null 时，属于超级项目访问；

@@ -19,7 +19,8 @@
 
 package com.didi.arius.gateway.core.es.http.search;
 
-import com.didi.arius.gateway.common.consts.QueryConsts;
+import static com.didi.arius.gateway.common.utils.CommonUtil.isIndexType;
+
 import com.didi.arius.gateway.common.consts.RestConsts;
 import com.didi.arius.gateway.common.metadata.FetchFields;
 import com.didi.arius.gateway.common.metadata.IndexTemplate;
@@ -30,6 +31,8 @@ import com.didi.arius.gateway.core.es.http.ESAction;
 import com.didi.arius.gateway.elasticsearch.client.ESClient;
 import com.didi.arius.gateway.elasticsearch.client.gateway.search.ESSearchRequest;
 import com.didi.arius.gateway.elasticsearch.client.gateway.search.ESSearchResponse;
+import java.util.List;
+import java.util.Map;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.common.Strings;
 import org.elasticsearch.common.collect.Tuple;
@@ -39,11 +42,6 @@ import org.elasticsearch.rest.action.support.RestActions;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.fetch.source.FetchSourceContext;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
-import java.util.Map;
-
-import static com.didi.arius.gateway.common.utils.CommonUtil.isIndexType;
 
 /**
  *
@@ -72,7 +70,8 @@ public class RestSearchAction extends ESAction {
         params.remove("source");
         params.remove("index");
         params.remove("type");
-        params.remove("filter_path");
+        addFilterPathDefaultValue(params);
+        
         esSearchRequest.setParams(params);
 
         esSearchRequest.extraSource(parseSearchExtraSource(request));

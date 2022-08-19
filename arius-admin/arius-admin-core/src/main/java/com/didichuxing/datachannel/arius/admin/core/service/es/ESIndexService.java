@@ -412,7 +412,8 @@ public interface ESIndexService {
      * @param tryTimes    试次
      * @return boolean
      */
-    boolean createIndexWithConfig(String clusterName, String indexName, IndexConfig indexConfig, int tryTimes);
+    boolean createIndexWithConfig(String clusterName, String indexName, IndexConfig indexConfig, int tryTimes)
+            throws ESOperateException;
     
     /**
      * @param clusterName 集群名称
