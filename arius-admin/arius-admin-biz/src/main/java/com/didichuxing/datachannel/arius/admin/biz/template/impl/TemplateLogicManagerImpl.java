@@ -64,6 +64,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectTe
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.DataTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateHealthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.event.index.IndexDeleteEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.template.LogicTemplateCreatePipelineEvent;
@@ -75,7 +76,6 @@ import com.didichuxing.datachannel.arius.admin.common.mapping.AriusTypeProperty;
 import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
 import com.didichuxing.datachannel.arius.admin.common.tuple.Tuples;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.TemplateUtils;
@@ -1116,7 +1116,9 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     }
     
     /**
+     *
      * 它通过其逻辑 ID 更新模板的健康状况。
+     * {@link  TemplateHealthEnum}
      * @param logicId 模板的 logicId。
      * @return 一个布尔值。
      */
@@ -1125,12 +1127,11 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         if (!indexTemplateService.exist(logicId)) {
             return true;
         }
-        IndexTemplateWithPhyTemplates indexTemplateWithPhyTemplates =
-                indexTemplateService.getLogicTemplateWithPhysicalsById(
+        IndexTemplateWithPhyTemplates indexTemplateWithPhyTemplates = indexTemplateService.getLogicTemplateWithPhysicalsById(
                 logicId);
         String masterCluster = Optional.ofNullable(indexTemplateWithPhyTemplates)
-                .map(IndexTemplateWithPhyTemplates::getMasterPhyTemplate)
-                .map(IndexTemplatePhy::getCluster).orElse(null);
+                .map(IndexTemplateWithPhyTemplates::getMasterPhyTemplate).map(IndexTemplatePhy::getCluster)
+                .orElse(null);
         if (Objects.isNull(masterCluster)) {
             LOGGER.warn(
                     "class={}||method=updateTemplateHealthByLogicId||logicId={}||error=don't find index template cluster",
@@ -1144,35 +1145,39 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
                     "class={}||method=updateTemplateHealthByLogicId||logicId={}||error=don't find index template cluster",
                     getClass().getSimpleName(), logicId);
             /**
-             * 未知
+             * {@link TemplateHealthEnum}
              */
-            templatePO.setHealthRate(-1.0);
+            templatePO.setHealth(TemplateHealthEnum.UNKNOWN.getCode());
             indexTemplateService.update(templatePO);
             return true;
-            
+        
         }
         try {
-            final List<CatIndexResult> catIndexResults = indicesManager.listIndexCatInfoByTemplatePhyId(
-                    indexTemplateWithPhyTemplates.getMasterPhyTemplate().getId());
-            // 总数
-            final int healthTotal = catIndexResults.size();
-            // 统计 green 的个数
-            final long greenTotal = catIndexResults.stream().filter(catIndexResult ->
-                    // 可能由于新建的索引，暂时没有采集到，导致了 health 为 null，这里也算做健康的
-                    Objects.isNull(catIndexResult.getHealth()) || StringUtils.equalsIgnoreCase(
-                            catIndexResult.getHealth(), "green")).count();
-            if (healthTotal == 0 || Objects.equals((int) greenTotal, healthTotal)) {
-                templatePO.setHealthRate(1.0);
+            String cluster = indexTemplateWithPhyTemplates.getMasterPhyTemplate().getCluster();
+            String expression = indexTemplateWithPhyTemplates.getMasterPhyTemplate().getExpression();
+            if (esTemplateService.hasMatchHealthIndexByExpressionTemplateHealthEnum(cluster, expression,
+                    TemplateHealthEnum.GREEN)) {
+                templatePO.setHealth(TemplateHealthEnum.GREEN.getCode());
                 indexTemplateService.update(templatePO);
                 return true;
             }
-            final double healthRate = CommonUtils.divideIntAndFormatDouble((int) greenTotal, healthTotal, 2, 1);
-            templatePO.setHealthRate(healthRate);
-            indexTemplateService.update(templatePO);
+    
+            if (esTemplateService.hasMatchHealthIndexByExpressionTemplateHealthEnum(cluster, expression,
+                    TemplateHealthEnum.YELLOW)) {
+                templatePO.setHealth(TemplateHealthEnum.YELLOW.getCode());
+                indexTemplateService.update(templatePO);
+                return true;
+            }
+    
+            if (esTemplateService.hasMatchHealthIndexByExpressionTemplateHealthEnum(cluster, expression,
+                    TemplateHealthEnum.RED)) {
+                templatePO.setHealth(TemplateHealthEnum.RED.getCode());
+                indexTemplateService.update(templatePO);
+                return true;
+            }
             return true;
         } catch (Exception e) {
-            LOGGER.warn("class=TemplateLogicManagerImpl||method=getCyclicalRollInfo||logicId={}||errMsg={}", logicId,
-                    e.getMessage(), e);
+            LOGGER.error("class=TemplateLogicManagerImpl||method=updateTemplateHealthByLogicId||logicId={}", logicId, e);
             return false;
         }
         

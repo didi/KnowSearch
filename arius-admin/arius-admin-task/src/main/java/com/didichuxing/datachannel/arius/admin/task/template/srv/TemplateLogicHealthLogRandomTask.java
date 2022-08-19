@@ -15,8 +15,9 @@ import com.didiglobal.logi.log.LogFactory;
  * @author shizeying
  * @date 2022/08/16
  */
-@Task(name = "TemplateHealthRandomTask", description = "模板健康率同步任务", cron = "0 0/5 * * * ? *", autoRegister = true)
-public class TemplateHealthRandomTask extends BaseConcurrentTemplateTask implements Job {
+@Task(name = "TemplateLogicHealthLogRandomTask", description = "逻辑模板健康率同步任务", cron = "0 0/5 * * * ? *", autoRegister =
+		true)
+public class TemplateLogicHealthLogRandomTask extends BaseConcurrentTemplateTask implements Job {
 	private static final ILog LOGGER = LogFactory.getLog(ColdDataMoveRandomTask.class);
 	
 	@Override

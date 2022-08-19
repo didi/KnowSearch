@@ -146,6 +146,6 @@ public class IndexTemplatePO extends BasePO {
      * 模版健康率 -1 是unknown
      *
      */
-    private Double healthRate;
+    private Integer health;
 
 }

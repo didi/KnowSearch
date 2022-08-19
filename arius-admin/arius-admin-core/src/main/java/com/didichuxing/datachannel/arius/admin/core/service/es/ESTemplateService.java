@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.core.service.es;
 
+import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateHealthEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
 import com.didiglobal.logi.elasticsearch.client.response.setting.template.MultiTemplatesConfig;
@@ -186,5 +187,16 @@ public interface ESTemplateService {
     long synGetTemplateNumForAllVersion(String cluster);
     
     boolean syncGetEsClusterIsNormal(String cluster);
+    
+    /**
+     * > 检查指定集群的索引是否匹配指定的表达式和模板健康状态
+     *
+     * @param cluster 集群名称
+     * @param expression 索引的表达式，如“log-*”
+     * @param templateHealthEnum 模板的健康状态，为枚举类型，枚举值如下：
+     * @return 布尔值
+     */
+    boolean hasMatchHealthIndexByExpressionTemplateHealthEnum(String cluster, String expression,
+                                                                     TemplateHealthEnum templateHealthEnum) throws ESOperateException;
 
 }
