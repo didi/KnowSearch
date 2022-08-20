@@ -37,10 +37,10 @@
 	        parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.operaterecord.OperateRecordInfoPO"
 	        useGeneratedKeys="true" keyColumn="id" keyProperty="id">
 		<!--@mbg.generated-->    insert into operate_record_info (project_name, module_id, operate_id, trigger_way_id,
-		                                                     user_operation, operate_time, create_time, update_time,
+		                                                     user_operation, operate_time,
 		                                                     content, biz_id)
 		                         values (#{projectName}, #{moduleId}, #{operateId}, #{triggerWayId}, #{userOperation},
-		                                 #{operateTime}, #{createTime}, #{updateTime}, #{content}, #{bizId})
+		                                 #{operateTime}, #{content}, #{bizId})
 	</insert>
 	
 	<select id="listByCondition" resultMap="BaseResultMap"
