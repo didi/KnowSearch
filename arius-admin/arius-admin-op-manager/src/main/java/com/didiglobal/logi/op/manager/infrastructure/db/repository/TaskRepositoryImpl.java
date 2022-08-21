@@ -23,7 +23,8 @@ public  class TaskRepositoryImpl implements TaskRepository {
     @Override
     public int insertTask(Task task) {
         TaskPO po = TaskConverter.convertTaskDO2PO(task);
-        return taskDao.insert(po);
+        taskDao.insert(po);
+        return po.getId();
     }
 
     @Override
@@ -43,7 +44,7 @@ public  class TaskRepositoryImpl implements TaskRepository {
 
     @Override
     public List<Task> getUnFinishTaskList() {
-        return taskDao.getUnFinishTaskList();
+        return TaskConverter.convertTaskPO2DOList(taskDao.getUnFinishTaskList());
     }
 
 

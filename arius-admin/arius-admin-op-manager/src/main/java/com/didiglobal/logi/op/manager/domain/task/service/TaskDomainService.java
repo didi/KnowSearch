@@ -2,6 +2,7 @@ package com.didiglobal.logi.op.manager.domain.task.service;
 
 import com.didiglobal.logi.op.manager.domain.task.entity.Task;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
+import com.didiglobal.logi.op.manager.infrastructure.common.Tuple;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralGroupConfig;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.HostActionEnum;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.TaskActionEnum;
@@ -25,7 +26,7 @@ public interface TaskDomainService {
      * @return
      */
     Result<Void> createTask(String content, Integer type, String describe, String associationId,
-                            Map<String, List<String>> groupToIpList);
+                            Map<String, List<Tuple<String, Integer>>>  groupToIpList);
 
     /**
      * 执行任务

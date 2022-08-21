@@ -1,6 +1,7 @@
 package com.didiglobal.logi.op.manager.infrastructure.db.mapper;
 
 import com.didiglobal.logi.op.manager.infrastructure.db.TaskDetailPO;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -31,7 +32,7 @@ public interface TaskDetailDao {
      * @param groupName
      * @param executeId
      */
-    void updateExecuteId(int taskId, String groupName, int executeId);
+    void updateExecuteId(@Param("taskId" )int taskId, @Param("groupName") String groupName, @Param("executeTaskId") int executeId);
 
 
     /**

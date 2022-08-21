@@ -3,20 +3,25 @@ package com.didiglobal.logi.op.manager.infrastructure.common.hander;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.didiglobal.logi.op.manager.domain.component.entity.Component;
+import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentGroupConfig;
 import com.didiglobal.logi.op.manager.domain.component.event.ComponentEvent;
 import com.didiglobal.logi.op.manager.domain.component.service.ComponentDomainService;
 import com.didiglobal.logi.op.manager.domain.task.entity.Task;
 import com.didiglobal.logi.op.manager.domain.task.service.TaskDomainService;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
+import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralGroupConfig;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralUpgradeComponent;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.OperationEnum;
 import com.didiglobal.logi.op.manager.infrastructure.common.hander.base.BaseComponentHandler;
 import com.didiglobal.logi.op.manager.infrastructure.common.hander.base.ComponentHandler;
 import com.didiglobal.logi.op.manager.infrastructure.common.hander.base.DefaultHandler;
 import com.didiglobal.logi.op.manager.infrastructure.exception.ComponentHandlerException;
+import com.didiglobal.logi.op.manager.infrastructure.util.ConvertUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.List;
 
 /**
  * @author didi
@@ -41,11 +46,11 @@ public class UpgradeComponentHandler extends BaseComponentHandler implements Com
             GeneralUpgradeComponent upgradeComponent = (GeneralUpgradeComponent) componentEvent.getSource();
 
             upgradeComponent.setTemplateId(getTemplateIdByPackageId(upgradeComponent.getPackageId()));
-
+            List<ComponentGroupConfig> list = componentDomainService.getComponentConfig(upgradeComponent.getComponentId()).getData();
             String content = JSONObject.toJSON(upgradeComponent).toString();
             taskDomainService.createTask(content, componentEvent.getOperateType(),
                     componentEvent.getDescribe(), upgradeComponent.getAssociationId(),
-                    componentDomainService.getComponentConfig(upgradeComponent.getComponentId()).getData());
+                    getGroup2HostMap(ConvertUtil.list2List(list, GeneralGroupConfig.class)));
         } catch (Exception e) {
             LOGGER.error("event process error.", e);
             throw new ComponentHandlerException(e);

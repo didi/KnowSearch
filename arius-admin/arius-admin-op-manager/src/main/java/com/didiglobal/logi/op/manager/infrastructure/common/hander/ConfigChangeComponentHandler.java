@@ -8,6 +8,7 @@ import com.didiglobal.logi.op.manager.domain.task.entity.Task;
 import com.didiglobal.logi.op.manager.domain.task.service.TaskDomainService;
 import com.didiglobal.logi.op.manager.infrastructure.common.Constants;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
+import com.didiglobal.logi.op.manager.infrastructure.common.Tuple;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralConfigChangeComponent;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.OperationEnum;
 import com.didiglobal.logi.op.manager.infrastructure.common.hander.base.BaseComponentHandler;
@@ -20,10 +21,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
+import static com.didiglobal.logi.op.manager.infrastructure.common.Constants.SPLIT;
 
 /**
  * @author didi
@@ -44,13 +44,7 @@ public class ConfigChangeComponentHandler extends BaseComponentHandler implement
             GeneralConfigChangeComponent changeComponent = (GeneralConfigChangeComponent) componentEvent.getSource();
             changeComponent.setTemplateId(getTemplateId(changeComponent.getComponentId()));
             String content = JSONObject.toJSON(changeComponent).toString();
-            Map<String, List<String>> groupToIpList = new LinkedHashMap<>(16);
-            changeComponent.getGroupConfigList().forEach(config ->
-            {
-                if (!StringUtils.isEmpty(config.getHosts())) {
-                    groupToIpList.put(config.getGroupName(), Arrays.asList(config.getHosts().split(Constants.SPLIT)));
-                }
-            });
+            Map<String, List<Tuple<String, Integer>>> groupToIpList = getGroup2HostMap(changeComponent.getGroupConfigList());
             taskDomainService.createTask(content, componentEvent.getOperateType(),
                     componentEvent.getDescribe(), changeComponent.getAssociationId(), groupToIpList);
         } catch (Exception e) {

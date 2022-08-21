@@ -7,6 +7,7 @@ import com.didiglobal.logi.op.manager.domain.task.repository.TaskRepository;
 import com.didiglobal.logi.op.manager.domain.task.service.TaskDomainService;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 import com.didiglobal.logi.op.manager.infrastructure.common.ResultCode;
+import com.didiglobal.logi.op.manager.infrastructure.common.Tuple;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralBaseOperationComponent;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralExecuteComponentFunction;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralGroupConfig;
@@ -14,7 +15,6 @@ import com.didiglobal.logi.op.manager.infrastructure.common.enums.*;
 import com.didiglobal.logi.op.manager.infrastructure.deployment.DeploymentService;
 import com.didiglobal.logi.op.manager.infrastructure.util.ConvertUtil;
 import org.apache.logging.log4j.util.Strings;
-import org.elasticsearch.common.collect.Tuple;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -43,7 +43,7 @@ public class TaskDomainServiceImpl implements TaskDomainService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Result<Void> createTask(String content, Integer type, String describe,
-                                   String associationId, Map<String, List<String>> groupToHostList) {
+                                   String associationId, Map<String, List<Tuple<String, Integer>>>  groupToHostList) {
         //新建
         Task task = new Task();
         task.create(content, type, describe, associationId, groupToHostList);
@@ -257,7 +257,7 @@ public class TaskDomainServiceImpl implements TaskDomainService {
 
     @Override
     public Result<Void> updateTaskDetail(int taskId, int executeId, int status, List<String> hosts) {
-        //taskDetailRepository.update
+        //taskDetailRepository.getDetailByHostAndGroupName()
         return null;
     }
 
@@ -275,7 +275,7 @@ public class TaskDomainServiceImpl implements TaskDomainService {
             case SHRINK:
             case CONFIG_CHANGE:
             case RESTART:
-                GeneralBaseOperationComponent baseOperationComponent = ConvertUtil.obj2ObjByJSON(task.getContent(), GeneralBaseOperationComponent.class);
+                GeneralBaseOperationComponent baseOperationComponent = ConvertUtil.str2ObjByJson(task.getContent(), GeneralBaseOperationComponent.class);
                 for (GeneralGroupConfig config : baseOperationComponent.getGroupConfigList()) {
                     if (config.getGroupName().equals(name)) {
                         return Result.success(new Tuple<>(config, baseOperationComponent.getTemplateId()));

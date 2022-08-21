@@ -86,15 +86,8 @@ public class ComponentDomainServiceImpl implements ComponentDomainService {
     }
 
     @Override
-    public Result<Map<String, List<String>>> getComponentConfig(int componentId) {
-        Map<String, List<String>> groupToIpList = new HashMap<>(MAP_SIZE);
-        List<ComponentGroupConfig> groupConfigList = componentGroupConfigRepository.getConfigByComponentId(componentId);
-        for (ComponentGroupConfig config : groupConfigList) {
-            if (!StringUtils.isEmpty(config.getHosts())) {
-                groupToIpList.put(config.getGroupName(), Arrays.asList(config.getHosts().split(Constants.SPLIT)));
-            };
-        }
-        return Result.success(groupToIpList);
+    public Result<List<ComponentGroupConfig>> getComponentConfig(int componentId) {
+        return Result.success(componentGroupConfigRepository.getConfigByComponentId(componentId));
     }
 
     @Override

@@ -3,6 +3,7 @@ package com.didiglobal.logi.op.manager.domain.task.entity;
 import com.didiglobal.logi.op.manager.domain.task.entity.value.TaskDetail;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 import com.didiglobal.logi.op.manager.infrastructure.common.ResultCode;
+import com.didiglobal.logi.op.manager.infrastructure.common.Tuple;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.TaskActionEnum;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.TaskStatusEnum;
 import lombok.AllArgsConstructor;
@@ -10,6 +11,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -68,7 +70,7 @@ public class Task {
      */
     private String templateId;
 
-    public Task create(String content, Integer type, String describe, String associationId, Map<String, List<String>> groupToHostList) {
+    public Task create(String content, Integer type, String describe, String associationId, Map<String, List<Tuple<String, Integer>>>  groupToHostList) {
         this.createTime = new Timestamp(System.currentTimeMillis());
         this.updateTime = new Timestamp(System.currentTimeMillis());
         this.content = content;
@@ -77,11 +79,12 @@ public class Task {
         this.describe = describe;
         this.associationId = associationId;
         this.status = TaskStatusEnum.WAITING.getStatus();
+        this.detailList = new ArrayList<>();
         groupToHostList.forEach((groupName, hosts) -> {
-            hosts.forEach(host -> {
+            hosts.forEach(hostAndProcessNum -> {
                 TaskDetail taskDetail = new TaskDetail();
-                taskDetail.create(groupName, host);
-                detailList.add(taskDetail);
+                taskDetail.create(groupName, hostAndProcessNum.v1(), hostAndProcessNum.v2());
+                this.detailList.add(taskDetail);
             });
         });
         return this;

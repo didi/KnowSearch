@@ -3,6 +3,7 @@ package com.didiglobal.logi.op.manager.infrastructure.db.mapper;
 import com.didiglobal.logi.op.manager.domain.task.entity.Task;
 import com.didiglobal.logi.op.manager.infrastructure.db.PackagePO;
 import com.didiglobal.logi.op.manager.infrastructure.db.TaskPO;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -33,11 +34,11 @@ public interface TaskDao {
      * @param status
      * @return
      */
-    int updateStatus(int id, int status);
+    int updateStatus(@Param("id") int id, @Param("status") int status);
 
     /**
      * 获取未完成的任务列表
      * @return
      */
-    List<Task>  getUnFinishTaskList();
+    List<TaskPO>  getUnFinishTaskList();
 }

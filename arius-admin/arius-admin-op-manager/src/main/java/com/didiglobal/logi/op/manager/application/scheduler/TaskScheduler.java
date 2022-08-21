@@ -37,7 +37,7 @@ public class TaskScheduler {
     ComponentHandlerFactory componentHandlerFactory;
 
     //TODO 一个任务的最后一个节点失败，那这个节点就没法重试了以及忽略, 等志勇他们解决
-    @Scheduled(initialDelay = 10000, fixedDelay = 300000)
+    @Scheduled(initialDelay = 1000, fixedDelay = 5000)
     public void monitor() {
         try {
             List<Task> taskList = taskDomainService.getUnFinishTaskList().getData();
@@ -64,6 +64,7 @@ public class TaskScheduler {
                     //TODO 这里会有重复更新的情况，如何性能最大化
                     ZeusTaskStatus zeusTaskStatus = deploymentService.deployStatus(id).getData();
                     for (Field declaredField : zeusTaskStatus.getClass().getDeclaredFields()) {
+                        declaredField.setAccessible(true);
                         List<String> hostList = (List<String>) declaredField.get(zeusTaskStatus);
                         taskDomainService.updateTaskDetail(task.getId(), id, TaskStatusEnum.valueOf(declaredField.getName().toUpperCase()).getStatus(),
                                 hostList);

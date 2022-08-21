@@ -7,6 +7,7 @@ import com.didiglobal.logi.op.manager.infrastructure.common.enums.TaskStatusEnum
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.catalina.webresources.CachedResource;
 
 import java.sql.Timestamp;
 
@@ -43,16 +44,21 @@ public class TaskDetail {
      */
     private Timestamp createTime;
     /**
+     * 进程数量
+     */
+    private Integer processNum;
+    /**
      * 更新时间
      */
     private Timestamp updateTime;
 
-    public TaskDetail create(String groupName, String host) {
+    public TaskDetail create(String groupName, String host, int processNum) {
         this.status = TaskStatusEnum.WAITING.getStatus();
         this.createTime = new Timestamp(System.currentTimeMillis());
         this.updateTime = new Timestamp(System.currentTimeMillis());
         this.groupName = groupName;
         this.host = host;
+        this.processNum = processNum;
         return this;
     }
 

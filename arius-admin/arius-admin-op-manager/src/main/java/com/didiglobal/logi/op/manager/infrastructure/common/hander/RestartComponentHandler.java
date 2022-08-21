@@ -5,6 +5,7 @@ import com.didiglobal.logi.op.manager.domain.component.event.ComponentEvent;
 import com.didiglobal.logi.op.manager.domain.task.entity.Task;
 import com.didiglobal.logi.op.manager.domain.task.service.TaskDomainService;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
+import com.didiglobal.logi.op.manager.infrastructure.common.Tuple;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralBaseOperationComponent;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.OperationEnum;
 import com.didiglobal.logi.op.manager.infrastructure.common.hander.base.BaseComponentHandler;
@@ -39,7 +40,7 @@ public class RestartComponentHandler extends BaseComponentHandler implements Com
 
             baseOperationComponent.setTemplateId(getTemplateId(baseOperationComponent.getComponentId()));
             String content = JSONObject.toJSON(baseOperationComponent).toString();
-            Map<String, List<String>> groupToIpList = getGroupToIpList(baseOperationComponent);
+            Map<String, List<Tuple<String, Integer>>> groupToIpList = getGroup2HostMap(baseOperationComponent.getGroupConfigList());
             taskDomainService.createTask(content, componentEvent.getOperateType(),
                     componentEvent.getDescribe(), baseOperationComponent.getAssociationId(), groupToIpList);
         } catch (Exception e) {

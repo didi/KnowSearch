@@ -35,6 +35,10 @@ public class TaskDetailPO {
      */
     private String groupName;
     /**
+     * 进程数量
+     */
+    private Integer processNum;
+    /**
      * 创建时间
      */
     private Timestamp createTime;

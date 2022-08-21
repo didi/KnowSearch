@@ -2,6 +2,7 @@ package com.didiglobal.logi.op.manager.infrastructure.common.bean;
 
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 import com.didiglobal.logi.op.manager.infrastructure.common.ResultCode;
+import com.didiglobal.logi.op.manager.infrastructure.util.ConvertUtil;
 import com.didiglobal.logi.op.manager.interfaces.dto.GeneralGroupConfigDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -34,5 +35,9 @@ public class GeneralBaseOperationComponent {
             return Result.fail(ResultCode.PARAM_ERROR.getCode(), "配置组缺失");
         }
         return Result.success();
+    }
+
+    public void setGroupConfigList(List<GeneralGroupConfig> groupConfigList) {
+        this.groupConfigList = ConvertUtil.list2List(groupConfigList,GeneralGroupConfig.class);
     }
 }

@@ -3,7 +3,9 @@ package com.didiglobal.logi.op.manager.infrastructure.common.bean;
 import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentGroupConfig;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 import com.didiglobal.logi.op.manager.infrastructure.common.ResultCode;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -13,6 +15,8 @@ import java.util.List;
  * @date 2022-07-13 8:01 下午
  */
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class GeneralInstallComponent extends GeneralBaseOperationComponent{
     /**
      * 组件名

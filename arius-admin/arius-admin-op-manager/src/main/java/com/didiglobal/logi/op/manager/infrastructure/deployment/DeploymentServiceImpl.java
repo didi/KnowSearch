@@ -10,12 +10,16 @@ import com.didiglobal.logi.op.manager.infrastructure.deployment.zeus.ZeusTask;
 import com.didiglobal.logi.op.manager.infrastructure.deployment.zeus.ZeusTaskStatus;
 import com.didiglobal.logi.op.manager.infrastructure.deployment.zeus.ZeusTemplate;
 import com.didiglobal.logi.op.manager.infrastructure.exception.ZeusOperationException;
+import com.google.common.base.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.Arrays;
+
+import static com.didiglobal.logi.op.manager.infrastructure.common.Constants.SPLIT;
 
 /**
  * @author didi
@@ -69,9 +73,9 @@ public class DeploymentServiceImpl implements DeploymentService {
         try {
             ZeusTask task = new ZeusTask();
             task.setAction(TaskActionEnum.START.getAction());
-            task.setHosts(hosts);
+            task.setHosts(Arrays.asList(hosts.split(SPLIT)));
             task.setTemplateId(Integer.parseInt(templateId));
-            task.setArgs(String.format("%s %s", action, String.join(" ", args)));
+            task.setArgs(String.format("%s,,%s", action, String.join(",,", args)));
             return Result.success(zeusService.executeTask(task));
         } catch (ZeusOperationException e) {
             LOGGER.error("class=DeploymentServiceImpl||method=execute||errMsg={}||msg=execute failed", e.getMessage());

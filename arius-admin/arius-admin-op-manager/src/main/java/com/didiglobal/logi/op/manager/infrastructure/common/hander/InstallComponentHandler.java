@@ -11,6 +11,8 @@ import com.didiglobal.logi.op.manager.domain.script.service.impl.ScriptDomainSer
 import com.didiglobal.logi.op.manager.domain.task.entity.Task;
 import com.didiglobal.logi.op.manager.domain.task.service.TaskDomainService;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
+import com.didiglobal.logi.op.manager.infrastructure.common.Tuple;
+import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralGroupConfig;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralInstallComponent;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.OperationEnum;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.PackageTypeEnum;
@@ -19,15 +21,13 @@ import com.didiglobal.logi.op.manager.infrastructure.common.hander.base.Componen
 import com.didiglobal.logi.op.manager.infrastructure.common.hander.base.DefaultHandler;
 import com.didiglobal.logi.op.manager.infrastructure.exception.ComponentHandlerException;
 import com.didiglobal.logi.op.manager.infrastructure.util.ConvertUtil;
+import com.sun.xml.internal.ws.api.pipe.Tube;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.didiglobal.logi.op.manager.infrastructure.common.Constants.SPLIT;
 
@@ -67,13 +67,7 @@ public class InstallComponentHandler extends BaseComponentHandler implements Com
             installComponent.setTemplateId(scriptDomainService.getScriptById(pk.getScriptId()).getData().getTemplateId());
             String content = JSONObject.toJSON(installComponent).toString();
 
-            Map<String, List<String>> groupToIpList = new LinkedHashMap<>(16);
-            installComponent.getGroupConfigList().forEach(config ->
-            {
-                if (!StringUtils.isEmpty(config.getHosts())) {
-                    groupToIpList.put(config.getGroupName(), Arrays.asList(config.getHosts().split(SPLIT)));
-                }
-            });
+            Map<String, List<Tuple<String, Integer>>> groupToIpList = getGroup2HostMap(installComponent.getGroupConfigList());
             taskDomainService.createTask(content, componentEvent.getOperateType(),
                     componentEvent.getDescribe(), associationId, groupToIpList);
         } catch (Exception e) {

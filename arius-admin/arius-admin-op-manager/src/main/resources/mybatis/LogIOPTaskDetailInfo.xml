@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.didiglobal.logi.op.manager.infrastructure.db.mapper.TaskDetailDao">
+    <resultMap id="BaseResultMap"
+               type="com.didiglobal.logi.op.manager.infrastructure.db.TaskDetailPO">
+        <result column="id" jdbcType="INTEGER" property="id"/>
+        <result column="status" jdbcType="INTEGER" property="status"/>
+        <result column="execute_task_id" jdbcType="VARCHAR" property="executeTaskId"/>
+        <result column="host" jdbcType="VARCHAR" property="host"/>
+        <result column="group_name" jdbcType="VARCHAR" property="groupName"/>
+        <result column="process_num" jdbcType="INTEGER" property="processNum"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, status, execute_task_id, host, group_name, process_num, create_time, update_time
+    </sql>
+
+    <insert id="insert" parameterType="com.didiglobal.logi.op.manager.infrastructure.db.TaskDetailPO">
+        insert into logi_op_task_detail (id, status, execute_task_id, host, group_name, process_num, create_time, update_time)
+        values (#{id}, #{status}, #{executeTaskId}, #{host}, #{groupName}, #{processNum}, #{createTime}, #{updateTime})
+    </insert>
+
+    <insert id="batchInsert" parameterType="com.didiglobal.logi.op.manager.infrastructure.db.TaskDetailPO"
+            useGeneratedKeys="true"
+            keyColumn="id" keyProperty="id">
+        insert into logi_op_task_detail(id, status, execute_task_id, host, group_name, process_num, create_time, update_time)
+        values
+        <foreach collection="list" index="index" item="item" separator=",">
+            (
+            #{item.id},
+            #{item.status},
+            #{item.executeTaskId},
+            #{item.host},
+            #{item.groupName},
+            #{item.processNum},
+            #{item.createTime},
+            #{item.updateTime}
+            )
+        </foreach>
+    </insert>
+
+    <select id="listByTaskId"
+            parameterType="com.didiglobal.logi.op.manager.infrastructure.db.TaskDetailPO"
+            resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from logi_op_task_detail
+        where id = #{id}
+    </select>
+
+    <update id="updateExecuteId">
+        update logi_op_task_detail set execute_task_id = #{executeTaskId}
+        where id = #{taskId} and group_name = #{groupName}
+    </update>
+
+</mapper>

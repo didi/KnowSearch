@@ -52,7 +52,7 @@ public class ZeusServiceImpl implements ZeusService {
 
     private static final String API_EXECUTE_TASK = "http://%s/api/task?token=%s";
 
-    private static final String API_TASK_STATUS = "http://%s/api/task/%s/request";
+    private static final String API_TASK_STATUS = "http://%s/api/task/%s/result";
 
     private static final String API_TEMPLATE_REMOVE = "http://%s/tpl/%s";
 

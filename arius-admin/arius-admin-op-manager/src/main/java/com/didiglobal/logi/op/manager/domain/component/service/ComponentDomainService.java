@@ -1,6 +1,7 @@
 package com.didiglobal.logi.op.manager.domain.component.service;
 
 import com.didiglobal.logi.op.manager.domain.component.entity.Component;
+import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentGroupConfig;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.*;
 
@@ -102,7 +103,7 @@ public interface ComponentDomainService {
      * @param componentId
      * @return
      */
-    Result<Map<String, List<String>>> getComponentConfig(int componentId);
+    Result<List<ComponentGroupConfig>>  getComponentConfig(int componentId);
 
     /**
      * 更新组件

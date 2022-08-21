@@ -33,18 +33,6 @@
         </trim>
         where id = #{id}
     </update>
-    <!--<update id="update"
-            parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.config.AriusConfigInfoPO">
-        update arius_config_info
-        <trim prefix="set" prefixOverrides=",">
-            <if test="valueGroup != null">,`value_group` = #{valueGroup}</if>
-            <if test="valueName != null">,value_name = #{valueName}</if>
-            <if test="value != null">,`value` = #{value}</if>
-            <if test="dimension != null">,dimension = #{dimension}</if>
-            <if test="memo != null">,memo = #{memo}</if>
-        </trim>
-        where id = #{id}
-    </update>-->
     <select id="findById"
             parameterType="com.didiglobal.logi.op.manager.infrastructure.db.ScriptPO"
             resultMap="BaseResultMap">
@@ -81,11 +69,5 @@
         delete from logi_op_script
         where id = #{id}
     </delete>
-    <!--<select id="getById" parameterType="integer" resultMap="BaseResultMap">
-        select
-        <include refid="Base_Column_List"/>
-        from arius_config_info
-        where status != -1 and id = #{id}
-    </select>-->
 
 </mapper>
