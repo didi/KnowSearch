@@ -59,6 +59,8 @@ public class ESShardDAO extends BaseESDAO {
     private String              state                      = "state";
     private String              CLOSED                     = "closed";
     private String              OPEN                       = "open";
+    private String              BOOL                       = "bool";
+    private String              SHOULD                     = "should";
 
     private static final FutureUtil<List<ShardCatCellPO>> CAT_SHARD_FUTURE = FutureUtil.init("CAT_SHARD_FUTURE", 10, 10, 100);
 
@@ -243,8 +245,7 @@ public class ESShardDAO extends BaseESDAO {
     private String buildQueryTermDsl(String cluster,  Integer projectId,String keyword) {
         return "[" + buildTermCell(cluster, projectId,keyword) +"]";
     }
-  
-    private String buildTermCell(String cluster, Integer projectId,String keyword) {
+    private String buildTermCell(String cluster, Integer projectId, String keyword) {
         List<String> termCellList = Lists.newArrayList();
         //projectId == null 时，属于超级项目访问；
         if (null == projectId) {
@@ -256,13 +257,23 @@ public class ESShardDAO extends BaseESDAO {
 
             //get resourceId dsl term
             termCellList.add(DSLSearchUtils.getTermCellForExactSearch(cluster, "clusterLogic"));
-
         }
-        if (StringUtils.isNotBlank(keyword)){
-            termCellList.add(DSLSearchUtils.getTermCellForWildcardSearch(keyword, "index"));
-        }
+        termCellList.add(buildShouldTermCell(keyword));
         return ListUtils.strList2String(termCellList);
     }
+
+    private String buildShouldTermCell(String keyword){
+        //构造should的条件
+        List<String> shouldCellList = Lists.newArrayList();
+        if (StringUtils.isNotBlank(keyword)){
+            shouldCellList.add(DSLSearchUtils.getTermCellForWildcardSearch(keyword, "index"));
+            shouldCellList.add(DSLSearchUtils.getTermCellForWildcardSearch(keyword, "node"));
+            shouldCellList.add(DSLSearchUtils.getTermCellForWildcardSearch(keyword, "ip"));
+        }
+
+        return "{\""+BOOL+"\": {\""+SHOULD+"\": ["+ListUtils.strList2String(shouldCellList)+"]}}";
+    }
+
 
     private String buildSortType(Boolean orderByDesc) {
         String sortType = "desc";
