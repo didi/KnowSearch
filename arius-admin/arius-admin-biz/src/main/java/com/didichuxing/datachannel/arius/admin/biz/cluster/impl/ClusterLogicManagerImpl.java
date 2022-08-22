@@ -750,6 +750,22 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     }
 
     /**
+     * 返回与给定应用关联的逻辑集群名称列表
+     *
+     * @param projectId 项目id
+     * @return List<String> 逻辑集群名称列表
+     */
+    @Override
+    public List<String> listClusterLogicNameByApp(Integer projectId) {
+        List<ClusterLogic> clusterLogicList = clusterLogicService.getHasAuthClusterLogicsByProjectId(projectId);
+        List<String> names = Lists.newArrayList();
+        for (ClusterLogic clusterLogic : clusterLogicList) {
+            names.add(clusterLogic.getName());
+        }
+        return names;
+    }
+
+    /**
      * 返回与给定物理集群名称关联的逻辑集群名称列表
      *
      * @param phyClusterName 物理集群的名称。

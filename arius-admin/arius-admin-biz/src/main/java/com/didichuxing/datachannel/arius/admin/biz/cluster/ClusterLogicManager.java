@@ -236,4 +236,12 @@ public interface ClusterLogicManager {
      * @return List<String> 逻辑集群名称列表
      */
     List<String> listClusterLogicNameByPhyName(String phyClusterName);
+
+    /**
+     * 根据项目id获取对应的逻辑集群列表
+     * @param projectId 项目id
+     * @return List<String> 逻辑集群名称列表
+     */
+    List<String> listClusterLogicNameByApp(Integer projectId);
+
 }
