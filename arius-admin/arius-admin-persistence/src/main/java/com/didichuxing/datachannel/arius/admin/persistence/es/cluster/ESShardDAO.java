@@ -59,8 +59,6 @@ public class ESShardDAO extends BaseESDAO {
     private String              state                      = "state";
     private String              CLOSED                     = "closed";
     private String              OPEN                       = "open";
-    private String              BOOL                       = "bool";
-    private String              SHOULD                     = "should";
 
     private static final FutureUtil<List<ShardCatCellPO>> CAT_SHARD_FUTURE = FutureUtil.init("CAT_SHARD_FUTURE", 10, 10, 100);
 
