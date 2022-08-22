@@ -883,6 +883,20 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         return PaginationResult.buildFail("分页获取物理集群信息失败");
     }
 
+    @Override
+    public Result<List<String>> listClusterPhyNameBySuperApp(Integer projectId) {
+        List<String> names = Lists.newArrayList();
+        if (AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
+            names.addAll(clusterPhyService.listClusterNames());
+        } else {
+            return Result.buildFail("非超级项目，不能查看物理集群列表");
+        }
+        if (names.size()==0){
+            return Result.buildFail("超级项目无集群信息，请前往集群管理-->物理集群，进行新建集群或者接入集群。");
+        }
+        return Result.buildSucc(names);
+    }
+
     /**
      * 构建用户控制台统计信息: 集群使用率
      */

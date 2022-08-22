@@ -221,6 +221,13 @@ public interface ClusterPhyManager {
                                                       Integer projectId) throws NotFindSubclassException;
 
     /**
+     * 根据projectId获取超级项目下的物理集群列表
+     * @param projectId 项目id
+     * @return Result<List<String>>
+     */
+    Result<List<String>> listClusterPhyNameBySuperApp(Integer projectId);
+
+    /**
      * 构建物理集群角色信息
      * @param cluster
      */
