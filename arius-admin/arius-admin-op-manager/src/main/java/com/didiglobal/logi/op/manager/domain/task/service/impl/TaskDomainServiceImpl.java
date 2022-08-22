@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.didiglobal.logi.op.manager.infrastructure.common.Constants.REX;
 
@@ -143,11 +144,18 @@ public class TaskDomainServiceImpl implements TaskDomainService {
             return checkRes;
         }
 
-        //获取正在执行的任务id
-        int executeTaskId = getExecuteTaskId(taskId);
 
-        //执行zeus任务
-        Result<Void> actionRes = deploymentService.actionTask(executeTaskId, action.getAction());
+        //获取正在执行的任务id
+        Integer executeTaskId = getExecuteTaskId(taskId);
+        Result<Void> actionRes;
+        if (null != executeTaskId) {
+            //执行zeus任务
+            actionRes = deploymentService.actionTask(executeTaskId, action.getAction());
+        } else {
+            actionRes = executeDeployTask(task);
+        }
+
+
         if (actionRes.failed()) {
             return actionRes;
         }
@@ -202,26 +210,33 @@ public class TaskDomainServiceImpl implements TaskDomainService {
     }
 
 
-    private int getExecuteTaskId(int taskId) {
+    private Integer getExecuteTaskId(int taskId) {
         List<TaskDetail> detailList = taskDetailRepository.listTaskDetailByTaskId(taskId);
-        int executeTaskId = detailList.stream().filter(detail ->
+        Optional<TaskDetail> optional = detailList.stream().filter(detail ->
                 null != detail.getExecuteTaskId() &&
                         (detail.getStatus() == TaskStatusEnum.RUNNING.getStatus() ||
                                 detail.getStatus() == TaskStatusEnum.WAITING.getStatus())
-        ).findFirst().get().getExecuteTaskId();
-        return executeTaskId;
+        ).findFirst();
+
+        if (optional.isPresent()) {
+            return optional.get().getExecuteTaskId();
+        }
+
+        return null;
     }
 
     @NotNull
     private Result<Map.Entry<String, List<String>>> getFirstGroup(List<TaskDetail> detailList) {
         Map<String, List<String>> groupToHostList = new LinkedHashMap<>();
         detailList.forEach(taskDetail -> {
-            List<String> hosts = groupToHostList.get(taskDetail.getGroupName());
-            if (null == hosts) {
-                hosts = new ArrayList<>();
-                groupToHostList.put(taskDetail.getGroupName(), hosts);
+            if (null == taskDetail.getExecuteTaskId()) {
+                List<String> hosts = groupToHostList.get(taskDetail.getGroupName());
+                if (null == hosts) {
+                    hosts = new ArrayList<>();
+                    groupToHostList.put(taskDetail.getGroupName(), hosts);
+                }
+                hosts.add(taskDetail.getHost());
             }
-            hosts.add(taskDetail.getHost());
         });
         if (0 == groupToHostList.size()) {
             Result.fail("没有可以执行的分组");
@@ -257,8 +272,8 @@ public class TaskDomainServiceImpl implements TaskDomainService {
 
     @Override
     public Result<Void> updateTaskDetail(int taskId, int executeId, int status, List<String> hosts) {
-        //taskDetailRepository.getDetailByHostAndGroupName()
-        return null;
+        taskDetailRepository.updateStatusByExecuteTaskId(taskId, executeId, status, hosts);
+        return Result.success();
     }
 
     @Override

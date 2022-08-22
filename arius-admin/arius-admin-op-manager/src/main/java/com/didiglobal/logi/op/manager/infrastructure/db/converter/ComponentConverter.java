@@ -10,6 +10,8 @@ import com.didiglobal.logi.op.manager.infrastructure.util.ConvertUtil;
 
 import java.util.List;
 
+import static com.didiglobal.logi.op.manager.infrastructure.common.Constants.DEPEND_CONFIG_COMPONENT_ID;
+
 /**
  * @author didi
  * @date 2022-07-19 3:07 下午

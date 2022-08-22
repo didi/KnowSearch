@@ -45,10 +45,10 @@ public class ComponentPO {
     /**
      * 是否卸载
      */
-    private Integer isDelete;
+    private Integer isDeleted;
 
     /**
-     * 依赖的组件id
+     * 依赖配置的组件id
      */
-    private Integer dependComponentId;
+    private Integer dependConfigComponentId;
 }

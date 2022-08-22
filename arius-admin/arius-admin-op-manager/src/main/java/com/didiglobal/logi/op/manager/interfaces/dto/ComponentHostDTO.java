@@ -29,7 +29,11 @@ public class ComponentHostDTO {
     /**
      * 目录
      */
-    private String directory;
+    private String groupName;
+    /**
+     * 进程数量
+     */
+    private Integer processNum;
     /**
      * 是否卸载
      */

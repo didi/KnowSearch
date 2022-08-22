@@ -1,6 +1,8 @@
 package com.didiglobal.logi.op.manager.application.scheduler;
 
+import com.didiglobal.logi.op.manager.application.TaskService;
 import com.didiglobal.logi.op.manager.domain.task.entity.Task;
+import com.didiglobal.logi.op.manager.domain.task.entity.value.TaskDetail;
 import com.didiglobal.logi.op.manager.domain.task.service.TaskDomainService;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.TaskStatusEnum;
 import com.didiglobal.logi.op.manager.infrastructure.common.hander.ComponentHandlerFactory;
@@ -9,11 +11,13 @@ import com.didiglobal.logi.op.manager.infrastructure.deployment.zeus.ZeusTaskSta
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.task.TaskDecorator;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -36,13 +40,16 @@ public class TaskScheduler {
     @Autowired
     ComponentHandlerFactory componentHandlerFactory;
 
+    @Autowired
+    TaskScheduler taskScheduler;
+
     //TODO 一个任务的最后一个节点失败，那这个节点就没法重试了以及忽略, 等志勇他们解决
     @Scheduled(initialDelay = 1000, fixedDelay = 5000)
     public void monitor() {
         try {
             List<Task> taskList = taskDomainService.getUnFinishTaskList().getData();
             taskList.forEach(task -> {
-                handle(task);
+                taskScheduler.handle(task);
             });
         } catch (Exception e) {
             LOGGER.error("task monitor error", e);
@@ -53,9 +60,15 @@ public class TaskScheduler {
     public void handle(Task task) {
         try {
             Set<Integer> executeIdSet = new HashSet<>();
-            task.getDetailList().forEach(taskDetail -> {
-                executeIdSet.add(taskDetail.getExecuteTaskId());
-            });
+            boolean isContainEmptyExecuteId = false;
+
+            for (TaskDetail taskDetail : task.getDetailList()) {
+                if (null != taskDetail.getExecuteTaskId()) {
+                    executeIdSet.add(taskDetail.getExecuteTaskId());
+                } else {
+                    isContainEmptyExecuteId = true;
+                }
+            }
 
             if (executeIdSet.size() > 0) {
                 ZeusTaskStatus totalStatus = new ZeusTaskStatus();
@@ -66,14 +79,22 @@ public class TaskScheduler {
                     for (Field declaredField : zeusTaskStatus.getClass().getDeclaredFields()) {
                         declaredField.setAccessible(true);
                         List<String> hostList = (List<String>) declaredField.get(zeusTaskStatus);
-                        taskDomainService.updateTaskDetail(task.getId(), id, TaskStatusEnum.valueOf(declaredField.getName().toUpperCase()).getStatus(),
-                                hostList);
+                        if (hostList != null) {
+                            taskDomainService.updateTaskDetail(task.getId(), id, TaskStatusEnum.valueOf(declaredField.getName().toUpperCase()).getStatus(),
+                                    hostList);
+                        }
+
                     }
 
                     totalStatus.addZeusTaskStatus(zeusTaskStatus);
                 }
 
-                int finalStatus = getFinalStatusAndUpdate(task, totalStatus);
+                //这里是把未执行的当成待执行
+                if (isContainEmptyExecuteId) {
+                    totalStatus.addZeusTaskStatus(ZeusTaskStatus.builder().waiting(new ArrayList<>()).build());
+                }
+
+                int finalStatus = getFinalStatusAndUpdate(task, totalStatus, isContainEmptyExecuteId);
 
                 if (finalStatus == TaskStatusEnum.SUCCESS.getStatus()) {
                     componentHandlerFactory.getByType(task.getType()).taskFinishProcess(task.getContent());
@@ -85,7 +106,7 @@ public class TaskScheduler {
         }
     }
 
-    private int getFinalStatusAndUpdate(Task task, ZeusTaskStatus totalStatus) {
+    private int getFinalStatusAndUpdate(Task task, ZeusTaskStatus totalStatus, boolean isContainEmptyExecuteId) {
         int isFinish = 0;
         int finalStatus;
         if (null != totalStatus.getTimeout() || null != totalStatus.getFailed()) {
@@ -97,10 +118,11 @@ public class TaskScheduler {
             finalStatus = TaskStatusEnum.WAITING.getStatus();
         } else {
             finalStatus = TaskStatusEnum.SUCCESS.getStatus();
+            isFinish = 1;
         }
 
         if (task.getStatus() != finalStatus) {
-            taskDomainService.updateTaskStatusAndIsFinish(task.getId(), isFinish, task.getStatus());
+            taskDomainService.updateTaskStatusAndIsFinish(task.getId(), isFinish, finalStatus);
         }
         return finalStatus;
     }

@@ -50,4 +50,14 @@ public interface TaskDetailDao {
      * @return
      */
     void deleteByTaskId(int taskId);
+
+    /**
+     * 根据host和taskId以及executeId更新任务状态
+     * @param taskId
+     * @param executeId
+     * @param status
+     * @param hosts
+     */
+    void updateStatusByExecuteId(@Param("taskId") int taskId, @Param("executeId") int executeId,
+                                 @Param("status") int status,@Param("hosts") List<String> hosts);
 }

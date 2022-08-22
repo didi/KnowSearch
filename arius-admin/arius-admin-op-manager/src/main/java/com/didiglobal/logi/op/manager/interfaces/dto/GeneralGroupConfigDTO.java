@@ -46,4 +46,9 @@ public class GeneralGroupConfigDTO {
      * 节点列表
      */
     private String hosts;
+
+    /**
+     * 配置版本
+     */
+    private String version;
 }

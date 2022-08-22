@@ -14,14 +14,14 @@ import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.*;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.DeleteEnum;
 import com.didiglobal.logi.op.manager.infrastructure.common.event.SpringEventPublisher;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
-
-import static com.didiglobal.logi.op.manager.infrastructure.common.Constants.MAP_SIZE;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author didi
@@ -100,7 +100,7 @@ public class ComponentDomainServiceImpl implements ComponentDomainService {
     public Result<List<Component>> listComponent() {
         List<Component> componentList = componentRepository.listAllComponent();
         List<ComponentHost> hosts = componentHostRepository.listComponentHost();
-        List<ComponentGroupConfig>  configs = componentGroupConfigRepository.listGroupConfig();
+        List<ComponentGroupConfig> configs = componentGroupConfigRepository.listGroupConfig();
         Map<String, List<ComponentHost>> componentIdToHostMap = new HashMap<>(componentList.size());
         Map<String, List<ComponentGroupConfig>> componentIdToGroupConfigMap = new HashMap<>(componentList.size());
         hosts.forEach(componentHost -> {
@@ -134,32 +134,34 @@ public class ComponentDomainServiceImpl implements ComponentDomainService {
 
         //依赖组件更新
         if (null != component.getDependComponentId()) {
-            Component dependentComponent = componentRepository.getComponentById(componentId);
+            Component dependentComponent = componentRepository.getComponentById(component.getDependComponentId());
             dependentComponent.updateContainIds(componentId);
             componentRepository.updateContainIds(dependentComponent.getId(), dependentComponent.getContainComponentIds());
         }
 
-        //不依赖配置的组件，更新自己的配置
-        if (null == component.getDependConfigComponentId()) {
-            for (ComponentGroupConfig groupConfig : component.getGroupConfigList()) {
+        for (ComponentGroupConfig groupConfig : component.getGroupConfigList()) {
+            //不依赖配置的组件，更新自己的配置
+            if (null == component.getDependConfigComponentId()) {
                 groupConfig.create();
                 groupConfig.setComponentId(componentId);
                 //创建并保存配置
-                int groupId = componentGroupConfigRepository.saveGroupConfig(groupConfig);
-                for (String host : groupConfig.getHosts().split(Constants.SPLIT)) {
-                    //创建并保存组件host
-                    //TODO 考虑下能否批量提交
-                    ComponentHost componentHost = new ComponentHost();
-                    componentHost.setHost(host);
-                    componentHost.setProcessNum(JSON.parseObject(groupConfig.getProcessNumConfig()).getInteger(host));
-                    componentHost.setComponentId(componentId);
-                    componentHost.setGroupId(groupId);
-                    componentHost.create();
-                    componentHostRepository.saveComponentHost(componentHost);
-                }
-
+                componentGroupConfigRepository.saveGroupConfig(groupConfig);
             }
-        } else {
+            for (String host : groupConfig.getHosts().split(Constants.SPLIT)) {
+                //创建并保存组件host
+                //TODO 考虑下能否批量提交
+                ComponentHost componentHost = new ComponentHost();
+                componentHost.setHost(host);
+                componentHost.setProcessNum(JSON.parseObject(groupConfig.getProcessNumConfig()).getInteger(host));
+                componentHost.setComponentId(componentId);
+                componentHost.setGroupName(groupConfig.getGroupName());
+                componentHost.create();
+                componentHostRepository.saveComponentHost(componentHost);
+            }
+        }
+
+        //更改配置
+        if (null != component.getDependConfigComponentId()) {
             changeComponentConfig(component.newDeployComponent());
         }
         return Result.success();
@@ -179,7 +181,7 @@ public class ComponentDomainServiceImpl implements ComponentDomainService {
                 componentHost.setHost(host);
                 componentHost.setProcessNum(JSON.parseObject(config.getProcessNumConfig()).getInteger(host));
                 componentHost.setComponentId(component.getId());
-                componentHost.setGroupId(config.getId());
+                componentHost.setGroupName(config.getGroupName());
                 componentHost.create();
                 componentHostRepository.saveComponentHost(componentHost);
             }
@@ -200,7 +202,7 @@ public class ComponentDomainServiceImpl implements ComponentDomainService {
     @Override
     public Result<Void> changeComponentConfig(Component component) {
         for (ComponentGroupConfig config : component.getGroupConfigList()) {
-            config.setVersion(String.valueOf(Integer.parseInt(config.getVersion()) + 1));
+            config.setVersion(String.valueOf(Integer.parseInt(null == config.getVersion() ? "1" : config.getVersion()) + 1));
             componentGroupConfigRepository.saveGroupConfig(config);
         }
         return Result.success();

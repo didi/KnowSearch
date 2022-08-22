@@ -55,4 +55,12 @@
         where id = #{taskId} and group_name = #{groupName}
     </update>
 
+    <update id="updateStatusByExecuteId">
+        update logi_op_task_detail set status = #{status}
+        where id = #{taskId} and execute_task_id = #{executeId} and  host in
+        <foreach collection="hosts" item="id" index="index" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </update>
+
 </mapper>

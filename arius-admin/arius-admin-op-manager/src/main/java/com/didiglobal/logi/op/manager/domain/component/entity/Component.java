@@ -3,8 +3,10 @@ package com.didiglobal.logi.op.manager.domain.component.entity;
 import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentGroupConfig;
 import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentHost;
 import com.didiglobal.logi.op.manager.infrastructure.common.Constants;
+import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralGroupConfig;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.ComponentStatusEnum;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.DeleteEnum;
+import com.didiglobal.logi.op.manager.infrastructure.util.ConvertUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -57,7 +59,7 @@ public class Component {
     /**
      * 是否卸载
      */
-    private Integer isDelete;
+    private Integer isDeleted;
 
 
     /**
@@ -88,7 +90,7 @@ public class Component {
 
     public Component create() {
         this.status = ComponentStatusEnum.UN_KNOW.getStatus();
-        this.isDelete = DeleteEnum.NORMAL.getType();
+        this.isDeleted = DeleteEnum.NORMAL.getType();
         this.createTime = new Timestamp(System.currentTimeMillis());
         this.updateTime = new Timestamp(System.currentTimeMillis());
         return this;
@@ -105,20 +107,28 @@ public class Component {
 
     public Component newDeployComponent() {
         this.setId(this.getDependConfigComponentId());
+        for (ComponentGroupConfig componentGroupConfig : this.getGroupConfigList()) {
+            componentGroupConfig.setComponentId(this.getDependConfigComponentId());
+        }
         return this;
     }
 
     public Map<String, List<String>> groupIdToHost() {
         Map<String, List<String>> groupToHostList = new HashMap<>(MAP_SIZE);
         for (ComponentHost componentHost : this.getHostList()) {
-            List<String> hostList = groupToHostList.get(componentHost.getGroupId());
+            List<String> hostList = groupToHostList.get(componentHost.getGroupName());
             if (null == hostList) {
                 hostList = new ArrayList<>();
-                groupToHostList.put(componentHost.getGroupId().toString(), hostList);
+                groupToHostList.put(componentHost.getGroupName(), hostList);
             }
             hostList.add(componentHost.getHost());
         }
         return groupToHostList;
     }
+
+    public void setGroupConfigList(List<ComponentGroupConfig> groupConfigList) {
+        this.groupConfigList = ConvertUtil.list2List(groupConfigList, ComponentGroupConfig.class);
+    }
+
 
 }

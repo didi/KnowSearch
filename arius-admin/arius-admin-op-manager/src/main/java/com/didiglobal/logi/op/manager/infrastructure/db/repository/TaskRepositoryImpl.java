@@ -39,7 +39,7 @@ public  class TaskRepositoryImpl implements TaskRepository {
 
     @Override
     public void updateTaskStatusAndIsFinish(int id, int status, int isFinish) {
-        //TODO
+        taskDao.updateStatusAndIsFinish(id, status, isFinish);
     }
 
     @Override

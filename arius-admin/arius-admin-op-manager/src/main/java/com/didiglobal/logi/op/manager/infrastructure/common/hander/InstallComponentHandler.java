@@ -61,7 +61,7 @@ public class InstallComponentHandler extends BaseComponentHandler implements Com
 
             Package pk = packageDomainService.queryPackage(Package.builder().id(installComponent.getPackageId()).build()).
                     getData().get(0);
-            if (pk.getType() == PackageTypeEnum.CONFIG_DEPENDENT.type) {
+            if (pk.getType() == PackageTypeEnum.CONFIG_DEPENDENT.getType()) {
                 installComponent.setDependConfigComponentId(installComponent.getDependComponentId());
             }
             installComponent.setTemplateId(scriptDomainService.getScriptById(pk.getScriptId()).getData().getTemplateId());
@@ -82,6 +82,7 @@ public class InstallComponentHandler extends BaseComponentHandler implements Com
             GeneralInstallComponent installComponent = JSON.parseObject(content, GeneralInstallComponent.class);
             Component component = ConvertUtil.obj2Obj(installComponent, Component.class);
             componentDomainService.createComponent(component);
+            LOGGER.info("component[{}] handler success", content);
         } catch (Exception e) {
             LOGGER.error("component[{}] handler error.", content, e);
             throw new ComponentHandlerException(e);

@@ -46,4 +46,9 @@
         from logi_op_task
         where is_finish = 0
     </select>
+
+    <update id="updateStatusAndIsFinish">
+        update logi_op_task set status = #{status},is_finish = #{isFinish}
+        where id = #{id}
+    </update>
 </mapper>

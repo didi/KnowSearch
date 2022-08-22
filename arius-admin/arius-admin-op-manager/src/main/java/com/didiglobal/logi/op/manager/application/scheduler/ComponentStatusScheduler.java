@@ -71,7 +71,7 @@ public class ComponentStatusScheduler {
                     groupToHostList.entrySet().forEach(entry -> {
                         deploymentService.execute(packageIdToTemplate.get(component.getPackageId()),
                                 Strings.join(entry.getValue().iterator(), REX), String.valueOf(OperationEnum.STATUS.getType()),
-                                entry.getKey());
+                                component.getId().toString(), entry.getKey());
                     });
                 }
             });

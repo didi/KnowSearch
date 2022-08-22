@@ -27,9 +27,9 @@ public class ComponentHostPO {
      */
     private Integer status;
     /**
-     * 分组id
+     * 分组名
      */
-    private Integer groupId;
+    private String groupName;
     /**
      * 进程数量
      */

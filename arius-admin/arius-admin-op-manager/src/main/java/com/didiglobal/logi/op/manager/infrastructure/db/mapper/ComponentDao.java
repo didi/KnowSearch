@@ -1,6 +1,7 @@
 package com.didiglobal.logi.op.manager.infrastructure.db.mapper;
 
 import com.didiglobal.logi.op.manager.infrastructure.db.ComponentPO;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -30,7 +31,7 @@ public interface ComponentDao {
      * @param componentId
      * @param containIds
      */
-    void updateContainIds(int componentId, String containIds);
+    void updateContainIds(@Param("componentId") int componentId, @Param("containIds") String containIds);
 
     /**
      * 更新组件（安装包id）

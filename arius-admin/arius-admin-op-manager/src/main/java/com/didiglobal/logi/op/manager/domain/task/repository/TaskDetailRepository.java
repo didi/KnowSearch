@@ -46,4 +46,13 @@ public interface TaskDetailRepository {
      * @return
      */
     void deleteByTaskId(int taskId);
+
+    /**
+     * 更新任务状态
+     * @param taskId
+     * @param executeId
+     * @param status
+     * @param hosts
+     */
+    void updateStatusByExecuteTaskId(int taskId, int executeId, int status, List<String> hosts);
 }

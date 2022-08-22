@@ -18,4 +18,6 @@ public class Constants {
     public static final String SLASH = "/";
 
     public static final Character REX = ',';
+
+    public static final String DEPEND_CONFIG_COMPONENT_ID =  "dependConfigComponentId";
 }

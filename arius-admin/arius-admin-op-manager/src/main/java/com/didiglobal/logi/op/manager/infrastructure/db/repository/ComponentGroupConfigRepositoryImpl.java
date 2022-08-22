@@ -2,6 +2,7 @@ package com.didiglobal.logi.op.manager.infrastructure.db.repository;
 
 import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentGroupConfig;
 import com.didiglobal.logi.op.manager.domain.component.repository.ComponentGroupConfigRepository;
+import com.didiglobal.logi.op.manager.infrastructure.db.ComponentGroupConfigPO;
 import com.didiglobal.logi.op.manager.infrastructure.db.converter.ComponentConverter;
 import com.didiglobal.logi.op.manager.infrastructure.db.mapper.ComponentGroupConfigDao;
 import com.didiglobal.logi.op.manager.infrastructure.util.ConvertUtil;
@@ -23,7 +24,9 @@ public class ComponentGroupConfigRepositoryImpl implements ComponentGroupConfigR
 
     @Override
     public int saveGroupConfig(ComponentGroupConfig groupConfig) {
-        return configDao.insert(ComponentConverter.convertComponentConfigDO2PO(groupConfig));
+        ComponentGroupConfigPO po = ComponentConverter.convertComponentConfigDO2PO(groupConfig);
+        configDao.insert(po);
+        return po.getId();
     }
 
     @Override

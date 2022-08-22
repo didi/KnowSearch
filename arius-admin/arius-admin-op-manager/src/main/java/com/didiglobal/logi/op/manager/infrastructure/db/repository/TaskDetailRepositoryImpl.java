@@ -44,4 +44,9 @@ public class TaskDetailRepositoryImpl implements TaskDetailRepository {
         taskDetailDao.deleteByTaskId(taskId);
     }
 
+    @Override
+    public void updateStatusByExecuteTaskId(int taskId, int executeId, int status, List<String> hosts) {
+        taskDetailDao.updateStatusByExecuteId(taskId, executeId, status, hosts);
+    }
+
 }

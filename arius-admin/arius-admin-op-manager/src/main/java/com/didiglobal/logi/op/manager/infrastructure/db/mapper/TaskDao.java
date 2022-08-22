@@ -36,6 +36,16 @@ public interface TaskDao {
      */
     int updateStatus(@Param("id") int id, @Param("status") int status);
 
+
+    /**
+     * 根据状态和isFinish
+     * @param id
+     * @param status
+     * @param isFinish
+     * @return
+     */
+    int updateStatusAndIsFinish(@Param("id") int id, @Param("status") int status, @Param("isFinish") int isFinish);
+
     /**
      * 获取未完成的任务列表
      * @return
