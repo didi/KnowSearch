@@ -243,8 +243,7 @@ public class ESShardDAO extends BaseESDAO {
     private String buildQueryTermDsl(String cluster,  Integer projectId,String keyword) {
         return "[" + buildTermCell(cluster, projectId,keyword) +"]";
     }
-  
-    private String buildTermCell(String cluster, Integer projectId,String keyword) {
+    private String buildTermCell(String cluster, Integer projectId, String keyword) {
         List<String> termCellList = Lists.newArrayList();
         //projectId == null 时，属于超级项目访问；
         if (null == projectId) {
@@ -256,13 +255,49 @@ public class ESShardDAO extends BaseESDAO {
 
             //get resourceId dsl term
             termCellList.add(DSLSearchUtils.getTermCellForExactSearch(cluster, "clusterLogic"));
-
         }
-        if (StringUtils.isNotBlank(keyword)){
-            termCellList.add(DSLSearchUtils.getTermCellForWildcardSearch(keyword, "index"));
-        }
+        termCellList.add(buildShouldTermCell(keyword));
         return ListUtils.strList2String(termCellList);
     }
+
+    /**
+     * 构造多字段模糊查询
+     * {
+     *           "bool": {
+     *             "should": [
+     *               {
+     *                 "wildcard": {
+     *                   "ip": {
+     *                     "value": "*lyn-ks*"
+     *                   }
+     *                 }
+     *               },{
+     *                 "wildcard": {
+     *                   "index": {
+     *                     "value": "*lyn-ks*"
+     *                   }
+     *                 }
+     *               }
+     *             ]
+     *           }
+     *         }
+     * @param keyword 关键字
+     * @return
+     */
+    private String buildShouldTermCell(String keyword){
+        //构造should的条件
+        List<String> shouldCellList = Lists.newArrayList();
+        if (StringUtils.isNotBlank(keyword)){
+            shouldCellList.add(DSLSearchUtils.getTermCellForWildcardSearch(keyword, "index"));
+            shouldCellList.add(DSLSearchUtils.getTermCellForWildcardSearch(keyword, "node"));
+            shouldCellList.add(DSLSearchUtils.getTermCellForWildcardSearch(keyword, "ip"));
+            shouldCellList.add(DSLSearchUtils.getTermCellForWildcardSearch(keyword, "state"));
+        }
+
+        return dslLoaderUtil.getFormatDslByFileName(DslsConstant.SHOULD_TERM_CELL,
+                ListUtils.strList2String(shouldCellList));
+    }
+
 
     private String buildSortType(Boolean orderByDesc) {
         String sortType = "desc";
