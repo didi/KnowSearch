@@ -127,6 +127,8 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
 
     private static final ILog               LOGGER                = LogFactory.getLog(TemplateLogicManager.class);
     private static final String             INDEX_NOT_EXISTS_TIPS = "索引不存在";
+    private static final String DYNAMIC_TEMPLATES = "dynamic_templates";
+    private static final String PROPERTIES        = "properties";
     @Autowired
     private ProjectLogicTemplateAuthService projectLogicTemplateAuthService;
 
@@ -1535,12 +1537,14 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             AriusTypeProperty ariusTypeProperty = new AriusTypeProperty();
            
             ariusTypeProperty.setTypeName(DEFAULT_INDEX_MAPPING_TYPE);
-            final JSONObject properties = JSON.parseObject(param.getMapping());
-            if (properties.containsKey("dynamic_templates")) {
-                ariusTypeProperty.setDynamicTemplates(properties.getJSONArray("dynamic_templates"));
-            } else {
-                ariusTypeProperty.setProperties(properties);
+            final JSONObject mappings = JSON.parseObject(param.getMapping());
+            if (mappings.containsKey(DYNAMIC_TEMPLATES)) {
+                ariusTypeProperty.setDynamicTemplates(mappings.getJSONArray(DYNAMIC_TEMPLATES));
             }
+            if (mappings.containsKey(PROPERTIES)){
+                ariusTypeProperty.setProperties(mappings.getJSONObject(PROPERTIES));
+            }
+            
             
             indexTemplatePhyDTO.setMappings(
                 ariusTypeProperty.toMappingJSON().getJSONObject(DEFAULT_INDEX_MAPPING_TYPE).toJSONString());
