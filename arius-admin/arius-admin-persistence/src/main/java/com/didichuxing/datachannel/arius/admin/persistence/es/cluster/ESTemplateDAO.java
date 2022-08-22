@@ -284,7 +284,8 @@ public class ESTemplateDAO extends BaseESDAO {
      * @param templateConfig    模版配置
      * @return result
      */
-    public boolean updateTemplate(String clusterName, String templateName, TemplateConfig templateConfig) {
+    public boolean updateTemplate(String clusterName, String templateName, TemplateConfig templateConfig)
+            throws ESOperateException {
         ESClient esClient = esOpClient.getESClient(clusterName);
         if (esClient == null) {
             LOGGER.warn(
@@ -304,11 +305,15 @@ public class ESTemplateDAO extends BaseESDAO {
         try {
             response = esClient.admin().indices().putTemplate(request).actionGet(120, TimeUnit.SECONDS);
         } catch (Exception e) {
+            final String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
+            if (StringUtils.isNotBlank(exception)){
+                 throw new ESOperateException(exception);
+            }
             LOGGER.warn(
                 "class=ESTemplateDAO||method=updateTemplate||update template fail||clusterName={}||templateName={}||esVersion={}||templateConfig={}||msg={}",
                 clusterName, templateName, esClient.getEsVersion(),
                 templateConfig.toJson(ESVersion.valueBy(esClient.getEsVersion())), e.getMessage(), e);
-            throw e;
+            throw new ESOperateException(e.getMessage(),e);
         }
 
         return response.getAcknowledged();

@@ -300,6 +300,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
             expressionFinal = getExpression(param, oldPO);
             dateFieldFinal = getDateField(param, oldPO);
             nameFinal = oldPO.getName();
+            param.setName(nameFinal);
         }
 
         List<IndexTemplate> indexTemplateList = listLogicTemplateByName(param.getName());
