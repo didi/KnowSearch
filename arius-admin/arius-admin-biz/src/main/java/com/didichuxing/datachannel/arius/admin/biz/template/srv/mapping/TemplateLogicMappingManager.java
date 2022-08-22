@@ -52,7 +52,7 @@ public interface TemplateLogicMappingManager {
      * @param ariusTypeProperty mapping
      * @return result
      */
-    Result<Void> updateMappingForNew(Integer logicId, AriusTypeProperty ariusTypeProperty);
+    Result<Void> updateMappingForNew(Integer logicId, AriusTypeProperty ariusTypeProperty) throws AdminOperateException;
 
     /**
      * updateProperties

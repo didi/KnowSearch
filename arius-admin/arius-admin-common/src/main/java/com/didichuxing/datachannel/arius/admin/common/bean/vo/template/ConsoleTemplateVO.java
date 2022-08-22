@@ -50,8 +50,9 @@ public class ConsoleTemplateVO extends BaseTemplateVO implements Comparable<Cons
     @ApiModelProperty("逻辑集群")
     private String       cluster;
     @ApiModelProperty("是否为分区模板")
-    private Boolean  isPartition;
-
+    private Boolean isPartition;
+    @ApiModelProperty("模板健康度")
+    private Integer health;
     @Override
     public int compareTo(ConsoleTemplateVO o) {
         if (null == o) {
