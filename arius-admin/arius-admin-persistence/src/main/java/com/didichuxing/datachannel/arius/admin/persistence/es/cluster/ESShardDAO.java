@@ -269,6 +269,7 @@ public class ESShardDAO extends BaseESDAO {
             shouldCellList.add(DSLSearchUtils.getTermCellForWildcardSearch(keyword, "index"));
             shouldCellList.add(DSLSearchUtils.getTermCellForWildcardSearch(keyword, "node"));
             shouldCellList.add(DSLSearchUtils.getTermCellForWildcardSearch(keyword, "ip"));
+            shouldCellList.add(DSLSearchUtils.getTermCellForWildcardSearch(keyword, "state"));
         }
 
         return "{\""+BOOL+"\": {\""+SHOULD+"\": ["+ListUtils.strList2String(shouldCellList)+"]}}";
