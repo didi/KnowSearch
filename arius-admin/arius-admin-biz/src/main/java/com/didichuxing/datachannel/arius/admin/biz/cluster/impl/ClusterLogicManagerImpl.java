@@ -957,7 +957,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
      */
     private void buildClusterNodeInfo(ClusterLogicVO clusterLogicVO) {
 
-        //2. 获取gateway地址
+        //获取gateway地址
         clusterLogicVO.setGatewayAddress(esGatewayClient.getGatewayAddress());
     }
 
