@@ -6,7 +6,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleT
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithMapping;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateMappingVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
-import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.mapping.AriusTypeProperty;
 import com.didichuxing.datachannel.arius.admin.common.mapping.Field;
 import java.util.List;
@@ -53,7 +52,7 @@ public interface TemplateLogicMappingManager {
      * @param ariusTypeProperty mapping
      * @return result
      */
-    Result<Void> updateMappingForNew(Integer logicId, AriusTypeProperty ariusTypeProperty) throws ESOperateException;
+    Result<Void> updateMappingForNew(Integer logicId, AriusTypeProperty ariusTypeProperty) throws AdminOperateException;
 
     /**
      * updateProperties

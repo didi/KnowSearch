@@ -13,6 +13,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexCatCe
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexMappingVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexSettingVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexShardInfoVO;
+import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
@@ -57,7 +58,7 @@ public class IndicesController extends BaseIndicesController {
     @ResponseBody
     @ApiOperation(value = "创建索引")
     public Result<Void> createIndex(HttpServletRequest request, @RequestBody IndexCatCellWithConfigDTO param)
-            throws ESOperateException {
+            throws AdminOperateException {
         Result<Boolean> checkClusterValidResult = checkClusterValid(Lists.newArrayList(param.getCluster()));
         if (checkClusterValidResult.failed()) {
             return Result.buildFrom(checkClusterValidResult);
@@ -100,7 +101,8 @@ public class IndicesController extends BaseIndicesController {
     @PutMapping("/mapping")
     @ResponseBody
     @ApiOperation(value = "编辑mapping")
-    public Result<Void> editMapping(HttpServletRequest request, @RequestBody IndexCatCellWithConfigDTO param) throws ESOperateException {
+    public Result<Void> editMapping(HttpServletRequest request, @RequestBody IndexCatCellWithConfigDTO param)
+            throws AdminOperateException {
         Result<Boolean> checkClusterValidResult = checkClusterValid(Lists.newArrayList(param.getCluster()));
         if (checkClusterValidResult.failed()) {
             return Result.buildFrom(checkClusterValidResult);
