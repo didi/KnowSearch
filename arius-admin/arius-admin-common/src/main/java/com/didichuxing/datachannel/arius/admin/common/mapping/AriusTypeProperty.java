@@ -1,8 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.common.mapping;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.DEFAULT_INDEX_MAPPING_TYPE;
+
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-
+import com.alibaba.fastjson.annotation.JSONField;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -34,7 +37,7 @@ public class AriusTypeProperty {
      * type_name
      */
     @ApiModelProperty("名称")
-    private String             typeName              = "type";
+    private String             typeName              = DEFAULT_INDEX_MAPPING_TYPE;
 
     /**
      * id字段
@@ -71,12 +74,14 @@ public class AriusTypeProperty {
      *     }
      */
     @ApiModelProperty("属性（json格式）")
+    @JSONField(name = "properties")
     private JSONObject         properties;
 
     /**
      * [{"key1":{}},{"key2":{}}]
      */
     @ApiModelProperty("dynamic_templates（jsonArray格式）")
+    @JsonProperty("dynamic_templates")
     private JSONArray          dynamicTemplates;
 
     public static final String PROPERTIES_STR        = "properties";
