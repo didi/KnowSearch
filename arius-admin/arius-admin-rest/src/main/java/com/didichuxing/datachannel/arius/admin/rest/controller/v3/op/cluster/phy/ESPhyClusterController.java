@@ -130,6 +130,13 @@ public class ESPhyClusterController {
         return clusterPhyManager.pageGetClusterPhys(condition, HttpRequestUtil.getProjectId(request));
     }
 
+    @GetMapping("/super-phy-names")
+    @ResponseBody
+    @ApiOperation(value = "获取超级项目下的物理集群列表")
+    public Result<List<String>> listClusterPhyNameBySuperApp(HttpServletRequest request) {
+        return clusterPhyManager.listClusterPhyNameBySuperApp(HttpRequestUtil.getProjectId(request));
+    }
+
     @GetMapping("/{clusterPhyId}/overview")
     @ResponseBody
     @ApiOperation(value = "获取物理集群概览信息接口")

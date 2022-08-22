@@ -755,6 +755,23 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     }
 
     /**
+     * 根据物理集群名获取对应的逻辑集群列表，若传入为空，则返回全量
+     * @param phyClusterName 物理集群的名称
+     * @return List<String> 逻辑集群名称列表
+     */
+    @Override
+    public List<String> listClusterLogicNameByPhyName(String phyClusterName) {
+        List<String> names = Lists.newArrayList();
+        //若传入为空，则返回全量
+        if (null == phyClusterName) {
+            names = clusterPhyService.listClusterNames();
+        } else {
+            names = getClusterPhyAssociatedClusterLogicNames(phyClusterName);
+        }
+        return names;
+    }
+
+    /**
      * 返回与给定物理集群名称关联的逻辑集群名称列表
      *
      * @param phyClusterName 物理集群的名称。
