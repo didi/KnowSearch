@@ -13,6 +13,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.result.Res
 import static com.didichuxing.datachannel.arius.admin.core.service.template.physic.impl.IndexTemplatePhyServiceImpl.NOT_CHECK;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.biz.indices.IndicesManager;
 import com.didichuxing.datachannel.arius.admin.biz.page.TemplateLogicPageSearchHandle;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager;
@@ -1532,8 +1533,15 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
 
         if (StringUtils.isNotBlank(param.getMapping())) {
             AriusTypeProperty ariusTypeProperty = new AriusTypeProperty();
+           
             ariusTypeProperty.setTypeName(DEFAULT_INDEX_MAPPING_TYPE);
-            ariusTypeProperty.setProperties(JSON.parseObject(param.getMapping()));
+            final JSONObject properties = JSON.parseObject(param.getMapping());
+            if (properties.containsKey("dynamic_templates")) {
+                ariusTypeProperty.setDynamicTemplates(properties.getJSONArray("dynamic_templates"));
+            } else {
+                ariusTypeProperty.setProperties(properties);
+            }
+            
             indexTemplatePhyDTO.setMappings(
                 ariusTypeProperty.toMappingJSON().getJSONObject(DEFAULT_INDEX_MAPPING_TYPE).toJSONString());
         } else {
