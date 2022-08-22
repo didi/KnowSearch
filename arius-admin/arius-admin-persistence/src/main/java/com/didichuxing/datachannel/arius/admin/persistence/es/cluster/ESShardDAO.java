@@ -262,6 +262,30 @@ public class ESShardDAO extends BaseESDAO {
         return ListUtils.strList2String(termCellList);
     }
 
+    /**
+     * 构造多字段模糊查询
+     * {
+     *           "bool": {
+     *             "should": [
+     *               {
+     *                 "wildcard": {
+     *                   "ip": {
+     *                     "value": "*lyn-ks*"
+     *                   }
+     *                 }
+     *               },{
+     *                 "wildcard": {
+     *                   "index": {
+     *                     "value": "*lyn-ks*"
+     *                   }
+     *                 }
+     *               }
+     *             ]
+     *           }
+     *         }
+     * @param keyword 关键字
+     * @return
+     */
     private String buildShouldTermCell(String keyword){
         //构造should的条件
         List<String> shouldCellList = Lists.newArrayList();
@@ -272,7 +296,8 @@ public class ESShardDAO extends BaseESDAO {
             shouldCellList.add(DSLSearchUtils.getTermCellForWildcardSearch(keyword, "state"));
         }
 
-        return "{\""+BOOL+"\": {\""+SHOULD+"\": ["+ListUtils.strList2String(shouldCellList)+"]}}";
+        return dslLoaderUtil.getFormatDslByFileName(DslsConstant.SHOULD_TERM_CELL,
+                ListUtils.strList2String(shouldCellList));
     }
 
 
