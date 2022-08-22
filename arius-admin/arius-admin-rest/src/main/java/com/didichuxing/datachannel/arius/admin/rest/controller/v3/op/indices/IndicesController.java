@@ -56,7 +56,8 @@ public class IndicesController extends BaseIndicesController {
     @PostMapping("")
     @ResponseBody
     @ApiOperation(value = "创建索引")
-    public Result<Void> createIndex(HttpServletRequest request, @RequestBody IndexCatCellWithConfigDTO param) {
+    public Result<Void> createIndex(HttpServletRequest request, @RequestBody IndexCatCellWithConfigDTO param)
+            throws ESOperateException {
         Result<Boolean> checkClusterValidResult = checkClusterValid(Lists.newArrayList(param.getCluster()));
         if (checkClusterValidResult.failed()) {
             return Result.buildFrom(checkClusterValidResult);

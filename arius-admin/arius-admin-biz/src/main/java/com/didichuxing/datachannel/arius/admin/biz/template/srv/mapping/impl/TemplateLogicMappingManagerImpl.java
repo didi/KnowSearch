@@ -300,7 +300,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrvImpl impleme
     }
 
     @Override
-    public Result updateMappingForNew(Integer logicId, AriusTypeProperty ariusTypeProperty) {
+    public Result updateMappingForNew(Integer logicId, AriusTypeProperty ariusTypeProperty) throws ESOperateException {
         IndexTemplateWithPhyTemplates templateLogicWithPhysical = indexTemplateService
             .getLogicTemplateWithPhysicalsById(logicId);
 

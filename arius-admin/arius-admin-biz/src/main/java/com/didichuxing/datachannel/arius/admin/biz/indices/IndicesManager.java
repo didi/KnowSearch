@@ -40,7 +40,8 @@ public interface IndicesManager {
      * @param projectId
      * @param operator
      */
-    Result<Void> createIndex(IndexCatCellWithConfigDTO indexCreateDTO, Integer projectId, String operator);
+    Result<Void> createIndex(IndexCatCellWithConfigDTO indexCreateDTO, Integer projectId, String operator)
+            throws ESOperateException;
 
     /**
      * 删除索引
