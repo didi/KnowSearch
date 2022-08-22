@@ -1,9 +1,13 @@
 package com.didichuxing.datachannel.arius.admin.biz.cluster.impl;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum.EXCLUSIVE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum.PRIVATE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum.PUBLIC;
+import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum.UNKNOWN;
+import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.DATA_NODE;
 import static com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType.FAIL;
 
 import com.alibaba.fastjson.JSON;
-import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterNodeManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterRegionManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
@@ -11,11 +15,15 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRegionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRegionWithNodeInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterWithRegionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicContext;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhyContext;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionWithNodeInfoVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
@@ -38,8 +46,10 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -57,8 +67,7 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
     @Autowired
     private ClusterRegionService   clusterRegionService;
 
-    @Autowired
-    private ClusterContextManager  clusterContextManager;
+ 
 
     @Autowired
     private ClusterLogicService    clusterLogicService;
@@ -78,7 +87,8 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
     @Autowired
     private ProjectService         projectService;
     private static final String COLD = "cold";
-
+    private static final Integer LOGIC_ASSOCIATED_PHY_MAX_NUMBER = 2 << 9;
+    private static final Integer PHY_ASSOCIATED_LOGIC_MAX_NUMBER = 2 << 9;
     /**
      * 构建regionVO
      * @param regions region列表
@@ -157,15 +167,12 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
         if (CollectionUtils.isEmpty(param.getClusterRegionDTOS())) {
             return Result.buildParamIllegal("逻辑集群关联region信息为空");
         }
-
+       
         //2. 集群合法关联性校验
-        param.getClusterRegionDTOS().stream().distinct().forEach(clusterRegionDTO -> {
-            try {
-                checkCanBeBound(param.getId(), clusterRegionDTO, param.getType());
-            } catch (AdminOperateException e) {
-                e.printStackTrace();
-            }
-        });
+        for (int i = 0; i < param.getClusterRegionDTOS().size(); i++) {
+            checkCanBeBound(param.getId(), param.getClusterRegionDTOS().get(0), param.getType());
+        }
+      
 
         //3. 逻辑集群绑定的物理集群版本一致性校验
         Result<Void> phyClusterVersionsResult = boundPhyClusterVersionsCheck(param);
@@ -382,13 +389,285 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
      */
     private void checkCanBeBound(Long clusterLogicId, ClusterRegionDTO clusterRegionDTO,
                                  Integer clusterLogicType) throws AdminOperateException {
-        Result<Boolean> validResult = clusterContextManager.canClusterLogicAssociatedPhyCluster(clusterLogicId,
+        Result<Boolean> validResult = canClusterLogicAssociatedPhyCluster(clusterLogicId,
             clusterRegionDTO.getPhyClusterName(), clusterRegionDTO.getId(), clusterLogicType);
         if (validResult.failed()) {
             throw new AdminOperateException(validResult.getMessage(), FAIL);
         }
     }
+    public Result<Boolean> canClusterLogicAssociatedPhyCluster(Long clusterLogicId, String clusterPhyName,
+                                                               Long regionId, Integer clusterLogicType) {
+        //新建时clusterLogicId为空, 防止NPE
+        if (AriusObjUtils.isNull(clusterLogicId)) {
+            clusterLogicId = -1L;
+        }
+        /** todo 后续下线
+         ClusterLogicContext clusterLogicContext = getClusterLogicContext(clusterLogicId);
+         ClusterPhyContext clusterPhyContext = getClusterPhyContext(clusterPhyName);
+         int associatedPhyNum = 0;
+         int associatedLogicNum = 0;
+         if (null != clusterLogicContext) {
+         associatedPhyNum = clusterLogicContext.getAssociatedPhyNum();
+         }
+         if (null != clusterPhyContext) {
+         associatedLogicNum = clusterPhyContext.getAssociatedLogicNum();
+         }**/
+        int associatedPhyNum = getAssociatedPhyNumByLogicId(clusterLogicId);
+       
+        int associatedLogicNum =getAssociatedLogicNumByClusterPhy(clusterPhyName);
+       
 
+        return doValid(associatedPhyNum, associatedLogicNum, clusterLogicId, clusterPhyName, regionId,
+            clusterLogicType);
+    }
+    
+    private int getAssociatedLogicNumByClusterPhy(String clusterPhyName) {
+         // 1. set region
+        List<ClusterRegion> regions = clusterRegionService.listPhyClusterRegions(clusterPhyName);
+
+        // 2. set ClusterLogicInfo
+        Set<Long> associatedClusterLogicIds = Sets.newHashSet();
+        for (ClusterRegion clusterRegion : regions) {
+            // 添加每一个物理集群下每一个region所被绑定的逻辑集群
+            List<Long> logicClusterIds = ListUtils.string2LongList(clusterRegion.getLogicClusterIds());
+            if (!CollectionUtils.isEmpty(logicClusterIds)
+                && !logicClusterIds.contains(Long.parseLong(AdminConstant.REGION_NOT_BOUND_LOGIC_CLUSTER_ID))) {
+                associatedClusterLogicIds.addAll(logicClusterIds);
+            }
+        }
+        return associatedClusterLogicIds.size();
+    }
+    
+    private int getAssociatedPhyNumByLogicId(Long clusterLogicId) {
+        if (Objects.equals(clusterLogicId,-1L)){
+            return 0;
+        }
+         // 获取逻辑集群已关联的 Region 信息
+        List<ClusterRegion> regions = clusterRegionService.getClusterRegionsByLogicIds(
+                Collections.singletonList(clusterLogicId));
+         // 获取逻辑集群关联 region 下的 rack 节点信息
+        List<ClusterRoleHost> associatedRackClusterHosts = Lists.newArrayList();
+        for (ClusterRegion region : regions) {
+            Result<List<ClusterRoleHost>> regionDataNodeListRet = clusterRoleHostService.listByRegionId(
+                    region.getId().intValue());
+            if (regionDataNodeListRet.failed()) {
+                LOGGER.warn(
+                        "class=ClusterContextManagerImpl||method=setRegionAndAssociatedClusterPhyDataNodeInfo||regionId={}||msg=failed to get regionDataNodeList:{}",
+                        region.getId(), regionDataNodeListRet.getMessage());
+                continue;
+            }
+            associatedRackClusterHosts.addAll(regionDataNodeListRet.getData());
+        }
+        
+        // 设置数据节点总数
+       
+        return associatedRackClusterHosts.size();
+    }
+    
+    /**
+     * 具体校验逻辑
+     * @param associatedPhyNumber    逻辑集群关联物理集群个数
+     * @param associatedLogicNumber  物理集群关联逻辑集群个数
+     * @param regionId               需要绑定的regionId
+     * @param clusterLogicType       逻辑集群类型
+     */
+    private Result<Boolean> doValid(int associatedPhyNumber, int associatedLogicNumber, Long clusterLogicId,
+                                    String clusterPhyName, Long regionId, Integer clusterLogicType) {
+
+        if (AriusObjUtils.isNull(clusterLogicType)) {
+            return Result.buildParamIllegal("逻辑集群类型为空");
+        }
+
+        if (UNKNOWN.getCode() == ClusterResourceTypeEnum.valueOf(clusterLogicType).getCode()) {
+            return Result.buildParamIllegal("无法识别逻辑集群类型");
+        }
+
+        ClusterPhy clusterPhy = clusterPhyService.getClusterByName(clusterPhyName);
+        if (AriusObjUtils.isNull(clusterPhy)) {
+            return Result.buildFail("物理集群不存在");
+        }
+
+        if (PRIVATE.getCode() == clusterLogicType
+            && !canClusterLogicBoundRegion(regionId, clusterPhyName, clusterLogicId)) {
+            //先判断logic -> phy, 二次关联region需要先校验逻辑集群对应的物理集群数据是否合理
+            if (associatedPhyNumber > 0) {
+                return Result.buildParamIllegal(String.format("集群间关联失败 ,该独立逻辑集群%s已有关联物理集群", clusterLogicId));
+            }
+            //在判断phy -> logic
+            if (associatedLogicNumber > 0) {
+                return Result.buildFail(String.format("集群间关联失败, 物理集群%s已有关联逻辑集群", clusterPhyName));
+            }
+        }
+
+        return Result.buildSucc(Boolean.TRUE);
+    }
+        /**
+     * 判断指定的物理集群下的region是否被对应的逻辑集群绑定
+     * @param regionId regionId
+     * @param clusterPhyName 物理集群名称
+     * @param clusterLogicId 逻辑集群id
+     * @return  true of false
+     */
+    private boolean canClusterLogicBoundRegion(Long regionId, String clusterPhyName, Long clusterLogicId) {
+        ClusterRegion region = clusterRegionService.getRegionById(regionId);
+        ClusterPhyContext clusterPhyContext = getClusterPhyContext(clusterPhyName);
+        List<Long> clusterLogicIds = Optional.ofNullable(clusterPhyContext)
+                .map(ClusterPhyContext::getAssociatedClusterLogicIds).orElse(Collections.emptyList());
+        if (CollectionUtils.isNotEmpty(clusterLogicIds) && !clusterLogicIds.contains(clusterLogicId)) {
+            return false;
+        }
+
+        if (!region.getLogicClusterIds().equals(AdminConstant.REGION_NOT_BOUND_LOGIC_CLUSTER_ID)) {
+            return false;
+        }
+
+        return region.getPhyClusterName().equals(clusterPhyName);
+    }
+    private ClusterLogicContext getClusterLogicContext(Long clusterLogicId) {
+        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByIdThatNotContainsProjectId(clusterLogicId);
+        if (null == clusterLogic) {
+            LOGGER.error(
+                    "class=ClusterContextManagerImpl||method=flushClusterLogicContext||clusterLogicId={}||msg=clusterLogic is empty",
+                    clusterLogicId);
+            return null;
+        }
+        
+        ClusterLogicContext build = buildInitESClusterLogicContextByType(clusterLogic);
+        setAssociatedClusterPhyInfo(build);
+        setRegionAndAssociatedClusterPhyDataNodeInfo(build);
+        return build;
+    }
+    /**
+     *   定义规则:
+     *   1. Type为独立, LP = 1, PL = 1
+     *   2. Type为共享, LP = n, PL = 1 ,  1 <= n <= 1024   多个逻辑集群共享一个物理集群, 每个逻辑集群关联物理集群一部分region,不可跨其他物理集群，
+     *                                                    多个逻辑集群可关联同一部分region。
+     *   3. Type为独占, LP = 1, PL = n ,  1 <= n <= 1024   一个逻辑集群独占一个或者多个物理集群
+     */
+    private ClusterLogicContext buildInitESClusterLogicContextByType(ClusterLogic clusterLogic) {
+
+        if (PRIVATE.getCode() == clusterLogic.getType() || EXCLUSIVE.getCode() == clusterLogic.getType()) {
+            return ClusterLogicContext.builder().clusterLogicName(clusterLogic.getName())
+                .clusterLogicId(clusterLogic.getId()).logicClusterType(clusterLogic.getType()).associatedPhyNumMax(1)
+                .build();
+        } else if (PUBLIC.getCode() == clusterLogic.getType()) {
+            return ClusterLogicContext.builder().clusterLogicName(clusterLogic.getName())
+                .clusterLogicId(clusterLogic.getId()).logicClusterType(clusterLogic.getType())
+                .associatedPhyNumMax(LOGIC_ASSOCIATED_PHY_MAX_NUMBER).build();
+        } else {
+            LOGGER.error(
+                "class=ClusterContextManagerImpl||method=buildInitESClusterLogicContextByType||esClusterLogicId={}||msg={}",
+                clusterLogic.getId(), String.format("请确认逻辑集群%s类型是否存在", clusterLogic.getType()));
+
+            return ClusterLogicContext.builder().clusterLogicName(clusterLogic.getName())
+                .clusterLogicId(clusterLogic.getId()).logicClusterType(clusterLogic.getType()).associatedPhyNumMax(-1)
+                .build();
+        }
+    }
+    
+    private void setAssociatedClusterPhyInfo(ClusterLogicContext build) {
+        List<String> clusterPhyNames = clusterRegionService.listPhysicClusterNames(build.getClusterLogicId());
+        if (build.getAssociatedPhyNumMax() < clusterPhyNames.size()) {
+            LOGGER.error("class=ClusterContextManagerImpl||method=setAssociatedClusterPhyInfo"
+                         + "||logicClusterType={}||esClusterLogicId={}||msg= 集群间关联超过最大限制数 {}, 请纠正",
+                    build.getLogicClusterType(), build.getClusterLogicId(), build.getAssociatedPhyNumMax());
+            return;
+        }
+        
+        build.setAssociatedClusterPhyNames(clusterPhyNames);
+        build.setAssociatedPhyNum(clusterPhyNames.size());
+    }
+    
+    private void setRegionAndAssociatedClusterPhyDataNodeInfo(ClusterLogicContext build) {
+        // 获取逻辑集群已关联的 Region 信息
+        List<ClusterRegion> regions = clusterRegionService.getClusterRegionsByLogicIds(
+                Collections.singletonList(build.getClusterLogicId()));
+        build.setAssociatedRegionIds(regions.stream().map(ClusterRegion::getId).collect(Collectors.toList()));
+        
+        // 获取逻辑集群关联 region 下的 rack 节点信息
+        List<ClusterRoleHost> associatedRackClusterHosts = Lists.newArrayList();
+        for (ClusterRegion region : regions) {
+            Result<List<ClusterRoleHost>> regionDataNodeListRet = clusterRoleHostService.listByRegionId(
+                    region.getId().intValue());
+            if (regionDataNodeListRet.failed()) {
+                LOGGER.warn(
+                        "class=ClusterContextManagerImpl||method=setRegionAndAssociatedClusterPhyDataNodeInfo||regionId={}||msg=failed to get regionDataNodeList:{}",
+                        region.getId(), regionDataNodeListRet.getMessage());
+                continue;
+            }
+            associatedRackClusterHosts.addAll(regionDataNodeListRet.getData());
+        }
+        
+        // 设置数据节点总数
+        build.setAssociatedDataNodeNum(associatedRackClusterHosts.size());
+        
+        // 设置数据节点 Ip 地址
+        build.setAssociatedDataNodeIps(
+                associatedRackClusterHosts.stream().map(ClusterRoleHost::getIp).collect(Collectors.toList()));
+    }
+    
+    private ClusterPhyContext getClusterPhyContext(String clusterPhyName) {
+        ClusterPhy clusterPhy = clusterPhyService.getClusterByName(clusterPhyName);
+        if (null == clusterPhy) {
+            LOGGER.error(
+                    "class=ClusterContextManagerImpl||method=flushClusterPhyContext||clusterPhyName={}||msg=clusterPhy is empty",
+                    clusterPhyName);
+            return null;
+        }
+        
+        ClusterPhyContext build = ClusterPhyContext.builder().clusterPhyId(clusterPhy.getId().longValue())
+                .clusterName(clusterPhy.getCluster()).associatedLogicNumMax(PHY_ASSOCIATED_LOGIC_MAX_NUMBER).build();
+        
+        setClusterPhyNodeInfo(build);
+        setRegionAndClusterLogicInfoAndProjectId(build);
+        return build;
+    }
+     private void setRegionAndClusterLogicInfoAndProjectId(ClusterPhyContext build) {
+        // 1. set region
+        List<ClusterRegion> regions = clusterRegionService.listPhyClusterRegions(build.getClusterName());
+        build.setAssociatedRegionIds(regions.stream().map(ClusterRegion::getId).collect(Collectors.toList()));
+
+        // 2. set ClusterLogicInfo
+        Set<Long> associatedClusterLogicIds = Sets.newHashSet();
+        for (ClusterRegion clusterRegion : regions) {
+            // 添加每一个物理集群下每一个region所被绑定的逻辑集群
+            List<Long> logicClusterIds = ListUtils.string2LongList(clusterRegion.getLogicClusterIds());
+            if (!CollectionUtils.isEmpty(logicClusterIds)
+                && !logicClusterIds.contains(Long.parseLong(AdminConstant.REGION_NOT_BOUND_LOGIC_CLUSTER_ID))) {
+                associatedClusterLogicIds.addAll(logicClusterIds);
+            }
+        }
+
+        build.setAssociatedClusterLogicIds(Lists.newArrayList(associatedClusterLogicIds));
+        build.setAssociatedLogicNum(associatedClusterLogicIds.size());
+
+        // 3. set projectId
+        Set<Integer> projectIdSet = new HashSet<>();
+        Set<String> clusterLogicSet = new HashSet<>();
+        if (!CollectionUtils.isEmpty(associatedClusterLogicIds)) {
+            for (Long associatedClusterLogicId : associatedClusterLogicIds) {
+                clusterLogicService.listClusterLogicByIdThatProjectIdStrConvertProjectIdList(associatedClusterLogicId).stream().filter(Objects::nonNull)
+                        .filter(clusterLogic -> null != clusterLogic.getProjectId() && null != clusterLogic.getName())
+                        .forEach(clusterLogic -> {
+                            projectIdSet.add(clusterLogic.getProjectId());
+                            clusterLogicSet.add(clusterLogic.getName());
+                        });
+                
+            }
+        }
+
+        build.setAssociatedProjectIds(Lists.newArrayList(projectIdSet));
+        build.setAssociatedProjectNames(Lists.newArrayList(clusterLogicSet));
+    }
+    private void setClusterPhyNodeInfo(ClusterPhyContext build) {
+        List<ClusterRoleHost> nodes = clusterRoleHostService.getNodesByCluster(build.getClusterName());
+        List<ClusterRoleHost> dataNodes = nodes.stream().filter(r -> DATA_NODE.getCode() == r.getRole())
+            .collect(Collectors.toList());
+
+        build.setAssociatedDataNodeNum(dataNodes.size());
+        build.setAssociatedDataNodeIps(dataNodes.stream().map(ClusterRoleHost::getIp).collect(Collectors.toList()));
+        build.setAssociatedNodeIps(nodes.stream().map(ClusterRoleHost::getIp).collect(Collectors.toList()));
+    }
     private Result<Void> doBindRegionToClusterLogic(ESLogicClusterWithRegionDTO param,
                                                     String operator) throws AdminOperateException {
         List<ClusterRegionDTO> clusterRegionDTOS = param.getClusterRegionDTOS();

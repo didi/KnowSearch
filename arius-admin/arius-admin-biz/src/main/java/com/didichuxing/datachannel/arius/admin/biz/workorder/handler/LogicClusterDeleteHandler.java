@@ -1,12 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.biz.workorder.handler;
 
-import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterLogicManager;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.BaseWorkOrderHandler;
 import com.didichuxing.datachannel.arius.admin.biz.workorder.content.LogicClusterDeleteContent;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicContext;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.LogicClusterDeleteOrderDetail;
@@ -18,6 +17,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectClusterLogicAuthService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
@@ -39,10 +39,10 @@ public class LogicClusterDeleteHandler extends BaseWorkOrderHandler {
     private ClusterLogicService            clusterLogicService;
 
     @Autowired
-    private ClusterLogicManager            clusterLogicManager;
-
+    private ClusterLogicManager  clusterLogicManager;
     @Autowired
-    private ClusterContextManager          clusterContextManager;
+    private ClusterRegionService clusterRegionService;
+
 
     @Autowired
     private ProjectClusterLogicAuthService projectClusterLogicAuthService;
@@ -59,11 +59,13 @@ public class LogicClusterDeleteHandler extends BaseWorkOrderHandler {
         if (Boolean.TRUE.equals(clusterLogicService.hasLogicClusterWithTemplates(content.getId()))) {
             return Result.buildFail(String.format("逻辑集群[%s]存在模板", content.getName()));
         }
-
-        ClusterLogicContext clusterLogicContext = clusterContextManager.getClusterLogicContext(content.getId());
-        if (CollectionUtils.isNotEmpty(clusterLogicContext.getAssociatedClusterPhyNames())) {
-            return Result.buildFail(String.format("逻辑集群[%s]和物理集群[%s]关联", content.getName(),
-                ListUtils.strList2String(clusterLogicContext.getAssociatedClusterPhyNames())));
+        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByIdThatNotContainsProjectId(content.getId());
+        List<String> clusterPhyNames = clusterRegionService.listPhysicClusterNames(clusterLogic.getId());
+        //todo 暂时留着
+        //ClusterLogicContext clusterLogicContext = clusterContextManager.getClusterLogicContext(content.getId());
+        if (CollectionUtils.isNotEmpty(clusterPhyNames)) {
+            return Result.buildFail(String.format("逻辑集群 [%s] 和物理集群 [%s] 关联", content.getName(),
+                    ListUtils.strList2String(clusterPhyNames)));
         }
 
         ESLogicClusterDTO resourceLogicDTO = ConvertUtil.obj2Obj(content, ESLogicClusterDTO.class);
