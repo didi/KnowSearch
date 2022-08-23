@@ -223,9 +223,9 @@ public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrvImpl implem
 
         //获取变更前的setting
         final Result<IndexTemplatePhySetting> beforeSetting = getSettings(logicId);
-        final Integer shardNum = Optional.of(settings.getSettings())
+        final Optional<Integer> shardNumOptional = Optional.of(settings.getSettings())
                 .map(jsonObject -> jsonObject.getString(AdminConstant.INDEX_NUMBER_OF_SHARDS))
-                .filter(StringUtils::isNumeric).map(Integer::parseInt).orElse(1);
+                .filter(StringUtils::isNumeric).map(Integer::parseInt);
         for (IndexTemplatePhy templatePhysical : templatePhysicals) {
             
             try {
@@ -234,8 +234,8 @@ public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrvImpl implem
             } catch (AdminOperateException adminOperateException) {
                 return Result.buildFail(adminOperateException.getMessage());
             }
-            //更新shard num
-            indexTemplatePhyService.updateShardNumByLogicId(logicId,shardNum);
+            // 更新 shard num
+            shardNumOptional.ifPresent(shardNum -> indexTemplatePhyService.updateShardNumByLogicId(logicId, shardNum));
         }
     
         SpringTool.publish(new ReBuildTomorrowIndexEvent(this, logicId));
