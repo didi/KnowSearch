@@ -12,7 +12,6 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.resource.E
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.MASTER_NODE;
 
 import com.alibaba.fastjson.JSON;
-import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.page.ClusterPhyPageSearchHandle;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyManager;
@@ -185,8 +184,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     @Autowired
     private ClusterRegionService                                 clusterRegionService;
 
-    @Autowired
-    private ClusterContextManager                                clusterContextManager;
+    
 
     @Autowired
     private ProjectService                                       projectService;

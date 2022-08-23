@@ -1,7 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.biz.page;
 
-import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
-import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterLogicManager;
 import com.didichuxing.datachannel.arius.admin.common.Triple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -15,19 +13,17 @@ import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHe
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterNodeService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * Created by linyunan on 2021-10-14
@@ -40,11 +36,7 @@ public class ClusterLogicPageSearchHandle extends AbstractPageSearchHandle<Clust
     @Autowired
     private ClusterLogicService           clusterLogicService;
 
-    @Autowired
-    private ClusterLogicManager           clusterLogicManager;
-
-    @Autowired
-    private ClusterContextManager         clusterContextManager;
+  
 
     @Autowired
     private ClusterRegionService          clusterRegionService;
@@ -52,8 +44,7 @@ public class ClusterLogicPageSearchHandle extends AbstractPageSearchHandle<Clust
     @Autowired
     private ESClusterNodeService          eSClusterNodeService;
 
-    private static final FutureUtil<Void> futureUtilForClusterNum = FutureUtil.init("futureUtilForClusterNum", 10, 10,
-        100);
+
 
     /**
      * 1. 设置项目名称

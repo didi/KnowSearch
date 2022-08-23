@@ -1,16 +1,18 @@
 package com.didichuxing.datachannel.arius.admin.biz.cluster;
 
-import java.util.List;
-import java.util.Map;
-
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicContext;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhyContext;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by linyunan on 2021-06-08
+ * 后续下线
+ * {@see 0.3.2}
  */
+@Deprecated
 public interface ClusterContextManager {
     /**
      * 刷新物理集群上下文

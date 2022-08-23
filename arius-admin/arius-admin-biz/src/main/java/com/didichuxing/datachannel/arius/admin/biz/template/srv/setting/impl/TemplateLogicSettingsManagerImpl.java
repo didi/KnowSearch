@@ -22,6 +22,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithMapping;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateSettingVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
@@ -36,7 +37,9 @@ import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -220,14 +223,19 @@ public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrvImpl implem
 
         //获取变更前的setting
         final Result<IndexTemplatePhySetting> beforeSetting = getSettings(logicId);
-
+        final Integer shardNum = Optional.of(settings.getSettings())
+                .map(jsonObject -> jsonObject.getString(AdminConstant.INDEX_NUMBER_OF_SHARDS))
+                .filter(StringUtils::isNumeric).map(Integer::parseInt).orElse(1);
         for (IndexTemplatePhy templatePhysical : templatePhysicals) {
+            
             try {
                 templatePhySettingManager.mergeTemplateSettings(logicId, templatePhysical.getCluster(),
                     templatePhysical.getName(), settings);
             } catch (AdminOperateException adminOperateException) {
                 return Result.buildFail(adminOperateException.getMessage());
             }
+            //更新shard num
+            indexTemplatePhyService.updateShardNumByLogicId(logicId,shardNum);
         }
     
         SpringTool.publish(new ReBuildTomorrowIndexEvent(this, logicId));

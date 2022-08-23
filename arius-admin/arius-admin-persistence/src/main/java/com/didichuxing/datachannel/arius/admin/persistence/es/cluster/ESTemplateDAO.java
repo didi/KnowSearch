@@ -5,6 +5,7 @@ import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOpe
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.INDEX_SHARD_NUM;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.TEMPLATE_DEFAULT_ORDER;
 
+import com.didichuxing.datachannel.arius.admin.common.constant.ESSettingConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateHealthEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.function.BiFunctionWithESOperateException;
@@ -352,7 +353,7 @@ public class ESTemplateDAO extends BaseESDAO {
     public Map<String, TemplateConfig> getAllTemplate(List<String> clusters) {
         Map<String, TemplateConfig> map = new HashMap<>();
         for (String clusterName : clusters) {
-
+            
             MultiTemplatesConfig templatesConfig = getTemplates(clusterName, null,3);
 
             if (null == templatesConfig) {
@@ -369,7 +370,7 @@ public class ESTemplateDAO extends BaseESDAO {
      * @param templateName      模版名
      * @return result
      */
-    public MappingConfig getTemplateMapping(String clusterName, String templateName) {
+    public MappingConfig getTemplateMapping(String clusterName, String templateName) throws ESOperateException {
         MultiTemplatesConfig templatesConfig = getTemplates(clusterName, templateName,3);
 
         if (templatesConfig == null || templatesConfig.getSingleConfig() == null) {
@@ -437,7 +438,7 @@ public class ESTemplateDAO extends BaseESDAO {
             }
         };
         
-        return performTryTimesMethods(responseBiFunction, Objects::isNull, 3);
+        return performTryTimesMethods(responseBiFunction, Objects::isNull, tryTimes);
     }
 
     /**
@@ -447,7 +448,7 @@ public class ESTemplateDAO extends BaseESDAO {
      * @param setting setting
      * @return result
      */
-    public boolean upsertSetting(String cluster, String name, Map<String, String> setting) {
+    public boolean upsertSetting(String cluster, String name, Map<String, String> setting) throws ESOperateException {
         ESClient client = esOpClient.getESClient(cluster);
           if (client == null ) {
            
@@ -460,15 +461,47 @@ public class ESTemplateDAO extends BaseESDAO {
         ESIndicesGetTemplateResponse getTemplateResponse = client.admin().indices().prepareGetTemplate(name).execute()
             .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
         TemplateConfig templateConfig = getTemplateResponse.getMultiTemplatesConfig().getSingleConfig();
-
-        for (Map.Entry<String, String> entry : setting.entrySet()) {
-            templateConfig.setSettings(entry.getKey(), entry.getValue());
+        //对于默认配置进行设置，如果不存在则需要从templateConfig获取并设置进去
+        //setting必须是扁平化的
+        //shard
+        Optional
+                .of(templateConfig.getSetttings())
+                .map(settings->settings.get(ESSettingConstant.INDEX_NUMBER_OF_SHARDS))
+                .ifPresent(shardNum-> setting.putIfAbsent(ESSettingConstant.INDEX_NUMBER_OF_SHARDS,shardNum));
+        //refresh_interval
+        Optional
+                .of(templateConfig.getSetttings())
+                .map(settings->settings.get(ESSettingConstant.INDEX_REFRESH_INTERVAL))
+                .ifPresent(refreshInterval-> setting.putIfAbsent(ESSettingConstant.INDEX_REFRESH_INTERVAL,refreshInterval));
+        //sync_interval
+        Optional
+                .of(templateConfig.getSetttings())
+                .map(settings->settings.get(ESSettingConstant.INDEX_TRANSLOG_SYNC_INTERVAL))
+                .ifPresent(syncInterval-> setting.putIfAbsent(ESSettingConstant.INDEX_TRANSLOG_SYNC_INTERVAL,
+                        syncInterval));
+        //durability
+        Optional
+                .of(templateConfig.getSetttings())
+                .map(settings->settings.get(ESSettingConstant.INDEX_TRANSLOG_DURABILITY))
+                .ifPresent(durability-> setting.putIfAbsent(ESSettingConstant.INDEX_TRANSLOG_DURABILITY,durability));
+        //index.routing.allocation.include._name
+        Optional
+                .of(templateConfig.getSetttings())
+                .map(settings->settings.get(ESSettingConstant.INDEX_ROUTING_ALLOCATION_INCLUDE_NAME))
+                .ifPresent(includeName-> setting.putIfAbsent(ESSettingConstant.INDEX_ROUTING_ALLOCATION_INCLUDE_NAME,includeName));
+        templateConfig.setSetttings(setting);
+        try {
+            ESIndicesPutTemplateResponse response = client.admin().indices().preparePutTemplate(name)
+                    .setTemplateConfig(templateConfig).execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+            return response.getAcknowledged();
+        } catch (Exception e) {
+            final String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
+            if (StringUtils.isNotBlank(exception)) {
+                throw new ESOperateException(exception);
+            }
+            throw new ESOperateException(e.getMessage(), e);
         }
-
-        ESIndicesPutTemplateResponse response = client.admin().indices().preparePutTemplate(name)
-            .setTemplateConfig(templateConfig).execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
-
-        return response.getAcknowledged();
+       
     }
 
     /**
@@ -480,7 +513,7 @@ public class ESTemplateDAO extends BaseESDAO {
      * @return result
      */
     public boolean copyMappingAndAlias(String srcCluster, String srcTemplateName, String tgtCluster,
-                                       String tgtTemplateName) {
+                                       String tgtTemplateName) throws ESOperateException {
 
         ESClient srcClient = esOpClient.getESClient(srcCluster);
         ESClient tgtClient = esOpClient.getESClient(tgtCluster);
@@ -519,6 +552,10 @@ public class ESTemplateDAO extends BaseESDAO {
             response = tgtClient.admin().indices().preparePutTemplate(tgtTemplateName)
                 .setTemplateConfig(tgtTemplateConfig).execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
         } catch (Exception e) {
+            final String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
+            if (StringUtils.isNotBlank(exception)){
+                throw new ESOperateException(exception);
+            }
             LOGGER.error(
                 "class=ESTemplateDAO||method=copyMappingAndAlias||srcCluster={}||srcTemplateName={}||tgtCluster={}||tgtTemplateName={}",
                 srcCluster, srcTemplateName, tgtCluster, tgtTemplateName, e);

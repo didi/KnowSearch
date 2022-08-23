@@ -1,7 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.biz.cluster.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterLogicManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterRegionManager;
 import com.didichuxing.datachannel.arius.admin.biz.page.ClusterLogicPageSearchHandle;
@@ -18,7 +17,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatC
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateClearDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicContext;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicStatis;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
@@ -137,8 +135,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     @Autowired
     private ClusterRegionManager           clusterRegionManager;
 
-    @Autowired
-    private ClusterContextManager          clusterContextManager;
+ 
 
     @Autowired
     private ESClusterService               esClusterService;
@@ -1067,16 +1064,25 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         ClusterLogicStatis clusterLogicStatis = new ClusterLogicStatis();
 
         //获取集群上下文
-        ClusterLogicContext clusterLogicContext = clusterContextManager.getClusterLogicContext(logicClusterId);
-        if (null == clusterLogicContext) {
+        //todo 暂时留存
+        //ClusterLogicContext clusterLogicContext = clusterContextManager.getClusterLogicContext(logicClusterId);
+        //if (null == clusterLogicContext) {
+        //    return null;
+        //}
+        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByIdThatNotContainsProjectId(
+                logicClusterId);
+        if (Objects.isNull(clusterLogic)){
             return null;
         }
 
         //设置逻辑集群名称
-        clusterLogicStatis.setName(clusterLogicContext.getClusterLogicName());
+        //clusterLogicStatis.setName(clusterLogicService.getClusterLogicName());
+        clusterLogicStatis.setName(clusterLogic.getName());
         clusterLogicStatis.setId(logicClusterId);
 
-        List<ESClusterStatsResponse> esClusterStatsResponseList = clusterLogicContext.getAssociatedClusterPhyNames()
+        List<ESClusterStatsResponse> esClusterStatsResponseList =
+                //clusterLogicContext.getAssociatedClusterPhyNames()
+        clusterRegionService.listPhysicClusterNames(clusterLogic.getId())
             .stream().map(esClusterService::syncGetClusterStats).collect(Collectors.toList());
 
         //设置基础数据
