@@ -16,7 +16,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithCluster;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateCapacityVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateClearVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateDeleteVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateDetailVO;
@@ -150,15 +149,15 @@ public class ConsoleTemplateController extends BaseConsoleTemplateController {
         //    HttpRequestUtil.getOperator(request),HttpRequestUtil.getProjectId(request));
     }
 
-    @GetMapping("/capacity")
-    @ResponseBody
-    @ApiOperation(value = "获取索引配额信息接口【三方接口】",tags = "【三方接口】" )
-    @ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "索引ID", required = true) })
-    @Deprecated
-    public Result<ConsoleTemplateCapacityVO> getLogicTemplateCapacity(@RequestParam("logicId") Integer logicId) {
-         return Result.buildFail("接口已经下线：迁移到v3");
-        //return Result.buildSucc();
-    }
+    //@GetMapping("/capacity")
+    //@ResponseBody
+    //@ApiOperation(value = "获取索引配额信息接口【三方接口】",tags = "【三方接口】" )
+    //@ApiImplicitParams({ @ApiImplicitParam(paramType = "query", dataType = "Integer", name = "logicId", value = "索引ID", required = true) })
+    //@Deprecated
+    //public Result<ConsoleTemplateCapacityVO> getLogicTemplateCapacity(@RequestParam("logicId") Integer logicId) {
+    //     return Result.buildFail("接口已经下线：迁移到v3");
+    //    //return Result.buildSucc();
+    //}
 
     @GetMapping("/clearInfo")
     @ResponseBody

@@ -97,6 +97,7 @@
         <if test="resourceId != null"> and `resource_id` = #{resourceId}</if>
         <if test="desc != null"> and `desc` LIKE CONCAT('%', #{desc}, '%')</if>
         <if test="projectId != null"> and `project_id` = #{projectId}</if>
+        <if test="hasDCDR != null"> and `has_dcdr` = #{hasDCDR}</if>
         <if test="health != null"> and `health` = #{health}</if>
         order by id desc
     </select>
