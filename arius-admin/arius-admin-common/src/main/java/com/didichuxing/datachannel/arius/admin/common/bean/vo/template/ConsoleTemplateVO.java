@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.vo.template;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectTemplateAuthEnum;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -16,7 +17,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel(description = "模板信息")
-public class ConsoleTemplateVO extends BaseTemplateVO implements Comparable<ConsoleTemplateVO> {
+public class ConsoleTemplateVO extends IndexTemplate  {
     /**
      * @see ProjectTemplateAuthEnum
      */
@@ -53,12 +54,5 @@ public class ConsoleTemplateVO extends BaseTemplateVO implements Comparable<Cons
     private Boolean isPartition;
     @ApiModelProperty("模板健康度")
     private Integer health;
-    @Override
-    public int compareTo(ConsoleTemplateVO o) {
-        if (null == o) {
-            return 0;
-        }
-
-        return o.getId().intValue() - this.getId().intValue();
-    }
+  
 }

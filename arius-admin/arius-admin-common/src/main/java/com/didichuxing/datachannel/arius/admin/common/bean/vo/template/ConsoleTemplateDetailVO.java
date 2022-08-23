@@ -1,11 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.vo.template;
 
-import java.util.List;
-
-import com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicLevelEnum;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.resource.ResourceLogicLevelEnum;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel(description = "索引详细信息")
-public class ConsoleTemplateDetailVO extends BaseTemplateVO {
+public class ConsoleTemplateDetailVO extends IndexTemplate {
 
     @ApiModelProperty("所属应用名称")
     private String       appName;

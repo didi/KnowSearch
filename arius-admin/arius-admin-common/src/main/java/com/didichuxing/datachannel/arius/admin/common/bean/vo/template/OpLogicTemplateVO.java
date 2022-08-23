@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.vo.template;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import io.swagger.annotations.ApiModel;
 import lombok.Data;
 
@@ -9,5 +10,5 @@ import lombok.Data;
  */
 @Data
 @ApiModel(description = "逻辑模板信息")
-public class OpLogicTemplateVO extends BaseTemplateVO {
+public class OpLogicTemplateVO extends IndexTemplate {
 }
