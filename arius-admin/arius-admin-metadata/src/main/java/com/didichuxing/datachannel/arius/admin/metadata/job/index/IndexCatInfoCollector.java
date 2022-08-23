@@ -93,8 +93,9 @@ public class IndexCatInfoCollector extends AbstractMetaDataJob {
         // 2. 获取通过平台索引管理 创建的索引cat_index信息且没有生成索引健康的数据
         List<IndexCatCell> platformCreateCatIndexList = esIndexCatService.syncGetPlatformCreateCatIndexList(SEARCH_SIZE);
         //获取不到索引了就直接返回
-        if (CollectionUtils.isEmpty(platformCreateCatIndexList)){
-             return JOB_SUCCESS;
+        if (CollectionUtils.isEmpty(platformCreateCatIndexList)) {
+            LOGGER.warn("class=IndexCatInfoCollector||method=getIndexInfoFromEs||platformCreateCatIndexList is empty");
+        
         }
         // 这里的cluster 用户侧创建为逻辑集群名称，运维侧创建为物理集群名称
         Map<String/*cluster@index*/, IndexCatCell> index2IndexCatCellFromPlatformCreateMap = ConvertUtil.list2Map(
