@@ -18,10 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author didi
@@ -174,16 +171,34 @@ public class ComponentDomainServiceImpl implements ComponentDomainService {
     }
 
     @Override
-    public Result<Void> expandComponent(Component component) {
+    public Result<Void> expandComponent(Component component, Map<String, Set<String>> groupName2HostNormalStatusMap) {
+        //TODO 需要考虑部分成功以及部分失败场景
+        //TODO 优化批量插入能力
+        //TODO 扩容自动安装其他插件？
+        List<ComponentGroupConfig> configList = getComponentConfig(component.getId()).getData();
+        Map<String , ComponentGroupConfig> oriConfigMap = new HashMap<>(configList.size());
+        configList.forEach(oriConf -> {
+            oriConfigMap.put(oriConf.getGroupName(), oriConf);
+        });
+
         for (ComponentGroupConfig config : component.getGroupConfigList()) {
             for (String host : config.getHosts().split(Constants.SPLIT)) {
-                ComponentHost componentHost = new ComponentHost();
-                componentHost.setHost(host);
-                componentHost.setProcessNum(JSON.parseObject(config.getProcessNumConfig()).getInteger(host));
-                componentHost.setComponentId(component.getId());
-                componentHost.setGroupName(config.getGroupName());
-                componentHost.create();
-                componentHostRepository.saveComponentHost(componentHost);
+                //如果节点成功则加入
+                if (groupName2HostNormalStatusMap.get(config.getGroupName()).contains(host)) {
+                    ComponentHost componentHost = new ComponentHost();
+                    componentHost.setHost(host);
+                    componentHost.setProcessNum(JSON.parseObject(config.getProcessNumConfig()).getInteger(host));
+                    componentHost.setComponentId(component.getId());
+                    componentHost.setGroupName(config.getGroupName());
+                    componentHost.create();
+                    componentHostRepository.saveComponentHost(componentHost);
+                }
+            }
+
+            if (groupName2HostNormalStatusMap.containsKey(config.getGroupName())) {
+                ComponentGroupConfig oriGroupConfig = oriConfigMap.get(config.getGroupName());
+                oriGroupConfig.updateExpand(config, groupName2HostNormalStatusMap.get(config.getGroupName()));
+                componentGroupConfigRepository.updateGroupConfig(oriGroupConfig);
             }
         }
         return Result.success();
@@ -202,6 +217,7 @@ public class ComponentDomainServiceImpl implements ComponentDomainService {
     @Override
     public Result<Void> changeComponentConfig(Component component) {
         for (ComponentGroupConfig config : component.getGroupConfigList()) {
+            config.createWithoutVersion();
             config.setVersion(String.valueOf(Integer.parseInt(null == config.getVersion() ? "1" : config.getVersion()) + 1));
             componentGroupConfigRepository.saveGroupConfig(config);
         }

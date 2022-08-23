@@ -1,10 +1,17 @@
 package com.didiglobal.logi.op.manager.domain.component.entity.value;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.logging.log4j.util.Strings;
 
 import java.sql.Timestamp;
+import java.util.Arrays;
+import java.util.Set;
+
+import static com.didiglobal.logi.op.manager.infrastructure.common.Constants.REX;
 
 /**
  * @author didi
@@ -67,6 +74,34 @@ public class ComponentGroupConfig {
         this.version = "1";
         this.createTime = new Timestamp(System.currentTimeMillis());
         this.updateTime = new Timestamp(System.currentTimeMillis());
+        return this;
+    }
+
+    public ComponentGroupConfig createWithoutVersion(){
+        this.createTime = new Timestamp(System.currentTimeMillis());
+        this.updateTime = new Timestamp(System.currentTimeMillis());
+        return this;
+    }
+
+    public ComponentGroupConfig updateExpand(ComponentGroupConfig newConfig, Set<String> hosts) {
+        this.updateTime = new Timestamp(System.currentTimeMillis());
+        this.setHosts(this.getHosts() + REX + Strings.join(hosts, REX));
+        JSONObject processNumConfigJson = JSON.parseObject(this.getProcessNumConfig());
+        JSONObject installDirectoryJson = JSON.parseObject(this.getInstallDirectoryConfig());
+        JSON.parseObject(newConfig.getProcessNumConfig()).forEach((k, v) -> {
+            if (hosts.contains(k)) {
+                processNumConfigJson.put(k, v);
+            }
+        });
+
+        JSON.parseObject(newConfig.getInstallDirectoryConfig()).forEach((k, v) -> {
+            if (hosts.contains(k)) {
+                installDirectoryJson.put(k, v);
+            }
+        });
+
+        this.setProcessNumConfig(processNumConfigJson.toJSONString());
+        this.setInstallDirectoryConfig(installDirectoryJson.toJSONString());
         return this;
     }
 }

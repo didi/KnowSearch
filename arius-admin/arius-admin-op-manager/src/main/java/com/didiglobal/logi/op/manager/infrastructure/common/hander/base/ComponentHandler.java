@@ -37,10 +37,11 @@ public interface ComponentHandler {
 
     /**
      * 任务完成后的处理
-     * @param content
+     * @param taskId 任务id
+     * @param content 内容
      * @throws ComponentHandlerException
      */
-    void taskFinishProcess(String content) throws ComponentHandlerException;;
+    void taskFinishProcess(int taskId, String content) throws ComponentHandlerException;;
 
     /**
      * 处理器类型

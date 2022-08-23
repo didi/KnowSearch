@@ -30,8 +30,8 @@ public class ComponentGroupConfigRepositoryImpl implements ComponentGroupConfigR
     }
 
     @Override
-    public void updateGroupConfig(ComponentGroupConfig groupConfig) {
-
+    public int updateGroupConfig(ComponentGroupConfig groupConfig) {
+        return configDao.update(ComponentConverter.convertComponentConfigDO2PO(groupConfig));
     }
 
     @Override

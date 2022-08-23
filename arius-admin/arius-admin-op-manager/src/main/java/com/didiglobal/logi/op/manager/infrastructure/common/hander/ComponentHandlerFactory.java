@@ -12,6 +12,8 @@ import org.springframework.stereotype.Component;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.didiglobal.logi.op.manager.infrastructure.common.enums.OperationEnum.*;
+
 /**
  * @author didi
  * @date 2022-07-16 2:16 下午
@@ -39,6 +41,9 @@ public class ComponentHandlerFactory implements BeanPostProcessor {
     }
 
     public ComponentHandler getByType(int type) {
+        if (type == EXPAND.getType() || type == SHRINK.getType()) {
+            return handlerMap.get(SCALE.getType());
+        }
         return handlerMap.get(type);
     }
 }

@@ -27,14 +27,21 @@ public interface ComponentGroupConfigDao {
 
     /**
      * 通过组件id获取配置
-     * @param component
+     * @param componentId
      * @return
      */
-    List<ComponentGroupConfigPO> getByComponentId(int component);
+    List<ComponentGroupConfigPO> getByComponentId(int componentId);
 
     /**
      * 获取所有的组件分组配置
      * @return List<ComponentGroupConfigPO> 分组配置
      */
     List<ComponentGroupConfigPO> listAll();
+
+    /**
+     * 更新配置
+     * @param groupConfigPO
+     * @return
+     */
+    int update(ComponentGroupConfigPO groupConfigPO);
 }

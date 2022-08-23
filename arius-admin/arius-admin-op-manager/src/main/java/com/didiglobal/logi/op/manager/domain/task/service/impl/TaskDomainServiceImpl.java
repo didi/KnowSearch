@@ -246,7 +246,9 @@ public class TaskDomainServiceImpl implements TaskDomainService {
 
     @Override
     public Result<Task> getTaskById(int taskId) {
-        return Result.success(taskRepository.getTaskById(taskId));
+        Task task = taskRepository.getTaskById(taskId);
+        task.setDetailList(taskDetailRepository.listTaskDetailByTaskId(taskId));
+        return Result.success(task);
     }
 
     @Override

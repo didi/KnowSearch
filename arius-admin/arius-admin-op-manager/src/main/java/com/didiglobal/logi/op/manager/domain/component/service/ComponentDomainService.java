@@ -5,8 +5,10 @@ import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentGro
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.*;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author didi
@@ -55,11 +57,11 @@ public interface ComponentDomainService {
 
     /**
      * 组件扩容
-     *
      * @param component
+     * @param groupName2HostNormalStatusMap
      * @return
      */
-    Result<Void> expandComponent(Component component);
+    Result<Void> expandComponent(Component component, Map<String, Set<String>> groupName2HostNormalStatusMap);
 
 
     /**

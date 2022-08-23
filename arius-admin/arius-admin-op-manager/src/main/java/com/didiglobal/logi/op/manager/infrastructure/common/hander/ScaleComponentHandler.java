@@ -5,22 +5,26 @@ import com.alibaba.fastjson.JSONObject;
 import com.didiglobal.logi.op.manager.domain.component.entity.Component;
 import com.didiglobal.logi.op.manager.domain.component.event.ComponentEvent;
 import com.didiglobal.logi.op.manager.domain.task.entity.Task;
+import com.didiglobal.logi.op.manager.domain.task.entity.value.TaskDetail;
 import com.didiglobal.logi.op.manager.domain.task.service.TaskDomainService;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 import com.didiglobal.logi.op.manager.infrastructure.common.Tuple;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralScaleComponent;
+import com.didiglobal.logi.op.manager.infrastructure.common.enums.HostActionEnum;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.OperationEnum;
+import com.didiglobal.logi.op.manager.infrastructure.common.enums.TaskStatusEnum;
 import com.didiglobal.logi.op.manager.infrastructure.common.hander.base.BaseComponentHandler;
 import com.didiglobal.logi.op.manager.infrastructure.common.hander.base.ComponentHandler;
 import com.didiglobal.logi.op.manager.infrastructure.common.hander.base.DefaultHandler;
 import com.didiglobal.logi.op.manager.infrastructure.exception.ComponentHandlerException;
 import com.didiglobal.logi.op.manager.infrastructure.util.ConvertUtil;
+import com.didiglobal.logi.op.manager.interfaces.assembler.ComponentAssembler;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author didi
@@ -54,12 +58,13 @@ public class ScaleComponentHandler extends BaseComponentHandler implements Compo
     }
 
     @Override
-    public void taskFinishProcess(String content) throws ComponentHandlerException {
+    public void taskFinishProcess(int taskId, String content) throws ComponentHandlerException {
         try {
+            HashMap<String, Set<String>> groupName2HostNormalStatusMap = getGroupName2HostNormalStatusMap(taskId);
             GeneralScaleComponent scaleComponent = JSON.parseObject(content, GeneralScaleComponent.class);
-            Component component = ConvertUtil.obj2Obj(scaleComponent, Component.class);
+            Component component = ComponentAssembler.toScaleComponent(scaleComponent);
             if (scaleComponent.getType() == OperationEnum.EXPAND.getType()) {
-                componentDomainService.expandComponent(component);
+                componentDomainService.expandComponent(component, groupName2HostNormalStatusMap);
             } else {
                 componentDomainService.shrinkComponent(component);
             }

@@ -23,6 +23,12 @@ public class ComponentAssembler {
         return ConvertUtil.obj2Obj(dto, GeneralInstallComponent.class);
     }
 
+    public static Component toScaleComponent(GeneralScaleComponent scaleComponent) {
+        Component component = ConvertUtil.obj2Obj(scaleComponent, Component.class);
+        component.setId(scaleComponent.getComponentId());
+        return component;
+    }
+
     public static GeneralScaleComponent toScaleComponent(GeneralScaleComponentDTO dto) {
         return ConvertUtil.obj2Obj(dto, GeneralScaleComponent.class);
     }

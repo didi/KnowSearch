@@ -21,10 +21,30 @@
         id, component_id, group_name, system_config, running_config, file_config, install_directory_config, process_num_config, hosts, version, create_time, update_time
     </sql>
 
-    <insert id="insert" parameterType="com.didiglobal.logi.op.manager.infrastructure.db.PackageGroupConfigPO"
+    <insert id="insert" parameterType="com.didiglobal.logi.op.manager.infrastructure.db.ComponentGroupConfigPO"
             useGeneratedKeys="true"
             keyColumn="id" keyProperty="id">
         insert into logi_op_component_group_config (component_id, group_name, system_config, running_config, file_config, install_directory_config, process_num_config, hosts, version, create_time, update_time)
         values (#{componentId}, #{groupName}, #{systemConfig}, #{runningConfig}, #{fileConfig}, #{installDirectoryConfig}, #{processNumConfig}, #{hosts}, #{version}, #{createTime}, #{updateTime})
     </insert>
+
+    <select id="getByComponentId"
+            parameterType="com.didiglobal.logi.op.manager.infrastructure.db.ComponentGroupConfigPO"
+            resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from logi_op_component_group_config
+        where component_id = #{componentId}
+    </select>
+
+    <update id="update" parameterType="com.didiglobal.logi.op.manager.infrastructure.db.ComponentGroupConfigPO">
+        update logi_op_component_group_config
+        <trim prefix="set" prefixOverrides=",">
+            <if test="installDirectoryConfig != null">,install_directory_config = #{installDirectoryConfig}</if>
+            <if test="processNumConfig != null">,process_num_config = #{processNumConfig}</if>
+            <if test="hosts != null">,hosts = #{hosts}</if>
+            <if test="updateTime != null">,update_time = #{updateTime}</if>
+        </trim>
+        where id = #{id}
+    </update>
 </mapper>

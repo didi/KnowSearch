@@ -15,6 +15,7 @@ import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 import com.didiglobal.logi.op.manager.infrastructure.common.Tuple;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralBaseOperationComponent;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralGroupConfig;
+import com.didiglobal.logi.op.manager.infrastructure.common.enums.TaskStatusEnum;
 import com.didiglobal.logi.op.manager.infrastructure.exception.ComponentHandlerException;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -76,5 +77,21 @@ public abstract class BaseComponentHandler implements ComponentHandler {
             }
         });
         return groupToIpList;
+    }
+
+    protected HashMap<String, Set<String>> getGroupName2HostNormalStatusMap(int taskId) {
+        Task task = taskDomainService.getTaskById(taskId).getData();
+        HashMap<String, Set<String>> groupName2HostNormalStatusMap = new HashMap<>();
+        task.getDetailList().forEach(detail -> {
+            if (detail.getStatus() == TaskStatusEnum.SUCCESS.getStatus()) {
+                Set<String> hosts = groupName2HostNormalStatusMap.get(detail.getGroupName());
+                if (null == hosts) {
+                    hosts = new HashSet<>();
+                    groupName2HostNormalStatusMap.put(detail.getGroupName(), hosts);
+                }
+                hosts.add(detail.getHost());
+            }
+        });
+        return groupName2HostNormalStatusMap;
     }
 }

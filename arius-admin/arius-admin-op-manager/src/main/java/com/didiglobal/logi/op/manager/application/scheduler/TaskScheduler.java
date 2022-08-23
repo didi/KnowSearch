@@ -94,10 +94,10 @@ public class TaskScheduler {
                     totalStatus.addZeusTaskStatus(ZeusTaskStatus.builder().waiting(new ArrayList<>()).build());
                 }
 
-                int finalStatus = getFinalStatusAndUpdate(task, totalStatus, isContainEmptyExecuteId);
+                int finalStatus = getFinalStatusAndUpdate(task, totalStatus);
 
                 if (finalStatus == TaskStatusEnum.SUCCESS.getStatus()) {
-                    componentHandlerFactory.getByType(task.getType()).taskFinishProcess(task.getContent());
+                    componentHandlerFactory.getByType(task.getType()).taskFinishProcess(task.getId(), task.getContent());
                 }
             }
         } catch (Exception e) {
@@ -106,7 +106,14 @@ public class TaskScheduler {
         }
     }
 
-    private int getFinalStatusAndUpdate(Task task, ZeusTaskStatus totalStatus, boolean isContainEmptyExecuteId) {
+    /**
+     * 对zeus的转态转化到主任务的状态
+     * 只要有超时或者失败就认为是失败，有running就认为是运行中，有waiting就认为是暂停，除此之外都是success
+     * @param task 任务
+     * @param totalStatus zeus转态集合
+     * @return 返回最终状态
+     */
+    private int getFinalStatusAndUpdate(Task task, ZeusTaskStatus totalStatus) {
         int isFinish = 0;
         int finalStatus;
         if (null != totalStatus.getTimeout() || null != totalStatus.getFailed()) {
@@ -115,15 +122,40 @@ public class TaskScheduler {
         } else if (null != totalStatus.getRunning()) {
             finalStatus = TaskStatusEnum.RUNNING.getStatus();
         } else if (null != totalStatus.getWaiting()) {
-            finalStatus = TaskStatusEnum.WAITING.getStatus();
+            finalStatus = TaskStatusEnum.PAUSE.getStatus();
+            //这里对于kill以及cancel操作，后续就不会执行，那这里就会标记成已完成，然后后续不会定时去监控状态
+            if (isFinishStatus(task.getStatus())) {
+                isFinish = 1;
+            }
         } else {
-            finalStatus = TaskStatusEnum.SUCCESS.getStatus();
+            //这里如果是final status，那状态就跟任务状态一致
+            if (isFinishStatus(task.getStatus())) {
+                finalStatus = task.getStatus();
+            } else {
+                finalStatus = TaskStatusEnum.SUCCESS.getStatus();
+            }
             isFinish = 1;
         }
 
-        if (task.getStatus() != finalStatus) {
+        /**
+         * 暂停以及kill以及cancel都是由用户api触发去做变更的，所以这里的状态变更对这些状态不处理
+         */
+        if (task.getStatus() != finalStatus && !isUserActionStatus(task.getStatus())) {
             taskDomainService.updateTaskStatusAndIsFinish(task.getId(), isFinish, finalStatus);
+        } else if (task.getIsFinish() != isFinish) {
+            taskDomainService.updateTaskStatusAndIsFinish(task.getId(), isFinish, task.getStatus());
         }
         return finalStatus;
+    }
+
+    private boolean isFinishStatus(int status) {
+        return status == TaskStatusEnum.KILLED.getStatus() ||
+                status== TaskStatusEnum.CANCELLED.getStatus();
+    }
+
+    private boolean isUserActionStatus(int status) {
+        return status == TaskStatusEnum.PAUSE.getStatus() ||
+                status == TaskStatusEnum.KILLED.getStatus() ||
+                status == TaskStatusEnum.CANCELLED.getStatus();
     }
 }

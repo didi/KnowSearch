@@ -19,8 +19,9 @@ public interface ComponentGroupConfigRepository {
     /**
      * 更新分组配置
      * @param groupConfig
+     * @return
      */
-    void updateGroupConfig(ComponentGroupConfig  groupConfig);
+    int updateGroupConfig(ComponentGroupConfig groupConfig);
 
     /**
      * 根据id获取配置

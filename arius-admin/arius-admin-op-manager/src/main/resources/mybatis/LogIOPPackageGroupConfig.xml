@@ -48,7 +48,7 @@
         select
         <include refid="Base_Column_List"/>
         from logi_op_package_group_config
-        where package_id = #{package_id}
+        where package_id = #{id}
     </select>
 
     <delete id="deleteByPackageId" parameterType="com.didiglobal.logi.op.manager.infrastructure.db.PackageGroupConfigPO">

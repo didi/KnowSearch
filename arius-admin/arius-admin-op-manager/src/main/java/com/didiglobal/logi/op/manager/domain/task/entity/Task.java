@@ -117,8 +117,9 @@ public class Task {
                 }
                 break;
             case START:
-                if (status == TaskStatusEnum.RUNNING.getStatus()) {
-                    return Result.fail(ResultCode.TASK_IS_RUNNING);
+                if (status != TaskStatusEnum.WAITING.getStatus() &&
+                        status != TaskStatusEnum.PAUSE.getStatus()) {
+                    return Result.fail(ResultCode.TASK_IS_RUNNING_OR_FINISH);
                 }
                 break;
             case CANCEL:

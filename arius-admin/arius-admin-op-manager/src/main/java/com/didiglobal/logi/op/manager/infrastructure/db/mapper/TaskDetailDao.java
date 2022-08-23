@@ -42,7 +42,7 @@ public interface TaskDetailDao {
      * @param groupName
      * @return
      */
-    TaskDetailPO getByHostAndGroupName(int taskId, String host, String groupName);
+    TaskDetailPO getByHostAndGroupName(@Param("taskId") int taskId, @Param("host") String host, @Param("groupName") String groupName);
 
     /**
      * 根据task_id删除detail信息

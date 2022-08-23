@@ -51,7 +51,7 @@ public class RestartComponentHandler extends BaseComponentHandler implements Com
     }
 
     @Override
-    public void taskFinishProcess(String content) throws ComponentHandlerException {
+    public void taskFinishProcess(int taskId, String content) throws ComponentHandlerException {
         //暂时不用操作
     }
 

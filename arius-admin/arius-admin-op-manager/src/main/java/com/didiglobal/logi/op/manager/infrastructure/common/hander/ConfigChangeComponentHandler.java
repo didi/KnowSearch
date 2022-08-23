@@ -55,7 +55,7 @@ public class ConfigChangeComponentHandler extends BaseComponentHandler implement
     }
 
     @Override
-    public void taskFinishProcess(String content) throws ComponentHandlerException {
+    public void taskFinishProcess(int taskId, String content) throws ComponentHandlerException {
         try {
             GeneralConfigChangeComponent scaleComponent = JSON.parseObject(content, GeneralConfigChangeComponent.class);
             Component component = ConvertUtil.obj2Obj(scaleComponent, Component.class);

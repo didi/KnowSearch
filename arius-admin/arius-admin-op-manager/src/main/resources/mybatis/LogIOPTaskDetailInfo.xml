@@ -63,4 +63,13 @@
         </foreach>
     </update>
 
+    <select id="getByHostAndGroupName"
+            parameterType="com.didiglobal.logi.op.manager.infrastructure.db.TaskDetailPO"
+            resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from logi_op_task_detail
+        where id = #{taskId} and host = #{host} and group_name = #{groupName}
+    </select>
+
 </mapper>

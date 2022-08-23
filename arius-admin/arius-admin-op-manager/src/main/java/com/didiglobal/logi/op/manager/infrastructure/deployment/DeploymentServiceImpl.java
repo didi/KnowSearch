@@ -104,7 +104,7 @@ public class DeploymentServiceImpl implements DeploymentService {
             param.put("task_id", executeTaskId);
             param.put("hostname", host);
             param.put("action", action);
-            zeusService.actionTask(param);
+            zeusService.actionHost(param);
             return Result.success();
         } catch (ZeusOperationException e) {
             LOGGER.error("class=DeploymentServiceImpl||method=actionHost||errMsg={}||msg=execute failed", e.getMessage());

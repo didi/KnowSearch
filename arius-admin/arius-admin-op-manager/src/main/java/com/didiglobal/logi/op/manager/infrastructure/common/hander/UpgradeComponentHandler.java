@@ -59,7 +59,7 @@ public class UpgradeComponentHandler extends BaseComponentHandler implements Com
     }
 
     @Override
-    public void taskFinishProcess(String content) throws ComponentHandlerException {
+    public void taskFinishProcess(int taskId, String content) throws ComponentHandlerException {
         try {
             GeneralUpgradeComponent upgradeComponent = JSON.parseObject(content, GeneralUpgradeComponent.class);
             Component component = new Component();

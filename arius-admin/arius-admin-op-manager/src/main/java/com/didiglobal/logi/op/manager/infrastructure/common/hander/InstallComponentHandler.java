@@ -77,7 +77,7 @@ public class InstallComponentHandler extends BaseComponentHandler implements Com
     }
 
     @Override
-    public void taskFinishProcess(String content) throws ComponentHandlerException {
+    public void taskFinishProcess(int taskId, String content) throws ComponentHandlerException {
         try {
             GeneralInstallComponent installComponent = JSON.parseObject(content, GeneralInstallComponent.class);
             Component component = ConvertUtil.obj2Obj(installComponent, Component.class);

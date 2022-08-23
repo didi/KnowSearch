@@ -53,7 +53,7 @@ public class ExecuteComponentFunction extends BaseComponentHandler implements Co
     }
 
     @Override
-    public void taskFinishProcess(String content) throws ComponentHandlerException {
+    public void taskFinishProcess(int taskId, String content) throws ComponentHandlerException {
 
     }
 
