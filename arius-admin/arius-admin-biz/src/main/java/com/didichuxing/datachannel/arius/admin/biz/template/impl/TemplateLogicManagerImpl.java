@@ -58,6 +58,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateC
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.ESSettingConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TemplateOperateRecordEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
@@ -96,6 +97,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.template.physic.Inde
 import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateLabelService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateStatsService;
 import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
+import com.didiglobal.logi.elasticsearch.client.utils.JsonUtils;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
@@ -230,6 +232,14 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         if (validPhyTemplateResult.failed()) {
             return validPhyTemplateResult;
         }
+        final Map<String, String> setting = JsonUtils.flat(JSONObject.parseObject(param.getSetting()));
+        if (setting.containsKey(ESSettingConstant.INDEX_NUMBER_OF_SHARDS) || setting.containsKey(
+                ESSettingConstant.INDEX_ROUTING_ALLOCATION_INCLUDE_NAME)) {
+            return Result.buildFail(
+                    "\"index.number_of_shards \"和 \"index.routing.allocation.include._name \"两个字段系统会自动计算，不支持用户自定义设置。");
+        
+        }
+        
     
         try {
             Result<Void> save2DBResult = indexTemplateService.addTemplateWithoutCheck(indexTemplateDTO);

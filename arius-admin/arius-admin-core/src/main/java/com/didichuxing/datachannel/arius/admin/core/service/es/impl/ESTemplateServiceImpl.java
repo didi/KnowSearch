@@ -144,7 +144,15 @@ public class ESTemplateServiceImpl implements ESTemplateService {
         return ESOpTimeoutRetry.esRetryExecute("upsertSetting", retryCount,
             () -> esTemplateDAO.upsertSetting(cluster, name, setting));
     }
-
+    
+    
+    @Override
+    public boolean syncUpdateSettingCheckAllocationAndShard(String cluster, String name, Map<String, String> setting, int retryCount)
+            throws ESOperateException {
+        return ESOpTimeoutRetry.esRetryExecute("updateSettingCheckAllocationAndShard", retryCount,
+            () -> esTemplateDAO.updateSettingCheckAllocationAndShard(cluster, name, setting));
+    }
+    
     /**
      * 同步更新物理模板配置
      * @param cluster 集群名称
