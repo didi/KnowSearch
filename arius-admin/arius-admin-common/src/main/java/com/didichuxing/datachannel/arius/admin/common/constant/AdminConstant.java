@@ -1,7 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.constant;
 
 import com.didiglobal.logi.log.util.HostUtil;
-
 import java.util.Arrays;
 import java.util.List;
 
@@ -20,6 +19,7 @@ public class AdminConstant {
 //    public static final String       DEFAULT_TYPE                            = "type";
 
     public static final String       DEFAULT_INDEX_MAPPING_TYPE              = "_doc";
+    public static final String INDEX_NUMBER_OF_SHARDS = "index.number_of_shards";
     public static final String       DEFAULT_DYNAMIC_TEMPLATES_KEY           = "dynamic_templates";
 //    public static final String       SINGLE_TYPE_KEY                         = "index.mapping.single_type";
 //    public static final String       DEFAULT_SINGLE_TYPE                     = "true";

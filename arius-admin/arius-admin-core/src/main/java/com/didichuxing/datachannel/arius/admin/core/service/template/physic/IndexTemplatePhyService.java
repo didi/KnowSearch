@@ -290,4 +290,12 @@ public interface IndexTemplatePhyService {
     boolean updateByIndexTemplatePhyPO(IndexTemplatePhyPO physicalPO);
     
     List<String> getPhyClusterByLogicTemplateId(Integer logicTemplateId);
+    
+    /**
+     * 通过逻辑 id 更新索引模板的分片号
+     *
+     * @param logicId  逻辑索引 ID，即 index_template_logic 表中索引的 ID。
+     * @param shardNum 要更新的分片数
+     */
+    boolean updateShardNumByLogicId(Integer logicId, Integer shardNum);
 }
