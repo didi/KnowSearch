@@ -461,35 +461,65 @@ public class ESTemplateDAO extends BaseESDAO {
         ESIndicesGetTemplateResponse getTemplateResponse = client.admin().indices().prepareGetTemplate(name).execute()
             .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
         TemplateConfig templateConfig = getTemplateResponse.getMultiTemplatesConfig().getSingleConfig();
-        //对于默认配置进行设置，如果不存在则需要从templateConfig获取并设置进去
-        //setting必须是扁平化的
-        //shard
-        Optional
-                .of(templateConfig.getSetttings())
-                .map(settings->settings.get(ESSettingConstant.INDEX_NUMBER_OF_SHARDS))
-                .ifPresent(shardNum-> setting.putIfAbsent(ESSettingConstant.INDEX_NUMBER_OF_SHARDS,shardNum));
-        //refresh_interval
-        Optional
-                .of(templateConfig.getSetttings())
-                .map(settings->settings.get(ESSettingConstant.INDEX_REFRESH_INTERVAL))
-                .ifPresent(refreshInterval-> setting.putIfAbsent(ESSettingConstant.INDEX_REFRESH_INTERVAL,refreshInterval));
-        //sync_interval
-        Optional
-                .of(templateConfig.getSetttings())
-                .map(settings->settings.get(ESSettingConstant.INDEX_TRANSLOG_SYNC_INTERVAL))
-                .ifPresent(syncInterval-> setting.putIfAbsent(ESSettingConstant.INDEX_TRANSLOG_SYNC_INTERVAL,
-                        syncInterval));
-        //durability
-        Optional
-                .of(templateConfig.getSetttings())
-                .map(settings->settings.get(ESSettingConstant.INDEX_TRANSLOG_DURABILITY))
-                .ifPresent(durability-> setting.putIfAbsent(ESSettingConstant.INDEX_TRANSLOG_DURABILITY,durability));
+
+        for (Map.Entry<String, String> entry : setting.entrySet()) {
+            templateConfig.setSettings(entry.getKey(), entry.getValue());
+        }
+
+        try {
+            ESIndicesPutTemplateResponse response = client.admin().indices().preparePutTemplate(name)
+                    .setTemplateConfig(templateConfig).execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+            return response.getAcknowledged();
+        } catch (Exception e) {
+            final String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
+            if (StringUtils.isNotBlank(exception)) {
+                throw new ESOperateException(exception);
+            }
+            throw new ESOperateException(e.getMessage(), e);
+        }
+       
+    }
+    
+    
+    /**
+     * 它更新索引模板设置并检查分配包含名称。
+     *
+     * @param cluster 集群名称
+     * @param name 索引模板名称
+     * @param setting 索引模板的配置
+     */
+    public boolean updateSettingCheckAllocationAndShard(String cluster, String name,
+                                                        Map<String, String> setting) throws ESOperateException {
+        ESClient client = esOpClient.getESClient(cluster);
+          if (client == null ) {
+           
+            LOGGER.warn("class={}||method=upsertSetting||cluster={}||name={}||errMsg=client is null ",
+                    getClass().getSimpleName(), cluster, name);
+            return false;
+        }
+
+        // 获取es中原来index template的配置
+        ESIndicesGetTemplateResponse getTemplateResponse = client.admin().indices().prepareGetTemplate(name).execute()
+            .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+        TemplateConfig templateConfig = getTemplateResponse.getMultiTemplatesConfig().getSingleConfig();
+        final String indexRoutingAllocationIncludeName =
+                templateConfig.getSetttings().get(ESSettingConstant.INDEX_ROUTING_ALLOCATION_INCLUDE_NAME);
         //index.routing.allocation.include._name
-        Optional
-                .of(templateConfig.getSetttings())
-                .map(settings->settings.get(ESSettingConstant.INDEX_ROUTING_ALLOCATION_INCLUDE_NAME))
-                .ifPresent(includeName-> setting.putIfAbsent(ESSettingConstant.INDEX_ROUTING_ALLOCATION_INCLUDE_NAME,includeName));
+        if (!StringUtils.equals(setting.get(ESSettingConstant.INDEX_ROUTING_ALLOCATION_INCLUDE_NAME),
+                indexRoutingAllocationIncludeName)) {
+            throw new ESOperateException(
+                    "模版分片分配节点配置属于系统权限，不允许变更 index.routing.allocation.include._name");
+        }
+        //shard
+        if (!StringUtils.equals(setting.get(ESSettingConstant.INDEX_NUMBER_OF_SHARDS),
+                indexRoutingAllocationIncludeName)) {
+            throw new ESOperateException(
+                    "模版设置 shard 大小设置属于系统权限, 非运维人员不允许变更 index.number_of_shards");
+        
+        }
         templateConfig.setSetttings(setting);
+        
+
         try {
             ESIndicesPutTemplateResponse response = client.admin().indices().preparePutTemplate(name)
                     .setTemplateConfig(templateConfig).execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);

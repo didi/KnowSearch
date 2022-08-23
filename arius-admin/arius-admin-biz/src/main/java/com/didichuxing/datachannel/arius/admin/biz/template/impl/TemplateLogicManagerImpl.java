@@ -1556,7 +1556,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     }
 
     private void buildShardNum(IndexTemplateDTO indexTemplateDTO, IndexTemplateWithCreateInfoDTO param) {
-        if (param.getCyclicalRoll()) {
+        if (Boolean.TRUE.equals(param.getCyclicalRoll())) {
             int expireTime = param.getExpireTime();
             if (expireTime < 0) {
                 // 如果数据永不过期，平台会按着180天来计算每日数据增量，最终用于生成模板shard

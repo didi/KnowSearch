@@ -22,7 +22,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithMapping;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateSettingVO;
-import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
@@ -37,9 +36,7 @@ import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -69,30 +66,7 @@ public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrvImpl implem
     public TemplateServiceEnum templateSrv() {
         return TemplateServiceEnum.TEMPLATE_SETTING;
     }
-
-    //@Override
-    //@Transactional(rollbackFor = Exception.class)
-    //public Result<Void> modifySetting(ConsoleTemplateSettingDTO settingDTO, String operator,
-    //                                  Integer projectId) throws AdminOperateException {
-    //
-    //    LOGGER.info("class=TemplateLogicServiceImpl||method=modifySetting||operator={}||setting={}", operator,
-    //        JSON.toJSONString(settingDTO));
-    //
-    //    if (AriusObjUtils.isNull(operator)) {
-    //        return Result.buildParamIllegal("操作人为空");
-    //    }
-    //
-    //    if (settingDTO.getSetting() == null || settingDTO.getSetting().getAnalysis() == null) {
-    //        return Result.buildParamIllegal("setting信息不能为空");
-    //    }
-    //
-    //    Result<Void> result = updateSettings(settingDTO.getLogicId(), operator, settingDTO.getSetting());
-    //    if (result.success()) {
-    //        templatePreCreateManager.reBuildTomorrowIndex(settingDTO.getLogicId(), 3);
-    //    }
-    //
-    //    return result;
-    //}
+    
 
     @Override
     public Result<Void> customizeSetting(TemplateSettingDTO settingDTO, String operator) throws AdminOperateException {
@@ -201,7 +175,7 @@ public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrvImpl implem
 
     @Override
     public Result<Void> updateSettings(Integer logicId, IndexTemplatePhySetting settings, String operator,
-                                       Integer projectId) {
+                                       Integer projectId) throws AdminOperateException {
 
         IndexTemplateWithPhyTemplates templateLogicWithPhysical = indexTemplateService
             .getLogicTemplateWithPhysicalsById(logicId);
@@ -223,19 +197,10 @@ public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrvImpl implem
 
         //获取变更前的setting
         final Result<IndexTemplatePhySetting> beforeSetting = getSettings(logicId);
-        final Optional<Integer> shardNumOptional = Optional.of(settings.getSettings())
-                .map(jsonObject -> jsonObject.getString(AdminConstant.INDEX_NUMBER_OF_SHARDS))
-                .filter(StringUtils::isNumeric).map(Integer::parseInt);
         for (IndexTemplatePhy templatePhysical : templatePhysicals) {
-            
-            try {
-                templatePhySettingManager.mergeTemplateSettings(logicId, templatePhysical.getCluster(),
-                    templatePhysical.getName(), settings);
-            } catch (AdminOperateException adminOperateException) {
-                return Result.buildFail(adminOperateException.getMessage());
-            }
-            // 更新 shard num
-            shardNumOptional.ifPresent(shardNum -> indexTemplatePhyService.updateShardNumByLogicId(logicId, shardNum));
+        
+            templatePhySettingManager.mergeTemplateSettingsCheckAllocationAndShard(logicId,
+                    templatePhysical.getCluster(), templatePhysical.getName(), settings);
         }
     
         SpringTool.publish(new ReBuildTomorrowIndexEvent(this, logicId));

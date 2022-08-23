@@ -99,6 +99,16 @@ public interface ESTemplateService {
                               int retryCount) throws ESOperateException;
 
     /**
+     * 更新集群的设置，检查分配和分片是否正确
+     *
+     * @param cluster 集群名称
+     * @param name 索引的名称
+     * @param setting 要更新的设置
+     * @param retryCount 重试次数。
+     */
+    boolean syncUpdateSettingCheckAllocationAndShard(String cluster, String name, Map<String, String> setting,
+                                                     int retryCount) throws ESOperateException;
+    /**
      * 跨集群拷贝模板mapping和索引
      * @param srcCluster 源集群
      * @param srcTemplateName 原模板
