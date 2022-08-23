@@ -1,6 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.vo.template;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectTemplateAuthEnum;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -17,7 +16,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel(description = "模板信息")
-public class ConsoleTemplateVO extends IndexTemplate  {
+public class ConsoleTemplateVO extends BaseTemplateVO  {
     /**
      * @see ProjectTemplateAuthEnum
      */
