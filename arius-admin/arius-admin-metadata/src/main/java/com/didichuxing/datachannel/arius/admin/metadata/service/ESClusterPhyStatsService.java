@@ -144,7 +144,7 @@ public class ESClusterPhyStatsService {
      * @return {@code Long}
      */
     public Long getClustersShardTotal(String cluster) {
-        return ariusStatsClusterInfoEsDao.getClustersShardTotal(cluster);
+        return  ariusStatsClusterInfoEsDao.getClustersShardTotal(cluster);
     }
 
     /**

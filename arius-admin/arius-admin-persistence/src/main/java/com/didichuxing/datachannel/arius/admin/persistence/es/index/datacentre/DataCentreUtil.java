@@ -3,10 +3,11 @@ package com.didichuxing.datachannel.arius.admin.persistence.es.index.datacentre;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-import javax.annotation.PostConstruct;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.PostConstruct;
 
 @Component
 @NoArgsConstructor
@@ -45,9 +46,9 @@ public class DataCentreUtil {
     private String ariusStatsDashboardInfo;
     @Value("${es.index.info.index.name:arius_stats_index_info}")
     private String ariusStatsIndexInfo;
-    @Value("${es.index.cat.info:arius_cat_index_info}")
+    @Value("${es.cat.index.info:arius_cat_index_info}")
     private String ariusCatIndexInfo;
-    @Value("${es.index.cat.info:arius_cat_shard_info}")
+    @Value("${es.cat.shard.info:arius_cat_shard_info}")
     private String ariusCatShardInfo;
     @Value("${es.cluster.info.index.name:arius_stats_cluster_info}")
     private String ariusStatsClusterInfo;
