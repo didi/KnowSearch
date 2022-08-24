@@ -2,7 +2,6 @@ package com.didichuxing.datachannel.arius.admin.metadata.service;
 
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.percentiles.BasePercentileMetrics;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStatsResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.index.IndexCatCellPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.PercentilesEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
@@ -145,8 +144,7 @@ public class ESClusterPhyStatsService {
      * @return {@code Long}
      */
     public Long getClustersShardTotal(String cluster) {
-        ESClusterStatsResponse response =  esClusterDAO.getClusterStats(cluster);
-        return response.getTotalShard();
+        return  ariusStatsClusterInfoEsDao.getClustersShardTotal(cluster);
     }
 
     /**
