@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.vo.template;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.BaseEntity;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.DataTypeEnum;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -15,7 +16,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class BaseTemplateVO implements Comparable<BaseTemplateVO> {
+public class BaseTemplateVO extends BaseEntity implements Comparable<BaseTemplateVO> {
     
     @ApiModelProperty("索引 ID")
     private Integer id;
