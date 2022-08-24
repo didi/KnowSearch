@@ -34,16 +34,10 @@ public class DataCentreUtil {
     // projectId维度访问次数索引
     @Value("${es.projectId.template.access.index.name:arius.appid.template.access}")
     private String ariusProjectIdTemplateAccess;
-    // 索引维度访问次数索引
-    @Value("${es.indexname.access.index.name:arius.indexname.access}")
-    private String ariusIndexNameAccess;
     // 索引模板维度访问次数索引
     @Value("${es.template.access.index.name:arius.template.access}")
     private String  ariusTemplateAccess;
 
-    // es 索引标签数据
-    @Value("${es.template.label.index.name:v2.arius.template.label}")
-    private String  ariusTemplateLabel;
 
     
     @Value("${es.node.info.index.name:arius_stats_node_info}")
@@ -84,10 +78,8 @@ public class DataCentreUtil {
         LOGGER.info("class=DataCentreUtil||method=init||ariusGatewayJoin={}",                   getAriusGatewayJoin());
         LOGGER.info("class=DataCentreUtil||method=init||ariusDslTemplate={}",                   getAriusDslTemplate());
         LOGGER.info("class=DataCentreUtil||method=init||ariusProjectIdTemplateAccess={}",           getAriusProjectIdTemplateAccess());
-        LOGGER.info("class=DataCentreUtil||method=init||ariusIndexNameAccess={}",               getAriusIndexNameAccess());
+       
         LOGGER.info("class=DataCentreUtil||method=init||ariusTemplateAccess={}",                getAriusTemplateAccess());
-        LOGGER.info("class=DataCentreUtil||method=init||ariusTemplateLabel={}",                 getAriusTemplateLabel());
-        LOGGER.info("class=DataCentreUtil||method=init||ariusStatsNodeInfo={}",                 getAriusStatsNodeInfo());
         LOGGER.info("class=DataCentreUtil||method=init||ariusStatsClusterInfo={}",              getAriusStatsClusterInfo());
         LOGGER.info("class=DataCentreUtil||method=init||ariusStatsIndexInfo={}",                getAriusStatsIndexInfo());
         LOGGER.info("class=DataCentreUtil||method=init||ariusStatsGatewayInfo={}",              getAriusStatsGatewayInfo());
@@ -114,17 +106,12 @@ public class DataCentreUtil {
 
  
 
-    public String getAriusTemplateLabel(){
-        return getIndexName(ariusTemplateLabel);
-    }
-
+  
     public String getAriusTemplateAccess(){
         return getIndexName(ariusTemplateAccess);
     }
 
-    public String getAriusIndexNameAccess(){
-        return getIndexName(ariusIndexNameAccess);
-    }
+  
 
     public String getAriusProjectIdTemplateAccess(){
         return getIndexName(ariusProjectIdTemplateAccess);
