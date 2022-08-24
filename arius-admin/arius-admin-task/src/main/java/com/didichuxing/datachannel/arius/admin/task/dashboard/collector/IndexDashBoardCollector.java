@@ -27,8 +27,6 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.BYTE_TO_MB;
-
 /**
  * Created by linyunan on 3/11/22
  * dashboard单个集群索引采集器
@@ -111,7 +109,7 @@ public class IndexDashBoardCollector extends BaseDashboardCollector {
             // 2. 是否单副本索引
             indexMetrics.setSingReplicate(NO_REPLICA.equals(index.getRep()));
             // 3. 是否未分配shard索引
-            indexMetrics.setUnassignedShard(IndexStatusEnum.GREEN.getStatus().equals(index.getHealth()));
+            indexMetrics.setUnassignedShard(!IndexStatusEnum.GREEN.getStatus().equals(index.getHealth()));
             // 4. 是否为大shard索引(大于50G)
             indexMetrics.setBigShard(index2BigShardListMap.containsKey(index.getIndex()));
             // 5. 是否为小shard索引(小于1G)
@@ -131,7 +129,7 @@ public class IndexDashBoardCollector extends BaseDashboardCollector {
             indexMetrics.setSegmentNum((long) indexSegmentList.size());
             // 8. 索引Segements内存大小（MB）
             indexMetrics
-                .setSegmentMemSize(indexSegmentList.stream().mapToDouble(Segment::getMemoSize).sum() * BYTE_TO_MB);
+                .setSegmentMemSize(indexSegmentList.stream().mapToDouble(Segment::getMemoSize).sum() );
             // 9. 写入文档数突增个数 （上个时间间隔的两倍）
             double indexingIndexIncrementValue = index2IndexingIndexIncrementMapRef.get().getOrDefault(index.getIndex(),
                 0d);
