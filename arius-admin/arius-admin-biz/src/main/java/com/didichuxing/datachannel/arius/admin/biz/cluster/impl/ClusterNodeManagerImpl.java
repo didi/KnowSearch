@@ -288,7 +288,7 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
             if (clusterRegionService.isExistByRegionName(param.getName())) {
                 return Result.buildFail(String.format("region名称[%s]已经存在", param.getName()));
             }
-            if (CollectionUtils.isNotEmpty(param.getBindingNodeIds())) {
+            if (CollectionUtils.isEmpty(param.getBindingNodeIds())) {
                 return Result.buildFail("不允许绑定空region");
             }
         }
