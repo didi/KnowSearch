@@ -1,7 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.task.dashboard.collector;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.BYTE_TO_MB;
-
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.shard.Segment;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.DashBoardStats;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.TemplateMetrics;
@@ -13,11 +11,12 @@ import com.didichuxing.datachannel.arius.admin.core.service.template.physic.Inde
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
-import java.util.List;
-import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by linyunan on 3/11/22
@@ -87,7 +86,6 @@ public class TemplateDashBoardCollector extends BaseDashboardCollector {
             .filter(s -> IndexNameUtils.indexExpMatch(s.getIndex(), expression)).collect(Collectors.toList());
 
         templateMetrics.setSegmentNum((long) matchExpSegments.size());
-        templateMetrics
-            .setSegmentMemSize(matchExpSegments.stream().mapToDouble(Segment::getMemoSize).sum() * BYTE_TO_MB);
+        templateMetrics.setSegmentMemSize(matchExpSegments.stream().mapToDouble(Segment::getMemoSize).sum() );
     }
 }
