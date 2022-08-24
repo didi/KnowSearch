@@ -27,7 +27,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.IndexTemplateV
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.TemplateLabel;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatCellDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateRateLimitDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateConfigDTO;
@@ -94,7 +93,6 @@ import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService
 import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectLogicTemplateAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
-import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateLabelService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateStatsService;
 import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
 import com.didiglobal.logi.elasticsearch.client.utils.JsonUtils;
@@ -137,8 +135,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     @Autowired
     private TemplateStatsService            templateStatsService;
 
-    @Autowired
-    private TemplateLabelService            templateLabelService;
+  
 
     @Autowired
     private ColdManager                     templateColdManager;
@@ -292,37 +289,12 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     public List<IndexTemplateLogicAggregate> getAllTemplatesAggregate(Integer projectId) {
         List<IndexTemplateLogicAggregate> indexTemplateLogicAggregates = new ArrayList<>();
         List<IndexTemplateWithCluster> logicTemplates = indexTemplateService.listAllLogicTemplateWithClusters();
-
-        if (CollectionUtils.isNotEmpty(logicTemplates)) {
-            indexTemplateLogicAggregates = fetchLogicTemplatesAggregates(logicTemplates, projectId);
-        }
+        
 
         return indexTemplateLogicAggregates;
     }
 
-    /**
-     * 获取逻辑集群所有逻辑模板聚合
-     *
-     * @param logicClusterId 逻辑集群ID
-     * @param projectId 操作的project Id
-     * @return
-     */
-    @Override
-    public List<IndexTemplateLogicAggregate> getLogicClusterTemplatesAggregate(Long logicClusterId, Integer projectId) {
 
-        if (logicClusterId == null) {
-            return new ArrayList<>();
-        }
-
-        List<IndexTemplateWithCluster> logicTemplates = indexTemplateService
-            .listLogicTemplateWithClustersByClusterId(logicClusterId);
-
-        if (CollectionUtils.isEmpty(logicTemplates)) {
-            return new ArrayList<>();
-        }
-
-        return fetchLogicTemplatesAggregates(logicTemplates, projectId);
-    }
 
     /**
      * 拼接集群名称
@@ -670,15 +642,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         return Result.buildSucc();
     }
 
-    @Override
-    public List<Integer> getHaveDCDRLogicIds() {
-        Result<List<TemplateLabel>> result = templateLabelService.listHaveDcdrTemplates();
-        if (result.failed() || CollectionUtils.isEmpty(result.getData())) {
-            return Lists.newArrayList();
-        }
-
-        return result.getData().stream().map(TemplateLabel::getIndexTemplateId).collect(Collectors.toList());
-    }
+   
 
     @Override
     public Result<Boolean> checkTemplateEditService(Integer templateId, Integer templateSrvId) {
@@ -716,10 +680,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             return Result.buildNotExist("索引不存在");
         }
 
-        if (templateLabelService.isImportantIndex(logicId)) {
-            return Result.buildOpForBidden("禁止操作重要索引，请联系Arius服务号处理");
-        }
-
+       
         if (AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
             return Result.buildSucc();
         }
@@ -1066,7 +1027,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         consoleTemplateDetail.setAppName(
             projectService.getProjectBriefByProjectId(indexTemplateLogicWithCluster.getProjectId()).getProjectName());
         consoleTemplateDetail.setIndices(getLogicTemplateIndices(logicId));
-        consoleTemplateDetail.setEditable(templateLabelService.isImportantIndex(logicId));
+        consoleTemplateDetail.setEditable(true);
         // 获取indexRollover功能开启状态
         consoleTemplateDetail
             .setDisableIndexRollover(Optional.ofNullable(indexTemplateService.getTemplateConfig(logicId))
@@ -1333,56 +1294,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         return indexTemplateLogicAggregate;
     }
 
-    /**
-     * 获取模板价值分
-     *
-     * @return
-     */
-    private List<IndexTemplateValue> fetchTemplateValues() {
-        List<IndexTemplateValue> templateValues = Lists.newArrayList();
-      
 
-        return templateValues;
-    }
-
-    /**
-     * 获取逻辑模板聚合信息
-     * @param logicTemplates 逻辑模板列表
-     * @param projectId project Id
-     * @return
-     */
-    private List<IndexTemplateLogicAggregate> fetchLogicTemplatesAggregates(List<IndexTemplateWithCluster> logicTemplates,
-                                                                            Integer projectId) {
-        List<IndexTemplateLogicAggregate> indexTemplateLogicAggregates = new ArrayList<>();
-
-        if (CollectionUtils.isNotEmpty(logicTemplates)) {
-
-            // 模板权限
-            Map<Integer, ProjectTemplateAuth> projectTemplateAuths = ConvertUtil.list2Map(
-                projectLogicTemplateAuthService.getTemplateAuthsByProjectId(projectId),
-                ProjectTemplateAuth::getTemplateId);
-
-            // 模板
-            Map<Integer, IndexTemplateValue> logicTemplateValues = ConvertUtil.list2Map(fetchTemplateValues(),
-                IndexTemplateValue::getLogicTemplateId);
-
-            // 具备DCDR的模版id
-            List<Integer> hasDCDRLogicIds = getHaveDCDRLogicIds();
-
-            for (IndexTemplateWithCluster combineLogicCluster : logicTemplates) {
-                try {
-                    indexTemplateLogicAggregates.add(fetchTemplateAggregate(combineLogicCluster, projectTemplateAuths,
-                        logicTemplateValues, hasDCDRLogicIds));
-                } catch (Exception e) {
-                    LOGGER.warn(
-                        "class=LogicTemplateManager||method=fetchLogicTemplatesAggregates||" + "combineLogicCluster={}",
-                        combineLogicCluster, e);
-                }
-            }
-        }
-
-        return indexTemplateLogicAggregates;
-    }
 
     /**
      * 校验物理集群的合法性

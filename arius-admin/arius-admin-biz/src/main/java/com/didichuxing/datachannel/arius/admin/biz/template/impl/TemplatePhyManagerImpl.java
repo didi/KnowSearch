@@ -54,7 +54,6 @@ import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectLogic
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.impl.IndexTemplatePhyServiceImpl;
-import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateLabelService;
 import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
 import com.didiglobal.logi.elasticsearch.client.response.setting.template.TemplateConfig;
 import com.didiglobal.logi.log.ILog;
@@ -108,8 +107,7 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
     @Autowired
     private ClusterPhyService               clusterPhyService;
 
-    @Autowired
-    private TemplateLabelService            templateLabelService;
+    
 
     @Autowired
     private ESTemplateService               esTemplateService;
@@ -689,9 +687,7 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
     private Result<Void> upgradeTemplateWithCheck(TemplatePhysicalUpgradeDTO param, String operator,
                                                   int retryCount) throws ESOperateException {
         IndexTemplatePhy indexTemplatePhy = indexTemplatePhyService.getTemplateById(param.getPhysicalId());
-        if (templateLabelService.hasDeleteDoc(indexTemplatePhy.getLogicId())) {
-            return Result.buildParamIllegal("模板有删除操作,禁止升版本");
-        }
+       
 
         IndexTemplate logic = indexTemplateService.getLogicTemplateById(indexTemplatePhy.getLogicId());
         LOGGER.info("class=TemplatePhyManagerImpl||method=upgradeTemplateWithCheck||name={}||shard={}||version={}",
