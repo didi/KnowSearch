@@ -27,6 +27,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
@@ -277,7 +278,7 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
                 clusterRegionWithNodeInfoDTO.setName(region.getName());
 
                 Result<Boolean> editMultiNode2RegionRet = clusterNodeManager
-                    .editMultiNode2Region(Lists.newArrayList(clusterRegionWithNodeInfoDTO), operator, projectId);
+                    .editMultiNode2Region(Lists.newArrayList(clusterRegionWithNodeInfoDTO), operator, projectId, OperationEnum.DELETE);
                 if (editMultiNode2RegionRet.failed()) {
                     throw new AdminOperateException(
                         String.format("删除region失败, msg:%s", editMultiNode2RegionRet.getMessage()));

@@ -4,9 +4,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRegionWithNodeInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostWithRegionInfoVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminTaskException;
-
 import java.util.List;
 
 /**
@@ -35,13 +35,14 @@ public interface ClusterNodeManager {
     /**
      * 编辑节点的region属性
      *
-     * @param params    集群带节点信息的Region实体
-     * @param operator  操作者
+     * @param params        集群带节点信息的Region实体
+     * @param operator      操作者
      * @param projectId
+     * @param operationEnum
      * @return Result<Boolean>
      */
     Result<Boolean> editMultiNode2Region(List<ClusterRegionWithNodeInfoDTO> params, String operator,
-                                         Integer projectId) throws AdminOperateException;
+                                         Integer projectId, OperationEnum operationEnum) throws AdminOperateException;
 
     /**
      * 获取物理集群节点列表
