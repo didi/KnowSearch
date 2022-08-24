@@ -63,11 +63,8 @@ public class ScaleComponentHandler extends BaseComponentHandler implements Compo
             HashMap<String, Set<String>> groupName2HostNormalStatusMap = getGroupName2HostNormalStatusMap(taskId);
             GeneralScaleComponent scaleComponent = JSON.parseObject(content, GeneralScaleComponent.class);
             Component component = ComponentAssembler.toScaleComponent(scaleComponent);
-            if (scaleComponent.getType() == OperationEnum.EXPAND.getType()) {
-                componentDomainService.expandComponent(component, groupName2HostNormalStatusMap);
-            } else {
-                componentDomainService.shrinkComponent(component);
-            }
+            componentDomainService.scaleComponent(component, groupName2HostNormalStatusMap, scaleComponent.getType());
+            LOGGER.info("scale[{}] handler success", content);
         } catch (Exception e) {
             LOGGER.error("task finish process error.", e);
             throw new ComponentHandlerException(e);

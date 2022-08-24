@@ -24,4 +24,9 @@
         values (#{host}, #{status}, #{componentId}, #{groupName}, #{processNum}, #{isDeleted}, #{createTime}, #{updateTime})
     </insert>
 
+    <update id="updateDeleteStatus">
+        update logi_op_component_host set is_deleted = #{isDeleted}
+        where component_id = #{componentId} and group_name = #{groupName} and host = #{host}
+    </update>
+
 </mapper>

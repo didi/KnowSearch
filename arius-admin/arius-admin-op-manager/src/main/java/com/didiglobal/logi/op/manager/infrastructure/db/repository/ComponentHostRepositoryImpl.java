@@ -26,12 +26,17 @@ public class ComponentHostRepositoryImpl implements ComponentHostRepository {
     }
 
     @Override
-    public void updateComponentHostStatus(int componentId, String host, int groupId, int status) {
-        componentHostDao.updateStatus(componentId, host, groupId, status);
+    public int updateComponentHostStatus(int componentId, String host, String groupName, int status) {
+        return componentHostDao.updateStatus(componentId, host, groupName, status);
     }
 
     @Override
     public List<ComponentHost> listComponentHost() {
         return ComponentConverter.convertComponentHostPO2DOList(componentHostDao.listAll());
+    }
+
+    @Override
+    public int unInstallComponentHost(int componentId, String host, String groupName, int isDeleted) {
+        return componentHostDao.updateDeleteStatus(componentId, host, groupName, isDeleted);
     }
 }

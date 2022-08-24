@@ -20,10 +20,11 @@ public interface ComponentHostRepository {
      * 更新节点状态
      * @param componentId
      * @param host
-     * @param groupId
+     * @param groupName
      * @param status
+     * @return
      */
-    void updateComponentHostStatus(int componentId, String host, int groupId, int status);
+    int updateComponentHostStatus(int componentId, String host, String groupName, int status);
 
 
     /**
@@ -31,4 +32,14 @@ public interface ComponentHostRepository {
      * @return List<ComponentHost> 组件列表
      */
     List<ComponentHost> listComponentHost();
+
+    /**
+     * 卸载节点
+     * @param componentId
+     * @param host
+     * @param groupName
+     * @param isDeleted
+     * @return
+     */
+    int unInstallComponentHost(int componentId, String host, String groupName, int isDeleted);
 }

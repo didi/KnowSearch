@@ -1,6 +1,7 @@
 package com.didiglobal.logi.op.manager.infrastructure.db.mapper;
 
 import com.didiglobal.logi.op.manager.infrastructure.db.ComponentHostPO;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -21,14 +22,27 @@ public interface ComponentHostDao {
       * 更新状态
       * @param componentId
       * @param host
-      * @param groupId
+      * @param groupName
       * @param status
+      * @return
       */
-     void updateStatus(int componentId, String host, int groupId, int status);
+     int updateStatus(@Param("componentId") int componentId, @Param("host") String host,
+                       @Param("groupName") String groupName, @Param("status") int status);
 
      /**
       * 获取所有组件host列表
       * @return List<ComponentHostPO> 组件po
       */
      List<ComponentHostPO> listAll();
+
+     /**
+      * 更新isDeleted字段
+      * @param componentId
+      * @param host
+      * @param groupName
+      * @param isDeleted
+      * @return
+      */
+     int updateDeleteStatus(@Param("componentId") int componentId, @Param("host") String host,
+                      @Param("groupName") String groupName, @Param("isDeleted") int isDeleted);
 }

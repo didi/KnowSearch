@@ -9,6 +9,8 @@ import com.didiglobal.logi.op.manager.domain.component.repository.ComponentGroup
 import com.didiglobal.logi.op.manager.domain.component.repository.ComponentHostRepository;
 import com.didiglobal.logi.op.manager.domain.component.repository.ComponentRepository;
 import com.didiglobal.logi.op.manager.domain.component.service.ComponentDomainService;
+import com.didiglobal.logi.op.manager.domain.component.service.handler.ScaleHandler;
+import com.didiglobal.logi.op.manager.domain.component.service.handler.ScaleHandlerFactory;
 import com.didiglobal.logi.op.manager.infrastructure.common.Constants;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.*;
@@ -38,6 +40,9 @@ public class ComponentDomainServiceImpl implements ComponentDomainService {
 
     @Autowired
     private ComponentGroupConfigRepository componentGroupConfigRepository;
+
+    @Autowired
+    private ScaleHandlerFactory scaleHandlerFactory;
 
     @Override
     public Result<Void> submitInstallComponent(GeneralInstallComponent installComponent) {
@@ -171,7 +176,8 @@ public class ComponentDomainServiceImpl implements ComponentDomainService {
     }
 
     @Override
-    public Result<Void> expandComponent(Component component, Map<String, Set<String>> groupName2HostNormalStatusMap) {
+    @Transactional(rollbackFor = Exception.class)
+    public Result<Void> scaleComponent(Component component, Map<String, Set<String>> groupName2HostNormalStatusMap, int type) {
         //TODO 需要考虑部分成功以及部分失败场景
         //TODO 优化批量插入能力
         //TODO 扩容自动安装其他插件？
@@ -181,34 +187,18 @@ public class ComponentDomainServiceImpl implements ComponentDomainService {
             oriConfigMap.put(oriConf.getGroupName(), oriConf);
         });
 
+        ScaleHandler scaleHandler = scaleHandlerFactory.getScaleHandler(type);
         for (ComponentGroupConfig config : component.getGroupConfigList()) {
             for (String host : config.getHosts().split(Constants.SPLIT)) {
-                //如果节点成功则加入
+                //如果节点成功则加入,因为有些ignore之类的
                 if (groupName2HostNormalStatusMap.get(config.getGroupName()).contains(host)) {
-                    ComponentHost componentHost = new ComponentHost();
-                    componentHost.setHost(host);
-                    componentHost.setProcessNum(JSON.parseObject(config.getProcessNumConfig()).getInteger(host));
-                    componentHost.setComponentId(component.getId());
-                    componentHost.setGroupName(config.getGroupName());
-                    componentHost.create();
-                    componentHostRepository.saveComponentHost(componentHost);
+                    scaleHandler.dealComponentHost(component.getId(), host, config);
                 }
             }
 
             if (groupName2HostNormalStatusMap.containsKey(config.getGroupName())) {
                 ComponentGroupConfig oriGroupConfig = oriConfigMap.get(config.getGroupName());
-                oriGroupConfig.updateExpand(config, groupName2HostNormalStatusMap.get(config.getGroupName()));
-                componentGroupConfigRepository.updateGroupConfig(oriGroupConfig);
-            }
-        }
-        return Result.success();
-    }
-
-    @Override
-    public Result<Void> shrinkComponent(Component component) {
-        for (ComponentGroupConfig config : component.getGroupConfigList()) {
-            for (String host : config.getHosts().split(Constants.SPLIT)) {
-                componentHostRepository.updateComponentHostStatus(component.getId(), host, config.getId(), DeleteEnum.UNINSTALL.getType());
+                scaleHandler.dealComponentGroupConfig(oriGroupConfig, config, groupName2HostNormalStatusMap.get(config.getGroupName()));
             }
         }
         return Result.success();

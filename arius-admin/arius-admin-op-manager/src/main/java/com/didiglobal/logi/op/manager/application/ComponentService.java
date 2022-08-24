@@ -30,6 +30,7 @@ public class ComponentService {
     }
 
     public Result<Void> scaleComponent(GeneralScaleComponent scaleComponent) {
+        //TODO 对应有依赖的组件，扩容要校验依赖组件对应节点是否已经扩了
         LOGGER.info("start scale component[{}]", scaleComponent);
         Result checkRes = scaleComponent.checkParam();
         if (checkRes.failed()) {

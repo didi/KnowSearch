@@ -56,20 +56,14 @@ public interface ComponentDomainService {
     Result<Component> getComponentById(Integer id);
 
     /**
-     * 组件扩容
+     * 组件扩缩容
      * @param component
      * @param groupName2HostNormalStatusMap
+     * @param type
      * @return
      */
-    Result<Void> expandComponent(Component component, Map<String, Set<String>> groupName2HostNormalStatusMap);
+    Result<Void> scaleComponent(Component component, Map<String, Set<String>> groupName2HostNormalStatusMap, int type);
 
-
-    /**
-     * 组件缩容
-     * @param component
-     * @return
-     */
-    Result<Void> shrinkComponent(Component component);
 
     /**
      * 配置变更

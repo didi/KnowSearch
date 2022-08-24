@@ -2,6 +2,7 @@ package com.didiglobal.logi.op.manager.domain.component.entity.value;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.google.common.collect.Sets;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,6 +13,7 @@ import java.util.Arrays;
 import java.util.Set;
 
 import static com.didiglobal.logi.op.manager.infrastructure.common.Constants.REX;
+import static com.didiglobal.logi.op.manager.infrastructure.common.Constants.SPLIT;
 
 /**
  * @author didi
@@ -83,7 +85,7 @@ public class ComponentGroupConfig {
         return this;
     }
 
-    public ComponentGroupConfig updateExpand(ComponentGroupConfig newConfig, Set<String> hosts) {
+    public ComponentGroupConfig updateExpandConfig(ComponentGroupConfig newConfig, Set<String> hosts) {
         this.updateTime = new Timestamp(System.currentTimeMillis());
         this.setHosts(this.getHosts() + REX + Strings.join(hosts, REX));
         JSONObject processNumConfigJson = JSON.parseObject(this.getProcessNumConfig());
@@ -97,6 +99,30 @@ public class ComponentGroupConfig {
         JSON.parseObject(newConfig.getInstallDirectoryConfig()).forEach((k, v) -> {
             if (hosts.contains(k)) {
                 installDirectoryJson.put(k, v);
+            }
+        });
+
+        this.setProcessNumConfig(processNumConfigJson.toJSONString());
+        this.setInstallDirectoryConfig(installDirectoryJson.toJSONString());
+        return this;
+    }
+
+    public ComponentGroupConfig updateShrinkConfig(ComponentGroupConfig newConfig, Set<String> hosts) {
+        this.updateTime = new Timestamp(System.currentTimeMillis());
+        Set oriHostSet = Sets.newHashSet(this.hosts.split(SPLIT));
+        hosts.forEach(oriHostSet::remove);
+        this.setHosts(Strings.join(oriHostSet, REX));
+        JSONObject processNumConfigJson = JSON.parseObject(this.getProcessNumConfig());
+        JSONObject installDirectoryJson = JSON.parseObject(this.getInstallDirectoryConfig());
+        JSON.parseObject(newConfig.getProcessNumConfig()).forEach((k, v) -> {
+            if (hosts.contains(k)) {
+                processNumConfigJson.remove(k);
+            }
+        });
+
+        JSON.parseObject(newConfig.getInstallDirectoryConfig()).forEach((k, v) -> {
+            if (hosts.contains(k)) {
+                installDirectoryJson.remove(k);
             }
         });
 
