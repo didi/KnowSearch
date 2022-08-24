@@ -47,6 +47,7 @@ public class UpgradeComponentHandler extends BaseComponentHandler implements Com
 
             upgradeComponent.setTemplateId(getTemplateIdByPackageId(upgradeComponent.getPackageId()));
             List<ComponentGroupConfig> list = componentDomainService.getComponentConfig(upgradeComponent.getComponentId()).getData();
+            upgradeComponent.setGroupConfigList(ConvertUtil.list2List(list, GeneralGroupConfig.class));
             String content = JSONObject.toJSON(upgradeComponent).toString();
             taskDomainService.createTask(content, componentEvent.getOperateType(),
                     componentEvent.getDescribe(), upgradeComponent.getAssociationId(),

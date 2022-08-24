@@ -21,7 +21,10 @@ public class GeneralUpgradeComponent extends GeneralBaseOperationComponent{
 
 
     public Result<Void> checkUpgradeParam() {
-        super.checkParam();
+        Result result = super.checkParam();
+        if (result.failed()) {
+            return result;
+        }
 
         if (null == packageId) {
             return Result.fail(ResultCode.PARAM_ERROR.getCode(), "升级版本缺失");

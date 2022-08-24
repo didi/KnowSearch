@@ -14,7 +14,6 @@ import com.didiglobal.logi.op.manager.domain.component.service.handler.ScaleHand
 import com.didiglobal.logi.op.manager.infrastructure.common.Constants;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.*;
-import com.didiglobal.logi.op.manager.infrastructure.common.enums.DeleteEnum;
 import com.didiglobal.logi.op.manager.infrastructure.common.event.SpringEventPublisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -89,7 +88,17 @@ public class ComponentDomainServiceImpl implements ComponentDomainService {
 
     @Override
     public Result<List<ComponentGroupConfig>> getComponentConfig(int componentId) {
-        return Result.success(componentGroupConfigRepository.getConfigByComponentId(componentId));
+        Map<Integer, List<ComponentGroupConfig>> map = new TreeMap<>((o1, o2) -> o1 - o2);
+        List<ComponentGroupConfig> configList = componentGroupConfigRepository.getConfigByComponentId(componentId);
+        configList.forEach(groupConfig -> {
+            List<ComponentGroupConfig> list = map.get(Integer.parseInt(groupConfig.getVersion()));
+            if (null == list) {
+                list = new ArrayList<>();
+                map.put(Integer.parseInt(groupConfig.getVersion()), list);
+            }
+            list.add(groupConfig);
+        });
+        return Result.success(map.entrySet().stream().findFirst().get().getValue());
     }
 
     @Override
@@ -125,6 +134,14 @@ public class ComponentDomainServiceImpl implements ComponentDomainService {
             component.setHostList(componentIdToHostMap.get(component.getId().toString()));
         });
         return Result.success(componentList);
+    }
+
+    @Override
+    public Result<Boolean> hasPackageDependComponent(int packageId) {
+        if (componentRepository.getComponentByPackageId(packageId).size() > 0) {
+            return Result.success(true);
+        }
+        return Result.success(false);
     }
 
     @Override
@@ -182,7 +199,7 @@ public class ComponentDomainServiceImpl implements ComponentDomainService {
         //TODO 优化批量插入能力
         //TODO 扩容自动安装其他插件？
         List<ComponentGroupConfig> configList = getComponentConfig(component.getId()).getData();
-        Map<String , ComponentGroupConfig> oriConfigMap = new HashMap<>(configList.size());
+        Map<String, ComponentGroupConfig> oriConfigMap = new HashMap<>(configList.size());
         configList.forEach(oriConf -> {
             oriConfigMap.put(oriConf.getGroupName(), oriConf);
         });
@@ -206,11 +223,24 @@ public class ComponentDomainServiceImpl implements ComponentDomainService {
 
     @Override
     public Result<Void> changeComponentConfig(Component component) {
+        Map<String, ComponentGroupConfig> oriConfigMap = new HashMap<>();
+        getComponentConfig(component.getId()).getData().forEach(oriConfig -> {
+            oriConfigMap.put(oriConfig.getGroupName(), oriConfig);
+        });
+        //用改的配置把老的配置替换带点，然后统一所有分组都版本加1
         for (ComponentGroupConfig config : component.getGroupConfigList()) {
-            config.createWithoutVersion();
-            config.setVersion(String.valueOf(Integer.parseInt(null == config.getVersion() ? "1" : config.getVersion()) + 1));
-            componentGroupConfigRepository.saveGroupConfig(config);
+            config.setVersion(oriConfigMap.get(config.getGroupName()).getVersion());
+            config.setComponentId(component.getId());
+            oriConfigMap.put(config.getGroupName(), config);
         }
+
+        //统一新建配置
+        oriConfigMap.keySet().forEach(k -> {
+            ComponentGroupConfig config = oriConfigMap.get(k);
+            config.createWithoutVersion();
+            config.setVersion(String.valueOf(Integer.parseInt(config.getVersion()) + 1));
+            componentGroupConfigRepository.saveGroupConfig(config);
+        });
         return Result.success();
     }
 

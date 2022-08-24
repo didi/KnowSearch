@@ -82,6 +82,7 @@ public class ComponentGroupConfig {
     public ComponentGroupConfig createWithoutVersion(){
         this.createTime = new Timestamp(System.currentTimeMillis());
         this.updateTime = new Timestamp(System.currentTimeMillis());
+        this.id = null;
         return this;
     }
 

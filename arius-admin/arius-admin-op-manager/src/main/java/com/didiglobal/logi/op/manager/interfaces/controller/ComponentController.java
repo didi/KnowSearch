@@ -54,20 +54,20 @@ public class ComponentController {
         return componentService.configChangeComponent(ComponentAssembler.toConfigChangeComponent(changeComponentDTO));
     }
 
-    @PutMapping("/restart")
+    @PostMapping("/restart")
     @ApiOperation(value = "")
     public Result<Void> restart(@RequestBody GeneralBaseOperationComponentDTO restartOperationComponentDTO) {
         return componentService.restartComponent(ComponentAssembler.toRestartComponent(restartOperationComponentDTO));
     }
 
 
-    @PutMapping("/upgrade")
+    @PostMapping("/upgrade")
     @ApiOperation(value = "")
     public Result<Void> upgrade(@RequestBody GeneralUpgradeComponentDTO generalUpgradeComponentDTO) {
         return componentService.upgradeComponent(ComponentAssembler.toUpgradeComponent(generalUpgradeComponentDTO));
     }
 
-    @PutMapping("/execute-function")
+    @PostMapping("/execute-function")
     @ApiOperation(value = "")
     public Result<Void> executeFunction(@RequestBody GeneralExecuteComponentFunctionDTO executeComponentFunctionDTO) {
         return componentService.executeFunctionComponent(ComponentAssembler.toExecuteFunctionComponent(executeComponentFunctionDTO));

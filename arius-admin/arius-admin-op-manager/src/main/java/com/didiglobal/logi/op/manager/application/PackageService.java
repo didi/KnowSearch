@@ -1,5 +1,6 @@
 package com.didiglobal.logi.op.manager.application;
 
+import com.didiglobal.logi.op.manager.domain.component.service.ComponentDomainService;
 import com.didiglobal.logi.op.manager.domain.packages.entity.Package;
 import com.didiglobal.logi.op.manager.domain.packages.service.PackageDomainService;
 import com.didiglobal.logi.op.manager.domain.script.service.impl.ScriptDomainService;
@@ -11,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+
+import static com.didiglobal.logi.op.manager.infrastructure.common.ResultCode.PACKAGE_IS_DEPEND_ERROR;
 
 /**
  * @author didi
@@ -25,6 +28,10 @@ public class PackageService {
 
     @Autowired
     private ScriptDomainService scriptDomainService;
+
+    @Autowired
+    private ComponentDomainService componentDomainService;
+
 
     /**
      * 创建安装包
@@ -77,8 +84,11 @@ public class PackageService {
             return Result.fail(ResultCode.PARAM_ERROR.getCode(), "输入的id参数有问题，请核对");
         }
 
-        //TODO
         //判断,若包已经绑定了组件则不能删除
+        Result<Boolean> res = componentDomainService.hasPackageDependComponent(id);
+        if (res.failed() || res.getData()) {
+            return Result.fail(PACKAGE_IS_DEPEND_ERROR);
+        }
 
         return packageDomainService.deletePackage(pk);
     }

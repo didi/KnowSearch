@@ -28,16 +28,16 @@ public class GeneralBaseOperationComponent {
 
     public Result<Void> checkParam() {
         if (null == componentId) {
-            return Result.fail(ResultCode.PARAM_ERROR.getCode(), "id缺失");
+            return Result.fail(ResultCode.PARAM_ERROR.getCode(), "组件id缺失");
         }
 
-        if (groupConfigList.isEmpty()) {
+        if (null == groupConfigList || groupConfigList.isEmpty()) {
             return Result.fail(ResultCode.PARAM_ERROR.getCode(), "配置组缺失");
         }
         return Result.success();
     }
 
     public void setGroupConfigList(List<GeneralGroupConfig> groupConfigList) {
-        this.groupConfigList = ConvertUtil.list2List(groupConfigList,GeneralGroupConfig.class);
+        this.groupConfigList = ConvertUtil.list2List(groupConfigList, GeneralGroupConfig.class);
     }
 }

@@ -16,6 +16,7 @@ import com.didiglobal.logi.op.manager.infrastructure.common.hander.base.Componen
 import com.didiglobal.logi.op.manager.infrastructure.common.hander.base.DefaultHandler;
 import com.didiglobal.logi.op.manager.infrastructure.exception.ComponentHandlerException;
 import com.didiglobal.logi.op.manager.infrastructure.util.ConvertUtil;
+import com.didiglobal.logi.op.manager.interfaces.assembler.ComponentAssembler;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,8 +58,8 @@ public class ConfigChangeComponentHandler extends BaseComponentHandler implement
     @Override
     public void taskFinishProcess(int taskId, String content) throws ComponentHandlerException {
         try {
-            GeneralConfigChangeComponent scaleComponent = JSON.parseObject(content, GeneralConfigChangeComponent.class);
-            Component component = ConvertUtil.obj2Obj(scaleComponent, Component.class);
+            GeneralConfigChangeComponent configChangeComponent = JSON.parseObject(content, GeneralConfigChangeComponent.class);
+            Component component = ComponentAssembler.toConfigChangeComponent(configChangeComponent);
             componentDomainService.changeComponentConfig(component);
         } catch (Exception e) {
             LOGGER.error("task finish process error.", e);

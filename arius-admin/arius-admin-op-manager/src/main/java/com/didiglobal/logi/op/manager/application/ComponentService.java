@@ -19,7 +19,9 @@ public class ComponentService {
     @Autowired
     private ComponentDomainService componentDomainService;
 
+    //TODO 这几个操作母亲啊都缺乏校验
     public Result<Void> installComponent(GeneralInstallComponent installComponent) {
+        //TODO 需要判断如果有已有任务再执行是不允许执行其他的
         LOGGER.info("start install component[{}]", installComponent.getName());
         Result checkRes = installComponent.checkInstallParam();
         if (checkRes.failed()) {

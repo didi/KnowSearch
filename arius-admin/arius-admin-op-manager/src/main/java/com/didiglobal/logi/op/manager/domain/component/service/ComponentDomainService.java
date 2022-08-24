@@ -88,7 +88,7 @@ public interface ComponentDomainService {
     Result<Void> submitUpgradeComponent(GeneralUpgradeComponent upgradeComponent);
 
     /**
-     * 执行相应功能的组件爱你
+     * 执行相应功能的组件爱你D
      * @param executeComponentFunction
      * @return
      */
@@ -115,5 +115,12 @@ public interface ComponentDomainService {
      * @return Result<List<Component>>，组件列表
      */
     Result<List<Component>> listComponent();
+
+    /**
+     * 是否包含对该package依赖的组件
+     * @param packageId 安装包id
+     * @return Result<Boolean>
+     */
+    Result<Boolean> hasPackageDependComponent(int packageId);
 
 }

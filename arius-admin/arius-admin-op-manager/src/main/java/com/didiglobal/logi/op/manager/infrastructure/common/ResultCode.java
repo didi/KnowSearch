@@ -27,9 +27,6 @@ public enum ResultCode {
     /* zeus操作报错 */
     ZEUS_OPERATE_ERROR(3001, "zeus操作报错"),
 
-    /*script操作报错 */
-    SCRIPT_OPERATE_ERROR(4001, "脚本操作报错"),
-
     /*task不存在报错 */
     TASK_NOT_EXIST_ERROR(4001, "任务不存在"),
     TASK_IS_RUNNING(4002, "任务正在运行"),
@@ -40,9 +37,14 @@ public enum ResultCode {
     TASK_HOST_IS_NOT_EXIST(4005, "任务host不存在"),
     TASK_HOST_IS_NOT_ERROR(4006, "任务host状态未失败"),
 
-
     /*组件操作处理器处理失败 */
-    HANDLER_OPERATE_ERROR(5001, "组件操作处理器处理失败");
+    HANDLER_OPERATE_ERROR(5001, "组件操作处理器处理失败"),
+
+    /*script操作报错 */
+    SCRIPT_OPERATE_ERROR(6001, "脚本操作报错"),
+
+    /*安装包操作报错 */
+    PACKAGE_IS_DEPEND_ERROR(7001, "安装包已被组件依赖，不能删除");
 
     private final Integer code;
 

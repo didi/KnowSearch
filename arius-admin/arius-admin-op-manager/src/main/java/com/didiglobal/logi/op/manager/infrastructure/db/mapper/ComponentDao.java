@@ -1,5 +1,6 @@
 package com.didiglobal.logi.op.manager.infrastructure.db.mapper;
 
+import com.didiglobal.logi.op.manager.domain.component.entity.Component;
 import com.didiglobal.logi.op.manager.infrastructure.db.ComponentPO;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -44,4 +45,11 @@ public interface ComponentDao {
      * @return
      */
     List<ComponentPO> listAll();
+
+    /**
+     * 根军packageId获取组件
+     * @param packageId
+     * @return
+     */
+    List<ComponentPO> getByPackageId(int packageId);
 }

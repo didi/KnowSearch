@@ -11,14 +11,9 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class GeneralUpgradeComponentDTO {
+public class GeneralUpgradeComponentDTO extends GeneralBaseOperationComponentDTO {
     /**
      * 关联的安装包id
      */
     private Integer packageId;
-
-    /**
-     * 依赖的组件id
-     */
-    private Integer componentId;
 }

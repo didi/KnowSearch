@@ -37,6 +37,12 @@ public class ComponentAssembler {
         return ConvertUtil.obj2Obj(dto, GeneralConfigChangeComponent.class);
     }
 
+    public static Component toConfigChangeComponent(GeneralConfigChangeComponent configChangeComponent) {
+        Component component = ConvertUtil.obj2Obj(configChangeComponent, Component.class);
+        component.setId(configChangeComponent.getComponentId());
+        return component;
+    }
+
     public static GeneralBaseOperationComponent toRestartComponent(GeneralBaseOperationComponentDTO dto) {
         return ConvertUtil.obj2Obj(dto, GeneralBaseOperationComponent.class);
     }

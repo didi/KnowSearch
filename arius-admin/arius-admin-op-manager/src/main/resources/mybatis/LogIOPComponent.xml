@@ -40,4 +40,13 @@
         where id = #{componentId}
     </update>
 
+    <select id="getComponentByPackageId"
+            parameterType="com.didiglobal.logi.op.manager.infrastructure.db.ComponentPO"
+            resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from logi_op_component
+        where package_id = #{packageId}
+    </select>
+
 </mapper>

@@ -43,4 +43,11 @@ public interface ComponentRepository {
      * @return
      */
     List<Component> listAllComponent();
+
+    /**
+     * 根据package获取组件
+     * @param packageId
+     * @return
+     */
+    List<Component> getComponentByPackageId(int packageId);
 }
