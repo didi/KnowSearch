@@ -6,6 +6,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
+import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didiglobal.logi.security.common.PagingData;
 import com.didiglobal.logi.security.common.PagingResult;
@@ -13,12 +14,14 @@ import com.didiglobal.logi.security.common.dto.user.UserBriefQueryDTO;
 import com.didiglobal.logi.security.common.dto.user.UserDTO;
 import com.didiglobal.logi.security.common.dto.user.UserQueryDTO;
 import com.didiglobal.logi.security.common.entity.user.User;
+import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import com.didiglobal.logi.security.common.vo.role.AssignInfoVO;
 import com.didiglobal.logi.security.common.vo.role.RoleBriefVO;
 import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
 import com.didiglobal.logi.security.common.vo.user.UserVO;
 import com.didiglobal.logi.security.exception.LogiSecurityException;
 import com.didiglobal.logi.security.service.PermissionService;
+import com.didiglobal.logi.security.service.ProjectService;
 import com.didiglobal.logi.security.service.RolePermissionService;
 import com.didiglobal.logi.security.service.UserService;
 import java.util.Collections;
@@ -26,15 +29,21 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+/**
+ * > 这个类是一个 Spring 组件，实现了 `UserExtendManager` 接口
+ */
 @Component
 public class UserExtendManagerImpl implements UserExtendManager {
     @Autowired
     private UserService           userService;
+    @Autowired
+    private ProjectService projectService;
     @Autowired
     private OperateRecordService  operateRecordService;
     @Autowired
@@ -42,6 +51,8 @@ public class UserExtendManagerImpl implements UserExtendManager {
     @Autowired
     private PermissionService     permissionService;
 
+      private static final FutureUtil<Void> FUTURE_UTIL = FutureUtil.init(
+            "UserExtendManagerImpl", 20, 40, 100);
     /**
      * 用户注册信息校验
      *
@@ -67,6 +78,31 @@ public class UserExtendManagerImpl implements UserExtendManager {
     @Override
     public PagingResult<UserVO> getUserPage(UserQueryDTO queryDTO) {
         PagingData<UserVO> userPage = userService.getUserPage(queryDTO);
+        final List<UserVO> userList = userPage.getBizData();
+        //提前获取一下，避免多次查库
+        final List<ProjectBriefVO> projectBriefList = projectService.getProjectBriefList();
+        if (CollectionUtils.isNotEmpty(userList)) {
+            for (UserVO userVO : userList) {
+                FUTURE_UTIL.runnableTask(() -> {
+                    //如果可以匹配到管理员角色
+                    List<ProjectBriefVO> briefList;
+                    final List<RoleBriefVO> roleList = userVO.getRoleList();
+                    if (CollectionUtils.isNotEmpty(roleList) && roleList.stream()
+                            .anyMatch(roleBrief -> Objects.equals(roleBrief.getId(), AuthConstant.ADMIN_ROLE_ID))) {
+                        briefList = projectBriefList;
+                    
+                    } else {
+                        briefList = Optional.ofNullable(userVO.getProjectList()).orElse(Collections.emptyList())
+                                .stream().distinct().collect(Collectors.toList());
+                    
+                    }
+                    userVO.setProjectList(briefList);
+                    
+                });
+            
+            }
+            FUTURE_UTIL.waitExecute();
+        }
         return PagingResult.success(userPage);
     }
 
@@ -114,7 +150,17 @@ public class UserExtendManagerImpl implements UserExtendManager {
             }
 
         }
-
+        List<ProjectBriefVO> projectBriefList;
+        if (roleList.stream()
+                .anyMatch(roleBriefVO -> Objects.equals(roleBriefVO.getId(), AuthConstant.ADMIN_ROLE_ID))) {
+            projectBriefList = projectService.getProjectBriefList();
+        } else {
+            projectBriefList = Optional.ofNullable(userVO.getProjectList()).orElse(Collections.emptyList()).stream()
+                    .distinct().collect(Collectors.toList());
+        }
+    
+        userVO.setProjectList(projectBriefList);
+    
         return Result.buildSucc(userVO);
     }
 

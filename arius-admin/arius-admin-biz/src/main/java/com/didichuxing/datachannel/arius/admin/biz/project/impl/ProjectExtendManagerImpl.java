@@ -381,6 +381,16 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
             final ProjectSaveDTO project = saveDTO.getProject();
             List<Integer> ownerIdList = project.getOwnerIdList();
             List<Integer> userIdList = project.getUserIdList();
+            //超级项目侧校验添加的用户收否存在管理员角色
+            final Result<Void> ownerResult = checkProject(project.getId(), ownerIdList, OperationEnum.EDIT);
+            if (ownerResult.failed()) {
+                return ownerResult;
+            }
+            //超级项目侧校验添加的用户收否存在管理员角色
+            final Result<Void> userResult = checkProject(project.getId(), userIdList, OperationEnum.EDIT);
+            if (userResult.failed()) {
+                return userResult;
+            }
             project.setOwnerIdList(Collections.emptyList());
             project.setUserIdList(Collections.emptyList());
             //操作前的项目信息
@@ -690,9 +700,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
         if (operation.equals(OperationEnum.DELETE)) {
             return Result.buildSucc();
         }
-        if (CollectionUtils.isEmpty(userIdList)) {
-            return Result.buildParamIllegal("用户id不存在");
-        }
+      
         if (Objects.isNull(projectId)) {
             return Result.buildParamIllegal("项目id不存在");
         }
@@ -715,7 +723,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
                 Predicate<List<RoleBriefVO>> checkContainsAdminRoleFunc = roleBriefList -> roleBriefList.stream()
                     .anyMatch(roleBriefVO -> AuthConstant.ADMIN_ROLE_ID.equals(roleBriefVO.getId()));
                 /*当前用户列表中存在管理员*/
-                if (userIdList.stream().map(roleService::getRoleBriefListByUserId)
+                if (CollectionUtils.isNotEmpty(userIdList)&&userIdList.stream().map(roleService::getRoleBriefListByUserId)
                     .noneMatch(checkContainsAdminRoleFunc)) {
                     return Result.buildFail("超级项目只被允许添加拥有管理员角色的用户");
 
