@@ -109,7 +109,7 @@ public class IndexDashBoardCollector extends BaseDashboardCollector {
             // 2. 是否单副本索引
             indexMetrics.setSingReplicate(NO_REPLICA.equals(index.getRep()));
             // 3. 是否未分配shard索引
-            indexMetrics.setUnassignedShard(IndexStatusEnum.GREEN.getStatus().equals(index.getHealth()));
+            indexMetrics.setUnassignedShard(!IndexStatusEnum.GREEN.getStatus().equals(index.getHealth()));
             // 4. 是否为大shard索引(大于50G)
             indexMetrics.setBigShard(index2BigShardListMap.containsKey(index.getIndex()));
             // 5. 是否为小shard索引(小于1G)
