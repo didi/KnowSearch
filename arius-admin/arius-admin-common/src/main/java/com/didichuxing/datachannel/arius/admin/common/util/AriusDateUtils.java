@@ -1,12 +1,12 @@
 package com.didichuxing.datachannel.arius.admin.common.util;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.DateUtils;
 
 /**
  *
@@ -284,5 +284,29 @@ public class AriusDateUtils {
             i++;
         }
         return i;
+    }
+
+    /**
+     * 将时间的其他单位（s,m,h,d）转化为ms
+     * @param value
+     * @param unit
+     * @return
+     */
+    public static long getUnitTime(long value, String unit) {
+        long ms = 0L;
+        switch (unit) {
+            case "s":
+                ms = value * 1000;
+            break;
+            case "m":
+                ms =  value * 1000 * 60;
+            break;
+            case "h":
+                ms =  value * 1000 * 60 * 60;
+            case "d":
+                ms =  value * 1000 * 60 * 60 * 24;
+            break;
+        }
+        return ms;
     }
 }

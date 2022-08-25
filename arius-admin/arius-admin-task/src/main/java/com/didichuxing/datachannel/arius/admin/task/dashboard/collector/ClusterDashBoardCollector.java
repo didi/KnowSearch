@@ -1,19 +1,27 @@
 package com.didichuxing.datachannel.arius.admin.task.dashboard.collector;
 
+import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.DashBoardMetricThresholdDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.ClusterMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.DashBoardStats;
+import com.didichuxing.datachannel.arius.admin.common.util.AriusDateUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.MetricsUtils;
+import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.ESClusterPhyStatsService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
+
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_DASHBOARD_THRESHOLD_GROUP;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.NODE_STATUS_COLLECTOR_DELAYED_THRESHOLD;
 
 /**
  * Created by linyunan on 3/11/22
@@ -25,6 +33,8 @@ public class ClusterDashBoardCollector extends BaseDashboardCollector {
         .getLog(ClusterDashBoardCollector.class);
     @Autowired
     protected ESClusterPhyStatsService                                       esClusterPhyStatsService;
+    @Autowired
+    protected AriusConfigInfoService                                         ariusConfigInfoService;
 
     private static final Map<String/*集群名称*/, ClusterMetrics /*上一次采集到的集群数据*/> cluster2LastTimeClusterMetricsMap = Maps
         .newConcurrentMap();
@@ -65,9 +75,11 @@ public class ClusterDashBoardCollector extends BaseDashboardCollector {
         clusterMetrics.setClusterElapsedTime(esClusterPhyStatsService.getClusterStatusElapsedTime(cluster));
         clusterMetrics.setNodeElapsedTime(esClusterPhyStatsService.getNodeStatusElapsedTime(cluster));
         long collectorDelayed = getCollectorDelayed(cluster);
+        long configCollectorDelayed = getConfigCollectorDelayed();
 
         //12.消耗时间是否大于5分钟,开始采集到结束采集的时间，指标看板的采集任务，当前时间到最近一次采集的时间
-        clusterMetrics.setClusterElapsedTimeGte5Min(collectorDelayed > FIVE_MINUTE);
+
+        clusterMetrics.setClusterElapsedTimeGte5Min(collectorDelayed > configCollectorDelayed);
         clusterMetrics.setCollectorDelayed(collectorDelayed);
         //13.集群下索引数量
         clusterMetrics.setIndexCount(esClusterPhyStatsService.getIndexCountByCluster(cluster));
@@ -100,6 +112,24 @@ public class ClusterDashBoardCollector extends BaseDashboardCollector {
     @Override
     public String getName() {
         return "ClusterDashBoardCollector";
+    }
+
+    /**
+     * 获取配置的采集延时
+     * @return
+     */
+    private long getConfigCollectorDelayed() {
+        try {
+            String configValue = ariusConfigInfoService.stringSetting(ARIUS_DASHBOARD_THRESHOLD_GROUP, NODE_STATUS_COLLECTOR_DELAYED_THRESHOLD, "");
+            DashBoardMetricThresholdDTO configThreshold = null;
+            if (StringUtils.isNotBlank(configValue)) {
+                configThreshold = JSONObject.parseObject(configValue, DashBoardMetricThresholdDTO.class);
+                return AriusDateUtils.getUnitTime(configThreshold.getValue().longValue(),configThreshold.getUnit());
+            }
+        } catch (Exception e) {
+            return FIVE_MINUTE;
+        }
+        return FIVE_MINUTE;
     }
 
     /**

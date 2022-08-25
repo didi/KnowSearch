@@ -115,6 +115,11 @@ public class AriusConfigConstant {
     public static final String INDEX_MAPPING_NUM_THRESHOLD                             = "index.mapping.num_threshold";
 
     /**
+     * 索引Mapping个数阈值定义
+     */
+    public static final String NODE_STATUS_COLLECTOR_DELAYED_THRESHOLD                 = "node_status.collectorDelayed.threshold";
+
+    /**
      * rollover阈值，当索引大小超过该值自动rollover
      */
     public static final String INDEX_ROLLOVER_THRESHOLD                                = "index.rollover.threshold";
