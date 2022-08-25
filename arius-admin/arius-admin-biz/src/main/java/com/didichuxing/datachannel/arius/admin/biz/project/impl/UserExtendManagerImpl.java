@@ -51,7 +51,7 @@ public class UserExtendManagerImpl implements UserExtendManager {
     @Autowired
     private PermissionService     permissionService;
     
-    private static final FutureUtil<Void> FUTURE_UTIL = FutureUtil.init("UserExtendManagerImpl", 20, 40, 100);
+    private static final FutureUtil<Void> FUTURE_UTIL = FutureUtil.init("UserExtendManagerImpl", 10, 20, 100);
     /**
      * 用户注册信息校验
      *

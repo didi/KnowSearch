@@ -108,7 +108,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
     private RoleTool          roleTool;
     @Autowired
     private               ESIndexCatService esIndexCatService;
-    private static final FutureUtil<Void> FUTURE_UTIL = FutureUtil.init("ProjectExtendManagerImpl", 20, 40, 100);
+    private static final FutureUtil<Void> FUTURE_UTIL = FutureUtil.init("ProjectExtendManagerImpl", 10, 20, 100);
     
     /**
      * “检查一个项目的资源是否可用。”
