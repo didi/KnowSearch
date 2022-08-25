@@ -1,28 +1,13 @@
 
 package com.didichuxing.datachannel.arius.admin.biz.cluster;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.openMocks;
-
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.impl.ClusterPhyManagerImpl;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping.TemplatePhyMappingManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.pipeline.PipelineManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterJoinDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterSettingDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterRoleDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterRoleHostDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESConfigDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.PluginDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
@@ -55,12 +40,6 @@ import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpClient;
 import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
-import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import org.apache.commons.beanutils.BeanUtils;
 import org.elasticsearch.common.unit.ByteSizeUnit;
 import org.elasticsearch.common.unit.ByteSizeValue;
@@ -77,6 +56,13 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import java.lang.reflect.InvocationTargetException;
+import java.util.*;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+import static org.mockito.MockitoAnnotations.openMocks;
 
 @ActiveProfiles("test")
 @ExtendWith({ SpringExtension.class })
@@ -205,7 +191,7 @@ class ClusterPhyManagerTest {
             Collections.singletonList(clusterRoleInfo), Collections.singletonList(clusterRoleHost), 0, "writeAction", 0,
             0L, 0L, 0L, 0.0, "platformType", 1, "gatewayUrl");
         clusterPhyList = Collections.singletonList(clusterPhy);
-        esClusterStatsResponse = new ESClusterStatsResponse("status", 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L,
+        esClusterStatsResponse = new ESClusterStatsResponse("status", 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L,0L, 0L,
             new ByteSizeValue(0L, ByteSizeUnit.BYTES), new ByteSizeValue(0L, ByteSizeUnit.BYTES),
             new ByteSizeValue(0L, ByteSizeUnit.BYTES), 0L, 0L, new ByteSizeValue(0L, ByteSizeUnit.BYTES),
             new ByteSizeValue(0L, ByteSizeUnit.BYTES), new ByteSizeValue(0L, ByteSizeUnit.BYTES),
@@ -759,7 +745,7 @@ class ClusterPhyManagerTest {
         assertFalse(clusterPhyManager.updateClusterInfo(CLUSTER, "operator"));
 
         when(mockClusterPhyService.getClusterByName(CLUSTER)).thenReturn(clusterPhy);
-        ESClusterStatsResponse response = new ESClusterStatsResponse("status", 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L,
+        ESClusterStatsResponse response = new ESClusterStatsResponse("status", 0L, 0L, 0L,0L, 0L, 0L, 0L, 0L, 0L, 0L,
             new ByteSizeValue(0L, ByteSizeUnit.BYTES), new ByteSizeValue(0L, ByteSizeUnit.BYTES),
             new ByteSizeValue(0L, ByteSizeUnit.BYTES), 0L, 0L, new ByteSizeValue(100L, ByteSizeUnit.BYTES),
             new ByteSizeValue(40L, ByteSizeUnit.BYTES), new ByteSizeValue(0L, ByteSizeUnit.BYTES),
