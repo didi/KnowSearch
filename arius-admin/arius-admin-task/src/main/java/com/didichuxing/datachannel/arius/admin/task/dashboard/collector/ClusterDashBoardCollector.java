@@ -29,6 +29,7 @@ public class ClusterDashBoardCollector extends BaseDashboardCollector {
     private static final Map<String/*集群名称*/, ClusterMetrics /*上一次采集到的集群数据*/> cluster2LastTimeClusterMetricsMap = Maps
         .newConcurrentMap();
 
+    //TODO 指标-配置项
     private static final long                                                FIVE_MINUTE                       = 5 * 60
                                                                                                                  * 1000;
 
@@ -40,10 +41,13 @@ public class ClusterDashBoardCollector extends BaseDashboardCollector {
         clusterMetrics.setTimestamp(startTime);
         clusterMetrics.setCluster(cluster);
         // 1. 写入耗时
+        //TODO 指标-最大值，各个节点当前写入耗时最大值
         clusterMetrics.setIndexingLatency(esClusterPhyStatsService.getClusterIndexingLatency(cluster));
         // 2. 查询耗时
+        //TODO 指标-最大值，各节点当前查询耗时最大值
         clusterMetrics.setSearchLatency(esClusterPhyStatsService.getClusterSearchLatency(cluster));
         //4. 集群shard总数
+        //TODO 指标-轻量级获取_cat/health?format=json
         clusterMetrics.setShardNum(esClusterPhyStatsService.getClustersShardTotal(cluster));
         // 5. 写入请求数
         clusterMetrics.setIndexReqNum(esClusterPhyStatsService.getCurrentIndexTotal(cluster));
@@ -53,6 +57,7 @@ public class ClusterDashBoardCollector extends BaseDashboardCollector {
         clusterMetrics.setGatewaySucPer(gatewaySuccessRateAndFailureRate.getV1());
         clusterMetrics.setGatewayFailedPer(gatewaySuccessRateAndFailureRate.getV2());
         // 7. 集群Pending task数
+        //TODO 指标-轻量级获取_cat/health?format=json
         clusterMetrics.setPendingTaskNum(esClusterPhyStatsService.getPendingTaskTotal(cluster));
         // 8. 集群http连接数
         clusterMetrics.setHttpNum(esClusterPhyStatsService.getHttpConnectionTotal(cluster));
@@ -70,6 +75,7 @@ public class ClusterDashBoardCollector extends BaseDashboardCollector {
         clusterMetrics.setClusterElapsedTimeGte5Min(collectorDelayed > FIVE_MINUTE);
         clusterMetrics.setCollectorDelayed(collectorDelayed);
         //13.集群下索引数量
+        //TODO 指标-_cluster/stats，加参数过滤
         clusterMetrics.setIndexCount(esClusterPhyStatsService.getIndexCountByCluster(cluster));
 
         dashBoardStats.setCluster(clusterMetrics);

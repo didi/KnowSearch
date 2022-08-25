@@ -72,6 +72,7 @@ public class IndexDashBoardCollector extends BaseDashboardCollector {
             .collect(Collectors.toList());
 
         FUTURE_UTIL.runnableTask(() -> segmentsListRef.set(esShardService.syncGetSegments(cluster)))
+                //TODO 指标-shard和小shard是采集侧过滤的
             .runnableTask(() -> bigAndSmallListTupleRef.set(esShardService.syncGetBigAndSmallShards(cluster)))
             .runnableTask(() -> index2IndexConfigMapRef.set(batchGetIndexConfigMap(cluster, indexList)))
             .runnableTask(
