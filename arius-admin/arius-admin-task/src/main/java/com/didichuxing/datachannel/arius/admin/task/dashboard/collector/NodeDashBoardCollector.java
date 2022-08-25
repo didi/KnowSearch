@@ -35,16 +35,17 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 @Component
 public class NodeDashBoardCollector extends BaseDashboardCollector {
+    //TODO 指标-配置项
     private static final int                                                                     NODE_FREE_DISK_THRESHOLD          = 15;
-
+    //TODO 指标-配置项
     private static final int                                                                     HEAD_USED_PERCENT_THRESHOLD       = 80;
-
+    //TODO 指标-配置项
     private static final int                                                                     CPU_PERCENT_THRESHOLD             = 80;
-
+    //TODO 指标-配置项
     private static final long                                                                    LARGE_HEAD_USED_PERCENT_TIME      = 10
                                                                                                                                      * 60
                                                                                                                                      * 1000;
-
+    //TODO 指标-配置项
     private static final long                                                                    LARGE_CPU_PERCENT_TIME            = 30
                                                                                                                                      * 60
                                                                                                                                      * 1000;
@@ -128,14 +129,18 @@ public class NodeDashBoardCollector extends BaseDashboardCollector {
             // 2. 是否磁盘利用率超红线 （阈值85%）
             buildLargeDiskUsageInfo(nodeMetrics, clusterNodeStats);
             // 3. 是否堆内存利用率超红线 （阈值80% 且持续10分钟）
+            //TODO 指标-一段时间没踩到，这个连续就会有歧义,remove
             buildLargeHead(nodeMetrics, clusterNodeStats, uniqueNodeKey);
             // 4. 是否CPU利用率超红线 （80%  持续30分钟）
+            //TODO 指标-一段时间没踩到，这个连续就会有歧义,remove
             buildLargeCpuUsage(nodeMetrics, clusterNodeStats, uniqueNodeKey);
             // 5. 节点shard个数
             nodeMetrics.setShardNum(node2ShardNumMapAtomic.get().getOrDefault(nodeName, 0L));
             // 6. WriteRejected数
+            //TODO 指标-采用最新node_info里面各节点reject数量累加
             buildWriteRejectedNum(nodeMetrics, clusterNodeStats, uniqueNodeKey);
             // 7. SearchRejected数
+            //TODO 指标-采用最新node_info里面各节点reject数量累加
             buildSearchRejectedNum(nodeMetrics, clusterNodeStats, uniqueNodeKey);
             //8. 节点执行任务耗时
             nodeMetrics.setTaskConsuming(clusterNodesTaskTotalCostAtomic.get().getOrDefault(nodeName, 0d).longValue());
@@ -309,6 +314,7 @@ public class NodeDashBoardCollector extends BaseDashboardCollector {
         FSTotal total = clusterNodeStats.getFs().getTotal();
         double freeDiskPer = CommonUtils.divideDoubleAndFormatDouble(total.getFreeInBytes(), total.getTotalInBytes(), 5,
             100);
+        //TODO 指标-配置项
         if (freeDiskPer <= NODE_FREE_DISK_THRESHOLD) {
             nodeMetrics.setLargeDiskUsage(100 - freeDiskPer);
         } else {

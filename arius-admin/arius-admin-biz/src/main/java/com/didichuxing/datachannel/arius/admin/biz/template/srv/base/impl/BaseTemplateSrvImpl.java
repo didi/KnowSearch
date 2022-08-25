@@ -303,7 +303,7 @@ public abstract class BaseTemplateSrvImpl implements BaseTemplateSrv {
      */
     @Override
     public ClusterConnectionStatusWithTemplateEnum getClusterConnectionStatus(String clusterPhy) {
-        return esClusterService.syncConnectionStatus(clusterPhy)?ClusterConnectionStatusWithTemplateEnum.NORMAL:
+        return esClusterService.isConnectionStatus(clusterPhy)?ClusterConnectionStatusWithTemplateEnum.NORMAL:
                 ClusterConnectionStatusWithTemplateEnum.DISCONNECTED;
     }
 }

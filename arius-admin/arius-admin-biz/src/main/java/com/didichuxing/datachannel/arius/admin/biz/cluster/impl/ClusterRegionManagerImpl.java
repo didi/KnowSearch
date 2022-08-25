@@ -171,7 +171,7 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
        
         //2. 集群合法关联性校验
         for (int i = 0; i < param.getClusterRegionDTOS().size(); i++) {
-            checkCanBeBound(param.getId(), param.getClusterRegionDTOS().get(0), param.getType());
+            checkCanBeBound(param.getId(), param.getClusterRegionDTOS().get(i), param.getType());
         }
       
 

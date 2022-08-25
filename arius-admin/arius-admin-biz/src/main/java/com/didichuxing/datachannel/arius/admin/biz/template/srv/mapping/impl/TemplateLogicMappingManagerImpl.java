@@ -1,6 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping.impl;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.DEFAULT_INDEX_MAPPING_TYPE;
+import static com.didichuxing.datachannel.arius.admin.common.mapping.AriusTypeProperty.DYNAMIC_TEMPLATES_STR;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -379,7 +380,9 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrvImpl impleme
             }
 
             // 将对应的type替换
-            for (AriusTypeProperty ariusTypeProperty : ariusTypePropertyList) {
+            for (AriusTypeProperty ariusTypePropertyTemp : ariusTypePropertyList) {
+                //todo 后续0.3.2下线
+                AriusTypeProperty ariusTypeProperty = AriusTypeProperty.buildPropertiesAndDynamicTemplates(ariusTypePropertyTemp);
                 //高版本es集群只有一个type
                 TypeProperties typeProperties = new TypeProperties(ariusTypeProperty.getProperties());
 
@@ -419,7 +422,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrvImpl impleme
 
         return Result.buildSucc();
     }
-
+    
     /**
      * 修改模板schema
      *
@@ -989,8 +992,8 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrvImpl impleme
 
         // 获取并且设置对应的dynamic_templates
         Map<String, Object> notUsedMap = typeConfig.getNotUsedMap();
-        if (!MapUtils.isEmpty(notUsedMap) && notUsedMap.containsKey(AriusTypeProperty.DYNAMIC_TEMPLATES_STR)) {
-            JSONArray dynamicArrays = (JSONArray) notUsedMap.get(AriusTypeProperty.DYNAMIC_TEMPLATES_STR);
+        if (!MapUtils.isEmpty(notUsedMap) && notUsedMap.containsKey(DYNAMIC_TEMPLATES_STR)) {
+            JSONArray dynamicArrays = (JSONArray) notUsedMap.get(DYNAMIC_TEMPLATES_STR);
             ariusTypeProperty.setDynamicTemplates(dynamicArrays);
         }
 

@@ -40,7 +40,6 @@ import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOpe
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.TASK_ID;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.TOTAL;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.TOTAL_IN_BYTES;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.TYPE;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.UNASSIGN;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.USED_IN_BYTES;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.USED_PERCENT;
@@ -59,6 +58,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESCluste
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterTaskStatsResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.stats.ESClusterThreadPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.TimeValueUtil;
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
@@ -807,7 +807,12 @@ public class ESClusterDAO extends BaseESDAO {
         return nodes.values().stream().map(ClusterNodeStats::getTransportAddress).distinct().collect(Collectors.toList());
     }
     
-    public boolean syncConnectionStatus(String cluster) {
-        return Objects.nonNull(esOpClient.getESClient(cluster));
+    public boolean isConnectionStatus(String cluster) throws ESOperateException {
+        final boolean actualRunning = esOpClient.isActualRunning(cluster);
+        if (!actualRunning){
+            throw new ESOperateException(String.format("无法连接到es client %s",cluster));
+        }
+    
+        return  actualRunning;
     }
 }

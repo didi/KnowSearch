@@ -72,7 +72,12 @@ public class TemplatePhyMappingManagerImpl implements TemplatePhyMappingManager 
         if (!templateService.syncGetEsClusterIsNormal(cluster)) {
             return Result.buildFail(String.format("模版【%s】所属集群【%s】异常,无法获取mapping信息", name, cluster));
         }
-        TemplateConfig templateConfig = templateService.syncGetTemplateConfig(cluster, name);
+        TemplateConfig templateConfig = null;
+        try {
+            templateConfig = templateService.syncGetTemplateConfig(cluster, name);
+        } catch (ESOperateException e) {
+           return Result.buildFail(e.getMessage());
+        }
         if (templateConfig != null) {
             MappingConfig mappingConfig = templateConfig.getMappings();
             if (mappingConfig != null) {
@@ -457,8 +462,13 @@ public class TemplatePhyMappingManagerImpl implements TemplatePhyMappingManager 
         if (result.failed()) {
             return result;
         }
-
-        TemplateConfig templateConfig = templateService.syncGetTemplateConfig(cluster, name);
+    
+        TemplateConfig templateConfig = null;
+        try {
+            templateConfig = templateService.syncGetTemplateConfig(cluster, name);
+        } catch (ESOperateException e) {
+            return Result.buildFail(e.getMessage());
+        }
         if (templateConfig == null) {
             return Result.buildFail("模版不存在，tamplate:" + name);
         }

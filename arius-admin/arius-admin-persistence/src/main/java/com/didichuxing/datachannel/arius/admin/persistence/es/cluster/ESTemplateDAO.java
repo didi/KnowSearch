@@ -1,6 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.cluster;
 
-import static com.didichuxing.datachannel.arius.admin.common.RetryUtils.performTryTimesMethods;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_OPERATE_TIMEOUT;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.INDEX_SHARD_NUM;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.TEMPLATE_DEFAULT_ORDER;
@@ -11,6 +10,7 @@ import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateExcepti
 import com.didichuxing.datachannel.arius.admin.common.function.BiFunctionWithESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ParsingExceptionUtils;
+import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpTimeoutRetry;
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
 import com.didiglobal.logi.elasticsearch.client.ESClient;
 import com.didiglobal.logi.elasticsearch.client.gateway.direct.DirectRequest;
@@ -96,7 +96,7 @@ public class ESTemplateDAO extends BaseESDAO {
 
         // 获取es中原来index template的配置
          ESIndicesGetTemplateResponse getTemplateResponse = getESIndicesGetTemplateResponse(cluster,
-                name, 3);
+                name);
         TemplateConfig templateConfig = getTemplateResponse.getMultiTemplatesConfig().getSingleConfig();
        
         // 修改分片数目
@@ -198,8 +198,18 @@ public class ESTemplateDAO extends BaseESDAO {
                 throw new ESOperateException(e.getMessage());
             }
         };
-        TemplateConfig templateConfig = Optional.ofNullable(
-                        performTryTimesMethods(getTemplateResponseBiFunction, Objects::isNull, 1))
+        ESIndicesGetTemplateResponse esIndicesGetTemplateResponse = null;
+        try {
+            esIndicesGetTemplateResponse = ESOpTimeoutRetry.esRetryExecuteWithReturnValue("create", 3,
+                    () -> getTemplateResponseBiFunction.apply(Long.valueOf(ES_OPERATE_TIMEOUT), TimeUnit.SECONDS),
+                    Objects::isNull
+        
+            );
+        } catch (ESOperateException e) {
+            LOGGER.error("class={}||cluster={}||method=create", getClass().getSimpleName(), cluster, e);
+        }
+    
+        TemplateConfig templateConfig = Optional.ofNullable(esIndicesGetTemplateResponse)
                 .map(ESIndicesGetTemplateResponse::getMultiTemplatesConfig).map(MultiTemplatesConfig::getSingleConfig)
                 .orElse(new TemplateConfig());
        
@@ -240,9 +250,19 @@ public class ESTemplateDAO extends BaseESDAO {
             }
         
         };
+        ESIndicesPutTemplateResponse esIndicesPutTemplateResponse = null;
+        try {
+            esIndicesPutTemplateResponse = ESOpTimeoutRetry.esRetryExecuteWithReturnValue("create", 3,
+                    () -> getESIndicesPutTemplateResponseBiFunction.apply(Long.valueOf(ES_OPERATE_TIMEOUT),
+                            TimeUnit.SECONDS), Objects::isNull
+        
+            );
+        } catch (ESOperateException e) {
+            LOGGER.error("class={}||cluster={}||method=create", getClass().getSimpleName(), cluster, e);
+        }
     
         return Optional.ofNullable(
-                        performTryTimesMethods(getESIndicesPutTemplateResponseBiFunction, Objects::isNull, 1))
+                        esIndicesPutTemplateResponse)
                 .map(ESIndicesPutTemplateResponse::getAcknowledged).orElse(false);
                 
     }
@@ -273,8 +293,18 @@ public class ESTemplateDAO extends BaseESDAO {
                 throw new ESOperateException("模板创建失败");
             }
         };
+        ESIndicesPutTemplateResponse esIndicesPutTemplateResponse = null;
+        try {
+            esIndicesPutTemplateResponse = ESOpTimeoutRetry.esRetryExecuteWithReturnValue("create", 3,
+                    () -> responseBiFunction.apply(Long.valueOf(ES_OPERATE_TIMEOUT),
+                            TimeUnit.SECONDS), Objects::isNull
+        
+            );
+        } catch (ESOperateException e) {
+            LOGGER.error("class={}||cluster={}||method=create", getClass().getSimpleName(), cluster, e);
+        }
     
-        return Optional.ofNullable(performTryTimesMethods(responseBiFunction, Objects::isNull, 1))
+        return Optional.ofNullable(esIndicesPutTemplateResponse)
                 .map(ESIndicesPutTemplateResponse::getAcknowledged).orElse(false);
     }
 
@@ -335,8 +365,8 @@ public class ESTemplateDAO extends BaseESDAO {
      * @param templateName      模版名
      * @return result
      */
-    public TemplateConfig getTemplate(String clusterName, String templateName) {
-        MultiTemplatesConfig templatesConfig = getTemplates(clusterName, templateName,3);
+    public TemplateConfig getTemplate(String clusterName, String templateName) throws ESOperateException {
+        MultiTemplatesConfig templatesConfig = getTemplates(clusterName, templateName);
 
         if (templatesConfig == null) {
             return null;
@@ -350,11 +380,11 @@ public class ESTemplateDAO extends BaseESDAO {
      * @param clusters 集群列表
      * @return
      */
-    public Map<String, TemplateConfig> getAllTemplate(List<String> clusters) {
+    public Map<String, TemplateConfig> getAllTemplate(List<String> clusters) throws ESOperateException {
         Map<String, TemplateConfig> map = new HashMap<>();
         for (String clusterName : clusters) {
             
-            MultiTemplatesConfig templatesConfig = getTemplates(clusterName, null,3);
+            MultiTemplatesConfig templatesConfig = getTemplates(clusterName, null);
 
             if (null == templatesConfig) {
                 return null;
@@ -371,7 +401,7 @@ public class ESTemplateDAO extends BaseESDAO {
      * @return result
      */
     public MappingConfig getTemplateMapping(String clusterName, String templateName) throws ESOperateException {
-        MultiTemplatesConfig templatesConfig = getTemplates(clusterName, templateName,3);
+        MultiTemplatesConfig templatesConfig = getTemplates(clusterName, templateName);
 
         if (templatesConfig == null || templatesConfig.getSingleConfig() == null) {
             return null;
@@ -386,7 +416,8 @@ public class ESTemplateDAO extends BaseESDAO {
      * @param templateName      模版名
      * @return result
      */
-    public MultiTemplatesConfig getTemplates(String clusterName, String templateName,Integer tryTimes) {
+    public MultiTemplatesConfig getTemplates(String clusterName, String templateName)
+            throws ESOperateException {
 
       
 
@@ -400,7 +431,7 @@ public class ESTemplateDAO extends BaseESDAO {
         }
     
         ESIndicesGetTemplateResponse response = getESIndicesGetTemplateResponse(clusterName,
-                templateName, tryTimes);
+                templateName);
     
         if (response == null) {
             return null;
@@ -414,8 +445,7 @@ public class ESTemplateDAO extends BaseESDAO {
         return response.getMultiTemplatesConfig();
     }
     
-    protected ESIndicesGetTemplateResponse getESIndicesGetTemplateResponse(String clusterName, String templateName,
-                                                                           Integer tryTimes) {
+    protected ESIndicesGetTemplateResponse getESIndicesGetTemplateResponse(String clusterName, String templateName) throws ESOperateException {
         ESClient esClient = esOpClient.getESClient(clusterName);
     
         if (esClient == null) {
@@ -438,7 +468,12 @@ public class ESTemplateDAO extends BaseESDAO {
             }
         };
         
-        return performTryTimesMethods(responseBiFunction, Objects::isNull, tryTimes);
+        return ESOpTimeoutRetry.esRetryExecuteWithReturnValue("getESIndicesGetTemplateResponse", 3,
+                    () -> responseBiFunction.apply(Long.valueOf(ES_OPERATE_TIMEOUT),
+                            TimeUnit.SECONDS), Objects::isNull
+        
+            );
+            
     }
 
     /**

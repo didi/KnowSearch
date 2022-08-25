@@ -861,7 +861,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         //检测集群连通状态
         final Optional<TupleTwo<String, Boolean>> clusterConnectionStatusOption = templatePhyList.stream()
                 .map(indexTemplatePhy -> Tuples.of(indexTemplatePhy.getCluster(),
-                        esClusterService.syncConnectionStatus(indexTemplatePhy.getCluster())))
+                        esClusterService.isConnectionStatus(indexTemplatePhy.getCluster())))
                 .filter(tuple -> Boolean.FALSE.equals(tuple.v2)).findFirst();
         if (clusterConnectionStatusOption.isPresent()) {
             return Result.buildFail(
@@ -1114,7 +1114,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         }
         final IndexTemplatePO templatePO = new IndexTemplatePO();
         templatePO.setId(logicId);
-        if (!esClusterService.syncConnectionStatus(masterCluster)) {
+        if (!esClusterService.isConnectionStatus(masterCluster)) {
             LOGGER.warn(
                     "class={}||method=updateTemplateHealthByLogicId||logicId={}||error=don't find index template cluster",
                     getClass().getSimpleName(), logicId);
