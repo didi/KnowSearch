@@ -41,6 +41,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -77,6 +78,7 @@ public class ESIndexServiceImpl implements ESIndexService {
     @Override
     public boolean syncCreateIndex(String cluster, String indexName, IndexConfig indexConfig,
                                    int retryCount) throws ESOperateException {
+       
         return esIndexDAO.createIndexWithConfig(cluster, indexName, indexConfig,retryCount);
     }
 
@@ -562,7 +564,14 @@ public class ESIndexServiceImpl implements ESIndexService {
 
     @Override
     public boolean syncIsIndexExist(String cluster, String indexName) {
-        return esIndexDAO.existByClusterAndIndexName(cluster, indexName,3);
+        try {
+            return ESOpTimeoutRetry.esRetryExecute("syncIsIndexExist", 3,
+                    () -> esIndexDAO.existByClusterAndIndexName(cluster, indexName));
+        } catch (ESOperateException e) {
+            LOGGER.error("class={}||method=syncIsIndexExist||indexName={}||cluster={}", getClass().getSimpleName(),
+                    indexName, cluster, e);
+            return false;
+        }
     }
 
     @Override
@@ -733,7 +742,8 @@ public class ESIndexServiceImpl implements ESIndexService {
     @Override
     public boolean createIndexWithConfig(String clusterName, String indexName, IndexConfig indexConfig, int tryTimes)
             throws ESOperateException {
-        return esIndexDAO.createIndexWithConfig(clusterName,indexName,indexConfig,tryTimes);
+        return ESOpTimeoutRetry.esRetryExecuteWithReturnValue("createIndexWithConfig", 3,
+                () -> esIndexDAO.createIndexWithConfig(clusterName, indexName, indexConfig, tryTimes), Objects::isNull);
     }
     
     /**

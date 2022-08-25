@@ -1,11 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.common.util;
 
 import com.didichuxing.datachannel.arius.admin.common.exception.BaseException;
-
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import java.util.function.Predicate;
 
-public class RetryExecutor {
+public class RetryExecutor<T> {
     private static final ILog LOGGER     = LogFactory.getLog(RetryExecutor.class);
 
     /**
@@ -20,7 +20,7 @@ public class RetryExecutor {
      * es操作内容
      */
     private Handler           handler;
-
+    private HandlerWithReturnValue<T> handlerWithReturnValue;
     /**
      * 重试次数
      */
@@ -57,7 +57,39 @@ public class RetryExecutor {
             return 0;
         }
     }
-
+    
+    public interface HandlerWithReturnValue<T> {
+        /**
+         * 处理方法
+         *
+         * @return
+         * @throws Throwable
+         */
+        T process() throws BaseException;
+        
+        /***
+         * 是否重试
+         * @param e 异常
+         * @return
+         */
+        default boolean needRetry(Exception e) {
+            return true;
+        }
+        
+        default boolean needRetry(Predicate<T> predicate, T t) {
+            return predicate.test(t);
+        }
+        
+        /**
+         * 重试 Sleep 时间间隔
+         *
+         * @param retryTimes 重试次数
+         * @return
+         */
+        default int retrySleepTime(int retryTimes) {
+            return 0;
+        }
+    }
     public static RetryExecutor builder() {
         return new RetryExecutor();
     }
@@ -71,7 +103,11 @@ public class RetryExecutor {
         this.handler = handler;
         return this;
     }
-
+    
+    public RetryExecutor<T> HandlerWithReturnValue(HandlerWithReturnValue<T> handler) {
+        this.handlerWithReturnValue = handler;
+        return this;
+    }
     public RetryExecutor retryCount(Integer retryCount) {
         this.retryCount = (retryCount > RETRY_MAX) ? RETRY_MAX : retryCount;
         return this;
@@ -109,5 +145,32 @@ public class RetryExecutor {
         } while (tryCount++ < retryCount);
 
         return succ;
+    }
+    public  T execute(Predicate<T> predicate) throws Exception {
+        T t = null;
+        int tryCount = 0;
+        do {
+            try {
+                int retrySleepTime = handlerWithReturnValue.retrySleepTime(tryCount);
+                if (retrySleepTime > 0) {
+                    Thread.sleep(retrySleepTime);
+                }
+            
+                t = handlerWithReturnValue.process();
+            
+            } catch (Exception e) {
+                if (!handlerWithReturnValue.needRetry(e) || tryCount == retryCount) {
+                    LOGGER.warn("class=RetryExecutor||method=execute||errMsg={}||handlerName={}||tryCount={}",
+                            e.getMessage(), name, tryCount, e);
+                    throw e;
+                }
+            
+                LOGGER.warn(
+                        "class=RetryExecutor||method=execute||errMsg={}||handlerName={}||tryCount={}||maxTryCount={}",
+                        e.getMessage(), name, tryCount, retryCount);
+            }
+        } while (tryCount++ < retryCount && handlerWithReturnValue.needRetry(predicate, t));
+    
+        return t;
     }
 }
