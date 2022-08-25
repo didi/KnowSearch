@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 /**
@@ -64,6 +65,7 @@ public class UpgradeComponentHandler extends BaseComponentHandler implements Com
         try {
             GeneralUpgradeComponent upgradeComponent = JSON.parseObject(content, GeneralUpgradeComponent.class);
             Component component = new Component();
+            component.setUpdateTime(new Timestamp(System.currentTimeMillis()));
             component.setId(upgradeComponent.getComponentId());
             component.setPackageId(upgradeComponent.getPackageId());
             componentDomainService.updateComponent(component);

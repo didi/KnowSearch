@@ -49,4 +49,12 @@
         where package_id = #{packageId}
     </select>
 
+    <update id="update" parameterType="com.didiglobal.logi.op.manager.infrastructure.db.ComponentPO">
+        update logi_op_component
+        <trim prefix="set" prefixOverrides=",">
+            <if test="packageId!= null">,package_id = #{packageId}</if>
+            <if test="updateTime != null">,update_time = #{updateTime}</if>
+        </trim>
+        where id = #{id}
+    </update>
 </mapper>

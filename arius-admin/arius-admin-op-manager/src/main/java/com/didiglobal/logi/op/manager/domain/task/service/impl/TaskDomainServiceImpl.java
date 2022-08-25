@@ -292,6 +292,7 @@ public class TaskDomainServiceImpl implements TaskDomainService {
             case SHRINK:
             case CONFIG_CHANGE:
             case RESTART:
+            case UPGRADE:
                 GeneralBaseOperationComponent baseOperationComponent = ConvertUtil.str2ObjByJson(task.getContent(), GeneralBaseOperationComponent.class);
                 for (GeneralGroupConfig config : baseOperationComponent.getGroupConfigList()) {
                     if (config.getGroupName().equals(name)) {

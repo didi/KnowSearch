@@ -88,7 +88,7 @@ public class ComponentDomainServiceImpl implements ComponentDomainService {
 
     @Override
     public Result<List<ComponentGroupConfig>> getComponentConfig(int componentId) {
-        Map<Integer, List<ComponentGroupConfig>> map = new TreeMap<>((o1, o2) -> o1 - o2);
+        Map<Integer, List<ComponentGroupConfig>> map = new TreeMap<>((o1, o2) -> o2 - o1);
         List<ComponentGroupConfig> configList = componentGroupConfigRepository.getConfigByComponentId(componentId);
         configList.forEach(groupConfig -> {
             List<ComponentGroupConfig> list = map.get(Integer.parseInt(groupConfig.getVersion()));
