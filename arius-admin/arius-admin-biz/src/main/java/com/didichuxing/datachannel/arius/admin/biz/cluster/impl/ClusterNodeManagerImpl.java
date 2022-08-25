@@ -155,13 +155,13 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Result<Boolean> editMultiNode2Region(List<ClusterRegionWithNodeInfoDTO> params, String operator,
-                                                Integer projectId) throws AdminOperateException {
+                                                Integer projectId, OperationEnum operationEnum) throws AdminOperateException {
         final Result<Void> result = ProjectUtils.checkProjectCorrectly(i -> i, projectId, projectId);
         if (result.failed()) {
             return Result.buildFail(result.getMessage());
         }
         for (ClusterRegionWithNodeInfoDTO param : params) {
-            Result<Boolean> checkRet = baseCheckParamValid(param,OperationEnum.EDIT);
+            Result<Boolean> checkRet = baseCheckParamValid(param,operationEnum);
             if (checkRet.failed()) {
                 throw new AdminOperateException(checkRet.getMessage(), FAIL);
             }
@@ -288,7 +288,7 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
             if (clusterRegionService.isExistByRegionName(param.getName())) {
                 return Result.buildFail(String.format("region名称[%s]已经存在", param.getName()));
             }
-            if (CollectionUtils.isNotEmpty(param.getBindingNodeIds())) {
+            if (CollectionUtils.isEmpty(param.getBindingNodeIds())) {
                 return Result.buildFail("不允许绑定空region");
             }
         }
