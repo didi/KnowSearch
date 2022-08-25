@@ -481,8 +481,15 @@ public class ESClusterServiceImpl implements ESClusterService {
      * @return boolean
      */
     @Override
-    public boolean syncConnectionStatus(String cluster) {
-        return esClusterDAO.syncConnectionStatus(cluster);
+    public boolean isConnectionStatus(String cluster) {
+    
+        try {
+            return ESOpTimeoutRetry.esRetryExecute("isConnectionStatus", 3,
+                    () -> esClusterDAO.isConnectionStatus(cluster));
+        } catch (ESOperateException e) {
+            LOGGER.error("class={}||method=isConnectionStatus", getClass().getSimpleName(), e);
+            return false;
+        }
     }
     
     private List<TaskMissionAnalysisVO> buildTaskMission(JSONObject responseJson) {
