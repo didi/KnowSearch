@@ -3,7 +3,9 @@ package com.didichuxing.datachannel.arius.admin.persistence.component;
 import com.didichuxing.datachannel.arius.admin.common.exception.BaseException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.RetryExecutor;
+import com.didichuxing.datachannel.arius.admin.common.util.RetryExecutor.HandlerWithReturnValue;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import org.elasticsearch.ElasticsearchTimeoutException;
 import org.elasticsearch.cluster.metadata.ProcessClusterEventTimeoutException;
 
@@ -55,6 +57,40 @@ public class ESOpTimeoutRetry {
         }
     }
 
+    
+    public static <T> T esRetryExecuteWithReturnValue(String methodName, int tryCount,
+                                         RetryExecutor.HandlerWithReturnValue<T> handlerWithReturnValue,Predicate<T> predicate) throws ESOperateException {
+        try {
+            final RetryExecutor<T> retryExecutor = RetryExecutor.builder().<T>name(methodName).retryCount(tryCount)
+                    .HandlerWithReturnValue(new HandlerWithReturnValue<T>() {
+                        @Override
+                        public T process() throws BaseException {
+                            return handlerWithReturnValue.process();
+                        }
+                
+                        @Override
+                        public boolean needRetry(Exception e) {
+                            return e instanceof ProcessClusterEventTimeoutException
+                                   || e instanceof ElasticsearchTimeoutException;
+                        }
+                
+                        @Override
+                        public int retrySleepTime(int retryTims) {
+                            int sleepTime = retryTims * SEC_30;
+                            int randomSleepTime = (int) (Math.random() * 100);
+                            int totalSleepTime = sleepTime + randomSleepTime;
+                    
+                            return totalSleepTime > MIN_5 ? MIN_5 : totalSleepTime;
+                        }
+                    });
+            return retryExecutor.execute(predicate);
+    
+        } catch (ESOperateException e) {
+            throw new ESOperateException(e.getMessage(),e.getCause());
+        }catch (Exception e){
+             throw new ESOperateException(e.getMessage(), e);
+        }
+    }
     /**
      * 定制重试方法等待的时间
      * @param methodName 方法名称

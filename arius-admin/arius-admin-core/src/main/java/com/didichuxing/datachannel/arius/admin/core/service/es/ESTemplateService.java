@@ -138,7 +138,7 @@ public interface ESTemplateService {
      * @param name    名字
      * @return Config
      */
-    TemplateConfig syncGetTemplateConfig(String cluster, String name);
+    TemplateConfig syncGetTemplateConfig(String cluster, String name) throws ESOperateException;
 
     /**
      * 获取模板的mapping配置
@@ -147,7 +147,7 @@ public interface ESTemplateService {
      * @param templateName
      * @return
      */
-    MappingConfig syncGetMappingsByClusterName(String clusterName, String templateName);
+    MappingConfig syncGetMappingsByClusterName(String clusterName, String templateName) throws ESOperateException;
 
     /**
      * 获取模板配置
@@ -155,14 +155,14 @@ public interface ESTemplateService {
      * @param templateName 模板名称
      * @return
      */
-    MultiTemplatesConfig syncGetTemplates(String clusterName, String templateName);
+    MultiTemplatesConfig syncGetTemplates(String clusterName, String templateName) throws ESOperateException;
 
     /**
      * 获取所有引擎模板
      * @param clusters 集群名
      * @return
      */
-    Map<String, TemplateConfig> syncGetAllTemplates(List<String> clusters);
+    Map<String, TemplateConfig> syncGetAllTemplates(List<String> clusters) throws ESOperateException;
 
     /**
      * 修改模板名称
@@ -194,7 +194,7 @@ public interface ESTemplateService {
      * @param cluster 物理集群名称
      * @return 集群模板个数
      */
-    long synGetTemplateNumForAllVersion(String cluster);
+    long synGetTemplateNumForAllVersion(String cluster) throws ESOperateException;
     
     boolean syncGetEsClusterIsNormal(String cluster);
     
