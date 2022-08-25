@@ -40,7 +40,6 @@ import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOpe
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.TASK_ID;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.TOTAL;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.TOTAL_IN_BYTES;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.TYPE;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.UNASSIGN;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.USED_IN_BYTES;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.USED_PERCENT;
@@ -48,6 +47,7 @@ import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOpe
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.didichuxing.datachannel.arius.admin.common.RetryUtils;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.NodeAllocationInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.NodeAttrInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.ESResponsePluginInfo;
@@ -808,6 +808,7 @@ public class ESClusterDAO extends BaseESDAO {
     }
     
     public boolean syncConnectionStatus(String cluster) {
-        return Objects.nonNull(esOpClient.getESClient(cluster));
+       
+        return  RetryUtils.performTryTimesMethods(()->esOpClient.isActualRunning(cluster),Boolean.FALSE::equals,3);
     }
 }
