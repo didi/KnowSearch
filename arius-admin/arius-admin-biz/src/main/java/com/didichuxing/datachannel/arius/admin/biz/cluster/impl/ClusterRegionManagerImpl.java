@@ -378,6 +378,7 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
         if (boundPhyClusterVersions.size() != 1) {
             return Result.buildFail("逻辑集群绑定的物理集群的版本号应该一致");
         }
+
         return Result.buildSucc();
     }
 
