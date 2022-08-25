@@ -251,9 +251,14 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
             projectExtendVO.setOwnerList(userBriefListWithAdminRole);
             projectExtendVO.setIsAdmin(true);
         } else {
-            final List<UserBriefVO> ownerList = projectExtendVO.getOwnerList();
-            userBriefListWithAdminRole.addAll(ownerList);
-            projectExtendVO.setUserList(userBriefListWithAdminRole.stream().distinct().collect(Collectors.toList()));
+            List<UserBriefVO> ownerList = Optional.ofNullable(projectExtendVO.getOwnerList())
+                    .orElse(Lists.newArrayList());
+            List<UserBriefVO> useList = Optional.ofNullable(projectExtendVO.getUserList()).orElse(Lists.newArrayList());
+            ownerList.addAll(userBriefListWithAdminRole);
+            useList.addAll(userBriefListWithAdminRole);
+        
+            projectExtendVO.setOwnerList(ownerList.stream().distinct().collect(Collectors.toList()));
+            projectExtendVO.setUserList(useList.stream().distinct().collect(Collectors.toList()));
         }
     }
 
