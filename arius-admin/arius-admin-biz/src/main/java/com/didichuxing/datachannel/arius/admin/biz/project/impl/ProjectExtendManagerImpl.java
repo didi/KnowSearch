@@ -180,7 +180,13 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
             // 6. 创建项目配置
             TupleTwo<Result<Void>, ProjectConfigPO> resultProjectConfigTuple = projectConfigService
                 .updateOrInitProjectConfig(config, operator);
-            setAdminProjectExtendVO(projectExtendVO);
+            final String roleName = roleService.getRoleBriefByRoleId(AuthConstant.ADMIN_ROLE_ID).getRoleName();
+            // 全量获取具有管理员角色的用户
+            final List<UserBriefVO> userBriefListWithAdminRole = userService.getAllUserBriefList().stream()
+                    .filter(userBriefVO -> CollectionUtils.isNotEmpty(userBriefVO.getRoleList())
+                                           && userBriefVO.getRoleList().contains(roleName))
+                    .collect(Collectors.toList());
+            buildProjectExtendVO(projectExtendVO,userBriefListWithAdminRole);
             // 设置项目配置
             if (resultProjectConfigTuple.v1().success()) {
                 projectExtendVO.setConfig(ConvertUtil.obj2Obj(resultProjectConfigTuple.v2(), ProjectConfigVO.class));
@@ -219,7 +225,13 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
         try {
             ProjectVO projectVO = projectService.getProjectDetailByProjectId(projectId);
             ProjectExtendVO projectExtendVO = ConvertUtil.obj2Obj(projectVO, ProjectExtendVO.class);
-            setAdminProjectExtendVO(projectExtendVO);
+            final String roleName = roleService.getRoleBriefByRoleId(AuthConstant.ADMIN_ROLE_ID).getRoleName();
+            // 全量获取具有管理员角色的用户
+            final List<UserBriefVO> userBriefListWithAdminRole = userService.getAllUserBriefList().stream()
+                    .filter(userBriefVO -> CollectionUtils.isNotEmpty(userBriefVO.getRoleList())
+                                           && userBriefVO.getRoleList().contains(roleName))
+                    .collect(Collectors.toList());
+            buildProjectExtendVO(projectExtendVO, userBriefListWithAdminRole);
             ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectId);
             projectExtendVO.setConfig(ConvertUtil.obj2Obj(projectConfig, ProjectConfigVO.class));
             return Result.buildSucc(projectExtendVO);
@@ -233,13 +245,15 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
      *
      * @param projectExtendVO 项目延长签证官
      */
-    private void setAdminProjectExtendVO(ProjectExtendVO projectExtendVO) {
+    private void buildProjectExtendVO(ProjectExtendVO projectExtendVO, List<UserBriefVO> userBriefListWithAdminRole) {
         if (AuthConstant.SUPER_PROJECT_ID.equals(projectExtendVO.getId())) {
-            final List<UserBriefVO> briefVOS = userService.getUserBriefListByRoleId(AuthConstant.ADMIN_ROLE_ID).stream()
-                    .distinct().collect(Collectors.toList());
-            projectExtendVO.setUserList(briefVOS);
-            projectExtendVO.setOwnerList(briefVOS);
+            projectExtendVO.setUserList(userBriefListWithAdminRole);
+            projectExtendVO.setOwnerList(userBriefListWithAdminRole);
             projectExtendVO.setIsAdmin(true);
+        } else {
+            final List<UserBriefVO> ownerList = projectExtendVO.getOwnerList();
+            userBriefListWithAdminRole.addAll(ownerList);
+            projectExtendVO.setUserList(userBriefListWithAdminRole.stream().distinct().collect(Collectors.toList()));
         }
     }
 
@@ -358,10 +372,17 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
         final PagingData<ProjectVO> projectPage = projectService.getProjectPage(projectQueryDTO, projectIds);
         final List<ProjectExtendVO> projectExtendVOList = ConvertUtil.list2List(projectPage.getBizData(),
             ProjectExtendVO.class);
+        final String roleName = roleService.getRoleBriefByRoleId(AuthConstant.ADMIN_ROLE_ID).getRoleName();
+        //全量获取具有管理员角色的用户
+        final List<UserBriefVO> userBriefListWithAdminRole = userService.getAllUserBriefList()
+                .stream()
+                .filter(userBriefVO->CollectionUtils.isNotEmpty(userBriefVO.getRoleList())
+                &&userBriefVO.getRoleList().contains(roleName))
+                .collect(Collectors.toList());
         for (ProjectExtendVO projectExtendVO : projectExtendVOList) {
             FUTURE_UTIL.runnableTask(() -> {
                 
-                setAdminProjectExtendVO(projectExtendVO);
+                buildProjectExtendVO(projectExtendVO,userBriefListWithAdminRole);
                 final ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectExtendVO.getId());
                 projectExtendVO.setConfig(ConvertUtil.obj2Obj(projectConfig, ProjectConfigVO.class));
             });
