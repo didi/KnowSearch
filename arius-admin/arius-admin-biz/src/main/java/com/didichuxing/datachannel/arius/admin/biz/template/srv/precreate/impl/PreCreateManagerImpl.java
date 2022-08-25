@@ -55,7 +55,7 @@ public class PreCreateManagerImpl extends BaseTemplateSrvImpl implements PreCrea
     @Override
     public Result<Boolean> preCreateIndex(Integer logicTemplateId) throws ESOperateException {
         if (Boolean.FALSE.equals(isTemplateSrvOpen(logicTemplateId))) {
-            return Result.buildFail("指定索引模板未开启预先创建能力");
+            return Result.buildSucc();
         }
 
         List<IndexTemplatePhy> templatePhyList = indexTemplatePhyService.getTemplateByLogicId(logicTemplateId);
