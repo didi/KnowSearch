@@ -28,5 +28,7 @@ public class ConsoleTemplateUpdateDTO extends BaseDTO {
 
     @ApiModelProperty("备注")
     private String  desc;
+    @ApiModelProperty("保存天数, 单位天")
+    private Integer expireTime;
 
 }
