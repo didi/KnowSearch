@@ -6,13 +6,13 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linech
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats.AriusStatsIndexInfoESDAO;
 import com.google.common.collect.Maps;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by linyunan on 2021-08-16
@@ -46,9 +46,6 @@ public class ESIndicesStatsService {
     
     public List<VariousLineChartMetrics> getAggClusterPhyIndicesMetrics(MetricsClusterPhyIndicesDTO param,
                                                                         List<String> belongToProjectIndexName) {
-        if (CollectionUtils.isEmpty(belongToProjectIndexName)) {
-            return Collections.emptyList();
-        }
         Integer topNu = param.getTopNu();
         String topMethod = param.getTopMethod();
         Integer topTimeStep = param.getTopTimeStep();

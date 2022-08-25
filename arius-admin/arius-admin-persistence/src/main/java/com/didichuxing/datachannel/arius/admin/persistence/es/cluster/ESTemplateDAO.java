@@ -5,9 +5,16 @@ import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOpe
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.INDEX_SHARD_NUM;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.TEMPLATE_DEFAULT_ORDER;
 
+import com.didichuxing.datachannel.arius.admin.common.constant.ESSettingConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateHealthEnum;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import com.didichuxing.datachannel.arius.admin.common.function.BiFunctionWithESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.ParsingExceptionUtils;
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
 import com.didiglobal.logi.elasticsearch.client.ESClient;
+import com.didiglobal.logi.elasticsearch.client.gateway.direct.DirectRequest;
+import com.didiglobal.logi.elasticsearch.client.gateway.direct.DirectResponse;
 import com.didiglobal.logi.elasticsearch.client.model.type.ESVersion;
 import com.didiglobal.logi.elasticsearch.client.request.index.gettemplate.ESIndicesGetTemplateRequest;
 import com.didiglobal.logi.elasticsearch.client.request.index.puttemplate.ESIndicesPutTemplateRequest;
@@ -25,7 +32,9 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.rest.RestStatus;
 import org.springframework.stereotype.Repository;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 /**
  * @author d06679
@@ -33,6 +42,8 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public class ESTemplateDAO extends BaseESDAO {
+    public static final String CAT_INDIES_HEALTH = "/_cat/indices/%s?v=true&format=json&health=%s&filter_path=index";
+    public static final String CAT_INDIES = "/_cat/indices/%s?v=true&format=json&filter_path=index";
 
     /**
      * 修改模板表达式
@@ -75,23 +86,24 @@ public class ESTemplateDAO extends BaseESDAO {
      * @param shardNum 表达式
      * @return
      */
-    public boolean updateShardNum(String cluster, String name, Integer shardNum) {
+    public boolean updateShardNum(String cluster, String name, Integer shardNum) throws ESOperateException{
         ESClient client = esOpClient.getESClient(cluster);
         if (client == null) {
             LOGGER.warn("class={}||method=updateShardNum||clusterName={}||shardNum={}||errMsg=esClient is null",
                     getClass().getSimpleName(), cluster, shardNum);
-            return false;
+            throw new ESOperateException(String.format("集群【%s】异常，无法更新模版【%s】分片",cluster,name));
         }
 
         // 获取es中原来index template的配置
          ESIndicesGetTemplateResponse getTemplateResponse = getESIndicesGetTemplateResponse(cluster,
                 name, 3);
         TemplateConfig templateConfig = getTemplateResponse.getMultiTemplatesConfig().getSingleConfig();
-
+       
         // 修改分片数目
         if (shardNum != null && shardNum > 0) {
             templateConfig.setSettings(INDEX_SHARD_NUM, String.valueOf(shardNum));
         }
+        
 
         // 设置ES版本
         templateConfig.setVersion(client.getEsVersion());
@@ -162,7 +174,7 @@ public class ESTemplateDAO extends BaseESDAO {
      * @param shardRouting shardRouting
      * @return result
      */
-    public boolean create(String cluster, String name, String expression, Integer shard, Integer shardRouting) {
+    public boolean create(String cluster, String name, String expression, Integer shard, Integer shardRouting) throws ESOperateException {
         ESClient client = esOpClient.getESClient(cluster);
         if (client == null) {
             LOGGER.warn(
@@ -172,14 +184,18 @@ public class ESTemplateDAO extends BaseESDAO {
         }
     
         // 获取es中原来index template的配置
-        BiFunction<Long, TimeUnit, ESIndicesGetTemplateResponse> getTemplateResponseBiFunction = (time, unit) -> {
+        BiFunctionWithESOperateException<Long, TimeUnit, ESIndicesGetTemplateResponse> getTemplateResponseBiFunction = (time, unit) -> {
             try {
                 return client.admin().indices().prepareGetTemplate(name + "*").execute()
                         .actionGet(time,unit);
             } catch (Exception e) {
+                final String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
+                if (Objects.nonNull(exception)) {
+                    throw new ESOperateException(exception);
+                }
                 LOGGER.warn("class=ESTemplateDAO||method=create||msg=get src template fail||cluster={}||name={}",
                         cluster, name);
-                return null;
+                throw new ESOperateException(e.getMessage());
             }
         };
         TemplateConfig templateConfig = Optional.ofNullable(
@@ -209,14 +225,18 @@ public class ESTemplateDAO extends BaseESDAO {
         // 设置ES版本
         templateConfig.setVersion(client.getEsVersion());
         
-        BiFunction<Long, TimeUnit, ESIndicesPutTemplateResponse> getESIndicesPutTemplateResponseBiFunction = (time, unit) -> {
+        BiFunctionWithESOperateException<Long, TimeUnit, ESIndicesPutTemplateResponse> getESIndicesPutTemplateResponseBiFunction = (time, unit) -> {
             try {
                 return client.admin().indices().preparePutTemplate(name).setTemplateConfig(templateConfig)
                         .execute().actionGet(time, unit);
             } catch (Exception e) {
+                 final String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
+                if (Objects.nonNull(exception)) {
+                    throw new ESOperateException(exception);
+                }
                 LOGGER.error("class=ESTemplateDAO||method=create||msg=put template fail||cluster={}||name={}", cluster,
                         name, e);
-                return null;
+                throw new ESOperateException(e.getMessage());
             }
         
         };
@@ -227,7 +247,7 @@ public class ESTemplateDAO extends BaseESDAO {
                 
     }
 
-    public boolean create(String cluster, String name, TemplateConfig templateConfig) {
+    public boolean create(String cluster, String name, TemplateConfig templateConfig) throws ESOperateException{
         ESClient client = esOpClient.getESClient(cluster);
         if (client==null){
             LOGGER.warn("class=ESTemplateDAO||method=create||msg=es client is null ||cluster={}||name={}||templateConfig={}", cluster,
@@ -238,15 +258,19 @@ public class ESTemplateDAO extends BaseESDAO {
         // 设置ES版本
         templateConfig.setVersion(client.getEsVersion());
         // 向ES中创建模板流程
-        BiFunction<Long, TimeUnit, ESIndicesPutTemplateResponse> responseBiFunction = (time, unit) -> {
+        BiFunctionWithESOperateException<Long, TimeUnit, ESIndicesPutTemplateResponse> responseBiFunction = (time, unit) -> {
             try {
                 return client.admin().indices().preparePutTemplate(name).setTemplateConfig(templateConfig).execute()
                         .actionGet(time, unit);
             
             } catch (Exception e) {
+                final String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
+                if (Objects.nonNull(exception)) {
+                    throw new ESOperateException(exception);
+                }
                 LOGGER.error("class=ESTemplateDAO||method=create||put templates fail||clusterName={}||templateName={}",
                         cluster, name, e);
-                return null;
+                throw new ESOperateException("模板创建失败");
             }
         };
     
@@ -261,7 +285,8 @@ public class ESTemplateDAO extends BaseESDAO {
      * @param templateConfig    模版配置
      * @return result
      */
-    public boolean updateTemplate(String clusterName, String templateName, TemplateConfig templateConfig) {
+    public boolean updateTemplate(String clusterName, String templateName, TemplateConfig templateConfig)
+            throws ESOperateException {
         ESClient esClient = esOpClient.getESClient(clusterName);
         if (esClient == null) {
             LOGGER.warn(
@@ -281,16 +306,29 @@ public class ESTemplateDAO extends BaseESDAO {
         try {
             response = esClient.admin().indices().putTemplate(request).actionGet(120, TimeUnit.SECONDS);
         } catch (Exception e) {
+            final String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
+            if (StringUtils.isNotBlank(exception)){
+                 throw new ESOperateException(exception);
+            }
             LOGGER.warn(
                 "class=ESTemplateDAO||method=updateTemplate||update template fail||clusterName={}||templateName={}||esVersion={}||templateConfig={}||msg={}",
                 clusterName, templateName, esClient.getEsVersion(),
                 templateConfig.toJson(ESVersion.valueBy(esClient.getEsVersion())), e.getMessage(), e);
-            throw e;
+            throw new ESOperateException(e.getMessage(),e);
         }
 
         return response.getAcknowledged();
     }
-
+    
+    /**
+     * 同步获取集群是正常
+     *
+     * @param clusterName 集群名称
+     * @return boolean
+     */
+    public boolean syncGetClusterIsNormal(String clusterName) {
+        return esOpClient.getESClient(clusterName) != null;
+    }
     /**
      * 获取模板信息
      * @param clusterName       集群名
@@ -315,7 +353,7 @@ public class ESTemplateDAO extends BaseESDAO {
     public Map<String, TemplateConfig> getAllTemplate(List<String> clusters) {
         Map<String, TemplateConfig> map = new HashMap<>();
         for (String clusterName : clusters) {
-
+            
             MultiTemplatesConfig templatesConfig = getTemplates(clusterName, null,3);
 
             if (null == templatesConfig) {
@@ -332,7 +370,7 @@ public class ESTemplateDAO extends BaseESDAO {
      * @param templateName      模版名
      * @return result
      */
-    public MappingConfig getTemplateMapping(String clusterName, String templateName) {
+    public MappingConfig getTemplateMapping(String clusterName, String templateName) throws ESOperateException {
         MultiTemplatesConfig templatesConfig = getTemplates(clusterName, templateName,3);
 
         if (templatesConfig == null || templatesConfig.getSingleConfig() == null) {
@@ -400,7 +438,7 @@ public class ESTemplateDAO extends BaseESDAO {
             }
         };
         
-        return performTryTimesMethods(responseBiFunction, Objects::isNull, 3);
+        return performTryTimesMethods(responseBiFunction, Objects::isNull, tryTimes);
     }
 
     /**
@@ -410,7 +448,7 @@ public class ESTemplateDAO extends BaseESDAO {
      * @param setting setting
      * @return result
      */
-    public boolean upsertSetting(String cluster, String name, Map<String, String> setting) {
+    public boolean upsertSetting(String cluster, String name, Map<String, String> setting) throws ESOperateException {
         ESClient client = esOpClient.getESClient(cluster);
           if (client == null ) {
            
@@ -428,10 +466,72 @@ public class ESTemplateDAO extends BaseESDAO {
             templateConfig.setSettings(entry.getKey(), entry.getValue());
         }
 
-        ESIndicesPutTemplateResponse response = client.admin().indices().preparePutTemplate(name)
-            .setTemplateConfig(templateConfig).execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+        try {
+            ESIndicesPutTemplateResponse response = client.admin().indices().preparePutTemplate(name)
+                    .setTemplateConfig(templateConfig).execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+            return response.getAcknowledged();
+        } catch (Exception e) {
+            final String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
+            if (StringUtils.isNotBlank(exception)) {
+                throw new ESOperateException(exception);
+            }
+            throw new ESOperateException(e.getMessage(), e);
+        }
+       
+    }
+    
+    
+    /**
+     * 它更新索引模板设置并检查分配包含名称。
+     *
+     * @param cluster 集群名称
+     * @param name 索引模板名称
+     * @param setting 索引模板的配置
+     */
+    public boolean updateSettingCheckAllocationAndShard(String cluster, String name,
+                                                        Map<String, String> setting) throws ESOperateException {
+        ESClient client = esOpClient.getESClient(cluster);
+          if (client == null ) {
+           
+            LOGGER.warn("class={}||method=upsertSetting||cluster={}||name={}||errMsg=client is null ",
+                    getClass().getSimpleName(), cluster, name);
+            return false;
+        }
 
-        return response.getAcknowledged();
+        // 获取es中原来index template的配置
+        ESIndicesGetTemplateResponse getTemplateResponse = client.admin().indices().prepareGetTemplate(name).execute()
+            .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+        TemplateConfig templateConfig = getTemplateResponse.getMultiTemplatesConfig().getSingleConfig();
+        final String indexRoutingAllocationIncludeName =
+                templateConfig.getSetttings().get(ESSettingConstant.INDEX_ROUTING_ALLOCATION_INCLUDE_NAME);
+        //index.routing.allocation.include._name
+        if (!StringUtils.equals(setting.get(ESSettingConstant.INDEX_ROUTING_ALLOCATION_INCLUDE_NAME),
+                indexRoutingAllocationIncludeName)) {
+            throw new ESOperateException(
+                    "模版分片分配节点配置属于系统权限，不允许变更 index.routing.allocation.include._name");
+        }
+        //shard
+        if (!StringUtils.equals(setting.get(ESSettingConstant.INDEX_NUMBER_OF_SHARDS),
+                indexRoutingAllocationIncludeName)) {
+            throw new ESOperateException(
+                    "模版设置 shard 大小设置属于系统权限, 非运维人员不允许变更 index.number_of_shards");
+        
+        }
+        templateConfig.setSetttings(setting);
+        
+
+        try {
+            ESIndicesPutTemplateResponse response = client.admin().indices().preparePutTemplate(name)
+                    .setTemplateConfig(templateConfig).execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+            return response.getAcknowledged();
+        } catch (Exception e) {
+            final String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
+            if (StringUtils.isNotBlank(exception)) {
+                throw new ESOperateException(exception);
+            }
+            throw new ESOperateException(e.getMessage(), e);
+        }
+       
     }
 
     /**
@@ -443,7 +543,7 @@ public class ESTemplateDAO extends BaseESDAO {
      * @return result
      */
     public boolean copyMappingAndAlias(String srcCluster, String srcTemplateName, String tgtCluster,
-                                       String tgtTemplateName) {
+                                       String tgtTemplateName) throws ESOperateException {
 
         ESClient srcClient = esOpClient.getESClient(srcCluster);
         ESClient tgtClient = esOpClient.getESClient(tgtCluster);
@@ -482,11 +582,63 @@ public class ESTemplateDAO extends BaseESDAO {
             response = tgtClient.admin().indices().preparePutTemplate(tgtTemplateName)
                 .setTemplateConfig(tgtTemplateConfig).execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
         } catch (Exception e) {
+            final String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
+            if (StringUtils.isNotBlank(exception)){
+                throw new ESOperateException(exception);
+            }
             LOGGER.error(
                 "class=ESTemplateDAO||method=copyMappingAndAlias||srcCluster={}||srcTemplateName={}||tgtCluster={}||tgtTemplateName={}",
                 srcCluster, srcTemplateName, tgtCluster, tgtTemplateName, e);
         }
 
         return response.getAcknowledged();
+    }
+    
+    
+  
+    /**
+     * > 通过表达式模板健康枚举判断是否有匹配索引
+     *
+     * @param cluster 集群名称
+     * @param expression 索引名称表达式，可以是通配符表达式，如“logstash-*”
+     * @param templateHealthEnum 索引的状态，为枚举类，枚举类如下：
+     */
+    public boolean hasMatchHealthIndexByExpressionTemplateHealthEnum(String cluster, String expression,
+                                                                     TemplateHealthEnum templateHealthEnum) throws ESOperateException{
+        ESClient client = esOpClient.getESClient(cluster);
+        if (client == null) {
+            return false;
+        }
+        DirectResponse response = getDirectResponseByClusterAndUrl(client,
+                String.format(CAT_INDIES_HEALTH, expression, templateHealthEnum.getDesc()));
+    
+        if (templateHealthEnum.equals(TemplateHealthEnum.GREEN)) {
+            DirectResponse directResponse = getDirectResponseByClusterAndUrl(client,
+                    String.format(CAT_INDIES, expression));
+            return (response.getRestStatus() == RestStatus.OK && StringUtils.isNotBlank(response.getResponseContent()))
+                   || (directResponse.getRestStatus() == RestStatus.OK && StringUtils.isEmpty(
+                    directResponse.getResponseContent()));
+        }
+        return (response.getRestStatus() == RestStatus.OK && StringUtils.isNotBlank(response.getResponseContent()));
+    }
+  
+    /**
+     * > 通过集群和url获取模板的健康度
+     *
+     * @param client 用于连接 ES 集群的客户端对象。
+     * @param uri    请求地址，即模板的地址。
+     */
+    private DirectResponse getDirectResponseByClusterAndUrl(ESClient client, String uri) throws ESOperateException {
+        DirectRequest directRequest = new DirectRequest(RequestMethod.GET.name(), uri);
+        try {
+            return client.direct(directRequest).actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
+            if (Objects.nonNull(exception)) {
+                throw new ESOperateException(exception);
+            }
+            throw new ESOperateException(e.getMessage(), e);
+        }
+    
     }
 }

@@ -61,21 +61,35 @@ public class ClusterDashBoardCollector extends BaseDashboardCollector {
         //10.写入文档数突增量（上个时间间隔的写文档数的两倍
         clusterMetrics.setDocUprushNum(getDocUprushNum(cluster));
 
-        long currentTimeMillis = System.currentTimeMillis();
         //11._cluster/stats 和_nodes/stats 消耗时间
         clusterMetrics.setClusterElapsedTime(esClusterPhyStatsService.getClusterStatusElapsedTime(cluster));
         clusterMetrics.setNodeElapsedTime(esClusterPhyStatsService.getNodeStatusElapsedTime(cluster));
-        Long nearestPoint = esClusterPhyStatsService.getTimeDifferenceBetweenNearestPointAndNow(cluster);
-        long elapsedTime = currentTimeMillis - nearestPoint;
+        long collectorDelayed = getCollectorDelayed(cluster);
 
         //12.消耗时间是否大于5分钟,开始采集到结束采集的时间，指标看板的采集任务，当前时间到最近一次采集的时间
-        clusterMetrics.setClusterElapsedTimeGte5Min(elapsedTime > FIVE_MINUTE);
+        clusterMetrics.setClusterElapsedTimeGte5Min(collectorDelayed > FIVE_MINUTE);
+        clusterMetrics.setCollectorDelayed(collectorDelayed);
+        //13.集群下索引数量
+        clusterMetrics.setIndexCount(esClusterPhyStatsService.getIndexCountByCluster(cluster));
 
         dashBoardStats.setCluster(clusterMetrics);
         monitorMetricsSender.sendDashboardStats(Lists.newArrayList(dashBoardStats));
 
         // 暂存当前集群指标信息 针对特殊场景，即集群不可用后, 当前的策略是会使用上一次采集到的数据
         cluster2LastTimeClusterMetricsMap.put(cluster, clusterMetrics);
+    }
+
+    /**
+     * 获取采集延时
+     * @param cluster 集群
+     * @return
+     */
+    private long getCollectorDelayed(String cluster) {
+        long currentTimeMillis = System.currentTimeMillis();
+        //最近一个采集点的时间
+        Long nearestPoint = esClusterPhyStatsService.getTimeDifferenceBetweenNearestPointAndNow(cluster);
+        long collectorDelayed = currentTimeMillis - nearestPoint;
+        return collectorDelayed;
     }
 
     @Override

@@ -58,4 +58,6 @@ public interface IndexTemplatePhyDAO {
     List<IndexTemplatePhyPO> countListByLogicId();
 
     List<IndexTemplatePhyPO> listByRegionId(Integer regionId);
+    
+    int updateShardNumByLogicId(@Param("logicId")Integer logicId, @Param("shardNum")Integer shardNum);
 }

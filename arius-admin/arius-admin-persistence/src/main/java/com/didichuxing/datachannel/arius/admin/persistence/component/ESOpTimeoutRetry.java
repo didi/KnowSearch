@@ -1,13 +1,11 @@
 package com.didichuxing.datachannel.arius.admin.persistence.component;
 
 import com.didichuxing.datachannel.arius.admin.common.exception.BaseException;
-import org.elasticsearch.ElasticsearchTimeoutException;
-import org.elasticsearch.cluster.metadata.ProcessClusterEventTimeoutException;
-
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.RetryExecutor;
-
 import java.util.function.Function;
+import org.elasticsearch.ElasticsearchTimeoutException;
+import org.elasticsearch.cluster.metadata.ProcessClusterEventTimeoutException;
 
 /**
  * es操作器
@@ -50,8 +48,10 @@ public class ESOpTimeoutRetry {
                     return totalSleepTime > MIN_5 ? MIN_5 : totalSleepTime;
                 }
             }).execute();
-        } catch (Exception e) {
-            throw new ESOperateException(e.getMessage(), e);
+        } catch (ESOperateException e) {
+            throw new ESOperateException(e.getMessage(),e.getCause());
+        }catch (Exception e){
+             throw new ESOperateException(e.getMessage(), e);
         }
     }
 

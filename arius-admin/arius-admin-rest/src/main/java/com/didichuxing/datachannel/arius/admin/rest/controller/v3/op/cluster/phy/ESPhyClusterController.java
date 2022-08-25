@@ -112,6 +112,15 @@ public class ESPhyClusterController {
         return clusterPhyManager.getTemplateSameVersionClusterNamesByTemplateId(HttpRequestUtil.getProjectId(request),
             templateId);
     }
+    
+    @GetMapping("/{templateId}/same-version-and-dcdr-plugin/cluster-names")
+    @ResponseBody
+    @ApiOperation(value = "根据模板所在集群，获取与该集群相同版本号具备dcdr插件的集群名称列表")
+    public Result<List<String>> getTemplateSameVersionClusterNamesByTemplateIdExistDCDR(HttpServletRequest request,
+                                                                                        @PathVariable Integer templateId) {
+        return clusterPhyManager.getTemplateSameVersionClusterNamesByTemplateIdExistDCDR(
+                HttpRequestUtil.getProjectId(request), templateId);
+    }
 
     @PostMapping("/page")
     @ResponseBody
@@ -119,6 +128,13 @@ public class ESPhyClusterController {
     public PaginationResult<ClusterPhyVO> pageGetClusterPhys(HttpServletRequest request,
                                                              @RequestBody ClusterPhyConditionDTO condition) throws NotFindSubclassException {
         return clusterPhyManager.pageGetClusterPhys(condition, HttpRequestUtil.getProjectId(request));
+    }
+
+    @GetMapping("/super-phy-names")
+    @ResponseBody
+    @ApiOperation(value = "获取超级项目下的物理集群列表")
+    public Result<List<String>> listClusterPhyNameBySuperApp(HttpServletRequest request) {
+        return clusterPhyManager.listClusterPhyNameBySuperApp(HttpRequestUtil.getProjectId(request));
     }
 
     @GetMapping("/{clusterPhyId}/overview")

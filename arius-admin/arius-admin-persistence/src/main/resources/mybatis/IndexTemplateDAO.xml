@@ -29,13 +29,14 @@
         <result column="level"                   jdbcType="TINYINT" property="level"/>
         <result column="open_srv"                jdbcType="VARCHAR" property="openSrv"/>
         <result column="disk_size"               jdbcType="DECIMAL" property="diskSize"/>
+        <result column="health"               jdbcType="BIGINT" property="health"/>
     </resultMap>
 
     <sql id="Base_Column_List">
          id, `name`, data_type, date_format, data_center, expire_time, hot_time,
            date_field, date_field_format, id_field, routing_field, expression,
          `desc`, quota, write_rate_limit, project_id, ingest_pipeline,block_read, block_write, resource_id,
-          check_point_diff, has_dcdr, create_time, update_time, `level`, `open_srv`, disk_size
+          check_point_diff, has_dcdr, create_time, update_time, `level`, `open_srv`, disk_size,health
     </sql>
 
     <select id="listByCondition"
@@ -50,6 +51,7 @@
         <if test="dataCenter != null">and data_center = #{dataCenter}</if>
          <if test="projectId != null">and project_id = #{projectId}</if>
         <if test="resourceId != null">and resource_id = #{resourceId}</if>
+        <if test="health != null">and health = #{health}</if>
         order by id desc
     </select>
 
@@ -76,6 +78,9 @@
         <if test="param.resourceId != null"> and `resource_id` = #{param.resourceId}</if>
         <if test="param.desc != null"> and `desc` LIKE CONCAT('%', #{param.desc}, '%')</if>
         <if test="param.projectId != null"> and `project_id` = #{param.projectId}</if>
+        <if test="param.hasDCDR != null"> and `has_dcdr` = #{param.hasDCDR}</if>
+        <if test="param.health != null"> and `health` = #{param.health}</if>
+        
         order by  ${sortTerm}  ${sortType}
         limit #{from}, #{size}
     </select>
@@ -92,6 +97,8 @@
         <if test="resourceId != null"> and `resource_id` = #{resourceId}</if>
         <if test="desc != null"> and `desc` LIKE CONCAT('%', #{desc}, '%')</if>
         <if test="projectId != null"> and `project_id` = #{projectId}</if>
+        <if test="hasDCDR != null"> and `has_dcdr` = #{hasDCDR}</if>
+        <if test="health != null"> and `health` = #{health}</if>
         order by id desc
     </select>
 
@@ -111,12 +118,12 @@
             keyColumn="id" keyProperty="id">
         insert into index_template_info
           (is_active, `name`, data_type, date_format, data_center, expire_time, hot_time,  date_field, date_field_format, id_field, routing_field, expression,
-         `desc`, quota, write_rate_limit, project_id, ingest_pipeline, resource_id, `level`, open_srv, disk_size)
+         `desc`, quota, write_rate_limit, project_id, ingest_pipeline, resource_id, `level`, open_srv, disk_size,health)
         values
         (1, #{name}, #{dataType}, #{dateFormat}, #{dataCenter}, #{expireTime}, #{hotTime},
           #{dateField}, #{dateFieldFormat}, #{idField},
          #{routingField}, #{expression}, #{desc}, #{quota}, #{writeRateLimit}, #{projectId}, #{ingestPipeline}, #{resourceId}, #{level}
-        , #{openSrv}, #{diskSize})
+        , #{openSrv}, #{diskSize},0)
     </insert>
 
     <select id="getById" parameterType="int" resultMap="BaseResultMap">
@@ -174,6 +181,7 @@
             <if test="hasDCDR != null">,has_dcdr = #{hasDCDR}</if>
             <if test="openSrv != null">,open_srv = #{openSrv}</if>
             <if test="diskSize != null">,disk_size = #{diskSize}</if>
+            <if test="health != null">,health = #{health}</if>
         </trim>
         where id = #{id}
     </update>

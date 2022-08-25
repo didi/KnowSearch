@@ -7,22 +7,20 @@ import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.BaseTemplat
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.cold.ColdManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.ColdSrvOpenDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.TemplateQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.srv.TemplateSrv;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.srv.UnavailableTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv.TemplateWithSrvVO;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterConnectionStatusWithTemplateEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.SupportSrv;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
-import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
@@ -33,13 +31,11 @@ import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Service;
@@ -126,12 +122,13 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
     }
 
     @Override
-    public List<UnavailableTemplateSrv> getUnavailableSrv(IndexTemplate template) {
+    public List<UnavailableTemplateSrv> getUnavailableSrvByTemplateAndMasterPhy(IndexTemplate template,
+                                                                                String clusterPhy) {
         List<UnavailableTemplateSrv> unavailableSrvList = Lists.newCopyOnWriteArrayList();
         List<TemplateServiceEnum> allSrvList = TemplateServiceEnum.allTemplateSrv();
         //默认给一个srv就可以了
         BaseTemplateSrv srvHandle = BASE_TEMPLATE_SRV_MAP.get(TemplateServiceEnum.TEMPLATE_COLD.getCode());
-        SupportSrv supportSrv =srvHandle.getSupportDCDRAndPipelineByLogicTemplate(template);
+        SupportSrv supportSrv =srvHandle.getSupportSrvByLogicTemplateAndMasterClusterPhy(template,clusterPhy);
         final boolean dcdrSupport = supportSrv.isDcdrModuleExists();
         final boolean pipelineSupport = supportSrv.isPipelineModuleExists();
         boolean coldRegionSupport = supportSrv.isColdRegionExists();
@@ -233,115 +230,14 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
     }
 
 
-    @Override
-    public List<Integer> getPhyClusterTemplateSrvIds(String phyCluster) {
-        Result<List<ClusterTemplateSrv>> ret = clusterPhyService.getPhyClusterTemplateSrv(phyCluster);
-        if (ret.success()) {
-            return ret.getData().stream().map(ClusterTemplateSrv::getServiceId).collect(Collectors.toList());
-        }
-        return Lists.newArrayList();
-    }
-
-    /**
-     * @param phyClusterName
-     * @param clusterTemplateSrvIdList
-     * @param operator
-     * @return
-     */
-    @Override
-    public Result<Boolean> replaceTemplateServes(String phyClusterName, List<Integer> clusterTemplateSrvIdList,
-                                                 String operator) {
-        if (!isRDOrOP(operator)) {
-            return Result.buildNotExist(NO_PERMISSION_CONTENT);
-        }
-        ClusterPhy clusterPhy = clusterPhyService.getClusterByName(phyClusterName);
-        if (null == clusterPhy) {
-            return Result.buildNotExist(PHYSICAL_CLUSTER_NOT_EXISTS);
-        }
-
-        clusterPhy.setTemplateSrvs(ListUtils.intList2String(clusterTemplateSrvIdList));
-        return clusterPhyService.editCluster(ConvertUtil.obj2Obj(clusterPhy, ClusterPhyDTO.class), operator);
-    }
-
-    /**
-     * @param clusterPhy 物理集群名称
-     * @param operator   操作人
-     * @return
-     */
-    @Override
-    public Result<Boolean> delAllTemplateSrvByClusterPhy(String clusterPhy, String operator) {
-        if (!isRDOrOP(operator)) {
-            return Result.buildNotExist(NO_PERMISSION_CONTENT);
-        }
-
-        ClusterPhy cluster = clusterPhyService.getClusterByName(clusterPhy);
-        if (null == cluster) {
-            return Result.buildNotExist(PHYSICAL_CLUSTER_NOT_EXISTS);
-        }
-        cluster.setTemplateSrvs("");
-        //此处属于工单的特定使用是不需要进行冗余的操作记录的
-        return clusterPhyService.editCluster(ConvertUtil.obj2Obj(cluster, ClusterPhyDTO.class), operator);
-    }
-
-    private boolean isRDOrOP(String operator) {
-        return roleTool.isAdmin(operator);
-    }
-
-    /**
-     * @param clusterPhies
-     * @param srvId
-     * @return
-     */
-    @Override
-    public List<String> getPhyClusterByOpenTemplateSrv(List<ClusterPhy> clusterPhies, int srvId) {
-        List<String> clusterPhyNames = new ArrayList<>();
-        if (CollectionUtils.isEmpty(clusterPhies)) {
-            return clusterPhyNames;
-        }
-        clusterPhies.forEach(clusterPhy -> {
-            if (isPhyClusterOpenTemplateSrv(clusterPhy, srvId)) {
-                clusterPhyNames.add(clusterPhy.getCluster());
-            }
-        });
-        return clusterPhyNames;
-    }
-
-    public boolean isPhyClusterOpenTemplateSrv(ClusterPhy phyCluster, int srvId) {
-       
-            return true;
-    }
+    
 
 
-    /**
-     * 判断物理集群是否打开了某个索引服务
-     *
-     * @param phyCluster 物理集群名称
-     * @param srvId
-     * @return
-     */
-    @Override
-    public boolean isPhyClusterOpenTemplateSrv(String phyCluster, int srvId) {
-        try {
-            Result<List<ClusterTemplateSrv>> result = clusterPhyService.getPhyClusterTemplateSrv(phyCluster);
-            if (null == result || result.failed()) {
-                return false;
-            }
 
-            List<ClusterTemplateSrv> clusterTemplateSrvs = result.getData();
-            for (ClusterTemplateSrv templateSrv : clusterTemplateSrvs) {
-                if (srvId == templateSrv.getServiceId()) {
-                    return true;
-                }
-            }
 
-            return false;
-        } catch (Exception e) {
-            LOGGER.warn("class=TemplateSrvManager||method=isPhyClusterOpenTemplateSrv||phyCluster={}||srvId={}",
-                phyCluster, srvId, e);
+   
 
-            return true;
-        }
-    }
+
 
     /**
      * 查询开启了某个索引服务的物理集群列表
@@ -369,5 +265,17 @@ public class TemplateSrvManagerImpl implements TemplateSrvManager {
                 .map(IndexTemplate::getName)
                 .collect(Collectors.toList());
     }
-   
+    
+    /**
+     * 返回主集群连接的状态
+     *
+     * @param clusterPhy 集群的名称。
+     * @return 主集群连接状态。
+     */
+    @Override
+    public ClusterConnectionStatusWithTemplateEnum getClusterConnectionStatus(String clusterPhy) {
+        //默认给一个srv就可以了
+        BaseTemplateSrv srvHandle = BASE_TEMPLATE_SRV_MAP.get(TemplateServiceEnum.TEMPLATE_COLD.getCode());
+        return srvHandle.getClusterConnectionStatus(clusterPhy);
+    }
 }

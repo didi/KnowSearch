@@ -161,7 +161,7 @@ public class DslsConstant {
     public static final String GET_MULTIPLE_TEMPLATE_FIRST_INTERVAL_AGG_METRICS_WITH_STEP    = "AriusStatsIndexInfoEsDao/getAggMultipleTemplateMetricsWithStep";
 
     /**
-     * 查询topN索引聚合信息
+     * 查询topN模板聚合信息
      */
     public static final String GET_TOPN_TEMPLATE_AGG_METRICS                                 = "AriusStatsIndexInfoEsDao/getTopNTemplateAggMetrics";
 
@@ -696,15 +696,23 @@ public class DslsConstant {
 
     public static final String GET_PLATFORM_CREATE_CAT_INDEX  = "IndexCatESDAO/getPlatformCreateCatIndex";
     public static final String GET_PLATFORM_CREATE_CAT_INDEX_BY_INDEX_PROJECT  = "IndexCatESDAO/getPlatformCreateCatIndexByIndexProject";
+    public static final String GET_PLATFORM_CREATE_CAT_INDEX_GROUP_BY_CLUSTER  = "IndexCatESDAO/getPlatformCreateCatIndexGroupByCluster";
+    
+    public static final String GET_PLATFORM_CREATE_CAT_INDEX_BY_ID  = "IndexCatESDAO/getPlatformCreateCatIndexById";
 
     /************************************************************      ShardCatESDAO     **************************************************************/
     /**
      * 条件查询索引cat/shard信息
      */
     public static final String GET_CAT_SHARD_INFO_BY_CONDITION                               = "ShardCatESDAO/getCatShardInfoByCondition";
-  
 
- 
+    /**
+     * 构造多字段模糊查询
+     */
+    public static final String SHOULD_TERM_CELL                                              = "ShardCatESDAO/shouldTermCell";
+
+
+
 
     /**************************************************************  IndexNameAccessCountEsDao **************************************************************/
     /**

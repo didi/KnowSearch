@@ -8,7 +8,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.po.operaterecord.Oper
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.operaterecord.OperateRecordVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.OperateRecordSortEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.SortConstant;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.NewModuleEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
@@ -118,8 +118,8 @@ public class OperateRecordServiceImpl implements OperateRecordService {
      */
     private void poIncludeEnumIdConvertEnumStr(OperateRecordInfoPO recordInfo, OperateRecordVO operateRecordVO) {
         //设置操作的模块
-        Optional.ofNullable(recordInfo).map(OperateRecordInfoPO::getModuleId).map(NewModuleEnum::getModuleEnum)
-            .map(NewModuleEnum::getModule).ifPresent(operateRecordVO::setModule);
+        Optional.ofNullable(recordInfo).map(OperateRecordInfoPO::getModuleId).map(ModuleEnum::getModuleEnum)
+            .map(ModuleEnum::getModule).ifPresent(operateRecordVO::setModule);
         //设置触发方式
         Optional.ofNullable(recordInfo).map(OperateRecordInfoPO::getTriggerWayId).map(TriggerWayEnum::getTriggerWayEnum)
             .map(TriggerWayEnum::getTriggerWay).ifPresent(operateRecordVO::setTriggerWay);

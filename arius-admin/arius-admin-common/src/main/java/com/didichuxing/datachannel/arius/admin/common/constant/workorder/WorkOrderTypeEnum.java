@@ -58,6 +58,7 @@ public enum WorkOrderTypeEnum {
                                CLUSTER_DELETE("clusterDelete", "物理集群删除"),
 
                                PHY_CLUSTER_PLUGIN_OPERATION("clusterOpPluginRestart", "物理集群插件操作"),
+    LOGIC_CLUSTER_JOIN("logicClusterJoin", "集群加入"),
 
                                UNKNOWN("unknown", "未知");
 

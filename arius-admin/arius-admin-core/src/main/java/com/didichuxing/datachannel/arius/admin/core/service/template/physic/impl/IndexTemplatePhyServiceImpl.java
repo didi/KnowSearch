@@ -798,6 +798,18 @@ public class IndexTemplatePhyServiceImpl implements IndexTemplatePhyService {
                 Collectors.toList());
     }
     
+    
+    /**
+     * 通过逻辑id更新索引模板的分片号
+     *
+     * @param logicId 逻辑索引ID，即index_template_logic表中索引的ID。
+     * @param shardNum 要更新的分片数
+     */
+    @Override
+    public boolean updateShardNumByLogicId(Integer logicId, Integer shardNum) {
+        return indexTemplatePhyDAO.updateShardNumByLogicId(logicId,shardNum)>0;
+    }
+    
     /**************************************************** private method ****************************************************/
     private List<IndexTemplatePhyWithLogic> batchBuildTemplatePhysicalWithLogic(List<IndexTemplatePhyPO> indexTemplatePhyPOS) {
         if (CollectionUtils.isEmpty(indexTemplatePhyPOS)) {

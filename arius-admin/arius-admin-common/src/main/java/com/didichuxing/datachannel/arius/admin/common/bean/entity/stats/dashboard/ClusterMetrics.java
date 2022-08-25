@@ -80,9 +80,19 @@ public class ClusterMetrics {
      */
     private Long    nodeElapsedTime;
 
+    /**
+     * 指标采集延时
+     */
+    private Long    collectorDelayed;
+
 
     /**
      * 消耗时间是否大于5分钟（开始采集到结束采集的时间）
      */
     private Boolean clusterElapsedTimeGte5Min;
+
+    /**
+     * 索引数量
+     */
+    private Long indexCount;
 }

@@ -6,7 +6,6 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ESClusterV
 import static com.didichuxing.datachannel.arius.admin.common.constant.ESClusterVersionEnum.ES_6_6_6_800;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ESClusterVersionEnum.ES_7_6_0_1100;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.common.constant.ESClusterVersionEnum;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
@@ -162,20 +161,10 @@ public enum TemplateServiceEnum {
             return "";
         }
 
-        return String.join(",",
-            serviceEnumList.stream().map(t -> String.valueOf(t.getCode())).collect(Collectors.toList()));
+        return serviceEnumList.stream().map(t -> String.valueOf(t.getCode())).collect(Collectors.joining(","));
     }
 
-    public static ClusterTemplateSrv convertFromEnum(TemplateServiceEnum serviceEnum) {
-        if (Objects.isNull(serviceEnum)) {
-            return null;
-        }
-        ClusterTemplateSrv clusterTemplateSrv = new ClusterTemplateSrv();
-        clusterTemplateSrv.setServiceId(serviceEnum.getCode());
-        clusterTemplateSrv.setServiceName(serviceEnum.getServiceName());
-        clusterTemplateSrv.setEsVersion(serviceEnum.getEsClusterVersion().getVersion());
-        return clusterTemplateSrv;
-    }
+    
     
     public static List<TemplateServiceEnum> usePartitionService(){
         

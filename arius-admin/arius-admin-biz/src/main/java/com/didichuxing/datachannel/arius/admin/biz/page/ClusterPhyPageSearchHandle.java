@@ -115,8 +115,18 @@ public class ClusterPhyPageSearchHandle extends AbstractPageSearchHandle<Cluster
             .collect(Collectors.toList());
         //非正常集群需要重新发事件
         for (ClusterPhyVO clusterPhyVO : clusterPhyList) {
+            buildSupportZeusByClusterPhy(clusterPhyVO);
             SpringTool.publish(new ClusterPhyEvent(clusterPhyVO.getCluster(), AriusUser.SYSTEM.getDesc()));
         }
         return PaginationResult.buildSucc(clusterPhyVOList, totalHit, condition.getPage(), condition.getSize());
+    }
+    
+    /**
+     * > 该函数用于构建支持zeus by cluster phy
+     *
+     * @param clusterPhyVO 集群物理信息
+     */
+    private void buildSupportZeusByClusterPhy(ClusterPhyVO clusterPhyVO) {
+    
     }
 }

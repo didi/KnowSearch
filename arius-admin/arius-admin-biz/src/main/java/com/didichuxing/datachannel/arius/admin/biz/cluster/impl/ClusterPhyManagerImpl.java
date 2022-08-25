@@ -12,7 +12,6 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.resource.E
 import static com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum.MASTER_NODE;
 
 import com.alibaba.fastjson.JSON;
-import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.page.ClusterPhyPageSearchHandle;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyManager;
@@ -30,7 +29,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterSe
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterRoleHostDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhyContext;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterTag;
@@ -106,6 +104,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -122,7 +121,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.ElasticsearchTimeoutException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.interceptor.TransactionAspectSupport;
@@ -186,8 +184,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     @Autowired
     private ClusterRegionService                                 clusterRegionService;
 
-    @Autowired
-    private ClusterContextManager                                clusterContextManager;
+    
 
     @Autowired
     private ProjectService                                       projectService;
@@ -219,13 +216,13 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     @PostConstruct
     private void init() {
         ariusScheduleThreadPool.submitScheduleAtFixedDelayTask(this::refreshClusterDistInfo, 60, 180);
-
+        ariusScheduleThreadPool.submitScheduleAtFixedDelayTask(this::refreshDCDRAndPipelineAndColdRegionTupleByClusterPhyWithCache,
+                60,45*60L);
     }
     
     /**
      * 每45分钟全量更新一遍集群
      */
-    @Scheduled(cron = "45 * * * * ?")
     private synchronized void refreshDCDRAndPipelineAndColdRegionTupleByClusterPhyWithCache() {
     
         for (String clusterName : clusterPhyService.listClusterNames()) {
@@ -706,7 +703,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         }
         return Result.buildSucc(clusters);
     }
-
+    
     @Override
     public Result<List<String>> getTemplateSameVersionClusterNamesByTemplateId(Integer projectId, Integer templateId) {
         List<String> clusterPhyNameList = listClusterPhyNameByProjectId(projectId);
@@ -731,7 +728,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         if (null == clusterPhy) {
             return Result.buildFail(String.format("the cluster[%s] from templateId[%s] is empty", cluster, templateId));
         }
-
+        
         String esVersion = clusterPhy.getEsVersion();
 
         List<ClusterPhy> clusterPhies = clusterPhyService.listAllClusters();
@@ -739,19 +736,37 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         Predicate<ClusterPhy> matchingSameVersionESVersionPredicate =
                 cp -> ESVersionUtil.compareBigVersionConsistency(esVersion,cp.getEsVersion());
         List<String> sameVersionClusterNameList = clusterPhies.stream().filter(Objects::nonNull)
-                //正常的集群才能够进行dcdr
                 .filter(r-> !ClusterHealthEnum.UNKNOWN.getCode().equals(r.getHealth()))
             .filter(r -> clusterPhyNameList.contains(r.getCluster()))
             .filter(rCluster -> !StringUtils.equals(logicTemplateWithPhysicals.getMasterPhyTemplate().getCluster(),
                 rCluster.getCluster()))
-            .filter(matchingSameVersionESVersionPredicate).map(ClusterPhy::getCluster).distinct()
+            .filter(matchingSameVersionESVersionPredicate).map(ClusterPhy::getCluster)
+                .distinct()
             .collect(Collectors.toList());
 
         return Result.buildSucc(sameVersionClusterNameList);
     }
-
- 
-
+    
+    /**
+     * @param projectId
+     * @param templateId
+     * @return
+     */
+    @Override
+    public Result<List<String>> getTemplateSameVersionClusterNamesByTemplateIdExistDCDR(Integer projectId,
+                                                                                        Integer templateId) {
+        final Result<List<String>> clusterPhyListRes = getTemplateSameVersionClusterNamesByTemplateId(projectId,
+                templateId);
+        if (clusterPhyListRes.failed()) {
+            return clusterPhyListRes;
+        }
+        final List<String> existDCDRPluginClusterPhyList = clusterPhyListRes.getData().stream()
+                .filter(clusterPhy -> Boolean.TRUE.equals(
+                        getDCDRAndPipelineAndColdRegionTupleByClusterPhyWithCache(clusterPhy).v1))
+                .collect(Collectors.toList());
+        return Result.buildSucc(existDCDRPluginClusterPhyList);
+    }
+    
     @Override
     public List<String> listClusterPhyNodeName(String clusterPhyName) {
         if (null == clusterPhyName) {
@@ -864,6 +879,20 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             "class=ClusterPhyManagerImpl||method=pageGetConsoleClusterVOS||msg=failed to get the ClusterPhyPageSearchHandle");
 
         return PaginationResult.buildFail("分页获取物理集群信息失败");
+    }
+
+    @Override
+    public Result<List<String>> listClusterPhyNameBySuperApp(Integer projectId) {
+        List<String> names = Lists.newArrayList();
+        if (AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
+            names.addAll(clusterPhyService.listClusterNames());
+        } else {
+            return Result.buildFail("非超级项目，不能查看物理集群列表");
+        }
+        if (names.size()==0){
+            return Result.buildFail("超级项目无集群信息，请前往集群管理-->物理集群，进行新建集群或者接入集群。");
+        }
+        return Result.buildSucc(names);
     }
 
     /**
@@ -1482,12 +1511,14 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
     private void doDeleteClusterJoin(ClusterPhy clusterPhy, String operator,
                                      Integer projectId) throws AdminOperateException {
-        ClusterPhyContext clusterPhyContext = clusterContextManager.getClusterPhyContext(clusterPhy.getCluster());
-        if (null == clusterPhyContext) {
+        
+           // 1. set region
+        List<ClusterRegion> regions = clusterRegionService.listPhyClusterRegions(clusterPhy.getCluster());
+        if (CollectionUtils.isEmpty(regions)) {
             return;
         }
-
-        List<Long> associatedRegionIds = clusterPhyContext.getAssociatedRegionIds();
+    
+        List<Long> associatedRegionIds = regions.stream().map(ClusterRegion::getId).collect(Collectors.toList());
         for (Long associatedRegionId : associatedRegionIds) {
             final ClusterRegion region = clusterRegionService.getRegionById(associatedRegionId);
             Result<Void> unbindRegionResult = clusterRegionService.unbindRegion(associatedRegionId, null, operator);
@@ -1519,7 +1550,13 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             }
         }
 
-        List<Long> clusterLogicIds = clusterPhyContext.getAssociatedClusterLogicIds();
+        List<Long> clusterLogicIds =regions.stream()
+                .filter(clusterRegion -> Objects.nonNull(clusterRegion.getLogicClusterIds()))
+                .map(clusterRegion -> ListUtils.string2LongList(clusterRegion.getLogicClusterIds()))
+                .filter(CollectionUtils::isNotEmpty).flatMap(Collection::stream)
+                .filter(logicId -> Objects.equals(logicId,
+                        Long.parseLong(AdminConstant.REGION_NOT_BOUND_LOGIC_CLUSTER_ID))).distinct()
+                .collect(Collectors.toList());
         for (Long clusterLogicId : clusterLogicIds) {
             final ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByIdThatNotContainsProjectId(clusterLogicId);
             if (Objects.isNull(clusterLogic)){

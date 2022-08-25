@@ -2,6 +2,9 @@ package com.didichuxing.datachannel.arius.admin.persistence.es.cluster;
 
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_OPERATE_TIMEOUT;
 
+import com.alibaba.fastjson.JSONObject;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import com.didichuxing.datachannel.arius.admin.common.util.ParsingExceptionUtils;
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
 import com.didiglobal.logi.elasticsearch.client.ESClient;
 import com.didiglobal.logi.elasticsearch.client.request.dcdr.DCDRIndex;
@@ -15,6 +18,8 @@ import com.didiglobal.logi.elasticsearch.client.response.dcdr.ESGetDCDRTemplateR
 import com.didiglobal.logi.elasticsearch.client.response.dcdr.ESPutDCDRTemplateResponse;
 import com.google.common.collect.Lists;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.collections4.CollectionUtils;
@@ -26,7 +31,7 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public class ESDCDRDAO extends BaseESDAO {
-
+    public static final String SECURITY_EXCEPTION="security_exception";
     /**
      * 保存dcdr模板配置 支持幂等
      * @param cluster 集群
@@ -35,17 +40,34 @@ public class ESDCDRDAO extends BaseESDAO {
      * @param replicaCluster 从集群
      * @return true/false
      */
-    public boolean putAutoReplication(String cluster, String name, String template, String replicaCluster) {
+    public boolean putAutoReplication(String cluster, String name, String template, String replicaCluster) throws ESOperateException {
         ESClient client = esOpClient.getESClient(cluster);
         if (client == null) {
             LOGGER.warn("class={}||method=putAutoReplication||clusterName={}||replicaCluster={}||template={}||errMsg=esClient is null",
                     getClass().getSimpleName(), cluster, replicaCluster,template);
             return false;
         }
-        ESPutDCDRTemplateResponse response = client.admin().indices().preparePutDCDRTemplate().setName(name)
-            .setTemplate(template).setReplicaCluster(replicaCluster).execute()
-            .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
-        return response.getAcknowledged();
+        try {
+            ESPutDCDRTemplateResponse response = client.admin().indices().preparePutDCDRTemplate().setName(name)
+                    .setTemplate(template).setReplicaCluster(replicaCluster).execute()
+                    .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+            return response.getAcknowledged();
+        
+        }catch (Exception e){
+            final JSONObject exception = ParsingExceptionUtils.getResponseExceptionJsonMessageByException(e);
+            final Optional<Boolean> securityExceptionOptional = Optional.ofNullable(exception)
+                    .map(json -> json.getJSONObject(ERROR)).map(json -> json.getString(TYPE))
+                    .map(type -> type.equalsIgnoreCase(SECURITY_EXCEPTION));
+            if (securityExceptionOptional.isPresent() && Boolean.TRUE.equals(securityExceptionOptional.get())) {
+                throw new ESOperateException(String.format("集群 %s 含账户名密码，创建 DCDR 链路失败", cluster));
+            }
+            String messageByException = ParsingExceptionUtils.getESErrorMessageByException(e);
+            if (Objects.nonNull(messageByException)) {
+                throw new ESOperateException(messageByException);
+            }
+    
+            throw new ESOperateException(e.getMessage());
+        }
     }
 
     /**
@@ -55,10 +77,17 @@ public class ESDCDRDAO extends BaseESDAO {
      * @return true/false
      */
     public boolean deleteAutoReplication(String cluster, String name) {
-        DCDRTemplate dcdrTemplate = getAutoReplication(cluster, name);
-        if (dcdrTemplate == null) {
-            return true;
+        try {
+            DCDRTemplate dcdrTemplate = getAutoReplication(cluster, name);
+            if (dcdrTemplate == null) {
+                return true;
+            }
+        } catch (Exception e) {
+            LOGGER.error("class={}||method=deleteAutoReplication||clusterName={}||name={}", getClass().getSimpleName(),
+                    cluster, name, e);
+            return false;
         }
+       
 
         ESClient client = esOpClient.getESClient(cluster);
         ESDeleteDCDRTemplateRequest request = new ESDeleteDCDRTemplateRequest();
@@ -74,13 +103,13 @@ public class ESDCDRDAO extends BaseESDAO {
      * @param name 名字
      * @return dcdr模板
      */
-    public DCDRTemplate getAutoReplication(String cluster, String name) {
+    public DCDRTemplate getAutoReplication(String cluster, String name) throws ESOperateException {
+        //如果集群挂掉，就是可以抛出NPE
         ESClient client = esOpClient.getESClient(cluster);
-        if (client == null) {
-            LOGGER.warn("class={}||method=getAutoReplication||clusterName={}||name={}||errMsg=esClient is null",
-                    getClass().getSimpleName(), cluster, name);
-            return null;
+        if (client==null){
+            throw new ESOperateException(String.format("cluster:【%s】无法获取到es client",cluster));
         }
+        
         ESGetDCDRTemplateRequest request = new ESGetDCDRTemplateRequest();
         request.setName(name);
 

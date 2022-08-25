@@ -9,16 +9,20 @@ import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOpe
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.TEMPLATE_INDEX_INCLUDE_NODE_NAME;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.setting.ESIndicesGetAllSettingRequest;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import com.didichuxing.datachannel.arius.admin.common.function.BiFunctionWithESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.ParsingExceptionUtils;
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
 import com.didiglobal.logi.elasticsearch.client.ESClient;
 import com.didiglobal.logi.elasticsearch.client.gateway.direct.DirectRequest;
 import com.didiglobal.logi.elasticsearch.client.gateway.direct.DirectResponse;
 import com.didiglobal.logi.elasticsearch.client.model.Client;
+import com.didiglobal.logi.elasticsearch.client.model.exception.ESAlreadyExistsException;
 import com.didiglobal.logi.elasticsearch.client.model.type.ESVersion;
 import com.didiglobal.logi.elasticsearch.client.request.index.exists.ESIndicesExistsRequest;
 import com.didiglobal.logi.elasticsearch.client.request.index.getindex.ESIndicesGetIndexRequest;
@@ -51,7 +55,6 @@ import com.didiglobal.logi.elasticsearch.client.response.setting.index.IndexConf
 import com.didiglobal.logi.elasticsearch.client.response.setting.index.MultiIndexsConfig;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -76,14 +79,13 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public class ESIndexDAO extends BaseESDAO {
-
-    public static final String FAILED_MSG       = "%s 执行失败,请检查参数与索引配置";
+    
+    public static final String FAILED_MSG = "%s 执行失败, 请检查参数与索引配置";
     public static final String MAX_NUM_SEGMENTS = "max_num_segments";
     public static final String ONLY_EXPUNGE_DELETES = "only_expunge_deletes";
     public static final String ROLLOVER_API         = "/_rollover";
- 
+    public static final  String ALIAS_API              = "/%s/_alias";
     
-
     /**
      * 创建索引
      * @param cluster 集群
@@ -128,20 +130,25 @@ public class ESIndexDAO extends BaseESDAO {
      * @param indexConfig 索引配置
      * @return
      */
-    public boolean createIndexWithConfig(String cluster, String indexName, IndexConfig indexConfig,Integer tryTimes) {
+    public boolean createIndexWithConfig(String cluster, String indexName, IndexConfig indexConfig,Integer tryTimes)
+            throws ESOperateException {
         
         ESClient client = fetchESClientByCluster(cluster);
         if (client == null) {
             return Boolean.FALSE;
         }
         indexConfig.setVersion(ESVersion.valueBy(client.getEsVersion()));
-        BiFunction<Long, TimeUnit, ESIndicesPutIndexResponse> esIndicesExistsResponseBiFunction = (timeout, unit) -> {
+        BiFunctionWithESOperateException<Long, TimeUnit, ESIndicesPutIndexResponse> esIndicesExistsResponseBiFunction = (timeout, unit) -> {
             try {
                 return client.admin().indices().preparePutIndex(indexName).setIndexConfig(indexConfig).execute()
                         .actionGet(timeout, unit);
             } catch (Exception e) {
+                final String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
+                if (Objects.nonNull(exception)) {
+                    throw new ESOperateException(exception);
+                }
                 LOGGER.error("class=ESIndexDAO||method=createIndexWithConfig||cluster={}||indexName={}", cluster);
-                return null;
+                throw  new ESOperateException(e.getMessage());
             }
         };
         ESIndicesPutIndexResponse response = performTryTimesMethods(esIndicesExistsResponseBiFunction, Objects::isNull,
@@ -307,19 +314,25 @@ public class ESIndexDAO extends BaseESDAO {
      * @return
      */
     public List<CatIndexResult> catIndexByExpression(String cluster, String expression) {
-        List<CatIndexResult> indices = new ArrayList<>();
-
-        try {
-            ESClient client = fetchESClientByCluster(cluster);
-            if (client != null) {
-                ESIndicesCatIndicesResponse response = client.admin().indices().prepareCatIndices(expression).execute()
-                    .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
-                indices.addAll(response.getCatIndexResults());
-            }
-        } catch (Exception e) {
-            LOGGER.warn("class=ESIndexDAO||method=catIndexByExpression||errMsg={}||cluster={}||expression={}",
-                e.getMessage(), cluster, expression, e);
+        List<CatIndexResult> indices =Lists.newArrayList();
+        ESClient client = fetchESClientByCluster(cluster);
+        if (client != null) {
+            BiFunction<Long, TimeUnit, ESIndicesCatIndicesResponse> catIndicesResponseBiFunction = (timeout, unit) -> {
+                try {
+                    return client.admin().indices().prepareCatIndices(expression).execute()
+                            .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+                } catch (Exception e) {
+                    LOGGER.warn("class=ESIndexDAO||method=catIndexByExpression||errMsg={}||cluster={}||expression={}",
+                            e.getMessage(), cluster, expression, e);
+                    return null;
+                }
+            };
+        
+            Optional.ofNullable(performTryTimesMethods(catIndicesResponseBiFunction, Objects::isNull, 3))
+                    .map(ESIndicesCatIndicesResponse::getCatIndexResults).ifPresent(indices::addAll);
+        
         }
+
 
         return indices;
     }
@@ -840,8 +853,9 @@ public class ESIndexDAO extends BaseESDAO {
         ESClient client = fetchESClientByCluster(cluster);
         if (client == null) {
             LOGGER.warn("class=ESIndexDAO||method=rollover||errMsg=es client not found");
-            return Result.buildFail();
+            return Result.buildFail("所属集群异常，请检查集群是否正常");
         }
+        
 
         try {
             DirectRequest directRequest = new DirectRequest(HttpMethod.POST.name(), alias + ROLLOVER_API);
@@ -851,12 +865,46 @@ public class ESIndexDAO extends BaseESDAO {
             DirectResponse directResponse = client.direct(directRequest).actionGet(ES_OPERATE_TIMEOUT,
                 TimeUnit.SECONDS);
             return Result.buildWithMsg(RestStatus.OK == directResponse.getRestStatus(),
-                directResponse.getResponseContent());
-        } catch (Exception e) {
+                    RestStatus.OK == directResponse.getRestStatus() ? String.format("别名 %s 执行 rollover 成功", alias)
+                            : directResponse.getResponseContent());
+        }catch (ESAlreadyExistsException e){
+            return Result.buildFail(String.format("%s 需要先删除此索引",
+                    ParsingExceptionUtils.getESErrorMessageByException(e)));
+        }
+        catch (Exception e) {
+            final String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
+            if (Objects.nonNull(exception)) {
+                return Result.buildFail(exception);
+            }
+            
+            
             LOGGER.warn("class=ESIndexDAO||method=rollover||errMsg=index rollover fail");
             return Result.buildFail(String.format(FAILED_MSG, "rollover"));
         }
     }
+    
+    
+    public int countIndexByAlias(String cluster, String alias) throws ESOperateException {
+        ESClient client = fetchESClientByCluster(cluster);
+        if (client == null) {
+            LOGGER.warn("class=ESIndexDAO||method=rollover||errMsg=es client not found");
+            throw new ESOperateException(String.format("所属集群 %s 异常，请检查集群是否正常", cluster));
+        }
+        DirectRequest directRequest = new DirectRequest(HttpMethod.GET.name(), String.format(ALIAS_API, alias));
+        try {
+            DirectResponse directResponse = client.direct(directRequest)
+                    .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+            if (RestStatus.OK != directResponse.getRestStatus()) {
+                throw new ESOperateException(directResponse.getResponseContent());
+            }
+            return JSONObject.parseObject(directResponse.getResponseContent()).values().size();
+            
+        } catch (Exception e) {
+            throw new ESOperateException(e.getMessage(), e);
+        }
+        
+    }
+    
 
     public Result<Void> forceMerge(String cluster, String index, Integer maxNumSegments, Boolean onlyExpungeDeletes) {
         ESClient client = fetchESClientByCluster(cluster);
@@ -881,6 +929,10 @@ public class ESIndexDAO extends BaseESDAO {
             return Result.buildWithMsg(RestStatus.OK == directResponse.getRestStatus(),
                 directResponse.getResponseContent());
         } catch (Exception e) {
+            final String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
+            if (Objects.nonNull(exception)) {
+                return Result.buildFail(exception);
+            }
             LOGGER.warn("class=ESIndexDAO||method=forceMerge||errMsg=index forceMerge fail");
             return Result.buildFail(String.format(FAILED_MSG, "forceMerge"));
         }
@@ -892,15 +944,24 @@ public class ESIndexDAO extends BaseESDAO {
             LOGGER.warn("class=ESIndexDAO||method=forceMerge||errMsg=es client not found");
             return Result.buildFail();
         }
-
+    
         try {
             DirectRequest directRequest = new DirectRequest(HttpMethod.POST.name(), index + "/_shrink/" + targetIndex);
             directRequest.setPostContent(config);
-            DirectResponse directResponse = client.direct(directRequest).actionGet(ES_OPERATE_TIMEOUT,
-                TimeUnit.SECONDS);
+            DirectResponse directResponse = client.direct(directRequest)
+                    .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
             return Result.buildWithMsg(RestStatus.OK == directResponse.getRestStatus(),
-                directResponse.getResponseContent());
+                    directResponse.getResponseContent());
+        } catch (ESAlreadyExistsException e) {
+            return Result.buildFail(String.format("%s 需要先删除此索引",
+                    ParsingExceptionUtils.getESErrorMessageByException(e)));
         } catch (Exception e) {
+            final String exception = ParsingExceptionUtils.getESErrorMessageByException(
+                    e);
+        
+            if (Objects.nonNull(exception)) {
+                return Result.buildFail(exception);
+            }
             LOGGER.warn("class=ESIndexDAO||method=shrink||errMsg=index shrink fail");
             return Result.buildFail(String.format(FAILED_MSG, "shrink"));
         }
@@ -912,7 +973,9 @@ public class ESIndexDAO extends BaseESDAO {
             LOGGER.warn("class=ESIndexDAO||method=forceMerge||errMsg=es client not found");
             return Result.buildFail();
         }
-
+        if (Integer.parseInt(client.getEsVersion().substring(0, 1)) < 6) {
+            return Result.buildFail(String.format("es %s 不支持 split 功能", client.getEsVersion()));
+        }
         try {
             DirectRequest directRequest = new DirectRequest(HttpMethod.POST.name(), index + "/_split/" + targetIndex);
             directRequest.setPostContent(config);
@@ -920,7 +983,14 @@ public class ESIndexDAO extends BaseESDAO {
                 TimeUnit.SECONDS);
             return Result.buildWithMsg(RestStatus.OK == directResponse.getRestStatus(),
                 directResponse.getResponseContent());
+        } catch (ESAlreadyExistsException e) {
+            return Result.buildFail(String.format("%s 需要先删除此索引",
+                    ParsingExceptionUtils.getESErrorMessageByException(e)));
         } catch (Exception e) {
+            final String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
+            if (Objects.nonNull(exception)) {
+                return Result.buildFail(exception);
+            }
             LOGGER.warn("class=ESIndexDAO||method=split||errMsg=index split fail");
             return Result.buildFail(String.format(FAILED_MSG, "split"));
         }

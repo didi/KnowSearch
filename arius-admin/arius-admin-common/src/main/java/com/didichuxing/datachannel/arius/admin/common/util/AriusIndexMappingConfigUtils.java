@@ -5,7 +5,7 @@ import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
-
+import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
@@ -29,7 +29,7 @@ public class AriusIndexMappingConfigUtils {
      * @param mappingConfig mapping config JSON序列化内容
      * @return
      */
-    public static Result<MappingConfig> parseMappingConfig(String mappingConfig) {
+    public static Result<MappingConfig> parseMappingConfig(String mappingConfig) throws AdminOperateException {
         try {
             return Result.buildSucc(new MappingConfig(getMappingObj(JSON.parseObject(mappingConfig))));
         } catch (Exception t) {
@@ -37,7 +37,7 @@ public class AriusIndexMappingConfigUtils {
                 "class=AriusIndexMappingConfigUtils||method=parseMappingConfig||" + "mappingConfig={}||exception={}",
                 mappingConfig, t);
             if (t instanceof JSONException) {
-                return Result.build(ResultType.FAIL.getCode(), "json解析失败");
+                throw new AdminOperateException("mapping解析失败");
             }
             return Result.build(ResultType.FAIL.getCode(), t.getMessage());
         }

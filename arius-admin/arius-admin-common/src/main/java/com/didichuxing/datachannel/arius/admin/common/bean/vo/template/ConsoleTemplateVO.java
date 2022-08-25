@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel(description = "模板信息")
-public class ConsoleTemplateVO extends BaseTemplateVO implements Comparable<ConsoleTemplateVO> {
+public class ConsoleTemplateVO extends BaseTemplateVO  {
     /**
      * @see ProjectTemplateAuthEnum
      */
@@ -50,14 +50,8 @@ public class ConsoleTemplateVO extends BaseTemplateVO implements Comparable<Cons
     @ApiModelProperty("逻辑集群")
     private String       cluster;
     @ApiModelProperty("是否为分区模板")
-    private Boolean  isPartition;
-
-    @Override
-    public int compareTo(ConsoleTemplateVO o) {
-        if (null == o) {
-            return 0;
-        }
-
-        return o.getId().intValue() - this.getId().intValue();
-    }
+    private Boolean isPartition;
+    @ApiModelProperty("模板健康度")
+    private Integer health;
+  
 }

@@ -36,6 +36,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -92,7 +93,7 @@ public class ClusterRegionServiceImpl implements ClusterRegionService {
     @Override
     public List<String> listPhysicClusterNames(Long logicClusterId) {
         // 获取逻辑集群有的region
-        List<ClusterRegion> regions = listLogicClusterRegions(logicClusterId);
+        List<ClusterRegion> regions = getClusterRegionsByLogicIds(Collections.singletonList(logicClusterId));
         // 从region获取物理集群名
         return regions.stream().map(ClusterRegion::getPhyClusterName).distinct().collect(Collectors.toList());
     }
@@ -186,7 +187,9 @@ public class ClusterRegionServiceImpl implements ClusterRegionService {
             // 判断在未绑定状态,获取region被绑定的逻辑集群的类型，只有被共享逻辑集群绑定的region才能被另一个共享逻辑集群重复绑定
             if (isRegionBound(region)) {
                 if (!isRegionBindByPublicLogicCluster(region)) {
-                    return Result.buildFail(String.format("region %d 已经被非共享逻辑集群绑定", regionId));
+                    return Result.buildFail(
+                            String.format("regionId %d,regionName %s 已经被非共享逻辑集群绑定", regionId,
+                                    region.getName()));
                 }
 
                 if (!clusterLogic.getType().equals(ClusterResourceTypeEnum.PUBLIC.getCode())) {
@@ -290,24 +293,6 @@ public class ClusterRegionServiceImpl implements ClusterRegionService {
         return ListUtils.longList2String(boundLogicClusterIds);
     }
 
-    /**
-     * 获取逻辑集群拥有的region
-     * @param logicClusterId 逻辑集群ID
-     * @return 逻辑集群拥有的region
-     */
-    @Override
-    public List<ClusterRegion> listLogicClusterRegions(Long logicClusterId) {
-
-        if (logicClusterId == null) {
-            return new ArrayList<>();
-        }
-
-        List<ClusterRegionPO> clusterRegionPOS = clusterRegionDAO.listAll().stream().filter(
-            clusterRegionPO -> ListUtils.string2LongList(clusterRegionPO.getLogicClusterIds()).contains(logicClusterId))
-            .collect(Collectors.toList());
-
-        return ConvertUtil.list2List(clusterRegionPOS, ClusterRegion.class);
-    }
 
     @Override
     public ClusterRegion getRegionByLogicClusterId(Long logicClusterId) {

@@ -54,7 +54,6 @@ import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectLogic
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.impl.IndexTemplatePhyServiceImpl;
-import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateLabelService;
 import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
 import com.didiglobal.logi.elasticsearch.client.response.setting.template.TemplateConfig;
 import com.didiglobal.logi.log.ILog;
@@ -108,8 +107,7 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
     @Autowired
     private ClusterPhyService               clusterPhyService;
 
-    @Autowired
-    private TemplateLabelService            templateLabelService;
+    
 
     @Autowired
     private ESTemplateService               esTemplateService;
@@ -529,7 +527,7 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
                 return new Tuple<>();
             }
 
-            return getHotAndColdIndexSet(physicalWithLogic, days, logicTemplate, indices);
+            return getHotAndColdIndexSet( days, logicTemplate, indices);
         } catch (Exception e) {
             LOGGER.warn("class=TemplatePhyManagerImpl||method=getIndexByBeforeDay||templateName={}||errMsg={}",
                 physicalWithLogic.getName(), e.getMessage(), e);
@@ -560,7 +558,7 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
                 return Sets.newHashSet();
             }
 
-            return getFinalIndexSet(physicalWithLogic, days, logicTemplate, indices);
+            return getFinalIndexSet( days, logicTemplate, indices);
         } catch (Exception e) {
             LOGGER.warn("class=TemplatePhyManagerImpl||method=getIndexByBeforeDay||templateName={}||errMsg={}",
                 physicalWithLogic.getName(), e.getMessage(), e);
@@ -689,9 +687,7 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
     private Result<Void> upgradeTemplateWithCheck(TemplatePhysicalUpgradeDTO param, String operator,
                                                   int retryCount) throws ESOperateException {
         IndexTemplatePhy indexTemplatePhy = indexTemplatePhyService.getTemplateById(param.getPhysicalId());
-        if (templateLabelService.hasDeleteDoc(indexTemplatePhy.getLogicId())) {
-            return Result.buildParamIllegal("模板有删除操作,禁止升版本");
-        }
+       
 
         IndexTemplate logic = indexTemplateService.getLogicTemplateById(indexTemplatePhy.getLogicId());
         LOGGER.info("class=TemplatePhyManagerImpl||method=upgradeTemplateWithCheck||name={}||shard={}||version={}",
@@ -892,7 +888,7 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         }
     }
 
-    private Set<String> getFinalIndexSet(IndexTemplatePhyWithLogic physicalWithLogic, int days,
+    private Set<String> getFinalIndexSet( int days,
                                          IndexTemplate logicTemplate, List<String> indices) {
         Set<String> finalIndexSet = Sets.newHashSet();
         for (String indexName : indices) {
@@ -984,7 +980,7 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         return settingsMap;
     }
 
-    private Tuple</*存放冷存索引列表*/Set<String>, /*存放热存索引列表*/Set<String>> getHotAndColdIndexSet(IndexTemplatePhyWithLogic physicalWithLogic,
+    private Tuple</*存放冷存索引列表*/Set<String>, /*存放热存索引列表*/Set<String>> getHotAndColdIndexSet(
                                                                                           int days,
                                                                                           IndexTemplate logicTemplate,
                                                                                           List<String> indices) {

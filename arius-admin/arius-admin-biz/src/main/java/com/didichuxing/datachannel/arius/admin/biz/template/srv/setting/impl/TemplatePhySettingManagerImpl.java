@@ -54,7 +54,10 @@ public class TemplatePhySettingManagerImpl implements TemplatePhySettingManager 
     }
 
     @Override
-    public IndexTemplatePhySetting fetchTemplateSettings(String cluster, String template) {
+    public IndexTemplatePhySetting fetchTemplateSettings(String cluster, String template) throws ESOperateException {
+        if (!esTemplateService.syncGetEsClusterIsNormal(cluster)) {
+            throw new ESOperateException(String.format("模版【%s】所属集群【%s】异常,无法获取setting信息", template, cluster));
+        }
         TemplateConfig templateConfig = esTemplateService.syncGetTemplateConfig(cluster, template);
         if (templateConfig != null) {
             return new IndexTemplatePhySetting(templateConfig.getSetttings());
@@ -101,8 +104,8 @@ public class TemplatePhySettingManagerImpl implements TemplatePhySettingManager 
     }
 
     @Override
-    public boolean mergeTemplateSettings(Integer logicId, String cluster, String template,
-                                         IndexTemplatePhySetting settings) throws AdminOperateException {
+    public boolean mergeTemplateSettingsCheckAllocationAndShard(Integer logicId, String cluster, String template,
+                                                                IndexTemplatePhySetting settings) throws AdminOperateException {
         Map<String, String> flatSettings = settings.flatSettings();
         TemplateConfig templateConfig = esTemplateService.syncGetTemplateConfig(cluster, template);
         if (templateConfig == null) {
@@ -115,7 +118,7 @@ public class TemplatePhySettingManagerImpl implements TemplatePhySettingManager 
             throw new AdminOperateException("非法模板settings: " + settings);
         }
 
-        return esTemplateService.syncUpsertSetting(cluster, template, flatSettings,
+        return esTemplateService.syncUpdateSettingCheckAllocationAndShard(cluster, template, flatSettings,
             AdminESOpRetryConstants.DEFAULT_RETRY_COUNT);
     }
 

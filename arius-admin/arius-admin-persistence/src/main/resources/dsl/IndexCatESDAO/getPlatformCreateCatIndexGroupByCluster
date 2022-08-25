@@ -1,0 +1,31 @@
+{
+  "size": 0,
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "terms": {
+            "cluster": %s
+          }
+        },
+        {
+          "term": {
+            "deleteFlag": {
+              "value": "false"
+            }
+          }
+        }
+      ]
+    }
+  },
+  "aggs": {
+    "group_by_cluster": {
+      "terms": {
+        "field": "cluster",
+        "min_doc_count": 1,
+        "size": %d,
+        "include":%s
+      }
+    }
+  }
+}

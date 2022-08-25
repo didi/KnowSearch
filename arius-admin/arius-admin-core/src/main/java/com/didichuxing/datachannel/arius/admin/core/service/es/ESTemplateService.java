@@ -1,12 +1,12 @@
 package com.didichuxing.datachannel.arius.admin.core.service.es;
 
-import java.util.List;
-import java.util.Map;
-
+import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateHealthEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
 import com.didiglobal.logi.elasticsearch.client.response.setting.template.MultiTemplatesConfig;
 import com.didiglobal.logi.elasticsearch.client.response.setting.template.TemplateConfig;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author d06679
@@ -99,6 +99,16 @@ public interface ESTemplateService {
                               int retryCount) throws ESOperateException;
 
     /**
+     * 更新集群的设置，检查分配和分片是否正确
+     *
+     * @param cluster 集群名称
+     * @param name 索引的名称
+     * @param setting 要更新的设置
+     * @param retryCount 重试次数。
+     */
+    boolean syncUpdateSettingCheckAllocationAndShard(String cluster, String name, Map<String, String> setting,
+                                                     int retryCount) throws ESOperateException;
+    /**
      * 跨集群拷贝模板mapping和索引
      * @param srcCluster 源集群
      * @param srcTemplateName 原模板
@@ -185,5 +195,18 @@ public interface ESTemplateService {
      * @return 集群模板个数
      */
     long synGetTemplateNumForAllVersion(String cluster);
+    
+    boolean syncGetEsClusterIsNormal(String cluster);
+    
+    /**
+     * > 检查指定集群的索引是否匹配指定的表达式和模板健康状态
+     *
+     * @param cluster 集群名称
+     * @param expression 索引的表达式，如“log-*”
+     * @param templateHealthEnum 模板的健康状态，为枚举类型，枚举值如下：
+     * @return 布尔值
+     */
+    boolean hasMatchHealthIndexByExpressionTemplateHealthEnum(String cluster, String expression,
+                                                                     TemplateHealthEnum templateHealthEnum) throws ESOperateException;
 
 }

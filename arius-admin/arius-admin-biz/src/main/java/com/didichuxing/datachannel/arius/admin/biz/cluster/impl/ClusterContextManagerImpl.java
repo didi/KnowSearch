@@ -31,6 +31,7 @@ import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -518,7 +519,7 @@ public class ClusterContextManagerImpl implements ClusterContextManager {
 
     private void setRegionAndAssociatedClusterPhyDataNodeInfo(ClusterLogicContext build) {
         //获取逻辑集群已关联的Region信息
-        List<ClusterRegion> regions = clusterRegionService.listLogicClusterRegions(build.getClusterLogicId());
+        List<ClusterRegion> regions = clusterRegionService.getClusterRegionsByLogicIds(Collections.singletonList(build.getClusterLogicId()));
         build.setAssociatedRegionIds(regions.stream().map(ClusterRegion::getId).collect(Collectors.toList()));
 
         //获取逻辑集群关联region下的rack节点信息

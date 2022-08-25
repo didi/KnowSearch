@@ -66,30 +66,7 @@ public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrvImpl implem
     public TemplateServiceEnum templateSrv() {
         return TemplateServiceEnum.TEMPLATE_SETTING;
     }
-
-    //@Override
-    //@Transactional(rollbackFor = Exception.class)
-    //public Result<Void> modifySetting(ConsoleTemplateSettingDTO settingDTO, String operator,
-    //                                  Integer projectId) throws AdminOperateException {
-    //
-    //    LOGGER.info("class=TemplateLogicServiceImpl||method=modifySetting||operator={}||setting={}", operator,
-    //        JSON.toJSONString(settingDTO));
-    //
-    //    if (AriusObjUtils.isNull(operator)) {
-    //        return Result.buildParamIllegal("操作人为空");
-    //    }
-    //
-    //    if (settingDTO.getSetting() == null || settingDTO.getSetting().getAnalysis() == null) {
-    //        return Result.buildParamIllegal("setting信息不能为空");
-    //    }
-    //
-    //    Result<Void> result = updateSettings(settingDTO.getLogicId(), operator, settingDTO.getSetting());
-    //    if (result.success()) {
-    //        templatePreCreateManager.reBuildTomorrowIndex(settingDTO.getLogicId(), 3);
-    //    }
-    //
-    //    return result;
-    //}
+    
 
     @Override
     public Result<Void> customizeSetting(TemplateSettingDTO settingDTO, String operator) throws AdminOperateException {
@@ -198,7 +175,7 @@ public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrvImpl implem
 
     @Override
     public Result<Void> updateSettings(Integer logicId, IndexTemplatePhySetting settings, String operator,
-                                       Integer projectId) {
+                                       Integer projectId) throws AdminOperateException {
 
         IndexTemplateWithPhyTemplates templateLogicWithPhysical = indexTemplateService
             .getLogicTemplateWithPhysicalsById(logicId);
@@ -220,14 +197,10 @@ public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrvImpl implem
 
         //获取变更前的setting
         final Result<IndexTemplatePhySetting> beforeSetting = getSettings(logicId);
-
         for (IndexTemplatePhy templatePhysical : templatePhysicals) {
-            try {
-                templatePhySettingManager.mergeTemplateSettings(logicId, templatePhysical.getCluster(),
-                    templatePhysical.getName(), settings);
-            } catch (AdminOperateException adminOperateException) {
-                return Result.buildFail(adminOperateException.getMessage());
-            }
+        
+            templatePhySettingManager.mergeTemplateSettingsCheckAllocationAndShard(logicId,
+                    templatePhysical.getCluster(), templatePhysical.getName(), settings);
         }
     
         SpringTool.publish(new ReBuildTomorrowIndexEvent(this, logicId));

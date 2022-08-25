@@ -9,9 +9,11 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.manage.In
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.srv.IndexForceMergeDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.srv.IndexRolloverDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexCatCellVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexCatCellWithTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexMappingVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexSettingVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexShardInfoVO;
+import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
@@ -39,7 +41,8 @@ public interface IndicesManager {
      * @param projectId
      * @param operator
      */
-    Result<Void> createIndex(IndexCatCellWithConfigDTO indexCreateDTO, Integer projectId, String operator);
+    Result<Void> createIndex(IndexCatCellWithConfigDTO indexCreateDTO, Integer projectId, String operator)
+            throws AdminOperateException;
 
     /**
      * 删除索引
@@ -120,7 +123,8 @@ public interface IndicesManager {
      * @param operate
      * @return
      */
-    Result<Void> editMapping(IndexCatCellWithConfigDTO param, Integer projectId, String operate) throws ESOperateException;
+    Result<Void> editMapping(IndexCatCellWithConfigDTO param, Integer projectId, String operate)
+            throws AdminOperateException;
 
     /**
      * 获取索引setting信息
@@ -260,7 +264,7 @@ public interface IndicesManager {
      * @param physicalId 物理模板id
      * @return {@link List}<{@link String}>
      */
-    List<String> listIndexNameByTemplatePhyId(Long physicalId);
+    List<IndexCatCellWithTemplateVO> listIndexCatCellWithTemplateByTemplatePhyId(Long physicalId);
 
     /**
      * 获取物理模版所有匹配的索引catinfo
@@ -269,4 +273,6 @@ public interface IndicesManager {
      * @return {@link List}<{@link CatIndexResult}>
      */
     List<CatIndexResult> listIndexCatInfoByTemplatePhyId(Long physicalId);
+    
+    Result<Void> deleteIndexByCLusterPhy(String clusterPhy, List<String> indexNameList, Integer projectId, String operator);
 }

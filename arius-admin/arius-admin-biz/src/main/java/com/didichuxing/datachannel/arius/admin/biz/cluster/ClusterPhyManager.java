@@ -158,6 +158,9 @@ public interface ClusterPhyManager {
      * @return {@link Result}<{@link List}<{@link String}>>
      */
     Result<List<String>> getTemplateSameVersionClusterNamesByTemplateId(Integer projectId, Integer templateId);
+    
+    Result<List<String>> getTemplateSameVersionClusterNamesByTemplateIdExistDCDR(Integer projectId, Integer templateId);
+
 
     /**
      * 获取物理集群节点名称列表
@@ -216,6 +219,13 @@ public interface ClusterPhyManager {
      */
     PaginationResult<ClusterPhyVO> pageGetClusterPhys(ClusterPhyConditionDTO condition,
                                                       Integer projectId) throws NotFindSubclassException;
+
+    /**
+     * 根据projectId获取超级项目下的物理集群列表
+     * @param projectId 项目id
+     * @return Result<List<String>>
+     */
+    Result<List<String>> listClusterPhyNameBySuperApp(Integer projectId);
 
     /**
      * 构建物理集群角色信息

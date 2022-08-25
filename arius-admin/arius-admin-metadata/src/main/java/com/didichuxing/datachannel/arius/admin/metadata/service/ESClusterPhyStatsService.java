@@ -2,11 +2,13 @@ package com.didichuxing.datachannel.arius.admin.metadata.service;
 
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.percentiles.BasePercentileMetrics;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.index.IndexCatCellPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.PercentilesEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESClusterDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESClusterNodeDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.gateway.GatewayNodeMetricsDAO;
+import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.index.IndexCatESDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats.AriusStatsClusterInfoESDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats.AriusStatsNodeInfoESDAO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -35,6 +38,8 @@ public class ESClusterPhyStatsService {
     private ESClusterNodeDAO              esClusterNodeDAO;
     @Autowired
     private GatewayNodeMetricsDAO         gatewayNodeMetricsDAO;
+    @Autowired
+    private IndexCatESDAO                 indexCatESDAO;
 
     private static final FutureUtil<Void> futureUtil = FutureUtil.init("ESClusterPhyStaticsService", 10, 10, 200);
 
@@ -139,7 +144,7 @@ public class ESClusterPhyStatsService {
      * @return {@code Long}
      */
     public Long getClustersShardTotal(String cluster) {
-        return ariusStatsClusterInfoEsDao.getClustersShardTotal(cluster);
+        return  ariusStatsClusterInfoEsDao.getClustersShardTotal(cluster);
     }
 
     /**
@@ -218,5 +223,15 @@ public class ESClusterPhyStatsService {
      */
     public Long getTimeDifferenceBetweenNearestPointAndNow(String cluster){
         return ariusStatsClusterInfoEsDao.getTimeDifferenceBetweenNearestPointAndNow(cluster);
+    }
+
+    /**
+     * 获取集群下的索引数量
+     * @param cluster
+     * @return
+     */
+    public Long getIndexCountByCluster(String cluster){
+        Tuple<Long, List<IndexCatCellPO>> index = indexCatESDAO.getIndexListByTerms(cluster,null);
+        return Objects.nonNull(index)?index.v1():0L;
     }
 }

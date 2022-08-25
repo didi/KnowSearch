@@ -3,20 +3,28 @@ package com.didichuxing.datachannel.arius.admin.biz.template;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateRateLimitDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateWithCreateInfoDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateClearDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicAggregate;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateClearVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateDeleteVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateDetailVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateRateLimitVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateCyclicalRollInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectTemplateAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.AmsRemoteException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
+import java.util.List;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 /**
  * 逻辑模板管理Biz类
@@ -59,14 +67,7 @@ public interface TemplateLogicManager {
      */
     List<IndexTemplateLogicAggregate> getAllTemplatesAggregate(Integer projectId);
 
-    /**
-     * 获取逻辑集群所有逻辑模板聚合
-     *
-     * @param logicClusterId 逻辑集群ID
-     * @param projectId 操作的project Id
-     * @return
-     */
-    List<IndexTemplateLogicAggregate> getLogicClusterTemplatesAggregate(Long logicClusterId, Integer projectId);
+
 
     /**
      * 拼接集群名称
@@ -146,11 +147,7 @@ public interface TemplateLogicManager {
      */
     Result<Void> switchRolloverStatus(Integer templateLogicId, Integer status, String operator, Integer projectId);
 
-    /**
-     * 获取创建dcdr链路模板
-     * @return
-     */
-    List<Integer> getHaveDCDRLogicIds();
+
 
     /**
      * 校验模板是否可以使用索引模板的相关服务，例如是否可以编辑mapping,setting
@@ -218,7 +215,7 @@ public interface TemplateLogicManager {
 
     Result<ConsoleTemplateRateLimitVO> getTemplateRateLimit(Integer logicId);
 
-    Result<ConsoleTemplateDetailVO> getDetailVoByLogicId(Integer logicId);
+    Result<ConsoleTemplateDetailVO> getDetailVoByLogicId(Integer logicId, Integer projectId);
 
     Result<ConsoleTemplateClearVO> getLogicTemplateClearInfo(Integer logicId) throws AmsRemoteException;
 
@@ -226,5 +223,12 @@ public interface TemplateLogicManager {
 
     Result<Void> updateTemplateWriteRateLimit(ConsoleTemplateRateLimitDTO consoleTemplateRateLimitDTO, String operator,
                                               Integer projectId);
-
+    
+    /**
+     * 它通过其逻辑 ID 更新模板的健康状况。
+     *
+     * @param logicId 模板的 logicId。
+     * @return 一个布尔值。
+     */
+    boolean updateTemplateHealthByLogicId(Integer logicId);
 }

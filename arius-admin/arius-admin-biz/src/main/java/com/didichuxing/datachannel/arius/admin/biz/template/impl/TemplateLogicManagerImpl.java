@@ -10,10 +10,10 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.operaterec
 import static com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectTemplateAuthEnum.OWN;
 import static com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectTemplateAuthEnum.isTemplateAuthExitByCode;
 import static com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType.FAIL;
-import static com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum.TEMPLATE_MAPPING;
 import static com.didichuxing.datachannel.arius.admin.core.service.template.physic.impl.IndexTemplatePhyServiceImpl.NOT_CHECK;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.biz.indices.IndicesManager;
 import com.didichuxing.datachannel.arius.admin.biz.page.TemplateLogicPageSearchHandle;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager;
@@ -27,7 +27,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.IndexTemplateV
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.TemplateLabel;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatCellDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateRateLimitDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateConfigDTO;
@@ -47,6 +46,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithCluster;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexCatCellWithTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateClearVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateDeleteVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateDetailVO;
@@ -56,6 +57,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateC
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.ESSettingConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TemplateOperateRecordEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
@@ -63,6 +65,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectTe
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.DataTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateHealthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.event.index.IndexDeleteEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.template.LogicTemplateCreatePipelineEvent;
@@ -72,9 +75,9 @@ import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateExcepti
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.mapping.AriusTypeProperty;
 import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
+import com.didichuxing.datachannel.arius.admin.common.tuple.Tuples;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.TemplateUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
@@ -84,14 +87,15 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.Clust
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterNodeService;
+import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectLogicTemplateAuthService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
-import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateLabelService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.TemplateStatsService;
 import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
+import com.didiglobal.logi.elasticsearch.client.utils.JsonUtils;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
@@ -123,14 +127,15 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
 
     private static final ILog               LOGGER                = LogFactory.getLog(TemplateLogicManager.class);
     private static final String             INDEX_NOT_EXISTS_TIPS = "索引不存在";
+    private static final String DYNAMIC_TEMPLATES = "dynamic_templates";
+    private static final String PROPERTIES        = "properties";
     @Autowired
     private ProjectLogicTemplateAuthService projectLogicTemplateAuthService;
 
     @Autowired
     private TemplateStatsService            templateStatsService;
 
-    @Autowired
-    private TemplateLabelService            templateLabelService;
+  
 
     @Autowired
     private ColdManager                     templateColdManager;
@@ -179,10 +184,11 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     private IndicesManager                  indicesManager;
     @Autowired
     private PipelineManager                 templatePipelineManager;
-    @Autowired
-    private   TemplateLogicManager templateLogicManager;
+    
     @Autowired
     protected ESClusterNodeService esClusterNodeService;
+    @Autowired
+    private ESClusterService esClusterService;
 
     public static final int                 MAX_PERCENT           = 10000;
     public static final int                 MIN_PERCENT           = -99;
@@ -223,6 +229,14 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         if (validPhyTemplateResult.failed()) {
             return validPhyTemplateResult;
         }
+        final Map<String, String> setting = JsonUtils.flat(JSONObject.parseObject(param.getSetting()));
+        if (setting.containsKey(ESSettingConstant.INDEX_NUMBER_OF_SHARDS) || setting.containsKey(
+                ESSettingConstant.INDEX_ROUTING_ALLOCATION_INCLUDE_NAME)) {
+            return Result.buildFail(
+                    "\"index.number_of_shards \"和 \"index.routing.allocation.include._name \"两个字段系统会自动计算，不支持用户自定义设置。");
+        
+        }
+        
     
         try {
             Result<Void> save2DBResult = indexTemplateService.addTemplateWithoutCheck(indexTemplateDTO);
@@ -275,37 +289,12 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
     public List<IndexTemplateLogicAggregate> getAllTemplatesAggregate(Integer projectId) {
         List<IndexTemplateLogicAggregate> indexTemplateLogicAggregates = new ArrayList<>();
         List<IndexTemplateWithCluster> logicTemplates = indexTemplateService.listAllLogicTemplateWithClusters();
-
-        if (CollectionUtils.isNotEmpty(logicTemplates)) {
-            indexTemplateLogicAggregates = fetchLogicTemplatesAggregates(logicTemplates, projectId);
-        }
+        
 
         return indexTemplateLogicAggregates;
     }
 
-    /**
-     * 获取逻辑集群所有逻辑模板聚合
-     *
-     * @param logicClusterId 逻辑集群ID
-     * @param projectId 操作的project Id
-     * @return
-     */
-    @Override
-    public List<IndexTemplateLogicAggregate> getLogicClusterTemplatesAggregate(Long logicClusterId, Integer projectId) {
 
-        if (logicClusterId == null) {
-            return new ArrayList<>();
-        }
-
-        List<IndexTemplateWithCluster> logicTemplates = indexTemplateService
-            .listLogicTemplateWithClustersByClusterId(logicClusterId);
-
-        if (CollectionUtils.isEmpty(logicTemplates)) {
-            return new ArrayList<>();
-        }
-
-        return fetchLogicTemplatesAggregates(logicTemplates, projectId);
-    }
 
     /**
      * 拼接集群名称
@@ -503,7 +492,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         }
         List<String> phyClusterList=indexTemplatePhyService.getPhyClusterByLogicTemplateId(logicTemplateId);
        
-        Result<ConsoleTemplateClearVO> templateClearInfo = templateLogicManager.getLogicTemplateClearInfo(
+        Result<ConsoleTemplateClearVO> templateClearInfo = getLogicTemplateClearInfo(
                 logicTemplateId);
        
         String beforeDeleteName = indexTemplateService.getNameByTemplateLogicId(logicTemplateId);
@@ -531,7 +520,10 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
                         index->phyClusterList.stream().map(phyCluster->indexPhyClusterFunc.apply(index,phyCluster))
                                        .collect(Collectors.toList());
     
-                List<IndexCatCellDTO> catCellList = templateClearInfo.getData().getIndices().stream()
+                List<IndexCatCellDTO> catCellList = templateClearInfo.getData().getIndices()
+                       
+                        .stream()
+                        .map(IndexCatCellWithTemplateVO::getIndex)
                         .map(phyClusterFunc).flatMap(Collection::stream)
             
                         .collect(Collectors.toList());
@@ -602,10 +594,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
                 return Result.buildFail(String.format("模板归属集群[%s]不存在", clusterPhyName));
             }
 
-            List<String> templateSrvList = ListUtils.string2StrList(clusterPhy.getTemplateSrvs());
-            if (!templateSrvList.contains(TEMPLATE_MAPPING.getCode().toString())) {
-                return Result.buildFail("该模板归属集群未开启mapping修改服务");
-            }
+            
         }
 
         return Result.buildSucc(true);
@@ -653,15 +642,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         return Result.buildSucc();
     }
 
-    @Override
-    public List<Integer> getHaveDCDRLogicIds() {
-        Result<List<TemplateLabel>> result = templateLabelService.listHaveDcdrTemplates();
-        if (result.failed() || CollectionUtils.isEmpty(result.getData())) {
-            return Lists.newArrayList();
-        }
-
-        return result.getData().stream().map(TemplateLabel::getIndexTemplateId).collect(Collectors.toList());
-    }
+   
 
     @Override
     public Result<Boolean> checkTemplateEditService(Integer templateId, Integer templateSrvId) {
@@ -678,18 +659,10 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         }
 
         // 获取逻辑集群对应的物理模板的物理集群名称列表
-        List<String> clusterPhyNameList = logicTemplateWithPhysicals.getPhysicals().stream()
-            .map(IndexTemplatePhy::getCluster).distinct().collect(Collectors.toList());
-
-        // 查看对应的物理集群是否开启了指定的索引模板服务
-        for (String clusterPhyName : clusterPhyNameList) {
-            Result<Boolean> checkResult = checkTemplateSrvByClusterName(clusterPhyName, templateSrvId);
-            if (checkResult.failed()) {
-                return Result.buildFailWithMsg(false, checkResult.getMessage());
-            }
-        }
-
-        return Result.buildSucc(true);
+        final Optional<Result<Boolean>> resultOptional = logicTemplateWithPhysicals.getPhysicals().stream()
+                .map(IndexTemplatePhy::getCluster).distinct().map(this::checkExistClusterNamePhy).findFirst();
+        return resultOptional.map(booleanResult -> Result.buildFailWithMsg(false, booleanResult.getMessage()))
+                .orElseGet(() -> Result.buildSucc(true));
     }
 
     @Override
@@ -707,10 +680,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             return Result.buildNotExist("索引不存在");
         }
 
-        if (templateLabelService.isImportantIndex(logicId)) {
-            return Result.buildOpForBidden("禁止操作重要索引，请联系Arius服务号处理");
-        }
-
+       
         if (AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
             return Result.buildSucc();
         }
@@ -738,13 +708,15 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             IndexTemplatePhy masterPhyTemplate = logicTemplateWithPhysicals.getMasterPhyTemplate();
             if (null != masterPhyTemplate && null != slavePhyTemplate) {
                 dcdrFlag = templateDcdrManager.syncExistTemplateDCDR(masterPhyTemplate.getId(),
-                    slavePhyTemplate.getCluster());
+                        slavePhyTemplate.getCluster());
+                
             }
         } catch (Exception e) {
-            LOGGER.error("class=TemplateLogicManagerImpl||method=updateDCDRInfo||templateName={}||errorMsg={}", logicId,
-                e.getMessage(), e);
+            LOGGER.error("class={}||method=updateDCDRInfo||templateName={}",getClass().getSimpleName(), logicId, e);
+            return false;
         }
-
+       
+       
         // 2. 获取位点差dcdr
         if (dcdrFlag) {
             try {
@@ -753,9 +725,11 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
                 totalIndexCheckPointDiff = Math
                     .abs(masterAndSlaveTemplateCheckPointTuple.getV1() - masterAndSlaveTemplateCheckPointTuple.getV2());
             } catch (Exception e) {
-                LOGGER.error("class=TemplateLogicManagerImpl||method=updateDCDRInfo||templateId={}||errorMsg={}",
-                    logicId, e.getMessage(), e);
+                LOGGER.error("class={}||method=updateDCDRInfo||templateId={}",
+                    getClass().getSimpleName(),logicId,  e);
+                 return false;
             }
+    
         }
 
         try {
@@ -766,8 +740,8 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             indexTemplateService.editTemplateInfoTODB(indexTemplateDTO);
         } catch (AdminOperateException e) {
             LOGGER.error(
-                "class=TemplateLogicManagerImpl||method=updateDCDRInfo||templateId={}||errorMsg=failed to edit template",
-                logicId, e.getMessage(), e);
+                "class={}||method=updateDCDRInfo||templateId={}",
+                getClass().getSimpleName(),logicId, e);
         }
 
         return true;
@@ -848,29 +822,26 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             if (templatePhy.getShard().equals(shardNum)) {
                 throw new AdminOperateException("该模板已经是" + shardNum + "分片", FAIL);
             }
-
+    
             updateParam.setId(templatePhy.getId());
             updateParam.setShard(shardNum);
-            Result<Void> updateDBResult = indexTemplatePhyService.update(updateParam);
-            if (updateDBResult.failed()) {
-                throw new AdminOperateException(updateDBResult.getMessage(), FAIL);
-            }
-            
             boolean succ = esTemplateService.syncUpdateShardNum(templatePhy.getCluster(), templatePhy.getName(),
-                shardNum, RETRY_TIMES);
-            if (!succ) {
-                throw new AdminOperateException(String.format("同步修改es集群[%s]中模板[%s]shard数[%d]失败, 请确认集群是否正常",
-                    templatePhy.getCluster(), templatePhy.getName(), shardNum), FAIL);
+                    shardNum, RETRY_TIMES);
+            if (succ) {
+                Result<Void> updateDBResult = indexTemplatePhyService.update(updateParam);
+                if (updateDBResult.failed()) {
+                    throw new AdminOperateException(updateDBResult.getMessage(), FAIL);
+                }
+        
+                operateRecordService.save(
+                        new OperateRecord.Builder().project(projectService.getProjectBriefByProjectId(projectId))
+                                .bizId(logicTemplateId).operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE_CAPACITY)
+                                .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).content(
+                                        String.format("同步修改es集群[%s]中模板[%s]shard数[%d]", templatePhy.getCluster(),
+                                                templatePhy.getName(), shardNum)).userOperation(operator).build()
+        
+                );
             }
-            operateRecordService.save(new OperateRecord.Builder()
-                            .project(projectService.getProjectBriefByProjectId(projectId))
-                    .bizId(logicTemplateId)
-                .operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE_CAPACITY)
-                .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).content(String.format("同步修改es集群[%s]中模板[%s]shard数[%d]",
-                    templatePhy.getCluster(), templatePhy.getName(), shardNum))
-                .userOperation(operator).build()
-
-            );
         }
 
         return Result.buildSucc();
@@ -887,7 +858,15 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         if (CollectionUtils.isEmpty(templatePhyList)) {
             return Result.buildFail("模板不存在");
         }
-
+        //检测集群连通状态
+        final Optional<TupleTwo<String, Boolean>> clusterConnectionStatusOption = templatePhyList.stream()
+                .map(indexTemplatePhy -> Tuples.of(indexTemplatePhy.getCluster(),
+                        esClusterService.syncConnectionStatus(indexTemplatePhy.getCluster())))
+                .filter(tuple -> Boolean.FALSE.equals(tuple.v2)).findFirst();
+        if (clusterConnectionStatusOption.isPresent()) {
+            return Result.buildFail(
+                    String.format("集群%s故障，请检查集群状态后重试。", clusterConnectionStatusOption.get().v1()));
+        }
         IndexTemplatePhyDTO updateParam = new IndexTemplatePhyDTO();
         //这里为了保证逻辑模版下所有物理模版均创建最新索引后再进行pipeline切换，需要遍历两次
         for (IndexTemplatePhy templatePhy : templatePhyList) {
@@ -1009,10 +988,11 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
 
     /**
      * @param logicId
+     * @param projectId
      * @return
      */
     @Override
-    public Result<ConsoleTemplateDetailVO> getDetailVoByLogicId(Integer logicId) {
+    public Result<ConsoleTemplateDetailVO> getDetailVoByLogicId(Integer logicId, Integer projectId) {
         if (Objects.isNull(logicId)) {
             return Result.buildSucc();
         }
@@ -1028,8 +1008,16 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             ConsoleTemplateDetailVO.class);
 
         consoleTemplateDetail.setCyclicalRoll(indexTemplateLogicWithCluster.getExpression().endsWith("*"));
-        consoleTemplateDetail
-            .setCluster(templateLogicManager.jointCluster(indexTemplateLogicWithCluster.getLogicClusters()));
+
+        // supperApp显示物理集群，其他项目显示逻辑集群
+        if(AuthConstant.SUPER_PROJECT_ID.equals(projectId)){
+            List<IndexTemplatePhy> indexTemplatePhyList = indexTemplatePhyService.getTemplateByLogicId(logicId);
+            List<String> phyClusters = indexTemplatePhyList.stream().map(IndexTemplatePhy::getCluster).collect(Collectors.toList());
+            consoleTemplateDetail.setCluster(StringUtils.join(phyClusters, ","));
+        }else {
+            consoleTemplateDetail
+                    .setCluster(jointCluster(indexTemplateLogicWithCluster.getLogicClusters()));
+        }
 
         // 仅对有一个逻辑集群的情况设置集群类型与等级
         if (indexTemplateLogicWithCluster.getLogicClusters().size() == 1) {
@@ -1039,7 +1027,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         consoleTemplateDetail.setAppName(
             projectService.getProjectBriefByProjectId(indexTemplateLogicWithCluster.getProjectId()).getProjectName());
         consoleTemplateDetail.setIndices(getLogicTemplateIndices(logicId));
-        consoleTemplateDetail.setEditable(templateLabelService.isImportantIndex(logicId));
+        consoleTemplateDetail.setEditable(true);
         // 获取indexRollover功能开启状态
         consoleTemplateDetail
             .setDisableIndexRollover(Optional.ofNullable(indexTemplateService.getTemplateConfig(logicId))
@@ -1069,8 +1057,8 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         consoleTemplateClearVO.setLogicId(templateLogicWithPhysical.getId());
         consoleTemplateClearVO.setName(templateLogicWithPhysical.getName());
         consoleTemplateClearVO.setIndices(
-            indicesManager.listIndexNameByTemplatePhyId(templateLogicWithPhysical.getMasterPhyTemplate().getId()));
-        consoleTemplateClearVO.setAccessApps(templateLogicManager.getLogicTemplateProjectAccess(logicId));
+            indicesManager.listIndexCatCellWithTemplateByTemplatePhyId(templateLogicWithPhysical.getMasterPhyTemplate().getId()));
+        consoleTemplateClearVO.setAccessApps(getLogicTemplateProjectAccess(logicId));
 
         return Result.buildSucc(consoleTemplateClearVO);
     }
@@ -1096,11 +1084,84 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             return Result.buildParamIllegal("索引没有部署");
         }
 
-        consoleTemplateDeleteVO.setAccessApps(templateLogicManager.getLogicTemplateProjectAccess(logicId));
+        consoleTemplateDeleteVO.setAccessApps(getLogicTemplateProjectAccess(logicId));
 
         return Result.buildSucc(consoleTemplateDeleteVO);
     }
-
+    
+    /**
+     *
+     * 它通过其逻辑 ID 更新模板的健康状况。
+     * {@link  TemplateHealthEnum}
+     * @param logicId 模板的 logicId。
+     * @return 一个布尔值。
+     */
+    @Override
+    public boolean updateTemplateHealthByLogicId(Integer logicId) {
+        if (!indexTemplateService.exist(logicId)) {
+            return true;
+        }
+        IndexTemplateWithPhyTemplates indexTemplateWithPhyTemplates = indexTemplateService.getLogicTemplateWithPhysicalsById(
+                logicId);
+        String masterCluster = Optional.ofNullable(indexTemplateWithPhyTemplates)
+                .map(IndexTemplateWithPhyTemplates::getMasterPhyTemplate).map(IndexTemplatePhy::getCluster)
+                .orElse(null);
+        if (Objects.isNull(masterCluster)) {
+            LOGGER.warn(
+                    "class={}||method=updateTemplateHealthByLogicId||logicId={}||error=don't find index template cluster",
+                    getClass().getSimpleName(), logicId);
+            return false;
+        }
+        final IndexTemplatePO templatePO = new IndexTemplatePO();
+        templatePO.setId(logicId);
+        if (!esClusterService.syncConnectionStatus(masterCluster)) {
+            LOGGER.warn(
+                    "class={}||method=updateTemplateHealthByLogicId||logicId={}||error=don't find index template cluster",
+                    getClass().getSimpleName(), logicId);
+            /**
+             * {@link TemplateHealthEnum}
+             */
+            templatePO.setHealth(TemplateHealthEnum.UNKNOWN.getCode());
+            indexTemplateService.update(templatePO);
+            return true;
+        
+        }
+        try {
+            String cluster = indexTemplateWithPhyTemplates.getMasterPhyTemplate().getCluster();
+            String expression = indexTemplateWithPhyTemplates.getMasterPhyTemplate().getExpression();
+            if (esTemplateService.hasMatchHealthIndexByExpressionTemplateHealthEnum(cluster, expression,
+                    TemplateHealthEnum.RED)) {
+                templatePO.setHealth(TemplateHealthEnum.RED.getCode());
+                indexTemplateService.update(templatePO);
+                return true;
+            }
+             if (esTemplateService.hasMatchHealthIndexByExpressionTemplateHealthEnum(cluster, expression,
+                    TemplateHealthEnum.YELLOW)) {
+                templatePO.setHealth(TemplateHealthEnum.YELLOW.getCode());
+                indexTemplateService.update(templatePO);
+                return true;
+            }
+            
+            if (esTemplateService.hasMatchHealthIndexByExpressionTemplateHealthEnum(cluster, expression,
+                    TemplateHealthEnum.GREEN)) {
+                templatePO.setHealth(TemplateHealthEnum.GREEN.getCode());
+                indexTemplateService.update(templatePO);
+                return true;
+            }
+    
+           
+    
+            
+            return true;
+        } catch (Exception e) {
+            LOGGER.error("class=TemplateLogicManagerImpl||method=updateTemplateHealthByLogicId||logicId={}", logicId, e);
+            return false;
+        }
+        
+        
+        
+    }
+    
     /**
      * @param consoleTemplateRateLimitDTO
      * @param operator
@@ -1207,20 +1268,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         return consoleTemplateVO;
     }
 
-    /**
-     * 获取逻辑模板标签列表
-     * @param includeLabelIds 包含的标签ID列表
-     * @param excludeLabelIds 排除的标签ID列表
-     * @return
-     */
-    private List<TemplateLabel> fetchLabels(String includeLabelIds, String excludeLabelIds) throws AmsRemoteException {
-        Result<List<TemplateLabel>> result = templateLabelService.listByLabelIds(includeLabelIds, excludeLabelIds);
-        if (result.failed()) {
-            throw new AmsRemoteException("获取模板标签失败");
-        }
 
-        return result.getData();
-    }
 
     /**
      * 获取逻辑模板详情
@@ -1246,80 +1294,19 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         return indexTemplateLogicAggregate;
     }
 
-    /**
-     * 获取模板价值分
-     *
-     * @return
-     */
-    private List<IndexTemplateValue> fetchTemplateValues() {
-        List<IndexTemplateValue> templateValues = Lists.newArrayList();
-      
 
-        return templateValues;
-    }
 
     /**
-     * 获取逻辑模板聚合信息
-     * @param logicTemplates 逻辑模板列表
-     * @param projectId project Id
-     * @return
-     */
-    private List<IndexTemplateLogicAggregate> fetchLogicTemplatesAggregates(List<IndexTemplateWithCluster> logicTemplates,
-                                                                            Integer projectId) {
-        List<IndexTemplateLogicAggregate> indexTemplateLogicAggregates = new ArrayList<>();
-
-        if (CollectionUtils.isNotEmpty(logicTemplates)) {
-
-            // 模板权限
-            Map<Integer, ProjectTemplateAuth> projectTemplateAuths = ConvertUtil.list2Map(
-                projectLogicTemplateAuthService.getTemplateAuthsByProjectId(projectId),
-                ProjectTemplateAuth::getTemplateId);
-
-            // 模板
-            Map<Integer, IndexTemplateValue> logicTemplateValues = ConvertUtil.list2Map(fetchTemplateValues(),
-                IndexTemplateValue::getLogicTemplateId);
-
-            // 具备DCDR的模版id
-            List<Integer> hasDCDRLogicIds = getHaveDCDRLogicIds();
-
-            for (IndexTemplateWithCluster combineLogicCluster : logicTemplates) {
-                try {
-                    indexTemplateLogicAggregates.add(fetchTemplateAggregate(combineLogicCluster, projectTemplateAuths,
-                        logicTemplateValues, hasDCDRLogicIds));
-                } catch (Exception e) {
-                    LOGGER.warn(
-                        "class=LogicTemplateManager||method=fetchLogicTemplatesAggregates||" + "combineLogicCluster={}",
-                        combineLogicCluster, e);
-                }
-            }
-        }
-
-        return indexTemplateLogicAggregates;
-    }
-
-    /**
-     * 校验物理集群是否开启了指定的索引模板服务
+     * 校验物理集群的合法性
      * @param clusterPhyName 物理集群
-     * @param templateSrvId  索引服务id
      * @return 校验结果
      */
-    private Result<Boolean> checkTemplateSrvByClusterName(String clusterPhyName, Integer templateSrvId) {
-        TemplateServiceEnum templateServiceEnum = TemplateServiceEnum.getById(templateSrvId);
-        if (AriusObjUtils.isNull(templateServiceEnum)) {
-            return Result.buildFail("指定校验的索引服务id不存在");
-        }
-
+    private Result<Boolean> checkExistClusterNamePhy(String clusterPhyName) {
+        
         ClusterPhy clusterPhy = clusterPhyService.getClusterByName(clusterPhyName);
         if (AriusObjUtils.isNull(clusterPhy)) {
             return Result.buildFail(String.format("模板归属集群[%s]不存在", clusterPhyName));
         }
-
-        // 校验物理集群是否已经开启了指定的索引模板服务
-        List<String> templateSrvList = ListUtils.string2StrList(clusterPhy.getTemplateSrvs());
-        if (!templateSrvList.contains(templateSrvId.toString())) {
-            return Result.buildFail(String.format("该模板归属集群未开启%s服务", templateServiceEnum.getServiceName()));
-        }
-
         return Result.buildSucc();
     }
 
@@ -1470,8 +1457,17 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
 
         if (StringUtils.isNotBlank(param.getMapping())) {
             AriusTypeProperty ariusTypeProperty = new AriusTypeProperty();
+           
             ariusTypeProperty.setTypeName(DEFAULT_INDEX_MAPPING_TYPE);
-            ariusTypeProperty.setProperties(JSON.parseObject(param.getMapping()));
+            final JSONObject mappings = JSON.parseObject(param.getMapping());
+            if (mappings.containsKey(DYNAMIC_TEMPLATES)) {
+                ariusTypeProperty.setDynamicTemplates(mappings.getJSONArray(DYNAMIC_TEMPLATES));
+            }
+            if (mappings.containsKey(PROPERTIES)){
+                ariusTypeProperty.setProperties(mappings.getJSONObject(PROPERTIES));
+            }
+            
+            
             indexTemplatePhyDTO.setMappings(
                 ariusTypeProperty.toMappingJSON().getJSONObject(DEFAULT_INDEX_MAPPING_TYPE).toJSONString());
         } else {

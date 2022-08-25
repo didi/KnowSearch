@@ -4,6 +4,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ES
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.TEMPLATE_DEFAULT_ORDER;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePhyPO;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateHealthEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
@@ -143,7 +144,15 @@ public class ESTemplateServiceImpl implements ESTemplateService {
         return ESOpTimeoutRetry.esRetryExecute("upsertSetting", retryCount,
             () -> esTemplateDAO.upsertSetting(cluster, name, setting));
     }
-
+    
+    
+    @Override
+    public boolean syncUpdateSettingCheckAllocationAndShard(String cluster, String name, Map<String, String> setting, int retryCount)
+            throws ESOperateException {
+        return ESOpTimeoutRetry.esRetryExecute("updateSettingCheckAllocationAndShard", retryCount,
+            () -> esTemplateDAO.updateSettingCheckAllocationAndShard(cluster, name, setting));
+    }
+    
     /**
      * 同步更新物理模板配置
      * @param cluster 集群名称
@@ -308,5 +317,28 @@ public class ESTemplateServiceImpl implements ESTemplateService {
         Map<String, TemplateConfig> allTemplate = esTemplateDAO.getAllTemplate(Collections.singletonList(cluster));
         return MapUtils.isEmpty(allTemplate) ? 0 : allTemplate.size();
     }
-
+    
+    /**
+     * @param cluster
+     * @return
+     */
+    @Override
+    public boolean syncGetEsClusterIsNormal(String cluster) {
+        return esTemplateDAO.syncGetClusterIsNormal(cluster);
+    }
+    
+    /**
+     * > 检查指定集群的索引是否匹配指定的表达式和模板健康状态
+     *
+     * @param cluster            集群名称
+     * @param expression         索引的表达式，如“log-*”
+     * @param templateHealthEnum 模板的健康状态，为枚举类型，枚举值如下：
+     * @return 布尔值
+     */
+    @Override
+    public boolean hasMatchHealthIndexByExpressionTemplateHealthEnum(String cluster, String expression,
+                                                                     TemplateHealthEnum templateHealthEnum)
+            throws ESOperateException {
+        return esTemplateDAO.hasMatchHealthIndexByExpressionTemplateHealthEnum(cluster,expression,templateHealthEnum);
+    }
 }

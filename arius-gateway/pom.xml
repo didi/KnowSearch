@@ -182,7 +182,7 @@
             <dependency>
                 <groupId>io.github.zqrferrari</groupId>
                 <artifactId>logi-dsl-prase</artifactId>
-                <version>1.0.8</version>
+                <version>1.0.12</version>
                 <exclusions>
                     <exclusion>
                         <artifactId>elasticsearch</artifactId>

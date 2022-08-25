@@ -21,15 +21,7 @@ import io.swagger.annotations.ApiOperation;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @author guoyoupeng_v
@@ -151,5 +143,21 @@ public class ESLogicClusterOpV3Controller {
     @ApiOperation(value = "获取逻辑集群插件列表(用户侧获取)")
     public Result<List<PluginVO>> pluginList(Long clusterId) {
         return clusterLogicManager.getClusterLogicPlugins(clusterId);
+    }
+
+    //展示物理集群对应的逻辑集群名
+    @GetMapping("/cluster-phy-logic-names")
+    @ResponseBody
+    @ApiOperation(value = "获取物理集群所对应的逻辑集群名")
+    public Result<List<String>> listClusterLogicNameByPhy(@RequestParam(value = "phyClusterName",required = false) String phyClusterName) {
+        return Result.buildSucc(clusterLogicManager.listClusterLogicNameByPhyName(phyClusterName));
+    }
+
+    //展示有应用权限的逻辑集群名称列表
+    @GetMapping("/cluster-app-logic-names")
+    @ResponseBody
+    @ApiOperation(value = "根据项目Id获取对应的逻辑集群名称列表")
+    public Result<List<String>> listClusterLogicNameByPhy(HttpServletRequest request) {
+        return Result.buildSucc(clusterLogicManager.listClusterLogicNameByApp(HttpRequestUtil.getProjectId(request)));
     }
 }

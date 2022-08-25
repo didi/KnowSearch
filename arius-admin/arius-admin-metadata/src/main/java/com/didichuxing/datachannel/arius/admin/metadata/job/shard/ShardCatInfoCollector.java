@@ -3,6 +3,7 @@ package com.didichuxing.datachannel.arius.admin.metadata.job.shard;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.shard.ShardCatCellPO;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.BatchProcessor;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
@@ -86,29 +87,34 @@ public class ShardCatInfoCollector extends AbstractMetaDataJob {
         }
         List<List<ShardCatCellPO>> resultList = batchResult.getResultList();
         for (List<ShardCatCellPO> shardCatCellPOS : resultList) {
-            for (ShardCatCellPO shardCatCellPO:shardCatCellPOS) {
-                shardCatCellPO.setTimestamp(currentTimeMillis);
-            }
             shardCatCellList.addAll(shardCatCellPOS);
         }
-        esShardDAO.batchInsert(shardCatCellList);
+        esShardCatService.syncInsertCatShard(shardCatCellList,RETRY_TIMES);
         return JOB_SUCCESS;
     }
 
-    public List<ShardCatCellPO> getShardInfoFromEs(List<String> clusterNameList) {
+    public List<ShardCatCellPO> getShardInfoFromEs(List<String> clusterNameList){
         List<ShardCatCellPO> catShardCellList = Lists.newArrayList();
         for (String clusterName : clusterNameList) {
-            List<ShardCatCellPO> shardCatCells = getShardCatCells(clusterName);
+            List<ShardCatCellPO> shardCatCells = null;
+            try {
+                shardCatCells = getShardCatCells(clusterName);
+            } catch (ESOperateException e) {
+                LOGGER.error(
+                        "class=IndexCatInfoCollector||method=getShardInfoFromEs||clusterList={}||errMsg=batch result error:{}",
+                        ListUtils.strList2String(clusterNameList), e.getMessage());
+                throw new RuntimeException(e);
+            }
             if (null != shardCatCells && !shardCatCells.isEmpty()) {
                 catShardCellList.addAll(shardCatCells);
             }
         }
-
         return catShardCellList;
     }
 
-    private List<ShardCatCellPO> getShardCatCells(String clusterName) {
-        List<ShardCatCellPO> shardDistributionVOS = esShardCatService.syncShardDistribution(clusterName);
+    private List<ShardCatCellPO> getShardCatCells(String clusterName) throws ESOperateException {
+        long currentTimeMillis = System.currentTimeMillis();
+        List<ShardCatCellPO> shardDistributionVOS = esShardCatService.syncShardDistribution(clusterName,currentTimeMillis);
         return shardDistributionVOS;
     }
 }

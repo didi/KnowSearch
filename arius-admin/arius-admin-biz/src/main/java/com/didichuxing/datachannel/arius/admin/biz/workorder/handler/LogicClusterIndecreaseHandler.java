@@ -13,6 +13,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.deta
 import com.didichuxing.datachannel.arius.admin.common.bean.po.order.WorkOrderPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectClusterLogicAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
@@ -178,7 +179,7 @@ public class LogicClusterIndecreaseHandler extends BaseWorkOrderHandler {
         List<ClusterRegionWithNodeInfoDTO> clusterRegionWithNodeInfoDTOList = content.getRegionWithNodeInfo();
 
         Result<Boolean> regionEditResult = clusterNodeManager.editMultiNode2Region(clusterRegionWithNodeInfoDTOList,
-            approver, workOrder.getSubmitorProjectId());
+            approver, workOrder.getSubmitorProjectId(), OperationEnum.EDIT );
         if (regionEditResult.failed()) {
             return Result.buildFrom(regionEditResult);
         }

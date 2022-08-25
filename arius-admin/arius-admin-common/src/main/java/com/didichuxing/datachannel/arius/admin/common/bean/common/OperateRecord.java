@@ -1,6 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.common;
 
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.NewModuleEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
@@ -20,7 +20,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class OperateRecord {
     /**
-     * @see NewModuleEnum
+     * @see ModuleEnum
      */
     private Integer moduleId;
 
@@ -121,7 +121,7 @@ public class OperateRecord {
     }
 
     private OperateRecord(Builder builder) {
-        Optional.ofNullable(builder.operateTypeEnum).map(OperateTypeEnum::getModule).map(NewModuleEnum::getCode)
+        Optional.ofNullable(builder.operateTypeEnum).map(OperateTypeEnum::getModule).map(ModuleEnum::getCode)
             .ifPresent(this::setModuleId);
         Optional.ofNullable(builder.operateTypeEnum).map(OperateTypeEnum::getCode).ifPresent(this::setOperateId);
         setContent(builder.content);

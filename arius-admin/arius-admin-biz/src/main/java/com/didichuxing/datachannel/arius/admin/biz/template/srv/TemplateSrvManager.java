@@ -4,11 +4,11 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResu
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.ColdSrvOpenDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.TemplateQueryDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.srv.TemplateSrv;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.srv.UnavailableTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv.TemplateWithSrvVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterConnectionStatusWithTemplateEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import java.util.List;
 
@@ -36,9 +36,10 @@ public interface TemplateSrvManager {
     /**
      * 获取指定模板「不可用的」服务
      *
-     * @param template @return
+     * @param template        @return
+     * @param materClusterPhy
      */
-    List<UnavailableTemplateSrv> getUnavailableSrv(IndexTemplate template);
+    List<UnavailableTemplateSrv> getUnavailableSrvByTemplateAndMasterPhy(IndexTemplate template, String materClusterPhy);
 
     /**
      * 分页模糊查询模板服务
@@ -72,39 +73,7 @@ public interface TemplateSrvManager {
      * @return
      */
     Result<Void> closeSrv(Integer srvCode, List<Integer> templateIdList, String operator, Integer projectId);
-
-    List<Integer> getPhyClusterTemplateSrvIds(String clusterPhyName);
-
-    Result<Boolean> replaceTemplateServes(String phyClusterName, List<Integer> clusterTemplateSrvIdList,
-                                          String operator);
-
-    /**
-     * 清理所有索引服务
-     *
-     * @param clusterPhy 物理集群名称
-     * @param operator   操作人
-     * @return {@link Result}<{@link Boolean}>
-     */
-    Result<Boolean> delAllTemplateSrvByClusterPhy(String clusterPhy, String operator);
-
-    /**
-     * 查询开启了某个索引服务的物理集群列表 索引服务不在绑定集群测
-     * @param clusterPhies
-     * @param srvId
-     * @return
-     */
-    @Deprecated
-    List<String> getPhyClusterByOpenTemplateSrv(List<ClusterPhy> clusterPhies, int srvId);
-
-    /**
-    * 判断物理集群是否打开了某个索引服务 索引服务不在绑定集群测
-    * @param phyCluster        物理集群名称
-    * @param srvId
-    * @return
-    */
-    @Deprecated
-    boolean isPhyClusterOpenTemplateSrv(String phyCluster, int srvId);
-
+    
     /**
      * 查询开启了某个索引服务的物理集群列表
      *
@@ -121,4 +90,12 @@ public interface TemplateSrvManager {
      */
     List<String> getIndexTemplateContainsSrv(int srvId);
     
+   
+    /**
+     * 返回主集群连接的状态
+     *
+     * @param clusterPhy 集群的名称。
+     * @return 主集群连接状态。
+     */
+    ClusterConnectionStatusWithTemplateEnum getClusterConnectionStatus(String clusterPhy);
 }

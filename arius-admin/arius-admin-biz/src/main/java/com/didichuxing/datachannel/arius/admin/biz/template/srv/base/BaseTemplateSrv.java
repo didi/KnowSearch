@@ -3,6 +3,7 @@ package com.didichuxing.datachannel.arius.admin.biz.template.srv.base;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterConnectionStatusWithTemplateEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.SupportSrv;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
@@ -75,5 +76,14 @@ public interface BaseTemplateSrv {
 
 
     
-    SupportSrv getSupportDCDRAndPipelineByLogicTemplate(IndexTemplate template);
+    SupportSrv getSupportSrvByLogicTemplateAndMasterClusterPhy(IndexTemplate template,
+                                                               String materClusterPhy);
+    
+    /**
+     * 返回主集群连接的状态
+     *
+     * @param clusterPhy 集群的名称。
+     * @return 主集群连接状态。
+     */
+    ClusterConnectionStatusWithTemplateEnum getClusterConnectionStatus(String clusterPhy);
 }

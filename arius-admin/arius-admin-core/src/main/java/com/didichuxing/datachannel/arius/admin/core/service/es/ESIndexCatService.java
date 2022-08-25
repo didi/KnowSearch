@@ -5,9 +5,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatCellDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.IndexCatCell;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.IndexShardInfo;
-
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 public interface ESIndexCatService {
 
@@ -75,10 +75,14 @@ public interface ESIndexCatService {
      * @param name
      * @return
      */
-    List<IndexCatCellDTO> syncGetByCluster(String name, Integer projectId);
+    List<IndexCatCellDTO> syncGetIndexByCluster(String name, Integer projectId);
     
     Result<List<IndexCatCellDTO>> syncGetSegmentsIndexList(String cluster, Collection<String> indexList);
     
     List<String> syncGetIndexListByProjectId(Integer projectId,
                                              String clusterLogic);
+    
+    Map</*clusterPhy*/String,/*docCount*/Integer> syncGetByClusterPhyList(List<String> clusterPhyList);
+    
+    IndexCatCell syncGetCatIndexInfoById(/* clusterPhy*/String clusterPhy,/*IndexName*/ String index);
 }
