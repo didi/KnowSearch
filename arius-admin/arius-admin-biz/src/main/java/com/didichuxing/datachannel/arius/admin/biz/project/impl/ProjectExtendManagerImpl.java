@@ -30,6 +30,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectSe
 import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
 import com.didichuxing.datachannel.arius.admin.common.tuple.Tuples;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.VerifyCodeFactory;
 import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
@@ -106,7 +107,8 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
     @Autowired
     private RoleTool          roleTool;
     @Autowired
-    private ESIndexCatService esIndexCatService;
+    private               ESIndexCatService esIndexCatService;
+    private static final FutureUtil<Void> FUTURE_UTIL = FutureUtil.init("ProjectExtendManagerImpl", 10, 10, 100);
     
     /**
      * “检查一个项目的资源是否可用。”
@@ -178,7 +180,10 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
             // 6. 创建项目配置
             TupleTwo<Result<Void>, ProjectConfigPO> resultProjectConfigTuple = projectConfigService
                 .updateOrInitProjectConfig(config, operator);
-            setAdminProjectExtendVO(projectExtendVO);
+        
+            // 全量获取具有管理员角色的用户
+            final List<UserBriefVO> userBriefListWithAdminRole = userService.getUserBriefListByRoleId(AuthConstant.ADMIN_ROLE_ID);
+            buildProjectExtendVO(projectExtendVO,userBriefListWithAdminRole);
             // 设置项目配置
             if (resultProjectConfigTuple.v1().success()) {
                 projectExtendVO.setConfig(ConvertUtil.obj2Obj(resultProjectConfigTuple.v2(), ProjectConfigVO.class));
@@ -217,10 +222,12 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
         try {
             ProjectVO projectVO = projectService.getProjectDetailByProjectId(projectId);
             ProjectExtendVO projectExtendVO = ConvertUtil.obj2Obj(projectVO, ProjectExtendVO.class);
-            setAdminProjectExtendVO(projectExtendVO);
+            
+            // 全量获取具有管理员角色的用户
+            final List<UserBriefVO> userBriefListWithAdminRole =userService.getUserBriefListByRoleId(AuthConstant.ADMIN_ROLE_ID);
+            buildProjectExtendVO(projectExtendVO, userBriefListWithAdminRole);
             ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectId);
             projectExtendVO.setConfig(ConvertUtil.obj2Obj(projectConfig, ProjectConfigVO.class));
-
             return Result.buildSucc(projectExtendVO);
         } catch (LogiSecurityException e) {
             return Result.buildFail(e.getMessage());
@@ -232,9 +239,20 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
      *
      * @param projectExtendVO 项目延长签证官
      */
-    private void setAdminProjectExtendVO(ProjectExtendVO projectExtendVO) {
+    private void buildProjectExtendVO(ProjectExtendVO projectExtendVO, List<UserBriefVO> userBriefListWithAdminRole) {
         if (AuthConstant.SUPER_PROJECT_ID.equals(projectExtendVO.getId())) {
+            projectExtendVO.setUserList(userBriefListWithAdminRole);
+            projectExtendVO.setOwnerList(userBriefListWithAdminRole);
             projectExtendVO.setIsAdmin(true);
+        } else {
+            List<UserBriefVO> ownerList = Optional.ofNullable(projectExtendVO.getOwnerList())
+                    .orElse(Lists.newArrayList());
+            List<UserBriefVO> useList = Optional.ofNullable(projectExtendVO.getUserList()).orElse(Lists.newArrayList());
+            ownerList.addAll(userBriefListWithAdminRole);
+            useList.addAll(userBriefListWithAdminRole);
+        
+            projectExtendVO.setOwnerList(ownerList.stream().distinct().collect(Collectors.toList()));
+            projectExtendVO.setUserList(useList.stream().distinct().collect(Collectors.toList()));
         }
     }
 
@@ -353,11 +371,18 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
         final PagingData<ProjectVO> projectPage = projectService.getProjectPage(projectQueryDTO, projectIds);
         final List<ProjectExtendVO> projectExtendVOList = ConvertUtil.list2List(projectPage.getBizData(),
             ProjectExtendVO.class);
+        //全量获取具有管理员角色的用户
+        final List<UserBriefVO> userBriefListWithAdminRole =
+                userService.getUserBriefListByRoleId(AuthConstant.ADMIN_ROLE_ID);
         for (ProjectExtendVO projectExtendVO : projectExtendVOList) {
-            setAdminProjectExtendVO(projectExtendVO);
-            final ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectExtendVO.getId());
-            projectExtendVO.setConfig(ConvertUtil.obj2Obj(projectConfig, ProjectConfigVO.class));
+            FUTURE_UTIL.runnableTask(() -> {
+                
+                buildProjectExtendVO(projectExtendVO,userBriefListWithAdminRole);
+                final ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectExtendVO.getId());
+                projectExtendVO.setConfig(ConvertUtil.obj2Obj(projectConfig, ProjectConfigVO.class));
+            });
         }
+        FUTURE_UTIL.waitExecute();
         return PagingResult.success(new PagingData<>(projectExtendVOList, projectPage.getPagination()));
     }
 
