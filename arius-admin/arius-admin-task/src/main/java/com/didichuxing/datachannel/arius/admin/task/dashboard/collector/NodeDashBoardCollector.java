@@ -42,7 +42,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfi
  */
 @Component
 public class NodeDashBoardCollector extends BaseDashboardCollector {
-    private static final int                                                                     NODE_FREE_DISK_THRESHOLD          = 15;
+    private static final int                                                                     NODE_LARGE_DISK_THRESHOLD         = 85;
     private static final int                                                                     HEAD_USED_PERCENT_THRESHOLD       = 80;
     private static final int                                                                     CPU_PERCENT_THRESHOLD             = 80;
     private static final long                                                                    LARGE_HEAD_USED_PERCENT_TIME      = 10
@@ -339,9 +339,9 @@ public class NodeDashBoardCollector extends BaseDashboardCollector {
                 return configThreshold.getValue().longValue();
             }
         } catch (Exception e) {
-            return NODE_FREE_DISK_THRESHOLD;
+            return NODE_LARGE_DISK_THRESHOLD;
         }
-        return NODE_FREE_DISK_THRESHOLD;
+        return NODE_LARGE_DISK_THRESHOLD;
     }
 
     /**
