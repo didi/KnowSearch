@@ -30,6 +30,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectSe
 import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
 import com.didichuxing.datachannel.arius.admin.common.tuple.Tuples;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.VerifyCodeFactory;
 import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
@@ -106,7 +107,8 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
     @Autowired
     private RoleTool          roleTool;
     @Autowired
-    private ESIndexCatService esIndexCatService;
+    private               ESIndexCatService esIndexCatService;
+    private static final FutureUtil<Void> FUTURE_UTIL = FutureUtil.init("ProjectExtendManagerImpl", 20, 40, 100);
     
     /**
      * “检查一个项目的资源是否可用。”
@@ -220,7 +222,6 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
             setAdminProjectExtendVO(projectExtendVO);
             ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectId);
             projectExtendVO.setConfig(ConvertUtil.obj2Obj(projectConfig, ProjectConfigVO.class));
-
             return Result.buildSucc(projectExtendVO);
         } catch (LogiSecurityException e) {
             return Result.buildFail(e.getMessage());
@@ -234,6 +235,10 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
      */
     private void setAdminProjectExtendVO(ProjectExtendVO projectExtendVO) {
         if (AuthConstant.SUPER_PROJECT_ID.equals(projectExtendVO.getId())) {
+            final List<UserBriefVO> briefVOS = userService.getUserBriefListByRoleId(AuthConstant.ADMIN_ROLE_ID).stream()
+                    .distinct().collect(Collectors.toList());
+            projectExtendVO.setUserList(briefVOS);
+            projectExtendVO.setOwnerList(briefVOS);
             projectExtendVO.setIsAdmin(true);
         }
     }
@@ -354,10 +359,14 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
         final List<ProjectExtendVO> projectExtendVOList = ConvertUtil.list2List(projectPage.getBizData(),
             ProjectExtendVO.class);
         for (ProjectExtendVO projectExtendVO : projectExtendVOList) {
-            setAdminProjectExtendVO(projectExtendVO);
-            final ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectExtendVO.getId());
-            projectExtendVO.setConfig(ConvertUtil.obj2Obj(projectConfig, ProjectConfigVO.class));
+            FUTURE_UTIL.runnableTask(() -> {
+                
+                setAdminProjectExtendVO(projectExtendVO);
+                final ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectExtendVO.getId());
+                projectExtendVO.setConfig(ConvertUtil.obj2Obj(projectConfig, ProjectConfigVO.class));
+            });
         }
+        FUTURE_UTIL.waitExecute();
         return PagingResult.success(new PagingData<>(projectExtendVOList, projectPage.getPagination()));
     }
 
