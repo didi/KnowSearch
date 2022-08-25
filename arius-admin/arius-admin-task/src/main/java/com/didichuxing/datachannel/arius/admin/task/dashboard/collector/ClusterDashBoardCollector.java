@@ -58,10 +58,9 @@ public class ClusterDashBoardCollector extends BaseDashboardCollector {
         // 2. 查询耗时
         //TODO 指标-最大值，各节点当前查询耗时最大值
         clusterMetrics.setSearchLatency(esClusterPhyStatsService.getClusterSearchLatency(cluster));
+        //TODO 指标-轻量级获取_cat/health?format=json
         //4. 集群shard总数
         clusterMetrics.setShardNum(clusterStats.getTotalShard());
-        //TODO 指标-轻量级获取_cat/health?format=json
-        clusterMetrics.setShardNum(esClusterPhyStatsService.getClustersShardTotal(cluster));
         // 5. 写入请求数
         clusterMetrics.setIndexReqNum(esClusterPhyStatsService.getCurrentIndexTotal(cluster));
         // 6. 网关成功率、失败率
@@ -71,7 +70,7 @@ public class ClusterDashBoardCollector extends BaseDashboardCollector {
         clusterMetrics.setGatewayFailedPer(gatewaySuccessRateAndFailureRate.getV2());
         // 7. 集群Pending task数
         //TODO 指标-轻量级获取_cat/health?format=json
-        clusterMetrics.setPendingTaskNum(esClusterPhyStatsService.getPendingTaskTotal(cluster));
+        clusterMetrics.setPendingTaskNum(clusterStats.getPendingTasks());
         // 8. 集群http连接数
         clusterMetrics.setHttpNum(esClusterPhyStatsService.getHttpConnectionTotal(cluster));
         //9. 查询请求数突增量 （上个时间间隔请求数的两倍）
@@ -84,15 +83,12 @@ public class ClusterDashBoardCollector extends BaseDashboardCollector {
         clusterMetrics.setNodeElapsedTime(esClusterPhyStatsService.getNodeStatusElapsedTime(cluster));
         long collectorDelayed = getCollectorDelayed(cluster);
         long configCollectorDelayed = getConfigCollectorDelayed();
-
+        //TODO 指标-_cluster/stats，加参数过滤
         //12.消耗时间是否大于5分钟,开始采集到结束采集的时间，指标看板的采集任务，当前时间到最近一次采集的时间
-
         clusterMetrics.setClusterElapsedTimeGte5Min(collectorDelayed > configCollectorDelayed);
         clusterMetrics.setCollectorDelayed(collectorDelayed);
         //13.集群下索引数量
         clusterMetrics.setIndexCount(clusterStats.getIndexCount());
-        //TODO 指标-_cluster/stats，加参数过滤
-        clusterMetrics.setIndexCount(esClusterPhyStatsService.getIndexCountByCluster(cluster));
 
         dashBoardStats.setCluster(clusterMetrics);
         monitorMetricsSender.sendDashboardStats(Lists.newArrayList(dashBoardStats));

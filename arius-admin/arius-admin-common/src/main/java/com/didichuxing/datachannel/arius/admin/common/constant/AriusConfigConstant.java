@@ -115,9 +115,29 @@ public class AriusConfigConstant {
     public static final String INDEX_MAPPING_NUM_THRESHOLD                             = "index.mapping.num_threshold";
 
     /**
-     * 索引Mapping个数阈值定义
+     * 采集延时阈值定义
      */
     public static final String NODE_STATUS_COLLECTOR_DELAYED_THRESHOLD                 = "node_status.collectorDelayed.threshold";
+    /**
+     * 磁盘利用率超红线阈值
+     */
+    public static final String NODE_LARGE_DISK_USAGE_THRESHOLD                         = "node.large.disk.usage.threshold";
+    /**
+     * 堆内存利用率超红线阈值
+     */
+    public static final String NODE_LARGE_HEAD_USAGE_PERCENT_THRESHOLD                 = "node.large.head.used.percent.threshold";
+    /**
+     * 堆内存利用率持续时间红线
+     */
+    public static final String NODE_LARGE_HEAD_USED_PERCENT_TIME_USAGE_THRESHOLD      = "node.large.head.used.percent.time.threshold";
+    /**
+     * CPU利用率超红线
+     */
+    public static final String NODE_LARGE_CPU_USAGE_PERCENT_THRESHOLD                  = "node.large.cpu.percent.threshold";
+    /**
+     * cpu利用率持续时间超红线阈值
+     */
+    public static final String NODE_LARGE_CPU_USED_PERCENT_TIME_USAGE_THRESHOLD       = "node.large.cpu.used.percent.time.threshold";
 
     /**
      * rollover阈值，当索引大小超过该值自动rollover

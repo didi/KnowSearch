@@ -22,8 +22,8 @@
     }
   },
   "aggs": {
-    "sum": {
-      "sum": {
+    "max": {
+      "max": {
         "field": "metrics.%s"
       }
     }

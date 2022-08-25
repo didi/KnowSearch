@@ -1,13 +1,17 @@
 package com.didichuxing.datachannel.arius.admin.task.dashboard.collector;
 
+import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.DashBoardMetricThresholdDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.DashBoardStats;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.NodeMetrics;
+import com.didichuxing.datachannel.arius.admin.common.util.AriusDateUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
+import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterNodeService;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.stats.AriusStatsClusterTaskInfoESDAO;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodesstats.ClusterNodeStats;
@@ -21,12 +25,15 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
+
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.*;
 
 /**
  * Created by linyunan on 3/11/22
@@ -35,17 +42,12 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 @Component
 public class NodeDashBoardCollector extends BaseDashboardCollector {
-    //TODO 指标-配置项
     private static final int                                                                     NODE_FREE_DISK_THRESHOLD          = 15;
-    //TODO 指标-配置项
     private static final int                                                                     HEAD_USED_PERCENT_THRESHOLD       = 80;
-    //TODO 指标-配置项
     private static final int                                                                     CPU_PERCENT_THRESHOLD             = 80;
-    //TODO 指标-配置项
     private static final long                                                                    LARGE_HEAD_USED_PERCENT_TIME      = 10
                                                                                                                                      * 60
                                                                                                                                      * 1000;
-    //TODO 指标-配置项
     private static final long                                                                    LARGE_CPU_PERCENT_TIME            = 30
                                                                                                                                      * 60
                                                                                                                                      * 1000;
@@ -70,6 +72,8 @@ public class NodeDashBoardCollector extends BaseDashboardCollector {
 
     @Autowired
     protected AriusStatsClusterTaskInfoESDAO                                                     ariusStatsClusterTaskInfoESDAO;
+    @Autowired
+    protected AriusConfigInfoService                                                             ariusConfigInfoService;
 
     private static final FutureUtil                                                              futureUtil                        = FutureUtil
         .init("NodeDashBoardCollector", 10, 10, 100);
@@ -129,18 +133,14 @@ public class NodeDashBoardCollector extends BaseDashboardCollector {
             // 2. 是否磁盘利用率超红线 （阈值85%）
             buildLargeDiskUsageInfo(nodeMetrics, clusterNodeStats);
             // 3. 是否堆内存利用率超红线 （阈值80% 且持续10分钟）
-            //TODO 指标-一段时间没踩到，这个连续就会有歧义,remove
             buildLargeHead(nodeMetrics, clusterNodeStats, uniqueNodeKey);
             // 4. 是否CPU利用率超红线 （80%  持续30分钟）
-            //TODO 指标-一段时间没踩到，这个连续就会有歧义,remove
             buildLargeCpuUsage(nodeMetrics, clusterNodeStats, uniqueNodeKey);
             // 5. 节点shard个数
             nodeMetrics.setShardNum(node2ShardNumMapAtomic.get().getOrDefault(nodeName, 0L));
             // 6. WriteRejected数
-            //TODO 指标-采用最新node_info里面各节点reject数量累加
             buildWriteRejectedNum(nodeMetrics, clusterNodeStats, uniqueNodeKey);
             // 7. SearchRejected数
-            //TODO 指标-采用最新node_info里面各节点reject数量累加
             buildSearchRejectedNum(nodeMetrics, clusterNodeStats, uniqueNodeKey);
             //8. 节点执行任务耗时
             nodeMetrics.setTaskConsuming(clusterNodesTaskTotalCostAtomic.get().getOrDefault(nodeName, 0d).longValue());
@@ -190,10 +190,8 @@ public class NodeDashBoardCollector extends BaseDashboardCollector {
 
         ThreadPoolNode search = clusterNodeStats.getThreadPool().getSearch();
         // get diff
-        long diff = search.getRejected() - nodeName2SearchRejectNumMap.getOrDefault(uniqueNodeKey, 0L);
+        long diff = esClusterNodeService.getSearchRejectedNum(uniqueNodeKey.split("@")[0],uniqueNodeKey.split("@")[1]);
         nodeMetrics.setSearchRejectedNum(diff <= 0 ? 0 : diff);
-        // update node search reject
-        nodeName2SearchRejectNumMap.put(uniqueNodeKey, search.getRejected());
     }
 
     private void buildWriteRejectedNum(NodeMetrics nodeMetrics, ClusterNodeStats clusterNodeStats,
@@ -209,21 +207,22 @@ public class NodeDashBoardCollector extends BaseDashboardCollector {
         }
         ThreadPoolNode write = clusterNodeStats.getThreadPool().getWrite();
         // get diff
-        long diff = write.getRejected() - nodeName2WriteRejectNumMap.getOrDefault(uniqueNodeKey, 0L);
+        long diff = esClusterNodeService.getWriteRejectedNum(uniqueNodeKey.split("@")[0],uniqueNodeKey.split("@")[1]);
         nodeMetrics.setWriteRejectedNum(diff <= 0 ? 0 : diff);
-        // update node write reject
-        nodeName2WriteRejectNumMap.put(uniqueNodeKey, write.getRejected());
     }
 
     private void buildLargeCpuUsage(NodeMetrics nodeMetrics, ClusterNodeStats clusterNodeStats, String uniqueNodeKey) {
         // 如果节点掉线不去设置，保留上一次采集到的disk info
         if (null == clusterNodeStats) {
+            nodeName2LargeCpuUsedPerTupleMap.remove(uniqueNodeKey);
             return;
         }
         if (null == clusterNodeStats.getOs()) {
+            nodeName2LargeCpuUsedPerTupleMap.remove(uniqueNodeKey);
             return;
         }
         if (null == clusterNodeStats.getOs().getCpu()) {
+            nodeName2LargeCpuUsedPerTupleMap.remove(uniqueNodeKey);
             return;
         }
 
@@ -231,7 +230,8 @@ public class NodeDashBoardCollector extends BaseDashboardCollector {
         long cpuPer = cpu.getPercent();
 
         // cpuPer大于上限, save to nodeName2LargeCpuUsedPerTupleMap, 若连续出现大于上限, 仅保留第一次超过上限的时间点
-        if (cpuPer >= CPU_PERCENT_THRESHOLD) {
+
+        if (cpuPer >= getConfigLargeCpuPercentThreshold()) {
             // 连续出现大于上限, tuple中时间保持不变
             nodeName2LargeCpuUsedPerTupleMap.put(uniqueNodeKey, nodeName2LargeCpuUsedPerTupleMap
                 .getOrDefault(uniqueNodeKey, new Tuple<>(System.currentTimeMillis(), cpuPer)).setV2(cpuPer));
@@ -244,7 +244,7 @@ public class NodeDashBoardCollector extends BaseDashboardCollector {
             nodeMetrics.setLargeCpuUsage(0D);
         } else {
             long interval = System.currentTimeMillis() - nodeName2LargeCpuUsedPerTupleFromMap.getV1();
-            if (interval >= LARGE_CPU_PERCENT_TIME) {
+            if (interval >= getConfigLargeCpuPercentTimeThreshold()) {
                 nodeMetrics.setLargeCpuUsage((double) cpuPer);
             } else {
                 nodeMetrics.setLargeCpuUsage(-1D);
@@ -256,15 +256,19 @@ public class NodeDashBoardCollector extends BaseDashboardCollector {
     private void buildLargeHead(NodeMetrics nodeMetrics, ClusterNodeStats clusterNodeStats, String uniqueNodeKey) {
         // 如果节点掉线不去设置，保留上一次采集到的head info
         if (null == clusterNodeStats) {
+            nodeName2LargeHeadUsedPerTupleMap.remove(uniqueNodeKey);
             return;
         }
         if (null == clusterNodeStats.getJvm()) {
+            nodeName2LargeHeadUsedPerTupleMap.remove(uniqueNodeKey);
             return;
         }
         if (null == clusterNodeStats.getJvm().getMem()) {
+            nodeName2LargeHeadUsedPerTupleMap.remove(uniqueNodeKey);
             return;
         }
         if (null == clusterNodeStats.getJvm().getMem()) {
+            nodeName2LargeHeadUsedPerTupleMap.remove(uniqueNodeKey);
             return;
         }
 
@@ -272,7 +276,7 @@ public class NodeDashBoardCollector extends BaseDashboardCollector {
         long heapUsedPercent = jvmMem.getHeapUsedPercent();
 
         // heapUsedPercent大于上限, save to nodeName2LargeHeadUsedPerTupleMap, 若连续出现大于上限, 仅保留第一次超过上限的时间点
-        if (heapUsedPercent >= HEAD_USED_PERCENT_THRESHOLD) {
+        if (heapUsedPercent >= getConfigLargeHeadPercentThreshold()) {
             // 连续出现大于上限, tuple中时间保持不变
             nodeName2LargeHeadUsedPerTupleMap.put(uniqueNodeKey,
                 nodeName2LargeHeadUsedPerTupleMap
@@ -287,7 +291,7 @@ public class NodeDashBoardCollector extends BaseDashboardCollector {
             nodeMetrics.setLargeHead(0D);
         } else {
             long interval = System.currentTimeMillis() - time2HeadUsedPerTupleFromMap.getV1();
-            if (interval >= LARGE_HEAD_USED_PERCENT_TIME) {
+            if (interval >= getConfigLargeHeadPercentTimeThreshold()) {
                 nodeMetrics.setLargeHead((double) heapUsedPercent);
             } else {
                 nodeMetrics.setLargeHead(-1D);
@@ -314,11 +318,107 @@ public class NodeDashBoardCollector extends BaseDashboardCollector {
         FSTotal total = clusterNodeStats.getFs().getTotal();
         double freeDiskPer = CommonUtils.divideDoubleAndFormatDouble(total.getFreeInBytes(), total.getTotalInBytes(), 5,
             100);
-        //TODO 指标-配置项
-        if (freeDiskPer <= NODE_FREE_DISK_THRESHOLD) {
+
+        if (freeDiskPer <= 100 -getConfigLargeDiskUsage()) {
             nodeMetrics.setLargeDiskUsage(100 - freeDiskPer);
         } else {
             nodeMetrics.setLargeDiskUsage(-1D);
         }
     }
+
+    /**
+     * 获取从磁盘使用率配置
+     * @return large.disk.usage.threshold
+     */
+    private long getConfigLargeDiskUsage() {
+        try {
+            String configValue = ariusConfigInfoService.stringSetting(ARIUS_DASHBOARD_THRESHOLD_GROUP, NODE_LARGE_DISK_USAGE_THRESHOLD, "");
+            DashBoardMetricThresholdDTO configThreshold = null;
+            if (StringUtils.isNotBlank(configValue)) {
+                configThreshold = JSONObject.parseObject(configValue, DashBoardMetricThresholdDTO.class);
+                return configThreshold.getValue().longValue();
+            }
+        } catch (Exception e) {
+            return NODE_FREE_DISK_THRESHOLD;
+        }
+        return NODE_FREE_DISK_THRESHOLD;
+    }
+
+    /**
+     * 获取堆内存利用率超红线阈值
+     * node.large.head.used.percent.threshold
+     * @return
+     */
+    private long getConfigLargeHeadPercentThreshold() {
+        try {
+            String configValue = ariusConfigInfoService.stringSetting(ARIUS_DASHBOARD_THRESHOLD_GROUP, NODE_LARGE_HEAD_USAGE_PERCENT_THRESHOLD, "");
+            DashBoardMetricThresholdDTO configThreshold = null;
+            if (StringUtils.isNotBlank(configValue)) {
+                configThreshold = JSONObject.parseObject(configValue, DashBoardMetricThresholdDTO.class);
+                return configThreshold.getValue().longValue();
+            }
+        } catch (Exception e) {
+            return HEAD_USED_PERCENT_THRESHOLD;
+        }
+        return HEAD_USED_PERCENT_THRESHOLD;
+    }
+
+    /**
+     * 获堆内存利用率持续时间红线
+     * node.large.head.used.percent.time.threshold
+     * @return
+     */
+    private long getConfigLargeHeadPercentTimeThreshold() {
+        try {
+            String configValue = ariusConfigInfoService.stringSetting(ARIUS_DASHBOARD_THRESHOLD_GROUP, NODE_LARGE_HEAD_USED_PERCENT_TIME_USAGE_THRESHOLD, "");
+            DashBoardMetricThresholdDTO configThreshold = null;
+            if (StringUtils.isNotBlank(configValue)) {
+                configThreshold = JSONObject.parseObject(configValue, DashBoardMetricThresholdDTO.class);
+                return AriusDateUtils.getUnitTime(configThreshold.getValue().longValue(),configThreshold.getUnit());
+            }
+        } catch (Exception e) {
+            return LARGE_HEAD_USED_PERCENT_TIME;
+        }
+        return LARGE_HEAD_USED_PERCENT_TIME;
+    }
+
+    /**
+     * 获堆CPU利用率超红线
+     * node.large.cpu.used.percent.threshold
+     * @return
+     */
+    private long getConfigLargeCpuPercentThreshold() {
+        try {
+            String configValue = ariusConfigInfoService.stringSetting(ARIUS_DASHBOARD_THRESHOLD_GROUP, NODE_LARGE_CPU_USAGE_PERCENT_THRESHOLD, "");
+            DashBoardMetricThresholdDTO configThreshold = null;
+            if (StringUtils.isNotBlank(configValue)) {
+                configThreshold = JSONObject.parseObject(configValue, DashBoardMetricThresholdDTO.class);
+                return configThreshold.getValue().longValue();
+            }
+        } catch (Exception e) {
+            return CPU_PERCENT_THRESHOLD;
+        }
+        return CPU_PERCENT_THRESHOLD;
+    }
+
+    /**
+     * CPU利用率超持续时间红线
+     * node.large.cpu.used.percent.time.threshold
+     * @return
+     */
+    private long getConfigLargeCpuPercentTimeThreshold() {
+        try {
+            String configValue = ariusConfigInfoService.stringSetting(ARIUS_DASHBOARD_THRESHOLD_GROUP, NODE_LARGE_CPU_USED_PERCENT_TIME_USAGE_THRESHOLD, "");
+            DashBoardMetricThresholdDTO configThreshold = null;
+            if (StringUtils.isNotBlank(configValue)) {
+                configThreshold = JSONObject.parseObject(configValue, DashBoardMetricThresholdDTO.class);
+                return AriusDateUtils.getUnitTime(configThreshold.getValue().longValue(),configThreshold.getUnit());
+            }
+        } catch (Exception e) {
+            return LARGE_CPU_PERCENT_TIME;
+        }
+        return LARGE_CPU_PERCENT_TIME;
+    }
+
+
 }
