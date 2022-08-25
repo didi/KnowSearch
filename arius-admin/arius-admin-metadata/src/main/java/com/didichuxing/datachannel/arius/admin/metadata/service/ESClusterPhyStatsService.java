@@ -2,7 +2,7 @@ package com.didichuxing.datachannel.arius.admin.metadata.service;
 
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.percentiles.BasePercentileMetrics;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStatsResponse;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.index.IndexCatCellPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.PercentilesEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESClusterDAO;
@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -143,8 +144,7 @@ public class ESClusterPhyStatsService {
      * @return {@code Long}
      */
     public Long getClustersShardTotal(String cluster) {
-        ESClusterStatsResponse clusterStats = esClusterDAO.getClusterStats(cluster);
-        return  clusterStats.getTotalShard();
+        return  ariusStatsClusterInfoEsDao.getClustersShardTotal(cluster);
     }
 
     /**
@@ -231,7 +231,7 @@ public class ESClusterPhyStatsService {
      * @return
      */
     public Long getIndexCountByCluster(String cluster){
-        ESClusterStatsResponse clusterStats = esClusterDAO.getClusterStats(cluster);
-        return clusterStats.getIndexCount();
+        Tuple<Long, List<IndexCatCellPO>> index = indexCatESDAO.getIndexListByTerms(cluster,null);
+        return Objects.nonNull(index)?index.v1():0L;
     }
 }
