@@ -28,6 +28,10 @@ public class ESClusterStatsResponse {
      */
     private long          docsCount;
     /**
+     * 集群Pending task数
+     */
+    private long          pendingTasks;
+    /**
      * 总节点个数
      */
     private long          totalNodes;

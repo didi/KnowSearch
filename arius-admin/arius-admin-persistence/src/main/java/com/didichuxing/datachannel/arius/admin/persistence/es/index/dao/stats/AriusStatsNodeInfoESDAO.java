@@ -39,6 +39,11 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
     public static final String            OPEN_HTTP         = "open_http";
     public static final String            OPEN_HTTP_FIELD   = "http-current_open";
     private static final String           VALUE             = "value";
+    private static final String           WRITE_REJECTED_TOTAL             = "write_rejected_total";
+
+    private static final String           THREAD_POOL_WRITE_REJECTED       = "thread_pool-write-rejected";
+    private static final String           SEARCH_REJECTED_TOTAL            = "search_rejected_total";
+    private static final String           THREAD_POOL_SEARCH_REJECTED      = "thread_pool-search-rejected";
     private static final FutureUtil<Void> futureUtil        = FutureUtil.init("AriusStatsNodeInfoESDAO", 10, 10, 500);
 
     @PostConstruct
@@ -156,7 +161,7 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
             NOW_2M, NOW_1M, INDICES_INDEXING_LATENCY.getType());
         String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
 
-        return gatewayClient.performRequest(realIndex, TYPE, dsl, s -> getSumFromESQueryResponse(s, "sum"), 3);
+        return gatewayClient.performRequest(realIndex, TYPE, dsl, s -> getSumFromESQueryResponse(s, "max"), 3);
     }
 
     /**
@@ -167,7 +172,7 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
             NOW_1M, INDICES_QUERY_LATENCY.getType());
         String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
 
-        return gatewayClient.performRequest(realIndex, TYPE, dsl, s -> getSumFromESQueryResponse(s, "sum"), 3);
+        return gatewayClient.performRequest(realIndex, TYPE, dsl, s -> getSumFromESQueryResponse(s, "max"), 3);
     }
 
     /**
@@ -461,6 +466,26 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
         return commonGetCurrentAggMetrics(cluster, METRICS, OPEN_HTTP, OPEN_HTTP_FIELD);
     }
 
+    /**
+     * WriteRejected数
+     *
+     * @param cluster 集群 WriteRejectedNum
+     * @return {@code Long}
+     */
+    public Long getWriteRejectedNum(String cluster,String node) {
+        return commonGetNodeCurrentAggMetrics(cluster,node, METRICS, WRITE_REJECTED_TOTAL, THREAD_POOL_WRITE_REJECTED);
+    }
+
+    /**
+     * SearchRejected数
+     *
+     * @param cluster 集群 WriteRejectedNum
+     * @return {@code Long}
+     */
+    public Long getSearchRejectedNum(String cluster,String node) {
+        return commonGetNodeCurrentAggMetrics(cluster,node, METRICS, SEARCH_REJECTED_TOTAL, THREAD_POOL_SEARCH_REJECTED);
+    }
+
     /**************************************** private methods ****************************************/
     /**
      *
@@ -480,6 +505,26 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
                 .map(map -> map.get(metricsType1)).map(ESAggr::getUnusedMap).map(map -> map.get(VALUE))
                 .map(String::valueOf).map(Double::parseDouble).map(Double::longValue).orElse(0L),
             3);
+    }
+
+    /**
+     *
+     * @param cluster          集群名称
+     * @param oneLevelMetrics  dsl中一级指标
+     * @param metricsType1     dsl中二级指标项1字段
+     * @param metricsType2     dsl中二级指标项2字段
+     * @return
+     */
+    private Long commonGetNodeCurrentAggMetrics(String cluster,String node, String oneLevelMetrics, String metricsType1,
+                                            String metricsType2) {
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_NODE_FIELD_SUM_AND_RANGE_FIELD_TOTAL, cluster,node,
+                TIMESTAMP, NOW_2M, NOW_1M, metricsType1, SUM.getType(), String.format("%s%s", oneLevelMetrics, metricsType2));
+        String realIndexName = getIndexNameByNowTimestamp(indexName);
+        return gatewayClient.performRequest(cluster, realIndexName, TYPE, dsl,
+                response -> Optional.ofNullable(response).map(ESQueryResponse::getAggs).map(ESAggrMap::getEsAggrMap)
+                        .map(map -> map.get(metricsType1)).map(ESAggr::getUnusedMap).map(map -> map.get(VALUE))
+                        .map(String::valueOf).map(Double::parseDouble).map(Double::longValue).orElse(0L),
+                3);
     }
 
     /**

@@ -276,14 +276,14 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
         threshold.put(INDEX_SMALL_SHARD.getType(), DashBoardMetricThresholdValueNameEnum.INDEX_SMALL_SHARD_THRESHOLD.getMetrics());
         return threshold;
     }
-    
+
     /**
      * 获取dashboard指标阈值
      *
      * @return
      */
     @NotNull
-    private Map<DashBoardMetricListTypeEnum, DashBoardMetricThresholdDTO> getDashBoardMetricThresholdValues() {
+    public Map<DashBoardMetricListTypeEnum, DashBoardMetricThresholdDTO> getDashBoardMetricThresholdValues() {
         Map<DashBoardMetricListTypeEnum, DashBoardMetricThresholdDTO> thresholdValues = new HashMap<>();
         List<DashBoardMetricThresholdValueNameEnum> thresholdValueNameEnums = getAllDefaultThresholdValue();
         List<AriusConfigInfo> ariusConfigInfos = ariusConfigInfoService.getConfigByGroup(ARIUS_DASHBOARD_THRESHOLD_GROUP);
@@ -313,7 +313,7 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
         }
         return thresholdValues;
     }
-    
+
     /**
      * 合法性检测
      *

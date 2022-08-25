@@ -29,6 +29,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.Tri
 import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectSearchTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
 import com.didichuxing.datachannel.arius.admin.common.tuple.Tuples;
+import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.VerifyCodeFactory;
@@ -61,10 +62,8 @@ import com.google.common.collect.Sets;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -108,7 +107,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
     private RoleTool          roleTool;
     @Autowired
     private               ESIndexCatService esIndexCatService;
-    private static final FutureUtil<Void> FUTURE_UTIL = FutureUtil.init("ProjectExtendManagerImpl", 20, 40, 100);
+    private static final FutureUtil<Void> FUTURE_UTIL = FutureUtil.init("ProjectExtendManagerImpl", 10, 10, 100);
     
     /**
      * “检查一个项目的资源是否可用。”
@@ -251,8 +250,8 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
             ownerList.addAll(userBriefListWithAdminRole);
             useList.addAll(userBriefListWithAdminRole);
         
-            projectExtendVO.setOwnerList(ownerList.stream().distinct().collect(Collectors.toList()));
-            projectExtendVO.setUserList(useList.stream().distinct().collect(Collectors.toList()));
+            projectExtendVO.setOwnerList(ownerList.stream().filter(CommonUtils.distinctByKey(UserBriefVO::getId)).collect(Collectors.toList()));
+            projectExtendVO.setUserList(useList.stream().filter(CommonUtils.distinctByKey(UserBriefVO::getId)).collect(Collectors.toList()));
         }
     }
 
@@ -680,7 +679,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
         if (listResult.successed()) {
             final List<ProjectBriefExtendVO> dtoList = ConvertUtil.list2List(listResult.getData(),
                 ProjectBriefExtendVO.class).stream()
-                    .filter(distinctByKey(ProjectBriefVO::getId)).collect(Collectors.toList());
+                    .filter(CommonUtils.distinctByKey(ProjectBriefVO::getId)).collect(Collectors.toList());
             return getListResult(dtoList);
         } else {
             return Result.buildFail(listResult.getMessage());
@@ -799,10 +798,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
         }
     }
     
-    public static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
-        Map<Object, Boolean> seen = new ConcurrentHashMap<>();
-        return t -> seen.putIfAbsent(keyExtractor.apply(t), Boolean.TRUE) == null;
-    }
+   
     
     private ClusterLogicTemplateIndexDetailDTO getTemplateIndexVO(ClusterLogic clusterLogic, Integer projectId) {
         IndexTemplateDTO param = new IndexTemplateDTO();

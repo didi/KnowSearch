@@ -6,6 +6,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
+import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didiglobal.logi.security.common.PagingData;
@@ -51,7 +52,7 @@ public class UserExtendManagerImpl implements UserExtendManager {
     @Autowired
     private PermissionService     permissionService;
     
-    private static final FutureUtil<Void> FUTURE_UTIL = FutureUtil.init("UserExtendManagerImpl", 20, 40, 100);
+    private static final FutureUtil<Void> FUTURE_UTIL = FutureUtil.init("UserExtendManagerImpl", 10, 10, 100);
     /**
      * 用户注册信息校验
      *
@@ -92,7 +93,7 @@ public class UserExtendManagerImpl implements UserExtendManager {
                     
                     } else {
                         briefList = Optional.ofNullable(userVO.getProjectList()).orElse(Collections.emptyList())
-                                .stream().distinct().collect(Collectors.toList());
+                                .stream().filter(CommonUtils.distinctByKey(ProjectBriefVO::getId)).collect(Collectors.toList());
                     
                     }
                     userVO.setProjectList(briefList);
