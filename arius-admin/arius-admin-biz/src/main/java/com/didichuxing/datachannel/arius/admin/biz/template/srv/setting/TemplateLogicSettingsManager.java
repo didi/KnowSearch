@@ -67,7 +67,8 @@ public interface TemplateLogicSettingsManager {
      * @param projectId
      * @return
      */
-    Result<Void> updateSettings(Integer logicId, IndexTemplatePhySetting settings, String operator, Integer projectId);
+    Result<Void> updateSettings(Integer logicId, IndexTemplatePhySetting settings, String operator, Integer projectId)
+            throws AdminOperateException;
 
     /**
      * 更加逻辑ID获取Settings

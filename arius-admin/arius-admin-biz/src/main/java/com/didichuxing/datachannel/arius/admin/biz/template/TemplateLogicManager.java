@@ -67,14 +67,7 @@ public interface TemplateLogicManager {
      */
     List<IndexTemplateLogicAggregate> getAllTemplatesAggregate(Integer projectId);
 
-    /**
-     * 获取逻辑集群所有逻辑模板聚合
-     *
-     * @param logicClusterId 逻辑集群ID
-     * @param projectId 操作的project Id
-     * @return
-     */
-    List<IndexTemplateLogicAggregate> getLogicClusterTemplatesAggregate(Long logicClusterId, Integer projectId);
+
 
     /**
      * 拼接集群名称
@@ -154,11 +147,7 @@ public interface TemplateLogicManager {
      */
     Result<Void> switchRolloverStatus(Integer templateLogicId, Integer status, String operator, Integer projectId);
 
-    /**
-     * 获取创建dcdr链路模板
-     * @return
-     */
-    List<Integer> getHaveDCDRLogicIds();
+
 
     /**
      * 校验模板是否可以使用索引模板的相关服务，例如是否可以编辑mapping,setting

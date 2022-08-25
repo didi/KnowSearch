@@ -9,7 +9,6 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.resource.E
 import static com.didichuxing.datachannel.arius.admin.common.util.SizeUtil.getUnitSize;
 
 import com.alibaba.fastjson.JSON;
-import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterContextManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterLogicManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterRegionManager;
 import com.didichuxing.datachannel.arius.admin.biz.page.ClusterLogicPageSearchHandle;
@@ -26,7 +25,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatC
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateClearDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicContext;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogicStatis;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
@@ -35,7 +33,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.Projec
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStatsResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicAggregate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESMachineNormsPO;
@@ -48,7 +45,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterR
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PluginVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.ecm.ESClusterNodeSepcVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
@@ -91,7 +87,6 @@ import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import com.didiglobal.logi.security.service.ProjectService;
-import com.didiglobal.logi.security.util.HttpRequestUtil;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import java.util.ArrayList;
@@ -103,7 +98,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.ElasticsearchTimeoutException;
@@ -159,8 +153,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     @Autowired
     private ClusterRegionManager           clusterRegionManager;
 
-    @Autowired
-    private ClusterContextManager          clusterContextManager;
+ 
 
     @Autowired
     private ESClusterService               esClusterService;
@@ -383,31 +376,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
             ConvertUtil.list2List(clusterLogicService.listClusterLogics(logicClusterDTO), ClusterLogicVO.class));
     }
 
-    /**
-     * 获取逻辑集群所有逻辑模板列表
-     * @param request 请求
-     * @param clusterId 逻辑集群id
-     * @return 模板信息集合
-     */
-    @Override
-    public Result<List<ConsoleTemplateVO>> getClusterLogicTemplates(HttpServletRequest request, Long clusterId) {
 
-        List<ConsoleTemplateVO> result = new ArrayList<>();
-
-        Integer projectId = HttpRequestUtil.getProjectId(request, AuthConstant.SUPER_PROJECT_ID);
-        List<IndexTemplateLogicAggregate> aggregates = templateLogicManager.getLogicClusterTemplatesAggregate(clusterId,
-            projectId);
-        if (CollectionUtils.isNotEmpty(aggregates)) {
-            for (IndexTemplateLogicAggregate aggregate : aggregates) {
-                result.add(templateLogicManager.fetchConsoleTemplate((aggregate)));
-            }
-        }
-
-        LOGGER.info("class=ConsoleClusterController||method=getClusterLogicTemplates||clusterId={}||projectId={}",
-            clusterId, projectId);
-
-        return Result.buildSucc(result);
-    }
 
     @Override
     public Result<List<ESClusterNodeSepcVO>> listMachineSpec() {
@@ -639,7 +608,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
             tempAuthLogicClusters.addAll(clusterLogicService.getHasAuthClusterLogicsByProjectId(projectId));
         }
         List<String> names = tempAuthLogicClusters.stream().map(ClusterLogic::getName).collect(Collectors.toList());
-        if (names.size()==0){
+        if (CollectionUtils.isEmpty(names)){
             return Result.buildFail("无集群信息，请前往集群管理-->我的集群，进行集群申请。");
         }
         return Result.buildSucc(names);
@@ -767,6 +736,22 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
             names = clusterPhyService.listClusterNames();
         } else {
             names = getClusterPhyAssociatedClusterLogicNames(phyClusterName);
+        }
+        return names;
+    }
+
+    /**
+     * 返回与给定应用关联的逻辑集群名称列表
+     *
+     * @param projectId 项目id
+     * @return List<String> 逻辑集群名称列表
+     */
+    @Override
+    public List<String> listClusterLogicNameByApp(Integer projectId) {
+        List<ClusterLogic> clusterLogicList = clusterLogicService.getHasAuthClusterLogicsByProjectId(projectId);
+        List<String> names = Lists.newArrayList();
+        for (ClusterLogic clusterLogic : clusterLogicList) {
+            names.add(clusterLogic.getName());
         }
         return names;
     }
@@ -979,12 +964,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
      */
     private void buildClusterNodeInfo(ClusterLogicVO clusterLogicVO) {
 
-        //1. 没有关联物理集群下, 逻辑集群状态至为red
-        if (clusterLogicVO.getPhyClusterAssociated().equals(false)) {
-            clusterLogicVO.getClusterStatus().setStatus(RED.getDesc());
-        }
-
-        //2. 获取gateway地址
+        //获取gateway地址
         clusterLogicVO.setGatewayAddress(esGatewayClient.getGatewayAddress());
     }
 
@@ -1078,16 +1058,25 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         ClusterLogicStatis clusterLogicStatis = new ClusterLogicStatis();
 
         //获取集群上下文
-        ClusterLogicContext clusterLogicContext = clusterContextManager.getClusterLogicContext(logicClusterId);
-        if (null == clusterLogicContext) {
+        //todo 暂时留存
+        //ClusterLogicContext clusterLogicContext = clusterContextManager.getClusterLogicContext(logicClusterId);
+        //if (null == clusterLogicContext) {
+        //    return null;
+        //}
+        ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByIdThatNotContainsProjectId(
+                logicClusterId);
+        if (Objects.isNull(clusterLogic)){
             return null;
         }
 
         //设置逻辑集群名称
-        clusterLogicStatis.setName(clusterLogicContext.getClusterLogicName());
+        //clusterLogicStatis.setName(clusterLogicService.getClusterLogicName());
+        clusterLogicStatis.setName(clusterLogic.getName());
         clusterLogicStatis.setId(logicClusterId);
 
-        List<ESClusterStatsResponse> esClusterStatsResponseList = clusterLogicContext.getAssociatedClusterPhyNames()
+        List<ESClusterStatsResponse> esClusterStatsResponseList =
+                //clusterLogicContext.getAssociatedClusterPhyNames()
+        clusterRegionService.listPhysicClusterNames(clusterLogic.getId())
             .stream().map(esClusterService::syncGetClusterStats).collect(Collectors.toList());
 
         //设置基础数据
@@ -1126,22 +1115,5 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         return RED.getDesc();
     }
 
-    public static List rowBounds(int pageNum, int pageSize, List list) {
-        pageNum = pageNum - 1;
-        pageNum = Math.max(pageNum, 0);
-        // 默认至少返回5行
-        pageSize = Math.max(pageSize, 5);
-        int startRow;
-        int endRow;
-        if (list == null || list.isEmpty()) {
-            return list;
-        }
-        int totalCount = list.size();
-        startRow = pageNum > 0 ? pageNum * pageSize : 0;
-        endRow = startRow + pageSize;
-        endRow = Math.min(endRow, totalCount);
-        list = list.subList(startRow, endRow);
-        return list;
-    }
-
+    
 }

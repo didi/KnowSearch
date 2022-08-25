@@ -144,7 +144,15 @@ public class ESTemplateServiceImpl implements ESTemplateService {
         return ESOpTimeoutRetry.esRetryExecute("upsertSetting", retryCount,
             () -> esTemplateDAO.upsertSetting(cluster, name, setting));
     }
-
+    
+    
+    @Override
+    public boolean syncUpdateSettingCheckAllocationAndShard(String cluster, String name, Map<String, String> setting, int retryCount)
+            throws ESOperateException {
+        return ESOpTimeoutRetry.esRetryExecute("updateSettingCheckAllocationAndShard", retryCount,
+            () -> esTemplateDAO.updateSettingCheckAllocationAndShard(cluster, name, setting));
+    }
+    
     /**
      * 同步更新物理模板配置
      * @param cluster 集群名称
@@ -186,7 +194,7 @@ public class ESTemplateServiceImpl implements ESTemplateService {
      * @return Config
      */
     @Override
-    public TemplateConfig syncGetTemplateConfig(String cluster, String name) {
+    public TemplateConfig syncGetTemplateConfig(String cluster, String name) throws ESOperateException {
         if (StringUtils.isBlank(cluster) || StringUtils.isBlank(name)) {
             return null;
         }
@@ -202,7 +210,8 @@ public class ESTemplateServiceImpl implements ESTemplateService {
      * @return
      */
     @Override
-    public MappingConfig syncGetMappingsByClusterName(String clusterName, String templateName) {
+    public MappingConfig syncGetMappingsByClusterName(String clusterName, String templateName)
+            throws ESOperateException {
         MultiTemplatesConfig templatesConfig = syncGetTemplates(clusterName, templateName);
 
         if (templatesConfig == null || templatesConfig.getSingleConfig() == null) {
@@ -219,8 +228,8 @@ public class ESTemplateServiceImpl implements ESTemplateService {
      * @return
      */
     @Override
-    public MultiTemplatesConfig syncGetTemplates(String clusterName, String templateName) {
-        return esTemplateDAO.getTemplates(clusterName, templateName,3);
+    public MultiTemplatesConfig syncGetTemplates(String clusterName, String templateName) throws ESOperateException {
+        return esTemplateDAO.getTemplates(clusterName, templateName);
     }
 
     /**
@@ -229,7 +238,7 @@ public class ESTemplateServiceImpl implements ESTemplateService {
      * @return
      */
     @Override
-    public Map<String, TemplateConfig> syncGetAllTemplates(List<String> clusters) {
+    public Map<String, TemplateConfig> syncGetAllTemplates(List<String> clusters) throws ESOperateException {
         return esTemplateDAO.getAllTemplate(clusters);
     }
 
@@ -305,7 +314,7 @@ public class ESTemplateServiceImpl implements ESTemplateService {
     }
 
     @Override
-    public long synGetTemplateNumForAllVersion(String cluster) {
+    public long synGetTemplateNumForAllVersion(String cluster) throws ESOperateException {
         Map<String, TemplateConfig> allTemplate = esTemplateDAO.getAllTemplate(Collections.singletonList(cluster));
         return MapUtils.isEmpty(allTemplate) ? 0 : allTemplate.size();
     }

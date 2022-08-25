@@ -475,7 +475,7 @@ public class WorkOrderManagerImpl implements WorkOrderManager {
 
         } catch (AdminOperateException e) {
             LOGGER.error("class=WorkOrderController||method=doProcessByWorkOrderHandle||errMsg={}", e.getMessage(), e);
-            return Result.buildFail("操作失败, 请联系管理员");
+            return Result.buildFail(e.getMessage());
         }
 
         return Result.buildFail("审批结果非法");

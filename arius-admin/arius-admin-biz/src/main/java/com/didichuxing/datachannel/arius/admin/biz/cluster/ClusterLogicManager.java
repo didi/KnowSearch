@@ -14,13 +14,10 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLog
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PluginVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.ecm.ESClusterNodeSepcVO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.ConsoleTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
-
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -68,13 +65,7 @@ public interface ClusterLogicManager {
      */
     Result<List<ClusterLogicVO>> getProjectLogicClusterInfoByType(Integer projectId, Integer type);
 
-    /**
-     * 获取逻辑集群所有逻辑模板列表
-     * @param request
-     * @param clusterId
-     * @return
-     */
-    Result<List<ConsoleTemplateVO>> getClusterLogicTemplates(HttpServletRequest request, Long clusterId);
+
 
     /**
      * 获取当前集群支持的套餐列表
@@ -236,4 +227,12 @@ public interface ClusterLogicManager {
      * @return List<String> 逻辑集群名称列表
      */
     List<String> listClusterLogicNameByPhyName(String phyClusterName);
+
+    /**
+     * 根据项目id获取对应的逻辑集群列表
+     * @param projectId 项目id
+     * @return List<String> 逻辑集群名称列表
+     */
+    List<String> listClusterLogicNameByApp(Integer projectId);
+
 }

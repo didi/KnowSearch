@@ -705,9 +705,14 @@ public class DslsConstant {
      * 条件查询索引cat/shard信息
      */
     public static final String GET_CAT_SHARD_INFO_BY_CONDITION                               = "ShardCatESDAO/getCatShardInfoByCondition";
-  
 
- 
+    /**
+     * 构造多字段模糊查询
+     */
+    public static final String SHOULD_TERM_CELL                                              = "ShardCatESDAO/shouldTermCell";
+
+
+
 
     /**************************************************************  IndexNameAccessCountEsDao **************************************************************/
     /**

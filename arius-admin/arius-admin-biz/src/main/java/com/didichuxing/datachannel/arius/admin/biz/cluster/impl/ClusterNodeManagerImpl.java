@@ -15,6 +15,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.Cluster
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostWithRegionInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.event.region.RegionEditEvent;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminTaskException;
@@ -39,7 +40,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
-import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -121,14 +121,9 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
 
         List<Long> regionIdLis = Lists.newArrayList();
         for (ClusterRegionWithNodeInfoDTO param : params) {
-            Result<Boolean> checkRet = baseCheckParamValid(param);
+            Result<Boolean> checkRet = baseCheckParamValid(param,OperationEnum.ADD);
             if (checkRet.failed()) {
-                throw new AdminOperateException(
-                    String.format("region名称[%s], errMsg:%s", param.getName(), checkRet.getMessage()));
-            }
-
-            if (clusterRegionService.isExistByRegionName(param.getName())) {
-                throw new AdminOperateException(String.format("region名称[%s]已经存在", param.getName()));
+                throw new AdminOperateException(checkRet.getMessage());
             }
 
             if (CollectionUtils.isEmpty(param.getBindingNodeIds())) {
@@ -160,12 +155,17 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Result<Boolean> editMultiNode2Region(List<ClusterRegionWithNodeInfoDTO> params, String operator,
-                                                Integer projectId) throws AdminOperateException {
+                                                Integer projectId, OperationEnum operationEnum) throws AdminOperateException {
         final Result<Void> result = ProjectUtils.checkProjectCorrectly(i -> i, projectId, projectId);
         if (result.failed()) {
             return Result.buildFail(result.getMessage());
         }
         for (ClusterRegionWithNodeInfoDTO param : params) {
+            Result<Boolean> checkRet = baseCheckParamValid(param,operationEnum);
+            if (checkRet.failed()) {
+                throw new AdminOperateException(checkRet.getMessage(), FAIL);
+            }
+
             Result<Boolean> editNode2RegionRet = editNode2Region(param);
             if (editNode2RegionRet.failed()) {
                 throw new AdminOperateException(editNode2RegionRet.getMessage(), FAIL);
@@ -277,14 +277,28 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
         return roleHostList;
     }
 
-    @Nullable
-    private Result<Boolean> baseCheckParamValid(ClusterRegionWithNodeInfoDTO param) {
+    private Result<Boolean> baseCheckParamValid(ClusterRegionWithNodeInfoDTO param, OperationEnum operationEnum) {
         if (null == param) {
             return Result.buildFail("参数为空");
         }
-
-        if (AriusObjUtils.isBlank(param.getName())) {
-            return Result.buildFail("region名称不允许为空或者空字符串");
+        if (operationEnum.equals(OperationEnum.ADD)) {
+            if (AriusObjUtils.isBlank(param.getName())) {
+                return Result.buildFail("region名称不允许为空或者空字符串");
+            }
+            if (clusterRegionService.isExistByRegionName(param.getName())) {
+                return Result.buildFail(String.format("region名称[%s]已经存在", param.getName()));
+            }
+            if (CollectionUtils.isEmpty(param.getBindingNodeIds())) {
+                return Result.buildFail("不允许绑定空region");
+            }
+        }
+        if (operationEnum.equals(OperationEnum.EDIT)) {
+            if (Objects.isNull(param.getId())) {
+                return Result.buildFail("编辑id不能为空");
+            }
+            if (!clusterRegionService.isExistByRegionId(Math.toIntExact(param.getId()))) {
+                return Result.buildFail(String.format("编辑的region %d 不存在", param.getId()));
+            }
         }
 
         if (!clusterPhyService.isClusterExists(param.getPhyClusterName())) {
@@ -294,11 +308,7 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
     }
 
     private Result<Boolean> editNode2Region(ClusterRegionWithNodeInfoDTO param) throws AdminOperateException {
-        Result<Boolean> checkRet = baseCheckParamValid(param);
-        if (checkRet.failed()) {
-            return Result.buildFrom(checkRet);
-        }
-
+       
         // 校验bindingNodeIds 和 unBindingNodeIds的重复性
         List<Integer> bindingNodeIds = param.getBindingNodeIds();
         List<Integer> unBindingNodeIds = param.getUnBindingNodeIds();

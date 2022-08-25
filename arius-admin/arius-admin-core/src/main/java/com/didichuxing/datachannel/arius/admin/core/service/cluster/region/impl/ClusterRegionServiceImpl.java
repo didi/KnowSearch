@@ -187,7 +187,9 @@ public class ClusterRegionServiceImpl implements ClusterRegionService {
             // 判断在未绑定状态,获取region被绑定的逻辑集群的类型，只有被共享逻辑集群绑定的region才能被另一个共享逻辑集群重复绑定
             if (isRegionBound(region)) {
                 if (!isRegionBindByPublicLogicCluster(region)) {
-                    return Result.buildFail(String.format("region %d 已经被非共享逻辑集群绑定", regionId));
+                    return Result.buildFail(
+                            String.format("regionId %d,regionName %s 已经被非共享逻辑集群绑定", regionId,
+                                    region.getName()));
                 }
 
                 if (!clusterLogic.getType().equals(ClusterResourceTypeEnum.PUBLIC.getCode())) {

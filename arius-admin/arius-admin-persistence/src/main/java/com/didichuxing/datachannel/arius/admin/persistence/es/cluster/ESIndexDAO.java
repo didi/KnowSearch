@@ -1,6 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.cluster;
 
-import static com.didichuxing.datachannel.arius.admin.common.RetryUtils.performTryTimesMethods;
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.COMMA;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_OPERATE_TIMEOUT;
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.INDEX_BLOCKS_READ;
@@ -17,6 +16,7 @@ import com.didichuxing.datachannel.arius.admin.common.function.BiFunctionWithESO
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ParsingExceptionUtils;
+import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpTimeoutRetry;
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
 import com.didiglobal.logi.elasticsearch.client.ESClient;
 import com.didiglobal.logi.elasticsearch.client.gateway.direct.DirectRequest;
@@ -151,9 +151,9 @@ public class ESIndexDAO extends BaseESDAO {
                 throw  new ESOperateException(e.getMessage());
             }
         };
-        ESIndicesPutIndexResponse response = performTryTimesMethods(esIndicesExistsResponseBiFunction, Objects::isNull,
-                tryTimes);
-         
+        
+        ESIndicesPutIndexResponse response = esIndicesExistsResponseBiFunction.apply(Long.valueOf(ES_OPERATE_TIMEOUT), TimeUnit.SECONDS );
+        
         return Optional.ofNullable(response).map(ESAcknowledgedResponse::getAcknowledged).orElse(Boolean.FALSE);
     }
 
@@ -177,7 +177,7 @@ public class ESIndexDAO extends BaseESDAO {
      * @param indexName  索引名称
      * @return
      */
-    public boolean existByClusterAndIndexName(String cluster, String indexName,Integer tryTimes) {
+    public boolean existByClusterAndIndexName(String cluster, String indexName) {
         Client client = fetchESClientByCluster(cluster);
          if ( client==null) {
            return Boolean.FALSE;
@@ -193,11 +193,9 @@ public class ESIndexDAO extends BaseESDAO {
                  return null;
             }
         };
-        ESIndicesExistsResponse response = performTryTimesMethods(esIndicesExistsResponseBiFunction,
-            
-                Objects::isNull, tryTimes
-    
-        );
+        ESIndicesExistsResponse response = esIndicesExistsResponseBiFunction.apply(Long.valueOf(ES_OPERATE_TIMEOUT),
+                TimeUnit.SECONDS);
+                
         
         return Optional.ofNullable(response).map(ESIndicesExistsResponse::isExists).orElse(Boolean.FALSE);
     }
@@ -327,8 +325,18 @@ public class ESIndexDAO extends BaseESDAO {
                     return null;
                 }
             };
+            ESIndicesCatIndicesResponse esIndicesCatIndicesResponse = null;
+            try {
+                esIndicesCatIndicesResponse = ESOpTimeoutRetry.esRetryExecuteWithReturnValue("syncGetSegmentsIndexList",
+                        3, () -> catIndicesResponseBiFunction.apply(Long.valueOf(ES_OPERATE_TIMEOUT), TimeUnit.SECONDS),
+                        Objects::isNull
         
-            Optional.ofNullable(performTryTimesMethods(catIndicesResponseBiFunction, Objects::isNull, 3))
+                );
+            } catch (ESOperateException e) {
+                LOGGER.error("class={}||cluster={}||method=catIndexByExpression", getClass().getSimpleName(), cluster,
+                        e);
+        }
+            Optional.ofNullable(esIndicesCatIndicesResponse)
                     .map(ESIndicesCatIndicesResponse::getCatIndexResults).ifPresent(indices::addAll);
         
         }
@@ -467,10 +475,18 @@ public class ESIndexDAO extends BaseESDAO {
                 return null;
             }
         };
-        ESIndicesGetAliasResponse response =performTryTimesMethods(responseBiFunction, Objects::isNull,
-                3
-                
-                ) ;
+        ESIndicesGetAliasResponse response =null;
+        try {
+            response = ESOpTimeoutRetry.esRetryExecuteWithReturnValue("getAliasesByIndices", 3,
+                    () -> responseBiFunction.apply(Long.valueOf(ES_OPERATE_TIMEOUT), TimeUnit.SECONDS), Objects::isNull
+        
+            );
+        } catch (ESOperateException e) {
+            LOGGER.error("class={}||cluster={}||method=catIndexByExpression", getClass().getSimpleName(), cluster, e);
+        }
+        
+        
+        
         return Optional.ofNullable(response).map(ESIndicesGetAliasResponse::getM).orElse(null);
     }
 
@@ -828,10 +844,19 @@ public class ESIndexDAO extends BaseESDAO {
                 return null;
             }
         };
-        ESIndicesPutAliasResponse response = performTryTimesMethods(
-                esIndicesPutAliasResponseBiFunction, esIndicesPutAliasResponse -> Boolean.FALSE.equals(
-                        Optional.ofNullable(esIndicesPutAliasResponse).map(ESIndicesPutAliasResponse::getAcknowledged)
-                                .orElse(Boolean.FALSE)), tryTimes);
+        ESIndicesPutAliasResponse response = null;
+        try {
+            response = ESOpTimeoutRetry.esRetryExecuteWithReturnValue("editAlias", tryTimes,
+                    () -> esIndicesPutAliasResponseBiFunction.apply(Long.valueOf(ES_OPERATE_TIMEOUT), TimeUnit.SECONDS),
+                    esIndicesPutAliasResponse -> Optional.ofNullable(esIndicesPutAliasResponse)
+                            .map(ESIndicesPutAliasResponse::getAcknowledged).orElse(Boolean.FALSE)
+        
+            );
+        } catch (ESOperateException e) {
+            LOGGER.error("class={}||cluster={}||method=editAlias", getClass().getSimpleName(), cluster, e);
+        }
+        
+        
         final Boolean acknowledged = Optional.ofNullable(response).map(ESIndicesPutAliasResponse::getAcknowledged)
                 .orElse(Boolean.FALSE);
         if (Boolean.FALSE.equals(acknowledged)) {
