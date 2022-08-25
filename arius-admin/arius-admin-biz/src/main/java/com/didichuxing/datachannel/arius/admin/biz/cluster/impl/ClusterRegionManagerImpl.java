@@ -171,7 +171,7 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
        
         //2. 集群合法关联性校验
         for (int i = 0; i < param.getClusterRegionDTOS().size(); i++) {
-            checkCanBeBound(param.getId(), param.getClusterRegionDTOS().get(0), param.getType());
+            checkCanBeBound(param.getId(), param.getClusterRegionDTOS().get(i), param.getType());
         }
       
 
@@ -378,7 +378,6 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
         if (boundPhyClusterVersions.size() != 1) {
             return Result.buildFail("逻辑集群绑定的物理集群的版本号应该一致");
         }
-
         return Result.buildSucc();
     }
 
