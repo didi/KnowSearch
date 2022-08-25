@@ -9,6 +9,7 @@ import com.didichuxing.datachannel.arius.admin.persistence.es.index.dsls.DslsCon
 import com.didiglobal.logi.elasticsearch.client.gateway.direct.DirectResponse;
 import com.didiglobal.logi.elasticsearch.client.response.query.query.ESQueryResponse;
 import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESAggr;
+import com.didiglobal.logi.elasticsearch.client.response.query.query.hits.ESHit;
 import com.google.common.collect.Maps;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.rest.RestStatus;
@@ -189,7 +190,8 @@ public class AriusStatsClusterInfoESDAO extends BaseAriusStatsESDAO {
     }
 
     private Long getNearestTime(ESQueryResponse response){
-      return   response.getHits().getHits().stream().map(esHit -> esHit.getSource()).filter(Objects::nonNull)
+       List<ESHit> hits = Optional.ofNullable(response.getHits().getHits()).orElse(new ArrayList<ESHit>());
+      return   hits.stream().map(esHit -> esHit.getSource()).filter(Objects::nonNull)
                 .map(source->((JSONObject)source).getLong("timestamp")).findFirst().orElse(0L);
     }
 }
