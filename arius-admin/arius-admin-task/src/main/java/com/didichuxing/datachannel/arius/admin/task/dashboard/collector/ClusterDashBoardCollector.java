@@ -3,6 +3,7 @@ package com.didichuxing.datachannel.arius.admin.task.dashboard.collector;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.DashBoardMetricThresholdDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStatsResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.ClusterMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.DashBoardStats;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusDateUtils;
@@ -47,6 +48,7 @@ public class ClusterDashBoardCollector extends BaseDashboardCollector {
         DashBoardStats dashBoardStats = buildInitDashBoardStats(startTime);
 
         ClusterMetrics clusterMetrics = cluster2LastTimeClusterMetricsMap.getOrDefault(cluster, new ClusterMetrics());
+        ESClusterStatsResponse clusterStats = esClusterService.syncGetClusterStats(cluster);
         clusterMetrics.setTimestamp(startTime);
         clusterMetrics.setCluster(cluster);
         // 1. 写入耗时
@@ -54,7 +56,7 @@ public class ClusterDashBoardCollector extends BaseDashboardCollector {
         // 2. 查询耗时
         clusterMetrics.setSearchLatency(esClusterPhyStatsService.getClusterSearchLatency(cluster));
         //4. 集群shard总数
-        clusterMetrics.setShardNum(esClusterPhyStatsService.getClustersShardTotal(cluster));
+        clusterMetrics.setShardNum(clusterStats.getTotalShard());
         // 5. 写入请求数
         clusterMetrics.setIndexReqNum(esClusterPhyStatsService.getCurrentIndexTotal(cluster));
         // 6. 网关成功率、失败率
@@ -82,7 +84,7 @@ public class ClusterDashBoardCollector extends BaseDashboardCollector {
         clusterMetrics.setClusterElapsedTimeGte5Min(collectorDelayed > configCollectorDelayed);
         clusterMetrics.setCollectorDelayed(collectorDelayed);
         //13.集群下索引数量
-        clusterMetrics.setIndexCount(esClusterPhyStatsService.getIndexCountByCluster(cluster));
+        clusterMetrics.setIndexCount(clusterStats.getIndexCount());
 
         dashBoardStats.setCluster(clusterMetrics);
         monitorMetricsSender.sendDashboardStats(Lists.newArrayList(dashBoardStats));
