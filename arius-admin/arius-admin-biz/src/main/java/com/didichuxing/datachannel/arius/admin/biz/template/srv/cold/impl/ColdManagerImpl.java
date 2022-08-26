@@ -64,30 +64,37 @@ public class ColdManagerImpl extends BaseTemplateSrvImpl implements ColdManager 
     @Override
     public Result<Boolean> move2ColdNode(Integer logicTemplateId) throws ESOperateException {
         if (Boolean.FALSE.equals(isTemplateSrvOpen(logicTemplateId))) {
-            return Result.buildFail("没有开启冷热分离模板服务");
+            return Result.buildSucc();
         }
 
         IndexTemplateWithPhyTemplates logicTemplateWithPhysicals = indexTemplateService
             .getLogicTemplateWithPhysicalsById(logicTemplateId);
         if (null == logicTemplateWithPhysicals) {
-            return Result.buildFail("模板不存在");
+            LOGGER.info(
+                    "class=ColdManagerImpl||method=move2ColdNode||logicTemplateId={}||msg=ColdDataMoveTask no template",
+                    logicTemplateId);
+            return Result.buildSucc();
         }
 
         IndexTemplatePhy masterPhyTemplate = logicTemplateWithPhysicals.getMasterPhyTemplate();
         if (null == masterPhyTemplate) {
-            return Result.buildFail("主模板不存在");
+            LOGGER.info(
+                    "class=ColdManagerImpl||method=move2ColdNode||logicTemplateId={}||msg=ColdDataMoveTask no master template",
+                    logicTemplateId);
+            return Result.buildSucc();
         }
 
         List<ClusterRegion> coldRegionList = clusterRegionService
             .listColdRegionByCluster(masterPhyTemplate.getCluster());
         if (CollectionUtils.isEmpty(coldRegionList)) {
             LOGGER.warn("class=ColdManagerImpl||method=move2ColdNode||logicTemplate={}||no cold rack", logicTemplateId);
-            return Result.buildFail("没有冷节点");
+            return Result.buildSucc();
         }
         ClusterRegion minUsageColdRegion = getMinUsageColdRegion(masterPhyTemplate.getCluster(), coldRegionList);
         //minUsageColdRegion可能为空
         if (Objects.isNull(minUsageColdRegion)){
-            return Result.buildFail("没有冷节点");
+            LOGGER.warn("class=ColdManagerImpl||method=move2ColdNode||logicTemplate={}||no cold rack", logicTemplateId);
+            return Result.buildSucc();
         }
             Result<Void> moveResult = movePerTemplate(masterPhyTemplate, minUsageColdRegion.getId().intValue());
             if (moveResult.failed()) {
