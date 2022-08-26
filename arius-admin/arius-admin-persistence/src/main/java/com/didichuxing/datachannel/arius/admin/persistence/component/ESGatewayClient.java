@@ -22,6 +22,17 @@ import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import javax.annotation.Nullable;
+import javax.annotation.PostConstruct;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
@@ -35,17 +46,6 @@ import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.XContentHelper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
-import javax.annotation.Nullable;
-import javax.annotation.PostConstruct;
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 
 /**
  * @Author: zqr
@@ -551,7 +551,7 @@ public class ESGatewayClient {
 
         List<Object> objectList = esQueryResponse.getSourceList();
         if (CollectionUtils.isEmpty(objectList)) {
-            return null;
+            return new Tuple<>(0L, Collections.emptyList());
         }
 
         List<T> hits = Lists.newLinkedList();
