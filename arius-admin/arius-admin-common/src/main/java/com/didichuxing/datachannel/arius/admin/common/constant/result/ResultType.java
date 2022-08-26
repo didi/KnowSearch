@@ -69,7 +69,10 @@ public enum ResultType {
 
                         FILE_UPLOAD_ERROR(10029, "upload file failed"),
 
-                        NOT_SUPPORT_ERROR(10030, "接口不再支持"),;
+                        NOT_SUPPORT_ERROR(10030, "接口不再支持"),
+    ES_CLIENT_NUL_ERROR(10031, "es client %s 无法获取"),
+
+    ;
 
     private Integer code;
     private String  message;
