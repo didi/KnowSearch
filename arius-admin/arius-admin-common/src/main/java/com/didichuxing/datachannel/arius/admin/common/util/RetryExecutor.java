@@ -3,6 +3,7 @@ package com.didichuxing.datachannel.arius.admin.common.util;
 import com.didichuxing.datachannel.arius.admin.common.exception.BaseException;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
 public class RetryExecutor<T> {
@@ -47,6 +48,16 @@ public class RetryExecutor<T> {
         default boolean needRetry(Exception e) {
             return true;
         }
+    
+        /**
+         * 如果您不需要抛出异常，请不要抛出它们。
+         *
+         * @param e 抛出的异常。
+         * @return 正在返回默认方法。
+         */
+        default boolean needToThrowExceptions(Exception e) {
+            return false;
+        }
 
         /**
          * 重试Sleep时间间隔
@@ -75,7 +86,15 @@ public class RetryExecutor<T> {
         default boolean needRetry(Exception e) {
             return true;
         }
-        
+        /**
+         * 如果您不需要抛出异常，请不要抛出它们。
+         *
+         * @param e 抛出的异常。
+         * @return 正在返回默认方法。
+         */
+        default boolean needToThrowExceptions(Exception e) {
+            return false;
+        }
         default boolean needRetry(Predicate<T> predicate, T t) {
             return predicate.test(t);
         }
@@ -123,22 +142,22 @@ public class RetryExecutor<T> {
         do {
             try {
                 succ = handler.process();
-                if (succ) {
-                    return true;
-                }
             } catch (Exception e) {
-                if (!handler.needRetry(e) || tryCount == retryCount) {
+                if (!handler.needRetry(e) || tryCount == retryCount||handler.needToThrowExceptions(e)) {
                     LOGGER.warn("class=RetryExecutor||method=execute||errMsg={}||handlerName={}||tryCount={}",
                             e.getMessage(), name, tryCount, e);
                     throw e;
                 }
-    
+                /**
+                 * 这里需要做出对应的一个等待尝试策略，因为集群的抖动从而造成了操作等待时长，但是值得注意的是，这里如果多次重试的
+                 * 时间叠加一定不能超过30s，如果超过了，那么当数据库交互过程、页面交互过程中，很容易触发接口的超时
+                 */
                 LOGGER.warn(
                         "class=RetryExecutor||method=execute||errMsg={}||handlerName={}||tryCount={}||maxTryCount={}",
                         e.getMessage(), name, tryCount, retryCount);
                 int retrySleepTime = handler.retrySleepTime(tryCount);
                 if (retrySleepTime > 0) {
-                    Thread.sleep(retrySleepTime);
+                      TimeUnit.MILLISECONDS.sleep(retrySleepTime);
                 }
                 
             }
@@ -154,23 +173,25 @@ public class RetryExecutor<T> {
         do {
             try {
                 t = handlerWithReturnValue.process();
-                if (!handlerWithReturnValue.needRetry(predicate, t)){
-                    return t;
-                }
             } catch (Exception e) {
     
-                if (!handlerWithReturnValue.needRetry(e) || tryCount == retryCount) {
+                if (!handlerWithReturnValue.needRetry(e) || tryCount == retryCount||handler.needToThrowExceptions(e)) {
                     LOGGER.warn("class=RetryExecutor||method=execute||errMsg={}||handlerName={}||tryCount={}",
                             e.getMessage(), name, tryCount, e);
         
                     throw e;
                 }
+                /**
+                 * 这里需要做出对应的一个等待尝试策略，因为集群的抖动从而造成了操作等待时长，但是值得注意的是，这里如果多次重试的
+                 * 时间叠加一定不能超过30s，如果超过了，那么当数据库交互过程、页面交互过程中，很容易触发接口的超时
+                 */
                 LOGGER.warn(
                         "class=RetryExecutor||method=execute||errMsg={}||handlerName={}||tryCount={}||maxTryCount={}",
                         e.getMessage(), name, tryCount, retryCount);
                 int retrySleepTime = handlerWithReturnValue.retrySleepTime(tryCount);
                 if (retrySleepTime > 0) {
-                    Thread.sleep(retrySleepTime);
+                    
+                     TimeUnit.MILLISECONDS.sleep(retrySleepTime);
                 }
             }
             
