@@ -152,7 +152,7 @@ public abstract class BaseWorkOrderHandler implements WorkOrderHandler {
         for (WorkOrderVO param : applyListResultData) {
             if (workOrder.getType().equals(param.getType())
                 && JSON.toJSONString(workOrder.getContentObj()).equals(param.getExtensions())) {
-                return Result.buildFail("重复性工单的提交");
+                return Result.buildFail("存在重复工单，如需重新提交，需前往[工单任务-我的申请]撤回原有工单。");
             }
         }
 

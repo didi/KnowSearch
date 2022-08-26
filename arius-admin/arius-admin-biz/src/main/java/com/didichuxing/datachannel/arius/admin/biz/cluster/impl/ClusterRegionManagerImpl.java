@@ -131,7 +131,7 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
 
         List<ClusterRegion> clusterRegions = clusterRegionService.listPhyClusterRegions(phyCluster);
         if (CollectionUtils.isEmpty(clusterRegions)) {
-            return Result.buildFail(String.format("物理集群[%s]无划分region, 请先进行region划分", phyCluster));
+            return Result.buildFail(String.format("物理集群[%s]无可用region, 请前往物理集群-region划分进行region创建", phyCluster));
         }
         return Result.buildSucc(ConvertUtil.list2List(clusterRegions, ClusterRegionVO.class,
             regionVO -> regionVO.setClusterName(phyCluster)));

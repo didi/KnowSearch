@@ -733,14 +733,16 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
      */
     @Override
     public List<String> listClusterLogicNameByPhyName(String phyClusterName) {
-        List<String> names = Lists.newArrayList();
         //若传入为空，则返回全量
         if (null == phyClusterName) {
-            names = clusterPhyService.listClusterNames();
+            return clusterLogicService.listAllClusterLogics()
+                    .stream()
+                    .map(ClusterLogic::getName)
+                    .distinct()
+                    .collect(Collectors.toList());
         } else {
-            names = getClusterPhyAssociatedClusterLogicNames(phyClusterName);
+           return getClusterPhyAssociatedClusterLogicNames(phyClusterName);
         }
-        return names;
     }
 
     /**
