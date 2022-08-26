@@ -19,6 +19,7 @@ import com.didiglobal.logi.log.LogFactory;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.rest.RestStatus;
@@ -229,7 +230,8 @@ public class ESTemplateServiceImpl implements ESTemplateService {
      */
     @Override
     public MultiTemplatesConfig syncGetTemplates(String clusterName, String templateName) throws ESOperateException {
-        return esTemplateDAO.getTemplates(clusterName, templateName);
+        return ESOpTimeoutRetry.esRetryExecuteWithReturnValue("syncGetTemplates", 3,
+                () -> esTemplateDAO.getTemplates(clusterName, templateName), Objects::isNull);
     }
 
     /**
