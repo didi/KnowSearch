@@ -21,7 +21,16 @@ import io.swagger.annotations.ApiOperation;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * @author guoyoupeng_v
@@ -131,11 +140,11 @@ public class ESLogicClusterOpV3Controller {
     }
 
     //超级应展示全部物理集群、普通应用展示普通应用有权限的逻辑集群
-    @GetMapping("/cluster-phy-relation")
+    @GetMapping("/cluster-phy-health-relation")
     @ResponseBody
-    @ApiOperation(value = "根据项目id获取逻辑集群与物理集群映射")
+    @ApiOperation(value = "根据项目id获取健康的逻辑集群与物理集群映射")
     public Result<List<Tuple<String, ClusterPhyVO>>> getClusterRelationByProjectId(HttpServletRequest request) {
-        return clusterLogicManager.getClusterRelationByProjectId(HttpRequestUtil.getProjectId(request));
+        return clusterLogicManager.getHealthClusterRelationByProjectId(HttpRequestUtil.getProjectId(request));
     }
 
     @GetMapping("/plugins")
