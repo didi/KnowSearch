@@ -733,7 +733,10 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         List<String> names = Lists.newArrayList();
         //若传入为空，则返回全量
         if (null == phyClusterName) {
-            names = clusterPhyService.listClusterNames();
+            List<ClusterLogic> clusterLogicList = clusterLogicService.listAllClusterLogics();
+            for (ClusterLogic clusterLogic : clusterLogicList) {
+                names.add(clusterLogic.getName());
+            }
         } else {
             names = getClusterPhyAssociatedClusterLogicNames(phyClusterName);
         }
