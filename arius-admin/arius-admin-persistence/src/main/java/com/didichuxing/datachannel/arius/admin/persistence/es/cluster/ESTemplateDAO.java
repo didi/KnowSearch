@@ -545,9 +545,10 @@ public class ESTemplateDAO extends BaseESDAO {
             throw new ESOperateException(
                     "模版分片分配节点配置属于系统权限，不允许变更 index.routing.allocation.include._name");
         }
+        final String indexNumberOfShards = templateConfig.getSetttings().get(ESSettingConstant.INDEX_NUMBER_OF_SHARDS);
         //shard
         if (!StringUtils.equals(setting.get(ESSettingConstant.INDEX_NUMBER_OF_SHARDS),
-                indexRoutingAllocationIncludeName)) {
+                indexNumberOfShards)) {
             throw new ESOperateException(
                     "模版设置 shard 大小设置属于系统权限, 非运维人员不允许变更 index.number_of_shards");
         
