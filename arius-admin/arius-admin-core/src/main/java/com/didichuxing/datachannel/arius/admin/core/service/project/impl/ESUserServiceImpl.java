@@ -208,12 +208,7 @@ public class ESUserServiceImpl implements ESUserService {
             if (StringUtils.isBlank(appDTO.getVerifyCode())) {
                 return Result.buildParamIllegal("校验码不能为空");
             }
-            final int countByProjectIdAndSearchType = esUserDAO.countByProjectIdAndSearchType(appDTO.getSearchType(),
-                    appDTO.getProjectId());
-    
-            if (countByProjectIdAndSearchType >= 1) {
-                return Result.buildParamIllegal("当前项目已经存在相同模式的es user");
-            }
+            
         } else if (EDIT.equals(operation)) {
             if (AriusObjUtils.isNull(appDTO.getId()) || AriusObjUtils.isNull(oldESUser)) {
                 return Result.buildNotExist(ES_USER_NOT_EXIST);
