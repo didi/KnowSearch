@@ -251,16 +251,19 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
             
             projectExtendVO.setIsAdmin(true);
         } else {
-           
+    
             List<UserBriefVO> useList = Optional.ofNullable(projectExtendVO.getUserList()).orElse(Lists.newArrayList());
+            projectExtendVO.setUserList(useList.stream().filter(CommonUtils.distinctByKey(UserBriefVO::getId))
+                    .collect(Collectors.toList()));
+            projectExtendVO.setOwnerList(
+                    projectExtendVO.getOwnerList().stream().filter(CommonUtils.distinctByKey(UserBriefVO::getId))
+                            .collect(Collectors.toList()));
             useList.addAll(userBriefListWithAdminRole);
             // 具有管理员角色和持有项目用户的项目成员
             final List<UserBriefVO> userListWithBelongProjectAndAdminRole = useList.stream()
                     .filter(CommonUtils.distinctByKey(UserBriefVO::getId)).collect(Collectors.toList());
             projectExtendVO.setUserListWithAdminRole(userBriefListWithAdminRole);
             projectExtendVO.setUserListWithBelongProjectAndAdminRole(userListWithBelongProjectAndAdminRole);
-            projectExtendVO.setUserList(useList.stream().filter(CommonUtils.distinctByKey(UserBriefVO::getId)).collect(Collectors.toList()));
-            projectExtendVO.setOwnerList(projectExtendVO.getOwnerList().stream().filter(CommonUtils.distinctByKey(UserBriefVO::getId)).collect(Collectors.toList()));
             
         }
     }
