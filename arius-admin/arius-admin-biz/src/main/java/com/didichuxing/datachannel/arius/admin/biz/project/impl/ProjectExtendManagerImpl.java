@@ -162,9 +162,12 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
                 ownerIdList.add(operatorId);
 
             }
-            //谁创建、谁包含
+            // 谁创建、谁包含
             if (!ownerIdList.contains(operatorId)) {
                 ownerIdList.add(operatorId);
+            }
+            if (!userIdList.contains(operatorId)) {
+                userIdList.add(operatorId);
             }
 
             // 3. 创建项目
@@ -240,18 +243,22 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
      */
     private void buildProjectExtendVO(ProjectExtendVO projectExtendVO, List<UserBriefVO> userBriefListWithAdminRole) {
         if (AuthConstant.SUPER_PROJECT_ID.equals(projectExtendVO.getId())) {
+    
             projectExtendVO.setUserList(userBriefListWithAdminRole);
             projectExtendVO.setOwnerList(userBriefListWithAdminRole);
+            projectExtendVO.setUserListWithBelongProjectAndAdminRole(userBriefListWithAdminRole);
+            projectExtendVO.setUserListWithAdminRole(userBriefListWithAdminRole);
+            
             projectExtendVO.setIsAdmin(true);
         } else {
-            List<UserBriefVO> ownerList = Optional.ofNullable(projectExtendVO.getOwnerList())
-                    .orElse(Lists.newArrayList());
+           
             List<UserBriefVO> useList = Optional.ofNullable(projectExtendVO.getUserList()).orElse(Lists.newArrayList());
-            ownerList.addAll(userBriefListWithAdminRole);
             useList.addAll(userBriefListWithAdminRole);
-        
-            projectExtendVO.setOwnerList(ownerList.stream().filter(CommonUtils.distinctByKey(UserBriefVO::getId)).collect(Collectors.toList()));
-            projectExtendVO.setUserList(useList.stream().filter(CommonUtils.distinctByKey(UserBriefVO::getId)).collect(Collectors.toList()));
+            // 具有管理员角色和持有项目用户的项目成员
+            final List<UserBriefVO> userListWithBelongProjectAndAdminRole = useList.stream()
+                    .filter(CommonUtils.distinctByKey(UserBriefVO::getId)).collect(Collectors.toList());
+            projectExtendVO.setUserListWithAdminRole(userBriefListWithAdminRole);
+            projectExtendVO.setUserListWithBelongProjectAndAdminRole(userListWithBelongProjectAndAdminRole);
         }
     }
 
@@ -403,8 +410,14 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
                 projectConfigService.updateOrInitProjectConfig(config, operator);
             }
             final ProjectSaveDTO project = saveDTO.getProject();
-            List<Integer> ownerIdList = project.getOwnerIdList();
-            List<Integer> userIdList = project.getUserIdList();
+            List<Integer> ownerIdList = Optional.ofNullable(project.getOwnerIdList())
+                    .orElse(Collections.emptyList()).stream().distinct().collect(Collectors.toList());
+            List<Integer> userIdListTemp = Optional.ofNullable(project.getUserIdList())
+                    .orElse(Collections.emptyList());
+            //负责人一定是成员
+            userIdListTemp.addAll(ownerIdList);
+            final List<Integer> userIdList = userIdListTemp.stream().distinct().collect(Collectors.toList());
+    
             //超级项目侧校验添加的用户收否存在管理员角色
             final Result<Void> ownerResult = checkProject(project.getId(), ownerIdList, OperationEnum.EDIT);
             if (ownerResult.failed()) {
