@@ -3,6 +3,7 @@ package com.didichuxing.datachannel.arius.admin.persistence.component;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.BaseException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import com.didichuxing.datachannel.arius.admin.common.exception.NullESClientException;
 import com.didichuxing.datachannel.arius.admin.common.util.RetryExecutor;
 import com.didichuxing.datachannel.arius.admin.common.util.RetryExecutor.HandlerWithReturnValue;
 import java.util.concurrent.TimeUnit;
@@ -82,7 +83,7 @@ public class ESOpTimeoutRetry {
                         @Override
                         public boolean needRetry(Exception e) {
                             return e instanceof ProcessClusterEventTimeoutException
-                                   || e instanceof ElasticsearchTimeoutException;
+                                   || e instanceof ElasticsearchTimeoutException||e instanceof NullESClientException;
                         }
     
                         /**
@@ -126,12 +127,24 @@ public class ESOpTimeoutRetry {
                 public boolean process() throws BaseException {
                     return handler.process();
                 }
-
+    
                 @Override
                 public boolean needRetry(Exception e) {
                     return e instanceof ProcessClusterEventTimeoutException
-                           || e instanceof ElasticsearchTimeoutException || e instanceof AdminOperateException;
+                           || e instanceof ElasticsearchTimeoutException || e instanceof NullESClientException;
                 }
+    
+                /**
+                 * 如果您不需要抛出异常，请不要抛出它们。
+                 *
+                 * @param e 抛出的异常。
+                 * @return 正在返回默认方法。
+                 */
+                @Override
+                public boolean needToThrowExceptions(Exception e) {
+                    return e instanceof AdminOperateException;
+                }
+    
 
                 @Override
                 public int retrySleepTime(int retryTimes) {

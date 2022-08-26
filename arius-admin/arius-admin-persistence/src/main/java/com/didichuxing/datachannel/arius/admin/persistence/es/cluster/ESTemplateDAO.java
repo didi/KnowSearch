@@ -7,10 +7,10 @@ import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOpe
 import com.didichuxing.datachannel.arius.admin.common.constant.ESSettingConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateHealthEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import com.didichuxing.datachannel.arius.admin.common.exception.NullESClientException;
 import com.didichuxing.datachannel.arius.admin.common.function.BiFunctionWithESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ParsingExceptionUtils;
-import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpTimeoutRetry;
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
 import com.didiglobal.logi.elasticsearch.client.ESClient;
 import com.didiglobal.logi.elasticsearch.client.gateway.direct.DirectRequest;
@@ -180,7 +180,7 @@ public class ESTemplateDAO extends BaseESDAO {
             LOGGER.warn(
                     "class=ESTemplateDAO||method=create||msg=es client is null||cluster={}||name={}||expression={}||shard={}||shardRouting={}",
                     cluster, name, expression, shard, shardRouting);
-            return Boolean.FALSE;
+            throw new NullESClientException(cluster);
         }
     
         // 获取es中原来index template的配置
@@ -198,16 +198,7 @@ public class ESTemplateDAO extends BaseESDAO {
                 throw new ESOperateException(e.getMessage());
             }
         };
-        ESIndicesGetTemplateResponse esIndicesGetTemplateResponse = null;
-        try {
-            esIndicesGetTemplateResponse = ESOpTimeoutRetry.esRetryExecuteWithReturnValue("create", 3,
-                    () -> getTemplateResponseBiFunction.apply(Long.valueOf(ES_OPERATE_TIMEOUT), TimeUnit.SECONDS),
-                    Objects::isNull
-        
-            );
-        } catch (ESOperateException e) {
-            LOGGER.error("class={}||cluster={}||method=create", getClass().getSimpleName(), cluster, e);
-        }
+        ESIndicesGetTemplateResponse esIndicesGetTemplateResponse =  getTemplateResponseBiFunction.apply(Long.valueOf(ES_OPERATE_TIMEOUT), TimeUnit.SECONDS);
     
         TemplateConfig templateConfig = Optional.ofNullable(esIndicesGetTemplateResponse)
                 .map(ESIndicesGetTemplateResponse::getMultiTemplatesConfig).map(MultiTemplatesConfig::getSingleConfig)
@@ -250,16 +241,8 @@ public class ESTemplateDAO extends BaseESDAO {
             }
         
         };
-        ESIndicesPutTemplateResponse esIndicesPutTemplateResponse = null;
-        try {
-            esIndicesPutTemplateResponse = ESOpTimeoutRetry.esRetryExecuteWithReturnValue("create", 3,
-                    () -> getESIndicesPutTemplateResponseBiFunction.apply(Long.valueOf(ES_OPERATE_TIMEOUT),
-                            TimeUnit.SECONDS), Objects::isNull
-        
-            );
-        } catch (ESOperateException e) {
-            LOGGER.error("class={}||cluster={}||method=create", getClass().getSimpleName(), cluster, e);
-        }
+        ESIndicesPutTemplateResponse esIndicesPutTemplateResponse =getESIndicesPutTemplateResponseBiFunction.apply(Long.valueOf(ES_OPERATE_TIMEOUT),
+                            TimeUnit.SECONDS);
     
         return Optional.ofNullable(
                         esIndicesPutTemplateResponse)
@@ -272,7 +255,7 @@ public class ESTemplateDAO extends BaseESDAO {
         if (client==null){
             LOGGER.warn("class=ESTemplateDAO||method=create||msg=es client is null ||cluster={}||name={}||templateConfig={}", cluster,
                 name,templateConfig.toString());
-            return Boolean.FALSE;
+            throw new NullESClientException(cluster);
         }
 
         // 设置ES版本
@@ -293,16 +276,8 @@ public class ESTemplateDAO extends BaseESDAO {
                 throw new ESOperateException("模板创建失败");
             }
         };
-        ESIndicesPutTemplateResponse esIndicesPutTemplateResponse = null;
-        try {
-            esIndicesPutTemplateResponse = ESOpTimeoutRetry.esRetryExecuteWithReturnValue("create", 3,
-                    () -> responseBiFunction.apply(Long.valueOf(ES_OPERATE_TIMEOUT),
-                            TimeUnit.SECONDS), Objects::isNull
-        
-            );
-        } catch (ESOperateException e) {
-            LOGGER.error("class={}||cluster={}||method=create", getClass().getSimpleName(), cluster, e);
-        }
+        ESIndicesPutTemplateResponse esIndicesPutTemplateResponse = responseBiFunction.apply(
+                Long.valueOf(ES_OPERATE_TIMEOUT), TimeUnit.SECONDS);
     
         return Optional.ofNullable(esIndicesPutTemplateResponse)
                 .map(ESIndicesPutTemplateResponse::getAcknowledged).orElse(false);
@@ -322,7 +297,7 @@ public class ESTemplateDAO extends BaseESDAO {
             LOGGER.warn(
                     "class=ESTemplateDAO||method=updateTemplate||update template  fail||clusterName={}||templateName={}||esVersion={}||templateConfig={}||msg=es client is null",
                     clusterName, templateName, templateConfig.toString());
-            return Boolean.FALSE;
+            throw new NullESClientException(clusterName);
         }
 
         // 设置ES版本
@@ -445,7 +420,7 @@ public class ESTemplateDAO extends BaseESDAO {
         return response.getMultiTemplatesConfig();
     }
     
-    protected ESIndicesGetTemplateResponse getESIndicesGetTemplateResponse(String clusterName, String templateName) throws ESOperateException {
+    protected ESIndicesGetTemplateResponse getESIndicesGetTemplateResponse(String clusterName, String templateName) {
         ESClient esClient = esOpClient.getESClient(clusterName);
     
         if (esClient == null) {
@@ -468,11 +443,8 @@ public class ESTemplateDAO extends BaseESDAO {
             }
         };
         
-        return ESOpTimeoutRetry.esRetryExecuteWithReturnValue("getESIndicesGetTemplateResponse", 3,
-                    () -> responseBiFunction.apply(Long.valueOf(ES_OPERATE_TIMEOUT),
-                            TimeUnit.SECONDS), Objects::isNull
-        
-            );
+        return responseBiFunction.apply(Long.valueOf(ES_OPERATE_TIMEOUT),
+                            TimeUnit.SECONDS);
             
     }
 

@@ -147,7 +147,7 @@ public class RetryExecutor<T> {
                     break;
                 }
             } catch (Exception e) {
-                if (!handler.needRetry(e) || tryCount == retryCount||handler.needToThrowExceptions(e)) {
+                if (handler.needToThrowExceptions(e)|| tryCount == retryCount||!handler.needRetry(e)) {
                     LOGGER.warn("class=RetryExecutor||method=execute||errMsg={}||handlerName={}||tryCount={}",
                             e.getMessage(), name, tryCount, e);
                     throw e;
@@ -159,15 +159,14 @@ public class RetryExecutor<T> {
                 LOGGER.warn(
                         "class=RetryExecutor||method=execute||errMsg={}||handlerName={}||tryCount={}||maxTryCount={}",
                         e.getMessage(), name, tryCount, retryCount);
-               
-                
-            }
-            if (retryCount != tryCount) {
+    
                 int retrySleepTime = handler.retrySleepTime(tryCount);
                 if (retrySleepTime > 0) {
                     TimeUnit.MILLISECONDS.sleep(retrySleepTime);
                 }
+                
             }
+            
             
         } while (tryCount++ < retryCount);
 
@@ -184,25 +183,24 @@ public class RetryExecutor<T> {
                 }
             } catch (Exception e) {
     
-                if (!handlerWithReturnValue.needRetry(e) || tryCount == retryCount||handler.needToThrowExceptions(e)) {
+                if (handler.needToThrowExceptions(e)|| tryCount == retryCount||!handler.needRetry(e)) {
                     LOGGER.warn("class=RetryExecutor||method=execute||errMsg={}||handlerName={}||tryCount={}",
                             e.getMessage(), name, tryCount, e);
         
                     throw e;
                 }
-                
+    
                 LOGGER.warn(
                         "class=RetryExecutor||method=execute||errMsg={}||handlerName={}||tryCount={}||maxTryCount={}",
                         e.getMessage(), name, tryCount, retryCount);
-                
-            }
-            if (retryCount != tryCount) {
                 int retrySleepTime = handlerWithReturnValue.retrySleepTime(tryCount);
                 if (retrySleepTime > 0) {
-            
+        
                     TimeUnit.MILLISECONDS.sleep(retrySleepTime);
                 }
+                
             }
+            
             
         } while (tryCount++ < retryCount && handlerWithReturnValue.needRetry(predicate, t));
     
