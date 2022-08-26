@@ -543,11 +543,16 @@ public class IndicesManagerImpl implements IndicesManager {
         if (ret.failed()) {
             return Result.buildFrom(ret);
         }
+        
+        
+    
         final Result<IndexSettingVO> beforeSetting = getSetting(param.getCluster(), indexName, projectId);
+        IndexSettingsUtil.checkImmutableSettingAndCorrectSetting(param.getSetting(),projectId);
         JSONObject settingObj = JSON.parseObject(param.getSetting());
         if (null == settingObj) {
             return Result.buildFail("setting 配置非法");
         }
+        
         Map<String, IndexConfig> configMap = esIndexService.syncGetIndexSetting(phyCluster,
             Lists.newArrayList(indexName), RETRY_COUNT);
         Map<String, String> sourceSettings = AriusOptional.ofObjNullable(configMap.get(indexName))

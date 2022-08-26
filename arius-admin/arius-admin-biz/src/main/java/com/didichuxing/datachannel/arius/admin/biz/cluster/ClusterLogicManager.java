@@ -174,7 +174,7 @@ public interface ClusterLogicManager {
      * @param projectId 项目id
      * @return
      */
-    Result<List<Tuple<String, ClusterPhyVO>>> getClusterRelationByProjectId(Integer projectId);
+    Result<List<Tuple<String, ClusterPhyVO>>> getHealthClusterRelationByProjectId(Integer projectId);
 
     /**
      *  获取逻辑集群插件列表
