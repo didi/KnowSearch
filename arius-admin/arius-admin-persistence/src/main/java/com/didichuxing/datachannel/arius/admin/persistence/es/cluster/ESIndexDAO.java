@@ -12,6 +12,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.setting.ESIndicesGetAllSettingRequest;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import com.didichuxing.datachannel.arius.admin.common.exception.NullESClientException;
 import com.didichuxing.datachannel.arius.admin.common.function.BiFunctionWithESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
@@ -564,21 +565,37 @@ public class ESIndexDAO extends BaseESDAO {
      * @param settings key：setting名称 value：setting数值
      */
     public boolean putIndexSettings(String cluster, List<String> indices,
-                                    Map</*setting名称*/String, /*setting数值*/String> settings) {
+                                    Map</*setting名称*/String, /*setting数值*/String> settings)
+            throws ESOperateException {
         ESClient client = fetchESClientByCluster(cluster);
         if (client == null || MapUtils.isEmpty(settings)) {
             LOGGER.warn(
-                "class=ESTemplateDAO||method=putIndexSettings||get settings fail||clusterName={}||indexNames={}",
-                cluster, indices);
-            return false;
+                    "class=ESTemplateDAO||method=putIndexSettings||get settings fail||clusterName={}||indexNames={}",
+                    cluster, indices);
+            throw new NullESClientException(cluster);
         }
+    
+        ESIndicesUpdateSettingsResponse esIndicesUpdateSettingsResponse = null;
+        try {
+            ESIndicesUpdateSettingsRequestBuilder updateSettingsRequestBuilder = client.admin().indices()
+                    .prepareUpdateSettings(String.join(",", indices));
+            // 依次添加需要设置的 setting 的字段的名称和数值
+            settings.forEach(updateSettingsRequestBuilder::addSettings);
+            esIndicesUpdateSettingsResponse = updateSettingsRequestBuilder.execute()
+                    .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            final String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
+            if (StringUtils.isNotBlank(exception)) {
+                throw new ESOperateException(exception);
+            }
+            LOGGER.error("class=ESTemplateDAO||method=putIndexSettings||get index fail||clusterName={}||indexName={}",
+                    cluster, e);
+        
+        }
+        
 
-        ESIndicesUpdateSettingsRequestBuilder updateSettingsRequestBuilder = client.admin().indices()
-            .prepareUpdateSettings(String.join(",", indices));
-        //依次添加需要设置的setting的字段的名称和数值
-        settings.forEach(updateSettingsRequestBuilder::addSettings);
-
-        return updateSettingsRequestBuilder.execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS).getAcknowledged();
+        return Optional.ofNullable(esIndicesUpdateSettingsResponse).map(ESIndicesUpdateSettingsResponse::getAcknowledged
+        ).orElse(false);
     }
 
     /**
