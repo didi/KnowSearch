@@ -615,18 +615,21 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     }
 
     @Override
-    public Result<List<Tuple<String, ClusterPhyVO>>> getClusterRelationByProjectId(Integer projectId) {
+    public Result<List<Tuple<String, ClusterPhyVO>>> getHealthClusterRelationByProjectId(Integer projectId) {
 
         List<Tuple<String, ClusterPhyVO>> collect;
         if (AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
             List<ClusterPhy> phyList = clusterPhyService.listAllClusters();
-            collect = phyList.stream().map(
+            collect = phyList.stream()
+                    .filter(clusterPhy ->!Objects.equals(clusterPhy.getHealth(),UNKNOWN.getCode()) )
+                    .map(
                 clusterPhy -> new Tuple<>(clusterPhy.getCluster(), ConvertUtil.obj2Obj(clusterPhy, ClusterPhyVO.class)))
                 .collect(Collectors.toList());
         } else {
             List<ClusterLogic> logicList = clusterLogicService.getOwnedClusterLogicListByProjectId(projectId);
             collect = logicList.stream()
                 .map(clusterLogic -> new Tuple<>(clusterLogic.getName(), getPhyNameByLogic(clusterLogic.getId())))
+                 .filter(tuple2 ->!Objects.equals(tuple2.getV2().getHealth(),UNKNOWN.getCode()) )
                 .collect(Collectors.toList());
         }
         return Result.buildSucc(collect);

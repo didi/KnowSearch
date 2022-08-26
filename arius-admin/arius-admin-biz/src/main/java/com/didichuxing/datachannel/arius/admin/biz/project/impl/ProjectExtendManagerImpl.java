@@ -259,6 +259,9 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
                     .filter(CommonUtils.distinctByKey(UserBriefVO::getId)).collect(Collectors.toList());
             projectExtendVO.setUserListWithAdminRole(userBriefListWithAdminRole);
             projectExtendVO.setUserListWithBelongProjectAndAdminRole(userListWithBelongProjectAndAdminRole);
+            projectExtendVO.setUserList(useList.stream().filter(CommonUtils.distinctByKey(UserBriefVO::getId)).collect(Collectors.toList()));
+            projectExtendVO.setOwnerList(projectExtendVO.getOwnerList().stream().filter(CommonUtils.distinctByKey(UserBriefVO::getId)).collect(Collectors.toList()));
+            
         }
     }
 
