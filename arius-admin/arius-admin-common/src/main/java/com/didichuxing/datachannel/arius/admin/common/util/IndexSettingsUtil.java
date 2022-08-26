@@ -54,6 +54,12 @@ public class IndexSettingsUtil {
         return excludeIgnoreSettings(result);
     }
     
+    /**
+     * > 检查设置是否不可变且正确
+     *
+     * @param setting 指标设置
+     * @param projectId 项目编号
+     */
     public static void checkImmutableSettingAndCorrectSetting(String setting,Integer projectId) throws ESOperateException {
         final JSONValidator from = JSONValidator.from(setting);
         if (!(from.validate() && from.getType().equals(Type.Object))) {
