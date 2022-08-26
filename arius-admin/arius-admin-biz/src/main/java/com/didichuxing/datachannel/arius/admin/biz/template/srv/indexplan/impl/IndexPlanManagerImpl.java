@@ -63,7 +63,7 @@ public class IndexPlanManagerImpl extends BaseTemplateSrvImpl implements IndexPl
         LOGGER.info("class=IndexPlanManagerImpl||method=indexRollover||logicTemplateId={}||msg=start indexRollover",
             logicTemplateId);
         if (!isTemplateSrvOpen(logicTemplateId)) {
-            return Result.buildFail("指定索引模板未开启rollover能力");
+            return Result.buildSucc();
         }
 
         List<IndexTemplatePhy> templatePhyList = indexTemplatePhyService.getTemplateByLogicId(logicTemplateId);
@@ -119,7 +119,7 @@ public class IndexPlanManagerImpl extends BaseTemplateSrvImpl implements IndexPl
             "class=IndexPlanManagerImpl||method=adjustShardCount||logicTemplateId={}||msg=start adjustShardCount",
             logicTemplateId);
         if (!isTemplateSrvOpen(logicTemplateId)) {
-            return Result.buildFail(logicTemplateId + "没有开启" + templateSrvName());
+            return Result.buildSucc();
         }
 
         List<IndexTemplatePhy> templatePhyList = indexTemplatePhyService.getTemplateByLogicId(logicTemplateId);
