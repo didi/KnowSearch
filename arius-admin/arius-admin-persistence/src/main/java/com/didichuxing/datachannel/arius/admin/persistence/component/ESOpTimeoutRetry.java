@@ -8,7 +8,6 @@ import com.didichuxing.datachannel.arius.admin.common.util.RetryExecutor.Handler
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import org.apache.commons.lang3.RandomUtils;
 import org.elasticsearch.ElasticsearchTimeoutException;
 import org.elasticsearch.cluster.metadata.ProcessClusterEventTimeoutException;
 
@@ -24,8 +23,8 @@ import org.elasticsearch.cluster.metadata.ProcessClusterEventTimeoutException;
  */
 public class ESOpTimeoutRetry {
     private static final int SEC_30 = 30 * 1000;
-    private static final int MIN_5  = 5 * 60 * 1000;
-    private static final int MAX_10_SECONDS  = 10;
+    private static final int MIN_5         = 5 * 60 * 1000;
+    private static final int MAX_5_SECONDS = 5;
     
 
     private ESOpTimeoutRetry() {
@@ -59,8 +58,7 @@ public class ESOpTimeoutRetry {
     
                 @Override
                 public int retrySleepTime(int retryTimes) {
-                    int totalSleepTime = RandomUtils.nextInt(0, retryTimes);
-                    return (int) TimeUnit.SECONDS.toMillis(Math.max(totalSleepTime, MAX_10_SECONDS));
+                    return (int) TimeUnit.SECONDS.toMillis(MAX_5_SECONDS);
                 }
             }).execute();
         } catch (ESOperateException e) {
@@ -100,8 +98,7 @@ public class ESOpTimeoutRetry {
     
                         @Override
                         public int retrySleepTime(int retryTimes) {
-                            int totalSleepTime = RandomUtils.nextInt(0, retryTimes);
-                            return (int) TimeUnit.SECONDS.toMillis(Math.max(totalSleepTime, MAX_10_SECONDS));
+                            return (int) TimeUnit.SECONDS.toMillis(MAX_5_SECONDS);
                         }
                     });
             return retryExecutor.execute(predicate);

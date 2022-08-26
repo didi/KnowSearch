@@ -141,7 +141,11 @@ public class RetryExecutor<T> {
         int tryCount = 0;
         do {
             try {
+    
                 succ = handler.process();
+                if (succ) {
+                    break;
+                }
             } catch (Exception e) {
                 if (!handler.needRetry(e) || tryCount == retryCount||handler.needToThrowExceptions(e)) {
                     LOGGER.warn("class=RetryExecutor||method=execute||errMsg={}||handlerName={}||tryCount={}",
@@ -155,15 +159,17 @@ public class RetryExecutor<T> {
                 LOGGER.warn(
                         "class=RetryExecutor||method=execute||errMsg={}||handlerName={}||tryCount={}||maxTryCount={}",
                         e.getMessage(), name, tryCount, retryCount);
-                int retrySleepTime = handler.retrySleepTime(tryCount);
-                if (retrySleepTime > 0) {
-                      TimeUnit.MILLISECONDS.sleep(retrySleepTime);
-                }
+               
                 
             }
+            if (retryCount != tryCount) {
+                int retrySleepTime = handler.retrySleepTime(tryCount);
+                if (retrySleepTime > 0) {
+                    TimeUnit.MILLISECONDS.sleep(retrySleepTime);
+                }
+            }
             
-            
-        } while (tryCount++ < retryCount&&Boolean.FALSE.equals(succ));
+        } while (tryCount++ < retryCount);
 
         return succ;
     }
@@ -173,6 +179,9 @@ public class RetryExecutor<T> {
         do {
             try {
                 t = handlerWithReturnValue.process();
+                if (!handlerWithReturnValue.needRetry(predicate, t)){
+                    break;
+                }
             } catch (Exception e) {
     
                 if (!handlerWithReturnValue.needRetry(e) || tryCount == retryCount||handler.needToThrowExceptions(e)) {
@@ -181,17 +190,17 @@ public class RetryExecutor<T> {
         
                     throw e;
                 }
-                /**
-                 * 这里需要做出对应的一个等待尝试策略，因为集群的抖动从而造成了操作等待时长，但是值得注意的是，这里如果多次重试的
-                 * 时间叠加一定不能超过30s，如果超过了，那么当数据库交互过程、页面交互过程中，很容易触发接口的超时
-                 */
+                
                 LOGGER.warn(
                         "class=RetryExecutor||method=execute||errMsg={}||handlerName={}||tryCount={}||maxTryCount={}",
                         e.getMessage(), name, tryCount, retryCount);
+                
+            }
+            if (retryCount != tryCount) {
                 int retrySleepTime = handlerWithReturnValue.retrySleepTime(tryCount);
                 if (retrySleepTime > 0) {
-                    
-                     TimeUnit.MILLISECONDS.sleep(retrySleepTime);
+            
+                    TimeUnit.MILLISECONDS.sleep(retrySleepTime);
                 }
             }
             
