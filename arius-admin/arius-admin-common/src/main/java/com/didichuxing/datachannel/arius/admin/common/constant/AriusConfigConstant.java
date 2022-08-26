@@ -73,6 +73,7 @@ public class AriusConfigConstant {
      */
     public static final String INDEX_STAT_COLLECT_CONCURRENT                           = "index_stat.collect.concurrent";
 
+
     /**
      * dashboard阈值配置组
      */
@@ -80,12 +81,12 @@ public class AriusConfigConstant {
 
 
     /**
-     * 小Shard列表阈值定义(小Shard索引列表，并且shard个数大于1)
+     * 小Shard列表阈值定义(小Shard索引列表)
      */
     public static final String INDEX_SHARD_SMALL_THRESHOLD                             = "index.shard.small_threshold";
 
     /**
-     * 大Shard列表阈值定义(节点分片个数大于>500)
+     * 节点分片个数(节点分片个数大于>500)
      */
     public static final String NODE_SHARD_BIG_THRESHOLD                                = "node.shard.big_threshold";
 
@@ -133,11 +134,16 @@ public class AriusConfigConstant {
     /**
      * CPU利用率超红线
      */
-    public static final String NODE_LARGE_CPU_USAGE_PERCENT_THRESHOLD                  = "node.large.cpu.percent.threshold";
+    public static final String NODE_LARGE_CPU_USAGE_PERCENT_THRESHOLD                  = "node.large.cpu.used.percent.threshold";
     /**
      * cpu利用率持续时间超红线阈值
      */
     public static final String NODE_LARGE_CPU_USED_PERCENT_TIME_USAGE_THRESHOLD       = "node.large.cpu.used.percent.time.threshold";
+    /**
+     * 大Shard列表阈值定义(大Shard索引列表)
+     */
+    public static final String INDEX_SHARD_BIG_THRESHOLD                              = "index.shard.big_threshold";
+
 
     /**
      * rollover阈值，当索引大小超过该值自动rollover
@@ -178,5 +184,30 @@ public class AriusConfigConstant {
     public static final String LOGIC_TEMPLATE_TIME_FORMAT_LIST_DEFAULT_VALUE           = "yyyy-MM-dd HH:mm:ss,yyyy-MM-dd HH:mm:ss.SSS,yyyy-MM-dd HH:mm:ss.SSS Z,"
                                                                                          + "yyyy-MM-dd'T'HH:mm:ss,yyyy-MM-dd'T'HH:mm:ss.SSS,yyyy-MM-dd'T'HH:mm:ssZ,yyyy-MM-dd'T'HH:mm:ss.SSSZ,yyyy/MM/dd HH:mm:ss,epoch_second,epoch_millis,yyyy-MM-dd";
     public static final String CLUSTER_NODE_SPECIFICATION_LIST_DEFAULT_VALUE           = "16c-64g-3072g,16c-48g-3072g";
+
+    //dashboard大shard默认值
+    public static final String DASHBOARD_BIG_SHARD_DEFAULT_VALUE                       = "50g";
+
+    //dashboard小shard默认值
+    public static final String DASHBOARD_SMALL_SHARD_DEFAULT_VALUE                     = "100m";
+
+    //dashboard采集延时默认值  CollectorDelayed
+    public static final long DASHBOARD_COLLECTOR_DELAYED_DEFAULT_VALUE                 = 5 * 60 * 1000;
+
+    //dashboardCPU利用率超持续时间红线默认值
+    public static final long DASHBOARD_LARGE_CPU_PERCENT_TIME_DEFAULT_VALUE            = 30* 60* 1000;
+
+    //dashboardCPU利用率超持续时间红线默认值
+    public static final int DASHBOARD_CPU_PERCENT_THRESHOLD_DEFAULT_VALUE              = 80;
+
+    //dashboard内存利用率持续时间红线默认值
+    public static final long DASHBOARD_LARGE_HEAD_USED_PERCENT_TIME_DEFAULT_VALUE      = 10* 60* 1000;
+
+    //dashboard堆内存利用率超红线阈值默认值
+    public static final int  DASHBOARD_HEAD_USED_PERCENT_THRESHOLD_DEFAULT_VALUE      = 80;
+
+    //dashboard磁盘使用率配置默认值
+    public static final int  DASHBOARD_NODE_LARGE_DISK_THRESHOLD_DEFAULT_VALUE         = 85;
+
 
 }

@@ -21,8 +21,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Map;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_DASHBOARD_THRESHOLD_GROUP;
-import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.NODE_STATUS_COLLECTOR_DELAYED_THRESHOLD;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.*;
 
 /**
  * Created by linyunan on 3/11/22
@@ -40,7 +39,6 @@ public class ClusterDashBoardCollector extends BaseDashboardCollector {
     private static final Map<String/*集群名称*/, ClusterMetrics /*上一次采集到的集群数据*/> cluster2LastTimeClusterMetricsMap = Maps
         .newConcurrentMap();
 
-    //TODO 指标-配置项
     private static final long                                                FIVE_MINUTE                       = 5 * 60
                                                                                                                  * 1000;
 
@@ -133,9 +131,9 @@ public class ClusterDashBoardCollector extends BaseDashboardCollector {
                 return AriusDateUtils.getUnitTime(configThreshold.getValue().longValue(),configThreshold.getUnit());
             }
         } catch (Exception e) {
-            return FIVE_MINUTE;
+            return DASHBOARD_COLLECTOR_DELAYED_DEFAULT_VALUE;
         }
-        return FIVE_MINUTE;
+        return DASHBOARD_COLLECTOR_DELAYED_DEFAULT_VALUE;
     }
 
     /**

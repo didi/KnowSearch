@@ -339,9 +339,9 @@ public class NodeDashBoardCollector extends BaseDashboardCollector {
                 return configThreshold.getValue().longValue();
             }
         } catch (Exception e) {
-            return NODE_LARGE_DISK_THRESHOLD;
+            return DASHBOARD_NODE_LARGE_DISK_THRESHOLD_DEFAULT_VALUE;
         }
-        return NODE_LARGE_DISK_THRESHOLD;
+        return DASHBOARD_NODE_LARGE_DISK_THRESHOLD_DEFAULT_VALUE;
     }
 
     /**
@@ -358,9 +358,9 @@ public class NodeDashBoardCollector extends BaseDashboardCollector {
                 return configThreshold.getValue().longValue();
             }
         } catch (Exception e) {
-            return HEAD_USED_PERCENT_THRESHOLD;
+            return DASHBOARD_HEAD_USED_PERCENT_THRESHOLD_DEFAULT_VALUE;
         }
-        return HEAD_USED_PERCENT_THRESHOLD;
+        return DASHBOARD_HEAD_USED_PERCENT_THRESHOLD_DEFAULT_VALUE;
     }
 
     /**
@@ -377,9 +377,9 @@ public class NodeDashBoardCollector extends BaseDashboardCollector {
                 return AriusDateUtils.getUnitTime(configThreshold.getValue().longValue(),configThreshold.getUnit());
             }
         } catch (Exception e) {
-            return LARGE_HEAD_USED_PERCENT_TIME;
+            return DASHBOARD_LARGE_HEAD_USED_PERCENT_TIME_DEFAULT_VALUE;
         }
-        return LARGE_HEAD_USED_PERCENT_TIME;
+        return DASHBOARD_LARGE_HEAD_USED_PERCENT_TIME_DEFAULT_VALUE;
     }
 
     /**
@@ -396,9 +396,9 @@ public class NodeDashBoardCollector extends BaseDashboardCollector {
                 return configThreshold.getValue().longValue();
             }
         } catch (Exception e) {
-            return CPU_PERCENT_THRESHOLD;
+            return DASHBOARD_CPU_PERCENT_THRESHOLD_DEFAULT_VALUE;
         }
-        return CPU_PERCENT_THRESHOLD;
+        return DASHBOARD_CPU_PERCENT_THRESHOLD_DEFAULT_VALUE;
     }
 
     /**
@@ -415,9 +415,9 @@ public class NodeDashBoardCollector extends BaseDashboardCollector {
                 return AriusDateUtils.getUnitTime(configThreshold.getValue().longValue(),configThreshold.getUnit());
             }
         } catch (Exception e) {
-            return LARGE_CPU_PERCENT_TIME;
+            return DASHBOARD_LARGE_CPU_PERCENT_TIME_DEFAULT_VALUE;
         }
-        return LARGE_CPU_PERCENT_TIME;
+        return DASHBOARD_LARGE_CPU_PERCENT_TIME_DEFAULT_VALUE;
     }
 
 
