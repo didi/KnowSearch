@@ -49,25 +49,25 @@ public class SizeUtil {
             String lowerSValue = proStoreSize.trim();
             if (lowerSValue.endsWith("k")) {
                 bytes = (long) (Double.parseDouble(lowerSValue.substring(0, lowerSValue.length() - 1)) * C1);
-            } else if (lowerSValue.endsWith("kb")) {
+            } else if (lowerSValue.endsWith("kb")||lowerSValue.endsWith("KB")) {
                 bytes = (long) (Double.parseDouble(lowerSValue.substring(0, lowerSValue.length() - 2)) * C1);
-            } else if (lowerSValue.endsWith("m")) {
+            } else if (lowerSValue.endsWith("m")||lowerSValue.endsWith("M")) {
                 bytes = (long) (Double.parseDouble(lowerSValue.substring(0, lowerSValue.length() - 1)) * C2);
-            } else if (lowerSValue.endsWith("mb")) {
+            } else if (lowerSValue.endsWith("mb")||lowerSValue.endsWith("MB")) {
                 bytes = (long) (Double.parseDouble(lowerSValue.substring(0, lowerSValue.length() - 2)) * C2);
-            } else if (lowerSValue.endsWith("g")) {
+            } else if (lowerSValue.endsWith("g")||lowerSValue.endsWith("G")) {
                 bytes = (long) (Double.parseDouble(lowerSValue.substring(0, lowerSValue.length() - 1)) * C3);
-            } else if (lowerSValue.endsWith("gb")) {
+            } else if (lowerSValue.endsWith("gb")||lowerSValue.endsWith("GB")) {
                 bytes = (long) (Double.parseDouble(lowerSValue.substring(0, lowerSValue.length() - 2)) * C3);
-            } else if (lowerSValue.endsWith("t")) {
+            } else if (lowerSValue.endsWith("t")||lowerSValue.endsWith("T")) {
                 bytes = (long) (Double.parseDouble(lowerSValue.substring(0, lowerSValue.length() - 1)) * C4);
-            } else if (lowerSValue.endsWith("tb")) {
+            } else if (lowerSValue.endsWith("tb")||lowerSValue.endsWith("TB")) {
                 bytes = (long) (Double.parseDouble(lowerSValue.substring(0, lowerSValue.length() - 2)) * C4);
-            } else if (lowerSValue.endsWith("p")) {
+            } else if (lowerSValue.endsWith("p")||lowerSValue.endsWith("P")) {
                 bytes = (long) (Double.parseDouble(lowerSValue.substring(0, lowerSValue.length() - 1)) * C5);
-            } else if (lowerSValue.endsWith("pb")) {
+            } else if (lowerSValue.endsWith("pb")||lowerSValue.endsWith("PB")) {
                 bytes = (long) (Double.parseDouble(lowerSValue.substring(0, lowerSValue.length() - 2)) * C5);
-            } else if (lowerSValue.endsWith("b")) {
+            } else if (lowerSValue.endsWith("b")||lowerSValue.endsWith("B")) {
                 bytes = Long.parseLong(lowerSValue.substring(0, lowerSValue.length() - 1).trim());
             } else if (lowerSValue.equals("-1")) {
                 // Allow this special value to be unit-less:
