@@ -56,7 +56,7 @@ public class AriusConfigConstant {
     /**
      * 请求是否拦截鉴权
      */
-    public static final String REQUEST_INTERCEPTOR_SWITCH_OPEN                         = "request.interceptor.switch.open";
+    public static final String REQUEST_INTERCEPTOR_SWITCH_OPEN                         = "request.interceptor.is_switch_open";
 
     /**
      * meta监控配置组
@@ -88,7 +88,7 @@ public class AriusConfigConstant {
     /**
      * 节点分片个数(节点分片个数大于>500)
      */
-    public static final String NODE_SHARD_BIG_THRESHOLD                                = "node.shard.big_threshold";
+    public static final String NODE_SHARD_BIG_THRESHOLD                                = "node.shard.num_threshold";
 
     /**
      * 索引模板Segment内存大小列表阈值定义
@@ -103,7 +103,7 @@ public class AriusConfigConstant {
     /**
      * 索引模板Segment个数阈值定义(索引模板Segments个数超过1000)
      */
-    public static final String INDEX_TEMPLATE_SEGMENT_COUNT_THRESHOLD                  = "index.template.segment_count_threshold";
+    public static final String INDEX_TEMPLATE_SEGMENT_COUNT_THRESHOLD                  = "index.template.segment_num_threshold";
 
     /**
      * 索引Segment个数阈值定义(索引Segments个数超过阀值100)
@@ -118,27 +118,27 @@ public class AriusConfigConstant {
     /**
      * 采集延时阈值定义
      */
-    public static final String NODE_STATUS_COLLECTOR_DELAYED_THRESHOLD                 = "node_status.collectorDelayed.threshold";
+    public static final String NODE_STATUS_COLLECTOR_DELAYED_THRESHOLD                 = "cluster.metric.collector.delayed_threshold ";
     /**
      * 磁盘利用率超红线阈值
      */
-    public static final String NODE_LARGE_DISK_USAGE_THRESHOLD                         = "node.large.disk.usage.threshold";
+    public static final String NODE_LARGE_DISK_USAGE_THRESHOLD                         = "node.disk.used_percent_threshold";
     /**
      * 堆内存利用率超红线阈值
      */
-    public static final String NODE_LARGE_HEAD_USAGE_PERCENT_THRESHOLD                 = "node.large.head.used.percent.threshold";
+    public static final String NODE_LARGE_HEAD_USAGE_PERCENT_THRESHOLD                 = "node.jvm.heap.used_percent_threshold";
     /**
      * 堆内存利用率持续时间红线
      */
-    public static final String NODE_LARGE_HEAD_USED_PERCENT_TIME_USAGE_THRESHOLD      = "node.large.head.used.percent.time.threshold";
+    public static final String NODE_LARGE_HEAD_USED_PERCENT_TIME_USAGE_THRESHOLD      = "node.jvm.heap.used_percent_time_duration";
     /**
      * CPU利用率超红线
      */
-    public static final String NODE_LARGE_CPU_USAGE_PERCENT_THRESHOLD                  = "node.large.cpu.used.percent.threshold";
+    public static final String NODE_LARGE_CPU_USAGE_PERCENT_THRESHOLD                  = "node.cpu.used_percent_threshold";
     /**
      * cpu利用率持续时间超红线阈值
      */
-    public static final String NODE_LARGE_CPU_USED_PERCENT_TIME_USAGE_THRESHOLD       = "node.large.cpu.used.percent.time.threshold";
+    public static final String NODE_LARGE_CPU_USED_PERCENT_TIME_USAGE_THRESHOLD       = "node.cpu.used_percent_threshold_time_duration";
     /**
      * 大Shard列表阈值定义(大Shard索引列表)
      */
@@ -153,12 +153,12 @@ public class AriusConfigConstant {
     /**
      * 大shard阈值，用于集群指标看板，超过该值被认为是大shard
      */
-    public static final String BIG_SHARD_THRESHOLD                                     = "big_shard.threshold";
+    public static final String BIG_SHARD_THRESHOLD                                     = "cluster.shard.big_threshold";
 
     /**
      * 集群shard数阈值
      */
-    public static final String CLUSTER_SHARD_NUM_THRESHOLD                             = "cluster.shardNum.threshold";
+    public static final String CLUSTER_SHARD_NUM_THRESHOLD                             = "cluster.shard.num_threshold";
 
     /**
      * 模板冷热配置组
