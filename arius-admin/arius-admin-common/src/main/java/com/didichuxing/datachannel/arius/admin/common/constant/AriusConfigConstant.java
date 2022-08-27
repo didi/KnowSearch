@@ -66,12 +66,12 @@ public class AriusConfigConstant {
     /**
      * 节点是否并行获取
      */
-    public static final String NODE_STAT_COLLECT_CONCURRENT                            = "node_stat.collect.concurrent";
+    public static final String NODE_STAT_COLLECT_CONCURRENT                            = "node.stat.is_collect_concurrent";
 
     /**
      * 索引是否并行获取
      */
-    public static final String INDEX_STAT_COLLECT_CONCURRENT                           = "index_stat.collect.concurrent";
+    public static final String INDEX_STAT_COLLECT_CONCURRENT                           = "index.stat.is_collect_concurrent";
 
 
     /**
@@ -88,7 +88,7 @@ public class AriusConfigConstant {
     /**
      * 节点分片个数(节点分片个数大于>500)
      */
-    public static final String NODE_SHARD_BIG_THRESHOLD                                = "node.shard.num_threshold";
+    public static final String NODE_SHARD_NUM_THRESHOLD = "node.shard.num_threshold";
 
     /**
      * 索引模板Segment内存大小列表阈值定义
@@ -118,11 +118,11 @@ public class AriusConfigConstant {
     /**
      * 采集延时阈值定义
      */
-    public static final String NODE_STATUS_COLLECTOR_DELAYED_THRESHOLD                 = "cluster.metric.collector.delayed_threshold ";
+    public static final String DASHBOARD_CLUSTER_METRIC_COLLECTOR_DELAYED_THRESHOLD = "cluster.metric.collector.delayed_threshold ";
     /**
      * 磁盘利用率超红线阈值
      */
-    public static final String NODE_LARGE_DISK_USAGE_THRESHOLD                         = "node.disk.used_percent_threshold";
+    public static final String NODE_DISK_USED_PERCENT_THRESHOLD = "node.disk.used_percent_threshold";
     /**
      * 堆内存利用率超红线阈值
      */
@@ -138,7 +138,7 @@ public class AriusConfigConstant {
     /**
      * cpu利用率持续时间超红线阈值
      */
-    public static final String NODE_LARGE_CPU_USED_PERCENT_TIME_USAGE_THRESHOLD       = "node.cpu.used_percent_threshold_time_duration_threshold";
+    public static final String NODE_CPU_USED_PERCENT_THRESHOLD_TIME_DURATION_THRESHOLD = "node.cpu.used_percent_threshold_time_duration_threshold";
     /**
      * 大Shard列表阈值定义(大Shard索引列表)
      */
@@ -168,46 +168,109 @@ public class AriusConfigConstant {
     /**
      * 索引模板默认冷存天数
      */
-    public static final String INDEX_TEMPLATE_COLD_DAY_DEFAULT                         = "index_template.cold.day.default";
+    public static final String INDEX_TEMPLATE_COLD_DAY_DEFAULT                         = "index.template.default_cold_day";
 
     /**
      * default value
      */
+    /**
+     * 请求是否拦截鉴权
+     */
+    public static final Boolean REQUEST_INTERCEPTOR_SWITCH_OPEN_DEFAULT_VALUE         = Boolean.TRUE;
+
+    /**
+     * 索引模板默认冷存天数默认值
+     */
+    public static final String INDEX_TEMPLATE_COLD_DAY_DEFAULT_VALUE                   = "-1";
+    /**
+     * 历史索引模板shard分配是否自动调整
+     */
+    public static final boolean HISTORY_TEMPLATE_PHYSIC_INDICES_ALLOCATION_IS_EFFECTIVE_DEFAULT_VALUE = true;
     public static final String CLUSTER_PACKAGE_VERSION_LIST_DEFAULT_VALUE              = "7.6.2,7.6.0,7.6.0.1400,6.6.1.900";
 
     public static final String CLUSTER_DATA_CENTER_LIST_DEFAULT_VALUE                  = "cn,en";
 
-    public static final String CLUSTER_RESOURCE_TYPE_LIST_DEFAULT_VALUE                = "信创,acs,vmware";
+    public static final String CLUSTER_RESOURCE_TYPE_LIST_DEFAULT_VALUE                = "信创,ACS,VMWARE";
 
     public static final String CLUSTER_NODE_COUNT_LIST_DEFAULT_VALUE                   = "2,4,6,8,10,20";
 
-    public static final String LOGIC_TEMPLATE_TIME_FORMAT_LIST_DEFAULT_VALUE           = "yyyy-MM-dd HH:mm:ss,yyyy-MM-dd HH:mm:ss.SSS,yyyy-MM-dd HH:mm:ss.SSS Z,"
-                                                                                         + "yyyy-MM-dd'T'HH:mm:ss,yyyy-MM-dd'T'HH:mm:ss.SSS,yyyy-MM-dd'T'HH:mm:ssZ,yyyy-MM-dd'T'HH:mm:ss.SSSZ,yyyy/MM/dd HH:mm:ss,epoch_second,epoch_millis,yyyy-MM-dd";
+    public static final String LOGIC_TEMPLATE_TIME_FORMAT_LIST_DEFAULT_VALUE           = "yyyy-MM-dd HH:mm:ss,yyyy-MM-dd HH:mm:ss.SSS,yyyy-MM-dd HH:mm:ss.SSS Z," +
+            "                                                                               yyyy-MM-dd'T'HH:mm:ss,yyyy-MM-dd'T'HH:mm:ss.SSS,yyyy-MM-dd'T'HH:mm:ssZ,yyyy-MM-dd'T'HH:mm:ss.SSSZ,yyyy/MM/dd HH:mm:ss,epoch_second,epoch_millis,yyyy-MM-dd";
     public static final String CLUSTER_NODE_SPECIFICATION_LIST_DEFAULT_VALUE           = "16c-64g-3072g,16c-48g-3072g";
 
-    //dashboard大shard默认值
-    public static final String DASHBOARD_BIG_SHARD_DEFAULT_VALUE                       = "50g";
+    /**
+     * 节点状态并发采集
+     */
+    public static final boolean NODE_STAT_COLLECT_CONCURRENT_DEFAULT_VALUE              = false;
 
-    //dashboard小shard默认值
-    public static final String DASHBOARD_SMALL_SHARD_DEFAULT_VALUE                     = "100m";
+    /**
+     * 索引状态并发采集
+     */
+    public static final boolean INDEX_STAT_COLLECT_CONCURRENT_DEFAULT_VALUE             = false;
 
-    //dashboard采集延时默认值  CollectorDelayed
-    public static final long DASHBOARD_COLLECTOR_DELAYED_DEFAULT_VALUE                 = 5 * 60 * 1000;
+    /**
+     * 采集延时阈值定义
+     */
+    public static final String DASHBOARD_CLUSTER_METRIC_COLLECTOR_DELAYED_DEFAULT_VALUE                         = "{\"name\":\"cluster.metric.collector.delayed_threshold\",\"metrics\":\"clusterMetricCollectorTimeDelayMin\",\"unit\":\"m\",\"compare\":\">\",\"value\":5}";
 
-    //dashboardCPU利用率超持续时间红线默认值
-    public static final long DASHBOARD_LARGE_CPU_PERCENT_TIME_DEFAULT_VALUE            = 30* 60* 1000;
+    /**
+     * dashboard节点CPU利用率超阈值的[持续时间]默认值
+     */
+    public static final String DASHBOARD_NODE_CPU_USED_PERCENT_THRESHOLD_TIME_DURATION_THRESHOLD_DEFAULT_VALUE = "{\"name\":\"node.cpu.used_percent_threshold_time_duration\":\"cpuUsedPercentThresholdTimeDuration\",\"unit\":\"m\",\"compare\":\">\",\"value\":5}";
 
-    //dashboardCPU利用率超持续时间红线默认值
-    public static final int DASHBOARD_CPU_PERCENT_THRESHOLD_DEFAULT_VALUE              = 80;
+    /**
+     * dashboardCPU利用率红线默认值
+     */
+    public static final String DASHBOARD_CPU_PERCENT_THRESHOLD_DEFAULT_VALUE                                   = "{\"name\":\"node.cpu.used_percent_threshold\",\"metrics\":\"cpuUsedPercentThreshold\",\"unit\":\"%\",\"compare\":\">\",\"value\":60}";
 
-    //dashboard内存利用率持续时间红线默认值
-    public static final long DASHBOARD_LARGE_HEAD_USED_PERCENT_TIME_DEFAULT_VALUE      = 10* 60* 1000;
+    /**
+     * dashboard内存利用率持续时间红线默认值
+     */
+    public static final String DASHBOARD_LARGE_HEAD_USED_PERCENT_TIME_DEFAULT_VALUE                            = "{\"name\":\"node.jvm.heap.used_percent_threshold_time_duration_threshold\",\"metrics\":\"jvmHeapUsedPercentThresholdTimeDuration\",\"unit\":\"m\",\"compare\":\">\",\"value\":10}";
+    /**
+     * dashboard堆内存利用率超红线阈值默认值
+     */
+    public static final String DASHBOARD_HEAD_USED_PERCENT_THRESHOLD_DEFAULT_VALUE                             = "{\"name\":\"node.jvm.heap.used_percent_threshold\",\"metrics\":\"jvmHeapUsedPercentThreshold\",\"unit\":\"%\",\"compare\":\">\",\"value\":75}";
 
-    //dashboard堆内存利用率超红线阈值默认值
-    public static final int  DASHBOARD_HEAD_USED_PERCENT_THRESHOLD_DEFAULT_VALUE      = 80;
+    /**
+     * 磁盘利用率超红线阈值默认值
+     */
+    public static final String DASHBOARD_NODE_DISK_USED_PERCENT_THRESHOLD_DEFAULT_VALUE                        = "{\"name\":\"node.disk.used_percent_threshold\",\"metrics\":\"diskUsedPercentThreshold\",\"unit\":\"%\",\"compare\":\">\",\"value\":80}";
 
-    //dashboard磁盘使用率配置默认值
-    public static final int  DASHBOARD_NODE_LARGE_DISK_THRESHOLD_DEFAULT_VALUE         = 85;
-
-
+    /**
+     * 索引Segment个数阈值默认值
+     */
+    public static final String DASHBOARD_INDEX_SEGMENT_NUM_THRESHOLD_DEFAULT_VALUE                             = "{\"name\":\"index.segment.num_threshold\",\"metrics\":\"segmentNum\",\"unit\":\"个\",\"compare\":\">\",\"value\":100}";
+    /**
+     * 索引模板Segment个数阈值定义默认值
+     */
+    public static final String DASHBOARD_INDEX_TEMPLATE_SEGMENT_COUNT_THRESHOLD_DEFAULT_VALUE                  = "{\"name\":\"index.template.segment_num_threshold\",\"metrics\":\"segmentNum\",\"unit\":\"个\",\"compare\":\">\",\"value\":700}";
+    /**
+     * 索引Segment内存大小列表阈值定义默认值
+     */
+    public static final String DASHBOARD_INDEX_SEGMENT_MEMORY_SIZE_THRESHOLD_DEFAULT_VALUE                     = "{\"name\":\"index.segment.memory_size_threshold\",\"metrics\":\"segmentMemSize\",\"unit\":\"MB\",\"compare\":\">\",\"value\":500}";
+    /**
+     * 索引模板Segment内存大小列表阈值定义默认值
+     */
+    public static final String DASHBOARD_INDEX_TEMPLATE_SEGMENT_MEMORY_SIZE_THRESHOLD_DEFAULT_VALUE            = "{\"name\":\"index.template.segment.memory_size_threshold\",\"metrics\":\"segmentMemSize\",\"unit\":\"MB\",\"compare\":\">\",\"value\":3000}";
+    /**
+     * 大Shard列表阈值定义(大Shard索引列表)默认值
+     */
+    public static final String DASHBOARD_INDEX_SHARD_BIG_THRESHOLD_DEFAULT_VALUE                               = "{\"name\":\"index.shard.big_threshold\",\"metrics\":\"shardSize\",\"unit\":\"GB\",\"compare\":\">\",\"value\":20}";
+    /**
+     * 小Shard列表阈值定义(小Shard索引列表)默认值
+     */
+    public static final String DASHBOARD_INDEX_SHARD_SMALL_THRESHOLD_DEFAULT_VALUE                             = "{\"name\":\"index.shard.small_threshold\",\"metrics\":\"shardSize\",\"unit\":\"MB\",\"compare\":\"<\",\"value\":1000}";
+    /**
+     * 索引Mapping个数阈值定义默认值
+     */
+    public static final String DASHBOARD_INDEX_MAPPING_NUM_THRESHOLD_DEFAULT_VALUE                             = "{\"name\":\"index.mapping.num_threshold\",\"metrics\":\"mappingNum\",\"unit\":\"个\",\"compare\":\">\",\"value\":100}";
+    /**
+     * 集群shard数阈值默认值
+     */
+    public static final String DASHBOARD_CLUSTER_SHARD_NUM_THRESHOLD_DEFAULT_VALUE                            = "{\"name\":\"cluster.shard.num_threshold\",\"metrics\":\"shardNum\",\"unit\":\"个\",\"compare\":\">\",\"value\":2000}";
+    /**
+     * 节点分片个数(节点分片个数大于>500)
+     */
+    public static final String DASHBOARD_NODE_SHARD_NUM_THRESHOLD_DEFAULT_VALUE                               = "{\"name\":\"node.shard.num_threshold\",\"metrics\":\"shardNum\",\"unit\":\"个\",\"compare\":\">\",\"value\":1000}";
 }

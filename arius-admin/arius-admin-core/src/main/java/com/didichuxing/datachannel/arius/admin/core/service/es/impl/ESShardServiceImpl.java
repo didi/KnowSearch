@@ -10,6 +10,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.shard.Segment;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.shard.SegmentPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.ShardAssignmenNodeVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.ShardAssignmentDescriptionVO;
+import com.didichuxing.datachannel.arius.admin.common.util.AriusUnitUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.SizeUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
@@ -33,6 +34,7 @@ import java.util.stream.Collectors;
 import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.*;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.BIG_SHARD;
 import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.*;
+import static com.didichuxing.datachannel.arius.admin.common.util.AriusUnitUtil.SIZE;
 
 /**
  * Created by linyunan on 3/22/22
@@ -196,7 +198,7 @@ public class ESShardServiceImpl implements ESShardService {
      * @return
      */
     private long getConfigBigShard() {
-        return getConfigValue(INDEX_SHARD_BIG_THRESHOLD,DASHBOARD_BIG_SHARD_DEFAULT_VALUE);
+        return getConfigOrDefaultValue(INDEX_SHARD_BIG_THRESHOLD,DASHBOARD_INDEX_SHARD_BIG_THRESHOLD_DEFAULT_VALUE,SIZE);
     }
 
     /**
@@ -204,20 +206,25 @@ public class ESShardServiceImpl implements ESShardService {
      * @return
      */
     private long getConfigSmallShard() {
-        return getConfigValue(INDEX_SHARD_SMALL_THRESHOLD,DASHBOARD_SMALL_SHARD_DEFAULT_VALUE);
+        return getConfigOrDefaultValue(INDEX_SHARD_SMALL_THRESHOLD,DASHBOARD_INDEX_SHARD_SMALL_THRESHOLD_DEFAULT_VALUE,SIZE);
     }
 
-    private long getConfigValue(String indexShardSmallThreshold,String defaultValue) {
+    /**
+     * 获取dashboard配置值
+     * @param valueName    配置名称
+     * @param defaultValue 默认值
+     * @return
+     */
+    private long getConfigOrDefaultValue(String valueName,String defaultValue,String unitStyle){
+        DashBoardMetricThresholdDTO configThreshold = null;
         try {
-            String configValue = ariusConfigInfoService.stringSetting(ARIUS_DASHBOARD_THRESHOLD_GROUP, indexShardSmallThreshold, "");
-            DashBoardMetricThresholdDTO configThreshold = null;
+            String configValue = ariusConfigInfoService.stringSetting(ARIUS_DASHBOARD_THRESHOLD_GROUP, valueName, defaultValue);
             if (StringUtils.isNotBlank(configValue)) {
                 configThreshold = JSONObject.parseObject(configValue, DashBoardMetricThresholdDTO.class);
-                return SizeUtil.getUnitSize(configThreshold.getValue().longValue()+configThreshold.getUnit());
             }
         } catch (Exception e) {
-            return SizeUtil.getUnitSize(defaultValue);
+            configThreshold = JSONObject.parseObject(defaultValue, DashBoardMetricThresholdDTO.class);
         }
-        return SizeUtil.getUnitSize(defaultValue);
+        return AriusUnitUtil.unitChange(configThreshold.getValue().longValue(),configThreshold.getUnit(),unitStyle);
     }
 }

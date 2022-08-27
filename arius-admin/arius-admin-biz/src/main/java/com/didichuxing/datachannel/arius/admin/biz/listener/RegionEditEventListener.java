@@ -1,19 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.biz.listener;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.COMMA;
-
-import java.util.*;
-
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
-import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationListener;
-import org.springframework.stereotype.Component;
-
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant;
 import com.didichuxing.datachannel.arius.admin.common.event.region.RegionEditEvent;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
@@ -22,10 +12,19 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.Clust
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
+import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-
 import lombok.Data;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
+import org.springframework.stereotype.Component;
+
+import java.util.*;
+
+import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.COMMA;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.HISTORY_TEMPLATE_PHYSIC_INDICES_ALLOCATION_IS_EFFECTIVE_DEFAULT_VALUE;
 
 /**
  * @author didi
@@ -156,7 +155,7 @@ public class RegionEditEventListener implements ApplicationListener<RegionEditEv
     private void updateIndicesAllocationSetting(String cluster, String templateName,
                                                 Set<String> nodeNames) throws ESOperateException {
         if (ariusConfigInfoService.booleanSetting(AriusConfigConstant.ARIUS_COMMON_GROUP,
-            AriusConfigConstant.HISTORY_TEMPLATE_PHYSIC_INDICES_ALLOCATION_IS_EFFECTIVE, true)) {
+            AriusConfigConstant.HISTORY_TEMPLATE_PHYSIC_INDICES_ALLOCATION_IS_EFFECTIVE, HISTORY_TEMPLATE_PHYSIC_INDICES_ALLOCATION_IS_EFFECTIVE_DEFAULT_VALUE)) {
             boolean response = esIndexService.syncPutIndexSetting(cluster,
                 Collections.singletonList(templateName + "*"), TEMPLATE_INDEX_INCLUDE_NODE_NAME,
                 String.join(COMMA, nodeNames), "", RETRY_COUNT);

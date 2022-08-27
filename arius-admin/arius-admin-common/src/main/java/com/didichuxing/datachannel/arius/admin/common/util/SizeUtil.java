@@ -44,35 +44,35 @@ public class SizeUtil {
         final long C4 = C3 * 1024L;
         final long C5 = C4 * 1024L;
         long bytes = 0L;
-
+        //TODO:JIANG
         try {
-            String lowerSValue = proStoreSize.trim();
-            if (lowerSValue.endsWith("k")) {
-                bytes = (long) (Double.parseDouble(lowerSValue.substring(0, lowerSValue.length() - 1)) * C1);
-            } else if (lowerSValue.endsWith("kb")||lowerSValue.endsWith("KB")) {
-                bytes = (long) (Double.parseDouble(lowerSValue.substring(0, lowerSValue.length() - 2)) * C1);
-            } else if (lowerSValue.endsWith("m")||lowerSValue.endsWith("M")) {
-                bytes = (long) (Double.parseDouble(lowerSValue.substring(0, lowerSValue.length() - 1)) * C2);
-            } else if (lowerSValue.endsWith("mb")||lowerSValue.endsWith("MB")) {
-                bytes = (long) (Double.parseDouble(lowerSValue.substring(0, lowerSValue.length() - 2)) * C2);
-            } else if (lowerSValue.endsWith("g")||lowerSValue.endsWith("G")) {
-                bytes = (long) (Double.parseDouble(lowerSValue.substring(0, lowerSValue.length() - 1)) * C3);
-            } else if (lowerSValue.endsWith("gb")||lowerSValue.endsWith("GB")) {
-                bytes = (long) (Double.parseDouble(lowerSValue.substring(0, lowerSValue.length() - 2)) * C3);
-            } else if (lowerSValue.endsWith("t")||lowerSValue.endsWith("T")) {
-                bytes = (long) (Double.parseDouble(lowerSValue.substring(0, lowerSValue.length() - 1)) * C4);
-            } else if (lowerSValue.endsWith("tb")||lowerSValue.endsWith("TB")) {
-                bytes = (long) (Double.parseDouble(lowerSValue.substring(0, lowerSValue.length() - 2)) * C4);
-            } else if (lowerSValue.endsWith("p")||lowerSValue.endsWith("P")) {
-                bytes = (long) (Double.parseDouble(lowerSValue.substring(0, lowerSValue.length() - 1)) * C5);
-            } else if (lowerSValue.endsWith("pb")||lowerSValue.endsWith("PB")) {
-                bytes = (long) (Double.parseDouble(lowerSValue.substring(0, lowerSValue.length() - 2)) * C5);
-            } else if (lowerSValue.endsWith("b")||lowerSValue.endsWith("B")) {
-                bytes = Long.parseLong(lowerSValue.substring(0, lowerSValue.length() - 1).trim());
-            } else if (lowerSValue.equals("-1")) {
+            String trimValue = proStoreSize.trim();
+            if (trimValue.endsWith("k")) {
+                bytes = (long) (Double.parseDouble(trimValue.substring(0, trimValue.length() - 1)) * C1);
+            } else if (trimValue.endsWith("kb")) {
+                bytes = (long) (Double.parseDouble(trimValue.substring(0, trimValue.length() - 2)) * C1);
+            } else if (trimValue.endsWith("m")) {
+                bytes = (long) (Double.parseDouble(trimValue.substring(0, trimValue.length() - 1)) * C2);
+            } else if (trimValue.endsWith("mb")) {
+                bytes = (long) (Double.parseDouble(trimValue.substring(0, trimValue.length() - 2)) * C2);
+            } else if (trimValue.endsWith("g")) {
+                bytes = (long) (Double.parseDouble(trimValue.substring(0, trimValue.length() - 1)) * C3);
+            } else if (trimValue.endsWith("gb")) {
+                bytes = (long) (Double.parseDouble(trimValue.substring(0, trimValue.length() - 2)) * C3);
+            } else if (trimValue.endsWith("t")) {
+                bytes = (long) (Double.parseDouble(trimValue.substring(0, trimValue.length() - 1)) * C4);
+            } else if (trimValue.endsWith("tb")) {
+                bytes = (long) (Double.parseDouble(trimValue.substring(0, trimValue.length() - 2)) * C4);
+            } else if (trimValue.endsWith("p")) {
+                bytes = (long) (Double.parseDouble(trimValue.substring(0, trimValue.length() - 1)) * C5);
+            } else if (trimValue.endsWith("pb")) {
+                bytes = (long) (Double.parseDouble(trimValue.substring(0, trimValue.length() - 2)) * C5);
+            } else if (trimValue.endsWith("b")) {
+                bytes = Long.parseLong(trimValue.substring(0, trimValue.length() - 1).trim());
+            } else if (trimValue.equals("-1")) {
                 // Allow this special value to be unit-less:
                 bytes = -1;
-            } else if (lowerSValue.equals("0")) {
+            } else if (trimValue.equals("0")) {
                 // Allow this special value to be unit-less:
                 bytes = 0;
             } else {

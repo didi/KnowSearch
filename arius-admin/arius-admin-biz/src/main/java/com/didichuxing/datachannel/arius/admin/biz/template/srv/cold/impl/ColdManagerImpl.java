@@ -1,9 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.biz.template.srv.cold.impl;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_COMMON_GROUP;
-import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_TEMPLATE_COLD_GROUP;
-import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.INDEX_TEMPLATE_COLD_DAY_DEFAULT;
-
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
@@ -25,16 +21,19 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.Clust
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.google.common.collect.Lists;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.function.Function;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.function.Function;
+
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.*;
 
 /**
  * @author chengxiang, zqr
@@ -134,7 +133,7 @@ public class ColdManagerImpl extends BaseTemplateSrvImpl implements ColdManager 
     */
     private int getDefaultHotDay() {
         String defaultDay = ariusConfigInfoService.stringSetting(ARIUS_TEMPLATE_COLD_GROUP,
-            INDEX_TEMPLATE_COLD_DAY_DEFAULT, "");
+            INDEX_TEMPLATE_COLD_DAY_DEFAULT, INDEX_TEMPLATE_COLD_DAY_DEFAULT_VALUE);
         LOGGER.info("class=TemplateColdManagerImpl||method=getDefaultHotDay||msg=defaultDay: {}", defaultDay);
         if (StringUtils.isNotBlank(defaultDay)) {
             try {
