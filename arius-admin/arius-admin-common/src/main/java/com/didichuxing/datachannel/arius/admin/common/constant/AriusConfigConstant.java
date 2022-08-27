@@ -130,7 +130,7 @@ public class AriusConfigConstant {
     /**
      * 堆内存利用率持续时间红线
      */
-    public static final String NODE_LARGE_HEAD_USED_PERCENT_TIME_USAGE_THRESHOLD      = "node.jvm.heap.used_percent_time_duration";
+    public static final String NODE_LARGE_HEAD_USED_PERCENT_TIME_USAGE_THRESHOLD      = "node.jvm.heap.used_percent_time_duration_threshold";
     /**
      * CPU利用率超红线
      */
@@ -138,7 +138,7 @@ public class AriusConfigConstant {
     /**
      * cpu利用率持续时间超红线阈值
      */
-    public static final String NODE_LARGE_CPU_USED_PERCENT_TIME_USAGE_THRESHOLD       = "node.cpu.used_percent_threshold_time_duration";
+    public static final String NODE_LARGE_CPU_USED_PERCENT_TIME_USAGE_THRESHOLD       = "node.cpu.used_percent_threshold_time_duration_threshold";
     /**
      * 大Shard列表阈值定义(大Shard索引列表)
      */
