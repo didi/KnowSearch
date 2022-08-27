@@ -210,6 +210,7 @@ public class ESShardServiceImpl implements ESShardService {
 
     /**
      * 获取dashboard配置值
+     * catch:获取和转换都发生错误后，使用系统配置的默认配置项
      * @param valueName    配置名称
      * @param defaultValue 默认值
      * @return
@@ -222,7 +223,11 @@ public class ESShardServiceImpl implements ESShardService {
                 configThreshold = JSONObject.parseObject(configValue, DashBoardMetricThresholdDTO.class);
             }
         } catch (Exception e) {
+            //获取和转换都发生错误后，使用系统配置的默认配置项
+            LOGGER.warn("class=ESShardServiceImpl||method=getConfigOrDefaultValue||name={}||msg=JSON format error!",
+                    valueName);
             configThreshold = JSONObject.parseObject(defaultValue, DashBoardMetricThresholdDTO.class);
+
         }
         return AriusUnitUtil.unitChange(configThreshold.getValue().longValue(),configThreshold.getUnit(),unitStyle);
     }
