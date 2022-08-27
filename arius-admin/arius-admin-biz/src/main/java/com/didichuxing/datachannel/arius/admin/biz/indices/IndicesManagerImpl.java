@@ -955,7 +955,7 @@ public class IndicesManagerImpl implements IndicesManager {
             }
             phyClusterName = clusterRegion.getPhyClusterName();
             if (!esClusterService.isConnectionStatus(phyClusterName)){
-                return Result.buildFail(String.format("%s 不正常",phyClusterName));
+                return Result.buildFail(String.format("%s 集群不正常",cluster));
             }
         }
         return Result.buildSucc(phyClusterName);
