@@ -140,11 +140,11 @@ public class ESLogicClusterOpV3Controller {
     }
 
     //超级应展示全部物理集群、普通应用展示普通应用有权限的逻辑集群
-    @GetMapping("/cluster-phy-health-relation")
+    @GetMapping("/cluster-phy-relation")
     @ResponseBody
-    @ApiOperation(value = "根据项目id获取健康的逻辑集群与物理集群映射")
+    @ApiOperation(value = "根据项目id获取逻辑集群与物理集群映射")
     public Result<List<Tuple<String, ClusterPhyVO>>> getClusterRelationByProjectId(HttpServletRequest request) {
-        return clusterLogicManager.getHealthClusterRelationByProjectId(HttpRequestUtil.getProjectId(request));
+        return clusterLogicManager.getClusterRelationByProjectId(HttpRequestUtil.getProjectId(request));
     }
 
     @GetMapping("/plugins")

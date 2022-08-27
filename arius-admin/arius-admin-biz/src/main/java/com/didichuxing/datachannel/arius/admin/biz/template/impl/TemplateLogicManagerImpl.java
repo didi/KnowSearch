@@ -736,7 +736,8 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             IndexTemplateDTO indexTemplateDTO = new IndexTemplateDTO();
             indexTemplateDTO.setId(logicId);
             indexTemplateDTO.setHasDCDR(dcdrFlag);
-            indexTemplateDTO.setCheckPointDiff(totalIndexCheckPointDiff);
+            //如果还存在dcdr链路，则未totalIndexCheckPointDiff 否则未-1
+            indexTemplateDTO.setCheckPointDiff(Boolean.TRUE.equals(dcdrFlag)?totalIndexCheckPointDiff:-1);
             indexTemplateService.editTemplateInfoTODB(indexTemplateDTO);
         } catch (AdminOperateException e) {
             LOGGER.error(
