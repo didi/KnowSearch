@@ -340,8 +340,17 @@ public class ESTemplateServiceImpl implements ESTemplateService {
      */
     @Override
     public boolean hasMatchHealthIndexByExpressionTemplateHealthEnum(String cluster, String expression,
-                                                                     TemplateHealthEnum templateHealthEnum)
-            throws ESOperateException {
-        return esTemplateDAO.hasMatchHealthIndexByExpressionTemplateHealthEnum(cluster,expression,templateHealthEnum);
+                                                                     TemplateHealthEnum templateHealthEnum) {
+        try {
+            //无需关心底层的异常原因，这里在于，我们获取的的分区和非分区，一般来说，分区索引会自动+*，所以不会有错误的异常抛出
+            //那么非分区的话，就会精确到每一个索引名称，此时有可能出现index_not_found_exception，所以这里默认返回false即可
+            return esTemplateDAO.hasMatchHealthIndexByExpressionTemplateHealthEnum(cluster, expression,
+                    templateHealthEnum);
+        } catch (ESOperateException e) {
+            LOGGER.error("class={}||method=hasMatchHealthIndexByExpressionTemplateHealthEnum||clusterName={}",
+                    getClass().getSimpleName(), cluster, e);
+            return false;
+        }
+        
     }
 }
