@@ -954,7 +954,7 @@ public class IndicesManagerImpl implements IndicesManager {
                 return Result.buildParamIllegal("逻辑集群未绑定Region");
             }
             phyClusterName = clusterRegion.getPhyClusterName();
-            if (esClusterService.isConnectionStatus(phyClusterName)){
+            if (!esClusterService.isConnectionStatus(phyClusterName)){
                 return Result.buildFail(String.format("%s 不正常",phyClusterName));
             }
         }
