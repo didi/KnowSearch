@@ -58,6 +58,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.Cluste
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
+import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexCatService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
@@ -102,6 +103,8 @@ public class IndicesManagerImpl implements IndicesManager {
 
     @Autowired
     private ESIndexCatService       esIndexCatService;
+    @Autowired
+    private ESClusterService esClusterService;
 
     @Autowired
     private ESIndexService          esIndexService;
@@ -543,11 +546,16 @@ public class IndicesManagerImpl implements IndicesManager {
         if (ret.failed()) {
             return Result.buildFrom(ret);
         }
+        
+        
+    
         final Result<IndexSettingVO> beforeSetting = getSetting(param.getCluster(), indexName, projectId);
+        IndexSettingsUtil.checkImmutableSettingAndCorrectSetting(param.getSetting(),projectId);
         JSONObject settingObj = JSON.parseObject(param.getSetting());
         if (null == settingObj) {
             return Result.buildFail("setting 配置非法");
         }
+        
         Map<String, IndexConfig> configMap = esIndexService.syncGetIndexSetting(phyCluster,
             Lists.newArrayList(indexName), RETRY_COUNT);
         Map<String, String> sourceSettings = AriusOptional.ofObjNullable(configMap.get(indexName))
@@ -946,6 +954,9 @@ public class IndicesManagerImpl implements IndicesManager {
                 return Result.buildParamIllegal("逻辑集群未绑定Region");
             }
             phyClusterName = clusterRegion.getPhyClusterName();
+            if (!esClusterService.isConnectionStatus(phyClusterName)){
+                return Result.buildFail(String.format("%s 集群不正常",cluster));
+            }
         }
         return Result.buildSucc(phyClusterName);
     }
