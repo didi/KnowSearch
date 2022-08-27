@@ -58,6 +58,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.Cluste
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
+import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexCatService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
@@ -102,6 +103,8 @@ public class IndicesManagerImpl implements IndicesManager {
 
     @Autowired
     private ESIndexCatService       esIndexCatService;
+    @Autowired
+    private ESClusterService esClusterService;
 
     @Autowired
     private ESIndexService          esIndexService;
@@ -951,6 +954,9 @@ public class IndicesManagerImpl implements IndicesManager {
                 return Result.buildParamIllegal("逻辑集群未绑定Region");
             }
             phyClusterName = clusterRegion.getPhyClusterName();
+            if (esClusterService.isConnectionStatus(phyClusterName)){
+                return Result.buildFail(String.format("%s 不正常",phyClusterName));
+            }
         }
         return Result.buildSucc(phyClusterName);
     }
