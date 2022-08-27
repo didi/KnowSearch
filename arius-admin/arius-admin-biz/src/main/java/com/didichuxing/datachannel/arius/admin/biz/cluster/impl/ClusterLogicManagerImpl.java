@@ -482,7 +482,8 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
                 return Result.buildSuccWithTips(result.getData(),
                         String.format("逻辑集群%s下线成功", clusterLogic.getName()));
             }
-            return Result.buildFailWithMsg(result.getData(),String.format("逻辑集群%s下线失败", clusterLogic.getName()));
+            return Result.buildFailWithMsg(result.getData(),String.format("逻辑集群%s下线失败,%s", clusterLogic.getName(),
+                    result.getMessage()));
         } catch (AdminOperateException | ElasticsearchTimeoutException e) {
             LOGGER.error("class={}||method=deleteLogicCluster||clusterLogic={}||es operation errMsg={}",
                     getClass().getSimpleName(), clusterLogic.getName(), e);
