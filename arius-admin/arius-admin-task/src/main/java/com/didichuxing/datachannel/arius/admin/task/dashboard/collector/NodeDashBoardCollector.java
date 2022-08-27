@@ -334,16 +334,6 @@ public class NodeDashBoardCollector extends BaseDashboardCollector {
      */
     private long getConfigLargeDiskUsage() {
         return getConfigOrDefaultValue(NODE_DISK_USED_PERCENT_THRESHOLD,DASHBOARD_NODE_DISK_USED_PERCENT_THRESHOLD_DEFAULT_VALUE,COMMON);
-//        DashBoardMetricThresholdDTO configThreshold = null;
-//        try {
-//            String configValue = ariusConfigInfoService.stringSetting(ARIUS_DASHBOARD_THRESHOLD_GROUP, NODE_DISK_USED_PERCENT_THRESHOLD, DASHBOARD_NODE_DISK_USED_PERCENT_THRESHOLD_DEFAULT_VALUE);
-//            if (StringUtils.isNotBlank(configValue)) {
-//                configThreshold = JSONObject.parseObject(configValue, DashBoardMetricThresholdDTO.class);
-//            }
-//        } catch (Exception e) {
-//            configThreshold = JSONObject.parseObject(DASHBOARD_NODE_DISK_USED_PERCENT_THRESHOLD_DEFAULT_VALUE, DashBoardMetricThresholdDTO.class);
-//        }
-//        return configThreshold.getValue().longValue();
     }
 
     /**
@@ -353,16 +343,6 @@ public class NodeDashBoardCollector extends BaseDashboardCollector {
      */
     private long getConfigLargeHeadPercentThreshold() {
         return getConfigOrDefaultValue(NODE_LARGE_HEAD_USAGE_PERCENT_THRESHOLD,DASHBOARD_HEAD_USED_PERCENT_THRESHOLD_DEFAULT_VALUE,COMMON);
-//        DashBoardMetricThresholdDTO configThreshold = null;
-//        try {
-//            String configValue = ariusConfigInfoService.stringSetting(ARIUS_DASHBOARD_THRESHOLD_GROUP, DASHBOARD_HEAD_USED_PERCENT_THRESHOLD_DEFAULT_VALUE, DASHBOARD_HEAD_USED_PERCENT_THRESHOLD_DEFAULT_VALUE);
-//            if (StringUtils.isNotBlank(configValue)) {
-//                configThreshold = JSONObject.parseObject(configValue, DashBoardMetricThresholdDTO.class);
-//            }
-//        } catch (Exception e) {
-//            configThreshold = JSONObject.parseObject(DASHBOARD_HEAD_USED_PERCENT_THRESHOLD_DEFAULT_VALUE, DashBoardMetricThresholdDTO.class);
-//        }
-//        return configThreshold.getValue().longValue();
     }
 
     /**
@@ -372,16 +352,6 @@ public class NodeDashBoardCollector extends BaseDashboardCollector {
      */
     private long getConfigLargeHeadPercentTimeThreshold() {
         return getConfigOrDefaultValue(NODE_LARGE_HEAD_USED_PERCENT_TIME_USAGE_THRESHOLD,DASHBOARD_LARGE_HEAD_USED_PERCENT_TIME_DEFAULT_VALUE,TIME);
-//        DashBoardMetricThresholdDTO configThreshold = null;
-//        try {
-//            String configValue = ariusConfigInfoService.stringSetting(ARIUS_DASHBOARD_THRESHOLD_GROUP, NODE_LARGE_HEAD_USED_PERCENT_TIME_USAGE_THRESHOLD, DASHBOARD_LARGE_HEAD_USED_PERCENT_TIME_DEFAULT_VALUE);
-//            if (StringUtils.isNotBlank(configValue)) {
-//                configThreshold = JSONObject.parseObject(configValue, DashBoardMetricThresholdDTO.class);
-//            }
-//        } catch (Exception e) {
-//            configThreshold = JSONObject.parseObject(DASHBOARD_LARGE_HEAD_USED_PERCENT_TIME_DEFAULT_VALUE, DashBoardMetricThresholdDTO.class);
-//        }
-//        return AriusDateUtils.getUnitTime(configThreshold.getValue().longValue(),configThreshold.getUnit());
     }
 
     /**
@@ -391,16 +361,6 @@ public class NodeDashBoardCollector extends BaseDashboardCollector {
      */
     private long getConfigLargeCpuPercentThreshold() {
         return getConfigOrDefaultValue(NODE_LARGE_CPU_USAGE_PERCENT_THRESHOLD,DASHBOARD_CPU_PERCENT_THRESHOLD_DEFAULT_VALUE,COMMON);
-//        DashBoardMetricThresholdDTO configThreshold = null;
-//        try {
-//            String configValue = ariusConfigInfoService.stringSetting(ARIUS_DASHBOARD_THRESHOLD_GROUP, NODE_LARGE_CPU_USAGE_PERCENT_THRESHOLD, DASHBOARD_CPU_PERCENT_THRESHOLD_DEFAULT_VALUE);
-//            if (StringUtils.isNotBlank(configValue)) {
-//                configThreshold = JSONObject.parseObject(configValue, DashBoardMetricThresholdDTO.class);
-//            }
-//        } catch (Exception e) {
-//            configThreshold = JSONObject.parseObject(DASHBOARD_NODE_CPU_USED_PERCENT_THRESHOLD_TIME_DURATION_THRESHOLD_DEFAULT_VALUE, DashBoardMetricThresholdDTO.class);
-//        }
-//        return configThreshold.getValue().longValue();
     }
 
     /**

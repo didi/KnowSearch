@@ -162,17 +162,6 @@ public class ClusterDashBoardCollector extends BaseDashboardCollector {
      */
     private long getConfigCollectorDelayed() {
         return getConfigOrDefaultValue(DASHBOARD_CLUSTER_METRIC_COLLECTOR_DELAYED_THRESHOLD,DASHBOARD_CLUSTER_METRIC_COLLECTOR_DELAYED_DEFAULT_VALUE,TIME);
-//        DashBoardMetricThresholdDTO configThreshold = null;
-//        try {
-//            String configValue = ariusConfigInfoService.stringSetting(ARIUS_DASHBOARD_THRESHOLD_GROUP, DASHBOARD_CLUSTER_METRIC_COLLECTOR_DELAYED_THRESHOLD, DASHBOARD_CLUSTER_METRIC_COLLECTOR_DELAYED_DEFAULT_VALUE);
-//            if (StringUtils.isNotBlank(configValue)) {
-//                configThreshold = JSONObject.parseObject(configValue, DashBoardMetricThresholdDTO.class);
-//                return AriusDateUtils.getUnitTime(configThreshold.getValue().longValue(),configThreshold.getUnit());
-//            }
-//        } catch (Exception e) {
-//            configThreshold = JSONObject.parseObject(DASHBOARD_CLUSTER_METRIC_COLLECTOR_DELAYED_DEFAULT_VALUE, DashBoardMetricThresholdDTO.class);
-//        }
-//        return AriusDateUtils.getUnitTime(configThreshold.getValue().longValue(),configThreshold.getUnit());
     }
 
     /**
