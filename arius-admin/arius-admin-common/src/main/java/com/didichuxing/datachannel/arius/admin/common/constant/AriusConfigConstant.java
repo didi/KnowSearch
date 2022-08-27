@@ -273,4 +273,8 @@ public class AriusConfigConstant {
      * 节点分片个数(节点分片个数大于>500)
      */
     public static final String DASHBOARD_NODE_SHARD_NUM_THRESHOLD_DEFAULT_VALUE                               = "{\"name\":\"node.shard.num_threshold\",\"metrics\":\"shardNum\",\"unit\":\"个\",\"compare\":\">\",\"value\":1000}";
+    /**
+     * 集群大shard阈值定义
+     */
+    public static final double BIG_SHARD                                                                      = 10d;
 }

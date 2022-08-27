@@ -32,7 +32,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.*;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.BIG_SHARD;
 import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.*;
 import static com.didichuxing.datachannel.arius.admin.common.util.AriusUnitUtil.SIZE;
 
