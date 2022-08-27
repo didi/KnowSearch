@@ -29,7 +29,9 @@ import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.Tri
 import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectSearchTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
 import com.didichuxing.datachannel.arius.admin.common.tuple.Tuples;
+import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.VerifyCodeFactory;
 import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
@@ -60,10 +62,8 @@ import com.google.common.collect.Sets;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -106,7 +106,8 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
     @Autowired
     private RoleTool          roleTool;
     @Autowired
-    private ESIndexCatService esIndexCatService;
+    private               ESIndexCatService esIndexCatService;
+    private static final FutureUtil<Void> FUTURE_UTIL = FutureUtil.init("ProjectExtendManagerImpl", 10, 10, 100);
     
     /**
      * “检查一个项目的资源是否可用。”
@@ -161,9 +162,12 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
                 ownerIdList.add(operatorId);
 
             }
-            //谁创建、谁包含
+            // 谁创建、谁包含
             if (!ownerIdList.contains(operatorId)) {
                 ownerIdList.add(operatorId);
+            }
+            if (!userIdList.contains(operatorId)) {
+                userIdList.add(operatorId);
             }
 
             // 3. 创建项目
@@ -178,7 +182,10 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
             // 6. 创建项目配置
             TupleTwo<Result<Void>, ProjectConfigPO> resultProjectConfigTuple = projectConfigService
                 .updateOrInitProjectConfig(config, operator);
-            setAdminProjectExtendVO(projectExtendVO);
+        
+            // 全量获取具有管理员角色的用户
+            final List<UserBriefVO> userBriefListWithAdminRole = userService.getUserBriefListByRoleId(AuthConstant.ADMIN_ROLE_ID);
+            buildProjectExtendVO(projectExtendVO,userBriefListWithAdminRole);
             // 设置项目配置
             if (resultProjectConfigTuple.v1().success()) {
                 projectExtendVO.setConfig(ConvertUtil.obj2Obj(resultProjectConfigTuple.v2(), ProjectConfigVO.class));
@@ -217,10 +224,12 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
         try {
             ProjectVO projectVO = projectService.getProjectDetailByProjectId(projectId);
             ProjectExtendVO projectExtendVO = ConvertUtil.obj2Obj(projectVO, ProjectExtendVO.class);
-            setAdminProjectExtendVO(projectExtendVO);
+            
+            // 全量获取具有管理员角色的用户
+            final List<UserBriefVO> userBriefListWithAdminRole =userService.getUserBriefListByRoleId(AuthConstant.ADMIN_ROLE_ID);
+            buildProjectExtendVO(projectExtendVO, userBriefListWithAdminRole);
             ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectId);
             projectExtendVO.setConfig(ConvertUtil.obj2Obj(projectConfig, ProjectConfigVO.class));
-
             return Result.buildSucc(projectExtendVO);
         } catch (LogiSecurityException e) {
             return Result.buildFail(e.getMessage());
@@ -232,9 +241,30 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
      *
      * @param projectExtendVO 项目延长签证官
      */
-    private void setAdminProjectExtendVO(ProjectExtendVO projectExtendVO) {
+    private void buildProjectExtendVO(ProjectExtendVO projectExtendVO, List<UserBriefVO> userBriefListWithAdminRole) {
         if (AuthConstant.SUPER_PROJECT_ID.equals(projectExtendVO.getId())) {
+    
+            projectExtendVO.setUserList(userBriefListWithAdminRole);
+            projectExtendVO.setOwnerList(userBriefListWithAdminRole);
+            projectExtendVO.setUserListWithBelongProjectAndAdminRole(userBriefListWithAdminRole);
+            projectExtendVO.setUserListWithAdminRole(userBriefListWithAdminRole);
+            
             projectExtendVO.setIsAdmin(true);
+        } else {
+    
+            List<UserBriefVO> useList = Optional.ofNullable(projectExtendVO.getUserList()).orElse(Lists.newArrayList());
+            projectExtendVO.setUserList(useList.stream().filter(CommonUtils.distinctByKey(UserBriefVO::getId))
+                    .collect(Collectors.toList()));
+            projectExtendVO.setOwnerList(
+                    projectExtendVO.getOwnerList().stream().filter(CommonUtils.distinctByKey(UserBriefVO::getId))
+                            .collect(Collectors.toList()));
+            useList.addAll(userBriefListWithAdminRole);
+            // 具有管理员角色和持有项目用户的项目成员
+            final List<UserBriefVO> userListWithBelongProjectAndAdminRole = useList.stream()
+                    .filter(CommonUtils.distinctByKey(UserBriefVO::getId)).collect(Collectors.toList());
+            projectExtendVO.setUserListWithAdminRole(userBriefListWithAdminRole);
+            projectExtendVO.setUserListWithBelongProjectAndAdminRole(userListWithBelongProjectAndAdminRole);
+            
         }
     }
 
@@ -353,11 +383,18 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
         final PagingData<ProjectVO> projectPage = projectService.getProjectPage(projectQueryDTO, projectIds);
         final List<ProjectExtendVO> projectExtendVOList = ConvertUtil.list2List(projectPage.getBizData(),
             ProjectExtendVO.class);
+        //全量获取具有管理员角色的用户
+        final List<UserBriefVO> userBriefListWithAdminRole =
+                userService.getUserBriefListByRoleId(AuthConstant.ADMIN_ROLE_ID);
         for (ProjectExtendVO projectExtendVO : projectExtendVOList) {
-            setAdminProjectExtendVO(projectExtendVO);
-            final ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectExtendVO.getId());
-            projectExtendVO.setConfig(ConvertUtil.obj2Obj(projectConfig, ProjectConfigVO.class));
+            FUTURE_UTIL.runnableTask(() -> {
+                
+                buildProjectExtendVO(projectExtendVO,userBriefListWithAdminRole);
+                final ProjectConfig projectConfig = projectConfigService.getProjectConfig(projectExtendVO.getId());
+                projectExtendVO.setConfig(ConvertUtil.obj2Obj(projectConfig, ProjectConfigVO.class));
+            });
         }
+        FUTURE_UTIL.waitExecute();
         return PagingResult.success(new PagingData<>(projectExtendVOList, projectPage.getPagination()));
     }
 
@@ -379,8 +416,14 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
                 projectConfigService.updateOrInitProjectConfig(config, operator);
             }
             final ProjectSaveDTO project = saveDTO.getProject();
-            List<Integer> ownerIdList = project.getOwnerIdList();
-            List<Integer> userIdList = project.getUserIdList();
+            List<Integer> ownerIdList = Optional.ofNullable(project.getOwnerIdList())
+                    .orElse(Collections.emptyList()).stream().distinct().collect(Collectors.toList());
+            List<Integer> userIdListTemp = Optional.ofNullable(project.getUserIdList())
+                    .orElse(Collections.emptyList());
+            //负责人一定是成员
+            userIdListTemp.addAll(ownerIdList);
+            final List<Integer> userIdList = userIdListTemp.stream().distinct().collect(Collectors.toList());
+    
             //超级项目侧校验添加的用户收否存在管理员角色
             final Result<Void> ownerResult = checkProject(project.getId(), ownerIdList, OperationEnum.EDIT);
             if (ownerResult.failed()) {
@@ -655,7 +698,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
         if (listResult.successed()) {
             final List<ProjectBriefExtendVO> dtoList = ConvertUtil.list2List(listResult.getData(),
                 ProjectBriefExtendVO.class).stream()
-                    .filter(distinctByKey(ProjectBriefVO::getId)).collect(Collectors.toList());
+                    .filter(CommonUtils.distinctByKey(ProjectBriefVO::getId)).collect(Collectors.toList());
             return getListResult(dtoList);
         } else {
             return Result.buildFail(listResult.getMessage());
@@ -774,10 +817,7 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
         }
     }
     
-    public static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
-        Map<Object, Boolean> seen = new ConcurrentHashMap<>();
-        return t -> seen.putIfAbsent(keyExtractor.apply(t), Boolean.TRUE) == null;
-    }
+   
     
     private ClusterLogicTemplateIndexDetailDTO getTemplateIndexVO(ClusterLogic clusterLogic, Integer projectId) {
         IndexTemplateDTO param = new IndexTemplateDTO();

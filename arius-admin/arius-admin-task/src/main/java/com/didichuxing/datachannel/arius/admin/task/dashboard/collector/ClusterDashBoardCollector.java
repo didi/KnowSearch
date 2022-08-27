@@ -1,19 +1,28 @@
 package com.didichuxing.datachannel.arius.admin.task.dashboard.collector;
 
+import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.DashBoardMetricThresholdDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStatsResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.ClusterMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.DashBoardStats;
+import com.didichuxing.datachannel.arius.admin.common.util.AriusUnitUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.MetricsUtils;
+import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.ESClusterPhyStatsService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
+
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.*;
+import static com.didichuxing.datachannel.arius.admin.common.util.AriusUnitUtil.TIME;
 
 /**
  * Created by linyunan on 3/11/22
@@ -25,11 +34,12 @@ public class ClusterDashBoardCollector extends BaseDashboardCollector {
         .getLog(ClusterDashBoardCollector.class);
     @Autowired
     protected ESClusterPhyStatsService                                       esClusterPhyStatsService;
+    @Autowired
+    protected AriusConfigInfoService                                         ariusConfigInfoService;
 
     private static final Map<String/*集群名称*/, ClusterMetrics /*上一次采集到的集群数据*/> cluster2LastTimeClusterMetricsMap = Maps
         .newConcurrentMap();
 
-    //TODO 指标-配置项
     private static final long                                                FIVE_MINUTE                       = 5 * 60
                                                                                                                  * 1000;
 
@@ -38,6 +48,7 @@ public class ClusterDashBoardCollector extends BaseDashboardCollector {
         DashBoardStats dashBoardStats = buildInitDashBoardStats(startTime);
 
         ClusterMetrics clusterMetrics = cluster2LastTimeClusterMetricsMap.getOrDefault(cluster, new ClusterMetrics());
+        ESClusterStatsResponse clusterStats = esClusterService.syncGetClusterStats(cluster);
         clusterMetrics.setTimestamp(startTime);
         clusterMetrics.setCluster(cluster);
         // 1. 写入耗时
@@ -46,9 +57,9 @@ public class ClusterDashBoardCollector extends BaseDashboardCollector {
         // 2. 查询耗时
         //TODO 指标-最大值，各节点当前查询耗时最大值
         clusterMetrics.setSearchLatency(esClusterPhyStatsService.getClusterSearchLatency(cluster));
-        //4. 集群shard总数
         //TODO 指标-轻量级获取_cat/health?format=json
-        clusterMetrics.setShardNum(esClusterPhyStatsService.getClustersShardTotal(cluster));
+        //4. 集群shard总数
+        clusterMetrics.setShardNum(clusterStats.getTotalShard());
         // 5. 写入请求数
         clusterMetrics.setIndexReqNum(esClusterPhyStatsService.getCurrentIndexTotal(cluster));
         // 6. 网关成功率、失败率
@@ -58,7 +69,7 @@ public class ClusterDashBoardCollector extends BaseDashboardCollector {
         clusterMetrics.setGatewayFailedPer(gatewaySuccessRateAndFailureRate.getV2());
         // 7. 集群Pending task数
         //TODO 指标-轻量级获取_cat/health?format=json
-        clusterMetrics.setPendingTaskNum(esClusterPhyStatsService.getPendingTaskTotal(cluster));
+        clusterMetrics.setPendingTaskNum(clusterStats.getPendingTasks());
         // 8. 集群http连接数
         clusterMetrics.setHttpNum(esClusterPhyStatsService.getHttpConnectionTotal(cluster));
         //9. 查询请求数突增量 （上个时间间隔请求数的两倍）
@@ -70,13 +81,13 @@ public class ClusterDashBoardCollector extends BaseDashboardCollector {
         clusterMetrics.setClusterElapsedTime(esClusterPhyStatsService.getClusterStatusElapsedTime(cluster));
         clusterMetrics.setNodeElapsedTime(esClusterPhyStatsService.getNodeStatusElapsedTime(cluster));
         long collectorDelayed = getCollectorDelayed(cluster);
-
+        long configCollectorDelayed = getConfigCollectorDelayed();
+        //TODO 指标-_cluster/stats，加参数过滤
         //12.消耗时间是否大于5分钟,开始采集到结束采集的时间，指标看板的采集任务，当前时间到最近一次采集的时间
-        clusterMetrics.setClusterElapsedTimeGte5Min(collectorDelayed > FIVE_MINUTE);
+        clusterMetrics.setClusterElapsedTimeGte5Min(collectorDelayed > configCollectorDelayed);
         clusterMetrics.setCollectorDelayed(collectorDelayed);
         //13.集群下索引数量
-        //TODO 指标-_cluster/stats，加参数过滤
-        clusterMetrics.setIndexCount(esClusterPhyStatsService.getIndexCountByCluster(cluster));
+        clusterMetrics.setIndexCount(clusterStats.getIndexCount());
 
         dashBoardStats.setCluster(clusterMetrics);
         monitorMetricsSender.sendDashboardStats(Lists.newArrayList(dashBoardStats));
@@ -143,5 +154,36 @@ public class ClusterDashBoardCollector extends BaseDashboardCollector {
 
         return MetricsUtils.computerUprushNum(currentQueryTotal.doubleValue(), lastTimeQueryTotal.doubleValue())
             .longValue();
+    }
+
+    /**
+     * 获取配置的采集延时
+     * @return
+     */
+    private long getConfigCollectorDelayed() {
+        return getConfigOrDefaultValue(DASHBOARD_CLUSTER_METRIC_COLLECTOR_DELAYED_THRESHOLD,DASHBOARD_CLUSTER_METRIC_COLLECTOR_DELAYED_DEFAULT_VALUE,TIME);
+    }
+
+    /**
+     * 获取dashboard配置值
+     * catch:获取和转换都发生错误后，使用系统配置的默认配置项
+     * @param valueName    配置名称
+     * @param defaultValue 默认值
+     * @return
+     */
+    private long getConfigOrDefaultValue(String valueName,String defaultValue, String unitStyle){
+        DashBoardMetricThresholdDTO configThreshold = null;
+        try {
+            String configValue = ariusConfigInfoService.stringSetting(ARIUS_DASHBOARD_THRESHOLD_GROUP, valueName, defaultValue);
+            if (StringUtils.isNotBlank(configValue)) {
+                configThreshold = JSONObject.parseObject(configValue, DashBoardMetricThresholdDTO.class);
+            }
+        } catch (Exception e) {
+            //获取和转换都发生错误后，使用系统配置的默认配置项
+            LOGGER.warn("class=ClusterDashBoardCollector||method=getConfigOrDefaultValue||name={}||msg=JSON format error!",
+                    valueName);
+            configThreshold = JSONObject.parseObject(defaultValue, DashBoardMetricThresholdDTO.class);
+        }
+        return AriusUnitUtil.unitChange(configThreshold.getValue().longValue(),configThreshold.getUnit(),unitStyle);
     }
 }

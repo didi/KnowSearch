@@ -39,7 +39,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_DASHBOARD_THRESHOLD_GROUP;
-import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricListTypeEnum.INDEX_SMALL_SHARD;
 import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricThresholdValueNameEnum.getAllDefaultThresholdValue;
 import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.DashBoardMetricTopTypeEnum.CLUSTER_SHARD_NUM;
 
@@ -267,37 +266,20 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
     }
 
     /**
-     * 获取阈值项与值的名称
-     * 如：smallShard->shardSize
-     * @return
-     */
-    private Map<String,String> getDashBoardMetricThresholdNames(){
-        Map<String,String> threshold = new HashMap<>();
-        threshold.put(INDEX_SMALL_SHARD.getType(), DashBoardMetricThresholdValueNameEnum.INDEX_SMALL_SHARD_THRESHOLD.getMetrics());
-        return threshold;
-    }
-    
-    /**
      * 获取dashboard指标阈值
      *
      * @return
      */
     @NotNull
-    private Map<DashBoardMetricListTypeEnum, DashBoardMetricThresholdDTO> getDashBoardMetricThresholdValues() {
+    public Map<DashBoardMetricListTypeEnum, DashBoardMetricThresholdDTO> getDashBoardMetricThresholdValues() {
         Map<DashBoardMetricListTypeEnum, DashBoardMetricThresholdDTO> thresholdValues = new HashMap<>();
         List<DashBoardMetricThresholdValueNameEnum> thresholdValueNameEnums = getAllDefaultThresholdValue();
         List<AriusConfigInfo> ariusConfigInfos = ariusConfigInfoService.getConfigByGroup(ARIUS_DASHBOARD_THRESHOLD_GROUP);
         Map<String,String> ariusConfigInfoMap =ariusConfigInfos.stream().collect(Collectors.toMap(AriusConfigInfo::getValueName,AriusConfigInfo::getValue));
 
         for (DashBoardMetricThresholdValueNameEnum threshold : thresholdValueNameEnums) {
-            DashBoardMetricThresholdDTO thresholdDTO =DashBoardMetricThresholdDTO.builder()
-                    .typeEnum(threshold.getTypeEnum())
-                    .metrics(threshold.getMetrics())
-                    .compare(threshold.getCompare())
-                    .value(threshold.getValue())
-                    .configName(threshold.getConfigName())
-                    .unit(threshold.getUnit())
-                    .build();
+
+            DashBoardMetricThresholdDTO thresholdDTO = JSONObject.parseObject(threshold.getDefaultValue(),DashBoardMetricThresholdDTO.class);
             String configValue = Objects.nonNull(ariusConfigInfoMap.get(threshold.getConfigName()))?ariusConfigInfoMap.get(threshold.getConfigName()):"";
             if (StringUtils.isNotBlank(configValue)){
                 try {
@@ -313,7 +295,7 @@ public class DashboardMetricsManagerImpl implements DashboardMetricsManager {
         }
         return thresholdValues;
     }
-    
+
     /**
      * 合法性检测
      *

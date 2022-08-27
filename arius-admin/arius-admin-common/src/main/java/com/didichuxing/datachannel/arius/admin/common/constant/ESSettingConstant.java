@@ -18,8 +18,14 @@ public class ESSettingConstant {
     public static final String INDEX_REFRESH_INTERVAL = "index.refresh_interval";
     public static final String INDEX_TRANSLOG_DURABILITY = "index.translog.durability";
     public static final String INDEX_ROUTING_ALLOCATION_INCLUDE_NAME = "index.routing.allocation.include._name";
-    public static final String INDEX_TRANSLOG_SYNC_INTERVAL = "index.translog.sync_interval";
-    public static final String       DEFAULT_DYNAMIC_TEMPLATES_KEY           = "dynamic_templates";
-
+    public static final String INDEX_TRANSLOG_SYNC_INTERVAL    = "index.translog.sync_interval";
+    public static final String DEFAULT_DYNAMIC_TEMPLATES_KEY   = "dynamic_templates";
+    public static final String INDEX_CREATION_DATE             = "index.creation_date";
+    public static final String INDEX_VERIFIED_BEFORE_CLOSE     = "index.verified_before_close";
+    public static final String INDEX_VERSION_CREATED           = "index.version.created";
+    public static final String INDEX_VERSION                   = "index.version";
+    public static final String INDEX_UUID                      = "index.uuid";
+    public static final String INDEX_PROVIDED_NAME             = "index.provided_name";
+    public static final String INDEX_ROUTING_ALLOCATION_PREFIX = "index.routing.allocation";
 
 }

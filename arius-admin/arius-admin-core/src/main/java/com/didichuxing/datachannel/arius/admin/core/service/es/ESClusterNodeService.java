@@ -116,4 +116,20 @@ public interface ESClusterNodeService {
      * @return {@code TupleTwo<Boolean, Boolean>}
      */
     public TupleTwo</*dcdrExist*/Boolean,/*pipelineExist*/ Boolean> existDCDRAndPipelineModule(String phyClusterName);
+
+    /**
+     * WriteRejected数
+     *
+     * @param cluster 集群 WriteRejectedNum
+     * @return {@code Long}
+     */
+    public Long getWriteRejectedNum(String cluster,String node);
+
+    /**
+     * SearchRejected数
+     *
+     * @param cluster 集群 WriteRejectedNum
+     * @return {@code Long}
+     */
+    public Long getSearchRejectedNum(String cluster,String node);
 }

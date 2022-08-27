@@ -762,10 +762,15 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         if (!logicId2IndexTemplateLogicMap.containsKey(templatePhysical.getLogicId())) {
             errMsgs.add("逻辑模板不存在：" + templatePhysical.getName() + "(" + templatePhysical.getId() + ")");
         }
-
-        TemplateConfig templateConfig = esTemplateService.syncGetTemplateConfig(templatePhysical.getCluster(),
-            templatePhysical.getName());
-
+    
+        TemplateConfig templateConfig = null;
+        try {
+            templateConfig = esTemplateService.syncGetTemplateConfig(templatePhysical.getCluster(),
+                    templatePhysical.getName());
+        } catch (ESOperateException e) {
+            errMsgs.add(String.format("获取 templateConfig 失败:%s", e.getMessage()));
+        }
+    
         if (templateConfig == null) {
             errMsgs.add("es模板不存在：" + templatePhysical.getName() + "(" + templatePhysical.getId() + ")");
         }

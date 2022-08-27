@@ -1,6 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.index;
 
-import static com.didichuxing.datachannel.arius.admin.common.RetryUtils.performTryTimesMethods;
+
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_OPERATE_TIMEOUT;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -253,8 +254,19 @@ public class IndexCatESDAO extends BaseESDAO {
             }
             
         };
+    
+        DirectResponse response = null;
+        try {
+            response = ESOpTimeoutRetry.esRetryExecuteWithReturnValue("syncGetSegmentsIndexList", 3,
+                    () -> directRequestBiFunction.apply(Long.valueOf(ES_OPERATE_TIMEOUT), TimeUnit.SECONDS),
+                    directRequestPredicate
         
-        DirectResponse response = performTryTimesMethods(directRequestBiFunction, directRequestPredicate, 3);
+            );
+        } catch (ESOperateException e) {
+            LOGGER.error("class={}||cluster={}||method=syncGetSegmentsIndexList",getClass().getSimpleName(), cluster,
+                    e);
+        }
+    
         List<IndexCatCellDTO> indexCatCellDTOS = Optional.ofNullable(response)
                 .filter(r -> RestStatus.OK == r.getRestStatus()).map(DirectResponse::getResponseContent)
                 .map(JSON::parseObject).map(json -> json.getJSONObject(INDICES)).map(i->buildIndexCatCellDTOList(i,cluster))
@@ -311,11 +323,20 @@ public class IndexCatESDAO extends BaseESDAO {
         
         final String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_PLATFORM_CREATE_CAT_INDEX_BY_ID,
                 ids.size(), JSON.toJSONString(ids));
+    
+        Tuple<Long, List<IndexCatCellPO>> tuple = null;
+        try {
+            tuple = ESOpTimeoutRetry.esRetryExecuteWithReturnValue("syncGetSegmentsIndexList", 3,
+                    () -> gatewayClient.performRequestListAndGetTotalCount(metadataClusterName,
+                            IndexNameUtils.genCurrentDailyIndexName(indexName), typeName, dsl, IndexCatCellPO.class),
+                    Objects::isNull
         
-        final Tuple<Long, List<IndexCatCellPO>> tuple = performTryTimesMethods(
-                () -> gatewayClient.performRequestListAndGetTotalCount(metadataClusterName,
-                        IndexNameUtils.genCurrentDailyIndexName(indexName), typeName, dsl, IndexCatCellPO.class),
-                Objects::isNull, 3);
+            );
+        } catch (ESOperateException e) {
+            LOGGER.error("class={}||cluster={}||method=syncGetCatIndexInfoById", getClass().getSimpleName(), clusterPhy,
+                    e);
+        }
+        
         
         return Optional.ofNullable(tuple).map(Tuple::getV2).map(i -> ConvertUtil.list2List(i, IndexCatCell.class))
                 .filter(CollectionUtils::isNotEmpty).orElse(Collections.emptyList()).stream().findFirst().orElse(null);

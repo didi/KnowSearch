@@ -19,6 +19,7 @@ import com.didiglobal.logi.log.LogFactory;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.rest.RestStatus;
@@ -194,7 +195,7 @@ public class ESTemplateServiceImpl implements ESTemplateService {
      * @return Config
      */
     @Override
-    public TemplateConfig syncGetTemplateConfig(String cluster, String name) {
+    public TemplateConfig syncGetTemplateConfig(String cluster, String name) throws ESOperateException {
         if (StringUtils.isBlank(cluster) || StringUtils.isBlank(name)) {
             return null;
         }
@@ -210,7 +211,8 @@ public class ESTemplateServiceImpl implements ESTemplateService {
      * @return
      */
     @Override
-    public MappingConfig syncGetMappingsByClusterName(String clusterName, String templateName) {
+    public MappingConfig syncGetMappingsByClusterName(String clusterName, String templateName)
+            throws ESOperateException {
         MultiTemplatesConfig templatesConfig = syncGetTemplates(clusterName, templateName);
 
         if (templatesConfig == null || templatesConfig.getSingleConfig() == null) {
@@ -227,8 +229,9 @@ public class ESTemplateServiceImpl implements ESTemplateService {
      * @return
      */
     @Override
-    public MultiTemplatesConfig syncGetTemplates(String clusterName, String templateName) {
-        return esTemplateDAO.getTemplates(clusterName, templateName,3);
+    public MultiTemplatesConfig syncGetTemplates(String clusterName, String templateName) throws ESOperateException {
+        return ESOpTimeoutRetry.esRetryExecuteWithReturnValue("syncGetTemplates", 3,
+                () -> esTemplateDAO.getTemplates(clusterName, templateName), Objects::isNull);
     }
 
     /**
@@ -237,7 +240,7 @@ public class ESTemplateServiceImpl implements ESTemplateService {
      * @return
      */
     @Override
-    public Map<String, TemplateConfig> syncGetAllTemplates(List<String> clusters) {
+    public Map<String, TemplateConfig> syncGetAllTemplates(List<String> clusters) throws ESOperateException {
         return esTemplateDAO.getAllTemplate(clusters);
     }
 
@@ -313,7 +316,7 @@ public class ESTemplateServiceImpl implements ESTemplateService {
     }
 
     @Override
-    public long synGetTemplateNumForAllVersion(String cluster) {
+    public long synGetTemplateNumForAllVersion(String cluster) throws ESOperateException {
         Map<String, TemplateConfig> allTemplate = esTemplateDAO.getAllTemplate(Collections.singletonList(cluster));
         return MapUtils.isEmpty(allTemplate) ? 0 : allTemplate.size();
     }
@@ -337,8 +340,17 @@ public class ESTemplateServiceImpl implements ESTemplateService {
      */
     @Override
     public boolean hasMatchHealthIndexByExpressionTemplateHealthEnum(String cluster, String expression,
-                                                                     TemplateHealthEnum templateHealthEnum)
-            throws ESOperateException {
-        return esTemplateDAO.hasMatchHealthIndexByExpressionTemplateHealthEnum(cluster,expression,templateHealthEnum);
+                                                                     TemplateHealthEnum templateHealthEnum) {
+        try {
+            //无需关心底层的异常原因，这里在于，我们获取的的分区和非分区，一般来说，分区索引会自动+*，所以不会有错误的异常抛出
+            //那么非分区的话，就会精确到每一个索引名称，此时有可能出现index_not_found_exception，所以这里默认返回false即可
+            return esTemplateDAO.hasMatchHealthIndexByExpressionTemplateHealthEnum(cluster, expression,
+                    templateHealthEnum);
+        } catch (ESOperateException e) {
+            LOGGER.error("class={}||method=hasMatchHealthIndexByExpressionTemplateHealthEnum||clusterName={}",
+                    getClass().getSimpleName(), cluster, e);
+            return false;
+        }
+        
     }
 }

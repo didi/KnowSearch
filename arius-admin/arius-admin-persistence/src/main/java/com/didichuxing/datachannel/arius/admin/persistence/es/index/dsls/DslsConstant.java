@@ -249,6 +249,12 @@ public class DslsConstant {
      * 获取某个区间范围内的某个sum聚合值
      */
     public static final String GET_FIELD_SUM_AND_RANGE_FIELD_TOTAL                           = "AriusStatsNodeInfoEsDao/getFieldSumAndRangeFieldTotal";
+
+    /**
+     * 获取某个区间范围内节点的某个sum聚合值
+     */
+    public static final String GET_NODE_FIELD_SUM_AND_RANGE_FIELD_TOTAL                      = "AriusStatsNodeInfoEsDao/getNodeFieldSumAndRangeFieldTotal";
+
     /**
      * 获取时间段内指标的最大值或平均值
      */

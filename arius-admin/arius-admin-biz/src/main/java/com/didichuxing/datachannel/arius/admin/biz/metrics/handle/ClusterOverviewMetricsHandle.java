@@ -12,6 +12,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.clus
 import com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyClusterMetricsEnum;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.*;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
@@ -30,8 +31,8 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.BIG_SHARD;
 import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterConstant.PHY_CLUSTER;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.BIG_SHARD;
 import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyClusterMetricsEnum.*;
 
 /**
@@ -429,7 +430,11 @@ public class ClusterOverviewMetricsHandle {
      * @param clusterName
      */
     private void buildBasicMetricsFromEsClusterTemplate(ESClusterPhyBasicMetricsVO basicVO, String clusterName) {
-        basicVO.setTotalTemplateNu(esTemplateService.synGetTemplateNumForAllVersion(clusterName));
+        try {
+            basicVO.setTotalTemplateNu(esTemplateService.synGetTemplateNumForAllVersion(clusterName));
+        } catch (ESOperateException e) {
+            LOGGER.error("class={}||method=buildBasicMetricsFromEsClusterTemplate||clusterName={} ", getClass().getSimpleName(),clusterName, e);
+        }
     }
 
     /**

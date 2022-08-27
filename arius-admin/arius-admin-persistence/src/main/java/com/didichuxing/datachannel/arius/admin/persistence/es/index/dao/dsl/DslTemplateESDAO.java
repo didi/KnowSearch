@@ -1,6 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.dsl;
 
-import static com.didichuxing.datachannel.arius.admin.common.RetryUtils.performTryTimesMethods;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -11,9 +10,11 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.DslQueryLi
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.ScrollDslTemplateRequest;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.ScrollDslTemplateResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.dsl.DslTemplatePO;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.DSLSearchUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.DateTimeUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
+import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpTimeoutRetry;
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dsls.DslsConstant;
 import com.didiglobal.logi.elasticsearch.client.response.query.query.ESQueryResponse;
@@ -245,7 +246,8 @@ public class DslTemplateESDAO extends BaseESDAO {
      * @param projectId    应用id
      * @param queryDTO 查询条件
      */
-    public Tuple<Long, List<DslTemplatePO>> getDslTemplatePage(Integer projectId, DslTemplateConditionDTO queryDTO) {
+    public Tuple<Long, List<DslTemplatePO>> getDslTemplatePage(Integer projectId, DslTemplateConditionDTO queryDTO)
+            throws ESOperateException {
         String queryCriteriaDsl = buildQueryCriteriaDsl(projectId, queryDTO.getDslTemplateMd5(),
             queryDTO.getQueryIndex(), queryDTO.getStartTime(), queryDTO.getEndTime());
 
@@ -261,8 +263,8 @@ public class DslTemplateESDAO extends BaseESDAO {
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_DSL_TEMPLATE_BY_CONDITION,
             (queryDTO.getPage() - 1) * queryDTO.getSize(), queryDTO.getSize(), queryCriteriaDsl, sortInfo, sortOrder);
 
-        return performTryTimesMethods(()->gatewayClient.performRequestListAndGetTotalCount(null, indexName, typeName,
-                dsl, DslTemplatePO.class), Objects::isNull,3);
+        return ESOpTimeoutRetry.esRetryExecuteWithReturnValue("getDslTemplatePage",3,()->gatewayClient.performRequestListAndGetTotalCount(null, indexName, typeName,
+                dsl, DslTemplatePO.class),Objects::isNull);
     }
 
     /**

@@ -5,14 +5,14 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.dsl.DslQueryLimit
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.dsl.template.DslTemplateConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.DslQueryLimit;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.dsl.DslTemplatePO;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.DateTimeUtil;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.dsl.DslTemplateESDAO;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * @author cjm
@@ -58,7 +58,8 @@ public class DslTemplateService {
         return dslTemplateESDAO.getDslTemplateByKey(projectId, dslTemplateMd5);
     }
 
-    public Tuple<Long, List<DslTemplatePO>> getDslTemplatePage(Integer projectId, DslTemplateConditionDTO queryDTO) {
+    public Tuple<Long, List<DslTemplatePO>> getDslTemplatePage(Integer projectId, DslTemplateConditionDTO queryDTO)
+            throws ESOperateException {
         return dslTemplateESDAO.getDslTemplatePage(projectId, queryDTO);
     }
 }

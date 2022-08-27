@@ -94,6 +94,7 @@ public class ESOperateConstant {
     public static final String  USED_PERCENT                     = "used_percent";
     public static final String  HEAP_USED_IN_BYTES               = "heap_used_in_bytes";
     public static final String  HEAP_MAX_IN_BYTES                = "heap_max_in_bytes";
+    public static final String  PENDING_TASKS                    = "pending_tasks";
 
     /**
      * 索引管理

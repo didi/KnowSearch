@@ -1,9 +1,14 @@
 package com.didichuxing.datachannel.arius.admin.persistence.component;
 
+import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.BaseException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import com.didichuxing.datachannel.arius.admin.common.exception.NullESClientException;
 import com.didichuxing.datachannel.arius.admin.common.util.RetryExecutor;
+import com.didichuxing.datachannel.arius.admin.common.util.RetryExecutor.HandlerWithReturnValue;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import org.elasticsearch.ElasticsearchTimeoutException;
 import org.elasticsearch.cluster.metadata.ProcessClusterEventTimeoutException;
 
@@ -19,7 +24,9 @@ import org.elasticsearch.cluster.metadata.ProcessClusterEventTimeoutException;
  */
 public class ESOpTimeoutRetry {
     private static final int SEC_30 = 30 * 1000;
-    private static final int MIN_5  = 5 * 60 * 1000;
+    private static final int MIN_5         = 5 * 60 * 1000;
+    private static final int MAX_5_SECONDS = 5;
+    
 
     private ESOpTimeoutRetry() {
     }
@@ -36,16 +43,23 @@ public class ESOpTimeoutRetry {
                 @Override
                 public boolean needRetry(Exception e) {
                     return e instanceof ProcessClusterEventTimeoutException
-                           || e instanceof ElasticsearchTimeoutException;
+                           || e instanceof ElasticsearchTimeoutException ;
                 }
-
+    
+                /**
+                 * 如果您不需要抛出异常，请不要抛出它们。
+                 *
+                 * @param e 抛出的异常。
+                 * @return 正在返回默认方法。
+                 */
                 @Override
-                public int retrySleepTime(int retryTims) {
-                    int sleepTime = retryTims * SEC_30;
-                    int randomSleepTime = (int) (Math.random() * 100);
-                    int totalSleepTime = sleepTime + randomSleepTime;
-
-                    return totalSleepTime > MIN_5 ? MIN_5 : totalSleepTime;
+                public boolean needToThrowExceptions(Exception e) {
+                    return e instanceof AdminOperateException;
+                }
+    
+                @Override
+                public int retrySleepTime(int retryTimes) {
+                    return (int) TimeUnit.SECONDS.toMillis(MAX_5_SECONDS);
                 }
             }).execute();
         } catch (ESOperateException e) {
@@ -55,6 +69,47 @@ public class ESOpTimeoutRetry {
         }
     }
 
+    
+    public static <T> T esRetryExecuteWithReturnValue(String methodName, int tryCount,
+                                         RetryExecutor.HandlerWithReturnValue<T> handlerWithReturnValue,Predicate<T> predicate) throws ESOperateException {
+        try {
+            final RetryExecutor<T> retryExecutor = RetryExecutor.builder().<T>name(methodName).retryCount(tryCount)
+                    .HandlerWithReturnValue(new HandlerWithReturnValue<T>() {
+                        @Override
+                        public T process() throws BaseException {
+                            return handlerWithReturnValue.process();
+                        }
+                
+                        @Override
+                        public boolean needRetry(Exception e) {
+                            return e instanceof ProcessClusterEventTimeoutException
+                                   || e instanceof ElasticsearchTimeoutException||e instanceof NullESClientException;
+                        }
+    
+                        /**
+                         * 如果您不需要抛出异常，请不要抛出它们。
+                         *
+                         * @param e 抛出的异常。
+                         * @return 正在返回默认方法。
+                         */
+                        @Override
+                        public boolean needToThrowExceptions(Exception e) {
+                            return e instanceof AdminOperateException;
+                        }
+    
+                        @Override
+                        public int retrySleepTime(int retryTimes) {
+                            return (int) TimeUnit.SECONDS.toMillis(MAX_5_SECONDS);
+                        }
+                    });
+            return retryExecutor.execute(predicate);
+    
+        } catch (ESOperateException e) {
+            throw new ESOperateException(e.getMessage(),e.getCause());
+        }catch (Exception e){
+             throw new ESOperateException(e.getMessage(), e);
+        }
+    }
     /**
      * 定制重试方法等待的时间
      * @param methodName 方法名称
@@ -72,12 +127,24 @@ public class ESOpTimeoutRetry {
                 public boolean process() throws BaseException {
                     return handler.process();
                 }
-
+    
                 @Override
                 public boolean needRetry(Exception e) {
                     return e instanceof ProcessClusterEventTimeoutException
-                           || e instanceof ElasticsearchTimeoutException;
+                           || e instanceof ElasticsearchTimeoutException || e instanceof NullESClientException;
                 }
+    
+                /**
+                 * 如果您不需要抛出异常，请不要抛出它们。
+                 *
+                 * @param e 抛出的异常。
+                 * @return 正在返回默认方法。
+                 */
+                @Override
+                public boolean needToThrowExceptions(Exception e) {
+                    return e instanceof AdminOperateException;
+                }
+    
 
                 @Override
                 public int retrySleepTime(int retryTimes) {

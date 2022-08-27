@@ -251,5 +251,5 @@ public interface ESClusterService {
      * @param cluster 集群phy
      * @return boolean
      */
-    boolean syncConnectionStatus(String cluster);
+    boolean isConnectionStatus(String cluster);
 }
