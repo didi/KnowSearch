@@ -7,6 +7,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.HttpHostUtil;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.monitortask.AriusMetaJobClusterDistributeService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
+import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didichuxing.datachannel.arius.admin.task.component.TaskResultBuilder;
 import com.didichuxing.datachannel.arius.admin.task.dashboard.collector.BaseDashboardCollector;
 import com.didiglobal.logi.job.annotation.Task;
@@ -43,6 +44,8 @@ public class DashboardSingleClusterCollectorBroadcastTask implements Job {
     private AriusMetaJobClusterDistributeService      ariusMetaJobClusterDistributeService;
     @Autowired
     private ClusterPhyService                         clusterPhyService;
+    @Autowired
+    private AriusConfigInfoService ariusConfigInfoService;
 
     private static final FutureUtil<Void>             BATCH_COLLECTOR_FUTURE_UTIL  = FutureUtil
         .init("batchCollectorFutureUtil", 30, 30, 1000);
