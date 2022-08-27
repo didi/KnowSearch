@@ -106,7 +106,7 @@ public class IndexTemplateDTO extends PageDTO {
     @ApiModelProperty("逻辑集群id")
     private Long                      resourceId;
 
-    @ApiModelProperty("是否禁写")
+    @ApiModelProperty("位点差")
     private Long                      checkPointDiff;
 
     @ApiModelProperty("是否已创建dcdr")

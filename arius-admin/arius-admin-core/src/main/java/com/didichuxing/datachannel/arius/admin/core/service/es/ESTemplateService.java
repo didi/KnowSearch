@@ -207,6 +207,6 @@ public interface ESTemplateService {
      * @return 布尔值
      */
     boolean hasMatchHealthIndexByExpressionTemplateHealthEnum(String cluster, String expression,
-                                                                     TemplateHealthEnum templateHealthEnum) throws ESOperateException;
+                                                                     TemplateHealthEnum templateHealthEnum) ;
 
 }
