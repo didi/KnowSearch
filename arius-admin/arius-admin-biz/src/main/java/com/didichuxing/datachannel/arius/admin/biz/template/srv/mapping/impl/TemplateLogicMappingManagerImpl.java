@@ -746,7 +746,8 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrvImpl impleme
                    || TypeEnum.BOOLEAN.getCode().equalsIgnoreCase(typeObj.getString(TYPE_STR))
                    || TypeEnum.DOUBLE.getCode().equalsIgnoreCase(typeObj.getString(TYPE_STR))
                    || TypeEnum.DATE.getCode().equalsIgnoreCase(typeObj.getString(TYPE_STR))
-                   || TypeEnum.OBJECT.getCode().equalsIgnoreCase(typeObj.getString(TYPE_STR))) {
+                   || TypeEnum.OBJECT.getCode().equalsIgnoreCase(typeObj.getString(TYPE_STR))
+                   || TypeEnum.FLOAT.getCode().equalsIgnoreCase(typeObj.getString(TYPE_STR))) {
             handleTypeNonString(typeObj, field);
         } else {
             handleTypeUnknown(field);
