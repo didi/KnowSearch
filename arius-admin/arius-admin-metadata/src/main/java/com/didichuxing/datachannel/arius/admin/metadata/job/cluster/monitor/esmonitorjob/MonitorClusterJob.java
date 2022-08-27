@@ -1,20 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.*;
-import static com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.node.ESNodeStatsRequest.HTTP;
-
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.MulityTypeTemplatesInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESDataTempBean;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESIndexDCDRStats;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESIndexStats;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESIndexToNodeStats;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESIndexToNodeTempBean;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESIngestStats;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESNodeStats;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESNodeToIndexStats;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESNodeToIndexTempBean;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyWithLogic;
 import com.didichuxing.datachannel.arius.admin.common.event.metrics.MetricsMonitorCollectTimeEvent;
 import com.didichuxing.datachannel.arius.admin.common.event.metrics.MetricsMonitorIndexEvent;
@@ -57,16 +46,12 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.elasticsearch.common.StopWatch;
+import org.springframework.beans.BeanUtils;
+
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
@@ -74,10 +59,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.elasticsearch.common.StopWatch;
-import org.springframework.beans.BeanUtils;
+
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.*;
+import static com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.node.ESNodeStatsRequest.HTTP;
 
 /**
  * 每个集群的采集任务
@@ -293,7 +277,7 @@ public class MonitorClusterJob {
 
     private Map<String, ClusterNodeStats> getClusterNodeStats(ESClient esClient) throws AdminOperateException {
         boolean isConcurrentCollect = ariusConfigInfoService.booleanSetting(ARIUS_META_MONITOR_GROUP,
-            NODE_STAT_COLLECT_CONCURRENT, false);
+            NODE_STAT_COLLECT_CONCURRENT, NODE_STAT_COLLECT_CONCURRENT_DEFAULT_VALUE);
 
         Map<String, ClusterNodeStats> clusterNodeStatsMap;
         if (!isConcurrentCollect) {
@@ -473,7 +457,7 @@ public class MonitorClusterJob {
 
     private Map<String, IndexNodes> getIndexStats(ESClient esClient) {
         boolean isConcurrentCollect = ariusConfigInfoService.booleanSetting(ARIUS_META_MONITOR_GROUP,
-            INDEX_STAT_COLLECT_CONCURRENT, false);
+            INDEX_STAT_COLLECT_CONCURRENT, INDEX_STAT_COLLECT_CONCURRENT_DEFAULT_VALUE);
 
         // key-索引名，value-索引stats
         Map<String, IndexNodes> indexStatsMap;

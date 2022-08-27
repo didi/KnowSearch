@@ -3,14 +3,16 @@ package com.didichuxing.datachannel.arius.admin.core.service.es.impl;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.DashBoardMetricThresholdDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.MovingShardMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.ShardMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.shard.Segment;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.shard.SegmentPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.ShardAssignmenNodeVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.ShardAssignmentDescriptionVO;
-import com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant;
+import com.didichuxing.datachannel.arius.admin.common.util.AriusUnitUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.SizeUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESShardService;
 import com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESShardDAO;
@@ -25,11 +27,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.ClusterPhyMetricsConstant.BIG_SHARD;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.*;
 import static com.didichuxing.datachannel.arius.admin.common.constant.metrics.ESHttpRequestContent.*;
+import static com.didichuxing.datachannel.arius.admin.common.util.AriusUnitUtil.SIZE;
 
 /**
  * Created by linyunan on 3/22/22
@@ -74,21 +78,28 @@ public class ESShardServiceImpl implements ESShardService {
     @Override
     public List<ShardMetrics> syncGetBigShards(String clusterName) {
         List<ShardMetrics> shardsMetrics = getShardMetrics(clusterName);
-        return shardsMetrics.stream().filter(this::filterBigShard).collect(Collectors.toList());
+        long configBigShard = SizeUtil.getUnitSize(ariusConfigInfoService.doubleSetting(ARIUS_COMMON_GROUP,BIG_SHARD_THRESHOLD,BIG_SHARD)+"g");
+        return shardsMetrics.stream().filter(s->filterBigShard(configBigShard,s)).sorted(Comparator.comparing(s->SizeUtil.getUnitSize(s.getStore())))
+                .collect(Collectors.toList());
     }
+
+
 
     @Override
     public List<ShardMetrics> syncGetSmallShards(String clusterName) {
         List<ShardMetrics> shardsMetrics = getShardMetrics(clusterName);
-        return shardsMetrics.stream().filter(this::filterSmallShard).collect(Collectors.toList());
+        long configSmallShard = getConfigSmallShard();
+        return shardsMetrics.stream().filter(s->filterSmallShard(configSmallShard,s)).collect(Collectors.toList());
     }
 
     @Override
     public Tuple</*大shard列表*/List<ShardMetrics>, /*小shard列表*/List<ShardMetrics>> syncGetBigAndSmallShards(String clusterName) {
+        long configBigShard = getConfigBigShard();
+        long configSmallShard = getConfigSmallShard();
         List<ShardMetrics> shardsMetrics = getShardMetrics(clusterName);
         Tuple<List<ShardMetrics>, List<ShardMetrics>> tuple = new Tuple<>();
-        tuple.setV1(shardsMetrics.stream().filter(this::filterBigShard).collect(Collectors.toList()));
-        tuple.setV2(shardsMetrics.stream().filter(this::filterSmallShard).collect(Collectors.toList()));
+        tuple.setV1(shardsMetrics.stream().filter(s->filterBigShard(configBigShard,s)).collect(Collectors.toList()));
+        tuple.setV2(shardsMetrics.stream().filter(s->filterSmallShard(configSmallShard,s)).collect(Collectors.toList()));
         return tuple;
     }
 
@@ -127,31 +138,23 @@ public class ESShardServiceImpl implements ESShardService {
         return esShardDAO.commonGet(clusterName, shardsRequestContent, ShardMetrics.class);
     }
 
-    private boolean filterBigShard(ShardMetrics shardMetrics) {
+    private boolean filterBigShard( long configBigShard,ShardMetrics shardMetrics) {
         if (null == shardMetrics) { return false;}
 
         String store = shardMetrics.getStore();
         if (null == store) { return false;}
-        double value = Double.valueOf(store.substring(0, store.length() - 2));
-
-        double bigShardThreshold = ariusConfigInfoService.doubleSetting(AriusConfigConstant.ARIUS_COMMON_GROUP,
-                AriusConfigConstant.BIG_SHARD_THRESHOLD, BIG_SHARD);
-
-        if (store.endsWith("tb")) {
-            value *= 1024;
-            return bigShardThreshold <= value;
-        }else if (store.endsWith("gb")){
-            return bigShardThreshold <= value;
-        }else {
-            return false;
-        }
+        return  configBigShard<=SizeUtil.getUnitSize(store);
     }
 
-    private boolean filterSmallShard(ShardMetrics shardMetrics) {
-        if (null == shardMetrics) { return false;}
+    private boolean filterSmallShard(long configSmallValue,ShardMetrics shardMetrics) {
+        if (null == shardMetrics) {
+            return false;
+        }
         String store = shardMetrics.getStore();
-        if (null == store) { return false;}
-        return !store.endsWith("tb") && !store.endsWith("gb");
+        if (null == store) {
+            return false;
+        }
+        return  SizeUtil.getUnitSize(store)<=configSmallValue;
     }
 
     private ShardAssignmentDescriptionVO buildShardAssignment(JSONObject responseJson) {
@@ -187,5 +190,45 @@ public class ESShardServiceImpl implements ESShardService {
         }
 
         return "asc";
+    }
+
+    /**
+     * 获取配置的大shard列表
+     * @return
+     */
+    private long getConfigBigShard() {
+        return getConfigOrDefaultValue(INDEX_SHARD_BIG_THRESHOLD,DASHBOARD_INDEX_SHARD_BIG_THRESHOLD_DEFAULT_VALUE,SIZE);
+    }
+
+    /**
+     * 获取配置的小shard列表
+     * @return
+     */
+    private long getConfigSmallShard() {
+        return getConfigOrDefaultValue(INDEX_SHARD_SMALL_THRESHOLD,DASHBOARD_INDEX_SHARD_SMALL_THRESHOLD_DEFAULT_VALUE,SIZE);
+    }
+
+    /**
+     * 获取dashboard配置值
+     * catch:获取和转换都发生错误后，使用系统配置的默认配置项
+     * @param valueName    配置名称
+     * @param defaultValue 默认值
+     * @return
+     */
+    private long getConfigOrDefaultValue(String valueName,String defaultValue,String unitStyle){
+        DashBoardMetricThresholdDTO configThreshold = null;
+        try {
+            String configValue = ariusConfigInfoService.stringSetting(ARIUS_DASHBOARD_THRESHOLD_GROUP, valueName, defaultValue);
+            if (StringUtils.isNotBlank(configValue)) {
+                configThreshold = JSONObject.parseObject(configValue, DashBoardMetricThresholdDTO.class);
+            }
+        } catch (Exception e) {
+            //获取和转换都发生错误后，使用系统配置的默认配置项
+            LOGGER.warn("class=ESShardServiceImpl||method=getConfigOrDefaultValue||name={}||msg=JSON format error!",
+                    valueName);
+            configThreshold = JSONObject.parseObject(defaultValue, DashBoardMetricThresholdDTO.class);
+
+        }
+        return AriusUnitUtil.unitChange(configThreshold.getValue().longValue(),configThreshold.getUnit(),unitStyle);
     }
 }
