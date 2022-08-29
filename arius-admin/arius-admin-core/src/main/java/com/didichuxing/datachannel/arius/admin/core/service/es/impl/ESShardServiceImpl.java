@@ -29,6 +29,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.*;
@@ -89,7 +90,9 @@ public class ESShardServiceImpl implements ESShardService {
     public List<ShardMetrics> syncGetSmallShards(String clusterName) {
         List<ShardMetrics> shardsMetrics = getShardMetrics(clusterName);
         long configSmallShard = getConfigSmallShard();
-        return shardsMetrics.stream().filter(s->filterSmallShard(configSmallShard,s)).collect(Collectors.toList());
+        Map<String, List<ShardMetrics>> indexAndShardMetricsMap = shardsMetrics.parallelStream()
+                .collect(Collectors.groupingBy(ShardMetrics::getIndex));
+        return shardsMetrics.stream().filter(s->filterSmallShard(configSmallShard,s,indexAndShardMetricsMap)).collect(Collectors.toList());
     }
 
     @Override
@@ -98,8 +101,10 @@ public class ESShardServiceImpl implements ESShardService {
         long configSmallShard = getConfigSmallShard();
         List<ShardMetrics> shardsMetrics = getShardMetrics(clusterName);
         Tuple<List<ShardMetrics>, List<ShardMetrics>> tuple = new Tuple<>();
+        Map<String, List<ShardMetrics>> indexAndShardMetricsMap = shardsMetrics.parallelStream()
+                .collect(Collectors.groupingBy(ShardMetrics::getIndex));
         tuple.setV1(shardsMetrics.stream().filter(s->filterBigShard(configBigShard,s)).collect(Collectors.toList()));
-        tuple.setV2(shardsMetrics.stream().filter(s->filterSmallShard(configSmallShard,s)).collect(Collectors.toList()));
+        tuple.setV2(shardsMetrics.stream().filter(s->filterSmallShard(configSmallShard,s,indexAndShardMetricsMap)).collect(Collectors.toList()));
         return tuple;
     }
 
@@ -146,7 +151,7 @@ public class ESShardServiceImpl implements ESShardService {
         return  configBigShard<=SizeUtil.getUnitSize(store);
     }
 
-    private boolean filterSmallShard(long configSmallValue,ShardMetrics shardMetrics) {
+    private boolean filterSmallShard(long configSmallValue,ShardMetrics shardMetrics,Map<String, List<ShardMetrics>> indexAndShardMetricsMap) {
         if (null == shardMetrics) {
             return false;
         }
@@ -154,7 +159,8 @@ public class ESShardServiceImpl implements ESShardService {
         if (null == store) {
             return false;
         }
-        return  SizeUtil.getUnitSize(store)<=configSmallValue;
+        int shardNum = indexAndShardMetricsMap.get(shardMetrics.getIndex()).size();
+        return  shardNum>1&&SizeUtil.getUnitSize(store)<=configSmallValue;
     }
 
     private ShardAssignmentDescriptionVO buildShardAssignment(JSONObject responseJson) {
