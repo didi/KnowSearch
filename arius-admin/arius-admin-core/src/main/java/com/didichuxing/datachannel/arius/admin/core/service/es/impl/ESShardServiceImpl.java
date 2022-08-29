@@ -53,6 +53,7 @@ public class ESShardServiceImpl implements ESShardService {
     private String              decider                      = "decider";
     private String              deciders                     = "deciders";
     private String              explanation                  = "explanation";
+    private int                 ONE                          = 1;
     
     
     @Autowired
@@ -160,7 +161,7 @@ public class ESShardServiceImpl implements ESShardService {
             return false;
         }
         int shardNum = indexAndShardMetricsMap.get(shardMetrics.getIndex()).size();
-        return  shardNum>1&&SizeUtil.getUnitSize(store)<=configSmallValue;
+        return  shardNum>ONE&&SizeUtil.getUnitSize(store)<=configSmallValue;
     }
 
     private ShardAssignmentDescriptionVO buildShardAssignment(JSONObject responseJson) {
