@@ -102,8 +102,8 @@ public class ESShardServiceImpl implements ESShardService {
         long configSmallShard = getConfigSmallShard();
         List<ShardMetrics> shardsMetrics = getShardMetrics(clusterName);
         Tuple<List<ShardMetrics>, List<ShardMetrics>> tuple = new Tuple<>();
-        Map<String, List<ShardMetrics>> indexAndShardMetricsMap = shardsMetrics.parallelStream()
-                .collect(Collectors.groupingBy(ShardMetrics::getIndex));
+        Map<String, List<ShardMetrics>> indexAndShardMetricsMap =  ConvertUtil.list2MapOfList(
+                shardsMetrics, ShardMetrics::getIndex, shardMetrics -> shardMetrics);
         tuple.setV1(shardsMetrics.stream().filter(s->filterBigShard(configBigShard,s)).collect(Collectors.toList()));
         tuple.setV2(shardsMetrics.stream().filter(s->filterSmallShard(configSmallShard,s,indexAndShardMetricsMap)).collect(Collectors.toList()));
         return tuple;
