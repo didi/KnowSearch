@@ -1,11 +1,12 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.task.dashboard.collector.IndexDashBoardCollector;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController("healthController")
 @RequestMapping("/health")
@@ -22,22 +23,6 @@ public class HealthController {
     @ApiOperation(value = "探活接口", notes = "")
     public Result<String> demo() {
         return Result.buildSuccWithMsg("let's go");
-    }
-
-    /**
-     * 探活接口
-     *
-     * @return
-     */
-    @Autowired
-    private IndexDashBoardCollector indexDashBoardCollector;
-    @GetMapping("/test")
-    @ResponseBody
-    @ApiOperation(value = "探活接口", notes = "")
-    public Result<String> demo1(@RequestParam String cluster) {
-        indexDashBoardCollector.collectSingleCluster(cluster,System.currentTimeMillis());
-        return
-                Result.buildSuccWithMsg("let's go");
     }
 
 }
