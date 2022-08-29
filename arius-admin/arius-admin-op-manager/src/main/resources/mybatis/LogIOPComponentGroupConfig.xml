@@ -47,4 +47,12 @@
         </trim>
         where id = #{id}
     </update>
+
+    <select id="listAll"
+            parameterType="com.didiglobal.logi.op.manager.infrastructure.db.ComponentGroupConfigPO"
+            resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from logi_op_component_group_config
+    </select>
 </mapper>

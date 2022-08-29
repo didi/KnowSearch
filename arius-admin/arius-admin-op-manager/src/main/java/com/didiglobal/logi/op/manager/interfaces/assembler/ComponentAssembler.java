@@ -7,8 +7,6 @@ import com.didiglobal.logi.op.manager.infrastructure.util.ConvertUtil;
 import com.didiglobal.logi.op.manager.interfaces.dto.*;
 import com.didiglobal.logi.op.manager.interfaces.vo.GeneralGroupConfigHostVO;
 
-import static com.didiglobal.logi.op.manager.infrastructure.common.Constants.SPLIT;
-
 /**
  * @author didi
  * @date 2022-07-12 2:29 下午
@@ -55,28 +53,14 @@ public class ComponentAssembler {
         return ConvertUtil.obj2Obj(dto, GeneralExecuteComponentFunction.class);
     }
 
-
     public static GeneralGroupConfigHostVO toGeneralGroupConfigVO(GeneralGroupConfig config, String url, String host) {
         GeneralGroupConfigHostVO vo = ConvertUtil.obj2Obj(config, GeneralGroupConfigHostVO.class);
-        StringBuilder directory = new StringBuilder();
         //设置目录
-        JSON.parseObject(config.getInstallDirectoryConfig()).forEach((name, dc) -> {
-            if (name.equals(host)) {
-                if (0 == directory.length()) {
-                    directory.append(dc);
-                } else {
-                    directory.append(SPLIT).append(dc);
-                }
-
-            }
-        });
+        vo.setInstallDirector(JSON.parseObject(config.getInstallDirectoryConfig()).get(host).toString());
         //设置进程数
-        JSON.parseObject(config.getProcessNumConfig()).forEach((name, processNum) -> {
-            if (name.equals(host)) {
-                vo.setProcessNum(directory.toString());
-            }
-        });
+        vo.setProcessNum(JSON.parseObject(config.getProcessNumConfig()).get(host).toString());
         vo.setUrl(url);
         return vo;
     }
+
 }

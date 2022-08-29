@@ -15,11 +15,13 @@ import com.didiglobal.logi.op.manager.infrastructure.common.Constants;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.*;
 import com.didiglobal.logi.op.manager.infrastructure.common.event.SpringEventPublisher;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author didi
@@ -88,17 +90,8 @@ public class ComponentDomainServiceImpl implements ComponentDomainService {
 
     @Override
     public Result<List<ComponentGroupConfig>> getComponentConfig(int componentId) {
-        Map<Integer, List<ComponentGroupConfig>> map = new TreeMap<>((o1, o2) -> o2 - o1);
         List<ComponentGroupConfig> configList = componentGroupConfigRepository.getConfigByComponentId(componentId);
-        configList.forEach(groupConfig -> {
-            List<ComponentGroupConfig> list = map.get(Integer.parseInt(groupConfig.getVersion()));
-            if (null == list) {
-                list = new ArrayList<>();
-                map.put(Integer.parseInt(groupConfig.getVersion()), list);
-            }
-            list.add(groupConfig);
-        });
-        return Result.success(map.entrySet().stream().findFirst().get().getValue());
+        return Result.success(getLatestGroupConfig(configList));
     }
 
     @Override
@@ -114,6 +107,8 @@ public class ComponentDomainServiceImpl implements ComponentDomainService {
         List<ComponentGroupConfig> configs = componentGroupConfigRepository.listGroupConfig();
         Map<String, List<ComponentHost>> componentIdToHostMap = new HashMap<>(componentList.size());
         Map<String, List<ComponentGroupConfig>> componentIdToGroupConfigMap = new HashMap<>(componentList.size());
+
+        //构建componentIdToHostMap
         hosts.forEach(componentHost -> {
             List<ComponentHost> hostList = componentIdToHostMap.get(componentHost.getComponentId().toString());
             if (null == hostList) {
@@ -122,6 +117,8 @@ public class ComponentDomainServiceImpl implements ComponentDomainService {
             }
             hostList.add(componentHost);
         });
+
+        //构建componentIdToGroupConfigMap
         configs.forEach(groupConfig -> {
             List<ComponentGroupConfig> groupConfigList = componentIdToGroupConfigMap.get(groupConfig.getComponentId().toString());
             if (null == groupConfigList) {
@@ -130,10 +127,35 @@ public class ComponentDomainServiceImpl implements ComponentDomainService {
             }
             groupConfigList.add(groupConfig);
         });
+        //赋值汇总
         componentList.forEach(component -> {
             component.setHostList(componentIdToHostMap.get(component.getId().toString()));
+            if (null != componentIdToGroupConfigMap.get(component.getId().toString())) {
+                component.setGroupConfigList(getLatestGroupConfig(componentIdToGroupConfigMap.get(component.getId().toString())));
+            }
+
         });
+
         return Result.success(componentList);
+    }
+
+    /**
+     * 获取组件下，最新的分组配置信息
+     * @param configList 组件对应的所有分组配置
+     * @return List<ComponentGroupConfig> 最新分组配置信息
+     */
+    @NotNull
+    private List<ComponentGroupConfig> getLatestGroupConfig(List<ComponentGroupConfig> configList) {
+        Map<Integer, List<ComponentGroupConfig>> map = new TreeMap<>((o1, o2) -> o2 - o1);
+        configList.forEach(groupConfig -> {
+            List<ComponentGroupConfig> list = map.get(Integer.parseInt(groupConfig.getVersion()));
+            if (null == list) {
+                list = new ArrayList<>();
+                map.put(Integer.parseInt(groupConfig.getVersion()), list);
+            }
+            list.add(groupConfig);
+        });
+        return map.entrySet().stream().findFirst().get().getValue();
     }
 
     @Override
@@ -142,6 +164,18 @@ public class ComponentDomainServiceImpl implements ComponentDomainService {
             return Result.success(true);
         }
         return Result.success(false);
+    }
+
+    @Override
+    public Result<ComponentGroupConfig> getComponentConfigByGroupName(int componentId, String groupName) {
+        List<ComponentGroupConfig> configList = componentGroupConfigRepository.getConfigByComponentId(componentId);
+        List<ComponentGroupConfig> filterConfigList = configList.stream().filter(groupConfig -> groupConfig.getGroupName().equals(groupName)).collect(Collectors.toList());
+        return Result.buildSuccess(getLatestGroupConfig(filterConfigList).stream().findFirst().get());
+    }
+
+    @Override
+    public Result<Integer> reportComponentHostStatus(int componentId, String groupName, String host, int status) {
+        return Result.buildSuccess(componentHostRepository.updateComponentHostStatus(componentId, host, groupName, status));
     }
 
     @Override

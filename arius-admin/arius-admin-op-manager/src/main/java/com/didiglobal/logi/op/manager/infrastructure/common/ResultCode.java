@@ -39,6 +39,7 @@ public enum ResultCode {
 
     /*组件操作处理器处理失败 */
     HANDLER_OPERATE_ERROR(5001, "组件操作处理器处理失败"),
+    COMPONENT_HOST_STATUS_ILLEGAL_ERROR(5002, "组件host状态非法"),
 
     /*script操作报错 */
     SCRIPT_OPERATE_ERROR(6001, "脚本操作报错"),

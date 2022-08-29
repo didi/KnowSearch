@@ -118,7 +118,7 @@ public class TaskService {
 
         if (task.getType() == OperationEnum.INSTALL.getType() ||
                 task.getType() == OperationEnum.UPGRADE.getType()) {
-            Integer packageId = ConvertUtil.obj2ObjByJSON(task.getContent(), GeneralInstallComponent.class).getPackageId();
+            Integer packageId = ConvertUtil.str2ObjByJson(task.getContent(), GeneralInstallComponent.class).getPackageId();
             String url = packageDomainService.queryPackage(Package.builder().id(packageId).build()).getData().stream().findFirst().get().getUrl();
             request = new Tuple<>(configResult.getData(), url);
         } else {

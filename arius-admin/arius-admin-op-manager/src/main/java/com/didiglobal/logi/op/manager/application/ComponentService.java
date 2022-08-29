@@ -1,11 +1,16 @@
 package com.didiglobal.logi.op.manager.application;
 
+import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentGroupConfig;
 import com.didiglobal.logi.op.manager.domain.component.service.ComponentDomainService;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
+import com.didiglobal.logi.op.manager.infrastructure.common.ResultCode;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.*;
+import com.didiglobal.logi.op.manager.infrastructure.common.enums.HostStatusEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.List;
 
 /**
  * @author didi
@@ -27,8 +32,7 @@ public class ComponentService {
         if (checkRes.failed()) {
             return checkRes;
         }
-        componentDomainService.submitInstallComponent(installComponent);
-        return Result.success();
+        return componentDomainService.submitInstallComponent(installComponent);
     }
 
     public Result<Void> scaleComponent(GeneralScaleComponent scaleComponent) {
@@ -38,8 +42,7 @@ public class ComponentService {
         if (checkRes.failed()) {
             return checkRes;
         }
-        componentDomainService.submitScaleComponent(scaleComponent);
-        return Result.success();
+        return componentDomainService.submitScaleComponent(scaleComponent);
     }
 
     public Result<Void> configChangeComponent(GeneralConfigChangeComponent configChangeComponent) {
@@ -48,8 +51,7 @@ public class ComponentService {
         if (checkRes.failed()) {
             return checkRes;
         }
-        componentDomainService.submitConfigChangeComponent(configChangeComponent);
-        return Result.success();
+        return componentDomainService.submitConfigChangeComponent(configChangeComponent);
     }
 
     public Result<Void> restartComponent(GeneralBaseOperationComponent restartOperationComponent) {
@@ -58,8 +60,7 @@ public class ComponentService {
         if (checkRes.failed()) {
             return checkRes;
         }
-        componentDomainService.submitRestartComponent(restartOperationComponent);
-        return Result.success();
+        return componentDomainService.submitRestartComponent(restartOperationComponent);
     }
 
     public Result<Void> upgradeComponent(GeneralUpgradeComponent generalUpgradeComponent) {
@@ -68,8 +69,7 @@ public class ComponentService {
         if (checkRes.failed()) {
             return checkRes;
         }
-        componentDomainService.submitUpgradeComponent(generalUpgradeComponent);
-        return Result.success();
+        return componentDomainService.submitUpgradeComponent(generalUpgradeComponent);
     }
 
     public Result<Void> executeFunctionComponent(GeneralExecuteComponentFunction executeComponentFunction) {
@@ -78,7 +78,20 @@ public class ComponentService {
         if (checkRes.failed()) {
             return checkRes;
         }
-        componentDomainService.submitExecuteFunctionComponent(executeComponentFunction);
-        return Result.success();
+        return componentDomainService.submitExecuteFunctionComponent(executeComponentFunction);
+    }
+
+    public Result<ComponentGroupConfig> getConfig(Integer componentId, String groupName) {
+        if (null == componentId || null == groupName) {
+            return Result.fail(ResultCode.PARAM_ERROR.getCode(), "组件id或者groupName不能为空");
+        }
+        return componentDomainService.getComponentConfigByGroupName(componentId, groupName);
+    }
+
+    public Result<Integer> reportHostStatus(Integer componentId, String groupName, String host, Integer status) {
+        if (HostStatusEnum.UN_KNOW == HostStatusEnum.find(status)) {
+            return Result.fail(ResultCode.COMPONENT_HOST_STATUS_ILLEGAL_ERROR);
+        }
+        return componentDomainService.reportComponentHostStatus(componentId, groupName, host, status);
     }
 }

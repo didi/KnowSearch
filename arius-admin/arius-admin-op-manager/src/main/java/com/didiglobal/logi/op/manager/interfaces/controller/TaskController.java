@@ -56,14 +56,15 @@ public class TaskController {
     }
 
     @GetMapping("/task-config")
-    @ApiOperation(value = "")
+    @ApiOperation(value = "zeus获取任务配置的接口")
     public Result<GeneralGroupConfigHostVO> getConfig(@RequestParam(value = "taskId", required = true) Integer taskId,
-                                                      @RequestParam(value = "groupName", required = true) String groupName, HttpServletRequest request) {
+                                                      @RequestParam(value = "groupName", required = true) String groupName,
+                                                      @RequestParam(value = "host", required = true) String host) {
         Result res = taskService.getGroupConfig(taskId, groupName);
         if (res.isSuccess()) {
             Tuple<GeneralGroupConfig, String> tuple = (Tuple<GeneralGroupConfig, String>) res.getData();
             res.setData(ComponentAssembler.toGeneralGroupConfigVO(tuple.v1(), tuple.v2(),
-                    request.getRemoteAddr()));
+                    host));
         }
         return res;
     }

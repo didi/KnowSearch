@@ -113,7 +113,7 @@ public class Component {
         return this;
     }
 
-    public Map<String, List<String>> groupIdToHost() {
+    public Map<String, List<String>> groupNameToHost() {
         Map<String, List<String>> groupToHostList = new HashMap<>(MAP_SIZE);
         for (ComponentHost componentHost : this.getHostList()) {
             List<String> hostList = groupToHostList.get(componentHost.getGroupName());

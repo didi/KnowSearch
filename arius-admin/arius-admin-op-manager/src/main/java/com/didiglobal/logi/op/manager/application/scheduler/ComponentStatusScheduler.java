@@ -59,8 +59,8 @@ public class ComponentStatusScheduler {
             Map<String, String> packageIdToTemplate = packageId2TemplateIdMapCache.get(key, this::packageIdToTemplateMap);
 
             componentList.parallelStream().forEach(component -> {
-                Map<String, List<String>> groupToHostList = component.groupIdToHost();
-                String templateId = packageIdToTemplate.get(component.getPackageId());
+                Map<String, List<String>> groupToHostList = component.groupNameToHost();
+                String templateId = packageIdToTemplate.get(component.getPackageId().toString());
                 if (null == templateId) {
                     LOGGER.error("package[{}] can not find template", component.getPackageId());
                 } else {
@@ -69,7 +69,7 @@ public class ComponentStatusScheduler {
                     //这里也需要zeus去获取配置
                     //TODO 回调未执行
                     groupToHostList.entrySet().forEach(entry -> {
-                        deploymentService.execute(packageIdToTemplate.get(component.getPackageId()),
+                        deploymentService.execute(packageIdToTemplate.get(component.getPackageId().toString()),
                                 Strings.join(entry.getValue().iterator(), REX), String.valueOf(OperationEnum.STATUS.getType()),
                                 component.getId().toString(), entry.getKey());
                     });
@@ -91,7 +91,7 @@ public class ComponentStatusScheduler {
             scriptIdToTemplate.put(script.getId().toString(), script.getTemplateId());
         });
         packageList.forEach(pk -> {
-            packageIdToTemplate.put(pk.getId().toString(), scriptIdToTemplate.get(pk.getScriptId()));
+            packageIdToTemplate.put(pk.getId().toString(), scriptIdToTemplate.get(pk.getScriptId().toString()));
         });
         return packageIdToTemplate;
     }

@@ -123,4 +123,23 @@ public interface ComponentDomainService {
      */
     Result<Boolean> hasPackageDependComponent(int packageId);
 
+
+    /**
+     * 根据ComponentId和分组名获取分组信息
+     * @param componentId
+     * @param groupName
+     * @return
+     */
+    Result<ComponentGroupConfig>  getComponentConfigByGroupName(int componentId, String groupName);
+
+    /**
+     * 上报host status状态
+     * @param componentId
+     * @param groupName
+     * @param host
+     * @param status
+     * @return
+     */
+    Result<Integer>  reportComponentHostStatus(int componentId, String groupName, String host, int status);
+
 }

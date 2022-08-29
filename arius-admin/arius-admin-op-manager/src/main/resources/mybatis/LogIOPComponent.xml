@@ -57,4 +57,13 @@
         </trim>
         where id = #{id}
     </update>
+
+    <select id="listAll"
+            parameterType="com.didiglobal.logi.op.manager.infrastructure.db.ComponentPO"
+            resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from logi_op_component
+        where is_deleted = 0
+    </select>
 </mapper>
