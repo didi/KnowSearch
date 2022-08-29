@@ -91,8 +91,8 @@ public class ESShardServiceImpl implements ESShardService {
     public List<ShardMetrics> syncGetSmallShards(String clusterName) {
         List<ShardMetrics> shardsMetrics = getShardMetrics(clusterName);
         long configSmallShard = getConfigSmallShard();
-        Map<String, List<ShardMetrics>> indexAndShardMetricsMap = shardsMetrics.parallelStream()
-                .collect(Collectors.groupingBy(ShardMetrics::getIndex));
+        Map<String, List<ShardMetrics>> indexAndShardMetricsMap =  ConvertUtil.list2MapOfList(
+                shardsMetrics, ShardMetrics::getIndex, shardMetrics -> shardMetrics);
         return shardsMetrics.stream().filter(s->filterSmallShard(configSmallShard,s,indexAndShardMetricsMap)).collect(Collectors.toList());
     }
 
