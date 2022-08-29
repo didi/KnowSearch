@@ -4,6 +4,8 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConst
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.annotation.JSONField;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.Objects;
@@ -77,12 +79,14 @@ public class AriusTypeProperty {
      *     }
      */
     @ApiModelProperty("属性（json格式）")
+    @JSONField(name = "properties")
     private JSONObject         properties;
 
     /**
      * [{"key1":{}},{"key2":{}}]
      */
     @ApiModelProperty("dynamic_templates（jsonArray格式）")
+    @JsonProperty("dynamic_templates")
     private JSONArray          dynamicTemplates;
 
     public static final String PROPERTIES_STR        = "properties";
