@@ -147,7 +147,7 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
         if (logicCluster == null) {
             return Result.buildNotExist("逻辑集群不存在");
         }
-        if ( hasLogicClusterWithTemplates(logicClusterId)) {
+        if (hasLogicClusterWithTemplates(logicClusterId, deleteProjectId)) {
             return Result.build(ResultType.IN_USE_ERROR.getCode(), "逻辑集群使用中");
         }
         boolean succeed = false;
@@ -169,13 +169,10 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
     }
 
     @Override
-    public boolean hasLogicClusterWithTemplates(Long logicClusterId) {
-        ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(logicClusterId);
-        if (null == clusterRegion) {
-            return false;
-        }
-        return CollectionUtils.isNotEmpty(
-                indexTemplateDAO.listByResourceIds(Collections.singletonList(logicClusterId)));
+    public boolean hasLogicClusterWithTemplates(Long logicClusterId, Integer deleteProjectId) {
+       
+        return indexTemplateDAO.listByResourceIds(Collections.singletonList(logicClusterId))
+                .stream().anyMatch(indexTemplatePO -> indexTemplatePO.getProjectId().equals(deleteProjectId));
     }
     
     /**

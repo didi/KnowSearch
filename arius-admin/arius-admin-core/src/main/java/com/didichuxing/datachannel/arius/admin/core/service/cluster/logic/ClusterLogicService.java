@@ -49,10 +49,12 @@ public interface ClusterLogicService {
 
     /**
      * 判断逻辑集群是否有模板
-     * @param logicClusterId 逻辑集群id
+     *
+     * @param logicClusterId  逻辑集群id
+     * @param deleteProjectId
      * @return true/false
      */
-    boolean hasLogicClusterWithTemplates(Long logicClusterId);
+    boolean hasLogicClusterWithTemplates(Long logicClusterId, Integer deleteProjectId);
 
     /**
      * 新建逻辑集群

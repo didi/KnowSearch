@@ -56,7 +56,7 @@ public class LogicClusterDeleteHandler extends BaseWorkOrderHandler {
             return Result.buildFail(String.format("逻辑集群[%s]不存在", content.getName()));
         }
 
-        if (Boolean.TRUE.equals(clusterLogicService.hasLogicClusterWithTemplates(content.getId()))) {
+        if (Boolean.TRUE.equals(clusterLogicService.hasLogicClusterWithTemplates(content.getId(), workOrder.getSubmitorProjectId()))) {
             return Result.buildFail(String.format("逻辑集群[%s]存在模板", content.getName()));
         }
         ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByIdThatNotContainsProjectId(content.getId());
