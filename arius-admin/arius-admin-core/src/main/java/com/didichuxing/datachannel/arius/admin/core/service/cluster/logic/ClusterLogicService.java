@@ -48,11 +48,11 @@ public interface ClusterLogicService {
                                         Integer projectId) throws AdminOperateException;
 
     /**
-     * 判断逻辑集群是否有模板
+     * > 索引模板的项目id与待删除项目的项目id是否可以匹配
      *
-     * @param logicClusterId  逻辑集群id
-     * @param deleteProjectId
-     * @return true/false
+     * @param logicClusterId 逻辑集群的id
+     * @param deleteProjectId 要删除的项目
+     * @return boolean
      */
     boolean hasLogicClusterWithTemplates(Long logicClusterId, Integer deleteProjectId);
 
