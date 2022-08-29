@@ -31,6 +31,7 @@ import org.springframework.stereotype.Service;
  * Created by linyunan on 2021-06-11
  */
 @Service
+@Deprecated
 public class LogicClusterDeleteHandler extends BaseWorkOrderHandler {
 
     protected static final ILog            LOGGER = LogFactory.getLog(LogicClusterDeleteHandler.class);
@@ -55,7 +56,6 @@ public class LogicClusterDeleteHandler extends BaseWorkOrderHandler {
         if (Boolean.FALSE.equals(clusterLogicService.isClusterLogicExists(content.getId()))) {
             return Result.buildFail(String.format("逻辑集群[%s]不存在", content.getName()));
         }
-
         if (Boolean.TRUE.equals(clusterLogicService.hasLogicClusterWithTemplates(content.getId(), workOrder.getSubmitorProjectId()))) {
             return Result.buildFail(String.format("逻辑集群[%s]存在模板", content.getName()));
         }

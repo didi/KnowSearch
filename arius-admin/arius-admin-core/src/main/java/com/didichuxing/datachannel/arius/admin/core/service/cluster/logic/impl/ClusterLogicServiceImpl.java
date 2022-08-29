@@ -151,6 +151,7 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
             return Result.build(ResultType.IN_USE_ERROR.getCode(), "逻辑集群使用中");
         }
         boolean succeed = false;
+        //如果项目id中含有,默认为需要更新的状态
         if (StringUtils.contains(logicCluster.getProjectId(), ",")) {
             final ClusterLogicPO clusterLogicPO = new ClusterLogicPO();
             clusterLogicPO.setId(logicClusterId);
@@ -168,6 +169,13 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
         return Result.buildSucc();
     }
 
+    /**
+     * > 索引模板的项目id与待删除项目的项目id是否可以匹配
+     *
+     * @param logicClusterId 逻辑集群的id
+     * @param deleteProjectId 要删除的项目
+     * @return boolean
+     */
     @Override
     public boolean hasLogicClusterWithTemplates(Long logicClusterId, Integer deleteProjectId) {
        
