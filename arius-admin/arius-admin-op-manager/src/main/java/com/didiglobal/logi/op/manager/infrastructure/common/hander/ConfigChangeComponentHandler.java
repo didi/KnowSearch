@@ -40,14 +40,15 @@ public class ConfigChangeComponentHandler extends BaseComponentHandler implement
     private TaskDomainService taskDomainService;
 
     @Override
-    public void eventProcess(ComponentEvent componentEvent) throws ComponentHandlerException {
+    public Integer eventProcess(ComponentEvent componentEvent) throws ComponentHandlerException {
         try {
             GeneralConfigChangeComponent changeComponent = (GeneralConfigChangeComponent) componentEvent.getSource();
             changeComponent.setTemplateId(getTemplateId(changeComponent.getComponentId()));
             String content = JSONObject.toJSON(changeComponent).toString();
             Map<String, List<Tuple<String, Integer>>> groupToIpList = getGroup2HostMap(changeComponent.getGroupConfigList());
-            taskDomainService.createTask(content, componentEvent.getOperateType(),
-                    componentEvent.getDescribe(), changeComponent.getAssociationId(), groupToIpList);
+            int taskId = taskDomainService.createTask(content, componentEvent.getOperateType(),
+                    componentEvent.getDescribe(), changeComponent.getAssociationId(), groupToIpList).getData();
+            return taskId;
         } catch (Exception e) {
             LOGGER.error("event process error.", e);
             throw new ComponentHandlerException(e);

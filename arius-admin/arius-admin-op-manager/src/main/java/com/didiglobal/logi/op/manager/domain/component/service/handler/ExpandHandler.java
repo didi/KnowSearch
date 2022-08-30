@@ -67,10 +67,12 @@ public class ExpandHandler implements ScaleHandler {
             Set<String> dependHostSet = dependGroupToHostMap.get(config.getGroupName());
             if (null != hostSet) {
                 for (String host : config.getHosts().split(SPLIT)) {
+                    //判断扩容节点是否已经在组件host里面
                     if (hostSet.contains(host)) {
                         return Result.fail(ResultCode.COMPONENT_EXPAND_HOST_EXIST_ERROR);
                     }
 
+                    //判断扩容节点依赖的组件是否包含该节点
                     if (null != dependComponent && null != dependHostSet && !dependHostSet.contains(host)) {
                         return Result.fail(ResultCode.COMPONENT_EXPAND_DEPEND_HOST_NOT_EXIST_ERROR);
                     }

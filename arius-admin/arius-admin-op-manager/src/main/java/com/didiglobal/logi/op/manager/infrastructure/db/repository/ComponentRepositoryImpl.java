@@ -39,8 +39,8 @@ public class ComponentRepositoryImpl implements ComponentRepository {
     }
 
     @Override
-    public void updateComponent(Component component) {
-        componentDao.update(ComponentConverter.convertComponentDO2PO(component));
+    public int updateComponent(Component component) {
+        return componentDao.update(ComponentConverter.convertComponentDO2PO(component));
     }
 
     @Override

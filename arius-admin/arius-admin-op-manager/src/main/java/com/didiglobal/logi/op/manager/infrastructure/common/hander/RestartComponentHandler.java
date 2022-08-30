@@ -34,15 +34,16 @@ public class RestartComponentHandler extends BaseComponentHandler implements Com
 
 
     @Override
-    public void eventProcess(ComponentEvent componentEvent) throws ComponentHandlerException {
+    public Integer eventProcess(ComponentEvent componentEvent) throws ComponentHandlerException {
         try {
             GeneralBaseOperationComponent baseOperationComponent = (GeneralBaseOperationComponent) componentEvent.getSource();
 
             baseOperationComponent.setTemplateId(getTemplateId(baseOperationComponent.getComponentId()));
             String content = JSONObject.toJSON(baseOperationComponent).toString();
             Map<String, List<Tuple<String, Integer>>> groupToIpList = getGroup2HostMap(baseOperationComponent.getGroupConfigList());
-            taskDomainService.createTask(content, componentEvent.getOperateType(),
-                    componentEvent.getDescribe(), baseOperationComponent.getAssociationId(), groupToIpList);
+            int taskId = taskDomainService.createTask(content, componentEvent.getOperateType(),
+                    componentEvent.getDescribe(), baseOperationComponent.getAssociationId(), groupToIpList).getData();
+            return taskId;
         } catch (Exception e) {
             LOGGER.error("event process error.", e);
             throw new ComponentHandlerException(e);

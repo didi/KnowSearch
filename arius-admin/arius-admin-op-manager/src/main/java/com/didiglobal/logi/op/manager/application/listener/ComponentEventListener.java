@@ -28,8 +28,8 @@ public class ComponentEventListener implements ApplicationListener<ComponentEven
     public void onApplicationEvent(ComponentEvent componentEvent) {
         try {
             LOGGER.info("监听到事件[{}]", componentEvent.getDescribe());
-            componentHandlerFactory.getByType(componentEvent.getOperateType()).eventProcess(componentEvent);
-            componentEvent.setValue(Result.success());
+            Object res = componentHandlerFactory.getByType(componentEvent.getOperateType()).eventProcess(componentEvent);
+            componentEvent.setValue(Result.success(res));
         } catch (Exception e) {
             LOGGER.error("处理事件[{}]失败，参数内容[{}], stack:", componentEvent.getDescribe(), componentEvent.getSource(), e);
             componentEvent.setValue(Result.fail(TASK_EVENT_HANDLE_ERROR));

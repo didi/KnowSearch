@@ -33,46 +33,46 @@ public class ComponentController {
 
     @PostMapping("/install")
     @ApiOperation(value = "")
-    public Result<Void> install(@RequestBody GeneraInstallComponentDTO installComponentDTO) {
+    public Result<Integer> install(@RequestBody GeneraInstallComponentDTO installComponentDTO) {
         return componentService.installComponent(ComponentAssembler.toInstallComponent(installComponentDTO));
     }
 
     @PostMapping("/scale/expand")
     @ApiOperation(value = "")
-    public Result<Void> expend(@RequestBody GeneralScaleComponentDTO scaleComponentDTO) {
+    public Result<Integer> expend(@RequestBody GeneralScaleComponentDTO scaleComponentDTO) {
         scaleComponentDTO.setType(OperationEnum.EXPAND.getType());
         return componentService.scaleComponent(ComponentAssembler.toScaleComponent(scaleComponentDTO));
     }
 
     @PostMapping("/scale/shrink")
     @ApiOperation(value = "")
-    public Result<Void> shrink(@RequestBody GeneralScaleComponentDTO scaleComponentDTO) {
+    public Result<Integer> shrink(@RequestBody GeneralScaleComponentDTO scaleComponentDTO) {
         scaleComponentDTO.setType(OperationEnum.SHRINK.getType());
         return componentService.scaleComponent(ComponentAssembler.toScaleComponent(scaleComponentDTO));
     }
 
     @PutMapping("/config")
     @ApiOperation(value = "")
-    public Result<Void> configChange(@RequestBody GeneralConfigChangeComponentDTO changeComponentDTO) {
+    public Result<Integer> configChange(@RequestBody GeneralConfigChangeComponentDTO changeComponentDTO) {
         return componentService.configChangeComponent(ComponentAssembler.toConfigChangeComponent(changeComponentDTO));
     }
 
     @PostMapping("/restart")
     @ApiOperation(value = "")
-    public Result<Void> restart(@RequestBody GeneralBaseOperationComponentDTO restartOperationComponentDTO) {
+    public Result<Integer> restart(@RequestBody GeneralBaseOperationComponentDTO restartOperationComponentDTO) {
         return componentService.restartComponent(ComponentAssembler.toRestartComponent(restartOperationComponentDTO));
     }
 
 
     @PostMapping("/upgrade")
     @ApiOperation(value = "")
-    public Result<Void> upgrade(@RequestBody GeneralUpgradeComponentDTO generalUpgradeComponentDTO) {
+    public Result<Integer> upgrade(@RequestBody GeneralUpgradeComponentDTO generalUpgradeComponentDTO) {
         return componentService.upgradeComponent(ComponentAssembler.toUpgradeComponent(generalUpgradeComponentDTO));
     }
 
     @PostMapping("/execute-function")
     @ApiOperation(value = "")
-    public Result<Void> executeFunction(@RequestBody GeneralExecuteComponentFunctionDTO executeComponentFunctionDTO) {
+    public Result<Integer> executeFunction(@RequestBody GeneralExecuteComponentFunctionDTO executeComponentFunctionDTO) {
         return componentService.executeFunctionComponent(ComponentAssembler.toExecuteFunctionComponent(executeComponentFunctionDTO));
     }
 

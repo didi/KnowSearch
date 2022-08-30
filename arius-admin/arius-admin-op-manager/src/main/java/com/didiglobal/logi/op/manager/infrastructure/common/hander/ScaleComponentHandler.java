@@ -41,15 +41,16 @@ public class ScaleComponentHandler extends BaseComponentHandler implements Compo
 
 
     @Override
-    public void eventProcess(ComponentEvent componentEvent) throws ComponentHandlerException {
+    public Integer eventProcess(ComponentEvent componentEvent) throws ComponentHandlerException {
         try {
             GeneralScaleComponent scaleComponent = (GeneralScaleComponent) componentEvent.getSource();
 
             scaleComponent.setTemplateId(getTemplateId(scaleComponent.getComponentId()));
             String content = JSONObject.toJSON(scaleComponent).toString();
             Map<String, List<Tuple<String, Integer>>> groupToIpList = getGroup2HostMap(scaleComponent.getGroupConfigList());
-            taskDomainService.createTask(content, scaleComponent.getType(),
-                    componentEvent.getDescribe(), scaleComponent.getAssociationId(), groupToIpList);
+            int taskId = taskDomainService.createTask(content, scaleComponent.getType(),
+                    componentEvent.getDescribe(), scaleComponent.getAssociationId(), groupToIpList).getData();
+            return taskId;
         } catch (Exception e) {
             LOGGER.error("event process error.", e);
             throw new ComponentHandlerException(e);

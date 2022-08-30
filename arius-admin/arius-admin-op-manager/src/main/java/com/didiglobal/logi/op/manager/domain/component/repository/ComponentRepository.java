@@ -35,8 +35,9 @@ public interface ComponentRepository {
     /**
      * 更新组件信息
      * @param component
+     * @return
      */
-    void updateComponent(Component component);
+    int updateComponent(Component component);
 
     /**
      * 获取所有的组件列表

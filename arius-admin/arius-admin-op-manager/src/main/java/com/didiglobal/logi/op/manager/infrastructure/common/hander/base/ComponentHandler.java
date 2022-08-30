@@ -14,9 +14,10 @@ public interface ComponentHandler {
     /**
      * 事件处理
      * @param componentEvent
+     * @return <T>
      * @throws ComponentHandlerException
      */
-    void eventProcess(ComponentEvent componentEvent) throws ComponentHandlerException;
+    <T> T eventProcess(ComponentEvent componentEvent) throws ComponentHandlerException;
 
     /**
      * 任务执行

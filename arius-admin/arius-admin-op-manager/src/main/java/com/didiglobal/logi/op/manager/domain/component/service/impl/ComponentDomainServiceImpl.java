@@ -11,13 +11,11 @@ import com.didiglobal.logi.op.manager.domain.component.repository.ComponentRepos
 import com.didiglobal.logi.op.manager.domain.component.service.ComponentDomainService;
 import com.didiglobal.logi.op.manager.domain.component.service.handler.ScaleHandler;
 import com.didiglobal.logi.op.manager.domain.component.service.handler.ScaleHandlerFactory;
-import com.didiglobal.logi.op.manager.infrastructure.common.Constants;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 import com.didiglobal.logi.op.manager.infrastructure.common.ResultCode;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.*;
 import com.didiglobal.logi.op.manager.infrastructure.common.event.DomainEvent;
 import com.didiglobal.logi.op.manager.infrastructure.common.event.SpringEventPublisher;
-import com.google.common.collect.Collections2;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -51,7 +49,7 @@ public class ComponentDomainServiceImpl implements ComponentDomainService {
     private ScaleHandlerFactory scaleHandlerFactory;
 
     @Override
-    public Result<Void> submitInstallComponent(GeneralInstallComponent installComponent) {
+    public Result<Integer> submitInstallComponent(GeneralInstallComponent installComponent) {
         List<Component> repeatNameList = componentRepository.listAllComponent().stream().filter(component ->
                 component.getName().equals(installComponent.getName())
         ).collect(Collectors.toList());
@@ -60,46 +58,55 @@ public class ComponentDomainServiceImpl implements ComponentDomainService {
         }
         //发送事件，领域解耦
         DomainEvent domainEvent = publisher.publish(ComponentEvent.createInstallEvent(installComponent));
-        return (Result<Void>) domainEvent.getResult();
+        return (Result<Integer>) domainEvent.getResult();
     }
 
     @Override
-    public Result<Void> submitScaleComponent(GeneralScaleComponent scaleComponent) {
+    public Result<Integer> submitScaleComponent(GeneralScaleComponent scaleComponent) {
         Result checkRes = scaleHandlerFactory.getScaleHandler(scaleComponent.getType()).check(scaleComponent);
         if (checkRes.failed()) {
             return checkRes;
         }
         //发送事件，领域解耦
         DomainEvent domainEvent = publisher.publish(ComponentEvent.createScaleEvent(scaleComponent));
-        return (Result<Void>) domainEvent.getResult();
+        return (Result<Integer>) domainEvent.getResult();
     }
 
     @Override
-    public Result<Void> submitConfigChangeComponent(GeneralConfigChangeComponent changeComponent) {
+    public Result<Integer> submitConfigChangeComponent(GeneralConfigChangeComponent changeComponent) {
+        List<ComponentGroupConfig> currentConfigList = componentGroupConfigRepository.getConfigByComponentId(changeComponent.getComponentId());
+        for (GeneralGroupConfig config : changeComponent.getGroupConfigList()) {
+            boolean isExist = currentConfigList.stream().filter(currentConfig ->
+                    config.getGroupName().equals(currentConfig.getGroupName())).findFirst().isPresent();
+            if (!isExist) {
+                return Result.fail("更改的配置分组名不存在");
+            }
+        }
         //发送事件，领域解耦
-        publisher.publish(ComponentEvent.createConfigChangeEvent(changeComponent));
-        return Result.success();
+        DomainEvent domainEvent = publisher.publish(ComponentEvent.createConfigChangeEvent(changeComponent));
+        return (Result<Integer>) domainEvent.getResult();
     }
 
     @Override
-    public Result<Void> submitRestartComponent(GeneralBaseOperationComponent restartComponent) {
+    public Result<Integer> submitRestartComponent(GeneralBaseOperationComponent restartComponent) {
+
         //发送事件，领域解耦
-        publisher.publish(ComponentEvent.createRestartEvent(restartComponent));
-        return Result.success();
+        DomainEvent domainEvent = publisher.publish(ComponentEvent.createRestartEvent(restartComponent));
+        return (Result<Integer>) domainEvent.getResult();
     }
 
     @Override
-    public Result<Void> submitUpgradeComponent(GeneralUpgradeComponent upgradeComponent) {
+    public Result<Integer> submitUpgradeComponent(GeneralUpgradeComponent upgradeComponent) {
         //发送事件，领域解耦
-        publisher.publish(ComponentEvent.createUpdateEvent(upgradeComponent));
-        return Result.success();
+        DomainEvent domainEvent = publisher.publish(ComponentEvent.createUpdateEvent(upgradeComponent));
+        return (Result<Integer>) domainEvent.getResult();
     }
 
     @Override
-    public Result<Void> submitExecuteFunctionComponent(GeneralExecuteComponentFunction executeComponentFunction) {
+    public Result<Integer> submitExecuteFunctionComponent(GeneralExecuteComponentFunction executeComponentFunction) {
         //发送事件，领域解耦
-        publisher.publish(ComponentEvent.createExecuteFunctionEvent(executeComponentFunction));
-        return Result.success();
+        DomainEvent domainEvent = publisher.publish(ComponentEvent.createExecuteFunctionEvent(executeComponentFunction));
+        return (Result<Integer>) domainEvent.getResult();
     }
 
     @Override
@@ -109,9 +116,8 @@ public class ComponentDomainServiceImpl implements ComponentDomainService {
     }
 
     @Override
-    public Result<Void> updateComponent(Component component) {
-        componentRepository.updateComponent(component);
-        return Result.success();
+    public Result<Integer> updateComponent(Component component) {
+        return Result.success(componentRepository.updateComponent(component));
     }
 
     @Override
@@ -155,6 +161,7 @@ public class ComponentDomainServiceImpl implements ComponentDomainService {
 
     /**
      * 获取组件下，最新的分组配置信息
+     *
      * @param configList 组件对应的所有分组配置
      * @return List<ComponentGroupConfig> 最新分组配置信息
      */
@@ -194,7 +201,7 @@ public class ComponentDomainServiceImpl implements ComponentDomainService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result<Integer> createComponent(Component component) {
+    public Result<Void> createComponent(Component component) {
         //创建并保存组件
         component.create();
         int componentId = componentRepository.saveComponent(component);

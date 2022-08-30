@@ -4,6 +4,7 @@ import com.didiglobal.logi.op.manager.domain.component.entity.Component;
 import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentGroupConfig;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.*;
+import io.swagger.models.auth.In;
 
 import java.util.HashMap;
 import java.util.List;
@@ -21,7 +22,7 @@ public interface ComponentDomainService {
      * @param installComponent
      * @return
      */
-    Result<Void> submitInstallComponent(GeneralInstallComponent installComponent);
+    Result<Integer> submitInstallComponent(GeneralInstallComponent installComponent);
 
 
     /**
@@ -29,14 +30,14 @@ public interface ComponentDomainService {
      * @param scaleComponent
      * @return
      */
-    Result<Void> submitScaleComponent(GeneralScaleComponent scaleComponent);
+    Result<Integer> submitScaleComponent(GeneralScaleComponent scaleComponent);
 
     /**
      * 配置变更
      * @param changeComponent
      * @return
      */
-    Result<Void> submitConfigChangeComponent(GeneralConfigChangeComponent changeComponent);
+    Result<Integer> submitConfigChangeComponent(GeneralConfigChangeComponent changeComponent);
 
 
     /**
@@ -45,7 +46,7 @@ public interface ComponentDomainService {
      * @param component
      * @return
      */
-    Result<Integer> createComponent(Component component);
+    Result<Void> createComponent(Component component);
 
 
     /**
@@ -78,21 +79,21 @@ public interface ComponentDomainService {
      * @param restartComponent
      * @return
      */
-    Result<Void> submitRestartComponent(GeneralBaseOperationComponent restartComponent);
+    Result<Integer> submitRestartComponent(GeneralBaseOperationComponent restartComponent);
 
     /**
      * 升级组件
      * @param upgradeComponent
      * @return
      */
-    Result<Void> submitUpgradeComponent(GeneralUpgradeComponent upgradeComponent);
+    Result<Integer> submitUpgradeComponent(GeneralUpgradeComponent upgradeComponent);
 
     /**
      * 执行相应功能的组件爱你D
      * @param executeComponentFunction
      * @return
      */
-    Result<Void> submitExecuteFunctionComponent(GeneralExecuteComponentFunction executeComponentFunction);
+    Result<Integer> submitExecuteFunctionComponent(GeneralExecuteComponentFunction executeComponentFunction);
 
     /**
      * 获取组件配置
@@ -106,7 +107,7 @@ public interface ComponentDomainService {
      * @param component
      * @return
      */
-    Result<Void> updateComponent(Component component);
+    Result<Integer>  updateComponent(Component component);
 
 
     /**

@@ -32,66 +32,82 @@ public class ComponentService {
     private TaskDomainService taskDomainService;
 
     //TODO 这几个操作母亲啊都缺乏校验
-    public Result<Void> installComponent(GeneralInstallComponent installComponent) {
+    public Result<Integer> installComponent(GeneralInstallComponent installComponent) {
         LOGGER.info("start install component[{}]", installComponent.getName());
         Result checkRes = installComponent.checkInstallParam();
         if (checkRes.failed()) {
             return checkRes;
         }
-        Result taskCheckRes = taskDomainService.hasRepeatTask(installComponent.getName(), null, OperationEnum.INSTALL.getType());
+        Result taskCheckRes = taskDomainService.hasRepeatTask(installComponent.getName(), null);
         if (taskCheckRes.failed()) {
             return taskCheckRes;
         }
         return componentDomainService.submitInstallComponent(installComponent);
     }
 
-    public Result<Void> scaleComponent(GeneralScaleComponent scaleComponent) {
-        //TODO 对应有依赖的组件，扩容要校验依赖组件对应节点是否已经扩了
+    public Result<Integer> scaleComponent(GeneralScaleComponent scaleComponent) {
         LOGGER.info("start scale component[{}]", scaleComponent);
         Result checkRes = scaleComponent.checkParam();
         if (checkRes.failed()) {
             return checkRes;
         }
 
-        Result taskCheckRes = taskDomainService.hasRepeatTask(null, scaleComponent.getComponentId(), scaleComponent.getType());
+        Result taskCheckRes = taskDomainService.hasRepeatTask(null, scaleComponent.getComponentId());
         if (taskCheckRes.failed()) {
             return taskCheckRes;
         }
         return componentDomainService.submitScaleComponent(scaleComponent);
     }
 
-    public Result<Void> configChangeComponent(GeneralConfigChangeComponent configChangeComponent) {
+    public Result<Integer> configChangeComponent(GeneralConfigChangeComponent configChangeComponent) {
         LOGGER.info("start change component config[{}]", configChangeComponent);
         Result checkRes = configChangeComponent.checkParam();
         if (checkRes.failed()) {
             return checkRes;
         }
+
+        Result taskCheckRes = taskDomainService.hasRepeatTask(null, configChangeComponent.getComponentId());
+        if (taskCheckRes.failed()) {
+            return taskCheckRes;
+        }
         return componentDomainService.submitConfigChangeComponent(configChangeComponent);
     }
 
-    public Result<Void> restartComponent(GeneralBaseOperationComponent restartOperationComponent) {
+    public Result<Integer> restartComponent(GeneralBaseOperationComponent restartOperationComponent) {
         LOGGER.info("start restart component[{}]", restartOperationComponent);
         Result checkRes = restartOperationComponent.checkParam();
         if (checkRes.failed()) {
             return checkRes;
         }
+        Result taskCheckRes = taskDomainService.hasRepeatTask(null, restartOperationComponent.getComponentId());
+        if (taskCheckRes.failed()) {
+            return taskCheckRes;
+        }
         return componentDomainService.submitRestartComponent(restartOperationComponent);
     }
 
-    public Result<Void> upgradeComponent(GeneralUpgradeComponent generalUpgradeComponent) {
+    public Result<Integer> upgradeComponent(GeneralUpgradeComponent generalUpgradeComponent) {
         LOGGER.info("start upgrade component[{}]",generalUpgradeComponent);
         Result checkRes = generalUpgradeComponent.checkUpgradeParam();
         if (checkRes.failed()) {
             return checkRes;
         }
+        Result taskCheckRes = taskDomainService.hasRepeatTask(null, generalUpgradeComponent.getComponentId());
+        if (taskCheckRes.failed()) {
+            return taskCheckRes;
+        }
         return componentDomainService.submitUpgradeComponent(generalUpgradeComponent);
     }
 
-    public Result<Void> executeFunctionComponent(GeneralExecuteComponentFunction executeComponentFunction) {
+    public Result<Integer> executeFunctionComponent(GeneralExecuteComponentFunction executeComponentFunction) {
         LOGGER.info("start execute function component[{}]",executeComponentFunction);
         Result checkRes = executeComponentFunction.checkParam();
         if (checkRes.failed()) {
             return checkRes;
+        }
+        Result taskCheckRes = taskDomainService.hasRepeatTask(null, executeComponentFunction.getComponentId());
+        if (taskCheckRes.failed()) {
+            return taskCheckRes;
         }
         return componentDomainService.submitExecuteFunctionComponent(executeComponentFunction);
     }

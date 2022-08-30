@@ -38,7 +38,7 @@ public interface ComponentDao {
      * 更新组件（安装包id）
      * @param componentPO
      */
-    void update(ComponentPO componentPO);
+    int update(ComponentPO componentPO);
 
     /**
      * 获取所有组件

@@ -12,7 +12,6 @@ import com.didiglobal.logi.op.manager.domain.task.entity.Task;
 import com.didiglobal.logi.op.manager.domain.task.service.TaskDomainService;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 import com.didiglobal.logi.op.manager.infrastructure.common.Tuple;
-import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralGroupConfig;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralInstallComponent;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.OperationEnum;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.PackageTypeEnum;
@@ -21,15 +20,11 @@ import com.didiglobal.logi.op.manager.infrastructure.common.hander.base.Componen
 import com.didiglobal.logi.op.manager.infrastructure.common.hander.base.DefaultHandler;
 import com.didiglobal.logi.op.manager.infrastructure.exception.ComponentHandlerException;
 import com.didiglobal.logi.op.manager.infrastructure.util.ConvertUtil;
-import com.sun.xml.internal.ws.api.pipe.Tube;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.*;
-
-import static com.didiglobal.logi.op.manager.infrastructure.common.Constants.SPLIT;
 
 /**
  * @author didi
@@ -54,7 +49,7 @@ public class InstallComponentHandler extends BaseComponentHandler implements Com
     private ComponentDomainService componentDomainService;
 
     @Override
-    public void eventProcess(ComponentEvent componentEvent) throws ComponentHandlerException {
+    public Integer eventProcess(ComponentEvent componentEvent) throws ComponentHandlerException {
         try {
             GeneralInstallComponent installComponent = (GeneralInstallComponent) componentEvent.getSource();
             String associationId = installComponent.getAssociationId();
@@ -68,8 +63,9 @@ public class InstallComponentHandler extends BaseComponentHandler implements Com
             String content = JSONObject.toJSON(installComponent).toString();
 
             Map<String, List<Tuple<String, Integer>>> groupToIpList = getGroup2HostMap(installComponent.getGroupConfigList());
-            taskDomainService.createTask(content, componentEvent.getOperateType(),
-                    componentEvent.getDescribe(), associationId, groupToIpList);
+            int taskId = taskDomainService.createTask(content, componentEvent.getOperateType(),
+                    componentEvent.getDescribe(), associationId, groupToIpList).getData();
+            return taskId;
         } catch (Exception e) {
             LOGGER.error("event process error.", e);
             throw new ComponentHandlerException(e);

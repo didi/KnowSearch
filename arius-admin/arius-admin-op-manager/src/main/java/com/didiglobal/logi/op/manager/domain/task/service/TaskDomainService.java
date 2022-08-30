@@ -26,7 +26,7 @@ public interface TaskDomainService {
      * @param groupToIpList
      * @return
      */
-    Result<Void> createTask(String content, Integer type, String describe, String associationId,
+    Result<Integer> createTask(String content, Integer type, String describe, String associationId,
                             Map<String, List<Tuple<String, Integer>>>  groupToIpList);
 
     /**
@@ -114,8 +114,7 @@ public interface TaskDomainService {
      * 是否有未完成的重名工单
      * @param name
      * @param componentId
-     * @param type
      * @return
      */
-    Result<Void> hasRepeatTask(String name, Integer componentId, int type);
+    Result<Void> hasRepeatTask(String name, Integer componentId);
 }

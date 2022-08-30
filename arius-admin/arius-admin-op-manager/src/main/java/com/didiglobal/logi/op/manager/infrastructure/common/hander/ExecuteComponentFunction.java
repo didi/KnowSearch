@@ -37,15 +37,16 @@ public class ExecuteComponentFunction extends BaseComponentHandler implements Co
     private TaskDomainService taskDomainService;
 
     @Override
-    public void eventProcess(ComponentEvent componentEvent) throws ComponentHandlerException {
+    public Integer eventProcess(ComponentEvent componentEvent) throws ComponentHandlerException {
         try {
             GeneralExecuteComponentFunction executeComponentFunction = (GeneralExecuteComponentFunction) componentEvent.getSource();
             String associationId = executeComponentFunction.getAssociationId();
             executeComponentFunction.setTemplateId(getTemplateId(executeComponentFunction.getComponentId()));
             String content = JSONObject.toJSON(executeComponentFunction).toString();
             Map<String, List<Tuple<String, Integer>>> groupToIpList = getGroup2HostMap(executeComponentFunction.getGroupConfigList());
-            taskDomainService.createTask(content, componentEvent.getOperateType(),
-                    componentEvent.getDescribe(), associationId, groupToIpList);
+            int taskId = taskDomainService.createTask(content, componentEvent.getOperateType(),
+                    componentEvent.getDescribe(), associationId, groupToIpList).getData();
+            return taskId;
         } catch (Exception e) {
             LOGGER.error("event process error.", e);
             throw new ComponentHandlerException(e);
@@ -58,7 +59,7 @@ public class ExecuteComponentFunction extends BaseComponentHandler implements Co
     }
 
     @Override
-    public <T extends ProcessStatus> T getProcessStatus(Task task) throws ComponentHandlerException {
+    public ProcessStatus getProcessStatus(Task task) throws ComponentHandlerException {
         return super.getProcessStatus(task);
     }
 

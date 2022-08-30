@@ -47,7 +47,7 @@ public class TaskDomainServiceImpl implements TaskDomainService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result<Void> createTask(String content, Integer type, String describe,
+    public Result<Integer> createTask(String content, Integer type, String describe,
                                    String associationId, Map<String, List<Tuple<String, Integer>>> groupToHostList) {
         //新建
         Task task = new Task();
@@ -62,7 +62,7 @@ public class TaskDomainServiceImpl implements TaskDomainService {
 
         //存储host任务
         taskDetailRepository.batchInsertTaskDetail(task.getDetailList());
-        return Result.success();
+        return Result.success(id);
     }
 
     @Override
@@ -289,14 +289,14 @@ public class TaskDomainServiceImpl implements TaskDomainService {
     }
 
     @Override
-    public Result<Void> hasRepeatTask(String name, Integer componentId, int type) {
+    public Result<Void> hasRepeatTask(String name, Integer componentId) {
         List<Task> taskList = taskRepository.getUnFinalStatusTaskList();
         for (Task task : taskList) {
             JSONObject content = JSON.parseObject(task.getContent());
-            if (null != content.get("name") && content.get("name").equals(name) && type == task.getType()) {
+            if (null != content.get("name") && content.get("name").equals(name)) {
                 return Result.fail(ResultCode.TASK_REPEAT_ERROR.getCode(), String.format("有重名未完成任务[%s]", task.getId()));
             }
-            if (null != content.get("componentId") && content.get("componentId") == componentId && type == task.getType()) {
+            if (null != content.get("componentId") && content.get("componentId") == componentId) {
                 return Result.fail(ResultCode.TASK_REPEAT_ERROR.getCode(), String.format("有重复未完成任务[%s]，任务类型[%s]", task.getId(), task.getType()));
             }
         }
