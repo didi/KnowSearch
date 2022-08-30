@@ -47,5 +47,10 @@ public  class TaskRepositoryImpl implements TaskRepository {
         return TaskConverter.convertTaskPO2DOList(taskDao.getUnFinishTaskList());
     }
 
+    @Override
+    public List<Task> getUnFinalStatusTaskList() {
+        return TaskConverter.convertTaskPO2DOList(taskDao.getUnFinalStatusTaskList());
+    }
+
 
 }

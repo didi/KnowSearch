@@ -52,4 +52,11 @@ public interface ComponentDao {
      * @return
      */
     List<ComponentPO> getByPackageId(int packageId);
+
+    /**
+     * 通过id获取依赖组件
+     * @param id
+     * @return
+     */
+    ComponentPO findDependComponentById(int id);
 }

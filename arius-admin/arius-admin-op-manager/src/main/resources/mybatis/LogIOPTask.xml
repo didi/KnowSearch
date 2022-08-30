@@ -51,4 +51,12 @@
         update logi_op_task set status = #{status},is_finish = #{isFinish}
         where id = #{id}
     </update>
+
+    <select id="getUnFinalStatusTaskList"
+            resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from logi_op_task
+        where status != 4 and status != 5 and status != 6
+    </select>
 </mapper>

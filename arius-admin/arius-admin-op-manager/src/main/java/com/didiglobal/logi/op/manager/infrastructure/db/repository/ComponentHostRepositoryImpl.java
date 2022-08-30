@@ -39,4 +39,9 @@ public class ComponentHostRepositoryImpl implements ComponentHostRepository {
     public int unInstallComponentHost(int componentId, String host, String groupName, int isDeleted) {
         return componentHostDao.updateDeleteStatus(componentId, host, groupName, isDeleted);
     }
+
+    @Override
+    public List<ComponentHost> listHostByComponentId(int componentId) {
+        return ComponentConverter.convertComponentHostPO2DOList(componentHostDao.findByComponentId(componentId));
+    }
 }

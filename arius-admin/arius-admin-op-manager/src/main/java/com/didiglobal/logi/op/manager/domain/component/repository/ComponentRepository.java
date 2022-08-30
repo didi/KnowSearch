@@ -50,4 +50,11 @@ public interface ComponentRepository {
      * @return
      */
     List<Component> getComponentByPackageId(int packageId);
+
+    /**
+     * 通过id获取依赖的组件
+     * @param id
+     * @return
+     */
+    Component getDependComponentById(int id);
 }

@@ -20,4 +20,6 @@ public class Constants {
     public static final Character REX = ',';
 
     public static final String DEPEND_CONFIG_COMPONENT_ID =  "dependConfigComponentId";
+
+    public static final long TIME_WAIT = 20000;
 }

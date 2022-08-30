@@ -1,15 +1,13 @@
 package com.didiglobal.logi.op.manager.infrastructure.common.event;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 import org.springframework.context.ApplicationEvent;
 
 /**
  * @author didi
  * @date 2022-07-12 3:07 下午
  */
-public class DomainEvent extends ApplicationEvent {
+public abstract class DomainEvent<T> extends ApplicationEvent implements EventNotifyListener<T>{
     private String describe;
     public DomainEvent(Object source) {
         super(source);
@@ -21,5 +19,6 @@ public class DomainEvent extends ApplicationEvent {
 
     public void setDescribe(String describe) {
         this.describe = describe;
+
     }
 }

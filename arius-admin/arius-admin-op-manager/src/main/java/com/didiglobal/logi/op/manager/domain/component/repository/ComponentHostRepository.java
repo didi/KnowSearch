@@ -28,7 +28,7 @@ public interface ComponentHostRepository {
 
 
     /**
-     * 获取所有组件列表
+     * 获取所有组件host列表
      * @return List<ComponentHost> 组件列表
      */
     List<ComponentHost> listComponentHost();
@@ -42,4 +42,11 @@ public interface ComponentHostRepository {
      * @return
      */
     int unInstallComponentHost(int componentId, String host, String groupName, int isDeleted);
+
+    /**
+     * 获取对应组件host列表
+     * @param componentId 组件id
+     * @return List<ComponentHost> 组件列表
+     */
+    List<ComponentHost> listHostByComponentId(int componentId);
 }

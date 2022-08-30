@@ -66,4 +66,13 @@
         from logi_op_component
         where is_deleted = 0
     </select>
+
+    <select id="findDependComponentById"
+            parameterType="com.didiglobal.logi.op.manager.infrastructure.db.ComponentPO"
+            resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from logi_op_component
+        where find_in_set(#{id}, contain_component_ids)
+    </select>
 </mapper>

@@ -2,10 +2,14 @@ package com.didiglobal.logi.op.manager.application;
 
 import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentGroupConfig;
 import com.didiglobal.logi.op.manager.domain.component.service.ComponentDomainService;
+import com.didiglobal.logi.op.manager.domain.script.service.impl.ScriptDomainService;
+import com.didiglobal.logi.op.manager.domain.task.entity.Task;
+import com.didiglobal.logi.op.manager.domain.task.service.TaskDomainService;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 import com.didiglobal.logi.op.manager.infrastructure.common.ResultCode;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.*;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.HostStatusEnum;
+import com.didiglobal.logi.op.manager.infrastructure.common.enums.OperationEnum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,13 +28,19 @@ public class ComponentService {
     @Autowired
     private ComponentDomainService componentDomainService;
 
+    @Autowired
+    private TaskDomainService taskDomainService;
+
     //TODO 这几个操作母亲啊都缺乏校验
     public Result<Void> installComponent(GeneralInstallComponent installComponent) {
-        //TODO 需要判断如果有已有任务再执行是不允许执行其他的
         LOGGER.info("start install component[{}]", installComponent.getName());
         Result checkRes = installComponent.checkInstallParam();
         if (checkRes.failed()) {
             return checkRes;
+        }
+        Result taskCheckRes = taskDomainService.hasRepeatTask(installComponent.getName(), null, OperationEnum.INSTALL.getType());
+        if (taskCheckRes.failed()) {
+            return taskCheckRes;
         }
         return componentDomainService.submitInstallComponent(installComponent);
     }
@@ -41,6 +51,11 @@ public class ComponentService {
         Result checkRes = scaleComponent.checkParam();
         if (checkRes.failed()) {
             return checkRes;
+        }
+
+        Result taskCheckRes = taskDomainService.hasRepeatTask(null, scaleComponent.getComponentId(), scaleComponent.getType());
+        if (taskCheckRes.failed()) {
+            return taskCheckRes;
         }
         return componentDomainService.submitScaleComponent(scaleComponent);
     }

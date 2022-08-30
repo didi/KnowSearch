@@ -1,24 +1,25 @@
 package com.didiglobal.logi.op.manager.domain.component.event;
 
+import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.OperationEnum;
 import com.didiglobal.logi.op.manager.infrastructure.common.event.DomainEvent;
+
+import static com.didiglobal.logi.op.manager.infrastructure.common.Constants.TIME_WAIT;
 
 /**
  * @author didi
  * @date 2022-07-12 4:25 下午
  */
-public class ComponentEvent extends DomainEvent {
+public class ComponentEvent extends DomainEvent<Result> {
     /**
      * 操作类型
      */
     private int operateType;
 
+    private Result result;
+
     public int getOperateType() {
         return operateType;
-    }
-
-    public void setOperateType(int operateType) {
-        this.operateType = operateType;
     }
 
     private ComponentEvent(Object source) {
@@ -67,4 +68,27 @@ public class ComponentEvent extends DomainEvent {
         return event;
     }
 
+    @Override
+    public synchronized Result getResult() {
+        try {
+            if (null == result) {
+                this.wait(TIME_WAIT);
+            }
+            //判断到底是超时还是唤醒
+            if (null == result) {
+                return Result.fail("任务事件超时");
+            } else {
+                return result;
+            }
+        } catch (InterruptedException e) {
+            return Result.fail("任务事件中断");
+        }
+
+    }
+
+    @Override
+    public synchronized void setValue(Result result) {
+        this.result = result;
+        this.notify();
+    }
 }

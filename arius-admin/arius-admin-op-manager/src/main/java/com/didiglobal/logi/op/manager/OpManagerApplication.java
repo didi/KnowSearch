@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
@@ -15,6 +16,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  */
 @MapperScan(value = "com.didiglobal.logi.op.manager.infrastructure.db.mapper")
 @EnableScheduling
+@EnableAsync
 @SpringBootApplication(scanBasePackages = "com.didiglobal.logi.op.manager")
 public class OpManagerApplication {
     public static void main(String[] args) {

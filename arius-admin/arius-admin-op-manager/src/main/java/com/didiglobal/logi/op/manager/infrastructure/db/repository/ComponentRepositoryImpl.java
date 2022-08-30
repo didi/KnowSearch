@@ -52,4 +52,9 @@ public class ComponentRepositoryImpl implements ComponentRepository {
     public List<Component> getComponentByPackageId(int packageId) {
         return ComponentConverter.convertComponentPO2DOList(componentDao.getByPackageId(packageId));
     }
+
+    @Override
+    public Component getDependComponentById(int id) {
+        return ComponentConverter.convertComponentPO2DO(componentDao.findDependComponentById(id));
+    }
 }

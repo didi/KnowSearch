@@ -13,8 +13,11 @@ import com.didiglobal.logi.op.manager.domain.component.service.handler.ScaleHand
 import com.didiglobal.logi.op.manager.domain.component.service.handler.ScaleHandlerFactory;
 import com.didiglobal.logi.op.manager.infrastructure.common.Constants;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
+import com.didiglobal.logi.op.manager.infrastructure.common.ResultCode;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.*;
+import com.didiglobal.logi.op.manager.infrastructure.common.event.DomainEvent;
 import com.didiglobal.logi.op.manager.infrastructure.common.event.SpringEventPublisher;
+import com.google.common.collect.Collections2;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,6 +25,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.didiglobal.logi.op.manager.infrastructure.common.Constants.SPLIT;
 
 /**
  * @author didi
@@ -47,17 +52,26 @@ public class ComponentDomainServiceImpl implements ComponentDomainService {
 
     @Override
     public Result<Void> submitInstallComponent(GeneralInstallComponent installComponent) {
-        //TODO zeus的校验，是否安装了zeus
+        List<Component> repeatNameList = componentRepository.listAllComponent().stream().filter(component ->
+                component.getName().equals(installComponent.getName())
+        ).collect(Collectors.toList());
+        if (!repeatNameList.isEmpty()) {
+            return Result.fail(ResultCode.COMPONENT_NAME_REPEAT_ERROR);
+        }
         //发送事件，领域解耦
-        publisher.publish(ComponentEvent.createInstallEvent(installComponent));
-        return Result.success();
+        DomainEvent domainEvent = publisher.publish(ComponentEvent.createInstallEvent(installComponent));
+        return (Result<Void>) domainEvent.getResult();
     }
 
     @Override
     public Result<Void> submitScaleComponent(GeneralScaleComponent scaleComponent) {
+        Result checkRes = scaleHandlerFactory.getScaleHandler(scaleComponent.getType()).check(scaleComponent);
+        if (checkRes.failed()) {
+            return checkRes;
+        }
         //发送事件，领域解耦
-        publisher.publish(ComponentEvent.createScaleEvent(scaleComponent));
-        return Result.success();
+        DomainEvent domainEvent = publisher.publish(ComponentEvent.createScaleEvent(scaleComponent));
+        return (Result<Void>) domainEvent.getResult();
     }
 
     @Override
@@ -101,7 +115,7 @@ public class ComponentDomainServiceImpl implements ComponentDomainService {
     }
 
     @Override
-    public Result<List<Component>> listComponent() {
+    public Result<List<Component>> listComponentWithAll() {
         List<Component> componentList = componentRepository.listAllComponent();
         List<ComponentHost> hosts = componentHostRepository.listComponentHost();
         List<ComponentGroupConfig> configs = componentGroupConfigRepository.listGroupConfig();
@@ -200,7 +214,7 @@ public class ComponentDomainServiceImpl implements ComponentDomainService {
                 //创建并保存配置
                 componentGroupConfigRepository.saveGroupConfig(groupConfig);
             }
-            for (String host : groupConfig.getHosts().split(Constants.SPLIT)) {
+            for (String host : groupConfig.getHosts().split(SPLIT)) {
                 //创建并保存组件host
                 //TODO 考虑下能否批量提交
                 ComponentHost componentHost = new ComponentHost();
@@ -240,7 +254,7 @@ public class ComponentDomainServiceImpl implements ComponentDomainService {
 
         ScaleHandler scaleHandler = scaleHandlerFactory.getScaleHandler(type);
         for (ComponentGroupConfig config : component.getGroupConfigList()) {
-            for (String host : config.getHosts().split(Constants.SPLIT)) {
+            for (String host : config.getHosts().split(SPLIT)) {
                 //如果节点成功则加入,因为有些ignore之类的
                 if (groupName2HostNormalStatusMap.get(config.getGroupName()).contains(host)) {
                     scaleHandler.dealComponentHost(component.getId(), host, config);

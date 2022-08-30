@@ -1,6 +1,8 @@
 package com.didiglobal.logi.op.manager.domain.component.service.handler;
 
 import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentGroupConfig;
+import com.didiglobal.logi.op.manager.infrastructure.common.Result;
+import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralScaleComponent;
 
 import java.util.Set;
 
@@ -26,4 +28,11 @@ public interface ScaleHandler {
      * @param hosts
      */
     void dealComponentGroupConfig(ComponentGroupConfig oriGroupConfig, ComponentGroupConfig newGroupConfig, Set<String> hosts);
+
+    /**
+     * 校验扩容是否能执行
+     * @param scaleComponent
+     * @return
+     */
+    Result<Void> check(GeneralScaleComponent scaleComponent);
 }

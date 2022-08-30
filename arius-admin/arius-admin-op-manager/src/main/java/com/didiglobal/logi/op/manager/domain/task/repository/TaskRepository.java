@@ -43,4 +43,10 @@ public interface TaskRepository {
      * @return
      */
     List<Task> getUnFinishTaskList();
+
+    /**
+     * 获取没有到达终态的任务
+     * @return
+     */
+    List<Task> getUnFinalStatusTaskList();
 }

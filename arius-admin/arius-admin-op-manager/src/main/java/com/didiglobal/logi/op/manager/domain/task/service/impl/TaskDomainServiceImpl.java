@@ -1,5 +1,7 @@
 package com.didiglobal.logi.op.manager.domain.task.service.impl;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.didiglobal.logi.op.manager.domain.task.entity.Task;
 import com.didiglobal.logi.op.manager.domain.task.entity.value.TaskDetail;
 import com.didiglobal.logi.op.manager.domain.task.repository.TaskDetailRepository;
@@ -11,7 +13,10 @@ import com.didiglobal.logi.op.manager.infrastructure.common.Tuple;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralBaseOperationComponent;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralExecuteComponentFunction;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralGroupConfig;
-import com.didiglobal.logi.op.manager.infrastructure.common.enums.*;
+import com.didiglobal.logi.op.manager.infrastructure.common.enums.HostActionEnum;
+import com.didiglobal.logi.op.manager.infrastructure.common.enums.OperationEnum;
+import com.didiglobal.logi.op.manager.infrastructure.common.enums.TaskActionEnum;
+import com.didiglobal.logi.op.manager.infrastructure.common.enums.TaskStatusEnum;
 import com.didiglobal.logi.op.manager.infrastructure.deployment.DeploymentService;
 import com.didiglobal.logi.op.manager.infrastructure.util.ConvertUtil;
 import org.apache.logging.log4j.util.Strings;
@@ -21,7 +26,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static com.didiglobal.logi.op.manager.infrastructure.common.Constants.REX;
 
@@ -44,7 +48,7 @@ public class TaskDomainServiceImpl implements TaskDomainService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Result<Void> createTask(String content, Integer type, String describe,
-                                   String associationId, Map<String, List<Tuple<String, Integer>>>  groupToHostList) {
+                                   String associationId, Map<String, List<Tuple<String, Integer>>> groupToHostList) {
         //新建
         Task task = new Task();
         task.create(content, type, describe, associationId, groupToHostList);
@@ -111,7 +115,7 @@ public class TaskDomainServiceImpl implements TaskDomainService {
         List<String> hostList = new ArrayList<>();
         //只要取其中一个就行
         String groupName = detailList.get(0).getGroupName();
-        detailList.forEach(detail -> { 
+        detailList.forEach(detail -> {
             hostList.add(detail.getHost());
         });
         GeneralExecuteComponentFunction function = ConvertUtil.obj2ObjByJSON(task.getContent(), GeneralExecuteComponentFunction.class);
@@ -281,6 +285,21 @@ public class TaskDomainServiceImpl implements TaskDomainService {
     @Override
     public Result<Void> updateTaskStatusAndIsFinish(int taskId, int isFinish, int status) {
         taskRepository.updateTaskStatusAndIsFinish(taskId, status, isFinish);
+        return Result.success();
+    }
+
+    @Override
+    public Result<Void> hasRepeatTask(String name, Integer componentId, int type) {
+        List<Task> taskList = taskRepository.getUnFinalStatusTaskList();
+        for (Task task : taskList) {
+            JSONObject content = JSON.parseObject(task.getContent());
+            if (null != content.get("name") && content.get("name").equals(name) && type == task.getType()) {
+                return Result.fail(ResultCode.TASK_REPEAT_ERROR.getCode(), String.format("有重名未完成任务[%s]", task.getId()));
+            }
+            if (null != content.get("componentId") && content.get("componentId") == componentId && type == task.getType()) {
+                return Result.fail(ResultCode.TASK_REPEAT_ERROR.getCode(), String.format("有重复未完成任务[%s]，任务类型[%s]", task.getId(), task.getType()));
+            }
+        }
         return Result.success();
     }
 

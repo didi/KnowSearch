@@ -43,4 +43,13 @@
         where component_id = #{componentId} and group_name = #{groupName} and host = #{host}
     </update>
 
+    <select id="findByComponentId"
+            parameterType="com.didiglobal.logi.op.manager.infrastructure.db.ComponentHostPO"
+            resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from logi_op_component_host
+        where component_id = #{componentId} and is_deleted = 0
+    </select>
+
 </mapper>

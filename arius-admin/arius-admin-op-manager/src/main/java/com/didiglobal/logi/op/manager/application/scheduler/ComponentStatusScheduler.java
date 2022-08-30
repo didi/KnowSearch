@@ -54,7 +54,7 @@ public class ComponentStatusScheduler {
     public void monitor() {
         try {
             //list所有有限的组件，里面的host详情也需要有效的host详情
-            List<Component> componentList = componentDomainService.listComponent().getData();
+            List<Component> componentList = componentDomainService.listComponentWithAll().getData();
 
             Map<String, String> packageIdToTemplate = packageId2TemplateIdMapCache.get(key, this::packageIdToTemplateMap);
 

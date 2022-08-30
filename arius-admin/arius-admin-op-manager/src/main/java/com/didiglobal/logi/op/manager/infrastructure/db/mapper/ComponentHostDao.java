@@ -45,4 +45,11 @@ public interface ComponentHostDao {
       */
      int updateDeleteStatus(@Param("componentId") int componentId, @Param("host") String host,
                       @Param("groupName") String groupName, @Param("isDeleted") int isDeleted);
+
+     /**
+      * 获取所有组件host列表
+      * @param componentId 组件id
+      * @return List<ComponentHostPO> 组件po
+      */
+     List<ComponentHostPO> findByComponentId(@Param("componentId") int componentId);
 }

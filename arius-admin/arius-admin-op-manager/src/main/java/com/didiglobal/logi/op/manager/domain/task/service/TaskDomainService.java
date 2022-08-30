@@ -1,6 +1,7 @@
 package com.didiglobal.logi.op.manager.domain.task.service;
 
 import com.didiglobal.logi.op.manager.domain.task.entity.Task;
+import com.didiglobal.logi.op.manager.domain.task.entity.value.TaskDetail;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 import com.didiglobal.logi.op.manager.infrastructure.common.Tuple;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralGroupConfig;
@@ -107,4 +108,14 @@ public interface TaskDomainService {
      * @return
      */
     Result<Void> updateTaskStatusAndIsFinish(int taskId, int isFinish, int status);
+
+
+    /**
+     * 是否有未完成的重名工单
+     * @param name
+     * @param componentId
+     * @param type
+     * @return
+     */
+    Result<Void> hasRepeatTask(String name, Integer componentId, int type);
 }

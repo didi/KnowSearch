@@ -15,8 +15,9 @@ public class SpringEventPublisher {
     @Autowired
     private ApplicationEventPublisher publisher;
 
-    public void publish(DomainEvent event) {
+    public DomainEvent publish(DomainEvent event) {
         publisher.publishEvent(event);
+        return event;
     }
 }
 

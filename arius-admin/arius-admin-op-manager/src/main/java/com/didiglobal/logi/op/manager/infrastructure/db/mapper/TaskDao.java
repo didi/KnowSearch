@@ -51,4 +51,10 @@ public interface TaskDao {
      * @return
      */
     List<TaskPO>  getUnFinishTaskList();
+
+    /**
+     * 获取未到达终态的任务列表
+     * @return
+     */
+    List<TaskPO>  getUnFinalStatusTaskList();
 }

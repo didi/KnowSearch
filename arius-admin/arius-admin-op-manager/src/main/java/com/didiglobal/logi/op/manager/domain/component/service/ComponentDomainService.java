@@ -114,7 +114,7 @@ public interface ComponentDomainService {
      * @param 无
      * @return Result<List<Component>>，组件列表
      */
-    Result<List<Component>> listComponent();
+    Result<List<Component>> listComponentWithAll();
 
     /**
      * 是否包含对该package依赖的组件
