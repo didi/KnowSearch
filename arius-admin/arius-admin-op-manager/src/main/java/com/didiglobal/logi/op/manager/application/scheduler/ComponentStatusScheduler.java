@@ -6,6 +6,7 @@ import com.didiglobal.logi.op.manager.domain.packages.entity.Package;
 import com.didiglobal.logi.op.manager.domain.packages.service.PackageDomainService;
 import com.didiglobal.logi.op.manager.domain.script.entity.Script;
 import com.didiglobal.logi.op.manager.domain.script.service.impl.ScriptDomainService;
+import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.OperationEnum;
 import com.didiglobal.logi.op.manager.infrastructure.deployment.DeploymentService;
 import com.google.common.cache.Cache;
@@ -53,6 +54,7 @@ public class ComponentStatusScheduler {
     @Scheduled(initialDelay = 10000, fixedDelay = 300000)
     public void monitor() {
         try {
+            LOGGER.info("start monitor task");
             //list所有有限的组件，里面的host详情也需要有效的host详情
             List<Component> componentList = componentDomainService.listComponentWithAll().getData();
 
@@ -69,9 +71,12 @@ public class ComponentStatusScheduler {
                     //这里也需要zeus去获取配置
                     //TODO 回调未执行
                     groupToHostList.entrySet().forEach(entry -> {
-                        deploymentService.execute(packageIdToTemplate.get(component.getPackageId().toString()),
+                        Result res = deploymentService.execute(packageIdToTemplate.get(component.getPackageId().toString()),
                                 Strings.join(entry.getValue().iterator(), REX), String.valueOf(OperationEnum.STATUS.getType()),
                                 component.getId().toString(), entry.getKey());
+                        if (res.failed()) {
+                            LOGGER.error("组件[{}]分组[{}]执行失败，", component.getId(), entry.getKey(), res.getMessage());
+                        }
                     });
                 }
             });
