@@ -19,7 +19,7 @@ public class AriusConfigConstant {
     public static final String ARIUS_COMMON_GROUP                                      = "arius.common.group";
 
     /**
-     * arius的common配置组
+     * arius的template配置组
      */
     public static final String  ARIUS_TEMPLATE_GROUP                                      = "arius.template.group";
 

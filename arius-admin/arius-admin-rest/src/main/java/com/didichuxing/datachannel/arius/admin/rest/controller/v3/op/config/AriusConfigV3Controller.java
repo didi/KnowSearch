@@ -123,7 +123,7 @@ public class AriusConfigV3Controller {
     @ApiOperation(value = "获取时间格式列表")
     public Result<List<String>> listTimeFormat() {
         return Result.buildSucc(new ArrayList<>(ariusConfigInfoService.stringSettingSplit2Set(
-            AriusConfigConstant.ARIUS_COMMON_GROUP, AriusConfigConstant.LOGIC_TEMPLATE_TIME_FORMAT_LIST,
+            AriusConfigConstant.ARIUS_TEMPLATE_GROUP, AriusConfigConstant.LOGIC_TEMPLATE_TIME_FORMAT_LIST,
             AriusConfigConstant.LOGIC_TEMPLATE_TIME_FORMAT_LIST_DEFAULT_VALUE, COMMA)));
     }
 
