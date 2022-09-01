@@ -161,11 +161,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
                                                                                     List<Integer> logicClusterIds) {
         List<IndexTemplatePO> indexTemplatePOS = Lists.newArrayList();
         String sortTerm = null == param.getSortTerm() ? SortConstant.ID : param.getSortTerm();
-        // 如果 has dcdr 是 false 则找到的应该是可以创建 dcdr 链路，且没有开启 dcdr 服务的模板
-        if (Boolean.FALSE.equals(param.getHasDCDR())) {
-            param.setHasDCDR(null);
-            param.setOpenSrv(TemplateServiceEnum.TEMPLATE_DCDR.getCode().toString());
-        }
+        
         String sortType = param.getOrderByDesc() ? SortConstant.DESC : SortConstant.ASC;
         try {
             indexTemplatePOS = indexTemplateDAO.pagingByConditionAndLogicClusterIdList(
@@ -182,11 +178,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
     public List<IndexTemplate> pagingGetLogicTemplatesByCondition(TemplateConditionDTO param) {
         String sortTerm = null == param.getSortTerm() ? SortConstant.ID : param.getSortTerm();
         String sortType = param.getOrderByDesc() ? SortConstant.DESC : SortConstant.ASC;
-         // 如果 has dcdr 是 false 则找到的应该是可以创建 dcdr 链路，且没有开启 dcdr 服务的模板
-        if (Boolean.FALSE.equals(param.getHasDCDR())) {
-            param.setHasDCDR(null);
-            param.setOpenSrv(TemplateServiceEnum.TEMPLATE_DCDR.getCode().toString());
-        }
+       
         List<IndexTemplatePO> indexTemplatePOS = Lists.newArrayList();
         try {
             indexTemplatePOS = indexTemplateDAO.pagingByCondition(ConvertUtil.obj2Obj(param, IndexTemplatePO.class),
@@ -203,11 +195,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
     public List<IndexTemplate> pagingGetTemplateSrvByCondition(TemplateQueryDTO param) {
         List<IndexTemplatePO> indexTemplatePOS = Lists.newArrayList();
         String sortTerm = null == param.getSortTerm() ? SortConstant.ID : param.getSortTerm();
-        // 如果 has dcdr 是 false 则找到的应该是可以创建 dcdr 链路，且没有开启 dcdr 服务的模板
-        if (Boolean.FALSE.equals(param.getHasDCDR())) {
-                param.setHasDCDR(null);
-                param.setOpenSrv(TemplateServiceEnum.TEMPLATE_DCDR.getCode().toString());
-        }
+        
         String sortType = param.getOrderByDesc() ? SortConstant.DESC : SortConstant.ASC;
         try {
             indexTemplatePOS = indexTemplateDAO.pagingByCondition(ConvertUtil.obj2Obj(param, IndexTemplatePO.class),
@@ -238,11 +226,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
     @Override
     public Long fuzzyLogicTemplatesHitByConditionAndLogicClusterIdList(IndexTemplateDTO param,
                                                                        List<Integer> logicClusterIds) {
-        // 如果 has dcdr 是 false 则找到的应该是可以创建 dcdr 链路，且没有开启 dcdr 服务的模板
-        if (Boolean.FALSE.equals(param.getHasDCDR())) {
-            param.setHasDCDR(null);
-            param.setOpenSrv(TemplateServiceEnum.TEMPLATE_DCDR.getCode().toString());
-        }
+      
         return indexTemplateDAO.getTotalHitByConditionAndLogicClusterIdList(ConvertUtil.obj2Obj(param,
                 IndexTemplatePO.class),logicClusterIds);
     }
