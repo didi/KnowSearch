@@ -4,14 +4,13 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 /**
  * @author didi
- * @date 2022-07-25 5:36 下午
+ * @date 2022-09-01 10:57
  */
 @Data
 @AllArgsConstructor
-public class GeneralConfigChangeComponentDTO extends GeneralBaseOperationComponentDTO{
+@NoArgsConstructor
+public class GeneralRestartComponentDTO extends GeneralBaseOperationComponentDTO {
     private Integer componentId;
 }

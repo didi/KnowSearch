@@ -9,11 +9,12 @@ public enum OperationEnum {
     EXPAND(1, "组件扩缩"),
     SHRINK(2, "组件缩容"),
     SCALE(3, "组件扩缩容"),
-    CONFIG_CHANGE(4, "配置变更"),
-    RESTART(5, "重启"),
-    UPGRADE(6, "升级"),
-    STATUS(7, "状态"),
-    FUNCTION_EXECUTE(7, "任务执行"),
+    CONFIG_CHANGE(4, "组件配置变更"),
+    RESTART(5, "组件重启"),
+    UPGRADE(6, "组件升级"),
+    STATUS(7, "组件状态"),
+    FUNCTION_EXECUTE(8, "任务执行"),
+    ROLLBACK(9, "组件回滚"),
     UN_KNOW(-1, "未知");
 
     private int type;

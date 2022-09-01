@@ -8,25 +8,32 @@ import lombok.NoArgsConstructor;
 
 /**
  * @author didi
- * @date 2022-07-20 3:47 下午
+ * @date 2022-09-01 11:30
  */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class GeneralScaleComponent extends GeneralBaseOperationComponent {
+public class GeneralRollbackComponent extends GeneralBaseOperationComponent{
+    private Integer componentId;
+    /**
+     * rollback的类型，比如是配置变更回滚还是其他的
+     */
     private Integer type;
 
-    private Integer componentId;
+    /**
+     * 回滚任务id
+     */
+    private Integer taskId;
 
-    public Result<Void> checkScaleParam() {
+    public Result<Void> checkRollbackParam() {
         Result result = super.checkParam();
 
         if (result.failed()) {
             return result;
         }
 
-        if (null == componentId) {
-            return Result.fail(ResultCode.PARAM_ERROR.getCode(), "组件id缺失");
+        if (null == componentId || null == taskId || null == type) {
+            return Result.fail(ResultCode.PARAM_ERROR.getCode(), "组件id或者任务id缺失");
         }
 
         return Result.success();

@@ -44,8 +44,7 @@ public abstract class BaseComponentHandler implements ComponentHandler {
     @Autowired
     protected TaskDomainService taskDomainService;
 
-    protected String getTemplateId(int componentId) {
-        Component component = componentDomainService.getComponentById(componentId).getData();
+    protected String getTemplateId(Component component) {
         Package pk = packageDomainService.queryPackage(Package.builder().id(component.getPackageId()).build()).
                 getData().get(0);
         return scriptDomainService.getScriptById(pk.getScriptId()).getData().getTemplateId();
@@ -70,9 +69,7 @@ public abstract class BaseComponentHandler implements ComponentHandler {
             JSONObject processNumJson = JSON.parseObject(config.getProcessNumConfig());
             List<Tuple<String, Integer>> hostProcessNumTuple = new ArrayList<>();
             if (!StringUtils.isEmpty(config.getHosts())) {
-                Arrays.asList(config.getHosts().split(SPLIT)).forEach(host -> {
-                    hostProcessNumTuple.add(new Tuple<String, Integer>(host, (Integer) processNumJson.get(host)));
-                });
+                Arrays.asList(config.getHosts().split(SPLIT)).forEach(host -> hostProcessNumTuple.add(new Tuple<>(host, (Integer) processNumJson.get(host))));
                 groupToIpList.put(config.getGroupName(), hostProcessNumTuple);
             }
         });
@@ -84,11 +81,7 @@ public abstract class BaseComponentHandler implements ComponentHandler {
         HashMap<String, Set<String>> groupName2HostNormalStatusMap = new HashMap<>();
         task.getDetailList().forEach(detail -> {
             if (detail.getStatus() == TaskStatusEnum.SUCCESS.getStatus()) {
-                Set<String> hosts = groupName2HostNormalStatusMap.get(detail.getGroupName());
-                if (null == hosts) {
-                    hosts = new HashSet<>();
-                    groupName2HostNormalStatusMap.put(detail.getGroupName(), hosts);
-                }
+                Set<String> hosts = groupName2HostNormalStatusMap.computeIfAbsent(detail.getGroupName(), k -> new HashSet<>());
                 hosts.add(detail.getHost());
             }
         });

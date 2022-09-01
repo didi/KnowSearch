@@ -10,9 +10,13 @@ import com.didiglobal.logi.op.manager.infrastructure.common.ResultCode;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.*;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.HostStatusEnum;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.OperationEnum;
+import com.didiglobal.logi.op.manager.infrastructure.common.enums.TaskStatusEnum;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 
 import java.util.List;
 
@@ -47,7 +51,7 @@ public class ComponentService {
 
     public Result<Integer> scaleComponent(GeneralScaleComponent scaleComponent) {
         LOGGER.info("start scale component[{}]", scaleComponent);
-        Result checkRes = scaleComponent.checkParam();
+        Result checkRes = scaleComponent.checkScaleParam();
         if (checkRes.failed()) {
             return checkRes;
         }
@@ -61,7 +65,7 @@ public class ComponentService {
 
     public Result<Integer> configChangeComponent(GeneralConfigChangeComponent configChangeComponent) {
         LOGGER.info("start change component config[{}]", configChangeComponent);
-        Result checkRes = configChangeComponent.checkParam();
+        Result checkRes = configChangeComponent.checkConfigChangeParam();
         if (checkRes.failed()) {
             return checkRes;
         }
@@ -73,17 +77,17 @@ public class ComponentService {
         return componentDomainService.submitConfigChangeComponent(configChangeComponent);
     }
 
-    public Result<Integer> restartComponent(GeneralBaseOperationComponent restartOperationComponent) {
-        LOGGER.info("start restart component[{}]", restartOperationComponent);
-        Result checkRes = restartOperationComponent.checkParam();
+    public Result<Integer> restartComponent(GeneralRestartComponent restartComponent) {
+        LOGGER.info("start restart component[{}]", restartComponent);
+        Result checkRes = restartComponent.checkRestartParam();
         if (checkRes.failed()) {
             return checkRes;
         }
-        Result taskCheckRes = taskDomainService.hasRepeatTask(null, restartOperationComponent.getComponentId());
+        Result taskCheckRes = taskDomainService.hasRepeatTask(null, restartComponent.getComponentId());
         if (taskCheckRes.failed()) {
             return taskCheckRes;
         }
-        return componentDomainService.submitRestartComponent(restartOperationComponent);
+        return componentDomainService.submitRestartComponent(restartComponent);
     }
 
     public Result<Integer> upgradeComponent(GeneralUpgradeComponent generalUpgradeComponent) {
@@ -99,9 +103,57 @@ public class ComponentService {
         return componentDomainService.submitUpgradeComponent(generalUpgradeComponent);
     }
 
+    @Transactional(rollbackFor = Exception.class)
+    public Result<Integer> rollbackComponent(GeneralRollbackComponent generalRollbackComponent) {
+        LOGGER.info("start rollback component[{}]", generalRollbackComponent);
+        Result checkRes = generalRollbackComponent.checkRollbackParam();
+        if (checkRes.failed()) {
+            return checkRes;
+        }
+
+        //只有failed状态的任务才允许回滚
+        Result statusAndTypeRes = checkStatusAndType(generalRollbackComponent);
+        if (statusAndTypeRes.failed()) {
+            return statusAndTypeRes;
+        }
+
+        Result updateRes = taskDomainService.updateTaskStatus(generalRollbackComponent.getTaskId(), TaskStatusEnum.CANCELLED.getStatus());
+        if (updateRes.failed()) {
+            return updateRes;
+        }
+        Result taskCheckRes = taskDomainService.hasRepeatTask(null, generalRollbackComponent.getComponentId());
+        if (taskCheckRes.failed()) {
+            //TODO 测试
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+            return taskCheckRes;
+        }
+        Result<Integer> submitRes = componentDomainService.submitRollbackComponent(generalRollbackComponent);
+        if (submitRes.failed()) {
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
+        }
+        return submitRes;
+    }
+
+    @Nullable
+    private Result checkStatusAndType(GeneralRollbackComponent generalRollbackComponent) {
+        Result<Task> taskRes = taskDomainService.getTaskById(generalRollbackComponent.getTaskId());
+        if (taskRes.failed() || null == taskRes.getData()) {
+            return Result.fail("task任务不存在");
+        }
+
+        if (taskRes.getData().getStatus() != TaskStatusEnum.FAILED.getStatus()) {
+            return Result.fail("task任务状态不能为failed");
+        }
+
+        if (taskRes.getData().getType() == OperationEnum.ROLLBACK.getType()) {
+            return Result.fail("原任务不能是回滚任务");
+        }
+        return Result.success();
+    }
+
     public Result<Integer> executeFunctionComponent(GeneralExecuteComponentFunction executeComponentFunction) {
         LOGGER.info("start execute function component[{}]",executeComponentFunction);
-        Result checkRes = executeComponentFunction.checkParam();
+        Result checkRes = executeComponentFunction.checkExecuteFunctionParam();
         if (checkRes.failed()) {
             return checkRes;
         }

@@ -81,7 +81,7 @@ public class TaskDomainServiceImpl implements TaskDomainService {
         }
 
         //获取模板和分组
-        Result<Tuple<GeneralGroupConfig, String>> configAndTemplateIdRes = getConfigByGroupName(task, group2HostListRes.getData().getKey());
+        Result<Tuple<GeneralGroupConfig, String>> configAndTemplateIdRes = getConfigAndTemplateByGroupName(task, group2HostListRes.getData().getKey());
         if (configAndTemplateIdRes.failed()) {
             return Result.fail(configAndTemplateIdRes.getMessage());
         }
@@ -257,7 +257,7 @@ public class TaskDomainServiceImpl implements TaskDomainService {
 
     @Override
     public Result<GeneralGroupConfig> getConfig(Task task, String groupName) {
-        Result<Tuple<GeneralGroupConfig, String>> configRes = getConfigByGroupName(task, groupName);
+        Result<Tuple<GeneralGroupConfig, String>> configRes = getConfigAndTemplateByGroupName(task, groupName);
 
         if (configRes.failed()) {
             return Result.fail(configRes.getMessage());
@@ -303,7 +303,12 @@ public class TaskDomainServiceImpl implements TaskDomainService {
         return Result.success();
     }
 
-    private Result<Tuple<GeneralGroupConfig, String>> getConfigByGroupName(Task task, String name) {
+    @Override
+    public Result<Integer> updateTaskStatus(int taskId, int status) {
+        return Result.buildSuccess(taskRepository.updateTaskStatus(taskId, status));
+    }
+
+    private Result<Tuple<GeneralGroupConfig, String>> getConfigAndTemplateByGroupName(Task task, String name) {
 
         switch (OperationEnum.valueOfType(task.getType())) {
             case INSTALL:
@@ -312,6 +317,7 @@ public class TaskDomainServiceImpl implements TaskDomainService {
             case CONFIG_CHANGE:
             case RESTART:
             case UPGRADE:
+            case ROLLBACK:
                 GeneralBaseOperationComponent baseOperationComponent = ConvertUtil.str2ObjByJson(task.getContent(), GeneralBaseOperationComponent.class);
                 for (GeneralGroupConfig config : baseOperationComponent.getGroupConfigList()) {
                     if (config.getGroupName().equals(name)) {

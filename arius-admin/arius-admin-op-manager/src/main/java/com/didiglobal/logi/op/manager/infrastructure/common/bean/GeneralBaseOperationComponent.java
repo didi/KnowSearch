@@ -18,19 +18,13 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class GeneralBaseOperationComponent {
-    protected Integer componentId;
-
     protected List<GeneralGroupConfig> groupConfigList;
 
     protected String associationId;
 
     protected String templateId;
 
-    public Result<Void> checkParam() {
-        if (null == componentId) {
-            return Result.fail(ResultCode.PARAM_ERROR.getCode(), "组件id缺失");
-        }
-
+    protected Result<Void> checkParam() {
         if (null == groupConfigList || groupConfigList.isEmpty()) {
             return Result.fail(ResultCode.PARAM_ERROR.getCode(), "配置组缺失");
         }

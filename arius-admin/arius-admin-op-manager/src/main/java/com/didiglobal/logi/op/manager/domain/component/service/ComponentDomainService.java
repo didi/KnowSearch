@@ -79,7 +79,7 @@ public interface ComponentDomainService {
      * @param restartComponent
      * @return
      */
-    Result<Integer> submitRestartComponent(GeneralBaseOperationComponent restartComponent);
+    Result<Integer> submitRestartComponent(GeneralRestartComponent restartComponent);
 
     /**
      * 升级组件
@@ -87,6 +87,13 @@ public interface ComponentDomainService {
      * @return
      */
     Result<Integer> submitUpgradeComponent(GeneralUpgradeComponent upgradeComponent);
+
+    /**
+     * 回滚组件
+     * @param rollbackComponent
+     * @return
+     */
+    Result<Integer> submitRollbackComponent(GeneralRollbackComponent rollbackComponent);
 
     /**
      * 执行相应功能的组件爱你D

@@ -1,37 +1,31 @@
 package com.didiglobal.logi.op.manager.infrastructure.common.hander;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.didiglobal.logi.op.manager.domain.component.entity.Component;
 import com.didiglobal.logi.op.manager.domain.component.event.ComponentEvent;
-import com.didiglobal.logi.op.manager.domain.component.service.ComponentDomainService;
 import com.didiglobal.logi.op.manager.domain.task.entity.Task;
 import com.didiglobal.logi.op.manager.domain.task.service.TaskDomainService;
 import com.didiglobal.logi.op.manager.infrastructure.common.ProcessStatus;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 import com.didiglobal.logi.op.manager.infrastructure.common.Tuple;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralExecuteComponentFunction;
-import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralGroupConfig;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.OperationEnum;
 import com.didiglobal.logi.op.manager.infrastructure.common.hander.base.BaseComponentHandler;
 import com.didiglobal.logi.op.manager.infrastructure.common.hander.base.ComponentHandler;
 import com.didiglobal.logi.op.manager.infrastructure.exception.ComponentHandlerException;
-import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.*;
 
-import static com.didiglobal.logi.op.manager.infrastructure.common.Constants.SPLIT;
-
 /**
  * @author didi
  * @date 2022-08-15 10:17
  */
-public class ExecuteComponentFunction extends BaseComponentHandler implements ComponentHandler {
+public class ExecuteComponentFunctionHandler extends BaseComponentHandler implements ComponentHandler {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ExecuteComponentFunction.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ExecuteComponentFunctionHandler.class);
 
     @Autowired
     private TaskDomainService taskDomainService;
@@ -41,11 +35,12 @@ public class ExecuteComponentFunction extends BaseComponentHandler implements Co
         try {
             GeneralExecuteComponentFunction executeComponentFunction = (GeneralExecuteComponentFunction) componentEvent.getSource();
             String associationId = executeComponentFunction.getAssociationId();
-            executeComponentFunction.setTemplateId(getTemplateId(executeComponentFunction.getComponentId()));
+            Component component = componentDomainService.getComponentById(executeComponentFunction.getComponentId()).getData();
+            executeComponentFunction.setTemplateId(getTemplateId(component));
             String content = JSONObject.toJSON(executeComponentFunction).toString();
             Map<String, List<Tuple<String, Integer>>> groupToIpList = getGroup2HostMap(executeComponentFunction.getGroupConfigList());
             int taskId = taskDomainService.createTask(content, componentEvent.getOperateType(),
-                    componentEvent.getDescribe(), associationId, groupToIpList).getData();
+                    component.getName() + componentEvent.getDescribe(), associationId, groupToIpList).getData();
             return taskId;
         } catch (Exception e) {
             LOGGER.error("event process error.", e);

@@ -7,7 +7,7 @@ import com.didiglobal.logi.op.manager.domain.task.entity.Task;
 import com.didiglobal.logi.op.manager.domain.task.service.TaskDomainService;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 import com.didiglobal.logi.op.manager.infrastructure.common.Tuple;
-import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralRestartComponent;
+import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralRollbackComponent;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.OperationEnum;
 import com.didiglobal.logi.op.manager.infrastructure.common.hander.base.BaseComponentHandler;
 import com.didiglobal.logi.op.manager.infrastructure.common.hander.base.ComponentHandler;
@@ -22,28 +22,28 @@ import java.util.Map;
 
 /**
  * @author didi
- * @date 2022-07-26 3:57 下午
+ * @date 2022-09-01 11:27
  */
 @org.springframework.stereotype.Component
 @DefaultHandler
-public class RestartComponentHandler extends BaseComponentHandler implements ComponentHandler {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(RestartComponentHandler.class);
+public class RollbackComponentHandler extends BaseComponentHandler implements ComponentHandler {
+    private static final Logger LOGGER = LoggerFactory.getLogger(RollbackComponentHandler.class);
 
     @Autowired
     private TaskDomainService taskDomainService;
 
-
     @Override
     public Integer eventProcess(ComponentEvent componentEvent) throws ComponentHandlerException {
         try {
-            GeneralRestartComponent restartComponent = (GeneralRestartComponent) componentEvent.getSource();
-            Component component = componentDomainService.getComponentById(restartComponent.getComponentId()).getData();
-            restartComponent.setTemplateId(getTemplateId(component));
-            String content = JSONObject.toJSON(restartComponent).toString();
-            Map<String, List<Tuple<String, Integer>>> groupToIpList = getGroup2HostMap(restartComponent.getGroupConfigList());
-            int taskId = taskDomainService.createTask(content, componentEvent.getOperateType(),
-                    component.getName() + componentEvent.getDescribe(), restartComponent.getAssociationId(), groupToIpList).getData();
+            GeneralRollbackComponent rollbackComponent = (GeneralRollbackComponent) componentEvent.getSource();
+            Component component = componentDomainService.getComponentById(rollbackComponent.getComponentId()).getData();
+            rollbackComponent.setTemplateId(getTemplateId(component));
+            String content = JSONObject.toJSON(rollbackComponent).toString();
+            String desc = component.getName() + componentEvent.getDescribe() +
+                    String.format("[类型:%s]", OperationEnum.valueOfType(rollbackComponent.getType()).getDescribe());
+            Map<String, List<Tuple<String, Integer>>> groupToIpList = getGroup2HostMap(rollbackComponent.getGroupConfigList());
+            int taskId = taskDomainService.createTask(content, componentEvent.getOperateType(), desc,
+                    rollbackComponent.getAssociationId(), groupToIpList).getData();
             return taskId;
         } catch (Exception e) {
             LOGGER.error("event process error.", e);
@@ -53,18 +53,17 @@ public class RestartComponentHandler extends BaseComponentHandler implements Com
     }
 
     @Override
+    public Result<Void> execute(Task task) {
+        return taskDomainService.executeDeployTask(task);
+    }
+
+    @Override
     public void taskFinishProcess(int taskId, String content) throws ComponentHandlerException {
-        //暂时不用操作
+        LOGGER.info("任务{}执行成功", taskId);
     }
 
     @Override
     public Integer getOperationType() {
-        return OperationEnum.RESTART.getType();
-    }
-
-    @Override
-    public Result<Void> execute(Task task) {
-        return taskDomainService.executeDeployTask(task);
+        return OperationEnum.ROLLBACK.getType();
     }
 }
-

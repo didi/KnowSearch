@@ -9,6 +9,7 @@ import com.didiglobal.logi.op.manager.infrastructure.common.ResultCode;
 import com.didiglobal.logi.op.manager.infrastructure.common.Tuple;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralGroupConfig;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralInstallComponent;
+import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralRollbackComponent;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.HostActionEnum;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.OperationEnum;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.TaskActionEnum;
@@ -121,7 +122,12 @@ public class TaskService {
             Integer packageId = ConvertUtil.str2ObjByJson(task.getContent(), GeneralInstallComponent.class).getPackageId();
             String url = packageDomainService.queryPackage(Package.builder().id(packageId).build()).getData().stream().findFirst().get().getUrl();
             request = new Tuple<>(configResult.getData(), url);
-        } else {
+        } /*else if (task.getType() == OperationEnum.ROLLBACK.getType()){
+            *//*GeneralRollbackComponent rollbackComponent = ConvertUtil.str2ObjByJson(task.getContent(), GeneralRollbackComponent.class);
+            rollbackComponent.getType();
+            String url = packageDomainService.queryPackage(Package.builder().id(packageId).build()).getData().stream().findFirst().get().getUrl();
+            request = new Tuple<>(configResult.getData(), url);*//*
+        }*/else {
             request = new Tuple<>(configResult.getData(), null);
         }
         return Result.success(request);

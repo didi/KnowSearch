@@ -88,7 +88,7 @@ public class ComponentDomainServiceImpl implements ComponentDomainService {
     }
 
     @Override
-    public Result<Integer> submitRestartComponent(GeneralBaseOperationComponent restartComponent) {
+    public Result<Integer> submitRestartComponent(GeneralRestartComponent restartComponent) {
 
         //发送事件，领域解耦
         DomainEvent domainEvent = publisher.publish(ComponentEvent.createRestartEvent(restartComponent));
@@ -99,6 +99,13 @@ public class ComponentDomainServiceImpl implements ComponentDomainService {
     public Result<Integer> submitUpgradeComponent(GeneralUpgradeComponent upgradeComponent) {
         //发送事件，领域解耦
         DomainEvent domainEvent = publisher.publish(ComponentEvent.createUpdateEvent(upgradeComponent));
+        return (Result<Integer>) domainEvent.getResult();
+    }
+
+    @Override
+    public Result<Integer> submitRollbackComponent(GeneralRollbackComponent rollbackComponent) {
+        //发送事件，领域解耦
+        DomainEvent domainEvent = publisher.publish(ComponentEvent.createRollbackEvent(rollbackComponent));
         return (Result<Integer>) domainEvent.getResult();
     }
 

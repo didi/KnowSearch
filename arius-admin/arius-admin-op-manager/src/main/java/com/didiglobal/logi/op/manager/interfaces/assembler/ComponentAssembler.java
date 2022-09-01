@@ -41,12 +41,16 @@ public class ComponentAssembler {
         return component;
     }
 
-    public static GeneralBaseOperationComponent toRestartComponent(GeneralBaseOperationComponentDTO dto) {
-        return ConvertUtil.obj2Obj(dto, GeneralBaseOperationComponent.class);
+    public static GeneralRestartComponent toRestartComponent(GeneralRestartComponentDTO dto) {
+        return ConvertUtil.obj2Obj(dto, GeneralRestartComponent.class);
     }
 
     public static GeneralUpgradeComponent toUpgradeComponent(GeneralUpgradeComponentDTO dto) {
         return ConvertUtil.obj2Obj(dto, GeneralUpgradeComponent.class);
+    }
+
+    public static GeneralRollbackComponent toRollbackComponent(GeneralRollbackComponentDTO dto) {
+        return ConvertUtil.obj2Obj(dto, GeneralRollbackComponent.class);
     }
 
     public static GeneralExecuteComponentFunction toExecuteFunctionComponent(GeneralExecuteComponentFunctionDTO dto) {

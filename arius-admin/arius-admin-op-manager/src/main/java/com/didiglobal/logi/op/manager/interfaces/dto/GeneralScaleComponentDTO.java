@@ -13,4 +13,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class GeneralScaleComponentDTO extends GeneralBaseOperationComponentDTO {
     private Integer type;
+    private Integer componentId;
 }

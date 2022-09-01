@@ -14,8 +14,6 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class GeneralBaseOperationComponentDTO {
-    private Integer componentId;
-
     private List<GeneralGroupConfigDTO> groupConfigList;
 
     private String associationId;

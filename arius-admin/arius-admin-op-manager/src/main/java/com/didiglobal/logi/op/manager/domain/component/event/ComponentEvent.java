@@ -68,6 +68,13 @@ public class ComponentEvent extends DomainEvent<Result> {
         return event;
     }
 
+    public static ComponentEvent createRollbackEvent(Object source) {
+        ComponentEvent event = new ComponentEvent(source);
+        event.operateType = OperationEnum.ROLLBACK.getType();
+        event.setDescribe(OperationEnum.ROLLBACK.getDescribe());
+        return event;
+    }
+
     @Override
     public synchronized Result getResult() {
         try {

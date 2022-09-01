@@ -19,11 +19,21 @@ public class GeneralUpgradeComponent extends GeneralBaseOperationComponent{
      */
     private Integer packageId;
 
+    /**
+     * 组件id
+     */
+    private Integer componentId;
+
 
     public Result<Void> checkUpgradeParam() {
         Result result = super.checkParam();
+
         if (result.failed()) {
             return result;
+        }
+
+        if (null == componentId) {
+            return Result.fail(ResultCode.PARAM_ERROR.getCode(), "组件id缺失");
         }
 
         if (null == packageId) {

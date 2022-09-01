@@ -117,4 +117,13 @@ public interface TaskDomainService {
      * @return
      */
     Result<Void> hasRepeatTask(String name, Integer componentId);
+
+
+    /**
+     * 更新任务状态
+     * @param taskId
+     * @param status
+     * @return
+     */
+    Result<Integer> updateTaskStatus(int taskId, int status);
 }

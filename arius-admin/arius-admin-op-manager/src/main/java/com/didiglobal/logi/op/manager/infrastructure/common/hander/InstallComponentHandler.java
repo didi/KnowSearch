@@ -64,7 +64,7 @@ public class InstallComponentHandler extends BaseComponentHandler implements Com
 
             Map<String, List<Tuple<String, Integer>>> groupToIpList = getGroup2HostMap(installComponent.getGroupConfigList());
             int taskId = taskDomainService.createTask(content, componentEvent.getOperateType(),
-                    componentEvent.getDescribe(), associationId, groupToIpList).getData();
+                    installComponent.getName() + componentEvent.getDescribe(), associationId, groupToIpList).getData();
             return taskId;
         } catch (Exception e) {
             LOGGER.error("event process error.", e);

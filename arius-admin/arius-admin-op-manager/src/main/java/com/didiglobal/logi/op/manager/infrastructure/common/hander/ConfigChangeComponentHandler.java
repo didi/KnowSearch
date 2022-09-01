@@ -43,11 +43,12 @@ public class ConfigChangeComponentHandler extends BaseComponentHandler implement
     public Integer eventProcess(ComponentEvent componentEvent) throws ComponentHandlerException {
         try {
             GeneralConfigChangeComponent changeComponent = (GeneralConfigChangeComponent) componentEvent.getSource();
-            changeComponent.setTemplateId(getTemplateId(changeComponent.getComponentId()));
+            Component component = componentDomainService.getComponentById(changeComponent.getComponentId()).getData();
+            changeComponent.setTemplateId(getTemplateId(component));
             String content = JSONObject.toJSON(changeComponent).toString();
             Map<String, List<Tuple<String, Integer>>> groupToIpList = getGroup2HostMap(changeComponent.getGroupConfigList());
             int taskId = taskDomainService.createTask(content, componentEvent.getOperateType(),
-                    componentEvent.getDescribe(), changeComponent.getAssociationId(), groupToIpList).getData();
+                    component.getName() + componentEvent.getDescribe(), changeComponent.getAssociationId(), groupToIpList).getData();
             return taskId;
         } catch (Exception e) {
             LOGGER.error("event process error.", e);

@@ -8,17 +8,16 @@ import lombok.NoArgsConstructor;
 
 /**
  * @author didi
- * @date 2022-07-20 3:47 下午
+ * @date 2022-09-01 11:04
  */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class GeneralScaleComponent extends GeneralBaseOperationComponent {
-    private Integer type;
+public class GeneralRestartComponent extends GeneralBaseOperationComponent {
 
     private Integer componentId;
 
-    public Result<Void> checkScaleParam() {
+    public Result<Void> checkRestartParam() {
         Result result = super.checkParam();
 
         if (result.failed()) {

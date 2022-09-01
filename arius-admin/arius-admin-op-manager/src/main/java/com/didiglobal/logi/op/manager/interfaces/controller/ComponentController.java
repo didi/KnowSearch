@@ -59,8 +59,8 @@ public class ComponentController {
 
     @PostMapping("/restart")
     @ApiOperation(value = "")
-    public Result<Integer> restart(@RequestBody GeneralBaseOperationComponentDTO restartOperationComponentDTO) {
-        return componentService.restartComponent(ComponentAssembler.toRestartComponent(restartOperationComponentDTO));
+    public Result<Integer> restart(@RequestBody GeneralRestartComponentDTO restartComponentDTO) {
+        return componentService.restartComponent(ComponentAssembler.toRestartComponent(restartComponentDTO));
     }
 
 
@@ -68,6 +68,12 @@ public class ComponentController {
     @ApiOperation(value = "")
     public Result<Integer> upgrade(@RequestBody GeneralUpgradeComponentDTO generalUpgradeComponentDTO) {
         return componentService.upgradeComponent(ComponentAssembler.toUpgradeComponent(generalUpgradeComponentDTO));
+    }
+
+    @PostMapping("/rollback")
+    @ApiOperation(value = "")
+    public Result<Integer> rollback(@RequestBody GeneralRollbackComponentDTO generalRollbackComponentDTO) {
+        return componentService.rollbackComponent(ComponentAssembler.toRollbackComponent(generalRollbackComponentDTO));
     }
 
     @PostMapping("/execute-function")

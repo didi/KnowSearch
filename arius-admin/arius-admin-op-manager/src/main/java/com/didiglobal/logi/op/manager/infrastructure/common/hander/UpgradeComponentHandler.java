@@ -45,13 +45,13 @@ public class UpgradeComponentHandler extends BaseComponentHandler implements Com
     public Integer eventProcess(ComponentEvent componentEvent) throws ComponentHandlerException {
         try {
             GeneralUpgradeComponent upgradeComponent = (GeneralUpgradeComponent) componentEvent.getSource();
-
+            Component component = componentDomainService.getComponentById(upgradeComponent.getComponentId()).getData();
             upgradeComponent.setTemplateId(getTemplateIdByPackageId(upgradeComponent.getPackageId()));
             List<ComponentGroupConfig> list = componentDomainService.getComponentConfig(upgradeComponent.getComponentId()).getData();
             upgradeComponent.setGroupConfigList(ConvertUtil.list2List(list, GeneralGroupConfig.class));
             String content = JSONObject.toJSON(upgradeComponent).toString();
             int taskId = taskDomainService.createTask(content, componentEvent.getOperateType(),
-                    componentEvent.getDescribe(), upgradeComponent.getAssociationId(),
+                    component.getName() + componentEvent.getDescribe(), upgradeComponent.getAssociationId(),
                     getGroup2HostMap(ConvertUtil.list2List(list, GeneralGroupConfig.class))).getData();
             return taskId;
         } catch (Exception e) {

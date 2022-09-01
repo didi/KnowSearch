@@ -33,8 +33,8 @@ public  class TaskRepositoryImpl implements TaskRepository {
     }
 
     @Override
-    public void updateTaskStatus(int id, int status) {
-        taskDao.updateStatus(id, status);
+    public int updateTaskStatus(int id, int status) {
+        return taskDao.updateStatus(id, status);
     }
 
     @Override

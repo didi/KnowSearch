@@ -27,8 +27,9 @@ public interface TaskRepository {
      * 更新任务状态
      * @param id
      * @param status
+     * @return
      */
-    void updateTaskStatus(int id, int status);
+    int updateTaskStatus(int id, int status);
 
     /**
      * 更新任务状态以及是否完成状态

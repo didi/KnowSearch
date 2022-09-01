@@ -16,4 +16,6 @@ public class GeneralUpgradeComponentDTO extends GeneralBaseOperationComponentDTO
      * 关联的安装包id
      */
     private Integer packageId;
+
+    private Integer componentId;
 }

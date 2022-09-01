@@ -1,5 +1,6 @@
 package com.didiglobal.logi.op.manager.interfaces.dto;
 
+import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralBaseOperationComponent;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,7 +14,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class GeneraInstallComponentDTO {
+public class GeneraInstallComponentDTO extends GeneralBaseOperationComponentDTO {
     /**
      * 组件名
      */
@@ -23,17 +24,7 @@ public class GeneraInstallComponentDTO {
      */
     private Integer packageId;
     /**
-     * 值对象，关联group配置
-     */
-    private List<GeneralGroupConfigDTO> groupConfigList;
-
-    /**
      * 依赖的组件id
      */
     private Integer dependComponentId;
-
-    /**
-     * 模板id
-     */
-    private String templateId;
 }

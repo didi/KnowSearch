@@ -89,6 +89,14 @@ public class ZeusTaskStatus {
                 cancelled.addAll(status.getCancelled());
             }
         }
+
+        if (null == ignored) {
+            ignored = status.getIgnored();
+        } else {
+            if (null != status.getIgnored()) {
+                ignored.addAll(status.getIgnored());
+            }
+        }
     }
 
 }

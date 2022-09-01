@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class GeneralExecuteComponentFunctionDTO {
+public class GeneralExecuteComponentFunctionDTO extends GeneralBaseOperationComponentDTO{
     private Object param;
+    private Integer componentId;
 }
