@@ -823,11 +823,9 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         }
         final List<Integer> regionIds = listResult.getData().stream()
                 .map(ESClusterRoleHostVO::getId).distinct().map(Long::intValue).collect(Collectors.toList());
-        final ClusterRegionWithNodeInfoDTO clusterRegionWithNodeInfoDTO = new ClusterRegionWithNodeInfoDTO();
-        clusterRegionWithNodeInfoDTO.setBindingNodeIds(regionIds);
-        clusterRegionWithNodeInfoDTO.setPhyClusterName(param.getCluster());
-        clusterRegionWithNodeInfoDTO.setName(param.getCluster());
-        clusterRegionWithNodeInfoDTO.setLogicClusterIds("-1");
+        final ClusterRegionWithNodeInfoDTO clusterRegionWithNodeInfoDTO = ClusterRegionWithNodeInfoDTO.builder()
+                .bindingNodeIds(regionIds).name(param.getCluster()).logicClusterIds("-1")
+                .phyClusterName(param.getCluster()).build();
     
         final Result<List<Long>> result = clusterNodeManager.createMultiNode2Region(
                 Lists.newArrayList(clusterRegionWithNodeInfoDTO), AriusUser.SYSTEM.getDesc(), projectId);
@@ -835,18 +833,13 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
             return Result.buildFrom(result);
         }
         final Long regionId = result.getData().get(0);
-        ClusterRegionDTO clusterRegionDTO = new ClusterRegionDTO();
-        clusterRegionDTO.setId(regionId);
-        clusterRegionDTO.setLogicClusterIds("-1");
-        clusterRegionDTO.setPhyClusterName(param.getCluster());
-        clusterRegionDTO.setName(param.getCluster());
-        final ESLogicClusterWithRegionDTO esLogicClusterWithRegionDTO = new ESLogicClusterWithRegionDTO();
-        esLogicClusterWithRegionDTO.setProjectId(AuthConstant.DEFAULT_METADATA_PROJECT_ID);
-        esLogicClusterWithRegionDTO.setName(clusterRegionDTO.getName());
-        esLogicClusterWithRegionDTO.setLevel(1);
-        esLogicClusterWithRegionDTO.setType(1);
-        esLogicClusterWithRegionDTO.setDataNodeSpec("");
-        esLogicClusterWithRegionDTO.setClusterRegionDTOS(Lists.newArrayList(clusterRegionDTO));
+        ClusterRegionDTO clusterRegionDTO = ClusterRegionDTO.builder().id(regionId).logicClusterIds("-1")
+                .phyClusterName(param.getCluster()).name(param.getCluster()).build();
+    
+        final ESLogicClusterWithRegionDTO esLogicClusterWithRegionDTO = ESLogicClusterWithRegionDTO.builder()
+                .projectId(AuthConstant.DEFAULT_METADATA_PROJECT_ID).name(clusterRegionDTO.getName()).level(1).type(1)
+                .dataNodeSpec("").clusterRegionDTOS(Lists.newArrayList(clusterRegionDTO)).build();
+       
         final Result<Void> voidResult = addLogicClusterAndClusterRegions(esLogicClusterWithRegionDTO, AriusUser.SYSTEM.getDesc());
         if (voidResult.failed()) {
             return Result.buildFrom(voidResult);
