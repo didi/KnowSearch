@@ -11,5 +11,5 @@
   "dataType": 0,
   "desc": "索引列表",
   "mapping": "{\"properties\":{\"cluster\":{\"type\":\"keyword\"},\"priStoreSize\":{\"type\":\"keyword\"},\"clusterLogic\":{\"type\":\"keyword\"},\"resourceId\":{\"type\":\"long\"},\"platformCreateFlag\":{\"type\":\"boolean\"},\"pri\":{\"type\":\"long\"},\"health\":{\"type\":\"keyword\"},\"index\":{\"type\":\"keyword\"},\"templateId\":{\"type\":\"integer\"},\"docsDeleted\":{\"type\":\"long\"},\"deleteFlag\":{\"type\":\"boolean\"},\"totalSegmentCount\":{\"type\":\"long\"},\"clusterPhy\":{\"type\":\"keyword\"},\"appId\":{\"type\":\"integer\"},\"storeSize\":{\"type\":\"keyword\"},\"primariesSegmentCount\":{\"type\":\"long\"},\"rep\":{\"type\":\"long\"},\"docsCount\":{\"type\":\"long\"},\"projectId\":{\"type\":\"integer\"},\"key\":{\"ignore_above\":1024,\"type\":\"keyword\"},\"status\":{\"type\":\"keyword\"},\"timestamp\":{\"format\":\"epoch_millis\",\"type\":\"date\"}}}",
-  "setting": ""
+   "setting": "{\"index\":{\"translog.durability\":\"async\",\"translog.sync_interval\":\"15s\",\"refresh_interval\":\"1s\"}}"
 }
