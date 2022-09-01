@@ -280,11 +280,9 @@ public class ESIndexDAO extends BaseESDAO {
                 }
             } catch (Exception e) {
                 final String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
-                if(StringUtils.isNotBlank(exception)){
-                    throw new ESOperateException(exception);
-                }
                 LOGGER.error("class=ESIndexDAO||method=updateIndexMapping||msg=update index mapping fail||cluster={}||indexName={}", cluster
                         ,indexName,e);
+                throw new ESOperateException((StringUtils.isNotBlank(exception)?exception:"编辑mapping出错"));
             }
         }
 
