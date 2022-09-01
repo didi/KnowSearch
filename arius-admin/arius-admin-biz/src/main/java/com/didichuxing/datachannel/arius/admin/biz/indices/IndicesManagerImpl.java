@@ -703,7 +703,7 @@ public class IndicesManagerImpl implements IndicesManager {
             if (rolloverResult.failed()) {
                 return rolloverResult;
             }
-            resultMessage.add(JSONObject.parseObject(rolloverResult.getMessage()));
+            resultMessage.add(rolloverResult.getMessage());
             //操作记录
         operateRecordService.save(new OperateRecord.Builder()
                         .userOperation(operator)
