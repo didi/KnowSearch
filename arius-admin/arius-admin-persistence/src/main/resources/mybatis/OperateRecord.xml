@@ -157,7 +157,7 @@
 			and id &lt; #{id}
 	</update>
 
-	<update id="deleteBeforeSaveTime">
+	<update id="deleteExprieData">
 		delete
 		from operate_record_info
 		where cast(operate_time as datetime) &lt; #{saveTime}

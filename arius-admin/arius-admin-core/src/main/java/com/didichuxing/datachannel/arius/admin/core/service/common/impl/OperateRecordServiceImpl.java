@@ -52,7 +52,7 @@ public class OperateRecordServiceImpl implements OperateRecordService {
         LOGGER.info("class=OperateRecordServiceImpl||method=scheduledDeletionOldOperateRecord||msg=操作日志定时删除任务开始执行");
         try {
             Date saveTime = getSaveTime();
-            operateRecordDAO.deleteBeforeSaveTime(saveTime);
+            operateRecordDAO.deleteExprieData(saveTime);
         } catch (Exception e) {
             LOGGER.error("class=OperateRecordServiceImpl||method=scheduledDeletionOldOperateRecord||errMsg={}", e.getMessage());
         }

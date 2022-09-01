@@ -49,7 +49,7 @@ public interface OperateRecordDAO {
      * @param saveTime 规定的保存时间
      * @return OperateRecordPO
      */
-     void deleteBeforeSaveTime(@Param("saveTime") Date saveTime);
+     void deleteExprieData(@Param("saveTime") Date saveTime);
 
     /**
      * 通过moduleId和id删除数据
