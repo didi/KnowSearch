@@ -41,6 +41,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.DataTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.event.template.LogicTemplateModifyEvent;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
@@ -149,12 +150,35 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
         return ConvertUtil.list2List(
             indexTemplateDAO.likeByCondition(ConvertUtil.obj2Obj(param, IndexTemplatePO.class)), IndexTemplate.class);
     }
-
+    
+    /**
+     * @param param           查询条件对象，与上一方法中的查询条件对象相同。
+     * @param logicClusterIds 逻辑集群 ID 列表。
+     * @return 列表 < 索引模板 >
+     */
+    @Override
+    public List<IndexTemplate> pagingGetTemplateSrvByConditionAndLogicClusterIdList(TemplateQueryDTO param,
+                                                                                    List<Integer> logicClusterIds) {
+        List<IndexTemplatePO> indexTemplatePOS = Lists.newArrayList();
+        String sortTerm = null == param.getSortTerm() ? SortConstant.ID : param.getSortTerm();
+        
+        String sortType = param.getOrderByDesc() ? SortConstant.DESC : SortConstant.ASC;
+        try {
+            indexTemplatePOS = indexTemplateDAO.pagingByConditionAndLogicClusterIdList(
+                    ConvertUtil.obj2Obj(param, IndexTemplatePO.class), (param.getPage() - 1) * param.getSize(),
+                    param.getSize(), sortTerm, sortType, logicClusterIds);
+        } catch (Exception e) {
+            LOGGER.error("class=IndexTemplateServiceImpl||method=pagingGetTemplateSrvByCondition||err={}",
+                    e.getMessage(), e);
+        }
+        return ConvertUtil.list2List(indexTemplatePOS, IndexTemplate.class);
+    }
+    
     @Override
     public List<IndexTemplate> pagingGetLogicTemplatesByCondition(TemplateConditionDTO param) {
         String sortTerm = null == param.getSortTerm() ? SortConstant.ID : param.getSortTerm();
         String sortType = param.getOrderByDesc() ? SortConstant.DESC : SortConstant.ASC;
-
+       
         List<IndexTemplatePO> indexTemplatePOS = Lists.newArrayList();
         try {
             indexTemplatePOS = indexTemplateDAO.pagingByCondition(ConvertUtil.obj2Obj(param, IndexTemplatePO.class),
@@ -171,6 +195,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
     public List<IndexTemplate> pagingGetTemplateSrvByCondition(TemplateQueryDTO param) {
         List<IndexTemplatePO> indexTemplatePOS = Lists.newArrayList();
         String sortTerm = null == param.getSortTerm() ? SortConstant.ID : param.getSortTerm();
+        
         String sortType = param.getOrderByDesc() ? SortConstant.DESC : SortConstant.ASC;
         try {
             indexTemplatePOS = indexTemplateDAO.pagingByCondition(ConvertUtil.obj2Obj(param, IndexTemplatePO.class),
@@ -183,10 +208,29 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
     }
 
     @Override
-    public Long fuzzyLogicTemplatesHitByCondition(IndexTemplateDTO param) {
+    public Long fuzzyLogicTemplatesHitByCondition(IndexTemplateDTO param) {// 如果 has dcdr 是 false 则找到的应该是可以创建 dcdr 链路，且没有开启 dcdr 服务的模板
+        if (Boolean.FALSE.equals(param.getHasDCDR())) {
+            param.setHasDCDR(null);
+            param.setOpenSrv(TemplateServiceEnum.TEMPLATE_DCDR.getCode().toString());
+        }
         return indexTemplateDAO.getTotalHitByCondition(ConvertUtil.obj2Obj(param, IndexTemplatePO.class));
     }
-
+    
+    /**
+     * 它返回与给定条件和逻辑集群 ID 匹配的模板数量。
+     *
+     * @param param           将用于构造查询的参数对象。
+     * @param logicClusterIds 逻辑集群 ID 列表。
+     * @return 长
+     */
+    @Override
+    public Long fuzzyLogicTemplatesHitByConditionAndLogicClusterIdList(IndexTemplateDTO param,
+                                                                       List<Integer> logicClusterIds) {
+      
+        return indexTemplateDAO.getTotalHitByConditionAndLogicClusterIdList(ConvertUtil.obj2Obj(param,
+                IndexTemplatePO.class),logicClusterIds);
+    }
+    
     /**
      * 根据名字查询
      *

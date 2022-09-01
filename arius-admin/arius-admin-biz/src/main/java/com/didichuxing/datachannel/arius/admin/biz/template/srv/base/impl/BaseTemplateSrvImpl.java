@@ -283,7 +283,8 @@ public abstract class BaseTemplateSrvImpl implements BaseTemplateSrv {
         SupportSrv supportSrv = new SupportSrv();
         supportSrv.setPartition(StringUtils.endsWith(logicIndexTemplate.getExpression(), "*"));
         supportSrv.setDcdrModuleExists(
-                Objects.equals(logicIndexTemplate.getHasDCDR(), Boolean.TRUE) || Boolean.TRUE.equals(
+                templateServiceEnums.contains(TemplateServiceEnum.TEMPLATE_DCDR)||Objects.equals(logicIndexTemplate.getHasDCDR(),
+                        Boolean.TRUE) || Boolean.TRUE.equals(
                         existDCDRAndPipelineModule.v1));
         supportSrv.setPipelineModuleExists(
                 templateServiceEnums.contains(TemplateServiceEnum.TEMPLATE_PIPELINE) || Boolean.TRUE.equals(

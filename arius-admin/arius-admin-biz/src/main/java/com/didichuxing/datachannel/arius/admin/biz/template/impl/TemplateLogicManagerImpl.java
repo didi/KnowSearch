@@ -1375,6 +1375,10 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         if (Boolean.TRUE.equals(existDCDRAndPipelineModule.v2)) {
             openSrvList.add(TemplateServiceEnum.TEMPLATE_PIPELINE.getCode());
         }
+        // 如果存在 dcdr 插件，则开启 dcdr 服务
+        if (Boolean.TRUE.equals(existDCDRAndPipelineModule.v1)) {
+            openSrvList.add(TemplateServiceEnum.TEMPLATE_DCDR.getCode());
+        }
         if (CollectionUtils.isNotEmpty(openSrvList)) {
             //如果集群支持pipeline
             indexTemplateDTO.setOpenSrv(ConvertUtil.list2String(openSrvList, ","));
