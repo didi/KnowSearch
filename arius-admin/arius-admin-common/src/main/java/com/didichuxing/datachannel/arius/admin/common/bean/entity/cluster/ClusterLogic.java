@@ -33,6 +33,11 @@ public class ClusterLogic extends BaseEntity implements Comparable<ClusterLogic>
     private Integer projectId;
 
     /**
+     * 所属projectName
+     */
+    private String projectName;
+
+    /**
      * 数据中心
      */
     private String  dataCenter;

@@ -91,7 +91,7 @@ class ClusterPhyMetricsManagerTest {
             "aggType", Arrays.asList("value"), 0, 0, "topMethod", Arrays.asList("value"),null);
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
-        final ClusterLogic clusterLogic  = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0,
+        final ClusterLogic clusterLogic  = new ClusterLogic(0L, "name", 0, 0, "projectName" ,"dataCenter", "dataNodeSpec", 0,
                 "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
 
         when(clusterLogicService.getClusterLogicByNameAndProjectId("clusterLogicName", null)).thenReturn(clusterLogic);
@@ -142,7 +142,7 @@ class ClusterPhyMetricsManagerTest {
             "aggType", Arrays.asList("value"), 0, 0, "topMethod", Arrays.asList("value"),null);
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
-        final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0,  "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
+        final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "projectName", "dataCenter", "dataNodeSpec", 0,  "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
         when(clusterLogicService.getClusterLogicByNameAndProjectId("clusterLogicName", null)).thenReturn(clusterLogic);
 
         when(clusterRegionService.getRegionByLogicClusterId(0L)).thenReturn(null);
@@ -161,7 +161,7 @@ class ClusterPhyMetricsManagerTest {
             "aggType", Arrays.asList("value"), 0, 0, "topMethod", Arrays.asList("value"),null);
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
-        final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0,
+        final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "ProjectName", "dataCenter", "dataNodeSpec", 0,
             "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
         when(clusterLogicService.getClusterLogicByNameAndProjectId("clusterLogicName", null)).thenReturn(clusterLogic);
 
@@ -208,7 +208,7 @@ class ClusterPhyMetricsManagerTest {
             "aggType", Arrays.asList("value"), 0, 0, "topMethod", Arrays.asList("value"),null);
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
-        final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0, "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
+        final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0,"projectNama", "dataCenter", "dataNodeSpec", 0, "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
         when(clusterLogicService.getClusterLogicByNameAndProjectId("clusterLogicName", null)).thenReturn(clusterLogic);
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
@@ -256,7 +256,7 @@ class ClusterPhyMetricsManagerTest {
             "aggType", Arrays.asList("value"), 0, 0, "topMethod", Arrays.asList("value"),null);
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
-        final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0, "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
+        final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "projectName","dataCenter", "dataNodeSpec", 0, "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
         when(clusterLogicService.getClusterLogicByNameAndProjectId("clusterLogicName", null)).thenReturn(clusterLogic);
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
@@ -304,7 +304,7 @@ class ClusterPhyMetricsManagerTest {
             "aggType", Arrays.asList("value"), 0, 0, "topMethod", Arrays.asList("value"),null);
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
-        final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0,  "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
+        final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0,"projectName", "dataCenter", "dataNodeSpec", 0,  "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
         when(clusterLogicService.getClusterLogicByNameAndProjectId("clusterLogicName", null)).thenReturn(clusterLogic);
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
@@ -349,7 +349,7 @@ class ClusterPhyMetricsManagerTest {
             "aggType", Arrays.asList("value"), 0, 0, "topMethod", Arrays.asList("value"),null);
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
-        final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0,  "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
+        final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0,"projectName", "dataCenter", "dataNodeSpec", 0,  "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
         when(clusterLogicService.getClusterLogicByNameAndProjectId("clusterLogicName", null)).thenReturn(clusterLogic);
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
@@ -396,7 +396,7 @@ class ClusterPhyMetricsManagerTest {
             "aggType", Arrays.asList("value"), 0, 0, "topMethod", Arrays.asList("value"),null);
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
-        final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0,  "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
+        final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0,"projectName", "dataCenter", "dataNodeSpec", 0,  "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
         when(clusterLogicService.getClusterLogicByNameAndProjectId("clusterLogicName", null)).thenReturn(clusterLogic);
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
@@ -443,7 +443,7 @@ class ClusterPhyMetricsManagerTest {
             "aggType", Arrays.asList("value"), 0, 0, "topMethod", Arrays.asList("value"),null);
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
-        final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0, "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
+        final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0,"projectName", "dataCenter", "dataNodeSpec", 0, "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
         when(clusterLogicService.getClusterLogicByNameAndProjectId("clusterLogicName", null)).thenReturn(clusterLogic);
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
@@ -482,7 +482,7 @@ class ClusterPhyMetricsManagerTest {
                 .asList(new MetricsContentVO("cluster", "name", Arrays.asList(new MetricsContentCellVO(0.0, 0L)))))));
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
-        final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0, "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
+        final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0,"projectName", "dataCenter", "dataNodeSpec", 0, "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
         when(clusterLogicService.getClusterLogicByNameAndProjectId("clusterLogicName", null)).thenReturn(clusterLogic);
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
@@ -534,7 +534,7 @@ class ClusterPhyMetricsManagerTest {
                 .asList(new MetricsContentVO("cluster", "name", Arrays.asList(new MetricsContentCellVO(0.0, 0L)))))));
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
-        final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0, "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
+        final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0,"projectName", "dataCenter", "dataNodeSpec", 0, "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
         when(clusterLogicService.getClusterLogicByNameAndProjectId("clusterLogicName", null)).thenReturn(clusterLogic);
 
         when(clusterRegionService.getRegionByLogicClusterId(0L)).thenReturn(null);
@@ -556,7 +556,7 @@ class ClusterPhyMetricsManagerTest {
                 .asList(new MetricsContentVO("cluster", "name", Arrays.asList(new MetricsContentCellVO(0.0, 0L)))))));
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
-        final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0,  "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
+        final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0,"projectName", "dataCenter", "dataNodeSpec", 0,  "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
         when(clusterLogicService.getClusterLogicByNameAndProjectId("clusterLogicName", null)).thenReturn(clusterLogic);
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
@@ -605,7 +605,7 @@ class ClusterPhyMetricsManagerTest {
                 .asList(new MetricsContentVO("cluster", "name", Arrays.asList(new MetricsContentCellVO(0.0, 0L)))))));
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
-        final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0,"memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
+        final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0,"projectName", "dataCenter", "dataNodeSpec", 0,"memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
         when(clusterLogicService.getClusterLogicByNameAndProjectId("clusterLogicName", null)).thenReturn(clusterLogic);
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
@@ -656,7 +656,7 @@ class ClusterPhyMetricsManagerTest {
                 .asList(new MetricsContentVO("cluster", "name", Arrays.asList(new MetricsContentCellVO(0.0, 0L)))))));
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
-        final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0,  "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
+        final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0,"projectName", "dataCenter", "dataNodeSpec", 0,  "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
         when(clusterLogicService.getClusterLogicByNameAndProjectId("clusterLogicName", null)).thenReturn(clusterLogic);
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
@@ -707,7 +707,7 @@ class ClusterPhyMetricsManagerTest {
                 .asList(new MetricsContentVO("cluster", "name", Arrays.asList(new MetricsContentCellVO(0.0, 0L)))))));
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
-        final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0, "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
+        final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0,"projectName", "dataCenter", "dataNodeSpec", 0, "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
         when(clusterLogicService.getClusterLogicByNameAndProjectId("clusterLogicName", null)).thenReturn(clusterLogic);
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
@@ -755,7 +755,7 @@ class ClusterPhyMetricsManagerTest {
                 .asList(new MetricsContentVO("cluster", "name", Arrays.asList(new MetricsContentCellVO(0.0, 0L)))))));
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
-        final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0,  "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
+        final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0,"projectName", "dataCenter", "dataNodeSpec", 0,  "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
         when(clusterLogicService.getClusterLogicByNameAndProjectId("clusterLogicName", null)).thenReturn(clusterLogic);
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
@@ -805,7 +805,7 @@ class ClusterPhyMetricsManagerTest {
                 .asList(new MetricsContentVO("cluster", "name", Arrays.asList(new MetricsContentCellVO(0.0, 0L)))))));
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
-        final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0,  "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
+        final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0,"projectName", "dataCenter", "dataNodeSpec", 0,  "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
         when(clusterLogicService.getClusterLogicByNameAndProjectId("clusterLogicName", null)).thenReturn(clusterLogic);
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
@@ -855,7 +855,7 @@ class ClusterPhyMetricsManagerTest {
                 .asList(new MetricsContentVO("cluster", "name", Arrays.asList(new MetricsContentCellVO(0.0, 0L)))))));
 
         // Configure ClusterLogicService.getClusterLogicByName(...).
-        final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0, "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
+        final ClusterLogic clusterLogic = new ClusterLogic(0L, "name", 0, 0,"projectName", "dataCenter", "dataNodeSpec", 0, "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
         when(clusterLogicService.getClusterLogicByNameAndProjectId("clusterLogicName", null)).thenReturn(clusterLogic);
 
         // Configure ClusterRegionService.getRegionByLogicClusterId(...).
