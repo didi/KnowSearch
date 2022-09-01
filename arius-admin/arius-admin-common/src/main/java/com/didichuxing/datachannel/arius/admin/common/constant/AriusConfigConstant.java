@@ -19,6 +19,11 @@ public class AriusConfigConstant {
     public static final String ARIUS_COMMON_GROUP                                      = "arius.common.group";
 
     /**
+     * 操作记录保存时间
+     */
+    public static final String  OPERATE_RECORD_SAVE_TIME                           = "operate.record.save.time";
+
+    /**
      * 集群版本列表
      */
     public static final String CLUSTER_PACKAGE_VERSION_LIST                            = "cluster.package.version_list";
@@ -190,6 +195,7 @@ public class AriusConfigConstant {
      */
     public static final Boolean REQUEST_INTERCEPTOR_SWITCH_OPEN_DEFAULT_VALUE         = Boolean.TRUE;
 
+    public static final Integer OPERATE_RECORD_SAVE_TIME_DEFAULT_VALUE                = 30;
     /**
      * 索引模板默认冷存天数默认值
      */

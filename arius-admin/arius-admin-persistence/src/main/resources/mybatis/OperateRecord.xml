@@ -99,7 +99,7 @@
 		order by id DESC
 		LIMIT #{topN}, 1
 	</select>
-	
+
 	<select id="countByCondition" resultType="java.lang.Long"
 	        parameterType="com.didichuxing.datachannel.arius.admin.common.bean.dto.oprecord.OperateRecordDTO">
 		select count(id)
@@ -156,4 +156,11 @@
 		where module_id = #{moduleId}
 			and id &lt; #{id}
 	</update>
+
+	<update id="deleteBeforeSaveTime">
+		delete
+		from operate_record_info
+		where cast(operate_time as datetime) &lt; #{saveTime}
+	</update>
+
 </mapper>

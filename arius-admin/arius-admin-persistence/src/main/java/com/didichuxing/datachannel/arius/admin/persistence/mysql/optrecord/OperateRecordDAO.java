@@ -2,6 +2,8 @@ package com.didichuxing.datachannel.arius.admin.persistence.mysql.optrecord;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.oprecord.OperateRecordDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.operaterecord.OperateRecordInfoPO;
+
+import java.util.Date;
 import java.util.List;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -41,6 +43,13 @@ public interface OperateRecordDAO {
      * @return OperateRecordPO
      */
     OperateRecordInfoPO selectDescTopNByModuleId(@Param("moduleId") int moduleId, @Param("topN") int topN);
+
+    /**
+     * 删除saveTime之前的数据
+     * @param saveTime 规定的保存时间
+     * @return OperateRecordPO
+     */
+     void deleteBeforeSaveTime(@Param("saveTime") Date saveTime);
 
     /**
      * 通过moduleId和id删除数据
