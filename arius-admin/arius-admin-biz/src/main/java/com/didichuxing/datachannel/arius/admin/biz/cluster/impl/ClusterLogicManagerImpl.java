@@ -23,8 +23,10 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterJo
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterLogicConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRegionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRegionWithNodeInfoDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRegionWithNodeInfoDTO.ClusterRegionWithNodeInfoDTOBuilder;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterWithRegionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterWithRegionDTO.ESLogicClusterWithRegionDTOBuilder;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatCellDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateClearDTO;
@@ -823,9 +825,10 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         }
         final List<Integer> regionIds = listResult.getData().stream()
                 .map(ESClusterRoleHostVO::getId).distinct().map(Long::intValue).collect(Collectors.toList());
-        final ClusterRegionWithNodeInfoDTO clusterRegionWithNodeInfoDTO = ClusterRegionWithNodeInfoDTO.builder()
-                .bindingNodeIds(regionIds).name(param.getCluster()).logicClusterIds("-1")
-                .phyClusterName(param.getCluster()).build();
+        final ClusterRegionWithNodeInfoDTO clusterRegionWithNodeInfoDTO =
+                new ClusterRegionWithNodeInfoDTOBuilder()
+                .withBindingNodeIds(regionIds).withName(param.getCluster()).withLogicClusterIds("-1")
+                .withPhyClusterName(param.getCluster()).build();
     
         final Result<List<Long>> result = clusterNodeManager.createMultiNode2Region(
                 Lists.newArrayList(clusterRegionWithNodeInfoDTO), AriusUser.SYSTEM.getDesc(), projectId);
@@ -835,10 +838,9 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         final Long regionId = result.getData().get(0);
         ClusterRegionDTO clusterRegionDTO = ClusterRegionDTO.builder().id(regionId).logicClusterIds("-1")
                 .phyClusterName(param.getCluster()).name(param.getCluster()).build();
-    
-        final ESLogicClusterWithRegionDTO esLogicClusterWithRegionDTO = ESLogicClusterWithRegionDTO.builder()
-                .projectId(AuthConstant.DEFAULT_METADATA_PROJECT_ID).name(clusterRegionDTO.getName()).level(1).type(1)
-                .dataNodeSpec("").clusterRegionDTOS(Lists.newArrayList(clusterRegionDTO)).build();
+        final ESLogicClusterWithRegionDTO esLogicClusterWithRegionDTO = new ESLogicClusterWithRegionDTOBuilder()
+                .withProjectId(AuthConstant.DEFAULT_METADATA_PROJECT_ID).withName(clusterRegionDTO.getName()).withLevel(1).withType(1)
+                .withDataNodeSpec("").withClusterRegionDTOS(Lists.newArrayList(clusterRegionDTO)).build();
        
         final Result<Void> voidResult = addLogicClusterAndClusterRegions(esLogicClusterWithRegionDTO, AriusUser.SYSTEM.getDesc());
         if (voidResult.failed()) {
