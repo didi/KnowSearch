@@ -50,6 +50,21 @@ public class OperateRecordServiceImpl implements OperateRecordService {
     @Scheduled(cron = "0 0 1 * * ?")
     private void scheduledDeletionOldOperateRecord() {
         LOGGER.info("class=OperateRecordServiceImpl||method=scheduledDeletionOldOperateRecord||msg=操作日志定时删除任务开始执行");
+        try {
+            Date saveTime = getSaveTime();
+            operateRecordDAO.deleteBeforeSaveTime(saveTime);
+        } catch (Exception e) {
+            LOGGER.error("class=OperateRecordServiceImpl||method=scheduledDeletionOldOperateRecord||errMsg={}", e.getMessage());
+        }
+    }
+
+    /**
+     * 获得配置中设置的保存时间
+     *
+     * @param
+     * @return Date
+     */
+    private Date getSaveTime() {
         Date currentTime = new Date();
         Date saveTime = new Date();
         Calendar calendar = Calendar.getInstance();
@@ -58,7 +73,7 @@ public class OperateRecordServiceImpl implements OperateRecordService {
                 AriusConfigConstant.ARIUS_COMMON_GROUP,AriusConfigConstant.OPERATE_RECORD_SAVE_TIME,
                 AriusConfigConstant.OPERATE_RECORD_SAVE_TIME_DEFAULT_VALUE));
         saveTime = calendar.getTime();
-        operateRecordDAO.deleteBeforeSaveTime(saveTime);
+        return saveTime;
     }
 
     /**
