@@ -157,9 +157,7 @@ public class TemplateLogicSettingsManagerImpl extends BaseTemplateSrvImpl implem
 
         List<IndexTemplatePhy> templatePhysicals = templateLogicWithPhysical.fetchMasterPhysicalTemplates();
 
-        if (!isTemplateSrvOpen(templatePhysicals)) {
-            return Result.buildFail("集群没有开启" + templateServiceName());
-        }
+        
 
         for (IndexTemplatePhy templatePhysical : templatePhysicals) {
             try {
