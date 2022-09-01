@@ -6,25 +6,26 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.oprecord.OperateRecordDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.operaterecord.OperateRecordInfoPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.operaterecord.OperateRecordVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.OperateRecordSortEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.SortConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.optrecord.OperateRecordDAO;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+
+import java.util.*;
 import java.util.function.Consumer;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+
 
 /**
  *
@@ -38,37 +39,41 @@ public class OperateRecordServiceImpl implements OperateRecordService {
 
     @Autowired
     private OperateRecordDAO  operateRecordDAO;
-
-    /**
-     * 操作日志，每个类别，保留的最近操作日志数
-     */
-    private static final int  SAVE_RECENT_NUM = 1000;
+    @Autowired
+    private AriusConfigInfoService ariusConfigInfoService;
 
     /**
      * 0 0 1 * * ?
      * 每天凌晨1点执行该方法
-     * 定时删除操作日志，保留不同分类指定数量的最近操作日志
+     * 定时删除操作日志，根据配置中指定的保存天数对操作日志进行保留
      */
     @Scheduled(cron = "0 0 1 * * ?")
     private void scheduledDeletionOldOperateRecord() {
         LOGGER.info("class=OperateRecordServiceImpl||method=scheduledDeletionOldOperateRecord||msg=操作日志定时删除任务开始执行");
-        // 获取所有的分类
-        OperationEnum[] operationEnums = OperationEnum.values();
-        List<OperateRecordInfoPO> deleteList = new ArrayList<>();
-        for (OperationEnum operationEnum : operationEnums) {
-            // 获取每一个分类倒数第 N 条数据
-            int moduleId = operationEnum.getCode();
-            OperateRecordInfoPO operateRecordPO = operateRecordDAO.selectDescTopNByModuleId(moduleId, SAVE_RECENT_NUM);
-            if (operateRecordPO == null) {
-                // 说明这个分类数据一共不超过 N 条
-                continue;
-            }
-            deleteList.add(operateRecordPO);
+        try {
+            Date saveTime = getSaveTime();
+            operateRecordDAO.deleteExprieData(saveTime);
+        } catch (Exception e) {
+            LOGGER.error("class=OperateRecordServiceImpl||method=scheduledDeletionOldOperateRecord||errMsg={}", e.getMessage());
         }
-        for (OperateRecordInfoPO operateRecord : deleteList) {
-            // 删除该类别中，比指定id小的数据
-            operateRecordDAO.deleteByModuleIdAndLessThanId(operateRecord.getModuleId(), operateRecord.getId());
-        }
+    }
+
+    /**
+     * 获得配置中设置的保存时间
+     *
+     * @param
+     * @return Date
+     */
+    private Date getSaveTime() {
+        Date currentTime = new Date();
+        Date saveTime = new Date();
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(currentTime);
+        calendar.add(Calendar.DAY_OF_MONTH,-ariusConfigInfoService.intSetting(
+                AriusConfigConstant.ARIUS_COMMON_GROUP,AriusConfigConstant.OPERATE_RECORD_SAVE_TIME,
+                AriusConfigConstant.OPERATE_RECORD_SAVE_TIME_DEFAULT_VALUE));
+        saveTime = calendar.getTime();
+        return saveTime;
     }
 
     /**
