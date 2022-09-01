@@ -1,12 +1,11 @@
 package com.didiglobal.logi.op.manager.application;
 
-import com.didiglobal.logi.op.manager.domain.packages.entity.Package;
+import com.didiglobal.logi.op.manager.domain.component.service.ComponentDomainService;
 import com.didiglobal.logi.op.manager.domain.packages.service.PackageDomainService;
 import com.didiglobal.logi.op.manager.domain.task.entity.Task;
 import com.didiglobal.logi.op.manager.domain.task.service.TaskDomainService;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 import com.didiglobal.logi.op.manager.infrastructure.common.ResultCode;
-import com.didiglobal.logi.op.manager.infrastructure.common.Tuple;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralGroupConfig;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralInstallComponent;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralRollbackComponent;
@@ -14,7 +13,6 @@ import com.didiglobal.logi.op.manager.infrastructure.common.enums.HostActionEnum
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.OperationEnum;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.TaskActionEnum;
 import com.didiglobal.logi.op.manager.infrastructure.common.hander.ComponentHandlerFactory;
-import com.didiglobal.logi.op.manager.infrastructure.common.hander.base.ComponentHandler;
 import com.didiglobal.logi.op.manager.infrastructure.util.ConvertUtil;
 import com.google.common.base.Strings;
 import org.slf4j.Logger;
@@ -39,8 +37,12 @@ public class TaskService {
     @Autowired
     private ComponentHandlerFactory componentHandlerFactory;
 
+    @Autowired
+    private ComponentDomainService componentDomainService;
+
     /**
      * 执行任务
+     *
      * @param taskId
      * @return
      */
@@ -55,6 +57,7 @@ public class TaskService {
 
     /**
      * 对任务执行相应的操作，暂停，取消，杀死，继续
+     *
      * @param taskId
      * @param action
      * @return
@@ -79,6 +82,7 @@ public class TaskService {
 
     /**
      * 对host执行相应的操作，取消，重试，kill
+     *
      * @param taskId
      * @param action
      * @return
@@ -96,12 +100,12 @@ public class TaskService {
 
     /**
      * 获取任务执行的分组配置
-     * @param taskId
-     * @param groupName
-     * @return
+     *
+     * @param taskId 任务id
+     * @param groupName 分组名
+     * @return 通用配置
      */
-    public Result<Tuple<GeneralGroupConfig, String>> getGroupConfig(Integer taskId, String groupName) {
-        Tuple<GeneralGroupConfig, String> request;
+    public Result<GeneralGroupConfig> getGroupConfig(Integer taskId, String groupName) {
         if (null == taskId || Strings.isNullOrEmpty(groupName)) {
             return Result.fail(ResultCode.PARAM_ERROR.getCode(), "taskId or groupName为null");
         }
@@ -119,17 +123,16 @@ public class TaskService {
 
         if (task.getType() == OperationEnum.INSTALL.getType() ||
                 task.getType() == OperationEnum.UPGRADE.getType()) {
+            //如果是安装和升级，设置url
             Integer packageId = ConvertUtil.str2ObjByJson(task.getContent(), GeneralInstallComponent.class).getPackageId();
-            String url = packageDomainService.queryPackage(Package.builder().id(packageId).build()).getData().stream().findFirst().get().getUrl();
-            request = new Tuple<>(configResult.getData(), url);
-        } /*else if (task.getType() == OperationEnum.ROLLBACK.getType()){
-            *//*GeneralRollbackComponent rollbackComponent = ConvertUtil.str2ObjByJson(task.getContent(), GeneralRollbackComponent.class);
-            rollbackComponent.getType();
-            String url = packageDomainService.queryPackage(Package.builder().id(packageId).build()).getData().stream().findFirst().get().getUrl();
-            request = new Tuple<>(configResult.getData(), url);*//*
-        }*/else {
-            request = new Tuple<>(configResult.getData(), null);
+            configResult.getData().setUrl(packageDomainService.getPackageById(packageId).getData().getUrl());
+        } else if (task.getType() == OperationEnum.ROLLBACK.getType()) {
+            //如果是回滚，设置回滚类型以及url
+            GeneralRollbackComponent rollbackComponent = ConvertUtil.str2ObjByJson(task.getContent(), GeneralRollbackComponent.class);
+            configResult.getData().setType(rollbackComponent.getType());
+            int packageId = componentDomainService.getComponentById(rollbackComponent.getComponentId()).getData().getPackageId();
+            configResult.getData().setUrl(packageDomainService.getPackageById(packageId).getData().getUrl());
         }
-        return Result.success(request);
+        return Result.success(configResult.getData());
     }
 }

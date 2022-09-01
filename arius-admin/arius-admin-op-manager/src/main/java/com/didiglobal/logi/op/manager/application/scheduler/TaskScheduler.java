@@ -139,8 +139,10 @@ public class TaskScheduler {
 
         /**
          * 暂停以及kill以及cancel都是由用户api触发去做变更的，所以这里的状态变更对这些状态不处理
+         * (有个特例就是如果最后状态是success，那不管用户操作，直接更新，可以理解你的操作时候，任务已经完成，操作无效)
          */
-        if (task.getStatus() != finalStatus && !isUserActionStatus(task.getStatus())) {
+        if (task.getStatus() != finalStatus && (finalStatus == TaskStatusEnum.SUCCESS.getStatus() ||
+                !isUserActionStatus(task.getStatus()))) {
             taskDomainService.updateTaskStatusAndIsFinish(task.getId(), isFinish, finalStatus);
         } else if (task.getIsFinish() != isFinish) {
             taskDomainService.updateTaskStatusAndIsFinish(task.getId(), isFinish, task.getStatus());

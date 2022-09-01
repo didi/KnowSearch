@@ -57,13 +57,12 @@ public class ComponentAssembler {
         return ConvertUtil.obj2Obj(dto, GeneralExecuteComponentFunction.class);
     }
 
-    public static GeneralGroupConfigHostVO toGeneralGroupConfigVO(GeneralGroupConfig config, String url, String host) {
+    public static GeneralGroupConfigHostVO toGeneralGroupConfigVO(GeneralGroupConfig config, String host) {
         GeneralGroupConfigHostVO vo = ConvertUtil.obj2Obj(config, GeneralGroupConfigHostVO.class);
         //设置目录
         vo.setInstallDirector(JSON.parseObject(config.getInstallDirectoryConfig()).get(host).toString());
         //设置进程数
         vo.setProcessNum(JSON.parseObject(config.getProcessNumConfig()).get(host).toString());
-        vo.setUrl(url);
         return vo;
     }
 

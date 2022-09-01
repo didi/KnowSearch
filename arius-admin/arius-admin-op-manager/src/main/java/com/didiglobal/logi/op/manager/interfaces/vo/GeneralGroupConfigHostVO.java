@@ -41,5 +41,9 @@ public class GeneralGroupConfigHostVO {
      * 安装包url
      */
     private String url;
+    /**
+     * 操作类型
+     */
+    private Integer type;
 
 }

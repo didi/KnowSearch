@@ -62,9 +62,8 @@ public class TaskController {
                                                       @RequestParam(value = "host", required = true) String host) {
         Result res = taskService.getGroupConfig(taskId, groupName);
         if (res.isSuccess()) {
-            Tuple<GeneralGroupConfig, String> tuple = (Tuple<GeneralGroupConfig, String>) res.getData();
-            res.setData(ComponentAssembler.toGeneralGroupConfigVO(tuple.v1(), tuple.v2(),
-                    host));
+            GeneralGroupConfig config = (GeneralGroupConfig) res.getData();
+            res.setData(ComponentAssembler.toGeneralGroupConfigVO(config, host));
         }
         return res;
     }

@@ -83,14 +83,14 @@ public class ComponentController {
     }
 
     @GetMapping("/component_config")
-    @ApiOperation(value = "zeus获取组件分组配置")
+    @ApiOperation(value = "zeus获取组件分组配置,主要是任务状态获取用")
     public Result<GeneralGroupConfigHostVO> getConfig(@RequestParam(value = "componentId", required = true) Integer componentId,
                                                       @RequestParam(value = "groupName", required = true) String groupName,
                                                       @RequestParam(value = "host", required = true) String host) {
         Result res = componentService.getConfig(componentId, groupName);
         if (res.isSuccess()) {
             ComponentGroupConfig groupConfig = (ComponentGroupConfig) res.getData();
-            res.setData(ComponentAssembler.toGeneralGroupConfigVO(ConvertUtil.obj2Obj(groupConfig, GeneralGroupConfig.class), null, host));
+            res.setData(ComponentAssembler.toGeneralGroupConfigVO(ConvertUtil.obj2Obj(groupConfig, GeneralGroupConfig.class), host));
         }
         return res;
     }

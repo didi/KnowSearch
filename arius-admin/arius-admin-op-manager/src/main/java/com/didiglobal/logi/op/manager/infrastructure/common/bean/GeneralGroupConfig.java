@@ -40,9 +40,18 @@ public class GeneralGroupConfig {
      * 节点列表
      */
     private String hosts;
-
     /**
      * 配置版本
      */
     private String version;
+
+
+    /**
+     * url
+     */
+    private String url;
+    /**
+     * 操作类型
+     */
+    private Integer type;
 }
