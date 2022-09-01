@@ -1,0 +1,15 @@
+{
+  "dataCenter": "cn",
+  "name": "arius_cat_index_info",
+  "resourceId": #resourceId,
+  "level": 1,
+  "cyclicalRoll": 1,
+  "expireTime": 3,
+  "dateField": "timestamp",
+  "dateFieldFormat": "epoch_millis",
+  "diskSize": 30,
+  "dataType": 0,
+  "desc": "索引列表",
+  "mapping": "{\"properties\":{\"cluster\":{\"type\":\"keyword\"},\"priStoreSize\":{\"type\":\"keyword\"},\"clusterLogic\":{\"type\":\"keyword\"},\"resourceId\":{\"type\":\"long\"},\"platformCreateFlag\":{\"type\":\"boolean\"},\"pri\":{\"type\":\"long\"},\"health\":{\"type\":\"keyword\"},\"index\":{\"type\":\"keyword\"},\"templateId\":{\"type\":\"integer\"},\"docsDeleted\":{\"type\":\"long\"},\"deleteFlag\":{\"type\":\"boolean\"},\"totalSegmentCount\":{\"type\":\"long\"},\"clusterPhy\":{\"type\":\"keyword\"},\"appId\":{\"type\":\"integer\"},\"storeSize\":{\"type\":\"keyword\"},\"primariesSegmentCount\":{\"type\":\"long\"},\"rep\":{\"type\":\"long\"},\"docsCount\":{\"type\":\"long\"},\"projectId\":{\"type\":\"integer\"},\"key\":{\"ignore_above\":1024,\"type\":\"keyword\"},\"status\":{\"type\":\"keyword\"},\"timestamp\":{\"format\":\"epoch_millis\",\"type\":\"date\"}}}",
+  "setting": ""
+}
