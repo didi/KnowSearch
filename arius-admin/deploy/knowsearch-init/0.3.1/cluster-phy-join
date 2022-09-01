@@ -1,0 +1,25 @@
+{
+  "type": 4,
+  "resourceType": 2,
+  "dataCenter": "",
+  "platformType": "",
+  "tags": "{\"createSource\":0}",
+  "importRule": "0",
+  "projectId": 1,
+  "cluster": "logi-elasticsearch-meta",
+  "divide": true,
+  "phyClusterDesc": "",
+  "roleClusterHosts": [
+    {
+      "cluster": "logi-elasticsearch-meta",
+      "id": 0,
+      "ip": "114.96.99.223",
+      "nodeSet": "",
+      "port": "9201",
+      "role": 3,
+      "roleClusterId": 0,
+      "status": 0
+    }
+  ],
+  "password": "elastic:123456"
+}
