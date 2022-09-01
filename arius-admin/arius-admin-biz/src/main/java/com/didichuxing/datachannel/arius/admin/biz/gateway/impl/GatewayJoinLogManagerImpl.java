@@ -3,23 +3,24 @@ package com.didichuxing.datachannel.arius.admin.biz.gateway.impl;
 import com.didichuxing.datachannel.arius.admin.biz.gateway.GatewayJoinLogManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayJoinQueryDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.GatewayJoinVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.GatewayJoin;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.GatewayJoinVO;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectConfigService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.GatewayJoinLogService;
+import java.util.ArrayList;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Component
 public class GatewayJoinLogManagerImpl implements GatewayJoinLogManager {
 
     @Autowired
     private GatewayJoinLogService gatewayJoinLogService;
-
+    @Autowired
+    private ProjectConfigService projectConfigService;
     @Override
     public Result<List<GatewayJoinVO>> getGatewayErrorList(Long projectId, Long startDate, Long endDate) {
         return Result.buildSucc(ConvertUtil.list2List(
@@ -39,7 +40,10 @@ public class GatewayJoinLogManagerImpl implements GatewayJoinLogManager {
 
     @Override
     public Result<List<GatewayJoinVO>> getGatewayJoinSlowList(Integer projectId, GatewayJoinQueryDTO queryDTO) {
-        List<GatewayJoin> gatewayJoinList = gatewayJoinLogService.getGatewaySlowList(projectId, queryDTO);
+        Integer slowQueryTime = projectConfigService.getProjectConfig(projectId).getSlowQueryTimes();
+    
+        List<GatewayJoin> gatewayJoinList = gatewayJoinLogService.getGatewaySlowList(projectId, queryDTO,
+                slowQueryTime);
         if (CollectionUtils.isEmpty(gatewayJoinList)) {
             return Result.buildSucc(new ArrayList<>());
         }
