@@ -4,9 +4,7 @@ import com.didiglobal.logi.op.manager.domain.component.entity.Component;
 import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentGroupConfig;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.*;
-import io.swagger.models.auth.In;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -19,23 +17,25 @@ public interface ComponentDomainService {
     /**
      * 安装组件
      *
-     * @param installComponent
-     * @return
+     * @param installComponent 通用安装组件实体
+     * @return 任务id
      */
     Result<Integer> submitInstallComponent(GeneralInstallComponent installComponent);
 
 
     /**
      * 扩缩容
-     * @param scaleComponent
-     * @return
+     *
+     * @param scaleComponent 通用扩缩容实体
+     * @return 任务id
      */
     Result<Integer> submitScaleComponent(GeneralScaleComponent scaleComponent);
 
     /**
      * 配置变更
-     * @param changeComponent
-     * @return
+     *
+     * @param changeComponent 通用配置变更实体
+     * @return 任务id
      */
     Result<Integer> submitConfigChangeComponent(GeneralConfigChangeComponent changeComponent);
 
@@ -43,7 +43,7 @@ public interface ComponentDomainService {
     /**
      * 创建组件
      *
-     * @param component
+     * @param component 组件实体
      * @return
      */
     Result<Void> createComponent(Component component);
@@ -51,16 +51,18 @@ public interface ComponentDomainService {
 
     /**
      * 通过id获取Component
-     * @param id
-     * @return
+     *
+     * @param id 组件id
+     * @return 组件实体
      */
     Result<Component> getComponentById(Integer id);
 
     /**
      * 组件扩缩容
-     * @param component
-     * @param groupName2HostNormalStatusMap
-     * @param type
+     *
+     * @param component                     组件
+     * @param groupName2HostNormalStatusMap key-分组名，value->正常状态节点列表
+     * @param type                          类型
      * @return
      */
     Result<Void> scaleComponent(Component component, Map<String, Set<String>> groupName2HostNormalStatusMap, int type);
@@ -68,7 +70,8 @@ public interface ComponentDomainService {
 
     /**
      * 配置变更
-     * @param component
+     *
+     * @param component 组件实体
      * @return
      */
     Result<Void> changeComponentConfig(Component component);
@@ -76,78 +79,88 @@ public interface ComponentDomainService {
 
     /**
      * 重启组件
-     * @param restartComponent
-     * @return
+     *
+     * @param restartComponent 通用重启实体
+     * @return 任务id
      */
     Result<Integer> submitRestartComponent(GeneralRestartComponent restartComponent);
 
     /**
      * 升级组件
-     * @param upgradeComponent
-     * @return
+     *
+     * @param upgradeComponent 通用升级实体
+     * @return 任务id
      */
     Result<Integer> submitUpgradeComponent(GeneralUpgradeComponent upgradeComponent);
 
     /**
      * 回滚组件
-     * @param rollbackComponent
-     * @return
+     *
+     * @param rollbackComponent 通用回滚实体
+     * @return 任务id
      */
     Result<Integer> submitRollbackComponent(GeneralRollbackComponent rollbackComponent);
 
     /**
      * 执行相应功能的组件爱你D
-     * @param executeComponentFunction
-     * @return
+     *
+     * @param executeComponentFunction 通用执行功能实体
+     * @return 任务id
      */
     Result<Integer> submitExecuteFunctionComponent(GeneralExecuteComponentFunction executeComponentFunction);
 
     /**
      * 获取组件配置
-     * @param componentId
-     * @return
+     *
+     * @param componentId 组件id
+     * @return 组件配置列表
      */
-    Result<List<ComponentGroupConfig>>  getComponentConfig(int componentId);
+    Result<List<ComponentGroupConfig>> getComponentConfig(int componentId);
 
     /**
      * 更新组件
-     * @param component
-     * @return
+     *
+     * @param component 组件
+     * @return 更新条数
      */
-    Result<Integer>  updateComponent(Component component);
+    Result<Integer> updateComponent(Component component);
 
 
     /**
      * 获取所有的component
-     * @param 无
-     * @return Result<List<Component>>，组件列表
+     *
+     * @param null
+     * @return 组件列表
      */
     Result<List<Component>> listComponentWithAll();
 
     /**
      * 是否包含对该package依赖的组件
+     *
      * @param packageId 安装包id
-     * @return Result<Boolean>
+     * @return true->安装包有依赖，false->安装包无依赖
      */
     Result<Boolean> hasPackageDependComponent(int packageId);
 
 
     /**
      * 根据ComponentId和分组名获取分组信息
-     * @param componentId
-     * @param groupName
-     * @return
+     *
+     * @param componentId 组件id
+     * @param groupName   分组名
+     * @return 分组配置
      */
-    Result<ComponentGroupConfig>  getComponentConfigByGroupName(int componentId, String groupName);
+    Result<ComponentGroupConfig> getComponentConfigByGroupName(int componentId, String groupName);
 
     /**
      * 上报host status状态
-     * @param componentId
-     * @param groupName
-     * @param host
-     * @param status
-     * @return
+     *
+     * @param componentId 组件id
+     * @param groupName   分组名
+     * @param host        节点名
+     * @param status      状态
+     * @return 更新条数
      */
-    Result<Integer>  reportComponentHostStatus(int componentId, String groupName, String host, int status);
+    Result<Integer> reportComponentHostStatus(int componentId, String groupName, String host, int status);
 
 }
