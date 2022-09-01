@@ -22,6 +22,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.detail.DC
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.WorkTaskVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.DCDRSingleTemplateMasterSlaveSwitchDetailVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.DCDRTasksDetailVO;
@@ -246,6 +247,12 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
 
         //4. 记录操作
         if (result.success()) {
+            // 如果操作成功，则将 hasDCDR 设置为 true, 防止用户多次点击
+            IndexTemplatePO indexTemplatePO = new IndexTemplatePO();
+            indexTemplatePO.setId(templateId);
+            indexTemplatePO.setHasDCDR(true);
+            indexTemplatePO.setCheckPointDiff(0L);
+            indexTemplateService.update(indexTemplatePO);
             operateRecordService.save(new OperateRecord.Builder()
                 .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID)).content(
 
