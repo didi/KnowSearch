@@ -97,6 +97,7 @@ import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpClient;
 import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.logi.security.common.vo.project.ProjectVO;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.base.Strings;
 import com.google.common.cache.Cache;
@@ -383,6 +384,8 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             });
         if (CollectionUtils.isNotEmpty(logicIds)) {
             List<ClusterLogic> clusterLogicList = clusterLogicService.getClusterLogicListByIds(logicIds);
+            clusterLogicList.stream().forEach(clusterLogic -> clusterLogic
+                    .setProjectName(projectService.getProjectDetailByProjectId(clusterLogic.getProjectId()).getProjectName()));
             logicClusterId2LogicCluster = ConvertUtil.list2Map(clusterLogicList, ClusterLogic::getId,
                 clusterLogic -> ConvertUtil.obj2Obj(clusterLogic, ClusterLogicVO.class));
         }

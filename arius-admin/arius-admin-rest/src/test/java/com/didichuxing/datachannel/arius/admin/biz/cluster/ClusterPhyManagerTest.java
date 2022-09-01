@@ -202,7 +202,7 @@ class ClusterPhyManagerTest {
             Lists.newArrayList(), 0.0, 0L, 0L, "password", "idc", 0, "writeAction", 0, 0L, "platformType", 1,
             "gatewayUrl", null,null);
 
-        clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0,
+        clusterLogic = new ClusterLogic(0L, "name", 0, 0,"projectName", "dataCenter", "dataNodeSpec", 0,
            "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
         region = new ClusterRegion(0L, "name", "logicClusterIds", CLUSTER, "config");
 
