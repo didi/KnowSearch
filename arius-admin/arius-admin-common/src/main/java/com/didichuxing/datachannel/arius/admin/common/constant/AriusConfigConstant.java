@@ -21,7 +21,7 @@ public class AriusConfigConstant {
     /**
      * 操作记录保存时间
      */
-    public static final String  OPERATE_RECORD_SAVE_TIME                           = "operate.record.save.time";
+    public static final String  OPERATE_RECORD_SAVE_TIME                           = "operate.record.save_time";
 
     /**
      * 集群版本列表
