@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.util.EntityUtils;
 import org.elasticsearch.client.ResponseException;
@@ -157,6 +158,12 @@ public final class ParsingExceptionUtils {
     private static Optional<String> getErrorMessageByResponseException(ResponseException e) {
         HttpEntity entity = e.getResponse().getEntity();
         try {
+            String error = EntityUtils.toString(entity, "UTF-8");
+            if (StringUtils.equals(error,"{}")){
+                
+                return Optional.of(String.format("%s is not found",e.getResponse().getRequestLine().getUri()));
+            }
+            
             return Optional.ofNullable(EntityUtils.toString(entity, "UTF-8")).map(JSONObject::parseObject)
                     .map(json -> json.getJSONObject("error")).map(json -> json.getString("reason"));
         } catch (IOException ignore) {
