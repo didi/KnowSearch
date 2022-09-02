@@ -51,10 +51,14 @@ public class ComponentHost {
     private Timestamp updateTime;
 
     public ComponentHost create() {
+        return this.create(HostStatusEnum.ON_LINE.getStatus());
+    }
+
+    public ComponentHost create(int status) {
         this.createTime = new Timestamp(System.currentTimeMillis());
         this.updateTime = new Timestamp(System.currentTimeMillis());
         this.isDeleted = DeleteEnum.NORMAL.getType();
-        this.status = HostStatusEnum.ON_LINE.getStatus();
+        this.status = status;
         return this;
     }
 }

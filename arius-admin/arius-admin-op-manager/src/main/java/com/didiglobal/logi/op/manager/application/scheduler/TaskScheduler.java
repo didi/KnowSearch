@@ -83,9 +83,7 @@ public class TaskScheduler {
                             taskDomainService.updateTaskDetail(task.getId(), id, TaskStatusEnum.valueOf(declaredField.getName().toUpperCase()).getStatus(),
                                     hostList);
                         }
-
                     }
-
                     totalStatus.addZeusTaskStatus(zeusTaskStatus);
                 }
 

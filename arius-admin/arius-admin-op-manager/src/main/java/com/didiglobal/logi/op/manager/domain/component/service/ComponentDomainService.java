@@ -42,11 +42,11 @@ public interface ComponentDomainService {
 
     /**
      * 创建组件
-     *
      * @param component 组件实体
+     * @param groupName2HostNotNormalStatusMap key-分组名，value->正常状态节点列表
      * @return
      */
-    Result<Void> createComponent(Component component);
+    Result<Void> createComponent(Component component, Map<String, Set<String>> groupName2HostNotNormalStatusMap);
 
 
     /**

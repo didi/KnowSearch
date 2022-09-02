@@ -55,6 +55,7 @@ public class RestartComponentHandler extends BaseComponentHandler implements Com
     @Override
     public void taskFinishProcess(int taskId, String content) throws ComponentHandlerException {
         //暂时不用操作
+        LOGGER.info("任务{}执行成功", taskId);
     }
 
     @Override

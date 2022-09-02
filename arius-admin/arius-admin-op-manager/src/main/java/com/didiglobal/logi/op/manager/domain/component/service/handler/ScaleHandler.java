@@ -12,7 +12,7 @@ import java.util.Set;
 public interface ScaleHandler {
 
     /**
-     * 扩缩容后对组件host进行相应操作
+     * 扩缩容后对组件host进行相应操作（增加host信息）
      *
      * @param componentId
      * @param host
@@ -21,7 +21,7 @@ public interface ScaleHandler {
     void dealComponentHost(int componentId, String host, ComponentGroupConfig config);
 
     /**
-     * 扩缩容后对组件配置进行相应操作
+     * 扩缩容后对组件配置进行相应操作（增加）
      *
      * @param oriGroupConfig
      * @param newGroupConfig

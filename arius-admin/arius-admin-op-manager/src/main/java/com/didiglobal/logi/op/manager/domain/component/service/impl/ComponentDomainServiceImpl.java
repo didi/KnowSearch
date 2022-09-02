@@ -14,9 +14,12 @@ import com.didiglobal.logi.op.manager.domain.component.service.handler.ScaleHand
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 import com.didiglobal.logi.op.manager.infrastructure.common.ResultCode;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.*;
+import com.didiglobal.logi.op.manager.infrastructure.common.enums.HostStatusEnum;
 import com.didiglobal.logi.op.manager.infrastructure.common.event.DomainEvent;
 import com.didiglobal.logi.op.manager.infrastructure.common.event.SpringEventPublisher;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +35,8 @@ import static com.didiglobal.logi.op.manager.infrastructure.common.Constants.SPL
  */
 @Service
 public class ComponentDomainServiceImpl implements ComponentDomainService {
+
+    public static final Logger LOGGER = LoggerFactory.getLogger(ComponentDomainServiceImpl.class);
 
     @Autowired
     private SpringEventPublisher publisher;
@@ -208,7 +213,7 @@ public class ComponentDomainServiceImpl implements ComponentDomainService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Result<Void> createComponent(Component component) {
+    public Result<Void> createComponent(Component component, Map<String, Set<String>> groupName2HostNotNormalStatusMap) {
         //创建并保存组件
         component.create();
         int componentId = componentRepository.saveComponent(component);
@@ -221,8 +226,13 @@ public class ComponentDomainServiceImpl implements ComponentDomainService {
         }
 
         for (ComponentGroupConfig groupConfig : component.getGroupConfigList()) {
+
+            Set<String> invalidHosts = groupName2HostNotNormalStatusMap.get(groupConfig.getGroupName());
+
             //不依赖配置的组件，更新自己的配置
             if (null == component.getDependConfigComponentId()) {
+                //把一些不可用的节点移除掉
+                groupConfig.updateInstallConfig(invalidHosts);
                 groupConfig.create();
                 groupConfig.setComponentId(componentId);
                 //创建并保存配置
@@ -230,18 +240,24 @@ public class ComponentDomainServiceImpl implements ComponentDomainService {
             }
             for (String host : groupConfig.getHosts().split(SPLIT)) {
                 //创建并保存组件host
-                //TODO 考虑下能否批量提交
+                //TODO 考虑下批量提交
                 ComponentHost componentHost = new ComponentHost();
                 componentHost.setHost(host);
                 componentHost.setProcessNum(JSON.parseObject(groupConfig.getProcessNumConfig()).getInteger(host));
                 componentHost.setComponentId(componentId);
                 componentHost.setGroupName(groupConfig.getGroupName());
-                componentHost.create();
+                if (invalidHosts.contains(host)) {
+                    componentHost.create(HostStatusEnum.OFF_LINE.getStatus());
+                } else {
+                    componentHost.create();
+                }
                 componentHostRepository.saveComponentHost(componentHost);
             }
         }
 
         //更改配置
+        //TODO 这里有个场景，我安装的组件配置依赖其他组件的，然后安装过程中如果有节点过滤掉，
+        // 都会加入到默认加入(如果不是依赖配置的都会过滤掉)
         if (null != component.getDependConfigComponentId()) {
             changeComponentConfig(component.newDeployComponent());
         }
@@ -290,19 +306,27 @@ public class ComponentDomainServiceImpl implements ComponentDomainService {
             oriConfigMap.put(oriConfig.getGroupName(), oriConfig);
         });
         //用改的配置把老的配置替换带点，然后统一所有分组都版本加1
+        boolean needChangeConfig = false;
         for (ComponentGroupConfig config : component.getGroupConfigList()) {
+            if (!oriConfigMap.get(config.getGroupName()).isSame(config)) {
+                needChangeConfig = true;
+            }
             config.setVersion(oriConfigMap.get(config.getGroupName()).getVersion());
             config.setComponentId(component.getId());
             oriConfigMap.put(config.getGroupName(), config);
         }
 
         //统一新建配置
-        oriConfigMap.keySet().forEach(k -> {
-            ComponentGroupConfig config = oriConfigMap.get(k);
-            config.createWithoutVersion();
-            config.setVersion(String.valueOf(Integer.parseInt(config.getVersion()) + 1));
-            componentGroupConfigRepository.saveGroupConfig(config);
-        });
+        if (needChangeConfig) {
+            oriConfigMap.keySet().forEach(k -> {
+                ComponentGroupConfig config = oriConfigMap.get(k);
+                config.createWithoutVersion();
+                config.setVersion(String.valueOf(Integer.parseInt(config.getVersion()) + 1));
+                componentGroupConfigRepository.saveGroupConfig(config);
+            });
+        } else {
+            LOGGER.info("组件[{}]配置未发生变更,老配置", component.getId());
+        }
         return Result.success();
     }
 

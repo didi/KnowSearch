@@ -3,11 +3,12 @@ package com.didiglobal.logi.op.manager.domain.component.entity;
 import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentGroupConfig;
 import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentHost;
 import com.didiglobal.logi.op.manager.infrastructure.common.Constants;
-import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralGroupConfig;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.ComponentStatusEnum;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.DeleteEnum;
+import com.didiglobal.logi.op.manager.infrastructure.common.enums.HostStatusEnum;
 import com.didiglobal.logi.op.manager.infrastructure.util.ConvertUtil;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.elasticsearch.common.Strings;
@@ -27,6 +28,7 @@ import static com.didiglobal.logi.op.manager.infrastructure.common.Constants.MAP
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class Component {
     /**
      * 组件id
@@ -116,14 +118,33 @@ public class Component {
     public Map<String, List<String>> groupNameToHost() {
         Map<String, List<String>> groupToHostList = new HashMap<>(MAP_SIZE);
         for (ComponentHost componentHost : this.getHostList()) {
-            List<String> hostList = groupToHostList.get(componentHost.getGroupName());
-            if (null == hostList) {
-                hostList = new ArrayList<>();
-                groupToHostList.put(componentHost.getGroupName(), hostList);
-            }
+            List<String> hostList = groupToHostList.computeIfAbsent(componentHost.getGroupName(), k -> new ArrayList<>());
             hostList.add(componentHost.getHost());
         }
         return groupToHostList;
+    }
+
+    /**
+     * 获取子节点任务状态
+     * @return 状态，全在线green，在线数小于离线数red，在线数大于离线数yellow
+     */
+    public int convergeHostStatus() {
+        int onLineNum = 0;
+        int offLineNum = 0 ;
+        for (ComponentHost componentHost : this.getHostList()) {
+            if (componentHost.getStatus() == HostStatusEnum.ON_LINE.getStatus()) {
+                onLineNum ++;
+            } else {
+                offLineNum ++;
+            }
+        }
+        if (offLineNum == 0) {
+            return ComponentStatusEnum.GREEN.getStatus();
+        } else if (onLineNum < offLineNum) {
+            return ComponentStatusEnum.RED.getStatus();
+        } else {
+            return ComponentStatusEnum.YELLOW.getStatus();
+        }
     }
 
     public void setGroupConfigList(List<ComponentGroupConfig> groupConfigList) {

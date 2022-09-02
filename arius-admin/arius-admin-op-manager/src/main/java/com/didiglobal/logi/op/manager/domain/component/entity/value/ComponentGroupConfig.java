@@ -72,14 +72,14 @@ public class ComponentGroupConfig {
      */
     private Timestamp updateTime;
 
-    public ComponentGroupConfig create(){
+    public ComponentGroupConfig create() {
         this.version = "1";
         this.createTime = new Timestamp(System.currentTimeMillis());
         this.updateTime = new Timestamp(System.currentTimeMillis());
         return this;
     }
 
-    public ComponentGroupConfig createWithoutVersion(){
+    public ComponentGroupConfig createWithoutVersion() {
         this.createTime = new Timestamp(System.currentTimeMillis());
         this.updateTime = new Timestamp(System.currentTimeMillis());
         this.id = null;
@@ -130,5 +130,35 @@ public class ComponentGroupConfig {
         this.setProcessNumConfig(processNumConfigJson.toJSONString());
         this.setInstallDirectoryConfig(installDirectoryJson.toJSONString());
         return this;
+    }
+
+    public ComponentGroupConfig updateInstallConfig(Set<String> invalidHosts) {
+        Set oriHostSet = Sets.newHashSet(this.hosts.split(SPLIT));
+        JSONObject processNumConfigJson = JSON.parseObject(this.getProcessNumConfig());
+        JSONObject installDirectoryJson = JSON.parseObject(this.getInstallDirectoryConfig());
+        invalidHosts.forEach(host -> {
+            oriHostSet.remove(host);
+            processNumConfigJson.remove(host);
+            installDirectoryJson.remove(host);
+        });
+        this.setHosts(Strings.join(oriHostSet, REX));
+        this.setProcessNumConfig(processNumConfigJson.toJSONString());
+        this.setInstallDirectoryConfig(installDirectoryJson.toJSONString());
+        return this;
+    }
+
+    /**
+     * 是否是相同配置
+     * @param targetConfig
+     * @return
+     */
+    public boolean isSame(ComponentGroupConfig targetConfig) {
+        if (systemConfig.equals(targetConfig.getSystemConfig()) &&
+                runningConfig.equals(targetConfig.getSystemConfig()) &&
+                fileConfig.equals(targetConfig.getFileConfig()) &&
+                processNumConfig.equals(targetConfig.getProcessNumConfig())) {
+            return true;
+        }
+        return false;
     }
 }

@@ -61,7 +61,7 @@ public class ScaleComponentHandler extends BaseComponentHandler implements Compo
     @Override
     public void taskFinishProcess(int taskId, String content) throws ComponentHandlerException {
         try {
-            HashMap<String, Set<String>> groupName2HostNormalStatusMap = getGroupName2HostNormalStatusMap(taskId);
+            Map<String, Set<String>> groupName2HostNormalStatusMap = getGroupName2HostMapByStatus(taskId, status -> status == TaskStatusEnum.SUCCESS.getStatus());
             GeneralScaleComponent scaleComponent = JSON.parseObject(content, GeneralScaleComponent.class);
             Component component = ComponentAssembler.toScaleComponent(scaleComponent);
             componentDomainService.scaleComponent(component, groupName2HostNormalStatusMap, scaleComponent.getType());

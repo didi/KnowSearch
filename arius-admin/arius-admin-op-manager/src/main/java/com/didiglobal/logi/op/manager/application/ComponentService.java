@@ -141,13 +141,15 @@ public class ComponentService {
             return Result.fail("task任务不存在");
         }
 
+        if (generalRollbackComponent.getType() != OperationEnum.CONFIG_CHANGE.getType()
+        && generalRollbackComponent.getType() != OperationEnum.UPGRADE.getType()) {
+            return Result.fail("只有配置变更以及升级才能允许回滚");
+        }
+
         if (taskRes.getData().getStatus() != TaskStatusEnum.FAILED.getStatus()) {
             return Result.fail("task任务状态不能为failed");
         }
 
-        if (taskRes.getData().getType() == OperationEnum.ROLLBACK.getType()) {
-            return Result.fail("原任务不能是回滚任务");
-        }
         return Result.success();
     }
 

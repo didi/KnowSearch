@@ -54,6 +54,7 @@
         <trim prefix="set" prefixOverrides=",">
             <if test="packageId!= null">,package_id = #{packageId}</if>
             <if test="updateTime != null">,update_time = #{updateTime}</if>
+            <if test="status != null">,status = #{status}</if>
         </trim>
         where id = #{id}
     </update>

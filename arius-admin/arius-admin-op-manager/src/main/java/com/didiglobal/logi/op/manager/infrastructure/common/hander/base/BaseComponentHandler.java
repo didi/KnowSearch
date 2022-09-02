@@ -9,19 +9,16 @@ import com.didiglobal.logi.op.manager.domain.packages.service.PackageDomainServi
 import com.didiglobal.logi.op.manager.domain.script.service.impl.ScriptDomainService;
 import com.didiglobal.logi.op.manager.domain.task.entity.Task;
 import com.didiglobal.logi.op.manager.domain.task.service.TaskDomainService;
-import com.didiglobal.logi.op.manager.infrastructure.common.Constants;
 import com.didiglobal.logi.op.manager.infrastructure.common.ProcessStatus;
-import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 import com.didiglobal.logi.op.manager.infrastructure.common.Tuple;
-import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralBaseOperationComponent;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralGroupConfig;
-import com.didiglobal.logi.op.manager.infrastructure.common.enums.TaskStatusEnum;
 import com.didiglobal.logi.op.manager.infrastructure.exception.ComponentHandlerException;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.*;
+import java.util.function.Predicate;
 
 import static com.didiglobal.logi.op.manager.infrastructure.common.Constants.MAP_SIZE;
 import static com.didiglobal.logi.op.manager.infrastructure.common.Constants.SPLIT;
@@ -76,15 +73,15 @@ public abstract class BaseComponentHandler implements ComponentHandler {
         return groupToIpList;
     }
 
-    protected HashMap<String, Set<String>> getGroupName2HostNormalStatusMap(int taskId) {
+    protected Map<String, Set<String>> getGroupName2HostMapByStatus(int taskId, Predicate<Integer> statusPredicate) {
         Task task = taskDomainService.getTaskById(taskId).getData();
-        HashMap<String, Set<String>> groupName2HostNormalStatusMap = new HashMap<>();
+        Map<String, Set<String>> groupName2HostStatusMap = new HashMap<>(MAP_SIZE);
         task.getDetailList().forEach(detail -> {
-            if (detail.getStatus() == TaskStatusEnum.SUCCESS.getStatus()) {
-                Set<String> hosts = groupName2HostNormalStatusMap.computeIfAbsent(detail.getGroupName(), k -> new HashSet<>());
+            if (statusPredicate.test(detail.getStatus())) {
+                Set<String> hosts = groupName2HostStatusMap.computeIfAbsent(detail.getGroupName(), k -> new HashSet<>());
                 hosts.add(detail.getHost());
             }
         });
-        return groupName2HostNormalStatusMap;
+        return groupName2HostStatusMap;
     }
 }

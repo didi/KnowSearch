@@ -55,29 +55,40 @@ public class ComponentStatusScheduler {
     public void monitor() {
         try {
             LOGGER.info("start monitor task");
-            //list所有有限的组件，里面的host详情也需要有效的host详情
+            //list所有有效的组件，里面的host详情也需要有效的host详情
             List<Component> componentList = componentDomainService.listComponentWithAll().getData();
 
             Map<String, String> packageIdToTemplate = packageId2TemplateIdMapCache.get(key, this::packageIdToTemplateMap);
 
             componentList.parallelStream().forEach(component -> {
-                Map<String, List<String>> groupToHostList = component.groupNameToHost();
-                String templateId = packageIdToTemplate.get(component.getPackageId().toString());
-                if (null == templateId) {
-                    LOGGER.error("package[{}] can not find template", component.getPackageId());
-                } else {
-                    //安装目录需要zeus回调请求
-                    //这里任务下发，真正的回调是再zeus侧，通过调用admin的接口来实现是否存在进程
-                    //这里也需要zeus去获取配置
-                    //TODO 回调未执行
-                    groupToHostList.entrySet().forEach(entry -> {
-                        Result res = deploymentService.execute(packageIdToTemplate.get(component.getPackageId().toString()),
-                                Strings.join(entry.getValue().iterator(), REX), String.valueOf(OperationEnum.STATUS.getType()),
-                                component.getId().toString(), entry.getKey());
-                        if (res.failed()) {
-                            LOGGER.error("组件[{}]分组[{}]执行失败，", component.getId(), entry.getKey(), res.getMessage());
-                        }
-                    });
+                try {
+                    //更新组件状态
+                    int status = component.convergeHostStatus();
+                    if (status != component.getStatus()) {
+                        componentDomainService.updateComponent(Component.builder().id(component.getId()).status(status).build());
+                    }
+
+                    //下发任务更新组件节点状态
+                    Map<String, List<String>> groupToHostList = component.groupNameToHost();
+                    String templateId = packageIdToTemplate.get(component.getPackageId().toString());
+                    if (null == templateId) {
+                        LOGGER.error("package[{}] can not find template", component.getPackageId());
+                    } else {
+                        //安装目录需要zeus回调请求
+                        //这里任务下发，真正的回调是再zeus侧，通过调用admin的接口来实现是否存在进程
+                        //这里也需要zeus去获取配置
+                        //TODO 回调未执行
+                        groupToHostList.entrySet().forEach(entry -> {
+                            Result res = deploymentService.execute(packageIdToTemplate.get(component.getPackageId().toString()),
+                                    Strings.join(entry.getValue().iterator(), REX), String.valueOf(OperationEnum.STATUS.getType()),
+                                    component.getId().toString(), entry.getKey());
+                            if (res.failed()) {
+                                LOGGER.error("组件[{}]分组[{}]执行失败，", component.getId(), entry.getKey(), res.getMessage());
+                            }
+                        });
+                    }
+                } catch (Exception e) {
+                    LOGGER.error("monitor component[{}] error", component.getName(), e);
                 }
             });
         } catch (Exception e) {

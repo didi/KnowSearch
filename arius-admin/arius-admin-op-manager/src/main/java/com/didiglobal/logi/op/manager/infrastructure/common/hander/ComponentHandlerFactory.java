@@ -27,6 +27,9 @@ public class ComponentHandlerFactory implements BeanPostProcessor {
 
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+        /**
+         * 默认是@default实现，方便对接，用户可以自定义处理器
+         */
         if (bean instanceof ComponentHandler) {
             ComponentHandler handler = (ComponentHandler) bean;
             if (handlerMap.containsKey(handler.getOperationType())) {

@@ -15,6 +15,7 @@ import com.didiglobal.logi.op.manager.infrastructure.common.Tuple;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralInstallComponent;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.OperationEnum;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.PackageTypeEnum;
+import com.didiglobal.logi.op.manager.infrastructure.common.enums.TaskStatusEnum;
 import com.didiglobal.logi.op.manager.infrastructure.common.hander.base.BaseComponentHandler;
 import com.didiglobal.logi.op.manager.infrastructure.common.hander.base.ComponentHandler;
 import com.didiglobal.logi.op.manager.infrastructure.common.hander.base.DefaultHandler;
@@ -24,7 +25,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author didi
@@ -75,9 +78,10 @@ public class InstallComponentHandler extends BaseComponentHandler implements Com
     @Override
     public void taskFinishProcess(int taskId, String content) throws ComponentHandlerException {
         try {
+            Map<String, Set<String>> groupName2HostNotNormalStatusMap = getGroupName2HostMapByStatus(taskId, status -> status != TaskStatusEnum.SUCCESS.getStatus());
             GeneralInstallComponent installComponent = JSON.parseObject(content, GeneralInstallComponent.class);
             Component component = ConvertUtil.obj2Obj(installComponent, Component.class);
-            componentDomainService.createComponent(component);
+            componentDomainService.createComponent(component, groupName2HostNotNormalStatusMap);
             LOGGER.info("component[{}] handler success", content);
         } catch (Exception e) {
             LOGGER.error("component[{}] handler error.", content, e);
