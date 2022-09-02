@@ -78,10 +78,16 @@
         <if test="param.resourceId != null"> and `resource_id` = #{param.resourceId}</if>
         <if test="param.desc != null"> and `desc` LIKE CONCAT('%', #{param.desc}, '%')</if>
         <if test="param.projectId != null"> and `project_id` = #{param.projectId}</if>
-        <if test="param.hasDCDR != null"> and `has_dcdr` = #{param.hasDCDR}</if>
         <if test="param.health != null"> and `health` = #{param.health}</if>
-        <if test="param.openSrv != null and param.openSrv != '' ">
+        <if test="param.hasDCDR != null and (param.openSrv == null or param.openSrv == '')">
+            and `has_dcdr` = #{param.hasDCDR}
+        </if>
+        <if test="param.hasDCDR == null and param.openSrv != null and param.openSrv != ''">
             and FIND_IN_SET(#{param.openSrv}, open_srv)
+        </if>
+        <if test="param.hasDCDR != null and param.openSrv != null and param.openSrv != ''">
+            and (`has_dcdr` =
+                 #{param.hasDCDR} or FIND_IN_SET(#{param.openSrv}, open_srv))
         </if>
         order by  ${sortTerm}  ${sortType}
         limit #{from}, #{size}
@@ -99,12 +105,21 @@
         </if>
         <if test="param.desc != null">and `desc` LIKE CONCAT('%', #{param.desc}, '%')</if>
         <if test="param.projectId != null">and `project_id` = #{param.projectId}</if>
-        <if test="param.hasDCDR != null">and `has_dcdr` = #{param.hasDCDR}</if>
+   
         <if test="param.health != null">
             and `health` = #{param.health}
         </if>
-        <if test="param.openSrv != null and param.openSrv != '' ">
+        <!--        dcdr opensrv-->
+        <if test="param.hasDCDR != null and (param.openSrv == null or param.openSrv == '')">
+            and `has_dcdr` =
+                #{param.hasDCDR}
+        </if>
+        <if test="param.openSrv != null and param.openSrv != ''and param.hasDCDR == null">
             and FIND_IN_SET(#{param.openSrv}, open_srv)
+        </if>
+        <if test="param.hasDCDR != null and param.openSrv != null and param.openSrv != ''">
+            and (`has_dcdr` =
+                 #{param.hasDCDR} or FIND_IN_SET(#{param.openSrv}, open_srv))
         </if>
         <if test="logicClusterIdList != null and logicClusterIdList.size() != 0 and param.resourceId==null ">
             and `resource_id` in
@@ -131,12 +146,18 @@
         <if test="resourceId != null"> and `resource_id` = #{resourceId}</if>
         <if test="desc != null"> and `desc` LIKE CONCAT('%', #{desc}, '%')</if>
         <if test="projectId != null"> and `project_id` = #{projectId}</if>
-        <if test="hasDCDR != null"> and `has_dcdr` = #{hasDCDR}</if>
         <if test="health != null"> and `health` = #{health}</if>
-        <if test="openSrv != null and openSrv != ''">
+          <!--        hash dcdr open srv-->
+        <if test="hasDCDR != null and (openSrv == null or openSrv == '')">
+            and `has_dcdr` = #{hasDCDR}
+        </if>
+        <if test="hasDCDR == null and openSrv != null and openSrv != ''">
             and FIND_IN_SET(#{openSrv}, open_srv)
         </if>
-        order by id desc
+        <if test="hasDCDR != null and openSrv != null and openSrv != ''">
+            and (`has_dcdr` = #{hasDCDR} OR FIND_IN_SET(#{openSrv}, open_srv))
+        </if>
+       
     </select>
     
     <select id="getTotalHitByConditionAndLogicClusterIdList"
@@ -162,14 +183,18 @@
         <if test="param.projectId != null">
             and `project_id` = #{param.projectId}
         </if>
-        <if test="param.hasDCDR != null">
-            and `has_dcdr` = #{param.hasDCDR}
-        </if>
         <if test="param.health != null">
             and `health` = #{param.health}
         </if>
-        <if test="param.openSrv != null and param.openSrv != '' ">
+        <!--        hash dcdr open srv-->
+        <if test="param.hasDCDR != null and (param.openSrv == null or param.openSrv == '')">
+            and `has_dcdr` = #{param.hasDCDR}
+        </if>
+        <if test="param.hasDCDR == null and param.openSrv != null and param.openSrv != ''">
             and FIND_IN_SET(#{param.openSrv}, open_srv)
+        </if>
+        <if test="param.hasDCDR != null and param.openSrv != null and param.openSrv != ''">
+            and (`has_dcdr` = #{param.hasDCDR} OR FIND_IN_SET(#{param.openSrv}, open_srv))
         </if>
         <if test="logicClusterIdList != null and logicClusterIdList.size() != 0 and param.resourceId == null">
             and `resource_id` in
