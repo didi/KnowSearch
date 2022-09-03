@@ -138,6 +138,18 @@ public class TaskDomainServiceImpl implements TaskDomainService {
     }
 
     @Override
+    public Result<String> getTaskStdOuts(int taskId, String hostname) {
+        Result<String> taskStdOuts = deploymentService.deployStdOuts(taskId,hostname);
+        return taskStdOuts;
+    }
+
+    @Override
+    public Result<String> getTaskStdErrs(int taskId, String hostname) {
+        Result<String> taskStdErrs = deploymentService.deployStdErrs(taskId,hostname);
+        return taskStdErrs;
+    }
+
+    @Override
     public Result<Void> actionTask(int taskId, TaskActionEnum action) {
         Task task = taskRepository.getTaskById(taskId);
         if (null == task) {

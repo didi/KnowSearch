@@ -135,4 +135,43 @@ public class TaskService {
         }
         return Result.success(configResult.getData());
     }
+
+    /**
+     * 获取任务执行完成后的标准输出
+     *
+     * @param taskId 任务id
+     * @param hostname 主机名
+     * @return String
+     */
+    public Result<String> getTaskStdOuts(Integer taskId, String hostname){
+        if (null == taskId) {
+            return Result.fail(ResultCode.PARAM_ERROR.getCode(),"taskId 为null");
+        }
+
+        Result<String> taskStdOutsResult = taskDomainService.getTaskStdOuts(taskId,hostname);
+        if (taskStdOutsResult.failed()) {
+            return Result.fail(taskStdOutsResult.getCode(),taskStdOutsResult.getMessage());
+        }
+        return Result.success(taskStdOutsResult.getData());
+    }
+
+    /**
+     * 获取任务执行完成后的错误输出
+     *
+     * @param taskId 任务id
+     * @param hostname 主机名
+     * @return String
+     */
+    public Result<String> getTaskStderrs(Integer taskId, String hostname){
+        if (null == taskId) {
+            return Result.fail(ResultCode.PARAM_ERROR.getCode(),"taskId 为null");
+        }
+
+        Result<String> taskStdOutsResult = taskDomainService.getTaskStdErrs(taskId,hostname);
+        if (taskStdOutsResult.failed()) {
+            return Result.fail(taskStdOutsResult.getCode(),taskStdOutsResult.getMessage());
+        }
+        return Result.success(taskStdOutsResult.getData());
+    }
+
 }

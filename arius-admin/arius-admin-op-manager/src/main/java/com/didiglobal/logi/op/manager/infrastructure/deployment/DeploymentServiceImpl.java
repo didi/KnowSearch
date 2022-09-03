@@ -123,6 +123,26 @@ public class DeploymentServiceImpl implements DeploymentService {
     }
 
     @Override
+    public Result<String> deployStdOuts(int taskId,String hostname) {
+        try {
+            return Result.success(zeusService.getTaskStdOutLog(taskId,hostname));
+        } catch (ZeusOperationException e) {
+            LOGGER.error("class=DeploymentServiceImpl||method=deployStdouts||errMsg={}||msg=get stdouts error", e.getMessage());
+            return Result.fail(e.getCode(), e.getMessage());
+        }
+    }
+
+    @Override
+    public Result<String> deployStdErrs(int taskId,String hostname) {
+        try {
+            return Result.success(zeusService.getTaskStdErrLog(taskId,hostname));
+        } catch (ZeusOperationException e) {
+            LOGGER.error("class=DeploymentServiceImpl||method=deployStderrs||errMsg={}||msg=get stderrs error", e.getMessage());
+            return Result.fail(e.getCode(), e.getMessage());
+        }
+    }
+
+    @Override
     public Result<Void> removeScript(Script script) {
         try {
             zeusService.deleteTemplate(Integer.parseInt(script.getTemplateId()));

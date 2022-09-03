@@ -68,5 +68,21 @@ public class TaskController {
         return res;
     }
 
+    @GetMapping("/task-stdouts")
+    @ApiOperation(value = "zeus查看任务执行完成后的标准输出")
+    public Result<String> getTaskStdOuts(@RequestParam(value = "taskId", required = true) Integer taskId,
+                                                      @RequestParam(value = "hostname", required = false) String hostname) {
 
+        Result res = taskService.getTaskStdOuts(taskId,hostname);
+        return res;
+    }
+
+    @GetMapping("/task-stderrs")
+    @ApiOperation(value = "zeus查看任务执行完成后的错误输出")
+    public Result<String> getTaskStdErrs(@RequestParam(value = "taskId", required = true) Integer taskId,
+                                         @RequestParam(value = "hostname", required = false) String hostname) {
+
+        Result res = taskService.getTaskStderrs(taskId,hostname);
+        return res;
+    }
 }

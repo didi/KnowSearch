@@ -138,4 +138,23 @@ public interface TaskDomainService {
      * @return 更新条数
      */
     Result<Integer> updateTaskStatus(int taskId, int status);
+
+    /**
+     * 获取任务执行完成后的标准输出
+     *
+     * @param taskId 任务id
+     * @param hostname 主机名(可选)
+     * @return String
+     */
+    Result<String> getTaskStdOuts(int taskId, String hostname);
+
+    /**
+     * 获取任务执行完成后的错误输出
+     *
+     * @param taskId 任务id
+     * @param hostname 主机名(可选)
+     * @return String
+     */
+    Result<String> getTaskStdErrs(int taskId, String hostname);
+
 }

@@ -61,6 +61,20 @@ public interface DeploymentService {
     Result<ZeusTaskStatus> deployStatus(int taskId);
 
     /**
+     * 任务执行完成后的标准输出
+     * @param taskId
+     * @return
+     */
+    Result<String> deployStdOuts(int taskId,String  hostname);
+
+    /**
+     * 任务执行完成后的错误输出
+     * @param taskId
+     * @return
+     */
+    Result<String> deployStdErrs(int taskId,String hostname);
+
+    /**
      * 移除脚本
      * @param script
      * @return

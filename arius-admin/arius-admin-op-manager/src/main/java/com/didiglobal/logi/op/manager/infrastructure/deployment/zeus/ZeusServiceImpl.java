@@ -2,14 +2,19 @@ package com.didiglobal.logi.op.manager.infrastructure.deployment.zeus;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.didiglobal.logi.op.manager.infrastructure.deployment.ZeusSubTaskLog;
 import com.didiglobal.logi.op.manager.infrastructure.exception.ZeusOperationException;
 import com.didiglobal.logi.op.manager.infrastructure.util.HttpUtil;
+import com.google.common.collect.Maps;
 import lombok.Data;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author didi
@@ -58,6 +63,8 @@ public class ZeusServiceImpl implements ZeusService {
 
     private static final String API_HOST_ACTION = "http://%s/api/task/host-action?token=%s";
 
+    private static final String EMPTY_STRING = "";
+
     @Override
     public String createTemplate(ZeusTemplate zeusTemplate) throws ZeusOperationException {
         zeusTemplate.setBatch(zeusBatch);
@@ -90,6 +97,58 @@ public class ZeusServiceImpl implements ZeusService {
                 throw new ZeusOperationException(result.getMsg());
             }
             return JSON.parseObject(JSON.toJSONString(result.getData()), ZeusTaskStatus.class);
+        } catch (ZeusOperationException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ZeusOperationException(e);
+        }
+    }
+
+    @Override
+    public String getTaskStdOutLog(int taskId,String hostname) throws ZeusOperationException {
+        try {
+            ZeusTaskStatus zeusTaskStatus = getTaskStatus(1);
+            String s1 = zeusTaskStatus.toString();
+            String url;
+            if (null != hostname) {
+                url = zeusServer + API_TASK + taskId + "/stdouts.json?hostname=" + hostname;
+            } else {
+                url = zeusServer +API_TASK + taskId +"/stdouts.json";
+            }
+            ZeusResult result = getZeusResultForGet(buildHeader(),url);
+            if (result.failed()) {
+                throw new ZeusOperationException(result.getMsg());
+            }
+            List<ZeusSubTaskLog> zeusSubTaskLogs = JSON.parseArray(JSON.toJSONString(result.getData()),ZeusSubTaskLog.class);
+            if (zeusSubTaskLogs == null || zeusSubTaskLogs.isEmpty()) {
+                return EMPTY_STRING;
+            }
+            return zeusSubTaskLogs.get(0).getStdout();
+        } catch (ZeusOperationException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ZeusOperationException(e);
+        }
+    }
+
+    @Override
+    public String getTaskStdErrLog(int taskId,String hostname) throws ZeusOperationException {
+        try {
+            String url;
+            if (null != hostname) {
+                url = zeusServer + API_TASK + taskId + "/stderrs.json?hostname=" + hostname;
+            } else {
+                url = zeusServer +API_TASK + taskId +"/stderrs.json";
+            }
+            ZeusResult result = getZeusResultForGet(buildHeader(),url);
+            if (result.failed()) {
+                throw new ZeusOperationException(result.getMsg());
+            }
+            List<ZeusSubTaskLog> zeusSubTaskLogs = JSON.parseArray(JSON.toJSONString(result.getData()),ZeusSubTaskLog.class);
+            if (zeusSubTaskLogs == null || zeusSubTaskLogs.isEmpty()) {
+                return EMPTY_STRING;
+            }
+            return zeusSubTaskLogs.get(0).getStderr();
         } catch (ZeusOperationException e) {
             throw e;
         } catch (Exception e) {
@@ -135,5 +194,24 @@ public class ZeusServiceImpl implements ZeusService {
         }
     }
 
+    @NotNull
+    private ZeusResult getZeusResultForGet(Map<String, String> headers, String url) throws ZeusOperationException {
+        try {
+            ZeusResult result = HttpUtil.getRestTemplate().getForObject(url, ZeusResult.class);
+            if (result.failed()) {
+                throw new ZeusOperationException(result.getMsg());
+            }
+            return result;
+        } catch (ZeusOperationException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ZeusOperationException(e);
+        }
+    }
 
+    private Map<String, String> buildHeader() {
+        Map<String, String> headers = Maps.newHashMap();
+        headers.put("Content-Type", "application/json");
+        return headers;
+    }
 }
