@@ -62,15 +62,17 @@ public interface DeploymentService {
 
     /**
      * 任务执行完成后的标准输出
-     * @param taskId
-     * @return
+     * @param taskId 任务id
+     * @param hostname 主机名(可选)
+     * @return String
      */
     Result<String> deployStdOuts(int taskId,String  hostname);
 
     /**
      * 任务执行完成后的错误输出
-     * @param taskId
-     * @return
+     * @param taskId 任务id
+     * @param hostname 主机名(可选)
+     * @return String
      */
     Result<String> deployStdErrs(int taskId,String hostname);
 

@@ -63,6 +63,10 @@ public class ZeusServiceImpl implements ZeusService {
 
     private static final String API_HOST_ACTION = "http://%s/api/task/host-action?token=%s";
 
+    private static final String API_TASK_STDOUTS = "http://%s/api/task/%s/stdouts.json";
+
+    private static final String API_TASK_STDERRS = "http://%s/api/task/%s/stderrs.json";
+
     private static final String EMPTY_STRING = "";
 
     @Override
@@ -107,13 +111,9 @@ public class ZeusServiceImpl implements ZeusService {
     @Override
     public String getTaskStdOutLog(int taskId,String hostname) throws ZeusOperationException {
         try {
-            ZeusTaskStatus zeusTaskStatus = getTaskStatus(1);
-            String s1 = zeusTaskStatus.toString();
-            String url;
+            String url = String.format(API_TASK_STDOUTS,zeusServer,taskId);
             if (null != hostname) {
-                url = zeusServer + API_TASK + taskId + "/stdouts.json?hostname=" + hostname;
-            } else {
-                url = zeusServer +API_TASK + taskId +"/stdouts.json";
+                url =  url+"?hostname=" + hostname;
             }
             ZeusResult result = getZeusResultForGet(buildHeader(),url);
             if (result.failed()) {
@@ -134,11 +134,9 @@ public class ZeusServiceImpl implements ZeusService {
     @Override
     public String getTaskStdErrLog(int taskId,String hostname) throws ZeusOperationException {
         try {
-            String url;
+            String url = String.format(API_TASK_STDERRS,zeusServer,taskId);
             if (null != hostname) {
-                url = zeusServer + API_TASK + taskId + "/stderrs.json?hostname=" + hostname;
-            } else {
-                url = zeusServer +API_TASK + taskId +"/stderrs.json";
+                url =  url+"?hostname=" + hostname;
             }
             ZeusResult result = getZeusResultForGet(buildHeader(),url);
             if (result.failed()) {
