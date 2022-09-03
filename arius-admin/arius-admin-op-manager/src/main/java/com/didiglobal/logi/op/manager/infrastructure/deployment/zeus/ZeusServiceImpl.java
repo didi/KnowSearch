@@ -115,7 +115,7 @@ public class ZeusServiceImpl implements ZeusService {
             if (null != hostname) {
                 url =  url+"?hostname=" + hostname;
             }
-            ZeusResult result = getZeusResultForGet(buildHeader(),url);
+            ZeusResult result =  HttpUtil.getRestTemplate().getForObject(url, ZeusResult.class);
             if (result.failed()) {
                 throw new ZeusOperationException(result.getMsg());
             }
@@ -138,7 +138,7 @@ public class ZeusServiceImpl implements ZeusService {
             if (null != hostname) {
                 url =  url+"?hostname=" + hostname;
             }
-            ZeusResult result = getZeusResultForGet(buildHeader(),url);
+            ZeusResult result =  HttpUtil.getRestTemplate().getForObject(url, ZeusResult.class);
             if (result.failed()) {
                 throw new ZeusOperationException(result.getMsg());
             }
@@ -192,24 +192,4 @@ public class ZeusServiceImpl implements ZeusService {
         }
     }
 
-    @NotNull
-    private ZeusResult getZeusResultForGet(Map<String, String> headers, String url) throws ZeusOperationException {
-        try {
-            ZeusResult result = HttpUtil.getRestTemplate().getForObject(url, ZeusResult.class);
-            if (result.failed()) {
-                throw new ZeusOperationException(result.getMsg());
-            }
-            return result;
-        } catch (ZeusOperationException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new ZeusOperationException(e);
-        }
-    }
-
-    private Map<String, String> buildHeader() {
-        Map<String, String> headers = Maps.newHashMap();
-        headers.put("Content-Type", "application/json");
-        return headers;
-    }
 }

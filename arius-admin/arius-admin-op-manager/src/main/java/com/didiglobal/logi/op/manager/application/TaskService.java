@@ -162,16 +162,16 @@ public class TaskService {
      * @param hostname 主机名
      * @return String
      */
-    public Result<String> getTaskStderrs(Integer taskId, String hostname){
+    public Result<String> getTaskStdErrs(Integer taskId, String hostname){
         if (null == taskId) {
             return Result.fail(ResultCode.PARAM_ERROR.getCode(),"taskId 为null");
         }
 
-        Result<String> taskStdOutsResult = taskDomainService.getTaskStdErrs(taskId,hostname);
-        if (taskStdOutsResult.failed()) {
-            return Result.fail(taskStdOutsResult.getCode(),taskStdOutsResult.getMessage());
+        Result<String> taskStdErrsResult = taskDomainService.getTaskStdErrs(taskId,hostname);
+        if (taskStdErrsResult.failed()) {
+            return Result.fail(taskStdErrsResult.getCode(),taskStdErrsResult.getMessage());
         }
-        return Result.success(taskStdOutsResult.getData());
+        return Result.success(taskStdErrsResult.getData());
     }
 
 }

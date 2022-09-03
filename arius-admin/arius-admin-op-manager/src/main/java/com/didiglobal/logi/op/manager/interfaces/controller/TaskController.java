@@ -79,6 +79,6 @@ public class TaskController {
     @ApiOperation(value = "zeus查看任务执行完成后的错误输出")
     public Result<String> getTaskStdErrs(@RequestParam(value = "taskId", required = true) Integer taskId,
                                          @RequestParam(value = "hostname", required = false) String hostname) {
-        return taskService.getTaskStderrs(taskId,hostname);
+        return taskService.getTaskStdErrs(taskId,hostname);
     }
 }
