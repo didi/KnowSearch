@@ -210,6 +210,9 @@ public class EcmHostHandler extends AbstractEcmBaseHandle {
         return zeusClusterRemoteService.getZeusTaskStatus(ecmParamBase.getTaskId());
     }
 
+    public Result<List<String>> getAgentsList() {
+        return zeusClusterRemoteService.getAgentsList();
+    }
     /*********************** private method ***********************************/
 
     private String buildArgs(List<String> masterHostList, HostParamBase hostActionParam, String action,

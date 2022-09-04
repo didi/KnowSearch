@@ -6,6 +6,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
@@ -15,6 +16,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum;
 import com.didichuxing.datachannel.arius.admin.common.event.resource.ClusterPhyEvent;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.impl.handler.EcmHostHandler;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
@@ -47,6 +49,9 @@ public class ClusterPhyPageSearchHandle extends AbstractPageSearchHandle<Cluster
     private ClusterPhyManager           clusterPhyManager;
     @Autowired
     private ClusterRegionService        clusterRegionService;
+
+    @Autowired
+    private EcmHostHandler ecmHostHandler;
 
     @Override
     protected Result<Boolean> checkCondition(ClusterPhyConditionDTO condition, Integer projectId) {
@@ -114,8 +119,12 @@ public class ClusterPhyPageSearchHandle extends AbstractPageSearchHandle<Cluster
             .filter(clusterPhyVO -> ClusterHealthEnum.UNKNOWN.getCode().equals(clusterPhyVO.getHealth()))
             .collect(Collectors.toList());
         //非正常集群需要重新发事件
+        Result<List<String>> result = ecmHostHandler.getAgentsList();
+        if (result.failed()) {
+            return PaginationResult.buildFail("获取zeus的AgentsList失败");
+        }
         for (ClusterPhyVO clusterPhyVO : clusterPhyList) {
-            buildSupportZeusByClusterPhy(clusterPhyVO);
+            buildSupportZeusByClusterPhy(clusterPhyVO,result.getData());
             SpringTool.publish(new ClusterPhyEvent(clusterPhyVO.getCluster(), AriusUser.SYSTEM.getDesc()));
         }
         return PaginationResult.buildSucc(clusterPhyVOList, totalHit, condition.getPage(), condition.getSize());
@@ -126,7 +135,12 @@ public class ClusterPhyPageSearchHandle extends AbstractPageSearchHandle<Cluster
      *
      * @param clusterPhyVO 集群物理信息
      */
-    private void buildSupportZeusByClusterPhy(ClusterPhyVO clusterPhyVO) {
-    
+    private void buildSupportZeusByClusterPhy(ClusterPhyVO clusterPhyVO,List<String> ecmAgentsList) {
+        List<ClusterRoleHost> clusterRoleHosts = clusterPhyManager.listClusterRoleHostByCluster(clusterPhyVO.getCluster());
+
+        for (ClusterRoleHost clusterRoleHost : clusterRoleHosts) {
+            clusterPhyVO.setSupportZeus(ecmAgentsList.contains(clusterRoleHost.getIp()));
+        }
+
     }
 }

@@ -8,9 +8,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.response.E
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.response.EcmTaskStatus;
 import com.didichuxing.datachannel.arius.admin.common.util.BaseHttpUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
-import com.didichuxing.datachannel.arius.admin.remote.zeus.bean.ZeusResult;
-import com.didichuxing.datachannel.arius.admin.remote.zeus.bean.ZeusSubTaskLog;
-import com.didichuxing.datachannel.arius.admin.remote.zeus.bean.ZeusTaskStatus;
+import com.didichuxing.datachannel.arius.admin.remote.zeus.bean.*;
 import com.didichuxing.datachannel.arius.admin.remote.zeus.bean.request.ZeusCreateTaskParam;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -22,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @NoArgsConstructor
@@ -50,6 +49,8 @@ public class ZeusClusterRemoteServiceImpl implements ZeusClusterRemoteService {
     private Integer             zeusTolerance;
 
     private static final String API_TASK = "/api/task/";
+
+    private static final String API_AGENTS_LIST = "api/agents-list";
 
     @Override
     public Result<EcmOperateAppBase> createTask(List<String> hostList, String args) {
@@ -154,6 +155,30 @@ public class ZeusClusterRemoteServiceImpl implements ZeusClusterRemoteService {
             return Result.buildFail();
         }
         return Result.buildSucc(new EcmSubTaskLog(stdoutResult.getData(), stderrResult.getData()));
+    }
+
+    @Override
+    public Result<List<String>> getAgentsList(){
+        String url = zeusServer + API_AGENTS_LIST + "?token=" + zeusToken;
+        String  response = null;
+        try {
+            LOGGER.info("class=ZeusClusterRemoteServiceImpl||method=getAgentsList");
+            response = BaseHttpUtil.get(url,null,buildHeader());
+            Result<Object> result = convert2Result(JSON.parseObject(response,ZeusResult.class));
+            if (result.failed()) {
+                return Result.buildFrom(result);
+            }
+            ZeusAgentsList zeusAgentsList = JSON.parseObject(JSON.toJSONString(result.getData()),
+                    ZeusAgentsList.class);
+            List<ZeusDat> dat = zeusAgentsList.getDat();
+            List<String> ipList = dat.stream().map(ZeusDat::getIp).distinct().collect(Collectors.toList());
+            return Result.buildSucc(ipList);
+        } catch (Exception e) {
+            LOGGER.error(
+                    "class=ZeusClusterRemoteServiceImpl||method=getAgentsList||response={}||error={}",
+                     response, e.getMessage());
+        }
+        return Result.buildFail();
     }
 
     private Result<String> getTaskStdOutLog(Integer taskId, String hostname) {

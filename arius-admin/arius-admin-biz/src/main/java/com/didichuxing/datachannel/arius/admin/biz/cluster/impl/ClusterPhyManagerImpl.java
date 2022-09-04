@@ -1107,6 +1107,10 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         return clusterRoleService.getAllRoleClusterByClusterId(clusterId);
     }
 
+    @Override
+    public  List<ClusterRoleHost> listClusterRoleHostByCluster(String cluster) {
+        return clusterRoleHostService.getNodesByCluster(cluster);
+    }
     /**************************************** private method ***************************************************/
 
     private Result<Boolean> deleteClusterInner(Integer clusterPhyId, Integer projectId) {

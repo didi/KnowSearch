@@ -44,4 +44,5 @@ public abstract class AbstractEcmBaseHandle {
     public abstract Result<EcmSubTaskLog> getSubTaskLog(Long taskId, String hostname, EcmParamBase actionParamBase);
 
     public abstract Result<List<EcmTaskStatus>> getTaskStatus(EcmParamBase ecmParamBase, Integer orderType);
+
 }
