@@ -119,13 +119,18 @@ public class ClusterPhyPageSearchHandle extends AbstractPageSearchHandle<Cluster
             .filter(clusterPhyVO -> ClusterHealthEnum.UNKNOWN.getCode().equals(clusterPhyVO.getHealth()))
             .collect(Collectors.toList());
         //非正常集群需要重新发事件
+
+        for (ClusterPhyVO clusterPhyVO : clusterPhyList) {
+            SpringTool.publish(new ClusterPhyEvent(clusterPhyVO.getCluster(), AriusUser.SYSTEM.getDesc()));
+        }
+
+        //判断集群是否支持zeus，并设置对应的参数值
         Result<List<String>> result = zeusClusterRemoteService.getAgentsList();
         if (result.failed()) {
             return PaginationResult.buildFail("获取zeus的AgentsList失败");
         }
-        for (ClusterPhyVO clusterPhyVO : clusterPhyList) {
+        for (ClusterPhyVO clusterPhyVO :clusterPhyVOList) {
             buildSupportZeusByClusterPhy(clusterPhyVO,result.getData());
-            SpringTool.publish(new ClusterPhyEvent(clusterPhyVO.getCluster(), AriusUser.SYSTEM.getDesc()));
         }
         return PaginationResult.buildSucc(clusterPhyVOList, totalHit, condition.getPage(), condition.getSize());
     }
