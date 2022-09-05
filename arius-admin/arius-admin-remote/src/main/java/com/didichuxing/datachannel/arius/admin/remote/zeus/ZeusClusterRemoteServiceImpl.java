@@ -6,7 +6,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.response.E
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.response.EcmOperateAppBase;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.response.EcmSubTaskLog;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.response.EcmTaskStatus;
-import com.didichuxing.datachannel.arius.admin.common.tuple.TupleThree;
 import com.didichuxing.datachannel.arius.admin.common.util.BaseHttpUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.remote.zeus.bean.*;
@@ -21,11 +20,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
@@ -172,7 +169,7 @@ public class ZeusClusterRemoteServiceImpl implements ZeusClusterRemoteService {
             return ZEUS_AGENTS_LIST_CACHE.get(ZEUS_AGENTS_LIST, () -> getAgentsList().getData());
         } catch (Exception e) {
             LOGGER.error(
-                    "class=ZeusClusterRemoteServiceImpl||method=getAgentsList||error={}",
+                    "class=ZeusClusterRemoteServiceImpl||method=ipListWithCache||error={}",
                     e.getMessage());
             return new ArrayList<>();
         }
