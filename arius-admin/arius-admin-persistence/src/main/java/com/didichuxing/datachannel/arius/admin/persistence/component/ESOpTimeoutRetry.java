@@ -24,9 +24,9 @@ import org.elasticsearch.cluster.metadata.ProcessClusterEventTimeoutException;
  */
 public class ESOpTimeoutRetry {
     private static final int SEC_30 = 30 * 1000;
-    private static final int SEC_1 =1;
+    private static final int SEC_1 =(int) TimeUnit.SECONDS.toMillis(1);
     private static final int MIN_5         = 5 * 60 * 1000;
-    private static final int MAX_5_SECONDS = 5;
+    private static final int MAX_5_SECONDS =(int) TimeUnit.SECONDS.toMillis(5);
     
 
     private ESOpTimeoutRetry() {
@@ -51,8 +51,8 @@ public class ESOpTimeoutRetry {
     
                 @Override
                 public int retrySleepTime(int retryTimes) {
-                    int time =  retryTimes * SEC_1 + RandomUtils.nextInt(0, 100);
-                    return (int) TimeUnit.SECONDS.toMillis(Math.min(time, MAX_5_SECONDS));
+                    int time = retryTimes * SEC_1 + RandomUtils.nextInt(0, 100);
+                    return Math.min(time, MAX_5_SECONDS);
                 }
             }).execute();
         } catch (ESOperateException e) {
@@ -83,7 +83,7 @@ public class ESOpTimeoutRetry {
                         @Override
                         public int retrySleepTime(int retryTimes) {
                             int time = retryTimes * SEC_1 + RandomUtils.nextInt(0, 100);
-                            return (int) TimeUnit.SECONDS.toMillis(Math.min(time,MAX_5_SECONDS));
+                            return Math.min(time,MAX_5_SECONDS);
                         }
                     });
             return retryExecutor.execute(predicate);
