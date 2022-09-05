@@ -50,7 +50,7 @@ public class ZeusClusterRemoteServiceImpl implements ZeusClusterRemoteService {
 
     private static final String API_TASK = "/api/task/";
 
-    private static final String API_AGENTS_LIST = "api/agents-list";
+    private static final String API_AGENTS_LIST = "/api/agents-list";
 
     @Override
     public Result<EcmOperateAppBase> createTask(List<String> hostList, String args) {
