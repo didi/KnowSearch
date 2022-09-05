@@ -125,10 +125,10 @@ public class ClusterPhyPageSearchHandle extends AbstractPageSearchHandle<Cluster
         for (ClusterPhyVO clusterPhyVO : clusterPhyList) {
             SpringTool.publish(new ClusterPhyEvent(clusterPhyVO.getCluster(), AriusUser.SYSTEM.getDesc()));
         }
-
+        List<String> ipList = zeusClusterRemoteService.ipListWithCache();
         //判断集群是否支持zeus，并设置对应的参数值
         for (ClusterPhyVO clusterPhyVO :clusterPhyVOList) {
-            buildSupportZeusByClusterPhy(clusterPhyVO,zeusClusterRemoteService.ipListWithCache());
+            buildSupportZeusByClusterPhy(clusterPhyVO,ipList);
         }
         return PaginationResult.buildSucc(clusterPhyVOList, totalHit, condition.getPage(), condition.getSize());
     }
