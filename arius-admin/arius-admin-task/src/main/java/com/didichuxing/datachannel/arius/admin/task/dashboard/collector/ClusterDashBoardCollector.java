@@ -1,12 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.task.dashboard.collector;
 
-import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.DashBoardMetricThresholdDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESClusterStatsResponse;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.ClusterMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.DashBoardStats;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusUnitUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.MetricsUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.ESClusterPhyStatsService;
@@ -14,14 +11,14 @@ import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.*;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.DASHBOARD_CLUSTER_METRIC_COLLECTOR_DELAYED_DEFAULT_VALUE;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.DASHBOARD_CLUSTER_METRIC_COLLECTOR_DELAYED_THRESHOLD;
 import static com.didichuxing.datachannel.arius.admin.common.util.AriusUnitUtil.TIME;
 
 /**
@@ -164,26 +161,26 @@ public class ClusterDashBoardCollector extends BaseDashboardCollector {
         return getConfigOrDefaultValue(DASHBOARD_CLUSTER_METRIC_COLLECTOR_DELAYED_THRESHOLD,DASHBOARD_CLUSTER_METRIC_COLLECTOR_DELAYED_DEFAULT_VALUE,TIME);
     }
 
-    /**
-     * 获取dashboard配置值
-     * catch:获取和转换都发生错误后，使用系统配置的默认配置项
-     * @param valueName    配置名称
-     * @param defaultValue 默认值
-     * @return
-     */
-    private long getConfigOrDefaultValue(String valueName,String defaultValue, String unitStyle){
-        DashBoardMetricThresholdDTO configThreshold = null;
-        try {
-            String configValue = ariusConfigInfoService.stringSetting(ARIUS_DASHBOARD_THRESHOLD_GROUP, valueName, defaultValue);
-            if (StringUtils.isNotBlank(configValue)) {
-                configThreshold = JSONObject.parseObject(configValue, DashBoardMetricThresholdDTO.class);
-            }
-        } catch (Exception e) {
-            //获取和转换都发生错误后，使用系统配置的默认配置项
-            LOGGER.warn("class=ClusterDashBoardCollector||method=getConfigOrDefaultValue||name={}||msg=JSON format error!",
-                    valueName);
-            configThreshold = JSONObject.parseObject(defaultValue, DashBoardMetricThresholdDTO.class);
-        }
-        return AriusUnitUtil.unitChange(configThreshold.getValue().longValue(),configThreshold.getUnit(),unitStyle);
-    }
+//    /**
+//     * 获取dashboard配置值
+//     * catch:获取和转换都发生错误后，使用系统配置的默认配置项
+//     * @param valueName    配置名称
+//     * @param defaultValue 默认值
+//     * @return
+//     */
+//    private long getConfigOrDefaultValue(String valueName,String defaultValue, String unitStyle){
+//        DashBoardMetricThresholdDTO configThreshold = null;
+//        try {
+//            String configValue = ariusConfigInfoService.stringSetting(ARIUS_DASHBOARD_THRESHOLD_GROUP, valueName, defaultValue);
+//            if (StringUtils.isNotBlank(configValue)) {
+//                configThreshold = JSONObject.parseObject(configValue, DashBoardMetricThresholdDTO.class);
+//            }
+//        } catch (Exception e) {
+//            //获取和转换都发生错误后，使用系统配置的默认配置项
+//            LOGGER.warn("class=ClusterDashBoardCollector||method=getConfigOrDefaultValue||name={}||msg=JSON format error!",
+//                    valueName);
+//            configThreshold = JSONObject.parseObject(defaultValue, DashBoardMetricThresholdDTO.class);
+//        }
+//        return AriusUnitUtil.unitChange(configThreshold.getValue().longValue(),configThreshold.getUnit(),unitStyle);
+//    }
 }

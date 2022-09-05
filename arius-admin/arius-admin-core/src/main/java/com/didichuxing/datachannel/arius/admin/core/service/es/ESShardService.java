@@ -24,14 +24,9 @@ public interface ESShardService {
     List<ShardMetrics> syncGetBigShards(String clusterName);
 
     /**
-     * 获取ES集群小Shard(1G以内)信息
-     */
-    List<ShardMetrics> syncGetSmallShards(String clusterName);
-
-    /**
      * 获取ES集群大Shard(50G)信息 和 小Shard(1G以内)信息
      */
-    Tuple</*大shard列表*/List<ShardMetrics>, /*小shard列表*/List<ShardMetrics>> syncGetBigAndSmallShards(String clusterName);
+    Tuple</*大shard列表*/List<ShardMetrics>, /*小shard列表*/List<ShardMetrics>> syncGetBigAndSmallShards(String clusterName,long configBigShard,long configSmallShard);
 
     /**
      * 获取集群segments信息, 不包含全量segment属性
