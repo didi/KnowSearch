@@ -20,6 +20,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.impl.han
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
+import com.didichuxing.datachannel.arius.admin.remote.zeus.ZeusClusterRemoteService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
@@ -51,7 +52,7 @@ public class ClusterPhyPageSearchHandle extends AbstractPageSearchHandle<Cluster
     private ClusterRegionService        clusterRegionService;
 
     @Autowired
-    private EcmHostHandler ecmHostHandler;
+    private ZeusClusterRemoteService zeusClusterRemoteService;
 
     @Override
     protected Result<Boolean> checkCondition(ClusterPhyConditionDTO condition, Integer projectId) {
@@ -119,7 +120,7 @@ public class ClusterPhyPageSearchHandle extends AbstractPageSearchHandle<Cluster
             .filter(clusterPhyVO -> ClusterHealthEnum.UNKNOWN.getCode().equals(clusterPhyVO.getHealth()))
             .collect(Collectors.toList());
         //非正常集群需要重新发事件
-        Result<List<String>> result = ecmHostHandler.getAgentsList();
+        Result<List<String>> result = zeusClusterRemoteService.getAgentsList();
         if (result.failed()) {
             return PaginationResult.buildFail("获取zeus的AgentsList失败");
         }
@@ -135,11 +136,11 @@ public class ClusterPhyPageSearchHandle extends AbstractPageSearchHandle<Cluster
      *
      * @param clusterPhyVO 集群物理信息
      */
-    private void buildSupportZeusByClusterPhy(ClusterPhyVO clusterPhyVO,List<String> ecmAgentsList) {
+    private void buildSupportZeusByClusterPhy(ClusterPhyVO clusterPhyVO,List<String> zeusAgentsList) {
         List<ClusterRoleHost> clusterRoleHosts = clusterPhyManager.listClusterRoleHostByCluster(clusterPhyVO.getCluster());
 
         for (ClusterRoleHost clusterRoleHost : clusterRoleHosts) {
-            clusterPhyVO.setSupportZeus(ecmAgentsList.contains(clusterRoleHost.getIp()));
+            clusterPhyVO.setSupportZeus(zeusAgentsList.contains(clusterRoleHost.getIp()));
         }
 
     }
