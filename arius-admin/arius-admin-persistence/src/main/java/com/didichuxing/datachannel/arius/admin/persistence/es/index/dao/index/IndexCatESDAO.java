@@ -257,7 +257,7 @@ public class IndexCatESDAO extends BaseESDAO {
     
         DirectResponse response = null;
         try {
-            response = ESOpTimeoutRetry.esRetryExecuteWithReturnValue("syncGetSegmentsIndexList", 3,
+            response = ESOpTimeoutRetry.esRetryExecute("syncGetSegmentsIndexList", 3,
                     () -> directRequestBiFunction.apply(Long.valueOf(ES_OPERATE_TIMEOUT), TimeUnit.SECONDS),
                     directRequestPredicate
         
@@ -326,7 +326,7 @@ public class IndexCatESDAO extends BaseESDAO {
     
         Tuple<Long, List<IndexCatCellPO>> tuple = null;
         try {
-            tuple = ESOpTimeoutRetry.esRetryExecuteWithReturnValue("syncGetSegmentsIndexList", 3,
+            tuple = ESOpTimeoutRetry.esRetryExecute("syncGetSegmentsIndexList", 3,
                     () -> gatewayClient.performRequestListAndGetTotalCount(metadataClusterName,
                             IndexNameUtils.genCurrentDailyIndexName(indexName), typeName, dsl, IndexCatCellPO.class),
                     Objects::isNull

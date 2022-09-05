@@ -119,7 +119,7 @@ public class DslStatisticsService {
         }
 
         try {
-            ScrollDslTemplateResponse response = ESOpTimeoutRetry.esRetryExecuteWithReturnValue("scrollSearchDslTemplate",3,
+            ScrollDslTemplateResponse response = ESOpTimeoutRetry.esRetryExecute("scrollSearchDslTemplate",3,
                     ()->dslTemplateEsDao.handleScrollDslTemplates(request), Objects::isNull);
             if (response == null) {
                 return Result.buildFail("查询es失败");

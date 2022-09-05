@@ -20,8 +20,7 @@ public class RetryExecutor<T> {
     /**
      * es操作内容
      */
-    private Handler           handler;
-    private HandlerWithReturnValue<T> handlerWithReturnValue;
+    private Handler<T>        handler;
     /**
      * 重试次数
      */
@@ -32,24 +31,31 @@ public class RetryExecutor<T> {
      * Created by d06679 on 2017/8/24.
      */
 
-    public interface Handler {
+    public interface Handler<T> {
         /**
          * 处理方法
          * @return
          * @throws Throwable
          */
-        boolean process() throws BaseException;
+        T process() throws BaseException;
 
         /***
-         * 是否重试
+         * 异常是否需要重试
          * @param e 异常
          * @return
          */
-        default boolean needRetry(Exception e) {
-            return true;
+        default boolean needExceptionRetry(Exception e) {
+            return false;
         }
-    
 
+        /**
+         * 返回值是否需要重试
+         * @param t
+         * @return
+         */
+        default boolean needReturnObjRetry(Object t) {
+            return false;
+        }
 
         /**
          * 重试Sleep时间间隔
@@ -60,58 +66,22 @@ public class RetryExecutor<T> {
             return 0;
         }
     }
-    
-    public interface HandlerWithReturnValue<T> {
-        /**
-         * 处理方法
-         *
-         * @return
-         * @throws Throwable
-         */
-        T process() throws BaseException;
-        
-        /***
-         * 是否重试
-         * @param e 异常
-         * @return
-         */
-        default boolean needRetry(Exception e) {
-            return true;
-        }
 
-        default boolean needRetry(Predicate<T> predicate, T t) {
-            return predicate.test(t);
-        }
-        
-        /**
-         * 重试 Sleep 时间间隔
-         *
-         * @param retryTimes 重试次数
-         * @return
-         */
-        default int retrySleepTime(int retryTimes) {
-            return 0;
-        }
-    }
-    public static RetryExecutor builder() {
+    public static <T> RetryExecutor<T> builder() {
         return new RetryExecutor();
     }
 
-    public RetryExecutor name(String name) {
+    public RetryExecutor<T> name(String name) {
         this.name = name;
         return this;
     }
 
-    public RetryExecutor handler(Handler handler) {
+    public RetryExecutor<T> handler(Handler<T> handler) {
         this.handler = handler;
         return this;
     }
-    
-    public RetryExecutor<T> HandlerWithReturnValue(HandlerWithReturnValue<T> handler) {
-        this.handlerWithReturnValue = handler;
-        return this;
-    }
-    public RetryExecutor retryCount(Integer retryCount) {
+
+    public RetryExecutor<T> retryCount(Integer retryCount) {
         this.retryCount = (retryCount > RETRY_MAX) ? RETRY_MAX : retryCount;
         return this;
     }
@@ -120,21 +90,23 @@ public class RetryExecutor<T> {
      * 重试操作，要么handler执行成功有返回值,要么报异常
      * @throws Exception 操作的异常
      */
-    public boolean execute() throws Exception {
-        boolean succ = false;
+    public T execute() throws Exception {
+        T t = null;
         int tryCount = 0;
         do {
             try {
-                int retrySleepTime = handlerWithReturnValue.retrySleepTime(tryCount);
+                int retrySleepTime = handler.retrySleepTime(tryCount);
                 if (tryCount > 0 && retrySleepTime > 0) {
                     TimeUnit.MILLISECONDS.sleep(retrySleepTime);
                 }
-                succ = handler.process();
-                if (succ) {
-                    break;
+
+                t = handler.process();
+
+                if(!handler.needReturnObjRetry(t)){
+                    return t;
                 }
             } catch (Exception e) {
-                if (!handler.needRetry(e)|| tryCount == retryCount) {
+                if (!handler.needExceptionRetry(e) || tryCount == retryCount) {
                     LOGGER.warn("class=RetryExecutor||method=execute||errMsg={}||handlerName={}||tryCount={}",
                             e.getMessage(), name, tryCount, e);
                     throw e;
@@ -143,46 +115,9 @@ public class RetryExecutor<T> {
                 LOGGER.warn(
                         "class=RetryExecutor||method=execute||errMsg={}||handlerName={}||tryCount={}||maxTryCount={}",
                         e.getMessage(), name, tryCount, retryCount);
-    
-                
             }
-            
-            
         } while (tryCount++ < retryCount);
 
-        return succ;
-    }
-    public  T execute(Predicate<T> predicate) throws Exception {
-        T t = null;
-        int tryCount = 0;
-        do {
-            try {
-                int retrySleepTime = handlerWithReturnValue.retrySleepTime(tryCount);
-                if (tryCount > 0 && retrySleepTime > 0) {
-                    TimeUnit.MILLISECONDS.sleep(retrySleepTime);
-                }
-                t = handlerWithReturnValue.process();
-                if (!handlerWithReturnValue.needRetry(predicate, t)){
-                    break;
-                }
-            } catch (Exception e) {
-    
-                if (!handlerWithReturnValue.needRetry(e)|| tryCount == retryCount) {
-                    LOGGER.warn("class=RetryExecutor||method=execute||errMsg={}||handlerName={}||tryCount={}",
-                            e.getMessage(), name, tryCount, e);
-        
-                    throw e;
-                }
-    
-                LOGGER.warn(
-                        "class=RetryExecutor||method=execute||errMsg={}||handlerName={}||tryCount={}||maxTryCount={}",
-                        e.getMessage(), name, tryCount, retryCount);
-                
-            }
-            
-            
-        } while (tryCount++ < retryCount);
-    
         return t;
     }
 }
