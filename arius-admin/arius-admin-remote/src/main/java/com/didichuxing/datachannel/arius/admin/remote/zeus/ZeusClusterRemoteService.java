@@ -53,4 +53,10 @@ public interface ZeusClusterRemoteService {
      */
     Result<List<String>> getAgentsList();
 
+    /**
+     *  获取 缓存中存储的宙斯部署的ip列表
+     * @return List</String>
+     */
+    List<String> ipListWithCache();
+
 }

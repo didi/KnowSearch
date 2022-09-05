@@ -30,6 +30,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import static com.didichuxing.datachannel.arius.admin.remote.zeus.ZeusClusterRemoteServiceImpl.*;
+
 /**
  *
  * @author ohushenglin_v
@@ -125,12 +127,8 @@ public class ClusterPhyPageSearchHandle extends AbstractPageSearchHandle<Cluster
         }
 
         //判断集群是否支持zeus，并设置对应的参数值
-        Result<List<String>> result = zeusClusterRemoteService.getAgentsList();
-        if (result.failed()) {
-            return PaginationResult.buildFail("获取zeus的AgentsList失败");
-        }
         for (ClusterPhyVO clusterPhyVO :clusterPhyVOList) {
-            buildSupportZeusByClusterPhy(clusterPhyVO,result.getData());
+            buildSupportZeusByClusterPhy(clusterPhyVO,zeusClusterRemoteService.ipListWithCache());
         }
         return PaginationResult.buildSucc(clusterPhyVOList, totalHit, condition.getPage(), condition.getSize());
     }

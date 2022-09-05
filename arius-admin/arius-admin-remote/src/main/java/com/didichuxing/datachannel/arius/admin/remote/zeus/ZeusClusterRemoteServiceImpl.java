@@ -6,10 +6,13 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.response.E
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.response.EcmOperateAppBase;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.response.EcmSubTaskLog;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ecm.response.EcmTaskStatus;
+import com.didichuxing.datachannel.arius.admin.common.tuple.TupleThree;
 import com.didichuxing.datachannel.arius.admin.common.util.BaseHttpUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.remote.zeus.bean.*;
 import com.didichuxing.datachannel.arius.admin.remote.zeus.bean.request.ZeusCreateTaskParam;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import lombok.NoArgsConstructor;
@@ -18,8 +21,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
@@ -52,6 +58,9 @@ public class ZeusClusterRemoteServiceImpl implements ZeusClusterRemoteService {
 
     private static final String API_AGENTS_LIST = "/api/agents-list";
 
+    public static final Cache</*zeus_agents_list*/String, /*agents_list*/ List<String>> ZEUS_AGENTS_LIST_CACHE = CacheBuilder.newBuilder().build();
+
+    public static final String ZEUS_AGENTS_LIST = "zeus_agents_list";
     @Override
     public Result<EcmOperateAppBase> createTask(List<String> hostList, String args) {
         ZeusCreateTaskParam zeusCreateTaskParam = buildCreateZeusTaskParam(hostList, args);
@@ -155,6 +164,18 @@ public class ZeusClusterRemoteServiceImpl implements ZeusClusterRemoteService {
             return Result.buildFail();
         }
         return Result.buildSucc(new EcmSubTaskLog(stdoutResult.getData(), stderrResult.getData()));
+    }
+
+    @Override
+    public List<String> ipListWithCache() {
+        try {
+            return ZEUS_AGENTS_LIST_CACHE.get(ZEUS_AGENTS_LIST, () -> getAgentsList().getData());
+        } catch (Exception e) {
+            LOGGER.error(
+                    "class=ZeusClusterRemoteServiceImpl||method=getAgentsList||error={}",
+                    e.getMessage());
+            return new ArrayList<>();
+        }
     }
 
     @Override
