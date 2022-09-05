@@ -11,6 +11,7 @@ import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
 
 /**
  * @author d06679
@@ -130,6 +131,25 @@ public class ClusterPhyVO extends BaseVO implements Comparable<ClusterPhyVO> {
         if (clusterLogicVO != null || regionVO != null) {
             Tuple<ClusterLogicVO, ClusterRegionVO> tuple = new Tuple<>(clusterLogicVO, regionVO);
             logicClusterAndRegionList.add(tuple);
+        }
+    }
+    
+   
+    
+    /**
+     * > 将逻辑集群列表添加到逻辑集群列表
+     *
+     * @param clusterLogicVOList 要添加的逻辑集群列表
+     * @param regionVO regionVO  regionVO
+     */
+    public void addLogicCluster(List<ClusterLogicVO> clusterLogicVOList, ClusterRegionVO regionVO) {
+        if (null == logicClusterAndRegionList) {
+            logicClusterAndRegionList = Lists.newArrayList();
+        }
+        if (CollectionUtils.isNotEmpty(clusterLogicVOList)) {
+            for (ClusterLogicVO clusterLogicVO : clusterLogicVOList) {
+                addLogicCluster(clusterLogicVO, regionVO);
+            }
         }
     }
 
