@@ -11,7 +11,6 @@ import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.apache.commons.collections4.CollectionUtils;
 
 /**
  * @author d06679
@@ -116,7 +115,9 @@ public class ClusterPhyVO extends BaseVO implements Comparable<ClusterPhyVO> {
     @ApiModelProperty("是否支持 zeus:（扩缩容、升级、重启、配置变更）")
     private Boolean supportZeus = true;
     @ApiModelProperty("逻辑集群与对应region的列表")
-    private List<Tuple<ClusterLogicVO, ClusterRegionVO>> logicClusterAndRegionList;
+    private List<Tuple<ClusterLogicVOWithProjects, ClusterRegionVO>> logicClusterAndRegionList;
+    @ApiModelProperty("物理集群绑定的逻辑集群")
+    private List<String> bindLogicCluster;
 
     /**
      * 添加逻辑集群
@@ -124,32 +125,13 @@ public class ClusterPhyVO extends BaseVO implements Comparable<ClusterPhyVO> {
      * @param clusterLogicVO 逻辑集群
      * @param regionVO    region
      */
-    public void addLogicCluster(ClusterLogicVO clusterLogicVO, ClusterRegionVO regionVO) {
+    public void addLogicCluster(ClusterLogicVOWithProjects clusterLogicVO, ClusterRegionVO regionVO) {
         if (null == logicClusterAndRegionList) {
             logicClusterAndRegionList = Lists.newArrayList();
         }
         if (clusterLogicVO != null || regionVO != null) {
-            Tuple<ClusterLogicVO, ClusterRegionVO> tuple = new Tuple<>(clusterLogicVO, regionVO);
+            Tuple<ClusterLogicVOWithProjects, ClusterRegionVO> tuple = new Tuple<>(clusterLogicVO, regionVO);
             logicClusterAndRegionList.add(tuple);
-        }
-    }
-    
-   
-    
-    /**
-     * > 将逻辑集群列表添加到逻辑集群列表
-     *
-     * @param clusterLogicVOList 要添加的逻辑集群列表
-     * @param regionVO regionVO  regionVO
-     */
-    public void addLogicCluster(List<ClusterLogicVO> clusterLogicVOList, ClusterRegionVO regionVO) {
-        if (null == logicClusterAndRegionList) {
-            logicClusterAndRegionList = Lists.newArrayList();
-        }
-        if (CollectionUtils.isNotEmpty(clusterLogicVOList)) {
-            for (ClusterLogicVO clusterLogicVO : clusterLogicVOList) {
-                addLogicCluster(clusterLogicVO, regionVO);
-            }
         }
     }
 
