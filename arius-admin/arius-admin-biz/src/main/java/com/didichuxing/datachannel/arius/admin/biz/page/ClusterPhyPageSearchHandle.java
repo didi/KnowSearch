@@ -22,7 +22,11 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.Clust
 import com.didichuxing.datachannel.arius.admin.remote.zeus.ZeusClusterRemoteService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
@@ -42,6 +46,8 @@ public class ClusterPhyPageSearchHandle extends AbstractPageSearchHandle<Cluster
 
     private static final ILog           LOGGER         = LogFactory.getLog(ClusterPhyPageSearchHandle.class);
     private static final CharSequence[] CHAR_SEQUENCES = { "*", "?" };
+    public static final Cache</*zeus_agents_list*/String, /*agents_list*/ List<String>> ZEUS_AGENTS_LIST_CACHE = CacheBuilder.newBuilder().build();
+    public static final String ZEUS_AGENTS_LIST = "zeus_agents_list";
 
     @Autowired
     private ClusterPhyService           clusterPhyService;
@@ -125,14 +131,43 @@ public class ClusterPhyPageSearchHandle extends AbstractPageSearchHandle<Cluster
         for (ClusterPhyVO clusterPhyVO : clusterPhyList) {
             SpringTool.publish(new ClusterPhyEvent(clusterPhyVO.getCluster(), AriusUser.SYSTEM.getDesc()));
         }
-        List<String> ipList = zeusClusterRemoteService.ipListWithCache();
+        List<String> ipList = ipListWithCache();
         //判断集群是否支持zeus，并设置对应的参数值
         for (ClusterPhyVO clusterPhyVO :clusterPhyVOList) {
             buildSupportZeusByClusterPhy(clusterPhyVO,ipList);
         }
         return PaginationResult.buildSucc(clusterPhyVOList, totalHit, condition.getPage(), condition.getSize());
     }
-    
+
+    /**
+     * > 该函数用于获取存储zeus部署的ip列表的缓存
+     *return List<String>
+     */
+    private List<String> ipListWithCache() {
+        //捕获缓存中的异常
+        try {
+            return ZEUS_AGENTS_LIST_CACHE.get(ZEUS_AGENTS_LIST, () -> getIpList());
+        } catch (Exception e) {
+            LOGGER.error(
+                    "class=ClusterPhyPageSearchHandle||method=ipListWithCache||error={}", e.getMessage());
+            return getIpList();
+        }
+    }
+
+    /**
+     * > 该函数用于缓存初次获取zeus部署的agents list
+     *return List<String>
+     */
+    private List<String> getIpList() {
+        Result<List<String>> result = zeusClusterRemoteService.getAgentsList();
+        //如果获取zeus失败则返回空列表
+        if (result.failed()) {
+            return Lists.newArrayList();
+        } else {
+            return result.getData();
+        }
+    }
+
     /**
      * > 该函数用于构建支持zeus by cluster phy
      *

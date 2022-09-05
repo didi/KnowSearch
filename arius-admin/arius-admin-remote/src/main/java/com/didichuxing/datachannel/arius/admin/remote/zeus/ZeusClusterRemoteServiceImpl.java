@@ -55,9 +55,6 @@ public class ZeusClusterRemoteServiceImpl implements ZeusClusterRemoteService {
 
     private static final String API_AGENTS_LIST = "/api/agents-list";
 
-    public static final Cache</*zeus_agents_list*/String, /*agents_list*/ List<String>> ZEUS_AGENTS_LIST_CACHE = CacheBuilder.newBuilder().build();
-
-    public static final String ZEUS_AGENTS_LIST = "zeus_agents_list";
     @Override
     public Result<EcmOperateAppBase> createTask(List<String> hostList, String args) {
         ZeusCreateTaskParam zeusCreateTaskParam = buildCreateZeusTaskParam(hostList, args);
@@ -164,18 +161,6 @@ public class ZeusClusterRemoteServiceImpl implements ZeusClusterRemoteService {
     }
 
     @Override
-    public List<String> ipListWithCache() {
-        try {
-            return ZEUS_AGENTS_LIST_CACHE.get(ZEUS_AGENTS_LIST, () -> getAgentsList().getData());
-        } catch (Exception e) {
-            LOGGER.error(
-                    "class=ZeusClusterRemoteServiceImpl||method=ipListWithCache||error={}",
-                    e.getMessage());
-            return new ArrayList<>();
-        }
-    }
-
-    @Override
     public Result<List<String>> getAgentsList(){
         String url = zeusServer + API_AGENTS_LIST + "?token=" + zeusToken;
         String  response = null;
@@ -186,10 +171,10 @@ public class ZeusClusterRemoteServiceImpl implements ZeusClusterRemoteService {
             if (result.failed()) {
                 return Result.buildFrom(result);
             }
+            //获取Zeus的Agents列表并将获取zeus中的ip列表
             ZeusAgentsList zeusAgentsList = JSON.parseObject(JSON.toJSONString(result.getData()),
                     ZeusAgentsList.class);
-            List<ZeusDat> dat = zeusAgentsList.getDat();
-            List<String> ipList = dat.stream().map(ZeusDat::getIp).distinct().collect(Collectors.toList());
+            List<String> ipList = zeusAgentsList.getDat().stream().map(ZeusDat::getIp).distinct().collect(Collectors.toList());
             return Result.buildSucc(ipList);
         } catch (Exception e) {
             LOGGER.error(
