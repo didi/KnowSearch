@@ -1,6 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.persistence.component;
 
-import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.BaseException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NullESClientException;
@@ -9,6 +8,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.RetryExecutor.Handler
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import org.apache.commons.lang3.RandomUtils;
 import org.elasticsearch.ElasticsearchTimeoutException;
 import org.elasticsearch.cluster.metadata.ProcessClusterEventTimeoutException;
 
@@ -46,20 +46,12 @@ public class ESOpTimeoutRetry {
                            || e instanceof ElasticsearchTimeoutException ;
                 }
     
-                /**
-                 * 如果您不需要抛出异常，请不要抛出它们。
-                 *
-                 * @param e 抛出的异常。
-                 * @return 正在返回默认方法。
-                 */
-                @Override
-                public boolean needToThrowExceptions(Exception e) {
-                    return e instanceof AdminOperateException;
-                }
+               
     
                 @Override
                 public int retrySleepTime(int retryTimes) {
-                    return (int) TimeUnit.SECONDS.toMillis(MAX_5_SECONDS);
+                    int time = retryTimes + RandomUtils.nextInt(0, retryTimes);
+                    return (int) TimeUnit.SECONDS.toMillis(Math.min(time, MAX_5_SECONDS));
                 }
             }).execute();
         } catch (ESOperateException e) {
@@ -86,20 +78,11 @@ public class ESOpTimeoutRetry {
                                    || e instanceof ElasticsearchTimeoutException||e instanceof NullESClientException;
                         }
     
-                        /**
-                         * 如果您不需要抛出异常，请不要抛出它们。
-                         *
-                         * @param e 抛出的异常。
-                         * @return 正在返回默认方法。
-                         */
-                        @Override
-                        public boolean needToThrowExceptions(Exception e) {
-                            return e instanceof AdminOperateException;
-                        }
-    
+                       
                         @Override
                         public int retrySleepTime(int retryTimes) {
-                            return (int) TimeUnit.SECONDS.toMillis(MAX_5_SECONDS);
+                            int time= retryTimes + RandomUtils.nextInt(0,retryTimes);
+                            return (int) TimeUnit.SECONDS.toMillis(Math.min(time,MAX_5_SECONDS));
                         }
                     });
             return retryExecutor.execute(predicate);
@@ -134,17 +117,7 @@ public class ESOpTimeoutRetry {
                            || e instanceof ElasticsearchTimeoutException || e instanceof NullESClientException;
                 }
     
-                /**
-                 * 如果您不需要抛出异常，请不要抛出它们。
-                 *
-                 * @param e 抛出的异常。
-                 * @return 正在返回默认方法。
-                 */
-                @Override
-                public boolean needToThrowExceptions(Exception e) {
-                    return e instanceof AdminOperateException;
-                }
-    
+              
 
                 @Override
                 public int retrySleepTime(int retryTimes) {

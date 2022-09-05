@@ -12,6 +12,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.Ope
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.util.DateTimeUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
+import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpTimeoutRetry;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.dsl.DslTemplateESDAO;
 import com.didiglobal.logi.elasticsearch.client.parser.DslExtractionUtilV2;
 import com.didiglobal.logi.elasticsearch.client.parser.bean.ExtractResult;
@@ -22,6 +23,7 @@ import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -117,7 +119,8 @@ public class DslStatisticsService {
         }
 
         try {
-            ScrollDslTemplateResponse response = dslTemplateEsDao.handleScrollDslTemplates(request);
+            ScrollDslTemplateResponse response = ESOpTimeoutRetry.esRetryExecuteWithReturnValue("scrollSearchDslTemplate",3,
+                    ()->dslTemplateEsDao.handleScrollDslTemplates(request), Objects::isNull);
             if (response == null) {
                 return Result.buildFail("查询es失败");
             }

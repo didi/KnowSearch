@@ -52,7 +52,6 @@ import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.TemplateUtils;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectClusterLogicAuthService;
@@ -118,8 +117,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
     @Autowired
     private ClusterLogicService                clusterLogicService;
 
-    @Autowired
-    private ClusterPhyService                  clusterPhyService;
+  
 
     @Autowired
     private ClusterRegionService               clusterRegionService;
