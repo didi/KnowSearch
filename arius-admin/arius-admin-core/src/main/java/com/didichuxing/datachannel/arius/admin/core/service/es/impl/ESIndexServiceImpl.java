@@ -742,7 +742,7 @@ public class ESIndexServiceImpl implements ESIndexService {
     @Override
     public boolean createIndexWithConfig(String clusterName, String indexName, IndexConfig indexConfig, int tryTimes)
             throws ESOperateException {
-        return ESOpTimeoutRetry.esRetryExecuteWithReturnValue("createIndexWithConfig", 3,
+        return ESOpTimeoutRetry.esRetryExecute("createIndexWithConfig", 3,
                 () -> esIndexDAO.createIndexWithConfig(clusterName, indexName, indexConfig, tryTimes), Objects::isNull);
     }
     

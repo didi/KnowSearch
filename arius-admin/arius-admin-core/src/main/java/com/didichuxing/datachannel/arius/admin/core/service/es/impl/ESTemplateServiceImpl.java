@@ -230,7 +230,7 @@ public class ESTemplateServiceImpl implements ESTemplateService {
      */
     @Override
     public MultiTemplatesConfig syncGetTemplates(String clusterName, String templateName) throws ESOperateException {
-        return ESOpTimeoutRetry.esRetryExecuteWithReturnValue("syncGetTemplates", 3,
+        return ESOpTimeoutRetry.esRetryExecute("syncGetTemplates", 3,
                 () -> esTemplateDAO.getTemplates(clusterName, templateName), Objects::isNull);
     }
 

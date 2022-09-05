@@ -263,8 +263,9 @@ public class DslTemplateESDAO extends BaseESDAO {
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_DSL_TEMPLATE_BY_CONDITION,
             (queryDTO.getPage() - 1) * queryDTO.getSize(), queryDTO.getSize(), queryCriteriaDsl, sortInfo, sortOrder);
 
-        return ESOpTimeoutRetry.esRetryExecuteWithReturnValue("getDslTemplatePage",3,()->gatewayClient.performRequestListAndGetTotalCount(null, indexName, typeName,
-                dsl, DslTemplatePO.class),Objects::isNull);
+        return ESOpTimeoutRetry.esRetryExecute("getDslTemplatePage",3,
+                () -> gatewayClient.performRequestListAndGetTotalCount(null, indexName, typeName, dsl, DslTemplatePO.class),
+                Objects::isNull);
     }
 
     /**

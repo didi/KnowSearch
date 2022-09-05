@@ -331,7 +331,7 @@ public class ESIndexDAO extends BaseESDAO {
             };
             ESIndicesCatIndicesResponse esIndicesCatIndicesResponse = null;
             try {
-                esIndicesCatIndicesResponse = ESOpTimeoutRetry.esRetryExecuteWithReturnValue("syncGetSegmentsIndexList",
+                esIndicesCatIndicesResponse = ESOpTimeoutRetry.esRetryExecute("syncGetSegmentsIndexList",
                         3, () -> catIndicesResponseBiFunction.apply(Long.valueOf(ES_OPERATE_TIMEOUT), TimeUnit.SECONDS),
                         Objects::isNull
         
@@ -481,7 +481,7 @@ public class ESIndexDAO extends BaseESDAO {
         };
         ESIndicesGetAliasResponse response =null;
         try {
-            response = ESOpTimeoutRetry.esRetryExecuteWithReturnValue("getAliasesByIndices", 3,
+            response = ESOpTimeoutRetry.esRetryExecute("getAliasesByIndices", 3,
                     () -> responseBiFunction.apply(Long.valueOf(ES_OPERATE_TIMEOUT), TimeUnit.SECONDS), Objects::isNull
         
             );
@@ -866,7 +866,7 @@ public class ESIndexDAO extends BaseESDAO {
         };
         ESIndicesPutAliasResponse response = null;
         try {
-            response = ESOpTimeoutRetry.esRetryExecuteWithReturnValue("editAlias", tryTimes,
+            response = ESOpTimeoutRetry.esRetryExecute("editAlias", tryTimes,
                     () -> esIndicesPutAliasResponseBiFunction.apply(Long.valueOf(ES_OPERATE_TIMEOUT), TimeUnit.SECONDS),
                     esIndicesPutAliasResponse -> Optional.ofNullable(esIndicesPutAliasResponse)
                             .map(ESIndicesPutAliasResponse::getAcknowledged).orElse(Boolean.FALSE)

@@ -24,7 +24,6 @@ join_cluster(){
 
 
 create_logic_template(){
-  logic_cluster_id=3922
   num_exec='echo "$logic_cluster_id" | sed -n "/^[0-9]\+$/p" '
   num=`eval $num_exec` 
   if [ ! -n "$num" ]; then

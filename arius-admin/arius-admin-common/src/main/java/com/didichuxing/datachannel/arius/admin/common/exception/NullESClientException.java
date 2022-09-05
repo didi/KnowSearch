@@ -8,7 +8,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType
  * @author shizeying
  * @date 2022/08/26
  */
-public class NullESClientException extends NullPointerException {
+public class NullESClientException extends ESOperateException {
     private final ResultType resultType;
     
     
@@ -17,7 +17,7 @@ public class NullESClientException extends NullPointerException {
         this.resultType = ResultType.ES_CLIENT_NUL_ERROR;
         
     }
-    
+    @Override
     public ResultType getResultType() {
         return resultType;
     }
