@@ -469,12 +469,11 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
                 //将region解绑
                 ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(logicClusterId);
                 if (Objects.nonNull(clusterRegion)) {
-                    clusterRegionService.unbindRegion(clusterRegion.getId(), logicClusterId, operator);
                     //将region解绑
                     Result<Void> unbindRes = clusterRegionService.unbindRegion(clusterRegion.getId(), logicClusterId,
                             operator);
-                    if (!unbindRes.failed()) {
-                        return Result.buildFail();
+                    if (unbindRes.failed()) {
+                       throw new AdminOperateException(unbindRes.getMessage());
                     }
                 }
             }
