@@ -140,10 +140,12 @@ public class ClusterPhyPageSearchHandle extends AbstractPageSearchHandle<Cluster
      */
     private void buildSupportZeusByClusterPhy(ClusterPhyVO clusterPhyVO,List<String> zeusAgentsList) {
         List<ClusterRoleHost> clusterRoleHosts = clusterPhyManager.listClusterRoleHostByCluster(clusterPhyVO.getCluster());
-
+        Boolean supportZeus = true ;
         for (ClusterRoleHost clusterRoleHost : clusterRoleHosts) {
-            clusterPhyVO.setSupportZeus(zeusAgentsList.contains(clusterRoleHost.getIp()));
+            if (!zeusAgentsList.contains(clusterRoleHost.getIp())) {
+                supportZeus = false;
+            }
         }
-
+        clusterPhyVO.setSupportZeus(supportZeus);
     }
 }
