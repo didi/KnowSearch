@@ -18,6 +18,7 @@ import io.swagger.annotations.ApiOperation;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -97,5 +98,13 @@ public class ESPhyClusterNodeController {
     public Result<Void> collectNodeSettings(@PathVariable String clusterPhyName) throws AdminTaskException {
         return Result.build(clusterNodeManager.collectNodeSettings(clusterPhyName));
     }
-
+    
+    @DeleteMapping("")
+    @ResponseBody
+    @ApiOperation(value = "批量下线离线节点")
+    @ApiImplicitParam(type = "String", name = "phyClusterName", value = "物理集群名称", required = true)
+    public Result<Void> delete(@RequestBody List<Integer> ids, HttpServletRequest request) {
+        return clusterNodeManager.delete(ids, HttpRequestUtil.getProjectId(request),
+                        HttpRequestUtil.getOperator(request));
+    }
 }
