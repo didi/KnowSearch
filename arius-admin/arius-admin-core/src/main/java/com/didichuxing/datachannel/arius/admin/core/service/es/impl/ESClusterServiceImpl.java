@@ -262,7 +262,7 @@ public class ESClusterServiceImpl implements ESClusterService {
     }
 
     @Override
-    public ESClusterGetSettingsAllResponse syncGetClusterSetting(String cluster) {
+    public ESClusterGetSettingsAllResponse syncGetClusterSetting(String cluster) throws ESOperateException {
         return esClusterDAO.getClusterSetting(cluster);
     }
 
