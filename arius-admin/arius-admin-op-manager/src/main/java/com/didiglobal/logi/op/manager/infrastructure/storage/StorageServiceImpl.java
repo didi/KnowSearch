@@ -19,7 +19,7 @@ public class StorageServiceImpl implements StorageService {
     @Autowired
     private FileStorageFactory fileStorageFactory;
 
-    @Value("${file.storage.type:local}")
+    @Value("${file.storage.type:s3}")
     private String type;
 
     @Override

@@ -81,8 +81,12 @@ public class InstallComponentHandler extends BaseComponentHandler implements Com
             Map<String, Set<String>> groupName2HostNotNormalStatusMap = getGroupName2HostMapByStatus(taskId, status -> status != TaskStatusEnum.SUCCESS.getStatus());
             GeneralInstallComponent installComponent = JSON.parseObject(content, GeneralInstallComponent.class);
             Component component = ConvertUtil.obj2Obj(installComponent, Component.class);
-            componentDomainService.createComponent(component, groupName2HostNotNormalStatusMap);
-            LOGGER.info("component[{}] handler success", content);
+            if (getGroupName2HostMapByStatus(taskId, status -> status == TaskStatusEnum.SUCCESS.getStatus()).size() == 0) {
+                LOGGER.warn("component[{}],节点操作都忽略了", component.getName());
+            } else {
+                componentDomainService.createComponent(component, groupName2HostNotNormalStatusMap);
+            }
+            LOGGER.info("component[{}] handler success", component.getName());
         } catch (Exception e) {
             LOGGER.error("component[{}] handler error.", content, e);
             throw new ComponentHandlerException(e);

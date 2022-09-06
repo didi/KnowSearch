@@ -63,7 +63,7 @@ public class TaskController {
         Result res = taskService.getGroupConfig(taskId, groupName);
         if (res.isSuccess()) {
             GeneralGroupConfig config = (GeneralGroupConfig) res.getData();
-            res.setData(ComponentAssembler.toGeneralGroupConfigVO(config, host));
+            return ComponentAssembler.toGeneralGroupConfigVO(config, host);
         }
         return res;
     }
