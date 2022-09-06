@@ -205,7 +205,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
     }
 
     @Override
-    public Long fuzzyLogicTemplatesHitByCondition(IndexTemplateDTO param) {// 如果 has dcdr 是 false 则找到的应该是可以创建 dcdr 链路，且没有开启 dcdr 服务的模板
+    public Long fuzzyLogicTemplatesHitByCondition(IndexTemplateDTO param) {
       
         return indexTemplateDAO.getTotalHitByCondition(ConvertUtil.obj2Obj(param, IndexTemplatePO.class));
     }
