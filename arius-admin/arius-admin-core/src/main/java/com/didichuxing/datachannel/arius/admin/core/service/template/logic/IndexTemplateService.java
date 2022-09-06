@@ -372,21 +372,21 @@ public interface IndexTemplateService {
 
     /**
      * 修改禁读状态
-     * @param logicId 逻辑模板
-     * @param blockRead  是否禁读
-     * @param operator  操作人
+     *
+     * @param logicId   逻辑模板
+     * @param blockRead 是否禁读
      * @return
      */
-    Result<Void> updateBlockReadState(Integer logicId, Boolean blockRead, String operator);
+    Result<Void> updateBlockReadState(Integer logicId, Boolean blockRead);
 
     /**
      * 修改禁写状态
-     * @param logicId 逻辑模板
-     * @param blockWrite  是否禁读
-     * @param operator  操作人
+     *
+     * @param logicId    逻辑模板
+     * @param blockWrite 是否禁读
      * @return
      */
-    Result<Void> updateBlockWriteState(Integer logicId, Boolean blockWrite, String operator);
+    Result<Void> updateBlockWriteState(Integer logicId, Boolean blockWrite);
 
     Result updateTemplateWriteRateLimit(ConsoleTemplateRateLimitDTO consoleTemplateRateLimitDTO) throws ESOperateException;
 

@@ -1,24 +1,21 @@
 package com.didichuxing.datachannel.arius.admin.task;
 
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
+
 import com.didichuxing.datachannel.arius.admin.biz.indices.IndicesManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.util.SizeUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
 import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
+import java.util.List;
 import org.apache.commons.collections4.CollectionUtils;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
 import org.mockito.Mock;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 /**
  * @Authoer: zyl
@@ -58,8 +55,8 @@ public class JudgeTemplateBlockWriteTaskTest {
         }
 
         if (templateIndicesDiskSum >= templateIndicesDiskSum) {
-            when(indexTemplateService.updateBlockWriteState(1, true, "admin")).thenReturn(CustomDataSource.getResult());
-            result = indexTemplateService.updateBlockWriteState(1, true, "admin");
+            when(indexTemplateService.updateBlockWriteState(1, true)).thenReturn(CustomDataSource.getResult());
+            result = indexTemplateService.updateBlockWriteState(1, true);
         }
 
         Assertions.assertEquals(result.getCode(), 0);

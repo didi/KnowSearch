@@ -1,8 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.project.impl;
 
-import com.didichuxing.datachannel.arius.admin.biz.project.OperateRecordManager;
-import com.didichuxing.datachannel.arius.admin.biz.cluster.impl.ClusterPhyManagerImpl;
 import com.didichuxing.datachannel.arius.admin.biz.page.OperateRecordPageSearchHandle;
+import com.didichuxing.datachannel.arius.admin.biz.project.OperateRecordManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.oprecord.OperateRecordDTO;
@@ -25,7 +24,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class OperateRecordManagerImpl implements OperateRecordManager {
-    private static final ILog    LOGGER = LogFactory.getLog(ClusterPhyManagerImpl.class);
+    private static final ILog    LOGGER = LogFactory.getLog(OperateRecordManagerImpl.class);
     @Autowired
     private HandleFactory        handleFactory;
     @Autowired

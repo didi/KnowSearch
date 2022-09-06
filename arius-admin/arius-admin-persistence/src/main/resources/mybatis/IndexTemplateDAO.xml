@@ -83,7 +83,7 @@
             and `has_dcdr` = #{param.hasDCDR}
         </if>
         <if test="param.hasDCDR == null and param.openSrv != null and param.openSrv != ''">
-            and FIND_IN_SET(#{param.openSrv}, open_srv)
+             and FIND_IN_SET(#{param.openSrv}, open_srv) > 0 AND has_dcdr = 0
         </if>
         <if test="param.hasDCDR != null and param.openSrv != null and param.openSrv != ''">
             and (`has_dcdr` =
@@ -115,7 +115,7 @@
                 #{param.hasDCDR}
         </if>
         <if test="param.openSrv != null and param.openSrv != ''and param.hasDCDR == null">
-            and FIND_IN_SET(#{param.openSrv}, open_srv)
+             and FIND_IN_SET(#{param.openSrv}, open_srv) > 0 AND has_dcdr = 0
         </if>
         <if test="param.hasDCDR != null and param.openSrv != null and param.openSrv != ''">
             and (`has_dcdr` =
@@ -152,7 +152,7 @@
             and `has_dcdr` = #{hasDCDR}
         </if>
         <if test="hasDCDR == null and openSrv != null and openSrv != ''">
-            and FIND_IN_SET(#{openSrv}, open_srv)
+             and FIND_IN_SET(#{openSrv}, open_srv) > 0 AND has_dcdr = 0
         </if>
         <if test="hasDCDR != null and openSrv != null and openSrv != ''">
             and (`has_dcdr` = #{hasDCDR} OR FIND_IN_SET(#{openSrv}, open_srv))
@@ -191,7 +191,7 @@
             and `has_dcdr` = #{param.hasDCDR}
         </if>
         <if test="param.hasDCDR == null and param.openSrv != null and param.openSrv != ''">
-            and FIND_IN_SET(#{param.openSrv}, open_srv)
+            and FIND_IN_SET(#{param.openSrv}, open_srv) > 0 AND has_dcdr = 0
         </if>
         <if test="param.hasDCDR != null and param.openSrv != null and param.openSrv != ''">
             and (`has_dcdr` = #{param.hasDCDR} OR FIND_IN_SET(#{param.openSrv}, open_srv))
