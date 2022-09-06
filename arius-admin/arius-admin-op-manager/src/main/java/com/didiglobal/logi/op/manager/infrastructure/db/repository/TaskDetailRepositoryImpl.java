@@ -35,8 +35,8 @@ public class TaskDetailRepositoryImpl implements TaskDetailRepository {
     }
 
     @Override
-    public void updateTaskDetailExecuteIdByTaskIdAndGroupName(int taskId, String groupName, int executeTaskId) {
-        taskDetailDao.updateExecuteId(taskId, groupName, executeTaskId);
+    public int updateTaskDetailExecuteIdByTaskIdAndGroupName(int taskId, String groupName, int executeTaskId) {
+        return taskDetailDao.updateExecuteId(taskId, groupName, executeTaskId);
     }
 
     @Override
@@ -45,8 +45,8 @@ public class TaskDetailRepositoryImpl implements TaskDetailRepository {
     }
 
     @Override
-    public void updateStatusByExecuteTaskId(int taskId, int executeId, int status, List<String> hosts) {
-        taskDetailDao.updateStatusByExecuteId(taskId, executeId, status, hosts);
+    public int updateStatusByExecuteTaskId(int taskId, int executeId, int status, List<String> hosts) {
+        return taskDetailDao.updateStatusByExecuteId(taskId, executeId, status, hosts);
     }
 
 }

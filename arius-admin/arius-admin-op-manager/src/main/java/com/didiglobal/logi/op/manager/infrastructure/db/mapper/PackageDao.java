@@ -1,6 +1,5 @@
 package com.didiglobal.logi.op.manager.infrastructure.db.mapper;
 
-import com.didiglobal.logi.op.manager.domain.packages.entity.Package;
 import com.didiglobal.logi.op.manager.infrastructure.db.PackagePO;
 import org.springframework.stereotype.Repository;
 
@@ -14,6 +13,7 @@ import java.util.List;
 public interface PackageDao {
     /**
      * 通过id获取PackagePo
+     *
      * @param id
      * @return PackagePo
      */
@@ -21,6 +21,7 @@ public interface PackageDao {
 
     /**
      * 通过name获取PackagePo
+     *
      * @param name
      * @return PackagePo
      */
@@ -28,6 +29,7 @@ public interface PackageDao {
 
     /**
      * 通过version获取PackagePo
+     *
      * @param version
      * @return PackagePo
      */
@@ -35,6 +37,7 @@ public interface PackageDao {
 
     /**
      * 新建安装包
+     *
      * @param po
      * @return
      */
@@ -42,12 +45,15 @@ public interface PackageDao {
 
     /**
      * 更新安装包
+     *
      * @param po
-     * @return
+     * @return 删除条数
      */
-    void update(PackagePO po);
+    int update(PackagePO po);
+
     /**
      * 查询安装包
+     *
      * @param po
      * @return List<PackagePO>
      */
@@ -55,7 +61,9 @@ public interface PackageDao {
 
     /**
      * 删除包
+     *
      * @param id
+     * @return 删除条数
      */
-    void delete(int id);
+    int delete(int id);
 }

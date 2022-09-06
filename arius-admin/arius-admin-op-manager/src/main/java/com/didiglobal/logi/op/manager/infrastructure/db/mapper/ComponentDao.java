@@ -31,12 +31,14 @@ public interface ComponentDao {
      * 更新依赖组件信息
      * @param componentId
      * @param containIds
+     * @return 更新条数
      */
-    void updateContainIds(@Param("componentId") int componentId, @Param("containIds") String containIds);
+    int updateContainIds(@Param("componentId") int componentId, @Param("containIds") String containIds);
 
     /**
      * 更新组件（安装包id）
      * @param componentPO
+     * @return 更新条数
      */
     int update(ComponentPO componentPO);
 

@@ -39,9 +39,9 @@ public class ScriptRepositoryImpl implements ScriptRepository {
     }
 
     @Override
-    public void updateScript(Script script) {
+    public int updateScript(Script script) {
         ScriptPO scriptPO = ScriptConverter.convertScriptDO2PO(script);
-        scriptDao.update(scriptPO);
+        return scriptDao.update(scriptPO);
     }
 
     @Override
@@ -52,7 +52,7 @@ public class ScriptRepositoryImpl implements ScriptRepository {
     }
 
     @Override
-    public void deleteScript(int id) {
-        scriptDao.delete(id);
+    public int deleteScript(int id) {
+        return scriptDao.delete(id);
     }
 }

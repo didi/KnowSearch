@@ -19,7 +19,7 @@ public class TaskPO {
      */
     private Integer id;
     /**
-     * 状态
+     * 状态，0待执行，1执行，2失败，4成功，5取消，6杀死，7超时，8忽略
      */
     private Integer status;
     /**

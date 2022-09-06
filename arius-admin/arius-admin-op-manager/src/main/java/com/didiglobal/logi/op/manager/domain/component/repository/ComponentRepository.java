@@ -11,6 +11,7 @@ import java.util.List;
 public interface ComponentRepository {
     /**
      * 保存组件
+     *
      * @param component
      * @return
      */
@@ -18,6 +19,7 @@ public interface ComponentRepository {
 
     /**
      * 通过id获取组件
+     *
      * @param componentId
      * @return
      */
@@ -26,27 +28,32 @@ public interface ComponentRepository {
 
     /**
      * 更新包含的组件信息
+     *
      * @param componentId
      * @param containIds
+     * @return 更新条数
      */
-    void updateContainIds(int componentId, String containIds);
+    int updateContainIds(int componentId, String containIds);
 
 
     /**
      * 更新组件信息
+     *
      * @param component
-     * @return
+     * @return 更新条数
      */
     int updateComponent(Component component);
 
     /**
      * 获取所有的组件列表
+     *
      * @return
      */
     List<Component> listAllComponent();
 
     /**
      * 根据package获取组件
+     *
      * @param packageId
      * @return
      */
@@ -54,6 +61,7 @@ public interface ComponentRepository {
 
     /**
      * 通过id获取依赖的组件
+     *
      * @param id
      * @return
      */

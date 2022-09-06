@@ -12,6 +12,7 @@ public interface PackageRepository {
 
     /**
      * 根据name获取安装包
+     *
      * @param name
      * @return Package
      */
@@ -19,6 +20,7 @@ public interface PackageRepository {
 
     /**
      * 根据version获取安装包
+     *
      * @param version
      * @return Package
      */
@@ -26,6 +28,7 @@ public interface PackageRepository {
 
     /**
      * 根据id获取安装包
+     *
      * @param id
      * @return Package
      */
@@ -33,6 +36,7 @@ public interface PackageRepository {
 
     /**
      * 新增安装包
+     *
      * @param pk
      * @return int
      */
@@ -40,12 +44,15 @@ public interface PackageRepository {
 
     /**
      * 更新安装包
+     *
      * @param pk
+     * @return 更新条数
      */
-    void updatePackage(Package pk);
+    int updatePackage(Package pk);
 
     /**
      * 查询安装包
+     *
      * @param pk
      * @return List<Package>
      */
@@ -53,7 +60,9 @@ public interface PackageRepository {
 
     /**
      * 删除包
+     *
      * @param id 要删除的包对应的id
+     * @return 删除条数
      */
-    void deletePackage(int id);
+    int deletePackage(int id);
 }

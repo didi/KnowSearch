@@ -35,7 +35,6 @@ public class ComponentService {
     @Autowired
     private TaskDomainService taskDomainService;
 
-    //TODO 这几个操作母亲啊都缺乏校验
     public Result<Integer> installComponent(GeneralInstallComponent installComponent) {
         LOGGER.info("start install component[{}]", installComponent.getName());
         Result checkRes = installComponent.checkInstallParam();

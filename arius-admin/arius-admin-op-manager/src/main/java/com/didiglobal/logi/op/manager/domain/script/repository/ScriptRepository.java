@@ -32,9 +32,10 @@ public interface ScriptRepository {
 
     /**
      * 更新脚本，脚本内容以及描述
-     * @param script
+     * @param script 脚本实体
+     * @return 更新条数
      */
-    void updateScript(Script script);
+    int updateScript(Script script);
 
     /**
      * 新增
@@ -45,7 +46,8 @@ public interface ScriptRepository {
 
     /**
      * 删除脚本
-     * @param id
+     * @param id 脚本id
+     * @return 删除条数
      */
-    void deleteScript(int id);
+    int deleteScript(int id);
 }

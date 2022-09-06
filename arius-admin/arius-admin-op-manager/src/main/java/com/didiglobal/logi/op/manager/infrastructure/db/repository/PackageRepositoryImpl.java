@@ -46,9 +46,9 @@ public class PackageRepositoryImpl implements PackageRepository {
     }
 
     @Override
-    public void updatePackage(Package pk) {
+    public int updatePackage(Package pk) {
         PackagePO po = PackageConverter.convertPackageDO2PO(pk);
-        packageDao.update(po);
+        return packageDao.update(po);
     }
 
     @Override
@@ -59,7 +59,7 @@ public class PackageRepositoryImpl implements PackageRepository {
     }
 
     @Override
-    public void deletePackage(int id) {
-        packageDao.delete(id);
+    public int deletePackage(int id) {
+        return packageDao.delete(id);
     }
 }

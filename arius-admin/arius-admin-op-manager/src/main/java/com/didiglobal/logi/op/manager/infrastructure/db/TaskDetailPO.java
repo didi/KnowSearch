@@ -23,7 +23,7 @@ public class TaskDetailPO {
      */
     private Integer executeTaskId;
     /**
-     * 状态
+     * 状态，0待执行，1执行，2失败，3暂停，4成功，5取消，6杀死
      */
     private Integer status;
     /**
