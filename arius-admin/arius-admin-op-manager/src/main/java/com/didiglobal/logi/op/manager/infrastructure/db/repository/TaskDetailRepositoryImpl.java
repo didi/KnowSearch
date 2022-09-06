@@ -40,8 +40,8 @@ public class TaskDetailRepositoryImpl implements TaskDetailRepository {
     }
 
     @Override
-    public void deleteByTaskId(int taskId) {
-        taskDetailDao.deleteByTaskId(taskId);
+    public int deleteByTaskId(int taskId) {
+        return taskDetailDao.deleteByTaskId(taskId);
     }
 
     @Override

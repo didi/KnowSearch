@@ -46,10 +46,10 @@ public interface TaskDetailDao {
 
     /**
      * 根据task_id删除detail信息
-     * @param taskId
-     * @return
+     * @param taskId 任务id
+     * @return 删除条数
      */
-    void deleteByTaskId(int taskId);
+    int deleteByTaskId(int taskId);
 
     /**
      * 根据host和taskId以及executeId更新任务状态

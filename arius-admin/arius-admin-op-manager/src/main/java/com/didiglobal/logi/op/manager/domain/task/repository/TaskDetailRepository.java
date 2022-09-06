@@ -42,10 +42,10 @@ public interface TaskDetailRepository {
 
     /**
      * 通过taskId删除
-     * @param taskId
-     * @return
+     * @param taskId 任务id
+     * @return 删除条数
      */
-    void deleteByTaskId(int taskId);
+    int deleteByTaskId(int taskId);
 
     /**
      * 更新任务状态

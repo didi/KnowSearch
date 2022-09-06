@@ -24,6 +24,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.util.*;
 
@@ -48,7 +49,7 @@ public class TaskDomainServiceImpl implements TaskDomainService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Result<Integer> createTask(String content, Integer type, String describe,
-                                   String associationId, Map<String, List<Tuple<String, Integer>>> groupToHostList) {
+                                      String associationId, Map<String, List<Tuple<String, Integer>>> groupToHostList) {
         //新建
         Task task = new Task();
         task.create(content, type, describe, associationId, groupToHostList);
@@ -143,11 +144,11 @@ public class TaskDomainServiceImpl implements TaskDomainService {
         if (null == task) {
             return Result.fail(ResultCode.TASK_NOT_EXIST_ERROR);
         }
+        //校验action对应的状态是否符合
         Result checkRes = task.checkTaskActionStatus(action);
         if (checkRes.failed()) {
             return checkRes;
         }
-
 
         //获取正在执行的任务id
         Integer executeTaskId = getExecuteTaskId(taskId);
@@ -156,10 +157,9 @@ public class TaskDomainServiceImpl implements TaskDomainService {
             //执行zeus任务
             actionRes = deploymentService.actionTask(executeTaskId, action.getAction());
         } else {
+            //如果都没有那就是初始态，执行任务
             actionRes = executeDeployTask(task);
         }
-
-
         if (actionRes.failed()) {
             return actionRes;
         }
@@ -170,17 +170,18 @@ public class TaskDomainServiceImpl implements TaskDomainService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Result<Void> retryTask(int taskId) {
         Task task = taskRepository.getTaskById(taskId);
         if (null == task) {
             return Result.fail(ResultCode.TASK_NOT_EXIST_ERROR);
         }
+        //校验action对应的状态是否符合
         Result checkRes = task.checkRetryActionStatus();
-
         if (checkRes.failed()) {
             return checkRes;
         }
-
+        //删除detail任务信息
         taskDetailRepository.deleteByTaskId(taskId);
         //更新任务状态
         taskRepository.updateTaskStatus(taskId, TaskStatusEnum.WAITING.getStatus());
@@ -190,10 +191,11 @@ public class TaskDomainServiceImpl implements TaskDomainService {
     @Override
     public Result<Void> actionHost(int taskId, String host, String groupName, HostActionEnum action) {
         TaskDetail taskDetail = taskDetailRepository.getDetailByHostAndGroupName(taskId, host, groupName);
-
         if (null == taskDetail) {
             return Result.fail(ResultCode.TASK_HOST_IS_NOT_EXIST);
         }
+
+        //校验action对应的状态是否符合
         Result checkRes = taskDetail.checkHostActionStatus(action);
         if (checkRes.failed()) {
             return checkRes;
@@ -214,6 +216,12 @@ public class TaskDomainServiceImpl implements TaskDomainService {
     }
 
 
+    /**
+     * 任务获取执行的ExecuteTaskId
+     *
+     * @param taskId 任务id
+     * @return ExecuteTaskId或者null
+     */
     private Integer getExecuteTaskId(int taskId) {
         List<TaskDetail> detailList = taskDetailRepository.listTaskDetailByTaskId(taskId);
         Optional<TaskDetail> optional = detailList.stream().filter(detail ->
@@ -225,7 +233,6 @@ public class TaskDomainServiceImpl implements TaskDomainService {
         if (optional.isPresent()) {
             return optional.get().getExecuteTaskId();
         }
-
         return null;
     }
 
@@ -242,7 +249,7 @@ public class TaskDomainServiceImpl implements TaskDomainService {
                 hosts.add(taskDetail.getHost());
             }
         });
-        if (0 == groupToHostList.size()) {
+        if (CollectionUtils.isEmpty(groupToHostList)) {
             Result.fail("没有可以执行的分组");
         }
         return Result.success(groupToHostList.entrySet().toArray(new Map.Entry[]{})[0]);
@@ -260,11 +267,9 @@ public class TaskDomainServiceImpl implements TaskDomainService {
     @Override
     public Result<GeneralGroupConfig> getConfig(Task task, String groupName) {
         Result<Tuple<GeneralGroupConfig, String>> configRes = getConfigAndTemplateByGroupName(task, groupName);
-
         if (configRes.failed()) {
             return Result.fail(configRes.getMessage());
         }
-
         return Result.success(configRes.getData().v1());
     }
 
@@ -310,8 +315,14 @@ public class TaskDomainServiceImpl implements TaskDomainService {
         return Result.buildSuccess(taskRepository.updateTaskStatus(taskId, status));
     }
 
+    /**
+     * 获取分组和模板id，v1是配置，v2是模板id
+     *
+     * @param task 任务
+     * @param name 分组名
+     * @return 分组配置-v1是配置，v2是模板id
+     */
     private Result<Tuple<GeneralGroupConfig, String>> getConfigAndTemplateByGroupName(Task task, String name) {
-
         switch (OperationEnum.valueOfType(task.getType())) {
             case INSTALL:
             case EXPAND:
