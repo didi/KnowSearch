@@ -201,7 +201,7 @@ public class TemplateLogicV3Controller {
             HttpRequestUtil.getProjectId(request));
     }
     
-    @PutMapping("/{templateId}/write")
+    @PutMapping("/{templateId}/block-write")
     @ResponseBody
     @ApiOperation(value = "写变更")
     public Result<Void> write(HttpServletRequest request, @PathVariable Integer templateId,
@@ -210,7 +210,7 @@ public class TemplateLogicV3Controller {
                 HttpRequestUtil.getProjectId(request));
     }
     
-    @PutMapping("/{templateId}/read")
+    @PutMapping("/{templateId}/block-read")
     @ResponseBody
     @ApiOperation(value = "读变更")
     public Result<Void> read(HttpServletRequest request, @PathVariable Integer templateId,
