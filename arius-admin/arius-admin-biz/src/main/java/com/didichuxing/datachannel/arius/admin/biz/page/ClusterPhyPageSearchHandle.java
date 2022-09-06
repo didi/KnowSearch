@@ -28,6 +28,7 @@ import com.google.common.collect.Lists;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -46,7 +47,7 @@ public class ClusterPhyPageSearchHandle extends AbstractPageSearchHandle<Cluster
 
     private static final ILog           LOGGER         = LogFactory.getLog(ClusterPhyPageSearchHandle.class);
     private static final CharSequence[] CHAR_SEQUENCES = { "*", "?" };
-    public static final Cache</*zeus_agents_list*/String, /*agents_list*/ List<String>> ZEUS_AGENTS_LIST_CACHE = CacheBuilder.newBuilder().build();
+    public static final Cache</*zeus_agents_list*/String, /*agents_list*/ List<String>> ZEUS_AGENTS_LIST_CACHE = CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES).build();
     public static final String ZEUS_AGENTS_LIST = "zeus_agents_list";
 
     @Autowired
