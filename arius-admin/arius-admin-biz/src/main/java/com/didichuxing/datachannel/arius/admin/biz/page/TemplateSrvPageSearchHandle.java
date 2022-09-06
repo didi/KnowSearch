@@ -85,7 +85,7 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<Templa
                     .filter(clusterLogicId -> !AdminConstant.REGION_NOT_BOUND_LOGIC_CLUSTER_ID.equals(clusterLogicId))
                     .map(ListUtils::string2IntList).flatMap(Collection::stream).distinct().collect(Collectors.toList());
             if (CollectionUtils.isEmpty(logicClusterIdList)) {
-                return PaginationResult.buildSucc(Collections.emptyList(),0,0,0);
+                return PaginationResult.buildSucc(Collections.emptyList(),0,condition.getPage(),condition.getSize());
             }
             totalHit = indexTemplateService.fuzzyLogicTemplatesHitByConditionAndLogicClusterIdList(condition,
                     logicClusterIdList).intValue();
