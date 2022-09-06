@@ -25,6 +25,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.template.physic.Inde
 import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import com.google.common.collect.Lists;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -83,6 +84,9 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<Templa
                     .stream().map(ClusterRegion::getLogicClusterIds)
                     .filter(clusterLogicId -> !AdminConstant.REGION_NOT_BOUND_LOGIC_CLUSTER_ID.equals(clusterLogicId))
                     .map(ListUtils::string2IntList).flatMap(Collection::stream).distinct().collect(Collectors.toList());
+            if (CollectionUtils.isEmpty(logicClusterIdList)) {
+                return PaginationResult.buildSucc(Collections.emptyList(),0,condition.getPage(),condition.getSize());
+            }
             totalHit = indexTemplateService.fuzzyLogicTemplatesHitByConditionAndLogicClusterIdList(condition,
                     logicClusterIdList).intValue();
             matchIndexTemplateList =
