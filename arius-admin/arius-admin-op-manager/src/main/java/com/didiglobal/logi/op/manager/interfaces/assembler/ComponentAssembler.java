@@ -67,7 +67,7 @@ public class ComponentAssembler {
             return Result.fail(ResultCode.PARAM_ERROR.getCode(), String.format("未匹配到对应的host[%s]", host));
         }
         //设置目录
-        vo.setInstallDirector(directory);
+        vo.setInstallDirector(directory.toString());
         //设置进程数
         vo.setProcessNum(processNum);
         return Result.success(vo);

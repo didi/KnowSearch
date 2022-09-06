@@ -20,8 +20,6 @@ import java.util.List;
 @Component
 public class ScriptService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ScriptService.class);
-
     @Autowired
     private ScriptDomainService scriptDomainService;
 
