@@ -7,6 +7,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPh
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterSettingDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PluginVO;
@@ -315,6 +316,13 @@ public interface ClusterPhyManager {
      */
     List<ClusterRoleInfo> listClusterRolesByClusterId(Integer clusterId);
 
+    /**
+     * 根据集群名称获获取集群节点列表
+     *
+     * @param cluster 集群名称
+     * @return {@link List}<{@link ClusterRoleHost}>
+     */
+    List<ClusterRoleHost> listClusterRoleHostByCluster(String cluster);
     /**
      * 按照资源类型查询物理集群名称列表
      *
