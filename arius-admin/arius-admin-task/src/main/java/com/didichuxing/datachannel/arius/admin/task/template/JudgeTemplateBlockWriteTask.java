@@ -4,7 +4,6 @@ import com.didichuxing.datachannel.arius.admin.biz.indices.IndicesManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
-import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.SizeUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
@@ -99,8 +98,7 @@ public class JudgeTemplateBlockWriteTask extends BaseConcurrentTemplateTask impl
             return true;
         }
 
-        Result<Void> ret = indexTemplateService.updateBlockWriteState(indexTemplateWithPhyTemplates.getId(), true,
-            AriusUser.SYSTEM.getDesc());
+        Result<Void> ret = indexTemplateService.updateBlockWriteState(indexTemplateWithPhyTemplates.getId(), true);
         return !ret.failed();
     }
 }
