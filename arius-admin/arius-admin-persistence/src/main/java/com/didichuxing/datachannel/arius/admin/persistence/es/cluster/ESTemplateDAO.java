@@ -189,13 +189,10 @@ public class ESTemplateDAO extends BaseESDAO {
                 return client.admin().indices().prepareGetTemplate(name + "*").execute()
                         .actionGet(time,unit);
             } catch (Exception e) {
-                final String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
-                if (Objects.nonNull(exception)) {
-                    throw new ESOperateException(exception);
-                }
+                
                 LOGGER.warn("class=ESTemplateDAO||method=create||msg=get src template fail||cluster={}||name={}",
                         cluster, name);
-                throw new ESOperateException(e.getMessage());
+                return null;
             }
         };
         ESIndicesGetTemplateResponse esIndicesGetTemplateResponse =  getTemplateResponseBiFunction.apply(Long.valueOf(ES_OPERATE_TIMEOUT), TimeUnit.SECONDS);

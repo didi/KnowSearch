@@ -143,6 +143,8 @@ spring:
     password: ${spring.datasource.druid.password}
     username: ${spring.datasource.druid.username}
     resource-extend-bean-name: resourceExtendManager
+#    0.3.1.1新增
+    login-extend-bean-name: logiSecurityDefaultLoginExtendImpl
   application:
     admin:
       enabled:
