@@ -205,7 +205,7 @@ public class TemplateLogicV3Controller {
     @ResponseBody
     @ApiOperation(value = "写变更")
     public Result<Void> write(HttpServletRequest request, @PathVariable Integer templateId,
-                              @RequestParam("status") Boolean status) throws AdminOperateException {
+                              @RequestParam("status") Boolean status)  {
         return templateLogicManager.blockWrite(templateId, status, HttpRequestUtil.getOperator(request),
                 HttpRequestUtil.getProjectId(request));
     }
@@ -214,7 +214,7 @@ public class TemplateLogicV3Controller {
     @ResponseBody
     @ApiOperation(value = "读变更")
     public Result<Void> read(HttpServletRequest request, @PathVariable Integer templateId,
-                             @RequestParam("status") Boolean status) throws AdminOperateException {
+                             @RequestParam("status") Boolean status) {
         return templateLogicManager.blockRead(templateId, status, HttpRequestUtil.getOperator(request),
                 HttpRequestUtil.getProjectId(request));
     }
