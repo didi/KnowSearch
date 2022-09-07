@@ -261,9 +261,8 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
             return Result.buildFail("当前选中的节点绑定了 region，请先下线 region");
         }
         //2. 检验当前节点是否都离线
-        if (!clusterRoleHosts.stream().allMatch(clusterRoleHost ->
-                Objects.equals(clusterRoleHost.getStatus(), ESClusterNodeStatusEnum.OFFLINE.getCode())
-                || Objects.equals(clusterRoleHost.getStatus(), ESClusterNodeStatusEnum.UNKNOWN.getCode()))) {
+        if (!clusterRoleHosts.stream().allMatch(clusterRoleHost -> Objects.equals(clusterRoleHost.getStatus(),
+                ESClusterNodeStatusEnum.OFFLINE.getCode()))) {
             return Result.buildFail("只可以下线离线状态的节点，当前选中的节点存在非离线状态的节点");
         }
         //3. 下线离线的节点
