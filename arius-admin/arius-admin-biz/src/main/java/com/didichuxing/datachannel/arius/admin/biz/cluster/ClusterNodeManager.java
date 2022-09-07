@@ -77,5 +77,13 @@ public interface ClusterNodeManager {
      * @throws AdminTaskException 管理任务异常
      */
     boolean collectNodeSettings(String cluster) throws AdminTaskException;
-
+    
+    /**
+     * > 该功能用于删除集群节点，但该节点必须离线且未绑定 region
+     *
+     * @param ids       要删除的节点的 id
+     * @param projectId 项目编号
+     * @param operator  操作员是执行操作的用户。
+     */
+    Result<Void> delete(List<Integer> ids, Integer projectId, String operator);
 }

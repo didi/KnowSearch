@@ -13,7 +13,7 @@ public class NullESClientException extends ESOperateException {
     
     
     public NullESClientException(String cluster) {
-        super( ResultType.ES_CLIENT_NUL_ERROR.getCode()+"-"+String.format(ResultType.ES_CLIENT_NUL_ERROR.getMessage(), "cluster"));
+        super( ResultType.ES_CLIENT_NUL_ERROR.getCode()+"-"+String.format(ResultType.ES_CLIENT_NUL_ERROR.getMessage(),cluster));
         this.resultType = ResultType.ES_CLIENT_NUL_ERROR;
         
     }

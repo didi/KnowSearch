@@ -10,7 +10,7 @@ public enum SortTermEnum {
                           DISK_FREE_PERCENT("disk_usage_percent"),
 
                           /*********************************模板相关*****************************************/
-                          CHECK_POINT_DIFF("check_point_diff"), HAS_DCDR("has_dcdr"), LEVEL("level"), ACTIVE_SHARD_NUM("active_shard_num");
+                          CHECK_POINT_DIFF("check_point_diff"), HAS_DCDR("has_dcdr"), LEVEL("level"), ACTIVE_SHARD_NUM("active_shard_num"), BLOCK_WRITE("block_write"), BLOCK_READ("block_read");
 
     SortTermEnum(String type) {
         this.type = type;
