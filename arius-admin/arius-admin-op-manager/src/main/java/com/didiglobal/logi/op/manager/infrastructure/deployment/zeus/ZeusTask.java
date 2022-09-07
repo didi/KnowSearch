@@ -16,4 +16,5 @@ public class ZeusTask {
     private List<String> hosts;
     private String args;
     private String action;
+    private Integer batch;
 }

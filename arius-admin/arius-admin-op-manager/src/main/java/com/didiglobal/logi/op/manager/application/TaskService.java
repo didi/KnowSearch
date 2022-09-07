@@ -15,8 +15,6 @@ import com.didiglobal.logi.op.manager.infrastructure.common.enums.TaskActionEnum
 import com.didiglobal.logi.op.manager.infrastructure.common.hander.ComponentHandlerFactory;
 import com.didiglobal.logi.op.manager.infrastructure.util.ConvertUtil;
 import com.google.common.base.Strings;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -26,7 +24,6 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class TaskService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(TaskService.class);
 
     @Autowired
     private TaskDomainService taskDomainService;
@@ -43,7 +40,7 @@ public class TaskService {
     /**
      * 执行任务
      *
-     * @param taskId
+     * @param taskId 任务id
      * @return
      */
     public Result<Void> execute(Integer taskId) {
@@ -51,15 +48,15 @@ public class TaskService {
         if (result.failed() || null == result.getData()) {
             return Result.fail(ResultCode.TASK_NOT_EXIST_ERROR);
         }
-        //执行任务
+        //执行任务，根据类型进行相应的处理
         return componentHandlerFactory.getByType(result.getData().getType()).execute(result.getData());
     }
 
     /**
      * 对任务执行相应的操作，暂停，取消，杀死，继续
      *
-     * @param taskId
-     * @param action
+     * @param taskId 任务id
+     * @param action 操作
      * @return
      */
     public Result<Void> operateTask(Integer taskId, String action) {
@@ -73,6 +70,12 @@ public class TaskService {
         return taskDomainService.actionTask(taskId, taskAction);
     }
 
+    /**
+     * 任务重试
+     *
+     * @param taskId 任务id
+     * @return
+     */
     public Result<Void> retryTask(Integer taskId) {
         if (null == taskId) {
             return Result.fail(ResultCode.PARAM_ERROR.getCode(), "task id为空");
@@ -81,10 +84,12 @@ public class TaskService {
     }
 
     /**
-     * 对host执行相应的操作，取消，重试，kill
+     * 对host执行相应的操作，重试，kill以及忽略
      *
-     * @param taskId
-     * @param action
+     * @param taskId    任务id
+     * @param action    操作
+     * @param host      主机
+     * @param groupName 分组名
      * @return
      */
     public Result<Void> operateHost(Integer taskId, String action, String host, String groupName) {
@@ -101,7 +106,7 @@ public class TaskService {
     /**
      * 获取任务执行的分组配置
      *
-     * @param taskId 任务id
+     * @param taskId    任务id
      * @param groupName 分组名
      * @return 通用配置
      */
@@ -123,10 +128,12 @@ public class TaskService {
 
         if (task.getType() == OperationEnum.INSTALL.getType() ||
                 task.getType() == OperationEnum.UPGRADE.getType()) {
+
             //如果是安装和升级，设置url
             Integer packageId = ConvertUtil.str2ObjByJson(task.getContent(), GeneralInstallComponent.class).getPackageId();
             configResult.getData().setUrl(packageDomainService.getPackageById(packageId).getData().getUrl());
         } else if (task.getType() == OperationEnum.ROLLBACK.getType()) {
+
             //如果是回滚，设置回滚类型以及url
             GeneralRollbackComponent rollbackComponent = ConvertUtil.str2ObjByJson(task.getContent(), GeneralRollbackComponent.class);
             configResult.getData().setType(rollbackComponent.getType());

@@ -14,7 +14,18 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class GeneralBaseOperationComponentDTO {
-    private List<GeneralGroupConfigDTO> groupConfigList;
 
+    /**
+     * 分组配置
+     */
+    private List<GeneralGroupConfigDTO> groupConfigList;
+    /**
+     * 关联id
+     */
     private String associationId;
+
+    /**
+     * 操作并发度
+     */
+    private Integer batch;
 }

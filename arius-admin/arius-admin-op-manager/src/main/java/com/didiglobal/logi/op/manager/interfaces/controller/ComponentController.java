@@ -90,7 +90,7 @@ public class ComponentController {
         Result res = componentService.getConfig(componentId, groupName);
         if (res.isSuccess()) {
             ComponentGroupConfig groupConfig = (ComponentGroupConfig) res.getData();
-            res.setData(ComponentAssembler.toGeneralGroupConfigVO(ConvertUtil.obj2Obj(groupConfig, GeneralGroupConfig.class), host));
+            return ComponentAssembler.toGeneralGroupConfigVO(ConvertUtil.obj2Obj(groupConfig, GeneralGroupConfig.class), host);
         }
         return res;
     }

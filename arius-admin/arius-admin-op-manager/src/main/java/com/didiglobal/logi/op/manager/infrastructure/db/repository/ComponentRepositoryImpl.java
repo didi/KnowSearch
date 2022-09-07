@@ -2,7 +2,6 @@ package com.didiglobal.logi.op.manager.infrastructure.db.repository;
 
 import com.didiglobal.logi.op.manager.domain.component.entity.Component;
 import com.didiglobal.logi.op.manager.domain.component.repository.ComponentRepository;
-import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 import com.didiglobal.logi.op.manager.infrastructure.db.ComponentPO;
 import com.didiglobal.logi.op.manager.infrastructure.db.converter.ComponentConverter;
 import com.didiglobal.logi.op.manager.infrastructure.db.mapper.ComponentDao;
@@ -34,8 +33,8 @@ public class ComponentRepositoryImpl implements ComponentRepository {
     }
 
     @Override
-    public void updateContainIds(int componentId, String containIds) {
-        componentDao.updateContainIds(componentId, containIds);
+    public int updateContainIds(int componentId, String containIds) {
+        return componentDao.updateContainIds(componentId, containIds);
     }
 
     @Override

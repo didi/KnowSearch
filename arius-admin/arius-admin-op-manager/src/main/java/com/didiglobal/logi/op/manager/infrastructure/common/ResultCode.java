@@ -12,7 +12,7 @@ public enum ResultCode {
     SUCCESS(200, "成功"),
 
     /* 默认失败 */
-    COMMON_FAIL(999, "失败"),
+    COMMON_FAIL(500, "内部错误"),
 
     /* 默认失败 */
     UNKNOW(-1, "未知"),
@@ -51,7 +51,13 @@ public enum ResultCode {
     SCRIPT_OPERATE_ERROR(6001, "脚本操作报错"),
 
     /*安装包操作报错 */
-    PACKAGE_IS_DEPEND_ERROR(7001, "安装包已被组件依赖，不能删除");
+    PACKAGE_IS_DEPEND_ERROR(7001, "安装包已被组件依赖，不能删除"),
+
+    /*空指针 */
+    NULL_POINT_ERROR(8001, "空指针异常"),
+
+    /*sql异常 */
+    SQL_ERROR(9001, "sql异常");
 
     private final Integer code;
 

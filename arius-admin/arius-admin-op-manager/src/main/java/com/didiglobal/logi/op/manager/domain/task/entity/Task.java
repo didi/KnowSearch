@@ -123,6 +123,14 @@ public class Task {
                 }
                 break;
             case CANCEL:
+                //失败的任务也允许取消
+                if (status != TaskStatusEnum.WAITING.getStatus() &&
+                        status != TaskStatusEnum.RUNNING.getStatus() &&
+                        status != TaskStatusEnum.PAUSE.getStatus() &&
+                        status != TaskStatusEnum.KILLED.getStatus()) {
+                    return Result.fail(ResultCode.TASK_IS_FINISH);
+                }
+                break;
             case KILL:
                 if (status != TaskStatusEnum.WAITING.getStatus() &&
                         status != TaskStatusEnum.RUNNING.getStatus() &&
@@ -141,6 +149,25 @@ public class Task {
             return Result.fail(ResultCode.TASK_IS_NOT_FAILED);
         }
         return Result.success();
+    }
+
+    public Result<Void> checkHostActionStatus() {
+        boolean finalStatus = isFinalStatus();
+        if (finalStatus) {
+            return Result.fail(ResultCode.TASK_IS_FINISH);
+        }
+        return Result.success();
+    }
+
+    public boolean isFinalStatus() {
+        return status == TaskStatusEnum.KILLED.getStatus() ||
+                status== TaskStatusEnum.CANCELLED.getStatus();
+    }
+
+    public boolean isUserActionStatus() {
+        return status == TaskStatusEnum.PAUSE.getStatus() ||
+                status == TaskStatusEnum.KILLED.getStatus() ||
+                status == TaskStatusEnum.CANCELLED.getStatus();
     }
 
 }

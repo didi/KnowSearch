@@ -72,4 +72,9 @@
         where id = #{taskId} and host = #{host} and group_name = #{groupName}
     </select>
 
+    <delete id="deleteByTaskId">
+        delete from logi_op_task_detail
+        where id = #{taskId}
+    </delete>
+
 </mapper>

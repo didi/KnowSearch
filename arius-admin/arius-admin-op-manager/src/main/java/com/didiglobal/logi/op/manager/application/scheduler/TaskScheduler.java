@@ -1,6 +1,5 @@
 package com.didiglobal.logi.op.manager.application.scheduler;
 
-import com.didiglobal.logi.op.manager.application.TaskService;
 import com.didiglobal.logi.op.manager.domain.task.entity.Task;
 import com.didiglobal.logi.op.manager.domain.task.entity.value.TaskDetail;
 import com.didiglobal.logi.op.manager.domain.task.service.TaskDomainService;
@@ -11,7 +10,6 @@ import com.didiglobal.logi.op.manager.infrastructure.deployment.zeus.ZeusTaskSta
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.task.TaskDecorator;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -107,7 +105,8 @@ public class TaskScheduler {
     /**
      * 对zeus的转态转化到主任务的状态
      * 只要有超时或者失败就认为是失败，有running就认为是运行中，有waiting就认为是暂停，除此之外都是success
-     * @param task 任务
+     *
+     * @param task        任务
      * @param totalStatus zeus转态集合
      * @return 返回最终状态
      */
@@ -122,12 +121,12 @@ public class TaskScheduler {
         } else if (null != totalStatus.getWaiting()) {
             finalStatus = TaskStatusEnum.PAUSE.getStatus();
             //这里对于kill以及cancel操作，后续就不会执行，那这里就会标记成已完成，然后后续不会定时去监控状态
-            if (isFinishStatus(task.getStatus())) {
+            if (task.isFinalStatus()) {
                 isFinish = 1;
             }
         } else {
             //这里如果是final status，那状态就跟任务状态一致
-            if (isFinishStatus(task.getStatus())) {
+            if (task.isFinalStatus()) {
                 finalStatus = task.getStatus();
             } else {
                 finalStatus = TaskStatusEnum.SUCCESS.getStatus();
@@ -140,22 +139,11 @@ public class TaskScheduler {
          * (有个特例就是如果最后状态是success，那不管用户操作，直接更新，可以理解你的操作时候，任务已经完成，操作无效)
          */
         if (task.getStatus() != finalStatus && (finalStatus == TaskStatusEnum.SUCCESS.getStatus() ||
-                !isUserActionStatus(task.getStatus()))) {
+                !task.isUserActionStatus())) {
             taskDomainService.updateTaskStatusAndIsFinish(task.getId(), isFinish, finalStatus);
         } else if (task.getIsFinish() != isFinish) {
             taskDomainService.updateTaskStatusAndIsFinish(task.getId(), isFinish, task.getStatus());
         }
         return finalStatus;
-    }
-
-    private boolean isFinishStatus(int status) {
-        return status == TaskStatusEnum.KILLED.getStatus() ||
-                status== TaskStatusEnum.CANCELLED.getStatus();
-    }
-
-    private boolean isUserActionStatus(int status) {
-        return status == TaskStatusEnum.PAUSE.getStatus() ||
-                status == TaskStatusEnum.KILLED.getStatus() ||
-                status == TaskStatusEnum.CANCELLED.getStatus();
     }
 }

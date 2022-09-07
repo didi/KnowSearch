@@ -116,7 +116,7 @@ public class ScriptDomainServiceImpl implements com.didiglobal.logi.op.manager.d
         if (deleteStorage.failed()) {
             return Result.fail(deleteStorage.getCode(),deleteStorage.getMessage());
         }
-        //部署脚本删除,这里是zeus的一个缺陷不支持模板的删除，所以这里判断是否成功
+        //部署脚本删除,这里是zeus的一个缺陷不支持模板的删除，所以这里未判断是否成功，删除不成功也不影响
         deploymentService.removeScript(script);
         //删除脚本
         scriptRepository.deleteScript(script.getId());

@@ -227,7 +227,8 @@ public class ComponentDomainServiceImpl implements ComponentDomainService {
 
         for (ComponentGroupConfig groupConfig : component.getGroupConfigList()) {
 
-            Set<String> invalidHosts = groupName2HostNotNormalStatusMap.get(groupConfig.getGroupName());
+            Set<String> invalidHosts = groupName2HostNotNormalStatusMap.get(groupConfig.getGroupName()) == null ? new HashSet<>() :
+            groupName2HostNotNormalStatusMap.get(groupConfig.getGroupName());
 
             //不依赖配置的组件，更新自己的配置
             if (null == component.getDependConfigComponentId()) {
@@ -286,11 +287,13 @@ public class ComponentDomainServiceImpl implements ComponentDomainService {
         for (ComponentGroupConfig config : component.getGroupConfigList()) {
             for (String host : config.getHosts().split(SPLIT)) {
                 //如果节点成功则加入,因为有些ignore之类的
-                if (groupName2HostNormalStatusMap.get(config.getGroupName()).contains(host)) {
+                Set<String> validHosts = groupName2HostNormalStatusMap.get(config.getGroupName());
+                if (null != validHosts && validHosts.contains(host)) {
                     scaleHandler.dealComponentHost(component.getId(), host, config);
                 }
             }
 
+            //修改配置
             if (groupName2HostNormalStatusMap.containsKey(config.getGroupName())) {
                 ComponentGroupConfig oriGroupConfig = oriConfigMap.get(config.getGroupName());
                 scaleHandler.dealComponentGroupConfig(oriGroupConfig, config, groupName2HostNormalStatusMap.get(config.getGroupName()));

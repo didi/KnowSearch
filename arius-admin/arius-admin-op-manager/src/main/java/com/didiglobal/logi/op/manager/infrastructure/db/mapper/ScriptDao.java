@@ -1,7 +1,6 @@
 package com.didiglobal.logi.op.manager.infrastructure.db.mapper;
 
 import com.didiglobal.logi.op.manager.infrastructure.db.ScriptPO;
-import org.mapstruct.Mapper;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -15,42 +14,50 @@ public interface ScriptDao {
 
     /**
      * 通过id获取脚本po
-     * @param id
+     *
+     * @param id 脚本id
      * @return ScriptPO
      */
     ScriptPO findById(int id);
 
     /**
      * 通过name获取脚本po
-     * @param name
+     *
+     * @param name 脚本名
      * @return ScriptPO
      */
     ScriptPO findByName(String name);
 
     /**
      * 查询script
-     * @param scriptPO
-     * @return
+     *
+     * @param scriptPO 脚本
+     * @return 脚本列表
      */
     List<ScriptPO> queryScript(ScriptPO scriptPO);
 
     /**
      * 插入数据
-     * @param scriptPO
-     * @return
+     *
+     * @param scriptPO 脚本po
+     * @return 自增id
      */
     int insert(ScriptPO scriptPO);
 
     /**
      * 更新脚本
-     * @param scriptPO
+     *
+     * @param scriptPO 脚本po
+     * @return 更新条数
      */
-    void update(ScriptPO scriptPO);
+    int update(ScriptPO scriptPO);
 
     /**
      * 删除脚本
-     * @param id
+     *
+     * @param id 脚本id
+     * @return 删除条数
      */
-    void delete(int id);
+    int delete(int id);
 
 }

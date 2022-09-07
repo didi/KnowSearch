@@ -39,8 +39,8 @@ public class PackageGroupConfigRepositoryImpl implements PackageGroupConfigRepos
     }
 
     @Override
-    public void deleteByPackageId(int id) {
-        packageGroupConfigDao.deleteByPackageId(id);
+    public int deleteByPackageId(int id) {
+        return packageGroupConfigDao.deleteByPackageId(id);
     }
 
 }
