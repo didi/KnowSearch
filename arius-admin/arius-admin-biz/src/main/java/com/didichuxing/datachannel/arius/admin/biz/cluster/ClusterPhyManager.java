@@ -125,7 +125,8 @@ public interface ClusterPhyManager {
      * @param cluster 物理集群的名称
      * @return 动态配置信息 Map中的String见于动态配置的字段，例如cluster.routing.allocation.awareness.attributes
      */
-    Result<Map<ClusterDynamicConfigsTypeEnum, Map<String, Object>>> getPhyClusterDynamicConfigs(String cluster);
+    Result<Map<ClusterDynamicConfigsTypeEnum, Map<String, Object>>> getPhyClusterDynamicConfigs(String cluster)
+		    throws ESOperateException;
 
     /**
      * 更新集群下的动态配置信息
@@ -135,7 +136,7 @@ public interface ClusterPhyManager {
      * @param projectId
      * @return result
      */
-    Result<Boolean> updatePhyClusterDynamicConfig(ClusterSettingDTO param, String operator, Integer projectId);
+    Result<Boolean> updatePhyClusterDynamicConfig(ClusterSettingDTO param, String operator, Integer projectId) throws ESOperateException ;
 
     /**
      * 获取集群下的属性配置

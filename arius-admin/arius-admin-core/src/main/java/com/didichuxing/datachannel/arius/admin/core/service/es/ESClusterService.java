@@ -129,7 +129,7 @@ public interface ESClusterService {
      * @param cluster 集群名称
      * @return response
      */
-    ESClusterGetSettingsAllResponse syncGetClusterSetting(String cluster);
+    ESClusterGetSettingsAllResponse syncGetClusterSetting(String cluster) throws ESOperateException;
 
     /**
      * 获取集群ip上的segment数目
