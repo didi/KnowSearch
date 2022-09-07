@@ -6,9 +6,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterJo
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterRoleHostDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeRoleEnum;
-import com.didichuxing.datachannel.arius.admin.common.exception.AdminTaskException;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
-
+import com.didichuxing.datachannel.arius.admin.common.exception.AdminTaskException;
 import java.util.List;
 import java.util.Map;
 
@@ -232,4 +231,15 @@ public interface ClusterRoleHostService {
      * @return              Result<List<ClusterRoleHost>>
      */
     Result<List<ClusterRoleHost>> listByRegionId(Integer regionId);
+    
+   
+    /**
+     * 它返回 ClusterRoleHost 对象的列表。
+     *
+     * @param ids 要查询的 id 列表。
+     * @return 列表<ClusterRoleHost>
+     */
+    List<ClusterRoleHost> listById(List<Integer> ids);
+    
+    boolean deleteByIds(List<Integer> ids);
 }

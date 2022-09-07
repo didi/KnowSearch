@@ -7,6 +7,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPh
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterSettingDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PluginVO;
@@ -124,7 +125,8 @@ public interface ClusterPhyManager {
      * @param cluster 物理集群的名称
      * @return 动态配置信息 Map中的String见于动态配置的字段，例如cluster.routing.allocation.awareness.attributes
      */
-    Result<Map<ClusterDynamicConfigsTypeEnum, Map<String, Object>>> getPhyClusterDynamicConfigs(String cluster);
+    Result<Map<ClusterDynamicConfigsTypeEnum, Map<String, Object>>> getPhyClusterDynamicConfigs(String cluster)
+		    throws ESOperateException;
 
     /**
      * 更新集群下的动态配置信息
@@ -134,7 +136,7 @@ public interface ClusterPhyManager {
      * @param projectId
      * @return result
      */
-    Result<Boolean> updatePhyClusterDynamicConfig(ClusterSettingDTO param, String operator, Integer projectId);
+    Result<Boolean> updatePhyClusterDynamicConfig(ClusterSettingDTO param, String operator, Integer projectId) throws ESOperateException ;
 
     /**
      * 获取集群下的属性配置
@@ -315,6 +317,13 @@ public interface ClusterPhyManager {
      */
     List<ClusterRoleInfo> listClusterRolesByClusterId(Integer clusterId);
 
+    /**
+     * 根据集群名称获获取集群节点列表
+     *
+     * @param cluster 集群名称
+     * @return {@link List}<{@link ClusterRoleHost}>
+     */
+    List<ClusterRoleHost> listClusterRoleHostByCluster(String cluster);
     /**
      * 按照资源类型查询物理集群名称列表
      *

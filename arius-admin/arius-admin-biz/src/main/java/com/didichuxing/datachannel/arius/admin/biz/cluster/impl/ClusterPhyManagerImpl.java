@@ -18,6 +18,7 @@ import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping.TemplatePhyMappingManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.pipeline.PipelineManager;
 import com.didichuxing.datachannel.arius.admin.common.Triple;
+import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord.Builder;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
@@ -39,6 +40,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicVOWithProjects;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
@@ -111,6 +113,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -354,7 +357,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         List<ClusterRegion> regions = clusterRegionService.listRegionByPhyClusterNames(
             clusterPhyVOList.stream().map(ClusterPhyVO::getCluster).distinct().collect(Collectors.toList()));
         Map<String, Set<Long>> phyCluster2logicClusterIds = Maps.newHashMap();
-        Map<Long, ClusterLogicVO> logicClusterId2LogicCluster = Maps.newHashMap();
+        Map<Long,  List<ClusterLogicVO>> logicClusterId2LogicClusterList = Maps.newHashMap();
         Map<Long, ClusterRegionVO> logicClusterId2Region = Maps.newHashMap();
         List<Long> logicIds = Lists.newArrayList();
         regions.stream()
@@ -365,37 +368,50 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
                 String idStr = region.getLogicClusterIds();
                 List<Long> list = Lists.newArrayList();
                 for (String id : StringUtils.split(idStr, SEPARATOR_CHARS)) {
-                    try {
+                    if (StringUtils.isNumeric(id)) {
                         list.add(Long.valueOf(id));
-                    } catch (NumberFormatException e) {
-                        //pass
                     }
                 }
                 Set<Long> ids = phyCluster2logicClusterIds.getOrDefault(region.getPhyClusterName(), Sets.newHashSet());
                 ids.addAll(list);
                 phyCluster2logicClusterIds.put(region.getPhyClusterName(), ids);
-                list.forEach(id -> {
-                    logicClusterId2Region.put(id, ConvertUtil.obj2Obj(region, ClusterRegionVO.class, regionVO -> {
-                        regionVO.setClusterName(region.getPhyClusterName());
-                    }));
-                });
+                list.forEach(id -> logicClusterId2Region.put(id, ConvertUtil.obj2Obj(region, ClusterRegionVO.class, regionVO -> {
+                    regionVO.setClusterName(region.getPhyClusterName());
+                })));
                 logicIds.addAll(list);
             });
         if (CollectionUtils.isNotEmpty(logicIds)) {
             List<ClusterLogic> clusterLogicList = clusterLogicService.getClusterLogicListByIds(logicIds);
-            logicClusterId2LogicCluster = ConvertUtil.list2Map(clusterLogicList, ClusterLogic::getId,
-                clusterLogic -> ConvertUtil.obj2Obj(clusterLogic, ClusterLogicVO.class));
+    
+            logicClusterId2LogicClusterList = ConvertUtil.list2MapOfList(clusterLogicList, ClusterLogic::getId,
+                    clusterLogic -> ConvertUtil.obj2Obj(clusterLogic, ClusterLogicVO.class,
+                            clusterLogicVO -> clusterLogicVO.setProjectName(
+                                    projectService.getProjectBriefByProjectId(clusterLogicVO.getProjectId())
+                                            .getProjectName())));
         }
-
+        
         //3. 设置集群基本统计信息：磁盘使用信息
         long timeForBuildClusterDiskInfo = System.currentTimeMillis();
         for (ClusterPhyVO clusterPhyVO : clusterPhyVOList) {
             Set<Long> set = phyCluster2logicClusterIds.getOrDefault(clusterPhyVO.getCluster(), Sets.newHashSet());
-            Map<Long, ClusterLogicVO> finalLogicClusterId2Vo = logicClusterId2LogicCluster;
+            Map<Long, List<ClusterLogicVO>> finalLogicClusterId2Vo = logicClusterId2LogicClusterList;
             set.forEach(id -> {
-                clusterPhyVO.addLogicCluster(finalLogicClusterId2Vo.get(id), logicClusterId2Region.get(id));
+                List<ClusterLogicVO> clusterLogicVOList = finalLogicClusterId2Vo.get(id);
+                if (CollectionUtils.isNotEmpty(clusterLogicVOList)) {
+                    List<String> projectNames = clusterLogicVOList.stream().map(ClusterLogicVO::getProjectName)
+                            .collect(Collectors.toList());
+                    ClusterLogicVOWithProjects clusterLogicVOWithProjects = ConvertUtil.obj2Obj(clusterLogicVOList.get(0),
+                            ClusterLogicVOWithProjects.class, cp -> cp.setProjectNameList(projectNames));
+                    clusterPhyVO.addLogicCluster(clusterLogicVOWithProjects, logicClusterId2Region.get(id));
+                }
+            
             });
+            Optional.ofNullable(clusterPhyVO.getLogicClusterAndRegionList())
+                    .map(logicClusterAndRegionList -> logicClusterAndRegionList.stream().map(Tuple::getV1)
+                            .map(ClusterLogicVOWithProjects::getName).distinct().collect(Collectors.toList()))
+                    .ifPresent(clusterPhyVO::setBindLogicCluster);
         }
+        
         return timeForBuildClusterDiskInfo;
     }
 
@@ -575,7 +591,8 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     }
 
     @Override
-    public Result<Map<ClusterDynamicConfigsTypeEnum, Map<String, Object>>> getPhyClusterDynamicConfigs(String cluster) {
+    public Result<Map<ClusterDynamicConfigsTypeEnum, Map<String, Object>>> getPhyClusterDynamicConfigs(String cluster)
+            throws ESOperateException {
         if (!isClusterExists(cluster)) {
             return Result.buildFail(String.format("集群[%s]不存在", cluster));
         }
@@ -603,7 +620,8 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     }
 
     @Override
-    public Result<Boolean> updatePhyClusterDynamicConfig(ClusterSettingDTO param, String operator, Integer projectId) {
+    public Result<Boolean> updatePhyClusterDynamicConfig(ClusterSettingDTO param, String operator, Integer projectId)
+            throws ESOperateException {
         final Result<Void> resultCheck = ProjectUtils.checkProjectCorrectly(i -> i, projectId, projectId);
         if (resultCheck.failed()) {
             return Result.buildFail(resultCheck.getMessage());
@@ -1104,6 +1122,10 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         return clusterRoleService.getAllRoleClusterByClusterId(clusterId);
     }
 
+    @Override
+    public  List<ClusterRoleHost> listClusterRoleHostByCluster(String cluster) {
+        return clusterRoleHostService.getNodesByCluster(cluster);
+    }
     /**************************************** private method ***************************************************/
 
     private Result<Boolean> deleteClusterInner(Integer clusterPhyId, Integer projectId) {

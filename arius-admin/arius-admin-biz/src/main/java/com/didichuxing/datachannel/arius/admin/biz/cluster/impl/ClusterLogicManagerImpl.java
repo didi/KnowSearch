@@ -10,17 +10,23 @@ import static com.didichuxing.datachannel.arius.admin.common.util.SizeUtil.getUn
 
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterLogicManager;
+import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterNodeManager;
+import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterRegionManager;
 import com.didichuxing.datachannel.arius.admin.biz.page.ClusterLogicPageSearchHandle;
-import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager;
 import com.didichuxing.datachannel.arius.admin.common.Triple;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterJoinDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterLogicConditionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRegionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRegionWithNodeInfoDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRegionWithNodeInfoDTO.ClusterRegionWithNodeInfoDTOBuilder;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterWithRegionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterWithRegionDTO.ESLogicClusterWithRegionDTOBuilder;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatCellDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplateClearDTO;
@@ -42,6 +48,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLog
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterStatusVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostWithRegionInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PluginVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.ecm.ESClusterNodeSepcVO;
@@ -129,8 +136,6 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     @Autowired
     private IndexTemplateService           indexTemplateService;
 
-    @Autowired
-    private TemplateLogicManager           templateLogicManager;
 
     @Autowired
     private IndexTemplatePhyService        indexTemplatePhyService;
@@ -166,7 +171,11 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
     private ESIndexCatService              esIndexCatService;
 
     @Autowired
-    private ESClusterNodeService           eSClusterNodeService;
+    private ESClusterNodeService eSClusterNodeService;
+    @Autowired
+    private ClusterPhyManager    clusterPhyManager;
+    @Autowired
+    private ClusterNodeManager clusterNodeManager;
     
     private static final FutureUtil<Void>         FUTURE_UTIL        = FutureUtil.init("ClusterLogicManager", 10, 10,
             100);
@@ -460,12 +469,11 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
                 //将region解绑
                 ClusterRegion clusterRegion = clusterRegionService.getRegionByLogicClusterId(logicClusterId);
                 if (Objects.nonNull(clusterRegion)) {
-                    clusterRegionService.unbindRegion(clusterRegion.getId(), logicClusterId, operator);
                     //将region解绑
                     Result<Void> unbindRes = clusterRegionService.unbindRegion(clusterRegion.getId(), logicClusterId,
                             operator);
-                    if (!unbindRes.failed()) {
-                        return Result.buildFail();
+                    if (unbindRes.failed()) {
+                       throw new AdminOperateException(unbindRes.getMessage());
                     }
                 }
             }
@@ -482,7 +490,8 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
                 return Result.buildSuccWithTips(result.getData(),
                         String.format("逻辑集群%s下线成功", clusterLogic.getName()));
             }
-            return Result.buildFailWithMsg(result.getData(),String.format("逻辑集群%s下线失败", clusterLogic.getName()));
+            return Result.buildFailWithMsg(result.getData(),String.format("逻辑集群%s下线失败,%s", clusterLogic.getName(),
+                    result.getMessage()));
         } catch (AdminOperateException | ElasticsearchTimeoutException e) {
             LOGGER.error("class={}||method=deleteLogicCluster||clusterLogic={}||es operation errMsg={}",
                     getClass().getSimpleName(), clusterLogic.getName(), e);
@@ -791,7 +800,57 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
                 .collect(Collectors.toList());
 
     }
-
+    
+    /**
+     * 加入物理集群并创建逻辑集群
+     *
+     * @param param     ClusterJoinDTO
+     * @param projectId 项目编号
+     * @return joinClusterPhyAndCreateLogicCluster 方法的结果。
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Result<Long> joinClusterPhyAndCreateLogicCluster(ClusterJoinDTO param, Integer projectId)
+            throws AdminOperateException {
+        final Result<ClusterPhyVO> voResult = clusterPhyManager.joinCluster(param, AriusUser.SYSTEM.getDesc(), projectId);
+        if (voResult.failed()) {
+            return Result.buildFrom(voResult);
+        }
+        final Integer clusterPhyId = voResult.getData().getId();
+        final Result<List<ESClusterRoleHostWithRegionInfoVO>> listResult = clusterNodeManager.listDivide2ClusterNodeInfo(
+                clusterPhyId.longValue());
+        if (listResult.failed()) {
+            return Result.buildFrom(listResult);
+        }
+        final List<Integer> regionIds = listResult.getData().stream()
+                .map(ESClusterRoleHostVO::getId).distinct().map(Long::intValue).collect(Collectors.toList());
+        final ClusterRegionWithNodeInfoDTO clusterRegionWithNodeInfoDTO =
+                new ClusterRegionWithNodeInfoDTOBuilder()
+                .withBindingNodeIds(regionIds).withName(param.getCluster()).withLogicClusterIds("-1")
+                .withPhyClusterName(param.getCluster()).build();
+    
+        final Result<List<Long>> result = clusterNodeManager.createMultiNode2Region(
+                Lists.newArrayList(clusterRegionWithNodeInfoDTO), AriusUser.SYSTEM.getDesc(), projectId);
+        if (result.failed()) {
+            return Result.buildFrom(result);
+        }
+        final Long regionId = result.getData().get(0);
+        ClusterRegionDTO clusterRegionDTO = ClusterRegionDTO.builder().id(regionId).logicClusterIds("-1")
+                .phyClusterName(param.getCluster()).name(param.getCluster()).build();
+        final ESLogicClusterWithRegionDTO esLogicClusterWithRegionDTO = new ESLogicClusterWithRegionDTOBuilder()
+                .withProjectId(AuthConstant.DEFAULT_METADATA_PROJECT_ID).withName(clusterRegionDTO.getName()).withLevel(1).withType(1)
+                .withDataNodeSpec("").withClusterRegionDTOS(Lists.newArrayList(clusterRegionDTO)).build();
+       
+        final Result<Void> voidResult = addLogicClusterAndClusterRegions(esLogicClusterWithRegionDTO, AriusUser.SYSTEM.getDesc());
+        if (voidResult.failed()) {
+            return Result.buildFrom(voidResult);
+        }
+        final ClusterLogic logic = clusterLogicService.getClusterLogicByNameThatNotContainsProjectId(
+                param.getCluster());
+    
+        return Result.buildSucc(logic.getId());
+    }
+    
     /**
      * 构建ES集群版本
      * @param logicCluster 逻辑集群

@@ -39,8 +39,13 @@ public interface IndexTemplateDAO {
     List<IndexTemplatePO> pagingByCondition(@Param("param") IndexTemplatePO param, @Param("from") Long from,
                                             @Param("size") Long size, @Param("sortTerm") String sortTerm,
                                             @Param("sortType") String sortType);
+    List<IndexTemplatePO> pagingByConditionAndLogicClusterIdList(@Param("param") IndexTemplatePO param,
+                                                                 @Param("from") Long from,
+                                                                 @Param("size") Long size, @Param("sortTerm") String sortTerm,
+                                                                 @Param("sortType") String sortType, @Param("logicClusterIdList")List<Integer> logicClusterIdList);
 
     long getTotalHitByCondition(IndexTemplatePO param);
+    long getTotalHitByConditionAndLogicClusterIdList(@Param("param")IndexTemplatePO param,@Param("logicClusterIdList")List<Integer> logicClusterIdList);
 
     int batchChangeHotDay(@Param("days") Integer days, @Param("templateIdList") List<Integer> templateIdList);
 

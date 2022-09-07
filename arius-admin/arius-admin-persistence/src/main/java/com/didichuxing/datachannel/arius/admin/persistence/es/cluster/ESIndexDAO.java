@@ -280,7 +280,10 @@ public class ESIndexDAO extends BaseESDAO {
                     return false;
                 }
             } catch (Exception e) {
-                throw new ESOperateException("编辑mapping失败", e.getCause());
+                final String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
+                LOGGER.error("class=ESIndexDAO||method=updateIndexMapping||msg=update index mapping fail||cluster={}||indexName={}", cluster
+                        ,indexName,e);
+                throw new ESOperateException((StringUtils.isNotBlank(exception)?exception:"编辑mapping出错"));
             }
         }
 
@@ -328,7 +331,7 @@ public class ESIndexDAO extends BaseESDAO {
             };
             ESIndicesCatIndicesResponse esIndicesCatIndicesResponse = null;
             try {
-                esIndicesCatIndicesResponse = ESOpTimeoutRetry.esRetryExecuteWithReturnValue("syncGetSegmentsIndexList",
+                esIndicesCatIndicesResponse = ESOpTimeoutRetry.esRetryExecute("syncGetSegmentsIndexList",
                         3, () -> catIndicesResponseBiFunction.apply(Long.valueOf(ES_OPERATE_TIMEOUT), TimeUnit.SECONDS),
                         Objects::isNull
         
@@ -478,7 +481,7 @@ public class ESIndexDAO extends BaseESDAO {
         };
         ESIndicesGetAliasResponse response =null;
         try {
-            response = ESOpTimeoutRetry.esRetryExecuteWithReturnValue("getAliasesByIndices", 3,
+            response = ESOpTimeoutRetry.esRetryExecute("getAliasesByIndices", 3,
                     () -> responseBiFunction.apply(Long.valueOf(ES_OPERATE_TIMEOUT), TimeUnit.SECONDS), Objects::isNull
         
             );
@@ -863,7 +866,7 @@ public class ESIndexDAO extends BaseESDAO {
         };
         ESIndicesPutAliasResponse response = null;
         try {
-            response = ESOpTimeoutRetry.esRetryExecuteWithReturnValue("editAlias", tryTimes,
+            response = ESOpTimeoutRetry.esRetryExecute("editAlias", tryTimes,
                     () -> esIndicesPutAliasResponseBiFunction.apply(Long.valueOf(ES_OPERATE_TIMEOUT), TimeUnit.SECONDS),
                     esIndicesPutAliasResponse -> Optional.ofNullable(esIndicesPutAliasResponse)
                             .map(ESIndicesPutAliasResponse::getAcknowledged).orElse(Boolean.FALSE)

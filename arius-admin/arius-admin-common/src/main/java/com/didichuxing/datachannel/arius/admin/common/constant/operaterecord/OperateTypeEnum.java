@@ -209,7 +209,8 @@ public enum OperateTypeEnum {
     ROLE_MANAGER_DELETE(ModuleEnum.ROLE_MANAGER, "删除角色", 58),
     ROLE_MANAGER_CREATE(ModuleEnum.ROLE_MANAGER, "创建角色", 53),
     ROLE_MANAGER_UNBIND_USER(ModuleEnum.ROLE_MANAGER, "角色解绑用户", 54),
-    ROLE_MANAGER_BIND_USER(ModuleEnum.ROLE_MANAGER, "角色绑定用户", 55);
+    ROLE_MANAGER_BIND_USER(ModuleEnum.ROLE_MANAGER, "角色绑定用户", 55),
+    PHYSICAL_CLUSTER_NODE_CHANGE(ModuleEnum.PHYSICAL_CLUSTER, "节点变更", 62);
 
     /**
      * 模块

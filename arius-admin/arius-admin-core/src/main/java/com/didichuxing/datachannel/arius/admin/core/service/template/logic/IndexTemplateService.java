@@ -41,6 +41,15 @@ public interface IndexTemplateService {
      * @return      List<IndexTemplateLogic>
      */
     List<IndexTemplate> fuzzyLogicTemplatesByCondition(IndexTemplateDTO param);
+    
+    /**
+     *
+     *
+     * @param param 查询条件对象，与上一方法中的查询条件对象相同。
+     * @param logicClusterIds 逻辑集群 ID 列表。
+     * @return 列表<索引模板>
+     */
+    List<IndexTemplate> pagingGetTemplateSrvByConditionAndLogicClusterIdList(TemplateQueryDTO param, List<Integer> logicClusterIds);
 
     /**
      * 模糊分页查询模板列表信息
@@ -60,6 +69,15 @@ public interface IndexTemplateService {
      * @return      查询总命中数
      */
     Long fuzzyLogicTemplatesHitByCondition(IndexTemplateDTO param);
+   
+    /**
+     * 它返回与给定条件和逻辑集群 ID 匹配的模板数量。
+     *
+     * @param param 将用于构造查询的参数对象。
+     * @param logicClusterIds 逻辑集群 ID 列表。
+     * @return 长
+     */
+    Long fuzzyLogicTemplatesHitByConditionAndLogicClusterIdList(IndexTemplateDTO param,List<Integer> logicClusterIds);
 
     /**
      * 根据名字查询
@@ -354,21 +372,21 @@ public interface IndexTemplateService {
 
     /**
      * 修改禁读状态
-     * @param logicId 逻辑模板
-     * @param blockRead  是否禁读
-     * @param operator  操作人
+     *
+     * @param logicId   逻辑模板
+     * @param blockRead 是否禁读
      * @return
      */
-    Result<Void> updateBlockReadState(Integer logicId, Boolean blockRead, String operator);
+    Result<Void> updateBlockReadState(Integer logicId, Boolean blockRead);
 
     /**
      * 修改禁写状态
-     * @param logicId 逻辑模板
-     * @param blockWrite  是否禁读
-     * @param operator  操作人
+     *
+     * @param logicId    逻辑模板
+     * @param blockWrite 是否禁读
      * @return
      */
-    Result<Void> updateBlockWriteState(Integer logicId, Boolean blockWrite, String operator);
+    Result<Void> updateBlockWriteState(Integer logicId, Boolean blockWrite);
 
     Result updateTemplateWriteRateLimit(ConsoleTemplateRateLimitDTO consoleTemplateRateLimitDTO) throws ESOperateException;
 

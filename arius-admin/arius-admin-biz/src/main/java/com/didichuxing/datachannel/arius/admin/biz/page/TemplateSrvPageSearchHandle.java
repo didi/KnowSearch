@@ -5,6 +5,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResu
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.PageDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.srv.TemplateQueryDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.srv.TemplateSrv;
@@ -12,20 +13,22 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterCon
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv.TemplateSrvVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv.TemplateWithSrvVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv.UnavailableTemplateSrvVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import com.google.common.collect.Lists;
-import java.util.Comparator;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -52,6 +55,8 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<Templa
 
     @Autowired
     private TemplateSrvManager            templateSrvManager;
+    @Autowired
+    private ClusterRegionService clusterRegionService;
 
     @Override
     protected Result<Boolean> checkCondition(TemplateQueryDTO condition, Integer projectId) {
@@ -71,19 +76,25 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<Templa
 
     @Override
     protected PaginationResult<TemplateWithSrvVO> buildPageData(TemplateQueryDTO condition, Integer projectId) {
-    
-        // 注意这里的condition是物理集群
-        Integer totalHit;
+        Integer totalHit ;
         List<IndexTemplate> matchIndexTemplateList;
-        if (AriusObjUtils.isBlank(condition.getCluster())) {
-            matchIndexTemplateList = indexTemplateService.pagingGetTemplateSrvByCondition(condition);
-            totalHit = indexTemplateService.fuzzyLogicTemplatesHitByCondition(condition).intValue();
+        // 如果存物理集群，则需要通过物理集群找到指定的逻辑集群
+        if (StringUtils.isNotBlank(condition.getCluster())) {
+            List<Integer> logicClusterIdList = clusterRegionService.listPhyClusterRegions(condition.getCluster())
+                    .stream().map(ClusterRegion::getLogicClusterIds)
+                    .filter(clusterLogicId -> !AdminConstant.REGION_NOT_BOUND_LOGIC_CLUSTER_ID.equals(clusterLogicId))
+                    .map(ListUtils::string2IntList).flatMap(Collection::stream).distinct().collect(Collectors.toList());
+            if (CollectionUtils.isEmpty(logicClusterIdList)) {
+                return PaginationResult.buildSucc(Collections.emptyList(),0,condition.getPage(),condition.getSize());
+            }
+            totalHit = indexTemplateService.fuzzyLogicTemplatesHitByConditionAndLogicClusterIdList(condition,
+                    logicClusterIdList).intValue();
+            matchIndexTemplateList =
+                    indexTemplateService.pagingGetTemplateSrvByConditionAndLogicClusterIdList(condition,logicClusterIdList);
         } else {
-            List<IndexTemplate> meetConditionTemplateList = getMatchConditionTemplateListByClusterName(condition);
-            totalHit = meetConditionTemplateList.size();
-            matchIndexTemplateList = filterFullDataByPage(meetConditionTemplateList, condition);
+            totalHit = indexTemplateService.fuzzyLogicTemplatesHitByCondition(condition).intValue();
+            matchIndexTemplateList = indexTemplateService.pagingGetTemplateSrvByCondition(condition);
         }
-
         List<TemplateWithSrvVO> templateWithSrvVOList = buildExtraAttribute(matchIndexTemplateList);
         
         
@@ -91,68 +102,7 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<Templa
         return PaginationResult.buildSucc(templateWithSrvVOList, totalHit, condition.getPage(), condition.getSize());
     }
 
-    /******************************************private***********************************************/
-    /**
-     * 根据模板Id、名称、归属projectId、归属物理集群等进行组合查询
-     *
-     * @param condition
-     * @return
-     */
-    private List<IndexTemplate> getMatchConditionTemplateListByClusterName(TemplateQueryDTO condition) {
-        List<IndexTemplate> meetConditionTemplateList = Lists.newArrayList();
-        List<IndexTemplatePhy> indexTemplatePhyList = indexTemplatePhyService
-            .getNormalTemplateByCluster(condition.getCluster());
-        if (CollectionUtils.isEmpty(indexTemplatePhyList)) {
-            return meetConditionTemplateList;
-        }
-
-        List<Integer> matchTemplateLogicIdList = indexTemplatePhyList.stream().map(IndexTemplatePhy::getLogicId)
-            .distinct().collect(Collectors.toList());
-    
-        Predicate<IndexTemplate> conditionNotNullIdPre = indexTemplate -> Objects.isNull(condition.getId())
-                                                                          || Objects.equals(indexTemplate.getId(),
-                condition.getId());
-    
-        Predicate<IndexTemplate> conditionNotNullNamePre = indexTemplate -> !StringUtils.isNotBlank(condition.getName())
-                                                                            || StringUtils.equals(
-                indexTemplate.getName(), condition.getName());
-    
-        Predicate<IndexTemplate> conditionNotNullProjectIdPre = indexTemplate ->
-                Objects.isNull(condition.getProjectId()) || Objects.equals(indexTemplate.getProjectId(),
-                        condition.getProjectId());
-        Predicate<IndexTemplate> hasDCDRPre = indexTemplate -> Objects.isNull(condition.getHasDCDR()) || Objects.equals(
-                indexTemplate.getHasDCDR(),
-            
-                condition.getHasDCDR());
-         Predicate<IndexTemplate> healthPre = indexTemplate -> Objects.isNull(condition.getHealth()) || Objects.equals(
-                indexTemplate.getHealth(),
-            
-                condition.getHealth());
-        Comparator<IndexTemplate> comparator = Comparator.nullsLast(Comparator.comparing(indexTemplate -> {
-            if (StringUtils.equalsIgnoreCase(condition.getSortTerm(), CHECK_POINT_DIFF)) {
-                return indexTemplate.getCheckPointDiff() == null
-                        ? null
-                        : indexTemplate.getCheckPointDiff().doubleValue();
-            }
-            if (StringUtils.equalsIgnoreCase(condition.getSortTerm(), HEALTH)) {
-                return indexTemplate.getHealth() == null ? null : indexTemplate.getHealth().doubleValue();
-            } else {
-                return indexTemplate.getId().doubleValue();
-            }
-        }));
-        comparator=condition.getOrderByDesc()?comparator.reversed():comparator;
-    
-        return indexTemplateService.listLogicTemplatesByIds(matchTemplateLogicIdList).stream()
-                .filter(conditionNotNullProjectIdPre).filter(conditionNotNullIdPre)
-                .filter(conditionNotNullNamePre)
-                .filter(hasDCDRPre)
-                .filter(healthPre)
-                .sorted(comparator)
-                .collect(Collectors.toList());
-                
-        
-    }
-
+ 
     private List<TemplateWithSrvVO> buildExtraAttribute(List<IndexTemplate> templateList) {
         if (CollectionUtils.isEmpty(templateList)) {
             return Lists.newArrayList();

@@ -6,6 +6,7 @@ import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterSettingDTO;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterDynamicConfigsTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -34,13 +35,14 @@ public class ESClusterDynamicConfigController {
 
     @GetMapping("/{cluster}")
     @ApiOperation(value = "获取当前集群下的动态配置项信息")
-    public Result<Map<ClusterDynamicConfigsTypeEnum, Map<String, Object>>> getPhyClusterDynamicConfigs(@PathVariable String cluster) {
+    public Result<Map<ClusterDynamicConfigsTypeEnum, Map<String, Object>>> getPhyClusterDynamicConfigs(@PathVariable String cluster)
+            throws ESOperateException {
         return clusterPhyManager.getPhyClusterDynamicConfigs(cluster);
     }
 
     @PutMapping("")
     @ApiOperation(value = "更新集群配置项的信息")
-    public Result<Boolean> updateDynamicConfig(HttpServletRequest request, @RequestBody ClusterSettingDTO param) {
+    public Result<Boolean> updateDynamicConfig(HttpServletRequest request, @RequestBody ClusterSettingDTO param) throws ESOperateException {
         return clusterPhyManager.updatePhyClusterDynamicConfig(param, HttpRequestUtil.getOperator(request),
             HttpRequestUtil.getProjectId(request));
     }

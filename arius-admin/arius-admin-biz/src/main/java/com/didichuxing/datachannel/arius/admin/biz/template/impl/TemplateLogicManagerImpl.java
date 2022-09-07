@@ -1205,7 +1205,77 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             return Result.buildFail("限流调整失败！");
         }
     }
-
+    
+   
+    /**
+     * 用索引模板的写操作。
+     *
+     * @param templateId 要操作的模板的id
+     * @param status 0：否，1：是
+     * @param operator 触发操作的操作员
+     * @param projectId 项目编号
+     * @return Result<Void>
+     */
+    @Override
+    public Result<Void> blockWrite(Integer templateId, Boolean status, String operator, Integer projectId) {
+        IndexTemplatePO logicTemplate = indexTemplateService.getLogicTemplatePOById(templateId);
+    
+        if (Objects.isNull(logicTemplate)) {
+            return Result.buildFail("逻辑模板不存在");
+        }
+        Result<Void> checkProjectCorrectly = ProjectUtils.checkProjectCorrectly(IndexTemplatePO::getProjectId,
+                logicTemplate, projectId);
+        if (checkProjectCorrectly.failed()) {
+            return checkProjectCorrectly;
+        }
+    
+        Result<Void> result = indexTemplateService.updateBlockWriteState(templateId, status);
+        if (result.success()) {
+            // 是否禁写，0：否，1：是
+            operateRecordService.save(new OperateRecord.Builder().bizId(templateId).userOperation(operator)
+                    .content(Objects.equals(status, Boolean.TRUE) ? "禁写" : "开启写")
+                    .project(projectService.getProjectBriefByProjectId(projectId))
+                    .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                    .operationTypeEnum(OperateTypeEnum.TEMPLATE_MANAGEMENT_CREATE).build());
+        }
+    
+        return result;
+    }
+    
+    
+    /**
+     * 用于索引模板的读取。
+     *
+     * @param templateId 要操作的模板的id
+     * @param status 0：否，1：是
+     * @param operator 触发操作的用户
+     * @param projectId 项目编号
+     * @return Result<Void>
+     */
+    @Override
+    public Result<Void> blockRead(Integer templateId, Boolean status, String operator, Integer projectId) {
+        IndexTemplatePO logicTemplate = indexTemplateService.getLogicTemplatePOById(templateId);
+    
+        if (Objects.isNull(logicTemplate)) {
+            return Result.buildFail("逻辑模板不存在");
+        }
+        Result<Void> checkProjectCorrectly = ProjectUtils.checkProjectCorrectly(IndexTemplatePO::getProjectId,
+                logicTemplate, projectId);
+        if (checkProjectCorrectly.failed()) {
+            return checkProjectCorrectly;
+        }
+        Result<Void> result = indexTemplateService.updateBlockReadState(templateId, status);
+        if (result.success()) {
+            // 是否禁写，0：否，1：是
+            operateRecordService.save(new OperateRecord.Builder().bizId(templateId).userOperation(operator)
+                    .content(Objects.equals(status, Boolean.TRUE) ? "禁读" : "开启读")
+                    .project(projectService.getProjectBriefByProjectId(projectId))
+                    .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
+                    .operationTypeEnum(OperateTypeEnum.TEMPLATE_MANAGEMENT_CREATE).build());
+        }
+    
+        return result;
+    }
     /**************************************** private method ***************************************************/
     /**
     * 获取逻辑模板索引列表
@@ -1374,6 +1444,10 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
                 clusterRegion.getPhyClusterName());
         if (Boolean.TRUE.equals(existDCDRAndPipelineModule.v2)) {
             openSrvList.add(TemplateServiceEnum.TEMPLATE_PIPELINE.getCode());
+        }
+        // 如果存在 dcdr 插件，则开启 dcdr 服务
+        if (Boolean.TRUE.equals(existDCDRAndPipelineModule.v1)) {
+            openSrvList.add(TemplateServiceEnum.TEMPLATE_DCDR.getCode());
         }
         if (CollectionUtils.isNotEmpty(openSrvList)) {
             //如果集群支持pipeline
