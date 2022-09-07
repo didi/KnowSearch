@@ -5,6 +5,7 @@ import com.didiglobal.logi.op.manager.domain.script.entity.Script;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 import com.didiglobal.logi.op.manager.infrastructure.common.ResultCode;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.TaskActionEnum;
+import com.didiglobal.logi.op.manager.infrastructure.common.enums.TaskLogEnum;
 import com.didiglobal.logi.op.manager.infrastructure.deployment.zeus.ZeusService;
 import com.didiglobal.logi.op.manager.infrastructure.deployment.zeus.ZeusTask;
 import com.didiglobal.logi.op.manager.infrastructure.deployment.zeus.ZeusTaskStatus;
@@ -126,21 +127,11 @@ public class DeploymentServiceImpl implements DeploymentService {
     }
 
     @Override
-    public Result<String> deployStdOuts(int taskId,String hostname) {
+    public Result<String> deployTaskLog(int taskId, String hostname, TaskLogEnum taskLogEnum) {
         try {
-            return Result.success(zeusService.getTaskStdOutLog(taskId,hostname));
+            return Result.success(zeusService.getTaskLog(taskId, hostname, taskLogEnum));
         } catch (ZeusOperationException e) {
             LOGGER.error("class=DeploymentServiceImpl||method=deployStdouts||errMsg={}||msg=get stdouts error", e.getMessage());
-            return Result.fail(e.getCode(), e.getMessage());
-        }
-    }
-
-    @Override
-    public Result<String> deployStdErrs(int taskId,String hostname) {
-        try {
-            return Result.success(zeusService.getTaskStdErrLog(taskId,hostname));
-        } catch (ZeusOperationException e) {
-            LOGGER.error("class=DeploymentServiceImpl||method=deployStderrs||errMsg={}||msg=get stderrs error", e.getMessage());
             return Result.fail(e.getCode(), e.getMessage());
         }
     }

@@ -2,6 +2,7 @@ package com.didiglobal.logi.op.manager.infrastructure.deployment;
 
 import com.didiglobal.logi.op.manager.domain.script.entity.Script;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
+import com.didiglobal.logi.op.manager.infrastructure.common.enums.TaskLogEnum;
 import com.didiglobal.logi.op.manager.infrastructure.deployment.zeus.ZeusTaskStatus;
 
 /**
@@ -62,20 +63,13 @@ public interface DeploymentService {
     Result<ZeusTaskStatus> deployStatus(int taskId);
 
     /**
-     * 任务执行完成后的标准输出
+     * 任务执行完成后的输出
      * @param taskId 任务id
-     * @param hostname 主机名(可选)
-     * @return String
+     * @param hostname 主机名
+     * @param taskLogEnum 任务输出对应的枚举类
+     * @return Result
      */
-    Result<String> deployStdOuts(int taskId,String  hostname);
-
-    /**
-     * 任务执行完成后的错误输出
-     * @param taskId 任务id
-     * @param hostname 主机名(可选)
-     * @return String
-     */
-    Result<String> deployStdErrs(int taskId,String hostname);
+    Result<String> deployTaskLog(int taskId, String hostname, TaskLogEnum taskLogEnum);
 
     /**
      * 移除脚本

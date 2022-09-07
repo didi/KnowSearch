@@ -1,6 +1,7 @@
 package com.didiglobal.logi.op.manager.infrastructure.deployment.zeus;
 
 import com.alibaba.fastjson.JSONObject;
+import com.didiglobal.logi.op.manager.infrastructure.common.enums.TaskLogEnum;
 import com.didiglobal.logi.op.manager.infrastructure.exception.ZeusOperationException;
 
 /**
@@ -42,22 +43,14 @@ public interface ZeusService {
     ZeusTaskStatus getTaskStatus(int taskId) throws ZeusOperationException;
 
     /**
-     * 获取任务执行完成后的标准输出
+     * 获取任务执行完成后的输出
      * @param taskId
      * @param hostname
+     * @param taskLogEnum
      * @return String
      * @throws ZeusOperationException
      */
-    String getTaskStdOutLog(int taskId,String hostname) throws ZeusOperationException;
-
-    /**
-     * 获取任务执行完成后的错误输出
-     * @param taskId
-     * @param hostname
-     * @return String
-     * @throws ZeusOperationException
-     */
-    String getTaskStdErrLog(int taskId,String hostname) throws ZeusOperationException;
+    String getTaskLog(int taskId, String hostname, TaskLogEnum taskLogEnum) throws ZeusOperationException;
 
     /**
      * 删除模板
@@ -65,7 +58,6 @@ public interface ZeusService {
      * @throws ZeusOperationException
      */
     void deleteTemplate(int templateId) throws ZeusOperationException;
-
 
     /**
      * 对任务进行操作

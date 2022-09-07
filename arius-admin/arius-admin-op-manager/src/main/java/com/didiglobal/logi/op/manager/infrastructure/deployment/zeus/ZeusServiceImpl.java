@@ -2,6 +2,7 @@ package com.didiglobal.logi.op.manager.infrastructure.deployment.zeus;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.didiglobal.logi.op.manager.infrastructure.common.enums.TaskLogEnum;
 import com.didiglobal.logi.op.manager.infrastructure.deployment.ZeusSubTaskLog;
 import com.didiglobal.logi.op.manager.infrastructure.exception.ZeusOperationException;
 import com.didiglobal.logi.op.manager.infrastructure.util.HttpUtil;
@@ -109,12 +110,16 @@ public class ZeusServiceImpl implements ZeusService {
     }
 
     @Override
-    public String getTaskStdOutLog(int taskId,String hostname) throws ZeusOperationException {
+    public String getTaskLog(int taskId, String hostname, TaskLogEnum taskLogEnum) throws ZeusOperationException {
         try {
-            String url = String.format(API_TASK_STDOUTS,zeusServer,taskId);
-            if (null != hostname) {
-                url =  url+"?hostname=" + hostname;
+            String url = null;
+            //判断taskLogEnum是要获得标准输出还是错误输出
+            if (taskLogEnum.getType() == 0 ) {
+                url = String.format(API_TASK_STDOUTS,zeusServer,taskId);
+            } else if (taskLogEnum.getType() == 1 ) {
+                url = String.format(API_TASK_STDERRS,zeusServer,taskId);
             }
+            url = url+"?hostname=" + hostname;
             ZeusResult result =  HttpUtil.getRestTemplate().getForObject(url, ZeusResult.class);
             if (result.failed()) {
                 throw new ZeusOperationException(result.getMsg());
@@ -124,29 +129,6 @@ public class ZeusServiceImpl implements ZeusService {
                 return EMPTY_STRING;
             }
             return zeusSubTaskLogs.get(0).getStdout();
-        } catch (ZeusOperationException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new ZeusOperationException(e);
-        }
-    }
-
-    @Override
-    public String getTaskStdErrLog(int taskId,String hostname) throws ZeusOperationException {
-        try {
-            String url = String.format(API_TASK_STDERRS,zeusServer,taskId);
-            if (null != hostname) {
-                url =  url+"?hostname=" + hostname;
-            }
-            ZeusResult result =  HttpUtil.getRestTemplate().getForObject(url, ZeusResult.class);
-            if (result.failed()) {
-                throw new ZeusOperationException(result.getMsg());
-            }
-            List<ZeusSubTaskLog> zeusSubTaskLogs = JSON.parseArray(JSON.toJSONString(result.getData()),ZeusSubTaskLog.class);
-            if (zeusSubTaskLogs == null || zeusSubTaskLogs.isEmpty()) {
-                return EMPTY_STRING;
-            }
-            return zeusSubTaskLogs.get(0).getStderr();
         } catch (ZeusOperationException e) {
             throw e;
         } catch (Exception e) {
