@@ -30,10 +30,11 @@ public interface DeploymentService {
      * @param templateId
      * @param hosts
      * @param action
+     * @param batch
      * @param args
      * @return
      */
-    Result<Integer> execute(String templateId, String hosts, String action, String... args);
+    Result<Integer> execute(String templateId, String hosts, String action, Integer batch, String... args);
 
 
     /**

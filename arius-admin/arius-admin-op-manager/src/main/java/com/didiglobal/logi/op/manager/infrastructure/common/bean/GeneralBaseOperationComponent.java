@@ -24,6 +24,8 @@ public class GeneralBaseOperationComponent {
 
     protected String templateId;
 
+    protected Integer batch;
+
     protected Result<Void> checkParam() {
         if (null == groupConfigList || groupConfigList.isEmpty()) {
             return Result.fail(ResultCode.PARAM_ERROR.getCode(), "配置组缺失");
