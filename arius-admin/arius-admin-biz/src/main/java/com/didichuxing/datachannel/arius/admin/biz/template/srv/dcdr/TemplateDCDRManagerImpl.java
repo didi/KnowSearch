@@ -740,14 +740,13 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
 
         BatchProcessor.BatchProcessResult<String, Boolean> result = new BatchProcessor<String, Boolean>()
             .batchList(indices).batchSize(30).processor(items -> {
-                try {
                     return esIndexService.syncPutIndexSetting(cluster, items, DCDR_INDEX_SETTING,
                         String.valueOf(replicaIndex), "false", retryCount);
-                } catch (ESOperateException e) {
-                    return false;
-                }
             }).succChecker(succ -> succ).process();
-
+        if (!result.isSucc() && CollectionUtils.isNotEmpty(result.getErrorMap().values())) {
+            throw new ESOperateException(result.getErrorMap().values().stream().findFirst().get().getMessage());
+        
+        }
         return result.isSucc();
     }
 

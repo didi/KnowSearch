@@ -383,14 +383,13 @@ public class ESIndexServiceImpl implements ESIndexService {
                                            int retryCount) throws ESOperateException {
         BatchProcessor.BatchProcessResult<String, Boolean> result = new BatchProcessor<String, Boolean>()
             .batchList(indices).batchSize(30).processor(items -> {
-                try {
-                    return ESOpTimeoutRetry.esRetryExecute("syncBatchBlockIndexRead", retryCount,
-                        () -> esIndexDAO.blockIndexRead(cluster, items, block));
-                } catch (ESOperateException e) {
-                    return false;
-                }
-            }).succChecker(succ -> succ).process();
-
+                        return ESOpTimeoutRetry.esRetryExecute("syncBatchBlockIndexRead", retryCount,
+                                    () -> esIndexDAO.blockIndexRead(cluster, items, block));
+                }).succChecker(succ -> succ).process();
+        if (!result.isSucc() && CollectionUtils.isNotEmpty(result.getErrorMap().values())) {
+            throw new ESOperateException(result.getErrorMap().values().stream().findFirst().get().getMessage());
+        
+        }
         return result.isSucc();
     }
 
@@ -430,21 +429,20 @@ public class ESIndexServiceImpl implements ESIndexService {
      */
     @Override
     public boolean reOpenIndex(String cluster, List<String> indices, int retryCount) throws ESOperateException {
-        BatchProcessor.BatchProcessResult<String, Boolean> result = new BatchProcessor<String, Boolean>()
-            .batchList(indices).batchSize(30).processor(items -> {
-                try {
-                    if (ESOpTimeoutRetry.esRetryExecute("reOpenIndex-close", retryCount,
-                        () -> esIndexDAO.closeIndex(cluster, items))) {
-                        return ESOpTimeoutRetry.esRetryExecute("reOpenIndex-open", retryCount,
-                            () -> esIndexDAO.openIndex(cluster, items));
-                    } else {
-                        return false;
-                    }
-                } catch (ESOperateException e) {
-                    return false;
-                }
-            }).succChecker(succ -> succ).process();
-
+        BatchProcessor.BatchProcessResult<String, Boolean> result = new BatchProcessor<String, Boolean>().batchList(
+                indices).batchSize(30).processor(items -> {
+            if (ESOpTimeoutRetry.esRetryExecute("reOpenIndex-close", retryCount,
+                    () -> esIndexDAO.closeIndex(cluster, items))) {
+                return ESOpTimeoutRetry.esRetryExecute("reOpenIndex-open", retryCount,
+                        () -> esIndexDAO.openIndex(cluster, items));
+            } else {
+                return false;
+            }
+        }).succChecker(succ -> succ).process();
+        if (!result.isSucc() && CollectionUtils.isNotEmpty(result.getErrorMap().values())) {
+            throw new ESOperateException(result.getErrorMap().values().stream().findFirst().get().getMessage());
+        
+        }
         return result.isSucc();
     }
 
