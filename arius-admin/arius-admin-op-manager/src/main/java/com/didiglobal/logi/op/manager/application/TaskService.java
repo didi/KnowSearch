@@ -1,6 +1,5 @@
 package com.didiglobal.logi.op.manager.application;
 
-import com.baomidou.mybatisplus.extension.api.R;
 import com.didiglobal.logi.op.manager.domain.component.service.ComponentDomainService;
 import com.didiglobal.logi.op.manager.domain.packages.service.PackageDomainService;
 import com.didiglobal.logi.op.manager.domain.task.entity.Task;
@@ -13,7 +12,6 @@ import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralRollback
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.HostActionEnum;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.OperationEnum;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.TaskActionEnum;
-import com.didiglobal.logi.op.manager.infrastructure.common.enums.TaskLogEnum;
 import com.didiglobal.logi.op.manager.infrastructure.common.hander.ComponentHandlerFactory;
 import com.didiglobal.logi.op.manager.infrastructure.util.ConvertUtil;
 import com.google.common.base.Strings;
