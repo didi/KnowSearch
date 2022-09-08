@@ -62,6 +62,14 @@ public interface DeploymentService {
     Result<ZeusTaskStatus> deployStatus(int taskId);
 
     /**
+     * 任务执行完成后的输出
+     * @param taskId 任务id
+     * @param hostname 主机名
+     * @param taskLogEnumType 要获取的输出类型的type
+     */
+    Result<String> deployTaskLog(int taskId, String hostname, int taskLogEnumType);
+
+    /**
      * 移除脚本
      * @param script
      * @return

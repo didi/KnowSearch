@@ -5,12 +5,12 @@ import com.didiglobal.logi.op.manager.domain.script.entity.Script;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 import com.didiglobal.logi.op.manager.infrastructure.common.ResultCode;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.TaskActionEnum;
+import com.didiglobal.logi.op.manager.infrastructure.common.enums.TaskLogEnum;
 import com.didiglobal.logi.op.manager.infrastructure.deployment.zeus.ZeusService;
 import com.didiglobal.logi.op.manager.infrastructure.deployment.zeus.ZeusTask;
 import com.didiglobal.logi.op.manager.infrastructure.deployment.zeus.ZeusTaskStatus;
 import com.didiglobal.logi.op.manager.infrastructure.deployment.zeus.ZeusTemplate;
 import com.didiglobal.logi.op.manager.infrastructure.exception.ZeusOperationException;
-import com.google.common.base.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -121,6 +121,22 @@ public class DeploymentServiceImpl implements DeploymentService {
             return Result.success(zeusService.getTaskStatus(taskId));
         } catch (ZeusOperationException e) {
             LOGGER.error("class=DeploymentServiceImpl||method=deployStatus||errMsg={}||msg=get status error", e.getMessage());
+            return Result.fail(e.getCode(), e.getMessage());
+        }
+    }
+
+    @Override
+    public Result<String> deployTaskLog(int taskId, String hostname, int taskLogEnumType) {
+        try {
+            if (taskLogEnumType == TaskLogEnum.STDOUT.getType()) {
+                return Result.success(zeusService.getTaskStdOutLog(taskId, hostname));
+            } else if (taskLogEnumType == TaskLogEnum.STDERR.getType()) {
+                return Result.success(zeusService.getTaskStdErrLog(taskId, hostname));
+            } else {
+                return Result.fail(ResultCode.PARAM_ERROR.getCode(),"taskLogEnumType参数错误");
+            }
+        } catch (ZeusOperationException e) {
+            LOGGER.error("class=DeploymentServiceImpl||method=deployStdouts||errMsg={}||msg=get stdouts error", e.getMessage());
             return Result.fail(e.getCode(), e.getMessage());
         }
     }

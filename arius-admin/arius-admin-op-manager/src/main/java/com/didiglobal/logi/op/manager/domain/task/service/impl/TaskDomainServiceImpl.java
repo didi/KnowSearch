@@ -15,6 +15,7 @@ import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralExecuteC
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralGroupConfig;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.HostActionEnum;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.TaskActionEnum;
+import com.didiglobal.logi.op.manager.infrastructure.common.enums.TaskLogEnum;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.TaskStatusEnum;
 import com.didiglobal.logi.op.manager.infrastructure.deployment.DeploymentService;
 import com.didiglobal.logi.op.manager.infrastructure.util.ConvertUtil;
@@ -132,6 +133,12 @@ public class TaskDomainServiceImpl implements TaskDomainService {
         taskDetailRepository.updateTaskDetailExecuteIdByTaskIdAndGroupName(task.getId(), groupName,
                 deployRes.getData());
         return Result.success();
+    }
+
+    @Override
+    public Result<String> getTaskLog(int taskId, String hostname, int taskLogEnumType) {
+        Result<String> taskLogResult = deploymentService.deployTaskLog(taskId, hostname, taskLogEnumType);
+        return taskLogResult;
     }
 
     @Override

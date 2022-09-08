@@ -1,5 +1,6 @@
 package com.didiglobal.logi.op.manager.application;
 
+import com.baomidou.mybatisplus.extension.api.R;
 import com.didiglobal.logi.op.manager.domain.component.service.ComponentDomainService;
 import com.didiglobal.logi.op.manager.domain.packages.service.PackageDomainService;
 import com.didiglobal.logi.op.manager.domain.task.entity.Task;
@@ -12,6 +13,7 @@ import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralRollback
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.HostActionEnum;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.OperationEnum;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.TaskActionEnum;
+import com.didiglobal.logi.op.manager.infrastructure.common.enums.TaskLogEnum;
 import com.didiglobal.logi.op.manager.infrastructure.common.hander.ComponentHandlerFactory;
 import com.didiglobal.logi.op.manager.infrastructure.util.ConvertUtil;
 import com.google.common.base.Strings;
@@ -142,4 +144,20 @@ public class TaskService {
         }
         return Result.success(configResult.getData());
     }
+
+    /**
+     * 获取任务执行完成后的输出
+     *
+     * @param taskId 任务id
+     * @param hostname 主机名
+     * @return String
+     */
+    public Result<String> getTaskLog(Integer taskId, String hostname, Integer taskLogEnumType){
+        if (null == taskId) {
+            return Result.fail(ResultCode.PARAM_ERROR.getCode(),"taskId 为null");
+        }
+        Result<String> taskLogResult = taskDomainService.getTaskLog(taskId, hostname, taskLogEnumType);
+        return taskLogResult;
+    }
+
 }

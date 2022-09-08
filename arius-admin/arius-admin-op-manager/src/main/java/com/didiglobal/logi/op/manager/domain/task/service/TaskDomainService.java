@@ -6,6 +6,7 @@ import com.didiglobal.logi.op.manager.infrastructure.common.Tuple;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralGroupConfig;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.HostActionEnum;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.TaskActionEnum;
+import com.didiglobal.logi.op.manager.infrastructure.common.enums.TaskLogEnum;
 
 import java.util.List;
 import java.util.Map;
@@ -140,4 +141,15 @@ public interface TaskDomainService {
      * @return 更新条数
      */
     Result<Integer> updateTaskStatus(int taskId, int status);
+
+    /**
+     * 获取任务执行完成后的输出
+     *
+     * @param taskId 任务id
+     * @param hostname 主机名
+     * @param taskLogEnumType 要获取的输出类型的type
+     * @return String
+     */
+    Result<String> getTaskLog(int taskId, String hostname, int taskLogEnumType);
+
 }

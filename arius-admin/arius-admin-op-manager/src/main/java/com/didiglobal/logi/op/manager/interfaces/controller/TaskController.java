@@ -4,6 +4,7 @@ import com.didiglobal.logi.op.manager.application.TaskService;
 import com.didiglobal.logi.op.manager.infrastructure.common.Constants;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralGroupConfig;
+import com.didiglobal.logi.op.manager.infrastructure.common.enums.TaskLogEnum;
 import com.didiglobal.logi.op.manager.interfaces.assembler.ComponentAssembler;
 import com.didiglobal.logi.op.manager.interfaces.vo.GeneralGroupConfigHostVO;
 import io.swagger.annotations.Api;
@@ -59,5 +60,20 @@ public class TaskController {
             return ComponentAssembler.toGeneralGroupConfigVO(config, host);
         }
         return res;
+    }
+
+
+    @GetMapping("/task-stdouts")
+    @ApiOperation(value = "zeus查看任务执行完成后的标准输出")
+    public Result<String> getTaskStdOuts(@RequestParam(value = "taskId", required = true) Integer taskId,
+                                         @RequestParam(value = "hostname", required = true) String hostname) {
+        return taskService.getTaskLog(taskId, hostname, TaskLogEnum.STDOUT.getType());
+    }
+
+    @GetMapping("/task-stderrs")
+    @ApiOperation(value = "zeus查看任务执行完成后的错误输出")
+    public Result<String> getTaskStdErrs(@RequestParam(value = "taskId", required = true) Integer taskId,
+                                         @RequestParam(value = "hostname", required = true) String hostname) {
+        return taskService.getTaskLog(taskId, hostname, TaskLogEnum.STDERR.getType());
     }
 }
