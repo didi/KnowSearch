@@ -137,8 +137,7 @@ public class TaskDomainServiceImpl implements TaskDomainService {
 
     @Override
     public Result<String> getTaskLog(int taskId, String hostname, int taskLogEnumType) {
-        Result<String> taskLogResult = deploymentService.deployTaskLog(taskId, hostname, taskLogEnumType);
-        return taskLogResult;
+        return deploymentService.deployTaskLog(taskId, hostname, taskLogEnumType);
     }
 
     @Override
@@ -154,21 +153,21 @@ public class TaskDomainServiceImpl implements TaskDomainService {
         }
 
         //获取正在执行的任务id
-        Integer executeTaskId = getExecuteTaskId(taskId);
+        Integer executeTaskId = getRunningExecuteTaskId(taskId);
         Result<Void> actionRes;
         if (null != executeTaskId) {
             //执行zeus任务
             actionRes = deploymentService.actionTask(executeTaskId, action.getAction());
         } else {
-            //如果都没有那就是初始态，执行任务
+            //如果都没有那就是初始态或者一个分组已经运行完了，执行任务
             actionRes = executeDeployTask(task);
         }
         if (actionRes.failed()) {
             return actionRes;
         }
 
-        //更新任务状态
-        taskRepository.updateTaskStatus(taskId, action.getStatus());
+        //更新任务状态并且此时任务应该改成未完成，由zeus来判断是否完成(因为需要更新下zeus正在运行的任务的状态)
+        taskRepository.updateTaskStatusAndIsFinish(taskId, action.getStatus(), 0);
         return Result.success();
     }
 
@@ -232,10 +231,10 @@ public class TaskDomainServiceImpl implements TaskDomainService {
      * @param taskId 任务id
      * @return ExecuteTaskId或者null
      */
-    private Integer getExecuteTaskId(int taskId) {
+    private Integer getRunningExecuteTaskId(int taskId) {
         List<TaskDetail> detailList = taskDetailRepository.listTaskDetailByTaskId(taskId);
         Optional<TaskDetail> optional = detailList.stream().filter(detail ->
-                null != detail.getExecuteTaskId() && (detail.getStatus() == TaskStatusEnum.RUNNING.getStatus() || detail.getStatus() == TaskStatusEnum.WAITING.getStatus())
+                null != detail.getExecuteTaskId() && (!detail.isNormalStatus())
         ).findFirst();
 
         return optional.map(TaskDetail::getExecuteTaskId).orElse(null);

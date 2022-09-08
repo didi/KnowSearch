@@ -59,7 +59,7 @@ public class TaskScheduler {
         try {
             Set<Integer> executeIdSet = new HashSet<>();
             boolean isContainEmptyExecuteId = false;
-
+            //获取执行id列表
             for (TaskDetail taskDetail : task.getDetailList()) {
                 if (null != taskDetail.getExecuteTaskId()) {
                     executeIdSet.add(taskDetail.getExecuteTaskId());
@@ -68,6 +68,7 @@ public class TaskScheduler {
                 }
             }
 
+            //汇总任务状态
             if (executeIdSet.size() > 0) {
                 ZeusTaskStatus totalStatus = new ZeusTaskStatus();
                 for (Integer id : executeIdSet) {
@@ -90,8 +91,8 @@ public class TaskScheduler {
                     totalStatus.addZeusTaskStatus(ZeusTaskStatus.builder().waiting(new ArrayList<>()).build());
                 }
 
+                //更新最终状态
                 int finalStatus = getFinalStatusAndUpdate(task, totalStatus);
-
                 if (finalStatus == TaskStatusEnum.SUCCESS.getStatus()) {
                     componentHandlerFactory.getByType(task.getType()).taskFinishProcess(task.getId(), task.getContent());
                 }

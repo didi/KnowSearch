@@ -66,6 +66,7 @@ public interface DeploymentService {
      * @param taskId 任务id
      * @param hostname 主机名
      * @param taskLogEnumType 要获取的输出类型的type
+     * @return
      */
     Result<String> deployTaskLog(int taskId, String hostname, int taskLogEnumType);
 

@@ -28,7 +28,7 @@ public class Task {
      */
     private Integer id;
     /**
-     * 状态
+     * 状态，0待执行，1执行，2失败，4成功，5取消，6杀死，7超时，8忽略
      */
     private Integer status;
     /**
@@ -127,7 +127,7 @@ public class Task {
                 if (status != TaskStatusEnum.WAITING.getStatus() &&
                         status != TaskStatusEnum.RUNNING.getStatus() &&
                         status != TaskStatusEnum.PAUSE.getStatus() &&
-                        status != TaskStatusEnum.KILLED.getStatus()) {
+                        status != TaskStatusEnum.FAILED.getStatus()) {
                     return Result.fail(ResultCode.TASK_IS_FINISH);
                 }
                 break;

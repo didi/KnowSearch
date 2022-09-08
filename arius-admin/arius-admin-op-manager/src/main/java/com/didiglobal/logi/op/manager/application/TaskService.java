@@ -122,6 +122,7 @@ public class TaskService {
             return Result.fail(ResultCode.TASK_NOT_EXIST_ERROR);
         }
 
+        //分组名是否匹配
         Task task = taskResult.getData();
         Result<GeneralGroupConfig> configResult = taskDomainService.getConfig(task, groupName);
         if (configResult.failed()) {
@@ -130,12 +131,10 @@ public class TaskService {
 
         if (task.getType() == OperationEnum.INSTALL.getType() ||
                 task.getType() == OperationEnum.UPGRADE.getType()) {
-
             //如果是安装和升级，设置url
             Integer packageId = ConvertUtil.str2ObjByJson(task.getContent(), GeneralInstallComponent.class).getPackageId();
             configResult.getData().setUrl(packageDomainService.getPackageById(packageId).getData().getUrl());
         } else if (task.getType() == OperationEnum.ROLLBACK.getType()) {
-
             //如果是回滚，设置回滚类型以及url
             GeneralRollbackComponent rollbackComponent = ConvertUtil.str2ObjByJson(task.getContent(), GeneralRollbackComponent.class);
             configResult.getData().setType(rollbackComponent.getType());
@@ -153,8 +152,8 @@ public class TaskService {
      * @return String
      */
     public Result<String> getTaskLog(Integer taskId, String hostname, Integer taskLogEnumType){
-        if (null == taskId) {
-            return Result.fail(ResultCode.PARAM_ERROR.getCode(),"taskId 为null");
+        if (null == taskId || null == hostname) {
+            return Result.fail(ResultCode.PARAM_ERROR.getCode(),"taskId或者hostname 为null");
         }
         Result<String> taskLogResult = taskDomainService.getTaskLog(taskId, hostname, taskLogEnumType);
         return taskLogResult;

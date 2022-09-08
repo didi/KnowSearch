@@ -28,7 +28,7 @@ public class TaskDetail {
      */
     private Integer executeTaskId;
     /**
-     * 状态
+     * 状态，0待执行，1执行，2失败，3暂停，4成功，5取消，6杀死
      */
     private Integer status;
     /**
@@ -62,6 +62,11 @@ public class TaskDetail {
         return this;
     }
 
+    /**
+     * 检查节点action对应的节点状态是否符合
+     * @param action
+     * @return
+     */
     public Result<Void> checkHostActionStatus(HostActionEnum action) {
         switch (action) {
             case IGNORE:
@@ -81,6 +86,17 @@ public class TaskDetail {
         }
         return Result.success();
 
+    }
+
+    /**
+     * 是否是正常状态，success以及ignored以及killed可以认为是正常成功状态
+     *
+     * @return true 正常，false 非正常
+     */
+    public boolean isNormalStatus() {
+        return status == TaskStatusEnum.SUCCESS.getStatus() ||
+                status == TaskStatusEnum.IGNORED.getStatus() ||
+                status == TaskStatusEnum.KILLED.getStatus();
     }
 
 }

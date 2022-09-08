@@ -31,7 +31,7 @@ public class Package {
      */
     private String name;
     /**
-     * 地址
+     * 文件地址
      */
     private String url;
     /**
@@ -63,7 +63,7 @@ public class Package {
      */
     private String creator;
     /**
-     * 传输文件
+     * 文件
      */
     private MultipartFile uploadFile;
 

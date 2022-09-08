@@ -122,7 +122,6 @@ public class ComponentService {
         }
         Result taskCheckRes = taskDomainService.hasRepeatTask(null, generalRollbackComponent.getComponentId());
         if (taskCheckRes.failed()) {
-            //TODO 测试
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             return taskCheckRes;
         }

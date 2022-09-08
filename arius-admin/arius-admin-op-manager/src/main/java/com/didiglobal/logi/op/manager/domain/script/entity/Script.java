@@ -33,7 +33,7 @@ public class Script {
      */
     private String templateId;
     /**
-     * 内容地址
+     * 文件地址
      */
     private String contentUrl;
     /**

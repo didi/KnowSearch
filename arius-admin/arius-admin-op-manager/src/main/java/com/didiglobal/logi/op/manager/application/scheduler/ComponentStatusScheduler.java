@@ -57,7 +57,6 @@ public class ComponentStatusScheduler {
             LOGGER.info("start monitor task");
             //list所有有效的组件，里面的host详情也需要有效的host详情
             List<Component> componentList = componentDomainService.listComponentWithAll().getData();
-
             Map<String, String> packageIdToTemplate = packageId2TemplateIdMapCache.get(key, this::packageIdToTemplateMap);
 
             componentList.parallelStream().forEach(component -> {
@@ -78,12 +77,12 @@ public class ComponentStatusScheduler {
                         //这里任务下发，真正的回调是再zeus侧，通过调用admin的接口来实现是否存在进程
                         //这里也需要zeus去获取配置
                         //TODO 回调未执行
-                        groupToHostList.entrySet().forEach(entry -> {
-                            Result res = deploymentService.execute(packageIdToTemplate.get(component.getPackageId().toString()),
-                                    Strings.join(entry.getValue().iterator(), REX), String.valueOf(OperationEnum.STATUS.getType()),
-                                    0, component.getId().toString(), entry.getKey());
+                        groupToHostList.forEach((key1, value) -> {
+                            Result<Integer> res = deploymentService.execute(packageIdToTemplate.get(component.getPackageId().toString()),
+                                    Strings.join(value.iterator(), REX), String.valueOf(OperationEnum.STATUS.getType()),
+                                    0, component.getId().toString(), key1);
                             if (res.failed()) {
-                                LOGGER.error("组件[{}]分组[{}]执行失败，", component.getId(), entry.getKey(), res.getMessage());
+                                LOGGER.error("组件[{}]分组[{}]执行失败，", component.getId(), key1, res.getMessage());
                             }
                         });
                     }
@@ -97,6 +96,10 @@ public class ComponentStatusScheduler {
 
     }
 
+    /**
+     * 安装包id到模板map的映射
+     * @return key->安装包id，value->模板id
+     */
     @NotNull
     private Map<String, String> packageIdToTemplateMap() {
         List<Package> packageList = packageDomainService.queryPackage(Package.builder().build()).getData();
