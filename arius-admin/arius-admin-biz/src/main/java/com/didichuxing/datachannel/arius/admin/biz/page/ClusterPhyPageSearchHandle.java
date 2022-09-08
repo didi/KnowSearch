@@ -164,9 +164,8 @@ public class ClusterPhyPageSearchHandle extends AbstractPageSearchHandle<Cluster
         //如果获取zeus失败则返回空列表
         if (result.failed()) {
             return Lists.newArrayList();
-        } else {
-            return result.getData();
         }
+        return result.getData();
     }
 
     /**
@@ -177,9 +176,11 @@ public class ClusterPhyPageSearchHandle extends AbstractPageSearchHandle<Cluster
     private void buildSupportZeusByClusterPhy(ClusterPhyVO clusterPhyVO,List<String> zeusAgentsList) {
         List<ClusterRoleHost> clusterRoleHosts = clusterPhyManager.listClusterRoleHostByCluster(clusterPhyVO.getCluster());
         Boolean supportZeus = true ;
+        //物理集群上所有的节点都需要在zeus的ip列表上，那么它才属于支持zeus的，一旦发现有一个不在就是不支持，不再遍历
         for (ClusterRoleHost clusterRoleHost : clusterRoleHosts) {
             if (!zeusAgentsList.contains(clusterRoleHost.getIp())) {
                 supportZeus = false;
+                break;
             }
         }
         clusterPhyVO.setSupportZeus(supportZeus);

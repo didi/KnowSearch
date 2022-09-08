@@ -1,9 +1,8 @@
 package com.didichuxing.datachannel.arius.admin.persistence.mysql.ecm;
 
-import java.util.List;
-
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.ecm.ESClusterRoleHostPO;
+import java.util.List;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
@@ -134,6 +133,7 @@ public interface ESClusterRoleHostDAO {
      * @return
      */
     int delete(Long id);
+    int deleteByIds(@Param("ids")List<Integer> ids);
 
     /**
      * 根据主机名和roleId 删除主机信息
@@ -179,4 +179,14 @@ public interface ESClusterRoleHostDAO {
      * @return         List<ESClusterRoleHostPO>
      */
     List<ESClusterRoleHostPO> listDataNodeByCluster(String cluster);
+    
+    /**
+     * 它返回 ClusterRoleHost 对象的列表。
+     *
+     * @param ids 要查询的id列表。
+     * @return 列表<ClusterRoleHost>
+     */
+    List<ESClusterRoleHostPO> listByIds(@Param("ids") List<Integer> ids);
+    
+    
 }

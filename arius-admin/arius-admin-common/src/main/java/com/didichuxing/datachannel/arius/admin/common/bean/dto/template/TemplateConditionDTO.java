@@ -25,7 +25,7 @@ public class TemplateConditionDTO extends IndexTemplateDTO {
     @ApiModelProperty("所属集群")
     private List<String> clusterPhies;
 
-    @ApiModelProperty("排序字段")
+    @ApiModelProperty("排序字段 block_read(禁读)、block_write(禁写)")
     private String       sortTerm;
     @ApiModelProperty("模板健康度")
     private Integer health;

@@ -42,7 +42,6 @@ import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.DataTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.event.template.LogicTemplateModifyEvent;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
@@ -188,11 +187,8 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
     }
 
     @Override
-    public Long fuzzyLogicTemplatesHitByCondition(IndexTemplateDTO param) {// 如果 has dcdr 是 false 则找到的应该是可以创建 dcdr 链路，且没有开启 dcdr 服务的模板
-        if (Boolean.FALSE.equals(param.getHasDCDR())) {
-            param.setHasDCDR(null);
-            param.setOpenSrv(TemplateServiceEnum.TEMPLATE_DCDR.getCode().toString());
-        }
+    public Long fuzzyLogicTemplatesHitByCondition(IndexTemplateDTO param) {
+      
         return indexTemplateDAO.getTotalHitByCondition(ConvertUtil.obj2Obj(param, IndexTemplatePO.class));
     }
     
@@ -929,14 +925,14 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
 
     /**
      * 更新读状态
-     * @param logicId 逻辑模板
-     * @param blockRead  是否禁读
-     * @param operator  操作人
+     *
+     * @param logicId   逻辑模板
+     * @param blockRead 是否禁读
      * @return
      * @throws AdminOperateException
      */
     @Override
-    public Result<Void> updateBlockReadState(Integer logicId, Boolean blockRead, String operator) {
+    public Result<Void> updateBlockReadState(Integer logicId, Boolean blockRead) {
         if (null == logicId || null == blockRead) {
             return Result.buildFail("logicId or blockRead is null");
         }
@@ -946,13 +942,13 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
 
     /**
      * 更新写状态
-     * @param logicId 逻辑模板
+     *
+     * @param logicId    逻辑模板
      * @param blockWrite 是否禁写
-     * @param operator 操作热人
      * @return
      */
     @Override
-    public Result<Void> updateBlockWriteState(Integer logicId, Boolean blockWrite, String operator) {
+    public Result<Void> updateBlockWriteState(Integer logicId, Boolean blockWrite) {
         if (null == logicId || null == blockWrite) {
             return Result.buildFail("logicId or blockWrite is null");
         }
