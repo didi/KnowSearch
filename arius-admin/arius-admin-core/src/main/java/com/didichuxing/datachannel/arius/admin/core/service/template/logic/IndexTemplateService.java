@@ -441,5 +441,13 @@ public interface IndexTemplateService {
      * @return boolean
      */
     boolean updateTemplateType(TemplateTypePO param);
-
+	
+	
+	/**
+	 * 通过逻辑模板ID获取主模板的物理模板ID
+	 *
+	 * @param logicTemplateId 逻辑模板 ID。
+	 * @return 长
+	 */
+	Long getMasterTemplatePhyIdByLogicTemplateId(Integer logicTemplateId);
 }

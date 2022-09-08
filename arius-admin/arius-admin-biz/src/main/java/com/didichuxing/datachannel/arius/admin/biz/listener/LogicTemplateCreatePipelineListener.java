@@ -2,7 +2,6 @@ package com.didichuxing.datachannel.arius.admin.biz.listener;
 
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.pipeline.PipelineManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
 import com.didichuxing.datachannel.arius.admin.common.event.template.LogicTemplateCreatePipelineEvent;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didiglobal.logi.log.ILog;
@@ -34,10 +33,16 @@ public class LogicTemplateCreatePipelineListener implements ApplicationListener<
         try {
              //保证数据已经刷到数据库，如果立即执行，会存在获取不到数据库中数据的状态，所以等待3s
             TimeUnit.SECONDS.sleep(3);
-            IndexTemplateWithPhyTemplates template = indexTemplateService.getLogicTemplateWithPhysicalsById(
+            Long masterTemplateId = indexTemplateService.getMasterTemplatePhyIdByLogicTemplateId(
                     logicTemplateCreatePipelineEvent.getLogicTemplateId());
+            if (masterTemplateId == null) {
+                LOGGER.error(
+                        "class=LogicTemplateCreatePipelineListener||method=onApplicationEvent||{} get templatePhy is null",
+                        logicTemplateCreatePipelineEvent.getLogicTemplateId());
+                return;
+            }
             final Result<Void> result = pipelineManager.createPipeline(
-                    template.getMasterPhyTemplate().getId().intValue());
+                    masterTemplateId.intValue());
             if (result.failed()) {
                 LOGGER.warn(
                         "class=LogicTemplateCreatePipelineListener||method=onApplicationEvent||logicTemplateI={}||msg={}",
