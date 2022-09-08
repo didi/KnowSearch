@@ -147,13 +147,13 @@ public class TaskService {
     /**
      * 获取任务执行完成后的输出
      *
-     * @param taskId 任务id
+     * @param taskId   任务id
      * @param hostname 主机名
      * @return String
      */
-    public Result<String> getTaskLog(Integer taskId, String hostname, Integer taskLogEnumType){
+    public Result<String> getTaskLog(Integer taskId, String hostname, Integer taskLogEnumType) {
         if (null == taskId || null == hostname) {
-            return Result.fail(ResultCode.PARAM_ERROR.getCode(),"taskId或者hostname 为null");
+            return Result.fail(ResultCode.PARAM_ERROR.getCode(), "taskId或者hostname 为null");
         }
         Result<String> taskLogResult = taskDomainService.getTaskLog(taskId, hostname, taskLogEnumType);
         return taskLogResult;

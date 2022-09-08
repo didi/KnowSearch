@@ -133,7 +133,7 @@ public class DeploymentServiceImpl implements DeploymentService {
             } else if (taskLogEnumType == TaskLogEnum.STDERR.getType()) {
                 return Result.success(zeusService.getTaskStdErrLog(taskId, hostname));
             } else {
-                return Result.fail(ResultCode.PARAM_ERROR.getCode(),"taskLogEnumType参数错误");
+                return Result.fail(ResultCode.PARAM_ERROR.getCode(), "taskLogEnumType参数错误");
             }
         } catch (ZeusOperationException e) {
             LOGGER.error("class=DeploymentServiceImpl||method=deployStdouts||errMsg={}||msg=get stdouts error", e.getMessage());

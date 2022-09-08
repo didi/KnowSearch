@@ -12,6 +12,7 @@ public interface DeploymentService {
 
     /**
      * 部署脚本
+     *
      * @param script
      * @return
      */
@@ -19,6 +20,7 @@ public interface DeploymentService {
 
     /**
      * 修改脚本
+     *
      * @param script
      * @return
      */
@@ -27,6 +29,7 @@ public interface DeploymentService {
 
     /**
      * 执行任务
+     *
      * @param templateId
      * @param hosts
      * @param action
@@ -39,6 +42,7 @@ public interface DeploymentService {
 
     /**
      * 对任务id执行action操作
+     *
      * @param executeTaskId
      * @param action
      * @return
@@ -47,6 +51,7 @@ public interface DeploymentService {
 
     /**
      * 对任务host执行action操作
+     *
      * @param executeTaskId
      * @param host
      * @param action
@@ -56,6 +61,7 @@ public interface DeploymentService {
 
     /**
      * 执行状态
+     *
      * @param taskId
      * @return
      */
@@ -63,8 +69,9 @@ public interface DeploymentService {
 
     /**
      * 任务执行完成后的输出
-     * @param taskId 任务id
-     * @param hostname 主机名
+     *
+     * @param taskId          任务id
+     * @param hostname        主机名
      * @param taskLogEnumType 要获取的输出类型的type
      * @return
      */
@@ -72,6 +79,7 @@ public interface DeploymentService {
 
     /**
      * 移除脚本
+     *
      * @param script
      * @return
      */
