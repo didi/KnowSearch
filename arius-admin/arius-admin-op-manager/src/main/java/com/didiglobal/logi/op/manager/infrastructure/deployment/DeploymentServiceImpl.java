@@ -11,7 +11,6 @@ import com.didiglobal.logi.op.manager.infrastructure.deployment.zeus.ZeusTask;
 import com.didiglobal.logi.op.manager.infrastructure.deployment.zeus.ZeusTaskStatus;
 import com.didiglobal.logi.op.manager.infrastructure.deployment.zeus.ZeusTemplate;
 import com.didiglobal.logi.op.manager.infrastructure.exception.ZeusOperationException;
-import com.google.common.base.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -127,9 +126,15 @@ public class DeploymentServiceImpl implements DeploymentService {
     }
 
     @Override
-    public Result<String> deployTaskLog(int taskId, String hostname, TaskLogEnum taskLogEnum) {
+    public Result<String> deployTaskLog(int taskId, String hostname, int taskLogEnumType) {
         try {
-            return Result.success(zeusService.getTaskLog(taskId, hostname, taskLogEnum));
+            if (taskLogEnumType == TaskLogEnum.STDOUT.getType()) {
+                return Result.success(zeusService.getTaskStdOutLog(taskId, hostname));
+            } else if (taskLogEnumType == TaskLogEnum.STDERR.getType()) {
+                return Result.success(zeusService.getTaskStdErrLog(taskId, hostname));
+            } else {
+                return Result.fail(ResultCode.PARAM_ERROR.getCode(),"taskLogEnumType参数错误");
+            }
         } catch (ZeusOperationException e) {
             LOGGER.error("class=DeploymentServiceImpl||method=deployStdouts||errMsg={}||msg=get stdouts error", e.getMessage());
             return Result.fail(e.getCode(), e.getMessage());

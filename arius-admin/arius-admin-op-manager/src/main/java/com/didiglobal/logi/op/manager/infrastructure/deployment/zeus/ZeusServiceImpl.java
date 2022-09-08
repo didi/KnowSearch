@@ -64,9 +64,9 @@ public class ZeusServiceImpl implements ZeusService {
 
     private static final String API_HOST_ACTION = "http://%s/api/task/host-action?token=%s";
 
-    private static final String API_TASK_STDOUTS = "http://%s/api/task/%s/stdouts.json";
+    private static final String API_TASK_STDOUTS = "http://%s/api/task/%s/stdouts.json?hostname=%s";
 
-    private static final String API_TASK_STDERRS = "http://%s/api/task/%s/stderrs.json";
+    private static final String API_TASK_STDERRS = "http://%s/api/task/%s/stderrs.json?hostname=%s";
 
     private static final String EMPTY_STRING = "";
 
@@ -110,16 +110,9 @@ public class ZeusServiceImpl implements ZeusService {
     }
 
     @Override
-    public String getTaskLog(int taskId, String hostname, TaskLogEnum taskLogEnum) throws ZeusOperationException {
+    public String getTaskStdOutLog(int taskId, String hostname) throws ZeusOperationException {
         try {
-            String url = null;
-            //判断taskLogEnum是要获得标准输出还是错误输出
-            if (taskLogEnum.getType() == 0 ) {
-                url = String.format(API_TASK_STDOUTS,zeusServer,taskId);
-            } else if (taskLogEnum.getType() == 1 ) {
-                url = String.format(API_TASK_STDERRS,zeusServer,taskId);
-            }
-            url = url+"?hostname=" + hostname;
+            String url = String.format(API_TASK_STDOUTS,zeusServer,taskId,hostname);
             ZeusResult result =  HttpUtil.getRestTemplate().getForObject(url, ZeusResult.class);
             if (result.failed()) {
                 throw new ZeusOperationException(result.getMsg());
@@ -129,6 +122,26 @@ public class ZeusServiceImpl implements ZeusService {
                 return EMPTY_STRING;
             }
             return zeusSubTaskLogs.get(0).getStdout();
+        } catch (ZeusOperationException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ZeusOperationException(e);
+        }
+    }
+
+    @Override
+    public String getTaskStdErrLog(int taskId, String hostname) throws ZeusOperationException {
+        try {
+            String url = String.format(API_TASK_STDERRS,zeusServer,taskId,hostname);
+            ZeusResult result =  HttpUtil.getRestTemplate().getForObject(url, ZeusResult.class);
+            if (result.failed()) {
+                throw new ZeusOperationException(result.getMsg());
+            }
+            List<ZeusSubTaskLog> zeusSubTaskLogs = JSON.parseArray(JSON.toJSONString(result.getData()),ZeusSubTaskLog.class);
+            if (zeusSubTaskLogs == null || zeusSubTaskLogs.isEmpty()) {
+                return EMPTY_STRING;
+            }
+            return zeusSubTaskLogs.get(0).getStderr();
         } catch (ZeusOperationException e) {
             throw e;
         } catch (Exception e) {

@@ -2,7 +2,6 @@ package com.didiglobal.logi.op.manager.infrastructure.deployment;
 
 import com.didiglobal.logi.op.manager.domain.script.entity.Script;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
-import com.didiglobal.logi.op.manager.infrastructure.common.enums.TaskLogEnum;
 import com.didiglobal.logi.op.manager.infrastructure.deployment.zeus.ZeusTaskStatus;
 
 /**
@@ -66,10 +65,9 @@ public interface DeploymentService {
      * 任务执行完成后的输出
      * @param taskId 任务id
      * @param hostname 主机名
-     * @param taskLogEnum 任务输出对应的枚举类
-     * @return Result
+     * @param taskLogEnumType 要获取的输出类型的type
      */
-    Result<String> deployTaskLog(int taskId, String hostname, TaskLogEnum taskLogEnum);
+    Result<String> deployTaskLog(int taskId, String hostname, int taskLogEnumType);
 
     /**
      * 移除脚本

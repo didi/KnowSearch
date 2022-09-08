@@ -152,11 +152,11 @@ public class TaskService {
      * @param hostname 主机名
      * @return String
      */
-    public Result<String> getTaskLog(Integer taskId, String hostname, TaskLogEnum taskLogEnum){
+    public Result<String> getTaskLog(Integer taskId, String hostname, Integer taskLogEnumType){
         if (null == taskId) {
             return Result.fail(ResultCode.PARAM_ERROR.getCode(),"taskId 为null");
         }
-        Result<String> taskLogResult = taskDomainService.getTaskLog(taskId, hostname, taskLogEnum);
+        Result<String> taskLogResult = taskDomainService.getTaskLog(taskId, hostname, taskLogEnumType);
         return taskLogResult;
     }
 

@@ -136,8 +136,8 @@ public class TaskDomainServiceImpl implements TaskDomainService {
     }
 
     @Override
-    public Result<String> getTaskLog(int taskId, String hostname, TaskLogEnum taskLogEnum) {
-        Result<String> taskLogResult = deploymentService.deployTaskLog(taskId, hostname, taskLogEnum);
+    public Result<String> getTaskLog(int taskId, String hostname, int taskLogEnumType) {
+        Result<String> taskLogResult = deploymentService.deployTaskLog(taskId, hostname, taskLogEnumType);
         return taskLogResult;
     }
 

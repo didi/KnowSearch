@@ -147,9 +147,9 @@ public interface TaskDomainService {
      *
      * @param taskId 任务id
      * @param hostname 主机名
-     * @param taskLogEnum 要获取的输出类型
+     * @param taskLogEnumType 要获取的输出类型的type
      * @return String
      */
-    Result<String> getTaskLog(int taskId, String hostname, TaskLogEnum taskLogEnum);
+    Result<String> getTaskLog(int taskId, String hostname, int taskLogEnumType);
 
 }

@@ -43,14 +43,22 @@ public interface ZeusService {
     ZeusTaskStatus getTaskStatus(int taskId) throws ZeusOperationException;
 
     /**
-     * 获取任务执行完成后的输出
+     * 获取任务执行完成后的标准输出
      * @param taskId
      * @param hostname
-     * @param taskLogEnum
      * @return String
      * @throws ZeusOperationException
      */
-    String getTaskLog(int taskId, String hostname, TaskLogEnum taskLogEnum) throws ZeusOperationException;
+    String getTaskStdOutLog(int taskId, String hostname) throws ZeusOperationException;
+
+    /**
+     * 获取任务执行完成后的错误输出
+     * @param taskId
+     * @param hostname
+     * @return String
+     * @throws ZeusOperationException
+     */
+    String getTaskStdErrLog(int taskId, String hostname) throws ZeusOperationException;
 
     /**
      * 删除模板
