@@ -29,5 +29,7 @@ public class TemplateOperateRecord {
     protected List<DiffJson> diffResult = Lists.newArrayList();
 
     protected Boolean        change;
+    protected String         behavior;
+    
 
 }

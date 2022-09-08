@@ -35,6 +35,8 @@ public class TemplateSettingOperateRecord extends TemplateOperateRecord {
 
         diffResult.addAll(diffs);
         change = CollectionUtils.isNotEmpty(diffs);
+        this.behavior="编辑SETTING";
+        
 
     }
 
@@ -46,6 +48,7 @@ public class TemplateSettingOperateRecord extends TemplateOperateRecord {
         diffResult.addAll(diffs);
         operateType = TemplateOperateRecordEnum.SETTING.getCode();
         change = CollectionUtils.isNotEmpty(diffs);
+        this.behavior="编辑SETTING";
     }
 
     @Override
