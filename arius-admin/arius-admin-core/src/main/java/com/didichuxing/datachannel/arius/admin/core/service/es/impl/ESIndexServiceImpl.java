@@ -631,7 +631,11 @@ public class ESIndexServiceImpl implements ESIndexService {
         });
 
         if (CollectionUtils.isNotEmpty(putAliasNodeList)) {
-            return esIndexDAO.editAlias(cluster, putAliasNodeList,3);
+            try {
+                return Result.build(esIndexDAO.editAlias(cluster, putAliasNodeList));
+            } catch (ESOperateException e) {
+                return Result.buildFail(e.getMessage());
+            }
         }
         return Result.buildSucc();
     }
@@ -663,7 +667,11 @@ public class ESIndexServiceImpl implements ESIndexService {
         if (!notExistsAlias.isEmpty()) {
             return Result.buildParamIllegal(String.format("要删除的别名【%s】不存在", StringUtils.join(notExistsAlias, ",")));
         }
-        return esIndexDAO.editAlias(cluster, putAliasNodeList,3);
+        try {
+            return Result.build(esIndexDAO.editAlias(cluster, putAliasNodeList));
+        } catch (ESOperateException e) {
+            return Result.buildFail(e.getMessage());
+        }
     }
 
     @Override
