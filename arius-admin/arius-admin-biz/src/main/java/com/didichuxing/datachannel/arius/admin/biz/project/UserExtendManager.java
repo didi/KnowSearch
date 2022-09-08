@@ -1,6 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.project;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.UserExtendDTO;
 import com.didiglobal.logi.security.common.PagingResult;
 import com.didiglobal.logi.security.common.dto.user.UserBriefQueryDTO;
 import com.didiglobal.logi.security.common.dto.user.UserDTO;
@@ -144,7 +145,7 @@ public interface UserExtendManager {
      * @param operator
      * @return
      */
-    Result<Void> editUser(UserDTO userDTO, String operator);
+    Result<Void> editUser(UserExtendDTO userDTO, String operator);
 
     Result<List<UserVO>> getUserDetailByUserIds(List<Integer> ids);
 }

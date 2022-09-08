@@ -841,57 +841,50 @@ public class ESIndexDAO extends BaseESDAO {
      * @param aliases
      * @return result
      */
-    public Result<Void> editAlias(String cluster, List<PutAliasNode> aliases, Integer tryTimes) {
+    public boolean editAlias(String cluster, List<PutAliasNode> aliases) throws ESOperateException {
         ESClient client = fetchESClientByCluster(cluster);
         if (client == null) {
-            LOGGER.warn("class=ESIndexDAO||method=editAlias||errMsg=es client not found");
-            return Result.buildFail();
+            throw new NullESClientException(cluster);
         }
-        if (CollectionUtils.isEmpty(aliases)){
-          return Result.build(Boolean.TRUE);
+        if (CollectionUtils.isEmpty(aliases)) {
+            return true;
         }
-      String[] indeies= aliases.stream().map(PutAliasNode::getIndex).distinct().toArray(String[]::new);
+        String[] indeies = aliases.stream().map(PutAliasNode::getIndex).distinct().toArray(String[]::new);
         final List<String> aliasLit = aliases.stream().map(PutAliasNode::getAlias).distinct()
                 .collect(Collectors.toList());
-        //这里有两种情况，第一种：直接删除成功，但是因为集群不稳定导致了返回异常；第二种：删除失败；
-        BiFunction<Long, TimeUnit, ESIndicesPutAliasResponse> esIndicesPutAliasResponseBiFunction = (time, unit) -> {
+        // 这里有两种情况，第一种：直接删除成功，但是因为集群不稳定导致了返回异常；第二种：删除失败；
+        BiFunctionWithESOperateException<Long, TimeUnit, ESIndicesPutAliasResponse> esIndicesPutAliasResponseBiFunction = (time, unit) -> {
             try {
                 return client.admin().indices().preparePutAlias().addPutAliasNodes(aliases).execute()
                         .actionGet(time, unit);
             } catch (Exception e) {
-                LOGGER.error("class=ESIndexDAO||method=editAlias||clusterName={} ", cluster, e);
+                String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
+                if (StringUtils.isNotBlank(exception)) {
+                    throw new ESOperateException(exception);
+                }
+                LOGGER.error("class=ESIndexDAO||method=editAlias||clusterName={}", cluster, e);
             
                 return null;
             }
         };
-        ESIndicesPutAliasResponse response = null;
-        try {
-            response = ESOpTimeoutRetry.esRetryExecute("editAlias", tryTimes,
-                    () -> esIndicesPutAliasResponseBiFunction.apply(Long.valueOf(ES_OPERATE_TIMEOUT), TimeUnit.SECONDS),
-                    esIndicesPutAliasResponse -> Optional.ofNullable(esIndicesPutAliasResponse)
-                            .map(ESIndicesPutAliasResponse::getAcknowledged).orElse(Boolean.FALSE)
-        
-            );
-        } catch (ESOperateException e) {
-            LOGGER.error("class={}||cluster={}||method=editAlias", getClass().getSimpleName(), cluster, e);
-        }
-        
-        
+        ESIndicesPutAliasResponse response = esIndicesPutAliasResponseBiFunction.apply(Long.valueOf(ES_OPERATE_TIMEOUT),
+                TimeUnit.SECONDS);
+    
         final Boolean acknowledged = Optional.ofNullable(response).map(ESIndicesPutAliasResponse::getAcknowledged)
                 .orElse(Boolean.FALSE);
         if (Boolean.FALSE.equals(acknowledged)) {
-            //针对第一种情况进行别名存在的情况判断，不存在则认为删除成功
+            // 针对第一种情况进行别名存在的情况判断，不存在则认为删除成功
             final Map<String, AliasIndexNode> aliasesByIndices = getAliasesByIndices(cluster, indeies);
-            if (Objects.isNull(aliasesByIndices)){
-                return Result.build(Boolean.FALSE);
+            if (Objects.isNull(aliasesByIndices)) {
+                return false;
             }
-            //如果不包含，则都删除成功了
-            return Result.build(aliasesByIndices.values().stream().map(AliasIndexNode::getAliases).map(Map::keySet)
-                    .flatMap(Collection::stream).noneMatch(aliasLit::contains));
-            
-        }
+            // 如果不包含，则都删除成功了
+            return aliasesByIndices.values().stream().map(AliasIndexNode::getAliases).map(Map::keySet)
+                    .flatMap(Collection::stream).noneMatch(aliasLit::contains);
         
-        return Result.build(acknowledged);
+        }
+    
+        return acknowledged;
     }
 
     public Result<Void> rollover(String cluster, String alias, String conditions) {

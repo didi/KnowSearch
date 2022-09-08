@@ -775,6 +775,23 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
         return IndexTemplatePhy.getCluster();
     }
     
+    /**
+     * 通过逻辑模板ID获取主模板的物理模板ID
+     *
+     * @param logicTemplateId 逻辑模板 ID。
+     * @return 长
+     */
+    @Override
+    public Long getMasterTemplatePhyIdByLogicTemplateId(Integer logicTemplateId) {
+        IndexTemplatePhy IndexTemplatePhy = indexTemplatePhyService.getTemplateByLogicIdAndRole(logicTemplateId,
+                TemplateDeployRoleEnum.MASTER.getCode());
+        if (IndexTemplatePhy==null){
+            return null;
+        }
+     
+        return IndexTemplatePhy.getId();
+    }
+    
     @Override
     public List<IndexTemplateLogicWithClusterAndMasterTemplate> listLogicTemplatesWithClusterAndMasterTemplate(Set<Integer> logicTemplateIds) {
 

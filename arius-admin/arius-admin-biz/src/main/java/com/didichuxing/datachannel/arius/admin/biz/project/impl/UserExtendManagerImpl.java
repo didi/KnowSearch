@@ -3,6 +3,7 @@ package com.didichuxing.datachannel.arius.admin.biz.project.impl;
 import com.didichuxing.datachannel.arius.admin.biz.project.UserExtendManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.UserExtendDTO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
@@ -25,6 +26,7 @@ import com.didiglobal.logi.security.service.PermissionService;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.didiglobal.logi.security.service.RolePermissionService;
 import com.didiglobal.logi.security.service.UserService;
+import com.didiglobal.logi.security.util.PWEncryptUtil;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -302,9 +304,23 @@ public class UserExtendManagerImpl implements UserExtendManager {
      * @return
      */
     @Override
-    public Result<Void> editUser(UserDTO userDTO, String operator) {
-        UserBriefVO userBriefVO = userService.getUserBriefByUserName(userDTO.getUserName());
-
+    public Result<Void> editUser(UserExtendDTO userDTO, String operator) {
+        User userBriefVO = userService.getUserByUserName(userDTO.getUserName());
+        if (Objects.isNull(userBriefVO)){
+            return Result.buildFail("用户不存在");
+        }
+        String pw = userBriefVO.getPw();
+        try {
+            String decode = PWEncryptUtil.decode(pw);
+            // 开启密码比对且数据库中的密码和传入进来的原始密码不一致的时候
+            if (Boolean.FALSE.equals(userDTO.isIgnorePasswordMatching()) && !StringUtils.equals(userDTO.getOldPw(),
+                    decode)) {
+                return Result.buildFail("旧密码不正确");
+            }
+        } catch (Exception ignore) {
+        
+        }
+    
         com.didiglobal.logi.security.common.Result<Void> voidResult = userService.editUser(userDTO, operator);
 
         if (voidResult.failed()) {
@@ -374,6 +390,13 @@ public class UserExtendManagerImpl implements UserExtendManager {
 
             ));
         return Result.buildSucc();
+
+    }
+     public static void main(String[] args) throws Exception {
+        String encode = PWEncryptUtil.encode("admin");
+        String dpw    = PWEncryptUtil.decode(encode);
+        System.out.println(encode + ":" + dpw);
+        System.out.println(encode.length() + ":" + dpw);
 
     }
 }
