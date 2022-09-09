@@ -975,17 +975,15 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
         dcdrdto.setReplicaClusters(Arrays.asList(slaveTemplate.getCluster()));
         return dcdrdto;
     }
-
-    private Result<Void> changeDCDRConfig(String cluster, List<String> indices,
-                                          boolean replicaIndex) throws ESOperateException {
+    
+    private Result<Void> changeDCDRConfig(String cluster, List<String> indices, boolean replicaIndex) {
         try {
             // 修改配置
             if (!syncDCDRSetting(cluster, indices, replicaIndex, TRY_TIMES_THREE)) {
                 return Result.buildFail("修改" + cluster + "索引 dcdr 配置失败");
             }
         } catch (ESOperateException e) {
-            throw new ESOperateException(
-                    String.format("修改 [%s] 索引 dcdr 配置失败, 原因是：%s", cluster, e.getMessage()));
+            return Result.buildFail(String.format("修改 [%s] 索引 dcdr 配置失败, 原因是：%s", cluster, e.getMessage()));
         }
         try {
             // reopen 索引
@@ -993,7 +991,7 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
                 return Result.buildFail("reOpen" + cluster + "索引失败");
             }
         } catch (ESOperateException e) {
-            throw new ESOperateException(String.format("reOpen[%s] 索引失败, 原因是：%s", cluster, e.getMessage()));
+            return Result.buildFail(String.format("reOpen[%s] 索引失败, 原因是：%s", cluster, e.getMessage()));
         }
 
         return Result.buildSucc();
