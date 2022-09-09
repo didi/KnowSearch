@@ -73,15 +73,10 @@ public class RoleExtendManagerImpl implements RoleExtendManager {
                 return Result.buildFailWithMsg(roleDeleteCheckVO,
                     String.format("角色:[%s]已经分配给用了,不允许删除,请先解除分配的用户再试！", roleVO.getRoleName()));
             }
-
             roleService.deleteRoleByRoleId(id, request);
-            operateRecordService.save(new OperateRecord.Builder().userOperation(HttpRequestUtil.getOperator(request))
-                .operationTypeEnum(OperateTypeEnum.ROLE_MANAGER_DELETE)
-                .content(String.format("删除角色:[%s]", roleBriefByRoleId.getRoleName()))
-                .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
-                .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).build()
-
-            );
+            saveOperateRecord(HttpRequestUtil.getOperator(request),
+                    String.format("删除角色:[%s]", roleBriefByRoleId.getRoleName()),
+                    OperateTypeEnum.ROLE_MANAGER_DELETE);
             return Result.buildSucc();
         } catch (LogiSecurityException e) {
             return Result.buildFail(e.getMessage());
@@ -118,13 +113,8 @@ public class RoleExtendManagerImpl implements RoleExtendManager {
     public Result<Void> createRole(RoleSaveDTO saveDTO, HttpServletRequest request) {
         try {
             roleService.createRole(saveDTO, request);
-            operateRecordService.save(new OperateRecord.Builder().userOperation(HttpRequestUtil.getOperator(request))
-                .operationTypeEnum(OperateTypeEnum.ROLE_MANAGER_CREATE)
-                .content(String.format("新增角色:[%s]", saveDTO.getRoleName()))
-                .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
-                .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).build()
-
-            );
+            saveOperateRecord(HttpRequestUtil.getOperator(request), String.format("新增角色:[%s]", saveDTO.getRoleName()),
+                    OperateTypeEnum.ROLE_MANAGER_CREATE);
             return Result.buildSucc();
         } catch (LogiSecurityException e) {
             return Result.buildFail(e.getMessage());
@@ -143,13 +133,9 @@ public class RoleExtendManagerImpl implements RoleExtendManager {
             final RoleBriefVO roleBriefByRoleId = roleService.getRoleBriefByRoleId(roleId);
             final UserBriefVO userBriefVO = userService.getUserBriefListByUserIdList(Collections.singletonList(userId))
                 .get(0);
-            operateRecordService.save(new OperateRecord.Builder().userOperation(HttpRequestUtil.getOperator(request))
-                .operationTypeEnum(OperateTypeEnum.ROLE_MANAGER_UNBIND_USER)
-                .content(String.format("角色:[%s]解绑的用户:[%s]", roleBriefByRoleId.getRoleName(), userBriefVO.getUserName()))
-                .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
-                .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).build()
-
-            );
+            saveOperateRecord(HttpRequestUtil.getOperator(request),
+                    String.format("角色:[%s] 解绑的用户:[%s]", roleBriefByRoleId.getRoleName(),
+                            userBriefVO.getUserName()), OperateTypeEnum.ROLE_MANAGER_UNBIND_USER);
             return Result.buildSucc();
         } catch (LogiSecurityException e) {
             return Result.buildFail(e.getMessage());
@@ -189,20 +175,18 @@ public class RoleExtendManagerImpl implements RoleExtendManager {
                 .sorted().distinct().collect(Collectors.joining(","));
             String userNames = userService.getUserBriefListByUserIdList(userIds).stream().map(UserBriefVO::getUserName)
                 .sorted().distinct().collect(Collectors.joining(","));
-
-            operateRecordService.save(new OperateRecord.Builder().userOperation(HttpRequestUtil.getOperator(request))
-                .operationTypeEnum(OperateTypeEnum.ROLE_MANAGER_BIND_USER)
-                .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
-                .content(String.format("角色列表:[%s]解绑的用户列表:[%s]", roleNames, userNames))
-                .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).build());
-
+            String operator = HttpRequestUtil.getOperator(request);
+            saveOperateRecord(operator, String.format("角色列表:[%s] 解绑的用户列表:[%s]", roleNames, userNames),
+                    OperateTypeEnum.ROLE_MANAGER_BIND_USER);
             return Result.buildSucc();
 
         } catch (LogiSecurityException e) {
             return Result.buildFail(e.getMessage());
         }
     }
-
+    
+   
+    
     @Override
     public Result<List<AssignInfoVO>> getAssignInfoByRoleId(Integer roleId) {
         return Result.buildSucc(roleService.getAssignInfoByRoleId(roleId));
@@ -212,5 +196,10 @@ public class RoleExtendManagerImpl implements RoleExtendManager {
     public Result<List<RoleBriefVO>> getRoleBriefListByRoleName(String roleName) {
         return Result.buildSucc(roleService.getRoleBriefListByRoleName(roleName));
     }
-
+    
+    private void saveOperateRecord(String operator, String content, OperateTypeEnum operateTypeEnum) {
+        operateRecordService.save(new OperateRecord.Builder().userOperation(operator).operationTypeEnum(operateTypeEnum)
+                .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID)).content(content)
+                .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).build());
+    }
 }
