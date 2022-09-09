@@ -18,18 +18,12 @@ import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import com.didiglobal.logi.security.dao.ProjectDao;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 /**
@@ -52,14 +46,9 @@ public class OperateRecordServiceImpl implements OperateRecordService {
     
     @Override
     public void deleteExprieData(Date saveTime) {
-        LOGGER.info(
-                "class=OperateRecordServiceImpl||method=scheduledDeletionOldOperateRecord||msg= 操作日志定时删除任务开始执行");
-        try {
-            operateRecordDAO.deleteExprieData(saveTime);
-        } catch (Exception e) {
-            LOGGER.error("class=OperateRecordServiceImpl||method=scheduledDeletionOldOperateRecord||errMsg={}",
-                    e.getMessage());
-        }
+    
+        operateRecordDAO.deleteExprieData(saveTime);
+    
     }
     
     

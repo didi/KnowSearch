@@ -43,7 +43,14 @@ public class OperateRecordManagerImpl implements OperateRecordManager {
     @Scheduled(cron = "0 0 1 * * ?")
     private void scheduledDeletionOldOperateRecord() {
         Date saveTime = getSaveTime();
-        operateRecordService.deleteExprieData(saveTime);
+        LOGGER.info(
+                "class=OperateRecordServiceImpl||method=scheduledDeletionOldOperateRecord||msg= 操作日志定时删除任务开始执行");
+        try {
+            operateRecordService.deleteExprieData(saveTime);
+        } catch (Exception e) {
+            LOGGER.error("class=OperateRecordServiceImpl||method=scheduledDeletionOldOperateRecord||errMsg={}",
+                    e.getMessage());
+        }
     }
 
     /**
