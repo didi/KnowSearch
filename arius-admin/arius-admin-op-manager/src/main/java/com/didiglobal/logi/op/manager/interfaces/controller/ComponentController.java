@@ -82,7 +82,7 @@ public class ComponentController {
         return componentService.executeFunctionComponent(ComponentAssembler.toExecuteFunctionComponent(executeComponentFunctionDTO));
     }
 
-    @GetMapping("/component_config")
+    @GetMapping("/config")
     @ApiOperation(value = "zeus获取组件分组配置,主要是任务状态获取用")
     public Result<GeneralGroupConfigHostVO> getConfig(@RequestParam(value = "componentId", required = true) Integer componentId,
                                                       @RequestParam(value = "groupName", required = true) String groupName,
@@ -95,7 +95,7 @@ public class ComponentController {
         return res;
     }
 
-    @PutMapping("/host_status")
+    @PutMapping("/host/status")
     @ApiOperation(value = "zeus上报状态")
     public Result<Integer> reportHostStatus(@RequestBody ComponentHostReportDTO componentHostReportDTO) {
         return componentService.reportHostStatus(componentHostReportDTO.getComponentId(), componentHostReportDTO.getGroupName(),
