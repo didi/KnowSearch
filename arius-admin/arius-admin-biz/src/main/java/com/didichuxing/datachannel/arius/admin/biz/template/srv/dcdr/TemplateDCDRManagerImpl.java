@@ -978,15 +978,22 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
 
     private Result<Void> changeDCDRConfig(String cluster, List<String> indices,
                                           boolean replicaIndex) throws ESOperateException {
-
-        // 修改配置
-        if (!syncDCDRSetting(cluster, indices, replicaIndex, TRY_TIMES_THREE)) {
-            return Result.buildFail("修改" + cluster + "索引dcdr配置失败");
+        try {
+            // 修改配置
+            if (!syncDCDRSetting(cluster, indices, replicaIndex, TRY_TIMES_THREE)) {
+                return Result.buildFail("修改" + cluster + "索引 dcdr 配置失败");
+            }
+        } catch (ESOperateException e) {
+            throw new ESOperateException(
+                    String.format("修改 [%s] 索引 dcdr 配置失败, 原因是：%s", cluster, e.getMessage()));
         }
-
-        // reopen索引
-        if (!esIndexService.reOpenIndex(cluster, indices, TRY_TIMES_THREE)) {
-            return Result.buildFail("reOpen " + cluster + "索引失败");
+        try {
+            // reopen 索引
+            if (!esIndexService.reOpenIndex(cluster, indices, TRY_TIMES_THREE)) {
+                return Result.buildFail("reOpen" + cluster + "索引失败");
+            }
+        } catch (ESOperateException e) {
+            throw new ESOperateException(String.format("reOpen[%s] 索引失败, 原因是：%s", cluster, e.getMessage()));
         }
 
         return Result.buildSucc();

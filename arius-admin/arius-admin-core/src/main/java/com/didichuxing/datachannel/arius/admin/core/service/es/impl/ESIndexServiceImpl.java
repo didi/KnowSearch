@@ -367,14 +367,12 @@ public class ESIndexServiceImpl implements ESIndexService {
                                             int retryCount) throws ESOperateException {
         BatchProcessor.BatchProcessResult<String, Boolean> result = new BatchProcessor<String, Boolean>()
             .batchList(indices).batchSize(30).processor(items -> {
-                try {
                     return ESOpTimeoutRetry.esRetryExecute("syncBatchBlockIndexWrite", retryCount,
                         () -> esIndexDAO.blockIndexWrite(cluster, items, block));
-                } catch (ESOperateException e) {
-                    return false;
-                }
             }).succChecker(succ -> succ).process();
-
+        if (!result.isSucc() && CollectionUtils.isNotEmpty(result.getErrorMap().values())) {
+            throw new ESOperateException(result.getErrorMap().values().stream().findFirst().get().getMessage());
+        }
         return result.isSucc();
     }
 
