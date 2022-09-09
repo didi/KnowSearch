@@ -18,10 +18,14 @@ import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecord
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.optrecord.OperateRecordDAO;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-
-import java.util.*;
+import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
+import com.didiglobal.logi.security.dao.ProjectDao;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -39,6 +43,8 @@ public class OperateRecordServiceImpl implements OperateRecordService {
 
     @Autowired
     private OperateRecordDAO  operateRecordDAO;
+    @Autowired
+    private ProjectDao projectDao;
     @Autowired
     private AriusConfigInfoService ariusConfigInfoService;
 
@@ -86,7 +92,16 @@ public class OperateRecordServiceImpl implements OperateRecordService {
         return Result.build(operateRecordDAO.insert(operateRecordInfoPO) == 1);
 
     }
-
+    
+    @Override
+    public void saveOperateRecordWithManualTrigger(String content, String operator, Integer projectId,
+                                                   Object bizId, OperateTypeEnum operateTypeEnum) {
+        save(new OperateRecord.Builder().project(ConvertUtil.obj2Obj(projectDao.selectByProjectId(projectId),
+                        ProjectBriefVO.class)).operationTypeEnum(operateTypeEnum)
+                .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).userOperation(operator).content(content).bizId(bizId)
+                .build());
+    }
+    
     /**
      * 动态分页查询
      *

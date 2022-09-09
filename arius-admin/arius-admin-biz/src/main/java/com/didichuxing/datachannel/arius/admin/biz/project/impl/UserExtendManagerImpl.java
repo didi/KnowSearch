@@ -322,46 +322,30 @@ public class UserExtendManagerImpl implements UserExtendManager {
         }
     
         com.didiglobal.logi.security.common.Result<Void> voidResult = userService.editUser(userDTO, operator);
-
+    
         if (voidResult.failed()) {
             return Result.build(voidResult.getCode(), voidResult.getMessage());
         }
         if (StringUtils.isNotBlank(userDTO.getEmail())) {
-            operateRecordService
-                .save(new OperateRecord(OperateTypeEnum.TENANT_INFO_MODIFY, TriggerWayEnum.MANUAL_TRIGGER,
-                    String.format("修改email:%s-->%s", userBriefVO.getEmail(), userDTO.getEmail()), operator,
-
-                    userBriefVO.getId()));
+            saveOperateRecord(operator, userBriefVO.getId(),
+                    String.format("修改 email:%s-->%s", userBriefVO.getEmail(), userDTO.getEmail()));
         }
         if (StringUtils.isNotBlank(userDTO.getPhone())) {
-            operateRecordService
-                .save(new OperateRecord(OperateTypeEnum.TENANT_INFO_MODIFY, TriggerWayEnum.MANUAL_TRIGGER,
-                    String.format("修改手机号:%s-->%s", userBriefVO.getPhone(), userDTO.getPhone()), operator
-
-                    ,
-
-                    userBriefVO.getId()));
+            saveOperateRecord(operator, userBriefVO.getId(),
+                    String.format("修改手机号:%s-->%s", userBriefVO.getPhone(), userDTO.getPhone()));
         }
         if (StringUtils.isNotBlank(userDTO.getRealName())) {
-            operateRecordService
-                .save(new OperateRecord(OperateTypeEnum.TENANT_INFO_MODIFY, TriggerWayEnum.MANUAL_TRIGGER,
-                    String.format("修改用户实名:%s-->%s", userBriefVO.getRealName(), userDTO.getRealName()), operator
-
-                    ,
-
-                    userBriefVO.getId()));
+            saveOperateRecord(operator, userBriefVO.getId(),
+                    String.format("修改用户实名:%s-->%s", userBriefVO.getRealName(), userDTO.getRealName()));
         }
         if (StringUtils.isNotBlank(userDTO.getPw())) {
-            operateRecordService.save(
-                new OperateRecord(OperateTypeEnum.TENANT_INFO_MODIFY, TriggerWayEnum.MANUAL_TRIGGER, "修改用户密码", operator
-
-                    ,
-
-                    userBriefVO.getId()));
+            saveOperateRecord(operator, userBriefVO.getId(), "修改用户密码");
         }
         return Result.buildSucc();
     }
-
+    
+ 
+    
     /**
      * @param ids
      * @return
@@ -385,18 +369,15 @@ public class UserExtendManagerImpl implements UserExtendManager {
         if (result.failed()) {
             return Result.buildFail(result.getMessage());
         }
-        operateRecordService.save(
-            new OperateRecord(OperateTypeEnum.TENANT_ADD, TriggerWayEnum.MANUAL_TRIGGER, param.getUserName(), operator
-
-            ));
+        operateRecordService.save(new OperateRecord(OperateTypeEnum.TENANT_ADD, TriggerWayEnum.MANUAL_TRIGGER, param.getUserName(),
+                        operator));
         return Result.buildSucc();
 
     }
-     public static void main(String[] args) throws Exception {
-        String encode = PWEncryptUtil.encode("admin");
-        String dpw    = PWEncryptUtil.decode(encode);
-        System.out.println(encode + ":" + dpw);
-        System.out.println(encode.length() + ":" + dpw);
-
+    
+    private void saveOperateRecord(String operator, Integer bizId, String content) {
+        operateRecordService.save(
+                new OperateRecord(OperateTypeEnum.TENANT_INFO_MODIFY, TriggerWayEnum.MANUAL_TRIGGER, content, operator,
+                        bizId));
     }
 }
