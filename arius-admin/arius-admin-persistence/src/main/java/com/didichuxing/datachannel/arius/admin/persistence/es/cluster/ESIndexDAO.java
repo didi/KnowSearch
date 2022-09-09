@@ -517,7 +517,7 @@ public class ESIndexDAO extends BaseESDAO {
         return true;
     }
 
-    public boolean batchUpdateIndexRegion(String cluster, List<String> indices, Set<String> nodeNames) {
+    public boolean batchUpdateIndexRegion(String cluster, List<String> indices, Set<String> nodeNames)  throws ESOperateException{
         return putIndexSetting(cluster, indices, TEMPLATE_INDEX_INCLUDE_NODE_NAME, String.join(COMMA, nodeNames), "");
     }
 
@@ -528,7 +528,7 @@ public class ESIndexDAO extends BaseESDAO {
      * @param block 配置
      * @return result
      */
-    public boolean blockIndexWrite(String cluster, List<String> indexNames, boolean block) {
+    public boolean blockIndexWrite(String cluster, List<String> indexNames, boolean block)  throws ESOperateException{
         return putIndexSetting(cluster, indexNames, INDEX_BLOCKS_WRITE, String.valueOf(block), "false");
     }
 
@@ -539,7 +539,7 @@ public class ESIndexDAO extends BaseESDAO {
      * @param block 配置
      * @return result
      */
-    public boolean blockIndexRead(String cluster, List<String> indexNames, boolean block) {
+    public boolean blockIndexRead(String cluster, List<String> indexNames, boolean block)  throws ESOperateException{
         return putIndexSetting(cluster, indexNames, INDEX_BLOCKS_READ, String.valueOf(block), "false");
     }
 
@@ -611,10 +611,10 @@ public class ESIndexDAO extends BaseESDAO {
      * @return true/false
      */
     public boolean putIndexSetting(String cluster, List<String> indices, String settingName, String setting,
-                                   String defaultValue) {
+                                   String defaultValue) throws ESOperateException{
         ESClient client = fetchESClientByCluster(cluster);
         if (client == null) {
-            return false;
+            throw new NullESClientException(cluster);
         }
 
         MultiIndexsConfig multiIndexsConfig = batchGetIndexConfig(cluster, indices);
@@ -642,11 +642,26 @@ public class ESIndexDAO extends BaseESDAO {
         if (CollectionUtils.isEmpty(needOps)) {
             return true;
         }
-
-        ESIndicesUpdateSettingsResponse updateSettingsResponse = client.admin().indices()
-            .prepareUpdateSettings(String.join(",", needOps)).addSettings(settingName, String.valueOf(setting))
-            .execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
-        return updateSettingsResponse.getAcknowledged();
+    
+        ESIndicesUpdateSettingsResponse updateSettingsResponse = null;
+        try {
+        
+            updateSettingsResponse = client.admin().indices().prepareUpdateSettings(String.join(",", needOps))
+                    .addSettings(settingName, String.valueOf(setting)).execute()
+                    .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
+            if (StringUtils.isNotBlank(exception)) {
+                throw new ESOperateException(exception);
+            
+            }
+            LOGGER.error("class={}||method=putIndexSetting||clusterName={}||indexName={}", getClass().getSimpleName(),
+                    cluster, String.join(",", indices), e);
+        
+        }
+        return Optional.ofNullable(updateSettingsResponse).map(ESIndicesUpdateSettingsResponse::getAcknowledged)
+                .orElse(false);
+        
     }
 
     public boolean putIndexSetting(String cluster, List<String> indices, Map<String, String> settingMap) {

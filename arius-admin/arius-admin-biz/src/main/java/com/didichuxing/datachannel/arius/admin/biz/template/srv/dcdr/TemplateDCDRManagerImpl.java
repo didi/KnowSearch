@@ -740,14 +740,13 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
 
         BatchProcessor.BatchProcessResult<String, Boolean> result = new BatchProcessor<String, Boolean>()
             .batchList(indices).batchSize(30).processor(items -> {
-                try {
                     return esIndexService.syncPutIndexSetting(cluster, items, DCDR_INDEX_SETTING,
                         String.valueOf(replicaIndex), "false", retryCount);
-                } catch (ESOperateException e) {
-                    return false;
-                }
             }).succChecker(succ -> succ).process();
-
+        if (!result.isSucc() && CollectionUtils.isNotEmpty(result.getErrorMap().values())) {
+            throw new ESOperateException(result.getErrorMap().values().stream().findFirst().get().getMessage());
+        
+        }
         return result.isSucc();
     }
 
@@ -976,18 +975,23 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
         dcdrdto.setReplicaClusters(Arrays.asList(slaveTemplate.getCluster()));
         return dcdrdto;
     }
-
-    private Result<Void> changeDCDRConfig(String cluster, List<String> indices,
-                                          boolean replicaIndex) throws ESOperateException {
-
-        // 修改配置
-        if (!syncDCDRSetting(cluster, indices, replicaIndex, TRY_TIMES_THREE)) {
-            return Result.buildFail("修改" + cluster + "索引dcdr配置失败");
+    
+    private Result<Void> changeDCDRConfig(String cluster, List<String> indices, boolean replicaIndex) {
+        try {
+            // 修改配置
+            if (!syncDCDRSetting(cluster, indices, replicaIndex, TRY_TIMES_THREE)) {
+                return Result.buildFail("修改" + cluster + "索引 dcdr 配置失败");
+            }
+        } catch (ESOperateException e) {
+            return Result.buildFail(String.format("修改 [%s] 索引 dcdr 配置失败, 原因是：%s", cluster, e.getMessage()));
         }
-
-        // reopen索引
-        if (!esIndexService.reOpenIndex(cluster, indices, TRY_TIMES_THREE)) {
-            return Result.buildFail("reOpen " + cluster + "索引失败");
+        try {
+            // reopen 索引
+            if (!esIndexService.reOpenIndex(cluster, indices, TRY_TIMES_THREE)) {
+                return Result.buildFail("reOpen" + cluster + "索引失败");
+            }
+        } catch (ESOperateException e) {
+            return Result.buildFail(String.format("reOpen[%s] 索引失败, 原因是：%s", cluster, e.getMessage()));
         }
 
         return Result.buildSucc();

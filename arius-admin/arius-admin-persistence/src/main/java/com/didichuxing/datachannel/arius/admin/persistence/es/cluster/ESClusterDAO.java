@@ -172,19 +172,30 @@ public class ESClusterDAO extends BaseESDAO {
      * @param tcpAddresses 地址
      * @return true/false
      */
-    public boolean putPersistentRemoteClusters(String cluster, String remoteCluster, List<String> tcpAddresses) {
+    public boolean putPersistentRemoteClusters(String cluster, String remoteCluster, List<String> tcpAddresses)
+            throws ESOperateException {
         ESClient client = esOpClient.getESClient(cluster);
         if (null == client) {
-            return false;
+          throw new NullESClientException(cluster);
         }
 
         JSONArray addresses = new JSONArray();
         addresses.addAll(tcpAddresses);
-
-        ESClusterUpdateSettingsResponse response = client.admin().cluster().prepareUpdateSettings()
-            .addPersistent(remoteCluster, addresses).execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
-
-        return response.getAcknowledged();
+        try {
+        
+            ESClusterUpdateSettingsResponse response = client.admin().cluster().prepareUpdateSettings()
+                    .addPersistent(remoteCluster, addresses).execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+        
+            return response.getAcknowledged();
+        } catch (Exception e) {
+            String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
+            if (StringUtils.isNotBlank(exception)) {
+                throw new ESOperateException(exception);
+            }
+            LOGGER.error("class=ESClusterDAO||method=putPersistentRemoteClusters||clusterName={}", cluster, e);
+            return false;
+        }
+        
     }
 
     /**

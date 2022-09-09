@@ -1,19 +1,16 @@
 package com.didichuxing.datachannel.arius.admin.common.util;
 
+import com.didichuxing.datachannel.arius.admin.common.function.FunctionWithESOperateException;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-
-import org.apache.commons.collections4.CollectionUtils;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-
 import javax.annotation.Nullable;
+import org.apache.commons.collections4.CollectionUtils;
 
 /**
  * 分配次执行
@@ -26,7 +23,7 @@ public class BatchProcessor<S, R> {
 
     private Collection<S>        batchList;
 
-    private Function<List<S>, R> processor;
+    private FunctionWithESOperateException<List<S>, R> processor;
 
     @Nullable
     private Predicate<R>         succChecker;
@@ -38,7 +35,7 @@ public class BatchProcessor<S, R> {
         return this;
     }
 
-    public BatchProcessor<S, R> processor(Function<List<S>, R> processor) {
+    public BatchProcessor<S, R> processor(FunctionWithESOperateException<List<S>, R> processor) {
         this.processor = processor;
         return this;
     }
