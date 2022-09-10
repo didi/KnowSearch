@@ -207,15 +207,23 @@ public class ESIndexDAO extends BaseESDAO {
      * @param indexNames 索引名字
      * @return 配置
      */
-    public MultiIndexsConfig batchGetIndexConfig(String cluster, List<String> indexNames) {
+    public MultiIndexsConfig batchGetIndexConfig(String cluster, List<String> indexNames) throws ESOperateException {
         ESClient client = esOpClient.getESClient(cluster);
-
-        if (client != null) {
+        if (client == null) {
+            throw new NullESClientException(cluster);
+        }
+        try {
             String indexExpression = String.join(",", indexNames);
             ESIndicesGetIndexResponse getIndexResponse = client.admin().indices().prepareGetIndex(indexExpression)
-                .execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+                    .execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
             return getIndexResponse.getIndexsMapping();
-        } else {
+        } catch (Exception e) {
+            String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
+            if (StringUtils.isNotBlank(exception)) {
+                throw new ESOperateException(exception);
+            }
+            LOGGER.error("class=ESIndexDAO||method=batchGetIndexConfig||cluster={}||indexName={}||msg=index not exist",
+                    cluster, String.join(",", indexNames),e);
             return null;
         }
     }
@@ -664,7 +672,8 @@ public class ESIndexDAO extends BaseESDAO {
         
     }
 
-    public boolean putIndexSetting(String cluster, List<String> indices, Map<String, String> settingMap) {
+    public boolean putIndexSetting(String cluster, List<String> indices, Map<String, String> settingMap)
+            throws ESOperateException {
         ESClient client = fetchESClientByCluster(cluster);
         if (null == client) {
             return false;
@@ -697,13 +706,24 @@ public class ESIndexDAO extends BaseESDAO {
         if (CollectionUtils.isEmpty(needOps)) {
             return true;
         }
-
-        ESIndicesUpdateSettingsRequestBuilder updateSettingsRequestBuilder = client.admin().indices()
-            .prepareUpdateSettings(String.join(",", needOps));
-        for (Map.Entry<String, String> settingEntry : settingMap.entrySet()) {
-            updateSettingsRequestBuilder.addSettings(settingEntry.getKey(), settingEntry.getValue());
+        try {
+        
+            ESIndicesUpdateSettingsRequestBuilder updateSettingsRequestBuilder = client.admin().indices()
+                    .prepareUpdateSettings(String.join(",", needOps));
+            for (Map.Entry<String, String> settingEntry : settingMap.entrySet()) {
+                updateSettingsRequestBuilder.addSettings(settingEntry.getKey(), settingEntry.getValue());
+            }
+            return updateSettingsRequestBuilder.execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS)
+                    .getAcknowledged();
+        } catch (Exception e) {
+            String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
+            if (StringUtils.isNotBlank(exception)) {
+                throw new ESOperateException(exception);
+            }
+            LOGGER.error("class=ESIndexDAO||method=putIndexSetting||cluster={}||indexName={}",
+                    cluster, String.join(",", indices));
+            return false;
         }
-        return updateSettingsRequestBuilder.execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS).getAcknowledged();
     }
 
     /**

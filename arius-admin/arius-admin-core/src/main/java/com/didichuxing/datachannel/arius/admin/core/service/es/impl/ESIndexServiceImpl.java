@@ -130,11 +130,15 @@ public class ESIndexServiceImpl implements ESIndexService {
 
     @Override
     public Map<String, IndexConfig> syncBatchGetIndexConfig(String cluster, List<String> indexList) {
-        MultiIndexsConfig multiIndexsConfig = esIndexDAO.batchGetIndexConfig(cluster, indexList);
-        if (null == multiIndexsConfig) {
-            return Maps.newConcurrentMap();
+        try {
+            MultiIndexsConfig multiIndexsConfig = esIndexDAO.batchGetIndexConfig(cluster, indexList);
+            return Optional.ofNullable(multiIndexsConfig).map(MultiIndexsConfig::getIndexConfigMap)
+                    .orElse(Maps.newConcurrentMap());
+        } catch (ESOperateException e) {
+            LOGGER.error("class=ESIndexServiceImpl||method=syncBatchGetIndexConfig||index={}", cluster,
+                    String.join(",", indexList), e);
         }
-        return multiIndexsConfig.getIndexConfigMap();
+        return Maps.newConcurrentMap();
     }
 
     /**
