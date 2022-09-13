@@ -194,8 +194,6 @@ public class ProjectClusterLogicAuthServiceImpl implements ProjectClusterLogicAu
                 ConvertUtil.obj2Obj(oldAuthPO, ProjectClusterLogicAuth.class)));
             operateRecordService.save(new OperateRecord.Builder().bizId(oldAuthPO.getId())
                 .operationTypeEnum(OperateTypeEnum.MY_CLUSTER_OFFLINE).userOperation(operator).build());
-            //operateRecordService.save(ModuleEnum.LOGIC_CLUSTER_PERMISSIONS, OperationEnum.DELETE, oldAuthPO.getId(),
-            //    StringUtils.EMPTY, operator);
         }
 
         return Result.build(succeed);
@@ -541,14 +539,8 @@ public class ProjectClusterLogicAuthServiceImpl implements ProjectClusterLogicAu
             SpringTool.publish(new ProjectLogicClusterAuthEditEvent(this,
                 ConvertUtil.obj2Obj(oldAuthPO, ProjectClusterLogicAuth.class),
                 ConvertUtil.obj2Obj(logicClusterAuthDAO.getById(authDTO.getId()), ProjectClusterLogicAuth.class)));
-            operateRecordService.save(new OperateRecord.Builder().bizId(oldAuthPO.getId())
-                .operationTypeEnum(OperateTypeEnum.MY_CLUSTER_INFO_MODIFY)
-                .project(projectService.getProjectBriefByProjectId(authDTO.getProjectId())).userOperation(operator)
-                .content(JSON.toJSONString(newAuthPO))
-
-                .build());
-            //operateRecordService.save(ModuleEnum.LOGIC_CLUSTER_PERMISSIONS, OperationEnum.EDIT, oldAuthPO.getId(),
-            //    JSON.toJSONString(newAuthPO), operator);
+            operateRecordService.saveOperateRecordWithManualTrigger(JSON.toJSONString(newAuthPO), operator,
+                    authDTO.getProjectId(), oldAuthPO.getId(), OperateTypeEnum.MY_CLUSTER_INFO_MODIFY);
         }
 
         return Result.build(succeed);

@@ -10,7 +10,6 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.result.Res
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterNodeManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterRegionManager;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRegionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRegionWithNodeInfoDTO;
@@ -28,7 +27,6 @@ import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
@@ -286,14 +284,10 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
             }
 
             //CLUSTER_REGION, DELETE, regionId, "", operator
-            operateRecordService
-                .save(new OperateRecord.Builder().operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_REGION_CHANGE)
-                    .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                    .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
-                    .content(String.format("集群: %s, region删除：%s,删除的regionId：%s", region.getPhyClusterName(), region.getName(), regionId))
-                    .userOperation(operator)
-                        .bizId(regionId)
-                    .build());
+            operateRecordService.saveOperateRecordWithManualTrigger(
+                    String.format("集群: %s, region 删除：%s, 删除的 regionId：%s", region.getPhyClusterName(),
+                            region.getName(), regionId), operator, AuthConstant.SUPER_PROJECT_ID, regionId,
+                    OperateTypeEnum.PHYSICAL_CLUSTER_REGION_CHANGE);
         }
 
         return deletResult;

@@ -4,7 +4,6 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.operaterec
 import static com.didichuxing.datachannel.arius.admin.core.service.project.impl.ESUserServiceImpl.VERIFY_CODE_LENGTH;
 
 import com.didichuxing.datachannel.arius.admin.biz.project.ESUserManager;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ESUser;
@@ -13,7 +12,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.ConsoleESU
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.ConsoleESUserWithVerifyCodeVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.ESUserVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectSearchTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
@@ -262,9 +260,6 @@ public class ESUserManagerImpl implements ESUserManager {
     }
      private void saveOperateRecord(String content, Integer projectId, String operator,
                                    OperateTypeEnum operateTypeEnum) {
-        operateRecordService.save(
-                new OperateRecord.Builder().project(projectService.getProjectBriefByProjectId(projectId))
-                        .content(content).operationTypeEnum(operateTypeEnum)
-                        .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).userOperation(operator).build());
+        operateRecordService.saveOperateRecordWithManualTrigger(content,operator,projectId,projectId,operateTypeEnum);
     }
 }

@@ -1,7 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.biz.project.impl;
 
 import com.didichuxing.datachannel.arius.admin.biz.project.ProjectLogicTemplateAuthManager;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ProjectTemplateAuthDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
@@ -9,7 +8,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.Projec
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithClusterAndMasterTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.ProjectTemplateAuthVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectTemplateAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
@@ -58,13 +56,9 @@ public class ProjectLogicTemplateAuthManagerImpl implements ProjectLogicTemplate
         Result<Void> voidResult = projectLogicTemplateAuthService.addTemplateAuth(authDTO);
         if (voidResult.success()) {
             final ProjectTemplateAuthEnum projectTemplateAuthEnum = ProjectTemplateAuthEnum.valueOf(authDTO.getType());
-            operateRecordService.save(
-                    new OperateRecord.Builder().triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).userOperation(operator)
-                            .operationTypeEnum(OperateTypeEnum.TEMPLATE_MANAGEMENT_INFO_MODIFY)
-                            .bizId(authDTO.getId()).content(String.format("权限变更：%s", projectTemplateAuthEnum.getDesc()))
-                            .project(projectService.getProjectBriefByProjectId(authDTO.getProjectId()))
-                    
-                            .build());
+            operateRecordService.saveOperateRecordWithManualTrigger(
+                    String.format("权限变更：%s", projectTemplateAuthEnum.getDesc()), operator, projectId,
+                    authDTO.getId(), OperateTypeEnum.TEMPLATE_MANAGEMENT_INFO_MODIFY);
 
         }
         return voidResult;
@@ -110,13 +104,9 @@ public class ProjectLogicTemplateAuthManagerImpl implements ProjectLogicTemplate
         }
         Result<Void> result = projectLogicTemplateAuthService.deleteTemplateAuth(authId);
         if (result.success()) {
-            operateRecordService
-                .save(new OperateRecord.Builder().operationTypeEnum(OperateTypeEnum.TEMPLATE_MANAGEMENT_OFFLINE)
-                    .bizId(authId).content(String.format("删除模板，模板id：%s", authId))
-                    .project(projectService.getProjectBriefByProjectId(projectId))
-                    .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-
-                    .build());
+    
+            operateRecordService.saveOperateRecordWithManualTrigger(String.format("删除模板，模板 id：%s", authId),
+                    operator, projectId, authId, OperateTypeEnum.TEMPLATE_MANAGEMENT_OFFLINE);
         }
         return result;
     }
@@ -156,14 +146,10 @@ public class ProjectLogicTemplateAuthManagerImpl implements ProjectLogicTemplate
                 ConvertUtil.obj2Obj(projectTemplateAuth, ProjectTemplateAuthDTO.class));
         if (result.success()) {
             final ProjectTemplateAuthEnum projectTemplateAuthEnum = ProjectTemplateAuthEnum.valueOf(authDTO.getType());
-            operateRecordService.save(
-                    new OperateRecord.Builder().triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).userOperation(operator)
-                            .operationTypeEnum(OperateTypeEnum.TEMPLATE_MANAGEMENT_INFO_MODIFY)
-                            .bizId(authDTO.getId())
-                            .content(String.format("权限变更：【%s】", projectTemplateAuthEnum.getDesc()))
-                            .project(projectService.getProjectBriefByProjectId(authDTO.getProjectId()))
-                        
-                            .build());
+    
+            operateRecordService.saveOperateRecordWithManualTrigger(
+                    String.format("权限变更：【%s】", projectTemplateAuthEnum.getDesc()), operator, authDTO.getProjectId(),
+                    authDTO.getId(), OperateTypeEnum.TEMPLATE_MANAGEMENT_INFO_MODIFY);
         }
         return result;
     
