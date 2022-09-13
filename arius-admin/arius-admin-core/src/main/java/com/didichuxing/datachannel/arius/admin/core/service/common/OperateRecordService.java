@@ -35,6 +35,17 @@ public interface OperateRecordService {
      */
     void saveOperateRecordWithManualTrigger(String content, String operator, Integer projectId, Object bizId,
                                             OperateTypeEnum operateTypeEnum) ;
+    /**
+     * 保存项目的运行记录
+     *
+     * @param content 操作记录的内容
+     * @param operator 运营商名称
+     * @param projectId 项目编号
+     * @param bizId 操作记录的业务ID，即任务的ID。
+     * @param operateTypeEnum 操作的类型，为枚举类型，枚举类型如下：
+     */
+    void saveOperateRecordWithSchedulingTasks(String content, String operator, Integer projectId, Object bizId,
+                                            OperateTypeEnum operateTypeEnum) ;
 
     /**
      * 动态分页查询

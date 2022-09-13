@@ -68,6 +68,15 @@ public class OperateRecordServiceImpl implements OperateRecordService {
                 .build());
     }
     
+    @Override
+    public void saveOperateRecordWithSchedulingTasks(String content, String operator, Integer projectId, Object bizId,
+                                                     OperateTypeEnum operateTypeEnum) {
+       save(new OperateRecord.Builder().project(ConvertUtil.obj2Obj(projectDao.selectByProjectId(projectId),
+                        ProjectBriefVO.class)).operationTypeEnum(operateTypeEnum)
+                .triggerWayEnum(TriggerWayEnum.SCHEDULING_TASKS).userOperation(operator).content(content).bizId(bizId)
+                .build());
+    }
+    
     /**
      * 动态分页查询
      *
