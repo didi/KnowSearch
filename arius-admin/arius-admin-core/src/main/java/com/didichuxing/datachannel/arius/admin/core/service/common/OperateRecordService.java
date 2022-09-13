@@ -35,6 +35,8 @@ public interface OperateRecordService {
      */
     void saveOperateRecordWithManualTrigger(String content, String operator, Integer projectId, Object bizId,
                                             OperateTypeEnum operateTypeEnum) ;
+    void saveOperateRecordWithSchedulingTasks(String content, String operator, Integer projectId, Object bizId,
+                                            OperateTypeEnum operateTypeEnum) ;
 
     /**
      * 动态分页查询

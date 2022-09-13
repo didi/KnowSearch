@@ -14,6 +14,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhyAlias;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
@@ -241,13 +242,8 @@ public class TemplateLogicAliasManagerImpl extends BaseTemplateSrvImpl implement
 
         Result<Void> operationResult = createTemplateAliases(aliases.getLogicId(), aliases.getAliases());
         if (operationResult.success()) {
-            operateRecordService.save(new OperateRecord.Builder()
-
-                .operationTypeEnum(OperateTypeEnum.INDEX_MANAGEMENT_ALIAS_MODIFY)
-                .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).bizId(aliases.getLogicId()).content("别名创建")
-                .userOperation(operator)
-
-                .build());
+            operateRecordService.saveOperateRecordWithManualTrigger("别名创建", operator, AuthConstant.SUPER_PROJECT_ID,
+                    aliases.getLogicId(), OperateTypeEnum.INDEX_MANAGEMENT_ALIAS_MODIFY);
         }
 
         return operationResult;
