@@ -105,6 +105,7 @@ import com.google.common.collect.Maps;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -1000,8 +1001,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         IndexTemplateWithCluster indexTemplateLogicWithCluster = indexTemplateService
             .getLogicTemplateWithCluster(logicId);
 
-        if (null == indexTemplateLogicWithCluster
-            || CollectionUtils.isEmpty(indexTemplateLogicWithCluster.getLogicClusters())) {
+        if (null == indexTemplateLogicWithCluster) {
             return Result.buildFail("模板对应资源不存在!");
         }
 
@@ -1009,31 +1009,33 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             ConsoleTemplateDetailVO.class);
 
         consoleTemplateDetail.setCyclicalRoll(indexTemplateLogicWithCluster.getExpression().endsWith("*"));
-
+        //根据模板resourceId project获取逻辑集群
+         ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByIdAndProjectId(
+                    consoleTemplateDetail.getResourceId(), consoleTemplateDetail.getProjectId());
         // supperApp显示物理集群，其他项目显示逻辑集群
-        if(AuthConstant.SUPER_PROJECT_ID.equals(projectId)){
+        if (AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
             List<IndexTemplatePhy> indexTemplatePhyList = indexTemplatePhyService.getTemplateByLogicId(logicId);
-            List<String> phyClusters = indexTemplatePhyList.stream().map(IndexTemplatePhy::getCluster).collect(Collectors.toList());
-            consoleTemplateDetail.setCluster(StringUtils.join(phyClusters, ","));
-        }else {
-            consoleTemplateDetail
-                    .setCluster(jointCluster(indexTemplateLogicWithCluster.getLogicClusters()));
+            String phyClusters = indexTemplatePhyList.stream().sorted(Comparator.comparing(IndexTemplatePhy::getRole))
+                    .map(IndexTemplatePhy::getCluster).collect(Collectors.joining(","));
+            consoleTemplateDetail.setCluster(phyClusters);
+        } else {
+            Optional.ofNullable(clusterLogic).map(ClusterLogic::getName).ifPresent(consoleTemplateDetail::setCluster);
         }
-
-        // 仅对有一个逻辑集群的情况设置集群类型与等级
-        if (indexTemplateLogicWithCluster.getLogicClusters().size() == 1) {
-            consoleTemplateDetail.setClusterType(indexTemplateLogicWithCluster.getLogicClusters().get(0).getType());
-            consoleTemplateDetail.setClusterLevel(indexTemplateLogicWithCluster.getLogicClusters().get(0).getLevel());
-        }
+    
+        // 逻辑集群设置集群类型与等级
+        Optional.ofNullable(clusterLogic).ifPresent(cl -> {
+            consoleTemplateDetail.setClusterLevel(cl.getLevel());
+            consoleTemplateDetail.setClusterType(cl.getType());
+        });
         consoleTemplateDetail.setAppName(
-            projectService.getProjectBriefByProjectId(indexTemplateLogicWithCluster.getProjectId()).getProjectName());
+                projectService.getProjectBriefByProjectId(indexTemplateLogicWithCluster.getProjectId())
+                        .getProjectName());
         consoleTemplateDetail.setIndices(getLogicTemplateIndices(logicId));
         consoleTemplateDetail.setEditable(true);
-        // 获取indexRollover功能开启状态
-        consoleTemplateDetail
-            .setDisableIndexRollover(Optional.ofNullable(indexTemplateService.getTemplateConfig(logicId))
-                .map(IndexTemplateConfig::getDisableIndexRollover).orElse(null)
-            );
+        // 获取 indexRollover 功能开启状态
+        Optional.ofNullable(indexTemplateService.getTemplateConfig(logicId))
+                .map(IndexTemplateConfig::getDisableIndexRollover)
+                .ifPresent(consoleTemplateDetail::setDisableIndexRollover);
         return Result.buildSucc(consoleTemplateDetail);
     }
 

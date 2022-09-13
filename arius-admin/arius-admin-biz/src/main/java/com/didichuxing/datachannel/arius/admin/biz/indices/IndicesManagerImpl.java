@@ -73,6 +73,8 @@ import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -189,6 +191,7 @@ public class IndicesManagerImpl implements IndicesManager {
             if (syncCreateIndexRet) {
                 //在分页查询的时候被强制要求deleteFlag=false，如果数据不存在deleteFlag会导致查询不到；
                 indexCreateDTO.setDeleteFlag(false);
+                indexCreateDTO.setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.ofHours(8)).toEpochMilli());
                 succ = esIndexCatService.syncInsertCatIndex(Lists.newArrayList(indexCreateDTO), RETRY_COUNT);
             }
 
