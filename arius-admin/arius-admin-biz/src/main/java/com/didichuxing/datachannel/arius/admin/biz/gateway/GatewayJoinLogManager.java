@@ -56,7 +56,7 @@ public interface GatewayJoinLogManager {
      *
      * @param projectId 项目编号
      * @param indexName 索引的名称
-     * @return 一个包含字符串的 Result 对象。
+     * @return Result<String>
      */
     Result<String> getDSLByProjectIdAndIndexName(Integer projectId, String indexName);
 }

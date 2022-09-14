@@ -60,6 +60,13 @@ public class GatewayJoinLogService {
         }
     }
     
+    /**
+     *  通过项目 id 和索引名称获取一个 DSL
+     *
+     * @param projectId 您要查询的项目的项目ID。
+     * @param indexName 索引的名称
+     * @return String
+     */
     public String getOneDSLByProjectIdAndIndexName(Integer projectId, String indexName) {
         return gatewayJoinESDAO.getOneDSLByProjectIdAndIndexName(projectId, indexName);
     }
