@@ -60,4 +60,10 @@ public class GatewayJoinLogManagerImpl implements GatewayJoinLogManager {
         List<GatewayJoinVO> gatewayJoinVOList = ConvertUtil.list2List(gatewayJoinList, GatewayJoinVO.class);
         return Result.buildSucc(gatewayJoinVOList);
     }
+    
+    @Override
+    public Result<String> getDSLByProjectIdAndIndexName(Integer projectId, String indexName) {
+    
+        return Result.buildSucc(gatewayJoinLogService.getOneDSLByProjectIdAndIndexName(projectId, indexName));
+    }
 }

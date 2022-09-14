@@ -306,6 +306,8 @@ public class DslsConstant {
      * 根据index获得对应的templateMD5
      */
     public static final String GET_DSLS_BY_INDEX_NAME                                        = "GatewayJoinEsDao/getTemplateMD5ByIndexName";
+    public static final String GET_ONE_DSL_BY_PROJECT_ID_AND_INDEX_NAME = "GatewayJoinEsDao/getOneDSLByProjectIdAndIndexName";
+
     /**
      * 根据index获得对应的查询请求
      */

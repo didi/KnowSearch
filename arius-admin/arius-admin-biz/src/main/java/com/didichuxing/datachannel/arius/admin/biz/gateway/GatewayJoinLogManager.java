@@ -1,10 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.biz.gateway;
 
-import java.util.List;
-
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayJoinQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.GatewayJoinVO;
+import java.util.List;
 
 public interface GatewayJoinLogManager {
     /**
@@ -51,4 +50,13 @@ public interface GatewayJoinLogManager {
      * @return Result<List<GatewayJoinVO>>
      */
     Result<List<GatewayJoinVO>> getGatewayJoinErrorList(Integer projectId, GatewayJoinQueryDTO queryDTO);
+    
+    /**
+     * 获取指定索引的DSL
+     *
+     * @param projectId 项目编号
+     * @param indexName 索引的名称
+     * @return 一个包含字符串的 Result 对象。
+     */
+    Result<String> getDSLByProjectIdAndIndexName(Integer projectId, String indexName);
 }

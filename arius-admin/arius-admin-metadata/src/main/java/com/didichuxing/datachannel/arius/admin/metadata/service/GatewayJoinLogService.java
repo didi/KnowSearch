@@ -59,4 +59,8 @@ public class GatewayJoinLogService {
             queryDTO.setEndTime(System.currentTimeMillis());
         }
     }
+    
+    public String getOneDSLByProjectIdAndIndexName(Integer projectId, String indexName) {
+        return gatewayJoinESDAO.getOneDSLByProjectIdAndIndexName(projectId, indexName);
+    }
 }

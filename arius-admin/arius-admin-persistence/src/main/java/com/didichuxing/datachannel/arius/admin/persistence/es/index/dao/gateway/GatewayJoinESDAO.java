@@ -23,6 +23,7 @@ import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESAggr
 import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESAggrMap;
 import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESBucket;
 import com.didiglobal.logi.elasticsearch.client.response.query.query.hits.ESHit;
+import com.didiglobal.logi.elasticsearch.client.response.query.query.hits.ESHits;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -32,6 +33,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.annotation.Nullable;
@@ -1237,6 +1239,15 @@ public class GatewayJoinESDAO extends BaseESDAO {
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_ERROR_LIST_BY_CONDITION,
             queryCriteriaDsl);
         return gatewayClient.performRequest(realName, typeName, dsl, GatewayJoinPO.class);
+    }
+    public String getOneDSLByProjectIdAndIndexName(Integer projectId, String index) {
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_ONE_DSL_BY_PROJECT_ID_AND_INDEX_NAME,
+                index,projectId);
+        String realName =  IndexNameUtils.genCurrentDailyIndexName(indexName);
+        return gatewayClient.performRequest(realName, typeName, dsl,
+                res -> Optional.ofNullable(res).map(ESQueryResponse::getHits).map(ESHits::getHits)
+                        .filter(CollectionUtils::isNotEmpty).map(hits -> hits.get(0)).map(ESHit::getSource)
+                        .map(String::valueOf).orElse(null), 3);
     }
 
     /**************************************************** private methods ****************************************************/
