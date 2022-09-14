@@ -83,10 +83,8 @@ public class PackageDomainServiceImpl implements PackageDomainService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Result<Void> updatePackage(Package pk) {
-
-        //todo
-        // 跟组件相关，若绑定了组件，则所绑定的脚本和版本以及安装包都不可以更改。
 
         //更新
         pk.update();
@@ -99,7 +97,7 @@ public class PackageDomainServiceImpl implements PackageDomainService {
             pk.setUrl(storageRes.getData());
         }
 
-        //更新
+        //更新数据库
         packageRepository.updatePackage(pk);
         int packageId = pk.getId();
         if (null != pk.getGroupConfigList()) {

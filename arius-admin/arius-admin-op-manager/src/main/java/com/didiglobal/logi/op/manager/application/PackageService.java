@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 import static com.didiglobal.logi.op.manager.infrastructure.common.ResultCode.PACKAGE_IS_DEPEND_ERROR;
+import static com.didiglobal.logi.op.manager.infrastructure.common.ResultCode.PACKAGE_IS_DEPEND_UPDATE_ERROR;
 
 /**
  * @author didi
@@ -63,6 +64,10 @@ public class PackageService {
         Result<Void>  checkResult = pk.checkUpdateParam();
         if (checkResult.failed()) {
             return checkResult;
+        }
+        Result<Boolean> res = componentDomainService.hasPackageDependComponent(pk.getId());
+        if (res.getData() && null != pk.getUploadFile()) {
+            return Result.fail(PACKAGE_IS_DEPEND_UPDATE_ERROR);
         }
         //修改安装包
         return packageDomainService.updatePackage(pk);

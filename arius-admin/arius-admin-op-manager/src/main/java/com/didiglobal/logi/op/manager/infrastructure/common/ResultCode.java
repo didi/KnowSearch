@@ -52,6 +52,7 @@ public enum ResultCode {
 
     /*安装包操作报错 */
     PACKAGE_IS_DEPEND_ERROR(7001, "安装包已被组件依赖，不能删除"),
+    PACKAGE_IS_DEPEND_UPDATE_ERROR(7002, "安装包已被组件依赖，更新组件包"),
 
     /*空指针 */
     NULL_POINT_ERROR(8001, "空指针异常"),

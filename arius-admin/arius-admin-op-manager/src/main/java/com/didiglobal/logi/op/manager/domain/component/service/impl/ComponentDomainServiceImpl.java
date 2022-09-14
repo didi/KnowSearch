@@ -276,7 +276,7 @@ public class ComponentDomainServiceImpl implements ComponentDomainService {
     public Result<Void> scaleComponent(Component component, Map<String, Set<String>> groupName2HostNormalStatusMap, int type) {
         //TODO 需要考虑部分成功以及部分失败场景
         //TODO 优化批量插入能力
-        //TODO 扩容自动安装其他插件？
+        //TODO 扩容后会自动提交多个任务，而不是一个任务自动安装所有
         List<ComponentGroupConfig> configList = getComponentConfig(component.getId()).getData();
         Map<String, ComponentGroupConfig> oriConfigMap = new HashMap<>(configList.size());
         configList.forEach(oriConf -> {

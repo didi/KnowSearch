@@ -41,7 +41,6 @@ public class TaskScheduler {
     @Autowired
     TaskScheduler taskScheduler;
 
-    //TODO 一个任务的最后一个节点失败，那这个节点就没法重试了以及忽略, 等志勇他们解决
     @Scheduled(initialDelay = 1000, fixedDelay = 5000)
     public void monitor() {
         try {
