@@ -734,17 +734,17 @@ public class IndicesManagerImpl implements IndicesManager {
     }
 
     @Override
-    public Result<List<String>> getClusterPhyIndexName(String clusterPhyName, Integer projectId) {
+    public Result<List<String>> getClusterPhyIndexName(String clusterPhyName, Integer projectId, String index) {
         if (!projectService.checkProjectExist(projectId)) {
             return Result.buildParamIllegal(String.format("There is no projectId:%s", projectId));
         }
 
-        return Result.buildSucc(esIndexService.syncGetIndexName(clusterPhyName));
+        return Result.buildSucc(esIndexCatService.syncGetIndexListByProjectIdAndFuzzyIndexAndClusterPhy( clusterPhyName,index ));
     }
 
     @Override
-    public Result<List<String>> getClusterLogicIndexName(String clusterLogicName, Integer projectId) {
-        List<String> indexNames = esIndexCatService.syncGetIndexListByProjectId(projectId,clusterLogicName);
+    public Result<List<String>> getClusterLogicIndexName(String clusterLogicName, Integer projectId, String index) {
+        List<String> indexNames = esIndexCatService.syncGetIndexListByProjectIdAndFuzzyIndexAndClusterLogic(projectId, clusterLogicName,index );
         return Result.buildSucc(indexNames);
     }
 
