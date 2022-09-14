@@ -1,5 +1,16 @@
 package com.didichuxing.datachannel.arius.admin.biz.gateway.impl;
 
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.gateway.GatewayManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.TemplateSrvManager;
@@ -51,21 +62,6 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  * @author didi
@@ -285,15 +281,12 @@ public class GatewayManagerImpl implements GatewayManager {
         Multimap<Integer, IndexTemplateAlias> logicId2IndexTemplateAliasMultiMap = ConvertUtil
             .list2MulMap(logicWithAliases, IndexTemplateAlias::getLogicId);
 
-        List<String> pipelineIndexTemplateSet = templateSrvManager
-            .getIndexTemplateContainsSrv(TemplateServiceEnum.TEMPLATE_PIPELINE.getCode());
-
         Map<String, GatewayTemplateDeployInfoVO> result = Maps.newHashMap();
         for (IndexTemplateWithPhyTemplates logicWithPhysical : logicWithPhysicals) {
             if (logicWithPhysical.hasPhysicals()) {
                 try {
                     GatewayTemplateDeployInfoVO gatewayTemplateDeployInfoVO = buildGatewayTemplateDeployInfoVO(
-                        logicWithPhysical, logicId2IndexTemplateAliasMultiMap, pipelineIndexTemplateSet);
+                        logicWithPhysical, logicId2IndexTemplateAliasMultiMap);
 
                     if (null != gatewayTemplateDeployInfoVO) {
                         result.put(logicWithPhysical.getName(), gatewayTemplateDeployInfoVO);
@@ -475,8 +468,7 @@ public class GatewayManagerImpl implements GatewayManager {
     }
 
     private GatewayTemplateDeployInfoVO buildGatewayTemplateDeployInfoVO(IndexTemplateWithPhyTemplates logicWithPhysical,
-                                                                         Multimap<Integer, IndexTemplateAlias> logicId2IndexTemplateAliasMultiMap,
-                                                                         List<String> pipelineIndexTemplateSet) {
+                                                                         Multimap<Integer, IndexTemplateAlias> logicId2IndexTemplateAliasMultiMap) {
         if (null == logicWithPhysical || null == logicWithPhysical.getMasterPhyTemplate()) {
             return null;
         }
@@ -495,7 +487,7 @@ public class GatewayManagerImpl implements GatewayManager {
         deployInfoVO.setMasterInfo(masterInfo);
         deployInfoVO.setSlaveInfos(slaveInfos);
         
-        if (!pipelineIndexTemplateSet.contains(logicWithPhysical.getMasterPhyTemplate().getName())) {
+        if (!TemplateServiceEnum.strContainsSrv(logicWithPhysical.getOpenSrv(), TemplateServiceEnum.TEMPLATE_PIPELINE)) {
             deployInfoVO.getBaseInfo().setIngestPipeline("");
         }
 

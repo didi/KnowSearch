@@ -7,7 +7,6 @@ import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.task.OpTaskManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.impl.BaseTemplateSrvImpl;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskProcessDTO;
@@ -32,7 +31,6 @@ import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
 import com.didichuxing.datachannel.arius.admin.common.constant.dcdr.DCDRStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.dcdr.DCDRSwithTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDCDRStepEnum;
@@ -253,15 +251,10 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
             indexTemplatePO.setHasDCDR(true);
             indexTemplatePO.setCheckPointDiff(0L);
             indexTemplateService.update(indexTemplatePO);
-            operateRecordService.save(new OperateRecord.Builder()
-                .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID)).content(
-
-                    String.format("创建DCDR链路，主集群：%s，从集群：%s", sourceClusterPhyResult.getData().getCluster(),
-                        targetClusterPhyResult.getData().getCluster()))
-                .userOperation(operator).bizId(templateId).triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                .operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE_DCDR_SETTING)
-
-                .build());
+            operateRecordService.saveOperateRecordWithManualTrigger(
+                    String.format("创建 DCDR 链路，主集群：%s，从集群：%s", sourceClusterPhyResult.getData().getCluster(),
+                            targetClusterPhyResult.getData().getCluster()), operator, projectId, templateId,
+                    OperateTypeEnum.TEMPLATE_SERVICE_DCDR_SETTING);
         }
         return result;
     }
@@ -354,14 +347,9 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
                             param.getPhysicalIds());
                     }
                 }
-                operateRecordService
-                    .save(new OperateRecord.Builder()
-                            .project(projectService.getProjectBriefByProjectId(projectId))
-                            .operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE_DCDR_SETTING)
-                        .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).bizId(templatePhysicalPO.getLogicId())
-                        .userOperation(operator).content("replicaCluster:" + param.getReplicaClusters())
-
-                        .build());
+                operateRecordService.saveOperateRecordWithManualTrigger("replicaCluster:" + param.getReplicaClusters(),
+                        operator, projectId, templatePhysicalPO.getLogicId(),
+                        OperateTypeEnum.TEMPLATE_SERVICE_DCDR_SETTING);
                 return Result.buildSucc();
             }
         }
@@ -408,16 +396,9 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
             //2.5 记录操作
             for (DCDRSingleTemplateMasterSlaveSwitchDetail dcdrTask : dcdrTasksDetail
                 .getDcdrSingleTemplateMasterSlaveSwitchDetailList()) {
-                operateRecordService.save(
-                        new OperateRecord.Builder()
-                                .operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE_DCDR_SETTING)
-                                .bizId(dcdrTask.getTemplateId())
-                                .userOperation(operator).content(String.format("【%s】%s",
-                                        indexTemplateService.getNameByTemplateLogicId(dcdrTask.getTemplateId().intValue()),
-                                        dcdrType))
-                                .project(projectService.getProjectBriefByProjectId(projectId))
-                        
-                                    .buildDefaultManualTrigger());
+                operateRecordService.saveOperateRecordWithManualTrigger(String.format("【%s】%s",
+                                indexTemplateService.getNameByTemplateLogicId(dcdrTask.getTemplateId().intValue()), dcdrType),
+                        operator, projectId, dcdrTask.getTemplateId(), OperateTypeEnum.TEMPLATE_SERVICE_DCDR_SETTING);
                 
             }
 

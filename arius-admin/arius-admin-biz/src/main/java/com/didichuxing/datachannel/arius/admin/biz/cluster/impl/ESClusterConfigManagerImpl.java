@@ -1,14 +1,12 @@
 package com.didichuxing.datachannel.arius.admin.biz.cluster.impl;
 
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ESClusterConfigManager;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESConfigDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleInfo;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.esconfig.ESConfig;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.ecm.ESConfigVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESClusterConfigService;
@@ -47,10 +45,9 @@ public class ESClusterConfigManagerImpl implements ESClusterConfigManager {
         final ESConfig oldEsConfig = esClusterConfigService.getEsClusterConfigById(param.getId());
         final Result<Void> result = esClusterConfigService.editConfigDesc(param);
         if (result.success()) {
-            operateRecordService.save(new OperateRecord.Builder()
-                .content(String.format("描述变更：【%s】->【%s】", oldEsConfig.getDesc(), param.getDesc()))
-                .userOperation(operator).operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_CONF_FILE_CHANGE)
-                .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).bizId(Math.toIntExact(param.getId())).build());
+            operateRecordService.saveOperateRecordWithManualTrigger(
+                    String.format("描述变更：【%s】->【%s】", oldEsConfig.getDesc(), param.getDesc()), operator, projectId,
+                    param.getId(), OperateTypeEnum.PHYSICAL_CLUSTER_CONF_FILE_CHANGE);
         }
         return result;
     }

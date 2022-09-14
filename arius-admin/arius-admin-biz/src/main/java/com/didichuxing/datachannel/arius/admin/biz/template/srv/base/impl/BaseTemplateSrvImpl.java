@@ -6,7 +6,6 @@ import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.TemplateSrvManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.BaseTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.BaseResult;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateConfigDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplateDTO;
@@ -15,7 +14,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithClusterAndMasterTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.SupportSrv;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
@@ -191,14 +189,10 @@ public abstract class BaseTemplateSrvImpl implements BaseTemplateSrv {
             final Result<Void> result = indexTemplateService
                 .editTemplateInfoTODB(ConvertUtil.obj2Obj(tupleTwo.v2, IndexTemplateDTO.class));
             if (result.success()) {
-                
-                operateRecordService.save(new OperateRecord.Builder()
-                    .operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE).triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                    .bizId(tupleTwo.v2.getId()).project(projectService.getProjectBriefByProjectId(projectId))
-                    .content(String.format("%s:【%s】", Boolean.TRUE.equals(status) ? "开启模板服务" : "关闭模板服务",templateSrvName())
-                           
-                           
-                           ).userOperation(operator).build());
+                operateRecordService.saveOperateRecordWithManualTrigger(
+                        String.format("%s:【%s】", Boolean.TRUE.equals(status) ? "开启模板服务" : "关闭模板服务",
+                                templateSrvName()), operator, projectId, tupleTwo.v2.getId(),
+                        OperateTypeEnum.TEMPLATE_SERVICE);
             }
         }
 
