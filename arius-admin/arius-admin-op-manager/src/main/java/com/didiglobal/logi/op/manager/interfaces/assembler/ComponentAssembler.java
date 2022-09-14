@@ -6,7 +6,8 @@ import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 import com.didiglobal.logi.op.manager.infrastructure.common.ResultCode;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.*;
 import com.didiglobal.logi.op.manager.infrastructure.util.ConvertUtil;
-import com.didiglobal.logi.op.manager.interfaces.dto.*;
+import com.didiglobal.logi.op.manager.interfaces.dto.component.ComponentDTO;
+import com.didiglobal.logi.op.manager.interfaces.dto.general.*;
 import com.didiglobal.logi.op.manager.interfaces.vo.GeneralGroupConfigHostVO;
 
 /**

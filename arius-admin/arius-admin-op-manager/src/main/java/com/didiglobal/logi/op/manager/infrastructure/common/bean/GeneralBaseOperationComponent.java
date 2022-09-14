@@ -3,7 +3,6 @@ package com.didiglobal.logi.op.manager.infrastructure.common.bean;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 import com.didiglobal.logi.op.manager.infrastructure.common.ResultCode;
 import com.didiglobal.logi.op.manager.infrastructure.util.ConvertUtil;
-import com.didiglobal.logi.op.manager.interfaces.dto.GeneralGroupConfigDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

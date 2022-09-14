@@ -34,7 +34,7 @@ public class ComponentStatusScheduler {
     private static final Logger LOGGER = LoggerFactory.getLogger(ComponentStatusScheduler.class);
 
     private final Cache<String, Map<String, String>> packageId2TemplateIdMapCache = CacheBuilder.newBuilder()
-            .expireAfterWrite(1, TimeUnit.MINUTES).maximumSize(10000).build();
+            .expireAfterWrite(10, TimeUnit.MINUTES).maximumSize(10000).build();
 
     @Autowired
     ComponentDomainService componentDomainService;

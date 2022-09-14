@@ -1,4 +1,4 @@
-package com.didiglobal.logi.op.manager.interfaces.dto;
+package com.didiglobal.logi.op.manager.interfaces.dto.component;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -1,21 +1,27 @@
-package com.didiglobal.logi.op.manager.interfaces.dto;
+package com.didiglobal.logi.op.manager.interfaces.dto.component;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.sql.Timestamp;
+
 /**
  * @author didi
- * @date 2022-07-14 6:38 下午
+ * @date 2022-07-12 2:25 下午
  */
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
-public class GeneralGroupConfigDTO {
+@NoArgsConstructor
+public class ComponentGroupConfigDTO {
     /**
-     * 分组id
+     * 配置id
      */
     private Integer id;
+    /**
+     * 组件id
+     */
+    private Integer componentId;
     /**
      * 分组名
      */
@@ -36,19 +42,20 @@ public class GeneralGroupConfigDTO {
      * 安装目录配置
      */
     private String installDirectoryConfig;
-
-    /**
-     * ip对应的进程数量
-     */
-    private String processNumConfig;
-
     /**
      * 节点列表
      */
     private String hosts;
-
     /**
      * 配置版本
      */
     private String version;
+    /**
+     * 创建时间
+     */
+    private Timestamp createTime;
+    /**
+     * 更新时间
+     */
+    private Timestamp updateTime;
 }

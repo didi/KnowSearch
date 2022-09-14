@@ -1,11 +1,8 @@
-package com.didiglobal.logi.op.manager.interfaces.dto;
+package com.didiglobal.logi.op.manager.interfaces.dto.general;
 
-import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralBaseOperationComponent;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
 
 /**
  * @author didi

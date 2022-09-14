@@ -8,7 +8,8 @@ import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralGroupCon
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.OperationEnum;
 import com.didiglobal.logi.op.manager.infrastructure.util.ConvertUtil;
 import com.didiglobal.logi.op.manager.interfaces.assembler.ComponentAssembler;
-import com.didiglobal.logi.op.manager.interfaces.dto.*;
+import com.didiglobal.logi.op.manager.interfaces.dto.component.ComponentHostReportDTO;
+import com.didiglobal.logi.op.manager.interfaces.dto.general.*;
 import com.didiglobal.logi.op.manager.interfaces.vo.GeneralGroupConfigHostVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

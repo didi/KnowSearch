@@ -1,7 +1,5 @@
-package com.didiglobal.logi.op.manager.interfaces.dto;
+package com.didiglobal.logi.op.manager.interfaces.dto.component;
 
-import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentGroupConfig;
-import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentHost;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

@@ -47,11 +47,11 @@ public class GeneralGroupConfig {
 
 
     /**
-     * url
+     * 包的url
      */
     private String url;
     /**
-     * 操作类型
+     * 针对哪种操作类型
      */
     private Integer type;
 }

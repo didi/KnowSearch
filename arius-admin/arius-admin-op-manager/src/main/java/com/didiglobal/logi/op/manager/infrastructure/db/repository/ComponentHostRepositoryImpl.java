@@ -4,7 +4,6 @@ import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentHos
 import com.didiglobal.logi.op.manager.domain.component.repository.ComponentHostRepository;
 import com.didiglobal.logi.op.manager.infrastructure.db.converter.ComponentConverter;
 import com.didiglobal.logi.op.manager.infrastructure.db.mapper.ComponentHostDao;
-import com.didiglobal.logi.op.manager.interfaces.dto.ComponentHostDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
