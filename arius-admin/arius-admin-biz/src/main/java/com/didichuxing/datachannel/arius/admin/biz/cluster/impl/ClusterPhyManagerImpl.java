@@ -51,6 +51,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.DataCenterEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.RunModeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterConnectionStatus;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterConnectionStatusWithTemplateEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterDynamicConfigsEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterDynamicConfigsTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum;
@@ -211,25 +212,27 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     private RoleTool                                             roleTool;
     private static final FutureUtil<Void>                                                                                                    FUTURE_UTIL               = FutureUtil.init(
             "ClusterPhyManagerImpl", 20, 40, 100);
-    private static final Cache</*clusterPhy*/String, TupleThree</*dcdrExist*/Boolean,/*pipelineExist*/ Boolean,/*existColdRegion*/ Boolean>> CLUSTER_PHY_DCDR_PIPELINE = CacheBuilder.newBuilder()
+    private static final Cache</*clusterPhy*/String, TupleThree</*dcdrExist*/Boolean,/*pipelineExist*/ Boolean,/*existColdRegion*/ Boolean>> CLUSTER_PHY_DCDR_PIPELINE   = CacheBuilder.newBuilder()
+            .expireAfterWrite(10, TimeUnit.MINUTES).maximumSize(10000).build();
+    private static final Cache</*clusterPhy*/String, ClusterConnectionStatusWithTemplateEnum> CLUSTER_PHY_CONNECTION_ENUM = CacheBuilder.newBuilder()
             .expireAfterWrite(10, TimeUnit.MINUTES).maximumSize(10000).build();
     @PostConstruct
     private void init() {
         ariusScheduleThreadPool.submitScheduleAtFixedDelayTask(this::refreshClusterDistInfo, 60, 180);
-        ariusScheduleThreadPool.submitScheduleAtFixedDelayTask(this::refreshDCDRAndPipelineAndColdRegionTupleByClusterPhyWithCache,
+        ariusScheduleThreadPool.submitScheduleAtFixedDelayTask(this::refreshClusterPhyInfoWithCache,
                 60,45*60L);
     }
     
     /**
      * 每45分钟全量更新一遍集群
      */
-    private synchronized void refreshDCDRAndPipelineAndColdRegionTupleByClusterPhyWithCache() {
+    private synchronized void refreshClusterPhyInfoWithCache() {
     
         for (String clusterName : clusterPhyService.listClusterNames()) {
             CLUSTER_PHY_DCDR_PIPELINE.put(clusterName, getDCDRAndPipelineTupleByClusterPhy(clusterName));
+            CLUSTER_PHY_CONNECTION_ENUM.put(clusterName, getClusterConnectionStatus(clusterName));
         }
     }
-    
 
   
     
@@ -246,6 +249,17 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             return Tuples.of(false, false, false);
         }
     }
+    
+    @Override
+    public ClusterConnectionStatusWithTemplateEnum getClusterConnectionStatusWithCache(String clusterPhy) {
+        try {
+            return CLUSTER_PHY_CONNECTION_ENUM.get(clusterPhy, () -> getClusterConnectionStatus(clusterPhy));
+        } catch (Exception e) {
+            return ClusterConnectionStatusWithTemplateEnum.DISCONNECTED;
+        }
+    }
+    
+   
     
     @Override
     public boolean copyMapping(String cluster, int retryCount) {
@@ -1691,6 +1705,12 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             String clusterPhy) {
         TupleTwo<Boolean, Boolean> tupleTwo = esClusterNodeService.existDCDRAndPipelineModule(clusterPhy);
         return Tuples.of(tupleTwo.v1,tupleTwo.v2,CollectionUtils.isNotEmpty(getColdRegionByPhyCluster(clusterPhy)));
+    }
+    
+    private ClusterConnectionStatusWithTemplateEnum getClusterConnectionStatus(String clusterPhy) {
+        return esClusterService.isConnectionStatus(clusterPhy)
+                ? ClusterConnectionStatusWithTemplateEnum.NORMAL
+                : ClusterConnectionStatusWithTemplateEnum.DISCONNECTED;
     }
     
    

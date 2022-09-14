@@ -8,8 +8,8 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.Index
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.srv.TemplateSrv;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.srv.UnavailableTemplateSrv;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv.TemplateWithSrvVO;
-import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterConnectionStatusWithTemplateEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
+import com.didichuxing.datachannel.arius.admin.common.tuple.TupleThree;
 import java.util.List;
 
 /**
@@ -37,9 +37,9 @@ public interface TemplateSrvManager {
      * 获取指定模板「不可用的」服务
      *
      * @param template        @return
-     * @param materClusterPhy
+     * @param existDCDRAndPipelineModule
      */
-    List<UnavailableTemplateSrv> getUnavailableSrvByTemplateAndMasterPhy(IndexTemplate template, String materClusterPhy);
+    List<UnavailableTemplateSrv> getUnavailableSrvByTemplateAndMasterPhy(IndexTemplate template,  TupleThree<Boolean, Boolean, Boolean> existDCDRAndPipelineModule);
 
     /**
      * 分页模糊查询模板服务
@@ -91,11 +91,5 @@ public interface TemplateSrvManager {
     List<String> getIndexTemplateContainsSrv(int srvId);
     
    
-    /**
-     * 返回主集群连接的状态
-     *
-     * @param clusterPhy 集群的名称。
-     * @return 主集群连接状态。
-     */
-    ClusterConnectionStatusWithTemplateEnum getClusterConnectionStatus(String clusterPhy);
+
 }

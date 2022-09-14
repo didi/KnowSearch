@@ -13,7 +13,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.Cluste
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateLogicWithClusterAndMasterTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
-import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterConnectionStatusWithTemplateEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.SupportSrv;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
@@ -270,9 +269,8 @@ public abstract class BaseTemplateSrvImpl implements BaseTemplateSrv {
     
     @Override
     public SupportSrv getSupportSrvByLogicTemplateAndMasterClusterPhy(IndexTemplate logicIndexTemplate,
-                                                                      String clusterPhy) {
-        TupleThree</*dcdrExist*/Boolean,/*pipelineExist*/ Boolean,/*existColdRegion*/ Boolean> existDCDRAndPipelineModule = clusterPhyManager.getDCDRAndPipelineAndColdRegionTupleByClusterPhyWithCache(
-                clusterPhy);
+                                                                      TupleThree<Boolean, Boolean, Boolean> existDCDRAndPipelineModule) {
+       
         List<TemplateServiceEnum> templateServiceEnums = TemplateServiceEnum.str2Srv(logicIndexTemplate.getOpenSrv());
         SupportSrv supportSrv = new SupportSrv();
         supportSrv.setPartition(StringUtils.endsWith(logicIndexTemplate.getExpression(), "*"));
@@ -290,15 +288,5 @@ public abstract class BaseTemplateSrvImpl implements BaseTemplateSrv {
         return supportSrv;
     }
     
-    /**
-     * 返回主集群连接的状态
-     *
-     * @param clusterPhy 集群的名称。
-     * @return 主集群连接状态。
-     */
-    @Override
-    public ClusterConnectionStatusWithTemplateEnum getClusterConnectionStatus(String clusterPhy) {
-        return esClusterService.isConnectionStatus(clusterPhy)?ClusterConnectionStatusWithTemplateEnum.NORMAL:
-                ClusterConnectionStatusWithTemplateEnum.DISCONNECTED;
-    }
+
 }
