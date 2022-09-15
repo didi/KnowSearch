@@ -356,7 +356,7 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
         try {
             return !JSON.parseObject(clusterRegion.getConfig()).getBoolean(COLD);
         } catch (Exception e) {
-            return Boolean.FALSE;
+            return Boolean.TRUE;
         }
 
     };
