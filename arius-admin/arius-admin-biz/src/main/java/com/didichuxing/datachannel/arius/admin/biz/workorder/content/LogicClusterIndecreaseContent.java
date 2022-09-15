@@ -25,13 +25,10 @@ public class LogicClusterIndecreaseContent extends BaseContent {
     private String                             dataNodeSpec;
 
     /**
-     * 期望的dataNode的个数
+     * dataNode的个数
      */
     private int                                dataNodeNu;
-    /**
-     * 旧的dataNode的个数
-     */
-    private int                                oldDataNodeNu;
+
     /**
      * 备注
      */
