@@ -117,10 +117,6 @@ public class ESUserManagerImpl implements ESUserManager {
             return Result.buildFail("es user为空");
         }
         initESUser(appDTO, projectId);
-        Result<Void> result = checkClusterAuthAndSetCluster(appDTO);
-        if (result.failed()) {
-            return Result.buildFrom(result);
-        }
 
         final TupleTwo</*创建的es user*/Result, /*创建的es user po*/ ESUserPO> resultESUserPOTuple = esUserService
             .registerESUser(appDTO, operator);
@@ -153,10 +149,7 @@ public class ESUserManagerImpl implements ESUserManager {
             LOGGER.warn("class=ESUserManagerImpl||method=editESUser||fail msg={}", checkResult.getMessage());
             return checkResult;
         }
-        Result<Void> result = checkClusterAuthAndSetCluster(esUserDTO);
-        if (result.failed()){
-            return result;
-        }
+       
         //获取更新之前的po
         final ESUser oldESUser = esUserService.getEsUserById(esUserDTO.getId());
         //校验当前esUserDTO中的projectId是否存在于esUser
