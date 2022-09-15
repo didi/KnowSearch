@@ -7,6 +7,7 @@ import com.didichuxing.datachannel.arius.admin.biz.workorder.content.LogicCluste
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRegionWithNodeInfoDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.LogicClusterIndecreaseOrderDetail;
@@ -27,7 +28,6 @@ import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
 import com.didiglobal.logi.security.service.ProjectService;
 import java.util.List;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -170,8 +170,8 @@ public class LogicClusterIndecreaseHandler extends BaseWorkOrderHandler {
                 content.getLogicClusterId().intValue());
         Long beforeSize = 0L;
         if (resultBefore.success() && CollectionUtils.isNotEmpty(resultBefore.getData())) {
-            beforeSize = resultBefore.getData().stream().map(ESClusterRoleHostVO::getRegionName).distinct()
-                    .map(StringUtils::isNotBlank).count();
+            beforeSize = resultBefore.getData().stream().map(ESClusterRoleHostVO::getId).distinct()
+                   .count();
         
         }
        
@@ -187,11 +187,15 @@ public class LogicClusterIndecreaseHandler extends BaseWorkOrderHandler {
          final Result<List<ESClusterRoleHostVO>> resultAfter = clusterNodeManager.listClusterLogicNode(
                 content.getLogicClusterId().intValue());
         Long afterSize=0L;
-        if (resultAfter.success() && CollectionUtils.isNotEmpty(resultAfter.getData())){
-            afterSize=
-                    resultAfter.getData().stream().map(ESClusterRoleHostVO::getRegionName).distinct().map(StringUtils::isNotBlank)
-                    .count();
-            
+        if (resultAfter.success() && CollectionUtils.isNotEmpty(resultAfter.getData())) {
+            afterSize = resultAfter.getData().stream().map(ESClusterRoleHostVO::getId).distinct().count();
+            // 更新逻辑集群下的节点数目
+            Long logicClusterId = content.getLogicClusterId();
+            ESLogicClusterDTO esLogicClusterDTO = new ESLogicClusterDTO();
+            esLogicClusterDTO.setId(logicClusterId);
+            esLogicClusterDTO.setDataNodeNum(Math.toIntExact(afterSize));
+            clusterLogicService.editClusterLogicNotCheck(esLogicClusterDTO);
+        
         }
         
         operateRecordService.save(new OperateRecord.Builder().bizId(content.getLogicClusterId())
@@ -199,11 +203,6 @@ public class LogicClusterIndecreaseHandler extends BaseWorkOrderHandler {
             .content(String.format("%s：【%d】->【%d】",afterSize>beforeSize?"扩容":"缩容",beforeSize,afterSize))
             .userOperation(workOrder.getSubmitor())
             .project(projectService.getProjectBriefByProjectId(workOrder.getSubmitorProjectId())).build());
-        //todo 后续工程清理
-        //List<String> administrators = getOPList().stream().map(UserBriefVO::getUserName).collect(Collectors.toList());
-        //return Result.buildSuccWithMsg(
-        //    String.format("请联系管理员【%s】进行后续操作", administrators.get(new Random().nextInt(administrators.size()))));
-        //当管理员扩容分配完成，就已经自动绑定了region，完成了扩缩容，不需要再进行下一步冗余操作
         return Result.buildFrom(regionEditResult);
     }
 }

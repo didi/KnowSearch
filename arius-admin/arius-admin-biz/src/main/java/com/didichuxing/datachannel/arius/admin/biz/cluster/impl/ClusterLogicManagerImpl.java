@@ -564,7 +564,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
 
             updateLogicClusterDTO.setHealth(ClusterUtils.getClusterLogicHealthByClusterHealth(clusterHealthSet));
             setClusterLogicInfo(updateLogicClusterDTO,clusterRegion);
-            clusterLogicService.editClusterLogicNotCheck(updateLogicClusterDTO, AriusUser.SYSTEM.getDesc());
+            clusterLogicService.editClusterLogicNotCheck(updateLogicClusterDTO);
         } catch (Exception e) {
             LOGGER.error("class=ClusterLogicManagerImpl||method=updateClusterLogicHealth||clusterLogicId={}||errMsg={}",
                     clusterLogicId, e.getMessage(), e);
