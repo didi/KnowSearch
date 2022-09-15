@@ -230,7 +230,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrvImpl impleme
             }
             final Result<MappingConfig> beforeResult = templatePhyMappingManager
                 .getMapping(masterTemplatePhysical.getCluster(), masterTemplatePhysical.getName());
-
+            JSONObject beforeData = beforeResult.getData().toJson();
             Result<MappingConfig> getDiffResult = getDiffMapping(masterTemplatePhysical.getCluster(),
                 masterTemplatePhysical.getName(), fields);
             if (getDiffResult.failed()) {
@@ -247,7 +247,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrvImpl impleme
             final Result<MappingConfig> afterResult = templatePhyMappingManager
                 .getMapping(masterTemplatePhysical.getCluster(), masterTemplatePhysical.getName());
             operateRecordService.saveOperateRecordWithManualTrigger(
-                    new TemplateMappingOperateRecord(beforeResult.getData(), afterResult.getData()).toString(),
+                    new TemplateMappingOperateRecord(beforeData, afterResult.getData()).toString(),
                     operator, projectId, logicId, OperateTypeEnum.TEMPLATE_MANAGEMENT_EDIT_MAPPING);
         }
 
@@ -397,16 +397,17 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrvImpl impleme
             }
             final Result<MappingConfig> beforeResult = templatePhyMappingManager
                 .getMapping(templatePhysical.getCluster(), templatePhysical.getName());
+            JSONObject beforeData = beforeResult.getData().toJson();
             Result<Void> updateMappingResult = templatePhyMappingManager.updateMapping(templatePhysical.getCluster(),
                 templatePhysical.getName(), templateMappingConfig.toJson().toJSONString());
-
+            
             if (updateMappingResult.failed()) {
                 return Result.buildFrom(updateMappingResult);
             }
             final Result<MappingConfig> afterResult = templatePhyMappingManager
                 .getMapping(templatePhysical.getCluster(), templatePhysical.getName());
             operateRecordService.saveOperateRecordWithManualTrigger(
-                    new TemplateMappingOperateRecord(beforeResult.getData(), afterResult.getData()).toString(),
+                    new TemplateMappingOperateRecord(beforeData, afterResult.getData()).toString(),
                     operator, templateLogicWithPhysical.getProjectId(), logicId,
                     OperateTypeEnum.TEMPLATE_MANAGEMENT_EDIT_MAPPING);
         }
