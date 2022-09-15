@@ -1,6 +1,7 @@
 package com.didiglobal.logi.op.manager.domain.task.service;
 
 import com.didiglobal.logi.op.manager.domain.task.entity.Task;
+import com.didiglobal.logi.op.manager.domain.task.entity.value.TaskDetail;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 import com.didiglobal.logi.op.manager.infrastructure.common.Tuple;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralGroupConfig;
@@ -83,6 +84,14 @@ public interface TaskDomainService {
      * @return 任务task
      */
     Result<Task> getTaskById(int taskId);
+
+    /**
+     * 通过id获取任务详情
+     *
+     * @param taskId 任务id
+     * @return 任务详情列表
+     */
+    Result<List<TaskDetail>> listTaskDetailByTaskId(int taskId);
 
     /**
      * 获取分组配置
