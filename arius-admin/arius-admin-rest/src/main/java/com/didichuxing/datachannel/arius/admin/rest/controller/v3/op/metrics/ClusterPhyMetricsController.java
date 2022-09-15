@@ -51,18 +51,18 @@ public class ClusterPhyMetricsController {
     @PostMapping("/config-metrics")
     @ResponseBody
     @ApiOperation(value = "获取账号下已配置指标类型")
-    public Result<List<String>> getClusterPhyMetricsTypes(@RequestBody MetricsConfigInfoDTO param,
+    public Result<List<String>> getAccountMetricsTypes(@RequestBody UserConfigInfoDTO param,
                                                           HttpServletRequest request) {
         return Result
-            .buildSucc(clusterPhyMetricsManager.getUserNameConfigMetrics(param, HttpRequestUtil.getOperator(request)));
+            .buildSucc(clusterPhyMetricsManager.getUserNameConfigMetrics(param, HttpRequestUtil.getOperator(request),HttpRequestUtil.getProjectId(request)));
     }
 
     @PutMapping("/config-metrics")
     @ResponseBody
     @ApiOperation(value = "更新账号下已配置指标类型")
-    public Result<Integer> updateClusterPhyMetricsTypes(@RequestBody MetricsConfigInfoDTO param,
+    public Result<Integer> updateAccountMetricsTypes(@RequestBody UserConfigInfoDTO param,
                                                         HttpServletRequest request) {
-        return clusterPhyMetricsManager.updateUserNameConfigMetrics(param, HttpRequestUtil.getOperator(request));
+        return clusterPhyMetricsManager.updateUserNameConfigMetrics(param, HttpRequestUtil.getOperator(request),HttpRequestUtil.getProjectId(request));
     }
 
     @PostMapping("/overview")

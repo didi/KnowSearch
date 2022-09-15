@@ -4,12 +4,12 @@ package com.didichuxing.datachannel.arius.admin.common.constant.metrics;
  * @author wangpengkai
  */
 
-public enum MetricsTypeEnum {
+public enum UserConfigTypeEnum {
 
                              /**
                               * code表示编号
-                              * firstMetricsType表示一级目录下指标配置信息，如集群看板和网关看板
-                              * secondMetricsType表示二级目录下指标配置信息，如集群看板下的总览指标类型
+                              * firstUserConfigType表示一级目录下指标配置信息，如集群看板和网关看板
+                              * secondUserConfigType表示二级目录下指标配置信息，如集群看板下的总览指标类型
                               */
                              /**
                               * 未知的分类
@@ -77,39 +77,44 @@ public enum MetricsTypeEnum {
                              /**
                               * dashboard 索引指标配置
                               */
-                             DASHBOARD_INDEX(43, MetricsConstant.DASHBOARD, "index");
+                             DASHBOARD_INDEX(43, MetricsConstant.DASHBOARD, "index"),
 
-    MetricsTypeEnum(int code, String firstMetricsType, String secondMetricsType) {
+                            /**
+                             * 检索查询 查询模板指标配置
+                             */
+                            QUERY_TEMPLATE(44, "searchQuery", "searchTemplate");
+
+    UserConfigTypeEnum(int code, String firstUserConfigType, String secondUserConfigType) {
         this.code = code;
-        this.firstMetricsType = firstMetricsType;
-        this.secondMetricsType = secondMetricsType;
+        this.firstUserConfigType = firstUserConfigType;
+        this.secondUserConfigType = secondUserConfigType;
     }
 
     private int    code;
-    private String firstMetricsType;
-    private String secondMetricsType;
+    private String firstUserConfigType;
+    private String secondUserConfigType;
 
     public int getCode() {
         return code;
     }
 
-    public String getFirstMetricsType() {
-        return firstMetricsType;
+    public String getFirstUserConfigType() {
+        return firstUserConfigType;
     }
 
-    public String getSecondMetricsType() {
-        return secondMetricsType;
+    public String getSecondUserConfigType() {
+        return secondUserConfigType;
     }
 
-    public static MetricsTypeEnum valueOfCode(Integer code) {
+    public static UserConfigTypeEnum valueOfCode(Integer code) {
         if (null == code) {
-            return MetricsTypeEnum.UNKNOWN;
+            return UserConfigTypeEnum.UNKNOWN;
         }
-        for (MetricsTypeEnum typeEnum : MetricsTypeEnum.values()) {
+        for (UserConfigTypeEnum typeEnum : UserConfigTypeEnum.values()) {
             if (code.equals(typeEnum.getCode())) {
                 return typeEnum;
             }
         }
-        return MetricsTypeEnum.UNKNOWN;
+        return UserConfigTypeEnum.UNKNOWN;
     }
 }

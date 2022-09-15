@@ -4,6 +4,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResu
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.dsl.DslQueryLimitDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.dsl.template.DslTemplateConditionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.UserConfigInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.DslTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 
@@ -47,4 +48,22 @@ public interface DslTemplateManager {
      */
     PaginationResult<DslTemplateVO> getDslTemplatePage(Integer projectId,
                                                        DslTemplateConditionDTO queryDTO) throws NotFindSubclassException;
+
+    /**
+     * 查询查询模板个性化配置
+     * @param param 配置类型
+     * @param operator 用户
+     * @param projectId 用户所属应用
+     * @return
+     */
+    List<String> getUserNameProjectSearchTemplateConfig(UserConfigInfoDTO param, String operator, Integer projectId);
+
+    /**
+     * 更新查询模板个性化配置
+     * @param userConfigInfoDTO
+     * @param userName
+     * @param projectId
+     * @return
+     */
+    Result<Integer> updateUserNameProjectSearchTemplateConfig(UserConfigInfoDTO userConfigInfoDTO, String userName, Integer projectId);
 }

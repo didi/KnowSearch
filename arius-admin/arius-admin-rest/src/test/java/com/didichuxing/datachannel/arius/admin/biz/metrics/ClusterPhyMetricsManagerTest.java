@@ -6,7 +6,7 @@ import static org.mockito.Mockito.when;
 import com.didichuxing.datachannel.arius.admin.biz.metrics.impl.ClusterPhyMetricsManagerImpl;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsClusterPhyDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsConfigInfoDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.UserConfigInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MultiMetricsClusterPhyNodeDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
@@ -25,7 +25,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.Cluste
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterRoleHostService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
-import com.didichuxing.datachannel.arius.admin.core.service.metrics.UserMetricsConfigService;
+import com.didichuxing.datachannel.arius.admin.core.service.metrics.UserConfigService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.NodeStatsService;
 import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
@@ -33,6 +33,8 @@ import com.didiglobal.logi.security.service.ProjectService;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
+import com.didiglobal.logi.security.util.HttpRequestUtil;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
@@ -59,7 +61,7 @@ class ClusterPhyMetricsManagerTest {
     @Mock
     private ProjectService               projectService;
     @Mock
-    private UserMetricsConfigService     userMetricsConfigService;
+    private UserConfigService     userConfigService;
     @Mock
     private NodeStatsService             nodeStatsService;
     @Mock
@@ -889,30 +891,30 @@ class ClusterPhyMetricsManagerTest {
     @Test
     void getUserNameConfigMetricsTest() {
         // Setup
-        final MetricsConfigInfoDTO metricsConfigInfoDTO = new MetricsConfigInfoDTO("userName", "firstMetricsType",
-            "secondMetricsType", Arrays.asList("value"));
-        when(userMetricsConfigService.getMetricsByTypeAndUserName(
-            new MetricsConfigInfoDTO("userName", "firstMetricsType", "secondMetricsType", Arrays.asList("value"))))
+        final UserConfigInfoDTO userConfigInfoDTO = new UserConfigInfoDTO("userName", "firstUserConfigType",
+            "secondUserConfigType", Arrays.asList("value"),1,1);
+        when(userConfigService.getMetricsByTypeAndUserName(
+            new UserConfigInfoDTO("userName", "firstUserConfigType", "secondUserConfigType", Arrays.asList("value"),1,1)))
                 .thenReturn(Arrays.asList("value"));
 
         // Run the test
-        final List<String> result = clusterPhyMetricsManager.getUserNameConfigMetrics(metricsConfigInfoDTO, "userName");
+        final List<String> result = clusterPhyMetricsManager.getUserNameConfigMetrics(userConfigInfoDTO, "userName", 1);
 
         // Verify the results
         assertThat(result).isEqualTo(Arrays.asList("value"));
     }
 
     @Test
-    void getUserNameConfigMetricsUserMetricsConfigServiceReturnsNoItemsTest() {
+    void getUserNameConfigMetricsUserConfigServiceReturnsNoItemsTest() {
         // Setup
-        final MetricsConfigInfoDTO metricsConfigInfoDTO = new MetricsConfigInfoDTO("userName", "firstMetricsType",
-            "secondMetricsType", Arrays.asList("value"));
-        when(userMetricsConfigService.getMetricsByTypeAndUserName(
-            new MetricsConfigInfoDTO("userName", "firstMetricsType", "secondMetricsType", Arrays.asList("value"))))
+        final UserConfigInfoDTO userConfigInfoDTO = new UserConfigInfoDTO("userName", "firstUserConfigType",
+            "secondUserConfigType", Arrays.asList("value"),1,1);
+        when(userConfigService.getMetricsByTypeAndUserName(
+            new UserConfigInfoDTO("userName", "firstUserConfigType", "secondUserConfigType", Arrays.asList("value"),1,1)))
                 .thenReturn(Collections.emptyList());
 
         // Run the test
-        final List<String> result = clusterPhyMetricsManager.getUserNameConfigMetrics(metricsConfigInfoDTO, "userName");
+        final List<String> result = clusterPhyMetricsManager.getUserNameConfigMetrics(userConfigInfoDTO, "userName", 1);
 
         // Verify the results
         assertThat(result).isEqualTo(Collections.emptyList());
@@ -921,48 +923,48 @@ class ClusterPhyMetricsManagerTest {
     @Test
     void updateUserNameConfigMetricsTest() {
         // Setup
-        final MetricsConfigInfoDTO param = new MetricsConfigInfoDTO("userName", "firstMetricsType", "secondMetricsType",
-            Arrays.asList("value"));
+        final UserConfigInfoDTO param = new UserConfigInfoDTO("userName", "firstUserConfigType", "secondUserConfigType",
+            Arrays.asList("value"),1,1);
         final Result<Integer> expectedResult = Result.buildFail(0);
-        when(userMetricsConfigService.updateByMetricsByTypeAndUserName(
-            new MetricsConfigInfoDTO("userName", "firstMetricsType", "secondMetricsType", Arrays.asList("value"))))
+        when(userConfigService.updateByMetricsByTypeAndUserName(
+            new UserConfigInfoDTO("userName", "firstUserConfigType", "secondUserConfigType", Arrays.asList("value"),1,1)))
                 .thenReturn(Result.buildFail(0));
 
         // Run the test
-        final Result<Integer> result = clusterPhyMetricsManager.updateUserNameConfigMetrics(param, "userName");
+        final Result<Integer> result = clusterPhyMetricsManager.updateUserNameConfigMetrics(param, "userName",1);
 
         // Verify the results
         assertThat(result).isEqualTo(expectedResult);
     }
 
     @Test
-    void updateUserNameConfigMetricsUserMetricsConfigServiceReturnsNoItemTest() {
+    void updateUserNameConfigMetricsUserConfigServiceReturnsNoItemTest() {
         // Setup
-        final MetricsConfigInfoDTO param = new MetricsConfigInfoDTO("userName", "firstMetricsType", "secondMetricsType",
-            Arrays.asList("value"));
-        when(userMetricsConfigService.updateByMetricsByTypeAndUserName(
-            new MetricsConfigInfoDTO("userName", "firstMetricsType", "secondMetricsType", Arrays.asList("value"))))
+        final UserConfigInfoDTO param = new UserConfigInfoDTO("userName", "firstUserConfigType", "secondUserConfigType",
+            Arrays.asList("value"),1,1);
+        when(userConfigService.updateByMetricsByTypeAndUserName(
+            new UserConfigInfoDTO("userName", "firstUserConfigType", "secondUserConfigType", Arrays.asList("value"),1,1)))
                 .thenReturn(Result.buildSucc());
 
         // Run the test
-        final Result<Integer> result = clusterPhyMetricsManager.updateUserNameConfigMetrics(param, "userName");
+        final Result<Integer> result = clusterPhyMetricsManager.updateUserNameConfigMetrics(param, "userName",1);
 
         // Verify the results
         assertThat(result).isEqualTo(Result.buildSucc());
     }
 
     @Test
-    void updateUserNameConfigMetricsUserMetricsConfigServiceReturnsFailureTest() {
+    void updateUserNameConfigMetricsUserConfigServiceReturnsFailureTest() {
         // Setup
-        final MetricsConfigInfoDTO param = new MetricsConfigInfoDTO("userName", "firstMetricsType", "secondMetricsType",
-            Arrays.asList("value"));
+        final UserConfigInfoDTO param = new UserConfigInfoDTO("userName", "firstUserConfigType", "secondUserConfigType",
+            Arrays.asList("value"),1,1);
         final Result<Integer> expectedResult = Result.buildFail(0);
-        when(userMetricsConfigService.updateByMetricsByTypeAndUserName(
-            new MetricsConfigInfoDTO("userName", "firstMetricsType", "secondMetricsType", Arrays.asList("value"))))
+        when(userConfigService.updateByMetricsByTypeAndUserName(
+            new UserConfigInfoDTO("userName", "firstUserConfigType", "secondUserConfigType", Arrays.asList("value"),1,1)))
                 .thenReturn(Result.buildFail());
 
         // Run the test
-        final Result<Integer> result = clusterPhyMetricsManager.updateUserNameConfigMetrics(param, "userName");
+        final Result<Integer> result = clusterPhyMetricsManager.updateUserNameConfigMetrics(param, "userName",1);
 
         // Verify the results
         assertThat(result).isEqualTo(expectedResult);

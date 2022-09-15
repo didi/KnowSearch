@@ -7,14 +7,17 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResu
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.dsl.DslQueryLimitDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.dsl.template.DslTemplateConditionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.UserConfigInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.dsl.DslTemplatePO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.DslTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
+import com.didichuxing.datachannel.arius.admin.common.constant.metrics.ConfigTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
+import com.didichuxing.datachannel.arius.admin.core.service.metrics.UserConfigService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.DslTemplateService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
@@ -44,6 +47,8 @@ public class DslTemplateManagerImpl implements DslTemplateManager {
 
     @Autowired
     private HandleFactory        handleFactory;
+    @Autowired
+    private UserConfigService userConfigService;
     @Override
     public Result<Boolean> updateDslTemplateQueryLimit(Integer projectId,String operator,List<DslQueryLimitDTO> dslTemplateList) {
         Boolean succeed =  dslTemplateService.updateDslTemplateQueryLimit(dslTemplateList);
@@ -99,6 +104,27 @@ public class DslTemplateManagerImpl implements DslTemplateManager {
             "class=DslTemplateManagerImpl||method=getDslTemplatePage||msg=failed to get the DslTemplatePageSearchHandle");
 
         return PaginationResult.buildFail("分页获取DSL查询模版信息失败");
+    }
+
+    @Override
+    public List<String> getUserNameProjectSearchTemplateConfig(UserConfigInfoDTO userConfigInfoDTO, String userName, Integer projectId) {
+        userConfigInfoDTO.setUserName(userName);
+        userConfigInfoDTO.setProjectId(projectId);
+        userConfigInfoDTO.setConfigType(ConfigTypeEnum.RETRIEVE_TEMPLATE.getCode());
+        return userConfigService.getMetricsByTypeAndUserName(userConfigInfoDTO);
+    }
+
+    @Override
+    public Result<Integer> updateUserNameProjectSearchTemplateConfig(UserConfigInfoDTO param, String userName, Integer projectId) {
+        param.setUserName(userName);
+        param.setProjectId(projectId);
+        param.setConfigType(ConfigTypeEnum.RETRIEVE_TEMPLATE.getCode());
+        Result<Integer> result = userConfigService.updateByMetricsByTypeAndUserName(param);
+        if (result.failed()) {
+            LOGGER.warn("class=ClusterPhyMetricsManagerImpl||method=updateDomainAccountConfigMetrics||errMsg={}",
+                    "用户指标配置信息更新出错");
+        }
+        return result;
     }
 
 }

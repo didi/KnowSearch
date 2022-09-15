@@ -15,8 +15,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@TableName("user_metrics_config_info")
-public class UserMetricsConfigPO extends BasePO {
+@TableName("user_config_info")
+public class UserConfigPO extends BasePO {
     /**
      * id自增
      */
@@ -30,5 +30,15 @@ public class UserMetricsConfigPO extends BasePO {
     /**
      * 指标看板的配置
      */
-    private String  metricInfo;
+    private String  configInfo;
+
+    /**
+     * 应用ID
+     */
+    private Integer projectId;
+
+    /**
+     * 配置类型
+     */
+    private Integer configType;
 }

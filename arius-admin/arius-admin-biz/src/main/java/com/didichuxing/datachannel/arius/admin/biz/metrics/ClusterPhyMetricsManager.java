@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsClusterPhyDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsConfigInfoDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.UserConfigInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MultiMetricsClusterPhyNodeDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.ESClusterTaskDetailVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.top.VariousLineChartMetricsVO;
@@ -54,20 +54,21 @@ public interface ClusterPhyMetricsManager {
     /**
      * 获取用户配置指标
      *
-     @param param 入参
-     @param userName 用户名
-     
      @return {@code List<String>}
+      * @param param 入参
+     * @param userName 用户名
+     * @param projectId
      */
-    List<String> getUserNameConfigMetrics(MetricsConfigInfoDTO param, String userName);
+    List<String> getUserNameConfigMetrics(UserConfigInfoDTO param, String userName, Integer projectId);
 
     /**
      * 更新账号下已配置的指标类型
-     @param param 入参
-     @param userName 用户名
      @return {@code Result<Integer>}
+      * @param param 入参
+     * @param userName 用户名
+     * @param projectId
      */
-    Result<Integer> updateUserNameConfigMetrics(MetricsConfigInfoDTO param, String userName);
+    Result<Integer> updateUserNameConfigMetrics(UserConfigInfoDTO param, String userName, Integer projectId);
 
     /**
      * 获取物理集群中的索引列表

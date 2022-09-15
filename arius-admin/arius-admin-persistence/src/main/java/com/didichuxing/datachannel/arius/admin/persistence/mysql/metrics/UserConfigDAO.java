@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.persistence.mysql.metrics;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.metrics.UserMetricsConfigPO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.metrics.UserConfigPO;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -11,5 +11,6 @@ import org.springframework.stereotype.Repository;
  * @date 2022/05/24
  */
 @Repository
-public interface UserMetricsConfigDAO extends BaseMapper<UserMetricsConfigPO> {
+public interface UserConfigDAO extends BaseMapper<UserConfigPO> {
+
 }
