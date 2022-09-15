@@ -104,7 +104,7 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
     }
 
     /**
-     * 逻辑集群绑定同一个物理集群的region的时候需要根据类型进行过滤
+     * 逻辑集群绑定同一个物理集群的region的时候需要根据类型进行过滤，返回的region不包含cold region
      * @param phyCluster 物理集群名称
      * @param clusterLogicType 逻辑集群类型
      * @return
@@ -127,7 +127,7 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
                 String.format("物理集群[%s]类型为[%s], 不满足逻辑集群类型[%s], 请调整类型一致", phyCluster, resourceType, clusterLogicType));
         }
 
-        List<ClusterRegion> clusterRegions = clusterRegionService.listPhyClusterRegions(phyCluster);
+        List<ClusterRegion> clusterRegions = clusterRegionService.listPhyClusterRegions(phyCluster).stream().filter(notColdTruePreByClusterRegion).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(clusterRegions)) {
             return Result.buildFail(String.format("物理集群[%s]无可用region, 请前往物理集群-region划分进行region创建", phyCluster));
         }
@@ -348,7 +348,18 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
         }
     
     };
-   
+
+    private final static Predicate<ClusterRegion> notColdTruePreByClusterRegion = clusterRegion -> {
+        if (StringUtils.isBlank(clusterRegion.getConfig())) {
+            return Boolean.TRUE;
+        }
+        try {
+            return !JSON.parseObject(clusterRegion.getConfig()).getBoolean(COLD);
+        } catch (Exception e) {
+            return Boolean.FALSE;
+        }
+
+    };
     /**
      * 对于逻辑集群绑定的物理集群的版本进行一致性校验
      *
