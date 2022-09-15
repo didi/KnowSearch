@@ -170,7 +170,9 @@ public class TaskService {
         if (null == taskId) {
             return Result.fail(ResultCode.PARAM_ERROR.getCode(), "taskId为null");
         }
-        if (null == taskDomainService.getTaskById(taskId)) {
+        if (taskDomainService.getTaskById(taskId).failed()) {
+            return Result.fail(ResultCode.PARAM_ERROR.getCode(), "taskId获取任务失败");
+        }else if (null == taskDomainService.getTaskById(taskId).getData()) {
             return Result.fail(ResultCode.TASK_NOT_EXIST_ERROR.getCode(),"传入的任务id找不到对应的任务，请重新输入");
         }
         Result<List<TaskDetail>> taskDetailListResult = taskDomainService.listTaskDetailByTaskId(taskId);
