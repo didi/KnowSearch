@@ -28,7 +28,6 @@ public class LogicClusterIndecreaseContent extends BaseContent {
      * dataNode的个数
      */
     private int                                dataNodeNu;
-
     /**
      * 备注
      */
