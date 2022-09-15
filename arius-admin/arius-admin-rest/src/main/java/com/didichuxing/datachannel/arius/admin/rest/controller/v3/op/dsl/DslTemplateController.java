@@ -1,5 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.dsl;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
+
 import com.didichuxing.datachannel.arius.admin.biz.dsl.DslTemplateManager;
 import com.didichuxing.datachannel.arius.admin.biz.gateway.GatewayJoinLogManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
@@ -15,14 +17,18 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import java.util.List;
+import javax.servlet.http.HttpServletRequest;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
-import javax.servlet.http.HttpServletRequest;
-import java.util.List;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * @author cjm
@@ -83,5 +89,11 @@ public class DslTemplateController {
     public Result<List<GatewayJoinVO>> errorList(@RequestBody GatewayJoinQueryDTO queryDTO,
                                                  HttpServletRequest request) {
         return gatewayJoinLogManager.getGatewayJoinErrorList(HttpRequestUtil.getProjectId(request), queryDTO);
+    }
+    
+    @GetMapping("/{indexName}")
+    public Result<String> getDSLByProjectIdAndIndexName(@PathVariable(value = "indexName") String indexName,
+                                                 HttpServletRequest request) {
+        return gatewayJoinLogManager.getDSLByProjectIdAndIndexName(HttpRequestUtil.getProjectId(request), indexName);
     }
 }

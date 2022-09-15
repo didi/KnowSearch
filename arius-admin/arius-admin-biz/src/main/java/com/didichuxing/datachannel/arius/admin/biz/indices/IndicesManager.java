@@ -238,15 +238,17 @@ public interface IndicesManager {
     /**
      * 获取物理集群中的索引列表
      */
-    Result<List<String>> getClusterPhyIndexName(String clusterPhyName, Integer projectId);
+    Result<List<String>> getClusterPhyIndexName(String clusterPhyName, Integer projectId, String index);
 
     /**
      * 获取逻辑集群下的索引列表
+     *
      * @param clusterLogicName
      * @param projectId
+     * @param index
      * @return
      */
-    Result<List<String>> getClusterLogicIndexName(String clusterLogicName, Integer projectId);
+    Result<List<String>> getClusterLogicIndexName(String clusterLogicName, Integer projectId, String index);
 
     /**
      * 判断索引是否存在

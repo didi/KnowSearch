@@ -1,0 +1,37 @@
+{
+  "size": 1,
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "exists": {
+            "field": "indices"
+          }
+        },
+        {
+          "term": {
+            "queryRequest": "true"
+          }
+        },
+        {
+          "term": {
+            "indices": "%s"
+          }
+        },
+        {
+          "term": {
+            "projectId": %d
+          }
+        }
+      ]
+    }
+  },
+  "sort": [
+    {
+      "timeStamp": {
+        "order": "desc"
+      }
+    }
+  ],
+  "_source": "dsl"
+}

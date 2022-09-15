@@ -85,4 +85,26 @@ public interface ESIndexCatService {
     Map</*clusterPhy*/String,/*docCount*/Integer> syncGetByClusterPhyList(List<String> clusterPhyList);
     
     IndexCatCell syncGetCatIndexInfoById(/* clusterPhy*/String clusterPhy,/*IndexName*/ String index);
+    
+   
+    /**
+     * 通过projectId和模糊索引获取索引列表
+     *
+     * @param projectId 项目编号
+     * @param clusterLogicName 集群名称，即配置文件中的集群名称。
+     * @param index 索引名称
+     * @return List<String>
+     */
+    List<String> syncGetIndexListByProjectIdAndFuzzyIndexAndClusterLogic(Integer projectId, String clusterLogicName, String index);
+    
+    /**
+     * 通过项目id、集群物理名、模糊索引获取索引列表
+     *
+     * @param clusterPhyName 集群的物理名称，例如“es-cluster-01”
+     * @param index          索引名称
+     * @return List<String>
+     */
+    List<String> syncGetIndexListByProjectIdAndFuzzyIndexAndClusterPhy( String clusterPhyName,
+                                                                       String index);
+
 }
