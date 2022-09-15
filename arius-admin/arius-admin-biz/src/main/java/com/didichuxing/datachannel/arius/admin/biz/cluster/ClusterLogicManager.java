@@ -3,6 +3,7 @@ package com.didichuxing.datachannel.arius.admin.biz.cluster;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterJoinDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterLogicConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterWithRegionDTO;
@@ -234,5 +235,14 @@ public interface ClusterLogicManager {
      * @return List<String> 逻辑集群名称列表
      */
     List<String> listClusterLogicNameByApp(Integer projectId);
-
+    
+     /**
+     * 加入物理集群并创建逻辑集群
+     *
+     * @param param ClusterJoinDTO
+     * @param projectId 项目编号
+     * @return joinClusterPhyAndCreateLogicCluster 方法的结果。
+     */
+    Result<Long> joinClusterPhyAndCreateLogicCluster(ClusterJoinDTO param, Integer projectId)
+            throws AdminOperateException;
 }

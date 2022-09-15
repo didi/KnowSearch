@@ -85,7 +85,11 @@ public class DslTemplateController {
                                                  HttpServletRequest request) {
         return gatewayJoinLogManager.getGatewayJoinErrorList(HttpRequestUtil.getProjectId(request), queryDTO);
     }
-
+    @GetMapping("/{indexName}")
+    public Result<String> getDSLByProjectIdAndIndexName(@PathVariable(value = "indexName") String indexName,
+                                                        HttpServletRequest request) {
+        return gatewayJoinLogManager.getDSLByProjectIdAndIndexName(HttpRequestUtil.getProjectId(request), indexName);
+    }
     @PostMapping("/dsl-template-config")
     @ResponseBody
     @ApiOperation(value = "获取账号下已配置字段类型")

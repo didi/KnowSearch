@@ -7,7 +7,6 @@ import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.task.OpTaskManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.impl.BaseTemplateSrvImpl;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.OpTaskProcessDTO;
@@ -22,6 +21,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.task.detail.DC
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplatePhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateWithPhyTemplates;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.task.WorkTaskVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.DCDRSingleTemplateMasterSlaveSwitchDetailVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.DCDRTasksDetailVO;
@@ -31,7 +31,6 @@ import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
 import com.didichuxing.datachannel.arius.admin.common.constant.dcdr.DCDRStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.dcdr.DCDRSwithTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDCDRStepEnum;
@@ -246,15 +245,16 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
 
         //4. 记录操作
         if (result.success()) {
-            operateRecordService.save(new OperateRecord.Builder()
-                .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID)).content(
-
-                    String.format("创建DCDR链路，主集群：%s，从集群：%s", sourceClusterPhyResult.getData().getCluster(),
-                        targetClusterPhyResult.getData().getCluster()))
-                .userOperation(operator).bizId(templateId).triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                .operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE_DCDR_SETTING)
-
-                .build());
+            // 如果操作成功，则将 hasDCDR 设置为 true, 防止用户多次点击
+            IndexTemplatePO indexTemplatePO = new IndexTemplatePO();
+            indexTemplatePO.setId(templateId);
+            indexTemplatePO.setHasDCDR(true);
+            indexTemplatePO.setCheckPointDiff(0L);
+            indexTemplateService.update(indexTemplatePO);
+            operateRecordService.saveOperateRecordWithManualTrigger(
+                    String.format("创建 DCDR 链路，主集群：%s，从集群：%s", sourceClusterPhyResult.getData().getCluster(),
+                            targetClusterPhyResult.getData().getCluster()), operator, projectId, templateId,
+                    OperateTypeEnum.TEMPLATE_SERVICE_DCDR_SETTING);
         }
         return result;
     }
@@ -347,14 +347,9 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
                             param.getPhysicalIds());
                     }
                 }
-                operateRecordService
-                    .save(new OperateRecord.Builder()
-                            .project(projectService.getProjectBriefByProjectId(projectId))
-                            .operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE_DCDR_SETTING)
-                        .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).bizId(templatePhysicalPO.getLogicId())
-                        .userOperation(operator).content("replicaCluster:" + param.getReplicaClusters())
-
-                        .build());
+                operateRecordService.saveOperateRecordWithManualTrigger("replicaCluster:" + param.getReplicaClusters(),
+                        operator, projectId, templatePhysicalPO.getLogicId(),
+                        OperateTypeEnum.TEMPLATE_SERVICE_DCDR_SETTING);
                 return Result.buildSucc();
             }
         }
@@ -401,16 +396,9 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
             //2.5 记录操作
             for (DCDRSingleTemplateMasterSlaveSwitchDetail dcdrTask : dcdrTasksDetail
                 .getDcdrSingleTemplateMasterSlaveSwitchDetailList()) {
-                operateRecordService.save(
-                        new OperateRecord.Builder()
-                                .operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE_DCDR_SETTING)
-                                .bizId(dcdrTask.getTemplateId())
-                                .userOperation(operator).content(String.format("【%s】%s",
-                                        indexTemplateService.getNameByTemplateLogicId(dcdrTask.getTemplateId().intValue()),
-                                        dcdrType))
-                                .project(projectService.getProjectBriefByProjectId(projectId))
-                        
-                                    .buildDefaultManualTrigger());
+                operateRecordService.saveOperateRecordWithManualTrigger(String.format("【%s】%s",
+                                indexTemplateService.getNameByTemplateLogicId(dcdrTask.getTemplateId().intValue()), dcdrType),
+                        operator, projectId, dcdrTask.getTemplateId(), OperateTypeEnum.TEMPLATE_SERVICE_DCDR_SETTING);
                 
             }
 
@@ -733,14 +721,13 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
 
         BatchProcessor.BatchProcessResult<String, Boolean> result = new BatchProcessor<String, Boolean>()
             .batchList(indices).batchSize(30).processor(items -> {
-                try {
                     return esIndexService.syncPutIndexSetting(cluster, items, DCDR_INDEX_SETTING,
                         String.valueOf(replicaIndex), "false", retryCount);
-                } catch (ESOperateException e) {
-                    return false;
-                }
             }).succChecker(succ -> succ).process();
-
+        if (!result.isSucc() && CollectionUtils.isNotEmpty(result.getErrorMap().values())) {
+            throw new ESOperateException(result.getErrorMap().values().stream().findFirst().get().getMessage());
+        
+        }
         return result.isSucc();
     }
 
@@ -969,18 +956,23 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
         dcdrdto.setReplicaClusters(Arrays.asList(slaveTemplate.getCluster()));
         return dcdrdto;
     }
-
-    private Result<Void> changeDCDRConfig(String cluster, List<String> indices,
-                                          boolean replicaIndex) throws ESOperateException {
-
-        // 修改配置
-        if (!syncDCDRSetting(cluster, indices, replicaIndex, TRY_TIMES_THREE)) {
-            return Result.buildFail("修改" + cluster + "索引dcdr配置失败");
+    
+    private Result<Void> changeDCDRConfig(String cluster, List<String> indices, boolean replicaIndex) {
+        try {
+            // 修改配置
+            if (!syncDCDRSetting(cluster, indices, replicaIndex, TRY_TIMES_THREE)) {
+                return Result.buildFail("修改" + cluster + "索引 dcdr 配置失败");
+            }
+        } catch (ESOperateException e) {
+            return Result.buildFail(String.format("修改 [%s] 索引 dcdr 配置失败, 原因是：%s", cluster, e.getMessage()));
         }
-
-        // reopen索引
-        if (!esIndexService.reOpenIndex(cluster, indices, TRY_TIMES_THREE)) {
-            return Result.buildFail("reOpen " + cluster + "索引失败");
+        try {
+            // reopen 索引
+            if (!esIndexService.reOpenIndex(cluster, indices, TRY_TIMES_THREE)) {
+                return Result.buildFail("reOpen" + cluster + "索引失败");
+            }
+        } catch (ESOperateException e) {
+            return Result.buildFail(String.format("reOpen[%s] 索引失败, 原因是：%s", cluster, e.getMessage()));
         }
 
         return Result.buildSucc();

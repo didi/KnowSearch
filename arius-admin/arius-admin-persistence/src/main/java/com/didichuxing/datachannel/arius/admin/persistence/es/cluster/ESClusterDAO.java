@@ -1,5 +1,50 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.cluster;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterQuickCommandMethodsEnum.ABNORMAL_SHARD_RETRY;
+import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterQuickCommandMethodsEnum.CLEAR_FIELDDATA_MEMORY;
+import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterQuickCommandMethodsEnum.HOT_THREAD;
+import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterQuickCommandMethodsEnum.PENDING_TASK;
+import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterQuickCommandMethodsEnum.TASK_MISSION_ANALYSIS;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ACTION;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.COUNT;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.DESCRIPTION;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.DOCS;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_OPERATE_MIN_TIMEOUT;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_OPERATE_TIMEOUT;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_ROLE_CLIENT;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_ROLE_COORDINATING_ONLY;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_ROLE_DATA;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_ROLE_DATA_ONLY;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_ROLE_INGEST;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_ROLE_MASTER;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_ROLE_MASTER_DATA;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_ROLE_MASTER_ONLY;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.FREE_IN_BYTES;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.FREE_PERCENT;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.FS;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.HEAP_MAX_IN_BYTES;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.HEAP_USED_IN_BYTES;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.INDICES;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.IP;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.JVM;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.MEM;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.NODE;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.NODES;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.OS;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.PARENT_TASK_ID;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.PENDING_TASKS;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.REBALANCE;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.RUNNING_TIME;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.SHARDS;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.START_TIME;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.STATUS;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.TASK_ID;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.TOTAL;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.TOTAL_IN_BYTES;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.UNASSIGN;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.USED_IN_BYTES;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.USED_PERCENT;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -15,7 +60,9 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESCluste
 import com.didichuxing.datachannel.arius.admin.common.bean.po.stats.ESClusterThreadPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import com.didichuxing.datachannel.arius.admin.common.exception.NullESClientException;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.common.util.ParsingExceptionUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.TimeValueUtil;
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
 import com.didiglobal.logi.elasticsearch.client.ESClient;
@@ -40,18 +87,18 @@ import com.didiglobal.logi.elasticsearch.client.response.cluster.updatesetting.E
 import com.didiglobal.logi.elasticsearch.client.response.indices.getalias.ESIndicesGetAliasResponse;
 import com.didiglobal.logi.elasticsearch.client.utils.JsonUtils;
 import com.google.common.collect.Lists;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.common.unit.ByteSizeValue;
 import org.elasticsearch.rest.RestStatus;
 import org.springframework.stereotype.Repository;
-
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterQuickCommandMethodsEnum.*;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.*;
 
 /**
  * @author d06679
@@ -100,15 +147,21 @@ public class ESClusterDAO extends BaseESDAO {
      * @param cluster 集群名称
      * @return response
      */
-    public ESClusterGetSettingsAllResponse getClusterSetting(String cluster) {
+    public ESClusterGetSettingsAllResponse getClusterSetting(String cluster) throws ESOperateException {
         ESClusterGetSettingsAllResponse response = null;
         ESClient client = esOpClient.getESClient(cluster);
-        if (null != client) {
-            response = client.admin().cluster()
-                .execute(ESClusterGetSettingsAllAction.INSTANCE, new ESClusterGetSettingsAllRequest())
-                .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+        if (null == client) {
+            throw new NullESClientException(cluster);
         }
-
+        try {
+        
+            response = client.admin().cluster()
+                    .execute(ESClusterGetSettingsAllAction.INSTANCE, new ESClusterGetSettingsAllRequest())
+                    .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
+            throw new ESOperateException(StringUtils.isNotBlank(exception) ? exception : e.getMessage());
+        }
         return response;
     }
 
@@ -119,19 +172,30 @@ public class ESClusterDAO extends BaseESDAO {
      * @param tcpAddresses 地址
      * @return true/false
      */
-    public boolean putPersistentRemoteClusters(String cluster, String remoteCluster, List<String> tcpAddresses) {
+    public boolean putPersistentRemoteClusters(String cluster, String remoteCluster, List<String> tcpAddresses)
+            throws ESOperateException {
         ESClient client = esOpClient.getESClient(cluster);
         if (null == client) {
-            return false;
+          throw new NullESClientException(cluster);
         }
 
         JSONArray addresses = new JSONArray();
         addresses.addAll(tcpAddresses);
-
-        ESClusterUpdateSettingsResponse response = client.admin().cluster().prepareUpdateSettings()
-            .addPersistent(remoteCluster, addresses).execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
-
-        return response.getAcknowledged();
+        try {
+        
+            ESClusterUpdateSettingsResponse response = client.admin().cluster().prepareUpdateSettings()
+                    .addPersistent(remoteCluster, addresses).execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+        
+            return response.getAcknowledged();
+        } catch (Exception e) {
+            String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
+            if (StringUtils.isNotBlank(exception)) {
+                throw new ESOperateException(exception);
+            }
+            LOGGER.error("class=ESClusterDAO||method=putPersistentRemoteClusters||clusterName={}", cluster, e);
+            return false;
+        }
+        
     }
 
     /**

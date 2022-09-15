@@ -8,8 +8,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.didichuxing.datachannel.arius.admin.biz.page.IndexPageSearchHandle;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord.Builder;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatCellDTO;
@@ -58,6 +56,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.Cluste
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
+import com.didichuxing.datachannel.arius.admin.core.service.es.ESClusterService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexCatService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
@@ -72,6 +71,8 @@ import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -102,6 +103,8 @@ public class IndicesManagerImpl implements IndicesManager {
 
     @Autowired
     private ESIndexCatService       esIndexCatService;
+    @Autowired
+    private ESClusterService esClusterService;
 
     @Autowired
     private ESIndexService          esIndexService;
@@ -186,14 +189,14 @@ public class IndicesManagerImpl implements IndicesManager {
             if (syncCreateIndexRet) {
                 //在分页查询的时候被强制要求deleteFlag=false，如果数据不存在deleteFlag会导致查询不到；
                 indexCreateDTO.setDeleteFlag(false);
+                indexCreateDTO.setTimestamp(LocalDateTime.now().toInstant(ZoneOffset.ofHours(8)).toEpochMilli());
                 succ = esIndexCatService.syncInsertCatIndex(Lists.newArrayList(indexCreateDTO), RETRY_COUNT);
             }
 
             if (succ) {
-                operateRecordService.save(new OperateRecord.Builder()
-                        .content(String.format("物理集群:[%s],创建索引：[%s]", indexCreateDTO.getCluster(), indexCreateDTO.getIndex()))
-                        .operationTypeEnum(OperateTypeEnum.INDEX_MANAGEMENT_CREATE).userOperation(operator)
-                        .project(projectService.getProjectBriefByProjectId(projectId)).bizId(indexCreateDTO.getIndex()).buildDefaultManualTrigger());
+                operateRecordService.saveOperateRecordWithManualTrigger(
+                        String.format("物理集群:[%s], 创建索引：[%s]", indexCreateDTO.getCluster(),
+                                indexCreateDTO.getIndex()), operator, projectId, indexCreateDTO.getIndex(), OperateTypeEnum.INDEX_MANAGEMENT_CREATE);
             }
         } catch (ESOperateException e) {
             LOGGER.error("class=IndicesManagerImpl||method=createIndex||msg=create index failed||index={}",
@@ -212,13 +215,10 @@ public class IndicesManagerImpl implements IndicesManager {
                 Result<Void> batchSetIndexFlagInvalidResult = updateIndexFlagInvalid(cluster, indexNameList);
                 if (batchSetIndexFlagInvalidResult.success()) {
                     for (String indexName : indexNameList) {
-                        operateRecordService
-                            .save(new OperateRecord.Builder().operationTypeEnum(OperateTypeEnum.INDEX_MANAGEMENT_DELETE)
-                                .userOperation(operator).content(String.format("删除索引：【%s】",  indexName))
-
-                                .project(projectService.getProjectBriefByProjectId(projectId)).bizId(indexName)
-
-                                .buildDefaultManualTrigger());
+    
+                        operateRecordService.saveOperateRecordWithManualTrigger(
+                                String.format("删除索引：【%s】", indexName), operator, projectId, indexName,
+                                OperateTypeEnum.INDEX_MANAGEMENT_DELETE);
                     }
 
                 }
@@ -282,12 +282,9 @@ public class IndicesManagerImpl implements IndicesManager {
                     return Result.buildFail("批量更新索引状态失败");
                 }
                 for (String indexName : indexNameList) {
-                    operateRecordService
-                        .save(new OperateRecord.Builder().project(projectService.getProjectBriefByProjectId(projectId))
-                            .content(String.format("开启索引：【%s】",  indexName)).userOperation(operator)
-
-                            .bizId(indexName).operationTypeEnum(OperateTypeEnum.INDEX_SERVICE_OP_INDEX)
-                            .buildDefaultManualTrigger());
+        
+                    operateRecordService.saveOperateRecordWithManualTrigger(String.format("开启索引：【%s】", indexName),
+                            operator, projectId, indexName, OperateTypeEnum.INDEX_SERVICE_OP_INDEX);
                 }
 
             } catch (ESOperateException e) {
@@ -316,15 +313,8 @@ public class IndicesManagerImpl implements IndicesManager {
                     return Result.buildFail("批量更新索引状态失败");
                 }
                 for (String indexName : indexNameList) {
-                    operateRecordService.save(
-                        new OperateRecord.Builder().content(String.format("关闭索引：【%s】",  indexName))
-                            .project(projectService.getProjectBriefByProjectId(projectId))
-                            .operationTypeEnum(OperateTypeEnum.INDEX_SERVICE_OP_INDEX).userOperation(operator)
-                            .bizId(indexName)
-
-                            .buildDefaultManualTrigger()
-
-                    );
+                    operateRecordService.saveOperateRecordWithManualTrigger(String.format("关闭索引：【%s】", indexName),
+                            operator, projectId, indexName, OperateTypeEnum.INDEX_SERVICE_OP_INDEX);
                 }
 
             } catch (ESOperateException e) {
@@ -403,11 +393,8 @@ public class IndicesManagerImpl implements IndicesManager {
                         
                         for (IndicesBlockSettingDTO param : params) {
                             String operateContent = String.format("【%s】:%s%s", param.getIndex(), value, writeOrRead);
-                            operateRecordService.save(new Builder().content(operateContent).userOperation(operator)
-                                    .bizId(param.getIndex())
-                                    .project(projectService.getProjectBriefByProjectId(projectId))
-                                    .operationTypeEnum(OperateTypeEnum.INDEX_SERVICE_READ_WRITE_CHANGE)
-                                    .buildDefaultManualTrigger());
+                            operateRecordService.saveOperateRecordWithManualTrigger(operateContent, operator, projectId,
+                                    param.getIndex(), OperateTypeEnum.INDEX_SERVICE_READ_WRITE_CHANGE);
                         }
 
                     }
@@ -478,15 +465,10 @@ public class IndicesManagerImpl implements IndicesManager {
             if (syncUpdateIndexMapping) {
 
                 final Result<IndexMappingVO> afterMapping = getMapping(param.getCluster(), indexName, projectId);
-
-                operateRecordService.save(new Builder()
-                    .project(projectService.getProjectBriefByProjectId(projectId)).userOperation(operate)
-                    .operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_EDIT_MAPPING)
-                    .content(new TemplateMappingOperateRecord(beforeMapping.getData(), afterMapping.getData()).toString())
-
-                    .bizId(indexName)
-
-                    .buildDefaultManualTrigger());
+    
+                operateRecordService.saveOperateRecordWithManualTrigger(
+                        new TemplateMappingOperateRecord(beforeMapping.getData(), afterMapping.getData()).toString(),
+                        operate, projectId, indexName, OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_EDIT_MAPPING);
             }
 
         } catch (ESOperateException e) {
@@ -543,11 +525,16 @@ public class IndicesManagerImpl implements IndicesManager {
         if (ret.failed()) {
             return Result.buildFrom(ret);
         }
+        
+        
+    
         final Result<IndexSettingVO> beforeSetting = getSetting(param.getCluster(), indexName, projectId);
+        IndexSettingsUtil.checkImmutableSettingAndCorrectSetting(param.getSetting(),projectId);
         JSONObject settingObj = JSON.parseObject(param.getSetting());
         if (null == settingObj) {
             return Result.buildFail("setting 配置非法");
         }
+        
         Map<String, IndexConfig> configMap = esIndexService.syncGetIndexSetting(phyCluster,
             Lists.newArrayList(indexName), RETRY_COUNT);
         Map<String, String> sourceSettings = AriusOptional.ofObjNullable(configMap.get(indexName))
@@ -560,14 +547,9 @@ public class IndicesManagerImpl implements IndicesManager {
                     Lists.newArrayList(indexName), finalSettingMap, RETRY_COUNT);
             if (syncPutIndexSettings) {
                 final Result<IndexSettingVO> afterSetting = getSetting(param.getCluster(), indexName, projectId);
-                operateRecordService.save(new OperateRecord.Builder()
-                        .project(projectService.getProjectBriefByProjectId(projectId)).userOperation(operator)
-                        .operationTypeEnum(OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_EDIT_SETTING)
-                        .content(new TemplateSettingOperateRecord(beforeSetting.getData(), afterSetting.getData()).toString())
-
-                        .bizId(indexName)
-
-                        .buildDefaultManualTrigger());
+                operateRecordService.saveOperateRecordWithManualTrigger(
+                        new TemplateSettingOperateRecord(beforeSetting.getData(), afterSetting.getData()).toString(),
+                        operator, projectId, indexName, OperateTypeEnum.INDEX_TEMPLATE_MANAGEMENT_EDIT_SETTING);
             }
         }
 
@@ -623,12 +605,10 @@ public class IndicesManagerImpl implements IndicesManager {
         String phyCluster = getClusterRet.getData();
         Result<Void> result = esIndexService.addAliases(phyCluster, param.getIndex(), param.getAliases());
         if (result.success()) {
-            OperateRecord operateRecord = new OperateRecord.Builder()
-                .content(String.format("index:【%s】,添加别名：【%s】",  param.getIndex(), param.getAliases()))
-                .operationTypeEnum(OperateTypeEnum.INDEX_MANAGEMENT_ALIAS_MODIFY)
-                .project(projectService.getProjectBriefByProjectId(projectId)).userOperation(operator)
-                .bizId(param.getIndex()).buildDefaultManualTrigger();
-            operateRecordService.save(operateRecord);
+    
+            operateRecordService.saveOperateRecordWithManualTrigger(
+                    String.format("index:【%s】, 添加别名：【%s】", param.getIndex(), param.getAliases()), operator,
+                    projectId, param.getIndex(), OperateTypeEnum.INDEX_MANAGEMENT_ALIAS_MODIFY);
         }
         return result;
     }
@@ -642,12 +622,9 @@ public class IndicesManagerImpl implements IndicesManager {
         String phyCluster = getClusterRet.getData();
         Result<Void> result = esIndexService.deleteAliases(phyCluster, param.getIndex(), param.getAliases());
         if (result.success()) {
-            OperateRecord operateRecord = new OperateRecord.Builder()
-                .content(String.format("index:【%s】删除别名：【%s】",  param.getIndex(), param.getAliases()))
-                .operationTypeEnum(OperateTypeEnum.INDEX_MANAGEMENT_ALIAS_MODIFY)
-                .project(projectService.getProjectBriefByProjectId(projectId)).userOperation(operator)
-                .bizId(param.getIndex()).buildDefaultManualTrigger();
-            operateRecordService.save(operateRecord);
+            operateRecordService.saveOperateRecordWithManualTrigger(
+                    String.format("index:【%s】删除别名：【%s】", param.getIndex(), param.getAliases()), operator, projectId,
+                    param.getIndex(), OperateTypeEnum.INDEX_MANAGEMENT_ALIAS_MODIFY);
         }
         return result;
     }
@@ -695,15 +672,11 @@ public class IndicesManagerImpl implements IndicesManager {
             if (rolloverResult.failed()) {
                 return rolloverResult;
             }
-            resultMessage.add(JSONObject.parseObject(rolloverResult.getMessage()));
+            resultMessage.add(rolloverResult.getMessage());
             //操作记录
-        operateRecordService.save(new OperateRecord.Builder()
-                        .userOperation(operator)
-                        .operationTypeEnum(OperateTypeEnum.INDEXING_SERVICE_RUN)
-                        .project(projectService.getProjectBriefByProjectId(projectId))
-                        .content(String.format("【%s】使用别名{%s}执行rollover",indexCatCellDTO.getIndex(),aliasName))
-                        .bizId(indexCatCellDTO.getIndex())
-                .buildDefaultManualTrigger());
+            operateRecordService.saveOperateRecordWithManualTrigger(
+                    String.format("【%s】使用别名{%s}执行rollover",indexCatCellDTO.getIndex(),aliasName), operator, projectId,
+                    indexCatCellDTO.getIndex(), OperateTypeEnum.INDEXING_SERVICE_RUN);
         }
 
         return Result.buildSuccWithMsg(resultMessage.toJSONString());
@@ -715,12 +688,8 @@ public class IndicesManagerImpl implements IndicesManager {
                 param.getExtra());
         if (result.success()) {
             //操作记录
-            operateRecordService.save(
-                    new OperateRecord.Builder().operationTypeEnum(OperateTypeEnum.INDEXING_SERVICE_RUN)
-                            .userOperation(operator)
-                            .project(projectService.getProjectBriefByProjectId(projectId))
-                            .content(String.format("【%s】执行shrink", param.getIndex())).bizId(param.getIndex())
-                            .buildDefaultManualTrigger());
+            operateRecordService.saveOperateRecordWithManualTrigger(String.format("【%s】执行 shrink", param.getIndex()),
+                    operator, projectId, param.getIndex(), OperateTypeEnum.INDEXING_SERVICE_RUN);
         }
         return result;
        
@@ -732,13 +701,8 @@ public class IndicesManagerImpl implements IndicesManager {
                 param.getExtra());
         if (result.success()){
               //操作记录
-        operateRecordService.save(new OperateRecord.Builder()
-                        .userOperation(operator)
-                        .operationTypeEnum(OperateTypeEnum.INDEXING_SERVICE_RUN)
-                        .project(projectService.getProjectBriefByProjectId(projectId))
-                        .content(String.format("【%s】执行split",param.getIndex()))
-                        .bizId(param.getIndex())
-                .buildDefaultManualTrigger());
+            operateRecordService.saveOperateRecordWithManualTrigger(String.format("【%s】执行split",param.getIndex()),
+                    operator, projectId, param.getIndex(), OperateTypeEnum.INDEXING_SERVICE_RUN);
         }
         return result;
       
@@ -758,13 +722,9 @@ public class IndicesManagerImpl implements IndicesManager {
                 return Result.buildFrom(forceMergeResult);
             }
                  //操作记录
-        operateRecordService.save(new OperateRecord.Builder()
-                        .operationTypeEnum(OperateTypeEnum.INDEXING_SERVICE_RUN)
-                        .userOperation(operator)
-                        .project(projectService.getProjectBriefByProjectId(projectId))
-                        .content(String.format("【%s】执行forceMerge",indexCatCellDTO.getIndex()))
-                        .bizId(indexCatCellDTO.getIndex())
-                .buildDefaultManualTrigger());
+            operateRecordService.saveOperateRecordWithManualTrigger(
+                    String.format("【%s】执行 forceMerge", indexCatCellDTO.getIndex()), operator, projectId,
+                    indexCatCellDTO.getIndex(), OperateTypeEnum.INDEXING_SERVICE_RUN);
             clusterIndexTuple.add(Tuples.of(indexCatCellDTO.getCluster(), indexCatCellDTO.getIndex()));
             resultMessage.add(JSON.parseObject(forceMergeResult.getMessage()));
         }
@@ -774,17 +734,17 @@ public class IndicesManagerImpl implements IndicesManager {
     }
 
     @Override
-    public Result<List<String>> getClusterPhyIndexName(String clusterPhyName, Integer projectId) {
+    public Result<List<String>> getClusterPhyIndexName(String clusterPhyName, Integer projectId, String index) {
         if (!projectService.checkProjectExist(projectId)) {
             return Result.buildParamIllegal(String.format("There is no projectId:%s", projectId));
         }
 
-        return Result.buildSucc(esIndexService.syncGetIndexName(clusterPhyName));
+        return Result.buildSucc(esIndexCatService.syncGetIndexListByProjectIdAndFuzzyIndexAndClusterPhy( clusterPhyName,index ));
     }
 
     @Override
-    public Result<List<String>> getClusterLogicIndexName(String clusterLogicName, Integer projectId) {
-        List<String> indexNames = esIndexCatService.syncGetIndexListByProjectId(projectId,clusterLogicName);
+    public Result<List<String>> getClusterLogicIndexName(String clusterLogicName, Integer projectId, String index) {
+        List<String> indexNames = esIndexCatService.syncGetIndexListByProjectIdAndFuzzyIndexAndClusterLogic(projectId, clusterLogicName,index );
         return Result.buildSucc(indexNames);
     }
 
@@ -851,12 +811,8 @@ public class IndicesManagerImpl implements IndicesManager {
             Result<Void> batchSetIndexFlagInvalidResult = updateIndexFlagInvalid(clusterPhy, indexNameList);
             if (batchSetIndexFlagInvalidResult.success()) {
                 for (String indexName : indexNameList) {
-                    operateRecordService.save(
-                            new OperateRecord.Builder().operationTypeEnum(OperateTypeEnum.INDEX_MANAGEMENT_DELETE)
-                                    .userOperation(operator).content(String.format("删除索引：【%s】", indexName))
-                                    .project(projectService.getProjectBriefByProjectId(projectId))
-                                    .bizId(indexName)
-                                    .buildDefaultManualTrigger());
+                    operateRecordService.saveOperateRecordWithManualTrigger(String.format("删除索引：【%s】", indexName),
+                            operator, projectId, indexName, OperateTypeEnum.INDEX_MANAGEMENT_DELETE);
                 }
             
             }
@@ -946,6 +902,9 @@ public class IndicesManagerImpl implements IndicesManager {
                 return Result.buildParamIllegal("逻辑集群未绑定Region");
             }
             phyClusterName = clusterRegion.getPhyClusterName();
+            if (!esClusterService.isConnectionStatus(phyClusterName)){
+                return Result.buildFail(String.format("%s 集群不正常",cluster));
+            }
         }
         return Result.buildSucc(phyClusterName);
     }

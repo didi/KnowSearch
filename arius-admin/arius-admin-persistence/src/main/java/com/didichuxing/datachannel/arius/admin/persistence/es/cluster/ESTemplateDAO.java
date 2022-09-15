@@ -189,13 +189,10 @@ public class ESTemplateDAO extends BaseESDAO {
                 return client.admin().indices().prepareGetTemplate(name + "*").execute()
                         .actionGet(time,unit);
             } catch (Exception e) {
-                final String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
-                if (Objects.nonNull(exception)) {
-                    throw new ESOperateException(exception);
-                }
+                
                 LOGGER.warn("class=ESTemplateDAO||method=create||msg=get src template fail||cluster={}||name={}",
                         cluster, name);
-                throw new ESOperateException(e.getMessage());
+                return null;
             }
         };
         ESIndicesGetTemplateResponse esIndicesGetTemplateResponse =  getTemplateResponseBiFunction.apply(Long.valueOf(ES_OPERATE_TIMEOUT), TimeUnit.SECONDS);
@@ -615,19 +612,29 @@ public class ESTemplateDAO extends BaseESDAO {
                                                                      TemplateHealthEnum templateHealthEnum) throws ESOperateException{
         ESClient client = esOpClient.getESClient(cluster);
         if (client == null) {
-            return false;
+            throw new NullESClientException(cluster);
         }
-        DirectResponse response = getDirectResponseByClusterAndUrl(client,
-                String.format(CAT_INDIES_HEALTH, expression, templateHealthEnum.getDesc()));
-    
-        if (templateHealthEnum.equals(TemplateHealthEnum.GREEN)) {
-            DirectResponse directResponse = getDirectResponseByClusterAndUrl(client,
-                    String.format(CAT_INDIES, expression));
-            return (response.getRestStatus() == RestStatus.OK && StringUtils.isNotBlank(response.getResponseContent()))
-                   || (directResponse.getRestStatus() == RestStatus.OK && StringUtils.isEmpty(
-                    directResponse.getResponseContent()));
+        try {
+            DirectResponse response = getDirectResponseByClusterAndUrl(client,
+                    String.format(CAT_INDIES_HEALTH, expression, templateHealthEnum.getDesc()));
+        
+            if (templateHealthEnum.equals(TemplateHealthEnum.GREEN)) {
+                DirectResponse directResponse = getDirectResponseByClusterAndUrl(client,
+                        String.format(CAT_INDIES, expression));
+                return (response.getRestStatus() == RestStatus.OK && StringUtils.isNotBlank(
+                        response.getResponseContent())) || (directResponse.getRestStatus() == RestStatus.OK
+                                                            && StringUtils.isEmpty(
+                        directResponse.getResponseContent()));
+            }
+            return (response.getRestStatus() == RestStatus.OK && StringUtils.isNotBlank(response.getResponseContent()));
+        } catch (ESOperateException e) {
+            //由于模板没有新建索引，所以会有这种问题出来，注意这是不分区模板产生的问题
+            if (e.getMessage().startsWith("no such index") && templateHealthEnum.equals(TemplateHealthEnum.GREEN)) {
+                return true;
+            }
+            throw e;
         }
-        return (response.getRestStatus() == RestStatus.OK && StringUtils.isNotBlank(response.getResponseContent()));
+        
     }
   
     /**

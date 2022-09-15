@@ -24,7 +24,6 @@ import com.didichuxing.datachannel.arius.admin.biz.template.srv.pipeline.Pipelin
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.precreate.PreCreateManager;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.IndexTemplateValue;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatCellDTO;
@@ -60,7 +59,6 @@ import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.ESSettingConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TemplateOperateRecordEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectTemplateAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.DataTypeEnum;
@@ -105,6 +103,7 @@ import com.google.common.collect.Maps;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -254,13 +253,9 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             if (saveTemplateConfigResult.failed()) {
                 throw new AdminOperateException(String.format("创建模板失败:%s", saveTemplateConfigResult.getMessage()));
             }
-           
-            operateRecordService.save(
-                    new OperateRecord.Builder().bizId(indexTemplateDTO.getId()).userOperation(operator)
-                            .content(String.format("模版创建：%s", param.getName()))
-                            .project(projectService.getProjectBriefByProjectId(projectId))
-                            .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                            .operationTypeEnum(OperateTypeEnum.TEMPLATE_MANAGEMENT_CREATE).build());
+    
+            operateRecordService.saveOperateRecordWithManualTrigger(String.format("模版创建：%s", param.getName()),
+                    operator, projectId, indexTemplateDTO.getId(), OperateTypeEnum.TEMPLATE_MANAGEMENT_CREATE);
             //发布创建pipeline的事件
             SpringTool.publish(new LogicTemplateCreatePipelineEvent(this,indexTemplateDTO.getId()));
             return Result.buildSucc();
@@ -466,12 +461,11 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
                 String dataTypeAfter= DataTypeEnum.valueOf(param.getDataType()).getDesc();
                 String descBefore=oldIndexTemplate.getDesc();
                 String descAfter=param.getDesc();
-                operateRecordService.save(
-                    new OperateRecord.Builder().operationTypeEnum(OperateTypeEnum.TEMPLATE_MANAGEMENT_INFO_MODIFY)
-                        .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).userOperation(operator)
-                        .content(String.format("数据类型变更：【%s】->【%s】;描述变更:【%s】->【%s】",dataTypeBefore,dataTypeAfter,
-                                descBefore,descAfter))
-                        .bizId(param.getId()).project(projectService.getProjectBriefByProjectId(projectId)).build());
+    
+                operateRecordService.saveOperateRecordWithManualTrigger(
+                        String.format("数据类型变更：【%s】->【%s】; 描述变更:【%s】->【%s】", dataTypeBefore, dataTypeAfter,
+                                descBefore, descAfter), operator, projectId, param.getId(),
+                        OperateTypeEnum.TEMPLATE_MANAGEMENT_INFO_MODIFY);
             }
 
             return voidResult;
@@ -498,12 +492,8 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         String beforeDeleteName = indexTemplateService.getNameByTemplateLogicId(logicTemplateId);
         Result<Void> result = indexTemplateService.delTemplate(logicTemplateId, operator);
         if (result.success()) {
-            
-            operateRecordService
-                .save(new OperateRecord.Builder().bizId(logicTemplateId).triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                    .content(String.format("模板【%s】下线", beforeDeleteName))
-                    .project(projectService.getProjectBriefByProjectId(projectId)).userOperation(operator)
-                    .operationTypeEnum(OperateTypeEnum.TEMPLATE_MANAGEMENT_OFFLINE).build());
+            operateRecordService.saveOperateRecordWithManualTrigger(String.format("模板【%s】下线", beforeDeleteName),
+                    operator, projectId, logicTemplateId, OperateTypeEnum.TEMPLATE_MANAGEMENT_OFFLINE);
             //一并下线模板关联的索引
             /**
              * [{"cluster":"Zh_test3_cluster_7-6-0-1400","index":"zh_test3_template3_2022-07-18"}]
@@ -627,16 +617,10 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
                 operator);
             if (updateStatusResult.success()) {
                 // rollover状态修改记录(兼容开启或者关闭)
-                operateRecordService.save(new OperateRecord.Builder()
-
-                    .bizId(templateLogicId).userOperation(operator)
-                    .project(Optional.of(projectId).map(projectService::getProjectBriefByProjectId).orElse(null))
-                    .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                    .content(String.format("%s:rollover状态修改为:【%s】", TemplateOperateRecordEnum.ROLLOVER.getDesc(),
-                        (newDisable ? "关闭" : "开启")))
-                    .operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE)
-
-                    .build());
+                operateRecordService.saveOperateRecordWithManualTrigger(
+                        String.format("%s:rollover 状态修改为:【%s】", TemplateOperateRecordEnum.ROLLOVER.getDesc(),
+                                (newDisable ? "关闭" : "开启")), operator, projectId, templateLogicId,
+                        OperateTypeEnum.TEMPLATE_SERVICE);
             }
         }
         return Result.buildSucc();
@@ -736,7 +720,8 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             IndexTemplateDTO indexTemplateDTO = new IndexTemplateDTO();
             indexTemplateDTO.setId(logicId);
             indexTemplateDTO.setHasDCDR(dcdrFlag);
-            indexTemplateDTO.setCheckPointDiff(totalIndexCheckPointDiff);
+            //如果还存在dcdr链路，则未totalIndexCheckPointDiff 否则未-1
+            indexTemplateDTO.setCheckPointDiff(Boolean.TRUE.equals(dcdrFlag)?totalIndexCheckPointDiff:-1);
             indexTemplateService.editTemplateInfoTODB(indexTemplateDTO);
         } catch (AdminOperateException e) {
             LOGGER.error(
@@ -798,11 +783,9 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         String name = Optional.ofNullable(templateLogicWithPhysical).map(IndexTemplateWithPhyTemplates::getName)
             .orElse("");
         String clearIndices = String.join(",", indices);
-        operateRecordService.save(new OperateRecord.Builder()
-                        .project(projectService.getProjectBriefByProjectId(projectId))
-                .bizId(clearDTO.getLogicId())
-            .operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE_CLEAN).userOperation(operator)
-            .content(String.format("清理索引模板：%s下的索引列表：【%s】", name, clearIndices)).buildDefaultManualTrigger());
+        operateRecordService.saveOperateRecordWithManualTrigger(
+                String.format("清理索引模板：%s 下的索引列表：【%s】", name, clearIndices), operator, projectId,
+                clearDTO.getLogicId(), OperateTypeEnum.TEMPLATE_SERVICE_CLEAN);
 
         return Result.build(succ);
     }
@@ -832,15 +815,10 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
                 if (updateDBResult.failed()) {
                     throw new AdminOperateException(updateDBResult.getMessage(), FAIL);
                 }
-        
-                operateRecordService.save(
-                        new OperateRecord.Builder().project(projectService.getProjectBriefByProjectId(projectId))
-                                .bizId(logicTemplateId).operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE_CAPACITY)
-                                .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).content(
-                                        String.format("同步修改es集群[%s]中模板[%s]shard数[%d]", templatePhy.getCluster(),
-                                                templatePhy.getName(), shardNum)).userOperation(operator).build()
-        
-                );
+                operateRecordService.saveOperateRecordWithManualTrigger(
+                        String.format("同步修改 es 集群 [%s] 中模板[%s]shard 数[%d]", templatePhy.getCluster(),
+                                templatePhy.getName(), shardNum), operator, projectId, logicTemplateId,
+                        OperateTypeEnum.TEMPLATE_SERVICE_CAPACITY);
             }
         }
 
@@ -892,15 +870,10 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             }
 
             preCreateManager.asyncCreateTodayAndTomorrowIndexByPhysicalId(templatePhy.getId());
-            operateRecordService.save(new OperateRecord.Builder().bizId(templateId)
-                .operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE_UPGRADED_VERSION)
-                .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                            .project(projectService.getProjectBriefByProjectId(projectId))
-                .content(String.format("模板[%s]升版本%d->%d",
-                    templatePhy.getName(), beforeVersion, afterVersion))
-                .userOperation(operator).build()
-
-            );
+    
+            operateRecordService.saveOperateRecordWithManualTrigger(
+                    String.format("模板 [%s] 升版本 %d->%d", templatePhy.getName(), beforeVersion, afterVersion),
+                    operator, projectId, templateId, OperateTypeEnum.TEMPLATE_SERVICE_UPGRADED_VERSION);
         }
 
         return Result.buildSucc();
@@ -999,8 +972,7 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
         IndexTemplateWithCluster indexTemplateLogicWithCluster = indexTemplateService
             .getLogicTemplateWithCluster(logicId);
 
-        if (null == indexTemplateLogicWithCluster
-            || CollectionUtils.isEmpty(indexTemplateLogicWithCluster.getLogicClusters())) {
+        if (null == indexTemplateLogicWithCluster) {
             return Result.buildFail("模板对应资源不存在!");
         }
 
@@ -1008,31 +980,33 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             ConsoleTemplateDetailVO.class);
 
         consoleTemplateDetail.setCyclicalRoll(indexTemplateLogicWithCluster.getExpression().endsWith("*"));
-
+        //根据模板resourceId project获取逻辑集群
+         ClusterLogic clusterLogic = clusterLogicService.getClusterLogicByIdAndProjectId(
+                    consoleTemplateDetail.getResourceId(), consoleTemplateDetail.getProjectId());
         // supperApp显示物理集群，其他项目显示逻辑集群
-        if(AuthConstant.SUPER_PROJECT_ID.equals(projectId)){
+        if (AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
             List<IndexTemplatePhy> indexTemplatePhyList = indexTemplatePhyService.getTemplateByLogicId(logicId);
-            List<String> phyClusters = indexTemplatePhyList.stream().map(IndexTemplatePhy::getCluster).collect(Collectors.toList());
-            consoleTemplateDetail.setCluster(StringUtils.join(phyClusters, ","));
-        }else {
-            consoleTemplateDetail
-                    .setCluster(jointCluster(indexTemplateLogicWithCluster.getLogicClusters()));
+            String phyClusters = indexTemplatePhyList.stream().sorted(Comparator.comparing(IndexTemplatePhy::getRole))
+                    .map(IndexTemplatePhy::getCluster).collect(Collectors.joining(","));
+            consoleTemplateDetail.setCluster(phyClusters);
+        } else {
+            Optional.ofNullable(clusterLogic).map(ClusterLogic::getName).ifPresent(consoleTemplateDetail::setCluster);
         }
-
-        // 仅对有一个逻辑集群的情况设置集群类型与等级
-        if (indexTemplateLogicWithCluster.getLogicClusters().size() == 1) {
-            consoleTemplateDetail.setClusterType(indexTemplateLogicWithCluster.getLogicClusters().get(0).getType());
-            consoleTemplateDetail.setClusterLevel(indexTemplateLogicWithCluster.getLogicClusters().get(0).getLevel());
-        }
+    
+        // 逻辑集群设置集群类型与等级
+        Optional.ofNullable(clusterLogic).ifPresent(cl -> {
+            consoleTemplateDetail.setClusterLevel(cl.getLevel());
+            consoleTemplateDetail.setClusterType(cl.getType());
+        });
         consoleTemplateDetail.setAppName(
-            projectService.getProjectBriefByProjectId(indexTemplateLogicWithCluster.getProjectId()).getProjectName());
+                projectService.getProjectBriefByProjectId(indexTemplateLogicWithCluster.getProjectId())
+                        .getProjectName());
         consoleTemplateDetail.setIndices(getLogicTemplateIndices(logicId));
         consoleTemplateDetail.setEditable(true);
-        // 获取indexRollover功能开启状态
-        consoleTemplateDetail
-            .setDisableIndexRollover(Optional.ofNullable(indexTemplateService.getTemplateConfig(logicId))
-                .map(IndexTemplateConfig::getDisableIndexRollover).orElse(null)
-            );
+        // 获取 indexRollover 功能开启状态
+        Optional.ofNullable(indexTemplateService.getTemplateConfig(logicId))
+                .map(IndexTemplateConfig::getDisableIndexRollover)
+                .ifPresent(consoleTemplateDetail::setDisableIndexRollover);
         return Result.buildSucc(consoleTemplateDetail);
     }
 
@@ -1188,15 +1162,11 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             Result<Void> updateTemplateWriteRateLimit = indexTemplateService
                 .updateTemplateWriteRateLimit(consoleTemplateRateLimitDTO);
             if (updateTemplateWriteRateLimit.success()) {
-                operateRecordService.save(new OperateRecord.Builder()
-                    .operationTypeEnum(OperateTypeEnum.QUERY_TEMPLATE_DSL_CURRENT_LIMIT_ADJUSTMENT)
-                    .project(
-                        Optional.ofNullable(projectId).map(projectService::getProjectBriefByProjectId).orElse(null))
-                    .userOperation(operator)
-                    .content(String.format("数据库写入限流值修改%s->%s", consoleTemplateRateLimitDTO.getCurRateLimit(),
-                        consoleTemplateRateLimitDTO.getAdjustRateLimit()))
-                    .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).userOperation(operator)
-                    .bizId(consoleTemplateRateLimitDTO.getLogicId()).build());
+                operateRecordService.saveOperateRecordWithManualTrigger(
+                        String.format("数据库写入限流值修改 %s->%s", consoleTemplateRateLimitDTO.getCurRateLimit(),
+                                consoleTemplateRateLimitDTO.getAdjustRateLimit()), operator, projectId,
+                        consoleTemplateRateLimitDTO.getLogicId(),
+                        OperateTypeEnum.QUERY_TEMPLATE_DSL_CURRENT_LIMIT_ADJUSTMENT);
             }
             return updateTemplateWriteRateLimit;
         } catch (ESOperateException e) {
@@ -1204,7 +1174,73 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
             return Result.buildFail("限流调整失败！");
         }
     }
-
+    
+   
+    /**
+     * 用索引模板的写操作。
+     *
+     * @param templateId 要操作的模板的id
+     * @param status 0：否，1：是
+     * @param operator 触发操作的操作员
+     * @param projectId 项目编号
+     * @return Result<Void>
+     */
+    @Override
+    public Result<Void> blockWrite(Integer templateId, Boolean status, String operator, Integer projectId) {
+        IndexTemplatePO logicTemplate = indexTemplateService.getLogicTemplatePOById(templateId);
+    
+        if (Objects.isNull(logicTemplate)) {
+            return Result.buildFail("逻辑模板不存在");
+        }
+        Result<Void> checkProjectCorrectly = ProjectUtils.checkProjectCorrectly(IndexTemplatePO::getProjectId,
+                logicTemplate, projectId);
+        if (checkProjectCorrectly.failed()) {
+            return checkProjectCorrectly;
+        }
+    
+        Result<Void> result = indexTemplateService.updateBlockWriteState(templateId, status);
+        if (result.success()) {
+            // 是否禁写，0：否，1：是
+            operateRecordService.saveOperateRecordWithManualTrigger(
+                    Objects.equals(status, Boolean.TRUE) ? "禁写" : "开启写", operator, projectId, templateId,
+                    OperateTypeEnum.TEMPLATE_MANAGEMENT_CREATE);
+        }
+    
+        return result;
+    }
+    
+    
+    /**
+     * 用于索引模板的读取。
+     *
+     * @param templateId 要操作的模板的id
+     * @param status 0：否，1：是
+     * @param operator 触发操作的用户
+     * @param projectId 项目编号
+     * @return Result<Void>
+     */
+    @Override
+    public Result<Void> blockRead(Integer templateId, Boolean status, String operator, Integer projectId) {
+        IndexTemplatePO logicTemplate = indexTemplateService.getLogicTemplatePOById(templateId);
+    
+        if (Objects.isNull(logicTemplate)) {
+            return Result.buildFail("逻辑模板不存在");
+        }
+        Result<Void> checkProjectCorrectly = ProjectUtils.checkProjectCorrectly(IndexTemplatePO::getProjectId,
+                logicTemplate, projectId);
+        if (checkProjectCorrectly.failed()) {
+            return checkProjectCorrectly;
+        }
+        Result<Void> result = indexTemplateService.updateBlockReadState(templateId, status);
+        if (result.success()) {
+            // 是否禁写，0：否，1：是
+            operateRecordService.saveOperateRecordWithManualTrigger(
+                    Objects.equals(status, Boolean.TRUE) ? "禁读" : "开启读", operator, projectId, templateId,
+                    OperateTypeEnum.TEMPLATE_MANAGEMENT_CREATE);
+        }
+    
+        return result;
+    }
     /**************************************** private method ***************************************************/
     /**
     * 获取逻辑模板索引列表
@@ -1373,6 +1409,10 @@ public class TemplateLogicManagerImpl implements TemplateLogicManager {
                 clusterRegion.getPhyClusterName());
         if (Boolean.TRUE.equals(existDCDRAndPipelineModule.v2)) {
             openSrvList.add(TemplateServiceEnum.TEMPLATE_PIPELINE.getCode());
+        }
+        // 如果存在 dcdr 插件，则开启 dcdr 服务
+        if (Boolean.TRUE.equals(existDCDRAndPipelineModule.v1)) {
+            openSrvList.add(TemplateServiceEnum.TEMPLATE_DCDR.getCode());
         }
         if (CollectionUtils.isNotEmpty(openSrvList)) {
             //如果集群支持pipeline

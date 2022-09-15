@@ -2,11 +2,15 @@ package com.didichuxing.datachannel.arius.admin.rest.controller.v3.white.thirdpa
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_THIRD_PART;
 
+import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterLogicManager;
 import com.didichuxing.datachannel.arius.admin.biz.thardpart.CommonManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterJoinDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.config.AriusConfigInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ThirdPartClusterVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.config.ThirdpartConfigVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
+import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -28,6 +32,8 @@ public class ThirdpartCommonController {
 
     @Autowired
     private CommonManager commonManager;
+    @Autowired
+    private ClusterLogicManager clusterLogicManager;
 
     @GetMapping("/cluster")
     @ResponseBody
@@ -52,4 +58,14 @@ public class ThirdpartCommonController {
     public Result<List<ThirdpartConfigVO>> queryConfig(@RequestBody AriusConfigInfoDTO param) {
         return commonManager.queryConfig(param);
     }
+    @PostMapping("/cluster/join-with-logic")
+    @ResponseBody
+    @ApiOperation(value = "加入物理集群并创建逻辑集群", notes = "")
+    public Result<Long> joinClusterPhyAndCreateLogicCluster(
+                                                                               @RequestBody ClusterJoinDTO param)
+            throws AdminOperateException {
+        return clusterLogicManager.joinClusterPhyAndCreateLogicCluster(param, AuthConstant.SUPER_PROJECT_ID);
+    }
+    
+    
 }

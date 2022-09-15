@@ -4,7 +4,6 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.operaterec
 import static com.didichuxing.datachannel.arius.admin.core.service.project.impl.ESUserServiceImpl.VERIFY_CODE_LENGTH;
 
 import com.didichuxing.datachannel.arius.admin.biz.project.ESUserManager;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ESUser;
@@ -13,7 +12,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.ConsoleESU
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.ConsoleESUserWithVerifyCodeVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.ESUserVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectSearchTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
@@ -120,17 +118,17 @@ public class ESUserManagerImpl implements ESUserManager {
 
         if (resultESUserPOTuple.v1().success()) {
             // 操作记录
-            operateRecordService
-                .save(new OperateRecord.Builder().project(projectService.getProjectBriefByProjectId(projectId))
-                    .content(String.format("新增访问模式:[%s]", ProjectSearchTypeEnum.valueOf(appDTO.getSearchType())))
-                    .operationTypeEnum(OperateTypeEnum.APPLICATION_ACCESS_MODE)
-                    .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).userOperation(operator).build());
+            saveOperateRecord(
+                    String.format("新增访问模式:[%s]", ProjectSearchTypeEnum.valueOf(appDTO.getSearchType()).getDesc()),
+                    projectId, operator, OperateTypeEnum.APPLICATION_ACCESS_MODE);
 
         }
 
         return resultESUserPOTuple.v1();
     }
-
+    
+   
+    
     /**
      * @param esUserDTO   es user dto
      * @param operator 操作人或角色
@@ -155,12 +153,10 @@ public class ESUserManagerImpl implements ESUserManager {
 
         if (resultESUserTuple.v1().success()) {
             // 操作记录
-            operateRecordService.save(
-                new OperateRecord.Builder().project(projectService.getProjectBriefByProjectId(oldESUser.getProjectId()))
-                    .content(String.format("修改访问模式:%s-->%s", ProjectSearchTypeEnum.valueOf(oldESUser.getSearchType()),
-                        ProjectSearchTypeEnum.valueOf(esUserDTO.getSearchType())))
-                    .operationTypeEnum(OperateTypeEnum.APPLICATION_ACCESS_MODE)
-                    .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).userOperation(operator).build());
+            saveOperateRecord(String.format("修改访问模式:%s-->%s",
+                            ProjectSearchTypeEnum.valueOf(oldESUser.getSearchType()).getDesc(),
+                            ProjectSearchTypeEnum.valueOf(esUserDTO.getSearchType()).getDesc()), oldESUser.getProjectId(),
+                    operator, OperateTypeEnum.APPLICATION_ACCESS_MODE);
         }
         return resultESUserTuple.v1();
     }
@@ -196,13 +192,9 @@ public class ESUserManagerImpl implements ESUserManager {
         final TupleTwo<Result<Void>, ESUserPO> resultESUserPOTuple = esUserService.deleteESUserById(esUser);
         if (resultESUserPOTuple.v1().success()) {
             // 操作记录
-            operateRecordService
-                .save(new OperateRecord(projectService.getProjectBriefByProjectId(projectId).getProjectName(),
-                    OperateTypeEnum.APPLICATION_ACCESS_MODE, TriggerWayEnum.MANUAL_TRIGGER,
-                    String.format("删除访问模式:%s", ProjectSearchTypeEnum.valueOf(resultESUserPOTuple.v2().getSearchType())),
-                    operator
-
-                ));
+            saveOperateRecord(String.format("删除访问模式:%s",
+                            ProjectSearchTypeEnum.valueOf(resultESUserPOTuple.v2().getSearchType()).getDesc()), projectId,
+                    operator, OperateTypeEnum.APPLICATION_ACCESS_MODE);
         }
         return resultESUserPOTuple.v1();
     }
@@ -223,11 +215,7 @@ public class ESUserManagerImpl implements ESUserManager {
         final TupleTwo<Result<Void>, List<ESUserPO>> resultListTuple = esUserService.deleteByESUsers(projectId);
         if (resultListTuple.v1().success()) {
             // 操作记录
-            operateRecordService
-                .save(new OperateRecord(projectService.getProjectBriefByProjectId(projectId).getProjectName(),
-                    OperateTypeEnum.APPLICATION_ACCESS_MODE, TriggerWayEnum.MANUAL_TRIGGER, "删除访问模式", operator
-
-                ));
+            saveOperateRecord("删除访问模式", projectId, operator, OperateTypeEnum.APPLICATION_ACCESS_MODE);
         }
         return resultListTuple.v1();
     }
@@ -269,5 +257,9 @@ public class ESUserManagerImpl implements ESUserManager {
         }
         return Result.buildSucc(ConvertUtil.list2List(users, ConsoleESUserWithVerifyCodeVO.class));
 
+    }
+     private void saveOperateRecord(String content, Integer projectId, String operator,
+                                   OperateTypeEnum operateTypeEnum) {
+        operateRecordService.saveOperateRecordWithManualTrigger(content,operator,projectId,projectId,operateTypeEnum);
     }
 }

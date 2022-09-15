@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -231,16 +232,17 @@ public class IndicesController extends BaseIndicesController {
     @ResponseBody
     @ApiModelProperty(value = "获取物理集群索引列表")
     public Result<List<String>> getClusterPhyIndexName(@PathVariable String clusterPhyName,
+                                                       @RequestParam(value = "index",required = false) String index,
                                                        HttpServletRequest request) {
-        return indicesManager.getClusterPhyIndexName(clusterPhyName, HttpRequestUtil.getProjectId(request));
+        return indicesManager.getClusterPhyIndexName(clusterPhyName, HttpRequestUtil.getProjectId(request),index);
     }
 
     @GetMapping("/{clusterLogicName}/logic/indices")
     @ResponseBody
     @ApiModelProperty(value = "获取逻辑集群索引列表")
-    public Result<List<String>> getClusterLogicIndexName(@PathVariable String clusterLogicName,
+    public Result<List<String>> getClusterLogicIndexName(@PathVariable String clusterLogicName,  @RequestParam(value = "index",required = false) String index,
                                                          HttpServletRequest request) {
-        return indicesManager.getClusterLogicIndexName(clusterLogicName, HttpRequestUtil.getProjectId(request));
+        return indicesManager.getClusterLogicIndexName(clusterLogicName, HttpRequestUtil.getProjectId(request),index);
     }
 
 }

@@ -10,7 +10,6 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.result.Res
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterNodeManager;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterRegionManager;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRegionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRegionWithNodeInfoDTO;
@@ -28,7 +27,6 @@ import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterResourceTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
@@ -106,7 +104,7 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
     }
 
     /**
-     * 逻辑集群绑定同一个物理集群的region的时候需要根据类型进行过滤
+     * 逻辑集群绑定同一个物理集群的region的时候需要根据类型进行过滤，返回的region不包含cold region
      * @param phyCluster 物理集群名称
      * @param clusterLogicType 逻辑集群类型
      * @return
@@ -129,9 +127,9 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
                 String.format("物理集群[%s]类型为[%s], 不满足逻辑集群类型[%s], 请调整类型一致", phyCluster, resourceType, clusterLogicType));
         }
 
-        List<ClusterRegion> clusterRegions = clusterRegionService.listPhyClusterRegions(phyCluster);
+        List<ClusterRegion> clusterRegions = clusterRegionService.listPhyClusterRegions(phyCluster).stream().filter(notColdTruePreByClusterRegion).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(clusterRegions)) {
-            return Result.buildFail(String.format("物理集群[%s]无划分region, 请先进行region划分", phyCluster));
+            return Result.buildFail(String.format("物理集群[%s]无可用region, 请前往物理集群-region划分进行region创建", phyCluster));
         }
         return Result.buildSucc(ConvertUtil.list2List(clusterRegions, ClusterRegionVO.class,
             regionVO -> regionVO.setClusterName(phyCluster)));
@@ -286,14 +284,10 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
             }
 
             //CLUSTER_REGION, DELETE, regionId, "", operator
-            operateRecordService
-                .save(new OperateRecord.Builder().operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_REGION_CHANGE)
-                    .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                    .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
-                    .content(String.format("集群: %s, region删除：%s,删除的regionId：%s", region.getPhyClusterName(), region.getName(), regionId))
-                    .userOperation(operator)
-                        .bizId(regionId)
-                    .build());
+            operateRecordService.saveOperateRecordWithManualTrigger(
+                    String.format("集群: %s, region 删除：%s, 删除的 regionId：%s", region.getPhyClusterName(),
+                            region.getName(), regionId), operator, AuthConstant.SUPER_PROJECT_ID, regionId,
+                    OperateTypeEnum.PHYSICAL_CLUSTER_REGION_CHANGE);
         }
 
         return deletResult;
@@ -354,7 +348,18 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
         }
     
     };
-   
+
+    private final static Predicate<ClusterRegion> notColdTruePreByClusterRegion = clusterRegion -> {
+        if (StringUtils.isBlank(clusterRegion.getConfig())) {
+            return Boolean.TRUE;
+        }
+        try {
+            return !JSON.parseObject(clusterRegion.getConfig()).getBoolean(COLD);
+        } catch (Exception e) {
+            return Boolean.TRUE;
+        }
+
+    };
     /**
      * 对于逻辑集群绑定的物理集群的版本进行一致性校验
      *

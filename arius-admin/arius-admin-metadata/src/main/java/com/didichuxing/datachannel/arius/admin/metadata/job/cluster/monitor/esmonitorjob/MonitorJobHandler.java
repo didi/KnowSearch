@@ -3,6 +3,24 @@ package com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esm
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.JOB_FAILED;
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.JOB_SUCCESS;
 
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
+import javax.annotation.PostConstruct;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.concurrent.BasicThreadFactory;
+import org.elasticsearch.common.StopWatch;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.common.Triple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.IndexTemplatePhysicalConfig;
@@ -29,28 +47,8 @@ import com.didiglobal.logi.elasticsearch.client.ESClient;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-import javax.annotation.PostConstruct;
+
 import lombok.NoArgsConstructor;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.concurrent.BasicThreadFactory;
-import org.elasticsearch.common.StopWatch;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 /**
  * 通过查数据库观察每个节点采集es集群名称
@@ -599,11 +597,9 @@ public class MonitorJobHandler extends AbstractMetaDataJob {
                         Thread.currentThread().setName("monitor-cluster-data-collect-" + clusterName);
                         ESClient esClient = esOpClient.getESClient(clusterName);
                         if (esClient == null) {
-                            int effectCount = ariusMetaJobClusterDistributeDAO
-                                .deleteBatch(Lists.newArrayList(taskEntity.getId()));
                             LOGGER.error(
-                                "class=MonitorJobHandler||method=collectData||clusterName={}||errMsg=fail to get esClient, then delete it result {}",
-                                clusterName, effectCount);
+                                "class=MonitorJobHandler||method=collectData||clusterName={}||errMsg=fail to get esClient",
+                                clusterName);
                             monitorTaskInfo.setRunning(false);
                             return;
                         }

@@ -1,8 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.vo.project;
 
 import com.didiglobal.logi.security.common.vo.project.ProjectVO;
+import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -21,6 +23,12 @@ public class ProjectExtendVO extends ProjectVO {
     @ApiModelProperty(value = "项目配置", dataType = "ProjectSaveDTO", required = false)
     private ProjectConfigVO config;
     @ApiModelProperty(value = "是否为超级项目", dataType = "boolean", required = false)
-    private Boolean         isAdmin = false;
+    private Boolean           isAdmin = false;
+    @ApiModelProperty(value = "持有管理员角色的项目成员", dataType = "List<UserBriefVO>", required = false)
+    private List<UserBriefVO> userListWithAdminRole;
+    
+    @ApiModelProperty(value = "具有管理员角色和持有项目用户的项目成员", dataType = "List<UserBriefVO>", required = false)
+    private List<UserBriefVO> userListWithBelongProjectAndAdminRole;
+    
 
 }

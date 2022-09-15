@@ -189,6 +189,19 @@ public class ESIndexCatServiceImpl implements ESIndexCatService {
                 clusterLogic);
     }
     
+    @Override
+    public List<String> syncGetIndexListByProjectIdAndFuzzyIndexAndClusterLogic(Integer projectId, String clusterLogicName,
+                                                                                String index) {
+       return indexCatESDAO.syncGetIndexListByProjectIdAndFuzzyIndexAndClusterLogic(projectId,
+                clusterLogicName,index);
+    }
+    
+    @Override
+    public List<String> syncGetIndexListByProjectIdAndFuzzyIndexAndClusterPhy(String clusterPhyName,
+                                                                              String index) {
+         return indexCatESDAO.syncGetIndexListByProjectIdAndFuzzyIndexAndClusterPhy( clusterPhyName,index);
+    }
+    
     /**
      * @param clusterPhyList
      * @return

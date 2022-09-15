@@ -1,13 +1,28 @@
 
 package com.didichuxing.datachannel.arius.admin.biz.cluster;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.openMocks;
+
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.biz.cluster.impl.ClusterPhyManagerImpl;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping.TemplatePhyMappingManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.pipeline.PipelineManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterJoinDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterSettingDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterRoleDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESClusterRoleHostDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESConfigDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.PluginDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
@@ -40,6 +55,12 @@ import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpClient;
 import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import org.apache.commons.beanutils.BeanUtils;
 import org.elasticsearch.common.unit.ByteSizeUnit;
 import org.elasticsearch.common.unit.ByteSizeValue;
@@ -56,13 +77,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import java.lang.reflect.InvocationTargetException;
-import java.util.*;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.openMocks;
 
 @ActiveProfiles("test")
 @ExtendWith({ SpringExtension.class })
@@ -169,7 +183,7 @@ class ClusterPhyManagerTest {
             "httpWriteAddress", 0, "tags", "dataCenter", 0, "machineSpec", 0, "esVersion", "imageName", null,
             Collections.singletonList(
                 new ESClusterRoleVO(0L, 0L, "roleClusterName", "role", 0, 0, "machineSpec", Lists.newArrayList())),
-            0.0, 0L, 0L, "password", "idc", 0, "writeAction", 0, 0L, "platformType", 0, "gatewayUrl",null,null );
+            0.0, 0L, 0L, "password", "idc", 0, "writeAction", 0, 0L, "platformType", 0, "gatewayUrl",null,null ,null);
 
         clusterRoleHost = new ClusterRoleHost(0L, 0L, "hostname", "ip", CLUSTER, "port", 0, 0, "rack", "nodeSet",
             "machineSpec", 0, "attributes");
@@ -200,9 +214,9 @@ class ClusterPhyManagerTest {
         clusterPhyVOWithNotRole = new ClusterPhyVO(0, CLUSTER, "desc", "readAddress", "writeAddress", "httpAddress",
             "httpWriteAddress", 0, "tags", "dataCenter", 0, "machineSpec", 0, "esVersion", "imageName", null,
             Lists.newArrayList(), 0.0, 0L, 0L, "password", "idc", 0, "writeAction", 0, 0L, "platformType", 1,
-            "gatewayUrl", null,null);
+            "gatewayUrl", null,null,null);
 
-        clusterLogic = new ClusterLogic(0L, "name", 0, 0, "dataCenter", "dataNodeSpec", 0,
+        clusterLogic = new ClusterLogic(0L, "name", 0, 0,"projectName", "dataCenter", "dataNodeSpec", 0,
            "memo", 0.0, 0, "configJson", 0,0D,0L,0L,"",0);
         region = new ClusterRegion(0L, "name", "logicClusterIds", CLUSTER, "config");
 
@@ -616,7 +630,7 @@ class ClusterPhyManagerTest {
     }
 
     @Test
-    void testGetPhyClusterDynamicConfigs() {
+    void testGetPhyClusterDynamicConfigs() throws ESOperateException  {
         when(mockClusterPhyService.isClusterExists(Mockito.anyString())).thenReturn(false);
         assertEquals(Result.buildFail("集群[" + CLUSTER + "]不存在").getMessage(),
             clusterPhyManager.getPhyClusterDynamicConfigs(CLUSTER).getMessage());
@@ -640,8 +654,13 @@ class ClusterPhyManagerTest {
         when(mockClusterPhyService.updatePhyClusterDynamicConfig(new ClusterSettingDTO("clusterName", "key", "value")))
             .thenReturn(Result.buildFail(false));
         Integer projectId = 1;
-        final Result<Boolean> result = clusterPhyManager.updatePhyClusterDynamicConfig(param, "operator", projectId);
-
+        final Result<Boolean> result;
+        try {
+            result = clusterPhyManager.updatePhyClusterDynamicConfig(param, "operator", projectId);
+        } catch (ESOperateException e) {
+            throw new RuntimeException(e);
+        }
+    
         assertEquals(expectedResult, result);
     }
 

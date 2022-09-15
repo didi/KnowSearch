@@ -1,17 +1,14 @@
 package com.didichuxing.datachannel.arius.admin.metadata.service;
 
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayJoinQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.GatewayJoin;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectConfigService;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.gateway.GatewayJoinESDAO;
+import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 @Service
 public class GatewayJoinLogService {
@@ -19,8 +16,7 @@ public class GatewayJoinLogService {
     @Autowired
     private GatewayJoinESDAO gatewayJoinESDAO;
 
-    @Autowired
-    private ProjectConfigService projectConfigService;
+    
 
     public Result<Long> getSearchCountByProjectId(Long projectId, Long startDate, Long endDate) {
         return Result.buildSucc(gatewayJoinESDAO.getSearchCountByProjectId(projectId, startDate, endDate));
@@ -36,8 +32,7 @@ public class GatewayJoinLogService {
             .list2List(gatewayJoinESDAO.getGatewaySlowList(projectId, startDate, endDate), GatewayJoin.class));
     }
 
-    public List<GatewayJoin> getGatewaySlowList(Integer projectId, GatewayJoinQueryDTO queryDTO) {
-        Integer slowQueryTime = projectConfigService.getProjectConfig(projectId).getSlowQueryTimes();
+    public List<GatewayJoin> getGatewaySlowList(Integer projectId, GatewayJoinQueryDTO queryDTO, Integer slowQueryTime) {
         initGatewaySlowQueryCondition(queryDTO, slowQueryTime);
         return ConvertUtil.list2List(gatewayJoinESDAO.getGatewayJoinSlowList(projectId, queryDTO), GatewayJoin.class);
     }
@@ -63,5 +58,16 @@ public class GatewayJoinLogService {
         if (queryDTO.getEndTime() == null) {
             queryDTO.setEndTime(System.currentTimeMillis());
         }
+    }
+    
+    /**
+     *  通过项目 id 和索引名称获取一个 DSL
+     *
+     * @param projectId 您要查询的项目的项目ID。
+     * @param indexName 索引的名称
+     * @return String
+     */
+    public String getOneDSLByProjectIdAndIndexName(Integer projectId, String indexName) {
+        return gatewayJoinESDAO.getOneDSLByProjectIdAndIndexName(projectId, indexName);
     }
 }

@@ -3,6 +3,7 @@ package com.didichuxing.datachannel.arius.admin.biz.template.srv.cold.impl;
 import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_COMMON_GROUP;
 import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.ARIUS_TEMPLATE_COLD_GROUP;
 import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.INDEX_TEMPLATE_COLD_DAY_DEFAULT;
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.INDEX_TEMPLATE_COLD_DAY_DEFAULT_VALUE;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
@@ -51,7 +52,7 @@ public class ColdManagerImpl extends BaseTemplateSrvImpl implements ColdManager 
     @Autowired
     private ClusterRoleHostService clusterRoleHostService;
 
-    public static final int      MAX_HOT_DAY = 2;
+    public static final int      MAX_HOT_DAY = 3;
     public static final int      MIN_HOT_DAY = -2;
 
     private final static Integer RETRY_TIME  = 3;
@@ -134,7 +135,7 @@ public class ColdManagerImpl extends BaseTemplateSrvImpl implements ColdManager 
     */
     private int getDefaultHotDay() {
         String defaultDay = ariusConfigInfoService.stringSetting(ARIUS_TEMPLATE_COLD_GROUP,
-            INDEX_TEMPLATE_COLD_DAY_DEFAULT, "");
+            INDEX_TEMPLATE_COLD_DAY_DEFAULT, INDEX_TEMPLATE_COLD_DAY_DEFAULT_VALUE);
         LOGGER.info("class=TemplateColdManagerImpl||method=getDefaultHotDay||msg=defaultDay: {}", defaultDay);
         if (StringUtils.isNotBlank(defaultDay)) {
             try {
@@ -310,7 +311,6 @@ public class ColdManagerImpl extends BaseTemplateSrvImpl implements ColdManager 
             operateRecordService.save(
                 new OperateRecord.Builder().userOperation(operator).operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE)
                     .bizId(id).project(projectService.getProjectBriefByProjectId(projectId))
-
                     .content("deltaHotDays:" + days).buildDefaultManualTrigger());
         }
 

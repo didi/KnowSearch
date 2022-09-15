@@ -9,21 +9,15 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.alias.Co
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.alias.IndexTemplateAliasDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateAlias;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePO;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePhyPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateAliasPO;
-import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.component.CacheSwitch;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.TemplateLogicAliasService;
-import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpClient;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateAliasDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplateDAO;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.template.IndexTemplatePhyDAO;
-import com.didiglobal.logi.elasticsearch.client.ESClient;
 import com.didiglobal.logi.elasticsearch.client.request.index.putalias.PutAliasNode;
 import com.didiglobal.logi.elasticsearch.client.request.index.putalias.PutAliasType;
-import com.didiglobal.logi.elasticsearch.client.response.indices.getalias.ESIndicesGetAliasResponse;
-import com.didiglobal.logi.elasticsearch.client.response.indices.putalias.ESIndicesPutAliasResponse;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Maps;
@@ -39,7 +33,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class TemplateLogicAliasServiceImpl implements TemplateLogicAliasService {
@@ -50,8 +43,7 @@ public class TemplateLogicAliasServiceImpl implements TemplateLogicAliasService 
     private IndexTemplateDAO                          indexTemplateDAO;
     @Autowired
     private IndexTemplatePhyDAO                       indexTemplatePhyDAO;
-    @Autowired
-    private ESOpClient                                esOpClient;
+ 
     @Autowired
     private CacheSwitch                               cacheSwitch;
 
@@ -165,70 +157,7 @@ public class TemplateLogicAliasServiceImpl implements TemplateLogicAliasService 
         return Result.buildSucc(ret > 0);
     }
 
-    @Override
-    @Transactional
-    public Result aliasSwitch(ConsoleTemplateAliasSwitchDTO aliasSwitchDTO) throws ESOperateException {
-        //检查别名
-        Result result = aliasChecked(aliasSwitchDTO.getAliasName(), aliasSwitchDTO.getProjectId(), null);
-        if (result != null && result.failed()) {
-            return result;
-        }
-        List<TemplateAliasPO> insertAliasList = new ArrayList<>();
-        List<Integer> deleteAliasList = new ArrayList<>();
-        Set<Integer> logicIdList = new HashSet<>();
-        List<PutAliasNode> nodes;
-        List<IndexTemplatePO> indexIndexTemplatePOS = indexTemplateDAO.listByProjectId(aliasSwitchDTO.getProjectId());
-        //检查索引
-        if (CollectionUtils.isEmpty(aliasSwitchDTO.getAddAliasIndices())
-            && CollectionUtils.isEmpty(aliasSwitchDTO.getDelAliasIndices())) {
-            return Result.buildFail("操作的索引名称不能为空！");
-        }
-        Result<List<PutAliasNode>> nodesResult = buildAliasNodes(aliasSwitchDTO, indexIndexTemplatePOS, insertAliasList,
-            deleteAliasList, logicIdList);
-        if (nodesResult.success()) {
-            nodes = new ArrayList<>(nodesResult.getData());
-        } else {
-            return nodesResult;
-        }
-        //这里需要在同一个物理集群中，否则别名没有意义
-        List<IndexTemplatePhyPO> physicalPOList = indexTemplatePhyDAO.listByLogicIds(new ArrayList<>(logicIdList));
-        String cluster = "";
-        if (CollectionUtils.isNotEmpty(physicalPOList)) {
-            Set<String> set = physicalPOList.stream().map(IndexTemplatePhyPO::getCluster).collect(Collectors.toSet());
-            if (set.size() != 1) {
-                return Result.buildFail("索引所在集群不一致！");
-            }
-            cluster = set.toArray(new String[1])[0];
-        } else {
-            return Result.buildFail("物理模板不存在！");
-        }
-        //写入数据
-        if (CollectionUtils.isNotEmpty(deleteAliasList)) {
-            indexTemplateAliasDAO.deleteBatch(deleteAliasList, aliasSwitchDTO.getAliasName());
-        }
-        if (CollectionUtils.isNotEmpty(insertAliasList)) {
-            indexTemplateAliasDAO.insertBatch(insertAliasList);
-        }
-        //写入ES
-        ESClient client = esOpClient.getESClient(cluster);
-        if (CollectionUtils.isNotEmpty(aliasSwitchDTO.getDelAliasIndices())
-            && CollectionUtils.isEmpty(aliasSwitchDTO.getAddAliasIndices())) {
-            //在仅删除别名的时候会出现别名不存在的异常，所以在这里判断要删除别名的索引至少存在一个拥有要删除的别名，并且优化提示信息
-            ESIndicesGetAliasResponse response = client.admin().indices()
-                .prepareAlias(StringUtils.join(aliasSwitchDTO.getDelAliasIndices(), ",").split(",")).execute()
-                .actionGet(30, TimeUnit.SECONDS);
-            if (null == response || null == response.getM() || response.getM().values().stream()
-                .noneMatch(indexNode -> indexNode.getAliases().containsKey(aliasSwitchDTO.getAliasName()))) {
-                throw new ESOperateException("操作的别名不存在！");
-            }
-        }
-        ESIndicesPutAliasResponse response = client.admin().indices().preparePutAlias().addPutAliasNodes(nodes)
-            .execute().actionGet(30, TimeUnit.SECONDS);
-        if (null == response || !response.getAcknowledged()) {
-            throw new ESOperateException("设置别名失败！");
-        }
-        return Result.buildSucc();
-    }
+   
 
     private Result<List<PutAliasNode>> buildAliasNodes(ConsoleTemplateAliasSwitchDTO aliasSwitchDTO,
                                                        List<IndexTemplatePO> indexIndexTemplatePOS,

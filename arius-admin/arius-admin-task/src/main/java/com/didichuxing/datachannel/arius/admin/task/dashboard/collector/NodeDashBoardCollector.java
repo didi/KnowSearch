@@ -6,7 +6,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.DashBoard
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.DashBoardStats;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.dashboard.NodeMetrics;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusDateUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.AriusUnitUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
@@ -34,6 +34,8 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.*;
+import static com.didichuxing.datachannel.arius.admin.common.util.AriusUnitUtil.COMMON;
+import static com.didichuxing.datachannel.arius.admin.common.util.AriusUnitUtil.TIME;
 
 /**
  * Created by linyunan on 3/11/22
@@ -331,17 +333,7 @@ public class NodeDashBoardCollector extends BaseDashboardCollector {
      * @return large.disk.usage.threshold
      */
     private long getConfigLargeDiskUsage() {
-        try {
-            String configValue = ariusConfigInfoService.stringSetting(ARIUS_DASHBOARD_THRESHOLD_GROUP, NODE_LARGE_DISK_USAGE_THRESHOLD, "");
-            DashBoardMetricThresholdDTO configThreshold = null;
-            if (StringUtils.isNotBlank(configValue)) {
-                configThreshold = JSONObject.parseObject(configValue, DashBoardMetricThresholdDTO.class);
-                return configThreshold.getValue().longValue();
-            }
-        } catch (Exception e) {
-            return NODE_LARGE_DISK_THRESHOLD;
-        }
-        return NODE_LARGE_DISK_THRESHOLD;
+        return getConfigOrDefaultValue(NODE_DISK_USED_PERCENT_THRESHOLD,DASHBOARD_NODE_DISK_USED_PERCENT_THRESHOLD_DEFAULT_VALUE,COMMON);
     }
 
     /**
@@ -350,17 +342,7 @@ public class NodeDashBoardCollector extends BaseDashboardCollector {
      * @return
      */
     private long getConfigLargeHeadPercentThreshold() {
-        try {
-            String configValue = ariusConfigInfoService.stringSetting(ARIUS_DASHBOARD_THRESHOLD_GROUP, NODE_LARGE_HEAD_USAGE_PERCENT_THRESHOLD, "");
-            DashBoardMetricThresholdDTO configThreshold = null;
-            if (StringUtils.isNotBlank(configValue)) {
-                configThreshold = JSONObject.parseObject(configValue, DashBoardMetricThresholdDTO.class);
-                return configThreshold.getValue().longValue();
-            }
-        } catch (Exception e) {
-            return HEAD_USED_PERCENT_THRESHOLD;
-        }
-        return HEAD_USED_PERCENT_THRESHOLD;
+        return getConfigOrDefaultValue(NODE_LARGE_HEAD_USAGE_PERCENT_THRESHOLD,DASHBOARD_HEAD_USED_PERCENT_THRESHOLD_DEFAULT_VALUE,COMMON);
     }
 
     /**
@@ -369,17 +351,7 @@ public class NodeDashBoardCollector extends BaseDashboardCollector {
      * @return
      */
     private long getConfigLargeHeadPercentTimeThreshold() {
-        try {
-            String configValue = ariusConfigInfoService.stringSetting(ARIUS_DASHBOARD_THRESHOLD_GROUP, NODE_LARGE_HEAD_USED_PERCENT_TIME_USAGE_THRESHOLD, "");
-            DashBoardMetricThresholdDTO configThreshold = null;
-            if (StringUtils.isNotBlank(configValue)) {
-                configThreshold = JSONObject.parseObject(configValue, DashBoardMetricThresholdDTO.class);
-                return AriusDateUtils.getUnitTime(configThreshold.getValue().longValue(),configThreshold.getUnit());
-            }
-        } catch (Exception e) {
-            return LARGE_HEAD_USED_PERCENT_TIME;
-        }
-        return LARGE_HEAD_USED_PERCENT_TIME;
+        return getConfigOrDefaultValue(NODE_LARGE_HEAD_USED_PERCENT_TIME_USAGE_THRESHOLD,DASHBOARD_LARGE_HEAD_USED_PERCENT_TIME_DEFAULT_VALUE,TIME);
     }
 
     /**
@@ -388,37 +360,38 @@ public class NodeDashBoardCollector extends BaseDashboardCollector {
      * @return
      */
     private long getConfigLargeCpuPercentThreshold() {
-        try {
-            String configValue = ariusConfigInfoService.stringSetting(ARIUS_DASHBOARD_THRESHOLD_GROUP, NODE_LARGE_CPU_USAGE_PERCENT_THRESHOLD, "");
-            DashBoardMetricThresholdDTO configThreshold = null;
-            if (StringUtils.isNotBlank(configValue)) {
-                configThreshold = JSONObject.parseObject(configValue, DashBoardMetricThresholdDTO.class);
-                return configThreshold.getValue().longValue();
-            }
-        } catch (Exception e) {
-            return CPU_PERCENT_THRESHOLD;
-        }
-        return CPU_PERCENT_THRESHOLD;
+        return getConfigOrDefaultValue(NODE_LARGE_CPU_USAGE_PERCENT_THRESHOLD,DASHBOARD_CPU_PERCENT_THRESHOLD_DEFAULT_VALUE,COMMON);
     }
 
     /**
-     * CPU利用率超持续时间红线
+     * cpu利用率持续时间超红线阈值
      * node.large.cpu.used.percent.time.threshold
      * @return
      */
     private long getConfigLargeCpuPercentTimeThreshold() {
-        try {
-            String configValue = ariusConfigInfoService.stringSetting(ARIUS_DASHBOARD_THRESHOLD_GROUP, NODE_LARGE_CPU_USED_PERCENT_TIME_USAGE_THRESHOLD, "");
-            DashBoardMetricThresholdDTO configThreshold = null;
-            if (StringUtils.isNotBlank(configValue)) {
-                configThreshold = JSONObject.parseObject(configValue, DashBoardMetricThresholdDTO.class);
-                return AriusDateUtils.getUnitTime(configThreshold.getValue().longValue(),configThreshold.getUnit());
-            }
-        } catch (Exception e) {
-            return LARGE_CPU_PERCENT_TIME;
-        }
-        return LARGE_CPU_PERCENT_TIME;
+        return getConfigOrDefaultValue(NODE_CPU_USED_PERCENT_THRESHOLD_TIME_DURATION_THRESHOLD,
+                DASHBOARD_NODE_CPU_USED_PERCENT_THRESHOLD_TIME_DURATION_THRESHOLD_DEFAULT_VALUE,TIME);
     }
 
-
+    /**
+     * 获取dashboard配置值
+     * catch:获取和转换都发生错误后，使用系统配置的默认配置项
+     * @param valueName    配置名称
+     * @param defaultValue 默认值
+     * @return
+     */
+    private long getConfigOrDefaultValue(String valueName,String defaultValue,String unitStyle){
+        DashBoardMetricThresholdDTO configThreshold = null;
+        try {
+            String configValue = ariusConfigInfoService.stringSetting(ARIUS_DASHBOARD_THRESHOLD_GROUP, valueName, defaultValue);
+            if (StringUtils.isNotBlank(configValue)) {
+                configThreshold = JSONObject.parseObject(configValue, DashBoardMetricThresholdDTO.class);
+            }
+        } catch (Exception e) {
+            LOGGER.warn("class=NodeDashBoardCollector||method=getConfigOrDefaultValue||name={}||msg=JSON format error!",
+                     valueName);
+            configThreshold = JSONObject.parseObject(defaultValue, DashBoardMetricThresholdDTO.class);
+        }
+        return AriusUnitUtil.unitChange(configThreshold.getValue().longValue(),configThreshold.getUnit(),unitStyle);
+    }
 }

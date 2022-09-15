@@ -22,15 +22,15 @@ public enum DashBoardMetricThresholdValueNameEnum {
      * {"name":"集群shard个数","metrics":"shardNum","unit":"个","compare":">","value":10000}
      */
 
-    INDEX_SEGMENTS_NUM_THRESHOLD(INDEX_SEGMENT_NUM_THRESHOLD,INDEX_SEGMENT_NUM,"索引Segments个数","segmentNum", "个",">",1D),
-    TEMPLATE_SEGMENTS_NUM_THRESHOLD(INDEX_TEMPLATE_SEGMENT_COUNT_THRESHOLD,TEMPLATE_SEGMENT_NUM,"模板Segments个数","segmentNum","个",">",20D),
-    INDEX_SEGMENTS_MEN_SIZE_THRESHOLD(INDEX_SEGMENT_MEMORY_SIZE_THRESHOLD,INDEX_SEGMENT_MEM_SIZE,"索引Segments内存大小","segmentMemSize","kb",">",1D),
-    TEMPLATE_SEGMENTS_MEN_SIZE_THRESHOLD(INDEX_TEMPLATE_SEGMENT_MEMORY_SIZE_THRESHOLD,TEMPLATE_SEGMENT_MEM_NUM,"模板Segments内存大小","segmentMemSize","kb",">",50D),
-    NODE_SHARD_SIZE_THRESHOLD(NODE_SHARD_BIG_THRESHOLD,NODE_SHARD_NUM,"节点分片个数","shardNum","个",">",500D),
-    MAPPING_NUM_THRESHOLD(INDEX_MAPPING_NUM_THRESHOLD,INDEX_MAPPING_NUM,"索引Mapping个数","mappingNum","个",">",1D),
-    INDEX_SMALL_SHARD_THRESHOLD(INDEX_SHARD_SMALL_THRESHOLD,INDEX_SMALL_SHARD,"小shard索引列表","shardSize","个",">",100D),
-    COLLECTOR_DELAYED_THRESHOLD(NODE_STATUS_COLLECTOR_DELAYED_THRESHOLD,CLUSTER_ELAPSED_TIME_GTE_5MIN,"指标采集延时","clusterElapsedTimeGte5Min","min",">",5D),
-    SHARD_NUM_THRESHOLD(CLUSTER_SHARD_NUM_THRESHOLD,CLUSTER_SHARD_NUM, "集群shard个数", "shardNum", "个", ">", 10000D);
+    INDEX_SEGMENTS_NUM_THRESHOLD(INDEX_SEGMENT_NUM_THRESHOLD,INDEX_SEGMENT_NUM,DASHBOARD_INDEX_SEGMENT_NUM_THRESHOLD_DEFAULT_VALUE),
+    TEMPLATE_SEGMENTS_NUM_THRESHOLD(INDEX_TEMPLATE_SEGMENT_COUNT_THRESHOLD,TEMPLATE_SEGMENT_NUM,DASHBOARD_INDEX_TEMPLATE_SEGMENT_COUNT_THRESHOLD_DEFAULT_VALUE),
+    INDEX_SEGMENTS_MEN_SIZE_THRESHOLD(INDEX_SEGMENT_MEMORY_SIZE_THRESHOLD,INDEX_SEGMENT_MEM_SIZE,DASHBOARD_INDEX_SEGMENT_MEMORY_SIZE_THRESHOLD_DEFAULT_VALUE),
+    TEMPLATE_SEGMENTS_MEN_SIZE_THRESHOLD(INDEX_TEMPLATE_SEGMENT_MEMORY_SIZE_THRESHOLD,TEMPLATE_SEGMENT_MEM_NUM,DASHBOARD_INDEX_TEMPLATE_SEGMENT_MEMORY_SIZE_THRESHOLD_DEFAULT_VALUE),
+    NODE_SHARD_SIZE_THRESHOLD(NODE_SHARD_NUM_THRESHOLD,NODE_SHARD_NUM,DASHBOARD_NODE_SHARD_NUM_THRESHOLD_DEFAULT_VALUE),
+    MAPPING_NUM_THRESHOLD(INDEX_MAPPING_NUM_THRESHOLD,INDEX_MAPPING_NUM,DASHBOARD_INDEX_MAPPING_NUM_THRESHOLD_DEFAULT_VALUE),
+    INDEX_SMALL_SHARD_THRESHOLD(INDEX_SHARD_SMALL_THRESHOLD,INDEX_SMALL_SHARD,DASHBOARD_INDEX_SHARD_SMALL_THRESHOLD_DEFAULT_VALUE),
+    COLLECTOR_DELAYED_THRESHOLD(DASHBOARD_CLUSTER_METRIC_COLLECTOR_DELAYED_THRESHOLD,CLUSTER_ELAPSED_TIME_GTE_5MIN,DASHBOARD_CLUSTER_METRIC_COLLECTOR_DELAYED_DEFAULT_VALUE),
+    SHARD_NUM_THRESHOLD(CLUSTER_SHARD_NUM_THRESHOLD,CLUSTER_SHARD_NUM, DASHBOARD_CLUSTER_SHARD_NUM_THRESHOLD_DEFAULT_VALUE);
     /**
      * 配置名称
      */
@@ -43,33 +43,12 @@ public enum DashBoardMetricThresholdValueNameEnum {
     /**
      * 名称
      */
-    private String name;
-    /**
-     * 指标项名称
-     */
-    private String metrics;
-    /**
-     * 单位
-     */
-    private String unit;
-    /**
-     * 比较符号
-     */
-    private String compare;
-    /**
-     * 阈值
-     */
-    private Double value;
+    private String defaultValue;
 
-    DashBoardMetricThresholdValueNameEnum(String configName, DashBoardMetricListTypeEnum typeEnum, String name, String metrics, String unit, String compare, Double value) {
-
+    DashBoardMetricThresholdValueNameEnum(String configName, DashBoardMetricListTypeEnum typeEnum, String defaultValue) {
         this.configName = configName;
         this.typeEnum = typeEnum;
-        this.name = name;
-        this.metrics = metrics;
-        this.unit = unit;
-        this.compare = compare;
-        this.value = value;
+        this.defaultValue = defaultValue;
     }
 
     public String getConfigName() {
@@ -88,44 +67,12 @@ public enum DashBoardMetricThresholdValueNameEnum {
         this.typeEnum = typeEnum;
     }
 
-    public String getName() {
-        return name;
+    public String getDefaultValue() {
+        return defaultValue;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getMetrics() {
-        return metrics;
-    }
-
-    public void setMetrics(String metrics) {
-        this.metrics = metrics;
-    }
-
-    public String getUnit() {
-        return unit;
-    }
-
-    public void setUnit(String unit) {
-        this.unit = unit;
-    }
-
-    public String getCompare() {
-        return compare;
-    }
-
-    public void setCompare(String compare) {
-        this.compare = compare;
-    }
-
-    public Double getValue() {
-        return value;
-    }
-
-    public void setValue(Double value) {
-        this.value = value;
+    public void setDefaultValue(String defaultValue) {
+        this.defaultValue = defaultValue;
     }
 
     public static List<DashBoardMetricThresholdValueNameEnum> getAllDefaultThresholdValue(){

@@ -1,8 +1,9 @@
 package com.didichuxing.datachannel.arius.admin.biz.dsl.impl;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum.DSL_TEMPLATE;
+
 import com.didichuxing.datachannel.arius.admin.biz.dsl.DslTemplateManager;
 import com.didichuxing.datachannel.arius.admin.biz.page.DslTemplatePageSearchHandle;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.dsl.DslQueryLimitDTO;
@@ -21,14 +22,10 @@ import com.didichuxing.datachannel.arius.admin.core.service.metrics.UserConfigSe
 import com.didichuxing.datachannel.arius.admin.metadata.service.DslTemplateService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-import com.didiglobal.logi.security.service.ProjectService;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
-
-import java.util.List;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum.DSL_TEMPLATE;
 
 /**
  * @author cjm
@@ -42,8 +39,7 @@ public class DslTemplateManagerImpl implements DslTemplateManager {
     private DslTemplateService   dslTemplateService;
     @Autowired
     private OperateRecordService operateRecordService;
-    @Autowired
-    private ProjectService       projectService;
+
 
     @Autowired
     private HandleFactory        handleFactory;
@@ -54,12 +50,10 @@ public class DslTemplateManagerImpl implements DslTemplateManager {
         Boolean succeed =  dslTemplateService.updateDslTemplateQueryLimit(dslTemplateList);
         if (Boolean.TRUE.equals(succeed)) {
             for (DslQueryLimitDTO entry : dslTemplateList) {
-                OperateRecord operateRecord = new OperateRecord.Builder()
-                        .content(String.format("queryLimit %s->%s", entry.getDslTemplateMd5(),entry.getQueryLimit()))
-                        .operationTypeEnum(OperateTypeEnum.QUERY_TEMPLATE_DSL_CURRENT_LIMIT_ADJUSTMENT)
-                        .project(projectService.getProjectBriefByProjectId(projectId)).userOperation(operator)
-                        .bizId(entry.getProjectIdDslTemplateMd5()).buildDefaultManualTrigger();
-                operateRecordService.save(operateRecord);
+                operateRecordService.saveOperateRecordWithManualTrigger(
+                        String.format("queryLimit %s->%s", entry.getDslTemplateMd5(), entry.getQueryLimit()), operator,
+                        projectId, entry.getProjectIdDslTemplateMd5(),
+                        OperateTypeEnum.QUERY_TEMPLATE_DSL_CURRENT_LIMIT_ADJUSTMENT);
             }
 
         }
@@ -73,12 +67,8 @@ public class DslTemplateManagerImpl implements DslTemplateManager {
         }
        Boolean succeed = dslTemplateService.updateDslTemplateStatus(projectId, dslTemplateMd5);
         if (Boolean.TRUE.equals(succeed)) {
-            OperateRecord operateRecord = new OperateRecord.Builder()
-                    .content("变更状态:" + dslTemplateMd5)
-                    .operationTypeEnum(OperateTypeEnum.QUERY_TEMPLATE_DISABLE)
-                    .project(projectService.getProjectBriefByProjectId(projectId)).userOperation(operator)
-                    .bizId(dslTemplateMd5).buildDefaultManualTrigger();
-            operateRecordService.save(operateRecord);
+            operateRecordService.saveOperateRecordWithManualTrigger("变更状态:" + dslTemplateMd5, operator, projectId,
+                    dslTemplateMd5, OperateTypeEnum.QUERY_TEMPLATE_DISABLE);
         }
         return Result.build(succeed);
     }

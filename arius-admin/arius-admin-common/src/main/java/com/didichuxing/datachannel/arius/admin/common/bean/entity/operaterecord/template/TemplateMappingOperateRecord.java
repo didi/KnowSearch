@@ -26,6 +26,7 @@ public class TemplateMappingOperateRecord extends TemplateOperateRecord {
         diffResult.addAll(diffs);
         operateType = TemplateOperateRecordEnum.MAPPING.getCode();
         change = CollectionUtils.isNotEmpty(diffs);
+        this.behavior = "编辑MAPPING";
     }
 
     public TemplateMappingOperateRecord(MappingConfig before, MappingConfig after) {
@@ -37,6 +38,7 @@ public class TemplateMappingOperateRecord extends TemplateOperateRecord {
         diffResult.addAll(diffs);
         operateType = TemplateOperateRecordEnum.MAPPING.getCode();
         change = CollectionUtils.isNotEmpty(diffs);
+        this.behavior = "编辑MAPPING";
     }
 
     @Override

@@ -46,4 +46,11 @@ public interface ZeusClusterRemoteService {
      * @return Result
      */
     Result<EcmSubTaskLog> getTaskLog(Integer taskId, String hostname);
+
+    /**
+     *  获取 宙斯部署 ip列表
+     * @return Result
+     */
+    Result<List<String>> getAgentsList();
+
 }

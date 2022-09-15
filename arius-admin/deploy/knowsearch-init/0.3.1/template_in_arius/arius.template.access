@@ -1,0 +1,15 @@
+{
+  "dataCenter": "cn",
+  "name": "arius.template.access",
+  "resourceId": #resourceId,
+  "level": 1,
+  "cyclicalRoll": 1,
+  "expireTime": -1,
+  "dateField": "logTime",
+  "dateFieldFormat": "epoch_millis",
+  "diskSize": 30,
+  "dataType": 0,
+  "desc": "索引模板维度访问次数索引",
+  "mapping": "{\"properties\":{\"date\":{\"format\":\"strict_date_optional_time||yyyy-MM-dd HH:mm:ss Z||yyyy-MM-dd HH:mm:ss||yyyy-MM-dd HH:mm:ss.SSS Z||yyyy-MM-dd HH:mm:ss.SSS||yyyy-MM-dd HH:mm:ss,SSS||yyyy/MM/dd HH:mm:ss||yyyy-MM-dd HH:mm:ss,SSS Z||yyyy/MM/dd HH:mm:ss,SSS Z||yyyy-MM-dd||yyyyMMdd||yyyyMM||epoch_millis\",\"type\":\"date\"},\"templateName\":{\"type\":\"keyword\"},\"clusterName\":{\"type\":\"keyword\"},\"count\":{\"type\":\"long\"},\"templateId\":{\"type\":\"integer\"},\"logicTemplateId\":{\"type\":\"long\"}}}",
+   "setting": "{\"index\":{\"translog.durability\":\"async\",\"translog.sync_interval\":\"15s\",\"refresh_interval\":\"1s\"}}"
+}
