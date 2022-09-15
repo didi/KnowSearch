@@ -13,6 +13,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.Cluste
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicTemplateIndexCountVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyWithLogicClusterVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PluginVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.ecm.ESClusterNodeSepcVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
@@ -245,4 +246,12 @@ public interface ClusterLogicManager {
      */
     Result<Long> joinClusterPhyAndCreateLogicCluster(ClusterJoinDTO param, Integer projectId)
             throws AdminOperateException;
+    
+    /**
+     * 列出一个项目中的所有物理集群及其对应的逻辑集群
+     *
+     * @param projectId 项目编号
+     * @return 列表<ClusterPhyWithLogicClusterVO>
+     */
+    Result<List<ClusterPhyWithLogicClusterVO>> listLogicClusterWithClusterPhyByProjectId(Integer projectId);
 }
