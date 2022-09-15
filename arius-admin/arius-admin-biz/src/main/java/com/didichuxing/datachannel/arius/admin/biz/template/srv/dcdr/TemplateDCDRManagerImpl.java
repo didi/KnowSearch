@@ -744,7 +744,7 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
     }
 
     @Override
-    public Tuple<Long, Long> getMasterAndSlaveTemplateCheckPoint(Integer templateId) {
+    public Tuple<Long, Long> getMasterAndSlaveTemplateCheckPoint(Integer templateId) throws ESOperateException {
         //1.初始化信息
         Tuple<Long, Long> masterAndSlaveCheckPointTuple = new Tuple<>();
         masterAndSlaveCheckPointTuple.setV1(0L);

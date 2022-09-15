@@ -409,21 +409,27 @@ public class ESIndexDAO extends BaseESDAO {
      * @param expression
      * @return
      */
-    public Map<String, IndexNodes> getIndexStatsWithShards(String cluster, String expression) {
-        try {
-            ESClient client = fetchESClientByCluster(cluster);
-            if (client == null) {
-                return null;
-            }
-
-            ESIndicesStatsResponse response = client.admin().indices().prepareStats(expression)
-                .setLevel(IndicesStatsLevel.SHARDS).execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
-            return response.getIndicesMap();
-        } catch (Exception e) {
-            LOGGER.warn("class=ESIndexDAO||method=getIndexByExpression||errMsg={}||cluster={}||expression={}",
-                e.getMessage(), cluster, expression, e);
-            return Maps.newHashMap();
+    public Map<String, IndexNodes> getIndexStatsWithShards(String cluster, String expression)throws ESOperateException {
+        ESClient client = fetchESClientByCluster(cluster);
+        if (client == null) {
+            return null;
         }
+        ESIndicesStatsResponse response = null;
+        try {
+        
+            response = client.admin().indices().prepareStats(expression).setLevel(IndicesStatsLevel.SHARDS).execute()
+                    .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
+            if (StringUtils.isNotBlank(exception)) {
+                throw new ESOperateException(exception);
+            }
+        
+            LOGGER.warn("class=ESIndexDAO||method=getIndexByExpression||errMsg={}||cluster={}||expression={}",
+                    e.getMessage(), cluster, expression, e);
+        }
+        return Optional.ofNullable(response).map(ESIndicesStatsResponse::getIndicesMap).orElse(Maps.newHashMap());
+    
     }
 
     public Map<String, IndexNodes> getIndexStats(String cluster, String expression) {
@@ -557,17 +563,27 @@ public class ESIndexDAO extends BaseESDAO {
      * @param indexNames 索引列表
      * @return result
      */
-    public boolean refreshIndex(String cluster, List<String> indexNames) {
+    public boolean refreshIndex(String cluster, List<String> indexNames) throws ESOperateException{
         ESClient client = fetchESClientByCluster(cluster);
         if (client == null) {
-            return false;
+            throw new NullESClientException(cluster);
         }
-
-        ESIndicesRefreshIndexResponse response = client.admin().indices()
-            .prepareRefreshIndex(String.join(",", indexNames)).execute()
-            .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
-
-        return response.getFaild() == 0;
+    
+        ESIndicesRefreshIndexResponse response = null;
+        try {
+            response = client.admin().indices().prepareRefreshIndex(String.join(",", indexNames)).execute()
+                    .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
+            if (StringUtils.isNotBlank(exception)) {
+                throw new ESOperateException(exception);
+            
+            }
+            LOGGER.error("class={}||method=refreshIndex||clusterName={}||indexName={}", getClass().getSimpleName(),
+                    cluster, String.join(",", indexNames), e);
+        }
+    
+        return Optional.ofNullable(response).map(r -> r.getFaild() == 0).orElse(false);
     }
 
     /**
