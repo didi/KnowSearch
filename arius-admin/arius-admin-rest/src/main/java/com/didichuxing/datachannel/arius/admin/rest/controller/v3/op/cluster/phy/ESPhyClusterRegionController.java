@@ -5,6 +5,7 @@ import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterRegionManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterRegionWithNodeInfoVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
@@ -33,10 +34,19 @@ public class ESPhyClusterRegionController {
 
     @GetMapping("{cluster}/{clusterLogicType}")
     @ResponseBody
-    @ApiOperation(value = "获取物理集群region列表接口", notes = "支持各种纬度检索集群Region信息")
+    @ApiOperation(value = "获取物理集群region列表接口，不包含cold region", notes = "支持各种纬度检索集群Region信息")
     public Result<List<ClusterRegionVO>> listPhyClusterRegionsByLogicClusterTypeAndCluster(@PathVariable("cluster") String cluster,
                                                                                            @PathVariable("clusterLogicType") Integer clusterLogicType) {
         return clusterRegionManager.listPhyClusterRegionsByLogicClusterTypeAndCluster(cluster, clusterLogicType);
+    }
+
+    @GetMapping("/{regionId}/nodes")
+    @ResponseBody
+    @ApiOperation(value = "获取region下的节点列表", notes = "")
+    @Deprecated
+    public Result<List<ESClusterRoleHostVO>> getRegionNodes(@PathVariable Long regionId) {
+
+        return clusterNodeManager.listClusterRoleHostByRegionId(regionId);
     }
 
     @DeleteMapping("/{regionId}")
