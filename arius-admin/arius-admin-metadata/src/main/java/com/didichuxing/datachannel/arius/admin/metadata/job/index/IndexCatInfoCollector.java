@@ -157,10 +157,11 @@ public class IndexCatInfoCollector extends AbstractMetaDataJob {
                         //3.3 获取平台侧中属于模板的索引，并进行过滤，找出已经删除的索引,然后并打标设置为已删除，否则会导致模板的索引删出不干净
                         List<String> indexNameList = catIndexResults.stream().map(CatIndexResult::getIndex)
                                 .collect(Collectors.toList());
+                        
                         List<IndexCatCell> ariusIndexDeleteCatCells = Optional.ofNullable(
                                         clusterPhy2IndexCatCellListMap.get(clusterName)).orElse(Collections.emptyList())
                                 .stream()
-                                //
+                                //匹配模板测的索引
                                 .filter(r -> templateName2IndexTemplatePhyWithLogicMap.containsKey(r.getIndex())
                                              || templateName2IndexTemplatePhyWithLogicMap.containsKey(
                                         TemplateUtils.getMatchTemplateNameByIndexName(r.getIndex())))
@@ -169,6 +170,7 @@ public class IndexCatInfoCollector extends AbstractMetaDataJob {
                                 //打标
                                 .peek(r -> r.setDeleteFlag(true))
                                 .collect(Collectors.toList());
+                        indexCatCells.addAll(ConvertUtil.list2List(ariusIndexDeleteCatCells, IndexCatCellPO.class));
                         // 4.1 获取不匹配平台模板cat_index列表（通过索引管理创建，或者其他第三方客户端创建）
                         List<CatIndexResult> catIndexMatchNativeTemplateList = catIndexResults.stream()
                                 .filter(r -> !catIndexMatchAriusTemplateList.contains(r))
