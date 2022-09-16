@@ -9,6 +9,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.UserConfigInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.metrics.UserConfigPO;
+import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.metrics.impl.UserConfigServiceImpl;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.metrics.UserConfigDAO;
 import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
@@ -16,9 +17,25 @@ import java.util.Arrays;
 import org.apache.commons.collections4.CollectionUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.junit4.SpringRunner;
 
+@ActiveProfiles("test")
+@ExtendWith({ SpringExtension.class, MockitoExtension.class })
+@MockitoSettings(strictness = Strictness.LENIENT)
+@RunWith(SpringRunner.class)
+@ContextConfiguration(classes = { SpringTool.class })
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 class UserConfigServiceTest {
 
     @Mock
@@ -74,11 +91,11 @@ class UserConfigServiceTest {
         param.setFirstUserConfigType(null);
         // Verify the results
         assertThat(userConfigService.updateUserConfigByConfigTypeAndUserNameAndProjectId(param).getMessage())
-            .isEqualTo(Result.buildFail("指标看板未知").getMessage());
+            .isEqualTo(Result.buildFail("配置类型未知").getMessage());
         param.setFirstUserConfigType("cluster");
         param.setSecondUserConfigType(null);
         assertThat(userConfigService.updateUserConfigByConfigTypeAndUserNameAndProjectId(param).getMessage())
-            .isEqualTo(Result.buildFail("指标看板未知").getMessage());
+            .isEqualTo(Result.buildFail("配置类型未知").getMessage());
         param.setSecondUserConfigType("overview");
         when(userConfigDAO.selectOne(any())).thenReturn(null);
 
