@@ -39,14 +39,14 @@ public class UserConfigServiceImpl implements UserConfigService {
     private UserConfigDAO userConfigDAO;
 
     @Override
-    public List<String> getMetricsByTypeAndUserName(UserConfigInfoDTO param) {
+    public List<String> getUserConfigByConfigTypeAndUserNameAndProjectId(UserConfigInfoDTO param) {
         UserConfigTypeEnum userConfigTypeEnum = userConfigDTO2Type(param);
 
         Result<Void> result = paramCheck(param.getUserName(),param.getProjectId(), userConfigTypeEnum);
         if (result.failed()) {
             return new ArrayList<>();
         }
-        UserConfigPO userConfigPO = getUserConfigByDomainAccount(param);
+        UserConfigPO userConfigPO = getUserConfigByUserNameAndProjectIdAndConfigType(param);
         if (null == userConfigPO || AriusObjUtils.isNull(userConfigPO.getConfigInfo())) {
             return new ArrayList<>();
         }
@@ -67,7 +67,7 @@ public class UserConfigServiceImpl implements UserConfigService {
     }
 
     @Override
-    public Result<Integer> updateByMetricsByTypeAndUserName(UserConfigInfoDTO param) {
+    public Result<Integer> updateUserConfigByConfigTypeAndUserNameAndProjectId(UserConfigInfoDTO param) {
         UserConfigTypeEnum userConfigTypeEnum = userConfigDTO2Type(param);
 
         Result<Void> result = paramCheck(param.getUserName(), param.getProjectId(), userConfigTypeEnum);
@@ -75,7 +75,7 @@ public class UserConfigServiceImpl implements UserConfigService {
             return Result.buildFrom(result);
         }
 
-        UserConfigPO userConfigPO = getUserConfigByDomainAccount(param);
+        UserConfigPO userConfigPO = getUserConfigByUserNameAndProjectIdAndConfigType(param);
         if (null == userConfigPO) {
             return insertUserConfigInfoWithoutCheck(param);
         }
@@ -97,7 +97,7 @@ public class UserConfigServiceImpl implements UserConfigService {
         }
 
         userConfigPO.setConfigInfo(JSON.toJSONString(userConfigInfos));
-        boolean succ = (1 == userConfigDAO.update(userConfigPO,buildQueryWrapper(param)));
+        boolean succ = (1 == userConfigDAO.update(userConfigPO,buildUserConfigQueryWrapper(param)));
         return Result.build(succ, userConfigPO.getId());
     }
 
@@ -135,8 +135,8 @@ public class UserConfigServiceImpl implements UserConfigService {
         return Result.buildSucc();
     }
 
-    private UserConfigPO getUserConfigByDomainAccount(UserConfigInfoDTO userConfigInfoDTO) {
-        QueryWrapper<UserConfigPO> queryWrapper = buildQueryWrapper(userConfigInfoDTO);
+    private UserConfigPO getUserConfigByUserNameAndProjectIdAndConfigType(UserConfigInfoDTO userConfigInfoDTO) {
+        QueryWrapper<UserConfigPO> queryWrapper = buildUserConfigQueryWrapper(userConfigInfoDTO);
         return userConfigDAO.selectOne(queryWrapper);
     }
 
@@ -169,7 +169,7 @@ public class UserConfigServiceImpl implements UserConfigService {
      * @param param
      * @return
      */
-    private QueryWrapper<UserConfigPO> buildQueryWrapper(UserConfigInfoDTO param) {
+    private QueryWrapper<UserConfigPO> buildUserConfigQueryWrapper(UserConfigInfoDTO param) {
         QueryWrapper<UserConfigPO> userConfigPOQueryWrapper = new QueryWrapper<>();
         userConfigPOQueryWrapper.eq(USER_NAME, param.getUserName());
         userConfigPOQueryWrapper.eq(PROJECT_ID,param.getProjectId());

@@ -93,17 +93,17 @@ public class DslTemplateController {
     @PostMapping("/dsl-template-config")
     @ResponseBody
     @ApiOperation(value = "获取账号下已配置字段类型")
-    public Result<List<String>> getSearchTemplateTypes(@RequestBody UserConfigInfoDTO param,
+    public Result<List<String>> listDslTemplateFields(@RequestBody UserConfigInfoDTO param,
                                                        HttpServletRequest request) {
         return Result
-                .buildSucc(dslTemplateManager.getUserNameProjectSearchTemplateConfig(param, HttpRequestUtil.getOperator(request),HttpRequestUtil.getProjectId(request)));
+                .buildSucc(dslTemplateManager.listConfigDslTemplateFields(param, HttpRequestUtil.getOperator(request),HttpRequestUtil.getProjectId(request)));
     }
 
     @PutMapping("/dsl-template-config")
     @ResponseBody
     @ApiOperation(value = "更新账号下已配置指标类型")
-    public Result<Integer> updateClusterPhyMetricsTypes(@RequestBody UserConfigInfoDTO param,
+    public Result<Integer> updateConfigDslTemplateFields(@RequestBody UserConfigInfoDTO param,
                                                         HttpServletRequest request) {
-        return dslTemplateManager.updateUserNameProjectSearchTemplateConfig(param, HttpRequestUtil.getOperator(request),HttpRequestUtil.getProjectId(request));
+        return dslTemplateManager.updateConfigDslTemplateFields(param, HttpRequestUtil.getOperator(request),HttpRequestUtil.getProjectId(request));
     }
 }

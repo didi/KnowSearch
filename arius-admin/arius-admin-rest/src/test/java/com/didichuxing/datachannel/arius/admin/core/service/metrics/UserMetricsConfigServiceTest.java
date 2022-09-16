@@ -40,22 +40,22 @@ class UserConfigServiceTest {
 
         // Run the test
         param.setUserName(null);
-        Assertions.assertFalse(CollectionUtils.isNotEmpty(userConfigService.getMetricsByTypeAndUserName(param)));
+        Assertions.assertFalse(CollectionUtils.isNotEmpty(userConfigService.getUserConfigByConfigTypeAndUserNameAndProjectId(param)));
         param.setUserName("admin");
         metricsConfigPO.setConfigInfo(null);
 
         when(userConfigDAO.selectOne(any(QueryWrapper.class))).thenReturn(metricsConfigPO);
-        Assertions.assertFalse(CollectionUtils.isNotEmpty(userConfigService.getMetricsByTypeAndUserName(param)));
+        Assertions.assertFalse(CollectionUtils.isNotEmpty(userConfigService.getUserConfigByConfigTypeAndUserNameAndProjectId(param)));
         metricsConfigPO.setConfigInfo("[]");
         when(userConfigDAO.selectOne(any(QueryWrapper.class))).thenReturn(metricsConfigPO);
-        Assertions.assertFalse(CollectionUtils.isNotEmpty(userConfigService.getMetricsByTypeAndUserName(param)));
+        Assertions.assertFalse(CollectionUtils.isNotEmpty(userConfigService.getUserConfigByConfigTypeAndUserNameAndProjectId(param)));
         metricsConfigPO.setConfigInfo(CustomDataSource.metricInfo());
         when(userConfigDAO.selectOne(any(QueryWrapper.class))).thenReturn(metricsConfigPO);
-        Assertions.assertTrue(CollectionUtils.isNotEmpty(userConfigService.getMetricsByTypeAndUserName(param)));
+        Assertions.assertTrue(CollectionUtils.isNotEmpty(userConfigService.getUserConfigByConfigTypeAndUserNameAndProjectId(param)));
     }
 
     @Test
-    void testUpdateByMetricsByTypeAndUserName() {
+    void testupdateUserConfigByConfigTypeAndUserNameAndProjectId() {
         final UserConfigPO metricsConfigPO = CustomDataSource.getMetricsConfigPO();
         metricsConfigPO.setConfigInfo(CustomDataSource.metricInfo());
 
@@ -68,24 +68,24 @@ class UserConfigServiceTest {
         param.setUserName(null);
 
         // Verify the results
-        assertThat(userConfigService.updateByMetricsByTypeAndUserName(param).getMessage())
+        assertThat(userConfigService.updateUserConfigByConfigTypeAndUserNameAndProjectId(param).getMessage())
             .isEqualTo(Result.buildFail("用户账号为空").getMessage());
         param.setUserName("admin");
         param.setFirstUserConfigType(null);
         // Verify the results
-        assertThat(userConfigService.updateByMetricsByTypeAndUserName(param).getMessage())
+        assertThat(userConfigService.updateUserConfigByConfigTypeAndUserNameAndProjectId(param).getMessage())
             .isEqualTo(Result.buildFail("指标看板未知").getMessage());
         param.setFirstUserConfigType("cluster");
         param.setSecondUserConfigType(null);
-        assertThat(userConfigService.updateByMetricsByTypeAndUserName(param).getMessage())
+        assertThat(userConfigService.updateUserConfigByConfigTypeAndUserNameAndProjectId(param).getMessage())
             .isEqualTo(Result.buildFail("指标看板未知").getMessage());
         param.setSecondUserConfigType("overview");
         when(userConfigDAO.selectOne(any())).thenReturn(null);
 
-        assertThat(userConfigService.updateByMetricsByTypeAndUserName(param).success()).isTrue();
+        assertThat(userConfigService.updateUserConfigByConfigTypeAndUserNameAndProjectId(param).success()).isTrue();
         when(userConfigDAO.selectOne(any())).thenReturn(metricsConfigPO);
         when(userConfigDAO.update(any(), any())).thenReturn(1);
-        assertThat(userConfigService.updateByMetricsByTypeAndUserName(param).success()).isTrue();
+        assertThat(userConfigService.updateUserConfigByConfigTypeAndUserNameAndProjectId(param).success()).isTrue();
     }
 
     @Test

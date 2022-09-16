@@ -889,82 +889,82 @@ class ClusterPhyMetricsManagerTest {
     }
 
     @Test
-    void getUserNameConfigMetricsTest() {
+    void listConfigMetricsByConditionTest() {
         // Setup
         final UserConfigInfoDTO userConfigInfoDTO = new UserConfigInfoDTO("userName", "firstUserConfigType",
             "secondUserConfigType", Arrays.asList("value"),1,1);
-        when(userConfigService.getMetricsByTypeAndUserName(
+        when(userConfigService.getUserConfigByConfigTypeAndUserNameAndProjectId(
             new UserConfigInfoDTO("userName", "firstUserConfigType", "secondUserConfigType", Arrays.asList("value"),1,1)))
                 .thenReturn(Arrays.asList("value"));
 
         // Run the test
-        final List<String> result = clusterPhyMetricsManager.getUserNameConfigMetrics(userConfigInfoDTO, "userName", 1);
+        final List<String> result = clusterPhyMetricsManager.listConfigMetricsByCondition(userConfigInfoDTO, "userName", 1);
 
         // Verify the results
         assertThat(result).isEqualTo(Arrays.asList("value"));
     }
 
     @Test
-    void getUserNameConfigMetricsUserConfigServiceReturnsNoItemsTest() {
+    void listConfigMetricsByConditionUserConfigServiceReturnsNoItemsTest() {
         // Setup
         final UserConfigInfoDTO userConfigInfoDTO = new UserConfigInfoDTO("userName", "firstUserConfigType",
             "secondUserConfigType", Arrays.asList("value"),1,1);
-        when(userConfigService.getMetricsByTypeAndUserName(
+        when(userConfigService.getUserConfigByConfigTypeAndUserNameAndProjectId(
             new UserConfigInfoDTO("userName", "firstUserConfigType", "secondUserConfigType", Arrays.asList("value"),1,1)))
                 .thenReturn(Collections.emptyList());
 
         // Run the test
-        final List<String> result = clusterPhyMetricsManager.getUserNameConfigMetrics(userConfigInfoDTO, "userName", 1);
+        final List<String> result = clusterPhyMetricsManager.listConfigMetricsByCondition(userConfigInfoDTO, "userName", 1);
 
         // Verify the results
         assertThat(result).isEqualTo(Collections.emptyList());
     }
 
     @Test
-    void updateUserNameConfigMetricsTest() {
+    void updateConfigMetricsByConditionTest() {
         // Setup
         final UserConfigInfoDTO param = new UserConfigInfoDTO("userName", "firstUserConfigType", "secondUserConfigType",
             Arrays.asList("value"),1,1);
         final Result<Integer> expectedResult = Result.buildFail(0);
-        when(userConfigService.updateByMetricsByTypeAndUserName(
+        when(userConfigService.updateUserConfigByConfigTypeAndUserNameAndProjectId(
             new UserConfigInfoDTO("userName", "firstUserConfigType", "secondUserConfigType", Arrays.asList("value"),1,1)))
                 .thenReturn(Result.buildFail(0));
 
         // Run the test
-        final Result<Integer> result = clusterPhyMetricsManager.updateUserNameConfigMetrics(param, "userName",1);
+        final Result<Integer> result = clusterPhyMetricsManager.updateConfigMetricsByCondition(param, "userName",1);
 
         // Verify the results
         assertThat(result).isEqualTo(expectedResult);
     }
 
     @Test
-    void updateUserNameConfigMetricsUserConfigServiceReturnsNoItemTest() {
+    void updateConfigMetricsByConditionUserConfigServiceReturnsNoItemTest() {
         // Setup
         final UserConfigInfoDTO param = new UserConfigInfoDTO("userName", "firstUserConfigType", "secondUserConfigType",
             Arrays.asList("value"),1,1);
-        when(userConfigService.updateByMetricsByTypeAndUserName(
+        when(userConfigService.updateUserConfigByConfigTypeAndUserNameAndProjectId(
             new UserConfigInfoDTO("userName", "firstUserConfigType", "secondUserConfigType", Arrays.asList("value"),1,1)))
                 .thenReturn(Result.buildSucc());
 
         // Run the test
-        final Result<Integer> result = clusterPhyMetricsManager.updateUserNameConfigMetrics(param, "userName",1);
+        final Result<Integer> result = clusterPhyMetricsManager.updateConfigMetricsByCondition(param, "userName",1);
 
         // Verify the results
         assertThat(result).isEqualTo(Result.buildSucc());
     }
 
     @Test
-    void updateUserNameConfigMetricsUserConfigServiceReturnsFailureTest() {
+    void updateConfigMetricsByConditionUserConfigServiceReturnsFailureTest() {
         // Setup
         final UserConfigInfoDTO param = new UserConfigInfoDTO("userName", "firstUserConfigType", "secondUserConfigType",
             Arrays.asList("value"),1,1);
         final Result<Integer> expectedResult = Result.buildFail(0);
-        when(userConfigService.updateByMetricsByTypeAndUserName(
+        when(userConfigService.updateUserConfigByConfigTypeAndUserNameAndProjectId(
             new UserConfigInfoDTO("userName", "firstUserConfigType", "secondUserConfigType", Arrays.asList("value"),1,1)))
                 .thenReturn(Result.buildFail());
 
         // Run the test
-        final Result<Integer> result = clusterPhyMetricsManager.updateUserNameConfigMetrics(param, "userName",1);
+        final Result<Integer> result = clusterPhyMetricsManager.updateConfigMetricsByCondition(param, "userName",1);
 
         // Verify the results
         assertThat(result).isEqualTo(expectedResult);

@@ -59,7 +59,7 @@ public interface ClusterPhyMetricsManager {
      * @param userName 用户名
      * @param projectId
      */
-    List<String> getUserNameConfigMetrics(UserConfigInfoDTO param, String userName, Integer projectId);
+    List<String> listConfigMetricsByCondition(UserConfigInfoDTO param, String userName, Integer projectId);
 
     /**
      * 更新账号下已配置的指标类型
@@ -68,7 +68,7 @@ public interface ClusterPhyMetricsManager {
      * @param userName 用户名
      * @param projectId
      */
-    Result<Integer> updateUserNameConfigMetrics(UserConfigInfoDTO param, String userName, Integer projectId);
+    Result<Integer> updateConfigMetricsByCondition(UserConfigInfoDTO param, String userName, Integer projectId);
 
     /**
      * 获取物理集群中的索引列表

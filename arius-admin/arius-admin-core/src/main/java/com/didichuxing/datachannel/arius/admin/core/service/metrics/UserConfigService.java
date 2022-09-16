@@ -14,14 +14,14 @@ public interface UserConfigService {
      * @param param 指标的信息说明DTO
      * @return 二级目录下的指标名称列表
      */
-    List<String> getMetricsByTypeAndUserName(UserConfigInfoDTO param);
+    List<String> getUserConfigByConfigTypeAndUserNameAndProjectId(UserConfigInfoDTO param);
 
     /**
      * 更新物理集群看板下的配置
      * @param param 指标的信息说明DTO
      * @return result
      */
-    Result<Integer> updateByMetricsByTypeAndUserName(UserConfigInfoDTO param);
+    Result<Integer> updateUserConfigByConfigTypeAndUserNameAndProjectId(UserConfigInfoDTO param);
 
     /**
      * 删除用户账号下的指标配置信息

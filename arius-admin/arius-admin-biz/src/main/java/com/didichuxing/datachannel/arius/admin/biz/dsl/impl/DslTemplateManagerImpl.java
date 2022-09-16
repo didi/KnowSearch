@@ -97,22 +97,22 @@ public class DslTemplateManagerImpl implements DslTemplateManager {
     }
 
     @Override
-    public List<String> getUserNameProjectSearchTemplateConfig(UserConfigInfoDTO userConfigInfoDTO, String userName, Integer projectId) {
+    public List<String> listConfigDslTemplateFields(UserConfigInfoDTO userConfigInfoDTO, String userName, Integer projectId) {
         userConfigInfoDTO.setUserName(userName);
         userConfigInfoDTO.setProjectId(projectId);
         userConfigInfoDTO.setConfigType(ConfigTypeEnum.RETRIEVE_TEMPLATE.getCode());
-        return userConfigService.getMetricsByTypeAndUserName(userConfigInfoDTO);
+        return userConfigService.getUserConfigByConfigTypeAndUserNameAndProjectId(userConfigInfoDTO);
     }
 
     @Override
-    public Result<Integer> updateUserNameProjectSearchTemplateConfig(UserConfigInfoDTO param, String userName, Integer projectId) {
+    public Result<Integer> updateConfigDslTemplateFields(UserConfigInfoDTO param, String userName, Integer projectId) {
         param.setUserName(userName);
         param.setProjectId(projectId);
         param.setConfigType(ConfigTypeEnum.RETRIEVE_TEMPLATE.getCode());
-        Result<Integer> result = userConfigService.updateByMetricsByTypeAndUserName(param);
+        Result<Integer> result = userConfigService.updateUserConfigByConfigTypeAndUserNameAndProjectId(param);
         if (result.failed()) {
-            LOGGER.warn("class=ClusterPhyMetricsManagerImpl||method=updateDomainAccountConfigMetrics||errMsg={}",
-                    "用户指标配置信息更新出错");
+            LOGGER.warn("class=DslTemplateManagerImpl||method=updateConfigDslTemplateFields||errMsg={}",
+                    "用户查询模板字段配置信息更新出错");
         }
         return result;
     }

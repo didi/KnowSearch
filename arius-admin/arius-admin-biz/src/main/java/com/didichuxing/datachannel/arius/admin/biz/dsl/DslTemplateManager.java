@@ -56,7 +56,7 @@ public interface DslTemplateManager {
      * @param projectId 用户所属应用
      * @return
      */
-    List<String> getUserNameProjectSearchTemplateConfig(UserConfigInfoDTO param, String operator, Integer projectId);
+    List<String> listConfigDslTemplateFields(UserConfigInfoDTO param, String operator, Integer projectId);
 
     /**
      * 更新查询模板个性化配置
@@ -65,5 +65,5 @@ public interface DslTemplateManager {
      * @param projectId
      * @return
      */
-    Result<Integer> updateUserNameProjectSearchTemplateConfig(UserConfigInfoDTO userConfigInfoDTO, String userName, Integer projectId);
+    Result<Integer> updateConfigDslTemplateFields(UserConfigInfoDTO userConfigInfoDTO, String userName, Integer projectId);
 }

@@ -180,19 +180,19 @@ public class ClusterPhyMetricsManagerImpl implements ClusterPhyMetricsManager {
     }
 
     @Override
-    public List<String> getUserNameConfigMetrics(UserConfigInfoDTO userConfigInfoDTO, String userName, Integer projectId) {
+    public List<String> listConfigMetricsByCondition(UserConfigInfoDTO userConfigInfoDTO, String userName, Integer projectId) {
         userConfigInfoDTO.setUserName(userName);
         userConfigInfoDTO.setProjectId(projectId);
         userConfigInfoDTO.setConfigType(ConfigTypeEnum.DASHBOARD_AND_METRICS_BOARD.getCode());
-        return userConfigService.getMetricsByTypeAndUserName(userConfigInfoDTO);
+        return userConfigService.getUserConfigByConfigTypeAndUserNameAndProjectId(userConfigInfoDTO);
     }
 
     @Override
-    public Result<Integer> updateUserNameConfigMetrics(UserConfigInfoDTO param, String userName, Integer projectId) {
+    public Result<Integer> updateConfigMetricsByCondition(UserConfigInfoDTO param, String userName, Integer projectId) {
         param.setUserName(userName);
         param.setProjectId(projectId);
         param.setConfigType(ConfigTypeEnum.DASHBOARD_AND_METRICS_BOARD.getCode());
-        Result<Integer> result = userConfigService.updateByMetricsByTypeAndUserName(param);
+        Result<Integer> result = userConfigService.updateUserConfigByConfigTypeAndUserNameAndProjectId(param);
         if (result.failed()) {
             LOGGER.warn("class=ClusterPhyMetricsManagerImpl||method=updateDomainAccountConfigMetrics||errMsg={}",
                 "用户指标配置信息更新出错");
