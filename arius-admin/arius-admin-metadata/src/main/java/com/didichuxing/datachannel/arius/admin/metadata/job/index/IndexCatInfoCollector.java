@@ -31,9 +31,11 @@ import com.google.common.collect.Multimap;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -203,9 +205,27 @@ public class IndexCatInfoCollector extends AbstractMetaDataJob {
 
         //TODO: 部署多台admin，这里会出现过滤失败的问题
         //移除已删除索引, 不采集
+        Function<Entry<String, List<IndexCatCellDTO>>, IndexCatCellDTO> filterOneIndexCatCellDTOFunc = key2indexCatCellDTOListEntry -> {
+            List<IndexCatCellDTO> indexCatCellDTOList = key2indexCatCellDTOListEntry.getValue();
+            // 如果是只有 1 个或者都是 deleteFlag=true 的时候，默认取第一个即可
+            if (indexCatCellDTOList.size() == 1 || indexCatCellDTOList.stream()
+                    .allMatch(IndexCatCellDTO::getDeleteFlag)) {
+                return indexCatCellDTOList.get(0);
+            }
+            // 否则找到为 false 的即可
+            return indexCatCellDTOList.stream().filter(i -> Boolean.FALSE.equals(i.getDeleteFlag())).findFirst().get();
+        
+        };
+    
         List<IndexCatCellDTO> finalSaveIndexCatList = res.stream().filter(this::filterNotCollectorIndexCat)
-                //只需要回写我们已经采集到的索引
-            .collect(Collectors.toList());
+                // 过滤出重复的索引
+                // 根据 key group by 一次 目的为了找到重复的数据
+                .collect(Collectors.groupingBy(IndexCatCellDTO::getKey)).entrySet().stream()
+                .map(filterOneIndexCatCellDTOFunc).collect(Collectors.toList());
+                
+       
+        
+        
         esIndexCatService.syncUpsertCatIndex(finalSaveIndexCatList, RETRY_TIMES);
         return JOB_SUCCESS;
     }
