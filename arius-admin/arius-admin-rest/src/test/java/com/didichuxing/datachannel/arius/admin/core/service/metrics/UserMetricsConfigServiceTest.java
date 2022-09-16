@@ -7,97 +7,114 @@ import static org.mockito.Mockito.when;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MetricsConfigInfoDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.po.metrics.UserMetricsConfigPO;
-import com.didichuxing.datachannel.arius.admin.core.service.metrics.impl.MetricsConfigServiceImpl;
-import com.didichuxing.datachannel.arius.admin.persistence.mysql.metrics.UserMetricsConfigDAO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.UserConfigInfoDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.metrics.UserConfigPO;
+import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
+import com.didichuxing.datachannel.arius.admin.core.service.metrics.impl.UserConfigServiceImpl;
+import com.didichuxing.datachannel.arius.admin.persistence.mysql.metrics.UserConfigDAO;
 import com.didichuxing.datachannel.arius.admin.util.CustomDataSource;
 import java.util.Arrays;
 import org.apache.commons.collections4.CollectionUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.junit4.SpringRunner;
 
-class UserMetricsConfigServiceTest {
+@ActiveProfiles("test")
+@ExtendWith({ SpringExtension.class, MockitoExtension.class })
+@MockitoSettings(strictness = Strictness.LENIENT)
+@RunWith(SpringRunner.class)
+@ContextConfiguration(classes = { SpringTool.class })
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
+class UserConfigServiceTest {
 
     @Mock
-    private UserMetricsConfigDAO     userMetricsConfigDAO;
+    private UserConfigDAO     userConfigDAO;
 
     @InjectMocks
-    private MetricsConfigServiceImpl userMetricsConfigService;
+    private UserConfigServiceImpl userConfigService;
 
     @Test
     void testGetMetricsByTypeAndUserName() {
-        final UserMetricsConfigPO metricsConfigPO = CustomDataSource.getMetricsConfigPO();
-        metricsConfigPO.setMetricInfo(CustomDataSource.metricInfo());
+        final UserConfigPO metricsConfigPO = CustomDataSource.getMetricsConfigPO();
+        metricsConfigPO.setConfigInfo(CustomDataSource.metricInfo());
         // Setup
-        final MetricsConfigInfoDTO param = new MetricsConfigInfoDTO("admin", "cluster", "overview",
-            Arrays.asList("cpuUsage", "cpuLoad1M"));
+        final UserConfigInfoDTO param = new UserConfigInfoDTO("admin", "cluster", "overview",
+            Arrays.asList("cpuUsage", "cpuLoad1M"),1,1);
 
-        // Configure UserMetricsConfigDAO.selectOne(...).
-        when(userMetricsConfigDAO.selectOne(any(QueryWrapper.class))).thenReturn(metricsConfigPO);
+        // Configure UserConfigDAO.selectOne(...).
+        when(userConfigDAO.selectOne(any(QueryWrapper.class))).thenReturn(metricsConfigPO);
 
         // Run the test
         param.setUserName(null);
-        Assertions.assertFalse(CollectionUtils.isNotEmpty(userMetricsConfigService.getMetricsByTypeAndUserName(param)));
+        Assertions.assertFalse(CollectionUtils.isNotEmpty(userConfigService.getUserConfigByConfigTypeAndUserNameAndProjectId(param)));
         param.setUserName("admin");
-        metricsConfigPO.setMetricInfo(null);
+        metricsConfigPO.setConfigInfo(null);
 
-        when(userMetricsConfigDAO.selectOne(any(QueryWrapper.class))).thenReturn(metricsConfigPO);
-        Assertions.assertFalse(CollectionUtils.isNotEmpty(userMetricsConfigService.getMetricsByTypeAndUserName(param)));
-        metricsConfigPO.setMetricInfo("[]");
-        when(userMetricsConfigDAO.selectOne(any(QueryWrapper.class))).thenReturn(metricsConfigPO);
-        Assertions.assertFalse(CollectionUtils.isNotEmpty(userMetricsConfigService.getMetricsByTypeAndUserName(param)));
-        metricsConfigPO.setMetricInfo(CustomDataSource.metricInfo());
-        when(userMetricsConfigDAO.selectOne(any(QueryWrapper.class))).thenReturn(metricsConfigPO);
-        Assertions.assertTrue(CollectionUtils.isNotEmpty(userMetricsConfigService.getMetricsByTypeAndUserName(param)));
+        when(userConfigDAO.selectOne(any(QueryWrapper.class))).thenReturn(metricsConfigPO);
+        Assertions.assertFalse(CollectionUtils.isNotEmpty(userConfigService.getUserConfigByConfigTypeAndUserNameAndProjectId(param)));
+        metricsConfigPO.setConfigInfo("[]");
+        when(userConfigDAO.selectOne(any(QueryWrapper.class))).thenReturn(metricsConfigPO);
+        Assertions.assertFalse(CollectionUtils.isNotEmpty(userConfigService.getUserConfigByConfigTypeAndUserNameAndProjectId(param)));
+        metricsConfigPO.setConfigInfo(CustomDataSource.metricInfo());
+        when(userConfigDAO.selectOne(any(QueryWrapper.class))).thenReturn(metricsConfigPO);
+        Assertions.assertTrue(CollectionUtils.isNotEmpty(userConfigService.getUserConfigByConfigTypeAndUserNameAndProjectId(param)));
     }
 
     @Test
-    void testUpdateByMetricsByTypeAndUserName() {
-        final UserMetricsConfigPO metricsConfigPO = CustomDataSource.getMetricsConfigPO();
-        metricsConfigPO.setMetricInfo(CustomDataSource.metricInfo());
+    void testupdateUserConfigByConfigTypeAndUserNameAndProjectId() {
+        final UserConfigPO metricsConfigPO = CustomDataSource.getMetricsConfigPO();
+        metricsConfigPO.setConfigInfo(CustomDataSource.metricInfo());
 
-        // Configure UserMetricsConfigDAO.selectOne(...).
+        // Configure UserConfigDAO.selectOne(...).
 
-        when(userMetricsConfigDAO.insert(any())).thenReturn(1);
+        when(userConfigDAO.insert(any())).thenReturn(1);
 
-        final MetricsConfigInfoDTO param = new MetricsConfigInfoDTO("admin", "cluster", "overview",
-            Arrays.asList("cpuUsage", "cpuLoad1M"));
+        final UserConfigInfoDTO param = new UserConfigInfoDTO("admin", "cluster", "overview",
+            Arrays.asList("cpuUsage", "cpuLoad1M"),1,1);
         param.setUserName(null);
 
         // Verify the results
-        assertThat(userMetricsConfigService.updateByMetricsByTypeAndUserName(param).getMessage())
+        assertThat(userConfigService.updateUserConfigByConfigTypeAndUserNameAndProjectId(param).getMessage())
             .isEqualTo(Result.buildFail("用户账号为空").getMessage());
         param.setUserName("admin");
-        param.setFirstMetricsType(null);
+        param.setFirstUserConfigType(null);
         // Verify the results
-        assertThat(userMetricsConfigService.updateByMetricsByTypeAndUserName(param).getMessage())
-            .isEqualTo(Result.buildFail("指标看板未知").getMessage());
-        param.setFirstMetricsType("cluster");
-        param.setSecondMetricsType(null);
-        assertThat(userMetricsConfigService.updateByMetricsByTypeAndUserName(param).getMessage())
-            .isEqualTo(Result.buildFail("指标看板未知").getMessage());
-        param.setSecondMetricsType("overview");
-        when(userMetricsConfigDAO.selectOne(any())).thenReturn(null);
+        assertThat(userConfigService.updateUserConfigByConfigTypeAndUserNameAndProjectId(param).getMessage())
+            .isEqualTo(Result.buildFail("配置类型未知").getMessage());
+        param.setFirstUserConfigType("cluster");
+        param.setSecondUserConfigType(null);
+        assertThat(userConfigService.updateUserConfigByConfigTypeAndUserNameAndProjectId(param).getMessage())
+            .isEqualTo(Result.buildFail("配置类型未知").getMessage());
+        param.setSecondUserConfigType("overview");
+        when(userConfigDAO.selectOne(any())).thenReturn(null);
 
-        assertThat(userMetricsConfigService.updateByMetricsByTypeAndUserName(param).success()).isTrue();
-        when(userMetricsConfigDAO.selectOne(any())).thenReturn(metricsConfigPO);
-        when(userMetricsConfigDAO.update(any(), any())).thenReturn(1);
-        assertThat(userMetricsConfigService.updateByMetricsByTypeAndUserName(param).success()).isTrue();
+        assertThat(userConfigService.updateUserConfigByConfigTypeAndUserNameAndProjectId(param).success()).isTrue();
+        when(userConfigDAO.selectOne(any())).thenReturn(metricsConfigPO);
+        when(userConfigDAO.update(any(), any())).thenReturn(1);
+        assertThat(userConfigService.updateUserConfigByConfigTypeAndUserNameAndProjectId(param).success()).isTrue();
     }
 
     @Test
     void testDeleteByUserName() {
         // Setup
-        when(userMetricsConfigDAO.delete(any())).thenReturn(1);
+        when(userConfigDAO.delete(any())).thenReturn(1);
 
         // Run the test
-        userMetricsConfigService.deleteByUserName("userName");
+        userConfigService.deleteByUserName("userName",1);
 
         // Verify the results
-        verify(userMetricsConfigDAO).delete(any());
+        verify(userConfigDAO).delete(any());
     }
     
     //void setTemplateInit(){
