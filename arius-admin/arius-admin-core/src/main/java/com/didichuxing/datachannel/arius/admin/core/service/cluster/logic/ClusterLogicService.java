@@ -83,7 +83,7 @@ public interface ClusterLogicService {
      */
     Result<Void> editClusterLogic(ESLogicClusterDTO param, String operator, Integer projectId);
 
-    Result<Void> editClusterLogicNotCheck(ESLogicClusterDTO param, String operator);
+    Result<Void> editClusterLogicNotCheck(ESLogicClusterDTO param);
 
     /**
      * 查询指定逻辑集群

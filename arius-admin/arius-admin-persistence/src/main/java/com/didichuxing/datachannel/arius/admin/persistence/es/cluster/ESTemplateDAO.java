@@ -228,10 +228,7 @@ public class ESTemplateDAO extends BaseESDAO {
                 return client.admin().indices().preparePutTemplate(name).setTemplateConfig(templateConfig)
                         .execute().actionGet(time, unit);
             } catch (Exception e) {
-                 final String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
-                if (Objects.nonNull(exception)) {
-                    throw new ESOperateException(exception);
-                }
+                ParsingExceptionUtils.abnormalTermination(e);
                 LOGGER.error("class=ESTemplateDAO||method=create||msg=put template fail||cluster={}||name={}", cluster,
                         name, e);
                 throw new ESOperateException(e.getMessage());
@@ -264,10 +261,7 @@ public class ESTemplateDAO extends BaseESDAO {
                         .actionGet(time, unit);
             
             } catch (Exception e) {
-                final String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
-                if (Objects.nonNull(exception)) {
-                    throw new ESOperateException(exception);
-                }
+                ParsingExceptionUtils.abnormalTermination(e);
                 LOGGER.error("class=ESTemplateDAO||method=create||put templates fail||clusterName={}||templateName={}",
                         cluster, name, e);
                 throw new ESOperateException("模板创建失败");
@@ -308,10 +302,7 @@ public class ESTemplateDAO extends BaseESDAO {
         try {
             response = esClient.admin().indices().putTemplate(request).actionGet(120, TimeUnit.SECONDS);
         } catch (Exception e) {
-            final String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
-            if (StringUtils.isNotBlank(exception)){
-                 throw new ESOperateException(exception);
-            }
+            ParsingExceptionUtils.abnormalTermination(e);
             LOGGER.warn(
                 "class=ESTemplateDAO||method=updateTemplate||update template fail||clusterName={}||templateName={}||esVersion={}||templateConfig={}||msg={}",
                 clusterName, templateName, esClient.getEsVersion(),
@@ -475,10 +466,7 @@ public class ESTemplateDAO extends BaseESDAO {
                     .setTemplateConfig(templateConfig).execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
             return response.getAcknowledged();
         } catch (Exception e) {
-            final String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
-            if (StringUtils.isNotBlank(exception)) {
-                throw new ESOperateException(exception);
-            }
+            ParsingExceptionUtils.abnormalTermination(e);
             throw new ESOperateException(e.getMessage(), e);
         }
        
@@ -530,10 +518,7 @@ public class ESTemplateDAO extends BaseESDAO {
                     .setTemplateConfig(templateConfig).execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
             return response.getAcknowledged();
         } catch (Exception e) {
-            final String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
-            if (StringUtils.isNotBlank(exception)) {
-                throw new ESOperateException(exception);
-            }
+            ParsingExceptionUtils.abnormalTermination(e);
             throw new ESOperateException(e.getMessage(), e);
         }
        
@@ -587,10 +572,7 @@ public class ESTemplateDAO extends BaseESDAO {
             response = tgtClient.admin().indices().preparePutTemplate(tgtTemplateName)
                 .setTemplateConfig(tgtTemplateConfig).execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
         } catch (Exception e) {
-            final String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
-            if (StringUtils.isNotBlank(exception)){
-                throw new ESOperateException(exception);
-            }
+            ParsingExceptionUtils.abnormalTermination(e);
             LOGGER.error(
                 "class=ESTemplateDAO||method=copyMappingAndAlias||srcCluster={}||srcTemplateName={}||tgtCluster={}||tgtTemplateName={}",
                 srcCluster, srcTemplateName, tgtCluster, tgtTemplateName, e);

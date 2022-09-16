@@ -2,6 +2,7 @@ package com.didichuxing.datachannel.arius.admin.common.util;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didiglobal.logi.elasticsearch.client.model.exception.ESAlreadyExistsException;
 import com.didiglobal.logi.elasticsearch.client.model.exception.ESIndexNotFoundException;
 import com.didiglobal.logi.elasticsearch.client.model.exception.ESIndexTemplateMissingException;
@@ -46,6 +47,18 @@ public final class ParsingExceptionUtils {
             
         }
         return null;
+    }
+    
+    /**
+     * 如果异常不是解析异常，则抛出新异常
+     *
+     * @param e ES 客户端抛出的异常对象。
+     */
+    public static void abnormalTermination(Exception e) throws ESOperateException {
+        String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
+        if (StringUtils.isNotBlank(exception)) {
+            throw new ESOperateException(exception);
+        }
     }
     
     

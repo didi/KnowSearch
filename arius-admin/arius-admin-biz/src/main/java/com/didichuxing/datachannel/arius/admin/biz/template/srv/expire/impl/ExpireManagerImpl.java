@@ -62,6 +62,10 @@ public class ExpireManagerImpl extends BaseTemplateSrvImpl implements ExpireMana
         if (Boolean.FALSE.equals(isTemplateSrvOpen(logicTemplateId))) {
             return Result.buildSucc();
         }
+        //开启dcdr后不能进行过期删除
+        if (Boolean.TRUE.equals(indexTemplateService.getLogicTemplatePOById(logicTemplateId).getHasDCDR())) {
+            return Result.buildSucc();
+        }
 
         Boolean succ = deleteNormalTemplateExpireIndex(logicTemplateId, RETRY_TIMES)
                        && deleteDeletingTemplateExpireIndex(logicTemplateId);

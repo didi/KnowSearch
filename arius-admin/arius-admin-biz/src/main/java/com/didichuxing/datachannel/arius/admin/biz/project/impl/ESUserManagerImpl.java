@@ -6,11 +6,15 @@ import static com.didichuxing.datachannel.arius.admin.core.service.project.impl.
 import com.didichuxing.datachannel.arius.admin.biz.project.ESUserManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.ESUserDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.project.ESUser;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.project.ESUserPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.ConsoleESUserVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.ConsoleESUserWithVerifyCodeVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.ESUserVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectSearchTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
@@ -18,6 +22,8 @@ import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.VerifyCodeFactory;
 import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
+import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.core.service.project.ESUserService;
 import com.didiglobal.logi.log.ILog;
@@ -30,6 +36,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -48,7 +55,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ESUserManagerImpl implements ESUserManager {
     private static final ILog    LOGGER = LogFactory.getLog(ESUserManagerImpl.class);
-
+    private static final String ES_USER_ERROR_MSG="应用下未匹配到逻辑集群，es user 不可以被设置为 %s 和 %s";
     @Autowired
     private ProjectService       projectService;
     @Autowired
@@ -56,7 +63,11 @@ public class ESUserManagerImpl implements ESUserManager {
     @Autowired
     private OperateRecordService operateRecordService;
     @Autowired
-    private RoleTool             roleTool;
+    private RoleTool            roleTool;
+    @Autowired
+    private ClusterLogicService  clusterLogicService;
+    @Autowired
+    private ClusterRegionService clusterRegionService;
 
     /**
      * @param projectIdStr
@@ -102,16 +113,10 @@ public class ESUserManagerImpl implements ESUserManager {
      */
     @Override
     public Result<Integer> registerESUser(ESUserDTO appDTO, Integer projectId, String operator) {
-        if (Objects.nonNull(appDTO)) {
-            appDTO.setProjectId(projectId);
-            appDTO.setVerifyCode(VerifyCodeFactory.get(VERIFY_CODE_LENGTH));
-            appDTO.setIsActive(1);
-            appDTO.setQueryThreshold(1000);
-            appDTO.setIsRoot(0);
-            appDTO.setMemo("新增");
-
+        if (Objects.isNull(appDTO)){
+            return Result.buildFail("es user为空");
         }
-
+        initESUser(appDTO, projectId);
 
         final TupleTwo</*创建的es user*/Result, /*创建的es user po*/ ESUserPO> resultESUserPOTuple = esUserService
             .registerESUser(appDTO, operator);
@@ -144,6 +149,7 @@ public class ESUserManagerImpl implements ESUserManager {
             LOGGER.warn("class=ESUserManagerImpl||method=editESUser||fail msg={}", checkResult.getMessage());
             return checkResult;
         }
+       
         //获取更新之前的po
         final ESUser oldESUser = esUserService.getEsUserById(esUserDTO.getId());
         //校验当前esUserDTO中的projectId是否存在于esUser
@@ -261,5 +267,72 @@ public class ESUserManagerImpl implements ESUserManager {
      private void saveOperateRecord(String content, Integer projectId, String operator,
                                    OperateTypeEnum operateTypeEnum) {
         operateRecordService.saveOperateRecordWithManualTrigger(content,operator,projectId,projectId,operateTypeEnum);
+    }
+    
+    /**
+     *  检查集群并设置集群
+     *
+     * @param esUserDTO 要创建的用户信息
+     */
+    private Result<Void> checkClusterAuthAndSetCluster(ESUserDTO esUserDTO) {
+        // 如果这里是集群模式或者原生模式，那么有且仅当项目下的物理集群唯一时，才可以被设置成功
+        Integer projectId = esUserDTO.getProjectId();
+       
+        ProjectSearchTypeEnum searchTypeEnum = ProjectSearchTypeEnum.valueOf(esUserDTO.getSearchType());
+       
+        if (!searchTypeEnum.equals(ProjectSearchTypeEnum.TEMPLATE)) {
+            //默认必须传集群
+            if (StringUtils.isBlank(esUserDTO.getCluster())) {
+                return Result.buildFail(String.format(ES_USER_ERROR_MSG,
+                        ProjectSearchTypeEnum.PRIMITIVE.getDesc(), ProjectSearchTypeEnum.CLUSTER.getDesc()));
+            }
+            // 如果是超级项目
+            if (AuthConstant.SUPER_PROJECT_ID.equals(projectId)) {
+                return Result.buildSucc();
+            }
+            // 获取项目下的物理集群
+            ESLogicClusterDTO esLogicClusterDTO = new ESLogicClusterDTO();
+            esLogicClusterDTO.setProjectId(projectId);
+            List<ClusterLogic> clusterLogics = clusterLogicService.listClusterLogics(esLogicClusterDTO);
+            if (CollectionUtils.isEmpty(clusterLogics)) {
+                return Result.buildFail(String.format(ES_USER_ERROR_MSG,
+                        ProjectSearchTypeEnum.PRIMITIVE.getDesc(), ProjectSearchTypeEnum.CLUSTER.getDesc()));
+            }
+            List<Long> logicClusterIds = clusterLogics.stream().map(ClusterLogic::getId).distinct()
+                    .collect(Collectors.toList());
+            // 找到 region
+            List<ClusterRegion> regions = clusterRegionService.getClusterRegionsByLogicIds(logicClusterIds);
+            if (CollectionUtils.isEmpty(regions)) {
+                return Result.buildFail(String.format(ES_USER_ERROR_MSG,
+                        ProjectSearchTypeEnum.PRIMITIVE.getDesc(), ProjectSearchTypeEnum.CLUSTER.getDesc()));
+            }
+            // 找到物理集群
+            List<String> clusterPhyList = regions.stream().map(ClusterRegion::getPhyClusterName).distinct()
+                    .collect(Collectors.toList());
+          
+            // 如果存在 cluster 且没有匹配到具有权限的物理集群
+            if (StringUtils.isNotBlank(esUserDTO.getCluster()) && clusterPhyList.stream()
+                    .noneMatch(cp -> StringUtils.equals(cp, esUserDTO.getCluster()))) {
+                return Result.buildFail(String.format("应用没有 %s 集群的权限", esUserDTO.getCluster()));
+            }
+        }
+        // 索引模式默认集群设置未 null
+        if (searchTypeEnum.equals(ProjectSearchTypeEnum.TEMPLATE)) {
+            esUserDTO.setCluster(null);
+        }
+        return Result.buildSucc();
+    }
+    
+    private static void initESUser(ESUserDTO appDTO, Integer projectId) {
+        appDTO.setProjectId(projectId);
+        appDTO.setVerifyCode(VerifyCodeFactory.get(VERIFY_CODE_LENGTH));
+        appDTO.setIsActive(1);
+        if (Objects.isNull(appDTO.getQueryThreshold())) {
+            appDTO.setQueryThreshold(1000);
+        }
+        if (Objects.isNull(appDTO.getIsRoot())) {
+            appDTO.setIsRoot(0);
+        }
+        appDTO.setMemo("新增");
     }
 }

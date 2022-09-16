@@ -744,7 +744,7 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
     }
 
     @Override
-    public Tuple<Long, Long> getMasterAndSlaveTemplateCheckPoint(Integer templateId) {
+    public Tuple<Long, Long> getMasterAndSlaveTemplateCheckPoint(Integer templateId) throws ESOperateException {
         //1.初始化信息
         Tuple<Long, Long> masterAndSlaveCheckPointTuple = new Tuple<>();
         masterAndSlaveCheckPointTuple.setV1(0L);
@@ -1303,6 +1303,11 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
                 if (step9Result.failed()) {
                     return step9Result;
                 }
+                //打开hasDCDR
+                IndexTemplatePO indexTemplatePO = new IndexTemplatePO();
+                indexTemplatePO.setId(masterTemplate.getLogicId());
+                indexTemplatePO.setHasDCDR(true);
+                indexTemplateService.update(indexTemplatePO);
             }
         } catch (Exception e) {
             LOGGER.warn("method=executeDCDRForSmooth||templateId={}||errMsg={}", templateId, e.getMessage(), e);

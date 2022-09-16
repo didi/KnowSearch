@@ -159,8 +159,8 @@ public class ESClusterDAO extends BaseESDAO {
                     .execute(ESClusterGetSettingsAllAction.INSTANCE, new ESClusterGetSettingsAllRequest())
                     .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
         } catch (Exception e) {
-            String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
-            throw new ESOperateException(StringUtils.isNotBlank(exception) ? exception : e.getMessage());
+            ParsingExceptionUtils.abnormalTermination(e);
+            LOGGER.error("class=ESClusterDAO||method=getClusterSetting||clusterName={}", cluster, e);
         }
         return response;
     }
@@ -188,10 +188,7 @@ public class ESClusterDAO extends BaseESDAO {
         
             return response.getAcknowledged();
         } catch (Exception e) {
-            String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
-            if (StringUtils.isNotBlank(exception)) {
-                throw new ESOperateException(exception);
-            }
+            ParsingExceptionUtils.abnormalTermination(e);
             LOGGER.error("class=ESClusterDAO||method=putPersistentRemoteClusters||clusterName={}", cluster, e);
             return false;
         }
