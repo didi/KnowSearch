@@ -55,7 +55,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ESUserManagerImpl implements ESUserManager {
     private static final ILog    LOGGER = LogFactory.getLog(ESUserManagerImpl.class);
-
+    private static final String ES_USER_ERROR_MSG="应用下未匹配到逻辑集群，es user 不可以被设置为 %s 和 %s";
     @Autowired
     private ProjectService       projectService;
     @Autowired
@@ -283,7 +283,7 @@ public class ESUserManagerImpl implements ESUserManager {
         if (!searchTypeEnum.equals(ProjectSearchTypeEnum.TEMPLATE)) {
             //默认必须传集群
             if (StringUtils.isBlank(esUserDTO.getCluster())) {
-                return Result.buildFail(String.format("应用下没有指定集群名称，es user 不可以被设置为 %s 和 %s",
+                return Result.buildFail(String.format(ES_USER_ERROR_MSG,
                         ProjectSearchTypeEnum.PRIMITIVE.getDesc(), ProjectSearchTypeEnum.CLUSTER.getDesc()));
             }
             // 如果是超级项目
@@ -295,7 +295,7 @@ public class ESUserManagerImpl implements ESUserManager {
             esLogicClusterDTO.setProjectId(projectId);
             List<ClusterLogic> clusterLogics = clusterLogicService.listClusterLogics(esLogicClusterDTO);
             if (CollectionUtils.isEmpty(clusterLogics)) {
-                return Result.buildFail(String.format("应用下未匹配到逻辑集群，es user 不可以被设置为 %s 和 %s",
+                return Result.buildFail(String.format(ES_USER_ERROR_MSG,
                         ProjectSearchTypeEnum.PRIMITIVE.getDesc(), ProjectSearchTypeEnum.CLUSTER.getDesc()));
             }
             List<Long> logicClusterIds = clusterLogics.stream().map(ClusterLogic::getId).distinct()
@@ -303,7 +303,7 @@ public class ESUserManagerImpl implements ESUserManager {
             // 找到 region
             List<ClusterRegion> regions = clusterRegionService.getClusterRegionsByLogicIds(logicClusterIds);
             if (CollectionUtils.isEmpty(regions)) {
-                return Result.buildFail(String.format("应用下未匹配到逻辑集群，es user 不可以被设置为 %s 和 %s",
+                return Result.buildFail(String.format(ES_USER_ERROR_MSG,
                         ProjectSearchTypeEnum.PRIMITIVE.getDesc(), ProjectSearchTypeEnum.CLUSTER.getDesc()));
             }
             // 找到物理集群
