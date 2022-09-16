@@ -8,6 +8,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRegionWithNodeInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicClusterDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.WorkOrder;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.AbstractOrderDetail;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.workorder.detail.LogicClusterIndecreaseOrderDetail;
@@ -25,8 +26,8 @@ import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
 import com.didichuxing.datachannel.arius.admin.core.service.project.ProjectClusterLogicAuthService;
 import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
-import com.didiglobal.logi.security.service.ProjectService;
 import java.util.List;
+import java.util.Optional;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -46,8 +47,7 @@ public class LogicClusterIndecreaseHandler extends BaseWorkOrderHandler {
 
     @Autowired
     private ClusterNodeManager             clusterNodeManager;
-    @Autowired
-    private ProjectService                 projectService;
+  
 
     /**
      * 工单是否自动审批
@@ -63,8 +63,14 @@ public class LogicClusterIndecreaseHandler extends BaseWorkOrderHandler {
     @Override
     public AbstractOrderDetail getOrderDetail(String extensions) {
         LogicClusterIndecreaseContent content = JSON.parseObject(extensions, LogicClusterIndecreaseContent.class);
-
-        return ConvertUtil.obj2Obj(content, LogicClusterIndecreaseOrderDetail.class);
+        LogicClusterIndecreaseOrderDetail logicClusterIndecreaseOrderDetail = ConvertUtil.obj2Obj(content,
+                LogicClusterIndecreaseOrderDetail.class);
+        //添加原有的节点数目
+        Optional.ofNullable(content.getLogicClusterId())
+                .map(clusterLogicService::getClusterLogicByIdThatNotContainsProjectId)
+                .map(ClusterLogic::getDataNodeNum)
+                .ifPresent(logicClusterIndecreaseOrderDetail::setOldDataNodeNu);
+        return logicClusterIndecreaseOrderDetail;
     }
 
     @Override
