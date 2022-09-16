@@ -4,6 +4,7 @@ import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOpe
 
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import com.didichuxing.datachannel.arius.admin.common.exception.NullESClientException;
 import com.didichuxing.datachannel.arius.admin.common.util.ParsingExceptionUtils;
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
 import com.didiglobal.logi.elasticsearch.client.ESClient;
@@ -23,6 +24,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -43,9 +45,10 @@ public class ESDCDRDAO extends BaseESDAO {
     public boolean putAutoReplication(String cluster, String name, String template, String replicaCluster) throws ESOperateException {
         ESClient client = esOpClient.getESClient(cluster);
         if (client == null) {
-            LOGGER.warn("class={}||method=putAutoReplication||clusterName={}||replicaCluster={}||template={}||errMsg=esClient is null",
-                    getClass().getSimpleName(), cluster, replicaCluster,template);
-            return false;
+            LOGGER.warn(
+                    "class={}||method=putAutoReplication||clusterName={}||replicaCluster={}||template={}||errMsg=esClient is null",
+                    getClass().getSimpleName(), cluster, replicaCluster, template);
+            throw new NullESClientException(cluster);
         }
         try {
             ESPutDCDRTemplateResponse response = client.admin().indices().preparePutDCDRTemplate().setName(name)
@@ -107,21 +110,25 @@ public class ESDCDRDAO extends BaseESDAO {
         //如果集群挂掉，就是可以抛出NPE
         ESClient client = esOpClient.getESClient(cluster);
         if (client==null){
-            throw new ESOperateException(String.format("cluster:【%s】无法获取到es client",cluster));
+            throw new NullESClientException(cluster);
         }
         
         ESGetDCDRTemplateRequest request = new ESGetDCDRTemplateRequest();
         request.setName(name);
-
-        ESGetDCDRTemplateResponse response = client.admin().indices().getDCDRTemplate(request)
-            .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
-
-        List<DCDRTemplate> dcdrTemplates = response.getDcdrs();
-        if (CollectionUtils.isEmpty(dcdrTemplates)) {
-            return null;
+        ESGetDCDRTemplateResponse response = null;
+        try {
+            response = client.admin().indices().getDCDRTemplate(request)
+                    .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
+            if (StringUtils.isNotBlank(exception)) {
+                throw new ESOperateException(exception);
+            }
+            LOGGER.warn("class={}||method=deleteReplication||clusterName={}||name={}", getClass().getSimpleName(),
+                    cluster, name, e);
         }
-
-        return dcdrTemplates.get(0);
+        return Optional.ofNullable(response).map(ESGetDCDRTemplateResponse::getDcdrs)
+                .filter(CollectionUtils::isNotEmpty).map(dcdrTemplates -> dcdrTemplates.get(0)).orElse(null);
 
     }
 
@@ -132,38 +139,50 @@ public class ESDCDRDAO extends BaseESDAO {
      * @param indices 索引列表
      * @return result
      */
-    public boolean deleteReplication(String cluster, String replicaCluster, Set<String> indices) {
+    public boolean deleteReplication(String cluster, String replicaCluster, Set<String> indices)
+            throws ESOperateException {
         ESClient client = esOpClient.getESClient(cluster);
         if (client == null) {
-            LOGGER.warn("class={}||method=deleteReplication||clusterName={}||replicaCluster={}||indices={}||errMsg=esClient is null",
-                    getClass().getSimpleName(), cluster, replicaCluster,indices);
-            return false;
+            LOGGER.warn(
+                    "class={}||method=deleteReplication||clusterName={}||replicaCluster={}||indices={}||errMsg=esClient is null",
+                    getClass().getSimpleName(), cluster, replicaCluster, indices);
+            throw new NullESClientException(cluster);
         }
-        
-        ESGetDCDRIndexResponse getDCDRIndexResponse = client.admin().indices().getDCDRIndex(new ESGetDCDRIndexRequest())
-            .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
-        List<DCDRIndex> allIndexDCDRs = getDCDRIndexResponse.getDcdrs();
-
-        List<String> shouldDels = Lists.newArrayList();
-        if (CollectionUtils.isNotEmpty(allIndexDCDRs)) {
-            for (DCDRIndex index : allIndexDCDRs) {
-                if (index.getReplicaCluster().equals(replicaCluster) && indices.contains(index.getPrimaryIndex())) {
-                    shouldDels.add(index.getPrimaryIndex());
+        try {
+            ESGetDCDRIndexResponse getDCDRIndexResponse = client.admin().indices()
+                    .getDCDRIndex(new ESGetDCDRIndexRequest()).actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+            List<DCDRIndex> allIndexDCDRs = getDCDRIndexResponse.getDcdrs();
+    
+            List<String> shouldDels = Lists.newArrayList();
+            if (CollectionUtils.isNotEmpty(allIndexDCDRs)) {
+                for (DCDRIndex index : allIndexDCDRs) {
+                    if (index.getReplicaCluster().equals(replicaCluster) && indices.contains(index.getPrimaryIndex())) {
+                        shouldDels.add(index.getPrimaryIndex());
+                    }
                 }
             }
+    
+            if (CollectionUtils.isEmpty(shouldDels)) {
+                return true;
+            }
+    
+            boolean succ = true;
+            for (String delIndex : shouldDels) {
+                succ = succ && client.admin().indices().prepareDeleteDCDRIndex().setPrimaryIndex(delIndex)
+                        .setReplicaIndex(delIndex).setReplicaCluster(replicaCluster).execute()
+                        .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS).getAcknowledged();
+            }
+    
+            return succ;
+        } catch (Exception e) {
+            String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
+            if (StringUtils.isNotBlank(exception)) {
+                throw new ESOperateException(exception);
+            }
+            LOGGER.warn(
+                    "class={}||method=deleteReplication||clusterName={}||replicaCluster={}||indices={}||errMsg=esClient is null",
+                    getClass().getSimpleName(), cluster, replicaCluster, indices);
+            return false;
         }
-
-        if (CollectionUtils.isEmpty(shouldDels)) {
-            return true;
-        }
-
-        boolean succ = true;
-        for (String delIndex : shouldDels) {
-            succ = succ && client.admin().indices().prepareDeleteDCDRIndex().setPrimaryIndex(delIndex)
-                .setReplicaIndex(delIndex).setReplicaCluster(replicaCluster).execute()
-                .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS).getAcknowledged();
-        }
-
-        return succ;
     }
 }
