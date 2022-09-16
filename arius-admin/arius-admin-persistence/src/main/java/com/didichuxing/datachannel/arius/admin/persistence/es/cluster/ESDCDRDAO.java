@@ -19,12 +19,10 @@ import com.didiglobal.logi.elasticsearch.client.response.dcdr.ESGetDCDRTemplateR
 import com.didiglobal.logi.elasticsearch.client.response.dcdr.ESPutDCDRTemplateResponse;
 import com.google.common.collect.Lists;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -64,12 +62,11 @@ public class ESDCDRDAO extends BaseESDAO {
             if (securityExceptionOptional.isPresent() && Boolean.TRUE.equals(securityExceptionOptional.get())) {
                 throw new ESOperateException(String.format("集群 %s 含账户名密码，创建 DCDR 链路失败", cluster));
             }
-            String messageByException = ParsingExceptionUtils.getESErrorMessageByException(e);
-            if (Objects.nonNull(messageByException)) {
-                throw new ESOperateException(messageByException);
-            }
+            ParsingExceptionUtils.abnormalTermination(e);
     
-            throw new ESOperateException(e.getMessage());
+            LOGGER.error("class={}||method=putAutoReplication||clusterName={}||name={}", getClass().getSimpleName(),
+                    cluster, name, e);
+            return false;
         }
     }
 
@@ -120,10 +117,7 @@ public class ESDCDRDAO extends BaseESDAO {
             response = client.admin().indices().getDCDRTemplate(request)
                     .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
         } catch (Exception e) {
-            String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
-            if (StringUtils.isNotBlank(exception)) {
-                throw new ESOperateException(exception);
-            }
+            ParsingExceptionUtils.abnormalTermination(e);
             LOGGER.warn("class={}||method=deleteReplication||clusterName={}||name={}", getClass().getSimpleName(),
                     cluster, name, e);
         }
@@ -175,10 +169,7 @@ public class ESDCDRDAO extends BaseESDAO {
     
             return succ;
         } catch (Exception e) {
-            String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
-            if (StringUtils.isNotBlank(exception)) {
-                throw new ESOperateException(exception);
-            }
+            ParsingExceptionUtils.abnormalTermination(e);
             LOGGER.warn(
                     "class={}||method=deleteReplication||clusterName={}||replicaCluster={}||indices={}||errMsg=esClient is null",
                     getClass().getSimpleName(), cluster, replicaCluster, indices);

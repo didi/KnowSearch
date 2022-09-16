@@ -144,10 +144,7 @@ public class ESIndexDAO extends BaseESDAO {
                 return client.admin().indices().preparePutIndex(indexName).setIndexConfig(indexConfig).execute()
                         .actionGet(timeout, unit);
             } catch (Exception e) {
-                final String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
-                if (Objects.nonNull(exception)) {
-                    throw new ESOperateException(exception);
-                }
+                ParsingExceptionUtils.abnormalTermination(e);
                 LOGGER.error("class=ESIndexDAO||method=createIndexWithConfig||cluster={}||indexName={}", cluster);
                 throw  new ESOperateException(e.getMessage());
             }
@@ -218,10 +215,7 @@ public class ESIndexDAO extends BaseESDAO {
                     .execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
             return getIndexResponse.getIndexsMapping();
         } catch (Exception e) {
-            String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
-            if (StringUtils.isNotBlank(exception)) {
-                throw new ESOperateException(exception);
-            }
+            ParsingExceptionUtils.abnormalTermination(e);
             LOGGER.error("class=ESIndexDAO||method=batchGetIndexConfig||cluster={}||indexName={}||msg=index not exist",
                     cluster, String.join(",", indexNames),e);
             return null;
@@ -288,10 +282,9 @@ public class ESIndexDAO extends BaseESDAO {
                     return false;
                 }
             } catch (Exception e) {
-                final String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
+                ParsingExceptionUtils.abnormalTermination(e);
                 LOGGER.error("class=ESIndexDAO||method=updateIndexMapping||msg=update index mapping fail||cluster={}||indexName={}", cluster
                         ,indexName,e);
-                throw new ESOperateException((StringUtils.isNotBlank(exception)?exception:"编辑mapping出错"));
             }
         }
 
@@ -420,10 +413,7 @@ public class ESIndexDAO extends BaseESDAO {
             response = client.admin().indices().prepareStats(expression).setLevel(IndicesStatsLevel.SHARDS).execute()
                     .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
         } catch (Exception e) {
-            String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
-            if (StringUtils.isNotBlank(exception)) {
-                throw new ESOperateException(exception);
-            }
+            ParsingExceptionUtils.abnormalTermination(e);
         
             LOGGER.warn("class=ESIndexDAO||method=getIndexByExpression||errMsg={}||cluster={}||expression={}",
                     e.getMessage(), cluster, expression, e);
@@ -574,11 +564,7 @@ public class ESIndexDAO extends BaseESDAO {
             response = client.admin().indices().prepareRefreshIndex(String.join(",", indexNames)).execute()
                     .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
         } catch (Exception e) {
-            String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
-            if (StringUtils.isNotBlank(exception)) {
-                throw new ESOperateException(exception);
-            
-            }
+            ParsingExceptionUtils.abnormalTermination(e);
             LOGGER.error("class={}||method=refreshIndex||clusterName={}||indexName={}", getClass().getSimpleName(),
                     cluster, String.join(",", indexNames), e);
         }
@@ -611,10 +597,7 @@ public class ESIndexDAO extends BaseESDAO {
             esIndicesUpdateSettingsResponse = updateSettingsRequestBuilder.execute()
                     .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
         } catch (Exception e) {
-            final String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
-            if (StringUtils.isNotBlank(exception)) {
-                throw new ESOperateException(exception);
-            }
+            ParsingExceptionUtils.abnormalTermination(e);
             LOGGER.error("class=ESTemplateDAO||method=putIndexSettings||get index fail||clusterName={}||indexName={}",
                     cluster, e);
         
@@ -674,11 +657,7 @@ public class ESIndexDAO extends BaseESDAO {
                     .addSettings(settingName, String.valueOf(setting)).execute()
                     .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
         } catch (Exception e) {
-            String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
-            if (StringUtils.isNotBlank(exception)) {
-                throw new ESOperateException(exception);
-            
-            }
+            ParsingExceptionUtils.abnormalTermination(e);
             LOGGER.error("class={}||method=putIndexSetting||clusterName={}||indexName={}", getClass().getSimpleName(),
                     cluster, String.join(",", indices), e);
         
@@ -732,10 +711,7 @@ public class ESIndexDAO extends BaseESDAO {
             return updateSettingsRequestBuilder.execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS)
                     .getAcknowledged();
         } catch (Exception e) {
-            String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
-            if (StringUtils.isNotBlank(exception)) {
-                throw new ESOperateException(exception);
-            }
+            ParsingExceptionUtils.abnormalTermination(e);
             LOGGER.error("class=ESIndexDAO||method=putIndexSetting||cluster={}||indexName={}",
                     cluster, String.join(",", indices));
             return false;
@@ -909,10 +885,7 @@ public class ESIndexDAO extends BaseESDAO {
                 return client.admin().indices().preparePutAlias().addPutAliasNodes(aliases).execute()
                         .actionGet(time, unit);
             } catch (Exception e) {
-                String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
-                if (StringUtils.isNotBlank(exception)) {
-                    throw new ESOperateException(exception);
-                }
+                ParsingExceptionUtils.abnormalTermination(e);
                 LOGGER.error("class=ESIndexDAO||method=editAlias||clusterName={}", cluster, e);
             
                 return null;
@@ -989,7 +962,10 @@ public class ESIndexDAO extends BaseESDAO {
             return JSONObject.parseObject(directResponse.getResponseContent()).values().size();
             
         } catch (Exception e) {
-            throw new ESOperateException(e.getMessage(), e);
+            ParsingExceptionUtils.abnormalTermination(e);
+            LOGGER.warn("class=ESIndexDAO||method=countIndexByAlias||errMsg=index countIndexByAlias fail");
+            return 0;
+
         }
         
     }
