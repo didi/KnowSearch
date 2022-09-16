@@ -28,6 +28,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -100,7 +101,8 @@ public class IndexCatInfoCollector extends AbstractMetaDataJob {
         // 这里的cluster 用户侧创建为逻辑集群名称，运维侧创建为物理集群名称
         Map<String/*cluster@index*/, IndexCatCell> index2IndexCatCellFromPlatformCreateMap = ConvertUtil.list2Map(
                 platformCreateCatIndexList, IndexCatCell::getKey, r -> r);
-
+        Map<String, List<IndexCatCell>> clusterPhy2IndexCatCellListMap = ConvertUtil.list2MapOfList(platformCreateCatIndexList,
+                IndexCatCell::getCluster, i -> i);
         // 3. 并发采集
         for (String clusterName : clusterPhyNameList) {
                 INDEX_CAT_INFO_COLLECTOR_FUTURE_UTIL.callableTask(()-> {
@@ -152,7 +154,21 @@ public class IndexCatInfoCollector extends AbstractMetaDataJob {
                                 clusterName,
                                 timeMillis);
                         indexCatCells.addAll(ariusIndexCatCells);
-
+                        //3.3 获取平台侧中属于模板的索引，并进行过滤，找出已经删除的索引,然后并打标设置为已删除，否则会导致模板的索引删出不干净
+                        List<String> indexNameList = catIndexResults.stream().map(CatIndexResult::getIndex)
+                                .collect(Collectors.toList());
+                        List<IndexCatCell> ariusIndexDeleteCatCells = Optional.ofNullable(
+                                        clusterPhy2IndexCatCellListMap.get(clusterName)).orElse(Collections.emptyList())
+                                .stream()
+                                //
+                                .filter(r -> templateName2IndexTemplatePhyWithLogicMap.containsKey(r.getIndex())
+                                             || templateName2IndexTemplatePhyWithLogicMap.containsKey(
+                                        TemplateUtils.getMatchTemplateNameByIndexName(r.getIndex())))
+                                //过滤出从catIndexResults中获取到索引，这里是真实索引，然后进行过滤，找出已经删除，但是平台侧没有及时更新的索引
+                                .filter(r -> !indexNameList.contains(r.getIndex()))
+                                //打标
+                                .peek(r -> r.setDeleteFlag(true))
+                                .collect(Collectors.toList());
                         // 4.1 获取不匹配平台模板cat_index列表（通过索引管理创建，或者其他第三方客户端创建）
                         List<CatIndexResult> catIndexMatchNativeTemplateList = catIndexResults.stream()
                                 .filter(r -> !catIndexMatchAriusTemplateList.contains(r))
