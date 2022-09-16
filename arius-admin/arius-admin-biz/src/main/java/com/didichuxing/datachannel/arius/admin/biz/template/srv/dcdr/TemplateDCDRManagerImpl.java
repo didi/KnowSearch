@@ -990,6 +990,10 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
         dcdrDTO.setDeleteIndexDcdr(false);
 
         Result<Void> delTemDCDRResult = deletePhyDCDR(dcdrDTO, operator, AuthConstant.SUPER_PROJECT_ID);
+        //删除失败了需要抛出信息
+        if (delTemDCDRResult.failed()) {
+            return Result.buildFrom(delTemDCDRResult);
+        }
         boolean delIndexDCDRResult = syncDeleteIndexDCDR(masterTemplate.getCluster(), slaveTemplate.getCluster(),
             matchNoVersionIndexNames, 3);
 
