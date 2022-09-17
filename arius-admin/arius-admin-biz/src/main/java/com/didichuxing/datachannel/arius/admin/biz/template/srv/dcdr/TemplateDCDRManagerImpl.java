@@ -49,6 +49,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.dcdr.ESDCDRService;
+import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
 import com.didiglobal.logi.elasticsearch.client.response.indices.stats.IndexNodes;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
@@ -773,8 +774,14 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
 
         Map<String, IndexNodes> indexStatForMasterMap = esIndexService
             .syncBatchGetIndices(masterPhyTemplate.getCluster(), indexNames);
+        //获取从集群的真实索引
+        List<String> slaveMasterAllIndexList = esIndexService.syncCatIndex(slavePhyTemplate.getCluster(), 3).stream()
+                .map(CatIndexResult::getIndex).collect(Collectors.toList());
+        // 对索引进行过滤，找到从集群存在的索引，目的是保证从集群获取 count 数据不会报出 no such index not found 问题
+        List<String> relaIndexNames = indexNames.stream().filter(slaveMasterAllIndexList::contains)
+                .collect(Collectors.toList());
         Map<String, IndexNodes> indexStatForSlaveMap = esIndexService.syncBatchGetIndices(slavePhyTemplate.getCluster(),
-            indexNames);
+                relaIndexNames);
 
         long masterCheckPointTotal = 0;
         long slaveCheckPointTotal = 0;
