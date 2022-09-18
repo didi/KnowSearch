@@ -1,12 +1,12 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.template;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.dcdr.TemplateDCDRManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateDCDRInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -41,7 +41,8 @@ public class TemplateDCDRController {
     @GetMapping("/{templateId}")
     @ResponseBody
     @ApiOperation("获取模板DCDR详情")
-    public Result<TemplateDCDRInfoVO> getTemplateDCDRInfo(@PathVariable("templateId") Integer templateId) {
+    public Result<TemplateDCDRInfoVO> getTemplateDCDRInfo(@PathVariable("templateId") Integer templateId)
+            throws ESOperateException {
         return templateDCDRManager.getTemplateDCDRInfoVO(templateId);
     }
 

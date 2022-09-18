@@ -492,6 +492,11 @@ public class ESClusterServiceImpl implements ESClusterService {
         }
     }
     
+    @Override
+    public boolean checkTargetClusterConnected(String cluster, String targetCluster) throws ESOperateException {
+        return esClusterDAO.checkTargetClusterConnected(cluster,targetCluster);
+    }
+    
     private List<TaskMissionAnalysisVO> buildTaskMission(JSONObject responseJson) {
         List<TaskMissionAnalysisVO> vos = new ArrayList<>();
         JSONObject nodes = responseJson.getJSONObject(NODES);
