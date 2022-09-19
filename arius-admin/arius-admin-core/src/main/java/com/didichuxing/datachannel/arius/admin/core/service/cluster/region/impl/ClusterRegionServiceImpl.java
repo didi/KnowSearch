@@ -312,17 +312,9 @@ public class ClusterRegionServiceImpl implements ClusterRegionService {
      */
     @Override
     public boolean isRegionCanBeBound(ClusterRegion region,Integer clusterLogicType) {
-        //判断region是否已经被绑定，若该region还没被绑定则可以被绑定
-        if (isRegionBound(region)) {
-            //如果region被非共享逻辑集群绑定，则不可再被绑定
-            if (!isRegionBindByPublicLogicCluster(region)) {
-                return false;
-            }
-
-            //如果region已经被共享逻辑集群绑定，但是要绑定该region的逻辑集群不是共享集群，则该region不可被它绑定
-            if (!clusterLogicType.equals(ClusterResourceTypeEnum.PUBLIC.getCode())) {
-                return  false;
-            }
+        //判断region是否已经被绑定，以及绑定的region是否还能被逻辑集群绑定
+        if (isRegionBound(region) && (!isRegionBindByPublicLogicCluster(region)||!clusterLogicType.equals(ClusterResourceTypeEnum.PUBLIC.getCode()))) {
+            return false;
         }
         return true ;
     }
