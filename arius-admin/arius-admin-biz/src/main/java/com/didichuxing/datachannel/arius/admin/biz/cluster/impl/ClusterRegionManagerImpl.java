@@ -129,13 +129,6 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
 
         List<ClusterRegion> clusterRegions = clusterRegionService.listPhyClusterRegions(phyCluster).stream().filter(notColdTruePreByClusterRegion)
                                                                  .filter(clusterRegion -> clusterRegionService.isRegionCanBeBound(clusterRegion,clusterLogicType)).collect(Collectors.toList());
-//        List<ClusterRegion> clusterRegions =  Lists.newArrayList();
-//        for (ClusterRegion clusterRegion : clusterRegionList) {
-//            //判断该region是否可以被逻辑集群绑定
-//            if (clusterRegionService.isRegionCanBeBound(clusterRegion, clusterLogicType)) {
-//                clusterRegions.add(clusterRegion);
-//            }
-//        }
 
         if (CollectionUtils.isEmpty(clusterRegions)) {
             return Result.buildFail(String.format("物理集群[%s]无可用region, 请前往物理集群-region划分进行region创建", phyCluster));
