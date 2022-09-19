@@ -127,7 +127,9 @@ public class ClusterRegionManagerImpl implements ClusterRegionManager {
                 String.format("物理集群[%s]类型为[%s], 不满足逻辑集群类型[%s], 请调整类型一致", phyCluster, resourceType, clusterLogicType));
         }
 
-        List<ClusterRegion> clusterRegions = clusterRegionService.listPhyClusterRegions(phyCluster).stream().filter(notColdTruePreByClusterRegion).collect(Collectors.toList());
+        List<ClusterRegion> clusterRegions = clusterRegionService.listPhyClusterRegions(phyCluster).stream().filter(notColdTruePreByClusterRegion)
+                                                                 .filter(clusterRegion -> clusterRegionService.isRegionCanBeBound(clusterRegion,clusterLogicType)).collect(Collectors.toList());
+
         if (CollectionUtils.isEmpty(clusterRegions)) {
             return Result.buildFail(String.format("物理集群[%s]无可用region, 请前往物理集群-region划分进行region创建", phyCluster));
         }
