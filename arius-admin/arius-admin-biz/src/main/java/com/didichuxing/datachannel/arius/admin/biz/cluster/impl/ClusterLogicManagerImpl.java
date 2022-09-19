@@ -45,6 +45,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLog
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicTemplateIndexDetailDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyWithLogicClusterVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterStatusVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostWithRegionInfoVO;
@@ -95,6 +96,7 @@ import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -102,6 +104,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -564,7 +567,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
 
             updateLogicClusterDTO.setHealth(ClusterUtils.getClusterLogicHealthByClusterHealth(clusterHealthSet));
             setClusterLogicInfo(updateLogicClusterDTO,clusterRegion);
-            clusterLogicService.editClusterLogicNotCheck(updateLogicClusterDTO, AriusUser.SYSTEM.getDesc());
+            clusterLogicService.editClusterLogicNotCheck(updateLogicClusterDTO);
         } catch (Exception e) {
             LOGGER.error("class=ClusterLogicManagerImpl||method=updateClusterLogicHealth||clusterLogicId={}||errMsg={}",
                     clusterLogicId, e.getMessage(), e);
@@ -840,6 +843,44 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
                 param.getCluster());
     
         return Result.buildSucc(logic.getId());
+    }
+    
+    @Override
+    public Result<List<ClusterPhyWithLogicClusterVO>> listLogicClusterWithClusterPhyByProjectId(Integer projectId) {
+        List<ClusterLogic> clusterLogics = clusterLogicService.getOwnedClusterLogicListByProjectId(projectId);
+        if (CollectionUtils.isEmpty(clusterLogics)) {
+            return Result.buildSucc(Collections.emptyList());
+        }
+        Map<Long, String> clusterLogicId2ClusterLogicNameMap = ConvertUtil.list2Map(clusterLogics, ClusterLogic::getId,
+                ClusterLogic::getName);
+        List<Long> logicClusterIdList = clusterLogics.stream().map(ClusterLogic::getId).distinct()
+                .collect(Collectors.toList());
+        List<ClusterRegion> regions = clusterRegionService.getClusterRegionsByLogicIds(logicClusterIdList);
+        if (CollectionUtils.isEmpty(regions)) {
+            return Result.buildSucc(Collections.emptyList());
+        }
+        // 逻辑集群 -》region 1-1 所以
+        Function<ClusterRegion, List<TupleTwo<Long, String>>> logicClusterIds2logicClusterIdLongWithClusterPhyFunc = clusterRegion -> Arrays.stream(
+                        StringUtils.split(clusterRegion.getLogicClusterIds(), ",")).filter(StringUtils::isNumeric)
+                .map(Long::parseLong)
+                .map(logicClusterId -> Tuples.of(logicClusterId, clusterRegion.getPhyClusterName()))
+                .collect(Collectors.toList());
+        // 转换
+        Function<TupleTwo</*clusterLogicId*/Long,/*clusterPhy*/ String>, ClusterPhyWithLogicClusterVO> clusterLogicId2clusterPhyFunc = tuple -> {
+            Long logicId = tuple.v1;
+            String clusterPhy = tuple.v2;
+            if (clusterLogicId2ClusterLogicNameMap.containsKey(logicId)) {
+                return ClusterPhyWithLogicClusterVO.builder().clusterPhy(clusterPhy).clusterLogicId(logicId)
+                        .clusterLogic(clusterLogicId2ClusterLogicNameMap.get(logicId)).build();
+            }
+        
+            return null;
+        };
+    
+        List<ClusterPhyWithLogicClusterVO> clusterPhyWithLogicClusterList = regions.stream()
+                .map(logicClusterIds2logicClusterIdLongWithClusterPhyFunc).flatMap(Collection::stream).distinct()
+                .map(clusterLogicId2clusterPhyFunc).filter(Objects::nonNull).collect(Collectors.toList());
+        return Result.buildSucc(clusterPhyWithLogicClusterList);
     }
     
     /**

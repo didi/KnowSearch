@@ -252,4 +252,13 @@ public interface ESClusterService {
      * @return boolean
      */
     boolean isConnectionStatus(String cluster);
+	
+	/**
+	 * 检查目标集群是否连接到集群
+	 *
+	 * @param cluster 当前集群的集群名称
+	 * @param targetCluster 目标集群名称
+	 * @return boolean
+	 */
+	boolean checkTargetClusterConnected(String cluster, String targetCluster) throws ESOperateException;
 }

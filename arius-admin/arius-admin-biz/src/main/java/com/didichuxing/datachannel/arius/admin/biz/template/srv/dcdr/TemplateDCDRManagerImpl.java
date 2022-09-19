@@ -49,6 +49,7 @@ import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.dcdr.ESDCDRService;
+import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
 import com.didiglobal.logi.elasticsearch.client.response.indices.stats.IndexNodes;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
@@ -124,6 +125,7 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
     private static final String   TASK_IS_CANCEL              = "任务已取消";
 
     private static final String   TASK_EMPTY                  = "根据任务Id[%s]获取任务失败";
+    private static final String DCDR_CLUSTER_REMOTE_ERROR = "主从集群无法正常连接，不能进行 DCDR 迁移，请确认 cluster setting：【persistent.cluster.remote.%s.seeds】是否配置正确";
     public static final int       MAX_PHY_TEMPLATE_NUM        = 2;
 
     @Value("${dcdr.concurrent:2}")
@@ -212,6 +214,12 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
         IndexTemplatePhy masterPhyTemplate = templateLogicWithPhysical.getMasterPhyTemplate();
         if (null == masterPhyTemplate) {
             return Result.buildFail(String.format("模板Id[%s]不存在", templateId));
+        }
+        //校验集群的的连通性
+        if (!esClusterService.checkTargetClusterConnected(masterPhyTemplate.getCluster(),
+                targetCluster)) {
+            return Result.buildFail(String.format(
+                    DCDR_CLUSTER_REMOTE_ERROR, targetCluster));
         }
 
         if (AriusObjUtils.isBlack(masterPhyTemplate.getCluster())) {
@@ -744,7 +752,7 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
     }
 
     @Override
-    public Tuple<Long, Long> getMasterAndSlaveTemplateCheckPoint(Integer templateId) {
+    public Tuple<Long, Long> getMasterAndSlaveTemplateCheckPoint(Integer templateId) throws ESOperateException {
         //1.初始化信息
         Tuple<Long, Long> masterAndSlaveCheckPointTuple = new Tuple<>();
         masterAndSlaveCheckPointTuple.setV1(0L);
@@ -773,8 +781,14 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
 
         Map<String, IndexNodes> indexStatForMasterMap = esIndexService
             .syncBatchGetIndices(masterPhyTemplate.getCluster(), indexNames);
+        //获取从集群的真实索引
+        List<String> slaveMasterAllIndexList = esIndexService.syncCatIndex(slavePhyTemplate.getCluster(), 3).stream()
+                .map(CatIndexResult::getIndex).collect(Collectors.toList());
+        // 对索引进行过滤，找到从集群存在的索引，目的是保证从集群获取 count 数据不会报出 no such index not found 问题
+        List<String> relaIndexNames = indexNames.stream().filter(slaveMasterAllIndexList::contains)
+                .collect(Collectors.toList());
         Map<String, IndexNodes> indexStatForSlaveMap = esIndexService.syncBatchGetIndices(slavePhyTemplate.getCluster(),
-            indexNames);
+                relaIndexNames);
 
         long masterCheckPointTotal = 0;
         long slaveCheckPointTotal = 0;
@@ -793,7 +807,7 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
     }
 
     @Override
-    public Result<TemplateDCDRInfoVO> getTemplateDCDRInfoVO(Integer templateId) {
+    public Result<TemplateDCDRInfoVO> getTemplateDCDRInfoVO(Integer templateId) throws ESOperateException {
         TemplateDCDRInfoVO templateDCDRInfoVO = new TemplateDCDRInfoVO();
         IndexTemplateWithPhyTemplates logicTemplateWithPhysicals = indexTemplateService
             .getLogicTemplateWithPhysicalsById(templateId);
@@ -829,7 +843,11 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
         if (Boolean.FALSE.equals(templateDCDRInfoVO.getDcdrFlag())) {
             return Result.buildSuccWithTips(templateDCDRInfoVO, "模板未开启DCDR链路");
         }
-
+        // 校验集群的的连通性,如果链接不通，则会导致异常
+        if (!esClusterService.checkTargetClusterConnected(masterPhyTemplate.getCluster(),
+                slavePhyTemplate.getCluster())) {
+            return Result.buildFail(String.format(DCDR_CLUSTER_REMOTE_ERROR, slavePhyTemplate.getCluster()));
+        }
         // 2. 获取主从模板checkpoint信息
         Tuple<Long, Long> masterAndSlaveTemplateCheckPointTuple = new Tuple<>();
         try {
@@ -990,6 +1008,10 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
         dcdrDTO.setDeleteIndexDcdr(false);
 
         Result<Void> delTemDCDRResult = deletePhyDCDR(dcdrDTO, operator, AuthConstant.SUPER_PROJECT_ID);
+        //删除失败了需要抛出信息
+        if (delTemDCDRResult.failed()) {
+            return Result.buildFrom(delTemDCDRResult);
+        }
         boolean delIndexDCDRResult = syncDeleteIndexDCDR(masterTemplate.getCluster(), slaveTemplate.getCluster(),
             matchNoVersionIndexNames, 3);
 
@@ -1017,6 +1039,7 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
         int templateId = switchDetail.getTemplateId().intValue();
         try {
             if (DCDR_SWITCH_STEP_1 == step) {
+                // 不需要校验从集群到主集群是否是通路：这里是由于强切之后不会创建链路
                 // 修改DCDR索引配置 index.dcdr.replica_index = true/false
                 // 然后还需要reopen索引，配置才能生效
                 Result<Void> setSettingResult = Result.buildSucc();
@@ -1088,14 +1111,22 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
                                                       IndexTemplatePhy masterTemplate, IndexTemplatePhy slaveTemplate,
                                                       String operator) {
         List<String> matchIndexNames = indexTemplatePhyService.getMatchIndexNames(slaveTemplate.getId());
-
+        
         int templateId = switchDetail.getTemplateId().intValue();
-
+        //todo 注意如果主比从多一个索引的状态下，那么平滑切换是有问题
         try {
             /**
              * 注意这里的if不能使用else if代替，这里的代码需要顺序执行下去
              */
             if (DCDR_SWITCH_STEP_1 == step) {
+                // 校验从集群到主集群是否是通路：这里是由于平切之后会创建链路，那么就会出现问题，所以这里得严格规定
+                Result<Void> slaveConnectedMaster = Result.buildSucc();
+                if (!esClusterService.checkTargetClusterConnected(slaveTemplate.getCluster(),
+                        masterTemplate.getCluster())) {
+                    slaveConnectedMaster = Result.buildFail(
+                            String.format("集群 [%s] 无法连接到集群 [%s] ，不能进行平滑切换", slaveTemplate.getCluster(),
+                                    masterTemplate.getCluster()));
+                }
                 Result<Void> stopMasterIndexResult;
                 if (hasCancelSubTask(workTaskId, switchDetail.getTemplateId())) {
                     stopMasterIndexResult = Result.buildFail(TASK_IS_CANCEL);
@@ -1303,6 +1334,11 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
                 if (step9Result.failed()) {
                     return step9Result;
                 }
+                //打开hasDCDR
+                IndexTemplatePO indexTemplatePO = new IndexTemplatePO();
+                indexTemplatePO.setId(masterTemplate.getLogicId());
+                indexTemplatePO.setHasDCDR(true);
+                indexTemplateService.update(indexTemplatePO);
             }
         } catch (Exception e) {
             LOGGER.warn("method=executeDCDRForSmooth||templateId={}||errMsg={}", templateId, e.getMessage(), e);

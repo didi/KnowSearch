@@ -219,10 +219,15 @@ public class ESIndexServiceImpl implements ESIndexService {
      * @return result
      */
     @Override
-    public Map<String, IndexNodes> syncBatchGetIndices(String cluster, Collection<String> indexNames) {
+    public Map<String, IndexNodes> syncBatchGetIndices(String cluster, Collection<String> indexNames)
+            throws ESOperateException {
         BatchProcessor.BatchProcessResult<String, Map<String, IndexNodes>> result = new BatchProcessor<String, Map<String, IndexNodes>>()
             .batchList(indexNames).batchSize(30)
             .processor(items -> esIndexDAO.getIndexStatsWithShards(cluster, String.join(",", items))).process();
+        if (!result.isSucc() && CollectionUtils.isNotEmpty(result.getErrorMap().values())) {
+            throw new ESOperateException(String.format("cluster : %s get failed ; reason : %s", cluster,
+                    result.getErrorMap().values().stream().findFirst().get().getMessage()));
+        }
         return ConvertUtil.mergeMapList(result.getResultList());
     }
 
@@ -404,7 +409,7 @@ public class ESIndexServiceImpl implements ESIndexService {
      * @return true/false
      */
     @Override
-    public boolean ensureDateSame(String cluster1, String cluster2, List<String> indexNames) {
+    public boolean ensureDateSame(String cluster1, String cluster2, List<String> indexNames) throws ESOperateException {
         int retryCount = 1;
         while (retryCount-- > 0) {
             try {
@@ -822,30 +827,37 @@ public class ESIndexServiceImpl implements ESIndexService {
         return writeAndReadBlockFromMerge;
     }
 
-    private Result<Void> refreshIndex(String cluster, List<String> indexNames) {
+    private Result<Void> refreshIndex(String cluster, List<String> indexNames) throws ESOperateException {
         BatchProcessor.BatchProcessResult<String, Boolean> result = new BatchProcessor<String, Boolean>()
             .batchList(indexNames).batchSize(30).processor(items -> esIndexDAO.refreshIndex(cluster, items))
             .succChecker(succ -> succ).process();
+        if (!result.isSucc() && CollectionUtils.isNotEmpty(result.getErrorMap().values())) {
+            throw new ESOperateException(String.format("cluster : %s get failed ; reason : %s", cluster,
+                    result.getErrorMap().values().stream().findFirst().get().getMessage()));
+        
+        }
         return Result.build(result.isSucc());
     }
 
-    private boolean checkDateSame(String cluster1, String cluster2, List<String> indexNames) {
+    private boolean checkDateSame(String cluster1, String cluster2, List<String> indexNames) throws ESOperateException {
         Result<Void> refreshIndexResult1 = refreshIndex(cluster1, indexNames);
         if (refreshIndexResult1.failed()) {
             LOGGER.warn("class=ESIndexServiceImpl||method=ensureDateSame||cluster={}||indexNames={}||msg=refresh fail",
                 cluster1, indexNames);
             return false;
         }
-
+        
         Result<Void> refreshIndexResult2 = refreshIndex(cluster2, indexNames);
         if (refreshIndexResult2.failed()) {
             LOGGER.warn("class=ESIndexServiceImpl||method=ensureDateSame||cluster={}||indexNames={}||msg=refresh fail",
                 cluster2, indexNames);
             return false;
         }
-
-        Map<String, IndexNodes> indexStat1 = syncBatchGetIndices(cluster1, indexNames);
-        Map<String, IndexNodes> indexStat2 = syncBatchGetIndices(cluster2, indexNames);
+    
+        Map<String, IndexNodes> indexStat1 = ESOpTimeoutRetry.esRetryExecute("checkDateSame-indexStat1", 3,
+                () -> syncBatchGetIndices(cluster1, indexNames), MapUtils::isNotEmpty);
+        Map<String, IndexNodes> indexStat2 = ESOpTimeoutRetry.esRetryExecute("checkDateSame-indexStat2", 3,
+                () -> syncBatchGetIndices(cluster2, indexNames), MapUtils::isNotEmpty);
 
         for (String index : indexNames) {
             IndexNodes stat1 = indexStat1.get(index);

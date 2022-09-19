@@ -141,7 +141,8 @@ public interface ESIndexService {
      * @param indexNames 索引列表
      * @return result
      */
-    Map<String, IndexNodes> syncBatchGetIndices(String cluster, Collection<String> indexNames);
+    Map<String, IndexNodes> syncBatchGetIndices(String cluster, Collection<String> indexNames)
+		    throws ESOperateException;
 
     /**
      * 查询集群中的别名
@@ -239,7 +240,7 @@ public interface ESIndexService {
      * @param indexNames 索引名字
      * @return true/false
      */
-    boolean ensureDateSame(String cluster1, String cluster2, List<String> indexNames);
+    boolean ensureDateSame(String cluster1, String cluster2, List<String> indexNames) throws ESOperateException;
 
     /**
      * close and open index

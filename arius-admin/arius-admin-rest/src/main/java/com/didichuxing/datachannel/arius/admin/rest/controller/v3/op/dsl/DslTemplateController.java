@@ -1,7 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.dsl;
 
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
-
 import com.didichuxing.datachannel.arius.admin.biz.dsl.DslTemplateManager;
 import com.didichuxing.datachannel.arius.admin.biz.gateway.GatewayJoinLogManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
@@ -9,6 +7,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.dsl.DslQueryLimitDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.dsl.template.DslTemplateConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayJoinQueryDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.UserConfigInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.DslTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.GatewayJoinVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
@@ -17,18 +16,14 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import java.util.List;
-import javax.servlet.http.HttpServletRequest;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.List;
+
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
 
 /**
  * @author cjm
@@ -90,10 +85,25 @@ public class DslTemplateController {
                                                  HttpServletRequest request) {
         return gatewayJoinLogManager.getGatewayJoinErrorList(HttpRequestUtil.getProjectId(request), queryDTO);
     }
-    
     @GetMapping("/{indexName}")
     public Result<String> getDSLByProjectIdAndIndexName(@PathVariable(value = "indexName") String indexName,
-                                                 HttpServletRequest request) {
+                                                        HttpServletRequest request) {
         return gatewayJoinLogManager.getDSLByProjectIdAndIndexName(HttpRequestUtil.getProjectId(request), indexName);
+    }
+    @PostMapping("/dsl-template-config")
+    @ResponseBody
+    @ApiOperation(value = "获取账号下已配置字段类型")
+    public Result<List<String>> listDslTemplateFields(@RequestBody UserConfigInfoDTO param,
+                                                       HttpServletRequest request) {
+        return Result
+                .buildSucc(dslTemplateManager.listConfigDslTemplateFields(param, HttpRequestUtil.getOperator(request),HttpRequestUtil.getProjectId(request)));
+    }
+
+    @PutMapping("/dsl-template-config")
+    @ResponseBody
+    @ApiOperation(value = "更新账号下已配置指标类型")
+    public Result<Integer> updateConfigDslTemplateFields(@RequestBody UserConfigInfoDTO param,
+                                                        HttpServletRequest request) {
+        return dslTemplateManager.updateConfigDslTemplateFields(param, HttpRequestUtil.getOperator(request),HttpRequestUtil.getProjectId(request));
     }
 }

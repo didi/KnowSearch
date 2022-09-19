@@ -214,12 +214,13 @@ public interface TemplateDCDRManager {
      * @param templateId    模板id
      * @return
      */
-    Tuple<Long/*主模板位点*/, Long/*从模板位点*/> getMasterAndSlaveTemplateCheckPoint(Integer templateId);
+    Tuple<Long/*主模板位点*/, Long/*从模板位点*/> getMasterAndSlaveTemplateCheckPoint(Integer templateId)
+		    throws ESOperateException;
 
     /**
      * 获取模板DCDR信息
      * @param templateId
      * @return
      */
-    Result<TemplateDCDRInfoVO> getTemplateDCDRInfoVO(Integer templateId);
+    Result<TemplateDCDRInfoVO> getTemplateDCDRInfoVO(Integer templateId) throws ESOperateException;
 }

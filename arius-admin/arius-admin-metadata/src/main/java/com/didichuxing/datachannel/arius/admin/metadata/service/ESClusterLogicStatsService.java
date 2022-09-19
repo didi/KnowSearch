@@ -48,4 +48,5 @@ public class ESClusterLogicStatsService {
     public ClusterLogicStatsPO getLogicClusterStats(Long logicClusterId, boolean isJob) {
         return new ClusterLogicStatsPO();
     }
+
 }

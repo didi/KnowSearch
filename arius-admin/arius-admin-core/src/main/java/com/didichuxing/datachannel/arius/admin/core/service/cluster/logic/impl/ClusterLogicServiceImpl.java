@@ -250,11 +250,11 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
             return checkResult;
         }
 
-        return editClusterLogicNotCheck(param, operator);
+        return editClusterLogicNotCheck(param);
     }
 
     @Override
-    public Result<Void> editClusterLogicNotCheck(ESLogicClusterDTO param, String operator) {
+    public Result<Void> editClusterLogicNotCheck(ESLogicClusterDTO param) {
         ClusterLogicPO paramPO = ConvertUtil.obj2Obj(param, ClusterLogicPO.class);
         if (Objects.nonNull(paramPO.getProjectId())) {
             final ClusterLogicPO clusterLogicPO = logicClusterDAO.getById(param.getId());
@@ -579,7 +579,7 @@ public class ClusterLogicServiceImpl implements ClusterLogicService {
         ESLogicClusterDTO esLogicClusterDTO = new ESLogicClusterDTO();
         esLogicClusterDTO.setId(clusterLogicId);
         esLogicClusterDTO.setProjectId(targetProjectId);
-        return editClusterLogicNotCheck(esLogicClusterDTO, submitor);
+        return editClusterLogicNotCheck(esLogicClusterDTO);
     }
 
     @Override

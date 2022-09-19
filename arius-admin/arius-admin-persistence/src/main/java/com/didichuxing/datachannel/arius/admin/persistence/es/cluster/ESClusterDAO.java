@@ -105,6 +105,8 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public class ESClusterDAO extends BaseESDAO {
+    private final static String REMOTE_TARGET_CLUSTER="_remote/info?filter_path=%s.%s";
+    private final static String CONNECTED="connected";
 
     /**
      * 配置集群re balance开关
@@ -159,8 +161,8 @@ public class ESClusterDAO extends BaseESDAO {
                     .execute(ESClusterGetSettingsAllAction.INSTANCE, new ESClusterGetSettingsAllRequest())
                     .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
         } catch (Exception e) {
-            String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
-            throw new ESOperateException(StringUtils.isNotBlank(exception) ? exception : e.getMessage());
+            ParsingExceptionUtils.abnormalTermination(e);
+            LOGGER.error("class=ESClusterDAO||method=getClusterSetting||clusterName={}", cluster, e);
         }
         return response;
     }
@@ -188,10 +190,7 @@ public class ESClusterDAO extends BaseESDAO {
         
             return response.getAcknowledged();
         } catch (Exception e) {
-            String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
-            if (StringUtils.isNotBlank(exception)) {
-                throw new ESOperateException(exception);
-            }
+            ParsingExceptionUtils.abnormalTermination(e);
             LOGGER.error("class=ESClusterDAO||method=putPersistentRemoteClusters||clusterName={}", cluster, e);
             return false;
         }
@@ -841,5 +840,33 @@ public class ESClusterDAO extends BaseESDAO {
         }
     
         return  actualRunning;
+    }
+    
+    /**
+     *  检查目标集群是否连接到当前集群
+     *
+     * @param cluster 要操作的集群名称
+     * @param targetCluster 目标集群的名称
+     * @return boolean
+     */
+    public boolean checkTargetClusterConnected(String cluster, String targetCluster) throws ESOperateException {
+        ESClient client = esOpClient.getESClient(cluster);
+        if (client == null) {
+            throw new NullESClientException(cluster);
+        }
+        DirectResponse directResponse = null;
+        try {
+            directResponse = getDirectResponse(cluster, "GET",
+                    String.format(REMOTE_TARGET_CLUSTER, targetCluster, CONNECTED));
+        } catch (Exception e) {
+            ParsingExceptionUtils.abnormalTermination(e);
+            LOGGER.error(
+                    "class=ESClusterDAO||method=checkTargetClusterConnected||clusterName={}||errMsg=esClient is null",
+                    cluster);
+        }
+        return Optional.ofNullable(directResponse).filter(d -> d.getRestStatus() == RestStatus.OK)
+                .map(DirectResponse::getResponseContent).map(JSON::parseObject)
+                .map(jsonObject -> jsonObject.getJSONObject(targetCluster))
+                .map(jsonObject -> jsonObject.getBoolean(CONNECTED)).orElse(false);
     }
 }
