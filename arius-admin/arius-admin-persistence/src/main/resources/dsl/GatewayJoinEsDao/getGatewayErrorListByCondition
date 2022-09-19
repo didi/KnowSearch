@@ -5,6 +5,13 @@
       "must": %s,
       "must_not": [
         {
+          "wildcard": {
+            "uri": {
+              "value": "*/_bulk"
+            }
+          }
+        },
+        {
           "prefix": {
             "indices": {
               "value": "."

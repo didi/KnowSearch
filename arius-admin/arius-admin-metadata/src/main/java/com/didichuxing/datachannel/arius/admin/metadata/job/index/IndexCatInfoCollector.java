@@ -28,11 +28,14 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -100,7 +103,8 @@ public class IndexCatInfoCollector extends AbstractMetaDataJob {
         // 这里的cluster 用户侧创建为逻辑集群名称，运维侧创建为物理集群名称
         Map<String/*cluster@index*/, IndexCatCell> index2IndexCatCellFromPlatformCreateMap = ConvertUtil.list2Map(
                 platformCreateCatIndexList, IndexCatCell::getKey, r -> r);
-
+        Map<String, List<IndexCatCell>> clusterPhy2IndexCatCellListMap = ConvertUtil.list2MapOfList(platformCreateCatIndexList,
+                IndexCatCell::getCluster, i -> i);
         // 3. 并发采集
         for (String clusterName : clusterPhyNameList) {
                 INDEX_CAT_INFO_COLLECTOR_FUTURE_UTIL.callableTask(()-> {
@@ -152,7 +156,23 @@ public class IndexCatInfoCollector extends AbstractMetaDataJob {
                                 clusterName,
                                 timeMillis);
                         indexCatCells.addAll(ariusIndexCatCells);
-
+                        //3.3 获取平台侧中属于模板的索引，并进行过滤，找出已经删除的索引,然后并打标设置为已删除，否则会导致模板的索引删出不干净
+                        List<String> indexNameList = catIndexResults.stream().map(CatIndexResult::getIndex)
+                                .collect(Collectors.toList());
+                        
+                        List<IndexCatCell> ariusIndexDeleteCatCells = Optional.ofNullable(
+                                        clusterPhy2IndexCatCellListMap.get(clusterName)).orElse(Collections.emptyList())
+                                .stream()
+                                //匹配模板测的索引
+                                .filter(r -> templateName2IndexTemplatePhyWithLogicMap.containsKey(r.getIndex())
+                                             || templateName2IndexTemplatePhyWithLogicMap.containsKey(
+                                        TemplateUtils.getMatchTemplateNameByIndexName(r.getIndex())))
+                                //过滤出从catIndexResults中获取到索引，这里是真实索引，然后进行过滤，找出已经删除，但是平台侧没有及时更新的索引
+                                .filter(r -> !indexNameList.contains(r.getIndex()))
+                                //打标
+                                .peek(r -> r.setDeleteFlag(true))
+                                .collect(Collectors.toList());
+                        indexCatCells.addAll(ConvertUtil.list2List(ariusIndexDeleteCatCells, IndexCatCellPO.class));
                         // 4.1 获取不匹配平台模板cat_index列表（通过索引管理创建，或者其他第三方客户端创建）
                         List<CatIndexResult> catIndexMatchNativeTemplateList = catIndexResults.stream()
                                 .filter(r -> !catIndexMatchAriusTemplateList.contains(r))
@@ -185,9 +205,27 @@ public class IndexCatInfoCollector extends AbstractMetaDataJob {
 
         //TODO: 部署多台admin，这里会出现过滤失败的问题
         //移除已删除索引, 不采集
+        Function<Entry<String, List<IndexCatCellDTO>>, IndexCatCellDTO> filterOneIndexCatCellDTOFunc = key2indexCatCellDTOListEntry -> {
+            List<IndexCatCellDTO> indexCatCellDTOList = key2indexCatCellDTOListEntry.getValue();
+            // 如果是只有 1 个或者都是 deleteFlag=true 的时候，默认取第一个即可
+            if (indexCatCellDTOList.size() == 1 || indexCatCellDTOList.stream()
+                    .allMatch(IndexCatCellDTO::getDeleteFlag)) {
+                return indexCatCellDTOList.get(0);
+            }
+            // 否则找到为 false 的即可
+            return indexCatCellDTOList.stream().filter(i -> Boolean.FALSE.equals(i.getDeleteFlag())).findFirst().get();
+        
+        };
+    
         List<IndexCatCellDTO> finalSaveIndexCatList = res.stream().filter(this::filterNotCollectorIndexCat)
-                //只需要回写我们已经采集到的索引
-            .collect(Collectors.toList());
+                // 过滤出重复的索引
+                // 根据 key group by 一次 目的为了找到重复的数据
+                .collect(Collectors.groupingBy(IndexCatCellDTO::getKey)).entrySet().stream()
+                .map(filterOneIndexCatCellDTOFunc).collect(Collectors.toList());
+                
+       
+        
+        
         esIndexCatService.syncUpsertCatIndex(finalSaveIndexCatList, RETRY_TIMES);
         return JOB_SUCCESS;
     }

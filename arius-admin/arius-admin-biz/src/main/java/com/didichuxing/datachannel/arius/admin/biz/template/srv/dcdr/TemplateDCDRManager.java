@@ -222,5 +222,5 @@ public interface TemplateDCDRManager {
      * @param templateId
      * @return
      */
-    Result<TemplateDCDRInfoVO> getTemplateDCDRInfoVO(Integer templateId);
+    Result<TemplateDCDRInfoVO> getTemplateDCDRInfoVO(Integer templateId) throws ESOperateException;
 }

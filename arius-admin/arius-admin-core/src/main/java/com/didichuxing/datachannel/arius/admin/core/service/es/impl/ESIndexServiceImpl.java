@@ -846,7 +846,7 @@ public class ESIndexServiceImpl implements ESIndexService {
                 cluster1, indexNames);
             return false;
         }
-
+        
         Result<Void> refreshIndexResult2 = refreshIndex(cluster2, indexNames);
         if (refreshIndexResult2.failed()) {
             LOGGER.warn("class=ESIndexServiceImpl||method=ensureDateSame||cluster={}||indexNames={}||msg=refresh fail",
