@@ -310,15 +310,17 @@ public class UserExtendManagerImpl implements UserExtendManager {
             return Result.buildFail("用户不存在");
         }
         String pw = userBriefVO.getPw();
-        try {
-            String decode = PWEncryptUtil.decode(pw);
-            // 开启密码比对且数据库中的密码和传入进来的原始密码不一致的时候
-            if (Boolean.FALSE.equals(userDTO.isIgnorePasswordMatching()) && !StringUtils.equals(userDTO.getOldPw(),
-                    decode)) {
-                return Result.buildFail("旧密码不正确");
+        if (StringUtils.isNotBlank(pw)) {
+            try {
+                String decode = PWEncryptUtil.decode(pw);
+                // 开启密码比对且数据库中的密码和传入进来的原始密码不一致的时候
+                if (Boolean.FALSE.equals(userDTO.isIgnorePasswordMatching()) && !StringUtils.equals(userDTO.getOldPw(),
+                        decode)) {
+                    return Result.buildFail("旧密码不正确");
+                }
+            } catch (Exception ignore) {
+            
             }
-        } catch (Exception ignore) {
-        
         }
     
         com.didiglobal.logi.security.common.Result<Void> voidResult = userService.editUser(userDTO, operator);
