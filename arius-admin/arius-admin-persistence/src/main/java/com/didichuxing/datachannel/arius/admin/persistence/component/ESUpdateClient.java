@@ -1,5 +1,22 @@
 package com.didichuxing.datachannel.arius.admin.persistence.component;
 
+import java.net.InetSocketAddress;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import javax.annotation.PostConstruct;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpStatus;
+import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.elasticsearch.common.transport.TransportAddress;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
 import com.alibaba.fastjson.JSON;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.BaseESPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.cluster.ClusterPhyPO;
@@ -18,21 +35,9 @@ import com.didiglobal.logi.elasticsearch.client.response.indices.deletebyquery.E
 import com.didiglobal.logi.elasticsearch.client.response.indices.refreshindex.ESIndicesRefreshIndexResponse;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-import java.net.InetSocketAddress;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
-import javax.annotation.PostConstruct;
+import com.google.common.collect.Lists;
+
 import lombok.NoArgsConstructor;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpStatus;
-import org.elasticsearch.common.transport.InetSocketTransportAddress;
-import org.elasticsearch.common.transport.TransportAddress;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 /**
  * @Author: D10865
@@ -65,7 +70,12 @@ public class ESUpdateClient {
     /**
      *  更新es数据的客户端连接队列
      */
-    private LinkedBlockingQueue<ESClient> updateClientPool  = new LinkedBlockingQueue<>(clientCount);
+    private final List<ESClient> updateClientPool  = Lists.newCopyOnWriteArrayList();
+
+    /**
+     * 轮询获取esClient 时使用的下标
+     */
+    private final AtomicInteger currentIndex = new AtomicInteger(0);
     /**
      * 之前的http连接地址
      */
@@ -146,10 +156,6 @@ public class ESUpdateClient {
                     "class=UpdateClient||method=index||indexName={}||typeName={}||id={}||source={}||errMsg=response {}",
                     indexName, typeName, id, source, JSON.toJSONString(response));
             }
-        } finally {
-            if (esClient != null) {
-                returnUpdateEsClientToPool(esClient);
-            }
         }
 
         return false;
@@ -212,10 +218,6 @@ public class ESUpdateClient {
                     indexName, typeName, JSON.toJSONString(response));
             }
 
-        } finally {
-            if (esClient != null) {
-                returnUpdateEsClientToPool(esClient);
-            }
         }
 
         return false;
@@ -268,10 +270,6 @@ public class ESUpdateClient {
                     indexName, typeName, JSON.toJSONString(response));
             }
 
-        } finally {
-            if (esClient != null) {
-                returnUpdateEsClientToPool(esClient);
-            }
         }
 
         return false;
@@ -320,10 +318,6 @@ public class ESUpdateClient {
                     indexName, typeName, JSON.toJSONString(response));
             }
 
-        } finally {
-            if (esClient != null) {
-                returnUpdateEsClientToPool(esClient);
-            }
         }
 
         return false;
@@ -357,10 +351,6 @@ public class ESUpdateClient {
         } catch (Exception e) {
             LOGGER.warn("class=UpdateClient||method=refreshIndex||indexName={}||errMsg=refresh index error. ",
                 indexName, e);
-        } finally {
-            if (esClient != null) {
-                returnUpdateEsClientToPool(esClient);
-            }
         }
 
         return false;
@@ -373,38 +363,15 @@ public class ESUpdateClient {
      * @return
      */
     private ESClient getUpdateEsClientFromPool() {
-        ESClient esClient = null;
-        int retryCount = 0;
-
-        // 如果esClient为空或者重试次数小于5次，循环获取
-        while (esClient == null && retryCount < MAX_RETRY_CONT) {
-            try {
-                ++retryCount;
-                esClient = updateClientPool.poll(3, TimeUnit.SECONDS);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-        }
-
+        currentIndex.compareAndSet(clientCount,0);
+        int index = currentIndex.getAndIncrement() % clientCount;
+        ESClient esClient = updateClientPool.get(index);
         if (esClient == null) {
             LOGGER.error(
                 "class=ESUpdateClient||method=getUpdateEsClientFromPool||errMsg=fail to get es client from pool");
         }
 
         return esClient;
-    }
-
-    /**
-     * 归还到es http 客户端连接池
-     *
-     * @param esClient
-     */
-    private void returnUpdateEsClientToPool(ESClient esClient) {
-        try {
-            this.updateClientPool.put(esClient);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
     }
 
     private ESClient buildEsClient(String address, String password, String clusterName) {
