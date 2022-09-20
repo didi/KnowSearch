@@ -21,7 +21,7 @@ public interface TaskDetailRepository {
      * 通过taskId获取
      *
      * @param taskId 任务id
-     * @return 任务详情列表
+     * @return List<TaskDetail> 任务详情列表
      */
     List<TaskDetail> listTaskDetailByTaskId(int taskId);
 

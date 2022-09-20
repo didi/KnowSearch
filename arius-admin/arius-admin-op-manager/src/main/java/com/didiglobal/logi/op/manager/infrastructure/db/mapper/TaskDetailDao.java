@@ -21,10 +21,10 @@ public interface TaskDetailDao {
     void batchInsert(List<TaskDetailPO> list);
 
     /**
-     * 根据task_id获取
+     * 根据task_id获取任务详情
      *
      * @param taskId 任务id
-     * @return
+     * @return List<TaskDetailPO>
      */
     List<TaskDetailPO> listByTaskId(int taskId);
 

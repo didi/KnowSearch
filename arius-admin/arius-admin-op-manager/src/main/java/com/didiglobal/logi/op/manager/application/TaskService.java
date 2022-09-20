@@ -164,17 +164,11 @@ public class TaskService {
      * 根据任务id获取任务详情
      *
      * @param taskId   任务id
-     * @return List<TaskDetail>
+     * @return Result<List<TaskDetail>>
      */
     public Result<List<TaskDetail>> getTaskDetail(Integer taskId) {
         if (null == taskId) {
             return Result.fail(ResultCode.PARAM_ERROR.getCode(), "taskId为null");
-        }
-        Result<Task> taskResult = taskDomainService.getTaskById(taskId);
-        if (taskResult.failed()) {
-            return Result.fail(ResultCode.PARAM_ERROR.getCode(), "taskId获取任务失败");
-        }else if (null == taskResult.getData()) {
-            return Result.fail(ResultCode.TASK_NOT_EXIST_ERROR.getCode(),"传入的任务id找不到对应的任务，请重新输入");
         }
         Result<List<TaskDetail>> taskDetailListResult = taskDomainService.listTaskDetailByTaskId(taskId);
         return taskDetailListResult;

@@ -89,7 +89,7 @@ public interface TaskDomainService {
      * 通过id获取任务详情
      *
      * @param taskId 任务id
-     * @return 任务详情列表
+     * @return Result<List<TaskDetail>> 任务详情列表
      */
     Result<List<TaskDetail>> listTaskDetailByTaskId(int taskId);
 
