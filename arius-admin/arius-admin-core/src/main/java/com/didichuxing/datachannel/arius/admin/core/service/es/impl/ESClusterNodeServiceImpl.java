@@ -429,33 +429,7 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
     @Override
     public List<NodeStateVO> syncNodeStateAnalysis(String cluster) {
         List<ClusterNodeStats> nodeStats = esClusterNodeDAO.getNodeState(cluster);
-        List<NodeStateVO> vos = nodeStats.stream().map(this::buildNodeStateVO).collect(Collectors.toList());
-//
-//        nodeStats.forEach(nodeStat -> {
-//            NodeStateVO vo = new NodeStateVO();
-//
-//            vo.setNodeName(nodeStat.getName());
-//            vo.setSegmentsMemory(nodeStat.getIndices().getSegments().getMemoryInBytes());
-//            vo.setOsCpu(nodeStat.getOs().getCpu().getPercent());
-//            vo.setLoadAverage1m(nodeStat.getOs().getCpu().getLoadAverage().getOneM());
-//            vo.setLoadAverage5m(nodeStat.getOs().getCpu().getLoadAverage().getFiveM());
-//            vo.setLoadAverage15m(nodeStat.getOs().getCpu().getLoadAverage().getFifteenM());
-//            vo.setJvmHeapUsedPercent(nodeStat.getJvm().getMem().getHeapUsedPercent());
-//            vo.setThreadsCount(nodeStat.getJvm().getThreads().getCount());
-//            vo.setCurrentOpen(nodeStat.getHttp().getCurrentOpen());
-//            vo.setThreadPoolWriteActive(nodeStat.getThreadPool().getWrite().getActive());
-//            vo.setThreadPoolWriteQueue(nodeStat.getThreadPool().getWrite().getQueue());
-//            vo.setThreadPoolWriteReject(nodeStat.getThreadPool().getWrite().getRejected());
-//            vo.setThreadPoolSearchActive(nodeStat.getThreadPool().getSearch().getActive());
-//            vo.setThreadPoolSearchReject(nodeStat.getThreadPool().getSearch().getRejected());
-//            vo.setThreadPoolSearchQueue(nodeStat.getThreadPool().getSearch().getQueue());
-//            vo.setThreadPoolManagementActive(nodeStat.getThreadPool().getManagement().getActive());
-//            vo.setThreadPoolManagementReject(nodeStat.getThreadPool().getManagement().getRejected());
-//            vo.setThreadPoolManagementQueue(nodeStat.getThreadPool().getManagement().getQueue());
-//
-//            vos.add(vo);
-//        });
-        return vos;
+        return nodeStats.stream().map(this::buildNodeStateVO).collect(Collectors.toList());
     }
 
     @NotNull
