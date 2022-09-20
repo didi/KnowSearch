@@ -310,7 +310,7 @@ public class UserExtendManagerImpl implements UserExtendManager {
             return Result.buildFail("用户不存在");
         }
         String pw = userBriefVO.getPw();
-        if (StringUtils.isNotBlank(pw)) {
+        if (StringUtils.isNotBlank(userDTO.getPw())) {
             try {
                 String decode = PWEncryptUtil.decode(pw);
                 // 开启密码比对且数据库中的密码和传入进来的原始密码不一致的时候
