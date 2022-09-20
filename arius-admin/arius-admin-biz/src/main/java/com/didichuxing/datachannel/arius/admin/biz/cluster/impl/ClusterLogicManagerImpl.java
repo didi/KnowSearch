@@ -16,7 +16,6 @@ import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterRegionManager;
 import com.didichuxing.datachannel.arius.admin.biz.page.ClusterLogicPageSearchHandle;
 import com.didichuxing.datachannel.arius.admin.common.Triple;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterJoinDTO;
@@ -46,6 +45,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLog
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicTemplateIndexDetailDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyWithLogicClusterVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ConsoleClusterStatusVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostWithRegionInfoVO;
@@ -59,7 +59,6 @@ import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHealthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectClusterLogicAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.event.resource.ClusterLogicEvent;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
@@ -97,6 +96,7 @@ import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -104,6 +104,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -261,13 +262,10 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
 
         if (StringUtils.isNotBlank(clearDTO.getDelQueryDsl())) {
             String delIndices = String.join(",", clearDTO.getDelIndices());
-            operateRecordService.save(new OperateRecord.Builder().bizId(clearDTO.getLogicId()).userOperation(operator)
-                .project(projectService.getProjectBriefByProjectId(resultIntegerTuple2.v2))
-                .content(String.format("需要清理的索引列表:%s;删除条件:%s", delIndices, clearDTO.getDelQueryDsl()))
-                .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE_CLEAN)
-                .build()
+            operateRecordService.saveOperateRecordWithManualTrigger(
+                    String.format("需要清理的索引列表:%s; 删除条件:%s", delIndices, clearDTO.getDelQueryDsl()),
+                    operator, resultIntegerTuple2.v2, clearDTO.getLogicId(), OperateTypeEnum.TEMPLATE_SERVICE_CLEAN);
 
-            );
             return Result.buildSucWithTips("删除任务下发成功，请到sense中执行查询语句，确认删除进度");
         } else {
             return Result.buildSucWithTips("索引删除成功");
@@ -482,11 +480,8 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
             if (result.success()) {
                 SpringTool.publish(new ClusterLogicEvent(logicClusterId, projectId));
                 //操作记录 集群下线
-                operateRecordService.save(
-                        new OperateRecord.Builder().project(projectService.getProjectBriefByProjectId(projectId))
-                                .operationTypeEnum(OperateTypeEnum.MY_CLUSTER_OFFLINE)
-                                .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).content(clusterLogic.getName())
-                                .bizId(logicClusterId.intValue()).userOperation(operator).build());
+                operateRecordService.saveOperateRecordWithManualTrigger(clusterLogic.getName(), operator, projectId, logicClusterId,
+                        OperateTypeEnum.MY_CLUSTER_OFFLINE);
                 return Result.buildSuccWithTips(result.getData(),
                         String.format("逻辑集群%s下线成功", clusterLogic.getName()));
             }
@@ -529,17 +524,16 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
             SpringTool.publish(new ClusterLogicEvent(param.getId(), projectId));
             //操作记录 我的集群信息修改
             if (StringUtils.isNotBlank(param.getMemo())) {
-                operateRecordService
-                    .save(new OperateRecord.Builder().project(projectService.getProjectBriefByProjectId(projectId))
-                        .operationTypeEnum(OperateTypeEnum.MY_CLUSTER_INFO_MODIFY)
-                        .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).userOperation(operator)
-                        .content(String.format("%s修改集群描述，%s-->%s", logic.getName(), logic.getMemo(), param.getMemo()))
-                        .bizId(param.getId().intValue()).build());
+                 operateRecordService.saveOperateRecordWithManualTrigger(String.format("%s 修改集群描述，%s-->%s", logic.getName(), logic.getMemo(),
+                         param.getMemo()), operator, projectId, param.getId(),OperateTypeEnum.MY_CLUSTER_INFO_MODIFY);
+            
             }
         }
         return result;
     }
-
+    
+ 
+    
     @Override
     public PaginationResult<ClusterLogicVO> pageGetClusterLogics(ClusterLogicConditionDTO condition,
                                                                  Integer projectId) throws NotFindSubclassException {
@@ -573,7 +567,7 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
 
             updateLogicClusterDTO.setHealth(ClusterUtils.getClusterLogicHealthByClusterHealth(clusterHealthSet));
             setClusterLogicInfo(updateLogicClusterDTO,clusterRegion);
-            clusterLogicService.editClusterLogicNotCheck(updateLogicClusterDTO, AriusUser.SYSTEM.getDesc());
+            clusterLogicService.editClusterLogicNotCheck(updateLogicClusterDTO);
         } catch (Exception e) {
             LOGGER.error("class=ClusterLogicManagerImpl||method=updateClusterLogicHealth||clusterLogicId={}||errMsg={}",
                     clusterLogicId, e.getMessage(), e);
@@ -849,6 +843,44 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
                 param.getCluster());
     
         return Result.buildSucc(logic.getId());
+    }
+    
+    @Override
+    public Result<List<ClusterPhyWithLogicClusterVO>> listLogicClusterWithClusterPhyByProjectId(Integer projectId) {
+        List<ClusterLogic> clusterLogics = clusterLogicService.getOwnedClusterLogicListByProjectId(projectId);
+        if (CollectionUtils.isEmpty(clusterLogics)) {
+            return Result.buildSucc(Collections.emptyList());
+        }
+        Map<Long, String> clusterLogicId2ClusterLogicNameMap = ConvertUtil.list2Map(clusterLogics, ClusterLogic::getId,
+                ClusterLogic::getName);
+        List<Long> logicClusterIdList = clusterLogics.stream().map(ClusterLogic::getId).distinct()
+                .collect(Collectors.toList());
+        List<ClusterRegion> regions = clusterRegionService.getClusterRegionsByLogicIds(logicClusterIdList);
+        if (CollectionUtils.isEmpty(regions)) {
+            return Result.buildSucc(Collections.emptyList());
+        }
+        // 逻辑集群 -》region 1-1 所以
+        Function<ClusterRegion, List<TupleTwo<Long, String>>> logicClusterIds2logicClusterIdLongWithClusterPhyFunc = clusterRegion -> Arrays.stream(
+                        StringUtils.split(clusterRegion.getLogicClusterIds(), ",")).filter(StringUtils::isNumeric)
+                .map(Long::parseLong)
+                .map(logicClusterId -> Tuples.of(logicClusterId, clusterRegion.getPhyClusterName()))
+                .collect(Collectors.toList());
+        // 转换
+        Function<TupleTwo</*clusterLogicId*/Long,/*clusterPhy*/ String>, ClusterPhyWithLogicClusterVO> clusterLogicId2clusterPhyFunc = tuple -> {
+            Long logicId = tuple.v1;
+            String clusterPhy = tuple.v2;
+            if (clusterLogicId2ClusterLogicNameMap.containsKey(logicId)) {
+                return ClusterPhyWithLogicClusterVO.builder().clusterPhy(clusterPhy).clusterLogicId(logicId)
+                        .clusterLogic(clusterLogicId2ClusterLogicNameMap.get(logicId)).build();
+            }
+        
+            return null;
+        };
+    
+        List<ClusterPhyWithLogicClusterVO> clusterPhyWithLogicClusterList = regions.stream()
+                .map(logicClusterIds2logicClusterIdLongWithClusterPhyFunc).flatMap(Collection::stream).distinct()
+                .map(clusterLogicId2clusterPhyFunc).filter(Objects::nonNull).collect(Collectors.toList());
+        return Result.buildSucc(clusterPhyWithLogicClusterList);
     }
     
     /**
@@ -1175,6 +1207,4 @@ public class ClusterLogicManagerImpl implements ClusterLogicManager {
         }
         return RED.getDesc();
     }
-
-    
 }

@@ -110,6 +110,14 @@ public interface ClusterRegionService {
     boolean isRegionBound(ClusterRegion region);
 
     /**
+     * 判断region是否还可以被某个逻辑集群绑定
+     * @param region  ClusterRegion
+     * @param clusterLogicType 逻辑集群类型
+     * @return true-可以被绑定，false-不能被绑定
+     */
+    boolean isRegionCanBeBound(ClusterRegion region,Integer clusterLogicType);
+
+    /**
      * 根据物理集群id，获取该物理集群对应的逻辑集群的id列表
      * @param phyClusterId 物理集群id
      * @return 逻辑集群id列表

@@ -239,7 +239,7 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
      */
     @Override
     public boolean isClusterExists(String clusterName) {
-        return clusterDAO.getByName(clusterName) != null;
+        return StringUtils.isNotBlank(clusterName)&&clusterDAO.getByName(clusterName) != null;
     }
 
     /**

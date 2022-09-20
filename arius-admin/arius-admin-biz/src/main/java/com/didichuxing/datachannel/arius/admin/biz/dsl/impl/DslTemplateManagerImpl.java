@@ -1,31 +1,31 @@
 package com.didichuxing.datachannel.arius.admin.biz.dsl.impl;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum.DSL_TEMPLATE;
+
 import com.didichuxing.datachannel.arius.admin.biz.dsl.DslTemplateManager;
 import com.didichuxing.datachannel.arius.admin.biz.page.DslTemplatePageSearchHandle;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.dsl.DslQueryLimitDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.dsl.template.DslTemplateConditionDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.UserConfigInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.dsl.DslTemplatePO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.DslTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
+import com.didichuxing.datachannel.arius.admin.common.constant.metrics.ConfigTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
+import com.didichuxing.datachannel.arius.admin.core.service.metrics.UserConfigService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.DslTemplateService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-import com.didiglobal.logi.security.service.ProjectService;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
-
-import java.util.List;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum.DSL_TEMPLATE;
 
 /**
  * @author cjm
@@ -39,22 +39,21 @@ public class DslTemplateManagerImpl implements DslTemplateManager {
     private DslTemplateService   dslTemplateService;
     @Autowired
     private OperateRecordService operateRecordService;
-    @Autowired
-    private ProjectService       projectService;
+
 
     @Autowired
     private HandleFactory        handleFactory;
+    @Autowired
+    private UserConfigService userConfigService;
     @Override
     public Result<Boolean> updateDslTemplateQueryLimit(Integer projectId,String operator,List<DslQueryLimitDTO> dslTemplateList) {
         Boolean succeed =  dslTemplateService.updateDslTemplateQueryLimit(dslTemplateList);
         if (Boolean.TRUE.equals(succeed)) {
             for (DslQueryLimitDTO entry : dslTemplateList) {
-                OperateRecord operateRecord = new OperateRecord.Builder()
-                        .content(String.format("queryLimit %s->%s", entry.getDslTemplateMd5(),entry.getQueryLimit()))
-                        .operationTypeEnum(OperateTypeEnum.QUERY_TEMPLATE_DSL_CURRENT_LIMIT_ADJUSTMENT)
-                        .project(projectService.getProjectBriefByProjectId(projectId)).userOperation(operator)
-                        .bizId(entry.getProjectIdDslTemplateMd5()).buildDefaultManualTrigger();
-                operateRecordService.save(operateRecord);
+                operateRecordService.saveOperateRecordWithManualTrigger(
+                        String.format("queryLimit %s->%s", entry.getDslTemplateMd5(), entry.getQueryLimit()), operator,
+                        projectId, entry.getProjectIdDslTemplateMd5(),
+                        OperateTypeEnum.QUERY_TEMPLATE_DSL_CURRENT_LIMIT_ADJUSTMENT);
             }
 
         }
@@ -68,12 +67,8 @@ public class DslTemplateManagerImpl implements DslTemplateManager {
         }
        Boolean succeed = dslTemplateService.updateDslTemplateStatus(projectId, dslTemplateMd5);
         if (Boolean.TRUE.equals(succeed)) {
-            OperateRecord operateRecord = new OperateRecord.Builder()
-                    .content("变更状态:" + dslTemplateMd5)
-                    .operationTypeEnum(OperateTypeEnum.QUERY_TEMPLATE_DISABLE)
-                    .project(projectService.getProjectBriefByProjectId(projectId)).userOperation(operator)
-                    .bizId(dslTemplateMd5).buildDefaultManualTrigger();
-            operateRecordService.save(operateRecord);
+            operateRecordService.saveOperateRecordWithManualTrigger("变更状态:" + dslTemplateMd5, operator, projectId,
+                    dslTemplateMd5, OperateTypeEnum.QUERY_TEMPLATE_DISABLE);
         }
         return Result.build(succeed);
     }
@@ -99,6 +94,27 @@ public class DslTemplateManagerImpl implements DslTemplateManager {
             "class=DslTemplateManagerImpl||method=getDslTemplatePage||msg=failed to get the DslTemplatePageSearchHandle");
 
         return PaginationResult.buildFail("分页获取DSL查询模版信息失败");
+    }
+
+    @Override
+    public List<String> listConfigDslTemplateFields(UserConfigInfoDTO userConfigInfoDTO, String userName, Integer projectId) {
+        userConfigInfoDTO.setUserName(userName);
+        userConfigInfoDTO.setProjectId(projectId);
+        userConfigInfoDTO.setConfigType(ConfigTypeEnum.RETRIEVE_TEMPLATE.getCode());
+        return userConfigService.getUserConfigByConfigTypeAndUserNameAndProjectId(userConfigInfoDTO);
+    }
+
+    @Override
+    public Result<Integer> updateConfigDslTemplateFields(UserConfigInfoDTO param, String userName, Integer projectId) {
+        param.setUserName(userName);
+        param.setProjectId(projectId);
+        param.setConfigType(ConfigTypeEnum.RETRIEVE_TEMPLATE.getCode());
+        Result<Integer> result = userConfigService.updateUserConfigByConfigTypeAndUserNameAndProjectId(param);
+        if (result.failed()) {
+            LOGGER.warn("class=DslTemplateManagerImpl||method=updateConfigDslTemplateFields||errMsg={}",
+                    "用户查询模板字段配置信息更新出错");
+        }
+        return result;
     }
 
 }

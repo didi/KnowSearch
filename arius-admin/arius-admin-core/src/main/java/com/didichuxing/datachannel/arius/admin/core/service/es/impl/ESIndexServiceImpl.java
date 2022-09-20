@@ -130,11 +130,15 @@ public class ESIndexServiceImpl implements ESIndexService {
 
     @Override
     public Map<String, IndexConfig> syncBatchGetIndexConfig(String cluster, List<String> indexList) {
-        MultiIndexsConfig multiIndexsConfig = esIndexDAO.batchGetIndexConfig(cluster, indexList);
-        if (null == multiIndexsConfig) {
-            return Maps.newConcurrentMap();
+        try {
+            MultiIndexsConfig multiIndexsConfig = esIndexDAO.batchGetIndexConfig(cluster, indexList);
+            return Optional.ofNullable(multiIndexsConfig).map(MultiIndexsConfig::getIndexConfigMap)
+                    .orElse(Maps.newConcurrentMap());
+        } catch (ESOperateException e) {
+            LOGGER.error("class=ESIndexServiceImpl||method=syncBatchGetIndexConfig||index={}", cluster,
+                    String.join(",", indexList), e);
         }
-        return multiIndexsConfig.getIndexConfigMap();
+        return Maps.newConcurrentMap();
     }
 
     /**
@@ -215,10 +219,15 @@ public class ESIndexServiceImpl implements ESIndexService {
      * @return result
      */
     @Override
-    public Map<String, IndexNodes> syncBatchGetIndices(String cluster, Collection<String> indexNames) {
+    public Map<String, IndexNodes> syncBatchGetIndices(String cluster, Collection<String> indexNames)
+            throws ESOperateException {
         BatchProcessor.BatchProcessResult<String, Map<String, IndexNodes>> result = new BatchProcessor<String, Map<String, IndexNodes>>()
             .batchList(indexNames).batchSize(30)
             .processor(items -> esIndexDAO.getIndexStatsWithShards(cluster, String.join(",", items))).process();
+        if (!result.isSucc() && CollectionUtils.isNotEmpty(result.getErrorMap().values())) {
+            throw new ESOperateException(String.format("cluster : %s get failed ; reason : %s", cluster,
+                    result.getErrorMap().values().stream().findFirst().get().getMessage()));
+        }
         return ConvertUtil.mergeMapList(result.getResultList());
     }
 
@@ -367,14 +376,12 @@ public class ESIndexServiceImpl implements ESIndexService {
                                             int retryCount) throws ESOperateException {
         BatchProcessor.BatchProcessResult<String, Boolean> result = new BatchProcessor<String, Boolean>()
             .batchList(indices).batchSize(30).processor(items -> {
-                try {
                     return ESOpTimeoutRetry.esRetryExecute("syncBatchBlockIndexWrite", retryCount,
                         () -> esIndexDAO.blockIndexWrite(cluster, items, block));
-                } catch (ESOperateException e) {
-                    return false;
-                }
             }).succChecker(succ -> succ).process();
-
+        if (!result.isSucc() && CollectionUtils.isNotEmpty(result.getErrorMap().values())) {
+            throw new ESOperateException(result.getErrorMap().values().stream().findFirst().get().getMessage());
+        }
         return result.isSucc();
     }
 
@@ -383,14 +390,13 @@ public class ESIndexServiceImpl implements ESIndexService {
                                            int retryCount) throws ESOperateException {
         BatchProcessor.BatchProcessResult<String, Boolean> result = new BatchProcessor<String, Boolean>()
             .batchList(indices).batchSize(30).processor(items -> {
-                try {
-                    return ESOpTimeoutRetry.esRetryExecute("syncBatchBlockIndexRead", retryCount,
-                        () -> esIndexDAO.blockIndexRead(cluster, items, block));
-                } catch (ESOperateException e) {
-                    return false;
-                }
-            }).succChecker(succ -> succ).process();
-
+                        return ESOpTimeoutRetry.esRetryExecute("syncBatchBlockIndexRead", retryCount,
+                                    () -> esIndexDAO.blockIndexRead(cluster, items, block));
+                }).succChecker(succ -> succ).process();
+        if (!result.isSucc() && CollectionUtils.isNotEmpty(result.getErrorMap().values())) {
+            throw new ESOperateException(result.getErrorMap().values().stream().findFirst().get().getMessage());
+        
+        }
         return result.isSucc();
     }
 
@@ -403,7 +409,7 @@ public class ESIndexServiceImpl implements ESIndexService {
      * @return true/false
      */
     @Override
-    public boolean ensureDateSame(String cluster1, String cluster2, List<String> indexNames) {
+    public boolean ensureDateSame(String cluster1, String cluster2, List<String> indexNames) throws ESOperateException {
         int retryCount = 1;
         while (retryCount-- > 0) {
             try {
@@ -430,21 +436,20 @@ public class ESIndexServiceImpl implements ESIndexService {
      */
     @Override
     public boolean reOpenIndex(String cluster, List<String> indices, int retryCount) throws ESOperateException {
-        BatchProcessor.BatchProcessResult<String, Boolean> result = new BatchProcessor<String, Boolean>()
-            .batchList(indices).batchSize(30).processor(items -> {
-                try {
-                    if (ESOpTimeoutRetry.esRetryExecute("reOpenIndex-close", retryCount,
-                        () -> esIndexDAO.closeIndex(cluster, items))) {
-                        return ESOpTimeoutRetry.esRetryExecute("reOpenIndex-open", retryCount,
-                            () -> esIndexDAO.openIndex(cluster, items));
-                    } else {
-                        return false;
-                    }
-                } catch (ESOperateException e) {
-                    return false;
-                }
-            }).succChecker(succ -> succ).process();
-
+        BatchProcessor.BatchProcessResult<String, Boolean> result = new BatchProcessor<String, Boolean>().batchList(
+                indices).batchSize(30).processor(items -> {
+            if (ESOpTimeoutRetry.esRetryExecute("reOpenIndex-close", retryCount,
+                    () -> esIndexDAO.closeIndex(cluster, items))) {
+                return ESOpTimeoutRetry.esRetryExecute("reOpenIndex-open", retryCount,
+                        () -> esIndexDAO.openIndex(cluster, items));
+            } else {
+                return false;
+            }
+        }).succChecker(succ -> succ).process();
+        if (!result.isSucc() && CollectionUtils.isNotEmpty(result.getErrorMap().values())) {
+            throw new ESOperateException(result.getErrorMap().values().stream().findFirst().get().getMessage());
+        
+        }
         return result.isSucc();
     }
 
@@ -631,7 +636,11 @@ public class ESIndexServiceImpl implements ESIndexService {
         });
 
         if (CollectionUtils.isNotEmpty(putAliasNodeList)) {
-            return esIndexDAO.editAlias(cluster, putAliasNodeList,3);
+            try {
+                return Result.build(esIndexDAO.editAlias(cluster, putAliasNodeList));
+            } catch (ESOperateException e) {
+                return Result.buildFail(e.getMessage());
+            }
         }
         return Result.buildSucc();
     }
@@ -663,7 +672,11 @@ public class ESIndexServiceImpl implements ESIndexService {
         if (!notExistsAlias.isEmpty()) {
             return Result.buildParamIllegal(String.format("要删除的别名【%s】不存在", StringUtils.join(notExistsAlias, ",")));
         }
-        return esIndexDAO.editAlias(cluster, putAliasNodeList,3);
+        try {
+            return Result.build(esIndexDAO.editAlias(cluster, putAliasNodeList));
+        } catch (ESOperateException e) {
+            return Result.buildFail(e.getMessage());
+        }
     }
 
     @Override
@@ -814,30 +827,37 @@ public class ESIndexServiceImpl implements ESIndexService {
         return writeAndReadBlockFromMerge;
     }
 
-    private Result<Void> refreshIndex(String cluster, List<String> indexNames) {
+    private Result<Void> refreshIndex(String cluster, List<String> indexNames) throws ESOperateException {
         BatchProcessor.BatchProcessResult<String, Boolean> result = new BatchProcessor<String, Boolean>()
             .batchList(indexNames).batchSize(30).processor(items -> esIndexDAO.refreshIndex(cluster, items))
             .succChecker(succ -> succ).process();
+        if (!result.isSucc() && CollectionUtils.isNotEmpty(result.getErrorMap().values())) {
+            throw new ESOperateException(String.format("cluster : %s get failed ; reason : %s", cluster,
+                    result.getErrorMap().values().stream().findFirst().get().getMessage()));
+        
+        }
         return Result.build(result.isSucc());
     }
 
-    private boolean checkDateSame(String cluster1, String cluster2, List<String> indexNames) {
+    private boolean checkDateSame(String cluster1, String cluster2, List<String> indexNames) throws ESOperateException {
         Result<Void> refreshIndexResult1 = refreshIndex(cluster1, indexNames);
         if (refreshIndexResult1.failed()) {
             LOGGER.warn("class=ESIndexServiceImpl||method=ensureDateSame||cluster={}||indexNames={}||msg=refresh fail",
                 cluster1, indexNames);
             return false;
         }
-
+        
         Result<Void> refreshIndexResult2 = refreshIndex(cluster2, indexNames);
         if (refreshIndexResult2.failed()) {
             LOGGER.warn("class=ESIndexServiceImpl||method=ensureDateSame||cluster={}||indexNames={}||msg=refresh fail",
                 cluster2, indexNames);
             return false;
         }
-
-        Map<String, IndexNodes> indexStat1 = syncBatchGetIndices(cluster1, indexNames);
-        Map<String, IndexNodes> indexStat2 = syncBatchGetIndices(cluster2, indexNames);
+    
+        Map<String, IndexNodes> indexStat1 = ESOpTimeoutRetry.esRetryExecute("checkDateSame-indexStat1", 3,
+                () -> syncBatchGetIndices(cluster1, indexNames), MapUtils::isNotEmpty);
+        Map<String, IndexNodes> indexStat2 = ESOpTimeoutRetry.esRetryExecute("checkDateSame-indexStat2", 3,
+                () -> syncBatchGetIndices(cluster2, indexNames), MapUtils::isNotEmpty);
 
         for (String index : indexNames) {
             IndexNodes stat1 = indexStat1.get(index);

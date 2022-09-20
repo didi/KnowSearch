@@ -7,6 +7,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.dsl.DslQueryLimitDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.dsl.template.DslTemplateConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayJoinQueryDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.UserConfigInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.DslTemplateVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.GatewayJoinVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
@@ -83,5 +84,26 @@ public class DslTemplateController {
     public Result<List<GatewayJoinVO>> errorList(@RequestBody GatewayJoinQueryDTO queryDTO,
                                                  HttpServletRequest request) {
         return gatewayJoinLogManager.getGatewayJoinErrorList(HttpRequestUtil.getProjectId(request), queryDTO);
+    }
+    @GetMapping("/{indexName}")
+    public Result<String> getDSLByProjectIdAndIndexName(@PathVariable(value = "indexName") String indexName,
+                                                        HttpServletRequest request) {
+        return gatewayJoinLogManager.getDSLByProjectIdAndIndexName(HttpRequestUtil.getProjectId(request), indexName);
+    }
+    @PostMapping("/dsl-template-config")
+    @ResponseBody
+    @ApiOperation(value = "获取账号下已配置字段类型")
+    public Result<List<String>> listDslTemplateFields(@RequestBody UserConfigInfoDTO param,
+                                                       HttpServletRequest request) {
+        return Result
+                .buildSucc(dslTemplateManager.listConfigDslTemplateFields(param, HttpRequestUtil.getOperator(request),HttpRequestUtil.getProjectId(request)));
+    }
+
+    @PutMapping("/dsl-template-config")
+    @ResponseBody
+    @ApiOperation(value = "更新账号下已配置指标类型")
+    public Result<Integer> updateConfigDslTemplateFields(@RequestBody UserConfigInfoDTO param,
+                                                        HttpServletRequest request) {
+        return dslTemplateManager.updateConfigDslTemplateFields(param, HttpRequestUtil.getOperator(request),HttpRequestUtil.getProjectId(request));
     }
 }

@@ -18,7 +18,7 @@ public interface ClusterRegionManager {
     List<ClusterRegionVO> buildLogicClusterRegionVO(List<ClusterRegion> regions);
 
     /**
-     * 根据逻辑集群的类型筛选出可以绑定的region信息
+     * 根据逻辑集群的类型筛选出可以绑定的region信息，返回的region列表中不包含cold region
      * @param clusterLogicType 逻辑集群类型
      * @param phyCluster 物理集群名称
      * @return 筛选后的region列表

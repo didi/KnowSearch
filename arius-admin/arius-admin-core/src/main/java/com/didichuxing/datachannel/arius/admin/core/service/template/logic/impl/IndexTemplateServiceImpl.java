@@ -341,7 +341,7 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
             param.setName(nameFinal);
         }
 
-        List<IndexTemplate> indexTemplateList = listLogicTemplateByName(param.getName());
+        List<IndexTemplate> indexTemplateList = listAllLogicTemplates();
         Result<Void> result = validateIndexTemplateLogicStep1(param, indexTemplateList);
         if (result.failed()) {
             return result;
@@ -793,6 +793,23 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
         return IndexTemplatePhy.getCluster();
     }
     
+    /**
+     * 通过逻辑模板ID获取主模板的物理模板ID
+     *
+     * @param logicTemplateId 逻辑模板 ID。
+     * @return 长
+     */
+    @Override
+    public Long getMasterTemplatePhyIdByLogicTemplateId(Integer logicTemplateId) {
+        IndexTemplatePhy IndexTemplatePhy = indexTemplatePhyService.getTemplateByLogicIdAndRole(logicTemplateId,
+                TemplateDeployRoleEnum.MASTER.getCode());
+        if (IndexTemplatePhy==null){
+            return null;
+        }
+     
+        return IndexTemplatePhy.getId();
+    }
+    
     @Override
     public List<IndexTemplateLogicWithClusterAndMasterTemplate> listLogicTemplatesWithClusterAndMasterTemplate(Set<Integer> logicTemplateIds) {
 
@@ -1039,6 +1056,9 @@ public class IndexTemplateServiceImpl implements IndexTemplateService {
             IndexTemplateWithCluster indexTemplateWithCluster = ConvertUtil.obj2Obj(indexTemplateWithPhyTemplate,
                 IndexTemplateWithCluster.class);
             IndexTemplatePhy masterPhyTemplate = indexTemplateWithPhyTemplate.getMasterPhyTemplate();
+             if (null == masterPhyTemplate) {
+                continue;
+            }
             res.add(indexTemplateWithCluster);
 
             ClusterRegion region = clusterRegionService.getRegionById(masterPhyTemplate.getRegionId().longValue());

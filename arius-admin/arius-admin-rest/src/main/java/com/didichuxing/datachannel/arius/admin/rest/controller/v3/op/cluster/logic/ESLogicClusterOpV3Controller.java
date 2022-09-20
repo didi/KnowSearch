@@ -11,6 +11,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ESLogicCl
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicTemplateIndexCountVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterLogicVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyVO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyWithLogicClusterVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PluginVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
@@ -168,5 +169,13 @@ public class ESLogicClusterOpV3Controller {
     @ApiOperation(value = "根据项目Id获取对应的逻辑集群名称列表")
     public Result<List<String>> listClusterLogicNameByPhy(HttpServletRequest request) {
         return Result.buildSucc(clusterLogicManager.listClusterLogicNameByApp(HttpRequestUtil.getProjectId(request)));
+    }
+    
+    @GetMapping("/phy-relation-logic/{projectId}")
+    @ResponseBody
+    @ApiOperation(value = "获取项目下逻辑集群和物理集群的关系")
+    public Result<List<ClusterPhyWithLogicClusterVO>> listLogicClusterWithClusterPhyByProjectId(HttpServletRequest request,
+                                                                                                @PathVariable("projectId")Integer projectId) {
+        return clusterLogicManager.listLogicClusterWithClusterPhyByProjectId(projectId);
     }
 }

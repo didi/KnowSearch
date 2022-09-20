@@ -1,0 +1,27 @@
+{
+  "query": {
+    "bool": {
+      "filter": [
+      {
+          "term": {
+            "deleteFlag": false
+          }
+        },
+          {
+          "term": {
+            "cluster": "%s"
+          }
+        },
+        {
+          "wildcard": {
+            "index": {
+              "value": "%s*"
+            }
+          }
+        }
+      ]
+    }
+  },
+   "_source": "index",
+   "size":%d
+}

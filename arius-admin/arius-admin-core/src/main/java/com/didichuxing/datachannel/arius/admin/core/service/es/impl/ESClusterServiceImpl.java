@@ -262,7 +262,7 @@ public class ESClusterServiceImpl implements ESClusterService {
     }
 
     @Override
-    public ESClusterGetSettingsAllResponse syncGetClusterSetting(String cluster) {
+    public ESClusterGetSettingsAllResponse syncGetClusterSetting(String cluster) throws ESOperateException {
         return esClusterDAO.getClusterSetting(cluster);
     }
 
@@ -490,6 +490,11 @@ public class ESClusterServiceImpl implements ESClusterService {
             LOGGER.error("class={}||method=isConnectionStatus", getClass().getSimpleName(), e);
             return false;
         }
+    }
+    
+    @Override
+    public boolean checkTargetClusterConnected(String cluster, String targetCluster) throws ESOperateException {
+        return esClusterDAO.checkTargetClusterConnected(cluster,targetCluster);
     }
     
     private List<TaskMissionAnalysisVO> buildTaskMission(JSONObject responseJson) {

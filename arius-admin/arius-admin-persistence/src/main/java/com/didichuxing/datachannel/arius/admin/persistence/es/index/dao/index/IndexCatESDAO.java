@@ -47,6 +47,7 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import lombok.NoArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.rest.RestStatus;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
@@ -285,19 +286,34 @@ public class IndexCatESDAO extends BaseESDAO {
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_PLATFORM_CREATE_CAT_INDEX_BY_INDEX_PROJECT,
                 clusterLogic, projectId, AGG_SIZE);
         return gatewayClient.performRequest(metadataClusterName, realIndexName, TYPE, dsl,
-                response -> Optional.ofNullable(response).map(ESQueryResponse::getHits)
-        .map(ESHits::getHits)
-        .orElse(Collections.emptyList())
-        .stream()
-        .filter(Objects::nonNull)
-        .map(ESHit::getSource)
-        .filter(Objects::nonNull)
-        .map(JSONObject.class::cast)
-        .map(jsonObject -> jsonObject.getString(INDEX))
-        .filter(Objects::nonNull)
-        .distinct()
-        .collect(Collectors.toList()), 3);
+                IndexCatESDAO::buildIndexListByResponse, 3);
     }
+     public List<String> syncGetIndexListByProjectIdAndFuzzyIndexAndClusterLogic(Integer projectId, String clusterLogicName,
+                                                                                 String index) {
+         String realIndexName = IndexNameUtils.genCurrentDailyIndexName(indexName);
+         if (Objects.isNull(projectId)) {
+             return Collections.emptyList();
+         }
+    
+         String dsl = dslLoaderUtil.getFormatDslByFileName(
+                 DslsConstant.GET_PLATFORM_CREATE_CAT_INDEX_BY_INDEX_PROJECT_AND_FUZZY_INDEX_AND_CLUSTER_LOGIC,
+                 clusterLogicName, projectId, StringUtils.isNotBlank(index) ? index : "", AGG_SIZE);
+         return gatewayClient.performRequest(metadataClusterName, realIndexName, TYPE, dsl,
+                 IndexCatESDAO::buildIndexListByResponse, 3);
+    }
+    
+    public List<String> syncGetIndexListByProjectIdAndFuzzyIndexAndClusterPhy( String clusterPhyName,
+                                                                              String index) {
+         String realIndexName = IndexNameUtils.genCurrentDailyIndexName(indexName);
+       
+         String dsl = dslLoaderUtil.getFormatDslByFileName(
+                 DslsConstant.GET_PLATFORM_CREATE_CAT_INDEX_BY_INDEX_PROJECT_AND_FUZZY_INDEX_AND_CLUSTER_PHY,
+                 clusterPhyName, StringUtils.isNotBlank(index) ? index : "", AGG_SIZE);
+         return gatewayClient.performRequest(metadataClusterName, realIndexName, TYPE, dsl,
+                 IndexCatESDAO::buildIndexListByResponse, 3);
+    }
+    
+    
     
     public Map<String, Integer> syncGetByClusterPhyList(List<String> clusterPhyList) {
         if (CollectionUtils.isEmpty(clusterPhyList)) {
@@ -457,7 +473,12 @@ public class IndexCatESDAO extends BaseESDAO {
         }
         return indexCatCellDTOList;
     }
-    
+    private static List<String> buildIndexListByResponse(ESQueryResponse response) {
+        return Optional.ofNullable(response).map(ESQueryResponse::getHits).map(ESHits::getHits)
+                .orElse(Collections.emptyList()).stream().filter(Objects::nonNull).map(ESHit::getSource)
+                .filter(Objects::nonNull).map(JSONObject.class::cast).map(jsonObject -> jsonObject.getString(INDEX))
+                .filter(Objects::nonNull).distinct().collect(Collectors.toList());
+    }
    
     
   

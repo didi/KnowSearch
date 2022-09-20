@@ -305,6 +305,21 @@ public class ClusterRegionServiceImpl implements ClusterRegionService {
     }
 
     /**
+     * 判断region是否可以被某个逻辑集群绑定
+     * @param region  ClusterRegion
+     * @param clusterLogicType 逻辑集群类型
+     * @return true-可以被绑定，false-不能被绑定
+     */
+    @Override
+    public boolean isRegionCanBeBound(ClusterRegion region,Integer clusterLogicType) {
+        //判断region是否已经被绑定，以及绑定的region是否还能被逻辑集群绑定
+        if (isRegionBound(region) && (!isRegionBindByPublicLogicCluster(region)||!clusterLogicType.equals(ClusterResourceTypeEnum.PUBLIC.getCode()))) {
+            return false;
+        }
+        return true ;
+    }
+
+    /**
      * 获取物理下的region
      * @param phyClusterName 物理集群名
      * @return 物理集群下的region

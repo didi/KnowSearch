@@ -4,6 +4,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion
 
 import com.didichuxing.datachannel.arius.admin.biz.project.UserExtendManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.UserExtendDTO;
 import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
 import com.didiglobal.logi.security.common.PagingResult;
 import com.didiglobal.logi.security.common.dto.user.UserDTO;
@@ -106,7 +107,7 @@ public class UserV3Controller {
     @PutMapping("")
     @ResponseBody
     @ApiOperation(value = "编辑用户接口，暂时没有考虑权限", notes = "")
-    public Result<Void> edit(HttpServletRequest request, @RequestBody UserDTO param) {
+    public Result<Void> edit(HttpServletRequest request, @RequestBody UserExtendDTO param) {
         return userManager.editUser(param, HttpRequestUtil.getOperator(request));
     }
 

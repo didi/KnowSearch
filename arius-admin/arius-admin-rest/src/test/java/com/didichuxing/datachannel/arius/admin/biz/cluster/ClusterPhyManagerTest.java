@@ -630,7 +630,7 @@ class ClusterPhyManagerTest {
     }
 
     @Test
-    void testGetPhyClusterDynamicConfigs() {
+    void testGetPhyClusterDynamicConfigs() throws ESOperateException  {
         when(mockClusterPhyService.isClusterExists(Mockito.anyString())).thenReturn(false);
         assertEquals(Result.buildFail("集群[" + CLUSTER + "]不存在").getMessage(),
             clusterPhyManager.getPhyClusterDynamicConfigs(CLUSTER).getMessage());
@@ -654,8 +654,13 @@ class ClusterPhyManagerTest {
         when(mockClusterPhyService.updatePhyClusterDynamicConfig(new ClusterSettingDTO("clusterName", "key", "value")))
             .thenReturn(Result.buildFail(false));
         Integer projectId = 1;
-        final Result<Boolean> result = clusterPhyManager.updatePhyClusterDynamicConfig(param, "operator", projectId);
-
+        final Result<Boolean> result;
+        try {
+            result = clusterPhyManager.updatePhyClusterDynamicConfig(param, "operator", projectId);
+        } catch (ESOperateException e) {
+            throw new RuntimeException(e);
+        }
+    
         assertEquals(expectedResult, result);
     }
 

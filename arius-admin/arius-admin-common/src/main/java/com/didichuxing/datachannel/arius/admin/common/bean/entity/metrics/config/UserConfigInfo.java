@@ -1,7 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.config;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.BaseEntity;
-import com.didichuxing.datachannel.arius.admin.common.constant.metrics.MetricsTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.metrics.UserConfigTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,7 +17,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class MetricsConfigInfo extends BaseEntity {
+public class UserConfigInfo extends BaseEntity {
 
     /**
      * 用户名
@@ -26,18 +26,28 @@ public class MetricsConfigInfo extends BaseEntity {
 
     /**
      * 一级目录下的指标配置类型,如集群看板，网关看板
-     * @see MetricsTypeEnum
+     * @see UserConfigTypeEnum
      */
-    private String       firstMetricsType;
+    private String       firstUserConfigType;
 
     /**
      * 二级目录下的指标配置类型,如集群看板下的总览指标类型
-     * @see MetricsTypeEnum
+     * @see UserConfigTypeEnum
      */
-    private String       secondMetricsType;
+    private String       secondUserConfigType;
 
     /**
      * 二级目录指标配置下具体的配置列表,如cpu利用率
      */
-    private List<String> metricsTypes;
+    private List<String> userConfigTypes;
+
+    /**
+     * 应用ID
+     */
+    private Integer       projectId;
+
+    /**
+     * 配置类型
+     */
+    private Integer       configType;
 }

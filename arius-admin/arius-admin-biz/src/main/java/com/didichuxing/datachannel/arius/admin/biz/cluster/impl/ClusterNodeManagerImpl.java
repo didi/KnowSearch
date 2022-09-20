@@ -5,7 +5,6 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.result.Res
 
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterNodeManager;
 import com.didichuxing.datachannel.arius.admin.common.Triple;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRegionWithNodeInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
@@ -16,6 +15,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterR
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ESClusterRoleHostWithRegionInfoVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.resource.ESClusterNodeStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.event.region.RegionEditEvent;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminTaskException;
@@ -34,8 +34,10 @@ import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -139,10 +141,8 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
                 Result<Boolean> booleanResult = editNode2Region(param);
                 if (booleanResult.success()) {
                     // 2. 操作记录 :Region变更
-                    operateRecordService.save(new OperateRecord.Builder().userOperation(operator)
-                            .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_REGION_CHANGE)
-                            .project(projectService.getProjectBriefByProjectId(projectId))
-                            .content(String.format("新增region[%s]", param.getName())).buildDefaultManualTrigger());
+                     operateRecordService.saveOperateRecordWithManualTrigger(String.format("新增 region[%s]", param.getName()), operator, projectId,
+                            param.getId(), OperateTypeEnum.PHYSICAL_CLUSTER_REGION_CHANGE);
                     regionIdLis.add(addRegionRet.getData());
                 } else {
                     throw new AdminOperateException(addRegionRet.getMessage());
@@ -232,7 +232,61 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
     public boolean collectNodeSettings(String cluster) throws AdminTaskException {
         return clusterRoleHostService.collectClusterNodeSettings(cluster);
     }
-
+    
+  
+    /**
+     * > 该功能用于删除集群节点，但该节点必须离线且未绑定region
+     *
+     * @param ids 要删除的节点的id
+     * @param projectId 项目编号
+     * @param operator 操作员是执行操作的用户。
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Result<Void> delete(List<Integer> ids, Integer projectId, String operator) {
+        Result<Void> checkProjectCorrectly = ProjectUtils.checkProjectCorrectly(i -> i, projectId, projectId);
+        if (checkProjectCorrectly.failed()) {
+            return checkProjectCorrectly;
+        }
+    
+        List<ClusterRoleHost> clusterRoleHosts = clusterRoleHostService.listById(ids);
+        if (CollectionUtils.isEmpty(clusterRoleHosts)) {
+            return Result.buildSucc();
+        }
+        //1. 校验当前节点是否 bind region, 如果是则不允许下线
+        if (!clusterRoleHosts.stream().allMatch(clusterRoleHost -> Objects.equals(clusterRoleHost.getRegionId(), -1))) {
+            return Result.buildFail("当前选中的节点绑定了 region，请先下线 region");
+        }
+        //2. 检验当前节点是否都离线
+        if (!clusterRoleHosts.stream().allMatch(clusterRoleHost -> Objects.equals(clusterRoleHost.getStatus(),
+                ESClusterNodeStatusEnum.OFFLINE.getCode()))) {
+            return Result.buildFail("只可以下线离线状态的节点，当前选中的节点存在非离线状态的节点");
+        }
+        //3. 下线离线的节点
+        List<String> clusterPhies = clusterRoleHosts.stream().map(ClusterRoleHost::getCluster).distinct()
+                .collect(Collectors.toList());
+        List<ClusterPhy> clusterPhyList = clusterPhyService.listClustersByNames(clusterPhies);
+    
+        boolean delete = clusterRoleHostService.deleteByIds(ids);
+        if (delete) {
+            Map<String, Integer> clusterPhy2ClusterId = ConvertUtil.list2Map(clusterPhyList, ClusterPhy::getCluster,
+                    ClusterPhy::getId);
+            Multimap<String, Long> clusterPhy2NodeIds = ConvertUtil.list2MulMap(clusterRoleHosts,
+                    ClusterRoleHost::getCluster, ClusterRoleHost::getId);
+            Map<Long, String> nodeId2IpMap = ConvertUtil.list2Map(clusterRoleHosts, ClusterRoleHost::getId,
+                    ClusterRoleHost::getIp);
+            for (Entry<String, Integer> clusterPhy2ClusterIdEntry : clusterPhy2ClusterId.entrySet()) {
+                Integer clusterId = clusterPhy2ClusterIdEntry.getValue();
+                String ipStr = clusterPhy2NodeIds.get(clusterPhy2ClusterIdEntry.getKey()).stream()
+                        .map(nodeId2IpMap::get).distinct().collect(Collectors.joining(","));
+                // 2. 操作记录 : 节点下线
+                 operateRecordService.saveOperateRecordWithManualTrigger(String.format("下线节点的 ip 列表 ：[%s]", ipStr), operator, projectId, clusterId,
+                        OperateTypeEnum.PHYSICAL_CLUSTER_NODE_CHANGE);
+            }
+        }
+        return Result.build(delete);
+    }
+    
     /**
      * @param regionId
      * @return

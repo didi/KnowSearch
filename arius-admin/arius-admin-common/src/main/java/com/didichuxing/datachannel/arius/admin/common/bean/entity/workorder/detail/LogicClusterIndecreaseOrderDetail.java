@@ -36,7 +36,11 @@ public class LogicClusterIndecreaseOrderDetail extends AbstractOrderDetail {
      * dataNode的个数
      */
     private Integer dataNodeNu;
-
+    
+    /**
+     * 原有 dataNode 的个数
+     */
+    private int oldDataNodeNu;
    
 
     /**

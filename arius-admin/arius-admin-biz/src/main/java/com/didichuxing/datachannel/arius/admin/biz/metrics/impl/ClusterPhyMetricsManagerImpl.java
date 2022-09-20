@@ -11,6 +11,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.MetricsVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.cluster.ESClusterTaskDetailVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.top.VariousLineChartMetricsVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.ClusterPhyTypeMetricsEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.metrics.ConfigTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.MetricsUtils;
@@ -20,7 +21,7 @@ import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.Clust
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexCatService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.ESIndexService;
-import com.didichuxing.datachannel.arius.admin.core.service.metrics.UserMetricsConfigService;
+import com.didichuxing.datachannel.arius.admin.core.service.metrics.UserConfigService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.metadata.service.NodeStatsService;
 import com.didiglobal.logi.log.ILog;
@@ -53,7 +54,7 @@ public class ClusterPhyMetricsManagerImpl implements ClusterPhyMetricsManager {
     private ProjectService           projectService;
 
     @Autowired
-    private UserMetricsConfigService userMetricsConfigService;
+    private UserConfigService userConfigService;
 
     @Autowired
     private NodeStatsService         nodeStatsService;
@@ -179,15 +180,19 @@ public class ClusterPhyMetricsManagerImpl implements ClusterPhyMetricsManager {
     }
 
     @Override
-    public List<String> getUserNameConfigMetrics(MetricsConfigInfoDTO metricsConfigInfoDTO, String userName) {
-        metricsConfigInfoDTO.setUserName(userName);
-        return userMetricsConfigService.getMetricsByTypeAndUserName(metricsConfigInfoDTO);
+    public List<String> listConfigMetricsByCondition(UserConfigInfoDTO userConfigInfoDTO, String userName, Integer projectId) {
+        userConfigInfoDTO.setUserName(userName);
+        userConfigInfoDTO.setProjectId(projectId);
+        userConfigInfoDTO.setConfigType(ConfigTypeEnum.DASHBOARD_AND_METRICS_BOARD.getCode());
+        return userConfigService.getUserConfigByConfigTypeAndUserNameAndProjectId(userConfigInfoDTO);
     }
 
     @Override
-    public Result<Integer> updateUserNameConfigMetrics(MetricsConfigInfoDTO param, String userName) {
+    public Result<Integer> updateConfigMetricsByCondition(UserConfigInfoDTO param, String userName, Integer projectId) {
         param.setUserName(userName);
-        Result<Integer> result = userMetricsConfigService.updateByMetricsByTypeAndUserName(param);
+        param.setProjectId(projectId);
+        param.setConfigType(ConfigTypeEnum.DASHBOARD_AND_METRICS_BOARD.getCode());
+        Result<Integer> result = userConfigService.updateUserConfigByConfigTypeAndUserNameAndProjectId(param);
         if (result.failed()) {
             LOGGER.warn("class=ClusterPhyMetricsManagerImpl||method=updateDomainAccountConfigMetrics||errMsg={}",
                 "用户指标配置信息更新出错");

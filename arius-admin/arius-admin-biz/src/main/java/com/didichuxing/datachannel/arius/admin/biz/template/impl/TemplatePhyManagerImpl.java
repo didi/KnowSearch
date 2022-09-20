@@ -14,7 +14,6 @@ import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.precreate.PreCreateManager;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.IndexTemplatePhysicalConfig;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.IndexTemplatePhyDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.TemplatePhysicalCopyDTO;
@@ -30,7 +29,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.IndexTemp
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TemplateOperateRecordEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.project.ProjectTemplateAuthEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplatePhysicalStatusEnum;
@@ -271,13 +269,10 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
             return checkResult;
         } else {
             IndexTemplatePhy oldIndexTemplatePhy = indexTemplatePhyService.getTemplateById(param.getPhysicalId());
-            operateRecordService.save(new OperateRecord.Builder().bizId(param.getLogicId())
-                .content(String.format("模版[%s]升级版本：%s->%s", oldIndexTemplatePhy.getName(),
-                        oldIndexTemplatePhy.getVersion(),param.getVersion())).userOperation(operator)
-                .operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE_UPGRADED_VERSION).triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                .project(projectService.getProjectBriefByProjectId(projectId))
-
-                .build());
+            operateRecordService.saveOperateRecordWithManualTrigger(
+                    String.format("模版 [%s] 升级版本：%s->%s", oldIndexTemplatePhy.getName(),
+                            oldIndexTemplatePhy.getVersion(), param.getVersion()), operator, projectId,
+                    param.getLogicId(), OperateTypeEnum.TEMPLATE_SERVICE_UPGRADED_VERSION);
 
         }
 
@@ -333,11 +328,9 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         }
 
         // 记录操作记录
-        operateRecordService.save(new OperateRecord.Builder().operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE)
-            .content(String.format("复制【%s】物理模板至【%s】", indexTemplatePhy.getCluster(), param.getCluster()))
-            .triggerWayEnum(TriggerWayEnum.SYSTEM_TRIGGER)
-            .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID)).userOperation(operator)
-            .build());
+        operateRecordService.saveOperateRecordWithManualTrigger(
+                String.format("复制【%s】物理模板至【%s】", indexTemplatePhy.getCluster(), param.getCluster()), operator,
+                AuthConstant.SUPER_PROJECT_ID, indexTemplatePhy.getLogicId(), OperateTypeEnum.TEMPLATE_SERVICE);
 
         if (esTemplateService.syncCopyMappingAndAlias(indexTemplatePhy.getCluster(), indexTemplatePhy.getName(),
             tgtTemplateParam.getCluster(), tgtTemplateParam.getName(), 0)) {
@@ -368,12 +361,10 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         if (result.success()) {
             String editContent = AriusObjUtils.findChangedWithClear(oldIndexTemplatePhy, param);
             if (StringUtils.isNotBlank(editContent)) {
-                operateRecordService
-                    .save(new OperateRecord.Builder().operationTypeEnum(OperateTypeEnum.TEMPLATE_SERVICE)
-                        .content(String.format("%s变更:【%s】", TemplateOperateRecordEnum.CONFIG.getDesc(), editContent))
-                        .triggerWayEnum(TriggerWayEnum.SYSTEM_TRIGGER)
-                        .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
-                        .userOperation(operator).build());
+                operateRecordService.saveOperateRecordWithManualTrigger(
+                        String.format("%s 变更:【%s】", TemplateOperateRecordEnum.CONFIG.getDesc(), editContent),
+                        operator, AuthConstant.SUPER_PROJECT_ID, oldIndexTemplatePhy.getLogicId(),
+                        OperateTypeEnum.TEMPLATE_SERVICE);
 
             }
         }
