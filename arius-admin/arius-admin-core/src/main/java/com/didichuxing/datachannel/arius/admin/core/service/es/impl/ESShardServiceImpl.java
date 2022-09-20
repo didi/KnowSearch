@@ -9,6 +9,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.shard.Segment;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.shard.SegmentPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.ShardAssignmenNodeVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.ShardAssignmentDescriptionVO;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.SizeUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
@@ -109,7 +110,7 @@ public class ESShardServiceImpl implements ESShardService {
 
 
     @Override
-    public ShardAssignmentDescriptionVO syncShardAssignmentDescription(String cluster) {
+    public ShardAssignmentDescriptionVO syncShardAssignmentDescription(String cluster) throws ESOperateException {
         String response = esShardDAO.shardAssignment(cluster);
         if (null!=response){
             return buildShardAssignment(JSONObject.parseObject(response));

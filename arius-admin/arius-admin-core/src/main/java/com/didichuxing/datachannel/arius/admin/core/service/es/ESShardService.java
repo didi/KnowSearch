@@ -5,6 +5,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordina
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.ShardMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.shard.Segment;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.ShardAssignmentDescriptionVO;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 
 import java.util.List;
 
@@ -48,6 +49,6 @@ public interface ESShardService {
      * @param cluster
      * @return
      */
-    ShardAssignmentDescriptionVO syncShardAssignmentDescription(String cluster);
+    ShardAssignmentDescriptionVO syncShardAssignmentDescription(String cluster) throws ESOperateException;
 
 }

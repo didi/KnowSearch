@@ -22,7 +22,17 @@ import com.didiglobal.logi.elasticsearch.client.response.cluster.nodes.ESCluster
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodesstats.ClusterNodeStats;
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodesstats.ESClusterNodesStatsResponse;
 import com.didiglobal.logi.elasticsearch.client.response.model.fs.FSNode;
+import com.didiglobal.logi.elasticsearch.client.response.model.http.HttpNode;
+import com.didiglobal.logi.elasticsearch.client.response.model.indices.CommonStat;
+import com.didiglobal.logi.elasticsearch.client.response.model.indices.Segments;
+import com.didiglobal.logi.elasticsearch.client.response.model.jvm.JvmMem;
+import com.didiglobal.logi.elasticsearch.client.response.model.jvm.JvmNode;
+import com.didiglobal.logi.elasticsearch.client.response.model.jvm.JvmThreads;
+import com.didiglobal.logi.elasticsearch.client.response.model.os.LoadAverage;
+import com.didiglobal.logi.elasticsearch.client.response.model.os.OsCpu;
 import com.didiglobal.logi.elasticsearch.client.response.model.os.OsNode;
+import com.didiglobal.logi.elasticsearch.client.response.model.threadpool.ThreadPoolNode;
+import com.didiglobal.logi.elasticsearch.client.response.model.threadpool.ThreadPoolNodes;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
@@ -31,12 +41,16 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.rest.RestStatus;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -415,31 +429,56 @@ public class ESClusterNodeServiceImpl implements ESClusterNodeService {
     @Override
     public List<NodeStateVO> syncNodeStateAnalysis(String cluster) {
         List<ClusterNodeStats> nodeStats = esClusterNodeDAO.getNodeState(cluster);
-        List<NodeStateVO> vos = new ArrayList<>();
-        nodeStats.forEach(nodeStat -> {
-            NodeStateVO vo = new NodeStateVO();
-
-            vo.setNodeName(nodeStat.getName());
-            vo.setSegmentsMemory(nodeStat.getIndices().getSegments().getMemoryInBytes());
-            vo.setOsCpu(nodeStat.getOs().getCpu().getPercent());
-            vo.setLoadAverage1m(nodeStat.getOs().getCpu().getLoadAverage().getOneM());
-            vo.setLoadAverage5m(nodeStat.getOs().getCpu().getLoadAverage().getFiveM());
-            vo.setLoadAverage15m(nodeStat.getOs().getCpu().getLoadAverage().getFifteenM());
-            vo.setJvmHeapUsedPercent(nodeStat.getJvm().getMem().getHeapUsedPercent());
-            vo.setThreadsCount(nodeStat.getJvm().getThreads().getCount());
-            vo.setCurrentOpen(nodeStat.getHttp().getCurrentOpen());
-            vo.setThreadPoolWriteActive(nodeStat.getThreadPool().getWrite().getActive());
-            vo.setThreadPoolWriteQueue(nodeStat.getThreadPool().getWrite().getQueue());
-            vo.setThreadPoolWriteReject(nodeStat.getThreadPool().getWrite().getRejected());
-            vo.setThreadPoolSearchActive(nodeStat.getThreadPool().getSearch().getActive());
-            vo.setThreadPoolSearchReject(nodeStat.getThreadPool().getSearch().getRejected());
-            vo.setThreadPoolSearchQueue(nodeStat.getThreadPool().getSearch().getQueue());
-            vo.setThreadPoolManagementActive(nodeStat.getThreadPool().getManagement().getActive());
-            vo.setThreadPoolManagementReject(nodeStat.getThreadPool().getManagement().getRejected());
-            vo.setThreadPoolManagementQueue(nodeStat.getThreadPool().getManagement().getQueue());
-
-            vos.add(vo);
-        });
+        List<NodeStateVO> vos = nodeStats.stream().map(this::buildNodeStateVO).collect(Collectors.toList());
+//
+//        nodeStats.forEach(nodeStat -> {
+//            NodeStateVO vo = new NodeStateVO();
+//
+//            vo.setNodeName(nodeStat.getName());
+//            vo.setSegmentsMemory(nodeStat.getIndices().getSegments().getMemoryInBytes());
+//            vo.setOsCpu(nodeStat.getOs().getCpu().getPercent());
+//            vo.setLoadAverage1m(nodeStat.getOs().getCpu().getLoadAverage().getOneM());
+//            vo.setLoadAverage5m(nodeStat.getOs().getCpu().getLoadAverage().getFiveM());
+//            vo.setLoadAverage15m(nodeStat.getOs().getCpu().getLoadAverage().getFifteenM());
+//            vo.setJvmHeapUsedPercent(nodeStat.getJvm().getMem().getHeapUsedPercent());
+//            vo.setThreadsCount(nodeStat.getJvm().getThreads().getCount());
+//            vo.setCurrentOpen(nodeStat.getHttp().getCurrentOpen());
+//            vo.setThreadPoolWriteActive(nodeStat.getThreadPool().getWrite().getActive());
+//            vo.setThreadPoolWriteQueue(nodeStat.getThreadPool().getWrite().getQueue());
+//            vo.setThreadPoolWriteReject(nodeStat.getThreadPool().getWrite().getRejected());
+//            vo.setThreadPoolSearchActive(nodeStat.getThreadPool().getSearch().getActive());
+//            vo.setThreadPoolSearchReject(nodeStat.getThreadPool().getSearch().getRejected());
+//            vo.setThreadPoolSearchQueue(nodeStat.getThreadPool().getSearch().getQueue());
+//            vo.setThreadPoolManagementActive(nodeStat.getThreadPool().getManagement().getActive());
+//            vo.setThreadPoolManagementReject(nodeStat.getThreadPool().getManagement().getRejected());
+//            vo.setThreadPoolManagementQueue(nodeStat.getThreadPool().getManagement().getQueue());
+//
+//            vos.add(vo);
+//        });
         return vos;
+    }
+
+    @NotNull
+    private NodeStateVO buildNodeStateVO(ClusterNodeStats nodeStat) {
+        NodeStateVO vo = new NodeStateVO();
+        vo.setNodeName(nodeStat.getName());
+        Optional.of(nodeStat).map(ClusterNodeStats::getIndices).map(CommonStat::getSegments).map(Segments::getMemoryInBytes).ifPresent(vo::setSegmentsMemory);
+        Optional.of(nodeStat).map(ClusterNodeStats::getOs).map(OsNode::getCpu).map(OsCpu::getPercent).ifPresent(vo::setOsCpu);
+        Optional.of(nodeStat).map(ClusterNodeStats::getOs).map(OsNode::getCpu).map(OsCpu::getLoadAverage).map(LoadAverage::getOneM).ifPresent(vo::setLoadAverage1m);
+        Optional.of(nodeStat).map(ClusterNodeStats::getOs).map(OsNode::getCpu).map(OsCpu::getLoadAverage).map(LoadAverage::getFiveM).ifPresent(vo::setLoadAverage5m);
+        Optional.of(nodeStat).map(ClusterNodeStats::getOs).map(OsNode::getCpu).map(OsCpu::getLoadAverage).map(LoadAverage::getFifteenM).ifPresent(vo::setLoadAverage15m);
+        Optional.of(nodeStat).map(ClusterNodeStats::getJvm).map(JvmNode::getMem).map(JvmMem::getHeapUsedPercent).ifPresent(vo::setJvmHeapUsedPercent);
+        Optional.of(nodeStat).map(ClusterNodeStats::getJvm).map(JvmNode::getThreads).map(JvmThreads::getCount).ifPresent(vo::setThreadsCount);
+        Optional.of(nodeStat).map(ClusterNodeStats::getHttp).map(HttpNode::getCurrentOpen).ifPresent(vo::setCurrentOpen);
+        Optional.of(nodeStat).map(ClusterNodeStats::getThreadPool).map(ThreadPoolNodes::getWrite).map(ThreadPoolNode::getActive).ifPresent(vo::setThreadPoolWriteActive);
+        Optional.of(nodeStat).map(ClusterNodeStats::getThreadPool).map(ThreadPoolNodes::getWrite).map(ThreadPoolNode::getQueue).ifPresent(vo::setThreadPoolWriteQueue);
+        Optional.of(nodeStat).map(ClusterNodeStats::getThreadPool).map(ThreadPoolNodes::getWrite).map(ThreadPoolNode::getRejected).ifPresent(vo::setThreadPoolWriteReject);
+        Optional.of(nodeStat).map(ClusterNodeStats::getThreadPool).map(ThreadPoolNodes::getSearch).map(ThreadPoolNode::getActive).ifPresent(vo::setThreadPoolSearchActive);
+        Optional.of(nodeStat).map(ClusterNodeStats::getThreadPool).map(ThreadPoolNodes::getSearch).map(ThreadPoolNode::getRejected).ifPresent(vo::setThreadPoolSearchReject);
+        Optional.of(nodeStat).map(ClusterNodeStats::getThreadPool).map(ThreadPoolNodes::getSearch).map(ThreadPoolNode::getQueue).ifPresent(vo::setThreadPoolSearchQueue);
+        Optional.of(nodeStat).map(ClusterNodeStats::getThreadPool).map(ThreadPoolNodes::getManagement).map(ThreadPoolNode::getActive).ifPresent(vo::setThreadPoolManagementActive);
+        Optional.of(nodeStat).map(ClusterNodeStats::getThreadPool).map(ThreadPoolNodes::getManagement).map(ThreadPoolNode::getRejected).ifPresent(vo::setThreadPoolManagementReject);
+        Optional.of(nodeStat).map(ClusterNodeStats::getThreadPool).map(ThreadPoolNodes::getManagement).map(ThreadPoolNode::getQueue).ifPresent(vo::setThreadPoolManagementQueue);
+        return vo;
     }
 }
