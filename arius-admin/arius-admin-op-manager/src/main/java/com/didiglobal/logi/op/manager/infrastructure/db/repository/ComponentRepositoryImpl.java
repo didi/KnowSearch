@@ -3,7 +3,9 @@ package com.didiglobal.logi.op.manager.infrastructure.db.repository;
 import com.didiglobal.logi.op.manager.domain.component.entity.Component;
 import com.didiglobal.logi.op.manager.domain.component.repository.ComponentRepository;
 import com.didiglobal.logi.op.manager.infrastructure.db.ComponentPO;
+import com.didiglobal.logi.op.manager.infrastructure.db.ScriptPO;
 import com.didiglobal.logi.op.manager.infrastructure.db.converter.ComponentConverter;
+import com.didiglobal.logi.op.manager.infrastructure.db.converter.ScriptConverter;
 import com.didiglobal.logi.op.manager.infrastructure.db.mapper.ComponentDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -45,6 +47,12 @@ public class ComponentRepositoryImpl implements ComponentRepository {
     @Override
     public List<Component> listAllComponent() {
         return ComponentConverter.convertComponentPO2DOList(componentDao.listAll());
+    }
+
+    @Override
+    public List<Component> queryComponent(Component component) {
+        ComponentPO componentPO = ComponentConverter.convertComponentDO2PO(component);
+        return ComponentConverter.convertComponentPO2DOList(componentDao.queryComponent(componentPO));
     }
 
     @Override

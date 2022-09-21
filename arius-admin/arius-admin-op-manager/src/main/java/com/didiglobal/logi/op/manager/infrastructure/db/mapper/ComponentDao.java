@@ -2,6 +2,7 @@ package com.didiglobal.logi.op.manager.infrastructure.db.mapper;
 
 import com.didiglobal.logi.op.manager.domain.component.entity.Component;
 import com.didiglobal.logi.op.manager.infrastructure.db.ComponentPO;
+import com.didiglobal.logi.op.manager.infrastructure.db.ScriptPO;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
@@ -47,6 +48,14 @@ public interface ComponentDao {
      * @return
      */
     List<ComponentPO> listAll();
+
+    /**
+     * 查询component
+     *
+     * @param componentPO 组件
+     * @return 组件列表
+     */
+    List<ComponentPO> queryComponent(ComponentPO componentPO);
 
     /**
      * 根军packageId获取组件

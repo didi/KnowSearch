@@ -1,7 +1,9 @@
 package com.didiglobal.logi.op.manager.application;
 
+import com.didiglobal.logi.op.manager.domain.component.entity.Component;
 import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentGroupConfig;
 import com.didiglobal.logi.op.manager.domain.component.service.ComponentDomainService;
+import com.didiglobal.logi.op.manager.domain.script.entity.Script;
 import com.didiglobal.logi.op.manager.domain.script.service.impl.ScriptDomainService;
 import com.didiglobal.logi.op.manager.domain.task.entity.Task;
 import com.didiglobal.logi.op.manager.domain.task.service.TaskDomainService;
@@ -34,6 +36,19 @@ public class ComponentService {
 
     @Autowired
     private TaskDomainService taskDomainService;
+
+    public Result<List<Component>> listComponentWithAll() {
+            return componentDomainService.listComponentWithAll();
+    }
+
+    /**
+     * 根据条件获取所有的组件list
+     * @param component 组件
+     * @return Result<List<Component>
+     */
+    public Result<List<Component>> listComponent(Component component) {
+        return componentDomainService.queryComponent(component);
+    }
 
     public Result<Integer> installComponent(GeneralInstallComponent installComponent) {
         LOGGER.info("start install component[{}]", installComponent.getName());

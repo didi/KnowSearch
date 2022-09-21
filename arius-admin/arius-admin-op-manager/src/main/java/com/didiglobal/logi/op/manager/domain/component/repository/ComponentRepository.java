@@ -1,6 +1,7 @@
 package com.didiglobal.logi.op.manager.domain.component.repository;
 
 import com.didiglobal.logi.op.manager.domain.component.entity.Component;
+import com.didiglobal.logi.op.manager.domain.script.entity.Script;
 
 import java.util.List;
 
@@ -50,6 +51,13 @@ public interface ComponentRepository {
      * @return
      */
     List<Component> listAllComponent();
+
+    /**
+     * 根据条件获取组件list
+     * @param component
+     * @return List<Component>
+     */
+    List<Component> queryComponent(Component component);
 
     /**
      * 根据package获取组件
