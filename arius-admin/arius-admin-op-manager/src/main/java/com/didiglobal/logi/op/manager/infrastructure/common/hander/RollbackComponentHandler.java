@@ -42,8 +42,7 @@ public class RollbackComponentHandler extends BaseComponentHandler implements Co
             String desc = component.getName() + componentEvent.getDescribe() +
                     String.format("[类型:%s]", OperationEnum.valueOfType(rollbackComponent.getType()).getDescribe());
             Map<String, List<Tuple<String, Integer>>> groupToIpList = getGroup2HostMap(rollbackComponent.getGroupConfigList());
-            int taskId = taskDomainService.createTask(content, componentEvent.getOperateType(), desc,
-                    rollbackComponent.getAssociationId(), groupToIpList).getData();
+            int taskId = taskDomainService.createTask(content, componentEvent.getOperateType(), desc, groupToIpList).getData();
             return taskId;
         } catch (Exception e) {
             LOGGER.error("event process error.", e);

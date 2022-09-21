@@ -19,8 +19,6 @@ import java.util.List;
 public class GeneralBaseOperationComponent {
     protected List<GeneralGroupConfig> groupConfigList;
 
-    protected String associationId;
-
     protected String templateId;
 
     protected Integer batch;

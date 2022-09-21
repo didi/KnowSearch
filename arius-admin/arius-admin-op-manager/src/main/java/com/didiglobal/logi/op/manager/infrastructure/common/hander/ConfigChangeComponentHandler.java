@@ -48,7 +48,7 @@ public class ConfigChangeComponentHandler extends BaseComponentHandler implement
             String content = JSONObject.toJSON(changeComponent).toString();
             Map<String, List<Tuple<String, Integer>>> groupToIpList = getGroup2HostMap(changeComponent.getGroupConfigList());
             int taskId = taskDomainService.createTask(content, componentEvent.getOperateType(),
-                    component.getName() + componentEvent.getDescribe(), changeComponent.getAssociationId(), groupToIpList).getData();
+                    component.getName() + componentEvent.getDescribe(), groupToIpList).getData();
             return taskId;
         } catch (Exception e) {
             LOGGER.error("event process error.", e);

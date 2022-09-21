@@ -49,10 +49,10 @@ public class TaskDomainServiceImpl implements TaskDomainService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Result<Integer> createTask(String content, Integer type, String describe,
-                                      String associationId, Map<String, List<Tuple<String, Integer>>> groupToHostList) {
+                                      Map<String, List<Tuple<String, Integer>>> groupToHostList) {
         //新建
         Task task = new Task();
-        task.create(content, type, describe, associationId, groupToHostList);
+        task.create(content, type, describe, groupToHostList);
 
 
         //存储

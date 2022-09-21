@@ -25,11 +25,10 @@ public interface TaskDomainService {
      * @param content       任务内容
      * @param type          任务类型
      * @param describe      任务描述
-     * @param associationId 关联外部任务id
      * @param groupToIpList 分组倒ip的映射
      * @return 返回创建后的任务id
      */
-    Result<Integer> createTask(String content, Integer type, String describe, String associationId,
+    Result<Integer> createTask(String content, Integer type, String describe,
                                Map<String, List<Tuple<String, Integer>>> groupToIpList);
 
     /**

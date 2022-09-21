@@ -19,10 +19,6 @@ public class GeneralBaseOperationComponentDTO {
      * 分组配置
      */
     private List<GeneralGroupConfigDTO> groupConfigList;
-    /**
-     * 关联id
-     */
-    private String associationId;
 
     /**
      * 操作并发度

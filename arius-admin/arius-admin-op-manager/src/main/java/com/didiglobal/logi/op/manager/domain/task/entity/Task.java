@@ -32,10 +32,6 @@ public class Task {
      */
     private Integer status;
     /**
-     * 关联的任务id
-     */
-    private String associationId;
-    /**
      * 类型
      */
     private Integer type;
@@ -70,14 +66,13 @@ public class Task {
      */
     private String templateId;
 
-    public Task create(String content, Integer type, String describe, String associationId, Map<String, List<Tuple<String, Integer>>>  groupToHostList) {
+    public Task create(String content, Integer type, String describe, Map<String, List<Tuple<String, Integer>>>  groupToHostList) {
         this.createTime = new Timestamp(System.currentTimeMillis());
         this.updateTime = new Timestamp(System.currentTimeMillis());
         this.content = content;
         this.type = type;
         this.isFinish = 0;
         this.describe = describe;
-        this.associationId = associationId;
         this.status = TaskStatusEnum.WAITING.getStatus();
         this.detailList = new ArrayList<>();
         groupToHostList.forEach((groupName, hosts) -> {

@@ -49,7 +49,7 @@ public class ScaleComponentHandler extends BaseComponentHandler implements Compo
             String content = JSONObject.toJSON(scaleComponent).toString();
             Map<String, List<Tuple<String, Integer>>> groupToIpList = getGroup2HostMap(scaleComponent.getGroupConfigList());
             int taskId = taskDomainService.createTask(content, scaleComponent.getType(),
-                    component.getName() + componentEvent.getDescribe(), scaleComponent.getAssociationId(), groupToIpList).getData();
+                    component.getName() + componentEvent.getDescribe(), groupToIpList).getData();
             return taskId;
         } catch (Exception e) {
             LOGGER.error("event process error.", e);

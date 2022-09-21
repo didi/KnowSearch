@@ -60,11 +60,6 @@ public class ComponentDTO {
     private List<ComponentHostDTO> hostList;
 
     /**
-     * 关联外部任务
-     */
-    private String associationId;
-
-    /**
      * 依赖的组件id
      */
     private Integer dependComponentId;

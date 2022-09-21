@@ -70,11 +70,6 @@ public class Component {
     private List<ComponentGroupConfig> groupConfigList;
 
     /**
-     * 关联外部任务
-     */
-    private String associationId;
-
-    /**
      * 依赖的组件id
      */
     private Integer dependComponentId;

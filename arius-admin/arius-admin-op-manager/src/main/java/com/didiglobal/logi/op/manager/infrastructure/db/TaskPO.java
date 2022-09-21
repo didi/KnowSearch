@@ -23,10 +23,6 @@ public class TaskPO {
      */
     private Integer status;
     /**
-     * 关联的任务id
-     */
-    private Integer associationId;
-    /**
      * 类型
      */
     private Integer type;

@@ -51,7 +51,7 @@ public class UpgradeComponentHandler extends BaseComponentHandler implements Com
             upgradeComponent.setGroupConfigList(ConvertUtil.list2List(list, GeneralGroupConfig.class));
             String content = JSONObject.toJSON(upgradeComponent).toString();
             int taskId = taskDomainService.createTask(content, componentEvent.getOperateType(),
-                    component.getName() + componentEvent.getDescribe(), upgradeComponent.getAssociationId(),
+                    component.getName() + componentEvent.getDescribe(),
                     getGroup2HostMap(ConvertUtil.list2List(list, GeneralGroupConfig.class))).getData();
             return taskId;
         } catch (Exception e) {
