@@ -56,4 +56,18 @@ public interface OperateRecordService {
     Tuple<Long, List<OperateRecordVO>> pagingGetOperateRecordByCondition(OperateRecordDTO pageDTO);
 
     OperateRecordVO getById(Integer id);
+
+ /**
+  * 获取操作记录list
+  * @param queryDTO
+  * @return
+  */
+ List<OperateRecordVO> queryCondition(OperateRecordDTO queryDTO);
+
+    /**
+     * 更新操作记录
+     * @param operateRecordDTO
+     * @return
+     */
+    Result<Integer> updateOperateRecord(OperateRecordDTO operateRecordDTO);
 }

@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.core.service.common.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -11,6 +12,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.SortConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
+import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
@@ -19,11 +21,10 @@ import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import com.didiglobal.logi.security.dao.ProjectDao;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+
+import java.util.*;
 import java.util.function.Consumer;
+
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +39,15 @@ import org.springframework.stereotype.Service;
 public class OperateRecordServiceImpl implements OperateRecordService {
 
     private static final ILog LOGGER          = LogFactory.getLog(OperateRecordServiceImpl.class);
+
+    private static final String  ID = "id";
+    private static final String  CONTENT = "content";
+    private static final String  PROJECT_NAME = "project_name";
+    private static final String  MODULE_ID = "module_id";
+    private static final String  OPERATE_ID = "operate_id";
+    private static final String  TRIGGER_WAY_ID = "trigger_way_id";
+    private static final String  USER_OPERATION = "user_operation";
+    private static final int    DEFAULT_RECORD_ID = -1;
 
     @Autowired
     private OperateRecordDAO  operateRecordDAO;
@@ -143,6 +153,85 @@ public class OperateRecordServiceImpl implements OperateRecordService {
         final OperateRecordVO operateRecordVO = ConvertUtil.obj2Obj(recordInfo, OperateRecordVO.class);
         poIncludeEnumIdConvertEnumStr(recordInfo, operateRecordVO);
         return operateRecordVO;
+    }
+
+    /**
+     * 查询操作记录list
+     * @param queryDTO
+     * @return
+     */
+    @Override
+    public List<OperateRecordVO> queryCondition(OperateRecordDTO queryDTO) {
+        Result<Void> result = paramCheck(queryDTO.getUserOperation(), queryDTO.getProjectName());
+        if (result.failed()) {
+            return new ArrayList<>();
+        }
+        List<OperateRecordInfoPO> recordInfoPOList = operateRecordDAO.listByCondition(queryDTO);
+        List<OperateRecordVO> operateRecordVOList = ConvertUtil.list2List(recordInfoPOList,
+                OperateRecordVO.class);
+        return operateRecordVOList;
+    }
+
+    @Override
+    public Result<Integer> updateOperateRecord(OperateRecordDTO operateRecordDTO) {
+        operateRecordDTO.setContent(operateRecordDTO.getContent().trim());
+        Result<Void> result = paramCheck(operateRecordDTO.getUserOperation(), operateRecordDTO.getProjectName());
+        if (result.failed()) {
+            return Result.buildFrom(result);
+        }
+        QueryWrapper<OperateRecordInfoPO> operateRecordInfoPOQueryWrapper =
+                AriusObjUtils.isNull(operateRecordDTO.getId()) || operateRecordDTO.getId() == DEFAULT_RECORD_ID
+                        ? buildOperateRecordInfoPOQueryWrapper(operateRecordDTO)
+                        : new QueryWrapper<OperateRecordInfoPO>().eq(ID, operateRecordDTO.getId());
+        OperateRecordInfoPO operateRecordInfoPO = operateRecordDAO.selectOne(operateRecordInfoPOQueryWrapper);
+        if (null == operateRecordInfoPO) {
+            return insertOperateRecordInfoWithoutCheck(operateRecordDTO);
+        }
+        operateRecordInfoPO.setUpdateTime(new Date());
+        boolean succ = (1 == operateRecordDAO.update(operateRecordInfoPO, operateRecordInfoPOQueryWrapper));
+        return Result.build(succ, operateRecordInfoPO.getId());
+    }
+
+    /**
+     * 组装查询参数
+     * @param operateRecordDTO
+     * @return
+     */
+    private QueryWrapper<OperateRecordInfoPO> buildOperateRecordInfoPOQueryWrapper(OperateRecordDTO operateRecordDTO) {
+        QueryWrapper<OperateRecordInfoPO> operateRecordInfoPOQueryWrapper = new QueryWrapper<>();
+        operateRecordInfoPOQueryWrapper.eq(CONTENT, operateRecordDTO.getContent());
+        operateRecordInfoPOQueryWrapper.eq(PROJECT_NAME, operateRecordDTO.getProjectName());
+        operateRecordInfoPOQueryWrapper.eq(MODULE_ID, operateRecordDTO.getModuleId());
+        operateRecordInfoPOQueryWrapper.eq(OPERATE_ID, operateRecordDTO.getOperateId());
+        operateRecordInfoPOQueryWrapper.eq(TRIGGER_WAY_ID, operateRecordDTO.getTriggerWayId());
+        operateRecordInfoPOQueryWrapper.eq(USER_OPERATION, operateRecordDTO.getUserOperation());
+        return operateRecordInfoPOQueryWrapper;
+    }
+
+    /**
+     * 新增操作记录
+     * @param operateRecordDTO
+     */
+    private Result<Integer> insertOperateRecordInfoWithoutCheck(OperateRecordDTO operateRecordDTO) {
+        OperateRecordInfoPO operateRecordInfoPO = ConvertUtil.obj2Obj(operateRecordDTO, OperateRecordInfoPO.class);
+        boolean succ = (1 == operateRecordDAO.insert(operateRecordInfoPO));
+        return Result.build(succ, operateRecordInfoPO.getId());
+    }
+
+    /**
+     * 校验应用和用户
+     * @param userOperation
+     * @param projectName
+     * @return
+     */
+    private Result<Void> paramCheck(String userOperation, String projectName) {
+        if (AriusObjUtils.isNull(userOperation)) {
+            return Result.buildFail("用户账号为空");
+        }
+        if (AriusObjUtils.isNull(projectName)) {
+            return Result.buildFail("应用为空");
+        }
+        return Result.buildSucc();
     }
 
 }
