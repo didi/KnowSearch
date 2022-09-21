@@ -11,6 +11,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.Cluste
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.*;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 import com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
@@ -18,6 +19,8 @@ import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.es.*;
 import com.didiglobal.logi.elasticsearch.client.response.indices.catindices.CatIndexResult;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -33,6 +36,8 @@ import java.util.List;
  */
 @Component
 public class ClusterPhyQuickCommandManagerImpl implements ClusterPhyQuickCommandManager {
+
+    private static final ILog LOGGER            = LogFactory.getLog(ClusterPhyQuickCommandManagerImpl.class);
     
     @Autowired
     protected ClusterPhyService clusterPhyService;
@@ -115,11 +120,17 @@ public class ClusterPhyQuickCommandManagerImpl implements ClusterPhyQuickCommand
         if (checkResult.failed()) {
             return Result.buildFail(checkResult.getMessage());
         }
-        ShardAssignmentDescriptionVO vo = esShardService.syncShardAssignmentDescription(cluster);
-        if (vo == null) {
+        ShardAssignmentDescriptionVO shardAssignmentDescriptionVO = new ShardAssignmentDescriptionVO();
+        try {
+            shardAssignmentDescriptionVO = esShardService.syncShardAssignmentDescription(cluster);
+        } catch (ESOperateException e) {
+            LOGGER.error("class=IndicesManagerImpl||method=editMapping||errMsg={}", e.getMessage(), e);
+            return Result.buildFail(e.getMessage() + ":" + e.getCause());
+        }
+        if (shardAssignmentDescriptionVO == null) {
             return Result.buildFail();
         }
-        return Result.buildSucc(vo);
+        return Result.buildSucc(shardAssignmentDescriptionVO);
     }
     
     @Override
