@@ -55,7 +55,6 @@ public class InstallComponentHandler extends BaseComponentHandler implements Com
     public Integer eventProcess(ComponentEvent componentEvent) throws ComponentHandlerException {
         try {
             GeneralInstallComponent installComponent = (GeneralInstallComponent) componentEvent.getSource();
-            String associationId = installComponent.getAssociationId();
 
             Package pk = packageDomainService.queryPackage(Package.builder().id(installComponent.getPackageId()).build()).
                     getData().get(0);
@@ -67,7 +66,7 @@ public class InstallComponentHandler extends BaseComponentHandler implements Com
 
             Map<String, List<Tuple<String, Integer>>> groupToIpList = getGroup2HostMap(installComponent.getGroupConfigList());
             int taskId = taskDomainService.createTask(content, componentEvent.getOperateType(),
-                    installComponent.getName() + componentEvent.getDescribe(), associationId, groupToIpList).getData();
+                    installComponent.getName() + componentEvent.getDescribe(), groupToIpList).getData();
             return taskId;
         } catch (Exception e) {
             LOGGER.error("event process error.", e);

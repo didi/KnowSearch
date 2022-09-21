@@ -43,7 +43,7 @@ public class RestartComponentHandler extends BaseComponentHandler implements Com
             String content = JSONObject.toJSON(restartComponent).toString();
             Map<String, List<Tuple<String, Integer>>> groupToIpList = getGroup2HostMap(restartComponent.getGroupConfigList());
             int taskId = taskDomainService.createTask(content, componentEvent.getOperateType(),
-                    component.getName() + componentEvent.getDescribe(), restartComponent.getAssociationId(), groupToIpList).getData();
+                    component.getName() + componentEvent.getDescribe(), groupToIpList).getData();
             return taskId;
         } catch (Exception e) {
             LOGGER.error("event process error.", e);

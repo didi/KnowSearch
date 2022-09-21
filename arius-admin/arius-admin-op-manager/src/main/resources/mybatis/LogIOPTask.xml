@@ -5,7 +5,6 @@
                type="com.didiglobal.logi.op.manager.infrastructure.db.TaskPO">
         <result column="id" jdbcType="INTEGER" property="id"/>
         <result column="status" jdbcType="INTEGER" property="status"/>
-        <result column="association_id" jdbcType="VARCHAR" property="associationId"/>
         <result column="type" jdbcType="INTEGER" property="type"/>
         <result column="describe" jdbcType="VARCHAR" property="describe"/>
         <result column="is_finish" jdbcType="INTEGER" property="isFinish"/>
@@ -15,14 +14,14 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-        id, status, association_id, `describe`, `type`, is_finish, create_time, update_time, content
+        id, status, `describe`, `type`, is_finish, create_time, update_time, content
     </sql>
 
     <insert id="insert" parameterType="com.didiglobal.logi.op.manager.infrastructure.db.TaskPO"
             useGeneratedKeys="true"
             keyColumn="id" keyProperty="id">
-        insert into logi_op_task (status, association_id, `describe`, `type`, is_finish, create_time, update_time, content)
-        values (#{status}, #{associationId}, #{describe}, #{type}, #{isFinish}, #{createTime}, #{updateTime}, #{content})
+        insert into logi_op_task (status, `describe`, `type`, is_finish, create_time, update_time, content)
+        values (#{status}, #{describe}, #{type}, #{isFinish}, #{createTime}, #{updateTime}, #{content})
     </insert>
 
     <select id="getById"

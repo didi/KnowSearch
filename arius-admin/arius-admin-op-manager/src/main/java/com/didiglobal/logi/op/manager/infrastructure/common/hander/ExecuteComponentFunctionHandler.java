@@ -34,13 +34,12 @@ public class ExecuteComponentFunctionHandler extends BaseComponentHandler implem
     public Integer eventProcess(ComponentEvent componentEvent) throws ComponentHandlerException {
         try {
             GeneralExecuteComponentFunction executeComponentFunction = (GeneralExecuteComponentFunction) componentEvent.getSource();
-            String associationId = executeComponentFunction.getAssociationId();
             Component component = componentDomainService.getComponentById(executeComponentFunction.getComponentId()).getData();
             executeComponentFunction.setTemplateId(getTemplateId(component));
             String content = JSONObject.toJSON(executeComponentFunction).toString();
             Map<String, List<Tuple<String, Integer>>> groupToIpList = getGroup2HostMap(executeComponentFunction.getGroupConfigList());
             int taskId = taskDomainService.createTask(content, componentEvent.getOperateType(),
-                    component.getName() + componentEvent.getDescribe(), associationId, groupToIpList).getData();
+                    component.getName() + componentEvent.getDescribe(), groupToIpList).getData();
             return taskId;
         } catch (Exception e) {
             LOGGER.error("event process error.", e);
