@@ -334,9 +334,9 @@ public class ESIndexDAO extends BaseESDAO {
                     .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
         } catch (Exception e) {
             ParsingExceptionUtils.abnormalTermination(e);
-            
-            LOGGER.warn("class=ESIndexDAO||method=getIndexByExpression||errMsg={}||cluster={}||expression={}",
-                    e.getMessage(), cluster, expression, e);
+    
+            LOGGER.warn("class={}||method=deleteByExpression||cluster={}||expression={}", getClass().getSimpleName(),
+                    cluster, expression, e);
         }
         return Optional.ofNullable(response).map(ESIndicesDeleteIndexResponse::getAcknowledged).orElse(false);
         
