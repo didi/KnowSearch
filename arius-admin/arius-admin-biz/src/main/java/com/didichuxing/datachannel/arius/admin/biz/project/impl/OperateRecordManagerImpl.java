@@ -9,17 +9,26 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.operaterecord.Oper
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 import com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.SortConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
 import com.didichuxing.datachannel.arius.admin.core.component.HandleFactory;
 import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigInfoService;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-import java.util.Calendar;
-import java.util.Date;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+import com.didiglobal.logi.security.service.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+
+import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.COMMA;
 
 /**
  * 操作记录
@@ -30,12 +39,17 @@ import org.springframework.stereotype.Component;
 @Component
 public class OperateRecordManagerImpl implements OperateRecordManager {
     private static final ILog    LOGGER = LogFactory.getLog(OperateRecordManagerImpl.class);
+    private static final Integer    DEFAULT_RECORD_ID = -1;
+    private static final Long    FROM = 0L;
+    private static final String    DEFAULT_SORT_TERM = "update_time";
     @Autowired
     private HandleFactory        handleFactory;
     @Autowired
     private OperateRecordService   operateRecordService;
     @Autowired
     private AriusConfigInfoService ariusConfigInfoService;
+    @Autowired
+    private ProjectService projectService;
     
     /**
      * 0 0 1 * * ? 每天凌晨 1 点执行该方法 定时删除操作日志，根据配置中指定的保存天数对操作日志进行保留
@@ -105,4 +119,68 @@ public class OperateRecordManagerImpl implements OperateRecordManager {
 
         return Result.buildSucc(operateRecordService.getById(id));
     }
+
+    /**
+     * sense查询记录
+     * @param queryDTO 查询条件
+     * @param operator 用户名称
+     * @param projectId 项目id
+     * @return
+     */
+    @Override
+    public Result<List<OperateRecordVO>> listSenseOperateRecord(OperateRecordDTO queryDTO, String operator, Integer projectId) {
+        //查询平台配置中的保存操作记录条数
+        Integer saveRecordNum = ariusConfigInfoService.intSetting(AriusConfigConstant.ARIUS_COMMON_GROUP, AriusConfigConstant.OPERATE_RECORD_SAVE_NUM,
+                AriusConfigConstant.OPERATE_RECORD_SAVE_NUM_DEFAULT_VALUE);
+        //查询平台配置中的超级应用的默认命令
+        List<String> superAppDefaultCommandStringList = new ArrayList<>(ariusConfigInfoService.stringSettingSplit2Set(AriusConfigConstant.ARIUS_COMMON_GROUP
+                , AriusConfigConstant.SUPER_APP_DEFALT_DSL_COMMAND,
+                AriusConfigConstant.SUPER_APP_DEFALT_DSL_COMMAND_VALUE, COMMA));
+        //组装查询条件
+        buildCommonOperateRecordDTO(projectId, queryDTO, operator);
+        queryDTO.setSortTerm(DEFAULT_SORT_TERM);
+        queryDTO.setSortType(SortConstant.DESC);
+        queryDTO.setFrom(FROM);
+        queryDTO.setSize(saveRecordNum.longValue());
+        List<OperateRecordVO> operateRecordVOList = operateRecordService.queryCondition(queryDTO);
+        List<OperateRecordVO> superAppDefaultCommandList = superAppDefaultCommandStringList.stream().map(content -> {
+            OperateRecordVO operateRecordVO = new OperateRecordVO();
+            operateRecordVO.setId(DEFAULT_RECORD_ID);
+            operateRecordVO.setContent(content);
+            return operateRecordVO;
+        }).collect(Collectors.toList());
+        //默认取前30条，按更新时间降序排序
+        List<OperateRecordVO> operateRecordsList = operateRecordVOList.stream().sorted(Comparator.comparing(OperateRecordVO::getUpdateTime).reversed())
+                .collect(Collectors.toList());
+        operateRecordsList.addAll(superAppDefaultCommandList);
+        return Result.buildSucc(operateRecordsList);
+    }
+
+    @Override
+    public Result<Integer> updateSenseOperateRecord(OperateRecordDTO operateRecordDTO, String operator, Integer projectId) {
+        buildCommonOperateRecordDTO(projectId, operateRecordDTO, operator);
+        Result<Integer> result = operateRecordService.updateOperateRecord(operateRecordDTO);
+        if (result.failed()) {
+            LOGGER.warn("class=DslTemplateManagerImpl||method=updateConfigDslTemplateFields||errMsg={}",
+                    "用户查询模板字段配置信息更新出错");
+        }
+        return result;
+    }
+
+    /**
+     * 组装参数
+     *
+     * @param projectId
+     * @param operateRecordDTO
+     * @param operator
+     */
+    private void buildCommonOperateRecordDTO(Integer projectId, OperateRecordDTO operateRecordDTO, String operator) {
+        String projectName = projectService.getProjectBriefByProjectId(projectId).getProjectName();
+        operateRecordDTO.setOperateId(OperateTypeEnum.DSL_QUERY_RECORD.getCode());
+        operateRecordDTO.setModuleId(ModuleEnum.DSL_QUERY.getCode());
+        operateRecordDTO.setTriggerWayId(TriggerWayEnum.MANUAL_TRIGGER.getCode());
+        operateRecordDTO.setUserOperation(operator);
+        operateRecordDTO.setProjectName(projectName);
+    }
+
 }

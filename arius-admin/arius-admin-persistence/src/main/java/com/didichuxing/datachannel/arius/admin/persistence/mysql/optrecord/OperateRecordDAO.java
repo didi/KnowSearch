@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.persistence.mysql.optrecord;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.oprecord.OperateRecordDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.operaterecord.OperateRecordInfoPO;
 
@@ -13,7 +14,7 @@ import org.springframework.stereotype.Repository;
  * @date 2019/3/14
  */
 @Repository
-public interface OperateRecordDAO {
+public interface OperateRecordDAO extends BaseMapper<OperateRecordInfoPO> {
     /**
      * 通过条件查询列表
      * @param param OperateRecordInfoPO
@@ -34,6 +35,7 @@ public interface OperateRecordDAO {
      * @param po    OperateRecordInfoPO
      * @return      int
      */
+    @Override
     int insert(OperateRecordInfoPO po);
 
     /**
