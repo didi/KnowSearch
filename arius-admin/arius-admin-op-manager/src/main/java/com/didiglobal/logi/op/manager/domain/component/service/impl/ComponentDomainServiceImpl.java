@@ -174,8 +174,8 @@ public class ComponentDomainServiceImpl implements ComponentDomainService {
     }
 
     @Override
-    public Result<List<Component>> queryComponent(Component component1) {
-        List<Component> componentList = componentRepository.queryComponent(component1);
+    public Result<List<Component>> queryComponent(Component queryComponent) {
+        List<Component> componentList = componentRepository.queryComponent(queryComponent);
         List<ComponentHost> hosts = componentHostRepository.listComponentHost();
         List<ComponentGroupConfig> configs = componentGroupConfigRepository.listGroupConfig();
         Map<String, List<ComponentHost>> componentIdToHostMap = new HashMap<>(componentList.size());
