@@ -1,14 +1,12 @@
 package com.didiglobal.logi.op.manager.interfaces.controller;
 
 import com.didiglobal.logi.op.manager.application.TaskService;
-import com.didiglobal.logi.op.manager.domain.script.entity.Script;
 import com.didiglobal.logi.op.manager.domain.task.entity.value.TaskDetail;
 import com.didiglobal.logi.op.manager.infrastructure.common.Constants;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralGroupConfig;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.TaskLogEnum;
 import com.didiglobal.logi.op.manager.interfaces.assembler.ComponentAssembler;
-import com.didiglobal.logi.op.manager.interfaces.assembler.ScriptAssembler;
 import com.didiglobal.logi.op.manager.interfaces.assembler.TaskDetailAssembler;
 import com.didiglobal.logi.op.manager.interfaces.vo.GeneralGroupConfigHostVO;
 import com.didiglobal.logi.op.manager.interfaces.vo.TaskDetailVO;
