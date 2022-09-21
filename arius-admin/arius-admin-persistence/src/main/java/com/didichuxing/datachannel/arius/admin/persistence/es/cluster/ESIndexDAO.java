@@ -93,19 +93,25 @@ public class ESIndexDAO extends BaseESDAO {
      * @param indexName 索引名字
      * @return result
      */
-    public boolean createIndex(String cluster, String indexName) {
+    public boolean createIndex(String cluster, String indexName) throws ESOperateException {
         if (exist(cluster, indexName)) {
             LOGGER.warn("class=ESIndexDAO||method=createIndex||index already exist||cluster={}||indexName={}", cluster,
-                indexName);
+                    indexName);
             return true;
         }
-
+    
         ESClient client = fetchESClientByCluster(cluster);
-        if (client != null) {
+        if (client == null) {
+            throw new NullESClientException(cluster);
+        }
+        try {
+        
             ESIndicesPutIndexResponse response = client.admin().indices().preparePutIndex(indexName).execute()
-                .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+                    .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
             return response.getAcknowledged();
-        } else {
+        } catch (Exception e) {
+            ParsingExceptionUtils.abnormalTermination(e);
+            LOGGER.error("class=ESIndexDAO||method=createIndex||cluster={}||indexName={}", cluster);
             return false;
         }
     }
@@ -146,7 +152,7 @@ public class ESIndexDAO extends BaseESDAO {
             } catch (Exception e) {
                 ParsingExceptionUtils.abnormalTermination(e);
                 LOGGER.error("class=ESIndexDAO||method=createIndexWithConfig||cluster={}||indexName={}", cluster);
-                throw  new ESOperateException(e.getMessage());
+                return null;
             }
         };
         

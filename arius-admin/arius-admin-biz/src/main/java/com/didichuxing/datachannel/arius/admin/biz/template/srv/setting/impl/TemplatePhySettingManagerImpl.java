@@ -56,7 +56,7 @@ public class TemplatePhySettingManagerImpl implements TemplatePhySettingManager 
     @Override
     public IndexTemplatePhySetting fetchTemplateSettings(String cluster, String template) throws ESOperateException {
         if (!esTemplateService.syncGetEsClusterIsNormal(cluster)) {
-            throw new ESOperateException(String.format("模版【%s】所属集群【%s】异常,无法获取setting信息", template, cluster));
+            throw new ESOperateException(String.format("模版【%s】,无法获取setting信息", template));
         }
         TemplateConfig templateConfig = esTemplateService.syncGetTemplateConfig(cluster, template);
         if (templateConfig != null) {
