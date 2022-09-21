@@ -1,24 +1,24 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.index;
 
-
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_OPERATE_TIMEOUT;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.indices.IndexCatCellDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.IndexCatCell;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.index.IndexCatCellPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.index.IndexStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import com.didichuxing.datachannel.arius.admin.common.function.BiFunctionWithESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
 import com.didichuxing.datachannel.arius.admin.common.tuple.Tuples;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.DSLSearchUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.IndexNameUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.ParsingExceptionUtils;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpTimeoutRetry;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ScrollResultVisitor;
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
@@ -41,7 +41,6 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import java.util.function.BiFunction;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
@@ -231,49 +230,45 @@ public class IndexCatESDAO extends BaseESDAO {
         return indexCatCellList;
     }
     
-    public Result<List<IndexCatCellDTO>> syncGetSegmentsIndexList(String cluster, Collection<String> indexList) {
+    public List<IndexCatCellDTO> syncGetSegmentsIndexList(String cluster, Collection<String> indexList)
+            throws ESOperateException {
         ESClient esClient = esOpClient.getESClient(cluster);
         if (esClient == null) {
             LOGGER.error("class={}||method=syncGetSegmentsIndexList||clusterName={}||errMsg=esClient is null",
-                    getClass().getSimpleName(),cluster);
-             return Result.buildFail("集群不存在");
+                    getClass().getSimpleName(), cluster);
+            throw new NullPointerException(cluster);
         }
         if (CollectionUtils.isEmpty(indexList)) {
-            return Result.buildFail("索引不存在");
+            return Collections.emptyList();
         }
         String uri = String.format("/%s%s", String.join(",", indexList), SEGMENTS);
         DirectRequest directRequest = new DirectRequest(HttpMethod.GET.name(), uri);
         Predicate<DirectResponse> directRequestPredicate = directResponse -> Objects.isNull(directResponse)
                                                                              || RestStatus.OK
                                                                                 != directResponse.getRestStatus();
-        BiFunction<Long, TimeUnit, DirectResponse> directRequestBiFunction = (timeout, unit) -> {
+        BiFunctionWithESOperateException<Long, TimeUnit, DirectResponse> directRequestBiFunction = (timeout, unit) -> {
             try {
                 return esClient.direct(directRequest).actionGet(timeout, unit);
             } catch (Exception e) {
+                ParsingExceptionUtils.abnormalTermination(e);
                 LOGGER.error("class=ESIndexDAO||cluster={}||method=syncGetSegmentsIndexList", cluster, e);
                 return null;
             }
             
         };
     
-        DirectResponse response = null;
-        try {
-            response = ESOpTimeoutRetry.esRetryExecute("syncGetSegmentsIndexList", 3,
-                    () -> directRequestBiFunction.apply(Long.valueOf(ES_OPERATE_TIMEOUT), TimeUnit.SECONDS),
-                    directRequestPredicate
-        
-            );
-        } catch (ESOperateException e) {
-            LOGGER.error("class={}||cluster={}||method=syncGetSegmentsIndexList",getClass().getSimpleName(), cluster,
-                    e);
-        }
+        DirectResponse response = ESOpTimeoutRetry.esRetryExecute("syncGetSegmentsIndexList", 3,
+                () -> directRequestBiFunction.apply(Long.valueOf(ES_OPERATE_TIMEOUT), TimeUnit.SECONDS),
+                directRequestPredicate
     
-        List<IndexCatCellDTO> indexCatCellDTOS = Optional.ofNullable(response)
-                .filter(r -> RestStatus.OK == r.getRestStatus()).map(DirectResponse::getResponseContent)
-                .map(JSON::parseObject).map(json -> json.getJSONObject(INDICES)).map(i->buildIndexCatCellDTOList(i,cluster))
-                
+        );
+        
+    
+        return Optional.ofNullable(response).filter(r -> RestStatus.OK == r.getRestStatus())
+                .map(DirectResponse::getResponseContent).map(JSON::parseObject).map(json -> json.getJSONObject(INDICES))
+                .map(i -> buildIndexCatCellDTOList(i, cluster))
+            
                 .orElse(Lists.newArrayList());
-        return Result.buildSucc(indexCatCellDTOS);
     }
     
     public List<String> syncGetIndexListByProjectIdAndClusterLogic(Integer projectId,

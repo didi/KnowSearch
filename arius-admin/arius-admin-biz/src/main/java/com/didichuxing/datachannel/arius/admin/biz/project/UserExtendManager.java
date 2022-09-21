@@ -2,10 +2,10 @@ package com.didichuxing.datachannel.arius.admin.biz.project;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.UserExtendDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.UserQueryExtendDTO;
 import com.didiglobal.logi.security.common.PagingResult;
 import com.didiglobal.logi.security.common.dto.user.UserBriefQueryDTO;
 import com.didiglobal.logi.security.common.dto.user.UserDTO;
-import com.didiglobal.logi.security.common.dto.user.UserQueryDTO;
 import com.didiglobal.logi.security.common.entity.user.User;
 import com.didiglobal.logi.security.common.vo.role.AssignInfoVO;
 import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
@@ -43,7 +43,7 @@ public interface UserExtendManager {
      * @param queryDTO 条件信息
      * @return 用户信息list
      */
-    PagingResult<UserVO> getUserPage(UserQueryDTO queryDTO);
+    PagingResult<UserVO> getUserPage(UserQueryExtendDTO queryDTO);
 
     /**
      * 分页获取用户简要信息

@@ -190,10 +190,15 @@ public class ProjectV3Controller {
 
     @GetMapping("/unassigned")
     @ApiOperation(value = "获取项目未分配的用户列表", notes = "获取项目未分配的用户列表")
-    @ApiImplicitParam(name = "id", value = "项目id", dataType = "int", required = true)
-    public Result<List<UserBriefVO>> unassigned(@RequestParam("id") Integer id) {
+    @ApiImplicitParams({ @ApiImplicitParam(name = "id", value = "项目 id", dataType = "int", required = true),
+                         @ApiImplicitParam(name = "containsAdminRole", value = "是否包含管理员", dataType = "Boolean", required =
+                                 true)
+    
+    })
+    public Result<List<UserBriefVO>> unassigned(@RequestParam("id") Integer id,
+                                                @RequestParam(value = "containsAdminRole",required = false,defaultValue = "false") Boolean containsAdminRole) {
 
-        return projectExtendManager.unassignedByProjectId(id);
+        return projectExtendManager.unassignedByProjectId(id,containsAdminRole);
     }
 
     @GetMapping("/user/{userId}")

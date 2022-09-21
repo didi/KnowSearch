@@ -37,6 +37,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -403,13 +404,14 @@ public class ESIndexServiceImpl implements ESIndexService {
     /**
      * 校验索引数据是否一致
      *
-     * @param cluster1   集群1
-     * @param cluster2   集群2
-     * @param indexNames 索引名字
+     * @param cluster1        集群1
+     * @param cluster2        集群2
+     * @param indexNames      索引名字
+     * @param indexExpression
      * @return true/false
      */
     @Override
-    public boolean ensureDateSame(String cluster1, String cluster2, List<String> indexNames) throws ESOperateException {
+    public boolean ensureDateSame(String cluster1, String cluster2, List<String> indexNames, String indexExpression) throws ESOperateException {
         int retryCount = 1;
         while (retryCount-- > 0) {
             try {
@@ -419,7 +421,7 @@ public class ESIndexServiceImpl implements ESIndexService {
                 LOGGER.warn("class=ESIndexServiceImpl||method=ensureDateSame||msg=sleep interrupted", e);
             }
 
-            if (checkDateSame(cluster1, cluster2, indexNames)) {
+            if (checkDateSame(cluster1, cluster2, indexNames,indexExpression)) {
                 return true;
             }
         }
@@ -839,25 +841,24 @@ public class ESIndexServiceImpl implements ESIndexService {
         return Result.build(result.isSucc());
     }
 
-    private boolean checkDateSame(String cluster1, String cluster2, List<String> indexNames) throws ESOperateException {
-        Result<Void> refreshIndexResult1 = refreshIndex(cluster1, indexNames);
+    private boolean checkDateSame(String cluster1, String cluster2, List<String> indexNames, String indexExpression) throws ESOperateException {
+        //使用indexName*的方式进行索引关闭，避免索引数量过多，从而导致了执行时间过长
+        Result<Void> refreshIndexResult1 = refreshIndex(cluster1, Collections.singletonList(indexExpression));
         if (refreshIndexResult1.failed()) {
             LOGGER.warn("class=ESIndexServiceImpl||method=ensureDateSame||cluster={}||indexNames={}||msg=refresh fail",
                 cluster1, indexNames);
             return false;
         }
-        
-        Result<Void> refreshIndexResult2 = refreshIndex(cluster2, indexNames);
+        //使用indexName*的方式进行索引关闭，避免索引数量过多，从而导致了执行时间过长
+        Result<Void> refreshIndexResult2 = refreshIndex(cluster2, Collections.singletonList(indexExpression));
         if (refreshIndexResult2.failed()) {
             LOGGER.warn("class=ESIndexServiceImpl||method=ensureDateSame||cluster={}||indexNames={}||msg=refresh fail",
                 cluster2, indexNames);
             return false;
         }
     
-        Map<String, IndexNodes> indexStat1 = ESOpTimeoutRetry.esRetryExecute("checkDateSame-indexStat1", 3,
-                () -> syncBatchGetIndices(cluster1, indexNames), MapUtils::isNotEmpty);
-        Map<String, IndexNodes> indexStat2 = ESOpTimeoutRetry.esRetryExecute("checkDateSame-indexStat2", 3,
-                () -> syncBatchGetIndices(cluster2, indexNames), MapUtils::isNotEmpty);
+        Map<String, IndexNodes> indexStat1 = syncBatchGetIndices(cluster1, indexNames);
+        Map<String, IndexNodes> indexStat2 = syncBatchGetIndices(cluster2, indexNames);
 
         for (String index : indexNames) {
             IndexNodes stat1 = indexStat1.get(index);

@@ -51,8 +51,11 @@ TEMPLATE_MANAGEMENT("模板管理", 4),
      * 查询模板
      */
     QUERY_TEMPLATE("查询模板", 8),
-    
-    
+
+    /**
+     * DSL查询
+     */
+    DSL_QUERY("DSL查询",15),
     /**
      * 配置
      */
