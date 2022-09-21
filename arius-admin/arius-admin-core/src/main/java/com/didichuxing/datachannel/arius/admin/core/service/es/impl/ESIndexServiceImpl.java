@@ -90,9 +90,9 @@ public class ESIndexServiceImpl implements ESIndexService {
     }
     
     @Override
-    public boolean syncDeleteByExpression(String cluster, String indexName, int retryCount) throws ESOperateException {
+    public boolean syncDeleteByExpression(String cluster, String expression, int retryCount) throws ESOperateException {
         return ESOpTimeoutRetry.esRetryExecute("syncDeleteByExpression", retryCount,
-                () -> esIndexDAO.deleteByExpression(cluster, indexName));
+                () -> esIndexDAO.deleteByExpression(cluster, expression));
     }
     
     /**
