@@ -190,7 +190,7 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
         IndexTemplatePhy slavePhyTemplate = templateLogicWithPhysical.getSlavePhyTemplate();
         if (null != slavePhyTemplate) {
             //1.1删除DCDR链路
-            Result<Void> deleteDCDRResult = deleteDCDR(templateId, operator, projectId);
+            Result<Void> deleteDCDRResult = deleteDCDR(templateId, operator, projectId,false);
             if (deleteDCDRResult.failed()) {
                 return deleteDCDRResult;
             }
@@ -250,7 +250,7 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
         }
 
         //3. 创建DCDR链路
-        Result<Void> result = createPhyDCDR(createDCDRMeta(templateId), operator);
+        Result<Void> result = createPhyDCDR(createDCDRMeta(templateId,false), operator);
 
         //4. 记录操作
         if (result.success()) {
@@ -278,7 +278,7 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
      * @throws ESOperateException
      */
     @Override
-    public Result<Void> deleteDCDR(Integer templateId, String operator, Integer projectId) throws ESOperateException {
+    public Result<Void> deleteDCDR(Integer templateId, String operator, Integer projectId,boolean isDCDRForce) throws ESOperateException {
         final Result<Void> result = ProjectUtils.checkProjectCorrectly(i -> i, projectId, projectId);
         if (result.failed()) {
             return Result.buildFail(result.getMessage());
@@ -289,7 +289,8 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
             return checkResult;
         }
 
-        return deletePhyDCDR(createDCDRMeta(templateId), operator,projectId);
+        return deletePhyDCDR(createDCDRMeta(templateId,isDCDRForce), operator,
+                projectId);
     }
 
     /**
@@ -954,7 +955,7 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
      * @param templateId
      * @return {@link  TemplatePhysicalDCDRDTO}
      */
-    private TemplatePhysicalDCDRDTO createDCDRMeta(Integer templateId) {
+    private TemplatePhysicalDCDRDTO createDCDRMeta(Integer templateId,boolean isDCDRForce) {
         TemplatePhysicalDCDRDTO dcdrMeta = new TemplatePhysicalDCDRDTO();
 
         dcdrMeta.setPhysicalIds(new ArrayList<>());
@@ -975,13 +976,20 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
             }
 
             if (slave != null) {
-                dcdrMeta.getPhysicalIds().add(indexTemplatePhysicalInfo.getId());
-                dcdrMeta.getReplicaClusters().add(slave.getCluster());
+                if (isDCDRForce) {
+                    //如果是强切，则新主就是原从，且新从是旧主，然后进行切花
+                    dcdrMeta.getPhysicalIds().add(slave.getId());
+                    dcdrMeta.getReplicaClusters().add(indexTemplatePhysicalInfo.getCluster());
+                } else {
+                    dcdrMeta.getPhysicalIds().add(indexTemplatePhysicalInfo.getId());
+                    dcdrMeta.getReplicaClusters().add(slave.getCluster());
+                }
             }
         }
 
         return dcdrMeta;
     }
+
 
     private TemplatePhysicalDCDRDTO buildCreateDCDRParam(IndexTemplatePhy masterTemplate,
                                                          IndexTemplatePhy slaveTemplate) {
@@ -1834,7 +1842,7 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
             if (DCDRSwithTypeEnum.FORCE.getCode().equals(switchDetail.getSwitchType())) {
                 try {
                     Result<Void> deleteDCDRResult = deleteDCDR(switchDetail.getTemplateId().intValue(),
-                        AriusUser.SYSTEM.getDesc(), projectId);
+                        AriusUser.SYSTEM.getDesc(), projectId,true);
                     if (deleteDCDRResult.failed()) {
                         LOGGER.error(
                             "method=deleteDCDRChannelForSuccForceSwitch||taskId={}||msg=failed to deleteDCDR for force switch",
