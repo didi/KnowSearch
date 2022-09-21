@@ -88,7 +88,13 @@ public class ESIndexServiceImpl implements ESIndexService {
         return ESOpTimeoutRetry.esRetryExecute("deleteIndex", retryCount,
             () -> esIndexDAO.deleteIndex(cluster, indexName));
     }
-
+    
+    @Override
+    public boolean syncDeleteByExpression(String cluster, String indexName, int retryCount) throws ESOperateException {
+        return ESOpTimeoutRetry.esRetryExecute("syncDeleteByExpression", retryCount,
+                () -> esIndexDAO.deleteByExpression(cluster, indexName));
+    }
+    
     /**
      * 根据表达式删除索引
      * @param cluster    集群
