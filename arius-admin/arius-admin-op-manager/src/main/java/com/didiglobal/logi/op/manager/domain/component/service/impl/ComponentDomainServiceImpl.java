@@ -55,7 +55,7 @@ public class ComponentDomainServiceImpl implements ComponentDomainService {
 
     @Override
     public Result<Integer> submitInstallComponent(GeneralInstallComponent installComponent) {
-        //jiaoy
+        //校验是否有同名的任务
         List<Component> repeatNameList = componentRepository.listAllComponent().stream().filter(component ->
                 component.getName().equals(installComponent.getName())
         ).collect(Collectors.toList());
