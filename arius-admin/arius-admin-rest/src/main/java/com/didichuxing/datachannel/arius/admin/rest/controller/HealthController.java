@@ -24,5 +24,4 @@ public class HealthController {
     public Result<String> demo() {
         return Result.buildSuccWithMsg("let's go");
     }
-
 }
