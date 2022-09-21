@@ -75,7 +75,7 @@ public class ESUpdateClient {
     /**
      * 轮询获取esClient 时使用的下标
      */
-    private final AtomicInteger esClientCounter = new AtomicInteger(0);
+    private final AtomicInteger  esClientCounter   = new AtomicInteger(0);
     /**
      * 之前的http连接地址
      */
@@ -363,12 +363,20 @@ public class ESUpdateClient {
      * @return
      */
     private ESClient getUpdateEsClientFromPool() {
-        //这里获取当前轮询的次数，如果次数超过一定阈值则置为 0 （暂定阈值为client数量的10倍）
-        int flag = esClientCounter.accumulateAndGet(clientCount * 10, (left, right) ->
-                left > right ? esClientCounter.getAndSet(0) : esClientCounter.getAndIncrement());
-        //获取真正的esClient下标
-        int currentIndex =  flag % clientCount;
-        ESClient esClient = updateClientPool.get(currentIndex);
+        ESClient esClient = null;
+        try {
+            //这里获取当前轮询的次数，如果次数超过一定阈值则置为 0 （暂定阈值为client数量的10倍）
+            int flag = esClientCounter.getAndIncrement();
+            if (flag > clientCount * 5) {
+                esClientCounter.lazySet(0);
+            }
+            //获取真正的esClient下标
+            int currentIndex = flag % clientCount;
+            esClient = updateClientPool.get(currentIndex);
+        } catch (Exception e) {
+            LOGGER.error(
+                "class=ESUpdateClient||method=getUpdateEsClientFromPool||errMsg=fail to get es client from pool：", e);
+        }
         if (esClient == null) {
             LOGGER.error(
                 "class=ESUpdateClient||method=getUpdateEsClientFromPool||errMsg=fail to get es client from pool");
