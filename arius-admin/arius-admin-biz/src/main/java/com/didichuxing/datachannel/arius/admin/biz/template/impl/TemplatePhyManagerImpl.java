@@ -9,7 +9,6 @@ import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOpe
 import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.TEMPLATE_INDEX_INCLUDE_NODE_NAME;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplatePhyManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.precreate.PreCreateManager;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
@@ -72,6 +71,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -936,7 +936,7 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         }
         Map<String, String> settingsMap = getSettingsMap(param.getShard(), param.getRegionId(), param.getSettings());
         boolean ret;
-        if (null != mappings || null != param.getSettings()) {
+        if (null != mappings || MapUtils.isNotEmpty(settingsMap)) {
             ret = esTemplateService.syncCreate(settingsMap, param.getCluster(), param.getName(), logic.getExpression(),
                 mappings, 0);
         } else {
@@ -970,7 +970,7 @@ public class TemplatePhyManagerImpl implements TemplatePhyManager {
         }
 
         if (null != settings) {
-            settingsMap.putAll(AriusIndexTemplateSetting.flat(JSONObject.parseObject(settings)));
+            settingsMap.putAll(AriusIndexTemplateSetting.flat(JSON.parseObject(settings)));
         }
 
         return settingsMap;
