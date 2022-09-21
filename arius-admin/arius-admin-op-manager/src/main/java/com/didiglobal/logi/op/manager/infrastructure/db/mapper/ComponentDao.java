@@ -1,8 +1,6 @@
 package com.didiglobal.logi.op.manager.infrastructure.db.mapper;
 
-import com.didiglobal.logi.op.manager.domain.component.entity.Component;
 import com.didiglobal.logi.op.manager.infrastructure.db.ComponentPO;
-import com.didiglobal.logi.op.manager.infrastructure.db.ScriptPO;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 

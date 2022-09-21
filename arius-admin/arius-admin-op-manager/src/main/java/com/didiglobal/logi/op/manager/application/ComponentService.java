@@ -3,8 +3,6 @@ package com.didiglobal.logi.op.manager.application;
 import com.didiglobal.logi.op.manager.domain.component.entity.Component;
 import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentGroupConfig;
 import com.didiglobal.logi.op.manager.domain.component.service.ComponentDomainService;
-import com.didiglobal.logi.op.manager.domain.script.entity.Script;
-import com.didiglobal.logi.op.manager.domain.script.service.impl.ScriptDomainService;
 import com.didiglobal.logi.op.manager.domain.task.entity.Task;
 import com.didiglobal.logi.op.manager.domain.task.service.TaskDomainService;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;

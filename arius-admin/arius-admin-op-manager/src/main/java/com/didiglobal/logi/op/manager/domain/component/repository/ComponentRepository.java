@@ -1,7 +1,6 @@
 package com.didiglobal.logi.op.manager.domain.component.repository;
 
 import com.didiglobal.logi.op.manager.domain.component.entity.Component;
-import com.didiglobal.logi.op.manager.domain.script.entity.Script;
 
 import java.util.List;
 

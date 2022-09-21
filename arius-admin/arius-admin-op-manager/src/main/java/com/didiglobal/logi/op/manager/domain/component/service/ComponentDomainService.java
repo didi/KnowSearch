@@ -2,7 +2,6 @@ package com.didiglobal.logi.op.manager.domain.component.service;
 
 import com.didiglobal.logi.op.manager.domain.component.entity.Component;
 import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentGroupConfig;
-import com.didiglobal.logi.op.manager.domain.script.entity.Script;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.*;
 
