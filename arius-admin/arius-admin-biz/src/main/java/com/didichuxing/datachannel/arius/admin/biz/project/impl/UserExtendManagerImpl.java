@@ -79,6 +79,12 @@ public class UserExtendManagerImpl implements UserExtendManager {
      */
     @Override
     public PagingResult<UserVO> getUserPage(UserQueryDTO queryDTO) {
+        if(StringUtils.isNotBlank(queryDTO.getUserName())){
+            queryDTO.setUserName(CommonUtils.sqlFuzzyQueryTransfer(queryDTO.getUserName()));
+        }
+        if(StringUtils.isNotBlank(queryDTO.getRealName())){
+            queryDTO.setRealName(CommonUtils.sqlFuzzyQueryTransfer(queryDTO.getRealName()));
+        }
         PagingData<UserVO> userPage = userService.getUserPage(queryDTO);
         final List<UserVO> userList = userPage.getBizData();
         //提前获取一下，避免多次查库
