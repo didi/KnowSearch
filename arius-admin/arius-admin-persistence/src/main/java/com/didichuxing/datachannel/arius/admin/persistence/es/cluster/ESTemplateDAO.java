@@ -30,7 +30,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import java.util.function.BiFunction;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.rest.RestStatus;
 import org.springframework.stereotype.Repository;
@@ -153,16 +152,31 @@ public class ESTemplateDAO extends BaseESDAO {
      * @param templateName 模板名字
      * @return result
      */
-    public boolean delete(String cluster, String templateName) {
+    public boolean delete(String cluster, String templateName) throws ESOperateException {
         ESClient client = esOpClient.getESClient(cluster);
         if (client == null) {
             LOGGER.warn("class={}||method=delete||clusterName={}||templateName={}||errMsg=esClient is null",
                     getClass().getSimpleName(), cluster, templateName);
-            return false;
+            throw new NullESClientException(cluster);
         }
-        ESIndicesDeleteTemplateResponse response = client.admin().indices().prepareDeleteTemplate(templateName)
-            .execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
-        return response.getAcknowledged();
+        
+        
+        ESIndicesDeleteTemplateResponse response=null;
+        try {
+            ESIndicesGetTemplateRequest request = new ESIndicesGetTemplateRequest();
+            Map<String, TemplateConfig> templateConfigMap = client.admin().indices().getTemplate(request)
+                    .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS).getMultiTemplatesConfig().getTemplateConfigMap();
+            if (!templateConfigMap.containsKey(templateName)) {
+                return true;
+            }
+    
+            response = client.admin().indices().prepareDeleteTemplate(templateName).execute()
+                    .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            ParsingExceptionUtils.abnormalTermination(e);
+            LOGGER.warn("class=ESTemplateDAO||method=delete||cluster={}||name={}", cluster, templateName, e);
+        }
+        return Optional.ofNullable(response).map(ESIndicesDeleteTemplateResponse::getAcknowledged).orElse(false);
     }
 
     /**
@@ -231,7 +245,7 @@ public class ESTemplateDAO extends BaseESDAO {
                 ParsingExceptionUtils.abnormalTermination(e);
                 LOGGER.error("class=ESTemplateDAO||method=create||msg=put template fail||cluster={}||name={}", cluster,
                         name, e);
-                throw new ESOperateException(e.getMessage());
+                return null;
             }
         
         };
@@ -408,22 +422,24 @@ public class ESTemplateDAO extends BaseESDAO {
         return response.getMultiTemplatesConfig();
     }
     
-    protected ESIndicesGetTemplateResponse getESIndicesGetTemplateResponse(String clusterName, String templateName) {
+    protected ESIndicesGetTemplateResponse getESIndicesGetTemplateResponse(String clusterName, String templateName)
+            throws ESOperateException {
         ESClient esClient = esOpClient.getESClient(clusterName);
     
         if (esClient == null) {
             LOGGER.error("class={}||method=delete||clusterName={}||templateName={}||errMsg=esClient is null",
                     getClass().getSimpleName(), clusterName, templateName);
-            return null;
+            throw new NullESClientException(clusterName);
         }
         ESIndicesGetTemplateRequest request = new ESIndicesGetTemplateRequest();
         request.setTemplates(templateName);
     
-        BiFunction<Long, TimeUnit, ESIndicesGetTemplateResponse> responseBiFunction = (time, unit) -> {
+        BiFunctionWithESOperateException<Long, TimeUnit, ESIndicesGetTemplateResponse> responseBiFunction = (time, unit) -> {
             try {
                 return esClient.admin().indices().getTemplate(request).actionGet(time, unit);
             
             } catch (Exception e) {
+                ParsingExceptionUtils.abnormalTermination(e);
                 LOGGER.warn(
                         "class=ESTemplateDAO||method=getTemplates||get templates fail||clusterName={}||templateName={}||msg={}",
                         clusterName, templateName, e.getMessage(), e);
@@ -467,7 +483,7 @@ public class ESTemplateDAO extends BaseESDAO {
             return response.getAcknowledged();
         } catch (Exception e) {
             ParsingExceptionUtils.abnormalTermination(e);
-            throw new ESOperateException(e.getMessage(), e);
+            return false;
         }
        
     }

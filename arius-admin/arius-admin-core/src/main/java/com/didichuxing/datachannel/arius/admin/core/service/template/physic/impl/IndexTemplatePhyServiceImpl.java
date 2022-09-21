@@ -208,9 +208,10 @@ public class IndexTemplatePhyServiceImpl implements IndexTemplatePhyService {
         if (succ) {
             // 删除集群中的模板
             try {
-                boolean syncDelete = esTemplateService.syncDelete(oldPO.getCluster(), oldPO.getName(), 1);
-                if (syncDelete) {
-                    esIndexService.syncDeleteByExpression(oldPO.getCluster(), oldPO.getExpression(), 3);
+                if (esIndexService.syncDeleteByExpression(oldPO.getCluster(), oldPO.getExpression(), 3)
+                    && esTemplateService.syncDelete(oldPO.getCluster(), oldPO.getName(), 1)) {
+                    throw new ESOperateException(
+                            String.format("删除集群【%s】中物理模板【%s】失败！", oldPO.getCluster(), oldPO.getName()));
                 }
             } catch (ESOperateException e) {
                 String msg = e.getMessage();
