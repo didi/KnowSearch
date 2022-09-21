@@ -71,7 +71,7 @@ public class DeleteDirtyDCDRLinksRandomTask implements Job {
                     try {
                         Result<Void> deleteDcdrResult = templateDcdrManager.deleteDCDR(
                             switchDetail.getTemplateId().intValue(), AriusUser.SYSTEM.getDesc(),
-                            AuthConstant.SUPER_PROJECT_ID);
+                            AuthConstant.SUPER_PROJECT_ID,true);
 
                         if (deleteDcdrResult.failed()) {
                             LOGGER.error("class=DeleteDirtyDCDRLinksRandomTask||templateId={}||method=execute||msg={}",

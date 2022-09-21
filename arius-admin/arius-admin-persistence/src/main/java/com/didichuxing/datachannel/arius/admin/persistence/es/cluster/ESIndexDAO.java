@@ -411,7 +411,7 @@ public class ESIndexDAO extends BaseESDAO {
     public Map<String, IndexNodes> getIndexStatsWithShards(String cluster, String expression)throws ESOperateException {
         ESClient client = fetchESClientByCluster(cluster);
         if (client == null) {
-            return null;
+            throw new NullESClientException(cluster);
         }
         ESIndicesStatsResponse response = null;
         try {
