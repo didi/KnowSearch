@@ -2,7 +2,7 @@ package com.didichuxing.datachannel.arius.admin.core.service.template.dcdr;
 
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didiglobal.logi.elasticsearch.client.request.dcdr.DCDRTemplate;
-import java.util.Set;
+import java.util.List;
 
 /**
  * esdcdrservice
@@ -46,7 +46,7 @@ public interface ESDCDRService {
      * @param tryTimes       重试次数
      * @return boolean
      */
-    boolean delete(String methodName, String cluster, String replicaCluster, Set<String> indices, int tryTimes)
+    boolean delete(String methodName, String cluster, String replicaCluster, List<String> indices, int tryTimes)
             throws ESOperateException;
     
     /**

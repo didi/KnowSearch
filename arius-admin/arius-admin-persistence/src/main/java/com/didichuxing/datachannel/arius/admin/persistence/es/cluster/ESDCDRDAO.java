@@ -76,25 +76,28 @@ public class ESDCDRDAO extends BaseESDAO {
      * @param name 名字
      * @return true/false
      */
-    public boolean deleteAutoReplication(String cluster, String name) {
-        try {
-            DCDRTemplate dcdrTemplate = getAutoReplication(cluster, name);
-            if (dcdrTemplate == null) {
-                return true;
-            }
-        } catch (Exception e) {
-            LOGGER.error("class={}||method=deleteAutoReplication||clusterName={}||name={}", getClass().getSimpleName(),
-                    cluster, name, e);
-            return false;
+    public boolean deleteAutoReplication(String cluster, String name) throws ESOperateException {
+        DCDRTemplate dcdrTemplate = getAutoReplication(cluster, name);
+        if (dcdrTemplate == null) {
+            return true;
         }
        
 
         ESClient client = esOpClient.getESClient(cluster);
         ESDeleteDCDRTemplateRequest request = new ESDeleteDCDRTemplateRequest();
         request.setName(name);
-        ESDeleteDCDRTemplateResponse response = client.admin().indices().deleteDCDRTemplate(request)
-            .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
-        return response.getAcknowledged();
+        ESDeleteDCDRTemplateResponse response =null;
+    
+        try {
+        
+            response = client.admin().indices().deleteDCDRTemplate(request)
+                    .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            ParsingExceptionUtils.abnormalTermination(e);
+            LOGGER.warn("class={}||method=deleteReplication||clusterName={}||name={}", getClass().getSimpleName(),
+                    cluster, name, e);
+        }
+        return Optional.ofNullable(response).map(ESDeleteDCDRTemplateResponse::getAcknowledged).orElse(false);
     }
 
     /**
