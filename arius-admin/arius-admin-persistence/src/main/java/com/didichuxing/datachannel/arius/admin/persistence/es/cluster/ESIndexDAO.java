@@ -1,22 +1,32 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.cluster;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.COMMA;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_OPERATE_TIMEOUT;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.INDEX_BLOCKS_READ;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.INDEX_BLOCKS_WRITE;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.INDEX_SETTING_PRE;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.TEMPLATE_INDEX_INCLUDE_NODE_NAME;
+
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.index.setting.ESIndicesGetAllSettingRequest;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.exception.NullESClientException;
 import com.didichuxing.datachannel.arius.admin.common.function.BiFunctionWithESOperateException;
+import com.didichuxing.datachannel.arius.admin.common.function.FunctionWithESOperateException;
+import com.didichuxing.datachannel.arius.admin.common.util.BatchProcessor;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ParsingExceptionUtils;
-import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpTimeoutRetry;
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
 import com.didiglobal.logi.elasticsearch.client.ESClient;
 import com.didiglobal.logi.elasticsearch.client.gateway.direct.DirectRequest;
 import com.didiglobal.logi.elasticsearch.client.gateway.direct.DirectResponse;
 import com.didiglobal.logi.elasticsearch.client.model.Client;
 import com.didiglobal.logi.elasticsearch.client.model.exception.ESAlreadyExistsException;
+import com.didiglobal.logi.elasticsearch.client.model.exception.ESIndexNotFoundException;
 import com.didiglobal.logi.elasticsearch.client.model.type.ESVersion;
 import com.didiglobal.logi.elasticsearch.client.request.index.exists.ESIndicesExistsRequest;
 import com.didiglobal.logi.elasticsearch.client.request.index.getindex.ESIndicesGetIndexRequest;
@@ -49,21 +59,23 @@ import com.didiglobal.logi.elasticsearch.client.response.setting.index.IndexConf
 import com.didiglobal.logi.elasticsearch.client.response.setting.index.MultiIndexsConfig;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.function.BiFunction;
+import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.rest.RestStatus;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Repository;
-
-import javax.annotation.Nullable;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-import java.util.function.BiFunction;
-import java.util.stream.Collectors;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.COMMA;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.*;
 
 /**
  * @author d06679
@@ -77,7 +89,10 @@ public class ESIndexDAO extends BaseESDAO {
     public static final String ONLY_EXPUNGE_DELETES = "only_expunge_deletes";
     public static final String ROLLOVER_API         = "/_rollover";
     public static final  String ALIAS_API              = "/%s/_alias";
-    
+    public static final String CAT_INDIES = "/_cat/indices/%s?v=true&format=json&filter_path=index&ignore_unavailable=true";
+    public static final String INDEX = "index";
+    public static final String DELETE_INDEX = "%s?ignore_unavailable=true";
+    public static final String ACKNOWLEDGED = "acknowledged";
     /**
      * 创建索引
      * @param cluster 集群
@@ -306,6 +321,73 @@ public class ESIndexDAO extends BaseESDAO {
             .actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
         return response.getAcknowledged();
     }
+    
+    /**
+     * > 按表达式删除索引
+     *
+     * @param cluster 集群名称，与配置文件中的集群名称一致。
+     * @param expression 索引名称或索引名称表达式。
+     * @return boolean
+     */
+    public boolean deleteByExpression(String cluster, String expression) throws ESOperateException {
+        ESClient client = fetchESClientByCluster(cluster);
+        if (client == null) {
+            throw new NullESClientException(cluster);
+        }
+        try {
+            DirectRequest directRequest = new DirectRequest("GET", String.format(CAT_INDIES, expression));
+            DirectResponse directResponse = client.direct(directRequest).actionGet(30, TimeUnit.SECONDS);
+            List<String> indexNameList = Optional.ofNullable(directResponse)
+                    .filter(response -> response.getRestStatus() == RestStatus.OK)
+                    .map(DirectResponse::getResponseContent).filter(StringUtils::isNotBlank).map(JSON::parseArray)
+                    .filter(json -> !json.isEmpty()).orElse(new JSONArray()).stream().filter(Objects::nonNull)
+                    .map(json -> ((JSONObject) json).getString(INDEX)).distinct().collect(Collectors.toList());
+
+            if (CollectionUtils.isEmpty(indexNameList)) {
+                return true;
+            }
+            FunctionWithESOperateException<List<String>, Boolean> deleteFunc = indexList -> {
+                try {
+                    DirectRequest directRequestDelete = new DirectRequest("DELETE",
+                            String.format(DELETE_INDEX, String.join(",", indexList)));
+                    DirectResponse directResponseDelete = client.direct(directRequestDelete)
+                            .actionGet(30, TimeUnit.SECONDS);
+                    return Optional.ofNullable(directResponseDelete)
+                            .filter(response -> response.getRestStatus() == RestStatus.OK)
+                            .map(DirectResponse::getResponseContent).map(JSON::parseObject)
+                            .map(json -> json.getBoolean(ACKNOWLEDGED)).orElse(false);
+                } catch (Exception e) {
+                    ParsingExceptionUtils.abnormalTermination(e);
+                
+                    LOGGER.warn("class={}||method=deleteByExpression||cluster={}||expression={}",
+                            getClass().getSimpleName(), cluster, String.join(",", indexList), e);
+                    return false;
+                }
+            
+            };
+    
+            BatchProcessor.BatchProcessResult<String, Boolean> result = new BatchProcessor<String, Boolean>().batchList(
+                    indexNameList).batchSize(30).processor(deleteFunc).succChecker(succ -> succ).process();
+    
+            Optional<Exception> first = result.getErrorMap().values().stream().findFirst();
+            if (first.isPresent()) {
+                throw new ESOperateException(first.get().getMessage());
+            }
+    
+            return result.getResultList().stream().allMatch(Boolean.TRUE::equals);
+        
+        } catch (Exception e) {
+            if (e instanceof ESIndexNotFoundException) {
+                return true;
+            }
+            ParsingExceptionUtils.abnormalTermination(e);
+        
+            LOGGER.warn("class={}||method=deleteByExpression||cluster={}||expression={}", getClass().getSimpleName(),
+                    cluster, expression, e);
+        }
+        return false;
+        
+    }
 
     /**
      * 根据索引模板名称获取物理集群所有分区索引
@@ -314,7 +396,7 @@ public class ESIndexDAO extends BaseESDAO {
      * @return
      */
     public List<CatIndexResult> catIndexByExpression(String cluster, String expression) {
-        List<CatIndexResult> indices =Lists.newArrayList();
+        List<CatIndexResult> indices = Lists.newArrayList();
         ESClient client = fetchESClientByCluster(cluster);
         if (client != null) {
             BiFunction<Long, TimeUnit, ESIndicesCatIndicesResponse> catIndicesResponseBiFunction = (timeout, unit) -> {
@@ -327,24 +409,11 @@ public class ESIndexDAO extends BaseESDAO {
                     return null;
                 }
             };
-            ESIndicesCatIndicesResponse esIndicesCatIndicesResponse = null;
-            try {
-                esIndicesCatIndicesResponse = ESOpTimeoutRetry.esRetryExecute("syncGetSegmentsIndexList",
-                        3, () -> catIndicesResponseBiFunction.apply(Long.valueOf(ES_OPERATE_TIMEOUT), TimeUnit.SECONDS),
-                        Objects::isNull
-        
-                );
-            } catch (ESOperateException e) {
-                LOGGER.error("class={}||cluster={}||method=catIndexByExpression", getClass().getSimpleName(), cluster,
-                        e);
+            ESIndicesCatIndicesResponse esIndicesCatIndicesResponse =
+                    catIndicesResponseBiFunction.apply(Long.valueOf(ES_OPERATE_TIMEOUT), TimeUnit.SECONDS);
+            Optional.ofNullable(esIndicesCatIndicesResponse).map(ESIndicesCatIndicesResponse::getCatIndexResults).ifPresent(indices::addAll);
         }
-            Optional.ofNullable(esIndicesCatIndicesResponse)
-                    .map(ESIndicesCatIndicesResponse::getCatIndexResults).ifPresent(indices::addAll);
-        
-        }
-
-
-        return indices;
+         return indices;
     }
 
     /**
@@ -480,15 +549,7 @@ public class ESIndexDAO extends BaseESDAO {
                 return null;
             }
         };
-        ESIndicesGetAliasResponse response =null;
-        try {
-            response = ESOpTimeoutRetry.esRetryExecute("getAliasesByIndices", 3,
-                    () -> responseBiFunction.apply(Long.valueOf(ES_OPERATE_TIMEOUT), TimeUnit.SECONDS), Objects::isNull
-        
-            );
-        } catch (ESOperateException e) {
-            LOGGER.error("class={}||cluster={}||method=catIndexByExpression", getClass().getSimpleName(), cluster, e);
-        }
+        ESIndicesGetAliasResponse response =responseBiFunction.apply(Long.valueOf(ES_OPERATE_TIMEOUT),TimeUnit.SECONDS);
         
         
         
@@ -505,7 +566,7 @@ public class ESIndexDAO extends BaseESDAO {
     public boolean deleteByQuery(String cluster, String delIndices, String delQueryDsl) throws ESOperateException {
         ESClient client = fetchESClientByCluster(cluster);
         if (client == null) {
-            throw new ESOperateException("cannot fetch es client for cluster: " + cluster);
+            throw new NullESClientException( cluster);
         }
 
         ESIndicesDeleteByQueryResponse response = client.admin().indices().prepareDeleteByQuery().setIndex(delIndices)

@@ -55,6 +55,14 @@ public interface ESIndexService {
      * @throws ESOperateException
      */
     boolean syncDelIndex(String cluster, String indexName, int retryCount) throws ESOperateException;
+    /**
+     * 删除索引中的所有文档
+     *
+     * @param cluster ES集群的集群名称。
+     * @param expression 要删除的索引的名称。
+     * @param retryCount 重试次数，默认3次
+     */
+    boolean syncDeleteByExpression(String cluster, String expression, int retryCount) throws ESOperateException;
 
     /**
      * 根据表达式删除索引
