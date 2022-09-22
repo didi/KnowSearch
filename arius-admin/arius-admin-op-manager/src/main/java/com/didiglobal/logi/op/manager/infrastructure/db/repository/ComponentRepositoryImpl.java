@@ -48,6 +48,12 @@ public class ComponentRepositoryImpl implements ComponentRepository {
     }
 
     @Override
+    public List<Component> queryComponent(Component component) {
+        ComponentPO componentPO = ComponentConverter.convertComponentDO2PO(component);
+        return ComponentConverter.convertComponentPO2DOList(componentDao.queryComponent(componentPO));
+    }
+
+    @Override
     public List<Component> getComponentByPackageId(int packageId) {
         return ComponentConverter.convertComponentPO2DOList(componentDao.getByPackageId(packageId));
     }

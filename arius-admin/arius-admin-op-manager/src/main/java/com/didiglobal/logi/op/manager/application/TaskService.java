@@ -3,6 +3,7 @@ package com.didiglobal.logi.op.manager.application;
 import com.didiglobal.logi.op.manager.domain.component.service.ComponentDomainService;
 import com.didiglobal.logi.op.manager.domain.packages.service.PackageDomainService;
 import com.didiglobal.logi.op.manager.domain.task.entity.Task;
+import com.didiglobal.logi.op.manager.domain.task.entity.value.TaskDetail;
 import com.didiglobal.logi.op.manager.domain.task.service.TaskDomainService;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 import com.didiglobal.logi.op.manager.infrastructure.common.ResultCode;
@@ -17,6 +18,8 @@ import com.didiglobal.logi.op.manager.infrastructure.util.ConvertUtil;
 import com.google.common.base.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /**
  * @author didi
@@ -157,4 +160,17 @@ public class TaskService {
         return taskLogResult;
     }
 
+    /**
+     * 根据任务id获取任务详情
+     *
+     * @param taskId   任务id
+     * @return Result<List<TaskDetail>>
+     */
+    public Result<List<TaskDetail>> getTaskDetail(Integer taskId) {
+        if (null == taskId) {
+            return Result.fail(ResultCode.PARAM_ERROR.getCode(), "taskId为null");
+        }
+        Result<List<TaskDetail>> taskDetailListResult = taskDomainService.listTaskDetailByTaskId(taskId);
+        return taskDetailListResult;
+    }
 }

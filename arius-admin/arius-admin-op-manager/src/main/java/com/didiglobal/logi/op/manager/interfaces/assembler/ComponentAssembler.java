@@ -2,13 +2,18 @@ package com.didiglobal.logi.op.manager.interfaces.assembler;
 
 import com.alibaba.fastjson.JSON;
 import com.didiglobal.logi.op.manager.domain.component.entity.Component;
+import com.didiglobal.logi.op.manager.domain.script.entity.Script;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 import com.didiglobal.logi.op.manager.infrastructure.common.ResultCode;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.*;
 import com.didiglobal.logi.op.manager.infrastructure.util.ConvertUtil;
 import com.didiglobal.logi.op.manager.interfaces.dto.component.ComponentDTO;
 import com.didiglobal.logi.op.manager.interfaces.dto.general.*;
+import com.didiglobal.logi.op.manager.interfaces.vo.ComponentVO;
 import com.didiglobal.logi.op.manager.interfaces.vo.GeneralGroupConfigHostVO;
+import com.didiglobal.logi.op.manager.interfaces.vo.ScriptVO;
+
+import java.util.List;
 
 /**
  * @author didi
@@ -18,6 +23,10 @@ public class ComponentAssembler {
 
     public static Component toDO(ComponentDTO dto) {
         return ConvertUtil.obj2Obj(dto, Component.class);
+    }
+
+    public static List<ComponentVO> toVOList(List<Component> componentList) {
+        return ConvertUtil.list2List(componentList, ComponentVO.class);
     }
 
     public static GeneralInstallComponent toInstallComponent(GeneraInstallComponentDTO dto) {

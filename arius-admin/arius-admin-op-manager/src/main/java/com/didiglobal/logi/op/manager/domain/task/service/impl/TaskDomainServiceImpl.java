@@ -265,6 +265,12 @@ public class TaskDomainServiceImpl implements TaskDomainService {
     }
 
     @Override
+    public Result<List<TaskDetail>> listTaskDetailByTaskId(int taskId) {
+        List<TaskDetail> taskDetailList = taskDetailRepository.listTaskDetailByTaskId(taskId);
+        return Result.success(taskDetailList);
+    }
+
+    @Override
     public Result<GeneralGroupConfig> getConfig(Task task, String groupName) {
         GeneralBaseOperationComponent baseOperationComponent = ConvertUtil.str2ObjByJson(task.getContent(), GeneralBaseOperationComponent.class);
         for (GeneralGroupConfig config : baseOperationComponent.getGroupConfigList()) {

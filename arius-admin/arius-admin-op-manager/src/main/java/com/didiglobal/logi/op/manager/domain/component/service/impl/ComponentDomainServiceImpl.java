@@ -172,6 +172,11 @@ public class ComponentDomainServiceImpl implements ComponentDomainService {
         return Result.success(componentList);
     }
 
+    @Override
+    public Result<List<Component>> queryComponent(Component queryComponent) {
+        List<Component> componentList = componentRepository.queryComponent(queryComponent);
+        return Result.success(componentList);
+    }
     /**
      * 获取组件下，最新的分组配置信息
      *

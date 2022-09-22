@@ -52,6 +52,13 @@ public interface ComponentRepository {
     List<Component> listAllComponent();
 
     /**
+     * 根据条件获取组件list
+     * @param component
+     * @return List<Component>
+     */
+    List<Component> queryComponent(Component component);
+
+    /**
      * 根据package获取组件
      *
      * @param packageId

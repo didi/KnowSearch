@@ -1,16 +1,21 @@
 package com.didiglobal.logi.op.manager.interfaces.controller;
 
 import com.didiglobal.logi.op.manager.application.TaskService;
+import com.didiglobal.logi.op.manager.domain.task.entity.value.TaskDetail;
 import com.didiglobal.logi.op.manager.infrastructure.common.Constants;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
 import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralGroupConfig;
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.TaskLogEnum;
 import com.didiglobal.logi.op.manager.interfaces.assembler.ComponentAssembler;
+import com.didiglobal.logi.op.manager.interfaces.assembler.TaskDetailAssembler;
 import com.didiglobal.logi.op.manager.interfaces.vo.GeneralGroupConfigHostVO;
+import com.didiglobal.logi.op.manager.interfaces.vo.TaskDetailVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * @author didi
@@ -76,4 +81,15 @@ public class TaskController {
                                          @RequestParam(value = "hostname", required = true) String hostname) {
         return taskService.getTaskLog(taskId, hostname, TaskLogEnum.STDERR.getType());
     }
+
+    @GetMapping("/taskdetail")
+    @ApiOperation(value = "通过任务id获取任务详情")
+    public Result<List<TaskDetailVO>> getTaskDetail(@RequestParam(value = "taskId", required = true) Integer taskId) {
+        Result res = taskService.getTaskDetail(taskId);
+        if (res.isSuccess()) {
+            res.setData(TaskDetailAssembler.toVOList((List<TaskDetail>) res.getData()));
+        }
+        return res;
+    }
 }
+

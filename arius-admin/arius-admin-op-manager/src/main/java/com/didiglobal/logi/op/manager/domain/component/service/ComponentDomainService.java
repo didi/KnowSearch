@@ -129,10 +129,18 @@ public interface ComponentDomainService {
     /**
      * 获取所有的component
      *
-     * @param null
+     * @param
      * @return 组件列表
      */
     Result<List<Component>> listComponentWithAll();
+
+    /**
+     * 通过传入的组件参数进行id查询以及名字和描述模糊匹配查询获取组件
+     *
+     * @param component 组件实体
+     * @return 组件列表
+     */
+    Result<List<Component>> queryComponent(Component component);
 
     /**
      * 是否包含对该package依赖的组件

@@ -1,6 +1,7 @@
 package com.didiglobal.logi.op.manager.interfaces.controller;
 
 import com.didiglobal.logi.op.manager.application.ComponentService;
+import com.didiglobal.logi.op.manager.domain.component.entity.Component;
 import com.didiglobal.logi.op.manager.domain.component.entity.value.ComponentGroupConfig;
 import com.didiglobal.logi.op.manager.infrastructure.common.Constants;
 import com.didiglobal.logi.op.manager.infrastructure.common.Result;
@@ -8,8 +9,10 @@ import com.didiglobal.logi.op.manager.infrastructure.common.bean.GeneralGroupCon
 import com.didiglobal.logi.op.manager.infrastructure.common.enums.OperationEnum;
 import com.didiglobal.logi.op.manager.infrastructure.util.ConvertUtil;
 import com.didiglobal.logi.op.manager.interfaces.assembler.ComponentAssembler;
+import com.didiglobal.logi.op.manager.interfaces.dto.component.ComponentDTO;
 import com.didiglobal.logi.op.manager.interfaces.dto.component.ComponentHostReportDTO;
 import com.didiglobal.logi.op.manager.interfaces.dto.general.*;
+import com.didiglobal.logi.op.manager.interfaces.vo.ComponentVO;
 import com.didiglobal.logi.op.manager.interfaces.vo.GeneralGroupConfigHostVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -17,6 +20,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * @author didi
@@ -31,6 +36,16 @@ public class ComponentController {
     private ComponentService componentService;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PackageController.class);
+
+    @PostMapping("/query")
+    @ApiOperation(value = "获取组件详情列表")
+    public Result<List<ComponentVO>> listScript(@RequestBody ComponentDTO queryComponentDTO) {
+        Result res = componentService.listComponent(ComponentAssembler.toDO(queryComponentDTO));
+        if (res.isSuccess()) {
+            res.setData(ComponentAssembler.toVOList((List<Component>) res.getData()));
+        }
+        return res;
+    }
 
     @PostMapping("/install")
     @ApiOperation(value = "")
