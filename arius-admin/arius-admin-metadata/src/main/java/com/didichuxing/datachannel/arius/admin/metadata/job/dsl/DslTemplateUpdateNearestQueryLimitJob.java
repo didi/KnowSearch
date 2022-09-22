@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.JOB_SUCCESS;
 
@@ -48,6 +49,9 @@ public class DslTemplateUpdateNearestQueryLimitJob extends AbstractMetaDataJob {
         String ariusCreateTime = DateTimeUtil.getCurrentFormatDateTime();
         for (DslTemplatePO dslTemplatePO : dslTemplates) {
             dslTemplatePO.setAriusCreateTime(ariusCreateTime);
+            if (Objects.isNull(dslTemplatePO.getEnable())){
+                dslTemplatePO.setEnable(true);
+            }
         }
         boolean updateResult = dslTemplateESDAO.updateTemplates(dslTemplates);
 

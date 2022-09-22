@@ -263,8 +263,7 @@ public class AriusConfigConstant {
     /**
      * dashboard节点CPU利用率超阈值的[持续时间]默认值
      */
-    public static final String DASHBOARD_NODE_CPU_USED_PERCENT_THRESHOLD_TIME_DURATION_THRESHOLD_DEFAULT_VALUE = "{\"name\":\"node.cpu.used_percent_threshold_time_duration\":\"cpuUsedPercentThresholdTimeDuration\",\"unit\":\"m\",\"compare\":\">\",\"value\":5}";
-
+    public static final String DASHBOARD_NODE_CPU_USED_PERCENT_THRESHOLD_TIME_DURATION_THRESHOLD_DEFAULT_VALUE = "{\"name\":\"node.cpu.used_percent_threshold_time_duration\",\"metrics\":\"cpuUsedPercentThresholdTimeDuration\",\"unit\":\"m\",\"compare\":\">\",\"value\":5}";
     /**
      * dashboardCPU利用率红线默认值
      */

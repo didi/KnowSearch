@@ -27,6 +27,9 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.*;
+import static com.didichuxing.datachannel.arius.admin.common.util.AriusUnitUtil.SIZE;
+
 /**
  * Created by linyunan on 3/11/22
  * dashboard单个集群索引采集器
@@ -73,7 +76,7 @@ public class IndexDashBoardCollector extends BaseDashboardCollector {
 
         FUTURE_UTIL.runnableTask(() -> segmentsListRef.set(esShardService.syncGetSegments(cluster)))
                 //TODO 指标-shard和小shard是采集侧过滤的
-            .runnableTask(() -> bigAndSmallListTupleRef.set(esShardService.syncGetBigAndSmallShards(cluster)))
+            .runnableTask(() -> bigAndSmallListTupleRef.set(esShardService.syncGetBigAndSmallShards(cluster,getConfigBigShard(),getConfigSmallShard())))
             .runnableTask(() -> index2IndexConfigMapRef.set(batchGetIndexConfigMap(cluster, indexList)))
             .runnableTask(
                 () -> index2IndexingIndexIncrementMapRef.set(batchGetIndexingIndexIncrementMap(cluster, indexList)))
@@ -285,5 +288,21 @@ public class IndexDashBoardCollector extends BaseDashboardCollector {
     @Override
     public String getName() {
         return "IndexDashBoardCollector";
+    }
+
+    /**
+     * 获取配置的大shard列表
+     * @return
+     */
+    private long getConfigBigShard() {
+        return getConfigOrDefaultValue(INDEX_SHARD_BIG_THRESHOLD,DASHBOARD_INDEX_SHARD_BIG_THRESHOLD_DEFAULT_VALUE,SIZE);
+    }
+
+    /**
+     * 获取配置的小shard列表
+     * @return
+     */
+    private long getConfigSmallShard() {
+        return getConfigOrDefaultValue(INDEX_SHARD_SMALL_THRESHOLD,DASHBOARD_INDEX_SHARD_SMALL_THRESHOLD_DEFAULT_VALUE,SIZE);
     }
 }

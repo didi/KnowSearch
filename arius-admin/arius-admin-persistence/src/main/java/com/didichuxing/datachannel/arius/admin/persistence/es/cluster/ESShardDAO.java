@@ -171,7 +171,7 @@ public class ESShardDAO extends BaseESDAO {
      * @param clusterPhyName 物理集群名称
      * @return
      */
-    public String shardAssignment(String clusterPhyName) {
+    public String shardAssignment(String clusterPhyName) throws ESOperateException {
         ESClient client = esOpClient.getESClient(clusterPhyName);
         String result = null;
         if (Objects.isNull(client)) {
@@ -186,8 +186,9 @@ public class ESShardDAO extends BaseESDAO {
                 result = directResponse.getResponseContent();
             }
         } catch (Exception e) {
-            LOGGER.warn("class=ESClusterDAO||method=shardAssignment||cluster={}||mg=get es segments fail", clusterPhyName, e);
-            return null;
+            final String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
+            LOGGER.error("class=ESClusterDAO||method=shardAssignment||msg=get es segments faill||cluster={}", clusterPhyName,e);
+            throw new ESOperateException((StringUtils.isNotBlank(exception)?exception:"获取shard分配说明数据出错！"));
         }
         return result;
     }

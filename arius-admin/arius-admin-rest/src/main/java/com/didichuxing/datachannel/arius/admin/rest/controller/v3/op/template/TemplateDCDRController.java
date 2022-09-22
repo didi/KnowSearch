@@ -53,7 +53,7 @@ public class TemplateDCDRController {
                                    @PathVariable(value = "templateId") Integer templateId) throws AdminOperateException {
 
         return templateDCDRManager.deleteDCDR(templateId, HttpRequestUtil.getOperator(request),
-            HttpRequestUtil.getProjectId(request));
+            HttpRequestUtil.getProjectId(request),false);
     }
 
 }

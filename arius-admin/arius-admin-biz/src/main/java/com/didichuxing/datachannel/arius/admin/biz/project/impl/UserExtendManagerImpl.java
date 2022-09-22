@@ -5,10 +5,12 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.UserExtendDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.UserQueryExtendDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.UserExtendVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didiglobal.logi.security.common.PagingData;
@@ -81,14 +83,14 @@ public class UserExtendManagerImpl implements UserExtendManager {
      * @return 用户信息list
      */
     @Override
-    public PagingResult<UserVO> getUserPage(UserQueryExtendDTO queryDTO) {
-
-        PagingData<UserVO> userPage;
+    public PagingResult<UserExtendVO> getUserPage(UserQueryExtendDTO queryDTO) {
+        final List<UserBriefVO> userBriefListByAdmin = userService.getUserBriefListByRoleId(
+                AuthConstant.ADMIN_ROLE_ID);
+        PagingData<UserExtendVO> userPage;
         if (Boolean.FALSE.equals(queryDTO.getContainsAdminRole())) {
             final int page = queryDTO.getPage();
             final int pageSize = queryDTO.getSize();
-            final List<Integer> userBriefListWithAdminRole = userService.getUserBriefListByRoleId(
-                            AuthConstant.ADMIN_ROLE_ID).stream().map(UserBriefVO::getId).distinct()
+            final List<Integer> userBriefListWithAdminRole =userBriefListByAdmin.stream().map(UserBriefVO::getId).distinct()
                     .collect(Collectors.toList());
             // 获取全量的用户信息
             final int size = userService.getAllUserBriefList().size();
@@ -97,19 +99,23 @@ public class UserExtendManagerImpl implements UserExtendManager {
             final PagingData<UserVO> userPageAll = userService.getUserPage(queryDTO);
             final List<UserVO> userListAll = userPageAll.getBizData().parallelStream()
                     .filter(i -> !userBriefListWithAdminRole.contains(i.getId())).collect(Collectors.toList());
-            userPageAll.setBizData(userListAll);
-            userPageAll.setPagination(Pagination.builder().total(userListAll.size())
+           
+            final List<UserExtendVO> userExtendVOS = ConvertUtil.list2List(userListAll, UserExtendVO.class,userExtendVO -> userExtendVO.setUserListWithAdminRole(userBriefListByAdmin));
+            final Pagination pagination = Pagination.builder().total(userListAll.size())
                     .pages(new BigDecimal(userListAll.size()).divide(new BigDecimal(pageSize), 0, RoundingMode.UP)
                             .intValue()
             
-                    ).pageNo(page).pageSize(pageSize).build());
-            userPage=userPageAll;
+                    ).pageNo(page).pageSize(pageSize).build();
     
+            userPage=new PagingData<>(userExtendVOS,pagination);
         } else {
-            userPage = userService.getUserPage(queryDTO);
+            final PagingData<UserVO> userPageUserVo = userService.getUserPage(queryDTO);
+             final List<UserExtendVO> userExtendVOS = ConvertUtil.list2List(userPageUserVo.getBizData(),
+                     UserExtendVO.class,userExtendVO -> userExtendVO.setUserListWithAdminRole(userBriefListByAdmin));
+            userPage = new PagingData<>(userExtendVOS,userPageUserVo.getPagination()) ;
             
         }
-        final List<UserVO> userList = userPage.getBizData();
+        final List<UserExtendVO> userList = userPage.getBizData();
         //提前获取一下，避免多次查库
         final List<ProjectBriefVO> projectBriefList = projectService.getProjectBriefList();
         if (CollectionUtils.isNotEmpty(userList)) {

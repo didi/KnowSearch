@@ -29,8 +29,6 @@ public class AriusUnitUtil {
                 value = SizeUtil.getUnitSize(value + unit.toLowerCase());
                 break;
             case "common":
-                value = value;
-                break;
             default:
                 break;
         }
