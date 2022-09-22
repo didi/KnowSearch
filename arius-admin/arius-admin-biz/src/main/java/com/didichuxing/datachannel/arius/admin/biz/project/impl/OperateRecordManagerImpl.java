@@ -142,7 +142,7 @@ public class OperateRecordManagerImpl implements OperateRecordManager {
         if(CollectionUtils.isEmpty(operateRecordVOList)){
             //只有拥有管理员权限的才能被赋予默认命令
             final List<UserBriefVO> userBriefListWithAdminRole = userService.getUserBriefListByRoleId(AuthConstant.ADMIN_ROLE_ID);
-            if(userBriefListWithAdminRole.contains(operator)){
+            if(userBriefListWithAdminRole.stream().map(UserBriefVO::getUserName).anyMatch(userName->operator.equals(userName))){
                 //查询平台配置中的超级应用的默认命令
                 List<String> superAppDefaultCommandList = new ArrayList<>(ariusConfigInfoService.stringSettingSplit2Set(AriusConfigConstant.ARIUS_COMMON_GROUP
                         , AriusConfigConstant.SUPER_APP_DEFALT_DSL_COMMAND,
