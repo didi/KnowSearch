@@ -345,4 +345,20 @@ public interface ClusterPhyManager {
     Result<ClusterPhy> getClusterByName(String masterCluster);
     
     boolean ensureDCDRRemoteCluster(String cluster, String remoteCluster) throws ESOperateException;
+    
+    /**
+     * 它返回满足条件的总数。
+     *
+     * @param condition 查询的条件。
+     * @return 长
+     */
+    Long fuzzyClusterPhyHitByCondition(ClusterPhyConditionDTO condition);
+    
+    /**
+     * 按条件获取集群物理信息
+     *
+     * @param condition 查询的条件。
+     * @return 列表<ClusterPhy>
+     */
+    List<ClusterPhy> pagingGetClusterPhyByCondition(ClusterPhyConditionDTO condition);
 }

@@ -143,10 +143,11 @@ public interface ProjectExtendManager {
     /**
      * 未分配项目的用户列表
      *
-     * @param projectId projectId
+     * @param projectId         projectId
+     * @param containsAdminRole 是否包含管理员
      * @return {@code Result}
      */
-    Result<List<UserBriefVO>> unassignedByProjectId(Integer projectId);
+    Result<List<UserBriefVO>> unassignedByProjectId(Integer projectId, Boolean containsAdminRole);
 
     /**
      * 获取user下绑定的项目

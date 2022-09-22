@@ -621,14 +621,28 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
     /**
      * 未分配项目的用户列表
      *
-     * @param projectId projectId
+     * @param projectId         projectId
+     * @param containsAdminRole
      * @return {@code Result}
      */
     @Override
-    public Result<List<UserBriefVO>> unassignedByProjectId(Integer projectId) {
+    public Result<List<UserBriefVO>> unassignedByProjectId(Integer projectId, Boolean containsAdminRole) {
         final com.didiglobal.logi.security.common.Result<List<UserBriefVO>> listResult = projectService
             .unassignedByProjectId(projectId);
         if (listResult.successed()) {
+            //如果为false则不包含管理员角色的用户
+            if (Boolean.FALSE.equals(containsAdminRole)){
+                final List<Integer> userBriefListWithAdminRole =
+                userService.getUserBriefListByRoleId(AuthConstant.ADMIN_ROLE_ID)
+                        .stream()
+                        .map(UserBriefVO::getId).distinct().collect(Collectors.toList());
+                final List<UserBriefVO> userBriefVOList = listResult.getData().stream()
+                        .filter(i -> !userBriefListWithAdminRole.contains(i.getId()))
+                        .distinct().collect(Collectors.toList());
+                return Result.buildSucc(userBriefVOList);
+            }
+            
+            
             return Result.buildSucc(listResult.getData());
         } else {
             return Result.buildFail(listResult.getMessage());

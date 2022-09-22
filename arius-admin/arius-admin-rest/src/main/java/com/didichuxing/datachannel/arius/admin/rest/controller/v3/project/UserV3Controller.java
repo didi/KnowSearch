@@ -5,10 +5,10 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion
 import com.didichuxing.datachannel.arius.admin.biz.project.UserExtendManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.UserExtendDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.UserQueryExtendDTO;
 import com.didichuxing.datachannel.arius.admin.core.component.RoleTool;
 import com.didiglobal.logi.security.common.PagingResult;
 import com.didiglobal.logi.security.common.dto.user.UserDTO;
-import com.didiglobal.logi.security.common.dto.user.UserQueryDTO;
 import com.didiglobal.logi.security.common.vo.role.AssignInfoVO;
 import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
 import com.didiglobal.logi.security.common.vo.user.UserVO;
@@ -78,7 +78,7 @@ public class UserV3Controller {
 
     @PostMapping("/page")
     @ApiOperation(value = "查询用户列表", notes = "分页和条件查询")
-    public PagingResult<UserVO> page(@RequestBody UserQueryDTO queryDTO) {
+    public PagingResult<UserVO> page(@RequestBody UserQueryExtendDTO queryDTO) {
         return userManager.getUserPage(queryDTO);
     }
 
