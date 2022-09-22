@@ -50,7 +50,7 @@ public class ComponentVO {
     /**
      * 值对象，关联group配置
      */
-    private List<ComponentGroupConfig> groupConfigList;
+    private List<ComponentGroupConfigVO> groupConfigList;
 
     /**
      * 关联外部任务
@@ -65,7 +65,7 @@ public class ComponentVO {
     /**
      * 值对象，关联host
      */
-    private List<ComponentHost> hostList;
+    private List<ComponentHostVO> hostList;
 
     /**
      * 依赖配置组件id
