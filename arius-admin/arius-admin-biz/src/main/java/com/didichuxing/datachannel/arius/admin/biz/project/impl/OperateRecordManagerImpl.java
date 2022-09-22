@@ -9,7 +9,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.operaterecord.Oper
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 import com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.SortConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
@@ -24,6 +23,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import com.didiglobal.logi.security.service.ProjectService;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -39,9 +39,8 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConst
 @Component
 public class OperateRecordManagerImpl implements OperateRecordManager {
     private static final ILog    LOGGER = LogFactory.getLog(OperateRecordManagerImpl.class);
-    private static final Integer    DEFAULT_RECORD_ID = -1;
     private static final Long    FROM = 0L;
-    private static final String    DEFAULT_SORT_TERM = "update_time";
+    private static final Long    SIZE = 1L;
     @Autowired
     private HandleFactory        handleFactory;
     @Autowired
@@ -128,32 +127,23 @@ public class OperateRecordManagerImpl implements OperateRecordManager {
      * @return
      */
     @Override
-    public Result<List<OperateRecordVO>> listSenseOperateRecord(OperateRecordDTO queryDTO, String operator, Integer projectId) {
-        //查询平台配置中的保存操作记录条数
-        Integer saveRecordNum = ariusConfigInfoService.intSetting(AriusConfigConstant.ARIUS_COMMON_GROUP, AriusConfigConstant.OPERATE_RECORD_SAVE_NUM,
-                AriusConfigConstant.OPERATE_RECORD_SAVE_NUM_DEFAULT_VALUE);
-        //查询平台配置中的超级应用的默认命令
-        List<String> superAppDefaultCommandStringList = new ArrayList<>(ariusConfigInfoService.stringSettingSplit2Set(AriusConfigConstant.ARIUS_COMMON_GROUP
-                , AriusConfigConstant.SUPER_APP_DEFALT_DSL_COMMAND,
-                AriusConfigConstant.SUPER_APP_DEFALT_DSL_COMMAND_VALUE, COMMA));
+    public Result<List<String>> listSenseOperateRecord(OperateRecordDTO queryDTO, String operator, Integer projectId) {
         //组装查询条件
         buildCommonOperateRecordDTO(projectId, queryDTO, operator);
-        queryDTO.setSortTerm(DEFAULT_SORT_TERM);
-        queryDTO.setSortType(SortConstant.DESC);
         queryDTO.setFrom(FROM);
-        queryDTO.setSize(saveRecordNum.longValue());
+        queryDTO.setSize(SIZE);
         List<OperateRecordVO> operateRecordVOList = operateRecordService.queryCondition(queryDTO);
-        List<OperateRecordVO> superAppDefaultCommandList = superAppDefaultCommandStringList.stream().map(content -> {
-            OperateRecordVO operateRecordVO = new OperateRecordVO();
-            operateRecordVO.setId(DEFAULT_RECORD_ID);
-            operateRecordVO.setContent(content);
-            return operateRecordVO;
-        }).collect(Collectors.toList());
-        //默认取前30条，按更新时间降序排序
-        List<OperateRecordVO> operateRecordsList = operateRecordVOList.stream().sorted(Comparator.comparing(OperateRecordVO::getUpdateTime).reversed())
-                .collect(Collectors.toList());
-        operateRecordsList.addAll(superAppDefaultCommandList);
-        return Result.buildSucc(operateRecordsList);
+        List<String> operateRecordList = new ArrayList<>();
+        if(CollectionUtils.isEmpty(operateRecordVOList)){
+            //查询平台配置中的超级应用的默认命令
+            List<String> superAppDefaultCommandList = new ArrayList<>(ariusConfigInfoService.stringSettingSplit2Set(AriusConfigConstant.ARIUS_COMMON_GROUP
+                    , AriusConfigConstant.SUPER_APP_DEFALT_DSL_COMMAND,
+                    AriusConfigConstant.SUPER_APP_DEFALT_DSL_COMMAND_VALUE, COMMA));
+            operateRecordList.addAll(superAppDefaultCommandList);
+        }else{
+            operateRecordList = operateRecordVOList.stream().map(OperateRecordVO::getContent).collect(Collectors.toList());
+        }
+        return Result.buildSucc(operateRecordList);
     }
 
     @Override
@@ -161,8 +151,8 @@ public class OperateRecordManagerImpl implements OperateRecordManager {
         buildCommonOperateRecordDTO(projectId, operateRecordDTO, operator);
         Result<Integer> result = operateRecordService.updateOperateRecord(operateRecordDTO);
         if (result.failed()) {
-            LOGGER.warn("class=DslTemplateManagerImpl||method=updateConfigDslTemplateFields||errMsg={}",
-                    "用户查询模板字段配置信息更新出错");
+            LOGGER.warn("class=OperateRecordManagerImpl||method=updateSenseOperateRecord||errMsg={}",
+                    "用户DSL查询记录更新出错");
         }
         return result;
     }
@@ -182,5 +172,4 @@ public class OperateRecordManagerImpl implements OperateRecordManager {
         operateRecordDTO.setUserOperation(operator);
         operateRecordDTO.setProjectName(projectName);
     }
-
 }

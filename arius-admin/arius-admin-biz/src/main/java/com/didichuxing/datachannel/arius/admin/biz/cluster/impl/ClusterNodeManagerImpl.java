@@ -113,6 +113,25 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
     }
 
     @Override
+    public Result<Boolean> checkMultiNode2Region(List<ClusterRegionWithNodeInfoDTO> params, String operator, Integer projectId) {
+        final Result<Void> result = ProjectUtils.checkProjectCorrectly(i -> i, projectId, projectId);
+        if (result.failed()) {
+            return Result.buildFail(result.getMessage());
+        }
+        for(ClusterRegionWithNodeInfoDTO param : params){
+            Result<Boolean> checkRet = baseCheckParamValid(param,OperationEnum.ADD);
+            if (checkRet.failed()) {
+                return checkRet;
+            }
+
+            if (CollectionUtils.isEmpty(param.getBindingNodeIds())) {
+                return Result.buildFail(String.format("region名称[%s], errMsg=%s", param.getName(), "划分至该region的节点为空"));
+            }
+        }
+        return Result.buildSucc(true);
+    }
+
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public Result<List<Long>> createMultiNode2Region(List<ClusterRegionWithNodeInfoDTO> params, String operator,
                                                      Integer projectId) throws AdminOperateException {
@@ -286,7 +305,7 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
         }
         return Result.build(delete);
     }
-    
+
     /**
      * @param regionId
      * @return
