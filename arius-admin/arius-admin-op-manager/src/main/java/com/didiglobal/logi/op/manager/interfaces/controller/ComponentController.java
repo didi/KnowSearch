@@ -37,12 +37,6 @@ public class ComponentController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PackageController.class);
 
-    @GetMapping("/list")
-    @ApiOperation(value = "")
-    public Result<List<Component>> listResult() {
-        return componentService.listComponentWithAll();
-    }
-
     @PostMapping("/query")
     @ApiOperation(value = "获取组件详情列表")
     public Result<List<ComponentVO>> listScript(@RequestBody ComponentDTO queryComponentDTO) {

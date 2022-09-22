@@ -35,10 +35,6 @@ public class ComponentService {
     @Autowired
     private TaskDomainService taskDomainService;
 
-    public Result<List<Component>> listComponentWithAll() {
-            return componentDomainService.listComponentWithAll();
-    }
-
     /**
      * 根据条件获取所有的组件list
      * @param component 组件

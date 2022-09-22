@@ -176,39 +176,6 @@ public class ComponentDomainServiceImpl implements ComponentDomainService {
     @Override
     public Result<List<Component>> queryComponent(Component queryComponent) {
         List<Component> componentList = componentRepository.queryComponent(queryComponent);
-        List<ComponentHost> hosts = componentHostRepository.listComponentHost();
-        List<ComponentGroupConfig> configs = componentGroupConfigRepository.listGroupConfig();
-        Map<String, List<ComponentHost>> componentIdToHostMap = new HashMap<>(componentList.size());
-        Map<String, List<ComponentGroupConfig>> componentIdToGroupConfigMap = new HashMap<>(componentList.size());
-
-        //构建componentIdToHostMap
-        hosts.forEach(componentHost -> {
-            List<ComponentHost> hostList = componentIdToHostMap.get(componentHost.getComponentId().toString());
-            if (null == hostList) {
-                hostList = new ArrayList<>();
-                componentIdToHostMap.put(componentHost.getComponentId().toString(), hostList);
-            }
-            hostList.add(componentHost);
-        });
-
-        //构建componentIdToGroupConfigMap
-        configs.forEach(groupConfig -> {
-            List<ComponentGroupConfig> groupConfigList = componentIdToGroupConfigMap.get(groupConfig.getComponentId().toString());
-            if (null == groupConfigList) {
-                groupConfigList = new ArrayList<>();
-                componentIdToGroupConfigMap.put(groupConfig.getComponentId().toString(), groupConfigList);
-            }
-            groupConfigList.add(groupConfig);
-        });
-        //赋值汇总
-        componentList.forEach(component -> {
-            component.setHostList(componentIdToHostMap.get(component.getId().toString()));
-            if (null != componentIdToGroupConfigMap.get(component.getId().toString())) {
-                component.setGroupConfigList(getLatestGroupConfig(componentIdToGroupConfigMap.get(component.getId().toString())));
-            }
-
-        });
-
         return Result.success(componentList);
     }
     /**
