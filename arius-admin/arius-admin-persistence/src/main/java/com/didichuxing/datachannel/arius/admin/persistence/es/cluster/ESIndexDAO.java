@@ -20,7 +20,6 @@ import com.didichuxing.datachannel.arius.admin.common.util.BatchProcessor;
 import com.didichuxing.datachannel.arius.admin.common.util.EnvUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ParsingExceptionUtils;
-import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpTimeoutRetry;
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
 import com.didiglobal.logi.elasticsearch.client.ESClient;
 import com.didiglobal.logi.elasticsearch.client.gateway.direct.DirectRequest;
@@ -550,15 +549,7 @@ public class ESIndexDAO extends BaseESDAO {
                 return null;
             }
         };
-        ESIndicesGetAliasResponse response =null;
-        try {
-            response = ESOpTimeoutRetry.esRetryExecute("getAliasesByIndices", 3,
-                    () -> responseBiFunction.apply(Long.valueOf(ES_OPERATE_TIMEOUT), TimeUnit.SECONDS), Objects::isNull
-        
-            );
-        } catch (ESOperateException e) {
-            LOGGER.error("class={}||cluster={}||method=catIndexByExpression", getClass().getSimpleName(), cluster, e);
-        }
+        ESIndicesGetAliasResponse response =responseBiFunction.apply(Long.valueOf(ES_OPERATE_TIMEOUT),TimeUnit.SECONDS);
         
         
         
@@ -575,7 +566,7 @@ public class ESIndexDAO extends BaseESDAO {
     public boolean deleteByQuery(String cluster, String delIndices, String delQueryDsl) throws ESOperateException {
         ESClient client = fetchESClientByCluster(cluster);
         if (client == null) {
-            throw new ESOperateException("cannot fetch es client for cluster: " + cluster);
+            throw new NullESClientException( cluster);
         }
 
         ESIndicesDeleteByQueryResponse response = client.admin().indices().prepareDeleteByQuery().setIndex(delIndices)

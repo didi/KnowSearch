@@ -27,7 +27,6 @@ import com.didiglobal.logi.elasticsearch.client.response.setting.template.Templa
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.StringUtils;
@@ -338,7 +337,7 @@ public class ESTemplateDAO extends BaseESDAO {
                 "class=ESTemplateDAO||method=updateTemplate||update template fail||clusterName={}||templateName={}||esVersion={}||templateConfig={}||msg={}",
                 clusterName, templateName, esClient.getEsVersion(),
                 templateConfig.toJson(ESVersion.valueBy(esClient.getEsVersion())), e.getMessage(), e);
-            throw new ESOperateException(e.getMessage(),e);
+           
         }
 
         return response.getAcknowledged();
@@ -523,7 +522,7 @@ public class ESTemplateDAO extends BaseESDAO {
            
             LOGGER.warn("class={}||method=upsertSetting||cluster={}||name={}||errMsg=client is null ",
                     getClass().getSimpleName(), cluster, name);
-            return false;
+            throw new NullESClientException(cluster);
         }
 
         // 获取es中原来index template的配置
@@ -555,7 +554,10 @@ public class ESTemplateDAO extends BaseESDAO {
             return response.getAcknowledged();
         } catch (Exception e) {
             ParsingExceptionUtils.abnormalTermination(e);
-            throw new ESOperateException(e.getMessage(), e);
+            LOGGER.error(
+                "class=ESTemplateDAO||method=updateSettingCheckAllocationAndShard||cluster={}||name={}",
+                cluster, name,  e);
+            return false;
         }
        
     }
@@ -573,15 +575,11 @@ public class ESTemplateDAO extends BaseESDAO {
 
         ESClient srcClient = esOpClient.getESClient(srcCluster);
         ESClient tgtClient = esOpClient.getESClient(tgtCluster);
-        if (srcClient == null || tgtClient == null) {
-            String msg = Objects.isNull(srcClient) && Objects.isNull(tgtClient)
-                    ? String.format("{%s} and {%s} client is null", srcCluster, tgtCluster)
-                    : Objects.isNull(srcClient)
-                            ? String.format("{%s} client is null", srcCluster)
-                            : String.format("{%s} client  is null", tgtCluster);
-            LOGGER.warn("class={}||method=copyMappingAndAlias||srcCluster={}||tgtCluster={}||srcTemplateName={}||tgtTemplateName={}||errMsg={} ",
-                    getClass().getSimpleName(), srcCluster, tgtCluster, srcTemplateName, tgtTemplateName,msg);
-            return false;
+        if (srcClient == null) {
+            throw new NullESClientException(srcCluster);
+        }
+        if (tgtClient == null) {
+            throw new NullESClientException(tgtCluster);
         }
         ESIndicesPutTemplateResponse response = new ESIndicesPutTemplateResponse();
         response.setAcknowledged(false);
@@ -666,11 +664,12 @@ public class ESTemplateDAO extends BaseESDAO {
         try {
             return client.direct(directRequest).actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
         } catch (Exception e) {
-            String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
-            if (Objects.nonNull(exception)) {
-                throw new ESOperateException(exception);
-            }
-            throw new ESOperateException(e.getMessage(), e);
+            ParsingExceptionUtils.abnormalTermination(e);
+             LOGGER.error("class=BaseESDAO||method=getDirectResponseByClusterAndUrl||uri={}",
+                client.getClusterName(), e.getMessage(), e);
+            final DirectResponse directResponse = new DirectResponse();
+            directResponse.setRestStatus(RestStatus.SERVICE_UNAVAILABLE);
+            return directResponse;
         }
     
     }
