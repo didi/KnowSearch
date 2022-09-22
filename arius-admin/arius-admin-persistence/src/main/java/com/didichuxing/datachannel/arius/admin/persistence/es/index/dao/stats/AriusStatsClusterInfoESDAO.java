@@ -190,7 +190,7 @@ public class AriusStatsClusterInfoESDAO extends BaseAriusStatsESDAO {
     }
 
     private Long getNearestTime(ESQueryResponse response) {
-        if (null == response || null == response.getAggs()) {
+        if (null == response) {
             return 0L;
         }
         List<ESHit> hits = Optional.ofNullable(response.getHits().getHits()).orElse(new ArrayList<ESHit>());
