@@ -8,6 +8,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.dto.oprecord.OperateR
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.operaterecord.OperateRecordVO;
 import com.didichuxing.datachannel.arius.admin.common.component.BaseHandle;
 import com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.PageSearchHandleTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
@@ -22,7 +23,9 @@ import com.didiglobal.logi.log.LogFactory;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
 import com.didiglobal.logi.security.service.ProjectService;
+import com.didiglobal.logi.security.service.UserService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -49,6 +52,8 @@ public class OperateRecordManagerImpl implements OperateRecordManager {
     private AriusConfigInfoService ariusConfigInfoService;
     @Autowired
     private ProjectService projectService;
+    @Autowired
+    private UserService userService;
     
     /**
      * 0 0 1 * * ? 每天凌晨 1 点执行该方法 定时删除操作日志，根据配置中指定的保存天数对操作日志进行保留
@@ -135,11 +140,15 @@ public class OperateRecordManagerImpl implements OperateRecordManager {
         List<OperateRecordVO> operateRecordVOList = operateRecordService.queryCondition(queryDTO);
         List<String> operateRecordList = new ArrayList<>();
         if(CollectionUtils.isEmpty(operateRecordVOList)){
-            //查询平台配置中的超级应用的默认命令
-            List<String> superAppDefaultCommandList = new ArrayList<>(ariusConfigInfoService.stringSettingSplit2Set(AriusConfigConstant.ARIUS_COMMON_GROUP
-                    , AriusConfigConstant.SUPER_APP_DEFALT_DSL_COMMAND,
-                    AriusConfigConstant.SUPER_APP_DEFALT_DSL_COMMAND_VALUE, COMMA));
-            operateRecordList.addAll(superAppDefaultCommandList);
+            //只有拥有管理员权限的才能被赋予默认命令
+            final List<UserBriefVO> userBriefListWithAdminRole = userService.getUserBriefListByRoleId(AuthConstant.ADMIN_ROLE_ID);
+            if(userBriefListWithAdminRole.contains(operator)){
+                //查询平台配置中的超级应用的默认命令
+                List<String> superAppDefaultCommandList = new ArrayList<>(ariusConfigInfoService.stringSettingSplit2Set(AriusConfigConstant.ARIUS_COMMON_GROUP
+                        , AriusConfigConstant.SUPER_APP_DEFALT_DSL_COMMAND,
+                        AriusConfigConstant.SUPER_APP_DEFALT_DSL_COMMAND_VALUE, COMMA));
+                operateRecordList.addAll(superAppDefaultCommandList);
+            }
         }else{
             operateRecordList = operateRecordVOList.stream().map(OperateRecordVO::getContent).collect(Collectors.toList());
         }
