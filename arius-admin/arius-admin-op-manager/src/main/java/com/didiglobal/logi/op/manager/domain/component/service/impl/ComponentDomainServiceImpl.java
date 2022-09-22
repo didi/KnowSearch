@@ -144,7 +144,6 @@ public class ComponentDomainServiceImpl implements ComponentDomainService {
         //构建componentIdToHostMap
         hosts.forEach(componentHost -> {
             List<ComponentHost> hostList = componentIdToHostMap.get(componentHost.getComponentId().toString());
-
             if (null == hostList) {
                 hostList = new ArrayList<>();
                 componentIdToHostMap.put(componentHost.getComponentId().toString(), hostList);
