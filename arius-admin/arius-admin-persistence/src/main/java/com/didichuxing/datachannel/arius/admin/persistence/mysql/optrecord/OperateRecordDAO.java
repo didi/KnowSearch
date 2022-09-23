@@ -14,7 +14,7 @@ import org.springframework.stereotype.Repository;
  * @date 2019/3/14
  */
 @Repository
-public interface OperateRecordDAO extends BaseMapper<OperateRecordInfoPO> {
+public interface OperateRecordDAO {
     /**
      * 通过条件查询列表
      * @param param OperateRecordInfoPO
@@ -35,7 +35,6 @@ public interface OperateRecordDAO extends BaseMapper<OperateRecordInfoPO> {
      * @param po    OperateRecordInfoPO
      * @return      int
      */
-    @Override
     int insert(OperateRecordInfoPO po);
 
     /**
@@ -67,4 +66,18 @@ public interface OperateRecordDAO extends BaseMapper<OperateRecordInfoPO> {
      * @return {@code OperateRecordInfoPO}
      */
     OperateRecordInfoPO getById(Integer id);
+
+    /**
+     * 获取一条操作记录
+     * @param operateRecordDTO
+     * @return
+     */
+    OperateRecordInfoPO selectOneOperateRecord(OperateRecordDTO operateRecordDTO);
+
+    /**
+     * 根据id更新
+     * @param convertOperateRecordInfoPO
+     * @return
+     */
+    int updateById(OperateRecordInfoPO convertOperateRecordInfoPO);
 }

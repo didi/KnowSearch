@@ -189,9 +189,12 @@ public class AriusStatsClusterInfoESDAO extends BaseAriusStatsESDAO {
                 (ESQueryResponse response) -> getNearestTime(response), 3);
     }
 
-    private Long getNearestTime(ESQueryResponse response){
-       List<ESHit> hits = Optional.ofNullable(response.getHits().getHits()).orElse(new ArrayList<ESHit>());
-      return   hits.stream().map(esHit -> esHit.getSource()).filter(Objects::nonNull)
-                .map(source->((JSONObject)source).getLong("timestamp")).findFirst().orElse(0L);
+    private Long getNearestTime(ESQueryResponse response) {
+        if (null == response) {
+            return 0L;
+        }
+        List<ESHit> hits = Optional.ofNullable(response.getHits().getHits()).orElse(new ArrayList<ESHit>());
+        return hits.stream().map(esHit -> esHit.getSource()).filter(Objects::nonNull)
+                .map(source -> ((JSONObject) source).getLong("timestamp")).findFirst().orElse(0L);
     }
 }

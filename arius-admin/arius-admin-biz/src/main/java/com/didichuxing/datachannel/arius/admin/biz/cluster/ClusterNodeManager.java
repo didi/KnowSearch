@@ -86,4 +86,13 @@ public interface ClusterNodeManager {
      * @param operator  操作员是执行操作的用户。
      */
     Result<Void> delete(List<Integer> ids, Integer projectId, String operator);
+
+    /**
+     * 校验节点的region划分
+     * @param params
+     * @param operator
+     * @param projectId
+     * @return
+     */
+    Result<Boolean> checkMultiNode2Region(List<ClusterRegionWithNodeInfoDTO> params, String operator, Integer projectId);
 }

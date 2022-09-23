@@ -40,14 +40,12 @@ public class OperateRecordServiceImpl implements OperateRecordService {
 
     private static final ILog LOGGER          = LogFactory.getLog(OperateRecordServiceImpl.class);
 
-    private static final String  ID = "id";
-    private static final String  CONTENT = "content";
     private static final String  PROJECT_NAME = "project_name";
     private static final String  MODULE_ID = "module_id";
     private static final String  OPERATE_ID = "operate_id";
     private static final String  TRIGGER_WAY_ID = "trigger_way_id";
     private static final String  USER_OPERATION = "user_operation";
-    private static final int    DEFAULT_RECORD_ID = -1;
+    private static final String  ID = "id";
 
     @Autowired
     private OperateRecordDAO  operateRecordDAO;
@@ -174,22 +172,20 @@ public class OperateRecordServiceImpl implements OperateRecordService {
 
     @Override
     public Result<Integer> updateOperateRecord(OperateRecordDTO operateRecordDTO) {
-        operateRecordDTO.setContent(operateRecordDTO.getContent().trim());
         Result<Void> result = paramCheck(operateRecordDTO.getUserOperation(), operateRecordDTO.getProjectName());
         if (result.failed()) {
             return Result.buildFrom(result);
         }
-        QueryWrapper<OperateRecordInfoPO> operateRecordInfoPOQueryWrapper =
-                AriusObjUtils.isNull(operateRecordDTO.getId()) || operateRecordDTO.getId() == DEFAULT_RECORD_ID
-                        ? buildOperateRecordInfoPOQueryWrapper(operateRecordDTO)
-                        : new QueryWrapper<OperateRecordInfoPO>().eq(ID, operateRecordDTO.getId());
-        OperateRecordInfoPO operateRecordInfoPO = operateRecordDAO.selectOne(operateRecordInfoPOQueryWrapper);
-        if (null == operateRecordInfoPO) {
+        OperateRecordInfoPO selectOneOperateRecordInfoPO = operateRecordDAO.selectOneOperateRecord(operateRecordDTO);
+        if (null == selectOneOperateRecordInfoPO) {
             return insertOperateRecordInfoWithoutCheck(operateRecordDTO);
         }
-        operateRecordInfoPO.setUpdateTime(new Date());
-        boolean succ = (1 == operateRecordDAO.update(operateRecordInfoPO, operateRecordInfoPOQueryWrapper));
-        return Result.build(succ, operateRecordInfoPO.getId());
+        OperateRecordInfoPO convertOperateRecordInfoPO = ConvertUtil.obj2Obj(operateRecordDTO, OperateRecordInfoPO.class);
+        convertOperateRecordInfoPO.setUpdateTime(new Date());
+        convertOperateRecordInfoPO.setOperateTime(new Date());
+        convertOperateRecordInfoPO.setId(selectOneOperateRecordInfoPO.getId());
+        boolean succ = (1 == operateRecordDAO.updateById(convertOperateRecordInfoPO));
+        return Result.build(succ, convertOperateRecordInfoPO.getId());
     }
 
     /**
@@ -199,7 +195,6 @@ public class OperateRecordServiceImpl implements OperateRecordService {
      */
     private QueryWrapper<OperateRecordInfoPO> buildOperateRecordInfoPOQueryWrapper(OperateRecordDTO operateRecordDTO) {
         QueryWrapper<OperateRecordInfoPO> operateRecordInfoPOQueryWrapper = new QueryWrapper<>();
-        operateRecordInfoPOQueryWrapper.eq(CONTENT, operateRecordDTO.getContent());
         operateRecordInfoPOQueryWrapper.eq(PROJECT_NAME, operateRecordDTO.getProjectName());
         operateRecordInfoPOQueryWrapper.eq(MODULE_ID, operateRecordDTO.getModuleId());
         operateRecordInfoPOQueryWrapper.eq(OPERATE_ID, operateRecordDTO.getOperateId());

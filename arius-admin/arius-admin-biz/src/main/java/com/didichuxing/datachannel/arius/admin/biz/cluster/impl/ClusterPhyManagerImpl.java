@@ -94,9 +94,11 @@ import com.didichuxing.datachannel.arius.admin.core.service.template.logic.Index
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESGatewayClient;
 import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpClient;
+import com.didichuxing.datachannel.arius.admin.remote.zeus.ZeusClusterRemoteService;
 import com.didiglobal.logi.elasticsearch.client.response.setting.common.MappingConfig;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
+import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.base.Strings;
 import com.google.common.cache.Cache;
@@ -146,7 +148,9 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     private static final Map<String, Triple<Long, Long, Double>> CLUSTER_NAME_TO_ES_CLUSTER_STATS_TRIPLE_MAP = Maps
         .newConcurrentMap();
     public static final String                                   SEPARATOR_CHARS                             = ",";
-    private static final String COLD = "cold";
+    private static final String COLD             = "cold";
+    public static final  String ZEUS_AGENTS_LIST = "zeus_agents_list";
+
     
 
     @Autowired
@@ -207,20 +211,26 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
 
     @Autowired
     private ESOpClient                                           esOpClient;
-
+    
     @Autowired
-    private RoleTool                                             roleTool;
-    private static final FutureUtil<Void>                                                                                                    FUTURE_UTIL               = FutureUtil.init(
+    private RoleTool                 roleTool;
+    @Autowired
+    private ZeusClusterRemoteService zeusClusterRemoteService;
+    
+    private static final FutureUtil<Void>         FUTURE_UTIL               = FutureUtil.init(
             "ClusterPhyManagerImpl", 20, 40, 100);
     private static final Cache</*clusterPhy*/String, TupleThree</*dcdrExist*/Boolean,/*pipelineExist*/ Boolean,/*existColdRegion*/ Boolean>> CLUSTER_PHY_DCDR_PIPELINE   = CacheBuilder.newBuilder()
             .expireAfterWrite(10, TimeUnit.MINUTES).maximumSize(10000).build();
     private static final Cache</*clusterPhy*/String, ClusterConnectionStatusWithTemplateEnum> CLUSTER_PHY_CONNECTION_ENUM = CacheBuilder.newBuilder()
             .expireAfterWrite(10, TimeUnit.MINUTES).maximumSize(10000).build();
+    public static final Cache</*zeus_agents_list*/String, /*agents_list*/ List<String>> ZEUS_AGENTS_LIST_CACHE = CacheBuilder.newBuilder()
+            .expireAfterWrite(45, TimeUnit.MINUTES).build();
     @PostConstruct
     private void init() {
         ariusScheduleThreadPool.submitScheduleAtFixedDelayTask(this::refreshClusterDistInfo, 60, 180);
-        ariusScheduleThreadPool.submitScheduleAtFixedDelayTask(this::refreshClusterPhyInfoWithCache,
-                60,45*60L);
+        ariusScheduleThreadPool.submitScheduleAtFixedDelayTask(this::refreshClusterPhyInfoWithCache, 60, 10 * 60L);
+        ariusScheduleThreadPool.submitScheduleAtFixedDelayTask(this::refreshWhitIpList, 60, 45 * 60L);
+    
     }
     
     /**
@@ -351,9 +361,18 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         Map<Long, List<ClusterRoleInfo>> roleListMap = clusterRoleService.getAllRoleClusterByClusterIds(clusterIds);
         //3. 设置集群基本统计信息：磁盘使用信息
         long timeForBuildClusterDiskInfo = System.currentTimeMillis();
+        List<String> ipList = ipListWithCache();
+        final List<ClusterRoleHost> clusterRoleHosts = clusterRoleHostService.listAllNode();
+        final Map<String, List<String>> clusterPhy2IpListMap = ConvertUtil.list2MapOfList(clusterRoleHosts,
+                ClusterRoleHost::getCluster, ClusterRoleHost::getIp);
         for (ClusterPhyVO clusterPhyVO : clusterPhyVOList) {
-            FUTURE_UTIL
-                .runnableTask(() -> buildClusterRole(clusterPhyVO, roleListMap.get(clusterPhyVO.getId().longValue())));
+            FUTURE_UTIL.runnableTask(
+                            () -> buildClusterRole(clusterPhyVO, roleListMap.get(clusterPhyVO.getId().longValue())))
+                    // 判断集群是否支持 zeus，并设置对应的参数值
+                    .runnableTask(() -> buildSupportZeusByClusterPhy(clusterPhyVO,
+                            clusterPhy2IpListMap.get(clusterPhyVO.getCluster()), ipList))
+            
+            ;
         }
         buildClusterPhyWithLogicAndRegion(clusterPhyVOList);
         FUTURE_UTIL.waitExecute();
@@ -368,6 +387,9 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         List<ClusterRegion> regions = clusterRegionService.listRegionByPhyClusterNames(
             clusterPhyVOList.stream().map(ClusterPhyVO::getCluster).distinct().collect(Collectors.toList()));
         Map<String, Set<Long>> phyCluster2logicClusterIds = Maps.newHashMap();
+        final List<ProjectBriefVO> projectBriefList = projectService.getProjectBriefList();
+        final Map<Integer, String> projectId2ProjectNameMap = ConvertUtil.list2Map(projectBriefList, ProjectBriefVO::getId,
+                ProjectBriefVO::getProjectName);
         Map<Long,  List<ClusterLogicVO>> logicClusterId2LogicClusterList = Maps.newHashMap();
         Map<Long, ClusterRegionVO> logicClusterId2Region = Maps.newHashMap();
         List<Long> logicIds = Lists.newArrayList();
@@ -386,9 +408,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
                 Set<Long> ids = phyCluster2logicClusterIds.getOrDefault(region.getPhyClusterName(), Sets.newHashSet());
                 ids.addAll(list);
                 phyCluster2logicClusterIds.put(region.getPhyClusterName(), ids);
-                list.forEach(id -> logicClusterId2Region.put(id, ConvertUtil.obj2Obj(region, ClusterRegionVO.class, regionVO -> {
-                    regionVO.setClusterName(region.getPhyClusterName());
-                })));
+                list.forEach(id -> logicClusterId2Region.put(id, ConvertUtil.obj2Obj(region, ClusterRegionVO.class, regionVO -> regionVO.setClusterName(region.getPhyClusterName()))));
                 logicIds.addAll(list);
             });
         if (CollectionUtils.isNotEmpty(logicIds)) {
@@ -397,8 +417,7 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
             logicClusterId2LogicClusterList = ConvertUtil.list2MapOfList(clusterLogicList, ClusterLogic::getId,
                     clusterLogic -> ConvertUtil.obj2Obj(clusterLogic, ClusterLogicVO.class,
                             clusterLogicVO -> clusterLogicVO.setProjectName(
-                                    projectService.getProjectBriefByProjectId(clusterLogicVO.getProjectId())
-                                            .getProjectName())));
+                                    projectId2ProjectNameMap.get(clusterLogicVO.getProjectId()))));
         }
         
         //3. 设置集群基本统计信息：磁盘使用信息
@@ -406,23 +425,23 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         for (ClusterPhyVO clusterPhyVO : clusterPhyVOList) {
             Set<Long> set = phyCluster2logicClusterIds.getOrDefault(clusterPhyVO.getCluster(), Sets.newHashSet());
             Map<Long, List<ClusterLogicVO>> finalLogicClusterId2Vo = logicClusterId2LogicClusterList;
-            set.forEach(id -> {
-                List<ClusterLogicVO> clusterLogicVOList = finalLogicClusterId2Vo.get(id);
-                if (CollectionUtils.isNotEmpty(clusterLogicVOList)) {
-                    List<String> projectNames = clusterLogicVOList.stream().map(ClusterLogicVO::getProjectName)
-                            .collect(Collectors.toList());
-                    ClusterLogicVOWithProjects clusterLogicVOWithProjects = ConvertUtil.obj2Obj(clusterLogicVOList.get(0),
-                            ClusterLogicVOWithProjects.class, cp -> cp.setProjectNameList(projectNames));
-                    clusterPhyVO.addLogicCluster(clusterLogicVOWithProjects, logicClusterId2Region.get(id));
-                }
-            
-            });
-            Optional.ofNullable(clusterPhyVO.getLogicClusterAndRegionList())
-                    .map(logicClusterAndRegionList -> logicClusterAndRegionList.stream().map(Tuple::getV1)
-                            .map(ClusterLogicVOWithProjects::getName).distinct().collect(Collectors.toList()))
-                    .ifPresent(clusterPhyVO::setBindLogicCluster);
-        }
+            FUTURE_UTIL.runnableTask(()-> {
+                set.forEach(id -> {
+                    List<ClusterLogicVO> clusterLogicVOList = finalLogicClusterId2Vo.get(id);
+                    if (CollectionUtils.isNotEmpty(clusterLogicVOList)) {
+                        List<String> projectNames = clusterLogicVOList.stream().map(ClusterLogicVO::getProjectName).collect(Collectors.toList());
+                        ClusterLogicVOWithProjects clusterLogicVOWithProjects = ConvertUtil.obj2Obj(clusterLogicVOList.get(0),
+                                ClusterLogicVOWithProjects.class, cp -> cp.setProjectNameList(projectNames));
+                        clusterPhyVO.addLogicCluster(clusterLogicVOWithProjects, logicClusterId2Region.get(id));
+                    }
         
+                });
+                Optional.ofNullable(clusterPhyVO.getLogicClusterAndRegionList())
+                        .map(logicClusterAndRegionList -> logicClusterAndRegionList.stream().map(Tuple::getV1).map(ClusterLogicVOWithProjects::getName).distinct().collect(Collectors.toList()))
+                        .ifPresent(clusterPhyVO::setBindLogicCluster);
+            });
+        }
+        FUTURE_UTIL.waitExecute();
         return timeForBuildClusterDiskInfo;
     }
 
@@ -1113,6 +1132,29 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     public  List<ClusterRoleHost> listClusterRoleHostByCluster(String cluster) {
         return clusterRoleHostService.getNodesByCluster(cluster);
     }
+    
+    /**
+     * 它返回满足条件的总数。
+     *
+     * @param condition 查询的条件。
+     * @return 长
+     */
+    @Override
+    public Long fuzzyClusterPhyHitByCondition(ClusterPhyConditionDTO condition) {
+        return clusterPhyService.fuzzyClusterPhyHitByCondition(condition);
+    }
+    
+    /**
+     * 按条件获取集群物理信息
+     *
+     * @param condition 查询的条件。
+     * @return 列表<ClusterPhy>
+     */
+    @Override
+    public List<ClusterPhy> pagingGetClusterPhyByCondition(ClusterPhyConditionDTO condition) {
+        return  clusterPhyService.pagingGetClusterPhyByCondition(condition);
+    }
+    
     /**************************************** private method ***************************************************/
 
     private Result<Boolean> deleteClusterInner(Integer clusterPhyId, Integer projectId) {
@@ -1735,4 +1777,39 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
         }
     
     };
+    
+    /**
+     * > 该函数用于获取存储 zeus 部署的 ip 列表的缓存 return List<String>
+     */
+    private List<String> ipListWithCache() {
+        return ZEUS_AGENTS_LIST_CACHE.getIfPresent(ZEUS_AGENTS_LIST);
+    }
+    
+    private void refreshWhitIpList() {
+        ZEUS_AGENTS_LIST_CACHE.put(ZEUS_AGENTS_LIST, getIpList());
+    }
+
+    /**
+     * > 该函数用于缓存初次获取zeus部署的agents list
+     *return List<String>
+     */
+    private List<String> getIpList() {
+        Result<List<String>> result = zeusClusterRemoteService.getAgentsList();
+        //如果获取zeus失败则返回空列表
+        if (result.failed()) {
+            return Collections.emptyList();
+        }
+        return result.getData();
+    }
+        /**
+     * > 该函数用于构建支持zeus by cluster phy
+     *
+     * @param clusterPhyVO 集群物理信息
+     */
+        private void buildSupportZeusByClusterPhy(ClusterPhyVO clusterPhyVO, List<String> ipList,
+                                                  List<String> zeusAgentsList) {
+            // 物理集群上所有的节点都需要在 zeus 的 ip 列表上，那么它才属于支持 zeus 的，一旦发现有一个不在就是不支持，不再遍历
+            clusterPhyVO.setSupportZeus(
+                    CollectionUtils.isNotEmpty(ipList) && Sets.newHashSet(zeusAgentsList).containsAll(ipList));
+        }
 }

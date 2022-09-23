@@ -5,7 +5,7 @@ import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpTimeout
 import com.didichuxing.datachannel.arius.admin.persistence.es.cluster.ESDCDRDAO;
 import com.didiglobal.logi.elasticsearch.client.request.dcdr.DCDRTemplate;
 import com.google.common.collect.Sets;
-import java.util.Set;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -55,7 +55,7 @@ public class ESDCDRServiceImpl implements ESDCDRService {
      * @return boolean
      */
     @Override
-    public boolean delete(String methodName, String cluster, String replicaCluster, Set<String> indices, int tryTimes)
+    public boolean delete(String methodName, String cluster, String replicaCluster, List<String> indices, int tryTimes)
             throws ESOperateException {
         return ESOpTimeoutRetry.esRetryExecute(methodName, tryTimes,
                 () -> esDCDRDAO.deleteReplication(cluster, replicaCluster, Sets.newHashSet(indices)));

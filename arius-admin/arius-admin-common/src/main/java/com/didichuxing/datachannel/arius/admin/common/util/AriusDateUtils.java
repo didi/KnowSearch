@@ -303,9 +303,12 @@ public class AriusDateUtils {
             break;
             case "h":
                 ms =  value * 1000 * 60 * 60;
+                break;
             case "d":
                 ms =  value * 1000 * 60 * 60 * 24;
-            break;
+                break;
+            default:
+                ms = value;
         }
         return ms;
     }

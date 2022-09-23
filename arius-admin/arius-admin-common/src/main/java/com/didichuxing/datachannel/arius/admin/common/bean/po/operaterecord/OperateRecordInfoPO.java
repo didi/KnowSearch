@@ -16,7 +16,6 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@TableName("operate_record_info")
 public class OperateRecordInfoPO extends BasePO {
 
     /**

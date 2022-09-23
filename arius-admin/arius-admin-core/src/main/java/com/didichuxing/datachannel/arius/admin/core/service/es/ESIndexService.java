@@ -55,6 +55,14 @@ public interface ESIndexService {
      * @throws ESOperateException
      */
     boolean syncDelIndex(String cluster, String indexName, int retryCount) throws ESOperateException;
+    /**
+     * 删除索引中的所有文档
+     *
+     * @param cluster ES集群的集群名称。
+     * @param expression 要删除的索引的名称。
+     * @param retryCount 重试次数，默认3次
+     */
+    boolean syncDeleteByExpression(String cluster, String expression, int retryCount) throws ESOperateException;
 
     /**
      * 根据表达式删除索引
@@ -235,12 +243,14 @@ public interface ESIndexService {
 
     /**
      * 校验索引数据是否一致
-     * @param cluster1 集群1
-     * @param cluster2 集群2
-     * @param indexNames 索引名字
+     *
+     * @param cluster1        集群1
+     * @param cluster2        集群2
+     * @param indexNames      索引名字
+     * @param indexExpression
      * @return true/false
      */
-    boolean ensureDateSame(String cluster1, String cluster2, List<String> indexNames) throws ESOperateException;
+    boolean ensureDateSame(String cluster1, String cluster2, List<String> indexNames, String indexExpression) throws ESOperateException;
 
     /**
      * close and open index

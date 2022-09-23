@@ -80,7 +80,7 @@ public class NormalOperateRecordController {
     @PostMapping ("/sense-operate-record")
     @ResponseBody
     @ApiOperation(value = "获取sense操作记录列表")
-    public Result<List<OperateRecordVO>> listSenseOperateRecord(HttpServletRequest request, @RequestBody OperateRecordDTO queryDTO) {
+    public Result<List<String>> listSenseOperateRecord(HttpServletRequest request, @RequestBody OperateRecordDTO queryDTO) {
         return operateRecordManager.listSenseOperateRecord(queryDTO,HttpRequestUtil.getOperator(request),HttpRequestUtil.getProjectId(request));
     }
 

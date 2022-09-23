@@ -49,7 +49,7 @@ public interface TemplateDCDRManager {
      * @return result
      * @throws ESOperateException
      */
-    Result<Void> deleteDCDR(Integer templateId, String operator, Integer projectId) throws ESOperateException;
+    Result<Void> deleteDCDR(Integer templateId, String operator, Integer projectId,boolean isDCDRForce) throws ESOperateException;
 
     /**
      * deletePhyDCDR
