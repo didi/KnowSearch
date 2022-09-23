@@ -33,7 +33,7 @@ public interface OperateRecordManager {
      * @return
      * @param queryDTO
      */
-    Result<List<OperateRecordVO>> listSenseOperateRecord(OperateRecordDTO queryDTO, String operator, Integer projectId);
+    Result<List<String>> listSenseOperateRecord(OperateRecordDTO queryDTO, String operator, Integer projectId);
 
     /**
      * 更新sense操作记录

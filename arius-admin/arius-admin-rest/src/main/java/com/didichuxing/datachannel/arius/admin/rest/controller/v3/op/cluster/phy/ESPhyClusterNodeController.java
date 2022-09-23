@@ -57,6 +57,16 @@ public class ESPhyClusterNodeController {
         return clusterNodeManager.listDivide2ClusterNodeInfo(clusterId);
     }
 
+    @PostMapping("/divide-region-check")
+    @ResponseBody
+    @ApiOperation(value = "节点划分校验")
+    public Result<Boolean> checkMultiNode2Region(HttpServletRequest request,
+                                                     @RequestBody List<ClusterRegionWithNodeInfoDTO> params) throws AdminOperateException {
+
+        return clusterNodeManager.checkMultiNode2Region(params, HttpRequestUtil.getOperator(request),
+                HttpRequestUtil.getProjectId(request));
+    }
+
     @PostMapping("/divide-region")
     @ResponseBody
     @ApiOperation(value = "节点划分且创建region")
