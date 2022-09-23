@@ -5,45 +5,7 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.Cl
 import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterQuickCommandMethodsEnum.HOT_THREAD;
 import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterQuickCommandMethodsEnum.PENDING_TASK;
 import static com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterQuickCommandMethodsEnum.TASK_MISSION_ANALYSIS;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ACTION;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.COUNT;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.DESCRIPTION;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.DOCS;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_OPERATE_MIN_TIMEOUT;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_OPERATE_TIMEOUT;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_ROLE_CLIENT;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_ROLE_COORDINATING_ONLY;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_ROLE_DATA;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_ROLE_DATA_ONLY;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_ROLE_INGEST;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_ROLE_MASTER;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_ROLE_MASTER_DATA;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.ES_ROLE_MASTER_ONLY;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.FREE_IN_BYTES;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.FREE_PERCENT;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.FS;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.HEAP_MAX_IN_BYTES;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.HEAP_USED_IN_BYTES;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.INDICES;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.IP;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.JVM;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.MEM;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.NODE;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.NODES;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.OS;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.PARENT_TASK_ID;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.PENDING_TASKS;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.REBALANCE;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.RUNNING_TIME;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.SHARDS;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.START_TIME;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.STATUS;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.TASK_ID;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.TOTAL;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.TOTAL_IN_BYTES;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.UNASSIGN;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.USED_IN_BYTES;
-import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.USED_PERCENT;
+import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOperateConstant.*;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -502,6 +464,13 @@ public class ESClusterDAO extends BaseESDAO {
                             .map(jsonObject -> Long.parseLong(jsonObject.getString(PENDING_TASKS)))
                             .findFirst()
                             .ifPresent(responses::setPendingTasks);
+                    jsonArray.stream()
+                            .filter(Objects::nonNull)
+                            .filter(j -> j instanceof JSONObject)
+                            .map(j -> (JSONObject) j)
+                            .map(jsonObject -> Long.parseLong(jsonObject.getString(UNASSIGN)))
+                            .findFirst()
+                            .ifPresent(responses::setUnassignedShardNum);
                 }
 
                 JSONObject jsonObject = JSON.parseObject(directResponse.getResponseContent());
@@ -513,6 +482,9 @@ public class ESClusterDAO extends BaseESDAO {
 
                 JSONObject docsObj = indicesObj.getJSONObject(DOCS);
                 responses.setDocsCount(docsObj.getLongValue(COUNT));
+
+                JSONObject storeObj = indicesObj.getJSONObject(STORE);
+                responses.setIndicesStoreSize(new ByteSizeValue(storeObj.getLongValue(SIZE_IN_BYTES)));
 
                 JSONObject nodesObj = jsonObject.getJSONObject(NODES);
                 JSONObject nodesCountObj = nodesObj.getJSONObject(COUNT);

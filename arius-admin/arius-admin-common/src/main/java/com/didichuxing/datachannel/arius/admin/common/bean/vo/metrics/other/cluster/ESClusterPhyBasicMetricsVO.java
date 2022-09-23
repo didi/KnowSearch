@@ -110,4 +110,10 @@ public class ESClusterPhyBasicMetricsVO implements Serializable {
 
     @ApiModelProperty("CoordinatingOnly节点数量")
     private Long    numberCoordinatingOnlyNodes;
+
+    @ApiModelProperty("集群索引总存储量")
+    private Long    indicesStoreSize;
+
+    @ApiModelProperty("未分配shard数")
+    private Long    unassignedShardNum;
 }

@@ -82,6 +82,7 @@ public class ESOperateConstant {
     public static final String  SHARDS                           = "shards";
     public static final String  TOTAL                            = "total";
     public static final String  DOCS                             = "docs";
+    public static final String  STORE                            = "store";
     public static final String  NODES                            = "nodes";
     public static final String  OS                               = "os";
     public static final String  MEM                              = "mem";
@@ -89,6 +90,7 @@ public class ESOperateConstant {
     public static final String  JVM                              = "jvm";
     public static final String  TOTAL_IN_BYTES                   = "total_in_bytes";
     public static final String  FREE_IN_BYTES                    = "free_in_bytes";
+    public static final String  SIZE_IN_BYTES                    = "size_in_bytes";
     public static final String  USED_IN_BYTES                    = "used_in_bytes";
     public static final String  FREE_PERCENT                     = "free_percent";
     public static final String  USED_PERCENT                     = "used_percent";
