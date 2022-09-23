@@ -13,6 +13,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.Mod
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didichuxing.datachannel.arius.admin.persistence.mysql.optrecord.OperateRecordDAO;
@@ -24,6 +25,8 @@ import com.didiglobal.logi.security.dao.ProjectDao;
 import java.util.*;
 import java.util.function.Consumer;
 
+
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -97,6 +100,12 @@ public class OperateRecordServiceImpl implements OperateRecordService {
         String sortType = pageDTO.getOrderByDesc() ? SortConstant.DESC : SortConstant.ASC;
         pageDTO.setSortTerm(sortTerm);
         pageDTO.setSortType(sortType);
+        if(StringUtils.isNotBlank(pageDTO.getProjectName())){
+            pageDTO.setProjectName(CommonUtils.sqlFuzzyQueryTransfer(pageDTO.getProjectName()));
+        }
+        if(StringUtils.isNotBlank(pageDTO.getContent())){
+            pageDTO.setContent(CommonUtils.sqlFuzzyQueryTransfer(pageDTO.getContent()));
+        }
         final List<OperateRecordInfoPO> recordInfoPOList = operateRecordDAO.listByCondition(pageDTO);
 
         final Map</*id*/Integer, OperateRecordInfoPO> operateRecordInfoMap = ConvertUtil.list2Map(recordInfoPOList,

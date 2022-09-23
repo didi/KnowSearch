@@ -7,6 +7,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.RoleExtend
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
+import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didiglobal.logi.security.common.PagingData;
@@ -33,6 +34,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -96,6 +98,12 @@ public class RoleExtendManagerImpl implements RoleExtendManager {
 
     @Override
     public PagingResult<RoleExtendVO> getRolePage(RoleQueryDTO queryDTO) {
+        if(StringUtils.isNotBlank(queryDTO.getRoleName())){
+            queryDTO.setRoleName(CommonUtils.sqlFuzzyQueryTransfer(queryDTO.getRoleName()));
+        }
+        if(StringUtils.isNotBlank(queryDTO.getDescription())){
+            queryDTO.setDescription(CommonUtils.sqlFuzzyQueryTransfer(queryDTO.getDescription()));
+        }
         final PagingData<RoleVO> rolePage = roleService.getRolePage(queryDTO);
         final List<RoleVO> bizData = rolePage.getBizData();
         final List<RoleExtendVO> roleExtendVOList = ConvertUtil.list2List(bizData, RoleExtendVO.class);

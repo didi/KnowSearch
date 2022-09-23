@@ -19,10 +19,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterConnectionStatusWithTemplateEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
 import com.didichuxing.datachannel.arius.admin.common.tuple.TupleThree;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.*;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
@@ -90,6 +87,9 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<Templa
     protected PaginationResult<TemplateWithSrvVO> buildPageData(TemplateQueryDTO condition, Integer projectId) {
         Integer totalHit ;
         List<IndexTemplate> matchIndexTemplateList;
+        if(StringUtils.isNotBlank(condition.getName())){
+            condition.setName(CommonUtils.sqlFuzzyQueryTransfer(condition.getName()));
+        }
         // 如果存物理集群，则需要通过物理集群找到指定的逻辑集群
         if (StringUtils.isNotBlank(condition.getCluster())) {
             List<Integer> logicClusterIdList = clusterRegionService.listPhyClusterRegions(condition.getCluster())

@@ -365,6 +365,8 @@ public class ClusterOverviewMetricsHandle {
         basicVO.setTotalIndicesNu(clusterStats.getIndexCount());
         basicVO.setShardNu(clusterStats.getTotalShard());
         basicVO.setTotalDocNu(clusterStats.getDocsCount());
+        basicVO.setIndicesStoreSize(clusterStats.getIndicesStoreSize().getBytes());
+        basicVO.setUnassignedShardNum(clusterStats.getUnassignedShardNum());
 
         //设置集群磁盘信息
         long storeSize = clusterStats.getTotalFs().getBytes() - clusterStats.getFreeFs().getBytes();
