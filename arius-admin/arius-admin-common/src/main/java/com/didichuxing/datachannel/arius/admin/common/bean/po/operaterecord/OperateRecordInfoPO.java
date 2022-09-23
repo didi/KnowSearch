@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.po.operaterecord;
 
+import com.baomidou.mybatisplus.annotation.TableName;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.BasePO;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.ModuleEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;

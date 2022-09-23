@@ -10,6 +10,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.SortTermEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.DataTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
@@ -20,6 +21,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -70,6 +72,12 @@ public class TemplateLogicPageSearchHandle extends AbstractPageSearchHandle<Temp
 
     @Override
     protected PaginationResult<ConsoleTemplateVO> buildPageData(TemplateConditionDTO condition, Integer projectId) {
+        if(StringUtils.isNotBlank(condition.getName())){
+            condition.setName(CommonUtils.sqlFuzzyQueryTransfer(condition.getName()));
+        }
+        if(StringUtils.isNotBlank(condition.getDesc())){
+            condition.setDesc(CommonUtils.sqlFuzzyQueryTransfer(condition.getDesc()));
+        }
         List<IndexTemplate> matchIndexTemplate = indexTemplateService.pagingGetLogicTemplatesByCondition(condition);
         Integer totalHit = indexTemplateService.fuzzyLogicTemplatesHitByCondition(condition).intValue();
 

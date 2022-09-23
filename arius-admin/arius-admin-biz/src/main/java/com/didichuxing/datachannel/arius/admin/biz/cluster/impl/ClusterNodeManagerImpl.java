@@ -5,7 +5,6 @@ import static com.didichuxing.datachannel.arius.admin.common.constant.result.Res
 
 import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterNodeManager;
 import com.didichuxing.datachannel.arius.admin.common.Triple;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterRegionWithNodeInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
@@ -114,6 +113,25 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
     }
 
     @Override
+    public Result<Boolean> checkMultiNode2Region(List<ClusterRegionWithNodeInfoDTO> params, String operator, Integer projectId) {
+        final Result<Void> result = ProjectUtils.checkProjectCorrectly(i -> i, projectId, projectId);
+        if (result.failed()) {
+            return Result.buildFail(result.getMessage());
+        }
+        for(ClusterRegionWithNodeInfoDTO param : params){
+            Result<Boolean> checkRet = baseCheckParamValid(param,OperationEnum.ADD);
+            if (checkRet.failed()) {
+                return checkRet;
+            }
+
+            if (CollectionUtils.isEmpty(param.getBindingNodeIds())) {
+                return Result.buildFail(String.format("region名称[%s], errMsg=%s", param.getName(), "划分至该region的节点为空"));
+            }
+        }
+        return Result.buildSucc(true);
+    }
+
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public Result<List<Long>> createMultiNode2Region(List<ClusterRegionWithNodeInfoDTO> params, String operator,
                                                      Integer projectId) throws AdminOperateException {
@@ -142,10 +160,8 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
                 Result<Boolean> booleanResult = editNode2Region(param);
                 if (booleanResult.success()) {
                     // 2. 操作记录 :Region变更
-                    operateRecordService.save(new OperateRecord.Builder().userOperation(operator)
-                            .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_REGION_CHANGE)
-                            .project(projectService.getProjectBriefByProjectId(projectId))
-                            .content(String.format("新增region[%s]", param.getName())).buildDefaultManualTrigger());
+                     operateRecordService.saveOperateRecordWithManualTrigger(String.format("新增 region[%s]", param.getName()), operator, projectId,
+                            param.getId(), OperateTypeEnum.PHYSICAL_CLUSTER_REGION_CHANGE);
                     regionIdLis.add(addRegionRet.getData());
                 } else {
                     throw new AdminOperateException(addRegionRet.getMessage());
@@ -283,15 +299,13 @@ public class ClusterNodeManagerImpl implements ClusterNodeManager {
                 String ipStr = clusterPhy2NodeIds.get(clusterPhy2ClusterIdEntry.getKey()).stream()
                         .map(nodeId2IpMap::get).distinct().collect(Collectors.joining(","));
                 // 2. 操作记录 : 节点下线
-                operateRecordService.save(new OperateRecord.Builder().userOperation(operator)
-                        .operationTypeEnum(OperateTypeEnum.PHYSICAL_CLUSTER_NODE_CHANGE).bizId(clusterId)
-                        .project(projectService.getProjectBriefByProjectId(projectId))
-                        .content(String.format("下线节点的 ip 列表 ：[%s]", ipStr)).buildDefaultManualTrigger());
+                 operateRecordService.saveOperateRecordWithManualTrigger(String.format("下线节点的 ip 列表 ：[%s]", ipStr), operator, projectId, clusterId,
+                        OperateTypeEnum.PHYSICAL_CLUSTER_NODE_CHANGE);
             }
         }
         return Result.build(delete);
     }
-    
+
     /**
      * @param regionId
      * @return

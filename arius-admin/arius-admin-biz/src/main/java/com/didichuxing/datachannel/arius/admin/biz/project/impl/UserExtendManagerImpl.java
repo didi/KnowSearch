@@ -3,17 +3,21 @@ package com.didichuxing.datachannel.arius.admin.biz.project.impl;
 import com.didichuxing.datachannel.arius.admin.biz.project.UserExtendManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.UserExtendDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.app.UserQueryExtendDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.vo.project.UserExtendVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didiglobal.logi.security.common.PagingData;
+import com.didiglobal.logi.security.common.PagingData.Pagination;
 import com.didiglobal.logi.security.common.PagingResult;
 import com.didiglobal.logi.security.common.dto.user.UserBriefQueryDTO;
 import com.didiglobal.logi.security.common.dto.user.UserDTO;
-import com.didiglobal.logi.security.common.dto.user.UserQueryDTO;
 import com.didiglobal.logi.security.common.entity.user.User;
 import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import com.didiglobal.logi.security.common.vo.role.AssignInfoVO;
@@ -25,6 +29,9 @@ import com.didiglobal.logi.security.service.PermissionService;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.didiglobal.logi.security.service.RolePermissionService;
 import com.didiglobal.logi.security.service.UserService;
+import com.didiglobal.logi.security.util.PWEncryptUtil;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -76,9 +83,45 @@ public class UserExtendManagerImpl implements UserExtendManager {
      * @return 用户信息list
      */
     @Override
-    public PagingResult<UserVO> getUserPage(UserQueryDTO queryDTO) {
-        PagingData<UserVO> userPage = userService.getUserPage(queryDTO);
-        final List<UserVO> userList = userPage.getBizData();
+    public PagingResult<UserExtendVO> getUserPage(UserQueryExtendDTO queryDTO) {
+        if(StringUtils.isNotBlank(queryDTO.getUserName())){
+            queryDTO.setUserName(CommonUtils.sqlFuzzyQueryTransfer(queryDTO.getUserName()));
+        }
+        if(StringUtils.isNotBlank(queryDTO.getRealName())){
+            queryDTO.setRealName(CommonUtils.sqlFuzzyQueryTransfer(queryDTO.getRealName()));
+        }
+        final List<UserBriefVO> userBriefListByAdmin = userService.getUserBriefListByRoleId(
+                AuthConstant.ADMIN_ROLE_ID);
+        PagingData<UserExtendVO> userPage;
+        if (Boolean.FALSE.equals(queryDTO.getContainsAdminRole())) {
+            final int page = queryDTO.getPage();
+            final int pageSize = queryDTO.getSize();
+            final List<Integer> userBriefListWithAdminRole =userBriefListByAdmin.stream().map(UserBriefVO::getId).distinct()
+                    .collect(Collectors.toList());
+            // 获取全量的用户信息
+            final int size = userService.getAllUserBriefList().size();
+            queryDTO.setPage(1);
+            queryDTO.setSize(size);
+            final PagingData<UserVO> userPageAll = userService.getUserPage(queryDTO);
+            final List<UserVO> userListAll = userPageAll.getBizData().parallelStream()
+                    .filter(i -> !userBriefListWithAdminRole.contains(i.getId())).collect(Collectors.toList());
+
+            final List<UserExtendVO> userExtendVOS = ConvertUtil.list2List(userListAll, UserExtendVO.class,userExtendVO -> userExtendVO.setUserListWithAdminRole(userBriefListByAdmin));
+            final Pagination pagination = Pagination.builder().total(userListAll.size())
+                    .pages(new BigDecimal(userListAll.size()).divide(new BigDecimal(pageSize), 0, RoundingMode.UP)
+                            .intValue()
+
+                    ).pageNo(page).pageSize(pageSize).build();
+
+            userPage=new PagingData<>(userExtendVOS,pagination);
+        } else {
+            final PagingData<UserVO> userPageUserVo = userService.getUserPage(queryDTO);
+             final List<UserExtendVO> userExtendVOS = ConvertUtil.list2List(userPageUserVo.getBizData(),
+                     UserExtendVO.class,userExtendVO -> userExtendVO.setUserListWithAdminRole(userBriefListByAdmin));
+            userPage = new PagingData<>(userExtendVOS,userPageUserVo.getPagination()) ;
+
+        }
+        final List<UserExtendVO> userList = userPage.getBizData();
         //提前获取一下，避免多次查库
         final List<ProjectBriefVO> projectBriefList = projectService.getProjectBriefList();
         if (CollectionUtils.isNotEmpty(userList)) {
@@ -302,50 +345,50 @@ public class UserExtendManagerImpl implements UserExtendManager {
      * @return
      */
     @Override
-    public Result<Void> editUser(UserDTO userDTO, String operator) {
-        UserBriefVO userBriefVO = userService.getUserBriefByUserName(userDTO.getUserName());
-
+    public Result<Void> editUser(UserExtendDTO userDTO, String operator) {
+        User userBriefVO = userService.getUserByUserName(userDTO.getUserName());
+        if (Objects.isNull(userBriefVO)){
+            return Result.buildFail("用户不存在");
+        }
+        String pw = userBriefVO.getPw();
+        if (StringUtils.isNotBlank(userDTO.getPw())) {
+            try {
+                String decode = PWEncryptUtil.decode(pw);
+                // 开启密码比对且数据库中的密码和传入进来的原始密码不一致的时候
+                if (Boolean.FALSE.equals(userDTO.isIgnorePasswordMatching()) && !StringUtils.equals(userDTO.getOldPw(),
+                        decode)) {
+                    return Result.buildFail("旧密码不正确");
+                }
+            } catch (Exception ignore) {
+            
+            }
+        }
+    
         com.didiglobal.logi.security.common.Result<Void> voidResult = userService.editUser(userDTO, operator);
-
+    
         if (voidResult.failed()) {
             return Result.build(voidResult.getCode(), voidResult.getMessage());
         }
         if (StringUtils.isNotBlank(userDTO.getEmail())) {
-            operateRecordService
-                .save(new OperateRecord(OperateTypeEnum.TENANT_INFO_MODIFY, TriggerWayEnum.MANUAL_TRIGGER,
-                    String.format("修改email:%s-->%s", userBriefVO.getEmail(), userDTO.getEmail()), operator,
-
-                    userBriefVO.getId()));
+            saveOperateRecord(operator, userBriefVO.getId(),
+                    String.format("修改 email:%s-->%s", userBriefVO.getEmail(), userDTO.getEmail()));
         }
         if (StringUtils.isNotBlank(userDTO.getPhone())) {
-            operateRecordService
-                .save(new OperateRecord(OperateTypeEnum.TENANT_INFO_MODIFY, TriggerWayEnum.MANUAL_TRIGGER,
-                    String.format("修改手机号:%s-->%s", userBriefVO.getPhone(), userDTO.getPhone()), operator
-
-                    ,
-
-                    userBriefVO.getId()));
+            saveOperateRecord(operator, userBriefVO.getId(),
+                    String.format("修改手机号:%s-->%s", userBriefVO.getPhone(), userDTO.getPhone()));
         }
         if (StringUtils.isNotBlank(userDTO.getRealName())) {
-            operateRecordService
-                .save(new OperateRecord(OperateTypeEnum.TENANT_INFO_MODIFY, TriggerWayEnum.MANUAL_TRIGGER,
-                    String.format("修改用户实名:%s-->%s", userBriefVO.getRealName(), userDTO.getRealName()), operator
-
-                    ,
-
-                    userBriefVO.getId()));
+            saveOperateRecord(operator, userBriefVO.getId(),
+                    String.format("修改用户实名:%s-->%s", userBriefVO.getRealName(), userDTO.getRealName()));
         }
         if (StringUtils.isNotBlank(userDTO.getPw())) {
-            operateRecordService.save(
-                new OperateRecord(OperateTypeEnum.TENANT_INFO_MODIFY, TriggerWayEnum.MANUAL_TRIGGER, "修改用户密码", operator
-
-                    ,
-
-                    userBriefVO.getId()));
+            saveOperateRecord(operator, userBriefVO.getId(), "修改用户密码");
         }
         return Result.buildSucc();
     }
-
+    
+ 
+    
     /**
      * @param ids
      * @return
@@ -369,11 +412,15 @@ public class UserExtendManagerImpl implements UserExtendManager {
         if (result.failed()) {
             return Result.buildFail(result.getMessage());
         }
-        operateRecordService.save(
-            new OperateRecord(OperateTypeEnum.TENANT_ADD, TriggerWayEnum.MANUAL_TRIGGER, param.getUserName(), operator
-
-            ));
+        operateRecordService.save(new OperateRecord(OperateTypeEnum.TENANT_ADD, TriggerWayEnum.MANUAL_TRIGGER, param.getUserName(),
+                        operator));
         return Result.buildSucc();
 
+    }
+    
+    private void saveOperateRecord(String operator, Integer bizId, String content) {
+        operateRecordService.save(
+                new OperateRecord(OperateTypeEnum.TENANT_INFO_MODIFY, TriggerWayEnum.MANUAL_TRIGGER, content, operator,
+                        bizId));
     }
 }

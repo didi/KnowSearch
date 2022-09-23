@@ -1,8 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.biz.task.handler.cluster;
 
 import com.didichuxing.datachannel.arius.admin.biz.task.content.ClusterOfflineContent;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord.Builder;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.task.ecm.EcmTaskDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
@@ -48,12 +46,9 @@ public class ClusterOfflineTaskHandler extends AbstractClusterTaskHandler {
         ecmTaskDTO.setPhysicClusterId(content.getPhyClusterId());
         ecmTaskDTO.setOrderType(OpTaskTypeEnum.CLUSTER_OFFLINE.getType());
         //下线记录操作内容
-         final OperateRecord operateRecord = new Builder().userOperation(creator)
-                .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
-                .operationTypeEnum( OperateTypeEnum.PHYSICAL_CLUSTER_OFFLINE)
-                .content(String.format("下线物理集群：【%s】", content.getPhyClusterName()))
-                .bizId(content.getPhyClusterId()).buildDefaultManualTrigger();
-        operateRecordService.save(operateRecord);
+        operateRecordService.saveOperateRecordWithManualTrigger(
+                String.format("下线物理集群：【%s】", content.getPhyClusterName()), creator, AuthConstant.SUPER_PROJECT_ID,
+                content.getPhyClusterId(), OperateTypeEnum.PHYSICAL_CLUSTER_OFFLINE);
         return Result.buildSucc();
     }
 }

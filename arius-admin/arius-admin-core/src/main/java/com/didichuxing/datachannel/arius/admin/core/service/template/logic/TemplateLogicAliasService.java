@@ -1,13 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.core.service.template.logic;
 
-import java.util.List;
-import java.util.Map;
-
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.alias.ConsoleTemplateAliasSwitchDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.alias.IndexTemplateAliasDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplateAlias;
-import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import java.util.List;
+import java.util.Map;
 
 public interface TemplateLogicAliasService {
 
@@ -62,11 +59,5 @@ public interface TemplateLogicAliasService {
      */
     Map<Integer, List<String>> listAliasMapWithCache();
 
-    /**
-     * 别名切换功能
-     * @param aliasSwitchDTO
-     * @return
-     * @throws ESOperateException
-     */
-    Result aliasSwitch(ConsoleTemplateAliasSwitchDTO aliasSwitchDTO) throws ESOperateException;
+
 }

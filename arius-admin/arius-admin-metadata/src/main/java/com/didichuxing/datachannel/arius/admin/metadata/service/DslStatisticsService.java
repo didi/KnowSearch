@@ -1,6 +1,5 @@
 package com.didichuxing.datachannel.arius.admin.metadata.service;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.AuditDsl;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.dsl.DslInfo;
@@ -18,13 +17,11 @@ import com.didiglobal.logi.elasticsearch.client.parser.DslExtractionUtilV2;
 import com.didiglobal.logi.elasticsearch.client.parser.bean.ExtractResult;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,15 +58,11 @@ public class DslStatisticsService {
 
         // 添加操作记录
         if (operatorResult) {
-            ProjectBriefVO projectBriefVO = Optional.ofNullable(auditDsl.getProjectId())
-                .map(projectService::getProjectBriefByProjectId).orElse(null);
             for (DslTemplatePO dslTemplatePo : dslTemplatePOList) {
-                OperateRecord operateRecord = buildDslSettingOperatorRecord(
-                    String.format("%d_%s", projectId, dslTemplatePo.getDslTemplateMd5()),
-                    OperateTypeEnum.QUERY_TEMPLATE_DSL_CURRENT_LIMIT_ADJUSTMENT, auditDsl.getUserName(),
-                    String.format("checkMode->%s", dslTemplatePo.getCheckMode()), projectBriefVO);
-
-                operateRecordService.save(operateRecord);
+                operateRecordService.saveOperateRecordWithManualTrigger(String.format("checkMode->%s",
+                        dslTemplatePo.getCheckMode()),
+                        auditDsl.getUserName(),auditDsl.getProjectId(),String.format("%d_%s", projectId,
+                                dslTemplatePo.getDslTemplateMd5()),OperateTypeEnum.QUERY_TEMPLATE_DSL_CURRENT_LIMIT_ADJUSTMENT);
             }
         }
 
@@ -95,14 +88,10 @@ public class DslStatisticsService {
 
         // 添加操作记录
         for (DslQueryLimit dslQueryLimit : dslQueryLimitList) {
-            OperateRecord operateRecord = buildDslSettingOperatorRecord(dslQueryLimit.getProjectIdDslTemplateMd5(),
-                OperateTypeEnum.QUERY_TEMPLATE_DSL_CURRENT_LIMIT_ADJUSTMENT, operator,
-                String.format("queryLimit %f->%f",
-                    originalMap.getOrDefault(dslQueryLimit.getProjectIdDslTemplateMd5(), defaultDsl).getQueryLimit(),
-                    dslQueryLimit.getQueryLimit()),
-                null);
-
-            operateRecordService.save(operateRecord);
+            operateRecordService.saveOperateRecordWithManualTrigger(String.format("queryLimit %f->%f",
+                            originalMap.getOrDefault(dslQueryLimit.getProjectIdDslTemplateMd5(), defaultDsl).getQueryLimit(),
+                            dslQueryLimit.getQueryLimit()), operator, null, dslQueryLimit.getProjectIdDslTemplateMd5(),
+                    OperateTypeEnum.QUERY_TEMPLATE_DSL_CURRENT_LIMIT_ADJUSTMENT);
         }
 
         return Result.buildSucc(true);
@@ -220,12 +209,5 @@ public class DslStatisticsService {
 
         dslTemplatePO.setQueryLimit(10.0);
         return dslTemplatePO;
-    }
-
-    protected OperateRecord buildDslSettingOperatorRecord(String bizId, OperateTypeEnum operateType, String operator,
-                                                          String content, ProjectBriefVO projectBriefVO) {
-
-        return new OperateRecord.Builder().content(content).operationTypeEnum(operateType).project(projectBriefVO)
-            .userOperation(operator).bizId(bizId).build();
     }
 }

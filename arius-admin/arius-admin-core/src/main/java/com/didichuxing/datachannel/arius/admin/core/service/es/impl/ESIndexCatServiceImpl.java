@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.rest.RestStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -176,7 +177,21 @@ public class ESIndexCatServiceImpl implements ESIndexCatService {
      */
     @Override
     public Result<List<IndexCatCellDTO>> syncGetSegmentsIndexList(String cluster, Collection<String> indexList) {
-        return indexCatESDAO.syncGetSegmentsIndexList(cluster,indexList);
+        BatchProcessor.BatchProcessResult<String, List<IndexCatCellDTO>> result = new BatchProcessor<String, List<IndexCatCellDTO>>().batchList(
+                        indexList)
+            
+                .batchSize(50).processor(items -> indexCatESDAO.syncGetSegmentsIndexList(cluster, items))
+                .succChecker(CollectionUtils::isNotEmpty).process();
+        if (!result.isSucc() && MapUtils.isNotEmpty(result.getErrorMap()) && CollectionUtils.isNotEmpty(
+                result.getErrorMap().values())) {
+            LOGGER.error("class={}||method=syncGetSegmentsIndexList||errMsg=failed to get syncGetSegmentsIndexList",
+                    result.getErrorMap().values().stream().findFirst().get());
+        }
+        
+        
+        List<IndexCatCellDTO> indexCatCellDTOList = result.getResultList().stream().filter(CollectionUtils::isNotEmpty)
+                .flatMap(Collection::stream).collect(Collectors.toList());
+        return Result.buildSucc(indexCatCellDTOList);
     }
     
     /**
@@ -187,6 +202,19 @@ public class ESIndexCatServiceImpl implements ESIndexCatService {
     public List<String> syncGetIndexListByProjectId(Integer projectId, String clusterLogic) {
         return indexCatESDAO.syncGetIndexListByProjectIdAndClusterLogic(projectId,
                 clusterLogic);
+    }
+    
+    @Override
+    public List<String> syncGetIndexListByProjectIdAndFuzzyIndexAndClusterLogic(Integer projectId, String clusterLogicName,
+                                                                                String index) {
+       return indexCatESDAO.syncGetIndexListByProjectIdAndFuzzyIndexAndClusterLogic(projectId,
+                clusterLogicName,index);
+    }
+    
+    @Override
+    public List<String> syncGetIndexListByProjectIdAndFuzzyIndexAndClusterPhy(String clusterPhyName,
+                                                                              String index) {
+         return indexCatESDAO.syncGetIndexListByProjectIdAndFuzzyIndexAndClusterPhy( clusterPhyName,index);
     }
     
     /**

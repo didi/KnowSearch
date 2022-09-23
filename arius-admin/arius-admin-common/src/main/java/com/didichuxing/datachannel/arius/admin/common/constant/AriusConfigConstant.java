@@ -24,6 +24,16 @@ public class AriusConfigConstant {
     public static final String  OPERATE_RECORD_SAVE_TIME                           = "operate.record.save_time";
 
     /**
+     * DSL和kibana操作记录保存条数
+     */
+    public static final String OPERATE_RECORD_SAVE_NUM                         = "operate.record.save.num";
+
+    /**
+     * 超级应用默认就有的命令
+     */
+    public static final String SUPER_APP_DEFALT_DSL_COMMAND                         = "super_app.default.dsl.command";
+
+    /**
      * 集群版本列表
      */
     public static final String CLUSTER_PACKAGE_VERSION_LIST                            = "cluster.package.version_list";
@@ -47,6 +57,7 @@ public class AriusConfigConstant {
      * 节点规格列表
      */
     public static final String CLUSTER_NODE_SPECIFICATION_LIST                         = "cluster.node.specification_list";
+
 
     /**
      * 请求是否拦截鉴权
@@ -194,8 +205,14 @@ public class AriusConfigConstant {
      * 请求是否拦截鉴权
      */
     public static final Boolean REQUEST_INTERCEPTOR_SWITCH_OPEN_DEFAULT_VALUE         = Boolean.TRUE;
-
+    /**
+     * 操作记录的保存时间
+     */
     public static final Integer OPERATE_RECORD_SAVE_TIME_DEFAULT_VALUE                = 30;
+    /**
+     * DSL和kibana操作记录保存条数
+     */
+    public static final Integer OPERATE_RECORD_SAVE_NUM_DEFAULT_VALUE                = 30;
     /**
      * 索引模板默认冷存天数默认值
      */
@@ -219,6 +236,15 @@ public class AriusConfigConstant {
 
     public static final String CLUSTER_NODE_SPECIFICATION_LIST_DEFAULT_VALUE           = "16c-64g-3072g,16c-48g-3072g";
 
+    public static final String SUPER_APP_DEFALT_DSL_COMMAND_VALUE           = "\"#获取节点状态\\nGET /_nodes/stats\",\n" +
+                                    "\"#获取集群信息\\nGET _cluster/stats\",\n" +
+                                    "\"#获取集群健康信息\\nGET _cluster/health?v\",\n" +
+                                    "\"#查看当前集群的热点线程\\nGET _nodes/hot_threads\",\n" +
+                                    "\"#查看当前集群运行中的任务信息\\nGET _tasks?actions=*&detailed\",\n" +
+                                    "\"#shard分配说明，会在分片未分配的事后去通过这个命令查看下具体原因\\nGET /_cluster/allocation/explain\",\n" +
+                                    "\"#异常shard分配重试，当集群red有shard未分配的情况下会通过这个命令来重试分配\\nPOST /_cluster/reroute?retry_failed=true\",\n" +
+                                    "\"#清除fielddata内存，当集群因为fileddata太大导致熔断或占用很多内存，可以通过此命令释放内存\\nPOST _cache/clear?fielddata=true\"";
+
     /**
      * 节点状态并发采集
      */
@@ -237,8 +263,7 @@ public class AriusConfigConstant {
     /**
      * dashboard节点CPU利用率超阈值的[持续时间]默认值
      */
-    public static final String DASHBOARD_NODE_CPU_USED_PERCENT_THRESHOLD_TIME_DURATION_THRESHOLD_DEFAULT_VALUE = "{\"name\":\"node.cpu.used_percent_threshold_time_duration\":\"cpuUsedPercentThresholdTimeDuration\",\"unit\":\"m\",\"compare\":\">\",\"value\":5}";
-
+    public static final String DASHBOARD_NODE_CPU_USED_PERCENT_THRESHOLD_TIME_DURATION_THRESHOLD_DEFAULT_VALUE = "{\"name\":\"node.cpu.used_percent_threshold_time_duration\",\"metrics\":\"cpuUsedPercentThresholdTimeDuration\",\"unit\":\"m\",\"compare\":\">\",\"value\":5}";
     /**
      * dashboardCPU利用率红线默认值
      */

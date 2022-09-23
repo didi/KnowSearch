@@ -9,7 +9,6 @@ import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.impl.BaseTe
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping.TemplateLogicMappingManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.mapping.TemplatePhyMappingManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.MappingOptimizeItem;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateSchemaDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.template.ConsoleTemplateSchemaOptimizeDTO;
@@ -26,7 +25,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.po.template.TemplateT
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.TemplateMappingVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.event.index.ReBuildTomorrowIndexEvent;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
@@ -64,7 +62,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -233,7 +230,7 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrvImpl impleme
             }
             final Result<MappingConfig> beforeResult = templatePhyMappingManager
                 .getMapping(masterTemplatePhysical.getCluster(), masterTemplatePhysical.getName());
-
+            JSONObject beforeData = beforeResult.getData().toJson();
             Result<MappingConfig> getDiffResult = getDiffMapping(masterTemplatePhysical.getCluster(),
                 masterTemplatePhysical.getName(), fields);
             if (getDiffResult.failed()) {
@@ -249,13 +246,9 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrvImpl impleme
             }
             final Result<MappingConfig> afterResult = templatePhyMappingManager
                 .getMapping(masterTemplatePhysical.getCluster(), masterTemplatePhysical.getName());
-            operateRecordService.save(new OperateRecord.Builder()
-                .project(Optional.ofNullable(projectId).map(projectService::getProjectBriefByProjectId).orElse(null))
-                .userOperation(operator).operationTypeEnum(OperateTypeEnum.TEMPLATE_MANAGEMENT_EDIT_MAPPING)
-                .content(new TemplateMappingOperateRecord(beforeResult.getData(), afterResult.getData()).toString())
-                .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-
-                .build());
+            operateRecordService.saveOperateRecordWithManualTrigger(
+                    new TemplateMappingOperateRecord(beforeData, afterResult.getData()).toString(),
+                    operator, projectId, logicId, OperateTypeEnum.TEMPLATE_MANAGEMENT_EDIT_MAPPING);
         }
 
         return Result.buildSucc();
@@ -404,20 +397,19 @@ public class TemplateLogicMappingManagerImpl extends BaseTemplateSrvImpl impleme
             }
             final Result<MappingConfig> beforeResult = templatePhyMappingManager
                 .getMapping(templatePhysical.getCluster(), templatePhysical.getName());
+            JSONObject beforeData = beforeResult.getData().toJson();
             Result<Void> updateMappingResult = templatePhyMappingManager.updateMapping(templatePhysical.getCluster(),
                 templatePhysical.getName(), templateMappingConfig.toJson().toJSONString());
-
+            
             if (updateMappingResult.failed()) {
                 return Result.buildFrom(updateMappingResult);
             }
             final Result<MappingConfig> afterResult = templatePhyMappingManager
                 .getMapping(templatePhysical.getCluster(), templatePhysical.getName());
-            operateRecordService
-                .save(new OperateRecord.Builder().operationTypeEnum(OperateTypeEnum.TEMPLATE_MANAGEMENT_EDIT_MAPPING)
-                    .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER).userOperation(operator)
-                    .project(projectService.getProjectBriefByProjectId(templateLogicWithPhysical.getProjectId()))
-                    .content(new TemplateMappingOperateRecord(beforeResult.getData(), afterResult.getData()).toString())
-                    .bizId(logicId).build());
+            operateRecordService.saveOperateRecordWithManualTrigger(
+                    new TemplateMappingOperateRecord(beforeData, afterResult.getData()).toString(),
+                    operator, templateLogicWithPhysical.getProjectId(), logicId,
+                    OperateTypeEnum.TEMPLATE_MANAGEMENT_EDIT_MAPPING);
         }
 
         return Result.buildSucc();

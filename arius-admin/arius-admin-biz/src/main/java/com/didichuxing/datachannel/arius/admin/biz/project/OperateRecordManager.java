@@ -2,9 +2,12 @@ package com.didichuxing.datachannel.arius.admin.biz.project;
 
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.UserConfigInfoDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.oprecord.OperateRecordDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.operaterecord.OperateRecordVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.NotFindSubclassException;
+
+import java.util.List;
 
 public interface OperateRecordManager {
     /**
@@ -24,4 +27,20 @@ public interface OperateRecordManager {
      * @return {@code Result<OplogVO>}
      */
     Result<OperateRecordVO> getOplogDetailByOplogId(Integer id);
+
+    /**
+     * 获取DSL kibana操作记录 默认前30条
+     * @return
+     * @param queryDTO
+     */
+    Result<List<String>> listSenseOperateRecord(OperateRecordDTO queryDTO, String operator, Integer projectId);
+
+    /**
+     * 更新sense操作记录
+     * @param operateRecordDTO
+     * @param operator
+     * @param projectId
+     * @return
+     */
+    Result<Integer> updateSenseOperateRecord(OperateRecordDTO operateRecordDTO, String operator, Integer projectId);
 }

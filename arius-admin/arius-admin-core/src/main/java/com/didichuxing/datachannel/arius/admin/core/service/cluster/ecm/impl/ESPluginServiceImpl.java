@@ -11,6 +11,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.Cluste
 import com.didichuxing.datachannel.arius.admin.common.bean.po.esplugin.PluginPO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.PluginVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.FileCompressionType;
 import com.didichuxing.datachannel.arius.admin.common.constant.PluginTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
@@ -194,13 +195,9 @@ public class ESPluginServiceImpl implements ESPluginService {
             Map</*apiModelPropertyValue*/String, /*修改后的apiModelPropertyValue*/String> apiModelPropertyValueModify = Maps
                 .newHashMap();
             apiModelPropertyValueModify.put("上传插件类型: 0 系统默认插件, 1 ES能力插件, 2 平台能力插件", "上传插件类型");
-            operateRecordService.save(new OperateRecord.Builder().bizId(pluginDTO.getId()).userOperation(operator)
-                .operationTypeEnum(OperateTypeEnum.ES_CLUSTER_PLUGINS_EDIT)
-                .triggerWayEnum(TriggerWayEnum.MANUAL_TRIGGER)
-                .content(
-                    AriusObjUtils.findChangedWithClearByBeanVo(oldPluginVO, newPluginVO, apiModelPropertyValueModify))
-                .build()
-
+            operateRecordService.saveOperateRecordWithManualTrigger(
+                    AriusObjUtils.findChangedWithClearByBeanVo(oldPluginVO, newPluginVO, apiModelPropertyValueModify),
+                    operator, AuthConstant.SUPER_PROJECT_ID, pluginDTO.getId(), OperateTypeEnum.ES_CLUSTER_PLUGINS_EDIT
             );
         }
         return Result.build(succ);

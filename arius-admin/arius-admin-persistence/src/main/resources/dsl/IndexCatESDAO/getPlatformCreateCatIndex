@@ -2,11 +2,18 @@
   "size": %d,
   "query": {
     "bool": {
-      "filter": [
+      "should": [
         {
           "term": {
             "platformCreateFlag": {
               "value": true
+            }
+          }
+        },
+        {
+          "term": {
+            "deleteFlag": {
+              "value": false
             }
           }
         }

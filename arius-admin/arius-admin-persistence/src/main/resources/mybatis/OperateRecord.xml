@@ -149,6 +149,41 @@
 		from operate_record_info
 		where id = #{id}
 	</select>
+
+	<select id="selectOneOperateRecord" resultMap="BaseResultMap"
+			parameterType="com.didichuxing.datachannel.arius.admin.common.bean.dto.oprecord.OperateRecordDTO">
+		select
+		id
+		from operate_record_info
+		<where >
+			<if test="moduleId != null">
+				and module_id = #{moduleId}
+			</if>
+			<if test="operateId != null">
+				and operate_id = #{operateId}
+			</if>
+			<if test="triggerWayId != null">
+				and trigger_way_id = #{triggerWayId}
+			</if>
+			<if test="projectName != null  and projectName != ''">
+				and project_name = #{projectName}
+			</if>
+			<if test="userOperation != null  and userOperation != ''">
+				and user_operation = #{userOperation}
+			</if>
+		</where>
+	</select>
+
+	<update id="updateById"
+			parameterType="com.didichuxing.datachannel.arius.admin.common.bean.po.operaterecord.OperateRecordInfoPO">
+		update operate_record_info
+		<trim prefix="set" prefixOverrides=",">
+			<if test="content != null">,`content` = #{content}</if>
+			<if test="operateTime != null">,`operate_time` = #{operateTime}</if>
+			<if test="updateTime != null">,`update_time` = #{updateTime}</if>
+		</trim>
+		where id = #{id}
+	</update>
 	
 	<update id="deleteByModuleIdAndLessThanId">
 		delete

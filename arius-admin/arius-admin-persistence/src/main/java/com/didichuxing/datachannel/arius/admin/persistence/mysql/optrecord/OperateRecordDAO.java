@@ -1,5 +1,6 @@
 package com.didichuxing.datachannel.arius.admin.persistence.mysql.optrecord;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.oprecord.OperateRecordDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.po.operaterecord.OperateRecordInfoPO;
 
@@ -65,4 +66,18 @@ public interface OperateRecordDAO {
      * @return {@code OperateRecordInfoPO}
      */
     OperateRecordInfoPO getById(Integer id);
+
+    /**
+     * 获取一条操作记录
+     * @param operateRecordDTO
+     * @return
+     */
+    OperateRecordInfoPO selectOneOperateRecord(OperateRecordDTO operateRecordDTO);
+
+    /**
+     * 根据id更新
+     * @param convertOperateRecordInfoPO
+     * @return
+     */
+    int updateById(OperateRecordInfoPO convertOperateRecordInfoPO);
 }

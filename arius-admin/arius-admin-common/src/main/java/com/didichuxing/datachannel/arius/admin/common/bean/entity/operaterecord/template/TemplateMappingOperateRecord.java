@@ -1,6 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.operaterecord.template;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.indices.IndexMappingVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TemplateOperateRecordEnum;
 import com.didichuxing.datachannel.arius.admin.common.util.DiffUtil;
@@ -26,6 +27,7 @@ public class TemplateMappingOperateRecord extends TemplateOperateRecord {
         diffResult.addAll(diffs);
         operateType = TemplateOperateRecordEnum.MAPPING.getCode();
         change = CollectionUtils.isNotEmpty(diffs);
+        this.behavior = "编辑MAPPING";
     }
 
     public TemplateMappingOperateRecord(MappingConfig before, MappingConfig after) {
@@ -37,6 +39,18 @@ public class TemplateMappingOperateRecord extends TemplateOperateRecord {
         diffResult.addAll(diffs);
         operateType = TemplateOperateRecordEnum.MAPPING.getCode();
         change = CollectionUtils.isNotEmpty(diffs);
+        this.behavior = "编辑MAPPING";
+    }
+    public TemplateMappingOperateRecord(JSONObject before, MappingConfig after) {
+        source = before;
+        target = after.toJson();
+        final List<DiffJson> diffs = DiffUtil.diffJsonByString(before.toJSONString(),
+            after.toJson().toJSONString());
+
+        diffResult.addAll(diffs);
+        operateType = TemplateOperateRecordEnum.MAPPING.getCode();
+        change = CollectionUtils.isNotEmpty(diffs);
+        this.behavior = "编辑MAPPING";
     }
 
     @Override

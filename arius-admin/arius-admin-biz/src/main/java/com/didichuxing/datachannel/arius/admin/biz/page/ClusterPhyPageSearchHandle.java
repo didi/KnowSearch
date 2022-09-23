@@ -6,7 +6,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.cluster.ClusterPhyConditionDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterLogic;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ClusterPhy;
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.cluster.ecm.ClusterRoleHost;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.region.ClusterRegion;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.ClusterPhyVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
@@ -17,25 +16,17 @@ import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterHe
 import com.didichuxing.datachannel.arius.admin.common.event.resource.ClusterPhyEvent;
 import com.didichuxing.datachannel.arius.admin.core.component.SpringTool;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.logic.ClusterLogicService;
-import com.didichuxing.datachannel.arius.admin.core.service.cluster.physic.ClusterPhyService;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
-import com.didichuxing.datachannel.arius.admin.remote.zeus.ZeusClusterRemoteService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
-
-import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import javax.annotation.PostConstruct;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import static com.didichuxing.datachannel.arius.admin.remote.zeus.ZeusClusterRemoteServiceImpl.*;
 
 /**
  *
@@ -47,11 +38,9 @@ public class ClusterPhyPageSearchHandle extends AbstractPageSearchHandle<Cluster
 
     private static final ILog           LOGGER         = LogFactory.getLog(ClusterPhyPageSearchHandle.class);
     private static final CharSequence[] CHAR_SEQUENCES = { "*", "?" };
-    public static final Cache</*zeus_agents_list*/String, /*agents_list*/ List<String>> ZEUS_AGENTS_LIST_CACHE = CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES).build();
-    public static final String ZEUS_AGENTS_LIST = "zeus_agents_list";
+    
 
-    @Autowired
-    private ClusterPhyService           clusterPhyService;
+   
     @Autowired
     private ClusterLogicService         clusterLogicService;
     @Autowired
@@ -59,8 +48,11 @@ public class ClusterPhyPageSearchHandle extends AbstractPageSearchHandle<Cluster
     @Autowired
     private ClusterRegionService        clusterRegionService;
 
-    @Autowired
-    private ZeusClusterRemoteService zeusClusterRemoteService;
+   
+    
+    @PostConstruct
+    private void init() {
+    }
 
     @Override
     protected Result<Boolean> checkCondition(ClusterPhyConditionDTO condition, Integer projectId) {
@@ -119,69 +111,23 @@ public class ClusterPhyPageSearchHandle extends AbstractPageSearchHandle<Cluster
     @Override
     protected PaginationResult<ClusterPhyVO> buildPageData(ClusterPhyConditionDTO condition, Integer projectId) {
 
-        List<ClusterPhy> pagingGetClusterPhyList = clusterPhyService.pagingGetClusterPhyByCondition(condition);
+        List<ClusterPhy> pagingGetClusterPhyList = clusterPhyManager.pagingGetClusterPhyByCondition(condition);
 
         List<ClusterPhyVO> clusterPhyVOList = clusterPhyManager.buildClusterInfo(pagingGetClusterPhyList);
 
-        long totalHit = clusterPhyService.fuzzyClusterPhyHitByCondition(condition);
+        long totalHit = clusterPhyManager.fuzzyClusterPhyHitByCondition(condition);
         List<ClusterPhyVO> clusterPhyList = clusterPhyVOList.stream()
             .filter(clusterPhyVO -> ClusterHealthEnum.UNKNOWN.getCode().equals(clusterPhyVO.getHealth()))
             .collect(Collectors.toList());
         //非正常集群需要重新发事件
-
         for (ClusterPhyVO clusterPhyVO : clusterPhyList) {
             SpringTool.publish(new ClusterPhyEvent(clusterPhyVO.getCluster(), AriusUser.SYSTEM.getDesc()));
         }
-        List<String> ipList = ipListWithCache();
-        //判断集群是否支持zeus，并设置对应的参数值
-        for (ClusterPhyVO clusterPhyVO :clusterPhyVOList) {
-            buildSupportZeusByClusterPhy(clusterPhyVO,ipList);
-        }
+        
         return PaginationResult.buildSucc(clusterPhyVOList, totalHit, condition.getPage(), condition.getSize());
     }
 
-    /**
-     * > 该函数用于获取存储zeus部署的ip列表的缓存
-     *return List<String>
-     */
-    private List<String> ipListWithCache() {
-        //捕获缓存中的异常
-        try {
-            return ZEUS_AGENTS_LIST_CACHE.get(ZEUS_AGENTS_LIST, () -> getIpList());
-        } catch (Exception e) {
-            LOGGER.error(
-                    "class=ClusterPhyPageSearchHandle||method=ipListWithCache||error={}", e.getMessage());
-            return getIpList();
-        }
-    }
 
-    /**
-     * > 该函数用于缓存初次获取zeus部署的agents list
-     *return List<String>
-     */
-    private List<String> getIpList() {
-        Result<List<String>> result = zeusClusterRemoteService.getAgentsList();
-        //如果获取zeus失败则返回空列表
-        if (result.failed()) {
-            return Lists.newArrayList();
-        } else {
-            return result.getData();
-        }
-    }
 
-    /**
-     * > 该函数用于构建支持zeus by cluster phy
-     *
-     * @param clusterPhyVO 集群物理信息
-     */
-    private void buildSupportZeusByClusterPhy(ClusterPhyVO clusterPhyVO,List<String> zeusAgentsList) {
-        List<ClusterRoleHost> clusterRoleHosts = clusterPhyManager.listClusterRoleHostByCluster(clusterPhyVO.getCluster());
-        Boolean supportZeus = true ;
-        for (ClusterRoleHost clusterRoleHost : clusterRoleHosts) {
-            if (!zeusAgentsList.contains(clusterRoleHost.getIp())) {
-                supportZeus = false;
-            }
-        }
-        clusterPhyVO.setSupportZeus(supportZeus);
-    }
+
 }

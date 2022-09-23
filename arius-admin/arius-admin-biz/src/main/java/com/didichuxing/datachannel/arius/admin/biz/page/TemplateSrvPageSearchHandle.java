@@ -1,5 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.biz.page;
 
+import com.didichuxing.datachannel.arius.admin.biz.cluster.ClusterPhyManager;
+import com.didichuxing.datachannel.arius.admin.biz.cluster.impl.ClusterPhyManagerImpl;
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.TemplateSrvManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.PaginationResult;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
@@ -14,20 +16,23 @@ import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv.Templ
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv.TemplateWithSrvVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.template.srv.UnavailableTemplateSrvVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
+import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterConnectionStatusWithTemplateEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDeployRoleEnum;
-import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.FutureUtil;
-import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
+import com.didichuxing.datachannel.arius.admin.common.tuple.TupleThree;
+import com.didichuxing.datachannel.arius.admin.common.util.*;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.region.ClusterRegionService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.logic.IndexTemplateService;
 import com.didichuxing.datachannel.arius.admin.core.service.template.physic.IndexTemplatePhyService;
+import com.didiglobal.logi.log.ILog;
+import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
@@ -41,7 +46,9 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<TemplateQueryDTO, TemplateWithSrvVO> {
-    private static final FutureUtil<TemplateWithSrvVO> TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_CLUSTER_FUTURE_UTIL         =
+     private static final ILog                          LOGGER                                                    = LogFactory
+        .getLog(ClusterPhyManagerImpl.class);
+    private static final  FutureUtil<TemplateWithSrvVO> TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_CLUSTER_FUTURE_UTIL =
             FutureUtil
         .init("TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_CLUSTER_FUTURE_UTIL", 10, 10, 100);
     
@@ -56,7 +63,9 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<Templa
     @Autowired
     private TemplateSrvManager            templateSrvManager;
     @Autowired
-    private ClusterRegionService clusterRegionService;
+    private   ClusterRegionService clusterRegionService;
+    @Autowired
+    protected ClusterPhyManager clusterPhyManager;
 
     @Override
     protected Result<Boolean> checkCondition(TemplateQueryDTO condition, Integer projectId) {
@@ -78,6 +87,9 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<Templa
     protected PaginationResult<TemplateWithSrvVO> buildPageData(TemplateQueryDTO condition, Integer projectId) {
         Integer totalHit ;
         List<IndexTemplate> matchIndexTemplateList;
+        if(StringUtils.isNotBlank(condition.getName())){
+            condition.setName(CommonUtils.sqlFuzzyQueryTransfer(condition.getName()));
+        }
         // 如果存物理集群，则需要通过物理集群找到指定的逻辑集群
         if (StringUtils.isNotBlank(condition.getCluster())) {
             List<Integer> logicClusterIdList = clusterRegionService.listPhyClusterRegions(condition.getCluster())
@@ -109,41 +121,64 @@ public class TemplateSrvPageSearchHandle extends AbstractPageSearchHandle<Templa
         }
         final Map<Integer, String> projectId2ProjectName = ConvertUtil.list2Map(projectService.getProjectBriefList(),
                 ProjectBriefVO::getId, ProjectBriefVO::getProjectName);
-        // 构建基础信息
-        for (IndexTemplate template : templateList) {
-            TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_CLUSTER_FUTURE_UTIL.callableTask(()-> buildTemplateWithSrvVO(
-                    template,projectId2ProjectName));
+        List<Integer> logicTemplateIds =
+                templateList.stream().map(IndexTemplate::getId).distinct().collect(Collectors.toList());
+        List<IndexTemplatePhy> templatePhies = indexTemplatePhyService.getTemplateByLogicIds(logicTemplateIds);
+        Map<Integer, List<IndexTemplatePhy>> logicId2IndexTemplatePhyListMap = ConvertUtil.list2MapOfList(templatePhies,
+                IndexTemplatePhy::getLogicId, i -> i);
+        List<String> clusterPhyList = templatePhies.stream().map(IndexTemplatePhy::getCluster).distinct()
+                .collect(Collectors.toList());
+        Map<String, ClusterConnectionStatusWithTemplateEnum> cluster2ClusterConnectionStatusWithTemplateEnumMap = Maps.newConcurrentMap();
+        Map<String, TupleThree</*dcdrExist*/Boolean,/*pipelineExist*/ Boolean,/*existColdRegion*/ Boolean>> cluster2ExistDCDRAndPipelineModuleMap= Maps.newConcurrentMap();
+        for (String clusterPhy : clusterPhyList) {
+            TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_CLUSTER_FUTURE_UTIL.runnableTask(() -> {
+                cluster2ClusterConnectionStatusWithTemplateEnumMap.put(clusterPhy,
+                        clusterPhyManager.getClusterConnectionStatusWithCache(clusterPhy));
+                cluster2ExistDCDRAndPipelineModuleMap.put(clusterPhy,
+                        clusterPhyManager.getDCDRAndPipelineAndColdRegionTupleByClusterPhyWithCache(clusterPhy));
+            });
         }
-        return  TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_CLUSTER_FUTURE_UTIL.waitResult();
+        TEMPLATE_SRV_PAGE_SEARCH_HANDLE_BUILD_CLUSTER_FUTURE_UTIL.waitExecute();
+       
+        // 构建基础信息
+    
+        return templateList.stream().map(template -> buildTemplateWithSrvVO(template, projectId2ProjectName,
+                logicId2IndexTemplatePhyListMap, cluster2ClusterConnectionStatusWithTemplateEnumMap,
+                cluster2ExistDCDRAndPipelineModuleMap)).collect(Collectors.toList());
     }
     
-    private TemplateWithSrvVO buildTemplateWithSrvVO(IndexTemplate template, Map<Integer, String> projectId2ProjectName) {
+    private TemplateWithSrvVO buildTemplateWithSrvVO(IndexTemplate template, Map<Integer, String> projectId2ProjectName,
+                                                     Map<Integer, List<IndexTemplatePhy>> logicId2IndexTemplatePhyListMap,
+                                                     Map<String, ClusterConnectionStatusWithTemplateEnum> cluster2ClusterConnectionStatusWithTemplateEnumMap,
+                                                     Map<String, TupleThree<Boolean, Boolean, Boolean>> cluster2ExistDCDRAndPipelineModuleMap) {
         TemplateWithSrvVO templateWithSrvVO = ConvertUtil.obj2Obj(template, TemplateWithSrvVO.class);
         templateWithSrvVO.setCluster(Lists.newArrayList());
         templateWithSrvVO.setOpenSrv(
                 ConvertUtil.list2List(TemplateSrv.codeStr2SrvList(template.getOpenSrv()), TemplateSrvVO.class));
         Optional.ofNullable(template).map(IndexTemplate::getProjectId).map(projectId2ProjectName::get)
                 .ifPresent(templateWithSrvVO::setProjectName);
+        templateWithSrvVO.setPartition(StringUtils.endsWith(template.getExpression(), "*"));
         //这里整改为只要校验master即可，原因是由于我们在创建链路/获取相同版本出得集群的时候，进行插件的校验，不能放在这里，会损耗性能
-        final List<IndexTemplatePhy> indexTemplatePhies = indexTemplatePhyService.getTemplateByLogicId(
-                templateWithSrvVO.getId());
+        final List<IndexTemplatePhy> indexTemplatePhies = logicId2IndexTemplatePhyListMap.get(templateWithSrvVO.getId());
+        if (Objects.isNull(indexTemplatePhies)) {
+            LOGGER.warn("class={}||method=buildTemplateWithSrvVO||logicTemplateId={} 未匹配到物理模板，属于脏数据",
+                    getClass().getSimpleName(), templateWithSrvVO.getId());
+            return templateWithSrvVO;
+        }
         indexTemplatePhies.stream().filter(i -> TemplateDeployRoleEnum.MASTER.getCode().equals(i.getRole()))
-            
+
                 .map(IndexTemplatePhy::getCluster)
-                .map(cluster -> templateSrvManager.getUnavailableSrvByTemplateAndMasterPhy(template, cluster))
+                .map(cluster -> templateSrvManager.getUnavailableSrvByTemplateAndMasterPhy(template,
+                        cluster2ExistDCDRAndPipelineModuleMap.get(cluster)))
                 .map(unavailableTemplateSrvs -> ConvertUtil.list2List(Lists.newArrayList(unavailableTemplateSrvs),
                         UnavailableTemplateSrvVO.class)).findFirst().ifPresent(templateWithSrvVO::setUnavailableSrv);
-      
-        
-        
         indexTemplatePhies.stream().map(IndexTemplatePhy::getCluster).distinct()
                 .forEach(templateWithSrvVO.getCluster()::add);
-    
-        templateWithSrvVO.setPartition(StringUtils.endsWith(template.getExpression(), "*"));
+
         final List<ClusterConnectionStatusWithTemplateVO> statusWithTemplateList = indexTemplatePhies.stream()
                 //获取到主副本集群的连通状态
                 .map(indexTemplatePhy -> new ClusterConnectionStatusWithTemplateVO(indexTemplatePhy.getCluster(),
-                        templateSrvManager.getClusterConnectionStatus(indexTemplatePhy.getCluster())))
+                        cluster2ClusterConnectionStatusWithTemplateEnumMap.get(indexTemplatePhy.getCluster())))
                 .collect(Collectors.toList());
     
         templateWithSrvVO.setClusterConnectionStatus(statusWithTemplateList);

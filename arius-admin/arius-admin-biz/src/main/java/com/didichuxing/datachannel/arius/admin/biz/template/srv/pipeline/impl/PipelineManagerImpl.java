@@ -19,7 +19,6 @@ import com.didichuxing.datachannel.arius.admin.biz.template.srv.base.impl.BaseTe
 import com.didichuxing.datachannel.arius.admin.biz.template.srv.pipeline.PipelineManager;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.ESPipelineProcessor;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.IndexTemplatePhysicalConfig;
-import com.didichuxing.datachannel.arius.admin.common.bean.common.OperateRecord;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.ESPipeline;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.IndexTemplate;
@@ -29,7 +28,6 @@ import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemp
 import com.didichuxing.datachannel.arius.admin.common.bean.po.template.IndexTemplatePhyPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
-import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.TriggerWayEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateServiceEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
@@ -125,7 +123,7 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
         }
 
         for (IndexTemplatePhy physical : templatePhysicals) {
-            Integer rateLimit = getDynamicRateLimit(physical);
+            Integer rateLimit = getManualRateLimit(physical);
             try {
                 final ESPipeline esPipeline = new ESPipeline();
                 esPipeline.setCluster(physical.getCluster());
@@ -563,12 +561,10 @@ public class PipelineManagerImpl extends BaseTemplateSrvImpl implements Pipeline
             boolean esSuccess = esPipelineService.save("editFromTemplatePhysical", esPipeline, 3);
             
             if (esSuccess) {
-                operateRecordService.save(
-                    new OperateRecord.Builder().operationTypeEnum(OperateTypeEnum.TEMPLATE_MANAGEMENT_INFO_MODIFY)
-                        .userOperation(SYSTEM.getDesc()).triggerWayEnum(TriggerWayEnum.SCHEDULING_TASKS)
-                        .project(projectService.getProjectBriefByProjectId(AuthConstant.SUPER_PROJECT_ID))
-                        .content(String.format("rateLimit:%s->%s", rateLimitOld, rateLimitNew))
-                        .bizId(templatePhysical.getId()).build());
+                operateRecordService.saveOperateRecordWithSchedulingTasks(
+                        String.format("rateLimit:%s->%s", rateLimitOld, rateLimitNew), SYSTEM.getDesc(),
+                        AuthConstant.SUPER_PROJECT_ID, templatePhysical.getId(),
+                        OperateTypeEnum.TEMPLATE_MANAGEMENT_INFO_MODIFY);
             }
             return esSuccess;
         }

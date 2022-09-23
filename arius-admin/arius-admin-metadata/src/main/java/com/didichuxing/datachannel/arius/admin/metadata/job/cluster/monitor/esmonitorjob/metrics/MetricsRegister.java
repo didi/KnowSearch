@@ -1,21 +1,32 @@
 package com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.metrics;
 
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
+import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESDataTempBean;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESNodeToIndexTempBean;
-import com.didichuxing.datachannel.arius.admin.common.Tuple;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Maps;
 
-import java.util.Map;
-
+/**
+ * @author didi
+ * @date 2022/09/13
+ */
 public class MetricsRegister {
     /**
      * 缓存普通的采集自es 发送给odin的数据
      */
-    private Map<String, ESDataTempBean>        dataBeanRegister;
+    private final Cache<String, ESDataTempBean>        dataBeanRegisterCache  = CacheBuilder.newBuilder()
+        .expireAfterWrite(10, TimeUnit.MINUTES).initialCapacity(10000).build();
+
     /**
      * 缓存采集自一个node上的索引的指标数据
      */
-    private Map<String, ESNodeToIndexTempBean> nodeIndexRegister;
+    private final Cache<String, ESNodeToIndexTempBean> nodeIndexRegisterCache = CacheBuilder.newBuilder()
+        .expireAfterWrite(10, TimeUnit.MINUTES).initialCapacity(10000).build();
+
     /**
      * 缓存需要复合计算的值
      */
@@ -24,26 +35,24 @@ public class MetricsRegister {
     private Map<String, Tuple<Long, Double>>   clusterNodeCpu;
 
     public MetricsRegister() {
-        dataBeanRegister = Maps.newConcurrentMap();
-        nodeIndexRegister = Maps.newConcurrentMap();
         computeValueRegister = Maps.newConcurrentMap();
         clusterNodeCpu = Maps.newConcurrentMap();
     }
 
     public void putBeforeNodeToIndexData(String key, ESNodeToIndexTempBean data) {
-        nodeIndexRegister.put(key, data);
+        nodeIndexRegisterCache.put(key, data);
     }
 
     public ESNodeToIndexTempBean getBeforeNodeToIndexData(String key) {
-        return nodeIndexRegister.get(key);
+        return nodeIndexRegisterCache.getIfPresent(key);
     }
 
     public void putBeforeEsData(String key, ESDataTempBean data) {
-        dataBeanRegister.put(key, data);
+        dataBeanRegisterCache.put(key, data);
     }
 
     public ESDataTempBean getBeforeEsData(String key) {
-        return dataBeanRegister.get(key);
+        return dataBeanRegisterCache.getIfPresent(key);
     }
 
     public void putBeforeComputeData(String key, Double data) {
