@@ -167,12 +167,13 @@ public class OperateRecordServiceImpl implements OperateRecordService {
         if (result.failed()) {
             return Result.buildFrom(result);
         }
-        OperateRecordInfoPO selectOneOperateRecordInfoPO = operateRecordDAO.selectOne(buildOperateRecordInfoPOQueryWrapper(operateRecordDTO).select(ID));
+        OperateRecordInfoPO selectOneOperateRecordInfoPO = operateRecordDAO.selectOneOperateRecord(operateRecordDTO);
         if (null == selectOneOperateRecordInfoPO) {
             return insertOperateRecordInfoWithoutCheck(operateRecordDTO);
         }
         OperateRecordInfoPO convertOperateRecordInfoPO = ConvertUtil.obj2Obj(operateRecordDTO, OperateRecordInfoPO.class);
         convertOperateRecordInfoPO.setUpdateTime(new Date());
+        convertOperateRecordInfoPO.setOperateTime(new Date());
         convertOperateRecordInfoPO.setId(selectOneOperateRecordInfoPO.getId());
         boolean succ = (1 == operateRecordDAO.updateById(convertOperateRecordInfoPO));
         return Result.build(succ, convertOperateRecordInfoPO.getId());
