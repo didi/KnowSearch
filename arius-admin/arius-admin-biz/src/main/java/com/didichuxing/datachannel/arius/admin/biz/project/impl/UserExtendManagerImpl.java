@@ -84,6 +84,12 @@ public class UserExtendManagerImpl implements UserExtendManager {
      */
     @Override
     public PagingResult<UserExtendVO> getUserPage(UserQueryExtendDTO queryDTO) {
+        if(StringUtils.isNotBlank(queryDTO.getUserName())){
+            queryDTO.setUserName(CommonUtils.sqlFuzzyQueryTransfer(queryDTO.getUserName()));
+        }
+        if(StringUtils.isNotBlank(queryDTO.getRealName())){
+            queryDTO.setRealName(CommonUtils.sqlFuzzyQueryTransfer(queryDTO.getRealName()));
+        }
         final List<UserBriefVO> userBriefListByAdmin = userService.getUserBriefListByRoleId(
                 AuthConstant.ADMIN_ROLE_ID);
         PagingData<UserExtendVO> userPage;
