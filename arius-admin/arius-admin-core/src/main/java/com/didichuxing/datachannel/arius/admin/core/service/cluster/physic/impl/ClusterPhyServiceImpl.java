@@ -19,6 +19,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.cluster.ClusterRe
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.common.util.ProjectUtils;
 import com.didichuxing.datachannel.arius.admin.core.service.cluster.ecm.ESPluginService;
@@ -339,6 +340,9 @@ public class ClusterPhyServiceImpl implements ClusterPhyService {
         param.setSortTerm(sortTerm);
         param.setSortType(sortType);
         param.setFrom((param.getPage() - 1) * param.getSize());
+        if(StringUtils.isNotEmpty(param.getDesc())){
+            param.setDesc(CommonUtils.sqlFuzzyQueryTransfer(param.getDesc()));
+        }
         List<ClusterPhyPO> clusters = Lists.newArrayList();
         try {
             clusters = clusterDAO.pagingByCondition(param);

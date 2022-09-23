@@ -380,7 +380,9 @@ public class ProjectExtendManagerImpl implements ProjectExtendManager {
          * 		删除能力  :   假如A应用不属于当前的用户,是否可以被删除 (不能)
          */
         final ProjectQueryDTO projectQueryDTO = ConvertUtil.obj2Obj(queryDTO, ProjectQueryDTO.class);
-
+        if(StringUtils.isNotBlank(projectQueryDTO.getProjectName())){
+            projectQueryDTO.setProjectName(CommonUtils.sqlFuzzyQueryTransfer(projectQueryDTO.getProjectName()));
+        }
         final PagingData<ProjectVO> projectPage = projectService.getProjectPage(projectQueryDTO, Lists.newArrayList(projectIds));
         final List<ProjectExtendVO> projectExtendVOList = ConvertUtil.list2List(projectPage.getBizData(),
             ProjectExtendVO.class);

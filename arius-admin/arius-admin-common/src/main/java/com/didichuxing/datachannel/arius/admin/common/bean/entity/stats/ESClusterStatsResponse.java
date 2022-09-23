@@ -28,6 +28,15 @@ public class ESClusterStatsResponse {
      */
     private long          docsCount;
     /**
+     * 集群索引总存储量
+     */
+    private ByteSizeValue indicesStoreSize;
+
+    /**
+     * 集群未分配shard数
+     */
+    private long          unassignedShardNum;
+    /**
      * 集群Pending task数
      */
     private long          pendingTasks;

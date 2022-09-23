@@ -84,6 +84,12 @@ public class UserExtendManagerImpl implements UserExtendManager {
      */
     @Override
     public PagingResult<UserExtendVO> getUserPage(UserQueryExtendDTO queryDTO) {
+        if(StringUtils.isNotBlank(queryDTO.getUserName())){
+            queryDTO.setUserName(CommonUtils.sqlFuzzyQueryTransfer(queryDTO.getUserName()));
+        }
+        if(StringUtils.isNotBlank(queryDTO.getRealName())){
+            queryDTO.setRealName(CommonUtils.sqlFuzzyQueryTransfer(queryDTO.getRealName()));
+        }
         final List<UserBriefVO> userBriefListByAdmin = userService.getUserBriefListByRoleId(
                 AuthConstant.ADMIN_ROLE_ID);
         PagingData<UserExtendVO> userPage;
@@ -99,21 +105,21 @@ public class UserExtendManagerImpl implements UserExtendManager {
             final PagingData<UserVO> userPageAll = userService.getUserPage(queryDTO);
             final List<UserVO> userListAll = userPageAll.getBizData().parallelStream()
                     .filter(i -> !userBriefListWithAdminRole.contains(i.getId())).collect(Collectors.toList());
-           
+
             final List<UserExtendVO> userExtendVOS = ConvertUtil.list2List(userListAll, UserExtendVO.class,userExtendVO -> userExtendVO.setUserListWithAdminRole(userBriefListByAdmin));
             final Pagination pagination = Pagination.builder().total(userListAll.size())
                     .pages(new BigDecimal(userListAll.size()).divide(new BigDecimal(pageSize), 0, RoundingMode.UP)
                             .intValue()
-            
+
                     ).pageNo(page).pageSize(pageSize).build();
-    
+
             userPage=new PagingData<>(userExtendVOS,pagination);
         } else {
             final PagingData<UserVO> userPageUserVo = userService.getUserPage(queryDTO);
              final List<UserExtendVO> userExtendVOS = ConvertUtil.list2List(userPageUserVo.getBizData(),
                      UserExtendVO.class,userExtendVO -> userExtendVO.setUserListWithAdminRole(userBriefListByAdmin));
             userPage = new PagingData<>(userExtendVOS,userPageUserVo.getPagination()) ;
-            
+
         }
         final List<UserExtendVO> userList = userPage.getBizData();
         //提前获取一下，避免多次查库

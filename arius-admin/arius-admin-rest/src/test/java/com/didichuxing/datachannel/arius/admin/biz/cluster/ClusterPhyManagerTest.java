@@ -205,7 +205,7 @@ class ClusterPhyManagerTest {
             Collections.singletonList(clusterRoleInfo), Collections.singletonList(clusterRoleHost), 0, "writeAction", 0,
             0L, 0L, 0L, 0.0, "platformType", 1, "gatewayUrl");
         clusterPhyList = Collections.singletonList(clusterPhy);
-        esClusterStatsResponse = new ESClusterStatsResponse("status", 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L,0L, 0L,
+        esClusterStatsResponse = new ESClusterStatsResponse("status", 0L, 0L, 0L,new ByteSizeValue(0L, ByteSizeUnit.BYTES), 0L, 0L, 0L, 0L, 0L, 0L,0L, 0L,
             new ByteSizeValue(0L, ByteSizeUnit.BYTES), new ByteSizeValue(0L, ByteSizeUnit.BYTES),
             new ByteSizeValue(0L, ByteSizeUnit.BYTES), 0L, 0L, new ByteSizeValue(0L, ByteSizeUnit.BYTES),
             new ByteSizeValue(0L, ByteSizeUnit.BYTES), new ByteSizeValue(0L, ByteSizeUnit.BYTES),
@@ -764,7 +764,7 @@ class ClusterPhyManagerTest {
         assertFalse(clusterPhyManager.updateClusterInfo(CLUSTER, "operator"));
 
         when(mockClusterPhyService.getClusterByName(CLUSTER)).thenReturn(clusterPhy);
-        ESClusterStatsResponse response = new ESClusterStatsResponse("status", 0L, 0L, 0L,0L, 0L, 0L, 0L, 0L, 0L, 0L,
+        ESClusterStatsResponse response = new ESClusterStatsResponse("status", 0L, 0L, 0L,new ByteSizeValue(0L, ByteSizeUnit.BYTES), 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L,
             new ByteSizeValue(0L, ByteSizeUnit.BYTES), new ByteSizeValue(0L, ByteSizeUnit.BYTES),
             new ByteSizeValue(0L, ByteSizeUnit.BYTES), 0L, 0L, new ByteSizeValue(100L, ByteSizeUnit.BYTES),
             new ByteSizeValue(40L, ByteSizeUnit.BYTES), new ByteSizeValue(0L, ByteSizeUnit.BYTES),
