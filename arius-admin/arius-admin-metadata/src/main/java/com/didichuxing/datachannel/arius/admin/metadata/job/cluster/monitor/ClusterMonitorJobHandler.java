@@ -278,8 +278,6 @@ public class ClusterMonitorJobHandler extends AbstractMetaDataJob {
 
         AtomicReference<Map<String, Double>> clusterCpuAvgAndPercentilesAtomic = new AtomicReference<>();
         AtomicReference<Map<String, Double>> clusterDiskFreeUsagePercentAvgAndPercentilesAtomic = new AtomicReference<>();
-        AtomicReference<Map<String, Double>> clusterSearchLatencyAvgAndPercentilesAtomic = new AtomicReference<>();
-        AtomicReference<Map<String, Double>> clusterIndexingLatencyAvgAndPercentilesAtomic = new AtomicReference<>();
         AtomicReference<Map<String, Double>> clusterCpuLoad1MinAvgAndPercentilesAtomic = new AtomicReference<>();
         AtomicReference<Map<String, Double>> clusterCpuLoad5MinAvgAndPercentilesAtomic = new AtomicReference<>();
         AtomicReference<Map<String, Double>> clusterCpuLoad15MinAvgAndPercentilesAtomic = new AtomicReference<>();
@@ -290,10 +288,6 @@ public class ClusterMonitorJobHandler extends AbstractMetaDataJob {
                 .set(ariusStatsNodeInfoEsDao.getClusterCpuAvgAndPercentiles(clusterName)))
             .runnableTask(() -> clusterDiskFreeUsagePercentAvgAndPercentilesAtomic
                 .set(ariusStatsNodeInfoEsDao.getClusterDiskFreeUsagePercentAvgAndPercentiles(clusterName)))
-            .runnableTask(() -> clusterSearchLatencyAvgAndPercentilesAtomic
-                .set(ariusStatsNodeInfoEsDao.getClusterSearchLatencyAvgAndPercentiles(clusterName)))
-            .runnableTask(() -> clusterIndexingLatencyAvgAndPercentilesAtomic
-                .set(ariusStatsNodeInfoEsDao.getClusterIndexingLatencyAvgAndPercentiles(clusterName)))
             .runnableTask(() -> clusterCpuLoad1MinAvgAndPercentilesAtomic
                 .set(ariusStatsNodeInfoEsDao.getClusterCpuLoad1MinAvgAndPercentiles(clusterName)))
             .runnableTask(() -> clusterCpuLoad5MinAvgAndPercentilesAtomic
@@ -312,7 +306,6 @@ public class ClusterMonitorJobHandler extends AbstractMetaDataJob {
                 clusterCpuLoad1MinAvgAndPercentilesAtomic.get(), clusterCpuLoad5MinAvgAndPercentilesAtomic.get(),
                 clusterCpuLoad15MinAvgAndPercentilesAtomic.get(),
                 clusterDiskFreeUsagePercentAvgAndPercentilesAtomic.get(),
-                clusterSearchLatencyAvgAndPercentilesAtomic.get(), clusterIndexingLatencyAvgAndPercentilesAtomic.get(),
                 clusterTaskCostMinAvgAndPercentilesAtomic.get());
 
             percentilesType2ESClusterStatsCellsMap.put(type, esClusterStatsCellDeepCopy);
@@ -327,8 +320,6 @@ public class ClusterMonitorJobHandler extends AbstractMetaDataJob {
      * @param type                                             avg、分位类型(99、95、75、55)
      * @param clusterCpuAvgAndPercentiles                      集群cpu平均值和分位值(key:99, value:值)
      * @param clusterDiskFreeUsagePercentAvgAndPercentiles     集群节点磁盘空闲率平均值和分位值(key:99, value:值)
-     * @param clusterSearchLatencyAvgAndPercentiles            集群节点查询耗时平均值和分位值(key:99, value:值)
-     * @param clusterIndexingLatencyAvgAndPercentiles          集群节点写入耗时平均值和分位值(key:99, value:值)
      * @param clusterCpuLoad1MinAvgAndPercentiles              集群cpu load1平均值和分位值(key:99, value:值)
      * @param clusterCpuLoad5MinAvgAndPercentiles              集群cpu load5平均值和分位值(key:99, value:值)
      * @param clusterCpuLoad15MinAvgAndPercentiles             集群cpu load15平均值和分位值(key:99, value:值)
@@ -340,8 +331,6 @@ public class ClusterMonitorJobHandler extends AbstractMetaDataJob {
                                      Map<String, Double> clusterCpuLoad5MinAvgAndPercentiles,
                                      Map<String, Double> clusterCpuLoad15MinAvgAndPercentiles,
                                      Map<String, Double> clusterDiskFreeUsagePercentAvgAndPercentiles,
-                                     Map<String, Double> clusterSearchLatencyAvgAndPercentiles,
-                                     Map<String, Double> clusterIndexingLatencyAvgAndPercentiles,
                                      Map<String, Double> clusterTaskCostMinAvgAndPercentiles) {
         if (null != clusterCpuAvgAndPercentiles && null != clusterCpuAvgAndPercentiles.get(type)) {
             esClusterStatsCellDeepCopy.setCpuUsage(clusterCpuAvgAndPercentiles.get(type));
@@ -363,15 +352,6 @@ public class ClusterMonitorJobHandler extends AbstractMetaDataJob {
         if (null != clusterDiskFreeUsagePercentAvgAndPercentiles
             && null != clusterDiskFreeUsagePercentAvgAndPercentiles.get(realType)) {
             esClusterStatsCellDeepCopy.setDiskUsage(1 - clusterDiskFreeUsagePercentAvgAndPercentiles.get(realType));
-        }
-
-        if (null != clusterSearchLatencyAvgAndPercentiles && null != clusterSearchLatencyAvgAndPercentiles.get(type)) {
-            esClusterStatsCellDeepCopy.setSearchLatency(clusterSearchLatencyAvgAndPercentiles.get(type));
-        }
-
-        if (null != clusterIndexingLatencyAvgAndPercentiles
-            && null != clusterIndexingLatencyAvgAndPercentiles.get(type)) {
-            esClusterStatsCellDeepCopy.setIndexingLatency(clusterIndexingLatencyAvgAndPercentiles.get(type));
         }
 
         if (null != clusterTaskCostMinAvgAndPercentiles && null != clusterTaskCostMinAvgAndPercentiles.get(type)) {
@@ -441,9 +421,47 @@ public class ClusterMonitorJobHandler extends AbstractMetaDataJob {
             .runnableTask(() -> esClusterStats.setWriteTps(ariusStatsIndexInfoEsDao.getClusterTps(clusterName)))
             .runnableTask(() -> esClusterStats.setRecvTransSize(ariusStatsNodeInfoEsDao.getClusterRx(clusterName)))
             .runnableTask(() -> esClusterStats.setSendTransSize(ariusStatsNodeInfoEsDao.getClusterTx(clusterName)))
-            .runnableTask(() -> setClusterOtherStats(clusterName, esClusterStats)).runnableTask(() -> esClusterStats
-                .setQueryTimesPreDay(templateAccessESDAO.getYesterDayAllTemplateAccess(clusterName)))
+            .runnableTask(() -> setClusterOtherStats(clusterName, esClusterStats))
+            .runnableTask(() -> esClusterStats.setQueryTimesPreDay(templateAccessESDAO.getYesterDayAllTemplateAccess(clusterName)))
+            .runnableTask(() -> esClusterStats.setSearchLatency(calcSearchLatencyAvg(clusterName)))
+            .runnableTask(() -> esClusterStats.setIndexingLatency(calcIndexingLatencyAvg(clusterName)))
             .waitExecute();
+    }
+
+    /**
+     * 计算SearchLatency
+     *    计算逻辑：
+     *    （集群下的所有节点,间隔时间内通过_node/stats命令获取nodes.{nodeName}.indices.search.query_time_in_millis差值累加值）
+     *        除以
+     *    （节点间隔时间nodes.{nodeName}.indices.search.query_total差值累加值）
+     *
+     * @param clusterName   集群名称
+     * @return
+     */
+    private double calcSearchLatencyAvg(String clusterName){
+        // 获取分子：所有节点的indices.search.query_time_in_millis差值累加值
+        double searchLatencySum = ariusStatsNodeInfoEsDao.getClusterSearchLatencySum(clusterName);
+        // 获取分母：所有节点indices.search.query_total差值累加值
+        double searchQueryTotal = ariusStatsNodeInfoEsDao.getClusterSearchQueryTotal(clusterName);
+        return searchQueryTotal == 0 ? 0 : (searchLatencySum / searchQueryTotal);
+    }
+
+    /**
+     * 计算IndexingLatency
+     *    计算逻辑：
+     *    （集群下的所有节点,间隔时间内通过_node/stats命令获取nodes.{nodeName}.indices.indexing.index_time_in_millis差值累加值）
+     *         除以
+     *    （节点间隔时间nodes.{nodeName}.indices.docs.count差值累加值）
+     *
+     * @param clusterName
+     * @return
+     */
+    private double calcIndexingLatencyAvg(String clusterName){
+        // 获取分子：所有节点的indices.indexing.index_time_in_millis差值累加值
+        double indexingLatencySum = ariusStatsNodeInfoEsDao.getClusterIndexingLatencySum(clusterName);
+        // 获取分母：所有节点的indices.docs.count差值累加值
+        double indexingDocSum = ariusStatsNodeInfoEsDao.getClusterIndexingDocSum(clusterName);
+        return indexingDocSum == 0 ? 0 : (indexingLatencySum / indexingDocSum);
     }
 
     /**

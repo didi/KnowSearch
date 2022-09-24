@@ -287,6 +287,9 @@
                     "indices-docs-count":{
                         "type":"double"
                     },
+                    "indices-docs-count_diff":{
+                        "type":"double"
+                    },
                     "ingest-total-current":{
                         "type":"float"
                     },

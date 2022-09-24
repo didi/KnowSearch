@@ -280,6 +280,9 @@ public class MonitorCollectMetrics {
         nodeWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.indices.docs.count")
             .valueRoute("indices.docs.count").computeType(NONE).build());
 
+        nodeWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.indices.docs.count_diff")
+            .valueRoute("indices.docs.count").computeType(MINUS).build());
+
         nodeWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.indices.translog.operations_rate")
             .valueRoute("indices.translog.operations").computeType(AVG).build());
 

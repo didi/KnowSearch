@@ -178,25 +178,53 @@ public class AriusStatsNodeInfoESDAO extends BaseAriusStatsESDAO {
     /**
      * 获取集群写入耗时分位值(统计节点维度)和平均使用率
      */
-    public Map<String, Double> getClusterIndexingLatencyAvgAndPercentiles(String cluster) {
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.AGG_CLUSTER_REAL_TIME_AVG_AND_PERCENT, cluster,
-            NOW_2M, NOW_1M, INDICES_INDEXING_LATENCY.getType(), INDICES_INDEXING_LATENCY.getType());
+    public double getClusterIndexingLatencySum(String cluster) {
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.AGG_CLUSTER_INDEXING_SEARCH_TIME_SUM, cluster,
+            NOW_2M, NOW_1M, INDICES_INDEXING_LATENCY.getType());
         String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
 
         return gatewayClient.performRequestWithRouting(metadataClusterName, cluster, realIndex, TYPE, dsl,
-            this::getAvgAndPercentilesFromESQueryResponse, 3);
+                s -> getSumFromESQueryResponse(s, "sum"), 3);
+    }
+
+    /**
+     * 获取集群所有节点间隔时间nodes.{nodeName}.indices.docs.count差值累加值
+     * @param cluster 集群名称
+     * @return
+     */
+    public double getClusterIndexingDocSum(String cluster) {
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.AGG_CLUSTER_INDEXING_SEARCH_TIME_SUM, cluster,
+                NOW_2M, NOW_1M, INDICES_NUM_DIFF.getType());
+        String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
+
+        return gatewayClient.performRequestWithRouting(metadataClusterName, cluster, realIndex, TYPE, dsl,
+                s -> getSumFromESQueryResponse(s, "sum"), 3);
     }
 
     /**
      * 获取集群查询耗时分位值(统计节点维度)和平均使用率
      */
-    public Map<String, Double> getClusterSearchLatencyAvgAndPercentiles(String cluster) {
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.AGG_CLUSTER_REAL_TIME_AVG_AND_PERCENT, cluster,
-            NOW_2M, NOW_1M, INDICES_QUERY_LATENCY.getType(), INDICES_QUERY_LATENCY.getType());
+    public double getClusterSearchLatencySum(String cluster) {
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.AGG_CLUSTER_INDEXING_SEARCH_TIME_SUM, cluster,
+            NOW_2M, NOW_1M, INDICES_QUERY_LATENCY.getType());
         String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
 
         return gatewayClient.performRequest(metadataClusterName, realIndex, TYPE, dsl,
-            this::getAvgAndPercentilesFromESQueryResponse, 3);
+                s -> getSumFromESQueryResponse(s, "sum"), 3);
+    }
+
+    /**
+     * 获取集群所有节点间隔时间nodes.{nodeName}.indices.search.query_total差值累加值
+     * @param cluster 集群名称
+     * @return
+     */
+    public double getClusterSearchQueryTotal(String cluster){
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.AGG_CLUSTER_INDEXING_SEARCH_TIME_SUM, cluster,
+                NOW_2M, NOW_1M, INDICES_QUERY_TOTAL.getType());
+        String realIndex = IndexNameUtils.genCurrentDailyIndexName(indexName);
+
+        return gatewayClient.performRequest(metadataClusterName, realIndex, TYPE, dsl,
+                s -> getSumFromESQueryResponse(s, "sum"), 3);
     }
 
     /**

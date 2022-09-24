@@ -213,6 +213,11 @@ public class DslsConstant {
     public static final String AGG_CLUSTER_REAL_TIME_AVG_AND_PERCENT                         = "AriusStatsNodeInfoEsDao/aggClusterAvgAndPercentiles";
 
     /**
+     * 获取集群查询/写入总耗时
+     */
+    public static final String AGG_CLUSTER_INDEXING_SEARCH_TIME_SUM                         = "AriusStatsNodeInfoEsDao/aggClusterIndexingOrSearchTimeSum";
+
+    /**
      * 获取集群磁盘空闲率实时分位值和平均使用率
      */
     public static final String AGG_CLUSTER_AVG_AND_PERCENT_FOR_DISK_FREE_USAGE_PERCENT       = "AriusStatsNodeInfoEsDao/aggClusterAvgAndPercentilesForDiskFreeUsagePercent";
