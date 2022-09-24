@@ -68,6 +68,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import org.apache.commons.collections4.CollectionUtils;
@@ -89,7 +90,7 @@ public class ESIndexDAO extends BaseESDAO {
     public static final String ONLY_EXPUNGE_DELETES = "only_expunge_deletes";
     public static final String ROLLOVER_API         = "/_rollover";
     public static final  String ALIAS_API              = "/%s/_alias";
-    public static final String CAT_INDIES = "/_cat/indices/%s?v=true&format=json&filter_path=index&ignore_unavailable=true";
+    public static final String CAT_INDIES = "/_cat/indices/%s?v=true&format=json&filter_path=index";
     public static final String INDEX = "index";
     public static final String DELETE_INDEX = "%s?ignore_unavailable=true";
     public static final String ACKNOWLEDGED = "acknowledged";
