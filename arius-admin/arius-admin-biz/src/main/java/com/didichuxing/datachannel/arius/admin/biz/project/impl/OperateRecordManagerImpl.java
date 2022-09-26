@@ -19,10 +19,6 @@ import com.didichuxing.datachannel.arius.admin.core.service.common.AriusConfigIn
 import com.didichuxing.datachannel.arius.admin.core.service.common.OperateRecordService;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
-
-import java.util.*;
-import java.util.stream.Collectors;
-
 import com.didiglobal.logi.security.common.vo.user.UserBriefVO;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.didiglobal.logi.security.service.UserService;
@@ -30,6 +26,12 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant.COMMA;
 
@@ -142,7 +144,8 @@ public class OperateRecordManagerImpl implements OperateRecordManager {
         if(CollectionUtils.isEmpty(operateRecordVOList)){
             //只有拥有管理员权限的才能被赋予默认命令
             final List<UserBriefVO> userBriefListWithAdminRole = userService.getUserBriefListByRoleId(AuthConstant.ADMIN_ROLE_ID);
-            if(userBriefListWithAdminRole.stream().map(UserBriefVO::getUserName).anyMatch(userName->operator.equals(userName))){
+            if(userBriefListWithAdminRole.stream().map(UserBriefVO::getUserName).anyMatch(userName->operator.equals(userName))
+                    && AuthConstant.SUPER_PROJECT_ID.equals(projectId)){
                 //查询平台配置中的超级应用的默认命令
                 List<String> superAppDefaultCommandList = new ArrayList<>(ariusConfigInfoService.stringSettingSplit2Set(AriusConfigConstant.ARIUS_COMMON_GROUP
                         , AriusConfigConstant.SUPER_APP_DEFALT_DSL_COMMAND,
