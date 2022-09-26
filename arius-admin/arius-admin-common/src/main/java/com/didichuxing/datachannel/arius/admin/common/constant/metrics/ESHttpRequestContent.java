@@ -13,7 +13,7 @@ public class ESHttpRequestContent {
     /**
      * 获取集群搬迁shard
      */
-    public static final String GET_MOVING_SHARD            = "_cat/recovery?v&h=i,s,t,st,shost,thost&active_only=true";
+    public static final String GET_MOVING_SHARD            = "_cat/recovery?format=json&active_only=true";
 
     /**
      * 获取集群pendingTask

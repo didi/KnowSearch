@@ -19,20 +19,20 @@ import lombok.NoArgsConstructor;
 public class MovingShardMetricsVO implements Serializable {
 
     @ApiModelProperty("承载索引")
-    private String i;
-
-    @ApiModelProperty("shard序号")
-    private Long   s;
-
-    @ApiModelProperty("耗时")
-    private String t;
+    private String index;
 
     @ApiModelProperty("源节点Ip")
-    private String shost;
+    private String source_host;
 
     @ApiModelProperty("目标节点ip")
-    private String thost;
+    private String target_host;
 
-    @ApiModelProperty("状态 init、index、start、translog、finalize、done")
-    private String st;
+    @ApiModelProperty("恢复的字节数")
+    private String bytes_recovered;
+
+    @ApiModelProperty("字节数占比")
+    private String bytes_percent;
+
+    @ApiModelProperty("转换日志操作占比")
+    private String translog_ops_percent;
 }

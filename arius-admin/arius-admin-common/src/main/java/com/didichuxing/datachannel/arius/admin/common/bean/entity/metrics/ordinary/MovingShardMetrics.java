@@ -2,6 +2,7 @@ package com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordin
 
 import java.io.Serializable;
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,33 +15,31 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MovingShardMetrics implements Serializable {
+
     /**
      * 归属索引
      */
-    private String i;
+    private String index;
 
     /**
-     * shard标识
+     * 源节点ip
      */
-    private long   s;
-
-    /**
-     * 耗时
-     */
-    private String t;
-
-    /**
-     * 源节点Ip
-     */
-    private String shost;
+    private String source_host;
 
     /**
      * 目标节点ip
      */
-    private String thost;
+    private String target_host;
 
     /**
-     * 状态 init、index、start、translog、finalize、done
+     * 覆盖的字节数
      */
-    private String st;
+    private String bytes_recovered;
+
+    /**
+     * 字节占比
+     */
+    private String bytes_percent;
+
+    private String translog_ops_percent;
 }
