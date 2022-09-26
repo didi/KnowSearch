@@ -68,6 +68,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class ESClusterDAO extends BaseESDAO {
     private final static String REMOTE_TARGET_CLUSTER="_remote/info?filter_path=%s.%s";
+    private final static String REMOTE_TARGET_CLUSTER_COUNT="%s:*/_count";
     private final static String CONNECTED="connected";
 
     /**
@@ -839,6 +840,29 @@ public class ESClusterDAO extends BaseESDAO {
         return Optional.ofNullable(directResponse).filter(d -> d.getRestStatus() == RestStatus.OK)
                 .map(DirectResponse::getResponseContent).map(JSON::parseObject)
                 .map(jsonObject -> jsonObject.getJSONObject(targetCluster))
-                .map(jsonObject -> jsonObject.getBoolean(CONNECTED)).orElse(false);
+                .map(jsonObject -> jsonObject.getBoolean(CONNECTED)).orElse(tryRemoteClusterCountIndices(cluster,
+                        targetCluster));
+    }
+    
+    /**
+     * > 它尝试获取目标集群中的索引计数，只是为了进行主集群到从集群正常的健康性校验:
+     * 无需关注底层异常，这是由于如果集群不通，那么会触发Gateway Time-out，
+     * 那么也可以证明集群是不通的，所以无需关注
+     *
+     * @param cluster 索引所属的集群的名称。
+     * @param targetCluster 目标集群的名称。
+     */
+    private boolean tryRemoteClusterCountIndices(String cluster, String targetCluster)  {
+        DirectResponse directResponse = null;
+        try {
+            DirectRequest directRequest = new DirectRequest("GET",
+                    String.format(REMOTE_TARGET_CLUSTER_COUNT, targetCluster));
+            directResponse = esOpClient.getESClient(cluster).direct(directRequest).actionGet(3, TimeUnit.SECONDS);
+        } catch (Exception ignore) {
+        
+        }
+        return Optional.ofNullable(directResponse).map(d -> d.getRestStatus() == RestStatus.OK)
+                .orElse(false);
+        
     }
 }
