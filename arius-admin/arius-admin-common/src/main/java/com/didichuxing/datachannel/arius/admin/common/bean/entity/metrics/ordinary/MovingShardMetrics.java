@@ -19,27 +19,30 @@ public class MovingShardMetrics implements Serializable {
     /**
      * 归属索引
      */
-    private String index;
+    private String i;
 
     /**
      * 源节点ip
      */
-    private String source_host;
+    private String shost;
 
     /**
      * 目标节点ip
      */
-    private String target_host;
+    private String thost;
 
     /**
      * 覆盖的字节数
      */
-    private String bytes_recovered;
+    private String br;
 
     /**
      * 字节占比
      */
-    private String bytes_percent;
+    private String bp;
 
-    private String translog_ops_percent;
+    /**
+     * 转换日志操作占比
+     */
+    private String top;
 }
