@@ -26,10 +26,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.didichuxing.datachannel.arius.admin.common.constant.AriusConfigConstant.*;
@@ -81,15 +78,13 @@ public class ESShardServiceImpl implements ESShardService {
     public List<UnAssignShardMetrics> syncGetUnAssignShards(String clusterName) {
         DirectResponse directResponse = esShardDAO.getDirectResponse(clusterName, "Get", GET_SHARDS_JSON);
 
-        List<UnAssignShardMetrics> unAssignShardMetrics = Lists.newArrayList();
         if (directResponse.getRestStatus() == RestStatus.OK
                 && StringUtils.isNoneBlank(directResponse.getResponseContent())) {
 
-            unAssignShardMetrics = ConvertUtil.str2ObjArrayByJson(directResponse.getResponseContent(),
+            return ConvertUtil.str2ObjArrayByJson(directResponse.getResponseContent(),
                     UnAssignShardMetrics.class).stream().filter(r->r.getState().equals(unassign)).collect(Collectors.toList());
-
         }
-        return unAssignShardMetrics;
+        return Lists.newArrayList();
     }
     @Override
     public List<ShardMetrics> syncGetBigShards(String clusterName) {

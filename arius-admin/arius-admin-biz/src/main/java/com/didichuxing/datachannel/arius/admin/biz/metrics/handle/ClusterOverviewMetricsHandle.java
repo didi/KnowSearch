@@ -198,6 +198,7 @@ public class ClusterOverviewMetricsHandle {
                     return;
                 case UNASSIGN_SHARDS:
                     getUnassignShardsMetrics(metrics);
+                    return;
                 case INVALID_NODES:
                     getInvalidNodesMetrics(metrics);
                     return;
