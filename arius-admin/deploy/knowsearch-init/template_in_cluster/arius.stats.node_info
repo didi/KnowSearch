@@ -290,6 +290,36 @@
                     "indices-docs-count_diff":{
                         "type":"double"
                     },
+                    "indices-search-fetch_total":{
+                        "type":"double"
+                    },
+                    "indices-indexing-index_time_per_doc":{
+                        "type":"double"
+                    },
+                    "indices-search-query_time_per_query":{
+                        "type":"double"
+                    },
+                    "indices-search-fetch_time_per_fetch":{
+                        "type":"double"
+                    },
+                    "indices-search-scroll_avg_time":{
+                        "type":"double"
+                    },
+                    "indices-search-scroll_total":{
+                        "type":"double"
+                    },
+                    "indices-request_cache-total_count":{
+                        "type":"double"
+                    },
+                    "indices-query_cache-total_count":{
+                        "type":"double"
+                    },
+                    "indices-query_cache-hit_rate":{
+                        "type":"double"
+                    },
+                    "indices-request_cache-hit_rate":{
+                        "type":"double"
+                    },
                     "ingest-total-current":{
                         "type":"float"
                     },
