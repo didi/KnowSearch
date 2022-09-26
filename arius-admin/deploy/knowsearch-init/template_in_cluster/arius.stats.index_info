@@ -215,7 +215,41 @@
                     },
                     "indices-flush_avg_time":{
                         "type":"double"
+                    },
+                     "segments_norms_memory_in_bytes":{
+                        "type":"double"
+                    },
+                    "segments_version_map_memory_in_bytes":{
+                        "type":"double"
+                    },
+                    "segments_fixed_bit_set_memory_in_bytes":{
+                        "type":"double"
+                    },
+                    "segments_fielddata_memory_size_in_bytes":{
+                        "type":"double"
+                    },
+                    "segments_segments_request_cache_memory_size_in_bytes":{
+                        "type":"double"
+                    },
+                    "cost_index_time_in_millis":{
+                        "type":"double"
+                    },
+                    "cost_query_time_in_millis":{
+                        "type":"double"
+                    },
+                    "cost_fetch_time_in_millis":{
+                         "type":"double"
+                    },
+                    "cost_scroll_time_in_millis":{
+                         "type":"double"
+                    },
+                    "cost_refresh_total_time_in_millis":{
+                         "type":"double"
+                    },
+                    "cost_flush_total_time_in_millis":{
+                         "type":"double"
                     }
+
                 }
             },
             "key":{

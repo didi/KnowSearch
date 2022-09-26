@@ -26,7 +26,7 @@ es.password: azAWiJhxkho33ac
 scroll.timeout: 60s
 
 #ES元数据集群相关配置
-es.update.cluster.name: logi-elasticsearch-7.6.0
+es.update.cluster.name: es7
 
 #ES客户端相关配置
 es.client.cluster.port: 8061

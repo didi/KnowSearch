@@ -1,13 +1,13 @@
 package com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob;
 
-import static com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.metrics.MetricsComputeType.*;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESDataTempBean;
+import com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.metrics.CollectMetrics;
+import com.google.common.collect.Lists;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.entity.stats.ESDataTempBean;
-import com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.metrics.CollectMetrics;
-import com.google.common.collect.Lists;
+import static com.didichuxing.datachannel.arius.admin.metadata.job.cluster.monitor.esmonitorjob.metrics.MetricsComputeType.*;
 
 public class MonitorCollectMetrics {
 
@@ -34,14 +34,9 @@ public class MonitorCollectMetrics {
         indexWorkOrders.add(new CollectMetrics.Builder().valueName("es.indices.indexing.index_total_times")
             .valueRoute(INDEXING_INDEX_TOTAL).computeType(MINUS).build());
 
-        indexWorkOrders.add(new CollectMetrics.Builder().valueName("es.indices.indexing.index_total_rate")
-            .valueRoute(INDEXING_INDEX_TOTAL).computeType(AVG).sendToN9e().build());
 
         indexWorkOrders.add(new CollectMetrics.Builder().valueName("es.indices.indexing.index_time_in_millis_rate")
             .valueRoute(INDEXING_INDEX_TIME_IN_MILLIS).computeType(AVG).build());
-
-        indexWorkOrders.add(new CollectMetrics.Builder().valueName("es.indices.indexing.index_time_in_millis")
-            .valueRoute(INDEXING_INDEX_TIME_IN_MILLIS).computeType(MINUS).sendToN9e().build());
 
         indexWorkOrders.add(new CollectMetrics.Builder().valueName("es.indices.merges.current")
             .valueRoute("merges.current").computeType(NONE).build());
@@ -50,7 +45,7 @@ public class MonitorCollectMetrics {
             .computeType(MINUS).build());
 
         indexWorkOrders.add(new CollectMetrics.Builder().valueName("es.indices.merges.total_rate")
-            .valueRoute(MERGES_TOTAL).computeType(AVG).build());
+            .valueRoute(MERGES_TOTAL).computeType(AVG_MIN).build());
 
         indexWorkOrders.add(new CollectMetrics.Builder().valueName("es.indices.merges.total_time_in_millis")
             .valueRoute("merges.total_time_in_millis").computeType(MINUS).build());
@@ -80,16 +75,19 @@ public class MonitorCollectMetrics {
             .valueRoute("translog.size_in_bytes").computeType(NONE).build());
 
         indexWorkOrders.add(new CollectMetrics.Builder().valueName("es.indices.search.query_total_rate")
-            .valueRoute("search.query_total").computeType(AVG).build());
+            .valueRoute("search.query_total").computeType(AVG_MIN).build());
 
         indexWorkOrders.add(new CollectMetrics.Builder().valueName("es.indices.search.query_total")
             .valueRoute("search.query_total").computeType(MINUS).build());
 
         indexWorkOrders.add(new CollectMetrics.Builder().valueName("es.indices.search.fetch_total_rate")
-            .valueRoute("search.fetch_total").computeType(AVG).build());
+            .valueRoute("search.fetch_total").computeType(AVG_MIN).build());
 
         indexWorkOrders.add(new CollectMetrics.Builder().valueName("es.indices.search.scroll_total_rate")
             .valueRoute("search.scroll_total").computeType(AVG).build());
+
+        indexWorkOrders.add(new CollectMetrics.Builder().valueName("es.indices.search.scroll_total")
+                .valueRoute("search.scroll_total").computeType(MINUS).build());
 
         indexWorkOrders.add(new CollectMetrics.Builder().valueName("es.indices.search.query_time_in_millis")
             .valueRoute(SEARCH_QUERY_TIME_IN_MILLIS).computeType(MINUS).build());
@@ -113,16 +111,16 @@ public class MonitorCollectMetrics {
             .valueRoute("refresh.total").computeType(MINUS).build());
 
         indexWorkOrders.add(new CollectMetrics.Builder().valueName("es.indices.refresh.total_rate")
-            .valueRoute("refresh.total").computeType(AVG).build());
+            .valueRoute("refresh.total").computeType(AVG_MIN).build());
 
         indexWorkOrders.add(new CollectMetrics.Builder().valueName("es.indices.refresh.total_time_in_millis")
             .valueRoute("refresh.total_time_in_millis").computeType(MINUS).build());
 
-        indexWorkOrders.add(new CollectMetrics.Builder().valueName("es.indices.flush.total").valueRoute("flush.total")
-            .computeType(MINUS).build());
+        indexWorkOrders.add(new CollectMetrics.Builder().valueName("es.indices.flush.total")
+                .valueRoute("flush.total").computeType(MINUS).build());
 
         indexWorkOrders.add(new CollectMetrics.Builder().valueName("es.indices.flush.total_rate")
-            .valueRoute("flush.total").computeType(AVG).build());
+            .valueRoute("flush.total").computeType(AVG_MIN).build());
 
         indexWorkOrders.add(new CollectMetrics.Builder().valueName("es.indices.flush.total_time_in_millis")
             .valueRoute("flush.total_time_in_millis").computeType(MINUS).build());
@@ -178,8 +176,58 @@ public class MonitorCollectMetrics {
         indexWorkOrders.add(new CollectMetrics.Builder().valueName("es.indices.indices.merge_avg_time")
             .deriveParam(ESDataTempBean.DIVIDEND, "es.indices.merges.total_time_in_millis")
             .deriveParam(ESDataTempBean.DIVISOR, "es.indices.merges.total").computeType(DERIVE_DIVISION).build());
+        /**
+         * 新增指标
+         */
+        indexWorkOrders.add(new CollectMetrics.Builder().valueName("es.indices.segments.norms_memory_in_bytes")
+                .valueRoute("segments.norms_memory_in_bytes").computeType(NONE).build());
+        indexWorkOrders.add(new CollectMetrics.Builder().valueName("es.indices.segments.version_map_memory_in_bytes")
+                .valueRoute("segments.version_map_memory_in_bytes").computeType(NONE).build());
+        indexWorkOrders.add(new CollectMetrics.Builder().valueName("es.indices.segments.fixed_bit_set_memory_in_bytes")
+                .valueRoute("segments.fixed_bit_set_memory_in_bytes").computeType(NONE).build());
+        indexWorkOrders.add(new CollectMetrics.Builder().valueName("es.indices.fielddata.memory_size_in_bytes")
+                .valueRoute("fielddata.memory_size_in_bytes").computeType(NONE).build());
+        indexWorkOrders.add(new CollectMetrics.Builder().valueName("es.indices.segments.request_cache.memory_size_in_bytes")
+                .valueRoute("segments.request_cache.memory_size_in_bytes").computeType(NONE).build());
+        /**
+         * 写入耗时
+         * es.indices.indexing.index_time_in_millis
+         *
+         */
+        indexWorkOrders.add(new CollectMetrics.Builder().valueName("es.indices.indexing.index_time_in_millis")
+                .valueRoute(INDEXING_INDEX_TIME_IN_MILLIS).computeType(MINUS).sendToN9e().build());
+        indexWorkOrders.add(new CollectMetrics.Builder().valueName("es.indices.indexing.docs.count")
+                .valueRoute("docs.count").computeType(MINUS).sendToN9e().build());
+        indexWorkOrders.add(new CollectMetrics.Builder().valueName("es.indices.cost.index_time_in_millis")
+                .deriveParam(ESDataTempBean.DIVIDEND, "es.indices.merges.total_time_in_millis")
+                .deriveParam(ESDataTempBean.DIVISOR, "es.indices.indexing.docs.count").computeType(DERIVE_DIVISION).build());
+
+        indexWorkOrders.add(new CollectMetrics.Builder().valueName("es.indices.cost.query_time_in_millis")
+                .deriveParam(ESDataTempBean.DIVIDEND, "es.indices.search.query_time_in_millis")
+                .deriveParam(ESDataTempBean.DIVISOR, "es.indices.search.query_total").computeType(DERIVE_DIVISION).build());
+
+
+        indexWorkOrders.add(new CollectMetrics.Builder().valueName("es.indices.search.fetch_total")
+                .valueRoute("search.fetch_total").computeType(MINUS).build());
+
+        indexWorkOrders.add(new CollectMetrics.Builder().valueName("es.indices.cost.fetch_time_in_millis")
+                .deriveParam(ESDataTempBean.DIVIDEND, "es.indices.search.fetch_time_in_millis ")
+                .deriveParam(ESDataTempBean.DIVISOR, "es.indices.search.fetch_total").computeType(DERIVE_DIVISION).build());
+
+        indexWorkOrders.add(new CollectMetrics.Builder().valueName("es.indices.cost.scroll_time_in_millis")
+                .deriveParam(ESDataTempBean.DIVIDEND, "es.indices.search.scroll_time_in_millis")
+                .deriveParam(ESDataTempBean.DIVISOR, "es.indices.search.scroll_total").computeType(DERIVE_DIVISION).build());
+
+        indexWorkOrders.add(new CollectMetrics.Builder().valueName("es.indices.cost.refresh.total_time_in_millis")
+                .deriveParam(ESDataTempBean.DIVIDEND, "es.indices.refresh.total_time_in_millis")
+                .deriveParam(ESDataTempBean.DIVISOR, "es.indices.refresh.total").computeType(DERIVE_DIVISION).build());
+
+        indexWorkOrders.add(new CollectMetrics.Builder().valueName("es.indices.cost.flush.total_time_in_millis")
+                .deriveParam(ESDataTempBean.DIVIDEND, "es.indices.flush.total_time_in_millis ")
+                .deriveParam(ESDataTempBean.DIVISOR, "es.indices.flush.total").computeType(DERIVE_DIVISION).build());
 
         return indexWorkOrders;
+
     }
 
     /**
