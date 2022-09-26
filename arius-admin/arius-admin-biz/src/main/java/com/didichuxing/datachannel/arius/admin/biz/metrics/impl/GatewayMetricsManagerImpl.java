@@ -1,17 +1,19 @@
 package com.didichuxing.datachannel.arius.admin.biz.metrics.impl;
 
+import java.util.*;
+import java.util.stream.Collectors;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import com.didichuxing.datachannel.arius.admin.biz.gateway.GatewayManager;
 import com.didichuxing.datachannel.arius.admin.biz.metrics.GatewayMetricsManager;
 import com.didichuxing.datachannel.arius.admin.biz.template.TemplateLogicManager;
+import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.ClientNodeDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayDslDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayIndexDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayMetricsDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayNodeDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayOverviewDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayProjectDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.MultiGatewayNodesDTO;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.GlobalParam;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.GatewayOverviewMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.MetricsContent;
@@ -31,18 +33,6 @@ import com.didiglobal.logi.log.LogFactory;
 import com.didiglobal.logi.security.common.vo.project.ProjectBriefVO;
 import com.didiglobal.logi.security.service.ProjectService;
 import com.google.common.collect.Lists;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 @Component
 public class GatewayMetricsManagerImpl implements GatewayMetricsManager {
@@ -189,9 +179,9 @@ public class GatewayMetricsManagerImpl implements GatewayMetricsManager {
         if (StringUtils.isNotBlank(dto.getClientNodeIp())) {
             clientNodeIpList.add(dto.getClientNodeIp());
         } else {
-            clientNodeIpList.addAll(
-                    gatewayMetricsService.getEsClientNodeIpListByGatewayNode(dto.getNodeIp(), dto.getStartTime(),
-                            dto.getEndTime(), projectId));
+            gatewayMetricsService
+                .getEsClientNodeIpListByGatewayNode(dto.getNodeIp(), dto.getStartTime(), dto.getEndTime(), projectId)
+                .stream().map(Tuple::getV2).forEach(clientNodeIpList::add);
         }
         fillSortData(result, rawMetricsTypes, clientNodeIpList, startTime, endTime, dto.getTopNu());
         return Result.buildSucc(ConvertUtil.list2List(result, VariousLineChartMetricsVO.class));
@@ -270,8 +260,8 @@ public class GatewayMetricsManagerImpl implements GatewayMetricsManager {
     }
 
     @Override
-    public Result<List<String>> getClientNodeIdList(String gatewayNode, Long startTime, Long endTime,
-                                                    Integer projectId) {
+    public Result<List<Tuple<String, String>>> getClientNodeIdList(String gatewayNode, Long startTime, Long endTime,
+                                                                   Integer projectId) {
         long oneHour = 60 * 60 * 1000L;
         if (endTime == null) {
             endTime = System.currentTimeMillis();

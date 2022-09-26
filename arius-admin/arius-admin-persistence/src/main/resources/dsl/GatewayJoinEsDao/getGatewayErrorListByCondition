@@ -29,7 +29,8 @@
     "timeStamp",
     "indices",
     "uri",
-    "requestId"
+    "requestId",
+    "clusterName"
   ],
   "sort": [
     {

@@ -24,7 +24,8 @@
     "totalHits",
     "totalShards",
     "responseLen",
-    "isTimedOut"
+    "isTimedOut",
+    "clusterName"
   ],
   "sort": [
     {

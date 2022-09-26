@@ -1,5 +1,16 @@
 package com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.gateway;
 
+import java.util.*;
+import java.util.stream.Collectors;
+
+import javax.annotation.PostConstruct;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Component;
+
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
@@ -10,11 +21,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.ESConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.GatewayMetricsTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.MetricsConstant;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
-import com.didichuxing.datachannel.arius.admin.common.util.CommonUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.DSLSearchUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.IndexNameUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.ListUtils;
-import com.didichuxing.datachannel.arius.admin.common.util.MetricsUtils;
+import com.didichuxing.datachannel.arius.admin.common.util.*;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dsls.DslsConstant;
 import com.didichuxing.datachannel.arius.admin.persistence.es.metric.BaseTopNMetricsDAO;
 import com.didiglobal.logi.elasticsearch.client.response.query.query.ESQueryResponse;
@@ -22,19 +29,8 @@ import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESAggr
 import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESAggrMap;
 import com.didiglobal.logi.elasticsearch.client.response.query.query.aggs.ESBucket;
 import com.google.common.collect.Lists;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import javax.annotation.PostConstruct;
+
 import lombok.NoArgsConstructor;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Component;
 
 @Component
 @NoArgsConstructor
@@ -292,8 +288,8 @@ public class GatewayNodeMetricsDAO extends BaseTopNMetricsDAO {
     /**
      * 获取 gatewayNode 相关的 clientNode ip 信息
      */
-    public List<String> getEsClientNodeIpListByGatewayNode(String gatewayNode, Long startTime, Long endTime,
-                                                           Integer projectId) {
+    public List<Tuple<String, String>> getEsClientNodeIpListByGatewayNode(String gatewayNode, Long startTime, Long endTime,
+                                                                          Integer projectId) {
         String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTime, endTime);
         List<String> cellList = buildBaseTermCondition(gatewayNode, startTime, endTime, projectId);
         String condition = "[" + ListUtils.strList2String(cellList) + "]";
@@ -301,13 +297,14 @@ public class GatewayNodeMetricsDAO extends BaseTopNMetricsDAO {
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_CLIENT_NODE_BY_GATEWAY_NODE, condition);
 
         return gatewayClient.performRequest(realIndexName, TYPE, dsl, (ESQueryResponse response) -> {
-            List<String> list = Lists.newArrayList();
+            List<Tuple<String, String>> list = Lists.newArrayList();
             Map<String, ESAggr> esAggrMap = Optional.ofNullable(response.getAggs()).map(ESAggrMap::getEsAggrMap)
                 .orElse(null);
             if (null != esAggrMap && null != esAggrMap.get(AGG_KEY_FIELD)) {
                 for (ESBucket esBucket : esAggrMap.get(AGG_KEY_FIELD).getBucketList()) {
-                    String clientNode = esBucket.getUnusedMap().get(KEY).toString();
-                    list.add(clientNode);
+                    JSONObject clusterNameClientNode = JSON.parseObject(esBucket.getAggrMap().get(KEY).toString());
+                    list.add(new Tuple<>(clusterNameClientNode.getString(CLUSTER_NAME),
+                        clusterNameClientNode.getString(CLIENT_NODE)));
                 }
             }
             return list;
