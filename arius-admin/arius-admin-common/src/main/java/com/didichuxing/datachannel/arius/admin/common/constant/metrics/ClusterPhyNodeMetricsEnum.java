@@ -185,8 +185,24 @@ public enum ClusterPhyNodeMetricsEnum {
                                        /**
                                         * 单位：个
                                         */
-                                       SEARCH_QUEUE_NUM("thread_pool-search-queue", "SearchQueue大小"),
+                                       SEARCH_QUEUE_NUM("thread_pool-search-queue", "查询线程池queue数"),
                                        /**
+                                        * 单位：个
+                                        */
+                                       REFRESH_QUEUE_NUM("thread_pool-refresh-queue", "刷新线程池queue数"),
+                                        /**
+                                         * 单位：个
+                                         */
+                                        ROLLUP_INDEXING_QUEUE_NUM("thread_pool-rollup_indexing-queue", "落盘线程池queue数"),
+                                        /**
+                                         * 单位：个
+                                         */
+                                        MANAGEMENT_QUEUE_NUM("thread_pool-management-queue", "管理线程池queue数"),
+                                        /**
+                                         * 单位：个
+                                         */
+                                        FORCE_MERGE_QUEUE_NUM("thread_pool-force_merge-queue", "合并线程池queue数"),
+                                        /**
                                         * 单位：个
                                         */
                                        SEARCH_REJECTED_NUM("thread_pool-search-rejected", "SearchRejected个数"),
@@ -224,12 +240,36 @@ public enum ClusterPhyNodeMetricsEnum {
                                        /**
                                         * 单位：MB
                                         */
+                                       INDICES_NORMS_MEMORY_IN_BYTES("indices-segments-norms_memory_in_bytes",
+                                                                    "索引norms内存大小"),
+
+                                       /**
+                                        * 单位：MB
+                                        */
+                                       INDICES_FIXED_BIT_SET_MEMORY_IN_BYTES("indices-segments-fixed_bit_set_memory_in_bytes",
+                                               "索引Fixed Bitsets内存大小"),
+
+                                       /**
+                                        * 单位：MB
+                                        */
+                                       INDICES_VERSION_MAP_MEMORY_IN_BYTES("indices-segments-version_map_memory_in_bytes",
+                                                                     "索引Version Map内存大小"),
+                                       /**
+                                        * 单位：MB
+                                        */
+                                       INDICES_BREAKERS_FIELDDATA_LIMIT_SIZE_IN_BYTES("indices-segments-breakers-fielddata-limit_size_in_bytes",
+                                                "索引Fielddata内存大小"),
+
+                                       /**
+                                        * 单位：MB
+                                        */
                                        INDICES_WRITE_MEM_SIZE("indices-segments-index_writer_memory_in_bytes",
                                                               "索引index_writer内存大小"),
                                        /**
                                         * 单位：个
                                         */
                                        INDICES_NUM("indices-docs-count", "索引文档总数"),
+
                                        /**
                                         * 单位：MB
                                         */
