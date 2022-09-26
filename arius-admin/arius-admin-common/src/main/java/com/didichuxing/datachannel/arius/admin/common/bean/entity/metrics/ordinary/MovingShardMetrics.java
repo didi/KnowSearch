@@ -2,7 +2,6 @@ package com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordin
 
 import java.io.Serializable;
 
-import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
