@@ -354,6 +354,12 @@ public class MonitorCollectMetrics {
         nodeWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.jvm.gc.old.collection_time_in_millis")
             .valueRoute("jvm.gc.collectors.old.collection_time_in_millis").computeType(MINUS).build());
 
+        nodeWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.jvm.gc.young.collection_count")
+                .valueRoute("jvm.gc.collectors.young.collection_count").computeType(MINUS).build());
+
+        nodeWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.jvm.gc.old.collection_count")
+                .valueRoute("jvm.gc.collectors.old.collection_count").computeType(MINUS).build());
+
         nodeWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.jvm.gc.young.collection_count_rate")
             .valueRoute("jvm.gc.collectors.young.collection_count").computeType(AVG).bIndexToNodeMetrics().build());
 
@@ -499,6 +505,16 @@ public class MonitorCollectMetrics {
         nodeWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.indices.flush_avg_time")
             .deriveParam(ESDataTempBean.DIVIDEND, "es.node.indices.flush.total_time_in_millis")
             .deriveParam(ESDataTempBean.DIVISOR, "es.node.indices.flush.total").computeType(DERIVE_DIVISION).build());
+
+        nodeWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.jvm.gc.young.collection_avg_time")
+                .deriveParam(ESDataTempBean.DIVIDEND, "es.node.jvm.gc.young.collection_time_in_millis")
+                .deriveParam(ESDataTempBean.DIVISOR, "es.node.jvm.gc.young.collection_count")
+                .computeType(DERIVE_DIVISION).build());
+
+        nodeWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.jvm.gc.old.collection_avg_time")
+                .deriveParam(ESDataTempBean.DIVIDEND, "es.node.jvm.gc.old.collection_time_in_millis")
+                .deriveParam(ESDataTempBean.DIVISOR, "es.node.jvm.gc.old.collection_count")
+                .computeType(DERIVE_DIVISION).build());
 
         return nodeWorkOrders;
     }

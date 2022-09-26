@@ -320,6 +320,12 @@
                     "indices-request_cache-hit_rate":{
                         "type":"double"
                     },
+                    "jvm-gc-old-collection_avg_time":{
+                        "type":"double"
+                    },
+                    "jvm-gc-young-collection_avg_time":{
+                        "type":"double"
+                    },
                     "ingest-total-current":{
                         "type":"float"
                     },
