@@ -34,6 +34,12 @@ public class ESHttpRequestContent {
      * 获取集群shard
      */
     public static final String GET_SHARDS                  = "/_cat/shards/";
+
+    /**
+     * 获取json格式的集群shard
+     */
+    public static final String GET_SHARDS_JSON                  = "_cat/shards?format=json";
+
     /**
      * 获取集群shard
      */

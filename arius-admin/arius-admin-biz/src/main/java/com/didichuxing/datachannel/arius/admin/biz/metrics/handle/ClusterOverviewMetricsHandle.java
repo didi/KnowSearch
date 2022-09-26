@@ -196,6 +196,8 @@ public class ClusterOverviewMetricsHandle {
                 case MOVING_SHARDS:
                     getMovingShardsMetrics(metrics);
                     return;
+                case UNASSIGN_SHARDS:
+                    getUnassignShardsMetrics(metrics);
                 case INVALID_NODES:
                     getInvalidNodesMetrics(metrics);
                     return;
@@ -300,6 +302,11 @@ public class ClusterOverviewMetricsHandle {
     private void getMovingShardsMetrics(ESClusterOverviewMetricsVO metrics) {
         List<MovingShardMetrics> movingShardsMetrics = esShardService.syncGetMovingShards(metrics.getClusterName());
         metrics.setMovingShards(ConvertUtil.list2List(movingShardsMetrics, MovingShardMetricsVO.class));
+    }
+
+    private void getUnassignShardsMetrics(ESClusterOverviewMetricsVO metrics) {
+        List<UnAssignShardMetrics> unAssignShardMetrics = esShardService.syncGetUnAssignShards(metrics.getClusterName());
+        metrics.setUnAssignShards(ConvertUtil.list2List(unAssignShardMetrics, UnAssignShardMetricsVO.class));
     }
 
     private void getPendingTasksMetrics(ESClusterOverviewMetricsVO metrics) {
