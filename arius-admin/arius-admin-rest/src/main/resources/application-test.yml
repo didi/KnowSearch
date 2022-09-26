@@ -19,7 +19,7 @@ admin.url.kibana: http://10.160.80.135:8061/
 admin.thread.size.op: 20
 
 #gateway相关配置
-es.gateway.url: 10.190.44.150,10.190.42.122
+es.gateway.url: 10.190.1.208
 es.gateway.port: 8200
 es.user: 1
 es.password: azAWiJhxkho33ac
