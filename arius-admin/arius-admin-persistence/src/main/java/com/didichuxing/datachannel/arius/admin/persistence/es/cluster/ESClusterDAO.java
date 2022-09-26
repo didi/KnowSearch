@@ -49,6 +49,7 @@ import com.didiglobal.logi.elasticsearch.client.response.cluster.updatesetting.E
 import com.didiglobal.logi.elasticsearch.client.response.indices.getalias.ESIndicesGetAliasResponse;
 import com.didiglobal.logi.elasticsearch.client.utils.JsonUtils;
 import com.google.common.collect.Lists;
+import com.sun.tools.corba.se.idl.PragmaEntry;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -68,7 +69,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class ESClusterDAO extends BaseESDAO {
     private final static String REMOTE_TARGET_CLUSTER="_remote/info?filter_path=%s.%s";
-    private final static String REMOTE_TARGET_CLUSTER_COUNT="%s:*/_count";
+    private final static String REMOTE_TARGET_CLUSTER_COUNT="%s:*/_count?ignore_unavailable=true";
     private final static String CONNECTED="connected";
 
     /**
@@ -837,11 +838,22 @@ public class ESClusterDAO extends BaseESDAO {
                     "class=ESClusterDAO||method=checkTargetClusterConnected||clusterName={}||errMsg=esClient is null",
                     cluster);
         }
+        Function<JSONObject,Boolean> jsonObjectFunc=jsonObject -> {
+            //如果是空的，则直接为false
+            if (jsonObject.isEmpty()){
+                return false;
+            }
+            
+           return jsonObject.getJSONObject(targetCluster).getBoolean(CONNECTED)||tryRemoteClusterCountIndices(cluster
+                   , targetCluster);
+        };
+        
         return Optional.ofNullable(directResponse).filter(d -> d.getRestStatus() == RestStatus.OK)
-                .map(DirectResponse::getResponseContent).map(JSON::parseObject)
-                .map(jsonObject -> jsonObject.getJSONObject(targetCluster))
-                .map(jsonObject -> jsonObject.getBoolean(CONNECTED)).orElse(tryRemoteClusterCountIndices(cluster,
-                        targetCluster));
+                .map(DirectResponse::getResponseContent)
+                .map(JSON::parseObject)
+                .map(jsonObjectFunc)
+                
+                .orElse(false);
     }
     
     /**
@@ -859,7 +871,6 @@ public class ESClusterDAO extends BaseESDAO {
                     String.format(REMOTE_TARGET_CLUSTER_COUNT, targetCluster));
             directResponse = esOpClient.getESClient(cluster).direct(directRequest).actionGet(3, TimeUnit.SECONDS);
         } catch (Exception ignore) {
-        
         }
         return Optional.ofNullable(directResponse).map(d -> d.getRestStatus() == RestStatus.OK)
                 .orElse(false);
