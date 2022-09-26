@@ -71,6 +71,10 @@ public enum ClusterPhyClusterMetricsEnum {
                                           /**
                                            * 单位：个
                                            */
+                                          UNASSIGN_SHARDS("unassignShards", "未分配的shard"),
+                                          /**
+                                           * 单位：个
+                                           */
                                           BIG_SHARDS("bigShards", "大shard（大于50G）"),
 
                                           /*************************************5.index******************************************/

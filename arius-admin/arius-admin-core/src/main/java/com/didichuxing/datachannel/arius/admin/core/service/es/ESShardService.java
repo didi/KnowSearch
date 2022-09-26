@@ -3,6 +3,7 @@ package com.didichuxing.datachannel.arius.admin.core.service.es;
 import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.MovingShardMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.ShardMetrics;
+import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.ordinary.UnAssignShardMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.shard.Segment;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.cluster.quickcommand.ShardAssignmentDescriptionVO;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
@@ -18,6 +19,11 @@ public interface ESShardService {
      * 获取ES集群movingShard信息
      */
     List<MovingShardMetrics> syncGetMovingShards(String clusterName);
+
+    /**
+     * 获取ES集群unassignShard信息
+     */
+    List<UnAssignShardMetrics> syncGetUnAssignShards(String clusterName);
 
     /**
      * 获取ES集群大Shard(平台可配置，默认50G)信息
