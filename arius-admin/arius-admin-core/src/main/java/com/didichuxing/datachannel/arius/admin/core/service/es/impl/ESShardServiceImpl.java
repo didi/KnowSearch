@@ -52,7 +52,7 @@ public class ESShardServiceImpl implements ESShardService {
     private String              decider                      = "decider";
     private String              deciders                     = "deciders";
     private String              explanation                  = "explanation";
-    private String              unassign                     = "UNASSIGN";
+    private String              unassign                     = "UNASSIGNED";
     private int                 ONE                          = 1;
     
     

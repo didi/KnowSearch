@@ -15,13 +15,7 @@ public class UnAssignShardMetricsVO implements Serializable {
     @ApiModelProperty("主/备")
     private String prirep;
 
-    @ApiModelProperty("容量")
-    private String store;
-
-    @ApiModelProperty("所属节点Ip")
-    private String ip;
-
-    @ApiModelProperty("所属节点名称")
-    private String node;
+    @ApiModelProperty("状态")
+    private String state;
 
 }

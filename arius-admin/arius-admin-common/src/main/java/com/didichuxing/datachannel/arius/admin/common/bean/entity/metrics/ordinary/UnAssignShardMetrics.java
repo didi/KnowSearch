@@ -30,24 +30,4 @@ public class UnAssignShardMetrics implements Serializable {
      */
     private String state;
 
-    /**
-     * 文档
-     */
-    private long docs;
-
-    /**
-     * 容量
-     */
-    private String store;
-
-    /**
-     * 所属节点Ip
-     */
-    private String ip;
-
-    /**
-     * 所属节点
-     */
-    private String node;
-
 }
