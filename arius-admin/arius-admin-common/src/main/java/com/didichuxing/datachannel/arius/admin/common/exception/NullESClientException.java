@@ -17,6 +17,12 @@ public class NullESClientException extends ESOperateException {
         this.resultType = ResultType.ES_CLIENT_NUL_ERROR;
         
     }
+    
+    public NullESClientException(String message,ResultType resultType) {
+        super(message);
+        this.resultType = resultType;
+        
+    }
     @Override
     public ResultType getResultType() {
         return resultType;

@@ -31,6 +31,7 @@ import com.didichuxing.datachannel.arius.admin.common.constant.arius.AriusUser;
 import com.didichuxing.datachannel.arius.admin.common.constant.dcdr.DCDRStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.dcdr.DCDRSwithTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperateTypeEnum;
+import com.didichuxing.datachannel.arius.admin.common.constant.operaterecord.OperationEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskStatusEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.task.OpTaskTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.template.TemplateDCDRStepEnum;
@@ -305,7 +306,7 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Result<Void> createPhyDCDR(TemplatePhysicalDCDRDTO param, String operator) throws ESOperateException {
-        Result<Void> checkDCDRResult = checkDCDRParam(param);
+        Result<Void> checkDCDRResult = checkDCDRParam(param, OperationEnum.CREATE_DCDR);
 
         if (checkDCDRResult.failed()) { return Result.buildFrom(checkDCDRResult);}
 
@@ -353,7 +354,7 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
      */
     @Override
     public Result<Void> deletePhyDCDR(TemplatePhysicalDCDRDTO param, String operator, Integer projectId) throws ESOperateException {
-        Result<Void> checkDCDRResult = checkDCDRParam(param);
+        Result<Void> checkDCDRResult = checkDCDRParam(param, OperationEnum.DELETE_DCDR);
 
         if (checkDCDRResult.failed()) {
             return checkDCDRResult;
@@ -902,7 +903,6 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
      *
      * @param cluster       源集群的集群名称
      * @param targetCluster 目标集群名称
-     * @param templateName
      * @param indices       要重建的索引
      * @return 操作的结果。
      */
@@ -942,7 +942,7 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
         return Result.buildSucc();
     }
 
-    private Result<Void> checkDCDRParam(TemplatePhysicalDCDRDTO param) {
+    private Result<Void> checkDCDRParam(TemplatePhysicalDCDRDTO param, OperationEnum operationEnum) {
         if (param == null) {
             return Result.buildParamIllegal("DCDR参数不存在");
         }
@@ -964,13 +964,15 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
             if (!clusterPhyManager.isClusterExists(param.getReplicaClusters().get(i))) {
                 return Result.buildNotExist("从集群不存在");
             }
-
-            if (!clusterSupport(templatePhysical.getCluster())) {
-                return Result.buildParamIllegal("模板所在集群不支持DCDR");
-            }
-
-            if (!clusterSupport(param.getReplicaClusters().get(i))) {
-                return Result.buildParamIllegal("所选的从集群不支持DCDR");
+    
+            // 只有create阶段的dcdr才需要校验
+            if (OperationEnum.CREATE_DCDR.equals(operationEnum)) {
+                if (!clusterSupport(templatePhysical.getCluster())) {
+                    return Result.buildParamIllegal("模板所在集群不支持 DCDR");
+                }
+                if (!clusterSupport(param.getReplicaClusters().get(i))) {
+                    return Result.buildParamIllegal("所选的从集群不支持 DCDR");
+                }
             }
 
             if (templatePhysical.getCluster().equals(param.getReplicaClusters().get(i))) {
