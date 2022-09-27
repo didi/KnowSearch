@@ -1097,7 +1097,7 @@ public class ESIndexDAO extends BaseESDAO {
             LOGGER.warn("class=ESIndexDAO||method=forceMerge||errMsg=es client not found");
             return Result.buildFail();
         }
-        if (Integer.parseInt(client.getEsVersion().substring(0, 1)) < 6) {
+        if (Double.parseDouble(client.getEsVersion().substring(0, 2))<=6.0) {
             return Result.buildFail(String.format("es %s 不支持 split 功能", client.getEsVersion()));
         }
         try {
