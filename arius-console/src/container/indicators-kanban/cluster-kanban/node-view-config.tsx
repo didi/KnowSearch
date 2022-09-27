@@ -287,6 +287,11 @@ export const indexConfigData = {
     unit: unitMap.MB,
     classify: indexConfigClassifyList[2],
   },
+  "indices-segments-norms_memory_in_bytes": {
+    name: "norms_memory大小",
+    unit: unitMap.MB,
+    classify: indexConfigClassifyList[2],
+  },
   "jvm-gc-young-collection_count_rate": {
     name: "young-gc次数",
     unit: unitMap.ss,

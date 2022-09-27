@@ -104,6 +104,9 @@
                     "indices-segments-stored_fields_memory_in_bytes":{
                         "type":"double"
                     },
+                     "indices-segments-norms_memory_in_bytes":{
+                         "type":"double"
+                     },
                     "indices-request_cache-memory_size_in_bytes":{
                         "type":"double"
                     },
