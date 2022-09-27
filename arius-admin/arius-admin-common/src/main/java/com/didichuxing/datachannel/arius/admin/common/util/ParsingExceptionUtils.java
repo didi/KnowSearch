@@ -28,6 +28,7 @@ import org.elasticsearch.common.util.concurrent.UncategorizedExecutionException;
 public final class ParsingExceptionUtils {
     private final static String CONNECTION_REFUSED="Connection refused";
     public final static String CLUSTER_ERROR = "当前操作集群异常";
+    public final static String CONNECT_EXCEPTION = "connect_exception";
     private ParsingExceptionUtils(){}
     
  /**
