@@ -311,6 +311,29 @@ public class GatewayNodeMetricsDAO extends BaseTopNMetricsDAO {
         }, 3);
     }
 
+    public List<Tuple<String, String>> getEsClientNodeIpListByClientNodes(List<String> clientNodes, Long startTime, Long endTime,
+                                                                          Integer projectId) {
+        String realIndexName = IndexNameUtils.genDailyIndexName(indexName, startTime, endTime);
+        List<String> cellList = buildBaseTermCondition(clientNodes, startTime, endTime, projectId);
+        String condition = "[" + ListUtils.strList2String(cellList) + "]";
+
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_CLIENT_NODE_BY_GATEWAY_NODE, condition);
+
+        return gatewayClient.performRequest(realIndexName, TYPE, dsl, (ESQueryResponse response) -> {
+            List<Tuple<String, String>> list = Lists.newArrayList();
+            Map<String, ESAggr> esAggrMap = Optional.ofNullable(response.getAggs()).map(ESAggrMap::getEsAggrMap)
+                    .orElse(null);
+            if (null != esAggrMap && null != esAggrMap.get(AGG_KEY_FIELD)) {
+                for (ESBucket esBucket : esAggrMap.get(AGG_KEY_FIELD).getBucketList()) {
+                    JSONObject clusterNameClientNode = JSON.parseObject(esBucket.getAggrMap().get(KEY).toString());
+                    list.add(new Tuple<>(clusterNameClientNode.getString(CLUSTER_NAME),
+                            clusterNameClientNode.getString(CLIENT_NODE)));
+                }
+            }
+            return list;
+        }, 3);
+    }
+
     /**
      * 网关成功率和失败率
      *
@@ -351,6 +374,17 @@ public class GatewayNodeMetricsDAO extends BaseTopNMetricsDAO {
         cellList.add(DSLSearchUtils.getTermCellForRangeSearch(startTime, endTime, "timeStamp"));
         cellList.add(DSLSearchUtils.getTermCellForExactSearch(projectId, "projectId"));
         cellList.add(DSLSearchUtils.getTermCellForExactSearch(gatewayNode, "gatewayNode"));
+        return cellList;
+    }
+
+    private List<String> buildBaseTermCondition(List<String> clientNodes, Long startTime, Long endTime,
+                                                Integer projectId) {
+        List<String> cellList = Lists.newArrayList();
+        cellList.add(DSLSearchUtils.getTermCellForRangeSearch(startTime, endTime, "timeStamp"));
+        cellList.add(DSLSearchUtils.getTermCellForExactSearch(projectId, "projectId"));
+        if (CollectionUtils.isNotEmpty(clientNodes)) {
+            cellList.add(DSLSearchUtils.getTermCellsForExactSearch(clientNodes, "clientNode"));
+        }
         return cellList;
     }
 

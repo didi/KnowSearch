@@ -21,6 +21,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linech
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.VariousLineChartMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.gateway.GatewayOverviewMetricsVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.top.VariousLineChartMetricsVO;
+import com.didichuxing.datachannel.arius.admin.common.constant.AuthConstant;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.GatewayMetricsTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.MetricsConstant;
 import com.didichuxing.datachannel.arius.admin.common.util.AriusObjUtils;
@@ -156,7 +157,8 @@ public class GatewayMetricsManagerImpl implements GatewayMetricsManager {
         for (String nodeIp : dto.getNodeIps()) {
             try {
                 gatewayNodeDTO.setNodeIp(nodeIp);
-                Result<List<VariousLineChartMetricsVO>> nodeMetrics = getGatewayNodeMetrics(gatewayNodeDTO, projectId);
+                Result<List<VariousLineChartMetricsVO>> nodeMetrics = getGatewayNodeMetrics(gatewayNodeDTO,
+                    getProjectIdIsNotAdmin(projectId));
                 if (nodeMetrics.success()) {
                     result.addAll(nodeMetrics.getData());
                 }
@@ -179,9 +181,9 @@ public class GatewayMetricsManagerImpl implements GatewayMetricsManager {
         if (StringUtils.isNotBlank(dto.getClientNodeIp())) {
             clientNodeIpList.add(dto.getClientNodeIp());
         } else {
-            gatewayMetricsService
-                .getEsClientNodeIpListByGatewayNode(dto.getNodeIp(), dto.getStartTime(), dto.getEndTime(), projectId)
-                .stream().map(Tuple::getV2).forEach(clientNodeIpList::add);
+            gatewayMetricsService.getEsClientNodeIpListByGatewayNode(dto.getNodeIp(), dto.getStartTime(),
+                dto.getEndTime(), getProjectIdIsNotAdmin(projectId)).stream().map(Tuple::getV2)
+                .forEach(clientNodeIpList::add);
         }
         fillSortData(result, rawMetricsTypes, clientNodeIpList, startTime, endTime, dto.getTopNu());
         return Result.buildSucc(ConvertUtil.list2List(result, VariousLineChartMetricsVO.class));
@@ -274,7 +276,7 @@ public class GatewayMetricsManagerImpl implements GatewayMetricsManager {
             return Result.buildFail("时间跨度不要超过一周");
         }
         return Result.buildSucc(
-            gatewayMetricsService.getEsClientNodeIpListByGatewayNode(gatewayNode, startTime, endTime, projectId));
+            gatewayMetricsService.getEsClientNodeIpListByGatewayNode(gatewayNode, startTime, endTime, getProjectIdIsNotAdmin(projectId)));
     }
 
     /********************************************************** private methods **********************************************************/
@@ -390,7 +392,7 @@ public class GatewayMetricsManagerImpl implements GatewayMetricsManager {
             if (!metricsTypeEnumOptional.isPresent()) {
                 return Collections.emptyList();
             }
-            FUTURE_UTIL.runnableTask(() -> gatewayMetricsService.getTopNMetrics(projectId, dto,
+            FUTURE_UTIL.runnableTask(() -> gatewayMetricsService.getTopNMetrics(getProjectIdIsNotAdmin(projectId), dto,
                     metricsTypeEnumOptional.get()).filter(CollectionUtils::isNotEmpty).ifPresent(result::addAll));
         }
         FUTURE_UTIL.waitExecute();
@@ -430,7 +432,9 @@ public class GatewayMetricsManagerImpl implements GatewayMetricsManager {
                 .filter(enumValue -> enumValue.getType().equals(metricsType) && enumValue.getGroup().equals(groupType))
                 .findFirst();
     }
-    
-   
- 
+
+    private Integer getProjectIdIsNotAdmin(Integer projectId) {
+        return (null != projectId && !projectId.equals(AuthConstant.SUPER_PROJECT_ID)) ? projectId : null;
+    }
+
 }

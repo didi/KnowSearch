@@ -1,6 +1,7 @@
 package com.didichuxing.datachannel.arius.admin.metadata.service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -16,6 +17,7 @@ import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linech
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.GatewayMetricsTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.MetricsConstant;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
+import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.gateway.*;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dsls.DslsConstant;
 import com.didiglobal.logi.log.ILog;
@@ -227,7 +229,14 @@ public class GatewayMetricsService {
                     break;
                 case MetricsConstant.CLIENT_NODE:
                     contents = gatewayNodeMetricsDAO.getByRangeTopN(values, gatewayMetricsTypeEnum, startTime, endTime,
-                            projectId, nodeIp);
+                        projectId, nodeIp);
+                    List<Tuple<String, String>> tuples = gatewayNodeMetricsDAO
+                        .getEsClientNodeIpListByClientNodes(values, startTime, endTime, projectId);
+                    Map<String, String> clientNode2ClusterName = ConvertUtil.list2Map(tuples, Tuple::getV2,
+                        Tuple::getV1);
+                    if (null != contents) {
+                        contents.forEach(content -> content.setCluster(clientNode2ClusterName.get(content.getName())));
+                    }
                     break;
                 case MetricsConstant.INDEX:
                     contents = gatewayIndexMetricsDAO.getByRangeTopN(values, gatewayMetricsTypeEnum, startTime, endTime,
