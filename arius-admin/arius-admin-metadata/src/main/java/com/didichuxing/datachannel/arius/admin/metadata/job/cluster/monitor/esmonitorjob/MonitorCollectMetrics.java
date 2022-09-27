@@ -187,6 +187,8 @@ public class MonitorCollectMetrics {
                 .valueRoute("segments.fixed_bit_set_memory_in_bytes").computeType(NONE).build());
         indexWorkOrders.add(new CollectMetrics.Builder().valueName("es.indices.fielddata.memory_size_in_bytes")
                 .valueRoute("fielddata.memory_size_in_bytes").computeType(NONE).build());
+        indexWorkOrders.add(new CollectMetrics.Builder().valueName("es.indices.segments.breakers.fielddata.limit_size_in_bytes")
+                .valueRoute("segments.breakers.fielddata.limit_size_in_bytes").computeType(NONE).build());
         indexWorkOrders.add(new CollectMetrics.Builder().valueName("es.indices.segments.request_cache.memory_size_in_bytes")
                 .valueRoute("segments.request_cache.memory_size_in_bytes").computeType(NONE).build());
         /**
@@ -263,6 +265,26 @@ public class MonitorCollectMetrics {
         nodeWorkOrders
             .add(new CollectMetrics.Builder().valueName("es.node.indices.segments.norms_memory_in_bytes")
                .valueRoute("indices.segments.norms_memory_in_bytes").computeType(NONE).build());
+
+        nodeWorkOrders
+                .add(new CollectMetrics.Builder().valueName("es.node.indices.segments.norms_memory_in_bytes")
+                        .valueRoute("indices.segments.norms_memory_in_bytes").computeType(NONE).build());
+
+        nodeWorkOrders
+                .add(new CollectMetrics.Builder().valueName("es.node.indices.segments.version_map_memory_in_bytes")
+                        .valueRoute("indices.segments.version_map_memory_in_bytes").computeType(NONE).build());
+
+        nodeWorkOrders
+                .add(new CollectMetrics.Builder().valueName("es.node.indices.segments.version_map_memory_in_bytes")
+                        .valueRoute("indices.segments.version_map_memory_in_bytes").computeType(NONE).build());
+
+        nodeWorkOrders
+                .add(new CollectMetrics.Builder().valueName("es.node.indices.segments.fixed_bit_set_memory_in_bytes")
+                        .valueRoute("indices.segments.fixed_bit_set_memory_in_bytes").computeType(NONE).build());
+
+        nodeWorkOrders
+                .add(new CollectMetrics.Builder().valueName("es.node.indices.segments.breakers.fielddata.limit_size_in_bytes")
+                        .valueRoute("indices.segments.breakers.fielddata.limit_size_in_bytes").computeType(NONE).build());
 
         nodeWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.indices.query_cache.memory_size_in_bytes")
             .valueRoute("indices.query_cache.memory_size_in_bytes").computeType(NONE).build());
@@ -457,6 +479,18 @@ public class MonitorCollectMetrics {
         nodeWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.thread_pool.search.completed")
             .valueRoute("thread_pool.search.completed").computeType(MINUS).build());
 
+        nodeWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.thread_pool.refresh.queue")
+                .valueRoute("thread_pool.refresh.queue").computeType(NONE).sendToN9e().build());
+
+        nodeWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.thread_pool.rollup_indexing.queue")
+                .valueRoute("thread_pool.rollup_indexing.queue").computeType(NONE).sendToN9e().build());
+
+        nodeWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.thread_pool.management.queue")
+                .valueRoute("thread_pool.management.queue").computeType(NONE).sendToN9e().build());
+
+        nodeWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.thread_pool.force_merge.queue")
+                .valueRoute("thread_pool.force_merge.queue").computeType(NONE).sendToN9e().build());
+
         nodeWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.thread_pool.search.queue")
             .valueRoute("thread_pool.search.queue").computeType(NONE).sendToN9e().build());
 
@@ -625,6 +659,15 @@ public class MonitorCollectMetrics {
 
         nodeToIndexWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.index.segments.norms_memory_in_bytes")
              .valueRoute("segments.norms_memory_in_bytes").computeType(NONE).build());
+
+        nodeToIndexWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.index.segments.version_map_memory_in_bytes")
+                .valueRoute("segments.version_map_memory_in_bytes").computeType(NONE).build());
+
+        nodeToIndexWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.index.segments.fixed_bit_set_memory_in_bytes")
+                .valueRoute("segments.fixed_bit_set_memory_in_bytes").computeType(NONE).build());
+
+        nodeToIndexWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.index.segments.breakers.fielddata.limit_size_in_bytes")
+                .valueRoute("segments.breakers.fielddata.limit_size_in_bytes").computeType(NONE).build());
 
         nodeToIndexWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.index.docs.count")
             .valueRoute("docs.count").computeType(NONE).build());

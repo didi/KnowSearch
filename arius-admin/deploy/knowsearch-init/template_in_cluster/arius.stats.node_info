@@ -104,9 +104,18 @@
                     "indices-segments-stored_fields_memory_in_bytes":{
                         "type":"double"
                     },
-                     "indices-segments-norms_memory_in_bytes":{
-                         "type":"double"
-                     },
+                    "indices-segments-norms_memory_in_bytes":{
+                        "type":"double"
+                    },
+                    "indices-segments-version_map_memory_in_bytes":{
+                        "type":"double"
+                    },
+                    "indices-segments-fixed_bit_set_memory_in_bytes":{
+                        "type":"double"
+                    },
+                    "indices-segments-breakers-fielddata-limit_size_in_bytes":{
+                        "type":"double"
+                    },
                     "indices-request_cache-memory_size_in_bytes":{
                         "type":"double"
                     },
@@ -280,6 +289,18 @@
                     },
                     "thread_pool-search-rejected":{
                         "type":"double"
+                    },
+                    "thread_pool-refresh-queue":{
+                        "type":"double"
+                    },
+                    "thread_pool-management-queue":{
+                         "type":"double"
+                    },
+                    "thread_pool-force_merge-queue":{
+                         "type":"double"
+                    },
+                    "thread_pool-rollup_indexing-queue":{
+                         "type":"double"
                     },
                     "indices-flush-total_time_in_millis":{
                         "type":"double"
