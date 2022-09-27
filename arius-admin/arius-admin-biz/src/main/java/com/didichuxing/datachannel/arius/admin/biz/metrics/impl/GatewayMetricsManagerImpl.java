@@ -434,7 +434,7 @@ public class GatewayMetricsManagerImpl implements GatewayMetricsManager {
     }
 
     private Integer getProjectIdIsNotAdmin(Integer projectId) {
-        return (null != projectId && !projectId.equals(AuthConstant.SUPER_PROJECT_ID)) ? projectId : null;
+        return !AuthConstant.SUPER_PROJECT_ID.equals(projectId) ? projectId : null;
     }
 
 }
