@@ -49,7 +49,6 @@ import com.didiglobal.logi.elasticsearch.client.response.cluster.updatesetting.E
 import com.didiglobal.logi.elasticsearch.client.response.indices.getalias.ESIndicesGetAliasResponse;
 import com.didiglobal.logi.elasticsearch.client.utils.JsonUtils;
 import com.google.common.collect.Lists;
-import com.sun.tools.corba.se.idl.PragmaEntry;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -844,7 +843,7 @@ public class ESClusterDAO extends BaseESDAO {
                 return false;
             }
             
-           return jsonObject.getJSONObject(targetCluster).getBoolean(CONNECTED)||tryRemoteClusterCountIndices(cluster
+           return jsonObject.getJSONObject(targetCluster).getBoolean(CONNECTED) || tryRemoteClusterCountIndicesAndIgnoreException(cluster
                    , targetCluster);
         };
         
@@ -858,19 +857,31 @@ public class ESClusterDAO extends BaseESDAO {
     
     /**
      * > 它尝试获取目标集群中的索引计数，只是为了进行主集群到从集群正常的健康性校验:
-     * 无需关注底层异常，这是由于如果集群不通，那么会触发Gateway Time-out，
-     * 那么也可以证明集群是不通的，所以无需关注
+     * <p>
+     *     无需关注底层异常，这是由于如果集群不通，那么会触发Gateway Time-out，
+     *      那么也可以证明集群是不通的，所以无需关注
+     * </p>
+     * <p>
+     *     另外需要注意的是：如果远程集群_count报错后，我们无需理会它，它会自动为remote信息刷新，
+     *     从而使得remote信息是刷新的
+     * </p>
      *
      * @param cluster 索引所属的集群的名称。
      * @param targetCluster 目标集群的名称。
      */
-    private boolean tryRemoteClusterCountIndices(String cluster, String targetCluster)  {
+    private boolean tryRemoteClusterCountIndicesAndIgnoreException(String cluster, String targetCluster)  {
         DirectResponse directResponse = null;
         try {
             DirectRequest directRequest = new DirectRequest("GET",
                     String.format(REMOTE_TARGET_CLUSTER_COUNT, targetCluster));
             directResponse = esOpClient.getESClient(cluster).direct(directRequest).actionGet(3, TimeUnit.SECONDS);
         } catch (Exception ignore) {
+            final String messageByException = ParsingExceptionUtils.getESErrorMessageByException(
+                    ignore);
+            if (StringUtils.equals(messageByException,ParsingExceptionUtils.CLUSTER_ERROR)){
+                return false;
+            }
+            return true;
         }
         return Optional.ofNullable(directResponse).map(d -> d.getRestStatus() == RestStatus.OK)
                 .orElse(false);
