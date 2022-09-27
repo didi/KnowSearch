@@ -267,10 +267,6 @@ public class MonitorCollectMetrics {
                .valueRoute("indices.segments.norms_memory_in_bytes").computeType(NONE).build());
 
         nodeWorkOrders
-                .add(new CollectMetrics.Builder().valueName("es.node.indices.segments.norms_memory_in_bytes")
-                        .valueRoute("indices.segments.norms_memory_in_bytes").computeType(NONE).build());
-
-        nodeWorkOrders
                 .add(new CollectMetrics.Builder().valueName("es.node.indices.segments.version_map_memory_in_bytes")
                         .valueRoute("indices.segments.version_map_memory_in_bytes").computeType(NONE).build());
 
