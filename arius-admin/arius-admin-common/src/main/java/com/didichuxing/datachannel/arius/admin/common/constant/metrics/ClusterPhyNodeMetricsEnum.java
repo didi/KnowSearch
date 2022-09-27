@@ -82,6 +82,12 @@ public enum ClusterPhyNodeMetricsEnum {
                                         */
 
                                        INDICES_QUERY_LATENCY("indices-search-query_time_in_millis", "索引Query耗时"),
+
+                                       /**
+                                        * 单位：个
+                                        */
+                                       INDICES_QUERY_TOTAL("indices-search-query_total", "索引Query总数"),
+
                                        /**
                                         * 单位：ms
                                         */
@@ -269,6 +275,11 @@ public enum ClusterPhyNodeMetricsEnum {
                                         * 单位：个
                                         */
                                        INDICES_NUM("indices-docs-count", "索引文档总数"),
+
+                                       /**
+                                        * 单位：个
+                                        */
+                                       INDICES_NUM_DIFF("indices-docs-count_diff", "间隔时间索引文档差值"),
 
                                        /**
                                         * 单位：MB
