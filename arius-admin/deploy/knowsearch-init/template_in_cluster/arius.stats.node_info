@@ -329,6 +329,24 @@
                     "jvm-gc-young-collection_avg_time":{
                         "type":"double"
                     },
+                    "breakers-fielddata-limit_size_in_bytes":{
+                        "type":"double"
+                    },
+                    "breakers-request-limit_size_in_bytes":{
+                        "type":"double"
+                    },
+                    "breakers-in_flight_requests-limit_size_in_bytes":{
+                        "type":"double"
+                    },
+                    "breakers-accounting-limit_size_in_bytes":{
+                        "type":"double"
+                    },
+                    "breakers-parent-limit_size_in_bytes":{
+                        "type":"double"
+                    },
+                    "script-compilations":{
+                        "type":"double"
+                    },
                     "ingest-total-current":{
                         "type":"float"
                     },

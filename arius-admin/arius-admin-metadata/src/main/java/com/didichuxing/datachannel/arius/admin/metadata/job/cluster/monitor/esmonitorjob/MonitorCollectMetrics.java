@@ -302,19 +302,19 @@ public class MonitorCollectMetrics {
             .valueRoute("indices.merges.current").computeType(NONE).sendToN9e().build());
 
         nodeWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.indices.merges.total")
-            .valueRoute("indices.merges.total").computeType(MINUS).bIndexToNodeMetrics().build());
+            .valueRoute("indices.merges.total").computeType(AVG_MIN).bIndexToNodeMetrics().build());
 
         nodeWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.indices.merges.total_time_in_millis")
             .valueRoute("indices.merges.total_time_in_millis").computeType(MINUS).bIndexToNodeMetrics().build());
 
         nodeWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.indices.refresh.total")
-            .valueRoute("indices.refresh.total").computeType(MINUS).build());
+            .valueRoute("indices.refresh.total").computeType(AVG_MIN).build());
 
         nodeWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.indices.refresh.total_time_in_millis")
             .valueRoute("indices.refresh.total_time_in_millis").computeType(MINUS).build());
 
         nodeWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.indices.flush.total")
-            .valueRoute("indices.flush.total").computeType(MINUS).sendToN9e().build());
+            .valueRoute("indices.flush.total").computeType(AVG_MIN).sendToN9e().build());
 
         nodeWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.indices.flush.total_time_in_millis")
             .valueRoute("indices.flush.total_time_in_millis").computeType(MINUS).build());
@@ -452,7 +452,7 @@ public class MonitorCollectMetrics {
             .valueRoute("thread_pool.write.queue").computeType(NONE).bIndexToNodeMetrics().sendToN9e().build());
 
         nodeWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.thread_pool.search.rejected")
-            .valueRoute("thread_pool.search.rejected").computeType(MINUS).sendToN9e().build());
+            .valueRoute("thread_pool.search.rejected").computeType(AVG_MIN).sendToN9e().build());
 
         nodeWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.thread_pool.search.completed")
             .valueRoute("thread_pool.search.completed").computeType(MINUS).build());
@@ -513,6 +513,28 @@ public class MonitorCollectMetrics {
 
         nodeWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.ingest.total.current")
             .valueRoute("ingest.total.current").computeType(NONE).build());
+
+        /**********************************node -> breakers************************************/
+
+        nodeWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.breakers.fielddata.limit_size_in_bytes")
+                .valueRoute("breakers.fielddata.limit_size_in_bytes").computeType(NONE).build());
+
+        nodeWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.breakers.request.limit_size_in_bytes")
+                .valueRoute("breakers.request.limit_size_in_bytes").computeType(NONE).build());
+
+        nodeWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.breakers.in_flight_requests.limit_size_in_bytes")
+                .valueRoute("breakers.in_flight_requests.limit_size_in_bytes").computeType(NONE).build());
+
+        nodeWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.breakers.accounting.limit_size_in_bytes")
+                .valueRoute("breakers.accounting.limit_size_in_bytes").computeType(NONE).build());
+
+        nodeWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.breakers.parent.limit_size_in_bytes")
+                .valueRoute("breakers.parent.limit_size_in_bytes").computeType(NONE).build());
+
+        /**********************************node -> script************************************/
+
+        nodeWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.script.compilations")
+                .valueRoute("script.compilations").computeType(AVG_MIN).build());
 
         /**********************************node -> 复合指标************************************/
 
