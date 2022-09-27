@@ -62,12 +62,13 @@ public final class ParsingExceptionUtils {
      */
     public static void abnormalTermination(Exception e) throws ESOperateException {
         String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
-        if (StringUtils.isNotBlank(exception)&&!StringUtils.equals(exception,CLUSTER_ERROR)) {
-            throw new ESOperateException(exception);
-        }
-        if (StringUtils.equals(exception,CLUSTER_ERROR)){
+        if (StringUtils.equals(exception, CLUSTER_ERROR)) {
             throw new NullESClientException(exception, ResultType.ES_CLIENT_NUL_ERROR);
         }
+        if (StringUtils.isNotBlank(exception) && !StringUtils.equals(exception, CLUSTER_ERROR)) {
+            throw new ESOperateException(exception);
+        }
+
     }
     
     
