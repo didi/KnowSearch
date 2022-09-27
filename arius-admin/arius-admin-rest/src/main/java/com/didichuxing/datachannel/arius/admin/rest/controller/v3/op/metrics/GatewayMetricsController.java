@@ -1,26 +1,29 @@
 package com.didichuxing.datachannel.arius.admin.rest.controller.v3.op.metrics;
 
+import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
 import com.didichuxing.datachannel.arius.admin.biz.gateway.GatewayManager;
 import com.didichuxing.datachannel.arius.admin.biz.metrics.GatewayMetricsManager;
+import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.other.gateway.GatewayOverviewMetricsVO;
 import com.didichuxing.datachannel.arius.admin.common.bean.vo.metrics.top.VariousLineChartMetricsVO;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.GatewayMetricsTypeEnum;
 import com.didiglobal.logi.security.util.HttpRequestUtil;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiModelProperty;
 import io.swagger.annotations.ApiOperation;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
-import javax.servlet.http.HttpServletRequest;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3;
-import static com.didichuxing.datachannel.arius.admin.common.constant.ApiVersion.V3_OP;
 
 @RestController
 @RequestMapping({ V3 + "/metrics/gateway" })
@@ -84,8 +87,8 @@ public class GatewayMetricsController {
 
     @GetMapping("/client-node-ip")
     @ApiOperation(value = "获取取gatewayNode相关的clientNode ip列表")
-    public Result<List<String>> getClientNodeIpList(String gatewayNode, Long startTime, Long endTime,
-                                                    HttpServletRequest request) {
+    public Result<List<Tuple<String,String>>> getClientNodeIpList(String gatewayNode, Long startTime, Long endTime,
+                                                          HttpServletRequest request) {
         return gatewayMetricsManager.getClientNodeIdList(gatewayNode, startTime, endTime,
             HttpRequestUtil.getProjectId(request));
     }

@@ -25,4 +25,7 @@ public class GatewayJoinQueryDTO {
 
     @ApiModelProperty(value = "应用Id", dataType = "Integer", required = false)
     private Integer   projectId;
+
+    @ApiModelProperty(value = "物理集群名称（仅限超管侧使用）", dataType = "String", required = false)
+    private String clusterName;
 }
