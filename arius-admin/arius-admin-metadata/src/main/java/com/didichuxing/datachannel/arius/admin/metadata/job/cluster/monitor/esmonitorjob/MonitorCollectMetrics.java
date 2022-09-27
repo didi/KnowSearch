@@ -510,6 +510,28 @@ public class MonitorCollectMetrics {
         nodeWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.ingest.total.current")
             .valueRoute("ingest.total.current").computeType(NONE).build());
 
+        /**********************************node -> breakers************************************/
+
+        nodeWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.breakers.fielddata.limit_size_in_bytes")
+                .valueRoute("breakers.fielddata.limit_size_in_bytes").computeType(NONE).build());
+
+        nodeWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.breakers.request.limit_size_in_bytes")
+                .valueRoute("breakers.request.limit_size_in_bytes").computeType(NONE).build());
+
+        nodeWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.breakers.in_flight_requests.limit_size_in_bytes")
+                .valueRoute("breakers.in_flight_requests.limit_size_in_bytes").computeType(NONE).build());
+
+        nodeWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.breakers.accounting.limit_size_in_bytes")
+                .valueRoute("breakers.accounting.limit_size_in_bytes").computeType(NONE).build());
+
+        nodeWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.breakers.parent.limit_size_in_bytes")
+                .valueRoute("breakers.parent.limit_size_in_bytes").computeType(NONE).build());
+
+        /**********************************node -> script************************************/
+
+        nodeWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.script.compilations")
+                .valueRoute("script.compilations").computeType(MINUS).build());
+
         /**********************************node -> 复合指标************************************/
 
         nodeWorkOrders.add(new CollectMetrics.Builder().valueName("es.node.indices.query_cache.hit_rate")
