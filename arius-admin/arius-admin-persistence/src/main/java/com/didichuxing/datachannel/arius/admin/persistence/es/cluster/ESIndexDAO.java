@@ -68,7 +68,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import org.apache.commons.collections4.CollectionUtils;
@@ -783,14 +782,22 @@ public class ESIndexDAO extends BaseESDAO {
      * @param indices 索引
      * @return result
      */
-    public boolean closeIndex(String cluster, List<String> indices) {
+    public boolean closeIndex(String cluster, List<String> indices) throws ESOperateException {
         ESClient client = fetchESClientByCluster(cluster);
         if (client == null) {
+            throw new NullESClientException(cluster);
+        }
+        try {
+        
+            ESIndicesCloseIndexResponse response = client.admin().indices().prepareCloseIndex(String.join(",", indices))
+                    .execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+            return response.getAcknowledged();
+        } catch (Exception e) {
+            ParsingExceptionUtils.abnormalTermination(e);
+            LOGGER.warn("class={}||method=closeIndex||clusterName={}||indexName={}||msg={}", getClass().getSimpleName(),
+                    cluster, String.join(",", indices), e);
             return false;
         }
-        ESIndicesCloseIndexResponse response = client.admin().indices().prepareCloseIndex(String.join(",", indices))
-            .execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
-        return response.getAcknowledged();
     }
 
     /**
@@ -799,14 +806,22 @@ public class ESIndexDAO extends BaseESDAO {
      * @param indices 索引
      * @return result
      */
-    public boolean openIndex(String cluster, List<String> indices) {
+    public boolean openIndex(String cluster, List<String> indices) throws ESOperateException{
         ESClient client = fetchESClientByCluster(cluster);
         if (client == null) {
+            throw new NullESClientException(cluster);
+        }
+        try {
+        
+            ESIndicesOpenIndexResponse response = client.admin().indices().prepareOpenIndex(String.join(",", indices))
+                    .execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+            return response.getAcknowledged();
+        } catch (Exception e) {
+            ParsingExceptionUtils.abnormalTermination(e);
+            LOGGER.warn("class={}||method=closeIndex||clusterName={}||indexName={}||msg={}", getClass().getSimpleName(),
+                    cluster, String.join(",", indices), e);
             return false;
         }
-        ESIndicesOpenIndexResponse response = client.admin().indices().prepareOpenIndex(String.join(",", indices))
-            .execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
-        return response.getAcknowledged();
     }
 
     /**

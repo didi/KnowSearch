@@ -1093,8 +1093,8 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
                                                      Long expectMasterPhysicalId, int step,
                                                      IndexTemplatePhy masterTemplate, IndexTemplatePhy slaveTemplate,
                                                      String operator) {
-        List<String> matchIndexNames = indexTemplatePhyService.getMatchIndexNames(slaveTemplate.getId());
         int templateId = switchDetail.getTemplateId().intValue();
+        final String expression = slaveTemplate.getExpression();
         try {
             if (DCDR_SWITCH_STEP_1 == step) {
                 // 不需要校验从集群到主集群是否是通路：这里是由于强切之后不会创建链路
@@ -1104,7 +1104,8 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
                 if (hasCancelSubTask(workTaskId, switchDetail.getTemplateId())) {
                     setSettingResult = Result.buildFail(TASK_IS_CANCEL);
                 } else {
-                    Result<Void> changeSlaveDCDRConfig = changeDCDRConfig(slaveTemplate.getCluster(), matchIndexNames,
+                    //这里采用表达式设置这个会更快，这样会保证任务快速执行
+                    Result<Void> changeSlaveDCDRConfig = changeDCDRConfig(slaveTemplate.getCluster(), Collections.singletonList(expression),
                             false);
                     if (changeSlaveDCDRConfig.failed()) {
                         setSettingResult = Result.buildFail(changeSlaveDCDRConfig.getMessage());
@@ -1765,7 +1766,7 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
 
             });
         }
-        BATCH_DCDR_FUTURE_UTIL.waitExecute();
+        BATCH_DCDR_FUTURE_UTIL.waitExecute(120);
 
         try {
             saveNewestWorkTaskStatusToDB(taskForDCDRSwitch, dcdrTasksDetail, AuthConstant.SUPER_PROJECT_ID);
