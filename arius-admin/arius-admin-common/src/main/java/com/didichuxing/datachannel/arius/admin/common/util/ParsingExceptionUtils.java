@@ -26,9 +26,10 @@ import org.elasticsearch.common.util.concurrent.UncategorizedExecutionException;
  * @date 2022/08/17
  */
 public final class ParsingExceptionUtils {
-    private final static String CONNECTION_REFUSED="Connection refused";
-    public final static String CLUSTER_ERROR = "当前操作集群异常";
-    public final static String CONNECT_EXCEPTION = "connect_exception";
+    private static final String CONNECTION_REFUSED="Connection refused";
+    private static final String CONNECTION_CLOSE="远程主机强迫关闭了一个现有的连接。";
+    public static final String CLUSTER_ERROR = "当前操作集群异常";
+    public static final String CONNECT_EXCEPTION = "connect_exception";
     private ParsingExceptionUtils(){}
     
  /**
@@ -168,8 +169,8 @@ public final class ParsingExceptionUtils {
             
             return getErrorMessageByResponseException((ResponseException) cause).orElse(null);
         }
-        if (Objects.nonNull(cause) && cause instanceof ConnectException) {
-            return StringUtils.equals(cause.getMessage(), CONNECTION_REFUSED) ? CLUSTER_ERROR : cause.getMessage();
+        if (Objects.nonNull(cause) && cause instanceof IOException) {
+            return StringUtils.equals(cause.getMessage(), CONNECTION_REFUSED) || StringUtils.equals(cause.getMessage(), CONNECTION_CLOSE)? CLUSTER_ERROR : cause.getMessage();
         }
         return null;
     }
