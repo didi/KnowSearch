@@ -7,7 +7,12 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.annotation.Nullable;
 import javax.annotation.PostConstruct;
 
+import com.didichuxing.datachannel.arius.admin.common.bean.po.dsl.DslTemplatePO;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import com.didichuxing.datachannel.arius.admin.persistence.component.ESOpTimeoutRetry;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
@@ -1211,33 +1216,6 @@ public class GatewayJoinESDAO extends BaseESDAO {
         return DSLSearchUtils.getTermCellForExactSearch(currentProjectId, "projectId");
     }
 
-    /**
-     * 获取GatewayJoin慢查询日志
-     * @param projectId 应用id
-     * @param queryDTO 查询条件
-     * @return List<GatewayJoinPO>
-     */
-    public List<GatewayJoinPO> getGatewayJoinSlowList(Integer projectId, GatewayJoinQueryDTO queryDTO) {
-        String queryCriteriaDsl = buildGatewayJoinSlowQueryCriteriaDsl(projectId, queryDTO);
-        String realName = IndexNameUtils.genDailyIndexName(indexName, queryDTO.getStartTime(), queryDTO.getEndTime());
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_SLOW_LIST_BY_CONDITION,
-            queryCriteriaDsl);
-        return gatewayClient.performRequest(realName, typeName, dsl, GatewayJoinPO.class);
-    }
-
-    /**
-     * 获取GatewayJoin错误日志
-     * @param projectId 应用id
-     * @param queryDTO 查询条件
-     * @return List<GatewayJoinPO>
-     */
-    public List<GatewayJoinPO> getGatewayJoinErrorList(Integer projectId, GatewayJoinQueryDTO queryDTO) {
-        String queryCriteriaDsl = buildGatewayJoinErrorQueryCriteriaDsl(projectId, queryDTO);
-        String realName = IndexNameUtils.genDailyIndexName(indexName, queryDTO.getStartTime(), queryDTO.getEndTime());
-        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_ERROR_LIST_BY_CONDITION,
-            queryCriteriaDsl);
-        return gatewayClient.performRequest(realName, typeName, dsl, GatewayJoinPO.class);
-    }
     public String getOneDSLByProjectIdAndIndexName(Integer projectId, String index) {
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_ONE_DSL_BY_PROJECT_ID_AND_INDEX_NAME,
                 index,projectId);
@@ -1431,5 +1409,43 @@ public class GatewayJoinESDAO extends BaseESDAO {
             md5 = subEsBucket.getUnusedMap().get(ESConstant.AGG_KEY).toString();
             ret.computeIfAbsent(projectId, k -> Sets.newHashSet()).add(md5);
         }
+    }
+
+    public Tuple<Long, List<GatewayJoinPO>> getGatewayJoinSlowQueryPage(Integer projectId, GatewayJoinQueryDTO queryDTO) throws ESOperateException {
+        String queryCriteriaDsl = buildGatewayJoinSlowQueryCriteriaDsl(projectId, queryDTO);
+        String realName = IndexNameUtils.genDailyIndexName(indexName, queryDTO.getStartTime(), queryDTO.getEndTime());
+        // 排序条件，默认根据使用时间排序 desc
+        String sortTerm = "timeStamp";
+        String sortOrder = "desc";
+        if (!StringUtils.isEmpty(queryDTO.getSortTerm())) {
+            // 根据用户自定义条件排序
+            sortOrder = BooleanUtils.isTrue(queryDTO.getOrderByDesc()) ? "desc" : "asc";
+            sortTerm = queryDTO.getSortTerm();
+        }
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_SLOW_BY_CONDITION,
+                (queryDTO.getPage() - 1) * queryDTO.getSize(), queryDTO.getSize(), queryCriteriaDsl, sortTerm, sortOrder);
+
+        return ESOpTimeoutRetry.esRetryExecute("getGatewayJoinSlowQueryPage",3,
+                () -> gatewayClient.performRequestListAndGetTotalCount(null, realName, typeName, dsl, GatewayJoinPO.class),
+                Objects::isNull);
+    }
+
+    public Tuple<Long, List<GatewayJoinPO>> getGatewayJoinErrorPage(Integer projectId, GatewayJoinQueryDTO queryDTO) throws ESOperateException {
+        String queryCriteriaDsl = buildGatewayJoinErrorQueryCriteriaDsl(projectId, queryDTO);
+        String realName = IndexNameUtils.genDailyIndexName(indexName, queryDTO.getStartTime(), queryDTO.getEndTime());
+        // 排序条件，默认根据使用时间排序 desc
+        String sortTerm = "timeStamp";
+        String sortOrder = "desc";
+        if (!StringUtils.isEmpty(queryDTO.getSortTerm())) {
+            // 根据用户自定义条件排序
+            sortOrder = BooleanUtils.isTrue(queryDTO.getOrderByDesc()) ? "desc" : "asc";
+            sortTerm = queryDTO.getSortTerm();
+        }
+        String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_ERROR_BY_CONDITION,
+                (queryDTO.getPage() - 1) * queryDTO.getSize(), queryDTO.getSize(), queryCriteriaDsl, sortTerm, sortOrder);
+
+        return ESOpTimeoutRetry.esRetryExecute("getGatewayJoinErrorPage",3,
+                () -> gatewayClient.performRequestListAndGetTotalCount(null, realName, typeName, dsl, GatewayJoinPO.class),
+                Objects::isNull);
     }
 }

@@ -1,9 +1,17 @@
 {
-  "size": 1000,
+  "from": %d,
+  "size": %d,
   "query": {
     "bool": {
       "must": %s,
       "must_not": [
+        {
+          "wildcard": {
+            "uri": {
+              "value": "*/_bulk"
+            }
+          }
+        },
         {
           "prefix": {
             "indices": {
@@ -16,22 +24,20 @@
   },
   "_source": [
     "projectId",
+    "indiceSample",
+    "dsl",
+    "exceptionName",
     "timeStamp",
     "indices",
-    "dsl",
-    "esCost",
-    "totalCost",
-    "totalHits",
-    "totalShards",
-    "responseLen",
-    "isTimedOut",
+    "uri",
+    "requestId",
     "clusterName"
   ],
   "sort": [
-    {
-      "timeStamp": {
-        "order": "desc"
+      {
+        "%s": {
+          "order": "%s"
+        }
       }
-    }
   ]
 }

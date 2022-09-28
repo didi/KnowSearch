@@ -295,13 +295,13 @@ public class DslsConstant {
 
     /************************************************************** GatewayJoinEsDao **************************************************************/
     /**
-     * 获取dsl异常查询列表
+     * 分页获取dsl异常查询列表
      */
-    public static final String GET_GATEWAY_ERROR_LIST_BY_CONDITION                           = "GatewayJoinEsDao/getGatewayErrorListByCondition";
+    public static final String GET_GATEWAY_ERROR_BY_CONDITION                           = "GatewayJoinEsDao/getGatewayErrorByCondition";
     /**
-     * 获取dsl慢查询列表
+     * 分页获取dsl慢查询列表
      */
-    public static final String GET_GATEWAY_SLOW_LIST_BY_CONDITION                            = "GatewayJoinEsDao/getGatewaySlowListByCondition";
+    public static final String GET_GATEWAY_SLOW_BY_CONDITION                            = "GatewayJoinEsDao/getGatewaySlowByCondition";
     /**
      * 根据index获得对应的templateMD5
      */

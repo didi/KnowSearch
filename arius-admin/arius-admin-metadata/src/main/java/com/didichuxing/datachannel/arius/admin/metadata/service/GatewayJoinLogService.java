@@ -1,9 +1,12 @@
 package com.didichuxing.datachannel.arius.admin.metadata.service;
 
+import com.didichuxing.datachannel.arius.admin.common.Tuple;
 import com.didichuxing.datachannel.arius.admin.common.bean.common.Result;
 import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayJoinQueryDTO;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.template.GatewayJoin;
+import com.didichuxing.datachannel.arius.admin.common.bean.po.gateway.GatewayJoinPO;
 import com.didichuxing.datachannel.arius.admin.common.constant.AdminConstant;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
 import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.gateway.GatewayJoinESDAO;
 import java.util.List;
@@ -30,16 +33,6 @@ public class GatewayJoinLogService {
     public Result<List<GatewayJoin>> getGatewaySlowList(Long projectId, Long startDate, Long endDate) {
         return Result.buildSucc(ConvertUtil
             .list2List(gatewayJoinESDAO.getGatewaySlowList(projectId, startDate, endDate), GatewayJoin.class));
-    }
-
-    public List<GatewayJoin> getGatewaySlowList(Integer projectId, GatewayJoinQueryDTO queryDTO, Integer slowQueryTime) {
-        initGatewaySlowQueryCondition(queryDTO, slowQueryTime);
-        return ConvertUtil.list2List(gatewayJoinESDAO.getGatewayJoinSlowList(projectId, queryDTO), GatewayJoin.class);
-    }
-
-    public List<GatewayJoin> getGatewayJoinErrorList(Integer projectId, GatewayJoinQueryDTO queryDTO) {
-        initQueryTimeRange(queryDTO);
-        return ConvertUtil.list2List(gatewayJoinESDAO.getGatewayJoinErrorList(projectId, queryDTO), GatewayJoin.class);
     }
 
     private void initGatewaySlowQueryCondition(GatewayJoinQueryDTO queryDTO, int defaultSlowTime) {
@@ -69,5 +62,28 @@ public class GatewayJoinLogService {
      */
     public String getOneDSLByProjectIdAndIndexName(Integer projectId, String indexName) {
         return gatewayJoinESDAO.getOneDSLByProjectIdAndIndexName(projectId, indexName);
+    }
+
+    /**
+     * 分页查询gatewayJoin慢查询日志
+     * @param projectId
+     * @param queryDTO
+     * @param slowQueryTime
+     * @return
+     */
+    public Tuple<Long, List<GatewayJoinPO>> getGatewayJoinSlowQueryLogPage(Integer projectId, GatewayJoinQueryDTO queryDTO, Integer slowQueryTime) throws ESOperateException {
+        initGatewaySlowQueryCondition(queryDTO, slowQueryTime);
+        return gatewayJoinESDAO.getGatewayJoinSlowQueryPage(projectId, queryDTO);
+    }
+
+    /**
+     * 分页查询gatewayJoin异常日志
+     * @param projectId
+     * @param queryDTO
+     * @return
+     */
+    public Tuple<Long, List<GatewayJoinPO>> getGatewayJoinErrorLogPage(Integer projectId, GatewayJoinQueryDTO queryDTO) throws ESOperateException {
+        initQueryTimeRange(queryDTO);
+        return gatewayJoinESDAO.getGatewayJoinErrorPage(projectId, queryDTO);
     }
 }
