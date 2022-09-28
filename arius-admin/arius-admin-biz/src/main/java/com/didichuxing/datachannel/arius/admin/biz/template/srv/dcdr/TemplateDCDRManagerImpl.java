@@ -1766,7 +1766,7 @@ public class TemplateDCDRManagerImpl extends BaseTemplateSrvImpl implements Temp
 
             });
         }
-        BATCH_DCDR_FUTURE_UTIL.waitExecute();
+        BATCH_DCDR_FUTURE_UTIL.waitExecute(120);
 
         try {
             saveNewestWorkTaskStatusToDB(taskForDCDRSwitch, dcdrTasksDetail, AuthConstant.SUPER_PROJECT_ID);
