@@ -4,8 +4,11 @@ import static com.didichuxing.datachannel.arius.admin.persistence.constant.ESOpe
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import com.didichuxing.datachannel.arius.admin.common.exception.NullESClientException;
 import com.didichuxing.datachannel.arius.admin.common.tuple.TupleTwo;
 import com.didichuxing.datachannel.arius.admin.common.tuple.Tuples;
+import com.didichuxing.datachannel.arius.admin.common.util.ParsingExceptionUtils;
 import com.didichuxing.datachannel.arius.admin.persistence.es.BaseESDAO;
 import com.didiglobal.logi.elasticsearch.client.ESClient;
 import com.didiglobal.logi.elasticsearch.client.gateway.direct.DirectResponse;
@@ -14,11 +17,15 @@ import com.didiglobal.logi.elasticsearch.client.response.cluster.nodesstats.Clus
 import com.didiglobal.logi.elasticsearch.client.response.cluster.nodesstats.ESClusterNodesStatsResponse;
 import com.google.common.collect.Lists;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -50,21 +57,26 @@ public class ESClusterNodeDAO extends BaseESDAO {
         return count;
     }
 
-    public List<ClusterNodeStats> syncGetNodesStats(String clusterName) {
+    public List<ClusterNodeStats> syncGetNodesStats(String clusterName) throws ESOperateException {
         ESClient esClient = esOpClient.getESClient(clusterName);
         if (esClient == null) {
             LOGGER.error(
                 "class=ESClusterNodeServiceImpl||method=syncGetNodeFsStatsMap||clusterName={}||errMsg=esClient is null",
                 clusterName);
-            return Lists.newArrayList();
+            throw new NullESClientException(clusterName);
         }
-        ESClusterNodesStatsResponse response = esClient.admin().cluster().prepareNodeStats().setFs(true).setOs(true)
-            .setJvm(true).setThreadPool(true).level("node").execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
-        if (response.getNodes() != null) {
-            return new ArrayList<>(response.getNodes().values());
-
+        ESClusterNodesStatsResponse response=null;
+        try {
+        
+            response = esClient.admin().cluster().prepareNodeStats().setFs(true).setOs(true).setJvm(true)
+                    .setThreadPool(true).level("node").execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            ParsingExceptionUtils.abnormalTermination(e);
+            LOGGER.error("class=ESClusterNodeServiceImpl||method=syncGetNodeFsStatsMap||clusterName={}", clusterName,
+                    e);
         }
-        return Lists.newArrayList();
+        return Optional.ofNullable(response).map(ESClusterNodesStatsResponse::getNodes).filter(MapUtils::isNotEmpty)
+                .map(m->Lists.<ClusterNodeStats>newArrayList(m.values())).orElse(Lists.newArrayList());
     }
 
     /**
