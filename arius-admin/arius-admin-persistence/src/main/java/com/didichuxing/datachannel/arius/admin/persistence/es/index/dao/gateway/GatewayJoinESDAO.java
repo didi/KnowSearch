@@ -1415,15 +1415,15 @@ public class GatewayJoinESDAO extends BaseESDAO {
         String queryCriteriaDsl = buildGatewayJoinSlowQueryCriteriaDsl(projectId, queryDTO);
         String realName = IndexNameUtils.genDailyIndexName(indexName, queryDTO.getStartTime(), queryDTO.getEndTime());
         // 排序条件，默认根据使用时间排序 desc
-        String sortInfo = "timeStamp";
+        String sortTerm = "timeStamp";
         String sortOrder = "desc";
-        if (!StringUtils.isEmpty(queryDTO.getSortInfo())) {
+        if (!StringUtils.isEmpty(queryDTO.getSortTerm())) {
             // 根据用户自定义条件排序
             sortOrder = BooleanUtils.isTrue(queryDTO.getOrderByDesc()) ? "desc" : "asc";
-            sortInfo = queryDTO.getSortInfo();
+            sortTerm = queryDTO.getSortTerm();
         }
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_SLOW_BY_CONDITION,
-                (queryDTO.getPage() - 1) * queryDTO.getSize(), queryDTO.getSize(), queryCriteriaDsl, sortInfo, sortOrder);
+                (queryDTO.getPage() - 1) * queryDTO.getSize(), queryDTO.getSize(), queryCriteriaDsl, sortTerm, sortOrder);
 
         return ESOpTimeoutRetry.esRetryExecute("getGatewayJoinSlowQueryPage",3,
                 () -> gatewayClient.performRequestListAndGetTotalCount(null, realName, typeName, dsl, GatewayJoinPO.class),
@@ -1434,15 +1434,15 @@ public class GatewayJoinESDAO extends BaseESDAO {
         String queryCriteriaDsl = buildGatewayJoinErrorQueryCriteriaDsl(projectId, queryDTO);
         String realName = IndexNameUtils.genDailyIndexName(indexName, queryDTO.getStartTime(), queryDTO.getEndTime());
         // 排序条件，默认根据使用时间排序 desc
-        String sortInfo = "timeStamp";
+        String sortTerm = "timeStamp";
         String sortOrder = "desc";
-        if (!StringUtils.isEmpty(queryDTO.getSortInfo())) {
+        if (!StringUtils.isEmpty(queryDTO.getSortTerm())) {
             // 根据用户自定义条件排序
             sortOrder = BooleanUtils.isTrue(queryDTO.getOrderByDesc()) ? "desc" : "asc";
-            sortInfo = queryDTO.getSortInfo();
+            sortTerm = queryDTO.getSortTerm();
         }
         String dsl = dslLoaderUtil.getFormatDslByFileName(DslsConstant.GET_GATEWAY_ERROR_BY_CONDITION,
-                (queryDTO.getPage() - 1) * queryDTO.getSize(), queryDTO.getSize(), queryCriteriaDsl, sortInfo, sortOrder);
+                (queryDTO.getPage() - 1) * queryDTO.getSize(), queryDTO.getSize(), queryCriteriaDsl, sortTerm, sortOrder);
 
         return ESOpTimeoutRetry.esRetryExecute("getGatewayJoinErrorPage",3,
                 () -> gatewayClient.performRequestListAndGetTotalCount(null, realName, typeName, dsl, GatewayJoinPO.class),

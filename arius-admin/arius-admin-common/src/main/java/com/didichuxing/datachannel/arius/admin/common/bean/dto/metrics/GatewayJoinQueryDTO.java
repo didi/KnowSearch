@@ -30,8 +30,8 @@ public class GatewayJoinQueryDTO extends PageDTO {
     @ApiModelProperty(value = "物理集群名称（仅限超管侧使用）", dataType = "String", required = false)
     private String clusterName;
 
-    @ApiModelProperty(value = "排序信息（精确）", dataType = "String", required = false)
-    private String  sortInfo;
+    @ApiModelProperty(value = "排序信息（精确）,排序字段 响应时间（ms）esCost、总耗时（ms）totalCost、单次命中数totalHits、单次响应长度responseLen", dataType = "String", required = false)
+    private String  sortTerm;
 
     @ApiModelProperty(value = "是否逆序排序（默认逆序）", dataType = "Boolean", required = false)
     private Boolean orderByDesc = true;

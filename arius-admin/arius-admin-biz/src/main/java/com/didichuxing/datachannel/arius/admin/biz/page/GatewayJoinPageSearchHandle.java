@@ -31,13 +31,19 @@ public class GatewayJoinPageSearchHandle extends AbstractPageSearchHandle<Gatewa
     @Autowired
     private ProjectConfigService projectConfigService;
 
+    private static final Long             QUERY_COUNT_THRESHOLD = 10000L;
+
     @Override
     protected Result<Boolean> checkCondition(GatewayJoinQueryDTO condition, Integer projectId) {
         String queryIndex = condition.getQueryIndex();
         if (!AriusObjUtils.isBlack(queryIndex) && (queryIndex.startsWith("*") || queryIndex.startsWith("?"))) {
             return Result.buildParamIllegal("查询索引名称不允许带类似*, ?等通配符");
         }
-
+        // 只允许查询前10000条数据
+        long startNum = (condition.getPage() - 1) * condition.getSize();
+        if(startNum >= QUERY_COUNT_THRESHOLD) {
+            return Result.buildParamIllegal(String.format("查询条数不能超过%d条", QUERY_COUNT_THRESHOLD));
+        }
         return Result.buildSucc(true);
     }
 
