@@ -89,7 +89,7 @@ public class ESIndexDAO extends BaseESDAO {
     public static final String ONLY_EXPUNGE_DELETES = "only_expunge_deletes";
     public static final String ROLLOVER_API         = "/_rollover";
     public static final  String ALIAS_API              = "/%s/_alias";
-    public static final String CAT_INDIES = "/_cat/indices/%s?v=true&format=json&filter_path=index&ignore_unavailable=true";
+    public static final String CAT_INDIES = "/_cat/indices/%s?v=true&format=json&filter_path=index";
     public static final String INDEX = "index";
     public static final String DELETE_INDEX = "%s?ignore_unavailable=true";
     public static final String ACKNOWLEDGED = "acknowledged";
@@ -782,14 +782,22 @@ public class ESIndexDAO extends BaseESDAO {
      * @param indices 索引
      * @return result
      */
-    public boolean closeIndex(String cluster, List<String> indices) {
+    public boolean closeIndex(String cluster, List<String> indices) throws ESOperateException {
         ESClient client = fetchESClientByCluster(cluster);
         if (client == null) {
+            throw new NullESClientException(cluster);
+        }
+        try {
+        
+            ESIndicesCloseIndexResponse response = client.admin().indices().prepareCloseIndex(String.join(",", indices))
+                    .execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+            return response.getAcknowledged();
+        } catch (Exception e) {
+            ParsingExceptionUtils.abnormalTermination(e);
+            LOGGER.warn("class={}||method=closeIndex||clusterName={}||indexName={}||msg={}", getClass().getSimpleName(),
+                    cluster, String.join(",", indices), e);
             return false;
         }
-        ESIndicesCloseIndexResponse response = client.admin().indices().prepareCloseIndex(String.join(",", indices))
-            .execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
-        return response.getAcknowledged();
     }
 
     /**
@@ -798,14 +806,22 @@ public class ESIndexDAO extends BaseESDAO {
      * @param indices 索引
      * @return result
      */
-    public boolean openIndex(String cluster, List<String> indices) {
+    public boolean openIndex(String cluster, List<String> indices) throws ESOperateException{
         ESClient client = fetchESClientByCluster(cluster);
         if (client == null) {
+            throw new NullESClientException(cluster);
+        }
+        try {
+        
+            ESIndicesOpenIndexResponse response = client.admin().indices().prepareOpenIndex(String.join(",", indices))
+                    .execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
+            return response.getAcknowledged();
+        } catch (Exception e) {
+            ParsingExceptionUtils.abnormalTermination(e);
+            LOGGER.warn("class={}||method=closeIndex||clusterName={}||indexName={}||msg={}", getClass().getSimpleName(),
+                    cluster, String.join(",", indices), e);
             return false;
         }
-        ESIndicesOpenIndexResponse response = client.admin().indices().prepareOpenIndex(String.join(",", indices))
-            .execute().actionGet(ES_OPERATE_TIMEOUT, TimeUnit.SECONDS);
-        return response.getAcknowledged();
     }
 
     /**
@@ -1096,7 +1112,7 @@ public class ESIndexDAO extends BaseESDAO {
             LOGGER.warn("class=ESIndexDAO||method=forceMerge||errMsg=es client not found");
             return Result.buildFail();
         }
-        if (Integer.parseInt(client.getEsVersion().substring(0, 1)) < 6) {
+        if (Double.parseDouble(client.getEsVersion().substring(0, 2))<=6.0) {
             return Result.buildFail(String.format("es %s 不支持 split 功能", client.getEsVersion()));
         }
         try {

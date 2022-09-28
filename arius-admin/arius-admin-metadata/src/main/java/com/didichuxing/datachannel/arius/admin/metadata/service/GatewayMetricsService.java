@@ -1,32 +1,28 @@
 package com.didichuxing.datachannel.arius.admin.metadata.service;
 
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.ClientNodeDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayDslDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayIndexDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayMetricsDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayNodeDTO;
-import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.GatewayProjectDTO;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.didichuxing.datachannel.arius.admin.common.Tuple;
+import com.didichuxing.datachannel.arius.admin.common.bean.dto.metrics.*;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.GatewayOverviewMetrics;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.MetricsContent;
 import com.didichuxing.datachannel.arius.admin.common.bean.entity.metrics.linechart.VariousLineChartMetrics;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.GatewayMetricsTypeEnum;
 import com.didichuxing.datachannel.arius.admin.common.constant.metrics.MetricsConstant;
 import com.didichuxing.datachannel.arius.admin.common.exception.AdminOperateException;
-import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.gateway.GatewayAppMetricsDAO;
-import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.gateway.GatewayDslMetricsDAO;
-import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.gateway.GatewayIndexMetricsDAO;
-import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.gateway.GatewayNodeMetricsDAO;
-import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.gateway.GatewayOverviewMetricsDAO;
+import com.didichuxing.datachannel.arius.admin.common.util.ConvertUtil;
+import com.didichuxing.datachannel.arius.admin.persistence.es.index.dao.gateway.*;
 import com.didichuxing.datachannel.arius.admin.persistence.es.index.dsls.DslsConstant;
 import com.didiglobal.logi.log.ILog;
 import com.didiglobal.logi.log.LogFactory;
 import com.google.common.collect.Lists;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 /**
  * Created by fitz on 2021-08-16
@@ -199,8 +195,8 @@ public class GatewayMetricsService {
         return gatewayDslMetricsDAO.getDslMd5List(startTime, endTime, projectId);
     }
 
-    public List<String> getEsClientNodeIpListByGatewayNode(String gatewayNode, Long startTime, Long endTime,
-                                                           Integer projectId) {
+    public List<Tuple<String, String>> getEsClientNodeIpListByGatewayNode(String gatewayNode, Long startTime, Long endTime,
+                                                                          Integer projectId) {
         return gatewayNodeMetricsDAO.getEsClientNodeIpListByGatewayNode(gatewayNode, startTime, endTime, projectId);
     }
     
@@ -233,7 +229,14 @@ public class GatewayMetricsService {
                     break;
                 case MetricsConstant.CLIENT_NODE:
                     contents = gatewayNodeMetricsDAO.getByRangeTopN(values, gatewayMetricsTypeEnum, startTime, endTime,
-                            projectId, nodeIp);
+                        projectId, nodeIp);
+                    List<Tuple<String, String>> tuples = gatewayNodeMetricsDAO
+                        .getEsClientNodeIpListByClientNodes(values, startTime, endTime, projectId);
+                    Map<String, String> clientNode2ClusterName = ConvertUtil.list2Map(tuples, Tuple::getV2,
+                        Tuple::getV1);
+                    if (null != contents) {
+                        contents.forEach(content -> content.setCluster(clientNode2ClusterName.get(content.getName())));
+                    }
                     break;
                 case MetricsConstant.INDEX:
                     contents = gatewayIndexMetricsDAO.getByRangeTopN(values, gatewayMetricsTypeEnum, startTime, endTime,

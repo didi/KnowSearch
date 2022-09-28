@@ -223,4 +223,16 @@ public interface TemplateDCDRManager {
      * @return
      */
     Result<TemplateDCDRInfoVO> getTemplateDCDRInfoVO(Integer templateId) throws ESOperateException;
+    
+    /**
+     * 重建DCDR链路异常索引
+     *
+     * @param cluster       源集群的集群名称
+     * @param targetCluster 目标集群名称
+     * @param indices       要重建的索引
+     * @return 操作的结果。
+     */
+    Result<Void> rebuildDCDRLinkAbnormalIndices(String cluster, String targetCluster,
+                                                List<String> indices)throws ESOperateException;
+    
 }

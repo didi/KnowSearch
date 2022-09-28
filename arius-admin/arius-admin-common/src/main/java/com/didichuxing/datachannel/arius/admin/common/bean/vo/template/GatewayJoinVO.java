@@ -1,12 +1,12 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.vo.template;
 
+import java.util.Map;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.Map;
 
 /**
  * @author: D10865
@@ -102,4 +102,7 @@ public class GatewayJoinVO {
 
     @ApiModelProperty("请求源ip")
     private String            remoteAddr;
+
+    @ApiModelProperty("所属集群")
+    private String            clusterName;
 }

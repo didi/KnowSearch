@@ -1,10 +1,10 @@
 package com.didichuxing.datachannel.arius.admin.common.bean.entity.template;
 
+import java.util.Map;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.Map;
 
 /**
  * @author: D10865
@@ -127,4 +127,6 @@ public class GatewayJoin {
      * 请求源ip
      */
     private String            remoteAddr;
+
+    private String            clusterName;
 }

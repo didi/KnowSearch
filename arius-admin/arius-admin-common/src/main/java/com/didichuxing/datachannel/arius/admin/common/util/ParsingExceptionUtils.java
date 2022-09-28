@@ -2,11 +2,14 @@ package com.didichuxing.datachannel.arius.admin.common.util;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.didichuxing.datachannel.arius.admin.common.constant.result.ResultType;
 import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateException;
+import com.didichuxing.datachannel.arius.admin.common.exception.NullESClientException;
 import com.didiglobal.logi.elasticsearch.client.model.exception.ESAlreadyExistsException;
 import com.didiglobal.logi.elasticsearch.client.model.exception.ESIndexNotFoundException;
 import com.didiglobal.logi.elasticsearch.client.model.exception.ESIndexTemplateMissingException;
 import java.io.IOException;
+import java.net.ConnectException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
@@ -23,6 +26,10 @@ import org.elasticsearch.common.util.concurrent.UncategorizedExecutionException;
  * @date 2022/08/17
  */
 public final class ParsingExceptionUtils {
+    private static final String CONNECTION_REFUSED="Connection refused";
+    private static final String CONNECTION_CLOSE="远程主机强迫关闭了一个现有的连接。";
+    public static final String CLUSTER_ERROR = "当前操作集群异常";
+    public static final String CONNECT_EXCEPTION = "connect_exception";
     private ParsingExceptionUtils(){}
     
  /**
@@ -56,9 +63,13 @@ public final class ParsingExceptionUtils {
      */
     public static void abnormalTermination(Exception e) throws ESOperateException {
         String exception = ParsingExceptionUtils.getESErrorMessageByException(e);
-        if (StringUtils.isNotBlank(exception)) {
+        if (StringUtils.equals(exception, CLUSTER_ERROR)) {
+            throw new NullESClientException(exception, ResultType.ES_CLIENT_NUL_ERROR);
+        }
+        if (StringUtils.isNotBlank(exception) && !StringUtils.equals(exception, CLUSTER_ERROR)) {
             throw new ESOperateException(exception);
         }
+
     }
     
     
@@ -157,6 +168,9 @@ public final class ParsingExceptionUtils {
         if (Objects.nonNull(cause) && cause instanceof ResponseException) {
             
             return getErrorMessageByResponseException((ResponseException) cause).orElse(null);
+        }
+        if (Objects.nonNull(cause) && cause instanceof IOException) {
+            return StringUtils.equals(cause.getMessage(), CONNECTION_REFUSED) || StringUtils.equals(cause.getMessage(), CONNECTION_CLOSE)? CLUSTER_ERROR : cause.getMessage();
         }
         return null;
     }
