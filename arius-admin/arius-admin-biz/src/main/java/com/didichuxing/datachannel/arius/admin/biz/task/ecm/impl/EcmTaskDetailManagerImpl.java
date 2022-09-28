@@ -159,7 +159,7 @@ public class EcmTaskDetailManagerImpl implements EcmTaskDetailManager {
 
         List<EcmParamBase> ecmParamBaseList = OpOrderTaskConverter.convert2EcmParamBaseList(ecmTask);
         for (EcmParamBase ecmParamBase : ecmParamBaseList) {
-            if (!ecmTaskDetailPO.getTaskId().equals(ecmParamBase.getTaskId().longValue())) {
+            if (Objects.isNull(ecmParamBase.getTaskId())||!ecmTaskDetailPO.getTaskId().equals(ecmParamBase.getTaskId().longValue())) {
                 continue;
             }
             return ecmHandleService.getSubTaskLog(ecmParamBase, ecmTaskDetailPO.getHostname(), operator);
