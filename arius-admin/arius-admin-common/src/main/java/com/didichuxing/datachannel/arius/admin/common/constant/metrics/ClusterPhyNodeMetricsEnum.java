@@ -61,27 +61,27 @@ public enum ClusterPhyNodeMetricsEnum {
                                         * 单位：个/s
                                         */
 
-                                       INDICES_INDEXING_RATE("indices-indexing-index_total_rate", "索引写入速率"),
+                                       INDICES_INDEXING_RATE("indices-indexing-index_total_rate", "索引写入TPS"),
                                        /**
                                         * 单位：ms
                                         */
 
-                                       INDICES_INDEXING_LATENCY("indices-indexing-index_time_in_millis", "索引写入耗时"),
+                                       INDICES_INDEXING_LATENCY("indices-indexing-index_time_per_doc", "索引写入耗时"),
                                        /**
                                         * 单位：个/s
                                         */
 
-                                       INDICES_QUERY_RATE("indices-search-query_total_rate", "索引Query速率"),
+                                       INDICES_QUERY_RATE("indices-search-query_total_rate", "Query QPS"),
                                        /**
                                         * 单位：个/s
                                         */
 
-                                       INDICES_FETCH_RATE("indices-search-fetch_total_rate", "索引Fetch速率"),
+                                       INDICES_FETCH_RATE("indices-search-fetch_total_rate", "Fetch QPS"),
                                        /**
                                         * 单位：ms
                                         */
 
-                                       INDICES_QUERY_LATENCY("indices-search-query_time_in_millis", "索引Query耗时"),
+                                       INDICES_QUERY_LATENCY("indices-search-query_time_per_query", "索引Query耗时"),
 
                                        /**
                                         * 单位：个
@@ -92,7 +92,7 @@ public enum ClusterPhyNodeMetricsEnum {
                                         * 单位：ms
                                         */
 
-                                       INDICES_FETCH_LATENCY("indices-search-fetch_time_in_millis", "索引Fetch耗时"),
+                                       INDICES_FETCH_LATENCY("indices-search-fetch_time_per_fetch", "索引Fetch耗时"),
                                        /**
                                         * 单位：个
                                         */
@@ -102,12 +102,12 @@ public enum ClusterPhyNodeMetricsEnum {
                                         * 单位：ms
                                         */
 
-                                       INDICES_SCROLL_LATENCY("indices-search-scroll_time_in_millis", "Scroll请求耗时"),
+                                       INDICES_SCROLL_LATENCY("indices-search-scroll_avg_time", "Scroll请求耗时"),
                                        /**
                                         * 单位：ms
                                         */
 
-                                       INDICES_MERGE_LATENCY("indices-merges-total_time_in_millis", "Merge操作耗时"),
+                                       INDICES_MERGE_LATENCY("indices-merges_avg_time", "Merge操作耗时"),
                                        /**
                                         * 单位：次/分钟
                                         */
@@ -127,12 +127,12 @@ public enum ClusterPhyNodeMetricsEnum {
                                         * 单位：ms
                                         */
 
-                                       INDICES_REFRESH_LATENCY("indices-refresh-total_time_in_millis", "Refresh操作耗时"),
+                                       INDICES_REFRESH_LATENCY("indices-refresh_avg_time", "Refresh操作耗时"),
                                        /**
                                         * 单位：ms
                                         */
 
-                                       INDICES_FLUSH_LATENCY("indices-flush-total_time_in_millis", "Flush操作耗时"),
+                                       INDICES_FLUSH_LATENCY("indices-flush_avg_time", "Flush操作耗时"),
                                        /**
                                         * 单位：MB
                                         */
@@ -174,6 +174,20 @@ public enum ClusterPhyNodeMetricsEnum {
 
                                        INDICES_REQUEST_CACHE_MISS_NUM("indices-request_cache-miss_count",
                                                                       "RequestCache内存未命中次数"),
+
+                                       /**
+                                        * 单位：%
+                                        */
+
+                                       INDICES_QUERY_CACHE_HIT_RATE("indices-query_cache-hit_rate",
+                                                "Query Cache内存命中率"),
+
+                                       /**
+                                        * 单位：%
+                                        */
+
+                                       INDICES_REQUEST_CACHE_HIT_RATE("indices-request_cache-hit_rate",
+                                                "Request Cache内存未命率"),
 
                                        /*************************************3.节点-索引高级指标**************************************/
                                        /**
@@ -298,11 +312,11 @@ public enum ClusterPhyNodeMetricsEnum {
                                        /**
                                         * 单位：ms
                                         */
-                                       YOUNG_GC_LATENCY("jvm-gc-young-collection_time_in_millis", "young-gc耗时"),
+                                       YOUNG_GC_LATENCY("jvm-gc-young-collection_avg_time", "young-gc耗时"),
                                        /**
                                         * 单位：ms
                                         */
-                                       OLD_GC_LATENCY("jvm-gc-old-collection_time_in_millis", "old-gc耗时"),
+                                       OLD_GC_LATENCY("jvm-gc-old-collection_avg_time", "old-gc耗时"),
                                        /**
                                         * 单位：MB
                                         */
@@ -331,7 +345,44 @@ public enum ClusterPhyNodeMetricsEnum {
                                        STORED_FIELDS_MEMORY_IN_BYTES("indices-segments-stored_fields_memory_in_bytes",
                                                                      "indices-segments-stored_fields内存大小"),
 
-                                       /*************************************5.TASK指标******************************************/
+                                       /*************************************5.BREAKERS指标******************************************/
+
+                                       /**
+                                        * 单位：MB
+                                        */
+                                       BREAKERS_FIELDDATA_LIMIT_SIZE_IN_BYTES("breakers-fielddata-limit_size_in_bytes",
+                                                                              "Field data circuit breaker 内存占用"),
+                                       /**
+                                        * 单位：MB
+                                        */
+                                       BREAKERS_REQUEST_LIMIT_SIZE_IN_BYTES("breakers-request-limit_size_in_bytes",
+                                                                            "Request circuit breaker 内存占用"),
+
+                                       /**
+                                        * 单位：MB
+                                        */
+                                       BREAKERS_IN_FLIGHT_REQUESTS_LIMIT_SIZE_IN_BYTES("breakers-in_flight_requests-limit_size_in_bytes",
+                                                                                       "inflight requests circuit breaker 内存占用"),
+
+                                       /**
+                                        * 单位：MB
+                                        */
+                                       BREAKERS_ACCOUNTING_LIMIT_SIZE_IN_BYTES("breakers-accounting-limit_size_in_bytes",
+                                                                              "Accounting requests circuit breaker 内存占用"),
+
+                                       /**
+                                        * 单位：次/MIN
+                                        */
+                                       SCRIPT_COMPILATIONS("script-compilations",
+                                                           "Script compilation circuit breaker 编译次数"),
+
+                                       /**
+                                        * 单位：MB
+                                        */
+                                       BREAKERS_PARENT_LIMIT_SIZE_IN_BYTES("breakers-parent-limit_size_in_bytes",
+                                                                           "Parent circuit breaker JVM真实内存占用"),
+
+                                       /*************************************6.TASK指标******************************************/
                                        TASK_COUNT("taskId", "task id"), TASK_COST("runningTime", "task耗时");
 
     ClusterPhyNodeMetricsEnum(String type, String desc) {
