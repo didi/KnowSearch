@@ -71,7 +71,7 @@ public enum ClusterPhyClusterMetricsEnum {
                                           /**
                                            * 单位：个
                                            */
-                                          UNASSIGN_SHARDS("unassignShards", "未分配的shard"),
+                                          UNASSIGN_SHARDS("unAssignShards", "未分配的shard"),
                                           /**
                                            * 单位：个
                                            */
