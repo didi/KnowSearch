@@ -1154,6 +1154,19 @@ public class ClusterPhyManagerImpl implements ClusterPhyManager {
     public List<ClusterPhy> pagingGetClusterPhyByCondition(ClusterPhyConditionDTO condition) {
         return  clusterPhyService.pagingGetClusterPhyByCondition(condition);
     }
+
+    /**
+     * 获取当前集群所有节点名称
+     * @param cluster 集群名
+     * @return
+     */
+    @Override
+    public Result<List<String>> getClusterNodesName(String cluster) {
+        List<ClusterRoleHost> clusterRoleHostList = clusterRoleHostService.getNodesByCluster(cluster);
+        List<String> clusterNodeNameList = clusterRoleHostList.stream()
+                .map(ClusterRoleHost::getNodeSet).collect(Collectors.toList());
+        return Result.buildSucc(clusterNodeNameList);
+    }
     
     /**************************************** private method ***************************************************/
 

@@ -361,4 +361,12 @@ public interface ClusterPhyManager {
      * @return 列表<ClusterPhy>
      */
     List<ClusterPhy> pagingGetClusterPhyByCondition(ClusterPhyConditionDTO condition);
+
+
+    /**
+     * 获取当前集群所有节点名称
+     * @param cluster 集群名
+     * @return
+     */
+    Result<List<String>> getClusterNodesName(String cluster);
 }

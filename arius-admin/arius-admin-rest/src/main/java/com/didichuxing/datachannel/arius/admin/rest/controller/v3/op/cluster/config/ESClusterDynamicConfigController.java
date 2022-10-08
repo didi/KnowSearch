@@ -10,6 +10,8 @@ import com.didichuxing.datachannel.arius.admin.common.exception.ESOperateExcepti
 import com.didiglobal.logi.security.util.HttpRequestUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
@@ -51,5 +53,11 @@ public class ESClusterDynamicConfigController {
     @ApiOperation(value = "获取当前集群下的属性分配选项")
     public Result<Set<String>> getRoutingAllocationAwarenessAttributes(@PathVariable String cluster) {
         return clusterPhyManager.getRoutingAllocationAwarenessAttributes(cluster);
+    }
+
+    @GetMapping("/{cluster}/nodes")
+    @ApiOperation(value = "获取当前集群的所有节点名称")
+    public Result<List<String>> getClusterNodesName(@PathVariable String cluster) {
+        return clusterPhyManager.getClusterNodesName(cluster);
     }
 }
